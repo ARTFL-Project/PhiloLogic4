@@ -1,0 +1,116 @@
+body { 
+	background-color:ebe9e1; 
+	height: 100%;
+	color: #423D37;
+}
+
+a {
+	text-decoration: none;
+	color: #7FA036;
+}
+a:hover, a:active { color: #c16622; }
+a:visited, a:focus { color: #BC3118; }
+
+#header { 
+	margin-bottom: 20px;
+	margin-top: 20px;
+}
+#header h1 { 
+	padding-top:0.5em;
+	color: #423D37;
+}
+#header h1 span, .span-24 {
+	color: #7FA036;
+}
+.container { 
+	padding: 0 30px 20px 30px;
+	background-color:#f8f6ee; 
+	min-height:600px;
+	border-bottom: solid 6px #7FA036;
+
+}
+span.hilite { 
+	color:#BC3118;
+}
+.philologic_search_form {
+	padding-left: 0.25 em
+}
+.philologic_search_form tr td {
+	padding:0px; 
+}
+.philologic_search_form tr:nth-child(2n) td {
+	background-color:#FFFFFF;
+}
+.philologic_search_form tr.even td {
+	background-color:#FFFFFF;
+}
+span.speaker {
+	padding-left:1em; 
+	display:block;
+}
+.philologic_concordance {
+	padding: 0 30px;
+}
+.philologic_concordance ol{
+	margin-right: 0;
+	padding-left: 0em !important;
+	list-style-type:decimal;
+}
+.philologic_occurence {
+	padding: 18px 0px;
+	margin-left: 20px;
+	border-top: dotted 1px #DBD9D2;
+}
+.more{
+	margin-bottom: 20px;
+	margin-left: 20px
+}
+.philologic_cite {
+
+}
+.philologic_property {
+	
+}
+.description{
+	margin-left: 20px;
+	margin-bottom: 30px;
+	font-size: 16px;
+	line-height: 1.4em;
+}
+
+.span-7{
+	width: 300px;
+}
+.span-12{
+	width: 440px;
+}
+
+#rightcol table td, #rightcol table th {
+	padding: 8px;
+}
+
+th.header:hover{
+	color: #c16622;
+	cursor: pointer;
+}
+thead th{
+	background-color: #ebe9e1;
+	border-bottom: solid 1px #ccc;
+}
+tbody tr:nth-child(2n) td, tbody tr.even td {
+    background: none repeat scroll 0 0 #EFEDE3;
+}
+tbody tr td, tbody tr td {
+}
+.philologic_search_form tr:nth-child(2n) td {
+	background-color:  transparent;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, input.text:focus, input.title:focus, textarea:focus {
+    border-color: #c16622;
+}    
+
+::-moz-selection {background: #fff99a; color: #666; text-shadow: none;}
+::selection {background: #fff99a; color: #666; text-shadow: none;}
+
+

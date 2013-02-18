@@ -1,0 +1,33 @@
+As of June 2012, PhiloLogic 4 has now entered alpha testing. 
+It should compile and install reasonably well,
+but should not be expected to be feature or documentation complete.
+Note that this repository only contains the library code.
+See the related PhiloLogic4-Templates repo for a "soup to nuts" web app framework.
+
+C Dependencies: 
+gdbm - installed to your standard INCLUDE path [Mac users see :http://macosx.com/forums/unix-x11/257664-compile-gdbm.html]
+  [Also note that the /usr/local/ directory is often not included in default compiler lookups.  
+   If your gdbm lives there, either add it to your search path in the environment or as a compiler flag, as described below.]
+
+Python Dependences:
+2.6 and below: ElementTree 1.3alpha: http://effbot.org/zone/elementtree-13-intro.htm
+2.7 and greater: None
+
+Installation instructions:
+make
+sudo make install
+
+Due to an absence of a configuration script, 
+you can supply non-standard compiler arguments to the make commands.  For example, 
+'make LDFLAGS=-L/usr/local/lib/'.
+
+After installation, philologic will have installed:
+low-level search executables to /bin/
+PhiloLogic python library to your standard python path, according to distutils.
+
+To get started loading documents, please install the PhiloLogic4-Templates package.
+
+--
+Richard Whaling
+ARTFL Project
+July 2012
