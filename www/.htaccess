@@ -1,0 +1,4 @@
+Options +ExecCGI
+Options -Indexes
+AddHandler cgi-script py
+DirectoryIndex dispatcher.py
