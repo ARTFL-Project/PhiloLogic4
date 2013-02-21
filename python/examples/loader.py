@@ -153,6 +153,8 @@ word_regex = r"([^ \.,;:?!\"\n\r\t\(\)]+)"
 punct_regex = r"([\.;:?!])"
 
 token_regex = word_regex + "|" + punct_regex 
+extra_locals["word_regex"] = word_regex
+extra_locals["punct_regex"] = punct_regex
 
 #############################
 # Actual work.  Don't edit. #
