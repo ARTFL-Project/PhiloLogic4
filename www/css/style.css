@@ -251,9 +251,9 @@ span.projecthead { text-align: right; font-size: 20px; color: #000000;}
 .kwic_concordance {
         font-family: 'Droid Sans Mono', sans-serif;
         font-size: 13px;
-        border-top-style:solid;
-        border-top-width:1px;
-        border-top-color: #CCCCCC;
+        border-bottom-style:solid;
+        border-bottom-width:1px;
+        border-bottom-color: #CCCCCC;
         padding-top:7px;
         padding-bottom:8px;
         margin-right: 20px;
