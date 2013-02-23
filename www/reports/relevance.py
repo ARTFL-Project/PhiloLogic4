@@ -109,15 +109,16 @@ def retrieve_hits(q, db):
             results[philo_id]['bytes'].extend(bytes.split())
             
     ## Perform search on metadata
-    word_char = re.compile('\W')
-    my_words = '|'.join(set(["%s" % word_char.sub('',q_word) for q_word in query_words.split()]))
-    word_reg = re.compile(r"\b%s\b" % my_words)
+    token_regex = db.locals["word_regex"] + "|" + db.locals["punct_regex"] + '| '
+    query_words = unicode(query_words, 'utf-8')
+    my_words = '|'.join(set([w for w in re.split(token_regex, query_words, re.U) if w]))
+    word_reg = re.compile(r"\b%s\b" % my_words, re.U)
     metadata = ','.join([m for m in q['metadata']])
     query = 'select philo_id, %s from metadata_relevance' % metadata
     metadata_list = [i for i in c.execute(query)]
     for i in metadata_list:
-        metadata_string = ' '.join([i[m] or '' for m in q['metadata']]).lower()
-        matches = word_reg.findall(metadata_string, re.UNICODE)
+        metadata_string = ' '.join([i[m] or '' for m in q['metadata']]).decode('utf-8', 'ignore').lower()
+        matches = [w.encode('utf-8', 'ignore') for w in word_reg.findall(metadata_string)]
         if matches:
             philo_id = i['philo_id']
             if philo_id in results:
