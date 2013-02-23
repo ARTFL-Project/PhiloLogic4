@@ -3,9 +3,9 @@
 import re
 import htmlentitydefs
 import sys
-from BeautifulSoup import BeautifulSoup
 from DirtyFormatter import Formatter
 from custom_object_format import custom_format
+from lxml import etree
 
 def adjust_bytes(bytes, length):
     """Readjust byte offsets for concordance"""
@@ -142,7 +142,8 @@ def tokenize_text(text):
    
 def fix_html(text):
     """Fixes broken HTML tags"""
-    return unicode(BeautifulSoup(text))
+    html = etree.HTML(text)
+    return etree.tostring(html, pretty_print=True, method="html")
  
 def convert_entities(text):
     def fixup(m):

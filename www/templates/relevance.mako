@@ -16,6 +16,14 @@
     <li class='philologic_occurrence'>
    <%
    n += 1
+   %>
+   <span class='hit_n'>${n}.</span>
+   % if i.type == 'doc':
+    <span class='tooltip_link' title="Click to see title">${f.cite.make_doc_cite(i)}</span>
+   % else:
+    <span class='tooltip_link' title="Click to see document">${f.cite.make_div_cite(i)}</span>
+   % endif
+   <%
    author = i.author
    title = i.title
    from copy import deepcopy
@@ -23,11 +31,8 @@
    link_metadata['author'] = author.encode('utf-8', 'ignore')
    link_metadata['title'] = title.encode('utf-8', 'ignore')
    url = f.link.make_query_link(q["q"],q["method"],q["arg"],**link_metadata)
-   hit_num = len(i.bytes)
    %>
-   <span class='hit_n'>${n}.</span>
-   <a href='${url}' title="Click to retrieve all ${hit_num} occurences" class="tooltip_link"> ${title}, ${author}</a>
-   <span style="font-weight:700; padding-left:25px;">${hit_num} occurences</span>
+   <span style"padding-left:25px"><a href='${url}' title="Click to retrieve all ${len(i.bytes)} occurences" class="tooltip_link">${hit_num} occurences</a></span>
    <div class='philologic_context'>
    <span class='philologic_context'>${fetch_relevance(i, path, q)}...</span>
    </div>
