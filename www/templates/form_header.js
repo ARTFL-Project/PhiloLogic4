@@ -179,7 +179,7 @@ $(document).ready(function(){
                 });
             });
     $("#reset, #freq_sidebar").button();
-    $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_field").buttonset()
+    $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch").buttonset()
     $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
     

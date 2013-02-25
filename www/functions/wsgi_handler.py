@@ -72,6 +72,11 @@ def parse_cgi(environ):
     query['end_date'] = cgi.get("end_date", [''])[0]
     query['year_interval'] = cgi.get("year_interval", [''])[0]
     
+    ## This is for document page navigation
+    query['doc_page'] = cgi.get('doc_page', [''])[0]
+    query['philo_id'] = cgi.get('philo_id', [''])[0]
+    query['filename'] = cgi.get('filename', [''])[0]
+    
 #    query["dbname"] = dbname
     query["dbpath"] = dbfile
     query["start"] = int(cgi.get('start',[0])[0]) # special range handling done in each service now.

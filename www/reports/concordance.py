@@ -40,5 +40,4 @@ def fetch_concordance(hit, path, q):
     first_span = '<span class="begin_concordance" style="display:none;">'
     second_span = '<span class="end_concordance" style="display:none;">'
     conc_text =  first_span + conc_text[:begin] + '</span>' + conc_text[begin:end] + second_span + conc_text[end:] + '</span>'
-    return conc_text
-    
+    return f.format.fix_html(conc_text)

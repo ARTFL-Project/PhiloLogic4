@@ -26,7 +26,7 @@ html, body {
 /* The following is for the header and footer */
 #header {
   background: url(images/header_pattern.png);
-  height: 118px;
+  height: 95px;
   border-bottom: 1px #ECECEC solid;
 }
 #footer {
@@ -251,9 +251,9 @@ span.projecthead { text-align: right; font-size: 20px; color: #000000;}
 .kwic_concordance {
         font-family: 'Droid Sans Mono', sans-serif;
         font-size: 13px;
-        border-top-style:solid;
-        border-top-width:1px;
-        border-top-color: #CCCCCC;
+        border-bottom-style:solid;
+        border-bottom-width:1px;
+        border-bottom-color: #CCCCCC;
         padding-top:7px;
         padding-bottom:8px;
         margin-right: 20px;
@@ -452,10 +452,27 @@ ul.ui-autocomplete.ui-menu {
 }
 
 
+/*Navigating pages in documents*/
+.doc_pages {
+    padding-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 10%;
+}
+.prev_next {
+    font-size: 800%;
+    font-weight: 600;
+    color: #D8D8D8  !important;
+}
+.prev_next:hover {
+    text-decoration: none !important;
+    color: #A8A8A8 !important;
+}
+
+
 label.custom-select {
     position: relative;
     display: inline-block;
-
 }
 
 /* Ugly looking workaround while waiting for next release of jQueryUI with selectmenu*/
