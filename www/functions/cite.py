@@ -36,8 +36,10 @@ def make_div_cite(i):
         page_obj = page_q.fetchone()
         if page_obj:
             if page_obj['n']:
-                page_n = page_obj['n'].decode('utf-8', 'ignore') 
-                cite += u", page " + page_n + u"."
+                page_n = page_obj['n'].decode('utf-8', 'ignore')
+                bytes = '&'.join(['byte=%d' % int(byte) for byte in i.bytes])
+                page_href = u'<a href="?report=pagination&philo_id=%s&doc_page=%s&filename=%s&%s">' % (i.philo_id[0], page_n, i.filename, bytes)
+                cite += u", %spage %s.</a>" % (page_href, page_n)
 
     cite += "</span>"
     return cite
