@@ -60,7 +60,7 @@ class DB:
         hash.update(self.path)
         hash.update(philo_type)
         all_hash = hash.hexdigest()
-        all_file = "/var/lib/philologic/hitlists/" + all_hash + ".hitlist"
+        all_file = self.path + "/hitlists/" + all_hash + ".hitlist"
         if not os.path.isfile(all_file):
             #write out the corpus file
             return MetadataQuery.metadata_query(self,all_file,[{"philo_type":['"%s"' % philo_type]}])
@@ -88,7 +88,7 @@ class DB:
 
         if has_metadata:
             corpus_hash = hash.hexdigest()
-            corpus_file = "/var/lib/philologic/hitlists/" + corpus_hash + ".hitlist"
+            corpus_file = self.path + "/hitlists/" + corpus_hash + ".hitlist"
             corpus_width = 7
 
             if not os.path.isfile(corpus_file):
@@ -124,7 +124,7 @@ class DB:
             hash.update(str(method_arg))
             hash.update(str(limit))
             search_hash = hash.hexdigest()
-            search_file = "/var/lib/philologic/hitlists/" + search_hash + ".hitlist"
+            search_file = self.path + "/hitlists/" + search_hash + ".hitlist"
             if not os.path.isfile(search_file):
                 return Query.query(self,qs,corpus_file,self.width,method,method_arg,limit,filename=search_file)
             else:

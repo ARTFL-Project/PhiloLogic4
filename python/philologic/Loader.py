@@ -389,6 +389,8 @@ class Loader(object):
     def finish(self, Post_Filters=default_post_filters, **extra_locals):
         print "\n### Finishing up ###"
         os.mkdir(self.destination + "/src/")
+        os.mkdir(self.destination + "/hitlists/")
+        os.chmod(self.destination + "/hitlists/", 0777)
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
         
         if Post_Filters:

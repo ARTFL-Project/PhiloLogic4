@@ -36,11 +36,16 @@ class ShlaxIngestor():
         self.log = logfile
 
     def feed(self,data):
+#        console.log(data)
         if self.closed:
             return
         self.buffer += data
         last_end = 0
-        matches = re.finditer(shlax.pattern,self.buffer)
+        matches = re.finditer(shlax.pattern,self.buffer,re.DOTALL)
+        type = ""
+#        matches = list(matches)
+#        print >> sys.stderr, repr(matches)
+
         for m in matches:
             att = {}
             name = ""
@@ -86,6 +91,7 @@ class ShlaxIngestor():
             if empty:
                 self.target.feed("end","",offset,name,None)
             last_end = m.end(0)
+#            print >> sys.stderr, type + " : " + m.group(0)
         self.buffer_offset = self.buffer_offset + last_end
         self.buffer = self.buffer[last_end:]
 
@@ -222,4 +228,4 @@ if __name__ == "__main__":
     for file in sys.argv[1:]:
         root = parse(open(file))
         print "parsed %s successfully." % file
-        print et.tostring(root,encoding="utf8")
+#        print et.tostring(root,encoding="utf8")

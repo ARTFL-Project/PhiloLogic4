@@ -326,8 +326,8 @@ class Loader(object):
             self.dbh.text_factory = str
             self.dbh.row_factory = sqlite3.Row
             if table == 'pages':
-                file_in = self.workdir + '/all_pages'
-                self.make_sql_table(table, file_in, depth=9)
+                file_in = self.workdir + '/all_pages'                
+                self.make_sql_table(table, file_in, indices=["philo_id"],depth=9)
             elif table == 'toms':
                 file_in = self.workdir + '/all_toms_sorted'
                 indices = ['philo_type', 'philo_id'] + self.metadata_fields
@@ -389,6 +389,8 @@ class Loader(object):
     def finish(self, Post_Filters=default_post_filters, **extra_locals):
         print "\n### Finishing up ###"
         os.mkdir(self.destination + "/src/")
+        os.mkdir(self.destination + "/hitlists/")
+        os.chmod(self.destination + "/hitlists/", 0777)
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
         
         if Post_Filters:
