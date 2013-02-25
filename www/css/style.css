@@ -26,7 +26,7 @@ html, body {
 /* The following is for the header and footer */
 #header {
   background: url(images/header_pattern.png);
-  height: 118px;
+  height: 95px;
   border-bottom: 1px #ECECEC solid;
 }
 #footer {
