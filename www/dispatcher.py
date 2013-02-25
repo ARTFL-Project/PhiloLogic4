@@ -6,6 +6,7 @@ import urlparse
 import reports
 from wsgiref.handlers import CGIHandler
 from cgi import FieldStorage
+from functions import clean_hitlists
 
 def philo_dispatcher(environ,start_response):
     report = FieldStorage().getvalue('report')
@@ -25,3 +26,4 @@ def philo_dispatcher(environ,start_response):
         
 if __name__ == "__main__":
     CGIHandler().run(philo_dispatcher)
+    clean_hitlists()
