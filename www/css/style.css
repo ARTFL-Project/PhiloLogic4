@@ -438,19 +438,19 @@ ul.ui-autocomplete.ui-menu {
 
 
 /*Pages links*/
-/*.more {*/
-/*    font-size: 130%;*/
-/*    margin-left: auto;*/
-/*    margin-right: auto;*/
-/*    width:8%;*/
-/*    padding-top: 10px;*/
-/*}*/
-/*.more .previous {*/
-/*    float:left;*/
-/*}*/
-/*.more .next {*/
-/*    float: right;*/
-/*}*/
+.more {
+    font-size: 130%;
+    margin-left: auto;
+    margin-right: auto;
+    width:8%;
+    padding-top: 10px;
+}
+.more .previous {
+    float:left;
+}
+.more .next {
+    float: right;
+}
 
 
 /*Random stuff to be organized*/
