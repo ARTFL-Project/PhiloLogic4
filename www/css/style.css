@@ -170,61 +170,61 @@ div.main_body {
 }
 
 /* The following is PhiloLogic specific CSS to handle TEI encoding */
-span.emph {font-weight: bolder; }
-span.emphsc {FONT-SIZE: 12px;}
-span.hi   {font-weight: bolder;}
-span.foreign {font-style: italic;}
-span.bibl {font-style: italic;}
-span.title     {font-style: italic;}
-span.hiitalic  {font-style: italic;}
-span.hiunderline {text-decoration: underline;}
-span.hibold   {font-weight: bolder;}
-span.doctitle {display: block; text-align: center; FONT-SIZE: 24px; LINE-HEIGHT: 1.5;}
-span.byline {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}
-span.pubplace {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}
-span.docedition {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}
-span.publisher {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}
-span.docimprint {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}
-span.addrline {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}
-span.docauthor {display: block; text-align: center; FONT-SIZE: 20px; LINE-HEIGHT: 1.5;}
-span.docdate {display: block; text-align: center; FONT-SIZE: 20px; LINE-HEIGHT: 1.5;}
-span.opener   {display: block; text-align: center;}
-span.label   {display: block; text-align: center;}
-span.signed   {display: block; text-align: right;}
-span.stage    {display: block; text-align: right; font-style: italic; margin-left: 120px;}
-span.speaker  {display: block; text-align: center; FONT-SIZE: 16px;}
-span.epigraph {display: block; margin-left: 300px;}
-span.salute   {display: block; text-align: center;}
-span.trailer  {display: block; text-align: center;}
-span.closer   {display: block; text-align: center;}
-span.item     {display: block; text-align: left;}
-span.role     {display: block; text-align: left; margin-left: 100px; margin-right: 100px}
-span.argument {display: block; text-align: left; margin-left: 100px; margin-right: 100px}
-span.roledesc {display: block; text-align: right; margin-right: 100px}
-span.l        {display: block; text-align: left;}
-span.small   {FONT-SIZE: 11px;}
-span.smallcaps {font-variant: small-caps;}
-span.hismallcap {FONT-SIZE: 12px;}
-span.head    {FONT-SIZE: 18px; LINE-HEIGHT: 1.5;}
-span.notetarget {FONT-SIZE: 12px; text-decoration: underline; vertical-align: super;}
-span.footnote {display: block; FONT-SIZE: 12px; margin-left: 60px; margin-right: 40px;}
-span.marginnote {display: block; FONT-SIZE: 12px; text-align: right;}
-span.inlinenote {display: block; FONT-SIZE: 12px;}
-span.generalnote {display: block; FONT-SIZE: 12px;}
-span.endnote {display: block; FONT-SIZE: 12px;}
-span.refalignright {display: block; text-align: right;}
-span.mstoneid {display: block; FONT-SIZE: 12px; text-align: right;}
-span.mstonen {display: block; FONT-SIZE: 12px; text-align: right;}
-span.mstonetype {display: block; text-align: center;}
-span.mwright {display: block; FONT-SIZE: 12px; text-align: right;}
-span.authfreqindt {display: block; text-align: left; margin-left: 60px;}
-span.perfreqindt {display: block; text-align: left; margin-left: 45px;}
-span.navhead {display: block; text-align: center; font-size: 16px; font-weight: bold;}
-span.navbiblio {display: block; font-size: 14px;}
-span.navlevel1 {display: block; text-align: left; font-size: 14px;}
-span.navlevel2 {display: block; text-align: left; margin-left: 40px; FONT-SIZE: 14px;}
-span.navlevel3 {display: block; text-align: left; margin-left: 60px; FONT-SIZE: 12px;}
-span.projecthead { text-align: right; font-size: 20px; color: #000000;}
+/*span.emph {font-weight: bolder; }*/
+/*span.emphsc {FONT-SIZE: 12px;}*/
+/*span.hi   {font-weight: bolder;}*/
+/*span.foreign {font-style: italic;}*/
+/*span.bibl {font-style: italic;}*/
+/*span.title     {font-style: italic;}*/
+/*span.hiitalic  {font-style: italic;}*/
+/*span.hiunderline {text-decoration: underline;}*/
+/*span.hibold   {font-weight: bolder;}*/
+/*span.doctitle {display: block; text-align: center; FONT-SIZE: 24px; LINE-HEIGHT: 1.5;}*/
+/*span.byline {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}*/
+/*span.pubplace {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}*/
+/*span.docedition {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}*/
+/*span.publisher {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}*/
+/*span.docimprint {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}*/
+/*span.addrline {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}*/
+/*span.docauthor {display: block; text-align: center; FONT-SIZE: 20px; LINE-HEIGHT: 1.5;}*/
+/*span.docdate {display: block; text-align: center; FONT-SIZE: 20px; LINE-HEIGHT: 1.5;}*/
+/*span.opener   {display: block; text-align: center;}*/
+/*span.label   {display: block; text-align: center;}*/
+/*span.signed   {display: block; text-align: right;}*/
+/*span.stage    {display: block; text-align: right; font-style: italic; margin-left: 120px;}*/
+/*span.speaker  {display: block; text-align: center; FONT-SIZE: 16px;}*/
+/*span.epigraph {display: block; margin-left: 300px;}*/
+/*span.salute   {display: block; text-align: center;}*/
+/*span.trailer  {display: block; text-align: center;}*/
+/*span.closer   {display: block; text-align: center;}*/
+/*span.item     {display: block; text-align: left;}*/
+/*span.role     {display: block; text-align: left; margin-left: 100px; margin-right: 100px}*/
+/*span.argument {display: block; text-align: left; margin-left: 100px; margin-right: 100px}*/
+/*span.roledesc {display: block; text-align: right; margin-right: 100px}*/
+/*span.l        {display: block; text-align: left;}*/
+/*span.small   {FONT-SIZE: 11px;}*/
+/*span.smallcaps {font-variant: small-caps;}*/
+/*span.hismallcap {FONT-SIZE: 12px;}*/
+/*span.head    {FONT-SIZE: 18px; LINE-HEIGHT: 1.5;}*/
+/*span.notetarget {FONT-SIZE: 12px; text-decoration: underline; vertical-align: super;}*/
+/*span.footnote {display: block; FONT-SIZE: 12px; margin-left: 60px; margin-right: 40px;}*/
+/*span.marginnote {display: block; FONT-SIZE: 12px; text-align: right;}*/
+/*span.inlinenote {display: block; FONT-SIZE: 12px;}*/
+/*span.generalnote {display: block; FONT-SIZE: 12px;}*/
+/*span.endnote {display: block; FONT-SIZE: 12px;}*/
+/*span.refalignright {display: block; text-align: right;}*/
+/*span.mstoneid {display: block; FONT-SIZE: 12px; text-align: right;}*/
+/*span.mstonen {display: block; FONT-SIZE: 12px; text-align: right;}*/
+/*span.mstonetype {display: block; text-align: center;}*/
+/*span.mwright {display: block; FONT-SIZE: 12px; text-align: right;}*/
+/*span.authfreqindt {display: block; text-align: left; margin-left: 60px;}*/
+/*span.perfreqindt {display: block; text-align: left; margin-left: 45px;}*/
+/*span.navhead {display: block; text-align: center; font-size: 16px; font-weight: bold;}*/
+/*span.navbiblio {display: block; font-size: 14px;}*/
+/*span.navlevel1 {display: block; text-align: left; font-size: 14px;}*/
+/*span.navlevel2 {display: block; text-align: left; margin-left: 40px; FONT-SIZE: 14px;}*/
+/*span.navlevel3 {display: block; text-align: left; margin-left: 60px; FONT-SIZE: 12px;}*/
+/*span.projecthead { text-align: right; font-size: 20px; color: #000000;}*/
 
 
 /* For pop-in notes */
@@ -386,6 +386,40 @@ a.hide_frequency:hover {
     border-bottom-color: #ECECEC;
 }
 
+/*Document viewing styles*/
+.title {
+    font-size: 140%;
+    padding-bottom: 20px;
+}
+.table_of_contents {
+    display: inline-block;
+    max-width: 250px;
+    padding-top: 40px;
+    display:none;
+}
+.page_turner, .page_number, obj_nav {
+    text-align: center;
+    font-size: 150%;
+}
+
+
+/*Navigating pages in documents*/
+.doc_pages {
+    padding-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 10%;
+}
+.prev_next {
+    font-size: 200%;
+    font: inherit;
+    color: #D8D8D8  !important;
+}
+.prev_next:hover {
+    text-decoration: none !important;
+    color: #A8A8A8 !important;
+}
+
 
 /*jQueryUI styling*/
 .ui-button,  .ui-button-text .ui-button {  
@@ -404,19 +438,19 @@ ul.ui-autocomplete.ui-menu {
 
 
 /*Pages links*/
-.more {
-    font-size: 130%;
-    margin-left: auto;
-    margin-right: auto;
-    width:8%;
-    padding-top: 10px;
-}
-.more .previous {
-    float:left;
-}
-.more .next {
-    float: right;
-}
+/*.more {*/
+/*    font-size: 130%;*/
+/*    margin-left: auto;*/
+/*    margin-right: auto;*/
+/*    width:8%;*/
+/*    padding-top: 10px;*/
+/*}*/
+/*.more .previous {*/
+/*    float:left;*/
+/*}*/
+/*.more .next {*/
+/*    float: right;*/
+/*}*/
 
 
 /*Random stuff to be organized*/
@@ -451,23 +485,6 @@ ul.ui-autocomplete.ui-menu {
     font-size: 170%;
 }
 
-
-/*Navigating pages in documents*/
-.doc_pages {
-    padding-top: 20px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 10%;
-}
-.prev_next {
-    font-size: 800%;
-    font-weight: 600;
-    color: #D8D8D8  !important;
-}
-.prev_next:hover {
-    text-decoration: none !important;
-    color: #A8A8A8 !important;
-}
 
 
 label.custom-select {

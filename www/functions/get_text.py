@@ -10,11 +10,14 @@ def get_text(hit, byte_start, length, path):
     return file.read(length)
 
 def get_page_text(db, philo_id, page_num, filename, path, bytes):
-    philo_id = philo_id + ' %'
+    philo_id = str(philo_id) + ' %'
     conn = db.dbh
     c = conn.cursor()
     c.execute("select start_byte, end_byte from pages where philo_id like ? and n=? limit 1", (philo_id,page_num))
-    start_byte, end_byte = c.fetchone()
+    try:
+        start_byte, end_byte = c.fetchone()
+    except TypeError:   ## returns None because there are no pages in the doc
+        return ''
     length = int(end_byte) - int(start_byte)
     file_path = path + '/data/TEXT/' + filename
     file = open(file_path)        
