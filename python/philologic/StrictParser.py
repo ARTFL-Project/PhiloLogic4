@@ -1,8 +1,9 @@
+# -*- coding: UTF-8 -*-
 from philologic import OHCOVector, shlaxtree
 from philologic.ParserHelpers import *
 import re
 import sys
-
+from xml.parsers import expat
 et = shlaxtree.et  # MAKE SURE you use ElementTree version 1.3.
                    # This is standard in Python 2.7, but an add on in 2.6,
 
@@ -29,8 +30,8 @@ TEI_XPaths = {  ".":"doc", # Always fire a doc against the document root.
                 ".//div1":"div",
                 ".//div2":"div",
                 ".//div3":"div",
-                ".//p":"para",
-                ".//sp":"para",
+#                ".//p":"para",
+#                ".//sp":"para",
                 #"stage":"para"
                 ".//pb":"page",
              } 
@@ -52,13 +53,44 @@ TEI_MetadataXPaths = { "doc" : [(ContentExtractor,"./teiHeader/fileDesc/titleStm
                       (AttributeExtractor,".@src","img")],
            }
 
-Default_Token_Regex = r"([^ \.,;:?!\"\n\r\t\(\)]+)|([\.;:?!])"
+Default_Token_Regex = r"([\w]+)|([\.;:?!])"
 
-class Parser:
+class ExpatWrapper:
+    
+    def start_element(self,name, attrs):
+        buffer = self.p.GetInputContext()
+        tag_end = buffer.index(">")        
+        content = buffer[:tag_end]
+        self.target.feed("start",content,self.p.CurrentByteIndex,name,attrs.copy())
+    def end_element(self,name):
+        closer = (u"</%s>" % name)
+        closer_len = len(closer)
+        buffer = self.p.GetInputContext()
+#        print >> sys.stderr, repr(buffer)
+        if buffer[:closer_len] == closer.encode("utf-8"):
+            content_length = closer_len
+        else:
+            content_length = 0
+        content = buffer[:content_length]
+        self.target.feed("end",content,self.p.CurrentByteIndex,name,None)
+    def char_data(self,data):
+        data_len = len(data.encode("utf-8"))
+        self.target.feed("text",data,self.p.CurrentByteIndex,None,None)
+    def __init__(self,target):
+        self.target = target
+        self.p = expat.ParserCreate()    
+        self.p.StartElementHandler = self.start_element
+        self.p.EndElementHandler = self.end_element
+        self.p.CharacterDataHandler = self.char_data
+    def parse(self,file):      
+        self.p.ParseFile(file)        
+        return self.target.close()
+
+class StrictParser:
     def __init__(self,output,docid,types=ARTFLVector,parallel=ARTFLParallels,xpaths=None,metadata_xpaths = None,token_regex=Default_Token_Regex,non_nesting_tags = [],self_closing_tags = [],pseudo_empty_tags = [],**known_metadata):
         self.known_metadata = known_metadata
         self.docid = docid
-        self.i = shlaxtree.ShlaxIngestor(target=self)
+#        self.i = shlaxtree.ShlaxIngestor(target=self)
         self.tree = None #unnecessary?
         self.root = None
         self.stack = []
@@ -78,8 +110,10 @@ class Parser:
     def parse(self,input):
         """Top level function for reading a file and printing out the output."""
         self.input = input
-        self.i.feed(self.input.read())
-        return self.i.close()
+        p = ExpatWrapper(target=self)
+        return p.parse(input)
+#        self.i.feed(self.input.read())
+#        return self.i.close()
         
     def parsebyline(self,input):
         self.input = input
@@ -149,42 +183,45 @@ class Parser:
                     # Should test whether to go on and tokenize or not.
                 # Tokenize and emit tokens.  Still a bit hackish.
                 # TODO: Tokenizer object shared with output formatter. 
-                tokens = re.finditer(self.token_regex,content) # should put in a nicer tokenizer.
+                tokens = re.finditer(self.token_regex,content,re.U) # should put in a nicer tokenizer.
                 for t in tokens:
                     if t.group(1):
                         # This technique is kind of a hack.  
                         # Would be more flexible to simply suppress tokenization in tagged word objects,
                         # then REQUIRE a filter to index token value.                        
                         if "word" in self.v and self.v["word"].name == "w":
-                            self.v["word"].name = t.group(1).lower()
+                            self.v["word"].name = t.group(1).lower().encode("utf-8")
                         else:
                             # This will implicitly push a sentence if we aren't in one already.
-                            self.v.push("word",t.group(1).lower(),offset + t.start(1)) 
-                            self.v.pull("word",offset + t.end(1)) 
+                            self.v.push("word",t.group(1).lower().encode("utf-8"),offset + len(content[:t.start(1)].encode("utf-8")) )
+                            self.v.pull("word",offset + len(content[:t.end(1)].encode("utf-8")))
                     elif t.group(2): 
                         # a sentence should already be defined most of the time.
                         if "sent" not in self.v:
                             # but we'll make sure one is.
-                            self.v.push("sent",t.group(2),offset)
+                            self.v.push("sent",t.group(2).encode("utf-8"),offset)
                         # if we have a sentence, set its name attribute to the punctuation that has now ended it.
-                        self.v["sent"].name = t.group(2)                     
-                        self.v.pull("sent",offset + t.end(2))
+                        self.v["sent"].name = t.group(2)
+                        self.v.pull("sent",offset + len(content[:t.end(2)].encode("utf-8")))
 
         if e_type == "end":
 
-            if self.stack: # All elements get pulled of the stack..
+            if self.stack: # All elements get pulled off the stack..
                 if self.stack[-1].tag == name:
 
                     # This can go badly out of whack if you're just missing one end tag 
-                    if name not in self.pseudo_empty_tags:
+                    if name not in self.pseudo_empty_tags: # This should almost certainly be caught in the "start" event handler!
                         if len(self.stack) in self.depth_pushed:                        
                             # pseudo_empty_tags are popped off the XML stack, 
                             # but the records persist until another is pushed at the same level, 
                             # or a parent is pulled. Ideal for milestones, line breaks, etc.
                             ohco_type = self.depth_pushed[len(self.stack)]
-                            self.v.pull(ohco_type,offset + len(content))
-#                            del self.pushed_tags[old_element.tag]
+                            self.v.pull(ohco_type,offset)
+                            # del self.pushed_tags[old_element.tag]
                             del self.depth_pushed[len(self.stack)]
+                            #for k,v in self.depth_pushed.items():
+                            #    if v == ohco_type:
+                            #        del self.depth_pushed[k]
                     old_element = self.stack.pop()
                     
                     # clean up any metadata extractors instantiated for this element.
@@ -225,7 +262,7 @@ if __name__ == "__main__":
     for docid, filename in enumerate(files,1):
         f = open(filename)
         print >> sys.stderr, "%d: parsing %s" % (docid,filename)
-        p = Parser(output=sys.stdout,docid=docid,filename=filename)
+        p = StrictParser(output=sys.stdout,docid=docid,filename=filename)
 #        p = Parser({"filename":filename},docid, non_nesting_tags = ["div1","div2","div3","p"],self_closing_tags = ["br","lb","ab"],output=sys.stdout)
 #        p = Parser({"filename":filename},docid, non_nesting_tags = [],output=sys.stdout)
         p.parse(f)
