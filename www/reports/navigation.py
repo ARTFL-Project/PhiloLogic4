@@ -36,7 +36,6 @@ def navigate_doc(obj, db):
     conn = db.dbh ## make this more accessible 
     c = conn.cursor()
     query =  str(obj.philo_id[0]) + " _%"
-    print >> sys.stderr, "DEBUG", query
     c.execute("select philo_id, philo_name, philo_type, byte_start from toms where philo_id like ?", (query,))
     text_hierarchy = []
     for id, philo_name, philo_type, byte in c.fetchall():

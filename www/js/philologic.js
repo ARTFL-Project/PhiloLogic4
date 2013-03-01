@@ -1,4 +1,3 @@
-<script type="text/javascript">
 function monkeyPatchAutocomplete() {
     //taken from http://stackoverflow.com/questions/2435964/jqueryui-how-can-i-custom-format-the-autocomplete-plug-in-results    
     $.ui.autocomplete.prototype._renderItem = function( ul, item) {
@@ -309,4 +308,3 @@ function hide_frequency() {
         "margin-right": "0px"},
         50);
 }
-</script>
