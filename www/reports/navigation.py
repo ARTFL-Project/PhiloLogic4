@@ -9,7 +9,6 @@ import sys
 import functions as f
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
-from pagination import get_neighboring_pages
 from philologic import HitWrapper
 
 philo_types = set(['div1', 'div2', 'div3'])
@@ -45,7 +44,6 @@ def navigate_doc(obj, db):
             continue
         else:
             text_hierarchy.append(db[id])
-        print >> sys.stderr, "RESULT", id, philo_name, philo_type, byte
     return text_hierarchy
 
 def navigate_obj(obj, query_args=False):
@@ -66,3 +64,16 @@ def navigate_obj(obj, query_args=False):
         return text_obj.replace('[', '<').replace(']', '>')
     else:
         return f.format.formatter(raw_text).decode("utf-8","ignore")
+    
+def get_neighboring_pages(db, philo_id, doc_page):
+    conn = db.dbh
+    c = conn.cursor()
+    if doc_page != '1':
+        prev_page = int(doc_page) - 1
+    else:
+        prev_page = None
+    next_page = str(int(doc_page) + 1)
+    c.execute('select n from pages where n=?', (next_page,))
+    if c.fetchone() == None:
+        next_page = None
+    return prev_page, next_page
