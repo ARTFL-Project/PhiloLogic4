@@ -22,10 +22,14 @@
  <span style="padding-left:5px;">words</span>
  <br><input type="radio" name="method" id="method3" value='cooc'><label for="method3">In the same sentence</label>
  </span></td></tr>
+ </table>
+ <div id="metadata_fields">
+ <table class="table_row">
 % for facet in db.locals["metadata_fields"]:
-    <tr id="metadata_field" class="table_row"><td class="first_column">${facet.title()}:</td><td><input type='text' name='${facet}' id="${facet}" class="search_box"></td></tr>
+    <tr class="table_row"><td class="first_column">${facet.title()}:</td><td><input type='text' name='${facet}' id="${facet}" class="search_box"></td></tr>
 % endfor
  </table>
+ </div>
 <table> 
  <tr class="table_row" id="collocation"><td class="first_column">Within </td><td><span id='word_num'>
  <input type="radio" name="word_num" id="wordnum1" value="1"><label for="wordnum1">1</label>

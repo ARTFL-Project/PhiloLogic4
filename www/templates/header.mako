@@ -10,7 +10,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js" type="text/javascript"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/jquery-ui-1.10.0.custom.min.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/jquery.hoverIntent.minified.js"></script>
-<%include file="form_header.js"/>
+<script type="text/javascript" src="${db.locals['db_url']}/js/philologic.js"></script>
 </head>
 <body onunload="">
 <div id="container">
