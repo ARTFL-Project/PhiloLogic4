@@ -1,4 +1,3 @@
-<script type="text/javascript">
 function monkeyPatchAutocomplete() {
     //taken from http://stackoverflow.com/questions/2435964/jqueryui-how-can-i-custom-format-the-autocomplete-plug-in-results    
     $.ui.autocomplete.prototype._renderItem = function( ul, item) {
@@ -25,9 +24,13 @@ function autocomplete_metadata(metadata, field) {
     });
 }
 
-var fields = ${repr(db.locals['metadata_fields'])}
 
 $(document).ready(function(){
+    
+    var fields = [];
+    $('#metadata_fields input').each(function(){
+        fields.push($(this).attr('name'));
+    });
     
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var db_path = window.location.hostname + pathname;
@@ -169,6 +172,30 @@ $(document).ready(function(){
         });
     });
     
+    // This is to display the table of contents in the document viewer
+    $("#show_table_of_contents").click(function() {
+        if ($("#t_b_c_box").text() == "Show table of contents") {
+            $("#t_b_c_box").html("Hide table of contents");
+            $(".table_of_contents").css('float', 'left');
+            var width = $(".table_of_contents").width() + 20;
+            $(".page_display, .object_display").animate({
+                "float": "right",
+                "margin-left": width + "px"},
+                50, function() {
+                    $(".table_of_contents").fadeIn('fast');
+            });
+            
+        } else {
+            $("#t_b_c_box").html("Show table of contents");
+            $(".page_display, .object_display").animate({
+                "float": "",
+                "margin-left": "0px"},
+                50, function() {
+                    $(".table_of_contents").hide();
+            });
+        }
+    });
+    
     //  jQueryUI theming
     $( "#button" )
             .button()
@@ -178,7 +205,7 @@ $(document).ready(function(){
                     $("#waiting").css("margin-left", width).show();
                 });
             });
-    $("#reset, #freq_sidebar").button();
+    $("#reset, #freq_sidebar, #show_table_of_contents").button();
     $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch").buttonset()
     $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
@@ -281,4 +308,3 @@ function hide_frequency() {
         "margin-right": "0px"},
         50);
 }
-</script>

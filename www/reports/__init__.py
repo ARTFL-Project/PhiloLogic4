@@ -8,4 +8,3 @@ from form import form
 from navigation import navigation
 from concordance_from_collocation import concordance_from_collocation
 from time_series import time_series
-from pagination import pagination
