@@ -27,11 +27,6 @@ function autocomplete_metadata(metadata, field) {
 
 $(document).ready(function(){
     
-    var fields = [];
-    $('#metadata_fields input').each(function(){
-        fields.push($(this).attr('name'));
-    });
-    
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var db_path = window.location.hostname + pathname;
     var q_string = window.location.search.substr(1);
@@ -56,6 +51,10 @@ $(document).ready(function(){
         minLength: 2,
         "dataType": "json"
     });
+    var fields = [];
+    $('#metadata_fields input').each(function(){
+        fields.push($(this).attr('name'));
+    });
     for (i in fields) {
         var  metadata = $("#" + fields[i]).val();
         var field = fields[i];
@@ -72,7 +71,7 @@ $(document).ready(function(){
     $(".kwic_biblio").hoverIntent(config)
 
     //  This will show more context in concordance searches
-    $(document).on("click", ".more_context", function() {
+    $(".more_context").click(function(e) {
         var context_link = $(this).text();
         if (context_link == 'More') {
             $(this).siblings('.philologic_context').children('.begin_concordance').show()
@@ -84,6 +83,7 @@ $(document).ready(function(){
             $(this).siblings('.philologic_context').children('.end_concordance').hide()
             $(this).empty().fadeIn(100).append('More')
         }
+        e.preventDefault();
     });
     
     //  This will prefill the search form with the current query
@@ -227,12 +227,6 @@ function showHide(value) {
         $("#collocation, #metadata_field").show()
     }
     if (value == 'concordance') {
-        $("#search_elements").hide()
-        $("#frequency").hide()
-        $("#collocation, #time_series, #year_interval").hide()
-        $("#results_per_page, #method, #metadata_field").show()
-    }
-    if (value == 'kwic') {
         $("#search_elements").hide()
         $("#frequency").hide()
         $("#collocation, #time_series, #year_interval").hide()
