@@ -138,7 +138,6 @@ body {
 
 table {
   font-size:inherit;
-  font:100%;
   font-weight: inherit;
 }
 
@@ -394,30 +393,30 @@ a.hide_frequency:hover {
 .table_of_contents {
     display: inline-block;
     max-width: 250px;
-    padding-top: 40px;
+    padding-top: 30px;
     display:none;
 }
-.page_turner, .page_number, obj_nav {
+.page_number, obj_nav {
     text-align: center;
     font-size: 150%;
 }
-
-
-/*Navigating pages in documents*/
-.doc_pages {
+.prev_page {
     padding-top: 20px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 10%;
-}
-.prev_next {
-    font-size: 200%;
-    font: inherit;
+    font-size: 350%;
     color: #D8D8D8  !important;
+    cursor: pointer;
+    float: left;
 }
-.prev_next:hover {
+.prev_page:hover, .next_page:hover {
     text-decoration: none !important;
     color: #A8A8A8 !important;
+}
+.next_page {
+    padding-top: 20px;
+    font-size: 350%;
+    color: #D8D8D8  !important;
+    cursor: pointer;
+    float: right;
 }
 
 
@@ -487,12 +486,11 @@ ul.ui-autocomplete.ui-menu {
 
 
 
+/* Ugly looking workaround while waiting for next release of jQueryUI with selectmenu*/
 label.custom-select {
     position: relative;
     display: inline-block;
 }
-
-/* Ugly looking workaround while waiting for next release of jQueryUI with selectmenu*/
 .custom-select select {
     display: inline-block;
     padding: 2px 1px 1px 3px;

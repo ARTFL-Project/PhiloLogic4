@@ -172,6 +172,30 @@ $(document).ready(function(){
         });
     });
     
+    
+    // Change page in docs
+    $("#prev_page, #next_page").on('click', function() {
+        var my_path = db_path.replace(/\d+$/, '');
+        var doc_id = db_path.match(/\d+$/)[0];
+        var page = $("#current_page").text();
+        var direction = $(this).attr('id');
+        var myscript = "http://" + my_path + "scripts/go_to_page.py?philo_id=" + doc_id + "&go_to_page=" + direction + "&doc_page=" + page;
+        $.get(myscript, function(data) {
+            if (direction == "prev_page") {
+                $("#current_page").fadeOut('fast', function() {
+                    $(this).html(Number($("#current_page").text()) - 1).fadeIn('fast');
+                });
+            } else {
+                $("#current_page").fadeOut('fast', function() {
+                    $(this).html(Number($("#current_page").text()) + 1).fadeIn('fast');
+                });
+            }
+            $("#page_text").fadeOut('fast', function () {
+                $(this).html(data).fadeIn('fast');
+            }); 
+        });
+    });
+    
     // This is to display the table of contents in the document viewer
     $("#show_table_of_contents").click(function() {
         if ($("#t_b_c_box").text() == "Show table of contents") {
@@ -183,8 +207,7 @@ $(document).ready(function(){
                 "margin-left": width + "px"},
                 50, function() {
                     $(".table_of_contents").fadeIn('fast');
-            });
-            
+            });         
         } else {
             $("#t_b_c_box").html("Show table of contents");
             $(".page_display, .object_display").animate({

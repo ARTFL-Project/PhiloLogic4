@@ -25,7 +25,7 @@ def navigation(environ,start_response):
             prev_page, next_page = get_neighboring_pages(db, obj.philo_id[0], q['doc_page'])    
             return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
                                    dbname=dbname,current_page=q['doc_page'],f=f,navigate_doc=navigate_doc,
-                                   db=db,q=q,template_name='navigation.mako')
+                                   db=db,q=q,template_name='pages.mako')
         else:
             path_components += ['2']
             obj = db[path_components]

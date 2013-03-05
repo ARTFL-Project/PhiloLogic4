@@ -23,7 +23,8 @@ def get_page_text(db, philo_id, page_num, filename, path, bytes):
     file = open(file_path)        
     file.seek(start_byte)
     text = file.read(length)
-    if bytes and start_byte < sorted(bytes.split('+'))[0]:
+    sorted_bytes = sorted(bytes.split('+'))
+    if bytes and int(start_byte) < int(sorted_bytes[0]) < int(end_byte):
         bytes = sorted([int(byte) - start_byte for byte in bytes.split('+')])
         text_start, text_middle, text_end = chunkifier(text, bytes, highlight=True)
         text = text_start + text_middle + text_end
