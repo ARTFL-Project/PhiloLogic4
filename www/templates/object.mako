@@ -40,7 +40,9 @@
             <a href='${next_url}' class='next_obj'>></a>
         % endif
         </div>
+        <div class="obj_text">
         ${navigate_obj(obj, query_args=q['byte'])}
+        </div>
         </div>
   </div>
 <%include file="footer.mako"/>
