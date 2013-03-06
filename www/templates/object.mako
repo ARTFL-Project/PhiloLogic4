@@ -41,7 +41,7 @@
         % endif
         </div>
         <div class="obj_text">
-        ${navigate_obj(obj, query_args=q['byte'])}
+        ${obj_text}
         </div>
         </div>
   </div>

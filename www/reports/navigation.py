@@ -29,8 +29,9 @@ def navigation(environ,start_response):
         else:
             path_components += ['2']
             obj = db[path_components]
-    return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_obj=navigate_obj,
-                           navigate_doc=navigate_doc,db=db,q=q,template_name='object.mako')
+    obj_text = f.get_text_obj(obj, query_args=q['byte'])
+    return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
+                           db=db,q=q,obj_text=obj_text,template_name='object.mako')
 
 def navigate_doc(obj, db):
     conn = db.dbh ## make this more accessible 
@@ -44,25 +45,6 @@ def navigate_doc(obj, db):
         else:
             text_hierarchy.append(db[id])
     return text_hierarchy
-
-def navigate_obj(obj, query_args=False):
-    path = "./data/TEXT/" + obj.filename
-    file = open(path)
-    byte_start = obj.byte_start
-    file.seek(byte_start)
-    width = obj.byte_end - byte_start
-    raw_text = file.read(width)
-    if query_args:
-        bytes = sorted([int(byte) - byte_start for byte in query_args.split('+')])
-        text_start, text_middle, text_end = f.format.chunkifier(raw_text, bytes, highlight=True)
-        raw_text = text_start + text_middle + text_end
-        ## temp hack until we work out how to format without loosing highlight
-        ## tags
-        raw_text = re.sub('<(/?span[^>]*)>', '[\\1]', raw_text)
-        text_obj = f.format.formatter(raw_text).decode("utf-8","ignore")
-        return text_obj.replace('[', '<').replace(']', '>')
-    else:
-        return f.format.formatter(raw_text).decode("utf-8","ignore")
     
 def get_neighboring_pages(db, philo_id, doc_page):
     conn = db.dbh
