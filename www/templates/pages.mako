@@ -24,12 +24,12 @@
         % endfor
     </div>
     <div class='page_display'>
-        <div class="page_number">
-        <span id="current_page">${current_page}</span>
         <a id="prev_page" class="prev_page"><</a>
         <a id="next_page" class="next_page">></a>
+        <div class="page_number">
+        <span id="current_page">${current_page}</span>
         </div>
-        <span id="page_text">${page_text}</span>
+        <div class="page_text" id="page_text">${page_text}</div>
     </div>
 </div>
 <%include file="footer.mako"/>
