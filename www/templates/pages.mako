@@ -23,13 +23,13 @@
             ${spacing}<a href="${href}">${i.head or "[%s]" % i.type}</a><br>
         % endfor
     </div>
+    <a id="prev_page" class="prev_page"><</a>
+    <a id="next_page" class="next_page">></a>
     <div class='page_display'>
-        <a id="prev_page" class="prev_page"><</a>
-        <a id="next_page" class="next_page">></a>
-        <div class="page_number">
-        <span id="current_page">${current_page}</span>
+        <div id="current_page" class="current_page">${current_page}</div>
+        <div class="page_text" id="page_text">
+        ${page_text}
         </div>
-        <div class="page_text" id="page_text">${page_text}</div>
     </div>
 </div>
 <%include file="footer.mako"/>

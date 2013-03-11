@@ -281,6 +281,9 @@ div.main_body {
 .philologic_collocation {
     padding-right: 50px;
 }
+.philologic_context {
+    text-align: justify;
+}
 .more_context {
     padding-left: 24px;
     color: Gray !important;
@@ -398,34 +401,38 @@ a.hide_frequency:hover {
 }
 .page_number, obj_nav {
     text-align: center;
-    font-size: 150%;
-    margin-bottom: 40px;
+    margin-bottom: 10px;
 }
-.prev_page, .prev_obj {
+.current_page {
+    font-size: 105% !important;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.prev_page, .fake_prev_page {
     padding-top: 20px;
     font-size: 350%;
     color: #D8D8D8  !important;
     cursor: pointer;
     float: left;
 }
-.prev_page:hover, .next_page:hover, .prev_obj:hover, .next_obj:hover {
+.prev_page:hover, .next_page:hover, .fake_prev_page:hover, .fake_next_page:hover {
     text-decoration: none !important;
     color: #A8A8A8 !important;
 }
-.next_page, .next_obj {
+.next_page, .fake_next_page {
     padding-top: 20px;
     font-size: 350%;
     color: #D8D8D8  !important;
     cursor: pointer;
     float: right;
 }
-.page_text, .obj_text {
+.page_display, .obj_text {
     margin: 0 auto;
     padding: 20px 20px 20px 20px;
     width: 600px;
     background-color: #F8F8F8 !important;
     box-shadow: 0px 0px 15px #888888;
-    line-height: 200% !important;
+    line-height: 130% !important;
     text-align: justify;
     font-size: 105%;
 }
@@ -491,7 +498,7 @@ ul.ui-autocomplete.ui-menu {
     margin-right: auto;
     width: 30%;
 }
-.current_page {
+.current_results_page {
     font-size: 170%;
 }
 

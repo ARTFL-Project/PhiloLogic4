@@ -175,8 +175,8 @@ $(document).ready(function(){
     
     // Change page in docs
     $("#prev_page, #next_page").on('click', function() {
-        var my_path = db_path.replace(/\d+$/, '');
-        var doc_id = db_path.match(/\d+$/)[0];
+        var my_path = db_path.replace(/(\/\d+)+$/, '/');
+        var doc_id = db_path.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
         var page = $("#current_page").text();
         var direction = $(this).attr('id');
         var myscript = "http://" + my_path + "scripts/go_to_page.py?philo_id=" + doc_id + "&go_to_page=" + direction + "&doc_page=" + page;
@@ -194,6 +194,19 @@ $(document).ready(function(){
                 $(this).html(data).fadeIn('fast');
             }); 
         });
+    });
+    $(".fake_prev_page, .fake_next_page").on('click', function() {
+        var direction = $(this).attr('class');
+        var page_count = $(".obj_text").children('div').size();
+        console.log(page_count)
+        console.log($(".obj_text").children('div').eq(1).text());
+        var visible = $(".obj_text").children("div:visible")
+        console.log($(".obj_text").index(visible))
+        if (direction == "fake_prev_page") {
+            $(".obj_text").children().filter("div:visible").hide().prev().fadeIn('fast');
+        } else {
+            $(".obj_text").children().filter("div:visible").hide().next().fadeIn('fast');
+        }
     });
     
     // This is to display the table of contents in the document viewer
