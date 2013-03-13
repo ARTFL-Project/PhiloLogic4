@@ -31,14 +31,15 @@ def navigation(environ,start_response):
             obj = db[path_components]
     if has_pages(obj, db):
         page_num = get_page_num(obj,db)
-        page_text = f.get_page_text(db, obj.philo_id[0], page_num, obj.filename, path, '')
-        if page_text:  ## In case the page does not contain any text
-            prev_page, next_page = get_neighboring_pages(db, obj.philo_id[0], page_num)
-            return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
-                                    dbname=dbname,current_page=page_num,f=f,navigate_doc=navigate_doc,
-                                    db=db,q=q,template_name='pages.mako')
+        if page_num:
+            page_text = f.get_page_text(db, obj.philo_id[0], page_num, obj.filename, path, '')
+            if page_text:  ## In case the page does not contain any text
+                prev_page, next_page = get_neighboring_pages(db, obj.philo_id[0], page_num)
+                return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
+                                        dbname=dbname,current_page=page_num,f=f,navigate_doc=navigate_doc,
+                                        db=db,q=q,template_name='pages.mako')
     obj_text = f.get_text_obj(obj, query_args=q['byte'])
-    obj_text = obj_pager(db, obj_text)
+    obj_text = obj_pager(db, obj, obj_text)
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
                        db=db,q=q,obj_text=obj_text,template_name='object.mako')
 
@@ -83,9 +84,12 @@ def get_page_num(obj, db):
     conn = db.dbh
     c = conn.cursor()
     c.execute('select page from toms where philo_id = ?', (philo_id,))
-    return str(c.fetchone()[0] + 1)
+    try:
+        return str(c.fetchone()[0] + 1)
+    except TypeError:
+        return False
 
-def obj_pager(db, obj_text, word_num=500):
+def obj_pager(db, obj, obj_text, word_num=500):
     pages =[]
     token_regex = db.locals['punct_regex'] + '|' + db.locals['word_regex']
     words = [i for i in re.split(token_regex, obj_text) if i]
@@ -101,6 +105,10 @@ def obj_pager(db, obj_text, word_num=500):
         pages.append(''.join(page))
     page_divs = ''
     page_divs += '<div>%s</div>' % pages[0]
-    for p in pages[1:]:
+    for p in pages[1:-1]:
         page_divs += "<div style='display:none;'>" + p + '</div>'
+    next_id = obj.next.split(" ")[:7]
+    next_url = f.link.make_absolute_object_link(db, next_id)
+    next_link = '<a href="%s">NEXT</a>' % next_url
+    page_divs += "<div style='display:none;'>%s%s</div>" % (page[-1], next_link)
     return page_divs

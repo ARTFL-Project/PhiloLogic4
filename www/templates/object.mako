@@ -7,6 +7,7 @@
     <input type="checkbox" id="show_table_of_contents">
     <label for="show_table_of_contents"><span id="t_b_c_box">Show table of contents</span></label>
     </div>
+    <div style="float:right;" id="overlay_toggler"><label for="overlay_toggler"><span id="read">Start reading mode</span></label></div>
     <% results = navigate_doc(obj, db) %>
     <div id="table_of_contents" class="table_of_contents">
     % for i in results:
@@ -23,12 +24,12 @@
         ${spacing}<a href="${href}">${i.head or "[%s]" % i.type}</a><br>
     % endfor
     </div>
-        <div class="object_display">
-        <a class="fake_prev_page"><</a>
-        <a class="fake_next_page">></a>
-        <div class="obj_text">
-        ${obj_text}
+    <div class="page_display">
+        <div class="book_page">
+            <a class="fake_prev_page"><</a>
+            <a class="fake_next_page">></a>
+            <div class="obj_text">${obj_text}</div>
         </div>
-        </div>
+    </div>
   </div>
 <%include file="footer.mako"/>
