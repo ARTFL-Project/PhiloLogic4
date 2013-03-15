@@ -44,7 +44,6 @@ def filter_hits(q, obj_types, c):
     else:
         query = 'select count(*) from toms where '
         query += ' or '.join(['philo_type="%s"' % i for i in obj_types])
-        query += ' and philo_name != "__philo_virtual"'
         c.execute(query)
         total_docs = int(c.fetchone()[0])
     return philo_ids, total_docs
@@ -81,12 +80,12 @@ def retrieve_hits(q, db):
     c.execute('select * from %s limit 1' % table)
     fields = ['%s.' % table + i[0] for i in c.description] + ['toms.word_count']
     if len(query_words.split()) > 1:
-        query = 'select %s from %s inner join toms on toms.philo_id=%s.philo_id and toms.philo_name!="__philo_virtual" where ' % (','.join(fields), table, table)
+        query = 'select %s from %s inner join toms on toms.philo_id=%s.philo_id where ' % (','.join(fields), table, table)
         words =  query_words.split()
         query += ' or '.join(['%s.philo_name=?' % table for i in words])
         c.execute(query, words)
     else:
-        query = 'select %s from %s inner join toms on toms.philo_id=%s.philo_id and toms.philo_name!="__philo_virtual" where %s.philo_name=?' % (','.join(fields),table, table, table)
+        query = 'select %s from %s inner join toms on toms.philo_id=%s.philo_id where %s.philo_name=?' % (','.join(fields),table, table, table)
         c.execute(query, (query_words,))
     
     results = {}
@@ -113,11 +112,11 @@ def retrieve_hits(q, db):
     query_words = unicode(query_words, 'utf-8')
     my_words = '|'.join(set([w for w in re.split(token_regex, query_words, re.U) if w]))
     word_reg = re.compile(r"\b%s\b" % my_words, re.U)
-    metadata = ','.join([m for m in q['metadata']])
+    metadata = ','.join([m for m in q['metadata'] if m!= "id"])
     query = 'select philo_id, %s from metadata_relevance' % metadata
     metadata_list = [i for i in c.execute(query)]
     for i in metadata_list:
-        metadata_string = ' '.join([i[m] or '' for m in q['metadata']]).decode('utf-8', 'ignore').lower()
+        metadata_string = ' '.join([i[m] or '' for m in q['metadata'] if m != 'id']).decode('utf-8', 'ignore').lower()
         matches = [w.encode('utf-8', 'ignore') for w in word_reg.findall(metadata_string)]
         if matches:
             philo_id = i['philo_id']
@@ -143,6 +142,9 @@ def fetch_relevance(hit, path, q, samples=10):
     length = 75
     text_snippet = []
     byte_sample = hit.bytes[:samples]
+    hit_num = len(hit.bytes)
+    if hit_num < samples:
+        length = int(length * samples / hit_num)
     for byte in byte_sample: 
         byte = [int(byte)]
         bytes, byte_start = adjust_bytes(byte, length)
