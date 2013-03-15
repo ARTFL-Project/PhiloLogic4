@@ -30,7 +30,7 @@
  </ol>
  </div>
  <div class="more">
- <%include file="pages.mako" args="start=start,results_per_page=results_per_page,q=q,results=results"/> 
+ <%include file="results_paging.mako" args="start=start,results_per_page=results_per_page,q=q,results=results"/> 
    <div style='clear:both;'></div>
  </div>
 </div>
