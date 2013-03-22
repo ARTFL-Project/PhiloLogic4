@@ -22,7 +22,8 @@ def navigation(environ,start_response):
             q['doc_page'] = '1'
         page_text = f.get_page_text(db, obj.philo_id[0], q['doc_page'], obj.filename, path, q['byte'])
         if page_text:
-            prev_page, next_page = get_neighboring_pages(db, obj.philo_id[0], q['doc_page'])    
+            doc_id = str(obj.philo_id[0]) + ' %'
+            prev_page, next_page = get_neighboring_pages(db, doc_id, q['doc_page'])    
             return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
                                    dbname=dbname,current_page=q['doc_page'],f=f,navigate_doc=navigate_doc,
                                    db=db,q=q,template_name='pages.mako')
@@ -34,7 +35,8 @@ def navigation(environ,start_response):
         if page_num:
             page_text = f.get_page_text(db, obj.philo_id[0], page_num, obj.filename, path, '')
             if page_text:  ## In case the page does not contain any text
-                prev_page, next_page = get_neighboring_pages(db, obj.philo_id[0], page_num)
+                doc_id = str(obj.philo_id[0]) + ' %'
+                prev_page, next_page = get_neighboring_pages(db, doc_id, page_num)
                 return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
                                         dbname=dbname,current_page=page_num,f=f,navigate_doc=navigate_doc,
                                         db=db,q=q,template_name='pages.mako')
@@ -56,16 +58,22 @@ def navigate_doc(obj, db):
             text_hierarchy.append(db[id])
     return text_hierarchy
     
-def get_neighboring_pages(db, philo_id, doc_page):
+def get_neighboring_pages(db, doc_id, doc_page):
     conn = db.dbh
     c = conn.cursor()
-    if doc_page != '1':
-        prev_page = int(doc_page) - 1
-    else:
+    c.execute('select philo_seq from pages where n=? and philo_id like ?', (doc_page, doc_id))
+    philo_seq = c.fetchone()[0]
+    prev_seq = philo_seq - 1
+    c.execute('select n from pages where philo_seq=? and philo_id like ?', (prev_seq, doc_id))
+    try:
+        prev_page = c.fetchone()[0]
+    except TypeError:  ## There is no previous page in that doc
         prev_page = None
-    next_page = str(int(doc_page) + 1)
-    c.execute('select n from pages where n=?', (next_page,))
-    if c.fetchone() == None:
+    next_seq = philo_seq + 1
+    c.execute('select n from pages where philo_seq=? and philo_id like ?', (next_seq, doc_id))
+    try:
+        next_page = c.fetchone()[0]
+    except TypeError:  ## There is no previous page in that doc
         next_page = None
     return prev_page, next_page
 
@@ -104,9 +112,18 @@ def obj_pager(db, obj, obj_text, word_num=500):
     if len(page):
         pages.append(''.join(page))
     page_divs = ''
-    page_divs += '<div>%s</div>' % pages[0]
+    highlight = False
+    highlight_tag = re.compile('class="highlight"')
     for p in pages[1:-1]:
-        page_divs += "<div style='display:none;'>" + p + '</div>'
+        if highlight_tag.search(p):
+            highlight = True
+            page_divs += "<div>" + p + '</div>'
+        else:
+            page_divs += "<div style='display:none;'>" + p + '</div>'
+    if highlight:
+        page_divs = '<div style="display:none;">%s</div>' % pages[0] + page_divs
+    else:
+        page_divs = '<div>%s</div>' % pages[0] + page_divs
     next_id = obj.next.split(" ")[:7]
     next_url = f.link.make_absolute_object_link(db, next_id)
     next_link = '<a href="%s">NEXT</a>' % next_url

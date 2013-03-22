@@ -1,4 +1,5 @@
 <%include file="header.mako"/>
+<%include file="search_boxes.mako"/>
 <div class='philologic_response'>
     <div class='philologic_cite'>
         <div class='title'>${obj.author}, <i>${obj.title}</i> Tome ${obj.volume}</div>
@@ -26,8 +27,8 @@
     </div>
     <div class='page_display'>
         <div class="book_page">
-            <a id="prev_page" class="prev_page"><</a>
-            <a id="next_page" class="next_page">></a>   
+            <a id="${prev_page}" class="prev_page"><</a>
+            <a id="${next_page}" class="next_page">></a>   
             <div id="current_page" class="current_page">${current_page}</div>
             <div class="page_text" id="page_text">${page_text}</div>
         </div>

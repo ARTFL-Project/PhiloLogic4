@@ -143,7 +143,7 @@ def fetch_relevance(hit, path, q, samples=10):
     text_snippet = []
     byte_sample = hit.bytes[:samples]
     hit_num = len(hit.bytes)
-    if hit_num < samples:
+    if hit_num and hit_num < samples:
         length = int(length * samples / hit_num)
     for byte in byte_sample: 
         byte = [int(byte)]

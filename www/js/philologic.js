@@ -31,17 +31,21 @@ $(document).ready(function(){
     var db_path = window.location.hostname + pathname;
     var q_string = window.location.search.substr(1);
     
-    $(".show_search_form").click(function() {
-        var link = $(this).text()
-        if ($("#search_elements").css('display') == 'none') {
-            link = link.replace("Show", "Hide");
-            $(this).tooltip({content: "Click to hide the search form"},{ position: { my: "left+10 center", at: "right" } });
-        } else {
-            link = link.replace("Hide", "Show");
-            $(this).tooltip({content: "Click to show the search form"},{ position: { my: "left+10 center", at: "right" } });
+    $("#q").focus(function() {
+        if ($(".philologic_response").is('*')) {
+            show_more_options("report");
+            hide_search_on_click();
         }
-        $(this).text(link);
-        $("#search_elements").slideToggle()
+    });
+    $('.more_options').click(function() {
+        $('.search_elements').css('z-index', 150);
+        $('.book_page').css('z-index', 90);
+        if ($(".more_options").text() == "Show search options") {
+            show_more_options("all");
+            hide_search_on_click();
+        } else {
+            hide_search_form();
+        }
     });
     
     monkeyPatchAutocomplete();    
@@ -107,19 +111,17 @@ $(document).ready(function(){
     $("#report").buttonset();
     
     $('.form_body').show();
-    showHide($('input[name=report]:checked', '#search').val());
+    //showHide($('input[name=report]:checked', '#search').val());
+    $("#search_elements").hide();
     
-    $('#report').change(function() {
+    $('#report').click(function() {
         var report = $('input[name=report]:checked', '#search').val();
-        var visible = new Boolean(1);
-        if ($("#search_elements").css('display') == "none") {
-            visible = Boolean(0);
-        }
-        showHide(report);
-        if (visible) {
-            $("#search_elements").fadeIn();
-        } else {
+        if ($("#search_elements:visible")) {
+            showHide(report);
             $("#search_elements").slideDown();
+        } else {
+            showHide(report);
+            $("#search_elements").fadeIn();
         }
     });
     
@@ -166,6 +168,7 @@ $(document).ready(function(){
         var switchto = $('input[name=report_switch]:checked').val();
         var width = $(window).width() / 3;
         $("#waiting").css("margin-left", width).show();
+        $("#waiting").css("margin-top", 200).show();
         $.get("http://" + db_path + "/reports/concordance_switcher.py" + switchto, function(data) {
             $("#results_container").hide().empty().html(data).fadeIn('fast');
             $("#waiting").hide();
@@ -174,26 +177,24 @@ $(document).ready(function(){
     
     
     // Change page in docs
-    $("#prev_page, #next_page").on('click', function() {
+    $(".prev_page, .next_page").on('click', function() {
         var my_path = db_path.replace(/(\/\d+)+$/, '/');
         var doc_id = db_path.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
         var page = $("#current_page").text();
-        var direction = $(this).attr('id');
-        var myscript = "http://" + my_path + "scripts/go_to_page.py?philo_id=" + doc_id + "&go_to_page=" + direction + "&doc_page=" + page;
-        $.get(myscript, function(data) {
-            if (direction == "prev_page") {
-                $("#current_page").fadeOut('fast', function() {
-                    $(this).html(Number($("#current_page").text()) - 1).fadeIn('fast');
-                });
-            } else {
-                $("#current_page").fadeOut('fast', function() {
-                    $(this).html(Number($("#current_page").text()) + 1).fadeIn('fast');
-                });
-            }
+        var go_to_page = $(this).attr('id');
+        var myscript = "http://" + my_path + "scripts/go_to_page.py?philo_id=" + doc_id + "&go_to_page=" + go_to_page + "&doc_page=" + page;
+        $.getJSON(myscript, function(data) {
+            $("#current_page").fadeOut('fast', function() {
+                $(this).html(data[2]).fadeIn('fast');
+            });
             $("#page_text").fadeOut('fast', function () {
-                $(this).html(data).fadeIn('fast');
+                $(this).html(data[3]).fadeIn('fast');
+                $(".prev_page").attr("id", data[0]);
+                $('.next_page').attr('id', data[1]);
+                $()
             }); 
         });
+        
     });
     $(".fake_prev_page, .fake_next_page").on('click', function() {
         var direction = $(this).attr('class');
@@ -242,7 +243,9 @@ $(document).ready(function(){
             $("body").append("<div id='overlay' style='display:none;'></div>");
             $(".book_page").css('position', 'relative').css('box-shadow', '0px 0px 15px #FFFFFF');
             $("#read").html('Exit reading mode').fadeIn('fast');
-            $("#overlay_toggler").css('z-index', 1000).css('position', 'relative');
+            $("#overlay_toggler").css('z-index', 100).css('position', 'relative');
+            $('.initial_form').css('z-index', 98);
+            $('.book_page').css('z-index', 100);
             $("#overlay")
                .height(docHeight)
                .css({
@@ -252,22 +255,23 @@ $(document).ready(function(){
                   'left': 0,
                   'background-color': 'black',
                   'width': '100%',
-                  'z-index': 500
+                  'z-index': 99
                 });
             $("#overlay").fadeIn('fast');
         }
     });
     
     //  jQueryUI theming
-    $( "#button" )
+    $( "#button, #button1" )
             .button()
             .click(function( event ) {
                 $("#search_elements").slideUp(function() {
+                    $("#report").hide();
                     var width = $(window).width() / 3;
                     $("#waiting").css("margin-left", width).show();
                 });
             });
-    $("#reset, #freq_sidebar, #show_table_of_contents, #overlay_toggler").button();
+    $("#reset, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
     $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch").buttonset()
     $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
@@ -277,32 +281,22 @@ $(document).ready(function(){
 
 function showHide(value) {
     if (value == 'frequency') {
-        $("#search_elements").hide();
         $("#results_per_page, #collocation, #time_series, #year_interval").hide();
         $("#frequency, #method, #metadata_field").show();
     }
     if (value == 'collocation') {
-        $("#search_elements").hide()
-        $("#frequency").hide()
-        $("#results_per_page").hide()
-        $("#method, #time_series, #year_interval").hide()
-        $("#collocation, #metadata_field").show()
+        $("#results_per_page, #frequency, #method, #time_series, #year_interval").hide();
+        $("#collocation, #metadata_field").show();
     }
     if (value == 'concordance') {
-        $("#search_elements").hide()
-        $("#frequency").hide()
-        $("#collocation, #time_series, #year_interval").hide()
+        $("#frequency, #collocation, #time_series, #year_interval").hide();
         $("#results_per_page, #method, #metadata_field").show()
     }
     if (value == 'relevance') {
-        $("#search_elements").hide()
-        $("#frequency").hide()
-        $("#collocation").hide()
-        $("#method, #time_series, #year_interval").hide()
-        $("#results_per_page, #metadata_field").show()
+        $("#collocation, #frequency, #method, #time_series, #year_interval").hide();
+        $("#results_per_page, #metadata_field").show();
     }
     if (value == "time_series") {
-        $("#search_elements").hide();
         $("#results_per_page, #metadata_field, #method, #frequency, #collocation").hide();
         $("#time_series, #year_interval").show();
     }
@@ -329,38 +323,79 @@ function toggle_frequency(q_string, db_url, pathname) {
         var script_call = "http://" + db_url + "scripts/get_collocate.py?" + q_string
     }
     $(".loading").empty().hide();
-    var spinner = '<img src="http://' + db_url + '/js/spinner-round.gif" alt="Loading..." />';
-    if ($("#toggle_frequency").hasClass('show_frequency')) {
-        $(".results_container").animate({
-            "margin-right": "330px"},
-            50);
-        var width = $(".sidebar_display").width() / 2;
-        $(".loading").append(spinner).css("margin-left", width).css("margin-top", "10px").show();
-        $.getJSON(script_call, function(data) {
-            var newlist = "";
-            $(".loading").hide().empty();
-            if (field == "collocate") {
-                newlist += "<p class='freq_sidebar_status'>Collocates within 5 words left or right</p>";
-            }
-            $.each(data, function(index, item) {
-                if (item[0].length > 30) {
-                    var url = '<a href="' + item[2] + '">' + item[0].slice(0,32) + '[...]</a>'
-                } else {
-                    var url = '<a href="' + item[2] + '">' + item[0] + '</a>'
-                } 
-                newlist += '<p><li>' + url + '<span style="float:right;">' + item[1] + '</span></li></p>';
-            });
-            $("#freq").hide().empty().html(newlist).fadeIn('fast');
+    var spinner = '<img src="http://' + db_url + '/js/ajax-loader.gif" alt="Loading..."  height="25px" width="25px"/>';
+    $(".results_container").animate({
+        "margin-right": "420px"},
+        50);
+    var width = $(".sidebar_display").width() / 2;
+    $(".loading").append(spinner).css("margin-left", width).css("margin-top", "10px").show();
+    $.getJSON(script_call, function(data) {
+        var newlist = "";
+        $(".loading").hide().empty();
+        if (field == "collocate") {
+            newlist += "<p class='freq_sidebar_status'>Collocates within 5 words left or right</p>";
+        }
+        $.each(data, function(index, item) {
+            if (item[0].length > 30) {
+                var url = '<a href="' + item[2] + '">' + item[0].slice(0,32) + '[...]</a>'
+            } else {
+                var url = '<a href="' + item[2] + '">' + item[0] + '</a>'
+            } 
+            newlist += '<p><li>' + url + '<span style="float:right;">' + item[1] + '</span></li></p>';
         });
-        $(".hide_frequency").show();
-        $("#freq").show();
-    }
+        $("#freq").hide().empty().html(newlist).fadeIn('fast');
+    });
+    $(".hide_frequency").show();
+    $(".frequency_container").show();
 }
 function hide_frequency() {
     $(".hide_frequency").fadeOut();
     $("#freq").empty().hide();
+    $('.frequency_container').hide();
     $(".loading").empty();
     $(".results_container").animate({
         "margin-right": "0px"},
         50);
+}
+
+//  Function to show ore search options
+function show_more_options(display) {
+    $(".more_options").button('option', 'label', 'Hide search options');    
+    $("#report").slideDown('fast');
+    if (display == "all") {
+        var report = $('input[name=report]:checked', '#search').val();
+        showHide(report);
+        $("#search_elements").slideDown();
+    }
+    $('.form_body').css('z-index', 99);
+    $("body").append("<div id='search_overlay' style='display:none;'></div>");
+    var header_height = $('#header').height();
+    var footer_height = $('#footer').height();
+    var overlay_height = $(document).height() - header_height - footer_height;
+    $("#search_overlay")
+    .height(overlay_height)
+    .css({
+       'opacity' : 0.3,
+       'position': 'absolute',
+       'top': 0,
+       'left': 0,
+       'background-color': '#E0E0E0',
+       'width': '100%',
+       'margin-top': header_height,
+       'z-index': 90
+     });
+    $("#search_overlay").fadeIn('fast');
+}
+function hide_search_form() {
+    $("#report").slideUp();
+    $("#search_elements").slideUp();
+    $("#search_overlay").fadeOut('fast', function() {
+        $(this).remove();
+    });
+    $(".more_options").button('option', 'label', 'Show search options');
+}
+function hide_search_on_click() {
+    $("#search_overlay, #header, #footer").click(function() {
+        hide_search_form();
+    }); 
 }
