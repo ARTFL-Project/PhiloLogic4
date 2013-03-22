@@ -20,7 +20,6 @@ if __name__ == "__main__":
     c = db.dbh.cursor()
     c.execute('select filename from toms where philo_type="doc" and philo_id like ?', (philo_id,))
     filename = c.fetchone()[0]
-    print >> sys.stderr, "DOC3", q['go_to_page']
     page_text = f.get_page_text(db, doc_id, q['go_to_page'], filename, path, q['byte'])
     prev_page, next_page = get_neighboring_pages(db, doc_id, q['go_to_page'])
     print "Content-Type: text/html\n"
