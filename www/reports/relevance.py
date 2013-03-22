@@ -8,6 +8,7 @@ import sqlite3
 import os
 from functions.wsgi_handler import wsgi_response
 from math import log
+from random import sample
 from philologic.DB import DB
 from functions.format import adjust_bytes, chunkifier, clean_text, align_text
 from bibliography import bibliography
@@ -141,8 +142,11 @@ def retrieve_hits(q, db):
 def fetch_relevance(hit, path, q, samples=10):
     length = 75
     text_snippet = []
-    byte_sample = hit.bytes[:samples]
     hit_num = len(hit.bytes)
+    if hit_num < samples:
+        byte_sample = sorted(sample(hit.bytes, hit_num))
+    else:
+        byte_sample = sorted(sample(hit.bytes, samples))
     if hit_num and hit_num < samples:
         length = int(length * samples / hit_num)
     for byte in byte_sample: 

@@ -29,19 +29,16 @@ $(document).ready(function() {
                         <span class='tooltip_link' title="Click to see document">${f.cite.make_div_cite(i)}</span>
                     % endif
                     <%
-                        author = i.author
-                        title = i.title
-                        from copy import deepcopy
-                        link_metadata = deepcopy(q["metadata"])
-                        link_metadata['author'] = author.encode('utf-8', 'ignore')
-                        link_metadata['title'] = title.encode('utf-8', 'ignore')
-                        url = f.link.make_query_link(q["q"],q["method"],q["arg"],**link_metadata)
+                        metadata = {}
+                        for m in db.locals['metadata_fields']:
+                            metadata[m] = i[m]
+                        url = f.link.make_query_link(q["q"],q["method"],q["arg"],**metadata)
                         hit_num = len(i.bytes)
                     %>
                     <span style"padding-left:25px"><a href='${url}' title="Click to retrieve all ${hit_num} occurences" class="tooltip_link">${hit_num} occurences</a></span>
                     <div class='philologic_context'>
                         <span class='philologic_context'>${fetch_relevance(i, path, q)}...</span>
-                </div>
+                    </div>
                 </li>
             % endfor
         </ol>
