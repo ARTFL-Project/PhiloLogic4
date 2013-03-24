@@ -7,7 +7,7 @@ import functions as f
 import sqlite3
 import os
 from functions.wsgi_handler import wsgi_response
-from math import log
+from math import log10
 from random import sample
 from philologic.DB import DB
 from functions.format import adjust_bytes, chunkifier, clean_text, align_text
@@ -32,33 +32,27 @@ def filter_hits(q, obj_types, c):
     ## Filter out if necessary
     philo_ids = []
     total_docs = int
-    for field in q['metadata']:
-        if field != 'n' and q['metadata'][field] != '':
-            for obj_type in obj_types:
-                query = 'select philo_id from toms where %s=? and philo_type=?' % field
-                c.execute(query, (q['metadata'][field], obj_type))
-                results = [i[0] for i in c.fetchall()]
-                philo_ids.extend(results)
-    if philo_ids:
+    fields = [f for f in q['metadata'] if q['metadata'][f]]
+    metadata = [q['metadata'][j] for j in fields]
+    query = 'select philo_id from toms where ' + ' and '.join([i + '=?' for i in fields])
+    if fields:
+        for obj_type in obj_types:
+            q = query + 'and philo_type=?'
+            c.execute(q, metadata + [obj_type])
+            philo_ids = [i[0] for i in c.fetchall()]
         philo_ids = set(philo_ids)
-        total_docs = len(philo_ids)
-    else:
-        query = 'select count(*) from toms where '
-        query += ' or '.join(['philo_type="%s"' % i for i in obj_types])
-        c.execute(query)
-        total_docs = int(c.fetchone()[0])
-    return philo_ids, total_docs
+    return philo_ids
 
-def compute_idf(query_words, table, c, total_docs):
+def compute_idf(query_words, c, total_docs):
     ## Compute IDF
     idfs = {}
     for word in query_words.split():
-        c.execute('select count(*) from %s where philo_name=?' % table, (word,))
+        c.execute('select count(*) from ranked_relevance where philo_name=?', (word,))
         docs_with_word = int(c.fetchone()[0]) or 1  ## avoid division by 0
         doc_freq = total_docs / docs_with_word
         if doc_freq == 1:
             doc_freq = (total_docs + 1) / docs_with_word ## The logarithm won't be equal to 0
-        idf = log(doc_freq)
+        idf = log10(doc_freq)
         idfs[word] = idf
     return idfs
 
@@ -70,12 +64,20 @@ def retrieve_hits(q, db):
     ## Open cursors for sqlite tables
     conn = db.dbh
     c = conn.cursor()
-    philo_ids, total_docs = filter_hits(q, obj_types, c)
+    
+    ## Count all docs in corpus
+    query = 'select count(*) from toms where '
+    query += ' or '.join(['philo_type="%s"' % i for i in obj_types])
+    c.execute(query)
+    total_docs = int(c.fetchone()[0])
+    
+    ## Limit search according to metadata
+    philo_ids = filter_hits(q, obj_types, c)
     
     query_words = q['q'].replace('|', ' ') ## Handle ORs from crapser
     q['q'] = q['q'].replace(' ', '|') ## Add ORs for search links
     
-    idfs = compute_idf(query_words, table, c, total_docs)
+    idfs = compute_idf(query_words, c, total_docs)
     
     ## Perform search on the text
     c.execute('select * from %s limit 1' % table)
@@ -132,10 +134,10 @@ def retrieve_hits(q, db):
                 for match in matches:
                     results[philo_id]['tf_idf'] += idfs[match] * 100
     
-    if philo_ids:
-        hits = sorted(results.iteritems(), key=lambda x: x[1]['tf_idf'], reverse=False)  ## This is weird...
-    else:
-        hits = sorted(results.iteritems(), key=lambda x: x[1]['tf_idf'], reverse=True)
+    #if len(philo_ids) > 1:   ## BUG ALERT: sorted gets reversed when more than one metadata field...
+    #    hits = sorted(results.iteritems(), key=lambda x: x[1]['tf_idf'], reverse=False)
+    #else:
+    hits = sorted(results.iteritems(), key=lambda x: x[1]['tf_idf'], reverse=True)
     return ResultsWrapper(hits, db)
 
  
