@@ -127,16 +127,17 @@ $(document).ready(function(){
     
     
     //  Clear search form
-    $("#reset").click(function() {
-        $("#q").empty();
-        $("#arg").empty();
-        for (i in fields) {
-            var field = $("#" + i);
-            $(field).empty();
-        }
-        $("#method1").prop('checked', true).button("refresh");
-        $("#report1").prop('checked', true).button("refresh");
-        $("#pagenum1").prop('checked', true).button("refresh");
+    $("#reset_form").click(function() {
+        $("#method").find("input:radio").attr("checked", false).end();
+        $("#method1").attr('checked', true);
+        $("#method").buttonset('refresh');
+        $("#report").find("input:radio").attr("checked", false).end();
+        $("#report1").attr('checked', true);
+        $("#report").buttonset('refresh');
+        $("#page_num").find("input:radio").attr("checked", false).end();
+        $("#pagenum1").attr('checked', true);
+        $("#page_num").buttonset('refresh');
+        $('#search')[0].reset();
         showHide('concordance');
         $("#search_elements").fadeIn();
     });
@@ -271,7 +272,7 @@ $(document).ready(function(){
                     $("#waiting").css("margin-left", width).show();
                 });
             });
-    $("#reset, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
+    $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
     $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch").buttonset()
     $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });

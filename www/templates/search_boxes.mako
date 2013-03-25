@@ -75,13 +75,14 @@
                 </span>
                 </td></tr>
                 
-                <tr class="table_row" id="results_per_page"><td class="first_column"><span class="search_field">Results per page:</span></td><td><span id='page_num'>
-                <input type="radio" name="pagenum" id="pagenum1" value='20' checked="checked"><label for="pagenum1">20</label>
-                <input type="radio" name="pagenum" id="pagenum2" value='50'><label for="pagenum2">50</label>
-                <input type="radio" name="pagenum" id="pagenum3" value='100'><label for="pagenum3">100</label>
+                <tr class="table_row" id="results_per_page"><td class="first_column"><span class="search_field">Results per page:</span></td>
+                <td><span id='page_num'>
+                    <input type="radio" name="pagenum" id="pagenum1" value='20' checked="checked"><label for="pagenum1">20</label>
+                    <input type="radio" name="pagenum" id="pagenum2" value='50'><label for="pagenum2">50</label>
+                    <input type="radio" name="pagenum" id="pagenum3" value='100'><label for="pagenum3">100</label>
                 </span></td></tr>
                 <tr class="table_row"><td class="first_column"><input id="button" type='submit' value="Search"/></td>
-                <td><button type="reset" id="reset">Clear form</button></td></tr>
+                <td><button type="reset" id="reset_form">Clear form</button></td></tr>
            </table>
         </div>
     </form>
