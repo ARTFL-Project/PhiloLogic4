@@ -285,31 +285,31 @@ function showHide(value) {
         $("#results_per_page, #collocation, #time_series, #year_interval").hide();
         $("#frequency, #method, #metadata_field").show();
         $('.explain_relev, .explain_conc, .explain_time, .explain_colloc').hide();
-        $('.explain_freq').fadeIn();
+        $('.explain_freq').fadeIn('slow');
     }
     if (value == 'collocation') {
         $("#results_per_page, #frequency, #method, #time_series, #year_interval").hide();
         $("#collocation, #metadata_field").show();
         $('.explain_relev, .explain_freq, .explain_time, .explain_conc').hide();
-        $('.explain_colloc').fadeIn();
+        $('.explain_colloc').fadeIn('slow');
     }
     if (value == 'concordance') {
         $("#frequency, #collocation, #time_series, #year_interval").hide();
         $("#results_per_page, #method, #metadata_field").show();
         $('.explain_relev, .explain_freq, .explain_time, .explain_colloc').hide();
-        $('.explain_conc').fadeIn();
+        $('.explain_conc').fadeIn('slow');
     }
     if (value == 'relevance') {
         $("#collocation, #frequency, #method, #time_series, #year_interval").hide();
         $("#results_per_page, #metadata_field").show();
         $('.explain_conc, .explain_freq, .explain_time, .explain_colloc').hide();
-        $('.explain_relev').fadeIn();
+        $('.explain_relev').fadeIn('slow');
     }
     if (value == "time_series") {
         $("#results_per_page, #metadata_field, #method, #frequency, #collocation").hide();
         $("#time_series, #year_interval").show();
         $('.explain_relev, .explain_freq, .explain_conc, .explain_colloc').hide();
-        $('.explain_time').fadeIn();
+        $('.explain_time').fadeIn('slow');
     }
 }
 
@@ -404,7 +404,7 @@ function hide_search_form() {
         $(this).remove();
     });
     $(".more_options").button('option', 'label', 'Show search options');
-    $('.explain_conc').fadeOut();
+    $('.explain_conc, .explain_relev, .explain_freq, .explain_time, .explain_colloc').fadeOut();
 }
 function hide_search_on_click() {
     $("#search_overlay, #header, #footer").click(function() {
