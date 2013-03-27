@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from philologic.HitWrapper import ObjectWrapper
+
 
 obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 
             'para': 5, 'sent': 6, 'word': 7}
@@ -24,10 +26,16 @@ class HitWrapper(object):
             self.type = [k for k in obj_dict if obj_dict[k] == length][0]
 
     def __getitem__(self, key):
-        return self.__metadata_lookup(key)
+        if key in obj_dict:
+            return ObjectWrapper(self.hit, self.db, obj_type=key,encoding=self.encoding)
+        else:
+            return self.__metadata_lookup(key)
     
     def __getattr__(self, name):
-        return self.__metadata_lookup(name)
+        if name in obj_dict:
+            return ObjectWrapper(self.hit, self.db, obj_type=name,encoding=self.encoding)
+        else:
+            return self.__metadata_lookup(name)
         
     def __metadata_lookup(self, field):
         width = 7

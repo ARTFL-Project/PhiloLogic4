@@ -19,6 +19,4 @@ if __name__ == "__main__":
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
     field, results = r.generate_frequency(hits, q, db)
     print "Content-Type: text/html\n"
-    print json.dumps(results)
-    print >> sys.stderr, environ["QUERY_STRING"]
-    
+    print json.dumps(results)    
