@@ -76,6 +76,7 @@ def parse_cgi(environ):
     query['doc_page'] = cgi.get('doc_page', [''])[0]
     query['philo_id'] = cgi.get('philo_id', [''])[0]
     query['filename'] = cgi.get('filename', [''])[0]
+    query['go_to_page'] = cgi.get('go_to_page', [''])[0]
     
 #    query["dbname"] = dbname
     query["dbpath"] = dbfile

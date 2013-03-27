@@ -10,23 +10,44 @@ def get_text(hit, byte_start, length, path):
     return file.read(length)
 
 def get_page_text(db, philo_id, page_num, filename, path, bytes):
-    philo_id = philo_id + ' %'
+    philo_id = str(philo_id) + ' %'
     conn = db.dbh
     c = conn.cursor()
     c.execute("select start_byte, end_byte from pages where philo_id like ? and n=? limit 1", (philo_id,page_num))
-    start_byte, end_byte = c.fetchone()
+    try:
+        start_byte, end_byte = c.fetchone()
+    except TypeError:   ## returns None because there are no pages in the doc
+        return ''
     length = int(end_byte) - int(start_byte)
     file_path = path + '/data/TEXT/' + filename
     file = open(file_path)        
     file.seek(start_byte)
     text = file.read(length)
-    if bytes and start_byte < sorted(bytes.split('+'))[0]:
-        bytes = sorted([int(byte) - start_byte for byte in bytes.split('+')])
+    sorted_bytes = sorted(bytes.split('+'))
+    if bytes and int(start_byte) < int(sorted_bytes[0]) < int(end_byte):
+        bytes = sorted([int(byte) - int(start_byte) for byte in bytes.split('+')])
         text_start, text_middle, text_end = chunkifier(text, bytes, highlight=True)
-        text = text_start + text_middle + text_end
-        text = re.sub('<(/?span[^>]*)>', '[\\1]', text)
-        text = formatter(text).decode("utf-8","ignore")
-        text = text.replace('[', '<').replace(']', '>')
-        return text
+        highlighted_text = text_start + text_middle + text_end
+        highlighted_text = re.sub('<(/?span[^>]*)>', '[\\1]', highlighted_text)
+        highlighted_text = formatter(highlighted_text).decode("utf-8","ignore")
+        highlighted_text = highlighted_text.replace('[', '<').replace(']', '>')
+        return highlighted_text
     else:
-        return formatter(text).decode("utf-8","ignore")   
+        return formatter(text).decode("utf-8","ignore")
+    
+def get_text_obj(obj, query_args=False):
+    path = "./data/TEXT/" + obj.filename
+    file = open(path)
+    byte_start = obj.byte_start
+    file.seek(byte_start)
+    width = obj.byte_end - byte_start
+    raw_text = file.read(width)
+    if query_args:
+        bytes = sorted([int(byte) - byte_start for byte in query_args.split('+')])
+        text_start, text_middle, text_end = chunkifier(raw_text, bytes, highlight=True)
+        raw_text = text_start + text_middle + text_end
+        raw_text = re.sub('<(/?span[^>]*)>', '[\\1]', raw_text)
+        text_obj = formatter(raw_text).decode("utf-8","ignore")
+        return text_obj.replace('[', '<').replace(']', '>')
+    else:
+        return formatter(raw_text).decode("utf-8","ignore")

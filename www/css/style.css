@@ -26,13 +26,13 @@ html, body {
 /* The following is for the header and footer */
 #header {
   background: url(images/header_pattern.png);
-  height: 95px;
-  border-bottom: 1px #ECECEC solid;
+  height: 75px;
+  box-shadow: 0px 8px 15px #C8C8C8;
 }
 #footer {
     background-image: url(images/footer_pattern.png);
-    height: 210px;
-    border-top: 1px #ECECEC solid;
+    height: 75px;
+    box-shadow: 0px -8px 15px #C8C8C8;
 }
 
 .secondary-links {
@@ -47,8 +47,8 @@ html, body {
 }
 #header .region-content, #footer .region-content {
   min-width: 725px;
-  max-width: 1165px;
-  padding-left:30px;
+  padding-left:20px;
+  padding-right: 20px;
 }
 .site-name {
     overflow: hidden;
@@ -85,12 +85,6 @@ html, body {
   border: 0;
   padding-left: 0;
 }
-#footer {
-  color: #eee;
-}
-#footer h2, #footer h3, #footer h4 {
-  color: #eee;
-}
 #footer #footer-message {
     color: #800000;
     font-size: .9em;
@@ -108,7 +102,9 @@ html, body {
 #footer .primary-links {
   float: left;
 }
-
+.footer-nav {
+  font-size: 80%;
+}
 
 /* Links */
 a:link, a:visited {
@@ -138,7 +134,6 @@ body {
 
 table {
   font-size:inherit;
-  font:100%;
   font-weight: inherit;
 }
 
@@ -150,11 +145,15 @@ h1 {
   margin: 0;
   padding: 0;
   font-weight: normal;
-  font-family: "Gill sans", "Trebuchet MS", Helvetica, Tahoma, sans-serif;
   color: #555;
   line-height: 1.2em;
 }
-
+h3 {
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: 400 !important;
+    text-decoration: underline;
+}
 ol {
     list-style-type: none;
     margin: 0px;
@@ -168,63 +167,6 @@ div.main_body {
     margin-left:30px;
     margin-right: 30px;
 }
-
-/* The following is PhiloLogic specific CSS to handle TEI encoding */
-span.emph {font-weight: bolder; }
-span.emphsc {FONT-SIZE: 12px;}
-span.hi   {font-weight: bolder;}
-span.foreign {font-style: italic;}
-span.bibl {font-style: italic;}
-span.title     {font-style: italic;}
-span.hiitalic  {font-style: italic;}
-span.hiunderline {text-decoration: underline;}
-span.hibold   {font-weight: bolder;}
-span.doctitle {display: block; text-align: center; FONT-SIZE: 24px; LINE-HEIGHT: 1.5;}
-span.byline {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}
-span.pubplace {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}
-span.docedition {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}
-span.publisher {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}
-span.docimprint {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}
-span.addrline {display: block; text-align: center; FONT-SIZE: 16px; LINE-HEIGHT: 1.5;}
-span.docauthor {display: block; text-align: center; FONT-SIZE: 20px; LINE-HEIGHT: 1.5;}
-span.docdate {display: block; text-align: center; FONT-SIZE: 20px; LINE-HEIGHT: 1.5;}
-span.opener   {display: block; text-align: center;}
-span.label   {display: block; text-align: center;}
-span.signed   {display: block; text-align: right;}
-span.stage    {display: block; text-align: right; font-style: italic; margin-left: 120px;}
-span.speaker  {display: block; text-align: center; FONT-SIZE: 16px;}
-span.epigraph {display: block; margin-left: 300px;}
-span.salute   {display: block; text-align: center;}
-span.trailer  {display: block; text-align: center;}
-span.closer   {display: block; text-align: center;}
-span.item     {display: block; text-align: left;}
-span.role     {display: block; text-align: left; margin-left: 100px; margin-right: 100px}
-span.argument {display: block; text-align: left; margin-left: 100px; margin-right: 100px}
-span.roledesc {display: block; text-align: right; margin-right: 100px}
-span.l        {display: block; text-align: left;}
-span.small   {FONT-SIZE: 11px;}
-span.smallcaps {font-variant: small-caps;}
-span.hismallcap {FONT-SIZE: 12px;}
-span.head    {FONT-SIZE: 18px; LINE-HEIGHT: 1.5;}
-span.notetarget {FONT-SIZE: 12px; text-decoration: underline; vertical-align: super;}
-span.footnote {display: block; FONT-SIZE: 12px; margin-left: 60px; margin-right: 40px;}
-span.marginnote {display: block; FONT-SIZE: 12px; text-align: right;}
-span.inlinenote {display: block; FONT-SIZE: 12px;}
-span.generalnote {display: block; FONT-SIZE: 12px;}
-span.endnote {display: block; FONT-SIZE: 12px;}
-span.refalignright {display: block; text-align: right;}
-span.mstoneid {display: block; FONT-SIZE: 12px; text-align: right;}
-span.mstonen {display: block; FONT-SIZE: 12px; text-align: right;}
-span.mstonetype {display: block; text-align: center;}
-span.mwright {display: block; FONT-SIZE: 12px; text-align: right;}
-span.authfreqindt {display: block; text-align: left; margin-left: 60px;}
-span.perfreqindt {display: block; text-align: left; margin-left: 45px;}
-span.navhead {display: block; text-align: center; font-size: 16px; font-weight: bold;}
-span.navbiblio {display: block; font-size: 14px;}
-span.navlevel1 {display: block; text-align: left; font-size: 14px;}
-span.navlevel2 {display: block; text-align: left; margin-left: 40px; FONT-SIZE: 14px;}
-span.navlevel3 {display: block; text-align: left; margin-left: 60px; FONT-SIZE: 12px;}
-span.projecthead { text-align: right; font-size: 20px; color: #000000;}
 
 
 /* For pop-in notes */
@@ -240,6 +182,9 @@ span.projecthead { text-align: right; font-size: 20px; color: #000000;}
 
 
 /*Results formatting*/
+.philologic_response {
+    margin-top: 60px;
+}
 .initial_report {
     border-style:solid;
     border-width:1px;
@@ -282,9 +227,12 @@ span.projecthead { text-align: right; font-size: 20px; color: #000000;}
 .philologic_collocation {
     padding-right: 50px;
 }
+.philologic_context {
+    text-align: justify;
+}
 .more_context {
     padding-left: 24px;
-    color: Gray !important;
+    color: FFCC99 !important;
     font-weight: 300 !important;
 }
 .collocate {
@@ -324,40 +272,64 @@ span.projecthead { text-align: right; font-size: 20px; color: #000000;}
     border-width:1px;
     border-color: LightGray;
 }
-.frequency_table {
-        padding-top: 10px;
-}
 
 
 /*All the sidebar classes*/
-a.hide_frequency {
+.hide_frequency {
     font-family: 'Droid Sans Mono', sans-serif !important;
     float: right;
-    padding-left: 20px;
     color: Gray;
 }
-a.hide_frequency:hover {
-        text-decoration: none;
-        color: Black;
+.hide_frequency:hover {
+    color: Black;
+    cursor: pointer;
 }
 .sidebar_display {
-        float: right;
-        padding-left: 10px;
-        max-width: 300px;
+    float: right;
+    min-width: 200px;
+    max-width: 400px;
 }
-.sidebar_display .freq_sidebar_status{
+.sidebar_display .freq_sidebar_status {
 	margin: 0em 0em 0.5em 0em;
+}
+.frequency_container {
+    border-style: solid;
+    border-width: 1px;
+    border-color: #ECECEC;
+    margin-top: 10px;
+    background-color: #FAFAFA;
+    display: none;
+}
+.frequency_table {
+    padding: 10px 20px 10px 10px;
 }
 
 
 /*Search form*/
 .form_body {
-    padding-top: 10px;
-    width: auto;
+    /*margin-left: -420px;*/
+    margin-top: -20px;
+    margin-left: -30px;
+    /*left: 50%;*/
+    width: 840px;
+    position: absolute;
     display: none;
+    z-index: 90;
+    background-color: #FAFAFA;
+    border-right-style: solid;
+    border-right-width: 1px;
+    border-right-color: #ECECEC;
+    /*border-left-style: solid;*/
+    /*border-left-width: 1px;*/
+    /*border-left-color: #ECECEC;*/
+    border-bottom-style: double;
+    border-bottom-width: 5px;
+    border-bottom-color: #ECECEC;
+    box-shadow: 8px 8px 15px #C8C8C8;
 }
 .search_elements {
     margin-top: 20px;
+    padding-left: 30px;
     border-top: solid;
     border-top-width: 1px;
     border-top-color: #ECECEC;
@@ -370,20 +342,85 @@ a.hide_frequency:hover {
     font-size: 100%;
     color: #800000;
     font-weight: 600;
-    padding-bottom: 20px;
     width: inherit;
     text-decoration: none !important;
 }
 .report {
     width: auto;
     max-width: 960px;
+    display: none;
+    margin-bottom: 10px;
+    padding-left: 20px;
 }
-.form_separation {
-    margin-top: 20px;
-    width: inherit;
-    border-bottom-style: double;
-    border-bottom-width: 5px;
-    border-bottom-color: #ECECEC;
+.hide_search_form {
+    float:right;
+    margin-top:-30px;
+    font-weight: 400;
+    /*padding-right: 5px;*/
+}
+.initial_form {
+    margin-left: 5px;
+}
+.search_field {
+    font-weight: 400;
+}
+.more_options {
+    float: right;
+    padding-right: 10px;
+}
+
+/*Document viewing styles*/
+.title {
+    font-size: 140%;
+    padding-bottom: 20px;
+}
+.table_of_contents {
+    display: inline-block;
+    max-width: 250px;
+    padding-top: 30px;
+    display:none;
+}
+.page_number, obj_nav {
+    text-align: center;
+    margin-bottom: 10px;
+}
+.current_page {
+    font-size: 105% !important;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.prev_page, .fake_prev_page {
+    font-size: 500%;
+    color: #D8D8D8  !important;
+    cursor: pointer;
+    float: left;
+    margin-left: -70px;
+}
+.prev_page:hover, .next_page:hover, .fake_prev_page:hover, .fake_next_page:hover {
+    text-decoration: none !important;
+    color: #A8A8A8 !important;
+}
+.next_page, .fake_next_page {
+    font-size: 500%;
+    color: #D8D8D8  !important;
+    cursor: pointer;
+    float: right;
+    margin-right: -70px;
+}
+.book_page {
+    margin: 0 auto;
+    padding: 20px 20px 20px 20px;
+    width: 400px;
+    background-color: #FAFAFA !important;
+    box-shadow: 0px 0px 15px #888888;
+    line-height: 140% !important;
+    text-align: justify;
+    font-size: 105%;
+    min-height: 650px;
+    z-index: 100;
+}
+.obj_text {
+    vertical-align:middle;
 }
 
 
@@ -447,35 +484,17 @@ ul.ui-autocomplete.ui-menu {
     margin-right: auto;
     width: 30%;
 }
-.current_page {
+.current_results_page {
     font-size: 170%;
 }
 
 
-/*Navigating pages in documents*/
-.doc_pages {
-    padding-top: 20px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 10%;
-}
-.prev_next {
-    font-size: 800%;
-    font-weight: 600;
-    color: #D8D8D8  !important;
-}
-.prev_next:hover {
-    text-decoration: none !important;
-    color: #A8A8A8 !important;
-}
 
-
+/* Ugly looking workaround while waiting for next release of jQueryUI with selectmenu*/
 label.custom-select {
     position: relative;
     display: inline-block;
 }
-
-/* Ugly looking workaround while waiting for next release of jQueryUI with selectmenu*/
 .custom-select select {
     display: inline-block;
     padding: 2px 1px 1px 3px;
