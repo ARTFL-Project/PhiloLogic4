@@ -21,6 +21,7 @@ $(document).ready(function() {
                 <li class='philologic_occurrence'>
                     <%
                         n += 1
+                        hit_num = len(i.bytes)
                     %>
                     <span class='hit_n'>${n}.</span>
                     % if i.type == 'doc':
@@ -28,17 +29,24 @@ $(document).ready(function() {
                     % else:
                         <span class='tooltip_link' title="Click to see document">${f.cite.make_div_cite(i)}</span>
                     % endif
-                    <%
-                        metadata = {}
-                        for m in db.locals['metadata_fields']:
-                            metadata[m] = i[m]
-                        url = f.link.make_query_link(q["q"],q["method"],q["arg"],**metadata)
-                        hit_num = len(i.bytes)
-                    %>
-                    <span style"padding-left:25px"><a href='${url}' title="Click to retrieve all ${hit_num} occurences" class="tooltip_link">${hit_num} occurences</a></span>
-                    <div class='philologic_context'>
-                        <span class='philologic_context'>${fetch_relevance(i, path, q)}...</span>
-                    </div>
+                    % if hit_num:
+                        <%
+                            metadata = {}
+                            for m in db.locals['metadata_fields']:
+                                metadata[m] = i[m]
+                            url = f.link.make_query_link(q["q"],q["method"],q["arg"],**metadata)
+                        %>
+                        <span style"padding-left:25px">
+                            <a href='${url}' title="Click to retrieve all ${hit_num} occurences" class="tooltip_link">${hit_num} occurences</a>
+                        </span>
+                        <div class='philologic_context'>
+                            <span class='philologic_context'>${fetch_relevance(i, path, q)}...</span>
+                        </div>
+                    % else:
+                        <span style"padding-left:25px" style="font-style:italic">
+                            No occurences in the text itself
+                        </span>
+                    % endif
                 </li>
             % endfor
         </ol>
