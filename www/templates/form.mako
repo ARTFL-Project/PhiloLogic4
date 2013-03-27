@@ -1,8 +1,10 @@
 <%include file="header.mako"/>
 <script>	  	
-$(document).ready(function() {	  	
+$(document).ready(function() {
+    $("#report").show();
+    showHide('concordance');
     $("#search_elements").show();
-    $("#show_search_form").hide();
+    $(".more_options").hide();
     $("#form_separation").hide();
 });	  	
 </script>

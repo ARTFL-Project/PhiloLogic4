@@ -7,7 +7,8 @@ import functions as f
 import sqlite3
 import os
 from functions.wsgi_handler import wsgi_response
-from math import log
+from math import log10
+from random import sample
 from philologic.DB import DB
 from functions.format import adjust_bytes, chunkifier, clean_text, align_text
 from bibliography import bibliography
@@ -31,34 +32,27 @@ def filter_hits(q, obj_types, c):
     ## Filter out if necessary
     philo_ids = []
     total_docs = int
-    for field in q['metadata']:
-        if field != 'n' and q['metadata'][field] != '':
-            for obj_type in obj_types:
-                query = 'select philo_id from toms where %s=? and philo_type=?' % field
-                c.execute(query, (q['metadata'][field], obj_type))
-                results = [i[0] for i in c.fetchall()]
-                philo_ids.extend(results)
-    if philo_ids:
+    fields = [f for f in q['metadata'] if q['metadata'][f]]
+    metadata = [q['metadata'][j] for j in fields]
+    query = 'select philo_id from toms where ' + ' and '.join([i + '=?' for i in fields])
+    if fields:
+        for obj_type in obj_types:
+            q = query + 'and philo_type=?'
+            c.execute(q, metadata + [obj_type])
+            philo_ids = [i[0] for i in c.fetchall()]
         philo_ids = set(philo_ids)
-        total_docs = len(philo_ids)
-    else:
-        query = 'select count(*) from toms where '
-        query += ' or '.join(['philo_type="%s"' % i for i in obj_types])
-        query += ' and philo_name != "__philo_virtual"'
-        c.execute(query)
-        total_docs = int(c.fetchone()[0])
-    return philo_ids, total_docs
+    return philo_ids
 
-def compute_idf(query_words, table, c, total_docs):
+def compute_idf(query_words, c, total_docs):
     ## Compute IDF
     idfs = {}
     for word in query_words.split():
-        c.execute('select count(*) from %s where philo_name=?' % table, (word,))
+        c.execute('select count(*) from ranked_relevance where philo_name=?', (word,))
         docs_with_word = int(c.fetchone()[0]) or 1  ## avoid division by 0
         doc_freq = total_docs / docs_with_word
         if doc_freq == 1:
             doc_freq = (total_docs + 1) / docs_with_word ## The logarithm won't be equal to 0
-        idf = log(doc_freq)
+        idf = log10(doc_freq)
         idfs[word] = idf
     return idfs
 
@@ -70,23 +64,31 @@ def retrieve_hits(q, db):
     ## Open cursors for sqlite tables
     conn = db.dbh
     c = conn.cursor()
-    philo_ids, total_docs = filter_hits(q, obj_types, c)
+    
+    ## Count all docs in corpus
+    query = 'select count(*) from toms where '
+    query += ' or '.join(['philo_type="%s"' % i for i in obj_types])
+    c.execute(query)
+    total_docs = int(c.fetchone()[0])
+    
+    ## Limit search according to metadata
+    philo_ids = filter_hits(q, obj_types, c)
     
     query_words = q['q'].replace('|', ' ') ## Handle ORs from crapser
     q['q'] = q['q'].replace(' ', '|') ## Add ORs for search links
     
-    idfs = compute_idf(query_words, table, c, total_docs)
+    idfs = compute_idf(query_words, c, total_docs)
     
     ## Perform search on the text
     c.execute('select * from %s limit 1' % table)
     fields = ['%s.' % table + i[0] for i in c.description] + ['toms.word_count']
     if len(query_words.split()) > 1:
-        query = 'select %s from %s inner join toms on toms.philo_id=%s.philo_id and toms.philo_name!="__philo_virtual" where ' % (','.join(fields), table, table)
+        query = 'select %s from %s inner join toms on toms.philo_id=%s.philo_id where ' % (','.join(fields), table, table)
         words =  query_words.split()
         query += ' or '.join(['%s.philo_name=?' % table for i in words])
         c.execute(query, words)
     else:
-        query = 'select %s from %s inner join toms on toms.philo_id=%s.philo_id and toms.philo_name!="__philo_virtual" where %s.philo_name=?' % (','.join(fields),table, table, table)
+        query = 'select %s from %s inner join toms on toms.philo_id=%s.philo_id where %s.philo_name=?' % (','.join(fields),table, table, table)
         c.execute(query, (query_words,))
     
     results = {}
@@ -113,11 +115,11 @@ def retrieve_hits(q, db):
     query_words = unicode(query_words, 'utf-8')
     my_words = '|'.join(set([w for w in re.split(token_regex, query_words, re.U) if w]))
     word_reg = re.compile(r"\b%s\b" % my_words, re.U)
-    metadata = ','.join([m for m in q['metadata']])
+    metadata = ','.join([m for m in q['metadata'] if m!= "id"])
     query = 'select philo_id, %s from metadata_relevance' % metadata
     metadata_list = [i for i in c.execute(query)]
     for i in metadata_list:
-        metadata_string = ' '.join([i[m] or '' for m in q['metadata']]).decode('utf-8', 'ignore').lower()
+        metadata_string = ' '.join([i[m] or '' for m in q['metadata'] if m != 'id']).decode('utf-8', 'ignore').lower()
         matches = [w.encode('utf-8', 'ignore') for w in word_reg.findall(metadata_string)]
         if matches:
             philo_id = i['philo_id']
@@ -132,17 +134,23 @@ def retrieve_hits(q, db):
                 for match in matches:
                     results[philo_id]['tf_idf'] += idfs[match] * 100
     
-    if philo_ids:
-        hits = sorted(results.iteritems(), key=lambda x: x[1]['tf_idf'], reverse=False)  ## This is weird...
-    else:
-        hits = sorted(results.iteritems(), key=lambda x: x[1]['tf_idf'], reverse=True)
+    #if len(philo_ids) > 1:   ## BUG ALERT: sorted gets reversed when more than one metadata field...
+    #    hits = sorted(results.iteritems(), key=lambda x: x[1]['tf_idf'], reverse=False)
+    #else:
+    hits = sorted(results.iteritems(), key=lambda x: x[1]['tf_idf'], reverse=True)
     return ResultsWrapper(hits, db)
 
  
 def fetch_relevance(hit, path, q, samples=10):
     length = 75
     text_snippet = []
-    byte_sample = hit.bytes[:samples]
+    hit_num = len(hit.bytes)
+    if hit_num < samples:
+        byte_sample = sorted(sample(hit.bytes, hit_num))
+    else:
+        byte_sample = sorted(sample(hit.bytes, samples))
+    if hit_num and hit_num < samples:
+        length = int(length * samples / hit_num)
     for byte in byte_sample: 
         byte = [int(byte)]
         bytes, byte_start = adjust_bytes(byte, length)

@@ -22,18 +22,31 @@ def navigation(environ,start_response):
             q['doc_page'] = '1'
         page_text = f.get_page_text(db, obj.philo_id[0], q['doc_page'], obj.filename, path, q['byte'])
         if page_text:
-            prev_page, next_page = get_neighboring_pages(db, obj.philo_id[0], q['doc_page'])    
+            doc_id = str(obj.philo_id[0]) + ' %'
+            prev_page, next_page = get_neighboring_pages(db, doc_id, q['doc_page'])    
             return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
                                    dbname=dbname,current_page=q['doc_page'],f=f,navigate_doc=navigate_doc,
-                                   db=db,q=q,template_name='navigation.mako')
+                                   db=db,q=q,template_name='pages.mako')
         else:
             path_components += ['2']
             obj = db[path_components]
-    return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_obj=navigate_obj,
-                           navigate_doc=navigate_doc,db=db,q=q,template_name='object.mako')
+    if has_pages(obj, db):
+        page_num = get_page_num(obj,db)
+        if page_num:
+            page_text = f.get_page_text(db, obj.philo_id[0], page_num, obj.filename, path, '')
+            if page_text:  ## In case the page does not contain any text
+                doc_id = str(obj.philo_id[0]) + ' %'
+                prev_page, next_page = get_neighboring_pages(db, doc_id, page_num)
+                return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
+                                        dbname=dbname,current_page=page_num,f=f,navigate_doc=navigate_doc,
+                                        db=db,q=q,template_name='pages.mako')
+    obj_text = f.get_text_obj(obj, query_args=q['byte'])
+    obj_text = obj_pager(db, obj, obj_text)
+    return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
+                       db=db,q=q,obj_text=obj_text,template_name='object.mako')
 
 def navigate_doc(obj, db):
-    conn = db.dbh ## make this more accessible 
+    conn = db.dbh 
     c = conn.cursor()
     query =  str(obj.philo_id[0]) + " _%"
     c.execute("select philo_id, philo_name, philo_type, byte_start from toms where philo_id like ?", (query,))
@@ -44,35 +57,75 @@ def navigate_doc(obj, db):
         else:
             text_hierarchy.append(db[id])
     return text_hierarchy
-
-def navigate_obj(obj, query_args=False):
-    path = "./data/TEXT/" + obj.filename
-    file = open(path)
-    byte_start = obj.byte_start
-    file.seek(byte_start)
-    width = obj.byte_end - byte_start
-    raw_text = file.read(width)
-    if query_args:
-        bytes = sorted([int(byte) - byte_start for byte in query_args.split('+')])
-        text_start, text_middle, text_end = f.format.chunkifier(raw_text, bytes, highlight=True)
-        raw_text = text_start + text_middle + text_end
-        ## temp hack until we work out how to format without loosing highlight
-        ## tags
-        raw_text = re.sub('<(/?span[^>]*)>', '[\\1]', raw_text)
-        text_obj = f.format.formatter(raw_text).decode("utf-8","ignore")
-        return text_obj.replace('[', '<').replace(']', '>')
-    else:
-        return f.format.formatter(raw_text).decode("utf-8","ignore")
     
-def get_neighboring_pages(db, philo_id, doc_page):
+def get_neighboring_pages(db, doc_id, doc_page):
     conn = db.dbh
     c = conn.cursor()
-    if doc_page != '1':
-        prev_page = int(doc_page) - 1
-    else:
+    c.execute('select philo_seq from pages where n=? and philo_id like ?', (doc_page, doc_id))
+    philo_seq = c.fetchone()[0]
+    prev_seq = philo_seq - 1
+    c.execute('select n from pages where philo_seq=? and philo_id like ?', (prev_seq, doc_id))
+    try:
+        prev_page = c.fetchone()[0]
+    except TypeError:  ## There is no previous page in that doc
         prev_page = None
-    next_page = str(int(doc_page) + 1)
-    c.execute('select n from pages where n=?', (next_page,))
-    if c.fetchone() == None:
+    next_seq = philo_seq + 1
+    c.execute('select n from pages where philo_seq=? and philo_id like ?', (next_seq, doc_id))
+    try:
+        next_page = c.fetchone()[0]
+    except TypeError:  ## There is no previous page in that doc
         next_page = None
     return prev_page, next_page
+
+def has_pages(obj, db):
+    conn = db.dbh
+    c = conn.cursor()
+    ## this query will be slow until we create a doc id field
+    c.execute('select n from pages where philo_id like ?', (str(obj.philo_id[0]) + ' %', ))
+    if c.fetchall(): ## This document has pages
+        return True
+    else:
+        return False
+    
+def get_page_num(obj, db):
+    philo_id = ' '.join([str(i) for i in obj.philo_id])
+    conn = db.dbh
+    c = conn.cursor()
+    c.execute('select page from toms where philo_id = ?', (philo_id,))
+    try:
+        return str(c.fetchone()[0] + 1)
+    except TypeError:
+        return False
+
+def obj_pager(db, obj, obj_text, word_num=500):
+    pages =[]
+    token_regex = db.locals['punct_regex'] + '|' + db.locals['word_regex']
+    words = [i for i in re.split(token_regex, obj_text) if i]
+    page = []
+    for w in words:
+        page.append(w)
+        if len(page) > word_num:
+            if re.match(db.locals['punct_regex'], w):    
+                page = ''.join(page)
+                pages.append(page)
+                page = []
+    if len(page):
+        pages.append(''.join(page))
+    page_divs = ''
+    highlight = False
+    highlight_tag = re.compile('class="highlight"')
+    for p in pages[1:-1]:
+        if highlight_tag.search(p):
+            highlight = True
+            page_divs += "<div>" + p + '</div>'
+        else:
+            page_divs += "<div style='display:none;'>" + p + '</div>'
+    if highlight:
+        page_divs = '<div style="display:none;">%s</div>' % pages[0] + page_divs
+    else:
+        page_divs = '<div>%s</div>' % pages[0] + page_divs
+    next_id = obj.next.split(" ")[:7]
+    next_url = f.link.make_absolute_object_link(db, next_id)
+    next_link = '<a href="%s">NEXT</a>' % next_url
+    page_divs += "<div style='display:none;'>%s%s</div>" % (page[-1], next_link)
+    return page_divs
