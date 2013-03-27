@@ -4,14 +4,11 @@ import re
 import sys
 
 try:
-    import lxml.etree as ElementTree
+    import elementtree.ElementTree as ElementTree
 except ImportError:
-    try:
-        import elementtree.ElementTree as ElementTree
-    except ImportError:
-        if (sys.version[0] == 2) and (sys.version[1] <= 6):
-            print >> sys.stderr, "Warning: PhiloLogic require ElementTree 1.3 or greater"
-        import xml.etree.ElementTree as ElementTree
+    if (sys.version[0] == 2) and (sys.version[1] <= 6):
+        print >> sys.stderr, "Warning: PhiloLogic require ElementTree 1.3 or greater"
+    import xml.etree.ElementTree as ElementTree
 et = ElementTree
 
 def parse(file):

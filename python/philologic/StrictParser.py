@@ -1,10 +1,10 @@
-# -*- coding: UTF-8 -*-
 from philologic import OHCOVector, shlaxtree
 from philologic.ParserHelpers import *
 import re
 import sys
+from lxml import etree
 from xml.parsers import expat
-et = shlaxtree.et  # MAKE SURE you use ElementTree version 1.3.
+et = etree  # MAKE SURE you use ElementTree version 1.3.
                    # This is standard in Python 2.7, but an add on in 2.6,
 
 
@@ -61,6 +61,9 @@ class ExpatWrapper:
         buffer = self.p.GetInputContext()
         tag_end = buffer.index(">")        
         content = buffer[:tag_end]
+#        utf8_attrs = {}
+#        for k,v in attrs.items():
+#            utf8_attrs[k] = v.encode("utf-8")
         self.target.feed("start",content,self.p.CurrentByteIndex,name,attrs.copy())
     def end_element(self,name):
         closer = (u"</%s>" % name)
@@ -166,8 +169,11 @@ class StrictParser:
                     break   # Don't check any other paths.
                 
             # Extract any metadata in the attributes 
+            utf8_attrib = {}
+            for k,v in attrib.items():
+                utf8_attrib[k] = v.encode("utf-8")                
             for ex,depth in self.extractors:
-                ex(new_element,event)
+                ex(new_element,(e_type, content, offset, name, utf8_attrib))
                         
             # If self closing, immediately close the tag
             if name in self.self_closing_tags:
@@ -179,7 +185,8 @@ class StrictParser:
             if self.stack:
                 current_element = self.stack[-1]
                 for ex,depth in self.extractors:
-                    ex(current_element,event) # EXTRACTORS NEED TO USE NEW STACK API
+                    utf8_event = (e_type, content.encode("utf-8"), offset, name, attrib)
+                    ex(current_element,utf8_event) # EXTRACTORS NEED TO USE NEW STACK API
                     # Should test whether to go on and tokenize or not.
                 # Tokenize and emit tokens.  Still a bit hackish.
                 # TODO: Tokenizer object shared with output formatter. 
