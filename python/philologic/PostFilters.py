@@ -2,6 +2,8 @@
 
 import os
 import sqlite3
+import unicodedata
+from collections import defaultdict
     
 def word_frequencies(loader_obj):
     frequencies = loader_obj.destination + '/frequencies'
@@ -10,6 +12,20 @@ def word_frequencies(loader_obj):
     for line in open(loader_obj.destination + '/WORK/all_frequencies'):
         count, word = tuple(line.split())
         print >> output, word + '\t' + count
+    output.close()
+    
+def normalized_word_frequencies(loader_obj):
+    frequencies = loader_obj.destination + '/frequencies'
+    output = open(frequencies + "/normalized_word_frequencies", "w")
+    word_dict = defaultdict(int)
+    for line in open(frequencies + '/word_frequencies'):
+        word, count = tuple(line.split())
+        word = word.decode('utf-8').lower()
+        word = [i for i in unicodedata.normalize("NFKD",word) if not unicodedata.combining(i)]
+        word = ''.join(word).encode('utf-8')
+        word_dict[word] += int(count)
+    for norm_word, norm_word_count in sorted(word_dict.items(), key=lambda x: x[1], reverse=True):
+        print >> output, norm_word + '\t' + norm_word_count
     output.close()
     
 def metadata_frequencies(loader_obj):

@@ -35,7 +35,7 @@ default_filters = [
                    generate_pages, 
                    make_max_id]
 
-default_post_filters = [word_frequencies, metadata_frequencies]
+default_post_filters = [word_frequencies, normalized_word_frequencies, metadata_frequencies]
 
 ## While these tables are loaded by default, you can override that default, although be aware
 ## that you will only have reduced functionality if you do. It is strongly recommended that you 
