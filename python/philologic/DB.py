@@ -42,6 +42,8 @@ class DB:
             self.locals["metadata_hierarchy"] = [ ["author","title","date"],["head"],["who"] ]
         if "metadata_types" not in self.locals:
             self.locals["metadata_types"] = {"author":"doc","title":"doc","date":"doc","head":"div","who":"para"}
+        if "normalized_fields" not in self.locals:
+            self.locals["normalized_fields"] = []
 
     def __getitem__(self,item):
         hit = self.get_id_lowlevel(item)

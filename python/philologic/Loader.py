@@ -87,6 +87,7 @@ class Loader(object):
         self.metadata_fields = []
         self.metadata_hierarchy = []
         self.metadata_types = {}
+        self.normalized_fields = []
         for t in self.types:
             self.metadata_hierarchy.append([])
             for extractor,path,param in self.metadata_xpaths[t]:
@@ -406,6 +407,7 @@ class Loader(object):
         print >> db_locals, "metadata_hierarchy = %s" % self.metadata_hierarchy
         print >> db_locals, "metadata_types = %s" % self.metadata_types
         print >> db_locals, "db_path = '%s'" % self.destination
+        print >> db_locals, "normalized_fields = %s" % self.normalized_fields
         print >> db_locals, "debug = %s" % self.debug
         for k,v in extra_locals.items():
             print >> db_locals, "%s = %s" % (k,repr(v))

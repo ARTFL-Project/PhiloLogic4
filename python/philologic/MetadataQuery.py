@@ -4,7 +4,7 @@ import sys
 import struct
 import sqlite3 
 import HitList
-
+import unicodedata
 tests = ['hello','"hello"','hi|hello','hi|"hello"','1-5','hello-hi','1-5|"hi|hello"','NULL',"NOT NULL",'hi|NULL', 'hello NOT hi','"hello" NOT hi',"NOT 1-5|hi","1-5 NOT 4", "hello NOT"]
 pattern = r'(\"[^\"]*?\")|([|])|(.*?\-.*?)|(.+)'
 
@@ -15,7 +15,7 @@ patterns = [("QUOTE",r'".*?"'),
             ('NULL',r'NULL'),
             ('TERM',r'[^|!]+')]
 
-def make_clause(column,tokens):
+def make_clause(column,tokens,normalized=False):
     clauses = ""
     vars = []
     conj = "AND"
@@ -52,12 +52,20 @@ def make_clause(column,tokens):
             else:
                 clause = "%s IS NULL" % column
         elif t[0] == "TERM":
-            if neg:
-                clause = "%s NOT LIKE ?" % (column)
-                vars.append("%" + t[1] + "%")
+            clause_column = column
+            if normalized:
+                term = t[1].decode("utf-8").lower()
+                term = [c for c in unicodedata.normalize("NFKD",term) if not unicodedata.combining(c)]
+                term = u"".join(term).encode("utf-8")
+                clause_column = column + "_norm"
             else:
-                clause = "%s LIKE ?" % (column)
-                vars.append("%" + t[1] + "%")
+                term = t[1]
+            if neg:
+                clause = "%s NOT LIKE ?" % (clause_column)
+                vars.append("%" + term + "%")
+            else:
+                clause = "%s LIKE ?" % (clause_column)
+                vars.append("%" + term + "%")
                             
         if clause and clauses:
             clauses += " " + conj + " " + clause
@@ -70,7 +78,7 @@ def make_clause(column,tokens):
 
     return (clauses,vars)
 
-def parse(column,orig):
+def parse(column,orig,normalized=False):
         temp = orig[:]
         temp_result = []
         length = len(temp)
@@ -93,7 +101,7 @@ def parse(column,orig):
                     break
             else:
                 break
-        return make_clause(column,temp_result)
+        return make_clause(column,temp_result,normalized)
 
 def hit_to_string(hit,width):
     if isinstance(hit,sqlite3.Row):
@@ -132,8 +140,12 @@ def query_lowlevel(db,param_dict):
     vars = []
     clauses = []
     for column,values in param_dict.items():
+        if "normalized_fields" in db.locals and column in db.locals["normalized_fields"]:
+            normalized = True
+        else:
+            normalized = False
         for v in values:
-            clause,some_vars = parse(column,v)
+            clause,some_vars = parse(column,v,normalized)
             clauses.append(clause)
             vars += some_vars
     if clauses:
