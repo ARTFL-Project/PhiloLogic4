@@ -25,7 +25,7 @@ def normalized_word_frequencies(loader_obj):
         word = ''.join(word).encode('utf-8')
         word_dict[word] += int(count)
     for norm_word, norm_word_count in sorted(word_dict.items(), key=lambda x: x[1], reverse=True):
-        print >> output, norm_word + '\t' + norm_word_count
+        print >> output, norm_word + '\t' + str(norm_word_count)
     output.close()
     
 def metadata_frequencies(loader_obj):
