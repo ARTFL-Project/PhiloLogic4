@@ -7,6 +7,7 @@ from functions.wsgi_handler import wsgi_response
 from render_template import render_template
 from collections import defaultdict
 import json
+import re
 
 def frequency(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
@@ -33,8 +34,13 @@ def generate_frequency(results, q, db):
     if field == None:
         field = 'title'
     counts = defaultdict(int)
+    key_disp = {}
     for n in results:
         key = n[field] or "NULL" # NULL is a magic value for queries, don't change it recklessly.
+        if field in db.locals["normalized_fields"]:
+            disp_field = field.replace("_norm","")
+            disp_key = n[disp_field]
+            key_disp[key] = disp_key
         counts[key] += 1
 
     if q['rate'] == 'relative':
@@ -53,9 +59,11 @@ def generate_frequency(results, q, db):
         # Now build the url from q.
         url = f.link.make_query_link(q["q"],q["method"],q["arg"],**q["metadata"])     
 
-        # Contruct the label for the item.
-        # This is the place to modify the displayed label of frequency table item.
-        label = k #for example, replace NULL with '[None]', 'N.A.', 'Untitled', etc.
+        # Contruct the label for the item.        
+        if k in key_disp:
+            label = key_disp[k]
+        else:
+            label = k
         
         # We can also modify the count.
         if q['rate'] == 'relative':
