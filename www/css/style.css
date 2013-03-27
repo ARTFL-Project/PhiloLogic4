@@ -27,12 +27,12 @@ html, body {
 #header {
   background: url(images/header_pattern.png);
   height: 75px;
-  box-shadow: 0px 8px 15px #C8C8C8;
+  box-shadow: 0px 8px 15px -5px #C8C8C8;
 }
 #footer {
     background-image: url(images/footer_pattern.png);
     height: 75px;
-    box-shadow: 0px -8px 15px #C8C8C8;
+    box-shadow: 0px -8px 15px -5px #C8C8C8;
 }
 
 .secondary-links {
@@ -53,13 +53,12 @@ html, body {
 .site-name {
     overflow: hidden;
     white-space: nowrap;
+    padding-top: 15px;
+    padding-left: 20px;
 }
 #header h1 {
   font-size: 2.5em;
   color: #800000;
-}
-#header h1 span {
- line-height: 100px;
 }
 #header h1 a:link, #header h1 a:visited, #header h1 a:hover {
  color: #800000;
@@ -307,10 +306,10 @@ div.main_body {
 
 /*Search form*/
 .form_body {
-    /*margin-left: -420px;*/
+    margin-left: -420px;
     margin-top: -20px;
-    margin-left: -30px;
-    /*left: 50%;*/
+    /*margin-left: -30px;*/
+    left: 50%;
     width: 840px;
     position: absolute;
     display: none;
@@ -325,7 +324,10 @@ div.main_body {
     border-bottom-style: double;
     border-bottom-width: 5px;
     border-bottom-color: #ECECEC;
-    box-shadow: 8px 8px 15px #C8C8C8;
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: #ECECEC;
+    box-shadow: 0px 9px 15px -5px #C8C8C8;
 }
 .search_elements {
     margin-top: 20px;
@@ -333,7 +335,7 @@ div.main_body {
     border-top: solid;
     border-top-width: 1px;
     border-top-color: #ECECEC;
-    width: inherit;
+    float:left;
 }
 .search_box {
     width: 200px;
@@ -368,6 +370,24 @@ div.main_body {
     float: right;
     padding-right: 10px;
 }
+.explain_conc, .explain_relev, .explain_time, .explain_freq, .explain_colloc {
+    margin-left: 420px;
+	width: 399px;
+	margin-top: 20px;
+	padding-top:10px;
+	padding-left: 10px;
+	text-align: justify;
+	font-weight: 600 !important;
+	line-height: 200%;
+	padding-right: 10px;
+	border-top: solid;
+    border-top-width: 1px;
+    border-top-color: #ECECEC;
+	position: absolute;
+	display: none;
+}
+
+
 
 /*Document viewing styles*/
 .title {

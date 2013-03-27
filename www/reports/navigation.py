@@ -17,9 +17,8 @@ def navigation(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
     obj = db[path_components]
-    if obj.philo_type == 'doc':
-        if not q['doc_page']:
-            q['doc_page'] = '1'
+    print >> sys.stderr, "OBJ", obj.philo_type
+    if obj.philo_type == 'doc' and q['doc_page']:
         page_text = f.get_page_text(db, obj.philo_id[0], q['doc_page'], obj.filename, path, q['byte'])
         if page_text:
             doc_id = str(obj.philo_id[0]) + ' %'
@@ -95,7 +94,7 @@ def get_page_num(obj, db):
     try:
         return str(c.fetchone()[0] + 1)
     except TypeError:
-        return False
+        return c.fetchone()[0]
 
 def obj_pager(db, obj, obj_text, word_num=500):
     pages =[]

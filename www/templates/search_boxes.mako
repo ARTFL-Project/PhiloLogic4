@@ -17,6 +17,25 @@
                 <input type="radio" name="report" id="report6" value='time_series'><label for="report6">Time Series Report</label>
             </div>
          </div>
+         <div class="explain_conc">
+            Concordance search finds every single occurrence of the word(s) being searched
+            throughout the database filtered by optional metadata criteria.
+        </div>
+        <div class="explain_relev">
+            Ranked relevance search ranks documents by pertinence based on the frequency
+            of the word(s) being searched.
+        </div>
+        <div class="explain_freq">
+            Frequency report will display a table with frequency counts of the selected metadata field.
+        </div>
+        <div class='explain_colloc'>
+            Collocation report will display words in the immediate vicinity of the word(s) being searched.
+            You can define how close these words must be.
+        </div>
+        <div class='explain_time'>
+            Time Series report displays a graph showing the frequency of a word throughout the database
+            during a set time period.
+        </div>
          <div id="search_elements" class="search_elements">
             <h3>Refine your search with the following options and fields:</h3>
             <div id='method'>
@@ -63,11 +82,10 @@
                     % endif
                 % endfor
                 </span>
-                <input type="checkbox" name="rate" id="rate" value="relative"/>per 10,000 words
                 </td></tr>
                 
                 <tr class="table_row" id="time_series">
-                <td class="first_column">Dates:</td><td><span class="search_field">from </span><input type='text' name="start_date" id="start_date" style="width:35px;"><span class="search_field"> to </span><input type='text' name="end_date" id="end_date" style="width:35px;">
+                <td class="first_column">Date range:</td><td><span class="search_field">from </span><input type='text' name="start_date" id="start_date" style="width:35px;"><span class="search_field"> to </span><input type='text' name="end_date" id="end_date" style="width:35px;">
                 <tr class="table_row" id="year_interval"><td class="first_column"><span class="search_field">Year interval:</span></td><td><span id="year_interval">
                 <input type="radio" name="year_interval" id="year0" value="1" checked="checked"><label for="year0">every year</label>
                 <input type="radio" name="year_interval" id="year1" value="10" checked="checked"><label for="year1">every 10 years</label>
@@ -77,13 +95,13 @@
                 
                 <tr class="table_row" id="results_per_page"><td class="first_column"><span class="search_field">Results per page:</span></td>
                 <td><span id='page_num'>
-                    <input type="radio" name="pagenum" id="pagenum1" value='20' checked="checked"><label for="pagenum1">20</label>
-                    <input type="radio" name="pagenum" id="pagenum2" value='50'><label for="pagenum2">50</label>
+                    <input type="radio" name="pagenum" id="pagenum1" value='20'><label for="pagenum1">20</label>
+                    <input type="radio" name="pagenum" id="pagenum2" value='50' checked="checked"><label for="pagenum2">50</label>
                     <input type="radio" name="pagenum" id="pagenum3" value='100'><label for="pagenum3">100</label>
                 </span></td></tr>
                 <tr class="table_row"><td class="first_column"><input id="button" type='submit' value="Search"/></td>
                 <td><button type="reset" id="reset_form">Clear form</button></td></tr>
-           </table>
+            </table>
         </div>
     </form>
 </div>
