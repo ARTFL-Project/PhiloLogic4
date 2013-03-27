@@ -3,6 +3,7 @@
 import os
 import re
 import cPickle
+import unicodedata
 from philologic.OHCOVector import Record
 from ast import literal_eval as eval
 
@@ -112,6 +113,39 @@ def make_token_counts(loader_obj, text, depth=4):
     record_list = []
     os.remove(text['words'])
     os.rename(temp_file, text['words'])
+
+def normalize_unicode_words(loader_obj, text):
+    tmp_file = open(text["words"] + ".tmp","w")
+    for line in open(text["words"]):
+        type, word, id, attrib = line.split('\t')
+        id = id.split()
+        word = word.decode("utf-8").lower().encode("utf-8")
+        record = Record(type, word, id)
+        print >> tmp_file, record
+    os.remove(text["words"])
+    os.rename(text["words"] + ".tmp",text["words"])   
+
+def normalize_unicode_columns(*columns):
+    def smash_these_unicode_columns(loader_obj, text):
+        tmp_file = open(text["sortedtoms"] + ".tmp","w")
+        for line in open(text["sortedtoms"]):
+            type, word, id, attrib = line.split('\t')
+            id = id.split()
+            record = Record(type, word, id)
+            record.attrib = eval(attrib)
+            for column in columns:
+                if column in record.attrib:
+#                    print >> sys.stderr, repr(record.attrib)
+                    col = record.attrib[column].decode("utf-8")
+                    col = col.lower()
+                    smashed_col = [c for c in unicodedata.normalize("NFKD",col) if not unicodedata.combining(c)]
+                    record.attrib[column + "_norm"] = ''.join(smashed_col).encode("utf-8")
+                    #record.attrib[column + "_norm"] = ''.join([c.encode("utf-8") for c in unicodedata.normalize('NFKD',record.attrib[column].decode("utf-8").lower()) if not unicodedata.combining(c)])
+            print >> tmp_file, record
+        tmp_file.close()
+        os.remove(text["sortedtoms"])
+        os.rename(text["sortedtoms"] + ".tmp",text["sortedtoms"])
+    return smash_these_unicode_columns
     
 ## Helper functions
 def count_tokens(record_list, depth, output_file):
