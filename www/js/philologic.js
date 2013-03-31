@@ -31,6 +31,8 @@ $(document).ready(function(){
     var db_path = window.location.hostname + pathname;
     var q_string = window.location.search.substr(1);
     
+    
+    // Search form related events
     $("#q").focus(function() {
         if ($(".philologic_response").is('*')) {
             show_more_options("report");
@@ -42,11 +44,29 @@ $(document).ready(function(){
         $('.book_page').css('z-index', 90);
         if ($(".more_options").text() == "Show search options") {
             show_more_options("all");
+            $('.search_explain').slideDown();
             hide_search_on_click();
         } else {
             hide_search_form();
         }
-    });   
+    });
+    $("#report").buttonset();
+    $('.form_body').show();
+    $("#search_elements").hide();
+    $('.conc_question, .freq_question, .colloc_question, .time_question, .relev_question').hide();
+    $('.search_explain').hide();
+    $('#report').click(function() {
+        var report = $('input[name=report]:checked', '#search').val();
+        if ($("#search_elements:visible")) {
+            showHide(report);
+            $("#search_elements").slideDown();
+            $('.search_explain').slideDown();
+        } else {
+            showHide(report);
+            $("#search_elements").fadeIn();
+            $('.search_explain').fadeIn();
+        }
+    });
     
     monkeyPatchAutocomplete();    
     
@@ -107,24 +127,6 @@ $(document).ready(function(){
             }
         }
     }
-    
-    $("#report").buttonset();
-    
-    $('.form_body').show();
-    //showHide($('input[name=report]:checked', '#search').val());
-    $("#search_elements").hide();
-    
-    $('#report').click(function() {
-        var report = $('input[name=report]:checked', '#search').val();
-        if ($("#search_elements:visible")) {
-            showHide(report);
-            $("#search_elements").slideDown();
-        } else {
-            showHide(report);
-            $("#search_elements").fadeIn();
-        }
-    });
-    
     
     //  Clear search form
     $("#reset_form").click(function() {
@@ -276,6 +278,11 @@ $(document).ready(function(){
     $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch").buttonset()
     $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
+    $('.search_explain').accordion({
+        collapsible: true,
+        heightStyle: "content",
+        active: false
+    });
     
     
 });
@@ -285,31 +292,36 @@ function showHide(value) {
         $("#results_per_page, #collocation, #time_series, #year_interval").hide();
         $("#frequency, #method, #metadata_field").show();
         $('.explain_relev, .explain_conc, .explain_time, .explain_colloc').hide();
-        $('.explain_freq').fadeIn('slow');
+        $('.relev_question, .conc_question, .colloc_question, .time_question').hide();
+        $('.freq_question').fadeIn();
     }
     if (value == 'collocation') {
         $("#results_per_page, #frequency, #method, #time_series, #year_interval").hide();
         $("#collocation, #metadata_field").show();
         $('.explain_relev, .explain_freq, .explain_time, .explain_conc').hide();
-        $('.explain_colloc').fadeIn('slow');
+        $('.relev_question, .freq_question, .conc_question, .time_question').hide();
+        $('.colloc_question').fadeIn();
     }
     if (value == 'concordance') {
         $("#frequency, #collocation, #time_series, #year_interval").hide();
         $("#results_per_page, #method, #metadata_field").show();
         $('.explain_relev, .explain_freq, .explain_time, .explain_colloc').hide();
-        $('.explain_conc').fadeIn('slow');
+        $('.relev_question, .freq_question, .colloc_question, .time_question').hide();
+        $('.conc_question').fadeIn();
     }
     if (value == 'relevance') {
         $("#collocation, #frequency, #method, #time_series, #year_interval").hide();
         $("#results_per_page, #metadata_field").show();
         $('.explain_conc, .explain_freq, .explain_time, .explain_colloc').hide();
-        $('.explain_relev').fadeIn('slow');
+        $('.conc_question, .freq_question, .colloc_question, .time_question').hide();
+        $('.relev_question').fadeIn();
     }
     if (value == "time_series") {
         $("#results_per_page, #metadata_field, #method, #frequency, #collocation").hide();
         $("#time_series, #year_interval").show();
         $('.explain_relev, .explain_freq, .explain_conc, .explain_colloc').hide();
-        $('.explain_time').fadeIn('slow');
+        $('.relev_question, .freq_question, .colloc_question, .conc_question').hide();
+        $('.time_question').fadeIn();
     }
 }
 
@@ -369,7 +381,7 @@ function hide_frequency() {
         50);
 }
 
-//  Function to show ore search options
+//  Function to show or hide search options
 function show_more_options(display) {
     $(".more_options").button('option', 'label', 'Hide search options');    
     $("#report").slideDown('fast');
@@ -399,12 +411,17 @@ function show_more_options(display) {
 }
 function hide_search_form() {
     $("#report").slideUp();
+    $('.search_explain').accordion({
+        collapsible: true,
+        heightStyle: "content",
+        active: false
+    });
     $("#search_elements").slideUp();
     $("#search_overlay").fadeOut('fast', function() {
         $(this).remove();
     });
     $(".more_options").button('option', 'label', 'Show search options');
-    $('.explain_conc, .explain_relev, .explain_freq, .explain_time, .explain_colloc').fadeOut();
+    $('.search_explain').slideUp();
 }
 function hide_search_on_click() {
     $("#search_overlay, #header, #footer").click(function() {
