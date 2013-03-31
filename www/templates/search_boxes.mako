@@ -32,7 +32,8 @@
             </div>
             <h3 class="freq_question">What does a frequency report do?</h3>
             <div class="explain_freq">
-                Frequency report will display a table with frequency counts of the selected metadata field.
+                Frequency report will display a table with frequency counts of the search term(s) ordered
+                by the selected metadata field.
             </div>
             <h3 class="colloc_question">What does a collocation report do?</h3>
             <div class='explain_colloc'>
@@ -41,7 +42,7 @@
             </div>
             <h3 class="time_question">What does a time series report do?</h3>
             <div class='explain_time'>
-                Time Series report displays a graph showing the frequency of a word throughout the database
+                Time Series report displays a graph showing the frequency of the search term(s) throughout the database
                 during a set time period.
             </div>
         </div>
