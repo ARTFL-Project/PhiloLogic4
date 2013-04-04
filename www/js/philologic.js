@@ -1,38 +1,39 @@
-function monkeyPatchAutocomplete() {
-    //taken from http://stackoverflow.com/questions/2435964/jqueryui-how-can-i-custom-format-the-autocomplete-plug-in-results    
-    $.ui.autocomplete.prototype._renderItem = function( ul, item) {
-        // This regex took some fiddling but should match beginning of string and
-        // any match preceded by a string: this is useful for sql matches.
-        var re = new RegExp('((^' + this.term + ')|( ' + this.term + '))', "gi") ; 
-        var t = item.label.replace(re,"<span style='font-weight:bold;color:Red;'>" + 
-                "$&" + 
-                "</span>");
-        return $( "<li></li>" )
-            .data( "item.autocomplete", item )
-            .append( "<a>" + t + "</a>" )
-            .appendTo( ul );
-    };
-}
-
-var pathname = window.location.pathname.replace('dispatcher.py/', '');
-
-function autocomplete_metadata(metadata, field) {
-    $("#" + field).autocomplete({
-        source: pathname + "scripts/metadata_list.py?field=" + field,
-        minLength: 2,
-        dataType: "json"
-    });
-}
-
-
-$(document).ready(function(){
+$(document).ready(function() {
     
+    /////////////////////////
+    // Important variables //
+    /////////////////////////
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var db_path = window.location.hostname + pathname;
     var q_string = window.location.search.substr(1);
+    ////////////////////////////////////////////////////////////////////////////
     
     
-    // Search form related events
+    ////////////////////////
+    //  jQueryUI theming //
+    ///////////////////////
+    $( "#button, #button1" )
+        .button()
+        .click(function( event ) {
+            hide_search_form();
+            var width = $(window).width() / 3;
+            $("#waiting").css("margin-left", width).show();
+        });
+    $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
+    $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch").buttonset();
+    $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
+    $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
+    $('.search_explain').accordion({
+        collapsible: true,
+        heightStyle: "content",
+        active: false
+    });
+    ////////////////////////////////////////////////////////////////////////////
+    
+    
+    /////////////////////////////////
+    // Search form related events //
+    ////////////////////////////////
     $("#q").focus(function() {
         if ($(".philologic_response").is('*')) {
             show_more_options("report");
@@ -69,7 +70,6 @@ $(document).ready(function(){
     });
     
     monkeyPatchAutocomplete();    
-    
     $("#q").autocomplete({
         source: pathname + "scripts/term_list.py",
         minLength: 2,
@@ -85,45 +85,25 @@ $(document).ready(function(){
         autocomplete_metadata(metadata, field)
     }
     
-    //  This is for displaying the full bibliography on mouse hover
-    //  in kwic reports
-    var config = {    
-        over: showBiblio, 
-        timeout: 100,  
-        out: hideBiblio   
-    };
-    $(".kwic_biblio").hoverIntent(config)
-
-    //  This will show more context in concordance searches
-    $(".more_context").click(function(e) {
-        var context_link = $(this).text();
-        if (context_link == 'More') {
-            $(this).siblings('.philologic_context').children('.begin_concordance').show()
-            $(this).siblings('.philologic_context').children('.end_concordance').show()
-            $(this).empty().fadeIn(100).append('Less')
-        } 
-        else {
-            $(this).siblings('.philologic_context').children('.begin_concordance').hide()
-            $(this).siblings('.philologic_context').children('.end_concordance').hide()
-            $(this).empty().fadeIn(100).append('More')
-        }
-        e.preventDefault();
-    });
-    
     //  This will prefill the search form with the current query
     var val_list = q_string.split('&');
     for (var i = 0; i < val_list.length; i++) {
         var key_value = val_list[i].split('=');
-        var my_value = decodeURIComponent((key_value[1]+'').replace(/\+/g, '%20'));
-        if (my_value) {
-            if (key_value[0] == 'pagenum' || key_value[0] == 'report' || key_value[0] == 'field' || key_value[0] == 'word_num' || key_value[0] == 'method' || key_value[0] == 'year_interval') {
-                $('input[name=' + key_value[0] + '][value=' + my_value + ']').attr("checked", true)
+        var value = decodeURIComponent((key_value[1]+'').replace(/\+/g, '%20'));
+        var key = key_value[0]
+        if (value) {
+            if (key == 'report') {
+                $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
+                $("#report").buttonset("refresh");
             }
-            else if (my_value == 'relative') {
-                $('#' + key_value[0]).attr('checked', true);
+            else if (key == 'pagenum' || key == 'field' || key == 'word_num' || key == 'method' || key == 'year_interval') {
+                $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
+            }
+            else if (value == 'relative') {
+                $('#' + key).attr('checked', true);
             }
             else {
-                $('#' + key_value[0]).val(my_value);
+                $('#' + key).val(value);
             }
         }
     }
@@ -154,7 +134,53 @@ $(document).ready(function(){
         $("#method2").attr('checked', true).button("refresh");
     });
     
-    //    This will display the sidebar for various frequency reports
+    //  This is to switch views between concordance and KWIC
+    $("#report_switch").on("change", function() {
+        //console.log(config)
+        var switchto = $('input[name=report_switch]:checked').val();
+        var width = $(window).width() / 3;
+        $("#waiting").css("margin-left", width).show();
+        $("#waiting").css("margin-top", 200).show();
+        $.get("http://" + db_path + "/reports/concordance_switcher.py" + switchto, function(data) {
+            $("#results_container").hide().empty().html(data).fadeIn('fast');
+            $("#waiting").hide();
+            // This should only be loaded for KWIC results
+            var config = {    
+                over: showBiblio, 
+                timeout: 100,  
+                out: hideBiblio   
+            };
+            $(".kwic_biblio").hoverIntent(config)
+        });
+    });
+    ////////////////////////////////////////////////////////////////////////////
+
+    
+    ///////////////////////////////////
+    //  This will show more context //
+    ///// in concordance searches ////
+    //////////////////////////////////
+    $(".more_context").click(function(e) {
+        var context_link = $(this).text();
+        if (context_link == 'More') {
+            $(this).siblings('.philologic_context').children('.begin_concordance').show()
+            $(this).siblings('.philologic_context').children('.end_concordance').show()
+            $(this).empty().fadeIn(100).append('Less')
+        } 
+        else {
+            $(this).siblings('.philologic_context').children('.begin_concordance').hide()
+            $(this).siblings('.philologic_context').children('.end_concordance').hide()
+            $(this).empty().fadeIn(100).append('More')
+        }
+        e.preventDefault();
+    });
+    ////////////////////////////////////////////////////////////////////////////
+    
+    
+    ////////////////////////////////////
+    // This will display the sidebar //
+    // for various frequency reports //
+    ///////////////////////////////////
     $("#toggle_frequency").click(function() {
         toggle_frequency(q_string, db_path, pathname);
     });
@@ -164,22 +190,13 @@ $(document).ready(function(){
     $(".hide_frequency").click(function() {
         hide_frequency();
     });
+    ////////////////////////////////////////////////////////////////////////////
     
     
-    //  This is to switch views between concordance and KWIC
-    $("#report_switch").change(function() {
-        var switchto = $('input[name=report_switch]:checked').val();
-        var width = $(window).width() / 3;
-        $("#waiting").css("margin-left", width).show();
-        $("#waiting").css("margin-top", 200).show();
-        $.get("http://" + db_path + "/reports/concordance_switcher.py" + switchto, function(data) {
-            $("#results_container").hide().empty().html(data).fadeIn('fast');
-            $("#waiting").hide();
-        });
-    });
-    
-    
-    // Change page in docs
+    ///////////////////////////
+    // Page and reader code //
+    //////////////////////////
+    // Change pages
     $(".prev_page, .next_page").on('click', function() {
         var my_path = db_path.replace(/(\/\d+)+$/, '/');
         var doc_id = db_path.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
@@ -263,30 +280,41 @@ $(document).ready(function(){
             $("#overlay").fadeIn('fast');
         }
     });
-    
-    //  jQueryUI theming
-    $( "#button, #button1" )
-            .button()
-            .click(function( event ) {
-                $("#search_elements").slideUp(function() {
-                    $("#report").hide();
-                    var width = $(window).width() / 3;
-                    $("#waiting").css("margin-left", width).show();
-                });
-            });
-    $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
-    $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch").buttonset()
-    $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
-    $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
-    $('.search_explain').accordion({
-        collapsible: true,
-        heightStyle: "content",
-        active: false
-    });
-    
+    ////////////////////////////////////////////////////////////////////////////
     
 });
 
+
+/////////////////////////////////////
+//////////// FUNCTIONS //////////////
+/////////////////////////////////////
+
+
+// Patch jQueryUI autocomplete to get higlighting
+function monkeyPatchAutocomplete() {
+    $.ui.autocomplete.prototype._renderItem = function( ul, item) {
+        // This regex took some fiddling but should match beginning of string and
+        // any match preceded by a string: this is useful for sql matches.
+        var re = new RegExp('((^' + this.term + ')|( ' + this.term + '))', "gi") ; 
+        var t = item.label.replace(re,"<span class='highlight'>" + 
+                "$&" + 
+                "</span>");
+        return $( "<li></li>" )
+            .data( "item.autocomplete", item )
+            .append( "<a>" + t + "</a>" )
+            .appendTo( ul );
+    };
+}
+function autocomplete_metadata(metadata, field) {
+    var pathname = window.location.pathname.replace('dispatcher.py/', '');
+    $("#" + field).autocomplete({
+        source: pathname + "scripts/metadata_list.py?field=" + field,
+        minLength: 2,
+        dataType: "json"
+    });
+}
+
+// Display different search parameters based on the type of report used
 function showHide(value) {
     if (value == 'frequency') {
         $("#results_per_page, #collocation, #time_series, #year_interval").hide();
@@ -329,7 +357,7 @@ function showHide(value) {
 function showBiblio() {
     $(this).children("#full_biblio").css('position', 'absolute').css('text-decoration', 'underline')
     $(this).children("#full_biblio").css('background', 'LightGray')
-    $(this).children("#full_biblio").css('box-shadow', '5px 5px 5px #888888')
+    $(this).children("#full_biblio").css('box-shadow', '5px 5px 15px #C0C0C0')
     $(this).children("#full_biblio").css('display', 'inline')
 }
 
