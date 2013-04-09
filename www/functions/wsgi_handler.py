@@ -41,7 +41,7 @@ def parse_cgi(environ):
     
     query["report"] = cgi.get("report",[None])[0]
     query["format"] = cgi.get("format",[None])[0]
-    query["results_per_page"] = int(cgi.get("pagenum",[20])[0])
+    query["results_per_page"] = int(cgi.get("pagenum",[50])[0])
     
     ## Hack so that even if there are multiple byte offsets
     ## we still have it stored as a string in query
@@ -54,6 +54,8 @@ def parse_cgi(environ):
     query["collocate"] = cgi.get("collocate",[None])[0]
     query['direction'] = cgi.get("direction",[None])[0]
     query['collocate_num'] = cgi.get("collocate_num", [None])[0]
+    query['colloc_start'] = int(cgi.get('colloc_start', [0])[0])
+    query['colloc_end'] = int(cgi.get('colloc_end', [100])[0])
     
     ## This is for frequency searches: raw count or per n number of words
     query["rate"] = cgi.get("rate", [None])[0]
