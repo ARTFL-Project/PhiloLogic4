@@ -24,7 +24,9 @@ def frequency(environ,start_response):
         return json.dumps(wrapper,indent=1)
         
     else:
-        return render_template(results=hits,db=db,dbname=dbname,q=q,generate_frequency=generate_frequency,f=f, template_name='frequency.mako')
+        field, counts = generate_frequency(hits, q, db)
+        return render_template(db=db,dbname=dbname,q=q,frequency_field=field,counts=counts,
+                               template_name='frequency.mako')
 
 def generate_frequency(results, q, db):
     """reads through a hitlist. looks up q["field"] in each hit, and builds up a list of 
