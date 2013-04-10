@@ -17,24 +17,34 @@
                 <input type="radio" name="report" id="report6" value='time_series'><label for="report6">Time Series Report</label>
             </div>
          </div>
-         <div class="explain_conc">
-            Concordance search finds every single occurrence of the word(s) being searched
-            throughout the database filtered by optional metadata criteria.
-        </div>
-        <div class="explain_relev">
-            Ranked relevance search ranks documents by pertinence based on the frequency
-            of the word(s) being searched.
-        </div>
-        <div class="explain_freq">
-            Frequency report will display a table with frequency counts of the selected metadata field.
-        </div>
-        <div class='explain_colloc'>
-            Collocation report will display words in the immediate vicinity of the word(s) being searched.
-            You can define how close these words must be.
-        </div>
-        <div class='explain_time'>
-            Time Series report displays a graph showing the frequency of a word throughout the database
-            during a set time period.
+         <div class="search_explain">
+            <h3 class="conc_question">What does a concordance report do?</h3>
+            <div class="explain_conc">
+               Concordance search finds every single occurrence of the search term(s)
+               throughout the database filtered by optional metadata criteria.
+            </div>
+            <h3 class="relev_question">What does a ranked relevance report do?</h3>
+            <div class="explain_relev">
+                Ranked relevance search ranks documents by pertinence based on the frequency
+                of the search term(s).
+                <br>Note that this type of search is done on individual words, and therefore will not
+                be aware of phrases or expressions.
+            </div>
+            <h3 class="freq_question">What does a frequency report do?</h3>
+            <div class="explain_freq">
+                Frequency report will display a table with frequency counts of the search term(s) ordered
+                by the selected metadata field.
+            </div>
+            <h3 class="colloc_question">What does a collocation report do?</h3>
+            <div class='explain_colloc'>
+                Collocation report will display words in the immediate vicinity of the search term(s).
+                You can define how close these words must be.
+            </div>
+            <h3 class="time_question">What does a time series report do?</h3>
+            <div class='explain_time'>
+                Time Series report displays a graph showing the frequency of the search term(s) throughout the database
+                during a set time period.
+            </div>
         </div>
          <div id="search_elements" class="search_elements">
             <h3>Refine your search with the following options and fields:</h3>
