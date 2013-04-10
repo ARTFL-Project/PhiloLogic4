@@ -25,7 +25,7 @@ def fetch_kwic(results, path, q, byte_query, start, end, length=400):
     shortest_biblio = 0
 
     for hit in results[start:end]:
-        biblio = hit.articleAuthor_norm.title() + ', ' +  hit.head_norm.title()
+        biblio = hit.author.title() + ', ' +  hit.title.title()
         
         ## additional clean-up for titles
         biblio = ' '.join(biblio.split()) ## maybe hackish, but it works
