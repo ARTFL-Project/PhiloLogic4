@@ -5,6 +5,7 @@ sys.path.append('..')
 import functions as f
 import os
 import re
+import json
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
 from functions.format import adjust_bytes, clean_text, chunkifier, tokenize_text
@@ -22,10 +23,13 @@ def collocation(environ,start_response):
     path = os.getcwd().replace('functions/', '')
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ) ## the default should be an error message
-    else:
-        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-    return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_collocation=fetch_collocation,link=link_to_concordance,
-                           f=f,path=path, results_per_page=q['results_per_page'], template_name='collocation.mako')
+    hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+    all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q)
+    hit_len = len(hits)
+    return render_template(all_colloc=all_colloc, left_colloc=left_colloc, right_colloc=right_colloc,
+                           db=db,dbname=dbname,q=q,link=link_to_concordance,f=f,path=path,
+                           results_per_page=q['results_per_page'],hit_len=hit_len,
+                           order=sort_to_display,dumps=json.dumps,template_name='collocation.mako')
 
 def fetch_collocation(results, path, q, filter_words=100, full_report=True):
     within_x_words = q['word_num']    
@@ -50,7 +54,7 @@ def fetch_collocation(results, path, q, filter_words=100, full_report=True):
     all_collocates = defaultdict(int)
     
     count = 0
-    for hit in results:
+    for hit in results[q['colloc_start']:q['colloc_end']]:
         ## get my chunk of text ##
         bytes, byte_start = adjust_bytes(hit.bytes, 400)
         conc_text = f.get_text(hit, byte_start, 400, path)
@@ -69,17 +73,12 @@ def fetch_collocation(results, path, q, filter_words=100, full_report=True):
             if r_word == q['q']:
                 continue
             right_collocates[r_word] += 1
-            all_collocates[r_word] += 1
-
-    left_out = sorted(left_collocates.items(), key=lambda x: x[1], reverse=True)[:100]
-    right_out = sorted(right_collocates.items(), key=lambda x: x[1], reverse=True)[:100]
-    all_out = sorted(all_collocates.items(), key=lambda x: x[1], reverse=True)[:100]
+            all_collocates[r_word] += 1    
 
     if full_report:
-        tuple_out = zip(all_out, left_out, right_out)
-        return tuple_out
+        return dict(all_collocates), dict(left_collocates), dict(right_collocates)
     else:
-        return all_out
+        return sorted(all_collocates.items(), key=lambda x: x[1], reverse=True)
 
 def tokenize(text, filter_list, within_x_words, direction, highlighting=False):
     text = clean_text(text, collocation=True)
@@ -111,6 +110,13 @@ def filter(word_list, filter_list, within_x_words):
         if len(words_to_pass) == within_x_words:
             break
     return words_to_pass
+
+def sort_to_display(all_collocates, left_collocates, right_collocates):
+    left_colloc = sorted(left_collocates.items(), key=lambda x: x[1], reverse=True)[:100]
+    right_colloc = sorted(right_collocates.items(), key=lambda x: x[1], reverse=True)[:100]
+    all_colloc = sorted(all_collocates.items(), key=lambda x: x[1], reverse=True)[:100]
+    return zip(all_colloc, left_colloc, right_colloc)
+    
 
 def link_to_concordance(q, collocate, direction, collocate_num):
     collocate_values = [collocate.encode('utf-8', 'ignore'), direction, q['word_num'], collocate_num]

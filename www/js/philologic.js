@@ -1,36 +1,39 @@
-function monkeyPatchAutocomplete() {
-    //taken from http://stackoverflow.com/questions/2435964/jqueryui-how-can-i-custom-format-the-autocomplete-plug-in-results    
-    $.ui.autocomplete.prototype._renderItem = function( ul, item) {
-        // This regex took some fiddling but should match beginning of string and
-        // any match preceded by a string: this is useful for sql matches.
-        var re = new RegExp('((^' + this.term + ')|( ' + this.term + '))', "gi") ; 
-        var t = item.label.replace(re,"<span style='font-weight:bold;color:Red;'>" + 
-                "$&" + 
-                "</span>");
-        return $( "<li></li>" )
-            .data( "item.autocomplete", item )
-            .append( "<a>" + t + "</a>" )
-            .appendTo( ul );
-    };
-}
-
-var pathname = window.location.pathname.replace('dispatcher.py/', '');
-
-function autocomplete_metadata(metadata, field) {
-    $("#" + field).autocomplete({
-        source: pathname + "scripts/metadata_list.py?field=" + field,
-        minLength: 2,
-        dataType: "json"
-    });
-}
-
-
-$(document).ready(function(){
+$(document).ready(function() {
     
+    /////////////////////////
+    // Important variables //
+    /////////////////////////
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var db_path = window.location.hostname + pathname;
     var q_string = window.location.search.substr(1);
+    ////////////////////////////////////////////////////////////////////////////
     
+    
+    ////////////////////////
+    //  jQueryUI theming //
+    ///////////////////////
+    $( "#button, #button1" )
+        .button()
+        .click(function( event ) {
+            hide_search_form();
+            var width = $(window).width() / 3;
+            $("#waiting").css("margin-left", width).show();
+        });
+    $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
+    $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch").buttonset();
+    $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
+    $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
+    $('.search_explain').accordion({
+        collapsible: true,
+        heightStyle: "content",
+        active: false
+    });
+    ////////////////////////////////////////////////////////////////////////////
+    
+    
+    /////////////////////////////////
+    // Search form related events //
+    ////////////////////////////////
     $("#q").focus(function() {
         if ($(".philologic_response").is('*')) {
             show_more_options("report");
@@ -42,14 +45,31 @@ $(document).ready(function(){
         $('.book_page').css('z-index', 90);
         if ($(".more_options").text() == "Show search options") {
             show_more_options("all");
+            $('.search_explain').slideDown();
             hide_search_on_click();
         } else {
             hide_search_form();
         }
-    });   
+    });
+    $("#report").buttonset();
+    $('.form_body').show();
+    $("#search_elements").hide();
+    $('.conc_question, .freq_question, .colloc_question, .time_question, .relev_question').hide();
+    $('.search_explain').hide();
+    $('#report').click(function() {
+        var report = $('input[name=report]:checked', '#search').val();
+        if ($("#search_elements:visible")) {
+            showHide(report);
+            $("#search_elements").slideDown();
+            $('.search_explain').slideDown();
+        } else {
+            showHide(report);
+            $("#search_elements").fadeIn();
+            $('.search_explain').fadeIn();
+        }
+    });
     
     monkeyPatchAutocomplete();    
-    
     $("#q").autocomplete({
         source: pathname + "scripts/term_list.py",
         minLength: 2,
@@ -65,66 +85,28 @@ $(document).ready(function(){
         autocomplete_metadata(metadata, field)
     }
     
-    //  This is for displaying the full bibliography on mouse hover
-    //  in kwic reports
-    var config = {    
-        over: showBiblio, 
-        timeout: 100,  
-        out: hideBiblio   
-    };
-    $(".kwic_biblio").hoverIntent(config)
-
-    //  This will show more context in concordance searches
-    $(".more_context").click(function(e) {
-        var context_link = $(this).text();
-        if (context_link == 'More') {
-            $(this).siblings('.philologic_context').children('.begin_concordance').show()
-            $(this).siblings('.philologic_context').children('.end_concordance').show()
-            $(this).empty().fadeIn(100).append('Less')
-        } 
-        else {
-            $(this).siblings('.philologic_context').children('.begin_concordance').hide()
-            $(this).siblings('.philologic_context').children('.end_concordance').hide()
-            $(this).empty().fadeIn(100).append('More')
-        }
-        e.preventDefault();
-    });
-    
     //  This will prefill the search form with the current query
     var val_list = q_string.split('&');
     for (var i = 0; i < val_list.length; i++) {
         var key_value = val_list[i].split('=');
-        var my_value = decodeURIComponent((key_value[1]+'').replace(/\+/g, '%20'));
-        if (my_value) {
-            if (key_value[0] == 'pagenum' || key_value[0] == 'report' || key_value[0] == 'field' || key_value[0] == 'word_num' || key_value[0] == 'method' || key_value[0] == 'year_interval') {
-                $('input[name=' + key_value[0] + '][value=' + my_value + ']').attr("checked", true)
+        var value = decodeURIComponent((key_value[1]+'').replace(/\+/g, '%20'));
+        var key = key_value[0]
+        if (value) {
+            if (key == 'report') {
+                $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
+                $("#report").buttonset("refresh");
             }
-            else if (my_value == 'relative') {
-                $('#' + key_value[0]).attr('checked', true);
+            else if (key == 'pagenum' || key == 'field' || key == 'word_num' || key == 'method' || key == 'year_interval') {
+                $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
+            }
+            else if (value == 'relative') {
+                $('#' + key).attr('checked', true);
             }
             else {
-                $('#' + key_value[0]).val(my_value);
+                $('#' + key).val(value);
             }
         }
     }
-    
-    $("#report").buttonset();
-    
-    $('.form_body').show();
-    //showHide($('input[name=report]:checked', '#search').val());
-    $("#search_elements").hide();
-    
-    $('#report').click(function() {
-        var report = $('input[name=report]:checked', '#search').val();
-        if ($("#search_elements:visible")) {
-            showHide(report);
-            $("#search_elements").slideDown();
-        } else {
-            showHide(report);
-            $("#search_elements").fadeIn();
-        }
-    });
-    
     
     //  Clear search form
     $("#reset_form").click(function() {
@@ -152,7 +134,53 @@ $(document).ready(function(){
         $("#method2").attr('checked', true).button("refresh");
     });
     
-    //    This will display the sidebar for various frequency reports
+    //  This is to switch views between concordance and KWIC
+    $("#report_switch").on("change", function() {
+        //console.log(config)
+        var switchto = $('input[name=report_switch]:checked').val();
+        var width = $(window).width() / 3;
+        $("#waiting").css("margin-left", width).show();
+        $("#waiting").css("margin-top", 200).show();
+        $.get("http://" + db_path + "/reports/concordance_switcher.py" + switchto, function(data) {
+            $("#results_container").hide().empty().html(data).fadeIn('fast');
+            $("#waiting").hide();
+            // This should only be loaded for KWIC results
+            var config = {    
+                over: showBiblio, 
+                timeout: 100,  
+                out: hideBiblio   
+            };
+            $(".kwic_biblio").hoverIntent(config)
+        });
+    });
+    ////////////////////////////////////////////////////////////////////////////
+
+    
+    ///////////////////////////////////
+    //  This will show more context //
+    ///// in concordance searches ////
+    //////////////////////////////////
+    $(".more_context").click(function(e) {
+        var context_link = $(this).text();
+        if (context_link == 'More') {
+            $(this).siblings('.philologic_context').children('.begin_concordance').show()
+            $(this).siblings('.philologic_context').children('.end_concordance').show()
+            $(this).empty().fadeIn(100).append('Less')
+        } 
+        else {
+            $(this).siblings('.philologic_context').children('.begin_concordance').hide()
+            $(this).siblings('.philologic_context').children('.end_concordance').hide()
+            $(this).empty().fadeIn(100).append('More')
+        }
+        e.preventDefault();
+    });
+    ////////////////////////////////////////////////////////////////////////////
+    
+    
+    ////////////////////////////////////
+    // This will display the sidebar //
+    // for various frequency reports //
+    ///////////////////////////////////
     $("#toggle_frequency").click(function() {
         toggle_frequency(q_string, db_path, pathname);
     });
@@ -162,22 +190,13 @@ $(document).ready(function(){
     $(".hide_frequency").click(function() {
         hide_frequency();
     });
+    ////////////////////////////////////////////////////////////////////////////
     
     
-    //  This is to switch views between concordance and KWIC
-    $("#report_switch").change(function() {
-        var switchto = $('input[name=report_switch]:checked').val();
-        var width = $(window).width() / 3;
-        $("#waiting").css("margin-left", width).show();
-        $("#waiting").css("margin-top", 200).show();
-        $.get("http://" + db_path + "/reports/concordance_switcher.py" + switchto, function(data) {
-            $("#results_container").hide().empty().html(data).fadeIn('fast');
-            $("#waiting").hide();
-        });
-    });
-    
-    
-    // Change page in docs
+    ///////////////////////////
+    // Page and reader code //
+    //////////////////////////
+    // Change pages
     $(".prev_page, .next_page").on('click', function() {
         var my_path = db_path.replace(/(\/\d+)+$/, '/');
         var doc_id = db_path.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
@@ -261,55 +280,76 @@ $(document).ready(function(){
             $("#overlay").fadeIn('fast');
         }
     });
-    
-    //  jQueryUI theming
-    $( "#button, #button1" )
-            .button()
-            .click(function( event ) {
-                $("#search_elements").slideUp(function() {
-                    $("#report").hide();
-                    var width = $(window).width() / 3;
-                    $("#waiting").css("margin-left", width).show();
-                });
-            });
-    $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
-    $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch").buttonset()
-    $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
-    $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
-    
+    ////////////////////////////////////////////////////////////////////////////
     
 });
 
+
+/////////////////////////////////////
+//////////// FUNCTIONS //////////////
+/////////////////////////////////////
+
+
+// Patch jQueryUI autocomplete to get higlighting
+function monkeyPatchAutocomplete() {
+    $.ui.autocomplete.prototype._renderItem = function( ul, item) {
+        // This regex took some fiddling but should match beginning of string and
+        // any match preceded by a string: this is useful for sql matches.
+        var re = new RegExp('((^' + this.term + ')|( ' + this.term + '))', "gi") ; 
+        var t = item.label.replace(re,"<span class='highlight'>" + 
+                "$&" + 
+                "</span>");
+        return $( "<li></li>" )
+            .data( "item.autocomplete", item )
+            .append( "<a>" + t + "</a>" )
+            .appendTo( ul );
+    };
+}
+function autocomplete_metadata(metadata, field) {
+    var pathname = window.location.pathname.replace('dispatcher.py/', '');
+    $("#" + field).autocomplete({
+        source: pathname + "scripts/metadata_list.py?field=" + field,
+        minLength: 2,
+        dataType: "json"
+    });
+}
+
+// Display different search parameters based on the type of report used
 function showHide(value) {
     if (value == 'frequency') {
         $("#results_per_page, #collocation, #time_series, #year_interval").hide();
         $("#frequency, #method, #metadata_field").show();
         $('.explain_relev, .explain_conc, .explain_time, .explain_colloc').hide();
-        $('.explain_freq').fadeIn('slow');
+        $('.relev_question, .conc_question, .colloc_question, .time_question').hide();
+        $('.freq_question').fadeIn();
     }
     if (value == 'collocation') {
         $("#results_per_page, #frequency, #method, #time_series, #year_interval").hide();
         $("#collocation, #metadata_field").show();
         $('.explain_relev, .explain_freq, .explain_time, .explain_conc').hide();
-        $('.explain_colloc').fadeIn('slow');
+        $('.relev_question, .freq_question, .conc_question, .time_question').hide();
+        $('.colloc_question').fadeIn();
     }
     if (value == 'concordance') {
         $("#frequency, #collocation, #time_series, #year_interval").hide();
         $("#results_per_page, #method, #metadata_field").show();
         $('.explain_relev, .explain_freq, .explain_time, .explain_colloc').hide();
-        $('.explain_conc').fadeIn('slow');
+        $('.relev_question, .freq_question, .colloc_question, .time_question').hide();
+        $('.conc_question').fadeIn();
     }
     if (value == 'relevance') {
         $("#collocation, #frequency, #method, #time_series, #year_interval").hide();
         $("#results_per_page, #metadata_field").show();
         $('.explain_conc, .explain_freq, .explain_time, .explain_colloc').hide();
-        $('.explain_relev').fadeIn('slow');
+        $('.conc_question, .freq_question, .colloc_question, .time_question').hide();
+        $('.relev_question').fadeIn();
     }
     if (value == "time_series") {
         $("#results_per_page, #metadata_field, #method, #frequency, #collocation").hide();
         $("#time_series, #year_interval").show();
         $('.explain_relev, .explain_freq, .explain_conc, .explain_colloc').hide();
-        $('.explain_time').fadeIn('slow');
+        $('.relev_question, .freq_question, .colloc_question, .conc_question').hide();
+        $('.time_question').fadeIn();
     }
 }
 
@@ -317,7 +357,7 @@ function showHide(value) {
 function showBiblio() {
     $(this).children("#full_biblio").css('position', 'absolute').css('text-decoration', 'underline')
     $(this).children("#full_biblio").css('background', 'LightGray')
-    $(this).children("#full_biblio").css('box-shadow', '5px 5px 5px #888888')
+    $(this).children("#full_biblio").css('box-shadow', '5px 5px 15px #C0C0C0')
     $(this).children("#full_biblio").css('display', 'inline')
 }
 
@@ -369,7 +409,7 @@ function hide_frequency() {
         50);
 }
 
-//  Function to show ore search options
+//  Function to show or hide search options
 function show_more_options(display) {
     $(".more_options").button('option', 'label', 'Hide search options');    
     $("#report").slideDown('fast');
@@ -399,15 +439,82 @@ function show_more_options(display) {
 }
 function hide_search_form() {
     $("#report").slideUp();
+    $('.search_explain').accordion({
+        collapsible: true,
+        heightStyle: "content",
+        active: false
+    });
     $("#search_elements").slideUp();
     $("#search_overlay").fadeOut('fast', function() {
         $(this).remove();
     });
     $(".more_options").button('option', 'label', 'Show search options');
-    $('.explain_conc, .explain_relev, .explain_freq, .explain_time, .explain_colloc').fadeOut();
+    $('.search_explain').slideUp();
 }
 function hide_search_on_click() {
     $("#search_overlay, #header, #footer").click(function() {
         hide_search_form();
     }); 
+}
+
+// Set of functions for updating collocation tables
+function colloc_linker(word, q_string, direction, num) {
+    q_string = q_string.replace('collocation', 'concordance_from_collocation');
+    q_string += '&collocate=' + encodeURIComponent(word);
+    q_string += '&direction=' + direction;
+    q_string += '&collocate_num=' + num;
+    link = '<a href="?' + q_string + '">' + word + '</a>'
+    return link
+}
+
+function update_table(full_results, new_hash, q_string, column) {
+    $('[id^=' + column+ '_]').hide();
+    for (key in new_hash) {
+        if (key in full_results) {
+            full_results[key] += new_hash[key];
+        }
+        else {
+            full_results[key] = new_hash[key];
+        }
+    }
+    var sorted_list = [];
+    for (key in full_results) {
+        sorted_list.push([key, full_results[key]]);
+    }
+    sorted_list.sort(function(a,b) {return b[1] - a[1]});
+    var pos = 0;
+    for (i in sorted_list) {
+        pos += 1;
+        var link = colloc_linker(sorted_list[i][0], q_string, column, sorted_list[i][1]);
+        data = link + ' (' + sorted_list[i][1] + ')'
+        $('#' + column + '_num' + pos).html(data);
+    }
+    $('[id^=' + column+ '_]').fadeIn(800);
+    return full_results;
+}
+
+function update_colloc(all_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end) {
+    var pathname = window.location.pathname.replace('dispatcher.py/', '');
+    var db_path = window.location.hostname + pathname;
+    var q_string = window.location.search.substr(1);
+    var script = "http://" + db_path + "scripts/collocation_fetcher.py?" + q_string
+    if (colloc_start == 0) {
+        colloc_start = 100;
+        colloc_end = 800;
+    } else {
+        colloc_start += 700;
+        colloc_end += 700;
+    }
+    var script_call = script + '&colloc_start=' + colloc_start + '&colloc_end=' + colloc_end
+    if (colloc_start <= results_len) {
+        $.when($.getJSON(script_call).done(function(data) {
+            all_new_colloc = update_table(all_colloc, data[0], q_string, "all");
+            left_new_collc = update_table(left_colloc, data[1], q_string, "left");
+            right_new_colloc = update_table(right_colloc, data[2], q_string, "right");
+            update_colloc(all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
+        }));
+    }
+    else {
+        $("#working").hide();
+    }
 }
