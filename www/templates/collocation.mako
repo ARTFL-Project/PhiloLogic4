@@ -6,6 +6,16 @@ $(document).ready(function() {
     var left_colloc = ${dumps(left_colloc)};
     var right_colloc = ${dumps(right_colloc)}
     update_colloc(all_colloc, left_colloc, right_colloc, ${hit_len}, 0, 100);
+    $('#working').each(function() {
+        var elem = $(this);
+        setInterval(function() {
+            if (elem.css('visibility') == 'hidden') {
+                elem.css('visibility', 'visible');
+            } else {
+                elem.css('visibility', 'hidden');
+            }    
+        }, 750);
+    });
 })
 </script>
 <div class='philologic_response'>
@@ -14,6 +24,7 @@ $(document).ready(function() {
             Displaying the top 100 collocates of "${q['q'].decode('utf-8', 'ignore')}":
         </p>
         The 100 most common words are being filtered from this report.
+        <span id="working" style="font-weight:600;">Still working...</span>
     </div>
     <div class="results_container">
         <div class='philologic_collocation'>

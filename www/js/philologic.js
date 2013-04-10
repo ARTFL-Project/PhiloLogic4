@@ -285,62 +285,6 @@ $(document).ready(function() {
 });
 
 
-function colloc_linker(word, q_string, direction, num) {
-    q_string = q_string.replace('collocation', 'concordance_from_collocation');
-    q_string += '&collocate=' + encodeURIComponent(word);
-    q_string += '&direction=' + direction;
-    q_string += '&collocate_num=' + num;
-    link = '<a href="?' + q_string + '">' + word + '</a>'
-    return link
-}
-
-function update_table(full_results, new_hash, q_string, column) {
-    for (key in new_hash) {
-        if (key in full_results) {
-            full_results[key] += new_hash[key];
-        }
-        else {
-            full_results[key] = new_hash[key];
-        }
-    }
-    var sorted_list = [];
-    for (key in full_results) {
-        sorted_list.push([key, full_results[key]]);
-    }
-    sorted_list.sort(function(a,b) {return b[1] - a[1]});
-    var pos = 0;
-    for (i in sorted_list) {
-        pos += 1;
-        var link = colloc_linker(sorted_list[i][0], q_string, column, sorted_list[i][1]);
-        data = link + ' (' + sorted_list[i][1] + ')'
-        $('#' + column + '_num' + pos).empty().html(data);
-    }
-    return full_results;
-}
-
-function update_colloc(all_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end) {
-    var pathname = window.location.pathname.replace('dispatcher.py/', '');
-    var db_path = window.location.hostname + pathname;
-    var q_string = window.location.search.substr(1);
-    var script = "http://" + db_path + "scripts/collocation_fetcher.py?" + q_string
-    if (colloc_start == 0) {
-        colloc_start = 100;
-        colloc_end = 600;
-    } else {
-        colloc_start += 500;
-        colloc_end += 500;
-    }
-    var script_call = script + '&colloc_start=' + colloc_start + '&colloc_end=' + colloc_end
-    if (colloc_start <= results_len) {
-        $.when($.getJSON(script_call).done(function(data) {
-            all_new_colloc = update_table(all_colloc, data[0], q_string, "all");
-            left_new_collc = update_table(left_colloc, data[1], q_string, "left");
-            right_new_colloc = update_table(right_colloc, data[2], q_string, "right");
-            update_colloc(all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
-        }));
-    }
-}
-
 /////////////////////////////////////
 //////////// FUNCTIONS //////////////
 /////////////////////////////////////
@@ -511,4 +455,66 @@ function hide_search_on_click() {
     $("#search_overlay, #header, #footer").click(function() {
         hide_search_form();
     }); 
+}
+
+// Set of functions for updating collocation tables
+function colloc_linker(word, q_string, direction, num) {
+    q_string = q_string.replace('collocation', 'concordance_from_collocation');
+    q_string += '&collocate=' + encodeURIComponent(word);
+    q_string += '&direction=' + direction;
+    q_string += '&collocate_num=' + num;
+    link = '<a href="?' + q_string + '">' + word + '</a>'
+    return link
+}
+
+function update_table(full_results, new_hash, q_string, column) {
+    $('[id^=' + column+ '_]').hide();
+    for (key in new_hash) {
+        if (key in full_results) {
+            full_results[key] += new_hash[key];
+        }
+        else {
+            full_results[key] = new_hash[key];
+        }
+    }
+    var sorted_list = [];
+    for (key in full_results) {
+        sorted_list.push([key, full_results[key]]);
+    }
+    sorted_list.sort(function(a,b) {return b[1] - a[1]});
+    var pos = 0;
+    for (i in sorted_list) {
+        pos += 1;
+        var link = colloc_linker(sorted_list[i][0], q_string, column, sorted_list[i][1]);
+        data = link + ' (' + sorted_list[i][1] + ')'
+        $('#' + column + '_num' + pos).html(data);
+    }
+    $('[id^=' + column+ '_]').fadeIn(800);
+    return full_results;
+}
+
+function update_colloc(all_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end) {
+    var pathname = window.location.pathname.replace('dispatcher.py/', '');
+    var db_path = window.location.hostname + pathname;
+    var q_string = window.location.search.substr(1);
+    var script = "http://" + db_path + "scripts/collocation_fetcher.py?" + q_string
+    if (colloc_start == 0) {
+        colloc_start = 100;
+        colloc_end = 800;
+    } else {
+        colloc_start += 700;
+        colloc_end += 700;
+    }
+    var script_call = script + '&colloc_start=' + colloc_start + '&colloc_end=' + colloc_end
+    if (colloc_start <= results_len) {
+        $.when($.getJSON(script_call).done(function(data) {
+            all_new_colloc = update_table(all_colloc, data[0], q_string, "all");
+            left_new_collc = update_table(left_colloc, data[1], q_string, "left");
+            right_new_colloc = update_table(right_colloc, data[2], q_string, "right");
+            update_colloc(all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
+        }));
+    }
+    else {
+        $("#working").hide();
+    }
 }
