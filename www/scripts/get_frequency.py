@@ -4,6 +4,7 @@ import os
 import sys
 sys.path.append('..')
 from functions.wsgi_handler import parse_cgi
+from mako.template import Template
 import reports as r
 import cgi
 import json
@@ -19,4 +20,4 @@ if __name__ == "__main__":
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
     field, results = r.generate_frequency(hits, q, db)
     print "Content-Type: text/html\n"
-    print json.dumps(results)    
+    print json.dumps(results)

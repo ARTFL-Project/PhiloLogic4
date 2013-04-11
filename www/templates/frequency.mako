@@ -6,8 +6,14 @@
             Frequency by ${frequency_field}
         </p>
         Top 100 ${frequency_field}s displayed
+        <div id="frequency_report_switch" class="report_switch">
+            <input type="radio" name="freq_switch" id="abs_freq_switch" value="?${q['q_string'].replace('&rate=relative', '')}" checked="checked">
+            <label for="abs_freq_switch">View frequencies</label>
+            <input type="radio" name="freq_switch" id="rel_freq_switch" value="?${q['q_string'] + '&rate=relative'}">
+            <label for="rel_freq_switch">View frequencies per 10,000 words</label>
+        </div>
     </div>
-    <div class="results_container">
+    <div id="results_container" class="results_container">
         <div class='philologic_frequency_report'>
             <table border="1" class="philologic_table">
                 <tr>
