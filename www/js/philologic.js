@@ -1,17 +1,17 @@
 $(document).ready(function() {
     
-    /////////////////////////
-    // Important variables //
-    /////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    // Important variables /////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var db_path = window.location.hostname + pathname;
     var q_string = window.location.search.substr(1);
     ////////////////////////////////////////////////////////////////////////////
     
     
-    ////////////////////////
-    //  jQueryUI theming //
-    ///////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    //  jQueryUI theming ///////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     $( "#button, #button1" )
         .button()
         .click(function( event ) {
@@ -20,7 +20,7 @@ $(document).ready(function() {
             $("#waiting").css("margin-left", width).show();
         });
     $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
-    $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch").buttonset();
+    $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
     $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
     $('.search_explain').accordion({
@@ -31,9 +31,9 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     
     
-    /////////////////////////////////
-    // Search form related events //
-    ////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    // Search form related events //////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     $("#q").focus(function() {
         if ($(".philologic_response").is('*')) {
             show_more_options("report");
@@ -133,10 +133,13 @@ $(document).ready(function() {
         $("#arg_proxy").val('');
         $("#method2").attr('checked', true).button("refresh");
     });
+    ////////////////////////////////////////////////////////////////////////////
     
-    //  This is to switch views between concordance and KWIC
+    
+    ////////////////////////////////////////////////////////////////////////////
+    ///////// Concordance / KWIC switcher //////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     $("#report_switch").on("change", function() {
-        //console.log(config)
         var switchto = $('input[name=report_switch]:checked').val();
         var width = $(window).width() / 3;
         $("#waiting").css("margin-left", width).show();
@@ -154,33 +157,47 @@ $(document).ready(function() {
         });
     });
     ////////////////////////////////////////////////////////////////////////////
+    
+    
+    ////////////////////////////////////////////////////////////////////////////
+    ///////// Frequency / Frequency per 10,000 switcher ////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    $('#frequency_report_switch').on("change", function(){
+        var switchto = $('input[name=freq_switch]:checked').val();
+        var width = $(window).width() / 3;
+        $("#waiting").css("margin-left", width).show();
+        $("#waiting").css("margin-top", 200).show();
+        $.get("http://" + db_path + "/scripts/frequency_switcher.py" + switchto, function(data) {
+            $("#results_container").hide().html(data).fadeIn('fast');
+            $("#waiting").hide();
+        });
+    });
+    ////////////////////////////////////////////////////////////////////////////
 
     
-    ///////////////////////////////////
-    //  This will show more context //
-    ///// in concordance searches ////
-    //////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    //  This will show more context in concordance searches ////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     $(".more_context").click(function(e) {
         var context_link = $(this).text();
         if (context_link == 'More') {
-            $(this).siblings('.philologic_context').children('.begin_concordance').show()
-            $(this).siblings('.philologic_context').children('.end_concordance').show()
-            $(this).empty().fadeIn(100).append('Less')
+            $(this).siblings('.philologic_context').children('.begin_concordance').show();
+            $(this).siblings('.philologic_context').children('.end_concordance').show();
+            $(this).empty().fadeIn(100).append('Less');
         } 
         else {
-            $(this).siblings('.philologic_context').children('.begin_concordance').hide()
-            $(this).siblings('.philologic_context').children('.end_concordance').hide()
-            $(this).empty().fadeIn(100).append('More')
+            $(this).siblings('.philologic_context').children('.begin_concordance').hide();
+            $(this).siblings('.philologic_context').children('.end_concordance').hide();
+            $(this).empty().fadeIn(100).append('More');
         }
         e.preventDefault();
     });
     ////////////////////////////////////////////////////////////////////////////
     
     
-    ////////////////////////////////////
-    // This will display the sidebar //
-    // for various frequency reports //
-    ///////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    // This will display the sidebar for various frequency reports /////////////
+    ////////////////////////////////////////////////////////////////////////////
     $("#toggle_frequency").click(function() {
         toggle_frequency(q_string, db_path, pathname);
     });
@@ -193,9 +210,9 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     
     
-    ///////////////////////////
-    // Page and reader code //
-    //////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    // Page and reader code ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     // Change pages
     $(".prev_page, .next_page").on('click', function() {
         var my_path = db_path.replace(/(\/\d+)+$/, '/');
@@ -285,9 +302,9 @@ $(document).ready(function() {
 });
 
 
-/////////////////////////////////////
-//////////// FUNCTIONS //////////////
-/////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//////////// FUNCTIONS /////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 
 // Patch jQueryUI autocomplete to get higlighting
