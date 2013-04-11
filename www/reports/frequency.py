@@ -7,7 +7,6 @@ from functions.wsgi_handler import wsgi_response
 from render_template import render_template
 from collections import defaultdict
 import json
-import re
 
 def frequency(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
@@ -25,7 +24,9 @@ def frequency(environ,start_response):
         return json.dumps(wrapper,indent=1)
         
     else:
-        return render_template(results=hits,db=db,dbname=dbname,q=q,generate_frequency=generate_frequency,f=f, template_name='frequency.mako')
+        field, counts = generate_frequency(hits, q, db)
+        return render_template(db=db,dbname=dbname,q=q,frequency_field=field,counts=counts,
+                               template_name='frequency.mako')
 
 def generate_frequency(results, q, db):
     """reads through a hitlist. looks up q["field"] in each hit, and builds up a list of 
@@ -34,18 +35,11 @@ def generate_frequency(results, q, db):
     if field == None:
         field = 'title'
     counts = defaultdict(int)
-    key_disp = {}
     for n in results:
         key = n[field] or "NULL" # NULL is a magic value for queries, don't change it recklessly.
-        if field in db.locals["normalized_fields"]:
-            disp_field = field.replace("_norm","")
-            disp_key = n[disp_field]
-            key_disp[key] = disp_key
         counts[key] += 1
 
     if q['rate'] == 'relative':
-        conn = db.dbh ## make this more accessible 
-        c = conn.cursor()
         for key, count in counts.iteritems():
             counts[key] = relative_frequency(field, key, count, db)
 
@@ -59,11 +53,9 @@ def generate_frequency(results, q, db):
         # Now build the url from q.
         url = f.link.make_query_link(q["q"],q["method"],q["arg"],**q["metadata"])     
 
-        # Contruct the label for the item.        
-        if k in key_disp:
-            label = key_disp[k]
-        else:
-            label = k
+        # Contruct the label for the item.
+        # This is the place to modify the displayed label of frequency table item.
+        label = k #for example, replace NULL with '[None]', 'N.A.', 'Untitled', etc.
         
         # We can also modify the count.
         if q['rate'] == 'relative':
@@ -77,6 +69,8 @@ def generate_frequency(results, q, db):
     
 def relative_frequency(field, label, count, db):
     c = db.dbh.cursor()
+    if label == 'NULL':
+        label = ''
     query = '''select sum(word_count) from toms where %s="%s"''' % (field, label)
     c.execute(query)
     return count / c.fetchone()[0] * 10000
