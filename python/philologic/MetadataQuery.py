@@ -13,7 +13,7 @@ patterns = [("QUOTE",r'".*?"'),
             ('OR',r'\|'),
             ('RANGE',r'[^|! ]*?\-[^|! ]*'),
             ('NULL',r'NULL'),
-            ('TERM',r'[^|!]+')]
+            ('TERM',r'[^|!"]+')]
 
 def make_clause(column,tokens,normalized=False):
     clauses = ""
