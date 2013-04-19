@@ -28,8 +28,14 @@ $(document).ready(function() {
     </div>
     <div class="results_container">
         <div class='philologic_collocation'>
-            <table class="philologic_table">
-                <colgroup span="3"></colgroup>
+            <div id="word_cloud" class="word_cloud">
+                <div class="word_cloud_button">
+                    Display word cloud
+                </div>
+                <div id="collocate_counts" class="collocation_counts">
+                </div>
+            </div>
+            <table class="philologic_table" id="collocation_table">
                 <tr>
                  <th class="table_header">within ${q['word_num']} words on either side</th>
                  <th class="table_header">within ${q['word_num']} words to left</th>
@@ -42,19 +48,19 @@ $(document).ready(function() {
                         <td class="table_column">
                             <span id="all_num${pos}">
                                 <a href="${link(q, all[0], 'all', all[1])}">${all[0]}</a>
-                                (${all[1]})
+                                <span id="all_count_${pos}">(${all[1]})</span>
                             </span>
                         </td>
                         <td class="table_column">
                             <span id="left_num${pos}">
                                 <a href="${link(q, left[0], 'left', left[1])}">${left[0]}</a>
-                                (${left[1]})
+                                <span id="left_count_${pos}">(${left[1]})</span>
                             </span>
                         </td>
                         <td class="table_column">
                             <span id="right_num${pos}">
                                 <a href="${link(q, right[0], 'right', right[1])}">${right[0]}</a>
-                                (${right[1]})
+                                <span id="right_count_${pos}">(${right[1]})</span>
                             </span>
                         </td>
                     </tr>
