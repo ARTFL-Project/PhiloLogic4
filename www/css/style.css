@@ -177,7 +177,6 @@ div.main_body {
         padding: 2px;
 }
 
-/* New Philo4 styles */
 
 
 /*Results formatting*/
@@ -223,11 +222,42 @@ div.main_body {
         border-top:0px;
         overflow: hidden;
 }
-.philologic_collocation {
-    padding-right: 50px;
-}
 .philologic_context {
     text-align: justify;
+}
+.philologic_collocation {
+    float: left;
+}
+.word_cloud {
+    float: right;
+    width:400px !important;
+    height: auto;
+    background-color: #FAFAFA;
+    border-style:solid;
+    border-width:1px;
+    border-bottom-width: 0px;
+    border-left-width: 0px;
+    border-color: LightGray;
+}
+.word_cloud_button {
+    padding: 1px 0px 1px 10px;
+    font-weight:600;
+    background-color: #ECECEC;
+    border-bottom-style:solid;
+    border-bottom-width:1px;
+    border-bottom-color: LightGray;
+    text-align: center;
+}
+.word_cloud_button:hover {
+    background-color: #E8E8E8;
+    cursor: pointer;
+}
+.collocation_counts {
+    padding: 10px 10px 10px 10px;
+    display:none;
+    border-bottom-style:solid;
+    border-bottom-width:1px;
+    border-bottom-color: LightGray;
 }
 .more_context {
     padding-left: 24px;
@@ -252,7 +282,7 @@ div.main_body {
 }
 .philologic_table {
     border-collapse:collapse;
-    width:960px;
+    width:auto;
 }
 .table_header {
     background-color: #ECECEC;
@@ -270,6 +300,7 @@ div.main_body {
     border-style:solid;
     border-width:1px;
     border-color: LightGray;
+    background-color: #FAFAFA;
 }
 
 
@@ -430,7 +461,7 @@ div.main_body {
 .book_page {
     margin: 0 auto;
     padding: 20px 20px 20px 20px;
-    width: 400px;
+    width: 800px;
     background-color: #FAFAFA !important;
     box-shadow: 0px 0px 15px #888888;
     line-height: 140% !important;

@@ -25,7 +25,7 @@ def fetch_kwic(results, path, q, byte_query, start, end, length=400):
     shortest_biblio = 0
 
     for hit in results[start:end]:
-        biblio = hit.author.title() + ', ' +  hit.title.title()
+        biblio = hit.articleAuthor_norm.title() + ', ' +  hit.head_norm.title()
         
         ## additional clean-up for titles
         biblio = ' '.join(biblio.split()) ## maybe hackish, but it works
@@ -54,11 +54,17 @@ def fetch_kwic(results, path, q, byte_query, start, end, length=400):
         conc_text = (conc_start + conc_middle + conc_end).decode('utf-8', 'ignore')
         conc_text = f.format.align_text(conc_text, len(hit.bytes))
         kwic_results.append((biblio, href, conc_text, hit))
+        
+    if shortest_biblio < 20:
+        shortest_biblio = 20
     
     ## Populate Kwic_results with bibliography    
     for pos, result in enumerate(kwic_results):
         biblio, href, text, hit = result
-        short_biblio = '<span id="short_biblio">%s</span>' % biblio[:shortest_biblio]
+        if len(biblio) < 20:
+            diff = 20 - len(biblio)
+            biblio += ' ' * diff
+        short_biblio = '<span id="short_biblio" style="white-space:pre-wrap;">%s</span>' % biblio[:shortest_biblio]
         full_biblio = '<span id="full_biblio" style="display:none;">%s</span>' % biblio
         kwic_biblio = full_biblio + short_biblio
         kwic_biblio_link = '<a href="%s" class="kwic_biblio" style="white-space:pre-wrap;">' % href + kwic_biblio + '</a>: '

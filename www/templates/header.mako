@@ -10,6 +10,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js" type="text/javascript"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/jquery.hoverIntent.minified.js"></script>
+<script type="text/javascript" src="${db.locals['db_url']}/js/jquery.tagcloud.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/philologic.js"></script>
 </head>
 <body onunload="">
@@ -28,7 +29,7 @@
                     </div>
                 </div>    
                 <div class="site-name">
-                    <h1><a href="${db.locals['db_url']}/" title="${dbname}">${dbname.title()} alpha5</a></h1>           
+                    <h1 style="position: absolute"><a href="${db.locals['db_url']}/" title="${dbname}">${dbname.title()} alpha5</a></h1>           
                 </div>
             </div>
             <div class="main_body">

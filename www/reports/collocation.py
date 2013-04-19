@@ -64,13 +64,13 @@ def fetch_collocation(results, path, q, filter_words=100, full_report=True):
         right_words = tokenize(conc_right, filter_list, within_x_words, 'right')
            
         for l_word in left_words:
-            if l_word == q['q']:
+            if l_word in q['q'].split():
                 continue
             left_collocates[l_word] += 1
             all_collocates[l_word] += 1 
 
         for r_word in right_words:
-            if r_word == q['q']:
+            if r_word in q['q'].split():
                 continue
             right_collocates[r_word] += 1
             all_collocates[r_word] += 1    
