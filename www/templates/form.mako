@@ -3,9 +3,8 @@
 $(document).ready(function() {
     $("#report").show();
     showHide('concordance');
-    $("#search_elements").show();
-    $(".more_options").hide();
-    $("#form_separation").hide();
+    $("#search_elements, .search_explain").show();
+    $(".more_options, #form_separation").hide();
 });	  	
 </script>
 <%include file="search_boxes.mako"/>

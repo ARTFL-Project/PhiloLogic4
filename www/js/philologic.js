@@ -20,6 +20,7 @@ $(document).ready(function() {
             $("#waiting").css("margin-left", width).show();
         });
     $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
+    //$("#word_cloud_button").button()
     $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
     $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
@@ -299,6 +300,43 @@ $(document).ready(function() {
     });
     ////////////////////////////////////////////////////////////////////////////
     
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // Generate collocation cloud //////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    $.fn.tagcloud.defaults = {
+        size: {start: 0.8, end: 2.7, unit: 'em'},
+        color: {start: '#A0A0A0', end: '#000000'}
+      };
+    $(".word_cloud_button").click(function() {
+        $('#collocate_counts').empty();
+        var colloc_counts = {};
+        var unordered_list = $('#collocation_table tr');
+        unordered_list = unordered_list.sort(function() {
+                                                return Math.round( Math.random() ) - 0.5;
+                                            });
+        unordered_list.each(function() {
+        // need this to skip the first row
+            if ($(this).find("td:first").length > 0) {
+                var word = $(this).find("td:first").find('a').html();
+                var href = $(this).find("td:first").find('a').attr('href');
+                var count = $(this).find("td:first").find('[id^=all_count]').html();
+                count = count.replace('(', '').replace(')', '').replace(' ', '');
+                colloc_counts[word] = [];
+                colloc_counts[word]['href'] = href;
+                colloc_counts[word]['count'] = count;
+            }
+        });
+        for (word in colloc_counts) {
+            var searchlink = '<a href="' + colloc_counts[word]['href'] + '" rel="' + colloc_counts[word]['count'] + '"> ';
+            var full_link = searchlink + word + ' </a>';
+            $("#collocate_counts").append(full_link);
+        }
+        $("#collocate_counts a").tagcloud();
+        $("#collocate_counts").slideDown();
+    });
+    ////////////////////////////////////////////////////////////////////////////
+    
 });
 
 
@@ -503,7 +541,8 @@ function update_table(full_results, new_hash, q_string, column) {
     for (i in sorted_list) {
         pos += 1;
         var link = colloc_linker(sorted_list[i][0], q_string, column, sorted_list[i][1]);
-        data = link + ' (' + sorted_list[i][1] + ')'
+        var count_id = column + '_count_' + sorted_list[i][1];
+        data = link + '<span id="' + count_id + '"> (' + sorted_list[i][1] + ')</span>';
         $('#' + column + '_num' + pos).html(data);
     }
     $('[id^=' + column+ '_]').fadeIn(800);
@@ -534,4 +573,10 @@ function update_colloc(all_colloc, left_colloc, right_colloc, results_len, collo
     else {
         $("#working").hide();
     }
+}
+
+// Functions to draw collocation cloud
+function count_words(rows) {
+    var count = {};
+    return count;
 }

@@ -29,15 +29,22 @@ function drawChart(mydata, count_type) {
     chart.draw(data, options);
 }
 </script>
-<div class="results_container">
-<div class='time_series_report'>
-<p class='description'>Use of the term(s) "${q['q'].decode('utf_8')}" throughout time</p>
- <p class='status'></p>
- <div id="time_series_buttons">
- <input type="radio" name="freq_type" id="relative_time" value='${relative_frequencies}' checked="checked"><label for="relative_time">Relative frequency</label>
- <input type="radio" name="freq_type" id="absolute_time" value='${frequencies}'><label for="absolute_time">Absolute frequency</label>
- </div>
- <div id="chart" style="width: 900px; height: 500px;"></div>
-</div>
+<div class='philologic_response'>
+    <div class='initial_report'>
+        <p class='description'>
+            Use of the term(s) "${q['q'].decode('utf_8')}" throughout time
+        </p>
+    </div>
+    <div class="results_container">
+        <div class='time_series_report'>
+            <div id="time_series_buttons">
+                <input type="radio" name="freq_type" id="relative_time" value='${relative_frequencies}' checked="checked">
+                <label for="relative_time">Relative frequency</label>
+                <input type="radio" name="freq_type" id="absolute_time" value='${frequencies}'>
+                <label for="absolute_time">Absolute frequency</label>
+            </div>
+            <div id="chart" style="width: 900px; height: 500px;"></div>
+        </div>
+    </div>
 </div>
 <%include file="footer.mako"/>
