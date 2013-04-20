@@ -232,32 +232,16 @@ div.main_body {
     float: right;
     width:400px !important;
     height: auto;
-    background-color: #FAFAFA;
-    border-style:solid;
-    border-width:1px;
-    border-bottom-width: 0px;
-    border-left-width: 0px;
-    border-color: LightGray;
-}
-.word_cloud_button {
-    padding: 1px 0px 1px 10px;
-    font-weight:600;
-    background-color: #ECECEC;
-    border-bottom-style:solid;
-    border-bottom-width:1px;
-    border-bottom-color: LightGray;
-    text-align: center;
-}
-.word_cloud_button:hover {
-    background-color: #E8E8E8;
-    cursor: pointer;
 }
 .collocation_counts {
-    padding: 10px 10px 10px 10px;
+    padding: 5px 10px 10px 10px;
     display:none;
-    border-bottom-style:solid;
-    border-bottom-width:1px;
-    border-bottom-color: LightGray;
+    text-align: justify;
+    line-height: 200%;
+}
+.cloud_term:hover {
+    color: black !important;
+    text-decoration: none !important;
 }
 .more_context {
     padding-left: 24px;

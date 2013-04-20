@@ -300,43 +300,6 @@ $(document).ready(function() {
     });
     ////////////////////////////////////////////////////////////////////////////
     
-    
-    ////////////////////////////////////////////////////////////////////////////
-    // Generate collocation cloud //////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////
-    $.fn.tagcloud.defaults = {
-        size: {start: 0.8, end: 2.7, unit: 'em'},
-        color: {start: '#A0A0A0', end: '#000000'}
-      };
-    $(".word_cloud_button").click(function() {
-        $('#collocate_counts').empty();
-        var colloc_counts = {};
-        var unordered_list = $('#collocation_table tr');
-        unordered_list = unordered_list.sort(function() {
-                                                return Math.round( Math.random() ) - 0.5;
-                                            });
-        unordered_list.each(function() {
-        // need this to skip the first row
-            if ($(this).find("td:first").length > 0) {
-                var word = $(this).find("td:first").find('a').html();
-                var href = $(this).find("td:first").find('a').attr('href');
-                var count = $(this).find("td:first").find('[id^=all_count]').html();
-                count = count.replace('(', '').replace(')', '').replace(' ', '');
-                colloc_counts[word] = [];
-                colloc_counts[word]['href'] = href;
-                colloc_counts[word]['count'] = count;
-            }
-        });
-        for (word in colloc_counts) {
-            var searchlink = '<a href="' + colloc_counts[word]['href'] + '" rel="' + colloc_counts[word]['count'] + '"> ';
-            var full_link = searchlink + word + ' </a>';
-            $("#collocate_counts").append(full_link);
-        }
-        $("#collocate_counts a").tagcloud();
-        $("#collocate_counts").slideDown();
-    });
-    ////////////////////////////////////////////////////////////////////////////
-    
 });
 
 
@@ -556,10 +519,10 @@ function update_colloc(all_colloc, left_colloc, right_colloc, results_len, collo
     var script = "http://" + db_path + "scripts/collocation_fetcher.py?" + q_string
     if (colloc_start == 0) {
         colloc_start = 100;
-        colloc_end = 800;
+        colloc_end = 1100;
     } else {
-        colloc_start += 700;
-        colloc_end += 700;
+        colloc_start += 1000;
+        colloc_end += 1000;
     }
     var script_call = script + '&colloc_start=' + colloc_start + '&colloc_end=' + colloc_end
     if (colloc_start <= results_len) {
@@ -568,6 +531,7 @@ function update_colloc(all_colloc, left_colloc, right_colloc, results_len, collo
             left_new_collc = update_table(left_colloc, data[1], q_string, "left");
             right_new_colloc = update_table(right_colloc, data[2], q_string, "right");
             update_colloc(all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
+            collocation_cloud();
         }));
     }
     else {
@@ -576,7 +540,36 @@ function update_colloc(all_colloc, left_colloc, right_colloc, results_len, collo
 }
 
 // Functions to draw collocation cloud
-function count_words(rows) {
-    var count = {};
-    return count;
+function collocation_cloud() {
+    $.fn.tagcloud.defaults = {
+        size: {start: 1.1, end: 3.4, unit: 'em'},
+        color: {start: '#F9D69A', end: '#800000'}
+      };
+    $('#collocate_counts').fadeOut('fast').empty();
+    var colloc_counts = {};
+    var unordered_list = $('#collocation_table tr');
+    unordered_list = unordered_list.sort(function() {
+                                            return Math.round( Math.random() ) - 0.5;
+                                        });
+    unordered_list.each(function() {
+    // need this to skip the first row
+        if ($(this).find("td:first").length > 0) {
+            var word = $(this).find("td:first").find('a').html();
+            var href = $(this).find("td:first").find('a').attr('href');
+            var count = $(this).find("td:first").find('[id^=all_count]').html();
+            count = count.replace('(', '').replace(')', '').replace(' ', '');
+            colloc_counts[word] = [];
+            colloc_counts[word]['href'] = href;
+            colloc_counts[word]['count'] = count;
+        }
+    });
+    for (word in colloc_counts) {
+        var searchlink = '<a href="' + colloc_counts[word]['href'] + '" class="cloud_term" rel="' + colloc_counts[word]['count'] + '"> ';
+        var full_link = searchlink + word + ' </a>';
+        $("#collocate_counts").append(full_link);
+    }
+    $("#collocate_counts a").tagcloud();
+    //$(".cloud_term :hover").css('text-decoration', 'none');
+    //$(".cloud_term :hover").css('color', 'black');
+    $("#collocate_counts").fadeIn('fast');
 }
