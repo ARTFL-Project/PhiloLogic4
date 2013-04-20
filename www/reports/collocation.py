@@ -31,10 +31,10 @@ def collocation(environ,start_response):
                            results_per_page=q['results_per_page'],hit_len=hit_len,
                            order=sort_to_display,dumps=json.dumps,template_name='collocation.mako')
 
-def fetch_collocation(results, path, q, filter_words=100, full_report=True):
+def fetch_collocation(results, path, q, filter_words=200, full_report=True):
     within_x_words = q['word_num']    
     
-    ## set up filtering of most frequent 100 terms ##
+    ## set up filtering of most frequent 200 terms ##
     filter_list_path = path + '/data/frequencies/word_frequencies'
     filter_words_file = open(filter_list_path)
 
@@ -62,15 +62,17 @@ def fetch_collocation(results, path, q, filter_words=100, full_report=True):
         
         left_words = tokenize(conc_left, filter_list, within_x_words, 'left')
         right_words = tokenize(conc_right, filter_list, within_x_words, 'right')
-           
+        
+        query_words = set([w.decode('utf-8') for w in q['q'].split('|')])
+        
         for l_word in left_words:
-            if l_word in q['q'].split():
+            if l_word in query_words:
                 continue
             left_collocates[l_word] += 1
             all_collocates[l_word] += 1 
 
         for r_word in right_words:
-            if r_word in q['q'].split():
+            if r_word in query_words:
                 continue
             right_collocates[r_word] += 1
             all_collocates[r_word] += 1    
