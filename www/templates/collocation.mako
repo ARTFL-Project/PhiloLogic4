@@ -2,9 +2,10 @@
 <%include file="search_boxes.mako"/>
 <script>
 $(document).ready(function() {
+    collocation_cloud();
     var all_colloc = ${dumps(all_colloc)};
     var left_colloc = ${dumps(left_colloc)};
-    var right_colloc = ${dumps(right_colloc)}
+    var right_colloc = ${dumps(right_colloc)};
     update_colloc(all_colloc, left_colloc, right_colloc, ${hit_len}, 0, 100);
     $('#working').each(function() {
         var elem = $(this);
@@ -23,15 +24,12 @@ $(document).ready(function() {
         <p class='description'>
             Displaying the top 100 collocates of "${q['q'].decode('utf-8', 'ignore')}":
         </p>
-        The 100 most common words are being filtered from this report.
+        The 200 most common words are being filtered from this report.
         <span id="working" style="font-weight:600;">Still working...</span>
     </div>
     <div class="results_container">
         <div class='philologic_collocation'>
             <div id="word_cloud" class="word_cloud">
-                <div class="word_cloud_button">
-                    Display word cloud
-                </div>
                 <div id="collocate_counts" class="collocation_counts">
                 </div>
             </div>
