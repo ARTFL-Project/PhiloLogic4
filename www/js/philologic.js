@@ -20,8 +20,21 @@ $(document).ready(function() {
             $("#waiting").css("margin-left", width).show();
         });
     $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
-    //$("#word_cloud_button").button()
-    $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
+    $("#page_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
+    $("#word_num").spinner({
+        spin: function( event, ui ) {
+            if ( ui.value > 10 ) {
+                $( this ).spinner( "value", 1 );
+                return false;
+            } else if ( ui.value < 1 ) {
+                $( this ).spinner( "value", 10 );
+                return false;
+            }
+        }
+    });
+    $("#word_num").val(5);
+    $('.ui-spinner').css('width', '45px')
+    $(':text').addClass("ui-corner-all");
     $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
     $('.search_explain').accordion({

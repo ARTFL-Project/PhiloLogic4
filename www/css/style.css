@@ -124,7 +124,6 @@ a.active, a:link.active, a:visited.active, a:hover.active {
 body {
   font-family: 'Averia Serif Libre', cursive;
 }
-
 .main_body{
     font-weight:300;
     font-size: 14px;
@@ -139,6 +138,14 @@ table {
 .site-name {
     font-weight: 400 !important;
 }
+
+input[type=text] {
+    height: 20px;
+    font-size: 100%;
+    padding-left: .4em;
+}
+
+
 
 h1 {
   margin: 0;
@@ -343,6 +350,7 @@ div.main_body {
     border-top-width: 1px;
     border-top-color: #ECECEC;
     box-shadow: 0px 9px 15px -5px #C8C8C8;
+    color: #555 !important;
 }
 .search_elements {
     margin-top: 20px;
@@ -460,9 +468,13 @@ div.main_body {
 
 
 /*jQueryUI styling*/
-.ui-button,  .ui-button-text .ui-button {  
+.ui-button,  .ui-button-text, .ui-button, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {  
     font-size: inherit !important;
     font-family: inherit !important;
+}
+.ui-widget {
+    font-size: inherit !important;
+    font-family: inherit !important; 
 }
 
 ul.ui-autocomplete.ui-menu {  
@@ -537,12 +549,13 @@ label.custom-select {
     font: inherit !important;
     outline:none; /* remove focus ring from Webkit */
     line-height: 1.8;
-    background: #efefee;
+    background: #F8F8F8;
     color:#555555;
     border:solid;
     border-width: 1px;
     border-color: #cccccc;
     height: 28px;
+    width: 210px;
 }
 .custom-select:after {
     position: absolute;
