@@ -535,6 +535,37 @@ ul.ui-autocomplete.ui-menu {
     font-size: 170%;
 }
 
+.highlight_options {
+    position: absolute;
+    z-index: 1000;
+    display: none;
+    background-color: #FAFAFA;
+    border-style: solid;
+    border-color: #CCCCCC;
+    border-width: 1px;
+    border-radius:5px;
+    line-height: 170%;
+    box-shadow: 5px 9px 15px -5px #888888;
+    padding-bottom: 10px;
+}
+.selected_tag {
+    padding: 5px 5px 5px 5px;
+    font-size: 80%;
+    font-weight: 400 !important;
+}
+.selected_tag:hover {
+    text-decoration: none !important;
+    color: black;
+    background: #E8E8E8;
+}
+.selected_word {
+    padding: 10px 10px 5px 10px;
+    font-weight: 700;
+}
+.context_table {
+    border-collapse:collapse;
+    border-color: #CCCCCC;
+}
 
 
 /* Ugly looking workaround while waiting for next release of jQueryUI with selectmenu*/
