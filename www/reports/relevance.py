@@ -115,11 +115,11 @@ def retrieve_hits(q, db):
     query_words = unicode(query_words, 'utf-8')
     my_words = '|'.join(set([w for w in re.split(token_regex, query_words, re.U) if w]))
     word_reg = re.compile(r"\b%s\b" % my_words, re.U)
-    metadata = ','.join([m for m in q['metadata'] if m!= "id"])
+    metadata = ','.join([m for m in db.locals["metadata_fields"] if m!= "id"])
     query = 'select philo_id, %s from metadata_relevance' % metadata
     metadata_list = [i for i in c.execute(query)]
     for i in metadata_list:
-        metadata_string = ' '.join([i[m] or '' for m in q['metadata'] if m != 'id']).decode('utf-8', 'ignore').lower()
+        metadata_string = ' '.join([i[m] or '' for m in db.locals["metadata_fields"] if m != 'id']).decode('utf-8', 'ignore').lower()
         matches = [w.encode('utf-8', 'ignore') for w in word_reg.findall(metadata_string)]
         if matches:
             philo_id = i['philo_id']

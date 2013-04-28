@@ -337,7 +337,6 @@ function display_options_on_selected() {
         var text = getSelectedText();
         if (text != '') {
             var options = $('<div class="highlight_options">');
-            options.offset({ top: e.pageY + 5, left: e.pageX + 10});
             var my_table = '<table class="context_table" BORDER=1 RULES=ALL frame=void>';
             my_table += '<tr><td class="selected_word">"' + text.charAt(0).toUpperCase() + text.slice(1) + '"</td></tr>';
             var search_reports = ['concordance', "relevance", 'collocation']
@@ -362,7 +361,17 @@ function display_options_on_selected() {
             }
             my_table += "</td></tr>";
             options.append(my_table);
+            var top_coord = e.pageY + 10;
+            var left_coord = e.pageX + 10;
+            var parent_left_coord = $(this).offset().left + $(this).width();
             $("body").append(options);
+            var width = options.width();
+            options.offset({ top: top_coord, left: left_coord});
+            var options_left_coord = left_coord + options.width();
+            if (options_left_coord > parent_left_coord) {
+                options.css('position', '').css('float', 'right').css('margin-right', '20px');
+                options.css('left', parent_left_coord - width)
+            } 
             options.fadeIn('fast');
         }
     });
