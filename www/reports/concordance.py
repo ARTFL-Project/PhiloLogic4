@@ -32,7 +32,10 @@ def fetch_concordance(hit, path, q):
     conc_text = conc_text.decode('utf-8', 'ignore')
     start_highlight = conc_text.find('<span class="highlight"')
     end_highlight = conc_text.rfind('</span>')
-    begin = start_highlight - 200
+    if start_highlight >= 200:
+        begin = start_highlight - 200
+    else:
+        begin = 0
     end = end_highlight + 200
     min = bytes[-1] + len("<span class='highlight'></span>") * len(bytes)
     if end < min:
