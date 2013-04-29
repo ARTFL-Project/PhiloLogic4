@@ -8,16 +8,19 @@
             %>
             ${q['collocate_num']} occurences of collocate "${q['collocate'].decode('utf-8', 'ignore')}" in the vicinity of "${q['q'].decode('utf-8', 'ignore')}":
             <div class="description">
-                Hits <span class="start">${start}</span> - <span class="end">${end}</span> of ${q['collocate_num']}
+                <span id='colloc_in_hits'></span> occurences in
+                hits <span class="start">${start}</span> - <span class="end">${end}</span>
             </div>
         </p>
     </div>
+    <% occurences = 0 %>
     <div class="results_container">
         <ol class='philologic_concordance'>
             % for i in results[start - 1:end]:
                 <li class='philologic_occurrence'>
                     <%
-                     n += 1
+                    n += 1
+                    occurences += i.collocate_num
                     %>
                     <span class='hit_n'>${n}.</span> ${f.cite.make_div_cite(i)}
                     % if i.collocate_num > 1:
@@ -36,4 +39,9 @@
         <div style='clear:both;'></div>
      </div>
 </div>
+<script>
+$(document).ready(function() {
+    $('#colloc_in_hits').append(${occurences});
+});
+</script>
 <%include file="footer.mako"/>
