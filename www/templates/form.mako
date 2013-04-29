@@ -2,7 +2,6 @@
 <script>	  	
 $(document).ready(function() {
     $("#report").show();
-    showHide('concordance');
     $("#search_elements, .search_explain").show();
     $(".more_options, #form_separation").hide();
 });	  	

@@ -18,17 +18,18 @@ def concordance_from_collocation(environ,start_response):
         return bibliography(f,path, db, dbname,q,environ)
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_colloc_concordance=fetch_colloc_concordance,
-                               fetch_concordance=fetch_concordance,f=f,path=path, results_per_page=q['results_per_page'],
+        colloc_results = fetch_colloc_concordance(hits, path, q)
+        return render_template(results=colloc_results,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
+                               f=f,path=path, results_per_page=q['results_per_page'],
                                template_name="concordance_from_collocation.mako")
         
-def fetch_colloc_concordance(results, path, q, filter_words=100):
+def fetch_colloc_concordance(results, path, q, filter_words=200):
     within_x_words = q['word_num']
     direction = q['direction']
     collocate = q['collocate'].decode('utf-8', 'ignore')
     collocate_num = q['collocate_num']
     
-    ## set up filtering of most frequent 100 terms ##
+    ## set up filtering of most frequent 200 terms ##
     filter_list_path = path + '/data/frequencies/word_frequencies'
     filter_words_file = open(filter_list_path)
 
@@ -104,5 +105,5 @@ class collocation_hitlist(object):
         return self.hitlist[name]
         
     def __len__(self):
-        return len(self.hitlist)
+        return int(self.num)
         
