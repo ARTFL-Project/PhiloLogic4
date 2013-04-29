@@ -12,7 +12,7 @@ class HitWrapper(object):
     def __init__(self, hit, db, obj_type=False, encoding=None):
         self.db = db
         self.hit = hit
-        print >> sys.stderr, self.hit
+        #print >> sys.stderr, self.hit
         self.philo_id = hit
         self.encoding = encoding
         if obj_type:
