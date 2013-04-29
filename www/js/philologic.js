@@ -20,8 +20,21 @@ $(document).ready(function() {
             $("#waiting").css("margin-left", width).show();
         });
     $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
-    //$("#word_cloud_button").button()
-    $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
+    $("#page_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
+    $("#word_num").spinner({
+        spin: function( event, ui ) {
+            if ( ui.value > 10 ) {
+                $( this ).spinner( "value", 1 );
+                return false;
+            } else if ( ui.value < 1 ) {
+                $( this ).spinner( "value", 10 );
+                return false;
+            }
+        }
+    });
+    $("#word_num").val(5);
+    $('.ui-spinner').css('width', '45px')
+    $(':text').addClass("ui-corner-all");
     $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
     $('.search_explain').accordion({
@@ -141,6 +154,7 @@ $(document).ready(function() {
     ///////// Concordance / KWIC switcher //////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     $("#report_switch").on("change", function() {
+        $('.highlight_options').remove();
         var switchto = $('input[name=report_switch]:checked').val();
         var width = $(window).width() / 3;
         $("#waiting").css("margin-left", width).show();
@@ -155,6 +169,7 @@ $(document).ready(function() {
                 out: hideBiblio   
             };
             $(".kwic_biblio").hoverIntent(config)
+            display_options_on_selected();
         });
     });
     ////////////////////////////////////////////////////////////////////////////
@@ -300,12 +315,76 @@ $(document).ready(function() {
     });
     ////////////////////////////////////////////////////////////////////////////
     
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // Contextual menu when selecting a word ///////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    display_options_on_selected();
+    ////////////////////////////////////////////////////////////////////////////
+    
 });
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+
+
+function display_options_on_selected() {
+    $('.philologic_concordance, .kwic_concordance').mouseup(function(e) {
+        $('.highlight_options').remove();
+        var text = getSelectedText();
+        if (text != '') {
+            var options = $('<div class="highlight_options">');
+            var my_table = '<table class="context_table" BORDER=1 RULES=ALL frame=void>';
+            my_table += '<tr><td class="selected_word">"' + text.charAt(0).toUpperCase() + text.slice(1) + '"</td></tr>';
+            var search_reports = ['concordance', "relevance", 'collocation']
+            my_table += '<tr><td>';
+            for (report in search_reports) {
+                report = search_reports[report];
+                var url = "?report=" + report + "&method=proxy&q=" + text;
+                if (report != 'relevance') {
+                    var report_link = '<a href="' + url + '" class="selected_tag">Run a ' + report + ' search for this selection</a><br>'
+                } else {
+                    var report_link = '<a href="' + url + '" class="selected_tag">Run a ranked relevance search for this selection</a><br>'
+                }
+                my_table += report_link;
+            }
+            if (text.split(' ').length == 1) {
+                var url = "?report=time_series&method=proxy&q=" + text;
+                var report_link = '<a href="' + url + '" class="selected_tag">Run a time series search for this selection</a><br>'
+                var definition = '<a href="http://dvlf.uchicago.edu/mot/' + text + '" class="selected_tag">Get a definition of this word</a>'
+                my_table += report_link;
+                my_table += "</tr></td><tr><td class='definition'>";
+                my_table += definition;
+            }
+            my_table += "</td></tr>";
+            options.append(my_table);
+            var top_coord = e.pageY + 10;
+            var left_coord = e.pageX + 10;
+            var parent_left_coord = $(this).offset().left + $(this).width();
+            $("body").append(options);
+            var width = options.width();
+            options.offset({ top: top_coord, left: left_coord});
+            var options_left_coord = left_coord + options.width();
+            if (options_left_coord > parent_left_coord) {
+                options.css('position', '').css('float', 'right').css('margin-right', '20px');
+                options.css('left', parent_left_coord - width)
+            } 
+            options.fadeIn('fast');
+        }
+    });
+}
+
+function getSelectedText() {
+    if (window.getSelection) {
+        return window.getSelection().toString();
+    } else if (document.selection) {
+        return document.selection.createRange().text;
+    }
+    return '';
+}
 
 
 // Patch jQueryUI autocomplete to get higlighting

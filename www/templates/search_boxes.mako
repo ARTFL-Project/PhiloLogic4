@@ -70,29 +70,28 @@
                 </table>
             </div>
             <table> 
-                <tr class="table_row" id="collocation"><td class="first_column">Within </td><td><span id='word_num'>
-                <input type="radio" name="word_num" id="wordnum1" value="1"><label for="wordnum1">1</label>
-                <input type="radio" name="word_num" id="wordnum2" value="2"><label for="wordnum2">2</label>
-                <input type="radio" name="word_num" id="wordnum3" value="3"><label for="wordnum3">3</label>
-                <input type="radio" name="word_num" id="wordnum4" value="4"><label for="wordnum4">4</label>
-                <input type="radio" name="word_num" id="wordnum5" value="5" checked="checked"><label for="wordnum5">5</label>
-                <input type="radio" name="word_num" id="wordnum6" value='6'><label for="wordnum6">6</label>
-                <input type="radio" name="word_num" id="wordnum7" value='7'><label for="wordnum7">7</label>
-                <input type="radio" name="word_num" id="wordnum8" value='8'><label for="wordnum8">8</label>
-                <input type="radio" name="word_num" id="wordnum9" value="9"><label for="wordnum9">9</label>
-                <input type="radio" name="word_num" id="wordnum10" value="10"><label for="wordnum10">10</label>
-                </span> words</td></tr>
+                <tr class="table_row" id="collocation"><td class="first_column">Within </td>
+                    <td>
+                        <label for="word_num"></label>
+                        <input id="word_num" name="word_num" />
+                        (1-10) words
+                    </td>
+                </tr>
                
-                <tr class="table_row" id="frequency"><td class="first_column"><span class="search_field">Frequency by:</span></td><td><span id='field'>
-                % for pos, facet in enumerate(db.locals["metadata_fields"]):
-                    % if pos == 0:
-                        <input type="radio" name="field" id="field${pos}" value='${facet}' checked='checked'><label for="field${pos}">${facet}</label>
-                    % else:
-                        <input type="radio" name="field" id="field${pos}" value='${facet}'><label for="field${pos}">${facet}</label>
-                    % endif
-                % endfor
-                </span>
-                </td></tr>
+                <tr class="table_row" id="frequency">
+                    <td class="first_column">
+                        <span class="search_field">Frequency by:</span>
+                    </td>
+                    <td>
+                        <label class="custom-select">
+                            <select id='field' name="field">
+                                % for pos, facet in enumerate(db.locals["metadata_fields"]):
+                                    <option value='${facet}'>${facet}                                    
+                                % endfor
+                            </select>
+                        </label>
+                    </td>
+                </tr>
                 
                 <tr class="table_row" id="time_series">
                 <td class="first_column">Date range:</td><td><span class="search_field">from </span><input type='text' name="start_date" id="start_date" style="width:35px;"><span class="search_field"> to </span><input type='text' name="end_date" id="end_date" style="width:35px;">
