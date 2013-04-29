@@ -114,7 +114,7 @@ class DB:
 #                print >> sys.stderr, "cached @ %s" % corpus_file
                 corpus = HitList.HitList(corpus_file,0,self)
                 corpus.finish()             
-            print >> sys.stderr, "corpus file of length %d" % len(corpus)
+            #print >> sys.stderr, "corpus file of length %d" % len(corpus)
             if len(corpus) == 0:
                 return corpus
         else:

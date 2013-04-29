@@ -5,6 +5,7 @@ import struct
 import sqlite3 
 import HitList
 import unicodedata
+import subprocess
 tests = ['hello','"hello"','hi|hello','hi|"hello"','1-5','hello-hi','1-5|"hi|hello"','NULL',"NOT NULL",'hi|NULL', 'hello NOT hi','"hello" NOT hi',"NOT 1-5|hi","1-5 NOT 4", "hello NOT"]
 pattern = r'(\"[^\"]*?\")|([|])|(.*?\-.*?)|(.+)'
 
@@ -15,7 +16,7 @@ patterns = [("QUOTE",r'".*?"'),
             ('NULL',r'NULL'),
             ('TERM',r'[^|!"]+')]
 
-def make_clause(column,tokens,normalized=False):
+def make_clause(column,tokens,norm_path):
     clauses = ""
     vars = []
     conj = "AND"
@@ -52,20 +53,35 @@ def make_clause(column,tokens,normalized=False):
             else:
                 clause = "%s IS NULL" % column
         elif t[0] == "TERM":
-            clause_column = column
-            if normalized:
-                term = t[1].decode("utf-8").lower()
-                term = [c for c in unicodedata.normalize("NFKD",term) if not unicodedata.combining(c)]
-                term = u"".join(term).encode("utf-8")
-                clause_column = column + "_norm"
-            else:
-                term = t[1]
-            if neg:
-                clause = "%s NOT LIKE ?" % (clause_column)
-                vars.append("%" + term + "%")
-            else:
-                clause = "%s LIKE ?" % (clause_column)
-                vars.append("%" + term + "%")
+            norm_term = t[1].decode("utf-8").lower()
+            norm_term = [c for c in unicodedata.normalize("NFKD",norm_term) if not unicodedata.combining(c)]
+            norm_term = u"".join(norm_term).encode("utf-8")
+            expanded_terms = metadata_pattern_search(norm_term,norm_path)
+            print >> sys.stderr, "EXPANDED_TERMS:", expanded_terms
+            sub_clauses = []
+            for t in expanded_terms:
+                vars.append(t)               
+                if neg:
+                    sub_clauses.append("%s != ?" % column)
+                    conj = "AND"
+                else:
+                    sub_clauses.append("%s == ?" % column)
+                    conj = "OR"
+                clause = (" " + conj + " ").join(sub_clauses)
+#            clause_column = column
+#            if normalized:
+#                term = t[1].decode("utf-8").lower()
+#                term = [c for c in unicodedata.normalize("NFKD",term) if not unicodedata.combining(c)]
+#                term = u"".join(term).encode("utf-8")
+#                clause_column = column + "_norm"
+#            else:
+#                term = t[1]
+#            if neg:
+#                clause = "%s NOT LIKE ?" % (clause_column)
+#                vars.append("%" + term + "%")
+#            else:
+#                clause = "%s LIKE ?" % (clause_column)
+#                vars.append("%" + term + "%")
                             
         if clause and clauses:
             clauses += " " + conj + " " + clause
@@ -78,7 +94,7 @@ def make_clause(column,tokens,normalized=False):
 
     return (clauses,vars)
 
-def parse(column,orig,normalized=False):
+def parse(column,orig,norm_path):
         temp = orig[:]
         temp_result = []
         length = len(temp)
@@ -101,7 +117,18 @@ def parse(column,orig,normalized=False):
                     break
             else:
                 break
-        return make_clause(column,temp_result,normalized)
+        return make_clause(column,temp_result,norm_path)
+
+def metadata_pattern_search(term, path):
+    command = ['egrep', '-wi', "%s" % term, '%s' % path]
+    print >> sys.stderr, "METADATA COMMAND:", repr(command)
+    process = subprocess.Popen(command, stdout=subprocess.PIPE)
+    match, stderr = process.communicate()
+    print >> sys.stderr, "RESULTS:",repr(match)
+    match = match.split('\n')
+    match.remove('')
+    ## HACK: The extra decode/encode are there to fix errors when this list is converted to a json object
+    return [m.split("\t")[1].strip().decode('utf-8', 'ignore').encode('utf-8') for m in match]
 
 def hit_to_string(hit,width):
     if isinstance(hit,sqlite3.Row):
@@ -140,12 +167,9 @@ def query_lowlevel(db,param_dict):
     vars = []
     clauses = []
     for column,values in param_dict.items():
-        if "normalized_fields" in db.locals and column in db.locals["normalized_fields"]:
-            normalized = True
-        else:
-            normalized = False
+        norm_path = db.locals["db_path"]+"/frequencies/normalized_" + column + "_frequencies"
         for v in values:
-            clause,some_vars = parse(column,v,normalized)
+            clause,some_vars = parse(column,v,norm_path)
             clauses.append(clause)
             vars += some_vars
     if clauses:
