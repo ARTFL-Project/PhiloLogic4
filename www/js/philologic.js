@@ -70,6 +70,7 @@ $(document).ready(function() {
     $("#search_elements").hide();
     $('.conc_question, .freq_question, .colloc_question, .time_question, .relev_question').hide();
     $('.search_explain').hide();
+    showHide($('input[name=report]:checked', '#search').val());
     $('#report').click(function() {
         var report = $('input[name=report]:checked', '#search').val();
         if ($("#search_elements:visible")) {
