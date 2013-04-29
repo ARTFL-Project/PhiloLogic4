@@ -6,10 +6,12 @@ import time
 import struct
 import HitList
 import re
+import unicodedata
+from MetadataQuery import patterns
 
 def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,limit=3000,filename=""):
     sys.stdout.flush()
-    expandedterms = format_query(terms)
+    expandedterms = format_query(terms,db)
     words_per_hit = len(terms.split(" "))
     origpid = os.getpid()
     if not filename:
@@ -34,7 +36,7 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
             if method and method_arg:
                 args.extend((method,str(method_arg)))
             worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err)
-            worker.communicate(format_query(terms))
+            worker.communicate(format_query(terms,db))
             worker.stdin.close()
             worker.wait()
             #do something to mark query as finished
@@ -46,7 +48,92 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
         hl.close()
         return HitList.HitList(filename,words_per_hit,db)
 
-def format_query(qstring):
+def parse_query(qstring):
+    buf = qstring[:]
+    parsed = []
+    while len(buf) > 0:
+        for label,pattern in patterns:
+            m = re.match(pattern,buf)
+            if m:
+                parsed.append((label,m.group()))
+                buf = buf[m.end():]
+                break
+        else:
+            break
+#        print parsed
+    parsed_split = []
+    for label,token in parsed:
+        l,t = label,token
+        if l == "QUOTE":
+            subtokens = t[1:-1].split(" ")
+            parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
+        elif l == "TERM":
+            subtokens = t.split(" ")
+            parsed_split += [("TERM_S",sub_t) for sub_t in subtokens if sub_t]
+        else:
+            parsed_split += [(l,t)]
+    return parsed_split
+
+def format_parsed_query(parsed_split,db):
+    command = ""
+    clauses = [[]]
+    prior_label = "OR"
+#        print parsed_split
+    for label, token in parsed_split:
+        if label == "QUOTE_S":
+            if prior_label != "OR":
+                clauses.append([])
+                command += "\n"
+            subtokens = token.split(" ")
+            clauses[-1] += subtokens
+            command += "\n".join(subt+"\n" for subt in subtokens)
+        elif label == "TERM_S":
+            if prior_label != "OR":
+                clauses.append([])
+                command += "\n"
+            subtokens = token.split(" ")
+            expanded = []
+            for subt in subtokens:
+                norm_subt = subt.decode("utf-8").lower()
+                norm_subt = [i for i in unicodedata.normalize("NFKD",norm_subt) if not unicodedata.combining(i)]
+                norm_subt = "".join(norm_subt).encode("utf-8")
+                print >> sys.stderr, "TERMS:", norm_subt
+                matches = word_pattern_search(norm_subt,db.locals["db_path"]+"/frequencies/normalized_word_frequencies")
+                print >> sys.stderr, "MATCHES:"
+                print >> sys.stderr, matches                
+                for m in matches:
+                    if m not in expanded:
+                        expanded += [m]                                              
+            #subtokens should be expanded against word_frequencies here
+            #AFTER unicode-stripping, of course.
+            clauses[-1] += expanded
+            command += "\n".join(subt for subt in expanded) + "\n"
+#            print >> sys.stderr, expanded
+        elif label == "NOT":
+            #Need to decide something to do with NOT
+            break
+        prior_label = label
+#        print clauses
+#        print "\n".join("\n".join(c for c in clause) for clause in clauses) 
+    print >> sys.stderr, command
+    return command
+
+def format_query(qstring,db):
+    parsed_split = parse_query(qstring)
+    command = format_parsed_query(parsed_split,db)
+    return command
+
+def word_pattern_search(term, path):
+    command = ['egrep', '-wi', "^%s" % term, '%s' % path]
+    process = subprocess.Popen(command, stdout=subprocess.PIPE)
+    match, stderr = process.communicate()
+    print >> sys.stderr, "RESULTS:",repr(match)
+    match = match.split('\n')
+    match.remove('')
+    ## HACK: The extra decode/encode are there to fix errors when this list is converted to a json object
+    return [m.split("\t")[1].strip().decode('utf-8', 'ignore').encode('utf-8') for m in match]
+
+def old_format_query(qstring):
     q = [level.split("|") for level in qstring.split(" ") ]
     qs = ""
     for level in q:

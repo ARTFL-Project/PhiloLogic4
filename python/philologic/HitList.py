@@ -88,7 +88,7 @@ class HitList(object):
                     time.sleep(.05)
                     self.update()
             offset = self.hitsize * n
-            print >> sys.stderr, "seeking %d:%d" % (n,offset)
+            #print >> sys.stderr, "seeking %d:%d" % (n,offset)
             self.fh.seek(offset)
             self.position = n
 
@@ -104,7 +104,7 @@ class HitList(object):
                 pass
             self.size = os.stat(self.filename).st_size # in bytes
             self.count = self.size / self.hitsize 
-            print >> sys.stderr, "size:%d  count:%d" % (self.size, self.count)
+            #print >> sys.stderr, "size:%d  count:%d" % (self.size, self.count)
 
     def finish(self):
         while not self.done:
@@ -123,7 +123,7 @@ class HitList(object):
                 self.update()
         if n != self.position:
             offset = self.hitsize * n;
-            print >> sys.stderr, "reading %d, seeking %d" % (n,offset)
+            #print >> sys.stderr, "reading %d, seeking %d" % (n,offset)
             self.fh.seek(offset)
             self.position = n
         buffer = self.fh.read(self.hitsize)
