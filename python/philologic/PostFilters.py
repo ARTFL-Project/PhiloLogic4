@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import sys
 import os
 import sqlite3
 import unicodedata
@@ -17,15 +17,15 @@ def word_frequencies(loader_obj):
 def normalized_word_frequencies(loader_obj):
     frequencies = loader_obj.destination + '/frequencies'
     output = open(frequencies + "/normalized_word_frequencies", "w")
-    word_dict = defaultdict(int)
     for line in open(frequencies + '/word_frequencies'):
-        word, count = tuple(line.split())
-        word = word.decode('utf-8').lower()
-        word = [i for i in unicodedata.normalize("NFKD",word) if not unicodedata.combining(i)]
-        word = ''.join(word).encode('utf-8')
-        word_dict[word] += int(count)
-    for norm_word, norm_word_count in sorted(word_dict.items(), key=lambda x: x[1], reverse=True):
-        print >> output, norm_word + '\t' + str(norm_word_count)
+        word, count = line.split("\t")
+        norm_word = word.decode('utf-8').lower()
+        norm_word = [i for i in unicodedata.normalize("NFKD",norm_word) if not unicodedata.combining(i)]
+        norm_word = ''.join(norm_word).encode('utf-8')
+        print >> output, norm_word + "\t" + word
+#        word_dict[word] += int(count)
+#    for norm_word, norm_word_count in sorted(word_dict.items(), key=lambda x: x[1], reverse=True):
+#        print >> output, norm_word + '\t' + str(norm_word_count)
     output.close()
     
 def metadata_frequencies(loader_obj):
@@ -39,11 +39,29 @@ def metadata_frequencies(loader_obj):
             output = open(frequencies + "/%s_frequencies" % field, "w")
             for result in c.fetchall():
                 if result[0] != None:
-                    print >> output, result[0].encode('utf-8', 'ignore') + '\t' + str(result[1])
+                    val = result[0].encode('utf-8', 'ignore') 
+                    clean_val = val.replace("\n"," ").replace("\t","")
+                    print >> output, clean_val + '\t' + str(result[1])
             output.close()
         except sqlite3.OperationalError:
-            pass
+            print >> sys.stderr, "error writing " + field + "_frequencies"
     conn.close()
+    
+def normalized_metadata_frequencies(loader_obj):
+    frequencies = loader_obj.destination + '/frequencies'
+    for field in loader_obj.metadata_fields:
+        print >> sys.stderr, "normalizing " + field
+        try:
+            output = open(frequencies + "/normalized_" + field + "_frequencies","w")        
+            for line in open(frequencies + "/" + field + "_frequencies"):            
+                word, count = line.split("\t")
+                norm_word = word.decode('utf-8').lower()
+                norm_word = [i for i in unicodedata.normalize("NFKD",norm_word) if not unicodedata.combining(i)]
+                norm_word = ''.join(norm_word).encode('utf-8')
+                print >> output, norm_word + "\t" + word
+            output.close()
+        except:
+            print >> sys.stderr, "error writing normalized_" + field + "_frequencies"
 
 def metadata_relevance_table(loader_obj):
     if loader_obj.r_r_obj and len(loader_obj.r_r_obj) < 2: ## disable with more than 1 object, probably should use toms table then.

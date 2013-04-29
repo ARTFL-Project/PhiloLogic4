@@ -104,8 +104,8 @@ def parse_cgi(environ):
     else:
         query["no_q"] = False
     
-    if query['q']:
-        query['q'] = query_parser(query['q'])
+    #if query['q']:
+    #    query['q'] = query_parser(query['q'])
     
     try:
         path_components = [c for c in environ["PATH_INFO"].split("/") if c]
