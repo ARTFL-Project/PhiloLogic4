@@ -124,7 +124,6 @@ a.active, a:link.active, a:visited.active, a:hover.active {
 body {
   font-family: 'Averia Serif Libre', cursive;
 }
-
 .main_body{
     font-weight:300;
     font-size: 14px;
@@ -139,6 +138,14 @@ table {
 .site-name {
     font-weight: 400 !important;
 }
+
+input[type=text] {
+    height: 20px;
+    font-size: 100%;
+    padding-left: .4em;
+}
+
+
 
 h1 {
   margin: 0;
@@ -177,7 +184,6 @@ div.main_body {
         padding: 2px;
 }
 
-/* New Philo4 styles */
 
 
 /*Results formatting*/
@@ -223,11 +229,26 @@ div.main_body {
         border-top:0px;
         overflow: hidden;
 }
-.philologic_collocation {
-    padding-right: 50px;
-}
 .philologic_context {
     text-align: justify;
+}
+.philologic_collocation {
+    float: left;
+}
+.word_cloud {
+    float: right;
+    width:400px !important;
+    height: auto;
+}
+.collocation_counts {
+    padding: 5px 10px 10px 10px;
+    display:none;
+    text-align: justify;
+    line-height: 200%;
+}
+.cloud_term:hover {
+    color: black !important;
+    text-decoration: none !important;
 }
 .more_context {
     padding-left: 24px;
@@ -252,7 +273,7 @@ div.main_body {
 }
 .philologic_table {
     border-collapse:collapse;
-    width:960px;
+    width:auto;
 }
 .table_header {
     background-color: #ECECEC;
@@ -270,6 +291,7 @@ div.main_body {
     border-style:solid;
     border-width:1px;
     border-color: LightGray;
+    background-color: #FAFAFA;
 }
 
 
@@ -328,6 +350,7 @@ div.main_body {
     border-top-width: 1px;
     border-top-color: #ECECEC;
     box-shadow: 0px 9px 15px -5px #C8C8C8;
+    color: #555 !important;
 }
 .search_elements {
     margin-top: 20px;
@@ -430,7 +453,7 @@ div.main_body {
 .book_page {
     margin: 0 auto;
     padding: 20px 20px 20px 20px;
-    width: 400px;
+    width: 800px;
     background-color: #FAFAFA !important;
     box-shadow: 0px 0px 15px #888888;
     line-height: 140% !important;
@@ -445,9 +468,13 @@ div.main_body {
 
 
 /*jQueryUI styling*/
-.ui-button,  .ui-button-text .ui-button {  
+.ui-button,  .ui-button-text, .ui-button, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {  
     font-size: inherit !important;
     font-family: inherit !important;
+}
+.ui-widget {
+    font-size: inherit !important;
+    font-family: inherit !important; 
 }
 
 ul.ui-autocomplete.ui-menu {  
@@ -508,6 +535,37 @@ ul.ui-autocomplete.ui-menu {
     font-size: 170%;
 }
 
+.highlight_options {
+    position: absolute;
+    z-index: 1000;
+    display: none;
+    background-color: #FAFAFA;
+    border-style: solid;
+    border-color: #CCCCCC;
+    border-width: 1px;
+    border-radius:5px;
+    line-height: 170%;
+    box-shadow: 5px 9px 15px -5px #888888;
+    padding-bottom: 5px;
+}
+.selected_tag {
+    padding: 5px 15px 5px 15px;
+    font-size: 80%;
+    font-weight: 400 !important;
+    color: black !important;
+}
+.selected_tag:hover {
+    text-decoration: none !important;
+    background: #E8E8E8;
+}
+.selected_word {
+    padding: 10px 15px 5px 15px;
+    font-weight: 700;
+}
+.context_table {
+    border-collapse:collapse;
+    border-color: #CCCCCC;
+}
 
 
 /* Ugly looking workaround while waiting for next release of jQueryUI with selectmenu*/
@@ -522,12 +580,13 @@ label.custom-select {
     font: inherit !important;
     outline:none; /* remove focus ring from Webkit */
     line-height: 1.8;
-    background: #efefee;
+    background: #F8F8F8;
     color:#555555;
     border:solid;
     border-width: 1px;
     border-color: #cccccc;
     height: 28px;
+    width: 210px;
 }
 .custom-select:after {
     position: absolute;

@@ -56,12 +56,6 @@ def generate_frequency(results, q, db):
         # Contruct the label for the item.
         # This is the place to modify the displayed label of frequency table item.
         label = k #for example, replace NULL with '[None]', 'N.A.', 'Untitled', etc.
-        
-        # We can also modify the count.
-        if q['rate'] == 'relative':
-            count = relative_frequency(field,key,v,db)
-        else:
-            count = v
             
         table.append( (label,v,url) )
 

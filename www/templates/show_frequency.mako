@@ -4,7 +4,7 @@
             <span id="freq_sidebar"><label for="freq_sidebar">Display frequency by</label></span>
         </span>
         <label class="custom-select">
-            <select id='frequency_field'>
+            <select name="frequency_field" id='frequency_field'>
                 % for facet in db.locals["metadata_fields"]:
                     <option value='${facet}'>${facet}</option>
                 % endfor

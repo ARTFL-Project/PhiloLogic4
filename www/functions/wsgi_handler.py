@@ -48,7 +48,7 @@ def parse_cgi(environ):
     query["byte"] = '+'.join(cgi.get("byte",['']))
     
     ## This defines within how many words for collocation tables
-    query["word_num"] = int(cgi.get("word_num",[0])[0])
+    query["word_num"] = int(cgi.get("word_num",[5])[0])
     
     # This defines the collocate for collocation to concordance searches
     query["collocate"] = cgi.get("collocate",[None])[0]

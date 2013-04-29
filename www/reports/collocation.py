@@ -31,22 +31,21 @@ def collocation(environ,start_response):
                            results_per_page=q['results_per_page'],hit_len=hit_len,
                            order=sort_to_display,dumps=json.dumps,template_name='collocation.mako')
 
-def fetch_collocation(results, path, q, filter_words=100, full_report=True):
+def fetch_collocation(results, path, q, word_filter=True, filter_num=200, full_report=True):
     within_x_words = q['word_num']    
     
-    ## set up filtering of most frequent 100 terms ##
-    filter_list_path = path + '/data/frequencies/word_frequencies'
-    filter_words_file = open(filter_list_path)
-
-    line_count = 0
+    ## set up filtering of most frequent 200 terms ##
     filter_list = set([])
-
-    for line in filter_words_file:
-        line_count += 1
-        word = line.split()[0]
-        filter_list.add(word.decode('utf-8', 'ignore'))
-        if line_count > filter_words:
-                break
+    if word_filter:
+        filter_list_path = path + '/data/frequencies/word_frequencies'
+        filter_words_file = open(filter_list_path)
+        line_count = 0 
+        for line in filter_words_file:
+            line_count += 1
+            word = line.split()[0]
+            filter_list.add(word.decode('utf-8', 'ignore'))
+            if line_count > filter_num:
+                    break
     
     ## start going though hits ##
     left_collocates = defaultdict(int)
@@ -62,15 +61,17 @@ def fetch_collocation(results, path, q, filter_words=100, full_report=True):
         
         left_words = tokenize(conc_left, filter_list, within_x_words, 'left')
         right_words = tokenize(conc_right, filter_list, within_x_words, 'right')
-           
+        
+        query_words = set([w.decode('utf-8') for w in q['q'].split('|')])
+        
         for l_word in left_words:
-            if l_word == q['q']:
+            if l_word in query_words:
                 continue
             left_collocates[l_word] += 1
             all_collocates[l_word] += 1 
 
         for r_word in right_words:
-            if r_word == q['q']:
+            if r_word in query_words:
                 continue
             right_collocates[r_word] += 1
             all_collocates[r_word] += 1    
@@ -91,7 +92,7 @@ def tokenize(text, filter_list, within_x_words, direction, highlighting=False):
     else:
         text = right_truncate.sub("", text) ## hack off right-most word (potentially truncated)
         word_list = tokenize_text(text)
-        
+      
     word_list = filter(word_list, filter_list, within_x_words)
 
     return word_list
@@ -104,11 +105,9 @@ def filter(word_list, filter_list, within_x_words):
 
     words_to_pass = []
 
-    for word in word_list:
+    for word in word_list[:within_x_words]:
         if word not in filter_list and word_identifier.search(word):
             words_to_pass.append(word)
-        if len(words_to_pass) == within_x_words:
-            break
     return words_to_pass
 
 def sort_to_display(all_collocates, left_collocates, right_collocates):

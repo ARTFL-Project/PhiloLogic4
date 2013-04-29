@@ -20,7 +20,21 @@ $(document).ready(function() {
             $("#waiting").css("margin-left", width).show();
         });
     $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
-    $("#page_num, #word_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
+    $("#page_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
+    $("#word_num").spinner({
+        spin: function( event, ui ) {
+            if ( ui.value > 10 ) {
+                $( this ).spinner( "value", 1 );
+                return false;
+            } else if ( ui.value < 1 ) {
+                $( this ).spinner( "value", 10 );
+                return false;
+            }
+        }
+    });
+    $("#word_num").val(5);
+    $('.ui-spinner').css('width', '45px')
+    $(':text').addClass("ui-corner-all");
     $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
     $('.search_explain').accordion({
@@ -56,6 +70,7 @@ $(document).ready(function() {
     $("#search_elements").hide();
     $('.conc_question, .freq_question, .colloc_question, .time_question, .relev_question').hide();
     $('.search_explain').hide();
+    showHide($('input[name=report]:checked', '#search').val());
     $('#report').click(function() {
         var report = $('input[name=report]:checked', '#search').val();
         if ($("#search_elements:visible")) {
@@ -140,6 +155,7 @@ $(document).ready(function() {
     ///////// Concordance / KWIC switcher //////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     $("#report_switch").on("change", function() {
+        $('.highlight_options').remove();
         var switchto = $('input[name=report_switch]:checked').val();
         var width = $(window).width() / 3;
         $("#waiting").css("margin-left", width).show();
@@ -154,6 +170,7 @@ $(document).ready(function() {
                 out: hideBiblio   
             };
             $(".kwic_biblio").hoverIntent(config)
+            display_options_on_selected();
         });
     });
     ////////////////////////////////////////////////////////////////////////////
@@ -299,12 +316,76 @@ $(document).ready(function() {
     });
     ////////////////////////////////////////////////////////////////////////////
     
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // Contextual menu when selecting a word ///////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    display_options_on_selected();
+    ////////////////////////////////////////////////////////////////////////////
+    
 });
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+
+
+function display_options_on_selected() {
+    $('.philologic_concordance, .kwic_concordance').mouseup(function(e) {
+        $('.highlight_options').remove();
+        var text = getSelectedText();
+        if (text != '') {
+            var options = $('<div class="highlight_options">');
+            var my_table = '<table class="context_table" BORDER=1 RULES=ALL frame=void>';
+            my_table += '<tr><td class="selected_word">"' + text.charAt(0).toUpperCase() + text.slice(1) + '"</td></tr>';
+            var search_reports = ['concordance', "relevance", 'collocation']
+            my_table += '<tr><td>';
+            for (report in search_reports) {
+                report = search_reports[report];
+                var url = "?report=" + report + "&method=proxy&q=" + text;
+                if (report != 'relevance') {
+                    var report_link = '<a href="' + url + '" class="selected_tag">Run a ' + report + ' search for this selection</a><br>'
+                } else {
+                    var report_link = '<a href="' + url + '" class="selected_tag">Run a ranked relevance search for this selection</a><br>'
+                }
+                my_table += report_link;
+            }
+            if (text.split(' ').length == 1) {
+                var url = "?report=time_series&method=proxy&q=" + text;
+                var report_link = '<a href="' + url + '" class="selected_tag">Run a time series search for this selection</a><br>'
+                var definition = '<a href="http://dvlf.uchicago.edu/mot/' + text + '" class="selected_tag">Get a definition of this word</a>'
+                my_table += report_link;
+                my_table += "</tr></td><tr><td class='definition'>";
+                my_table += definition;
+            }
+            my_table += "</td></tr>";
+            options.append(my_table);
+            var top_coord = e.pageY + 10;
+            var left_coord = e.pageX + 10;
+            var parent_left_coord = $(this).offset().left + $(this).width();
+            $("body").append(options);
+            var width = options.width();
+            options.offset({ top: top_coord, left: left_coord});
+            var options_left_coord = left_coord + options.width();
+            if (options_left_coord > parent_left_coord) {
+                options.css('position', '').css('float', 'right').css('margin-right', '20px');
+                options.css('left', parent_left_coord - width)
+            } 
+            options.fadeIn('fast');
+        }
+    });
+}
+
+function getSelectedText() {
+    if (window.getSelection) {
+        return window.getSelection().toString();
+    } else if (document.selection) {
+        return document.selection.createRange().text;
+    }
+    return '';
+}
 
 
 // Patch jQueryUI autocomplete to get higlighting
@@ -503,7 +584,8 @@ function update_table(full_results, new_hash, q_string, column) {
     for (i in sorted_list) {
         pos += 1;
         var link = colloc_linker(sorted_list[i][0], q_string, column, sorted_list[i][1]);
-        data = link + ' (' + sorted_list[i][1] + ')'
+        var count_id = column + '_count_' + sorted_list[i][1];
+        data = link + '<span id="' + count_id + '"> (' + sorted_list[i][1] + ')</span>';
         $('#' + column + '_num' + pos).html(data);
     }
     $('[id^=' + column+ '_]').fadeIn(800);
@@ -517,10 +599,10 @@ function update_colloc(all_colloc, left_colloc, right_colloc, results_len, collo
     var script = "http://" + db_path + "scripts/collocation_fetcher.py?" + q_string
     if (colloc_start == 0) {
         colloc_start = 100;
-        colloc_end = 800;
+        colloc_end = 1100;
     } else {
-        colloc_start += 700;
-        colloc_end += 700;
+        colloc_start += 1000;
+        colloc_end += 1000;
     }
     var script_call = script + '&colloc_start=' + colloc_start + '&colloc_end=' + colloc_end
     if (colloc_start <= results_len) {
@@ -529,9 +611,45 @@ function update_colloc(all_colloc, left_colloc, right_colloc, results_len, collo
             left_new_collc = update_table(left_colloc, data[1], q_string, "left");
             right_new_colloc = update_table(right_colloc, data[2], q_string, "right");
             update_colloc(all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
+            collocation_cloud();
         }));
     }
     else {
         $("#working").hide();
     }
+}
+
+// Functions to draw collocation cloud
+function collocation_cloud() {
+    $.fn.tagcloud.defaults = {
+        size: {start: 1.1, end: 3.4, unit: 'em'},
+        color: {start: '#F9D69A', end: '#800000'}
+      };
+    $('#collocate_counts').fadeOut('fast').empty();
+    var colloc_counts = {};
+    var unordered_list = $('#collocation_table tr');
+    unordered_list = unordered_list.sort(function() {
+                                            return Math.round( Math.random() ) - 0.5;
+                                        });
+    unordered_list.each(function() {
+    // need this to skip the first row
+        if ($(this).find("td:first").length > 0) {
+            var word = $(this).find("td:first").find('a').html();
+            var href = $(this).find("td:first").find('a').attr('href');
+            var count = $(this).find("td:first").find('[id^=all_count]').html();
+            count = count.replace('(', '').replace(')', '').replace(' ', '');
+            colloc_counts[word] = [];
+            colloc_counts[word]['href'] = href;
+            colloc_counts[word]['count'] = count;
+        }
+    });
+    for (word in colloc_counts) {
+        var searchlink = '<a href="' + colloc_counts[word]['href'] + '" class="cloud_term" rel="' + colloc_counts[word]['count'] + '"> ';
+        var full_link = searchlink + word + ' </a>';
+        $("#collocate_counts").append(full_link);
+    }
+    $("#collocate_counts a").tagcloud();
+    //$(".cloud_term :hover").css('text-decoration', 'none');
+    //$(".cloud_term :hover").css('color', 'black');
+    $("#collocate_counts").fadeIn('fast');
 }
