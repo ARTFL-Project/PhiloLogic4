@@ -34,12 +34,13 @@ def fetch_concordance(hit, path, q):
     end_highlight = conc_text.rfind('</span>')
     if start_highlight >= 200:
         begin = start_highlight - 200
+        end = end_highlight + 200
+        min = bytes[-1] + len("<span class='highlight'></span>") * len(bytes)
+        if end < min:
+            end = min
     else:
         begin = 0
-    end = end_highlight + 200
-    min = bytes[-1] + len("<span class='highlight'></span>") * len(bytes)
-    if end < min:
-        end = min
+        end = end_highlight + 200
     first_span = '<span class="begin_concordance" style="display:none;">'
     second_span = '<span class="end_concordance" style="display:none;">'
     conc_text =  first_span + conc_text[:begin] + '</span>' + conc_text[begin:end] + second_span + conc_text[end:] + '</span>'
