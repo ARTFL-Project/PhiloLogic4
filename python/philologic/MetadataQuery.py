@@ -58,16 +58,20 @@ def make_clause(column,tokens,norm_path):
             norm_term = u"".join(norm_term).encode("utf-8")
             expanded_terms = metadata_pattern_search(norm_term,norm_path)
             print >> sys.stderr, "EXPANDED_TERMS:", expanded_terms
-            sub_clauses = []
-            for t in expanded_terms:
-                vars.append(t)               
-                if neg:
-                    sub_clauses.append("%s != ?" % column)
-                    conj = "AND"
-                else:
-                    sub_clauses.append("%s == ?" % column)
-                    conj = "OR"
-                clause = (" " + conj + " ").join(sub_clauses)
+            if not expanded_terms:
+                clause = "%s == ?" % column
+                vars.append(norm_term)
+            else:   
+                sub_clauses = []
+                for t in expanded_terms:
+                    vars.append(t)               
+                    if neg:
+                        sub_clauses.append("%s != ?" % column)
+                        conj = "AND"
+                    else:
+                        sub_clauses.append("%s == ?" % column)
+                        conj = "OR"
+                    clause = (" " + conj + " ").join(sub_clauses)
 #            clause_column = column
 #            if normalized:
 #                term = t[1].decode("utf-8").lower()
