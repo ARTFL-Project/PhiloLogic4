@@ -98,7 +98,7 @@
 									else:
 										alias = facet
 									%>
-                                    <option value='${alias}'>${alias}                                    
+                                    <option value='${facet}'>${alias}                                    
                                 % endfor
                             </select>
                         </label>
