@@ -65,12 +65,12 @@
             <div id="metadata_fields">
                 <table class="table_row">
                     % for facet in db.locals["metadata_fields"]:
-		    <%
-		      if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
-		        alias = db.locals["metadata_aliases"][facet]
-		      else:
-		        alias = facet
-		    %>
+						<%
+						if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
+							alias = db.locals["metadata_aliases"][facet]
+						else:
+							alias = facet
+						%>
                         <tr class="table_row"><td class="first_column"><span class="search_field">${alias}:</span></td><td><input type='text' name='${facet}' id="${facet}" class="search_box"></td></tr>
                     % endfor
                 </table>
@@ -91,8 +91,14 @@
                     <td>
                         <label class="custom-select">
                             <select id='field' name="field">
-                                % for pos, facet in enumerate(db.locals["metadata_fields"]):
-                                    <option value='${facet}'>${facet}                                    
+                                % for facet in db.locals["metadata_fields"]:
+									<%
+									if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
+										alias = db.locals["metadata_aliases"][facet]
+									else:
+										alias = facet
+									%>
+                                    <option value='${facet}'>${alias}                                    
                                 % endfor
                             </select>
                         </label>
