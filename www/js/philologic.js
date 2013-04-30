@@ -32,7 +32,7 @@ $(document).ready(function() {
             }
         }
     });
-    $("#word_num").val(5);
+    $("#word_num").val(10);
     $('.ui-spinner').css('width', '45px')
     $(':text').addClass("ui-corner-all");
     $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
@@ -111,7 +111,7 @@ $(document).ready(function() {
                 $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
                 $("#report").buttonset("refresh");
             }
-            else if (key == 'pagenum' || key == 'field' || key == 'word_num' || key == 'method' || key == 'year_interval') {
+            else if (key == 'pagenum' || key == 'field' || key == 'method' || key == 'year_interval') {
                 $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
             }
             else if (value == 'relative') {
