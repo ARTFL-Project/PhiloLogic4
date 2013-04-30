@@ -23,11 +23,11 @@ $(document).ready(function() {
     $("#page_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
     $("#word_num").spinner({
         spin: function( event, ui ) {
-            if ( ui.value > 10 ) {
+            if ( ui.value > 20 ) {
                 $( this ).spinner( "value", 1 );
                 return false;
             } else if ( ui.value < 1 ) {
-                $( this ).spinner( "value", 10 );
+                $( this ).spinner( "value", 20 );
                 return false;
             }
         }
