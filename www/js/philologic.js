@@ -111,11 +111,11 @@ $(document).ready(function() {
                 $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
                 $("#report").buttonset("refresh");
             }
-            else if (key == 'pagenum' || key == 'field' || key == 'method' || key == 'year_interval') {
+            else if (key == 'pagenum' || key == 'method' || key == 'year_interval') {
                 $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
             }
-            else if (value == 'relative') {
-                $('#' + key).attr('checked', true);
+            else if (key == 'field') {
+                $('select[name=' + key + ']').val(value);
             }
             else {
                 $('#' + key).val(value);
