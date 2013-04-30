@@ -10,11 +10,11 @@
                       if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
                         alias = db.locals["metadata_aliases"][facet]
                       else:
-                        alias = facet.title()
+                        alias = facet
                     %>
                     <option value='${facet}'>${alias}</option>
                 % endfor
-                    <option value='collocate'>Collocate</option>
+                    <option value='collocate'>Collocates</option>
             </select>
         </label>
     </div>

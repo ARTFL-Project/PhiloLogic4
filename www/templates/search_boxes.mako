@@ -65,6 +65,7 @@
             <div id="metadata_fields">
                 <table class="table_row">
                     % for facet in db.locals["metadata_fields"]:
+
                     <%
                       if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
                         alias = db.locals["metadata_aliases"][facet]
@@ -80,7 +81,7 @@
                     <td>
                         <label for="word_num"></label>
                         <input id="word_num" name="word_num" />
-                        (1-10) words
+                        (1-20) words
                     </td>
                 </tr>
                
@@ -91,8 +92,14 @@
                     <td>
                         <label class="custom-select">
                             <select id='field' name="field">
-                                % for pos, facet in enumerate(db.locals["metadata_fields"]):
-                                    <option value='${facet}'>${facet}                                    
+                                % for facet in db.locals["metadata_fields"]:
+									<%
+									if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
+										alias = db.locals["metadata_aliases"][facet]
+									else:
+										alias = facet
+									%>
+                                    <option value='${facet}'>${alias}                                    
                                 % endfor
                             </select>
                         </label>

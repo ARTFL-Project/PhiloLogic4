@@ -33,7 +33,7 @@ $(document).ready(function() {
                         <%
                             metadata = {}
                             for m in db.locals['metadata_fields']:
-                                metadata[m] = i[m]
+                                metadata[m] = i[m].encode('utf-8', 'ignore')
                             url = f.link.make_query_link(q["q"],q["method"],q["arg"],**metadata)
                         %>
                         <span style"padding-left:25px">

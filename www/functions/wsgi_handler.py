@@ -48,7 +48,9 @@ def parse_cgi(environ):
     query["byte"] = '+'.join(cgi.get("byte",['']))
     
     ## This defines within how many words for collocation tables
-    query["word_num"] = int(cgi.get("word_num",[5])[0])
+    query["word_num"] = cgi.get("word_num",[10])[0]
+    if query["word_num"]:
+        query["word_num"] = int(query["word_num"])
     
     # This defines the collocate for collocation to concordance searches
     query["collocate"] = cgi.get("collocate",[None])[0]
@@ -67,7 +69,7 @@ def parse_cgi(environ):
     query['theme_rheme'] = cgi.get("theme_rheme", [''])[0]
     
     ## This is for searches done from the bibliography template and possibly other use cases
-    query['philo_id'] = cgi.get("philo_id", [''])
+    query['philo_id'] = cgi.get("philo_id", [''])[0]
     
     ## This is for time series
     query['start_date'] = cgi.get("start_date", [''])[0]
