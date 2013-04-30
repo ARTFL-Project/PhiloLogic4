@@ -69,7 +69,7 @@ def parse_cgi(environ):
     query['theme_rheme'] = cgi.get("theme_rheme", [''])[0]
     
     ## This is for searches done from the bibliography template and possibly other use cases
-    query['philo_id'] = cgi.get("philo_id", [''])
+    query['philo_id'] = cgi.get("philo_id", [''])[0]
     
     ## This is for time series
     query['start_date'] = cgi.get("start_date", [''])[0]
