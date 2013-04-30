@@ -65,7 +65,13 @@
             <div id="metadata_fields">
                 <table class="table_row">
                     % for facet in db.locals["metadata_fields"]:
-                        <tr class="table_row"><td class="first_column"><span class="search_field">${facet.title()}:</span></td><td><input type='text' name='${facet}' id="${facet}" class="search_box"></td></tr>
+		    <%
+		      if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
+		        alias = db.locals["metadata_aliases"][facet]
+		      else:
+		        alias = facet
+		    %>
+                        <tr class="table_row"><td class="first_column"><span class="search_field">${alias}:</span></td><td><input type='text' name='${facet}' id="${facet}" class="search_box"></td></tr>
                     % endfor
                 </table>
             </div>
@@ -74,7 +80,7 @@
                     <td>
                         <label for="word_num"></label>
                         <input id="word_num" name="word_num" />
-                        (1-10) words
+                        (1-20) words
                     </td>
                 </tr>
                

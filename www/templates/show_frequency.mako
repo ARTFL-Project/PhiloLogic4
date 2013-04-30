@@ -6,9 +6,15 @@
         <label class="custom-select">
             <select name="frequency_field" id='frequency_field'>
                 % for facet in db.locals["metadata_fields"]:
-                    <option value='${facet}'>${facet}</option>
+                    <%
+                      if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
+                        alias = db.locals["metadata_aliases"][facet]
+                      else:
+                        alias = facet
+                    %>
+                    <option value='${facet}'>${alias}</option>
                 % endfor
-                    <option value='collocate'>collocate</option>
+                    <option value='collocate'>Collocates</option>
             </select>
         </label>
     </div>
