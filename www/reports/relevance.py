@@ -134,9 +134,6 @@ def retrieve_hits(q, db):
                 for match in matches:
                     results[philo_id]['tf_idf'] += idfs[match] * 100
     
-    #if len(philo_ids) > 1:   ## BUG ALERT: sorted gets reversed when more than one metadata field...
-    #    hits = sorted(results.iteritems(), key=lambda x: x[1]['tf_idf'], reverse=False)
-    #else:
     hits = sorted(results.iteritems(), key=lambda x: x[1]['tf_idf'], reverse=True)
     return ResultsWrapper(hits, db)
 
