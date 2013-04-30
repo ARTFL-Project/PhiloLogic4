@@ -23,11 +23,11 @@ $(document).ready(function() {
     $("#page_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
     $("#word_num").spinner({
         spin: function( event, ui ) {
-            if ( ui.value > 10 ) {
+            if ( ui.value > 20 ) {
                 $( this ).spinner( "value", 1 );
                 return false;
             } else if ( ui.value < 1 ) {
-                $( this ).spinner( "value", 10 );
+                $( this ).spinner( "value", 20 );
                 return false;
             }
         }
@@ -355,7 +355,7 @@ function display_options_on_selected() {
             if (text.split(' ').length == 1) {
                 var url = "?report=time_series&method=proxy&q=" + text;
                 var report_link = '<a href="' + url + '" class="selected_tag">Run a time series search for this selection</a><br>'
-                var definition = '<a href="http://dvlf.uchicago.edu/mot/' + text + '" class="selected_tag">Get a definition of this word</a>'
+                var definition = '<a href="http://artflx.uchicago.edu/cgi-bin/dicos/pubdico1look.pl?strippedhw=' + text + '" target="_blank" class="selected_tag">Get a definition of this word</a>'
                 my_table += report_link;
                 my_table += "</tr></td><tr><td class='definition'>";
                 my_table += definition;
