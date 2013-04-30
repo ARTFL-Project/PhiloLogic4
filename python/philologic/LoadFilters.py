@@ -126,6 +126,7 @@ def normalize_unicode_words(loader_obj, text):
     os.rename(text["words"] + ".tmp",text["words"])   
 
 def normalize_unicode_columns(*columns):
+#I should never, ever need to use this now.
     def smash_these_unicode_columns(loader_obj, text):
         tmp_file = open(text["sortedtoms"] + ".tmp","w")
         for line in open(text["sortedtoms"]):
