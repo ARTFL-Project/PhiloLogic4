@@ -174,6 +174,9 @@ div.main_body {
     margin-right: 30px;
 }
 
+.small-caps {
+    font-variant:small-caps;
+}
 
 /* For pop-in notes */
 .hiddennote {
@@ -298,6 +301,7 @@ div.main_body {
 /*All the sidebar classes*/
 .hide_frequency {
     font-family: 'Droid Sans Mono', sans-serif !important;
+    font-size: 130%;
     float: right;
     color: Gray;
 }
@@ -317,12 +321,12 @@ div.main_body {
     border-style: solid;
     border-width: 1px;
     border-color: #ECECEC;
-    margin-top: 10px;
+    padding-top: 10px;
     background-color: #FAFAFA;
     display: none;
 }
 .frequency_table {
-    padding: 10px 20px 10px 10px;
+    padding: 0px 10px 10px 10px;
 }
 
 
@@ -453,7 +457,7 @@ div.main_body {
 .book_page {
     margin: 0 auto;
     padding: 20px 20px 20px 20px;
-    width: 800px;
+    width: 600px;
     background-color: #FAFAFA !important;
     box-shadow: 0px 0px 15px #888888;
     line-height: 140% !important;

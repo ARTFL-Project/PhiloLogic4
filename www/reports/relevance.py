@@ -74,7 +74,12 @@ def retrieve_hits(q, db):
     ## Limit search according to metadata
     philo_ids = filter_hits(q, obj_types, c)
     
-    query_words = q['q'].replace('|', ' ') ## Handle ORs from crapser
+    ## TEMPORARY ###
+    query_words = re.sub('[.,;:?!]', ' ', q['q'])
+    #################
+    
+    
+    query_words = query_words.replace('|', ' ') ## Handle ORs from crapser
     q['q'] = q['q'].replace(' ', '|') ## Add ORs for search links
     
     idfs = compute_idf(query_words, c, total_docs)
