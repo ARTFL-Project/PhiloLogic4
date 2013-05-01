@@ -39,8 +39,11 @@ def navigation(environ,start_response):
                 return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
                                         dbname=dbname,current_page=page_num,f=f,navigate_doc=navigate_doc,
                                         db=db,q=q,template_name='pages.mako')
+    if obj.philo_type == 'doc':
+        return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
+                       db=db,q=q,template_name='toc.mako')
     obj_text = f.get_text_obj(obj, query_args=q['byte'])
-    obj_text = obj_pager(db, obj, obj_text)
+    #obj_text = obj_pager(db, obj, obj_text)
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
                        db=db,q=q,obj_text=obj_text,template_name='object.mako')
 
@@ -94,7 +97,10 @@ def get_page_num(obj, db):
     try:
         return str(c.fetchone()[0] + 1)
     except TypeError:
-        return c.fetchone()[0]
+        try:
+            return c.fetchone()[0]
+        except:
+            return None
 
 def obj_pager(db, obj, obj_text, word_num=500):
     pages =[]

@@ -6,6 +6,7 @@ import sys
 from DirtyFormatter import Formatter
 from custom_object_format import custom_format
 from lxml import etree
+from StringIO import StringIO
 
 def adjust_bytes(bytes, length):
     """Readjust byte offsets for concordance"""
@@ -171,6 +172,8 @@ def formatter(text):
     options for proper display in the web browser"""
     if custom_format():  ## check if the format dict contains any special formatting options
         f = Formatter(custom_format())
+        text = re.sub(r'<pb n="([^"]*)" fac="([^"]*)" />',r"<a href='http://artflx.uchicago.edu/images/encyclopedie/\2' rend='preserve'>[page \1]</a>",text)
+        text = re.sub(r'<figure><graphic url="([^"]*)"></graphic></figure>',r'<a href="\1" rend="preserve">[plate \1]</a>',text)
         return f.format(text)
     else:
         return text
