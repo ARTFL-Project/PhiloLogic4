@@ -496,6 +496,9 @@ function toggle_frequency(q_string, db_url, pathname) {
     });
     $(".hide_frequency").show();
     $(".frequency_container").show();
+    $(".hide_frequency").click(function() {
+        hide_frequency();
+    });
 }
 function hide_frequency() {
     $(".hide_frequency").fadeOut();
