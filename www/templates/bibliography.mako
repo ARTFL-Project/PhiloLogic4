@@ -9,7 +9,7 @@
   <li class='philologic_occurrence'>
 ##  <input type="checkbox" name="philo_id" value="${i.philo_id}">
   % if i.type == 'doc':
-  <span class='philologic_cite'>${f.cite.make_doc_cite(i)}</span>
+  <span class='philologic_cite'>${f.cite.make_doc_cite(i)} <b>Volume ${i.volume}</b></span>
   % else:
   <span class='philologic_cite'>${f.cite.make_div_cite(i)}</span>
   % endif

@@ -475,14 +475,14 @@ function toggle_frequency(q_string, db_url, pathname) {
     var spinner = '<img src="http://' + db_url + '/js/ajax-loader.gif" alt="Loading..."  height="25px" width="25px"/>';
     $(".results_container").animate({
         "margin-right": "420px"},
-        50);
+        150);
     var width = $(".sidebar_display").width() / 2;
     $(".loading").append(spinner).css("margin-left", width).css("margin-top", "10px").show();
     $.getJSON(script_call, function(data) {
         var newlist = "";
         $(".loading").hide().empty();
         if (field == "collocate") {
-            newlist += "<p class='freq_sidebar_status'>Collocates within 5 words left or right</p>";
+            newlist += "<p class='freq_sidebar_status'>Collocates within 10 words left or right</p>";
         }
         $.each(data, function(index, item) {
             if (item[0].length > 30) {
@@ -507,7 +507,7 @@ function hide_frequency() {
     $(".loading").empty();
     $(".results_container").animate({
         "margin-right": "0px"},
-        50);
+        150);
 }
 
 //  Function to show or hide search options
