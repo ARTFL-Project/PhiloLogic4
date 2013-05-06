@@ -31,17 +31,25 @@ def make_div_cite(i):
         cite += u" - <a href='%s'>%s</a>" % (sub_section_href,sub_section_name)
 
     # hack alert
-    if len(i.philo_id) >= 8:
-        page_id = [i.philo_id[0],0,0,0,0,0,0,0,i.philo_id[6]]
-        page_id = " ".join(str(s) for s in page_id)
-        page_q = i.db.dbh.execute("SELECT * FROM pages WHERE philo_id = ?;",(page_id,))
-        page_obj = page_q.fetchone()
-        if page_obj:
-            if page_obj['n']:
-                page_n = page_obj['n'].decode('utf-8', 'ignore')
+    page_obj = i.get_page()
+    #if len(i.philo_id) >= 8:
+    #    page_id = [i.philo_id[0],0,0,0,0,0,0,0,i.philo_id[6]]
+    #    page_id = " ".join(str(s) for s in page_id)
+    #    page_q = i.db.dbh.execute("SELECT * FROM pages WHERE philo_id = ?;",(page_id,))
+    #    page_obj = page_q.fetchone()
+
+    if page_obj:
+        # Page objects are raw SQLite rows, so we have to be very careful with them.
+        try:
+            page_n = page_obj["n"]
+            if page_n:
+                print >> sys.stderr, "TEST?"
+                page_n = page_n.decode('utf-8', 'ignore')
                 bytes = '&'.join(['byte=%d' % int(byte) for byte in i.bytes])
                 page_href = u'<a href="%s?doc_page=%s&%s">' % (i.philo_id[0],page_n, bytes)
                 cite += u", %spage %s.</a>" % (page_href, page_n)
+        except:
+            pass
 
     cite += "</span>"
     return cite
