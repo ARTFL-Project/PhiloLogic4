@@ -55,6 +55,14 @@ class DB:
         c = self.dbh.cursor()
         c.execute("SELECT * FROM toms WHERE philo_id=? LIMIT 1;",(hit_s,))
         return c.fetchone()
+        
+    def get_page(self,item):
+        print >> sys.stderr, "PAGE_ITEM", item
+        page_id_s = " ".join(str(s) for s in item)
+        print >> sys.stderr, "PAGE_ITEM_STRING", page_id_s
+        c = self.dbh.cursor()
+        c.execute("SELECT * FROM pages WHERE philo_id=? LIMIT 1;",(page_id_s,))       
+        return c.fetchone()
 
     def get_all(self,philo_type="doc"):
         """ get all objects of type philo_type """

@@ -3,6 +3,7 @@
 import time
 import sys
 from itertools import islice
+import sqlite3
 
 obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4,
             'para': 5, 'sent': 6, 'word': 7}
@@ -64,6 +65,8 @@ class HitWrapper(object):
                 ## if self.db[philo_id[:width]] returns None
                 width -= 1
                 continue
+            except sqlite3.OperationalError:
+                break
             if metadata != None:
                 break
             width -= 1
@@ -77,7 +80,17 @@ class HitWrapper(object):
                 return metadata
         else:
             return metadata
- 
+    
+    def get_page(self):
+        if self.type == "word" and len(list(self.hit)) > 7:
+            page_i = self.hit[6]
+        else:
+            page_i = self["page"]
+        if page_i:
+            page_id = [self.hit[0],0,0,0,0,0,0,0,page_i]
+            return self.db.get_page(page_id)
+        else:
+            return None
            
 class ObjectWrapper(object):
     
@@ -117,6 +130,8 @@ class ObjectWrapper(object):
         except (TypeError,IndexError):
             ## if self.db[self.philo_id[:width]] returns None]
             metadata = ''
+        except sqlite3.OperationalError:
+            metadata = ''            
         if metadata == None:
             metadata = ''
         if self.db.encoding:
@@ -127,3 +142,14 @@ class ObjectWrapper(object):
                 return metadata
         else:
             return metadata
+
+    def get_page(self):
+        if self.type == "word" and len(list(self.hit)) > 7:
+            page_i = self.hit[6]
+        else:
+            page_i = self["page"]
+        if page_i:
+            page_id = [self.hit[0],0,0,0,0,0,0,0,page_i]
+            return self.db.get_page(page_id)
+        else:
+            return None
