@@ -83,7 +83,11 @@ class ShlaxIngestor():
                 for am in amatches: # get the attributes out.  kinda nasty.
                     ad = am.groupdict()
                     aname = am.group("AttName") 
-                    aval = ad["DQAttVal"] or ad["SQAttVal"] #single or double quotes...
+                    if ad["DQAttVal"] is None:
+                        aval = ad["SQAttVal"]
+                    else:
+                        aval = ad["DQAttVal"]
+#                    aval = ad["DQAttVal"] or ad["SQAttVal"] #single or double quotes...
                     att[aname] = aval
                 self.target.feed(type,content,offset,name,att.copy())
             else:
