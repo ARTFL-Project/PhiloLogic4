@@ -17,7 +17,7 @@ $(document).ready(function() {
         .click(function( event ) {
             hide_search_form();
             var width = $(window).width() / 3;
-            $("#waiting").css("margin-left", width).show();
+            $("#waiting").css("margin-left", width).css('margin-top', 100).show();
         });
     $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
     $("#page_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
@@ -171,6 +171,7 @@ $(document).ready(function() {
             };
             $(".kwic_biblio").hoverIntent(config)
             display_options_on_selected();
+            more_context();
         });
     });
     ////////////////////////////////////////////////////////////////////////////
@@ -195,20 +196,7 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     //  This will show more context in concordance searches ////////////////////
     ////////////////////////////////////////////////////////////////////////////
-    $(".more_context").click(function(e) {
-        var context_link = $(this).text();
-        if (context_link == 'More') {
-            $(this).siblings('.philologic_context').children('.begin_concordance').show();
-            $(this).siblings('.philologic_context').children('.end_concordance').show();
-            $(this).empty().fadeIn(100).append('Less');
-        } 
-        else {
-            $(this).siblings('.philologic_context').children('.begin_concordance').hide();
-            $(this).siblings('.philologic_context').children('.end_concordance').hide();
-            $(this).empty().fadeIn(100).append('More');
-        }
-        e.preventDefault();
-    });
+    more_context();
     ////////////////////////////////////////////////////////////////////////////
     
     
@@ -501,7 +489,7 @@ function toggle_frequency(q_string, db_url, pathname) {
     });
 }
 function hide_frequency() {
-    $(".hide_frequency").fadeOut();
+    $(".hide_frequency").hide();
     $("#freq").empty().hide();
     $('.frequency_container').hide();
     $(".loading").empty();
@@ -655,4 +643,22 @@ function collocation_cloud() {
     //$(".cloud_term :hover").css('text-decoration', 'none');
     //$(".cloud_term :hover").css('color', 'black');
     $("#collocate_counts").fadeIn('fast');
+}
+
+// SHow more context in concordance searches
+function more_context() {
+    $(".more_context").click(function(e) {
+        var context_link = $(this).text();
+        if (context_link == 'More') {
+            $(this).siblings('.philologic_context').children('.begin_concordance').show();
+            $(this).siblings('.philologic_context').children('.end_concordance').show();
+            $(this).empty().fadeIn(100).append('Less');
+        } 
+        else {
+            $(this).siblings('.philologic_context').children('.begin_concordance').hide();
+            $(this).siblings('.philologic_context').children('.end_concordance').hide();
+            $(this).empty().fadeIn(100).append('More');
+        }
+        e.preventDefault();
+    });
 }
