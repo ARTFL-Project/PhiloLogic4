@@ -14,8 +14,12 @@
    
     <div class="page_display">
         <div class="book_page">
-            <a class="fake_prev_page"><</a>
-            <a class="fake_next_page">></a>
+            <div class="next_obj_wrapper">
+                <div class="next_obj" id="${next}">&gt;</div>
+            </div>
+            <div class="prev_obj_wrapper">
+                <div class="prev_obj" id="${prev}">&lt;</div>
+            </div>
             <div class="obj_text">${obj_text}</div>
         </div>
     </div>

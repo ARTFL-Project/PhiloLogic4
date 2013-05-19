@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import re
+from os.path import exists
 from format import chunkifier, convert_entities
 from ObjectFormatter import format, format_concordance
 
@@ -36,8 +37,16 @@ def get_page_text(db, philo_id, page_num, filename, path, bytes):
     else:
         return format(text).decode("utf-8","ignore")
     
-def get_text_obj(obj, query_args=False):
-    path = "./data/TEXT/" + obj.filename
+def get_text_obj(obj, path, query_args=False):
+    filename = obj.filename
+    if filename and exists(path + "/data/TEXT/" + filename):
+        path += "/data/TEXT/" + filename
+    else:
+        ## workaround for when no filename is returned with the full philo_id of the object
+        philo_id = obj.philo_id[0] + ' 0 0 0 0 0 0'
+        c = obj.db.dbh.cursor()
+        c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id,))
+        path += "data/TEXT/" + c.fetchone()["filename"]
     file = open(path)
     byte_start = obj.byte_start
     file.seek(byte_start)
@@ -45,11 +54,6 @@ def get_text_obj(obj, query_args=False):
     raw_text = file.read(width)
     if query_args:
         bytes = sorted([int(byte) - byte_start for byte in query_args.split('+')])
-        #text_start, text_middle, text_end = chunkifier(raw_text, bytes, highlight=True)
-        #raw_text = text_start + text_middle + text_end
-        #raw_text = re.sub('<(/?span[^>]*)>', '[\\1]', raw_text)
-        #text_obj = format(raw_text).decode("utf-8","ignore")
-        #return text_obj.replace('[', '<').replace(']', '>')
     else:
         bytes = []
     return format(raw_text,bytes).decode("utf-8","ignore")
