@@ -32,13 +32,17 @@ def parse_cgi(environ):
     query["q_string"] = environ["QUERY_STRING"] ## this might be useful to have around
     query["q"] = cgi.get("q",[None])[0]
     query["method"] = cgi.get("method",[None])[0]
+    query['arg'] = cgi.get("arg", [None])[0]
     if query["method"] == "proxy":
-        query["arg"] = cgi.get("arg_proxy",[0])[0]
+        if query['arg'] is None:
+            query["arg"] = cgi.get("arg_proxy",[0])[0]
     elif query["method"] == "phrase":
-        query["arg"] = cgi.get("arg_phrase",[0])[0]
+        if query['arg'] is None:
+            query["arg"] = cgi.get("arg_phrase",[0])[0]
     elif query["method"] == "sentence" or query["method"] == "cooc":
         query["arg"] = "6"
-    
+    if query['arg'] is None:
+        query['arg'] = 0
     query["report"] = cgi.get("report",[None])[0]
     query["format"] = cgi.get("format",[None])[0]
     query["results_per_page"] = int(cgi.get("pagenum",[50])[0])

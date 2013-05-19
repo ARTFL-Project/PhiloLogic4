@@ -17,7 +17,7 @@ $(document).ready(function() {
         .click(function( event ) {
             hide_search_form();
             var width = $(window).width() / 3;
-            $("#waiting").css("margin-left", width).show();
+            $("#waiting").css("margin-left", width).css('margin-top', 100).show();
         });
     $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
     $("#page_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
@@ -171,6 +171,7 @@ $(document).ready(function() {
             };
             $(".kwic_biblio").hoverIntent(config)
             display_options_on_selected();
+            more_context();
         });
     });
     ////////////////////////////////////////////////////////////////////////////
@@ -195,20 +196,7 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     //  This will show more context in concordance searches ////////////////////
     ////////////////////////////////////////////////////////////////////////////
-    $(".more_context").click(function(e) {
-        var context_link = $(this).text();
-        if (context_link == 'More') {
-            $(this).siblings('.philologic_context').children('.begin_concordance').show();
-            $(this).siblings('.philologic_context').children('.end_concordance').show();
-            $(this).empty().fadeIn(100).append('Less');
-        } 
-        else {
-            $(this).siblings('.philologic_context').children('.begin_concordance').hide();
-            $(this).siblings('.philologic_context').children('.end_concordance').hide();
-            $(this).empty().fadeIn(100).append('More');
-        }
-        e.preventDefault();
-    });
+    more_context();
     ////////////////////////////////////////////////////////////////////////////
     
     
@@ -259,6 +247,19 @@ $(document).ready(function() {
         } else {
             $(".obj_text").children().filter("div:visible").hide().next().fadeIn('fast');
         }
+    });
+    $(".prev_obj, .next_obj").on('click', function() {
+        var my_path = db_path.replace(/\/\d+.*$/, '/');
+        var philo_id = $(this).attr('id');
+        var script = "http://" + my_path + 'scripts/go_to_obj.py?philo_id=' + philo_id;
+        $.getJSON(script, function(data) {
+            $('.obj_text').fadeOut('fast', function() {
+                $(this).html(data['text']).fadeIn('fast');
+                $('.prev_obj').attr('id', data['prev']);
+                $('.next_obj').attr('id', data["next"]);
+                $("html, body").animate({ scrollTop: 0 }, "fast");
+            });
+        });
     });
     
     // This is to display the table of contents in the document viewer
@@ -312,6 +313,22 @@ $(document).ready(function() {
                   'z-index': 99
                 });
             $("#overlay").fadeIn('fast');
+        }
+    });
+    
+    // Links follow scroll
+    var top = $('.next_obj').offset().top - parseFloat($('.next_obj').css('marginTop').replace(/auto/, 0));
+    $(window).scroll(function (event) {
+      // what the y position of the scroll is
+        var y = $(this).scrollTop();
+      
+        // whether that's below the form
+        if (y >= top) {
+            // if so, ad the fixed class
+            $('.next_obj, .prev_obj').addClass('fixed');
+        } else {
+            // otherwise remove it
+            $('.next_obj, .prev_obj').removeClass('fixed');
         }
     });
     ////////////////////////////////////////////////////////////////////////////
@@ -501,7 +518,7 @@ function toggle_frequency(q_string, db_url, pathname) {
     });
 }
 function hide_frequency() {
-    $(".hide_frequency").fadeOut();
+    $(".hide_frequency").hide();
     $("#freq").empty().hide();
     $('.frequency_container').hide();
     $(".loading").empty();
@@ -655,4 +672,22 @@ function collocation_cloud() {
     //$(".cloud_term :hover").css('text-decoration', 'none');
     //$(".cloud_term :hover").css('color', 'black');
     $("#collocate_counts").fadeIn('fast');
+}
+
+// SHow more context in concordance searches
+function more_context() {
+    $(".more_context").click(function(e) {
+        var context_link = $(this).text();
+        if (context_link == 'More') {
+            $(this).siblings('.philologic_context').children('.begin_concordance').show();
+            $(this).siblings('.philologic_context').children('.end_concordance').show();
+            $(this).empty().fadeIn(100).append('Less');
+        } 
+        else {
+            $(this).siblings('.philologic_context').children('.begin_concordance').hide();
+            $(this).siblings('.philologic_context').children('.end_concordance').hide();
+            $(this).empty().fadeIn(100).append('More');
+        }
+        e.preventDefault();
+    });
 }

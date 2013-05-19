@@ -11,7 +11,8 @@ from math import log10, floor
 from random import sample
 from philologic.DB import DB
 from philologic.Query import format_query
-from functions.format import adjust_bytes, chunkifier, clean_text, align_text
+from functions.format import adjust_bytes
+from functions.ObjectFormatter import format_strip, convert_entities
 from bibliography import bibliography
 import re
 from render_template import render_template
@@ -190,10 +191,13 @@ def fetch_relevance(hit, path, q, samples=10):
         byte = [int(byte)]
         bytes, byte_start = adjust_bytes(byte, length)
         conc_text = f.get_text(hit, byte_start, length, path)
-        conc_start, conc_middle, conc_end = chunkifier(conc_text, bytes, highlight=True)
-        conc_start = clean_text(conc_start)
-        conc_end = clean_text(conc_end)
-        conc_text = (conc_start + conc_middle + conc_end).decode('utf-8', 'ignore')
+        conc_text = format_strip(conc_text, bytes)
+        conc_text = convert_entities(conc_text)
+        #conc_text = re.sub('<(/?span.*?)>', '[\\1]', conc_text)
+        #conc_text = re.sub('<.*?>', '', conc_text)
+        #conc_text = re.sub('\[(/?span.*?)\]', '<\\1>', conc_text)
+        #conc_text = re.sub('<div[^>]*>', '', conc_text)
+        #conc_text = re.sub('</div>', '', conc_text)
         text_snippet.append(conc_text)
     text = ' ... '.join(text_snippet)
     return text
