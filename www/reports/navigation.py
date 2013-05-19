@@ -42,10 +42,12 @@ def navigation(environ,start_response):
     if obj.philo_type == 'doc':
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
                        db=db,q=q,template_name='toc.mako')
-    obj_text = f.get_text_obj(obj, query_args=q['byte'])
-    #obj_text = obj_pager(db, obj, obj_text)
+    obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
+    #obj_text = obj_pager(db, obj, obj_text)  ## this creates virtual pages
+    prev = ' '.join(obj.prev.split()[:7])
+    next = ' '.join(obj.next.split()[:7])
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,obj_text=obj_text,template_name='object.mako')
+                       db=db,q=q,obj_text=obj_text,prev=prev,next=next,template_name='object.mako')
 
 def navigate_doc(obj, db):
     conn = db.dbh 

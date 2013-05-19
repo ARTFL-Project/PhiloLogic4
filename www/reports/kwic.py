@@ -8,6 +8,7 @@ import re
 from functions.wsgi_handler import wsgi_response
 from bibliography import bibliography
 from render_template import render_template
+from functions.ObjectFormatter import format_strip, convert_entities
 
 
 def kwic(environ,start_response):
@@ -47,12 +48,8 @@ def fetch_kwic(results, path, q, byte_query, start, end, length=400):
         ## Get concordance and align it
         bytes, byte_start = f.format.adjust_bytes(hit.bytes, length)
         conc_text = f.get_text(hit, byte_start, length, path)
-        conc_start, conc_middle, conc_end = f.format.chunkifier(conc_text, bytes, highlight=True, kwic=True)
-        conc_start = f.format.clean_text(conc_start, kwic=True)
-        conc_end = f.format.clean_text(conc_end, kwic=True)
-        conc_middle = f.format.clean_text(conc_middle, notag=False, kwic=True)
-        conc_text = (conc_start + conc_middle + conc_end).decode('utf-8', 'ignore')
-        conc_text = f.format.align_text(conc_text, len(hit.bytes))
+        conc_text = format_strip(conc_text, bytes)
+        conc_text = KWIC_formatter(conc_text, len(hit.bytes))
         kwic_results.append((biblio, href, conc_text, hit))
         
     if shortest_biblio < 20:
@@ -70,3 +67,23 @@ def fetch_kwic(results, path, q, byte_query, start, end, length=400):
         kwic_biblio_link = '<a href="%s" class="kwic_biblio" style="white-space:pre-wrap;">' % href + kwic_biblio + '</a>: '
         kwic_results[pos] = kwic_biblio_link + '<span id="kwic_text">%s</span>' % text
     return kwic_results
+
+
+def KWIC_formatter(output, hit_num, chars=40):
+    output = output.replace('\n', ' ')
+    output = output.replace('\r', '')
+    output = output.replace('\t', ' ')
+    output = re.sub(' {2,}', ' ', output)
+    output = convert_entities(output)
+    start_hit = output.index('<span class="highlight">')
+    end_hit = output.rindex('</span>') + 7
+    tag_length = 7 * hit_num
+    ## Dont know why I need to run the converter twice...
+    start_output = output[start_hit - chars:start_hit]
+    if len(start_output) < chars:
+        white_space = ' ' * (chars - len(start_output))
+        start_output = white_space + start_output
+    start_output = '<span style="white-space:pre-wrap;">' + start_output + '</span>'
+    end_output = output[end_hit:]
+    match = output[start_hit:end_hit]
+    return start_output + match + end_output[:chars+tag_length]
