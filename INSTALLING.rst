@@ -12,7 +12,7 @@ Installing `libphilo` system-wide requires administrator privileges.
 It processes in two classical steps:
 
 1. first compiling the library into binaries,
-2. then installing the built material into system,
+2. then installing the fresh built material into system,
 
 with shell commands:
 
@@ -33,7 +33,7 @@ usually ``/bin``.
 Installing library's `Python` binding system-wide
 -------------------------------------------------
 
-Once `libphilo` is installed, we need install its `Python` bindings.
+Once `libphilo` is installed, we need to install its `Python` bindings.
 Once again, this step requires administrator privileges.
 Installing bindings is reached by calling ``setup.py``:
 
@@ -47,9 +47,9 @@ Installing web application
 --------------------------
 
 Installing the web application consists on
-copying ``wwww`` directory content in desired web app. location subdirectory.
+copying ``www`` directory content in desired web app. location subdirectory.
 As the application could use many databases, it's common to install it
-in its own subdirectory, at same level of each database.
+in its own subdirectory, at same level than all databases.
 The loader used for database initialization needs that the web app. files
 are located in ``_system_dir/_install_dir``, such that the whole tree will
 be similar to this:
@@ -58,10 +58,10 @@ be similar to this:
 
     --- [web directory]
       \--- [philologic]
-      \--- database1
-      \--- database2
-      \--- _system_dir
-         \--- _install_dir
+         \--- database1
+         \--- database2
+         \--- _system_dir
+            \--- _install_dir
 
 where content of ``_install_dir`` subdirectory is identical to `PhiloLogic`
 ``www`` source directory. For a web directory located at ``/var/www/html``,
@@ -69,8 +69,8 @@ this could be achieved by:
 
 .. code-block:: sh
 
-    sudo mkdir -p /var/www/html/philologic/_system_dir/_install_dir
-    sudo cp -r /path/to/philologic4/sources/www/* /var/www/html/philologic/_system_dir/_install_dir/
+    $ sudo mkdir -p /var/www/html/philologic/_system_dir/_install_dir
+    $ sudo cp -r /path/to/philologic4/sources/www/* /var/www/html/philologic/_system_dir/_install_dir/
 
 .. seealso:: :doc:`www/README` for further details,
     including needed dependencies.
@@ -79,39 +79,42 @@ this could be achieved by:
 Initializing web application with a given database
 --------------------------------------------------
 
-Once web app. is copied in is ``_system_dir/_install_dir`` directory,
+Once web app. is copied in its ``_system_dir/_install_dir`` directory,
 the last step consists on initializing it with a database.
-This is the role of ``python/examples/loader.py`` module,
+This is the role of ``scripts/loader.py`` module,
 whose call takes two main arguments:
 
 1. the name of the database to create, which will be the subdirectory
    into ``philologic`` directory,
-2. the path to the `TEI-XML` file from which fulfill database content.
+2. the path(s) to the `TEI-XML` file(s) with which fulfill database content.
 
-But first, we need to configure this `loader.py` module, by editing
+But first, we need to configure this ``loader.py`` module, by editing
 some of its internals in a fresh new copy:
 
 .. code-block:: sh
 
-    cd /var/www/html/philologic
-    /var/www/html/philologic$ cp /path/to/philologic/sources/python/examples/loader.py ./_system_dir/
+    $ cd /var/www/html/philologic
+    /var/www/html/philologic$ cp /path/to/philologic4/sources/scripts/loader.py ./_system_dir/
 
-The main variables to edit in this module are located at lines 30-45:
+The main variables to edit in this module are located at lines 30-45
+of this ``loader.py`` module:
 
-.. literalinclude:: ../python/examples/loader.py
+.. literalinclude:: scripts/loader.py
     :language: python
     :lines: 30-39,44-45
 
 Following previous example, we must set :data:`database_root`
 to ``'/var/www/html/philologic/'`` -- with an ending slash! --,
-and :data:`url_root` set to e.g. ``http://localhost/philologic``.
+and :data:`url_root` set to e.g. ``'http://localhost/philologic'``.
 
-Then, we can call `loader.py`:
+Then, we can call ``loader.py``. For example, to create a database
+called ``database1``, with content from two `TEI-XML` files
+(``corpus1.xml`` and ``corpuse2.xml``):
 
 .. code-block:: sh
 
     /var/www/html/philologic$ cd _system_dir
-    /var/www/html/philologic/_system_dir$ python loader.py database1 /path/to/database1.xml
+    /var/www/html/philologic/_system_dir$ python loader.py database1 /path/to/corpus1.xml /path/to/corpus2.xml
 
 This will compute databases indexes needed by `PhiloLogic` for this
 specific corpus.
