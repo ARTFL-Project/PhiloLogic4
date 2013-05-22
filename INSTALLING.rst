@@ -29,6 +29,21 @@ usually ``/bin``.
 .. seealso:: :doc:`libphilo/README` for further details,
     including needed dependencies.
 
+.. note:: Installing library in a `virtualenv`
+
+    It may be possible to install library in a `virtualenv`_,
+    by setting ``exec_prefix`` parameter at installation,
+    and pointing it to the desired `virtualenv`'s path:
+
+    .. code-block:: sh
+
+        # create a fresh virtualenv
+        $ virtualenv --no-site-packages /path/to/philologic/venv
+        # go to libphilo source directory
+        $ cd libphilo
+        # install libphilo in virtualenv
+        libphilo$ make install exec_prefix=/path/to/philologic/venv
+
 
 Installing library's `Python` binding system-wide
 -------------------------------------------------
@@ -41,6 +56,26 @@ Installing bindings is reached by calling ``setup.py``:
 
     $ cd python
     python$ sudo python setup.py install
+
+.. note:: Installing bindings in a `virtualenv`
+
+    It may be possible to install `Python`'s bindings in a `virtualenv`_,
+    by setting ``python`` binary to `virtualenv`'s one:
+
+    .. code-block:: sh
+
+        # provided a given virtualenv at /path/to/philologic/venv
+        $ cd python
+        python$ /path/to/philologic/venv/bin/python setup.py install
+
+    or activating choosen `virtualenv` before installing bindings:
+
+    .. code-block:: sh
+
+        # provided a given virtualenv at /path/to/philologic/venv
+        $ source /path/to/philologic/venv/bin/activate
+        (venv) $ cd python
+        (venv) python$ python setup.py install
 
 
 Installing web application
@@ -122,3 +157,5 @@ specific corpus.
 .. seealso:: doc:`apache` for further details about setting up `Apache`
     web server.
 
+
+.. _virtualenv: http://www.virtualenv.org/
