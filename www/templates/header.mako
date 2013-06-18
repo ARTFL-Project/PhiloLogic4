@@ -29,7 +29,7 @@
                     </div>
                 </div>    
                 <div class="site-name">
-                    <h1 style="position: absolute"><a href="${db.locals['db_url']}/" title="${dbname}">${dbname.title()} alpha5</a></h1>           
+                    <h1 style="position: absolute"><a href="${db.locals['db_url']}/" title="${dbname}">${dbname.title()} Beta 1</a></h1>           
                 </div>
             </div>
             <div class="main_body">

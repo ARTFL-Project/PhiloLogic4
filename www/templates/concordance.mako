@@ -24,7 +24,7 @@
                  <%
                   n += 1
                  %>
-                 <span class='hit_n'>${n}.</span> ${f.cite.make_div_cite(i)}
+                 <span class='hit_n'>${n}.</span> ${f.cite.make_abs_div_cite(db,i)}
                  <a href="#" class="more_context">More</a>
                  <div class='philologic_context'>${fetch_concordance(i, path, q)}</div>
                 </li>
