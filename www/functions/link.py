@@ -15,7 +15,12 @@ def make_query_link(query,method=None,methodarg=None,report=None,start=None,end=
     if method:
         q_params.append(("method",method))
     if methodarg:
-        q_params.append(("arg",methodarg))
+        if method and method =='proxy':
+            q_params.append(("arg_proxy", methodarg))
+        elif method and method == "phrase":
+            q_params.append(('arg_phrase', methodarg))
+        else:
+            q_params.append(("arg",methodarg))
     metadata = dict([(k, v) for k, v in metadata.items()])
     q_params.extend(metadata.items()[:])
     if report:

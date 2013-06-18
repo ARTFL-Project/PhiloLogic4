@@ -6,6 +6,8 @@ $(document).ready(function() {
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var db_path = window.location.hostname + pathname;
     var q_string = window.location.search.substr(1);
+    console.log(db_locals)
+    console.log(pathname, db_path, q_string)
     ////////////////////////////////////////////////////////////////////////////
     
     
