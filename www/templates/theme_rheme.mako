@@ -24,7 +24,7 @@
     <%
      n += 1
     %>
-    <span class='hit_n'>${n}.</span> ${f.cite.make_div_cite(i)}
+    <span class='hit_n'>${n}.</span> ${f.cite.make_abs_div_cite(db,i)}
     <a href="javascript:void(0)" class="more_context">Show more context</a>
     <br><b>${i.position} of clause: [${i.score} = ${i.percentage}]</b><br>
     <div class='philologic_context'>${i.concordance}</div>

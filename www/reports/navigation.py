@@ -17,9 +17,9 @@ def navigation(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
     obj = db[path_components]
-    print >> sys.stderr, "OBJ", obj.philo_type
     if obj.philo_type == 'doc' and q['doc_page']:
         page_text = f.get_page_text(db, obj.philo_id[0], q['doc_page'], obj.filename, path, q['byte'])
+        #page_text = obj.get_page() This does not fetch the right page, just the first page of the object
         if page_text:
             doc_id = str(obj.philo_id[0]) + ' %'
             prev_page, next_page = get_neighboring_pages(db, doc_id, q['doc_page'])    
@@ -41,7 +41,7 @@ def navigation(environ,start_response):
                                         db=db,q=q,template_name='pages.mako')
     if obj.philo_type == 'doc':
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,template_name='toc.mako')
+                       db=db,q=q,template_name='t_o_c_template.mako')
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
     #obj_text = obj_pager(db, obj, obj_text)  ## this creates virtual pages
     prev = ' '.join(obj.prev.split()[:7])
