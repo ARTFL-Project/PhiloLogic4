@@ -16,7 +16,7 @@ $(document).ready(function() {
 <div class='philologic_response'>
     <div class='initial_report'>
         <p class='description'>
-            Displaying the top 100 collocates of "${q['q'].decode('utf-8', 'ignore')}":
+            Displaying the top 100 collocates for ${hit_len} occurrences of "${q['q'].decode('utf-8', 'ignore')}":
         </p>
         The 200 most common words are being filtered from this report.
         <span id="working" style="font-weight:600;"></span>

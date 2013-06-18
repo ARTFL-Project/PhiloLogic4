@@ -1,7 +1,7 @@
 <%include file="header.mako"/>
   <div class='philologic_response'>
     <div class='philologic_cite'>
-        <div class='title'>${obj.author}, <i>${obj.title}</i> Tome ${obj.volume}</div>
+        <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,obj)} <b>Volume ${obj.volume}</b></span>
     </div>
     <div id="table_toggler" class="table_toggler">
     <input type="checkbox" id="show_table_of_contents">

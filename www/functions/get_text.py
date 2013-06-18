@@ -2,7 +2,6 @@
 
 import re
 from os.path import exists
-from format import chunkifier, convert_entities
 from ObjectFormatter import format, format_concordance
 
 def get_text(hit, byte_start, length, path):
@@ -28,12 +27,7 @@ def get_page_text(db, philo_id, page_num, filename, path, bytes):
     sorted_bytes = sorted(bytes.split('+'))
     if bytes and int(start_byte) < int(sorted_bytes[0]) < int(end_byte):
         bytes = sorted([int(byte) - int(start_byte) for byte in bytes.split('+')])
-        text_start, text_middle, text_end = chunkifier(text, bytes, highlight=True)
-        highlighted_text = text_start + text_middle + text_end
-        highlighted_text = re.sub('<(/?span[^>]*)>', '[\\1]', highlighted_text)
-        highlighted_text = format(highlighted_text).decode("utf-8","ignore")
-        highlighted_text = highlighted_text.replace('[', '<').replace(']', '>')
-        return highlighted_text
+        return format(text, bytes).decode('utf-8', 'ignore')
     else:
         return format(text).decode("utf-8","ignore")
     
