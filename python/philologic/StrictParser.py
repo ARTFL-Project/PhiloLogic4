@@ -202,7 +202,7 @@ class StrictParser:
                             # This will implicitly push a sentence if we aren't in one already.
                             self.v.push("word",t.group(1).lower().encode("utf-8"),offset + len(content[:t.start(1)].encode("utf-8")) )
                             self.v.pull("word",offset + len(content[:t.end(1)].encode("utf-8")))
-                    elif t.group(2): 
+                    elif t.group(2):
                         # a sentence should already be defined most of the time.
                         if "sent" not in self.v:
                             # but we'll make sure one is.
