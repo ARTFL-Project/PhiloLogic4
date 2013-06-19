@@ -25,9 +25,9 @@ $(document).ready(function() {
                     %>
                     <span class='hit_n'>${n}.</span>
                     % if i.type == 'doc':
-                        <span class='tooltip_link' title="Click to see title">${f.cite.make_doc_cite(i)}</span>
+                        <span class='tooltip_link' title="Click to see title">${f.cite.make_abs,doc_cite(db,i)}</span>
                     % else:
-                        <span class='tooltip_link' title="Click to see document">${f.cite.make_div_cite(i)}</span>
+                        <span class='tooltip_link' title="Click to see document">${f.cite.make_abs_div_cite(db,i)}</span>
                     % endif
                     % if hit_num:
                         <%

@@ -7,7 +7,6 @@ from functions.wsgi_handler import parse_cgi
 from mako.template import Template
 import reports as r
 import cgi
-import json
 
     
 if __name__ == "__main__":

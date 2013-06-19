@@ -19,8 +19,8 @@
         </label>
     </div>
     <div class="loading" style="display:none;z-index:99;position:absolute;margin-left:20px;"></div>
+    <div class="hide_frequency" style='display:none;'>X</div>
     <div class="frequency_container">
-        <span class="hide_frequency" style="display:none;">X</span>
         <div id="freq" class="frequency_table"></div>
     </div>
 </div>

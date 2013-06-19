@@ -12,6 +12,7 @@ def custom_format():
     format["/span"] = "</span>"
     format["b"] = "<b>"
     format["/b"] = "</b>"
+    format["/a"] = "</a>"
     format["s"] = ""
     format["/s"] = ""
     format["l"] = ""
@@ -21,7 +22,12 @@ def custom_format():
     format["/speaker"] = "</b></p>"
     format["stage"] = "<br/><i>"
     format["/stage"] = "</i>"
-    format["head"] = "<p><b>"
-    format["/head"] = "</b></p>"
-
+    format["head"] = "<p/><b>"
+    format["/head"] = "</b><br/>"
+    format["i"] = "<i>"
+    format["/i"] = "</i>"
+    format["sc"] = "<span class='small-caps'>"
+    format["/sc"] = "</span>"
+    format["scx"] = "<span class='small-caps'>"
+    format["/scx"] = "</span>"
     return format

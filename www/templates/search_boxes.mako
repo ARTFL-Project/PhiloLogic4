@@ -11,17 +11,17 @@
             <div id="report" class="report">
                 <h3 style="padding-left: 5px;">Choose a search report:</h3>
                 <input type="radio" name="report" id="report1" value='concordance' checked="checked"><label for="report1">Concordance Report</label>
-                <input type="radio" name="report" id="report2" value='relevance'><label for="report2">Ranked Relevance Report</label>
+		<input type="radio" name="report" id="report3" value='kwic'><label for="report3">Key Word in Context (KWIC) Report</label>
                 <input type="radio" name="report" id="report4" value='collocation'><label for="report4">Collocation Table</label>
-                <input type="radio" name="report" id="report5" value='frequency'><label for="report5">Frequency Table</label>
-                <input type="radio" name="report" id="report6" value='time_series'><label for="report6">Time Series Report</label>
             </div>
          </div>
          <div class="search_explain">
             <h3 class="conc_question">What does a concordance report do?</h3>
             <div class="explain_conc">
                Concordance search finds every single occurrence of the search term(s)
-               throughout the database filtered by optional metadata criteria.
+               throughout the database filtered by optional metadata criteria.<p/>
+
+               Metadata-only searches are also permitted; simply leave the main "Search Terms" box empty, and enter your desired metadata criteria as usual.
             </div>
             <h3 class="relev_question">What does a ranked relevance report do?</h3>
             <div class="explain_relev">
@@ -29,6 +29,11 @@
                 of the search term(s).
                 <br>Note that this type of search is done on individual words, and therefore will not
                 be aware of phrases or expressions.
+            </div>
+            <h3 class="kwic_question">What does a Key Word in Context (KWIC) report do?</h3>
+            <div class="explain_kwic">
+  	        Just like the concordance search, Key Word in Context (KWIC) search finds every occurence of the search terms,
+                but displays the results in a much more compact format, one line per result item.
             </div>
             <h3 class="freq_question">What does a frequency report do?</h3>
             <div class="explain_freq">
@@ -65,13 +70,12 @@
             <div id="metadata_fields">
                 <table class="table_row">
                     % for facet in db.locals["metadata_fields"]:
-
-                    <%
-                      if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
-                        alias = db.locals["metadata_aliases"][facet]
-                      else:
-                        alias = facet.title()
-                    %>
+						<%
+						if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
+							alias = db.locals["metadata_aliases"][facet]
+						else:
+							alias = facet
+						%>
                         <tr class="table_row"><td class="first_column"><span class="search_field">${alias}:</span></td><td><input type='text' name='${facet}' id="${facet}" class="search_box"></td></tr>
                     % endfor
                 </table>

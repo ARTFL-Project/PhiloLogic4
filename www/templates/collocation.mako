@@ -7,25 +7,19 @@ $(document).ready(function() {
     var left_colloc = ${dumps(left_colloc)};
     var right_colloc = ${dumps(right_colloc)};
     update_colloc(all_colloc, left_colloc, right_colloc, ${hit_len}, 0, 100);
-    $('#working').each(function() {
-        var elem = $(this);
-        setInterval(function() {
-            if (elem.css('visibility') == 'hidden') {
-                elem.css('visibility', 'visible');
-            } else {
-                elem.css('visibility', 'hidden');
-            }    
-        }, 750);
-    });
+    var pathname = window.location.pathname.replace('dispatcher.py/', '');
+    var db_url = window.location.hostname + pathname;
+    var spinner = '<img src="http://' + db_url + '/js/ajax-loader.gif" alt="Loading..."  height="25px" width="25px"/>';
+    $('#working').append(spinner);
 })
 </script>
 <div class='philologic_response'>
     <div class='initial_report'>
         <p class='description'>
-            Displaying the top 100 collocates of "${q['q'].decode('utf-8', 'ignore')}":
+            Displaying the top 100 collocates for ${hit_len} occurrences of "${q['q'].decode('utf-8', 'ignore')}":
         </p>
         The 200 most common words are being filtered from this report.
-        <span id="working" style="font-weight:600;">Still working...</span>
+        <span id="working" style="font-weight:600;"></span>
     </div>
     <div class="results_container">
         <div class='philologic_collocation'>

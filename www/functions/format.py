@@ -3,9 +3,10 @@
 import re
 import htmlentitydefs
 import sys
-from DirtyFormatter import Formatter
+import ObjectFormatter as Formatter
 from custom_object_format import custom_format
 from lxml import etree
+from StringIO import StringIO
 
 def adjust_bytes(bytes, length):
     """Readjust byte offsets for concordance"""
@@ -169,8 +170,4 @@ def convert_entities(text):
 def formatter(text):
     """This function calls an external script containing a dictionnary with formatting
     options for proper display in the web browser"""
-    if custom_format():  ## check if the format dict contains any special formatting options
-        f = Formatter(custom_format())
-        return f.format(text)
-    else:
-        return text
+    return Formatter.format(text)

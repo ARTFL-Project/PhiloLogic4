@@ -17,9 +17,9 @@ def navigation(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
     obj = db[path_components]
-    print >> sys.stderr, "OBJ", obj.philo_type
     if obj.philo_type == 'doc' and q['doc_page']:
         page_text = f.get_page_text(db, obj.philo_id[0], q['doc_page'], obj.filename, path, q['byte'])
+        #page_text = obj.get_page() This does not fetch the right page, just the first page of the object
         if page_text:
             doc_id = str(obj.philo_id[0]) + ' %'
             prev_page, next_page = get_neighboring_pages(db, doc_id, q['doc_page'])    
@@ -39,10 +39,15 @@ def navigation(environ,start_response):
                 return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
                                         dbname=dbname,current_page=page_num,f=f,navigate_doc=navigate_doc,
                                         db=db,q=q,template_name='pages.mako')
-    obj_text = f.get_text_obj(obj, query_args=q['byte'])
-    obj_text = obj_pager(db, obj, obj_text)
+    if obj.philo_type == 'doc':
+        return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
+                       db=db,q=q,template_name='t_o_c_template.mako')
+    obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
+    #obj_text = obj_pager(db, obj, obj_text)  ## this creates virtual pages
+    prev = ' '.join(obj.prev.split()[:7])
+    next = ' '.join(obj.next.split()[:7])
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,obj_text=obj_text,template_name='object.mako')
+                       db=db,q=q,obj_text=obj_text,prev=prev,next=next,template_name='object.mako')
 
 def navigate_doc(obj, db):
     conn = db.dbh 
@@ -94,7 +99,10 @@ def get_page_num(obj, db):
     try:
         return str(c.fetchone()[0] + 1)
     except TypeError:
-        return c.fetchone()[0]
+        try:
+            return c.fetchone()[0]
+        except:
+            return None
 
 def obj_pager(db, obj, obj_text, word_num=500):
     pages =[]

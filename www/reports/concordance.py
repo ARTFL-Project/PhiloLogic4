@@ -4,9 +4,12 @@ import sys
 sys.path.append('..')
 import functions as f
 import os
+import re
 from functions.wsgi_handler import wsgi_response
 from bibliography import bibliography
 from render_template import render_template
+from functions.ObjectFormatter import format_concordance, format_strip, convert_entities
+from functions.FragmentParser import parse
 
 def concordance(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
@@ -25,23 +28,25 @@ def fetch_concordance(hit, path, q):
     
     bytes, byte_start = f.format.adjust_bytes(hit.bytes, length)
     conc_text = f.get_text(hit, byte_start, length, path)
-    conc_start, conc_middle, conc_end = f.format.chunkifier(conc_text, bytes, highlight=True)
-    conc_start = f.format.clean_text(conc_start)
-    conc_end = f.format.clean_text(conc_end)
-    conc_text = conc_start + conc_middle + conc_end
-    conc_text = conc_text.decode('utf-8', 'ignore')
+    conc_text = format_strip(conc_text, bytes)
+    conc_text = convert_entities(conc_text)
     start_highlight = conc_text.find('<span class="highlight"')
-    end_highlight = conc_text.rfind('</span>')
-    if start_highlight >= 200:
-        begin = start_highlight - 200
-        end = end_highlight + 200
-        min = bytes[-1] + len("<span class='highlight'></span>") * len(bytes)
-        if end < min:
-            end = min
-    else:
-        begin = 0
-        end = end_highlight + 200
-    first_span = '<span class="begin_concordance" style="display:none;">'
-    second_span = '<span class="end_concordance" style="display:none;">'
-    conc_text =  first_span + conc_text[:begin] + '</span>' + conc_text[begin:end] + second_span + conc_text[end:] + '</span>'
-    return f.format.fix_html(conc_text)
+    m = re.search(r'<span class="highlight">[^<]*(</span>)',conc_text)
+    if m:
+        end_highlight = m.end(len(bytes) - 1)
+        count = 0
+        for char in reversed(conc_text[:start_highlight]):
+            count += 1
+            if count > 200 and char == ' ':
+                break
+        begin = start_highlight - count
+        end = 0
+        for char in conc_text[end_highlight:]:
+            end += 1
+            if end > 200 and char == ' ':
+                break
+        end += end_highlight
+        first_span = '<span class="begin_concordance" style="display:none;">'
+        second_span = '<span class="end_concordance" style="display:none;">'
+        conc_text =  first_span + conc_text[:begin] + '</span>' + conc_text[begin:end] + second_span + conc_text[end:] + '</span>'
+    return conc_text

@@ -22,7 +22,7 @@
                     n += 1
                     occurences += i.collocate_num
                     %>
-                    <span class='hit_n'>${n}.</span> ${f.cite.make_div_cite(i)}
+                    <span class='hit_n'>${n}.</span> ${f.cite.make_abs_div_cite(db,i)}
                     % if i.collocate_num > 1:
                         <span style="padding-left:20px"><b>At least ${i.collocate_num} occurences of collocate in hit</b></span>
                     % endif
