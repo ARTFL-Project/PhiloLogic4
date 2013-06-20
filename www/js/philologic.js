@@ -4,7 +4,7 @@ $(document).ready(function() {
     // Important variables /////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
-    var db_path = window.location.hostname + pathname;
+    var db_url = db_locals['db_url'];
     var q_string = window.location.search.substr(1);
     ////////////////////////////////////////////////////////////////////////////
     
@@ -86,7 +86,7 @@ $(document).ready(function() {
     
     monkeyPatchAutocomplete();    
     $("#q").autocomplete({
-        source: pathname + "scripts/term_list.py",
+        source: db_url + "/scripts/term_list.py",
         minLength: 2,
         "dataType": "json"
     });
@@ -97,7 +97,7 @@ $(document).ready(function() {
     for (i in fields) {
         var  metadata = $("#" + fields[i]).val();
         var field = fields[i];
-        autocomplete_metadata(metadata, field)
+        autocomplete_metadata(metadata, field, db_url)
     }
     
     //  This will prefill the search form with the current query
@@ -154,36 +154,10 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     ///////// Concordance / KWIC switcher //////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
-    $("#report_switch").on("change", function() {
-        $('.highlight_options').remove();
-        var switchto = $('input[name=report_switch]:checked').val();
-        var width = $(window).width() / 3;
-        $("#waiting").css("margin-left", width).show();
-        $("#waiting").css("margin-top", 200).show();
-        $.get("http://" + db_path + "/reports/concordance_switcher.py" + switchto, function(data) {
-            $("#results_container").hide().empty().html(data).fadeIn('fast');
-            $("#waiting").hide();
-            if (switchto.match(/kwic/)) {
-                var config = {    
-                    over: showBiblio, 
-                    timeout: 100,  
-                    out: hideBiblio   
-                };
-                $(".kwic_biblio").hoverIntent(config);
-            }
-            display_options_on_selected();
-            more_context();
-            $('.more').find('a').each(function() {
-                if (switchto.match(/kwic/)) {
-                    var new_href = $(this).attr('href').replace('concordance', 'kwic');
-                }
-                else {
-                    var new_href = $(this).attr('href').replace('kwic', 'concordance');
-                }
-                $(this).attr('href', new_href);
-            });
-        });
-    });
+    if ($("#report_switch").length) {
+        concordance_kwic_switch(db_url);
+        more_context();
+    }
     ////////////////////////////////////////////////////////////////////////////
     
     
@@ -195,25 +169,18 @@ $(document).ready(function() {
         var width = $(window).width() / 3;
         $("#waiting").css("margin-left", width).show();
         $("#waiting").css("margin-top", 200).show();
-        $.get("http://" + db_path + "/scripts/frequency_switcher.py" + switchto, function(data) {
+        $.get(db_url + "/scripts/frequency_switcher.py" + switchto, function(data) {
             $("#results_container").hide().html(data).fadeIn('fast');
             $("#waiting").hide();
         });
     });
-    ////////////////////////////////////////////////////////////////////////////
-
-    
-    ////////////////////////////////////////////////////////////////////////////
-    //  This will show more context in concordance searches ////////////////////
-    ////////////////////////////////////////////////////////////////////////////
-    more_context();
     ////////////////////////////////////////////////////////////////////////////
     
     
     ////////////////////////////////////////////////////////////////////////////
     // This will display the sidebar for various frequency reports /////////////
     ////////////////////////////////////////////////////////////////////////////
-    sidebar_reports(q_string, db_path, pathname);
+    sidebar_reports(q_string, db_url, pathname);
     ////////////////////////////////////////////////////////////////////////////
     
     
@@ -221,25 +188,6 @@ $(document).ready(function() {
     // Page and reader code ////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     // Change pages
-    $(".prev_page, .next_page").on('click', function() {
-        var my_path = db_path.replace(/(\/\d+)+$/, '/');
-        var doc_id = db_path.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
-        var page = $("#current_page").text();
-        var go_to_page = $(this).attr('id');
-        var myscript = "http://" + my_path + "scripts/go_to_page.py?philo_id=" + doc_id + "&go_to_page=" + go_to_page + "&doc_page=" + page;
-        $.getJSON(myscript, function(data) {
-            $("#current_page").fadeOut('fast', function() {
-                $(this).html(data[2]).fadeIn('fast');
-            });
-            $('.obj_text').fadeOut('fast', function () {
-                $(this).html(data[3]).fadeIn('fast');
-                $(".prev_page").attr("id", data[0]);
-                $('.next_page').attr('id', data[1]);
-                $()
-            }); 
-        });
-        
-    });
     $(".fake_prev_page, .fake_next_page").on('click', function() {
         var direction = $(this).attr('class');
         var page_count = $(".obj_text").children('div').size();
@@ -250,23 +198,14 @@ $(document).ready(function() {
             $(".obj_text").children().filter("div:visible").hide().next().fadeIn('fast');
         }
     });
-    $(".prev_obj, .next_obj").on('click', function() {
-        var my_path = db_path.replace(/\/\d+.*$/, '/');
-        var philo_id = $(this).attr('id');
-        var script = "http://" + my_path + 'scripts/go_to_obj.py?philo_id=' + philo_id;
-        $.getJSON(script, function(data) {
-            $('.obj_text').fadeOut('fast', function() {
-                $(this).html(data['text']).fadeIn('fast');
-                $('.prev_obj').attr('id', data['prev']);
-                $('.next_obj').attr('id', data["next"]);
-                $("html, body").animate({ scrollTop: 0 }, "fast");
-            });
-        });
-    });
     
     // This is to display the table of contents in the document viewer
-    if ($('.next_obj').length || $('.next_page').length) {
-        t_o_c_handler(db_path);
+    if ($('.next_obj').length) {
+        retrieve_obj(db_url);
+        t_o_c_handler(db_url);
+    } else if ($('.next_page').length) {
+        retrieve_page(db_url);
+        t_o_c_handler(db_url);
     }
     
     
@@ -325,9 +264,87 @@ $(document).ready(function() {
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/// Go to next or previous object in text display
+function retrieve_obj(db_url){
+    $(".prev_obj, .next_obj").on('click', function() {
+        var my_path = db_url.replace(/\/\d+.*$/, '/');
+        var philo_id = $(this).attr('id');
+        var script = my_path + '/scripts/go_to_obj.py?philo_id=' + philo_id;
+        $.getJSON(script, function(data) {
+            var scrollto_id = '#' + $(".obj_text").attr('id');
+            $('#toc_container').find($(scrollto_id)).attr('style', 'color: #800000;');
+            $('.obj_text').fadeOut('fast', function() {
+                $(this).html(data['text']).fadeIn('fast');
+                $('.obj_text').attr("id", philo_id.replace(/ /g, '_'));
+                $('.prev_obj').attr('id', data['prev']);
+                $('.next_obj').attr('id', data["next"]);
+                $("html, body").animate({ scrollTop: 0 }, "fast");
+                var scrollto_id = '#' + $(".obj_text").attr('id');
+                $('#toc_container').scrollTo($(scrollto_id), 500);
+                $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
+            });
+        });
+    });
+}
+function retrieve_page(db_url) {
+    $(".prev_page, .next_page").on('click', function() {
+        var my_path = db_url.replace(/(\/\d+)+$/, '/');
+        var doc_id = db_url.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
+        var page = $(".book_page").attr('id');
+        var go_to_page = $(this).attr('id');
+        var myscript = my_path + "/scripts/go_to_page.py?philo_id=" + doc_id + "&go_to_page=" + go_to_page + "&doc_page=" + page;
+        console.log(myscript)
+        $.getJSON(myscript, function(data) {
+            $(".book_page").attr('id', data[2]);
+            $('.obj_text').fadeOut('fast', function () {
+                $(this).html(data[3]).fadeIn('fast');
+                $(".prev_page").attr("id", data[0]);
+                $('.next_page').attr('id', data[1]);
+                $()
+            }); 
+        });
+        
+    });
+}
+
+/// Switch betwwen concordance and KWIC reports
+function concordance_kwic_switch(db_url) {
+    $("#report_switch").on("change", function() {
+        $('.highlight_options').remove();
+        var switchto = $('input[name=report_switch]:checked').val();
+        var width = $(window).width() / 3;
+        $("#waiting").css("margin-left", width).show();
+        $("#waiting").css("margin-top", 200).show();
+        $.get(db_url + "/reports/concordance_switcher.py" + switchto, function(data) {
+            $("#results_container").hide().empty().html(data).fadeIn('fast');
+            $("#waiting").hide();
+            if (switchto.match(/kwic/)) {
+                var config = {    
+                    over: showBiblio, 
+                    timeout: 100,  
+                    out: hideBiblio   
+                };
+                $(".kwic_biblio").hoverIntent(config);
+            }
+            display_options_on_selected();
+            more_context();
+            $('.more').find('a').each(function() {
+                if (switchto.match(/kwic/)) {
+                    var new_href = $(this).attr('href').replace('concordance', 'kwic');
+                }
+                else {
+                    var new_href = $(this).attr('href').replace('kwic', 'concordance');
+                }
+                $(this).attr('href', new_href);
+            });
+        });
+    });
+}
+
 /// Have previous and next links follow scroll in page and object navigation ///
-function t_o_c_handler(db_path) {
-    var text_position = $('.book_page').offset().left + 30;
+function t_o_c_handler(db_url) {
+    var pathname = window.location.pathname.replace('dispatcher.py/', '');
+    var text_position = $('.book_page').offset().left + 20;
     var position = $('#toc_container').offset().top;
     var bottomPosition = $(window).height();
     var footer_pos = $("#footer").offset().top - 30;
@@ -338,22 +355,20 @@ function t_o_c_handler(db_path) {
     }
     $('#toc_container').css('max-height', max_height);
     $('#toc_container').css('width', text_position);
-    var my_path = db_path.replace(/\/\d+.*$/, '/');
-    var doc_id = db_path.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
+    var my_path = pathname.replace(/\/\d+.*$/, '/');
+    var doc_id = pathname.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
     var philo_id = doc_id + ' 0 0 0 0 0 0'
-    var script = "http://" + my_path + 'scripts/get_table_of_contents.py?philo_id=' + philo_id;
+    console.log(my_path, doc_id, philo_id)
+    var script = my_path + '/scripts/get_table_of_contents.py?philo_id=' + philo_id;
+    $('#t_b_c_box').attr('style', 'color: LightGray;');
     $.get(script, function(data) {
         $('#toc_container').css('position', 'absolute');
         $('#toc_container').hide().css('margin-left', '-700px').html(data).show();
-    });
-    $("#show_table_of_contents").click(function() {
-        if ($("#toc_container").is(':empty')) {
-            $.get(script, function(data) {
-                $('#toc_container').css('position', 'absolute');
-                $('#toc_container').hide().css('margin-left', '-700px').html(data).show();
+        $('#t_b_c_box').animate({color: '#555 !important'},400, function() {
+            $("#show_table_of_contents").click(function() {
+                show_hide_toc(text_position);
             });
-        }
-        show_hide_toc(text_position);
+        });
     });
 }
 function follow_scroll(prev, next) {
@@ -389,12 +404,15 @@ function follow_scroll(prev, next) {
 }
 function show_hide_toc(top_right) {
     var position = top_right - ($('#toc_container').width() - $('.table_of_contents').width()) - 15;
+    var scrollto_id = '#' + $(".obj_text").attr('id');
     if ($("#t_b_c_box").text() == "Show table of contents") {
         $("#t_b_c_box").html("Hide table of contents");
         $('#toc_container').animate({
             'margin-left': '-30px'
             }, 450
             );
+        $('#toc_container').scrollTo($(scrollto_id), 500);
+        $('#toc_container').find($(scrollto_id)).attr('style', 'color: black;');
     } else {
         $("#t_b_c_box").html("Show table of contents");
         $('#toc_container').animate({
@@ -476,10 +494,9 @@ function monkeyPatchAutocomplete() {
             .appendTo( ul );
     };
 }
-function autocomplete_metadata(metadata, field) {
-    var pathname = window.location.pathname.replace('dispatcher.py/', '');
+function autocomplete_metadata(metadata, field, db_url) {
     $("#" + field).autocomplete({
-        source: pathname + "scripts/metadata_list.py?field=" + field,
+        source: db_url + "/scripts/metadata_list.py?field=" + field,
         minLength: 2,
         dataType: "json"
     });
@@ -530,12 +547,12 @@ function hideBiblio() {
 }
 
 //    These functions are for the sidebar frequencies
-function sidebar_reports(q_string, db_path, pathname) {
+function sidebar_reports(q_string, db_url, pathname) {
     $("#toggle_frequency").click(function() {
-        toggle_frequency(q_string, db_path, pathname);
+        toggle_frequency(q_string, db_url, pathname);
     });
     $("#frequency_field").change(function() {
-        toggle_frequency(q_string, db_path, pathname);
+        toggle_frequency(q_string, db_url, pathname);
     });
     $(".hide_frequency").click(function() {
         hide_frequency();
@@ -544,12 +561,13 @@ function sidebar_reports(q_string, db_path, pathname) {
 function toggle_frequency(q_string, db_url, pathname) {
     var field =  $("#frequency_field").val();
     if (field != 'collocate') {
-        var script_call = "http://" + db_url + "scripts/get_frequency.py?" + q_string + "&frequency_field=" + field;
+        var script_call = db_url + "/scripts/get_frequency.py?" + q_string + "&frequency_field=" + field;
     } else {
-        var script_call = "http://" + db_url + "scripts/get_collocate.py?" + q_string
+        var script_call = db_url + "/scripts/get_collocate.py?" + q_string
     }
+    console.log(script_call)
     $(".loading").empty().hide();
-    var spinner = '<img src="http://' + db_url + '/js/ajax-loader.gif" alt="Loading..."  height="25px" width="25px"/>';
+    var spinner = '<img src="' + db_url + '/js/ajax-loader.gif" alt="Loading..."  height="25px" width="25px"/>';
     $(".results_container").animate({
         "margin-right": "420px"},
         150);
@@ -673,11 +691,9 @@ function update_table(full_results, new_hash, q_string, column) {
     return full_results;
 }
 
-function update_colloc(all_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end) {
-    var pathname = window.location.pathname.replace('dispatcher.py/', '');
-    var db_path = window.location.hostname + pathname;
+function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end) {
     var q_string = window.location.search.substr(1);
-    var script = "http://" + db_path + "scripts/collocation_fetcher.py?" + q_string
+    var script = db_url + "/scripts/collocation_fetcher.py?" + q_string
     if (colloc_start == 0) {
         colloc_start = 100;
         colloc_end = 1100;
@@ -691,7 +707,7 @@ function update_colloc(all_colloc, left_colloc, right_colloc, results_len, collo
             all_new_colloc = update_table(all_colloc, data[0], q_string, "all");
             left_new_collc = update_table(left_colloc, data[1], q_string, "left");
             right_new_colloc = update_table(right_colloc, data[2], q_string, "right");
-            update_colloc(all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
+            update_colloc(db_url, all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
             collocation_cloud();
         }));
     }

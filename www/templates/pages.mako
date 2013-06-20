@@ -47,8 +47,8 @@ function left_pos() {
                 </div>
             </div>
         </div>
-        <div class="book_page">
-            <div class="obj_text">${page_text}</div>
+        <div class="book_page" id="${current_page}">
+            <div class="obj_text" id="${'_'.join([str(j) for j in obj.philo_id])}">${page_text}</div>
         </div>
     </div>
 </div>

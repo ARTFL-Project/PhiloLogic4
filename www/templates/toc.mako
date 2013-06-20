@@ -11,6 +11,6 @@
         else:
             spacing = ""
         %>
-        ${spacing}<a href="${href}">${i.head or "[%s]" % i.type}</a><br>
+        ${spacing}<a href="${href}" id="${'_'.join([str(j) for j in i.philo_id])}">${i.head or "[%s]" % i.type}</a><br>
     % endfor
 </div>
