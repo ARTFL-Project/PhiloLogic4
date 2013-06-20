@@ -4,7 +4,6 @@ import sys
 sys.path.append('..')
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
-from json import dumps
 
 
 def form(environ,start_response):
