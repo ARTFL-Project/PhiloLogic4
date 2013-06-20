@@ -86,7 +86,7 @@ $(document).ready(function() {
     
     monkeyPatchAutocomplete();    
     $("#q").autocomplete({
-        source: pathname + "scripts/term_list.py",
+        source: db_url + "/scripts/term_list.py",
         minLength: 2,
         "dataType": "json"
     });
@@ -97,7 +97,7 @@ $(document).ready(function() {
     for (i in fields) {
         var  metadata = $("#" + fields[i]).val();
         var field = fields[i];
-        autocomplete_metadata(metadata, field)
+        autocomplete_metadata(metadata, field, db_url)
     }
     
     //  This will prefill the search form with the current query
@@ -154,36 +154,10 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     ///////// Concordance / KWIC switcher //////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
-    $("#report_switch").on("change", function() {
-        $('.highlight_options').remove();
-        var switchto = $('input[name=report_switch]:checked').val();
-        var width = $(window).width() / 3;
-        $("#waiting").css("margin-left", width).show();
-        $("#waiting").css("margin-top", 200).show();
-        $.get(db_url + "/reports/concordance_switcher.py" + switchto, function(data) {
-            $("#results_container").hide().empty().html(data).fadeIn('fast');
-            $("#waiting").hide();
-            if (switchto.match(/kwic/)) {
-                var config = {    
-                    over: showBiblio, 
-                    timeout: 100,  
-                    out: hideBiblio   
-                };
-                $(".kwic_biblio").hoverIntent(config);
-            }
-            display_options_on_selected();
-            more_context();
-            $('.more').find('a').each(function() {
-                if (switchto.match(/kwic/)) {
-                    var new_href = $(this).attr('href').replace('concordance', 'kwic');
-                }
-                else {
-                    var new_href = $(this).attr('href').replace('kwic', 'concordance');
-                }
-                $(this).attr('href', new_href);
-            });
-        });
-    });
+    if ($("#report_switch").length) {
+        concordance_kwic_switch(db_url);
+        more_context();
+    }
     ////////////////////////////////////////////////////////////////////////////
     
     
@@ -201,13 +175,6 @@ $(document).ready(function() {
         });
     });
     ////////////////////////////////////////////////////////////////////////////
-
-    
-    ////////////////////////////////////////////////////////////////////////////
-    //  This will show more context in concordance searches ////////////////////
-    ////////////////////////////////////////////////////////////////////////////
-    more_context();
-    ////////////////////////////////////////////////////////////////////////////
     
     
     ////////////////////////////////////////////////////////////////////////////
@@ -221,25 +188,6 @@ $(document).ready(function() {
     // Page and reader code ////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     // Change pages
-    $(".prev_page, .next_page").on('click', function() {
-        var my_path = db_url.replace(/(\/\d+)+$/, '/');
-        var doc_id = db_url.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
-        var page = $("#current_page").text();
-        var go_to_page = $(this).attr('id');
-        var myscript = my_path + "/scripts/go_to_page.py?philo_id=" + doc_id + "&go_to_page=" + go_to_page + "&doc_page=" + page;
-        $.getJSON(myscript, function(data) {
-            $("#current_page").fadeOut('fast', function() {
-                $(this).html(data[2]).fadeIn('fast');
-            });
-            $('.obj_text').fadeOut('fast', function () {
-                $(this).html(data[3]).fadeIn('fast');
-                $(".prev_page").attr("id", data[0]);
-                $('.next_page').attr('id', data[1]);
-                $()
-            }); 
-        });
-        
-    });
     $(".fake_prev_page, .fake_next_page").on('click', function() {
         var direction = $(this).attr('class');
         var page_count = $(".obj_text").children('div').size();
@@ -250,28 +198,13 @@ $(document).ready(function() {
             $(".obj_text").children().filter("div:visible").hide().next().fadeIn('fast');
         }
     });
-    $(".prev_obj, .next_obj").on('click', function() {
-        var my_path = db_url.replace(/\/\d+.*$/, '/');
-        var philo_id = $(this).attr('id');
-        var script = my_path + '/scripts/go_to_obj.py?philo_id=' + philo_id;
-        $.getJSON(script, function(data) {
-            var scrollto_id = '#' + $(".obj_text").attr('id');
-            $('#toc_container').find($(scrollto_id)).attr('style', 'color: #800000;');
-            $('.obj_text').fadeOut('fast', function() {
-                $(this).html(data['text']).fadeIn('fast');
-                $('.obj_text').attr("id", philo_id.replace(/ /g, '_'));
-                $('.prev_obj').attr('id', data['prev']);
-                $('.next_obj').attr('id', data["next"]);
-                $("html, body").animate({ scrollTop: 0 }, "fast");
-                var scrollto_id = '#' + $(".obj_text").attr('id');
-                $('#toc_container').scrollTo($(scrollto_id), 500);
-                $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
-            });
-        });
-    });
     
     // This is to display the table of contents in the document viewer
-    if ($('.next_obj').length || $('.next_page').length) {
+    if ($('.next_obj').length) {
+        retrieve_obj(db_url);
+        t_o_c_handler(db_url);
+    } else if ($('.next_page').length) {
+        retrieve_page(db_url);
         t_o_c_handler(db_url);
     }
     
@@ -330,6 +263,83 @@ $(document).ready(function() {
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+
+/// Go to next or previous object in text display
+function retrieve_obj(db_url){
+    $(".prev_obj, .next_obj").on('click', function() {
+        var my_path = db_url.replace(/\/\d+.*$/, '/');
+        var philo_id = $(this).attr('id');
+        var script = my_path + '/scripts/go_to_obj.py?philo_id=' + philo_id;
+        $.getJSON(script, function(data) {
+            var scrollto_id = '#' + $(".obj_text").attr('id');
+            $('#toc_container').find($(scrollto_id)).attr('style', 'color: #800000;');
+            $('.obj_text').fadeOut('fast', function() {
+                $(this).html(data['text']).fadeIn('fast');
+                $('.obj_text').attr("id", philo_id.replace(/ /g, '_'));
+                $('.prev_obj').attr('id', data['prev']);
+                $('.next_obj').attr('id', data["next"]);
+                $("html, body").animate({ scrollTop: 0 }, "fast");
+                var scrollto_id = '#' + $(".obj_text").attr('id');
+                $('#toc_container').scrollTo($(scrollto_id), 500);
+                $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
+            });
+        });
+    });
+}
+function retrieve_page(db_url) {
+    $(".prev_page, .next_page").on('click', function() {
+        var my_path = db_url.replace(/(\/\d+)+$/, '/');
+        var doc_id = db_url.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
+        var page = $(".book_page").attr('id');
+        var go_to_page = $(this).attr('id');
+        var myscript = my_path + "/scripts/go_to_page.py?philo_id=" + doc_id + "&go_to_page=" + go_to_page + "&doc_page=" + page;
+        console.log(myscript)
+        $.getJSON(myscript, function(data) {
+            $(".book_page").attr('id', data[2]);
+            $('.obj_text').fadeOut('fast', function () {
+                $(this).html(data[3]).fadeIn('fast');
+                $(".prev_page").attr("id", data[0]);
+                $('.next_page').attr('id', data[1]);
+                $()
+            }); 
+        });
+        
+    });
+}
+
+/// Switch betwwen concordance and KWIC reports
+function concordance_kwic_switch(db_url) {
+    $("#report_switch").on("change", function() {
+        $('.highlight_options').remove();
+        var switchto = $('input[name=report_switch]:checked').val();
+        var width = $(window).width() / 3;
+        $("#waiting").css("margin-left", width).show();
+        $("#waiting").css("margin-top", 200).show();
+        $.get(db_url + "/reports/concordance_switcher.py" + switchto, function(data) {
+            $("#results_container").hide().empty().html(data).fadeIn('fast');
+            $("#waiting").hide();
+            if (switchto.match(/kwic/)) {
+                var config = {    
+                    over: showBiblio, 
+                    timeout: 100,  
+                    out: hideBiblio   
+                };
+                $(".kwic_biblio").hoverIntent(config);
+            }
+            display_options_on_selected();
+            more_context();
+            $('.more').find('a').each(function() {
+                if (switchto.match(/kwic/)) {
+                    var new_href = $(this).attr('href').replace('concordance', 'kwic');
+                }
+                else {
+                    var new_href = $(this).attr('href').replace('kwic', 'concordance');
+                }
+                $(this).attr('href', new_href);
+            });
+        });
+    });
+}
 
 /// Have previous and next links follow scroll in page and object navigation ///
 function t_o_c_handler(db_url) {
@@ -484,10 +494,9 @@ function monkeyPatchAutocomplete() {
             .appendTo( ul );
     };
 }
-function autocomplete_metadata(metadata, field) {
-    var pathname = window.location.pathname.replace('dispatcher.py/', '');
+function autocomplete_metadata(metadata, field, db_url) {
     $("#" + field).autocomplete({
-        source: pathname + "/scripts/metadata_list.py?field=" + field,
+        source: db_url + "/scripts/metadata_list.py?field=" + field,
         minLength: 2,
         dataType: "json"
     });
