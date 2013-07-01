@@ -19,8 +19,8 @@ def format(text,bytes=[]):
             last_offset = b
         text = new_text + text[last_offset:]
     text = "<div>" + text + "</div>"
-#    xml = etree.parse(StringIO(text.decode("utf-8","ignore")),parser)
     xml = FragmentParser.parse(text)
+    print >> sys.stderr, "RAW_XML",etree.tostring(xml)
     for el in xml.iter():        
         try:
             if el.tag == "sc" or el.tag == "scx":
@@ -45,12 +45,12 @@ def format(text,bytes=[]):
                     el[0].attrib["src"] = url_prefix + img_url + ".sm.jpeg"
                     del el[0].attrib["url"]
                     el.append(etree.Element("br"))
-                elif el.tag == "philoHighlight":        
-                    word_match = re.match(r"\w+", el.tail, re.U)
-                    el.text = el.tail[:word_match.end()]
-                    el.tail = el.tail[word_match.end():]
-                    el.tag = "span"
-                    el.attrib["class"] = "highlight"
+            elif el.tag == "philoHighlight":        
+                word_match = re.match(r"\w+", el.tail, re.U)
+                el.text = el.tail[:word_match.end()]
+                el.tail = el.tail[word_match.end():]
+                el.tag = "span"
+                el.attrib["class"] = "highlight"
         except:
             pass
     output = etree.tostring(xml)

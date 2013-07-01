@@ -9,6 +9,7 @@ class FragmentParser:
         self.root.tail = u""
         self.current_el = self.root
         self.current_tail = None
+
         self.in_tag = True
         self.stack = []
 
@@ -18,8 +19,9 @@ class FragmentParser:
         new_el = etree.SubElement(self.current_el,tag,attrib)
         new_el.text = u""
         new_el.tail = u""
-        self.current_el = self.current_el[-1]
+        self.current_el = new_el
         self.in_tag = True
+        self.current_tail = None
 
     def end(self,tag):
         if len(self.stack) and self.stack[-1] == tag:
@@ -28,6 +30,7 @@ class FragmentParser:
             self.stack.pop()            
             self.current_el = self.current_el.getparent()
             self.in_tag = False
+
         else:
             pass
             #print >> sys.stderr, "UNBALANCED-END: " + tag        
