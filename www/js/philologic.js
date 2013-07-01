@@ -164,16 +164,9 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     ///////// Frequency / Frequency per 10,000 switcher ////////////////////////
     ////////////////////////////////////////////////////////////////////////////
-    $('#frequency_report_switch').on("change", function(){
-        var switchto = $('input[name=freq_switch]:checked').val();
-        var width = $(window).width() / 3;
-        $("#waiting").css("margin-left", width).show();
-        $("#waiting").css("margin-top", 200).show();
-        $.get(db_url + "/scripts/frequency_switcher.py" + switchto, function(data) {
-            $("#results_container").hide().html(data).fadeIn('fast');
-            $("#waiting").hide();
-        });
-    });
+    if ($('.philologic_frequency_report').length) {
+        frequency_switcher(db_url);
+    }
     ////////////////////////////////////////////////////////////////////////////
     
     
@@ -210,6 +203,35 @@ $(document).ready(function() {
     
     
     // Toggle reading mode
+    if ($('.book_page').length) {
+        display_overlay();
+    }
+    
+    // Links follow scroll
+    if ($('.next_obj').length) {
+        follow_scroll($('.prev_and_toc'), $('.next_and_read'));
+    } else if ($('.next_page').length) {
+        follow_scroll($('.prev_and_toc'), $('.next_and_read'));
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // Contextual menu when selecting a word ///////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    display_options_on_selected();
+    ////////////////////////////////////////////////////////////////////////////
+    
+});
+
+
+////////////////////////////////////////////////////////////////////////////////
+//////////// FUNCTIONS /////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+// Display overlay to enable a reading mode //
+function display_overlay() {
     $("#overlay_toggler").click(function() {
         if ($("#overlay").is('*')) {
             $(".book_page").css('box-shadow', '0px 0px 15px #888888');
@@ -240,29 +262,21 @@ $(document).ready(function() {
             $("#overlay").fadeIn('fast');
         }
     });
-    
-    // Links follow scroll
-    if ($('.next_obj').length) {
-        follow_scroll($('.prev_and_toc'), $('.next_and_read'));
-    } else if ($('.next_page').length) {
-        follow_scroll($('.prev_and_toc'), $('.next_and_read'));
-    }
-    ////////////////////////////////////////////////////////////////////////////
-    
-    
-    ////////////////////////////////////////////////////////////////////////////
-    // Contextual menu when selecting a word ///////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////
-    display_options_on_selected();
-    ////////////////////////////////////////////////////////////////////////////
-    
-});
+}
 
-
-////////////////////////////////////////////////////////////////////////////////
-//////////// FUNCTIONS /////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
+// Switch between absolute frequency and frequency per 10,000 words
+function frequency_switch(db_url) {
+    $('#frequency_report_switch').on("change", function(){
+        var switchto = $('input[name=freq_switch]:checked').val();
+        var width = $(window).width() / 3;
+        $("#waiting").css("margin-left", width).show();
+        $("#waiting").css("margin-top", 200).show();
+        $.get(db_url + "/scripts/frequency_switcher.py" + switchto, function(data) {
+            $("#results_container").hide().html(data).fadeIn('fast');
+            $("#waiting").hide();
+        });
+    });
+}
 
 /// Go to next or previous object in text display
 function retrieve_obj(db_url){
@@ -280,8 +294,10 @@ function retrieve_obj(db_url){
                 $('.next_obj').attr('id', data["next"]);
                 $("html, body").animate({ scrollTop: 0 }, "fast");
                 var scrollto_id = '#' + $(".obj_text").attr('id');
-                $('#toc_container').scrollTo($(scrollto_id), 500);
-                $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
+                if ($('#toc_container').find($(scrollto_id)).length) {
+                    $('#toc_container').scrollTo($(scrollto_id), 500);
+                    $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
+                }
             });
         });
     });
@@ -418,6 +434,7 @@ function show_hide_toc(top_right) {
         $('#toc_container').animate({
                 'margin-left': '-700px'
         }, 450);
+        $('#show_table_of_contents').button('refresh');
     }
 }
 

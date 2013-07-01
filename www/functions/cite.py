@@ -67,18 +67,14 @@ def make_abs_div_cite(db,i):
     if sub_section_name:
         cite += u" - <a href='%s'>%s</a>" % (sub_section_href,sub_section_name)
 
-    # hack alert                                                                                                                                                                                                                                                                   
-    if len(i.philo_id) >= 8:
-        page_id = [i.philo_id[0],0,0,0,0,0,0,0,i.philo_id[6]]
-        page_id = " ".join(str(s) for s in page_id)
-        page_q = i.db.dbh.execute("SELECT * FROM pages WHERE philo_id = ?;",(page_id,))
-        page_obj = page_q.fetchone()
-        if page_obj:
+    page_obj = i.get_page()
+    if page_obj:
             if page_obj['n']:
                 page_n = page_obj['n'].decode('utf-8', 'ignore')
-                bytes = '&'.join(['byte=%d' % int(byte) for byte in i.bytes])
-                page_href = u'<a href="%s&doc_page=%s&">' % (doc_href,page_n)
-                cite += u", %spage %s.</a>" % (page_href, page_n)
+                cite += u", page %s." % page_n
+#                bytes = '&'.join(['byte=%d' % int(byte) for byte in i.bytes])
+#                page_href = u'<a href="%s&doc_page=%s&">' % (doc_href,page_n)
+#                cite += u", %spage %s.</a>" % (page_href, page_n)
 
     cite += "</span>"
     return cite
