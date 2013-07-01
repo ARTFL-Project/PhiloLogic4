@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import re
+import sys
 from os.path import exists
 from ObjectFormatter import format, format_concordance
 
@@ -10,23 +11,20 @@ def get_text(hit, byte_start, length, path):
     file.seek(byte_start)
     return file.read(length)
 
-def get_page_text(db, philo_id, page_num, filename, path, bytes):
-    philo_id = str(philo_id) + ' %'
-    conn = db.dbh
-    c = conn.cursor()
-    c.execute("select start_byte, end_byte from pages where philo_id like ? and n=? limit 1", (philo_id,page_num))
-    try:
-        start_byte, end_byte = c.fetchone()
-    except TypeError:   ## returns None because there are no pages in the doc
-        return ''
-    length = int(end_byte) - int(start_byte)
-    file_path = path + '/data/TEXT/' + filename
+def get_page_text(db, obj, page_num, path, bytes):
+    page = obj.get_page()
+    print >> sys.stderr, "OBJ_ID", obj.philo_id,
+    print >> sys.stderr, "TYPE", obj.type
+    print >> sys.stderr, 'PAGE', obj.page
+    print >> sys.stderr, 'PHILO_ID', page['philo_id']
+    length = int(page['end_byte']) - int(page['start_byte'])
+    file_path = path + '/data/TEXT/' + obj.filename
     file = open(file_path)        
-    file.seek(start_byte)
+    file.seek(page['start_byte'])
     text = file.read(length)
     sorted_bytes = sorted(bytes.split('+'))
-    if bytes and int(start_byte) < int(sorted_bytes[0]) < int(end_byte):
-        bytes = sorted([int(byte) - int(start_byte) for byte in bytes.split('+')])
+    if bytes and int(page['start_byte']) < int(sorted_bytes[0]) < int(page['end_byte']):
+        bytes = sorted([int(byte) - int(page['start_byte']) for byte in bytes.split('+')])
         return format(text, bytes).decode('utf-8', 'ignore')
     else:
         return format(text).decode("utf-8","ignore")

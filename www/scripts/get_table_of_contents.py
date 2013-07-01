@@ -9,7 +9,8 @@ from mako.template import Template
 import reports as r
 import functions as f
 
-    
+obj_level = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4}
+
 if __name__ == "__main__":
     environ = os.environ
     environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/get_table_of_contents.py', '')
