@@ -59,12 +59,9 @@ def compute_idf(query_words, c, total_docs):
         idfs[word] = idf
     return idfs
 
-def bm25(tf, dl, avg_dl, idf, k1=1.2, b=0.75):
-    temp_score = tf * (k1 + 1.0)
-    ## a floor is applied to normalized length of doc
-    ## in order to diminish the importance of small docs
-    ## see http://xapian.org/docs/bm25.html
-    temp_score2 = tf + k1 * ((1.0 - b) + b * floor(dl / avg_dl))
+def bm25(tf, dl, avg_dl, idf, k1=1.6, b=0.6):
+    temp_score = tf * k1
+    temp_score2 = tf + k1 * ((1.0 - b) + b * dl / avg_dl)
     score = idf * temp_score / temp_score2
     return score
 
@@ -150,8 +147,6 @@ def retrieve_hits(q, db):
                     results[i['philo_id']]['score'] = bm25(1, len(q_word), len(q_word), idfs[q_word]) * 1000
                 perfect_match.add(i['philo_id'])
     # Look for matches in the metadata string
-    # In order to boost the importance of metadata, we'll set the average length of combined metadata to 50
-    avg_meta_length = 50
     token_regex = db.locals["word_regex"] + "|" + db.locals["punct_regex"] + '| '
     query_words = unicode(query_words, 'utf-8')
     my_words = '|'.join(set([w for w in re.split(token_regex, query_words, re.U) if w]))
@@ -162,7 +157,7 @@ def retrieve_hits(q, db):
         metadata_list = [i for i in c.execute(query)]
         for i in metadata_list:
             philo_id = i['philo_id']
-            metadata_string = ' '.join([i[m] or '' for m in db.locals["metadata_fields"] if m != 'id']).decode('utf-8', 'ignore').lower()
+            metadata_string = ' '.join([i[m] or '' for m in db.locals["metadata_fields"]]).decode('utf-8', 'ignore').lower()
             matches = [w.encode('utf-8', 'ignore') for w in word_reg.findall(metadata_string)]
             if matches:
                 metadata_length = len(metadata_string)
@@ -170,7 +165,7 @@ def retrieve_hits(q, db):
                     for match in matches:
                         if match: # not an empty string
                             try:
-                                results[philo_id]['score'] += bm25(1, metadata_length, avg_meta_length, idfs[match])
+                                results[philo_id]['score'] += bm25(100, metadata_length, avg_dl, idfs[match])
                             except KeyError:
                                 pass
                     if len(matches) > 1:
@@ -183,7 +178,7 @@ def retrieve_hits(q, db):
                     for match in matches:
                         if match: # not an empty string
                             try:
-                                results[philo_id]['score'] += bm25(1, metadata_length, avg_meta_length, idfs[match])
+                                results[philo_id]['score'] += bm25(100, metadata_length, avg_dl, idfs[match])
                             except KeyError:
                                 pass
                     if len(matches) > 1:
