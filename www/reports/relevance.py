@@ -15,8 +15,9 @@ from functions.format import adjust_bytes
 from functions.ObjectFormatter import format_strip, convert_entities
 from bibliography import bibliography
 import re
-from render_template import render_template
 import subprocess
+from render_template import render_template
+from collections import defaultdict
 
 
 def relevance(environ,start_response):
@@ -84,10 +85,10 @@ def retrieve_hits(q, db):
     philo_ids = filter_hits(q, obj_types, c)
     
     ## TEMPORARY ###
-    q['q'] = ' '.join([i for i in format_query('"'+ q['q'] + '"', db).split()])
-    query_words = q['q'].replace('|', ' ').decode('utf-8', 'ignore').lower().encode('utf-8') ## Handle ORs from crapser
-    query_words = ' '.join([i for i in query_words.split() if len(i.decode('utf-8', 'ignore')) > 1]) ## eliminate one letter words from query
+    q['q'] = ' '.join(re.split('\s', format_query(q['q'], db))) ## ask Richard about this
+    query_words = q['q'][:].strip()
     q['q'] = q['q'].replace(' ', '|') ## Add ORs for search links
+    print >> sys.stderr, "QS", repr(query_words)
     
     idfs = compute_idf(query_words, c, total_docs)
     
@@ -129,26 +130,42 @@ def retrieve_hits(q, db):
             results[philo_id]['match'] += 1
             results[philo_id]['score'] += score
             ## Boost score if more than one query word is in the document
-            results[philo_id]['score'] *= results[philo_id]['match'] + 100
+            results[philo_id]['score'] *= results[philo_id]['match'] + 1000
             results[philo_id]['bytes'].extend(bytes.split())
         
     ## Perform search on metadata
-    ## In order to boost the importance of metadata, we'll set the average length of combined metadata to 50
+    # Look for exact matches
+    perfect_match = set()
+    for q_word in query_words.split():
+        for metadata in db.locals["metadata_fields"]:
+            query = ('select philo_id from metadata_relevance where %s=? COLLATE NOCASE' % metadata)
+            c.execute(query, (q_word,))
+            for i in c.fetchall():
+                if i['philo_id'] in results:
+                    results[i['philo_id']]['score'] += bm25(1, len(q_word), len(q_word), idfs[q_word]) * 1000
+                else:
+                    results[i['philo_id']] = {}
+                    results[i['philo_id']]['obj_type'] = object_types[i['philo_id'].split().index('0') - 1]
+                    results[i['philo_id']]['bytes'] = []
+                    results[i['philo_id']]['score'] = bm25(1, len(q_word), len(q_word), idfs[q_word]) * 1000
+                perfect_match.add(i['philo_id'])
+    # Look for matches in the metadata string
+    # In order to boost the importance of metadata, we'll set the average length of combined metadata to 50
     avg_meta_length = 50
     token_regex = db.locals["word_regex"] + "|" + db.locals["punct_regex"] + '| '
     query_words = unicode(query_words, 'utf-8')
     my_words = '|'.join(set([w for w in re.split(token_regex, query_words, re.U) if w]))
     if my_words:
         word_reg = re.compile(r"\b%s\b" % my_words, re.U)
-        metadata = ','.join([m for m in db.locals["metadata_fields"] if m!= "id"])
+        metadata = ','.join([m for m in db.locals["metadata_fields"]])
         query = 'select philo_id, %s from metadata_relevance' % metadata
         metadata_list = [i for i in c.execute(query)]
         for i in metadata_list:
+            philo_id = i['philo_id']
             metadata_string = ' '.join([i[m] or '' for m in db.locals["metadata_fields"] if m != 'id']).decode('utf-8', 'ignore').lower()
             matches = [w.encode('utf-8', 'ignore') for w in word_reg.findall(metadata_string)]
             if matches:
                 metadata_length = len(metadata_string)
-                philo_id = i['philo_id']
                 if philo_id in results:
                     for match in matches:
                         if match: # not an empty string
@@ -156,6 +173,8 @@ def retrieve_hits(q, db):
                                 results[philo_id]['score'] += bm25(1, metadata_length, avg_meta_length, idfs[match])
                             except KeyError:
                                 pass
+                    if len(matches) > 1:
+                        results[philo_id]['score'] *= len(matches) + 1000
                 elif philo_id in philo_ids or not philo_ids:
                     results[philo_id] = {}
                     results[philo_id]['obj_type'] = object_types[philo_id.split().index('0') - 1]
@@ -167,7 +186,8 @@ def retrieve_hits(q, db):
                                 results[philo_id]['score'] += bm25(1, metadata_length, avg_meta_length, idfs[match])
                             except KeyError:
                                 pass
-        
+                    if len(matches) > 1:
+                        results[philo_id]['score'] *= len(matches) + 1000
         
         
         hits = sorted(results.iteritems(), key=lambda x: x[1]['score'], reverse=True)
@@ -193,11 +213,6 @@ def fetch_relevance(hit, path, q, samples=10):
         conc_text = f.get_text(hit, byte_start, length, path)
         conc_text = format_strip(conc_text, bytes)
         conc_text = convert_entities(conc_text)
-        #conc_text = re.sub('<(/?span.*?)>', '[\\1]', conc_text)
-        #conc_text = re.sub('<.*?>', '', conc_text)
-        #conc_text = re.sub('\[(/?span.*?)\]', '<\\1>', conc_text)
-        #conc_text = re.sub('<div[^>]*>', '', conc_text)
-        #conc_text = re.sub('</div>', '', conc_text)
         text_snippet.append(conc_text)
     text = ' ... '.join(text_snippet)
     return text
