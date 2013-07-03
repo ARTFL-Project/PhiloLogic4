@@ -11,7 +11,8 @@
             <div id="report" class="report">
                 <h3 style="padding-left: 5px;">Choose a search report:</h3>
                 <input type="radio" name="report" id="report1" value='concordance' checked="checked"><label for="report1">Concordance Report</label>
-		<input type="radio" name="report" id="report3" value='kwic'><label for="report3">Key Word in Context (KWIC) Report</label>
+                <input type="radio" name="report" id="report3" value='kwic'><label for="report3">Key Word in Context (KWIC) Report</label>
+                <input type="radio" name="report" id="report2" value='relevance'><label for="report2">Ranked Relevance Report</label>
                 <input type="radio" name="report" id="report4" value='collocation'><label for="report4">Collocation Table</label>
             </div>
          </div>

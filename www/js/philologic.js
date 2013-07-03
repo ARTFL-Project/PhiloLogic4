@@ -448,23 +448,28 @@ function display_options_on_selected() {
             var options = $('<div class="highlight_options">');
             var my_table = '<table class="context_table" BORDER=1 RULES=ALL frame=void>';
             my_table += '<tr><td class="selected_word">"' + text.charAt(0).toUpperCase() + text.slice(1) + '"</td></tr>';
-            var search_reports = ['concordance', 'collocation']
+            var search_reports = ['concordance', 'collocation', 'relevance']
             my_table += '<tr><td>';
-            for (report in search_reports) {
-                report = search_reports[report];
-                var url = "?report=" + report + "&method=proxy&q=" + text;
-                if (report != 'relevance') {
-                    var report_link = '<a href="' + url + '" class="selected_tag">Run a ' + report + ' search for this selection</a><br>'
-                } else {
-                    var report_link = '<a href="' + url + '" class="selected_tag">Run a ranked relevance search for this selection</a><br>'
+            if (text.split(' ').length == 1) {
+                for (report in search_reports) {
+                    report = search_reports[report];
+                    var url = "?report=" + report + "&method=proxy&q=" + text;
+                    if (report != 'relevance') {
+                        var report_link = '<a href="' + url + '" class="selected_tag">Run a ' + report + ' search for this selection</a><br>';
+                    } else {
+                        var report_link = '<a href="' + url + '" class="selected_tag">Run a ranked relevance search for this selection</a><br>';
+                    }
+                    my_table += report_link;
                 }
+            } else {
+                var url = "?report=relevance&method=proxy&q=" + text;
+                var report_link = '<a href="' + url + '" class="selected_tag">Run a ranked relevance search for this selection</a><br>';
                 my_table += report_link;
             }
             if (text.split(' ').length == 1) {
                 var url = "?report=time_series&method=proxy&q=" + text;
-                var report_link = '<a href="' + url + '" class="selected_tag">Run a time series search for this selection</a><br>'
-                var definition = '<a href="http://artflx.uchicago.edu/cgi-bin/dicos/pubdico1look.pl?strippedhw=' + text + '" target="_blank" class="selected_tag">Get a definition of this word</a>'
-                //my_table += report_link;
+                var report_link = '<a href="' + url + '" class="selected_tag">Run a time series search for this selection</a><br>';
+                var definition = '<a href="http://artflx.uchicago.edu/cgi-bin/dicos/pubdico1look.pl?strippedhw=' + text + '" target="_blank" class="selected_tag">Get a definition of this word</a>';
                 my_table += "</tr></td><tr><td class='definition'>";
                 my_table += definition;
             }

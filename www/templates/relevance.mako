@@ -25,7 +25,7 @@ $(document).ready(function() {
                     %>
                     <span class='hit_n'>${n}.</span>
                     % if i.type == 'doc':
-                        <span class='tooltip_link' title="Click to see title">${f.cite.make_abs,doc_cite(db,i)}</span>
+                        <span class='tooltip_link' title="Click to see title">${f.cite.make_abs_doc_cite(db,i)}</span>
                     % else:
                         <span class='tooltip_link' title="Click to see document">${f.cite.make_abs_div_cite(db,i)}</span>
                     % endif
@@ -34,7 +34,7 @@ $(document).ready(function() {
                             metadata = {}
                             for m in db.locals['metadata_fields']:
                                 metadata[m] = i[m].encode('utf-8', 'ignore')
-                            url = f.link.make_query_link(q["q"],q["method"],q["arg"],**metadata)
+                            url = f.link.make_query_link(q["q"],q["method"],q["arg"],report='concordance',**metadata)
                         %>
                         <span style"padding-left:25px">
                             <a href='${url}' title="Click to retrieve all ${hit_num} occurences" class="tooltip_link">${hit_num} occurences</a>
