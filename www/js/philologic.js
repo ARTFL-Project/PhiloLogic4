@@ -448,7 +448,7 @@ function display_options_on_selected() {
             var options = $('<div class="highlight_options">');
             var my_table = '<table class="context_table" BORDER=1 RULES=ALL frame=void>';
             my_table += '<tr><td class="selected_word">"' + text.charAt(0).toUpperCase() + text.slice(1) + '"</td></tr>';
-            var search_reports = ['concordance', 'collocation']
+            var search_reports = ['concordance', 'collocation', 'relevance']
             my_table += '<tr><td>';
             if (text.split(' ').length == 1) {
                 for (report in search_reports) {

@@ -66,7 +66,7 @@ def make_abs_div_cite(db,i):
         cite += u" - <a href='%s'>%s</a>" % (section_href,section_name)
     if sub_section_name:
         cite += u" - <a href='%s'>%s</a>" % (sub_section_href,sub_section_name)
-
+    
     page_obj = i.get_page()
     if page_obj:
             if page_obj['n']:
