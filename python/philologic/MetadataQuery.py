@@ -9,19 +9,23 @@ import subprocess
 tests = ['hello','"hello"','hi|hello','hi|"hello"','1-5','hello-hi','1-5|"hi|hello"','NULL',"NOT NULL",'hi|NULL', 'hello NOT hi','"hello" NOT hi',"NOT 1-5|hi","1-5 NOT 4", "hello NOT"]
 pattern = r'(\"[^\"]*?\")|([|])|(.*?\-.*?)|(.+)'
 
-patterns = [("QUOTE",r'".*?"'),
-            ("NOT"," ?NOT "),
+patterns = [("QUOTE",r'".+?"'),
+            ("NOT","NOT"),
             ('OR',r'\|'),
-            ('RANGE',r'[^|! ]*?\-[^|! ]*'),
+            ('RANGE',r'[^|\s]+?\-[^|\s]+'),
             ('NULL',r'NULL'),
-            ('TERM',r'[^|!"]+')]
+            ('TERM',r'[^\-|\s"]+')]
 
 def make_clause(column,tokens,norm_path):
     clauses = ""
     vars = []
     conj = "AND"
     neg = False
-    for t in tokens:
+    start_or = False
+    in_or = False
+    end_or = False
+    print >> sys.stderr, "TOKENS",tokens
+    for i,t in enumerate(tokens):
         if t[0] == "NOT":
             neg = True
             clause = ""
@@ -33,6 +37,7 @@ def make_clause(column,tokens,norm_path):
                 clause = "%s == ?" % (column)
                 vars.append(t[1][1:-1])
         elif t[0] == "OR":
+            clause = ""
             if neg:
                 conj = "AND"
             else:
@@ -58,40 +63,46 @@ def make_clause(column,tokens,norm_path):
             norm_term = u"".join(norm_term).encode("utf-8")
             expanded_terms = metadata_pattern_search(norm_term,norm_path)
             print >> sys.stderr, "EXPANDED_TERMS:", expanded_terms
+
             if not expanded_terms:
                 clause = "%s == ?" % column
                 vars.append(norm_term)
+
             else:   
                 sub_clauses = []
                 for t in expanded_terms:
                     vars.append(t)               
                     if neg:
                         sub_clauses.append("%s != ?" % column)
-                        conj = "AND"
+                        sub_conj = "AND"
+                        clause = (" " + "AND" + " ").join(sub_clauses)
                     else:
                         sub_clauses.append("%s == ?" % column)
-                        conj = "OR"
-                    clause = (" " + conj + " ").join(sub_clauses)
-#            clause_column = column
-#            if normalized:
-#                term = t[1].decode("utf-8").lower()
-#                term = [c for c in unicodedata.normalize("NFKD",term) if not unicodedata.combining(c)]
-#                term = u"".join(term).encode("utf-8")
-#                clause_column = column + "_norm"
-#            else:
-#                term = t[1]
-#            if neg:
-#                clause = "%s NOT LIKE ?" % (clause_column)
-#                vars.append("%" + term + "%")
-#            else:
-#                clause = "%s LIKE ?" % (clause_column)
-#                vars.append("%" + term + "%")
-                            
+                        sub_conj = "OR"
+                clause = "(" + (" " + sub_conj + " ").join(sub_clauses) + ")"
+
+        if in_or:
+            if i+1 == len(tokens):
+                end_or = True
+            elif i+1 < len(tokens):
+                if tokens[i][0] != "OR" and tokens[i+1][0] != "NOT":
+                    end_or = True
+
+        if in_or == False and i+1 < len(tokens) and tokens[i+1][0] == "OR":
+            in_or = True
+            clause = "(" + clause
+
+        if end_or:
+            clause = clause + ")"
+            in_or = False
+            end_or = False
+
         if clause and clauses:
             clauses += " " + conj + " " + clause
             clause = ""
             if conj == "OR":
                 conj = "AND"
+
         elif clause:
             clauses += clause
             clause = ""
@@ -120,8 +131,8 @@ def parse(column,orig,norm_path):
                         temp = temp[r.end():]
                     break
             else:
-                break
-        return make_clause(column,temp_result,norm_path)
+                temp = temp[1:]
+        return (column,temp_result,norm_path)
 
 def metadata_pattern_search(term, path):
     command = ['egrep', '-wi', "%s" % term, '%s' % path]
@@ -173,7 +184,8 @@ def query_lowlevel(db,param_dict):
     for column,values in param_dict.items():
         norm_path = db.locals["db_path"]+"/frequencies/normalized_" + column + "_frequencies"
         for v in values:
-            clause,some_vars = parse(column,v,norm_path)
+            column,temp_result,norm_path = parse(column,v,norm_path)
+            clause,some_vars = make_clause(column,temp_result,norm_path)
             clauses.append(clause)
             vars += some_vars
     if clauses:
