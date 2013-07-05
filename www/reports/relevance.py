@@ -139,12 +139,12 @@ def retrieve_hits(q, db):
             c.execute(query, (q_word,))
             for i in c.fetchall():
                 if i['philo_id'] in results:
-                    results[i['philo_id']]['score'] += bm25(1, len(q_word), len(q_word), idfs[q_word]) * 1000
+                    results[i['philo_id']]['score'] = results[i['philo_id']]['score'] * 1000
                 else:
                     results[i['philo_id']] = {}
                     results[i['philo_id']]['obj_type'] = object_types[i['philo_id'].split().index('0') - 1]
                     results[i['philo_id']]['bytes'] = []
-                    results[i['philo_id']]['score'] = bm25(1, len(q_word), len(q_word), idfs[q_word]) * 1000
+                    results[i['philo_id']]['score'] = results[i['philo_id']]['score'] * 1000
                 perfect_match.add(i['philo_id'])
     # Look for matches in the metadata string
     token_regex = db.locals["word_regex"] + "|" + db.locals["punct_regex"] + '| '
