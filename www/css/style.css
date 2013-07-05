@@ -234,9 +234,6 @@ div.main_body {
 .philologic_context {
     text-align: justify;
 }
-.philologic_collocation {
-    float: left;
-}
 .word_cloud {
     float: right;
     width:400px !important;
