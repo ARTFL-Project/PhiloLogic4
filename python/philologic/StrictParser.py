@@ -85,6 +85,8 @@ class ExpatWrapper:
         self.p.StartElementHandler = self.start_element
         self.p.EndElementHandler = self.end_element
         self.p.CharacterDataHandler = self.char_data
+        self.p.buffer_text = True
+        self.p.buffer_size = 65536
     def parse(self,file):      
         self.p.ParseFile(file)        
         return self.target.close()
@@ -202,7 +204,7 @@ class StrictParser:
                             # This will implicitly push a sentence if we aren't in one already.
                             self.v.push("word",t.group(1).lower().encode("utf-8"),offset + len(content[:t.start(1)].encode("utf-8")) )
                             self.v.pull("word",offset + len(content[:t.end(1)].encode("utf-8")))
-                    elif t.group(2): 
+                    elif t.group(2):
                         # a sentence should already be defined most of the time.
                         if "sent" not in self.v:
                             # but we'll make sure one is.
