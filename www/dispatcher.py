@@ -18,9 +18,15 @@ def philo_dispatcher(environ,start_response):
         if path_components[0] == "form":
             yield reports.form(environ,start_response)
         else:
-            yield getattr(reports, report or "navigation")(environ,start_response)
+            try:
+                yield getattr(reports, report or "navigation")(environ,start_response)
+            except:
+                yield reports.error(environ,start_response)
     elif environ["QUERY_STRING"]:
-        yield getattr(reports, report or "concordance")(environ,start_response)
+        try:
+            yield getattr(reports, report or "concordance")(environ,start_response)
+        except:
+            yield reports.error(environ,start_response)
     else:
         yield reports.form(environ,start_response)
         

@@ -12,10 +12,11 @@ def render_template(*args, **data):
     path = os.getcwd().replace('reports', '')
     templates = TemplateLookup(path)
     template = Template(filename="templates/%s" % data['template_name'], lookup=templates)
-    if not db.locals['debug']:
+    try:
         return template.render(*args, **data).encode("UTF-8", "ignore")
-    else:
-        try:
+    except:
+        if not db.locals['debug']:
+            template = Template(filename="templates/error.mako", lookup=templates)
             return template.render(*args, **data).encode("UTF-8", "ignore")
-        except:
+        else:
             return exceptions.html_error_template().render()
