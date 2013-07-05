@@ -30,6 +30,18 @@ def make_word_counts(loader_obj, text, depth=4):
     os.remove(text['raw'])
     os.rename(temp_file, text['raw'])
     
+def fix_pages(loader_obj,text,depth=4):
+    """Unfinished, do not use"""
+    object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word'][:depth]
+    current_page = 0;
+    temp_file = open(text["sortedtoms"] + ".tmp","w")
+    for line in open(text["sortedtoms"]):
+        type, word, id, attrib = line.split('\t')
+        id = id.split()
+        record = Record(type, word, id)
+        record.attrib = eval(attrib) 
+                
+
 def prev_next_obj(loader_obj, text, depth=4):
     object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word'][:depth]
     record_dict = {}

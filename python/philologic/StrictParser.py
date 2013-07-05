@@ -85,6 +85,8 @@ class ExpatWrapper:
         self.p.StartElementHandler = self.start_element
         self.p.EndElementHandler = self.end_element
         self.p.CharacterDataHandler = self.char_data
+        self.p.buffer_text = True
+        self.p.buffer_size = 65536
     def parse(self,file):      
         self.p.ParseFile(file)        
         return self.target.close()
