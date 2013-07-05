@@ -59,7 +59,7 @@ def parse_query(qstring):
                 buf = buf[m.end():]
                 break
         else:
-            break
+            buf = buf[1:]
 #        print parsed
     parsed_split = []
     for label,token in parsed:
@@ -67,9 +67,6 @@ def parse_query(qstring):
         if l == "QUOTE":
             subtokens = t[1:-1].split(" ")
             parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
-        elif l == "TERM":
-            subtokens = t.split(" ")
-            parsed_split += [("TERM_S",sub_t) for sub_t in subtokens if sub_t]
         else:
             parsed_split += [(l,t)]
     return parsed_split
@@ -87,23 +84,21 @@ def format_parsed_query(parsed_split,db):
             subtokens = token.split(" ")
             clauses[-1] += subtokens
             command += "\n".join(subt+"\n" for subt in subtokens)
-        elif label == "TERM_S":
+        elif label == "TERM":
             if prior_label != "OR":
                 clauses.append([])
                 command += "\n"
-            subtokens = token.split(" ")
             expanded = []
-            for subt in subtokens:
-                norm_subt = subt.decode("utf-8").lower()
-                norm_subt = [i for i in unicodedata.normalize("NFKD",norm_subt) if not unicodedata.combining(i)]
-                norm_subt = "".join(norm_subt).encode("utf-8")
-                print >> sys.stderr, "TERMS:", norm_subt
-                matches = word_pattern_search(norm_subt,db.locals["db_path"]+"/frequencies/normalized_word_frequencies")
-                print >> sys.stderr, "MATCHES:"
-                print >> sys.stderr, matches                
-                for m in matches:
-                    if m not in expanded:
-                        expanded += [m]                                              
+            norm_tok = token.decode("utf-8").lower()
+            norm_tok = [i for i in unicodedata.normalize("NFKD",norm_tok) if not unicodedata.combining(i)]
+            norm_tok = "".join(norm_tok).encode("utf-8")
+            print >> sys.stderr, "TERMS:", norm_tok
+            matches = word_pattern_search(norm_tok,db.locals["db_path"]+"/frequencies/normalized_word_frequencies")
+            print >> sys.stderr, "MATCHES:"
+            print >> sys.stderr, matches                
+            for m in matches:
+                if m not in expanded:
+                    expanded += [m]                                              
             #subtokens should be expanded against word_frequencies here
             #AFTER unicode-stripping, of course.
             clauses[-1] += expanded
