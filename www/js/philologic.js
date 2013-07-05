@@ -613,6 +613,10 @@ function toggle_frequency(q_string, db_url, pathname) {
     });
     $(".hide_frequency").show();
     $(".frequency_container").show();
+    // Workaround padding weirdness in Firefox and Internet Explorer
+    if (/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent) || /MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+        $(".frequency_table").css('padding-left', '20px');
+    }
     $(".hide_frequency").click(function() {
         hide_frequency();
     });
