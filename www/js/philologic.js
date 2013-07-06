@@ -113,6 +113,7 @@ $(document).ready(function() {
             }
             else if (key == 'pagenum' || key == 'method' || key == 'year_interval') {
                 $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
+                $('input[name=' + key + '][value=' + value + ']').button('refresh');
             }
             else if (key == 'field') {
                 $('select[name=' + key + ']').val(value);
@@ -157,6 +158,14 @@ $(document).ready(function() {
     if ($("#report_switch").length) {
         concordance_kwic_switch(db_url);
         more_context();
+        if ($('.kwic_concordance').length) {
+            var config = {    
+                    over: showBiblio, 
+                    timeout: 100,  
+                    out: hideBiblio   
+                };
+            $(".kwic_biblio").hoverIntent(config);
+        }
     }
     ////////////////////////////////////////////////////////////////////////////
     
@@ -341,7 +350,14 @@ function concordance_kwic_switch(db_url) {
                     out: hideBiblio   
                 };
                 $(".kwic_biblio").hoverIntent(config);
+                $('#report1').removeAttr("checked");
+                $('#report3').prop("checked", true)
             }
+            else {
+                $('#report3').removeAttr("checked");
+                $('#report1').prop("checked", true);
+            }
+            $("#report").buttonset("refresh");
             display_options_on_selected();
             more_context();
             $('.more').find('a').each(function() {
