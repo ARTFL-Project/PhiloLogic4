@@ -106,6 +106,10 @@ extra_locals = {"db_url": url_root + dbname}
 if r_r_obj:
     extra_locals['ranked_relevance_objects'] = r_r_obj
 
+## Define which search reports to enable
+## Note that this can still be configured in your database db_locals.py file
+search_reports = ['concordance', 'kwic', 'relevance', 'collocation', 'time_series']
+extra_locals['search_reports'] = search_reports
 
 ###########################
 ## Set-up database load ###

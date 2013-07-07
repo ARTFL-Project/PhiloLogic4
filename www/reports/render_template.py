@@ -1,6 +1,7 @@
 #!/usr/bin env python
 
 import os
+import sys
 from json import dumps
 from mako.template import Template
 from mako.lookup import TemplateLookup
@@ -14,9 +15,10 @@ def render_template(*args, **data):
     template = Template(filename="templates/%s" % data['template_name'], lookup=templates)
     try:
         return template.render(*args, **data).encode("UTF-8", "ignore")
-    except:
+    except Exception as error:
         if not db.locals['debug']:
             template = Template(filename="templates/error.mako", lookup=templates)
             return template.render(*args, **data).encode("UTF-8", "ignore")
+            #print >> sys.stderr, str(error)
         else:
-            return exceptions.html_error_template().render()
+            return exceptions.html_error_template().render

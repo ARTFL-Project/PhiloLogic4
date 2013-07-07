@@ -48,6 +48,10 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     // Search form related events //////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
+    for (i in db_locals['search_reports']) {
+        search_report = '#' + db_locals['search_reports'][i] + '_button';
+        $(search_report).show();
+    }
     $("#q").focus(function() {
         if ($(".philologic_response").is('*')) {
             show_more_options("report");
@@ -350,12 +354,12 @@ function concordance_kwic_switch(db_url) {
                     out: hideBiblio   
                 };
                 $(".kwic_biblio").hoverIntent(config);
-                $('#report1').removeAttr("checked");
-                $('#report3').prop("checked", true)
+                $('#concordance').removeAttr("checked");
+                $('#kwic').prop("checked", true)
             }
             else {
-                $('#report3').removeAttr("checked");
-                $('#report1').prop("checked", true);
+                $('#kwic').removeAttr("checked");
+                $('#concordance').prop("checked", true);
             }
             $("#report").buttonset("refresh");
             display_options_on_selected();
@@ -542,16 +546,16 @@ function autocomplete_metadata(metadata, field, db_url) {
 
 // Display different search parameters based on the type of report used
 function showHide(value) {
-    $("#results_per_page, #collocation, #time_series, #year_interval,#frequency, #method, #metadata_fields").hide();
+    $("#results_per_page, #collocation_num, #time_series_num, #year_interval,#frequency_num, #method, #metadata_fields").hide();
     $('.explain_relev, .explain_conc, .explain_time, .explain_colloc, .explain_kwic, explain_freq').hide();
     $('.relev_question, .conc_question, .colloc_question, .time_question, .kwic_question, explain_freq').hide();    
 
     if (value == 'frequency') {
-        $("#frequency, #method, #metadata_fields").show();
+        $("#frequency_num, #method, #metadata_fields").show();
         $('.freq_question').fadeIn();
     }
     if (value == 'collocation') {
-        $("#collocation, #method, #metadata_fields").show();
+        $("#collocation_num, #method, #metadata_fields").show();
         $('.colloc_question').fadeIn();
     }
     if (value == 'kwic') {
@@ -567,7 +571,7 @@ function showHide(value) {
         $('.relev_question').fadeIn();
     }
     if (value == "time_series") {
-        $("#time_series, #year_interval").show();
+        $("#time_series_num, #year_interval").show();
         $('.time_question').fadeIn();
     }
 }

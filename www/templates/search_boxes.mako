@@ -10,10 +10,22 @@
             </table>
             <div id="report" class="report">
                 <h3 style="padding-left: 5px;">Choose a search report:</h3>
-                <input type="radio" name="report" id="report1" value='concordance' checked="checked"><label for="report1">Concordance Report</label>
-                <input type="radio" name="report" id="report3" value='kwic'><label for="report3">Key Word in Context (KWIC) Report</label>
-                <input type="radio" name="report" id="report2" value='relevance'><label for="report2">Ranked Relevance Report</label>
-                <input type="radio" name="report" id="report4" value='collocation'><label for="report4">Collocation Table</label>
+                <span id="concordance_button" style="display: none;">
+                    <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
+                    <label for="concordance">Concordance Report</label>
+                </span>
+                <span id="kwic_button" style="display: none;">
+                    <input type="radio" name="report" id="kwic" value='kwic'>
+                    <label for="kwic">Key Word in Context (KWIC) Report</label>
+                </span>
+                <span id="relevance_button" style="display: none;">
+                    <input type="radio" name="report" id="relevance" value='relevance'>
+                    <label for="relevance">Ranked Relevance Report</label>
+                </span>
+                <span id="collocation_button" style="display: none;">
+                    <input type="radio" name="report" id="collocation" value='collocation'>
+                    <label for="collocation">Collocation Table</label>
+                </span>
             </div>
          </div>
          <div class="search_explain">
@@ -82,7 +94,7 @@
                 </table>
             </div>
             <table> 
-                <tr class="table_row" id="collocation"><td class="first_column">Within </td>
+                <tr class="table_row" id="collocation_num"><td class="first_column">Within </td>
                     <td>
                         <label for="word_num"></label>
                         <input id="word_num" name="word_num" />
@@ -90,7 +102,7 @@
                     </td>
                 </tr>
                
-                <tr class="table_row" id="frequency">
+                <tr class="table_row" id="frequency_num">
                     <td class="first_column">
                         <span class="search_field">Frequency by:</span>
                     </td>
@@ -111,7 +123,7 @@
                     </td>
                 </tr>
                 
-                <tr class="table_row" id="time_series">
+                <tr class="table_row" id="time_series_num">
                 <td class="first_column">Date range:</td><td><span class="search_field">from </span><input type='text' name="start_date" id="start_date" style="width:35px;"><span class="search_field"> to </span><input type='text' name="end_date" id="end_date" style="width:35px;">
                 <tr class="table_row" id="year_interval"><td class="first_column"><span class="search_field">Year interval:</span></td><td><span id="year_interval">
                 <input type="radio" name="year_interval" id="year0" value="1" checked="checked"><label for="year0">every year</label>
