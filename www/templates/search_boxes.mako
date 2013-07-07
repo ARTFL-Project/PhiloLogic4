@@ -26,6 +26,10 @@
                     <input type="radio" name="report" id="collocation" value='collocation'>
                     <label for="collocation">Collocation Table</label>
                 </span>
+                <span id="time_series_button" style="display: none;">
+                    <input type="radio" name="report" id="time_series" value='time_series'>
+                    <label for="time_series">Time Series Report</label>
+                </span>
             </div>
          </div>
          <div class="search_explain">
