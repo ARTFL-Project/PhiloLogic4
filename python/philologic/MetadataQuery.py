@@ -85,7 +85,7 @@ def make_clause(column,tokens,norm_path):
             if i+1 == len(tokens):
                 end_or = True
             elif i+1 < len(tokens):
-                if tokens[i][0] != "OR" and tokens[i+1][0] != "NOT":
+                if tokens[i][0] != "OR":
                     end_or = True
 
         if in_or == False and i+1 < len(tokens) and tokens[i+1][0] == "OR":
