@@ -109,7 +109,7 @@ html, body {
 a:link, a:visited {
   color: #800000;
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 700 !important;
 }
 a:hover {
   color: #800000;
@@ -117,7 +117,6 @@ a:hover {
 }
 a.active, a:link.active, a:visited.active, a:hover.active {
   color: #800000;
-  font-weight: 700;
 }
 
 /* Fonts */
@@ -234,9 +233,6 @@ div.main_body {
 }
 .philologic_context {
     text-align: justify;
-}
-.philologic_collocation {
-    float: left;
 }
 .word_cloud {
     float: right;
@@ -426,7 +422,6 @@ div.main_body {
 #toc_container {
     overflow-y: auto;
     background: white;
-    z-index: 99;
     margin-top: 20px;
 }
 .page_number, obj_nav {

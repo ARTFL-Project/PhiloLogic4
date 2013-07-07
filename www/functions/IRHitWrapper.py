@@ -60,3 +60,14 @@ class HitWrapper(object):
                 return metadata
         else:
             return metadata
+    
+    def get_page(self):
+        if self.type == "word" and len(list(self.hit)) > 7:
+            page_i = self.hit[6]
+        else:
+            page_i = self["page"]
+        if page_i:
+            page_id = [self.hit[0],0,0,0,0,0,0,0,page_i]
+            return self.db.get_page(page_id)
+        else:
+            return None
