@@ -506,6 +506,21 @@ ul.ui-autocomplete.ui-menu {
     font-size: 12px !important;
     font-family: inherit !important;
 }
+.ui-progressbar {
+    height: 1em;
+    position: relative;
+}
+.progress-label {
+    position: absolute;
+    left: 50%;
+    top: -2px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+}
+.ui-progressbar-value {
+    font-size: 70% !important;
+    text-align: center;
+}
 
 
 /*Pages links*/
@@ -630,4 +645,9 @@ label.custom-select {
     background: #efefee;
     color: #555555;
     pointer-events: none;
+}
+
+/* hack for inserted page links at top of object */
+b p.inserted-page {
+  display:inline;
 }

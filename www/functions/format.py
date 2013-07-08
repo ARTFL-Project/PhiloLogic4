@@ -10,6 +10,7 @@ from StringIO import StringIO
 
 def adjust_bytes(bytes, length):
     """Readjust byte offsets for concordance"""
+    ### Called from every report that fetches text and needs highlighting
     bytes = sorted(bytes) # bytes aren't stored in order
     byte_start = bytes[0] - (length / 2)
     first_hit =  length / 2
@@ -26,6 +27,7 @@ def adjust_bytes(bytes, length):
 
 
 def chunkifier(conc_text, bytes, kwic=False, highlight=False):
+    ## Still used in collocations
     """Divides the passage in three:
     * from the beginning to the first hit (not included)
     * from the first hit to the end of the last hit
@@ -55,20 +57,22 @@ def chunkifier(conc_text, bytes, kwic=False, highlight=False):
     return conc_start, conc_middle, conc_end
 
 
-def highlighter(text):
-    """This function highlights a passage based on the hit's byte offset"""
-
-    breaker = re.match(r"([^ \.,;:?!\'\-\"\n\r\t\(\)]+)",text)
-    if breaker:
-        end_byte = breaker.end()
-    else:
-        end_byte = len(text)
-
-    r_text = '<span class="highlight">' + text[:end_byte] + '</span>' # 0 element is always an empty string
-    return r_text, end_byte
+#def highlighter(text):
+#    """This function highlights a passage based on the hit's byte offset"""
+#    ### Deprecated
+#
+#    breaker = re.match(r"([^ \.,;:?!\'\-\"\n\r\t\(\)]+)",text)
+#    if breaker:
+#        end_byte = breaker.end()
+#    else:
+#        end_byte = len(text)
+#
+#    r_text = '<span class="highlight">' + text[:end_byte] + '</span>' # 0 element is always an empty string
+#    return r_text, end_byte
 
 
 def clean_text(text, notag=True, kwic=False, collocation=False):
+    ## Still used in collocations
     """Cleans your text, and by default removes all tags"""
     text = re.sub("^[^<]*?>","",text)
     text = re.sub("<[^>]*?$","",text)
@@ -109,22 +113,24 @@ def clean_text(text, notag=True, kwic=False, collocation=False):
     return text
   
   
-def align_text(text, byte_num, chars=40):
-    """This function is meant for formating text for KWIC results"""
-    start_hit = text.index('<span class="highlight">')
-    end_hit = text.rindex('</span>') + 7
-    tag_length = 7 * byte_num
-    start_text = convert_entities(text[:start_hit])
-    if len(start_text) < chars:
-        white_space = ' ' * (chars - len(start_text))
-        start_text = white_space + start_text
-    start_text = '<span style="white-space:pre-wrap;">' + start_text[-chars:] + '</span>'
-    end_text = convert_entities(text[end_hit:])
-    match = convert_entities(text[start_hit:end_hit])
-    return start_text + match + end_text[:chars+tag_length]
+#def align_text(text, byte_num, chars=40):
+#    ### Deprecated
+#    """This function is meant for formating text for KWIC results"""
+#    start_hit = text.index('<span class="highlight">')
+#    end_hit = text.rindex('</span>') + 7
+#    tag_length = 7 * byte_num
+#    start_text = convert_entities(text[:start_hit])
+#    if len(start_text) < chars:
+#        white_space = ' ' * (chars - len(start_text))
+#        start_text = white_space + start_text
+#    start_text = '<span style="white-space:pre-wrap;">' + start_text[-chars:] + '</span>'
+#    end_text = convert_entities(text[end_hit:])
+#    match = convert_entities(text[start_hit:end_hit])
+#    return start_text + match + end_text[:chars+tag_length]
    
     
 def clean_word(word):
+    ## Only used in the tokenize_text function below
     """Removes any potential non-word characters"""
     word = re.sub("[0-9]* ", "", word)
     word = re.sub("[\s]*", "", word)
@@ -135,39 +141,43 @@ def clean_word(word):
 
 def tokenize_text(text):
     """Returns a list of individual tokens"""
+    ## Still used in collocations
     text = text.lower()
     text_tokens = re.split(r"([^ \.,;:?!\'\-\"\n\r\t\(\)]+)|([\.;:?!])", text) ## this splits on whitespaces and punctuation
     text_tokens = [clean_word(token) for token in text_tokens if token] ## remove empty strings
     return text_tokens
  
    
-def fix_html(text):
-    """Fixes broken HTML tags"""
-    html = etree.HTML(text)
-    return etree.tostring(html, pretty_print=True, method="html")
- 
-def convert_entities(text):
-    def fixup(m):
-        text = m.group(0)
-        if text[:2] == "&#":
-            # character reference
-            try:
-                if text[:3] == "&#x":
-                    return unichr(int(text[3:-1], 16))
-                else:
-                    return unichr(int(text[2:-1]))
-            except ValueError:
-                pass
-        else:
-            # named entity
-            try:
-                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
-            except KeyError:
-                pass
-        return text # leave as is
-    return re.sub("&#?\w+;", fixup, text)
-
-def formatter(text):
-    """This function calls an external script containing a dictionnary with formatting
-    options for proper display in the web browser"""
-    return Formatter.format(text)
+#def fix_html(text):
+#    ## Deprecated
+#    """Fixes broken HTML tags"""
+#    html = etree.HTML(text)
+#    return etree.tostring(html, pretty_print=True, method="html")
+# 
+#def convert_entities(text):
+#    ## Deprecated
+#    def fixup(m):
+#        text = m.group(0)
+#        if text[:2] == "&#":
+#            # character reference
+#            try:
+#                if text[:3] == "&#x":
+#                    return unichr(int(text[3:-1], 16))
+#                else:
+#                    return unichr(int(text[2:-1]))
+#            except ValueError:
+#                pass
+#        else:
+#            # named entity
+#            try:
+#                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+#            except KeyError:
+#                pass
+#        return text # leave as is
+#    return re.sub("&#?\w+;", fixup, text)
+#
+#def formatter(text):
+#    ### Deprecated
+#    """This function calls an external script containing a dictionnary with formatting
+#    options for proper display in the web browser"""
+#    return Formatter.format(text)

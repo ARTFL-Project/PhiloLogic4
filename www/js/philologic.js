@@ -755,10 +755,19 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
             right_new_colloc = update_table(right_colloc, data[2], q_string, "right");
             update_colloc(db_url, all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
             collocation_cloud();
+            var total = $('#progress_bar').progressbar("option", "max");
+            var percent = colloc_end / total * 100;
+            if (colloc_end < total) {
+                $('#progress_bar').progressbar({value: colloc_end});
+                $('.progress-label').text(percent.toString().split('.')[0] + '%');
+            }
         }));
     }
     else {
-        $("#working").hide();
+        var total = $('#progress_bar').progressbar("option", "max");
+        $('#progress_bar').progressbar({value: total});
+        $('.progress-label').text('Complete!');
+        $("#progress_bar").delay(500).fadeOut('slow');
     }
 }
 
@@ -792,8 +801,6 @@ function collocation_cloud() {
         $("#collocate_counts").append(full_link);
     }
     $("#collocate_counts a").tagcloud();
-    //$(".cloud_term :hover").css('text-decoration', 'none');
-    //$(".cloud_term :hover").css('color', 'black');
     $("#collocate_counts").fadeIn('fast');
 }
 

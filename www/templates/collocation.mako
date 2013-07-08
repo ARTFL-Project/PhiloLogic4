@@ -8,17 +8,23 @@ $(document).ready(function() {
     var right_colloc = ${dumps(right_colloc)};
     var db_url = db_locals['db_url'];
     update_colloc(db_url, all_colloc, left_colloc, right_colloc, ${hit_len}, 0, 100);
-    var spinner = '<img src="' + db_url + '/js/ajax-loader.gif" alt="Loading..."  height="25px" width="25px"/>';
-    $('#working').append(spinner);
+    var colloc_hits = parseInt($('#colloc_hits').html());
+    $('#progress_bar').css('width', $('#collocation_table').width() - 5);
+    $('#progress_bar').progressbar({max: colloc_hits});
+    $('#progress_bar').progressbar({value: 100});
+    var percent = 100 / colloc_hits * 100;
+    $('.progress-label').text(percent.toString().split('.')[0] + '%');
 })
 </script>
 <div class='philologic_response'>
     <div class='initial_report'>
         <p class='description'>
-            Displaying the top 100 collocates for ${hit_len} occurrences of "${q['q'].decode('utf-8', 'ignore')}":
+            Displaying the top 100 collocates for <span id="colloc_hits">${hit_len}</span> occurrences of "${q['q'].decode('utf-8', 'ignore')}":
         </p>
+        <div id="progress_bar" style="position:absolute;margin-top:-15px;">
+            <div class="progress-label"></div>
+        </div>
         The 200 most common words are being filtered from this report.
-        <span id="working" style="font-weight:600;"></span>
     </div>
     <div class="results_container">
         <div class='philologic_collocation'>
