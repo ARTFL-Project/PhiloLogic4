@@ -14,7 +14,7 @@ if __name__ == "__main__":
     environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/get_collocate.py', '')
     db, path_components, q = parse_cgi(environ)
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-    results = r.fetch_collocation(hits, environ["SCRIPT_FILENAME"], q, full_report=False)
+    results = r.fetch_collocation(hits, environ["SCRIPT_FILENAME"], q, db, full_report=False)
     results_with_links = []
     for word, num in results:
         url = r.link_to_concordance(q, word, 'all', num)

@@ -8,6 +8,23 @@ import htmlentitydefs
 def get_text(obj,words):
     pass
 
+def adjust_bytes(bytes, length):
+    """Readjust byte offsets for concordance"""
+    ### Called from every report that fetches text and needs highlighting
+    bytes = sorted(bytes) # bytes aren't stored in order
+    byte_start = bytes[0] - (length / 2)
+    first_hit =  length / 2
+    if byte_start < 0:
+        first_hit = first_hit + byte_start ## this is a subtraction really
+        byte_start = 0
+    new_bytes = []
+    for pos, word_byte in enumerate(bytes):
+        if pos == 0:
+            new_bytes.append(first_hit)
+        else:
+            new_bytes.append(word_byte - byte_start)
+    return new_bytes, byte_start
+
 def format(text,bytes=[]):
 #    print >> sys.stderr, "TEXT:",text
     parser = etree.XMLParser(recover=True)

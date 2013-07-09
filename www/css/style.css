@@ -217,7 +217,7 @@ div.main_body {
 .kwic_biblio {
     font-weight:400 !important;
 }
-.philologic_concordance {
+.philologic_concordance, .colloc_concordance {
         list-style-type: none;
 }
 .philologic_occurrence {

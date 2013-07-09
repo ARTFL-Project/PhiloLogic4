@@ -8,7 +8,7 @@ import re
 from functions.wsgi_handler import wsgi_response
 from bibliography import bibliography
 from render_template import render_template
-from functions.ObjectFormatter import format_strip, convert_entities
+from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 
 
 def kwic(environ,start_response):
@@ -47,7 +47,7 @@ def fetch_kwic(results, path, q, byte_query, db, start, end, length=500):
         length = length/2 + byte_distance + length/2
             
         ## Get concordance and align it
-        bytes, byte_start = f.format.adjust_bytes(hit.bytes, length)
+        bytes, byte_start = adjust_bytes(hit.bytes, length)
         conc_text = f.get_text(hit, byte_start, length, path)
         conc_text = format_strip(conc_text, bytes)
         conc_text = KWIC_formatter(conc_text, len(hit.bytes))
