@@ -247,7 +247,7 @@ $(document).ready(function() {
 
 
 function scroll_to_highlight() {
-    var word_offset = $('.highlight').offset().top;
+    var word_offset = $('.highlight').offset().top - 40;
     $("html, body").animate({ scrollTop: word_offset }, 'slow');
 }
 
