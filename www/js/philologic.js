@@ -212,9 +212,15 @@ $(document).ready(function() {
     if ($('.next_obj').length) {
         retrieve_obj(db_url);
         t_o_c_handler(db_url);
+        follow_scroll($('.prev_and_toc'), $('.next_and_read'));
+        $(window).load(function() {
+            scroll_to_highlight();
+        });
     } else if ($('.next_page').length) {
         retrieve_page(db_url);
         t_o_c_handler(db_url);
+        follow_scroll($('.prev_and_toc'), $('.next_and_read'));
+        scroll_to_highlight();
     }
     
     
@@ -222,13 +228,6 @@ $(document).ready(function() {
     if ($('.book_page').length) {
         display_overlay();
         page_image_link();
-    }
-    
-    // Links follow scroll
-    if ($('.next_obj').length) {
-        follow_scroll($('.prev_and_toc'), $('.next_and_read'));
-    } else if ($('.next_page').length) {
-        follow_scroll($('.prev_and_toc'), $('.next_and_read'));
     }
     ////////////////////////////////////////////////////////////////////////////
     
@@ -246,6 +245,11 @@ $(document).ready(function() {
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+
+function scroll_to_highlight() {
+    var word_offset = $('.highlight').offset().top;
+    $("html, body").animate({ scrollTop: word_offset }, 'slow');
+}
 
 function page_image_link() {
     $('.page_image_link').click(function(e) {
