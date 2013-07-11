@@ -48,6 +48,10 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     // Search form related events //////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
+    for (i in db_locals['search_reports']) {
+        search_report = '#' + db_locals['search_reports'][i] + '_button';
+        $(search_report).show();
+    }
     $("#q").focus(function() {
         if ($(".philologic_response").is('*')) {
             show_more_options("report");
@@ -113,6 +117,7 @@ $(document).ready(function() {
             }
             else if (key == 'pagenum' || key == 'method' || key == 'year_interval') {
                 $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
+                $('input[name=' + key + '][value=' + value + ']').button('refresh');
             }
             else if (key == 'field') {
                 $('select[name=' + key + ']').val(value);
@@ -157,9 +162,20 @@ $(document).ready(function() {
     if ($("#report_switch").length) {
         concordance_kwic_switch(db_url);
         more_context();
+        if ($('.kwic_concordance').length) {
+            var config = {    
+                    over: showBiblio, 
+                    timeout: 100,  
+                    out: hideBiblio   
+                };
+            $(".kwic_biblio").hoverIntent(config);
+        }
     }
     ////////////////////////////////////////////////////////////////////////////
-    
+
+    if ($(".colloc_concordance")) {
+        more_context();
+    }
     
     ////////////////////////////////////////////////////////////////////////////
     ///////// Frequency / Frequency per 10,000 switcher ////////////////////////
@@ -196,22 +212,22 @@ $(document).ready(function() {
     if ($('.next_obj').length) {
         retrieve_obj(db_url);
         t_o_c_handler(db_url);
+        follow_scroll($('.prev_and_toc'), $('.next_and_read'));
+        $(window).load(function() {
+            scroll_to_highlight();
+        });
     } else if ($('.next_page').length) {
         retrieve_page(db_url);
         t_o_c_handler(db_url);
+        follow_scroll($('.prev_and_toc'), $('.next_and_read'));
+        scroll_to_highlight();
     }
     
     
     // Toggle reading mode
     if ($('.book_page').length) {
         display_overlay();
-    }
-    
-    // Links follow scroll
-    if ($('.next_obj').length) {
-        follow_scroll($('.prev_and_toc'), $('.next_and_read'));
-    } else if ($('.next_page').length) {
-        follow_scroll($('.prev_and_toc'), $('.next_and_read'));
+        page_image_link();
     }
     ////////////////////////////////////////////////////////////////////////////
     
@@ -229,6 +245,60 @@ $(document).ready(function() {
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+
+function scroll_to_highlight() {
+    var word_offset = $('.highlight').offset().top;
+    $("html, body").animate({ scrollTop: word_offset }, 'slow');
+}
+
+function page_image_link() {
+    $('.page_image_link').click(function(e) {
+        e.preventDefault();
+        var href = $(this).attr('href');
+        var image = $("<img />").attr('src', href).load(function() {
+            var div = '<div class="image_container" style="display: none;"></div>'
+            $('.page_display').prepend(div);
+            var close_div = '<div id="close_page_image" class="ui-icon ui-icon-circle-close close_page_image"></div>'
+            $('.image_container').append(close_div)
+            $("body").append("<div id='overlay' style='display:none;'></div>");
+            var header_height = $('#header').height();
+            var footer_height = $('#footer').height();
+            var overlay_height = $(document).height() - header_height - footer_height;
+            $("#overlay")
+            .height(overlay_height)
+            .css({
+               'opacity' : 0.3,
+               'position': 'absolute',
+               'top': 0,
+               'left': 0,
+               'background-color': 'white',
+               'width': '100%',
+               'margin-top': header_height,
+               'z-index': 90
+             });
+            $("html, body").animate({ scrollTop: 140 }, "slow");
+            $('.image_container').append(image);
+            $('.image_container, #overlay').fadeIn('fast');
+            var image_height = $('.image_container').offset().top + $('.image_container').height();
+            image_height = image_height + parseInt($('.image_container').css('border-top-width')) + parseInt($('.image_container').css('border-bottom-width'));
+            var original_footer_offset = $('#footer').offset().top;
+            if (image_height > $('#footer').offset().top) {
+                $('#footer').offset({top: image_height});
+            }
+            $("#close_page_image, #overlay").click(function() {
+                $('.image_container, #overlay').fadeOut('fast', function() {
+                    $('#overlay').remove();
+                    $('.image_container').remove();
+                    if ($('#footer').offset().top > original_footer_offset) {
+                        $("html, body").animate({ scrollTop: 0 }, function() {
+                            $('#footer').animate({top: original_footer_offset});
+                        });
+                    }
+                });
+            });
+        });
+    });
+}
 
 // Display overlay to enable a reading mode //
 function display_overlay() {
@@ -289,6 +359,7 @@ function retrieve_obj(db_url){
             $('#toc_container').find($(scrollto_id)).attr('style', 'color: #800000;');
             $('.obj_text').fadeOut('fast', function() {
                 $(this).html(data['text']).fadeIn('fast');
+                $('#footer').css('top', '');
                 $('.obj_text').attr("id", philo_id.replace(/ /g, '_'));
                 $('.prev_obj').attr('id', data['prev']);
                 $('.next_obj').attr('id', data["next"]);
@@ -298,6 +369,9 @@ function retrieve_obj(db_url){
                     $('#toc_container').scrollTo($(scrollto_id), 500);
                     $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
                 }
+                page_image_link();
+                var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
+                History.pushState(null, '', new_url);
             });
         });
     });
@@ -309,14 +383,16 @@ function retrieve_page(db_url) {
         var page = $(".book_page").attr('id');
         var go_to_page = $(this).attr('id');
         var myscript = my_path + "/scripts/go_to_page.py?philo_id=" + doc_id + "&go_to_page=" + go_to_page + "&doc_page=" + page;
-        console.log(myscript)
         $.getJSON(myscript, function(data) {
             $(".book_page").attr('id', data[2]);
             $('.obj_text').fadeOut('fast', function () {
                 $(this).html(data[3]).fadeIn('fast');
+                $('#footer').css('top', '');
                 $(".prev_page").attr("id", data[0]);
                 $('.next_page').attr('id', data[1]);
-                $()
+                page_image_link();
+                var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
+                History.pushState(null, '', new_url);
             }); 
         });
         
@@ -341,7 +417,18 @@ function concordance_kwic_switch(db_url) {
                     out: hideBiblio   
                 };
                 $(".kwic_biblio").hoverIntent(config);
+                $('#concordance').removeAttr("checked");
+                $('#kwic').prop("checked", true)
+                var new_url = History.getState().url.replace(/report=concordance/, 'report=kwic');
+                History.pushState(null, '', new_url);
             }
+            else {
+                $('#kwic').removeAttr("checked");
+                $('#concordance').prop("checked", true);
+                var new_url = History.getState().url.replace(/report=kwic/, 'report=concordance');
+                History.pushState(null, '', new_url);
+            }
+            $("#report").buttonset("refresh");
             display_options_on_selected();
             more_context();
             $('.more').find('a').each(function() {
@@ -526,16 +613,16 @@ function autocomplete_metadata(metadata, field, db_url) {
 
 // Display different search parameters based on the type of report used
 function showHide(value) {
-    $("#results_per_page, #collocation, #time_series, #year_interval,#frequency, #method, #metadata_fields").hide();
+    $("#results_per_page, #collocation_num, #time_series_num, #year_interval,#frequency_num, #method, #metadata_fields").hide();
     $('.explain_relev, .explain_conc, .explain_time, .explain_colloc, .explain_kwic, explain_freq').hide();
     $('.relev_question, .conc_question, .colloc_question, .time_question, .kwic_question, explain_freq').hide();    
 
     if (value == 'frequency') {
-        $("#frequency, #method, #metadata_fields").show();
+        $("#frequency_num, #method, #metadata_fields").show();
         $('.freq_question').fadeIn();
     }
     if (value == 'collocation') {
-        $("#collocation, #method, #metadata_fields").show();
+        $("#collocation_num, #method, #metadata_fields").show();
         $('.colloc_question').fadeIn();
     }
     if (value == 'kwic') {
@@ -551,7 +638,7 @@ function showHide(value) {
         $('.relev_question').fadeIn();
     }
     if (value == "time_series") {
-        $("#time_series, #year_interval").show();
+        $("#time_series_num, #year_interval").show();
         $('.time_question').fadeIn();
     }
 }
@@ -735,10 +822,19 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
             right_new_colloc = update_table(right_colloc, data[2], q_string, "right");
             update_colloc(db_url, all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
             collocation_cloud();
+            var total = $('#progress_bar').progressbar("option", "max");
+            var percent = colloc_end / total * 100;
+            if (colloc_end < total) {
+                $('#progress_bar').progressbar({value: colloc_end});
+                $('.progress-label').text(percent.toString().split('.')[0] + '%');
+            }
         }));
     }
     else {
-        $("#working").hide();
+        var total = $('#progress_bar').progressbar("option", "max");
+        $('#progress_bar').progressbar({value: total});
+        $('.progress-label').text('Complete!');
+        $("#progress_bar").delay(500).fadeOut('slow');
     }
 }
 
@@ -772,8 +868,6 @@ function collocation_cloud() {
         $("#collocate_counts").append(full_link);
     }
     $("#collocate_counts a").tagcloud();
-    //$(".cloud_term :hover").css('text-decoration', 'none');
-    //$(".cloud_term :hover").css('color', 'black');
     $("#collocate_counts").fadeIn('fast');
 }
 

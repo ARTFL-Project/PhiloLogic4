@@ -8,7 +8,7 @@ import re
 from functions.wsgi_handler import wsgi_response
 from bibliography import bibliography
 from render_template import render_template
-from functions.ObjectFormatter import format_strip, convert_entities
+from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 
 
 def kwic(environ,start_response):
@@ -19,9 +19,10 @@ def kwic(environ,start_response):
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
-                                path=path, results_per_page=q['results_per_page'], template_name='kwic.mako')
+                                path=path, results_per_page=q['results_per_page'],
+                                template_name='kwic.mako')
 
-def fetch_kwic(results, path, q, byte_query, start, end, length=400):
+def fetch_kwic(results, path, q, byte_query, db, start, end, length=500):
     kwic_results = []
     shortest_biblio = 0
 
@@ -32,7 +33,7 @@ def fetch_kwic(results, path, q, byte_query, start, end, length=400):
         biblio = ' '.join(biblio.split()) ## maybe hackish, but it works
         
         get_query = byte_query(hit.bytes)
-        href = "./" + '/'.join([str(i) for i in hit.philo_id[:4]]) + get_query
+        href = "./" + '/'.join([str(i) for i in hit.philo_id[:2]]) + get_query
         
         ## Find shortest bibliography entry
         biblio = biblio
@@ -43,10 +44,10 @@ def fetch_kwic(results, path, q, byte_query, start, end, length=400):
             
         ## Determine length of text needed
         byte_distance = hit.bytes[-1] - hit.bytes[0]
-        length = 200 + byte_distance + 200
+        length = length/2 + byte_distance + length/2
             
         ## Get concordance and align it
-        bytes, byte_start = f.format.adjust_bytes(hit.bytes, length)
+        bytes, byte_start = adjust_bytes(hit.bytes, length)
         conc_text = f.get_text(hit, byte_start, length, path)
         conc_text = format_strip(conc_text, bytes)
         conc_text = KWIC_formatter(conc_text, len(hit.bytes))
@@ -78,12 +79,12 @@ def KWIC_formatter(output, hit_num, chars=40):
     start_hit = output.index('<span class="highlight">')
     end_hit = output.rindex('</span>') + 7
     tag_length = 7 * hit_num
-    ## Dont know why I need to run the converter twice...
     start_output = output[start_hit - chars:start_hit]
+    start_output = re.sub('^[^ ]+? ', ' ', start_output, 1) # Do we want to keep this?
     if len(start_output) < chars:
         white_space = ' ' * (chars - len(start_output))
         start_output = white_space + start_output
     start_output = '<span style="white-space:pre-wrap;">' + start_output + '</span>'
-    end_output = output[end_hit:]
+    end_output = re.sub('[^ ]+\Z', ' ', output[end_hit:], 1)
     match = output[start_hit:end_hit]
     return start_output + match + end_output[:chars+tag_length]
