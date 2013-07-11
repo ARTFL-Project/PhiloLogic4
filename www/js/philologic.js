@@ -221,6 +221,7 @@ $(document).ready(function() {
     // Toggle reading mode
     if ($('.book_page').length) {
         display_overlay();
+        page_image_link();
     }
     
     // Links follow scroll
@@ -245,6 +246,55 @@ $(document).ready(function() {
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+
+function page_image_link() {
+    $('.page_image_link').click(function(e) {
+        e.preventDefault();
+        var href = $(this).attr('href');
+        var image = $("<img />").attr('src', href).load(function() {
+            var div = '<div class="image_container" style="display: none;"></div>'
+            $('.page_display').prepend(div);
+            var close_div = '<div id="close_page_image" class="ui-icon ui-icon-circle-close close_page_image"></div>'
+            $('.image_container').append(close_div)
+            $("body").append("<div id='overlay' style='display:none;'></div>");
+            var header_height = $('#header').height();
+            var footer_height = $('#footer').height();
+            var overlay_height = $(document).height() - header_height - footer_height;
+            $("#overlay")
+            .height(overlay_height)
+            .css({
+               'opacity' : 0.3,
+               'position': 'absolute',
+               'top': 0,
+               'left': 0,
+               'background-color': 'white',
+               'width': '100%',
+               'margin-top': header_height,
+               'z-index': 90
+             });
+            $("html, body").animate({ scrollTop: 140 }, "slow");
+            $('.image_container').append(image);
+            $('.image_container, #overlay').fadeIn('fast');
+            var image_height = $('.image_container').offset().top + $('.image_container').height();
+            image_height = image_height + parseInt($('.image_container').css('border-top-width')) + parseInt($('.image_container').css('border-bottom-width'));
+            var original_footer_offset = $('#footer').offset().top;
+            if (image_height > $('#footer').offset().top) {
+                $('#footer').offset({top: image_height});
+            }
+            $("#close_page_image").click(function() {
+                $('.image_container, #overlay').fadeOut('fast', function() {
+                    $('#overlay').remove();
+                    $('.image_container').remove();
+                    if ($('#footer').offset().top > original_footer_offset) {
+                        $("html, body").animate({ scrollTop: 0 }, function() {
+                            $('#footer').animate({top: original_footer_offset});
+                        });
+                    }
+                });
+            });
+        });
+    });
+}
 
 // Display overlay to enable a reading mode //
 function display_overlay() {
@@ -305,6 +355,7 @@ function retrieve_obj(db_url){
             $('#toc_container').find($(scrollto_id)).attr('style', 'color: #800000;');
             $('.obj_text').fadeOut('fast', function() {
                 $(this).html(data['text']).fadeIn('fast');
+                $('#footer').css('top', '');
                 $('.obj_text').attr("id", philo_id.replace(/ /g, '_'));
                 $('.prev_obj').attr('id', data['prev']);
                 $('.next_obj').attr('id', data["next"]);
@@ -314,6 +365,7 @@ function retrieve_obj(db_url){
                     $('#toc_container').scrollTo($(scrollto_id), 500);
                     $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
                 }
+                page_image_link();
             });
         });
     });
@@ -325,14 +377,14 @@ function retrieve_page(db_url) {
         var page = $(".book_page").attr('id');
         var go_to_page = $(this).attr('id');
         var myscript = my_path + "/scripts/go_to_page.py?philo_id=" + doc_id + "&go_to_page=" + go_to_page + "&doc_page=" + page;
-        console.log(myscript)
         $.getJSON(myscript, function(data) {
             $(".book_page").attr('id', data[2]);
             $('.obj_text').fadeOut('fast', function () {
                 $(this).html(data[3]).fadeIn('fast');
+                $('#footer').css('top', '');
                 $(".prev_page").attr("id", data[0]);
                 $('.next_page').attr('id', data[1]);
-                $()
+                page_image_link();
             }); 
         });
         

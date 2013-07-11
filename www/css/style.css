@@ -651,3 +651,31 @@ label.custom-select {
 b p.inserted-page {
   display:inline;
 }
+
+.image_container {
+    position: absolute;
+    border: solid;
+    border-color: #BFBFBF;
+    border-width: 18px;
+    border-radius: 6px;
+    z-index: 101;
+    left: 25%;
+}
+.page_image_link {
+    color: #800000;
+    text-decoration: none;
+    font-weight: 700 !important;
+}
+.page_image_link:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+.close_page_image {
+    position: absolute;
+    margin-top: -16px;
+    z-index: 200;
+    left: 100%;
+}
+.close_page_image:hover {
+    cursor: pointer;
+}

@@ -45,12 +45,14 @@ def format(text,bytes=[]):
                 el.attrib["class"] = "small-caps"
             elif el.tag == "head":
                 el.tag = "b"
+                el.attrib["class"] = "headword"
                 el.append(etree.Element("br"))
             elif el.tag == "pb" and "fac" in el.attrib and "n" in el.attrib:
                 el.tag = "p"
                 el.append(etree.Element("a"))
                 el[-1].attrib["href"] = 'http://artflx.uchicago.edu/images/encyclopedie/' + el.attrib["fac"]
                 el[-1].text = "[page " + el.attrib["n"] + "]"
+                el[-1].attrib['class'] = "page_image_link"
             elif el.tag == "figure":
                 if el[0].tag == "graphic":
                     img_url = el[0].attrib["url"].replace(":","_")

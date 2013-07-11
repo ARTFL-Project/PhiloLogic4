@@ -45,16 +45,18 @@ def get_text_obj(obj, path, query_args=False):
     width = obj.byte_end - byte_start
     raw_text = file.read(width)
 
-    page_obj = obj.get_page()
-    if page_obj:
-            if page_obj['n'] and page_obj['img']:
-                find_head = re.search("<head>([^>]*?)</head>",raw_text)
-                if find_head:
-                    start_head = find_head.start(0)
-                    end_head = find_head.end(0)
-                    raw_text = raw_text[:start_head] + "<head>"+find_head.group(1)+" <pb class=\"inserted-page\" n=\"%s\" fac=\"%s\"/>" % (page_obj['n'], page_obj['img']) + "</head>"+ raw_text[end_head:]
+
     if query_args:
         bytes = sorted([int(byte) - byte_start for byte in query_args.split('+')])
     else:
         bytes = []
-    return format(raw_text,bytes).decode("utf-8","ignore")
+    formatted = format(raw_text,bytes).decode("utf-8","ignore")
+    page_obj = obj.get_page()
+    if page_obj:
+            if page_obj['n'] and page_obj['img']:
+                find_head = re.search("<b class=\"headword\">([^\n\r]*?)<br/></b>",formatted)
+                if find_head:
+                    href = 'http://artflx.uchicago.edu/images/encyclopedie/' + page_obj["img"]
+                    page = "[page " + page_obj["n"] + "]"
+                    formatted = formatted[:find_head.end(1)] + " <a href='%s' class='page_image_link'>%s</a>" % (href,page) + formatted[find_head.end(1):]
+    return formatted
