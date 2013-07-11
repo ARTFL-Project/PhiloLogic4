@@ -111,7 +111,8 @@ def make_clause(column,tokens,norm_path):
 
     return (clauses,vars)
 
-def parse(column,orig,norm_path):
+def parse(column,orig,norm_path):  
+    """Deprecated"""
         temp = orig[:]
         temp_result = []
         length = len(temp)
