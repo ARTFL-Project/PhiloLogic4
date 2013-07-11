@@ -8,6 +8,7 @@ import HitList
 import re
 import unicodedata
 from MetadataQuery import patterns
+from QuerySyntax import parse_query
 
 def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,limit=3000,filename=""):
     sys.stdout.flush()
@@ -47,29 +48,6 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
     else:
         hl.close()
         return HitList.HitList(filename,words_per_hit,db)
-
-def parse_query(qstring):
-    buf = qstring[:]
-    parsed = []
-    while len(buf) > 0:
-        for label,pattern in patterns:
-            m = re.match(pattern,buf)
-            if m:
-                parsed.append((label,m.group()))
-                buf = buf[m.end():]
-                break
-        else:
-            buf = buf[1:]
-#        print parsed
-    parsed_split = []
-    for label,token in parsed:
-        l,t = label,token
-        if l == "QUOTE":
-            subtokens = t[1:-1].split(" ")
-            parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
-        else:
-            parsed_split += [(l,t)]
-    return parsed_split
 
 def format_parsed_query(parsed_split,db):
     command = ""
@@ -114,7 +92,15 @@ def format_parsed_query(parsed_split,db):
     return command
 
 def format_query(qstring,db):
-    parsed_split = parse_query(qstring)
+    parsed = parse_query(qstring)
+    parsed_split = []
+    for label,token in parsed:
+        l,t = label,token
+        if l == "QUOTE":
+            subtokens = t[1:-1].split(" ")
+            parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
+        else:
+            parsed_split += [(l,t)]
     command = format_parsed_query(parsed_split,db)
     return command
 
