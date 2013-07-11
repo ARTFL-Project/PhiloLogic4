@@ -281,7 +281,7 @@ function page_image_link() {
             if (image_height > $('#footer').offset().top) {
                 $('#footer').offset({top: image_height});
             }
-            $("#close_page_image").click(function() {
+            $("#close_page_image, #overlay").click(function() {
                 $('.image_container, #overlay').fadeOut('fast', function() {
                     $('#overlay').remove();
                     $('.image_container').remove();
@@ -366,6 +366,8 @@ function retrieve_obj(db_url){
                     $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
                 }
                 page_image_link();
+                var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
+                History.pushState(null, '', new_url);
             });
         });
     });
@@ -385,6 +387,8 @@ function retrieve_page(db_url) {
                 $(".prev_page").attr("id", data[0]);
                 $('.next_page').attr('id', data[1]);
                 page_image_link();
+                var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
+                History.pushState(null, '', new_url);
             }); 
         });
         
@@ -411,10 +415,14 @@ function concordance_kwic_switch(db_url) {
                 $(".kwic_biblio").hoverIntent(config);
                 $('#concordance').removeAttr("checked");
                 $('#kwic').prop("checked", true)
+                var new_url = History.getState().url.replace(/report=concordance/, 'report=kwic');
+                History.pushState(null, '', new_url);
             }
             else {
                 $('#kwic').removeAttr("checked");
                 $('#concordance').prop("checked", true);
+                var new_url = History.getState().url.replace(/report=kwic/, 'report=concordance');
+                History.pushState(null, '', new_url);
             }
             $("#report").buttonset("refresh");
             display_options_on_selected();
