@@ -11,8 +11,7 @@ from math import log10, floor
 from random import sample
 from philologic.DB import DB
 from philologic.Query import format_query
-from functions.format import adjust_bytes
-from functions.ObjectFormatter import format_strip, convert_entities
+from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 from bibliography import bibliography
 import re
 import subprocess

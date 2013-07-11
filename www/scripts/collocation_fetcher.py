@@ -15,7 +15,6 @@ if __name__ == "__main__":
     form = cgi.FieldStorage()
     db, path_components, q = parse_cgi(environ)
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-    #print >> sys.stderr, q['colloc_start'], q['colloc_end']
-    all_colloc, left_colloc, right_colloc = r.fetch_collocation(hits, environ["SCRIPT_FILENAME"], q)
+    all_colloc, left_colloc, right_colloc = r.fetch_collocation(hits, environ["SCRIPT_FILENAME"], q, db)
     print "Content-Type: text/html\n"
     print dumps([all_colloc, left_colloc, right_colloc])

@@ -1,4 +1,3 @@
-import format
 import link
 import cite
 import IRHitWrapper

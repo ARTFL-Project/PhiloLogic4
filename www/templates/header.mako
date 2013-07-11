@@ -15,6 +15,7 @@
 <script type="text/javascript" src="${db.locals['db_url']}/js/jquery.hoverIntent.minified.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/jquery.tagcloud.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/jquery.scrollTo.min.js"></script>
+<script type="text/javascript" src="${db.locals['db_url']}/js/history.js/scripts/bundled/html4+html5/jquery.history.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/philologic.js"></script>
 </head>
 <body onunload="">

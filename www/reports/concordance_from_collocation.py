@@ -3,13 +3,14 @@
 import sys
 sys.path.append('..')
 import functions as f
+from reports.concordance import fetch_concordance
 import os
 import re
 from functions.wsgi_handler import wsgi_response
 from bibliography import bibliography
 from render_template import render_template
-from collocation import tokenize, filter
-from functions.format import adjust_bytes, clean_text, chunkifier
+from collocation import tokenize, filter, clean_text, chunkifier
+from functions.ObjectFormatter import adjust_bytes
 
 def concordance_from_collocation(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
@@ -18,12 +19,12 @@ def concordance_from_collocation(environ,start_response):
         return bibliography(f,path, db, dbname,q,environ)
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        colloc_results = fetch_colloc_concordance(hits, path, q)
-        return render_template(results=colloc_results,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
+        colloc_results = fetch_colloc_concordance(hits, path, q, db)
+        return render_template(results=colloc_results,db=db,dbname=dbname,q=q,colloc_concordance=colloc_concordance,
                                f=f,path=path, results_per_page=q['results_per_page'],
                                template_name="concordance_from_collocation.mako")
         
-def fetch_colloc_concordance(results, path, q, filter_words=200):
+def fetch_colloc_concordance(results, path, q, db, filter_words=200):
     within_x_words = q['word_num']
     direction = q['direction']
     collocate = q['collocate'].decode('utf-8', 'ignore')
@@ -48,7 +49,7 @@ def fetch_colloc_concordance(results, path, q, filter_words=200):
         ## get my chunk of text ##
         bytes, byte_start = adjust_bytes(hit.bytes, 400)
         conc_text = f.get_text(hit, byte_start, 400, path)
-        conc_left, conc_middle, conc_right = chunkifier(conc_text, bytes)
+        conc_left, conc_middle, conc_right = chunkifier(conc_text, bytes, db)
         if direction =='left':
             words = tokenize(conc_left, filter_list, within_x_words, direction)
         elif direction == 'right':
@@ -64,24 +65,12 @@ def fetch_colloc_concordance(results, path, q, filter_words=200):
         if len(new_hitlist) > (q["start"] + q["results_per_page"]):
             break
             
-    
     return collocation_hitlist(new_hitlist, collocate_num)
 
-def fetch_concordance(hit, path, q, length=2000):
-    bytes, byte_start = f.format.adjust_bytes(hit.bytes, length)
-    conc_text = f.get_text(hit, byte_start, length, path)
-    conc_start, conc_middle, conc_end = f.format.chunkifier(conc_text, bytes, highlight=True)
-    conc_start = f.format.clean_text(conc_start)
-    conc_end = f.format.clean_text(conc_end)
-    conc_text = conc_start + conc_middle + conc_end
-    conc_text = conc_text.decode('utf-8', 'ignore')
-    highlight_index = conc_text.find('<span class="highlight"')
-    begin = highlight_index - 200 ## make sure the highlighted term does not get hidden
-    end = highlight_index + 200
-    first_span = '<span class="begin_concordance" style="display:none;">'
-    second_span = '<span class="end_concordance" style="display:none;">'
-    conc_text =  first_span + conc_text[:begin] + '</span>' + conc_text[begin:end] + second_span + conc_text[end:] + '</span>'
-    split_text = re.split(r"([^ \.,;:?!\"\n\r\t\(\)]+)|([\.;:?!])", conc_text)
+def colloc_concordance(hit, path, q, db):
+    conc_text = fetch_concordance(hit, path, q)
+    token_regex = db.locals["word_regex"] + "|" + db.locals["punct_regex"]
+    split_text = re.split(r"%s" % token_regex, conc_text)
     keep_text = []
     for w in split_text:
         if w:

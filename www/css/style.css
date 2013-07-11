@@ -217,7 +217,7 @@ div.main_body {
 .kwic_biblio {
     font-weight:400 !important;
 }
-.philologic_concordance {
+.philologic_concordance, .colloc_concordance {
         list-style-type: none;
 }
 .philologic_occurrence {
@@ -506,6 +506,21 @@ ul.ui-autocomplete.ui-menu {
     font-size: 12px !important;
     font-family: inherit !important;
 }
+.ui-progressbar {
+    height: 1em;
+    position: relative;
+}
+.progress-label {
+    position: absolute;
+    left: 50%;
+    top: -2px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+}
+.ui-progressbar-value {
+    font-size: 70% !important;
+    text-align: center;
+}
 
 
 /*Pages links*/
@@ -630,4 +645,37 @@ label.custom-select {
     background: #efefee;
     color: #555555;
     pointer-events: none;
+}
+
+/* hack for inserted page links at top of object */
+b p.inserted-page {
+  display:inline;
+}
+
+.image_container {
+    position: absolute;
+    border: solid;
+    border-color: #BFBFBF;
+    border-width: 18px;
+    border-radius: 6px;
+    z-index: 101;
+    left: 25%;
+}
+.page_image_link {
+    color: #800000;
+    text-decoration: none;
+    font-weight: 700 !important;
+}
+.page_image_link:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+.close_page_image {
+    position: absolute;
+    margin-top: -16px;
+    z-index: 200;
+    left: 100%;
+}
+.close_page_image:hover {
+    cursor: pointer;
 }
