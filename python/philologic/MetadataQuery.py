@@ -6,6 +6,8 @@ import sqlite3
 import HitList
 import unicodedata
 import subprocess
+from QuerySyntax import parse_query
+
 tests = ['hello','"hello"','hi|hello','hi|"hello"','1-5','hello-hi','1-5|"hi|hello"','NULL',"NOT NULL",'hi|NULL', 'hello NOT hi','"hello" NOT hi',"NOT 1-5|hi","1-5 NOT 4", "hello NOT"]
 pattern = r'(\"[^\"]*?\")|([|])|(.*?\-.*?)|(.+)'
 
@@ -85,7 +87,7 @@ def make_clause(column,tokens,norm_path):
             if i+1 == len(tokens):
                 end_or = True
             elif i+1 < len(tokens):
-                if tokens[i][0] != "OR" and tokens[i+1][0] != "NOT":
+                if tokens[i][0] != "OR":
                     end_or = True
 
         if in_or == False and i+1 < len(tokens) and tokens[i+1][0] == "OR":
@@ -109,7 +111,8 @@ def make_clause(column,tokens,norm_path):
 
     return (clauses,vars)
 
-def parse(column,orig,norm_path):
+def parse(column,orig,norm_path):  
+    """Deprecated"""
         temp = orig[:]
         temp_result = []
         length = len(temp)
@@ -184,8 +187,8 @@ def query_lowlevel(db,param_dict):
     for column,values in param_dict.items():
         norm_path = db.locals["db_path"]+"/frequencies/normalized_" + column + "_frequencies"
         for v in values:
-            column,temp_result,norm_path = parse(column,v,norm_path)
-            clause,some_vars = make_clause(column,temp_result,norm_path)
+            parsed = parse_query(v)            
+            clause,some_vars = make_clause(column,parsed,norm_path)
             clauses.append(clause)
             vars += some_vars
     if clauses:
