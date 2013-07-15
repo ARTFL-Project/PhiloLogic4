@@ -10,11 +10,13 @@ from functions.wsgi_handler import wsgi_response
 from math import log10, floor
 from random import sample
 from philologic.DB import DB
-from philologic.Query import format_query
+from philologic.QuerySyntax import parse_query
+from philologic.Query import word_pattern_search
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 from bibliography import bibliography
 import re
 import subprocess
+import unicodedata
 from render_template import render_template
 from collections import defaultdict
 
@@ -29,6 +31,37 @@ def relevance(environ,start_response):
         results = retrieve_hits(q, db)
     return render_template(results=results,db=db,dbname=dbname,q=q,fetch_relevance=fetch_relevance,f=f,format=format,
                                 path=path, results_per_page=q['results_per_page'], template_name='relevance.mako')
+
+def format_query(q, db):
+    parsed = parse_query(q)
+    parsed_split = []
+    for label,token in parsed:
+        l,t = label,token
+        if l == "QUOTE":
+            subtokens = t[1:-1].split(" ")
+            parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
+        else:
+            parsed_split += [(l,t)]
+    
+    output_string = []
+    prior_label = "OR"
+#        print parsed_split
+    for label, token in parsed_split:
+        if label == "QUOTE_S":
+            output_string += token.split()
+        elif label == "TERM":
+            expanded = []
+            norm_tok = token.decode("utf-8").lower()
+            norm_tok = [i for i in unicodedata.normalize("NFKD",norm_tok) if not unicodedata.combining(i)]
+            norm_tok = "".join(norm_tok).encode("utf-8")
+            matches = word_pattern_search(norm_tok,db.locals["db_path"]+"/frequencies/normalized_word_frequencies")              
+            for m in matches:
+                if m not in expanded:
+                    expanded += [m]                                              
+            output_string += expanded
+#            print >> sys.stderr, expanded
+    return output_string
+
 
 def filter_hits(q, obj_types, c):
     ## Filter out if necessary
@@ -81,7 +114,8 @@ def retrieve_hits(q, db):
     philo_ids = filter_hits(q, obj_types, c)
     
     ## TEMPORARY ###
-    q['q'] = ' '.join(re.split('\s', format_query(q['q'], db))) ## ask Richard about this
+    q['q'] = ' '.join(format_query(q['q'], db))
+    #q['q'] = ' '.join(re.split('\s', format_query(q['q'], db))) ## ask Richard about this
     query_words = q['q'][:].strip()
     q['q'] = q['q'].replace(' ', '|') ## Add ORs for search links
     print >> sys.stderr, "QS", repr(query_words)
