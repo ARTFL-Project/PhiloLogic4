@@ -68,8 +68,8 @@ Z32 m2m_cmp_cooc ( Z32 *a, Z32 *b, hitdef *hit_def, Z32 level )
   if ( a[0] != b[0] )
     return a[0] < b[0] ? -1 : 1;
 
-  i = h->r_context + 1;
-
+  i = h->r_context;
+  i = INDEX_DEF_WORD + 1;
   if ( a[i] != b[i] )
     return a[i] < b[i] ? -1 : 1;
 
