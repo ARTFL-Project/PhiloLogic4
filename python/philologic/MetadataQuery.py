@@ -113,29 +113,29 @@ def make_clause(column,tokens,norm_path):
 
 def parse(column,orig,norm_path):  
     """Deprecated"""
-        temp = orig[:]
-        temp_result = []
-        length = len(temp)
-        while len(temp) > 0:
-            for pattern in patterns:
-                r = re.match(pattern[1],temp)
-                if r:
-                    if pattern[0] == "TERM":
-                        notscan = re.match("(.*?)( NOT )",r.group())
-                        if notscan:
-                            temp_result.append(("TERM",notscan.group(1)))
-                            temp_result.append(("NOT"," NOT "))
-                            temp = temp[notscan.end():]
-                        else:
-                            temp_result.append((pattern[0],r.group())),
-                            temp = temp[r.end():]
+    temp = orig[:]
+    temp_result = []
+    length = len(temp)
+    while len(temp) > 0:
+        for pattern in patterns:
+            r = re.match(pattern[1],temp)
+            if r:
+                if pattern[0] == "TERM":
+                    notscan = re.match("(.*?)( NOT )",r.group())
+                    if notscan:
+                        temp_result.append(("TERM",notscan.group(1)))
+                        temp_result.append(("NOT"," NOT "))
+                        temp = temp[notscan.end():]
                     else:
                         temp_result.append((pattern[0],r.group())),
                         temp = temp[r.end():]
-                    break
-            else:
-                temp = temp[1:]
-        return (column,temp_result,norm_path)
+                else:
+                    temp_result.append((pattern[0],r.group())),
+                    temp = temp[r.end():]
+                break
+        else:
+            temp = temp[1:]
+    return (column,temp_result,norm_path)
 
 def metadata_pattern_search(term, path):
     command = ['egrep', '-wi', "%s" % term, '%s' % path]

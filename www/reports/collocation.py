@@ -8,7 +8,7 @@ import re
 import json
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
-from functions.format import adjust_bytes, clean_text, chunkifier, tokenize_text
+from functions.ObjectFormatter import adjust_bytes
 from bibliography import bibliography
 from collections import defaultdict
 
@@ -24,14 +24,14 @@ def collocation(environ,start_response):
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ) ## the default should be an error message
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-    all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q)
+    all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q, db)
     hit_len = len(hits)
     return render_template(all_colloc=all_colloc, left_colloc=left_colloc, right_colloc=right_colloc,
                            db=db,dbname=dbname,q=q,link=link_to_concordance,f=f,path=path,
                            results_per_page=q['results_per_page'],hit_len=hit_len,
                            order=sort_to_display,dumps=json.dumps,template_name='collocation.mako')
 
-def fetch_collocation(results, path, q, word_filter=True, filter_num=200, full_report=True):
+def fetch_collocation(results, path, q, db, word_filter=True, filter_num=200, full_report=True):
     within_x_words = q['word_num']    
     
     ## set up filtering of most frequent 200 terms ##
@@ -60,7 +60,7 @@ def fetch_collocation(results, path, q, word_filter=True, filter_num=200, full_r
         ## get my chunk of text ##
         bytes, byte_start = adjust_bytes(hit.bytes, 400)
         conc_text = f.get_text(hit, byte_start, 400, path)
-        conc_left, conc_middle, conc_right = chunkifier(conc_text, bytes)
+        conc_left, conc_middle, conc_right = chunkifier(conc_text, bytes, db)
         
         left_words = tokenize(conc_left, filter_list, within_x_words, 'left')
         right_words = tokenize(conc_right, filter_list, within_x_words, 'right')
@@ -83,9 +83,34 @@ def fetch_collocation(results, path, q, word_filter=True, filter_num=200, full_r
         return dict(all_collocates), dict(left_collocates), dict(right_collocates)
     else:
         return sorted(all_collocates.items(), key=lambda x: x[1], reverse=True)
+    
+def chunkifier(conc_text, bytes, db):
+    """Divides the passage in three:
+    * from the beginning to the first hit (not included)
+    * from the first hit to the end of the last hit
+    * form the end of the last hit to the end of the passage
+    Returns a tuple containing all three parts of the passage"""
+    conc_start = conc_text[:bytes[0]]
+    conc_middle = ''
+    end_byte = 0
+    token = db.locals['word_regex'] + '|' + db.locals['punct_regex']
+    for pos, word_byte in enumerate(bytes):
+        text_chunks = re.split(r"%s" % token, conc_text[word_byte:])
+        end_byte = word_byte + len(text_chunks[1])
+        text = text_chunks[1]
+        conc_middle += text
+        if len(bytes) > pos+1:
+            conc_middle += conc_text[end_byte:bytes[pos+1]]
+    conc_end = conc_text[end_byte:]
+    
+    ## Make sure we have no words cut out
+    conc_start = re.sub("^[^ ]+ ", "", conc_start)
+    conc_end = re.sub(" [^ ]+$", "", conc_end)
+    
+    return conc_start, conc_middle, conc_end
 
-def tokenize(text, filter_list, within_x_words, direction, highlighting=False):
-    text = clean_text(text, collocation=True)
+def tokenize(text, filter_list, within_x_words, direction):
+    text = clean_text(text)
     text = text.lower()
     
     if direction == 'left':
@@ -112,6 +137,52 @@ def filter(word_list, filter_list, within_x_words):
         if word not in filter_list and word_identifier.search(word):
             words_to_pass.append(word)
     return words_to_pass
+
+def clean_text(text):
+    """Cleans your text and removes all tags"""
+    text = re.sub("^[^<]*?>","",text)
+    text = re.sub("<[^>]*?$","",text)
+    text = re.sub("<.*?>","",text)
+    text = re.sub("-", " ", text)
+    text = re.sub("&dot;", " ", text)
+    text = re.sub("&nbsp;", " ", text)
+    text = re.sub("&amp;", " ", text)
+    text = re.sub("&.aquo;", " ", text)
+    text = re.sub("&.squo;", " ", text)
+    text = re.sub("&ldquo;", " ", text)
+    text = re.sub("&rdquo;", " ", text)
+    text = re.sub("&.dash;", " ", text)
+    text = re.sub("&lt;", " ", text)
+    text = re.sub("&gt;", " ", text)
+    text = re.sub("&hyphen;", " ", text)
+    text = re.sub("&colon;", " ", text)
+    text = re.sub("&excl;", " ", text)
+    text = re.sub("\xe2\x80\x9c", "", text) ## ldquo
+    text = re.sub("\xe2\x80\x9d", "", text) ## rdquo
+    text = re.sub("\"", " ", text)
+    text = re.sub(" +", " ", text)
+    text = re.sub("^  *", "", text)
+    text = re.sub("  *$", "", text)
+    text = re.sub("[^a-zA-Z'\177-\344 ]", " ", text) ## getting rid of '&' and ';' from orig.##
+    text = text.decode('utf-8', 'ignore')
+    return text
+
+def clean_word(word):
+    ## Only used in the tokenize_text function below
+    """Removes any potential non-word characters"""
+    word = re.sub("[0-9]* ", "", word)
+    word = re.sub("[\s]*", "", word)
+    word = word.replace('\n', '')
+    word = word.replace('\r', '')
+    return word
+
+def tokenize_text(text):
+    """Returns a list of individual tokens"""
+    ## Still used in collocations
+    text = text.lower()
+    text_tokens = re.split(r"([^ \.,;:?!\'\-\"\n\r\t\(\)]+)|([\.;:?!])", text) ## this splits on whitespaces and punctuation
+    text_tokens = [clean_word(token) for token in text_tokens if token] ## remove empty strings
+    return text_tokens
 
 def sort_to_display(all_collocates, left_collocates, right_collocates):
     left_colloc = sorted(left_collocates.items(), key=lambda x: x[1], reverse=True)[:100]

@@ -44,8 +44,19 @@ def get_text_obj(obj, path, query_args=False):
     file.seek(byte_start)
     width = obj.byte_end - byte_start
     raw_text = file.read(width)
+
+
     if query_args:
         bytes = sorted([int(byte) - byte_start for byte in query_args.split('+')])
     else:
         bytes = []
-    return format(raw_text,bytes).decode("utf-8","ignore")
+    formatted = format(raw_text,bytes).decode("utf-8","ignore")
+    page_obj = obj.get_page()
+    if page_obj:
+            if page_obj['n'] and page_obj['img']:
+                find_head = re.search("<b class=\"headword\">([^\n\r]*?)<br/></b>",formatted)
+                if find_head:
+                    href = 'http://artflx.uchicago.edu/images/encyclopedie/' + page_obj["img"]
+                    page = "[page " + page_obj["n"] + "]"
+                    formatted = formatted[:find_head.end(1)] + " <a href='%s' class='page_image_link'>%s</a>" % (href,page) + formatted[find_head.end(1):]
+    return formatted

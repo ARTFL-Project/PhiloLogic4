@@ -8,7 +8,7 @@ import re
 from functions.wsgi_handler import wsgi_response
 from bibliography import bibliography
 from render_template import render_template
-from functions.ObjectFormatter import format_concordance, format_strip, convert_entities
+from functions.ObjectFormatter import format_concordance, format_strip, convert_entities, adjust_bytes
 from functions.FragmentParser import parse
 
 def concordance(environ,start_response):
@@ -27,7 +27,7 @@ def fetch_concordance(hit, path, q):
     byte_distance = hit.bytes[-1] - hit.bytes[0]
     length = 1000 + byte_distance + 1000
     
-    bytes, byte_start = f.format.adjust_bytes(hit.bytes, length)
+    bytes, byte_start = adjust_bytes(hit.bytes, length)
     conc_text = f.get_text(hit, byte_start, length, path)
     conc_text = format_strip(conc_text, bytes)
     conc_text = convert_entities(conc_text)

@@ -15,7 +15,7 @@
     </div>
     <% occurences = 0 %>
     <div class="results_container">
-        <ol class='philologic_concordance'>
+        <ol class='colloc_concordance'>
             % for i in results[start - 1:end]:
                 <li class='philologic_occurrence'>
                     <%
@@ -28,7 +28,7 @@
                     % endif
                     <a href="javascript:void(0)" class="more_context">More</a>
                     <div class='philologic_context'>
-                       ${fetch_concordance(i, path, q)}
+                       ${colloc_concordance(i, path, q, db)}
                    </div>
                 </li>
             % endfor
