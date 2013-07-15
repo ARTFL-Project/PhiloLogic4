@@ -102,6 +102,7 @@ def format_query(qstring,db):
         else:
             parsed_split += [(l,t)]
     command = format_parsed_query(parsed_split,db)
+    print >> sys.stderr, "QUERY_COMMAND",repr(command)
     return command
 
 def word_pattern_search(term, path):
