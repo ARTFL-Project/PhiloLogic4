@@ -94,7 +94,7 @@ class Parser:
         based on the object and metadata Xpaths given to the constructor."""
         
         e_type, content, offset, name, attrib = event
-
+        
         if e_type == "start":
             # Add every element to the tree and store a pointer to it in the stack.
             # The first element will be the root of our tree.
