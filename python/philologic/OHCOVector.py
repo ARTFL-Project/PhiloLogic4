@@ -95,9 +95,7 @@ class CompoundStack(object):
     
     def push(self,type,name,byte):
         if type == self.p_type:
-            if self.current_p:
-                self.current_p.attrib["end_byte"] = byte
-                print >> self.out, self.current_p
+            self.pull(type,byte)
             self.p += 1
             self.current_p = self.p_factory(type,name,[self.stack.v[0],self.p])
             self.current_p.attrib["start_byte"] = byte
@@ -109,7 +107,10 @@ class CompoundStack(object):
     
     def pull(self,type,byte):
         if type == self.p_type:
-            pass
+            if self.current_p:
+                self.current_p.attrib["end_byte"] = byte
+                print >> self.out, self.current_p
+                self.current_p = None
         else:
             return self.stack.pull(type,byte)
         
