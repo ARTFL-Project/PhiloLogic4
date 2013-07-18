@@ -10,7 +10,7 @@ import subprocess
 import sqlite3
 from ast import literal_eval as eval
 
-from philologic import OHCOVector, Parser
+from philologic.BufferedParser import BufferedParser
 from philologic.LoadFilters import *
 from philologic.PostFilters import *
 from philologic.utils import OutputHandler
@@ -42,30 +42,32 @@ default_post_filters = [word_frequencies, normalized_word_frequencies, metadata_
 ## at least keep the 'toms' table from toms.db.
 default_tables = ['toms', 'pages', 'ranked_relevance']
 
-default_token_regex = r"([^ \.,;:?!\"\n\r\t\(\)]+)|([\.;:?!])"
+default_xpaths = [("doc",".")]
+default_metadata = [("doc",".//titleStmt/title","title"),("doc",".//titleStmt/author","author")]
+default_token_regex = r"(\w+)|([\.?!])"
 
 class Loader(object):
 
-    def __init__(self,destination,types,xpaths, metadata_xpaths,filters=default_filters,
-                 token_regex=default_token_regex,non_nesting_tags=[],self_closing_tags=[],
-                 pseudo_empty_tags=[],console_output=True, log=False, debug=False):
+    def __init__(self,destination,token_regex=default_token_regex,xpaths=default_xpaths,
+                 metadata_xpaths=default_metadata,filters=default_filters,
+                 pseudo_empty_tags=[],suppress_tags=[],default_object_level="doc",freq_object_levels = [],
+                 console_output=True,log=False, debug=False):
         self.omax = [1,1,1,1,1,1,1,1,1]
         self.debug = debug
         self.parse_pool = None 
-        self.parser_factory = Parser.Parser
-
-        self.types = types
-
-        self.xpaths = xpaths
-        self.metadata_xpaths = metadata_xpaths
-
-        self.default_filters = filters
+        self.parser_factory = BufferedParser
+        self.default_object_level = default_object_level
+        self.freq_object_levels = freq_object_levels or [self.default_object_level]
+        self.types = object_types
 
         self.token_regex = token_regex
+        self.xpaths = xpaths
+        self.metadata_xpaths = metadata_xpaths
+        self.default_filters = filters
 
-        self.non_nesting_tags = non_nesting_tags
-        self.self_closing_tags = self_closing_tags
         self.pseudo_empty_tags = pseudo_empty_tags
+        self.suppress_tags = suppress_tags
+
         if debug == True:
             self.clean = False
             self.verbose = True
@@ -88,16 +90,21 @@ class Loader(object):
         self.metadata_hierarchy = []
         self.metadata_types = {}
         self.normalized_fields = []
-        for t in self.types:
+        indexed_types = []
+        for o_type, path, param in self.metadata_xpaths:
+            if o_type not in indexed_types and o_type != "page":
+                indexed_types.append(o_type)
+        for t in indexed_types:
             self.metadata_hierarchy.append([])
-            for extractor,path,param in self.metadata_xpaths[t]:
-                if param not in self.metadata_fields:
-                    self.metadata_fields.append(param)
-                    self.metadata_hierarchy[-1].append(param)
-                if param not in self.metadata_types:
-                    self.metadata_types[param] = t
+            for e_type,path,param in self.metadata_xpaths:
+                if t == e_type:
+                    if param not in self.metadata_fields:
+                        self.metadata_fields.append(param)
+                        self.metadata_hierarchy[-1].append(param)
+                    if param not in self.metadata_types:
+                        self.metadata_types[param] = t
         
-        sys.stdout = OutputHandler(console=console_output, log=log)
+        #sys.stdout = OutputHandler(console=console_output, log=log)
 
     def setup_dir(self,path):
         os.mkdir(path)
@@ -123,10 +130,11 @@ class Loader(object):
 
         if not data_dicts:
             data_dicts = [{"filename":self.textdir + fn} for fn in self.list_files()]
-
             self.filequeue =   [{"orig":os.path.abspath(x),
                                  "name":os.path.basename(x),
+                                 "size":os.path.getsize(x),
                                  "id":n + 1,
+                                 "options":{},
                                  "newpath":self.textdir + os.path.basename(x),
                                  "raw":self.workdir + os.path.basename(x) + ".raw",
                                  "words":self.workdir + os.path.basename(x) + ".words.sorted",
@@ -136,9 +144,12 @@ class Loader(object):
                                  "results":self.workdir + os.path.basename(x) + ".results"} for n,x in enumerate(self.list_files())]
 
         else:
+             print repr(data_dicts)
              self.filequeue =   [{"orig":os.path.abspath(d["filename"]),
                                  "name":os.path.basename(d["filename"]),
+                                 "size":os.path.getsize(self.textdir + (d["filename"])),
                                  "id":n + 1,
+                                 "options":d["options"] if "options" in d else {},
                                  "newpath":self.textdir + os.path.basename(d["filename"]),
                                  "raw":self.workdir + os.path.basename(d["filename"]) + ".raw",
                                  "words":self.workdir + os.path.basename(d["filename"]) + ".words.sorted",
@@ -160,7 +171,8 @@ class Loader(object):
     
                 # we want to have up to max_workers processes going at once.
                 text = self.filequeue.pop(0) # parent and child will both know the relevant filenames
-                metadata = data_dicts.pop(0)                
+                metadata = data_dicts.pop(0)
+                options = text["options"]
                 #print >> sys.stderr, text
                 #print >> sys.stderr, metadata
                 pid = os.fork() # fork returns 0 to the child, the id of the child to the parent.  
@@ -173,28 +185,25 @@ class Loader(object):
     
                 if not pid: # the child process parses then exits.
     
-                    i = codecs.open(text["newpath"],"r",)
-                    o = codecs.open(text["raw"], "w",) # only print out raw utf-8, so we don't need a codec layer now.
+                    i = open(text["newpath"],"r",)
+                    o = open(text["raw"], "w",) # only print out raw utf-8, so we don't need a codec layer now.
                     print "%s: parsing %d : %s" % (time.ctime(),text["id"],text["name"])
-                    
-                    if "xpaths" not in metadata:
-                        metadata["xpaths"] = self.xpaths                        
-                    if "metadata_xpaths" not in metadata:
-                        metadata["metadata_xpaths"] = self.metadata_xpaths
-                    if "token_regex" not in metadata:
-                        metadata["token_regex"] = self.token_regex
-                    if "non_nesting_tags" not in metadata:
-                        metadata["non_nesting_tags"] = self.non_nesting_tags
-                    if "self_closing_tags" not in metadata:
-                        metadata["self_closing_tags"] = self.self_closing_tags
-                    if "pseudo_empty_tags" not in metadata:
-                        metadata["pseudo_empty_tags"] = self.pseudo_empty_tags
+                                        
+                    if "xpaths" not in options:
+                        options["xpaths"] = self.xpaths                        
+                    if "metadata_xpaths" not in options:
+                        options["metadata_xpaths"] = self.metadata_xpaths
+                    if "token_regex" not in options:
+                        options["token_regex"] = self.token_regex
+                    if "suppress_tags" not in options:
+                        options["suppress_tags"] = self.suppress_tags
+                    if "pseudo_empty_tags" not in options:
+                        options["pseudo_empty_tags"] = self.pseudo_empty_tags
                        
                     filters = self.default_filters
-                    if "filters" in metadata:
-                        filters = metadata["filters"]
-                        del metadata["filters"]
-                    parser = self.parser_factory(o,text["id"],**metadata)
+                    if "filters" in options:
+                        filters = options["filters"]
+                    parser = self.parser_factory(o,text["id"],text["size"],known_metadata=metadata,**options)
 #                    parser = Parser.Parser({"filename":text["name"]},text["id"],xpaths=xpaths,metadata_xpaths=metadata_xpaths,token_regex=token_regex,non_nesting_tags=non_nesting_tags,self_closing_tags=self_closing_tags,pseudo_empty_tags=pseudo_empty_tags,output=o)
                     try:
                         r = parser.parse(i)
@@ -254,9 +263,7 @@ class Loader(object):
         print "%s: word join returned %d" % (time.ctime(), pages_status)
         
         ## Generate sorted file for word frequencies    
-        counts_files = [i for i in os.listdir(self.workdir) if i.endswith('.freq_counts')]
-        r_r_obj = set([re.sub('.+\.(\w+)\.freq_counts\Z', '\\1', i) for i in counts_files])
-        for text_obj in r_r_obj:
+        for text_obj in self.freq_object_levels:
             wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + "*.%s.freq_counts" % text_obj
             print "%s: sorting words frequencies" % time.ctime()
             words_status = os.system(wordsargs + " > " + self.workdir + "%s.counts" % text_obj)
@@ -319,7 +326,7 @@ class Loader(object):
         if self.clean:
             os.system('rm all_words_sorted')
 
-    def make_tables(self, tables, *text_objects, **extra_tables):
+    def make_tables(self, tables, **extra_tables):
         print '\n### SQL Load ###'
         print "Loading in the following tables:"
         for table in tables:            
@@ -334,7 +341,7 @@ class Loader(object):
                 indices = ['philo_type', 'philo_id'] + self.metadata_fields
                 self.make_sql_table(table, file_in, indices=indices)
             elif table == "ranked_relevance":
-                files_in = [self.workdir + '%s.counts' % obj for obj in text_objects]
+                files_in = [self.workdir + '%s.counts' % obj for obj in self.freq_object_levels]
                 for file_in in files_in:
                     self.make_sql_table(table, file_in, indices=['philo_name', 'philo_id'])
         if extra_tables:
@@ -409,6 +416,8 @@ class Loader(object):
         print >> db_locals, "db_path = '%s'" % self.destination
         print >> db_locals, "normalized_fields = %s" % self.normalized_fields
         print >> db_locals, "debug = %s" % self.debug
+        print >> db_locals, "default_object_level = '%s'" % self.default_object_level
+        print >> db_locals, "freq_object_levels = %s" % self.freq_object_levels
         for k,v in extra_locals.items():
             print >> db_locals, "%s = %s" % (k,repr(v))
 
