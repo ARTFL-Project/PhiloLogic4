@@ -180,25 +180,18 @@ def count_tokens(record_list, depth, output_file):
             new_record.attrib[token_count] = record_dict[philo_id]
         print >> output_file, new_record
 
-def word_frequencies_per_obj(*types):
-    object_types = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5,
-                    'sent': 6, 'word': 7}
-    obj_types = {}
-    if types:
-        for o in object_types:
-            if o in types:
-                obj_types[o] = object_types[o]
-    else:
-        obj_types['doc'] = 1
-    
+def word_frequencies_per_obj(*obj_types):
+    object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
     def inner_word_frequencies_per_obj(loader_obj,text):
         files_path = loader_obj.destination + '/WORK/'
+        obj_types = loader_obj.freq_object_levels
         try:
-            os.mkdir(files_path)
+            os.mkdir(files_path)        
         except OSError:
             ## Path was already created                                                                                                                                       
             pass
-        for obj, d in obj_types.iteritems():
+        for obj in obj_types:
+            d = object_types.index(obj)+1
             file = text['name'] + '.%s.freq_counts' % obj
             output = open(files_path + file, 'w')
             old_philo_id = []
