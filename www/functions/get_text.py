@@ -6,8 +6,10 @@ from os.path import exists
 from ObjectFormatter import format, format_concordance
 
 def get_text(hit, byte_start, length, path):
+    print >> sys.stderr, "HIT: ", hit.philo_id
     file_path = path + '/data/TEXT/' + hit.filename
-    file = open(file_path)        
+    print >> sys.stderr, "FILE_PATH: ",file_path
+    file = open(file_path)
     file.seek(byte_start)
     return file.read(length)
 
