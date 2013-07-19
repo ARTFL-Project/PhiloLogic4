@@ -142,8 +142,13 @@ input[type=text] {
     height: 20px;
     font-size: 100%;
     padding-left: .4em;
+    transition: background-color 200ms ease;
+    -webkit-transition: background-color 200ms ease;
+    -ms-transition: background-color 200ms ease;
 }
-
+input[type=text]:focus {
+    background-color: #F2F9FF;
+}
 
 
 h1 {
@@ -244,6 +249,11 @@ div.main_body {
     display:none;
     text-align: justify;
     line-height: 200%;
+}
+.cloud_term {
+    -webkit-transition: 200ms linear;
+    -ms-transition: 200ms linear;
+    -moz-transition: 200ms linear;
 }
 .cloud_term:hover {
     color: black !important;
@@ -357,7 +367,7 @@ div.main_body {
     float:left;
 }
 .search_box {
-    width: 200px;
+    width: 250px;
 }
 .show_search_form {
     font-size: 100%;
@@ -521,6 +531,11 @@ ul.ui-autocomplete.ui-menu {
     font-size: 70% !important;
     text-align: center;
 }
+.ui-autocomplete {
+    max-height: 280px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
 
 
 /*Pages links*/
@@ -660,6 +675,8 @@ b p.inserted-page {
     border-radius: 6px;
     z-index: 101;
     left: 25%;
+    box-shadow: 0px 0px 15px #888888;
+    margin-top: -10px;
 }
 .page_image_link {
     color: #800000;
@@ -677,5 +694,16 @@ b p.inserted-page {
     left: 100%;
 }
 .close_page_image:hover {
+    cursor: pointer;
+}
+
+.return_to_colloc {
+    color: #800000;
+    text-decoration: none;
+    font-weight: 700 !important;
+    font-size: 140%;
+}
+.return_to_colloc:hover {
+    text-decoration: underline;
     cursor: pointer;
 }

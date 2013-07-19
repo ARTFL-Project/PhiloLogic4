@@ -88,12 +88,27 @@ $(document).ready(function() {
         }
     });
     
-    monkeyPatchAutocomplete();    
+    //monkeyPatchAutocomplete();    
     $("#q").autocomplete({
         source: db_url + "/scripts/term_list.py",
         minLength: 2,
-        "dataType": "json"
-    });
+        "dataType": "json",
+        focus: function( event, ui ) {
+            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            $("#q").val(q);
+            return false;
+        },
+        select: function( event, ui ) {
+            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            $("#q").val(q);
+            return false;
+        }
+    }).data("ui-autocomplete")._renderItem = function (ul, item) {
+         return $("<li></li>")
+             .data("item.autocomplete", item)
+             .append("<a>" + item.label + "</a>")
+             .appendTo(ul);
+     };
     var fields = [];
     $('#metadata_fields input').each(function(){
         fields.push($(this).attr('name'));
@@ -161,7 +176,7 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     if ($("#report_switch").length) {
         concordance_kwic_switch(db_url);
-        more_context();
+        back_forward_button_concordance_reload();
         if ($('.kwic_concordance').length) {
             var config = {    
                     over: showBiblio, 
@@ -213,14 +228,21 @@ $(document).ready(function() {
         retrieve_obj(db_url);
         t_o_c_handler(db_url);
         follow_scroll($('.prev_and_toc'), $('.next_and_read'));
-        $(window).load(function() {
-            scroll_to_highlight();
-        });
+        if ($('.highlight').length) {
+            $(window).load(function() {
+                scroll_to_highlight();
+            });
+        }
+        back_forward_button_reload(db_url);
     } else if ($('.next_page').length) {
         retrieve_page(db_url);
         t_o_c_handler(db_url);
         follow_scroll($('.prev_and_toc'), $('.next_and_read'));
-        scroll_to_highlight();
+        if ($('.highlight').length) {
+            $(window).load(function() {
+                scroll_to_highlight();
+            });
+        }
     }
     
     
@@ -398,6 +420,14 @@ function retrieve_page(db_url) {
         
     });
 }
+function back_forward_button_reload(db_url) {
+    $(window).on('popstate', function() {
+        var id_to_load = window.location.pathname.replace(/.*dispatcher.py\//, '').replace(/\//g, '_');
+        if (id_to_load != $('.obj_text').attr('id')) {
+            window.location = window.location.href;
+        }
+    });
+}
 
 /// Switch betwwen concordance and KWIC reports
 function concordance_kwic_switch(db_url) {
@@ -441,6 +471,21 @@ function concordance_kwic_switch(db_url) {
                 $(this).attr('href', new_href);
             });
         });
+    });
+}
+
+function back_forward_button_concordance_reload() {
+    $(window).on('popstate', function() {
+        var report = window.location.href.replace(/.*report=([^\W]+).*/, '$1');
+        if ($('#concordance_switch').prop('checked')) {
+            var report_displayed = "concordance";
+        } else {
+            var report_displayed = 'kwic'
+        }
+        console.log(report, report_displayed)
+        if (report != report_displayed) {
+            window.location = window.location.href;
+        }
     });
 }
 
@@ -588,27 +633,27 @@ function getSelectedText() {
 }
 
 
-// Patch jQueryUI autocomplete to get higlighting
-function monkeyPatchAutocomplete() {
-    $.ui.autocomplete.prototype._renderItem = function( ul, item) {
-        // This regex took some fiddling but should match beginning of string and
-        // any match preceded by a string: this is useful for sql matches.
-        var re = new RegExp('((^' + this.term + ')|( ' + this.term + '))', "gi") ; 
-        var t = item.label.replace(re,"<span class='highlight'>" + 
-                "$&" + 
-                "</span>");
-        return $( "<li></li>" )
-            .data( "item.autocomplete", item )
-            .append( "<a>" + t + "</a>" )
-            .appendTo( ul );
-    };
-}
 function autocomplete_metadata(metadata, field, db_url) {
     $("#" + field).autocomplete({
         source: db_url + "/scripts/metadata_list.py?field=" + field,
         minLength: 2,
-        dataType: "json"
-    });
+        dataType: "json",
+        focus: function( event, ui ) {
+            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            $("#" + field).val(q);
+            return false;
+        },
+        select: function( event, ui ) {
+            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            $("#" + field).val(q);
+            return false;
+        }
+    }).data("ui-autocomplete")._renderItem = function (ul, item) {
+         return $("<li></li>")
+             .data("item.autocomplete", item)
+             .append("<a>" + item.label + "</a>")
+             .appendTo(ul);
+     };
 }
 
 // Display different search parameters based on the type of report used
@@ -674,7 +719,6 @@ function toggle_frequency(q_string, db_url, pathname) {
     } else {
         var script_call = db_url + "/scripts/get_collocate.py?" + q_string
     }
-    console.log(script_call)
     $(".loading").empty().hide();
     var spinner = '<img src="' + db_url + '/js/ajax-loader.gif" alt="Loading..."  height="25px" width="25px"/>';
     $(".results_container").animate({
