@@ -476,13 +476,16 @@ function concordance_kwic_switch(db_url) {
 
 function back_forward_button_concordance_reload() {
     $(window).on('popstate', function() {
-        var report = window.location.href.replace(/.*report=([^\W]+).*/, '$1');
+        var report = window.location.href.replace(/.*?report=([^\W]+).*?/, '$1');
+        // Concordance is the default report if no report is specified
+        if (report.match(/kwic|concordance/) === null) {
+            report = "concordance";
+        }
         if ($('#concordance_switch').prop('checked')) {
             var report_displayed = "concordance";
         } else {
             var report_displayed = 'kwic'
         }
-        console.log(report, report_displayed)
         if (report != report_displayed) {
             window.location = window.location.href;
         }
