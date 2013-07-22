@@ -9,7 +9,7 @@ $(document).ready(function() {
     collocation_results = collocation_results.replace(/direction=[^ &]+/, '');
     collocation_results = collocation_results.replace(/collocate_num=[^ &]+/, '');
     $('.return_to_colloc').click(function() {
-        window.location = collocation_results;
+        History.back();
     });
 });
 </script>

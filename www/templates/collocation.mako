@@ -2,18 +2,24 @@
 <%include file="search_boxes.mako"/>
 <script>
 $(document).ready(function() {
-    collocation_cloud();
-    var all_colloc = ${dumps(all_colloc)};
-    var left_colloc = ${dumps(left_colloc)};
-    var right_colloc = ${dumps(right_colloc)};
-    var db_url = db_locals['db_url'];
-    update_colloc(db_url, all_colloc, left_colloc, right_colloc, ${hit_len}, 0, 100);
-    var colloc_hits = parseInt($('#colloc_hits').html());
-    $('#progress_bar').css('width', $('#collocation_table').width() - 5);
-    $('#progress_bar').progressbar({max: colloc_hits});
-    $('#progress_bar').progressbar({value: 100});
-    var percent = 100 / colloc_hits * 100;
-    $('.progress-label').text(percent.toString().split('.')[0] + '%');
+    if (localStorage[window.location.href] == null) {
+        collocation_cloud();
+        var all_colloc = ${dumps(all_colloc)};
+        var left_colloc = ${dumps(left_colloc)};
+        var right_colloc = ${dumps(right_colloc)};
+        var db_url = db_locals['db_url'];
+        update_colloc(db_url, all_colloc, left_colloc, right_colloc, ${hit_len}, 0, 100);
+        var colloc_hits = parseInt($('#colloc_hits').html());
+        $('#progress_bar').css('width', $('#collocation_table').width() - 5);
+        $('#progress_bar').progressbar({max: colloc_hits});
+        $('#progress_bar').progressbar({value: 100});
+        var percent = 100 / colloc_hits * 100;
+        $('.progress-label').text(percent.toString().split('.')[0] + '%');
+    } else {
+        var collocation = JSON.parse(localStorage[window.location.href]);
+        $('.philologic_collocation').html(collocation);
+        $("span[id^='all_'], span[id^='left_'], span[id^='right_']").css('opacity', '');
+    }
 })
 </script>
 <div class='philologic_response'>

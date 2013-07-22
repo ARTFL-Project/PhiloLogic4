@@ -882,6 +882,7 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
         $('#progress_bar').progressbar({value: total});
         $('.progress-label').text('Complete!');
         $("#progress_bar").delay(500).fadeOut('slow');
+        localStorage[window.location.href] = JSON.stringify($('.philologic_collocation').html());
     }
 }
 
