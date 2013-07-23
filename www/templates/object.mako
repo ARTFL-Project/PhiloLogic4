@@ -1,24 +1,6 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
-<script>
-$(document).ready(function() {
-    var page_pos = $('.book_page').offset().left;
-    $('.book_page').css('margin-left', page_pos);
-    left_pos();
-    right_pos();
-});
-function right_pos() {
-    var right_pos = $('.book_page').offset().left + $('.book_page').width();
-    $('.next_obj_wrapper').css('margin-left', right_pos + 33);
-}
-function left_pos() {
-    var prev_obj_pos = $('.prev_obj').offset().left + $('.prev_obj').width();
-    var page_pos = $('.book_page').offset().left;
-    var distance = page_pos - prev_obj_pos;
-    console.log(prev_obj_pos, page_pos, distance)
-    $('#prev_and_toc_button').css('margin-left', distance - 40);
-}
-</script>
+<script type="text/javascript" src="${db.locals['db_url']}/js/textObjectNavigation.js"></script>
 <div class='philologic_response'>
     <div class='object_title'>
         <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,obj)} <b>Volume ${obj.volume}</b></span>
