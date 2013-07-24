@@ -56,13 +56,13 @@ def format_query(q, db):
         matches = highlighter(matches, norm_tok.decode('utf-8'))
     for m in matches:
         if m not in expanded:
-            expanded += [m]                                              
+            expanded += [m.strip()]                                              
     output_string += expanded
     if len(q) > 1:
         mod_output = []
         for s in output_string:
-            new_s = ' '.join(re.split('([ |])', q)[:-1]) + ' ' + s
-            mod_output.append(new_s)
+            new_s = ''.join(re.split('([ |])', q)[:-1] + [s.strip()])
+            mod_output.append(new_s.strip())
         return mod_output
     else:
         return output_string
