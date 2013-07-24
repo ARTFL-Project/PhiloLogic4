@@ -1,3 +1,4 @@
+<script type="text/javascript" src="${db.locals['db_url']}/js/searchForm.js"></script>
 <div id="form_body" class='form_body'>
     <form id="search" action="${db.locals['db_url'] + "/dispatcher.py/"}">
         <div class="initial_form">

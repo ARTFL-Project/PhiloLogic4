@@ -1,18 +1,5 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
-<script>
-$(document).ready(function() {
-    $('#form_body').hide();
-    $('.philologic_response').css('margin-top', '0px');
-    var collocation_results = window.location.href.replace('report=concordance_from_collocation', 'report=collocation');
-    collocation_results = collocation_results.replace(/collocate=[^ &]+/, '');
-    collocation_results = collocation_results.replace(/direction=[^ &]+/, '');
-    collocation_results = collocation_results.replace(/collocate_num=[^ &]+/, '');
-    $('.return_to_colloc').click(function() {
-        window.location = collocation_results;
-    });
-});
-</script>
 <div class='philologic_response'>
     <div>
         <a href="${db.locals['db_url']}/">Return to search form</a>
@@ -61,8 +48,7 @@ $(document).ready(function() {
      </div>
 </div>
 <script>
-$(document).ready(function() {
-    $('#colloc_in_hits').append(${occurences});
-});
+var occurences = ${occurences};
 </script>
+<script type="text/javascript" src="${db.locals['db_url']}/js/concordanceFromCollocation.js"></script>
 <%include file="footer.mako"/>
