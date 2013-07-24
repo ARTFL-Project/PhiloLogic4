@@ -1,10 +1,6 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
-<script>
-$(document).ready(function() {
-    $('.sidebar_display').css('margin-top', '10px');
-})
-</script>
+<script type="text/javascript" src="${db.locals['db_url']}/js/rankedRelevance.js"></script>
 <div class='philologic_response'>
     <div class='initial_report'>
         <%include file="show_frequency.mako"/> 

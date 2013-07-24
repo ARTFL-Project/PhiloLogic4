@@ -99,7 +99,7 @@ def bm25(tf, dl, avg_dl, idf, k1=1.6, b=0.6):
 
 def retrieve_hits(q, db):
     object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
-    obj_types = db.locals['ranked_relevance_objects']
+    obj_types = db.locals['freq_object_levels']
     table = "ranked_relevance"
     
     ## Open cursors for sqlite tables
@@ -177,7 +177,7 @@ def retrieve_hits(q, db):
                     results[i['philo_id']] = {}
                     results[i['philo_id']]['obj_type'] = object_types[i['philo_id'].split().index('0') - 1]
                     results[i['philo_id']]['bytes'] = []
-                    results[i['philo_id']]['score'] = results[i['philo_id']]['score'] * 1000
+                    results[i['philo_id']]['score'] = bm25(1, len(q_word), avg_dl, idfs[q_word]) * 1000
                 perfect_match.add(i['philo_id'])
     # Look for matches in the metadata string
     token_regex = db.locals["word_regex"] + "|" + db.locals["punct_regex"] + '| '
