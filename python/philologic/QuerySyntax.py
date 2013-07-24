@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import re
 
-patterns = [("QUOTE",r'".+?"'),
+patterns = [("QUOTE",r'".+?"?'),
             ("NOT","NOT"),
             ('OR',r'\|'),
             ('RANGE',r'[^|\s]+?\-[^|\s]+'),
