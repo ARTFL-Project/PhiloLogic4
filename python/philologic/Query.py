@@ -80,7 +80,9 @@ def format_parsed_query(parsed_split,db):
             #subtokens should be expanded against word_frequencies here
             #AFTER unicode-stripping, of course.
             clauses[-1] += expanded
-            command += "\n".join(subt for subt in expanded) + "\n"
+            command += "\n".join(subt for subt in expanded)
+            if expanded:
+                command += "\n"
 #            print >> sys.stderr, expanded
         elif label == "NOT":
             #Need to decide something to do with NOT
