@@ -13,7 +13,7 @@ from QuerySyntax import parse_query
 def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,limit=3000,filename=""):
     sys.stdout.flush()
     expandedterms = format_query(terms,db)
-    words_per_hit = len(terms.split(" "))
+    words_per_hit = len(expandedterms.split("\n\n"))
     origpid = os.getpid()
     if not filename:
         hfile = str(origpid) + ".hitlist"
