@@ -13,19 +13,17 @@ from philologic.Query import word_pattern_search
 from functions.wsgi_handler import parse_cgi
 
 
-def exact_word_pattern_search(token, path):
-    term = token[:] + '.*'
-    command = ['egrep', '-ie', "^%s\s" % term, '%s' % path]
+def exact_word_pattern_search(term, path):
+    command = ['egrep', '-iw', "^%s" % term, '%s' % path]
     process = subprocess.Popen(command, stdout=subprocess.PIPE)
     match, stderr = process.communicate()
     match = match.split('\n')
     match.remove('')
     ## HACK: The extra decode/encode are there to fix errors when this list is converted to a json object
     matches = [m.split()[0].strip().decode('utf-8', 'ignore').encode('utf-8') for m in match]
-    return highlighter(matches, token)
+    return matches
 
-def highlighter(words, token):
-    token_len = len(token)
+def highlighter(words, token_len):
     highlighted_matches = []
     for word in words:
         highlighted_section = word.decode('utf-8')[:token_len]
@@ -36,36 +34,40 @@ def highlighter(words, token):
     return highlighted_matches
 
 def format_query(q, db):
+    parsed = parse_query(q)
     parsed_split = []
-    for word in q.split():
-        if word.startswith('"'):
-            parsed_split.append(("QUOTE_S", word.replace('"', '')))
+    for label,token in parsed:
+        l,t = label,token
+        if l == "QUOTE":
+            if t[-1] != '"':
+                t += '"'
+            subtokens = t[1:-1].split(" ")
+            parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
         else:
-            parsed_split.append(("TERM", word))
+            parsed_split += [(l,t)]
     output_string = []
     label, token = parsed_split[-1]
+    prefix = " ".join('"'+t[1]+'"' if t[0] == "QUOTE_S" else t[1] for t in parsed_split[:-1])
+    if prefix:
+        prefix = prefix + " "
     expanded = []
-    if label == "QUOTE_S":
-        token = token.decode("utf-8").lower().encode("utf-8")
-        matches = exact_word_pattern_search(token,db.locals["db_path"]+"/frequencies/word_frequencies")
-    elif label == "TERM":
+    if label == "QUOTE_S" or label == "TERM":
         norm_tok = token.decode("utf-8").lower()
         norm_tok = [i for i in unicodedata.normalize("NFKD",norm_tok) if not unicodedata.combining(i)]
         norm_tok = "".join(norm_tok).encode("utf-8")
-        matches = word_pattern_search(norm_tok + '.*',db.locals["db_path"]+"/frequencies/normalized_word_frequencies")
-        matches = highlighter(matches, norm_tok.decode('utf-8'))
-    for m in matches:
-        if m not in expanded:
-            expanded += [m.strip()]                                              
-    output_string += expanded
-    if len(q) > 1:
-        mod_output = []
-        for s in output_string:
-            new_s = ''.join(re.split('([ |])', q)[:-1] + [s.strip()])
-            mod_output.append(new_s.strip())
-        return mod_output
-    else:
-        return output_string
+        matches = word_pattern_search(norm_tok,db.locals["db_path"]+"/frequencies/normalized_word_frequencies")
+        substr_token = token.decode("utf-8").lower().encode("utf-8")
+        exact_matches = exact_word_pattern_search(substr_token + '.*',db.locals["db_path"]+"/frequencies/word_frequencies")
+        for m in exact_matches:
+            if m not in matches:
+                matches.append(m)
+        matches = highlighter(matches, len(norm_tok))
+        for m in matches:
+            if label == "QUOTE_S":
+                output_string.append(prefix + '"%s"' % m)
+            else:
+                output_string.append(prefix + m)
+    return output_string
 
 def autocomplete_term(q, db):
     ## Workaround for when jquery send a list of words: happens when using the back button

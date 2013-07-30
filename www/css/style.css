@@ -412,8 +412,12 @@ div.main_body {
     border-top-color: #ECECEC;
 	position: absolute;
 }
-.explain_conc, .explain_relev, .explain_freq, .explain_colloc, .explain_time {
+.explain_conc, .explain_relev, .explain_freq, .explain_colloc, .explain_time, .explain_kwic {
     display: none;
+    margin-left: 50px;
+}
+.conc_question, .kwic_question, .relev_question, .colloc_question, .time_question, .freq_question {
+    margin-left: 50px;
 }
 
 

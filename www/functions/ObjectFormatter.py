@@ -62,6 +62,8 @@ def format(text,bytes=[]):
                     el.attrib["href"] = url_prefix + img_url + ".jpeg"
                     el[0].tag = "img"
                     el[0].attrib["src"] = url_prefix + img_url + ".sm.jpeg"
+                    el[0].attrib["class"] = "plate_img"
+                    el.attrib["class"] = "plate_img_link"
                     del el[0].attrib["url"]
                     el.append(etree.Element("br"))
             elif el.tag == "philoHighlight":        
@@ -149,7 +151,10 @@ def format_strip(text,bytes=[], chars=40):
                 last_offset = b
         text = new_text + text[last_offset:]
     xml = FragmentParser.parse(text)
-    return clean_tags(xml)
+    output = clean_tags(xml)
+    ## remove spaces around hyphens and apostrophes
+    output = re.sub(r" ?([-'])+ ", '\\1', output)
+    return output
 
 def clean_tags(element):
     text = u''

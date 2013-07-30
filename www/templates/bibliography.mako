@@ -1,10 +1,6 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
-<script>
-$(document).ready(function() {
-    $('.sidebar_display').css('margin-top', '-29px');
-});
-</script>
+<script type="text/javascript" src="${db.locals['db_url']}/js/bibliography.js"></script>
 <div class='philologic_response'>
     <div class='initial_report'>
         <p class='description'>Bibliography Report: ${len(results)} results.</p>

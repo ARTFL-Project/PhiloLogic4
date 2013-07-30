@@ -26,7 +26,7 @@ def make_clause(column,tokens,norm_path):
     start_or = False
     in_or = False
     end_or = False
-    print >> sys.stderr, "TOKENS",tokens
+    #print >> sys.stderr, "TOKENS",tokens
     for i,t in enumerate(tokens):
         if t[0] == "NOT":
             neg = True
@@ -64,7 +64,7 @@ def make_clause(column,tokens,norm_path):
             norm_term = [c for c in unicodedata.normalize("NFKD",norm_term) if not unicodedata.combining(c)]
             norm_term = u"".join(norm_term).encode("utf-8")
             expanded_terms = metadata_pattern_search(norm_term,norm_path)
-            print >> sys.stderr, "EXPANDED_TERMS:", expanded_terms
+            #print >> sys.stderr, "EXPANDED_TERMS:", expanded_terms
 
             if not expanded_terms:
                 clause = "%s == ?" % column
@@ -139,10 +139,10 @@ def parse(column,orig,norm_path):
 
 def metadata_pattern_search(term, path):
     command = ['egrep', '-wi', "%s" % term, '%s' % path]
-    print >> sys.stderr, "METADATA COMMAND:", repr(command)
+    #print >> sys.stderr, "METADATA COMMAND:", repr(command)
     process = subprocess.Popen(command, stdout=subprocess.PIPE)
     match, stderr = process.communicate()
-    print >> sys.stderr, "RESULTS:",repr(match)
+    #print >> sys.stderr, "RESULTS:",repr(match)
     match = match.split('\n')
     match.remove('')
     ## HACK: The extra decode/encode are there to fix errors when this list is converted to a json object
@@ -196,9 +196,9 @@ def query_lowlevel(db,param_dict):
     else:
         query = "SELECT philo_id FROM toms;"
 #    vars = [v.decode("utf-8") for v in vars]
-    print >> sys.stderr, "%s %% %s" % (query,vars)
-    for v in vars:
-        print >> sys.stderr, "%s : %s" % (type(v),repr(v))
+    #print >> sys.stderr, "%s %% %s" % (query,vars)
+    #for v in vars:
+    #    print >> sys.stderr, "%s : %s" % (type(v),repr(v))
 
     results = db.dbh.execute(query,vars)
     return results
