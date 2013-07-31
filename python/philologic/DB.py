@@ -128,7 +128,7 @@ class DB:
         else:
             corpus = None
         if qs:
-            words_per_hit = len(qs.split(" "))
+            words_per_hit = len(qs.split("\n\n"))
             hash.update(qs)
             hash.update(method)
             hash.update(str(method_arg))

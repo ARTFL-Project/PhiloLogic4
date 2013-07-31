@@ -65,6 +65,8 @@ def format_query(q, field, db):
             if label == "QUOTE_S":
                 output_string.append(prefix + '"%s"' % m)
             else:
+                if re.search('\|', m):
+                    m = '"' + m + '"'
                 output_string.append(prefix + m)
     return output_string
 
