@@ -30,6 +30,7 @@ def make_div_cite(i):
     if sub_section_name:
         cite += u" - <a href='%s'>%s</a>" % (sub_section_href,sub_section_name)
 
+    cite += u"(%s)" % i.pos
     # hack alert
     if len(i.philo_id) >= 8:
         page_id = [i.philo_id[0],0,0,0,0,0,0,0,i.philo_id[6]]
@@ -66,6 +67,8 @@ def make_abs_div_cite(db,i):
         cite += u" - <a href='%s'>%s</a>" % (section_href,section_name)
     if sub_section_name:
         cite += u" - <a href='%s'>%s</a>" % (sub_section_href,sub_section_name)
+
+#    cite += u" (%s)" % i.pos
     
     page_obj = i.get_page()
     if page_obj:

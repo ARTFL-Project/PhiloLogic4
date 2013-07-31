@@ -57,9 +57,9 @@ class DB:
         return c.fetchone()
         
     def get_page(self,item):
-        print >> sys.stderr, "PAGE_ITEM", item
+        #print >> sys.stderr, "PAGE_ITEM", item
         page_id_s = " ".join(str(s) for s in item)
-        print >> sys.stderr, "PAGE_ITEM_STRING", page_id_s
+        #print >> sys.stderr, "PAGE_ITEM_STRING", page_id_s
         c = self.dbh.cursor()
         c.execute("SELECT * FROM pages WHERE philo_id=? LIMIT 1;",(page_id_s,))       
         return c.fetchone()
@@ -128,7 +128,7 @@ class DB:
         else:
             corpus = None
         if qs:
-            words_per_hit = len(qs.split(" "))
+            words_per_hit = len(qs.split("\n\n"))
             hash.update(qs)
             hash.update(method)
             hash.update(str(method_arg))

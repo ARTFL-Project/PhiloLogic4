@@ -160,7 +160,8 @@ def retrieve_hits(q, db):
             results[philo_id]['match'] += 1
             results[philo_id]['score'] += score
             ## Boost score if more than one query word is in the document
-            results[philo_id]['score'] *= results[philo_id]['match'] + 1000
+            if results[philo_id]['match'] > 1:
+                results[philo_id]['score'] *= results[philo_id]['match'] + 1000
             results[philo_id]['bytes'].extend(bytes.split())
         
     ## Perform search on metadata
@@ -198,7 +199,7 @@ def retrieve_hits(q, db):
                     for match in matches:
                         if match: # not an empty string
                             try:
-                                results[philo_id]['score'] += bm25(100, metadata_length, avg_dl, idfs[match])
+                                results[philo_id]['score'] += bm25(20, metadata_length, avg_dl, idfs[match])
                             except KeyError:
                                 pass
                     if len(matches) > 1:

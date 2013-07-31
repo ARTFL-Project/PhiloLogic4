@@ -130,6 +130,7 @@ function autocomplete_metadata(metadata, field, db_url) {
     $("#" + field).autocomplete({
         source: db_url + "/scripts/metadata_list.py?field=" + field,
         minLength: 2,
+        timeout: 1000,
         dataType: "json",
         focus: function( event, ui ) {
             q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');

@@ -17,7 +17,10 @@ if __name__ == "__main__":
     frequency_field = form.getvalue('frequency_field')
     db, path_components, q = parse_cgi(environ)
     q['field'] = frequency_field
-    hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+    if q['q'] == '' and q["no_q"]:
+        hits = db.get_all(db.locals['default_object_level'])
+    else:
+        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
     field, results = r.generate_frequency(hits, q, db)
     print "Content-Type: text/html\n"
     print json.dumps(results)
