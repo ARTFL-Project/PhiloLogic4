@@ -43,6 +43,8 @@ $(document).ready(function() {
     display_overlay();
     page_image_link();
     
+    var text = 'Click to see a full-sized version of this image';
+    $('.plate_img').attr('title', text).tooltip({ position: { my: "left center", at: "right center" } });
 });
 
 
@@ -68,7 +70,7 @@ function scroll_to_highlight() {
 }
 
 function page_image_link() {
-    $('.page_image_link').click(function(e) {
+    $('.page_image_link, .plate_img_link').click(function(e) {
         e.preventDefault();
         var href = $(this).attr('href');
         var image = $("<img />").attr('src', href).load(function() {
@@ -113,6 +115,13 @@ function page_image_link() {
                 });
             });
         });
+    });
+}
+
+function plate_hover() {
+    $('.plate_img_link').hover(function() {
+        var text = 'Click to see a full-sized version of this image';
+        $(this).tooltip({content: text});
     });
 }
 
