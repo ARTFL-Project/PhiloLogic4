@@ -156,7 +156,7 @@ class BufferedParser(object):
                     self.v.push("sent",tok.group(2).encode("utf-8"),offset)
                 self.v["sent"].name = tok.group(2).encode("utf-8")
                 self.v.pull("sent",end)
-            
+        self.buffers = []
 #            print >> self.output, tok_type, tok.group().encode("utf-8"), start, end                    
 
     def feed(self,*event):
