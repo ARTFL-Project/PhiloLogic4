@@ -6,6 +6,7 @@ import re
 import MetadataQuery
 import HitList
 import sys
+import QuerySyntax
 from HitWrapper import HitWrapper
 from philologic import Query,shlax
 
@@ -128,7 +129,7 @@ class DB:
         else:
             corpus = None
         if qs:
-            words_per_hit = len(qs.split(" "))
+#            words_per_hit = len(qs.split(" "))
             hash.update(qs)
             hash.update(method)
             hash.update(str(method_arg))
@@ -138,6 +139,17 @@ class DB:
             if not os.path.isfile(search_file):
                 return Query.query(self,qs,corpus_file,self.width,method,method_arg,limit,filename=search_file)
             else:
+                parsed = QuerySyntax.parse_query(qs)
+                parsed_split = []
+                for label,token in parsed:
+                    l,t = label,token
+                    if l == "QUOTE":
+                        subtokens = t[1:-1].split(" ")
+                        parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
+                    else:
+                        parsed_split += [(l,t)]
+                command = format_parsed_query(parsed_split,db)
+                words_per_hit = len(command.split("\n\n"))
                 return HitList.HitList(search_file,words_per_hit,self)
         else:
             if corpus:
