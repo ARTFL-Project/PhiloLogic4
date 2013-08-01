@@ -51,7 +51,7 @@ def generate_frequency(results, q, db):
         else:
             q["metadata"][field] = '"%s"' % k.encode('utf-8', 'ignore') # we want to do exact queries on defined values.
         # Now build the url from q.
-        url = f.link.make_query_link(q["q"],q["method"],q["arg"],**q["metadata"])     
+        url = f.link.make_query_link(q["q"],q["method"],q["arg"],q["report"],**q["metadata"])     
 
         # Contruct the label for the item.
         # This is the place to modify the displayed label of frequency table item.

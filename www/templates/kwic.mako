@@ -1,5 +1,6 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
+<script type="text/javascript" src="${db.locals['db_url']}/js/concordanceKwic.js"></script>
 <div class='philologic_response'>
     <div class='initial_report'>
        <p class='description'>

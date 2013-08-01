@@ -64,16 +64,15 @@ def normalized_metadata_frequencies(loader_obj):
             print >> sys.stderr, "error writing normalized_" + field + "_frequencies"
 
 def metadata_relevance_table(loader_obj):
-    if loader_obj.r_r_obj and len(loader_obj.r_r_obj) < 2: ## disable with more than 1 object, probably should use toms table then.
-        for obj in loader_obj.r_r_obj:
-            conn = sqlite3.connect(loader_obj.destination + '/toms.db')
-            c = conn.cursor()
-            c.execute('create table metadata_relevance as select * from toms where philo_type=?', (obj,))
-            conn.commit()
-            for metadata in loader_obj.metadata_fields:
-                try:
-                    c.execute('create index %s_metadata_relevance on metadata_relevance(%s)' % (metadata, metadata))
-                except sqlite3.OperationalError: # column doesn't exist for some reason
-                    pass
-            conn.commit()
-            conn.close()
+    if loader_obj.default_object_level:
+        conn = sqlite3.connect(loader_obj.destination + '/toms.db')
+        c = conn.cursor()
+        c.execute('create table metadata_relevance as select * from toms where philo_type=?', (loader_obj.default_object_level,))
+        conn.commit()
+        for metadata in loader_obj.metadata_fields:
+            try:
+                c.execute('create index %s_metadata_relevance on metadata_relevance(%s)' % (metadata, metadata))
+            except sqlite3.OperationalError: # column doesn't exist for some reason
+                pass
+        conn.commit()
+        conn.close()

@@ -1,6 +1,14 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
 <div class='philologic_response'>
+    <div>
+        <a href="${db.locals['db_url']}/">Return to search form</a>
+        <p>
+            <span class="return_to_colloc">
+                Return to collocation results
+            </span>
+        </p>
+    </div>
     <div class='initial_report'>
         <p class='description'>
             <%
@@ -40,8 +48,7 @@
      </div>
 </div>
 <script>
-$(document).ready(function() {
-    $('#colloc_in_hits').append(${occurences});
-});
+var occurences = ${occurences};
 </script>
+<script type="text/javascript" src="${db.locals['db_url']}/js/concordanceFromCollocation.js"></script>
 <%include file="footer.mako"/>

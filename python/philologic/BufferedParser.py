@@ -43,7 +43,7 @@ class ExpatWrapper:
         return self.target.close()
 
 class BufferedParser(object):
-    def __init__(self,output,docid,filesize,token_regex = r"(\w+)|([\.\?\!])", xpaths = [("doc","./")],metadata_xpaths=[],suppress = [], parser_options = {}, known_metadata = {}):
+    def __init__(self,output,docid,filesize,token_regex = r"(\w+)|([\.\?\!])", xpaths = [("doc","./")],metadata_xpaths=[],suppress_tags = [],pseudo_empty_tags=[], known_metadata = {}):
         self.types = ["doc","div1","div2","div3","para","sent","word"]
         self.parallel_type = "page"
         self.output = output
@@ -55,8 +55,8 @@ class BufferedParser(object):
         self.xpaths = xpaths[:]
         self.metadata_xpaths = metadata_xpaths[:]
 
-        self.suppress_xpaths = suppress
-        self.pseudo_empty_tags = []
+        self.suppress_xpaths = suppress_tags
+        self.pseudo_empty_tags = pseudo_empty_tags
         self.known_metadata = known_metadata
 
         self.stack = []
@@ -64,6 +64,13 @@ class BufferedParser(object):
         self.handlers = {}
         self.buffer_position = 0
         self.buffers = []
+
+    def parse(self,input):
+        """Top level function for reading a file and printing out the output."""
+        self.input = input
+        lexer = ExpatWrapper(self)
+        print repr(self.input), repr(self.output)
+        return lexer.parse(self.input)
         
     def make_extractor(self,new_element,obj_type,mxp,field):
         """Constructs metadata-xpath extraction callbacks.  Called from feed() when a new object is constructed.  
@@ -142,6 +149,7 @@ class BufferedParser(object):
             end = offset + tok_end - temp_position    
             if tok_type == "word":
                 self.v.push("word",tok.group(1).encode("utf-8"),start)
+#                print >> sys.stderr,tok.group(1).encode("utf-8")
                 self.v.pull("word",end)
             elif tok_type == "sent":
                 if "sent" not in self.v:
@@ -153,6 +161,7 @@ class BufferedParser(object):
 
     def feed(self,*event):
         e_type, content, offset, name, attrib = event
+#        print >> sys.stderr, repr(event)
         if e_type == "start":
             #create a new element, and initalize the tree if necessary
             if self.root is None:
@@ -168,6 +177,10 @@ class BufferedParser(object):
                     self.flush_buffer()
 #                    print obj_type,repr(new_element)
                     self.v.push(obj_type,name,offset)
+                    if obj_type == "doc":
+                        for key,value in self.known_metadata.items():
+                            self.v[obj_type][key] = value                        
+
                     # should not attach cleanup for page and milestone objects
                     def cleanup(event,element):
                         if event[0] == "end":
@@ -246,7 +259,7 @@ if __name__ == "__main__":
         parser = BufferedParser(sys.stdout,docid,size,token_regex = r"(\w+)|([\.\?\!])",
                                                       xpaths=[("doc","."),("div",".//div1"),("div",".//div2"),("page",".//pb")],
                                                       metadata_xpaths=[("doc",".//titlestmt/title","title"),("doc",".//titlestmt/author","author"),("div","./head","headword"),("div",".@n","n"),("div",".@id","id")],
-                                                      suppress=["teiheader","head"])
+                                                      suppress_tags=["teiheader","head"])
         lexer = ExpatWrapper(parser)
         lexer.parse(fh)
         
