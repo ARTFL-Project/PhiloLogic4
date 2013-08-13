@@ -111,7 +111,7 @@ def retrieve_hits(q, db):
     total_docs = int(c.fetchone()[0])
     
     ## Limit search according to metadata
-    philo_ids = filter_hits(q, obj_types, c)
+    philo_ids = []#filter_hits(q, obj_types, c)
     
     ## TEMPORARY ###
     q['q'] = ' '.join(format_query(q['q'], db))
