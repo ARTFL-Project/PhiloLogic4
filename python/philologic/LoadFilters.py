@@ -9,6 +9,19 @@ from ast import literal_eval as eval
 
 
 ## Default filters
+def normalize_unicode_raw_words(loader_obj, text):
+    tmp_file = open(text["raw"] + ".tmp","w")
+    for line in open(text["raw"]):
+        rec_type, word, id, attrib = line.split('\t')
+        id = id.split()
+        if rec_type == "word":
+            word = word.decode("utf-8").lower().encode("utf-8")
+        record = Record(rec_type, word, id)
+        record.attrib = eval(attrib)
+        print >> tmp_file, record
+    os.remove(text["raw"])
+    os.rename(text["raw"] + ".tmp",text["raw"])
+
 def make_word_counts(loader_obj, text, depth=4):
     object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
     counts = [0 for i in range(depth)]
@@ -79,8 +92,16 @@ def prev_next_obj(loader_obj, text, depth=4):
 def generate_words_sorted(loader_obj, text):
     wordcommand = "cat %s | egrep \"^word\" | sort %s %s > %s" % (text["raw"],loader_obj.sort_by_word,loader_obj.sort_by_id,text["words"])
     os.system(wordcommand)        
+
+def make_sorted_toms(*types):
+    def sorted_toms(loader_obj, text):
+        type_pattern = "|".join("^%s" % t for t in types)
+        tomscommand = "cat %s | egrep \"%s\" | sort %s > %s" % (text["raw"],type_pattern,loader_obj.sort_by_id,text["sortedtoms"])
+        os.system(tomscommand)
+    return sorted_toms
     
-def sorted_toms(loader_obj, text):
+def old_sorted_toms(loader_obj, text):
+    # should be entirely superseded by make_sorted_toms
     type_pattern = "|".join("^%s" % t for t in loader_obj.types)
     tomscommand = "cat %s | egrep \"%s\" | sort %s > %s" % (text["raw"],type_pattern,loader_obj.sort_by_id,text["sortedtoms"])
     os.system(tomscommand)
@@ -136,6 +157,40 @@ def normalize_unicode_words(loader_obj, text):
         print >> tmp_file, record
     os.remove(text["words"])
     os.rename(text["words"] + ".tmp",text["words"])   
+
+##Useful for nested metadata.  Should always pair with normalize_divs_post in postFilters
+def normalize_divs(*columns):
+    def normalize_these_columns(loader_obj,text,depth=5):
+        current_values = {}
+        tmp_file = open(text["sortedtoms"] + ".tmp","w")
+        for column in columns:
+            current_values[column] = ""
+        for line in open(text["sortedtoms"]):
+            type, word, id, attrib = line.split('\t')
+            id = id.split()
+            record = Record(type, word, id)
+            record.attrib = eval(attrib)
+            if type == "div1":
+                for column in columns:
+                    if column in record.attrib:
+                        current_values[column] = record.attrib[column]
+                    else:
+                        current_values[column] = ""
+            elif type == "div2":
+                for column in columns:
+                    if column in record.attrib:
+                        current_values[column] = record.attrib[column]
+            elif type == "div3":
+                for column in columns:
+                    if column not in record.attrib:
+                        record.attrib[column] = current_values[column]
+            print >> tmp_file, record
+        tmp_file.close()
+        os.remove(text["sortedtoms"])
+        os.rename(text["sortedtoms"] + ".tmp",text["sortedtoms"])
+    return normalize_these_columns
+
+
 
 def normalize_unicode_columns(*columns):
 #I should never, ever need to use this now.
