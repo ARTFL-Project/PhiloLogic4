@@ -20,4 +20,4 @@ if __name__ == "__main__":
         url = r.link_to_concordance(q, word, 'all', num)
         results_with_links.append((word, num, url))
     print "Content-Type: text/html\n"
-    print json.dumps(results_with_links)
+    print json.dumps(results_with_links,indent=2)

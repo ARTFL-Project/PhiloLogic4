@@ -212,7 +212,8 @@ function retrieve_page(db_url) {
 function back_forward_button_reload(db_url) {
     $(window).on('popstate', function() {
         var id_to_load = window.location.pathname.replace(/.*dispatcher.py\//, '').replace(/\//g, '_');
-        id_to_load = id_to_load.replace(/(_0)*$/g, '');
+        id_to_load = id_to_load.replace(/(_0_?)*$/g, '');
+        console.log(id_to_load, $('.obj_text').attr('id').replace(/(_0)*$/g, ''));
         if (id_to_load != $('.obj_text').attr('id').replace(/(_0)*$/g, '')) {
             window.location = window.location.href;
         }
@@ -222,7 +223,7 @@ function back_forward_button_reload(db_url) {
 /// Have previous and next links follow scroll in page and object navigation ///
 function t_o_c_handler(db_url) {
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
-    var text_position = $('.book_page').offset().left + 20;
+    var text_position = $('.book_page').offset().left - 10;
     var position = $('#toc_container').offset().top;
     var bottomPosition = $(window).height();
     var footer_pos = $("#footer").offset().top - 30;

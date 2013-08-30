@@ -29,10 +29,11 @@
                         <%
                             metadata = {}
                             for m in db.locals['metadata_fields']:
-                                metadata[m] = i[m].encode('utf-8', 'ignore')
+                                metadata[m] = '"' + i[m].encode('utf-8', 'ignore') + '"'
                             url = f.link.make_query_link(q["q"],q["method"],q["arg"],report='concordance',**metadata)
                         %>
                         <span style"padding-left:25px">
+                            ##<b>${hit_num} occurences</b>
                             <a href='${url}' title="Click to retrieve all ${hit_num} occurences" class="tooltip_link">${hit_num} occurences</a>
                         </span>
                         <div class='philologic_context'>
