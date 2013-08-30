@@ -149,7 +149,7 @@ class DB:
                         parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
                     else:
                         parsed_split += [(l,t)]
-                command = format_parsed_query(parsed_split,db)
+                command = QuerySyntax.format_parsed_query(parsed_split,db)
                 words_per_hit = len(command.split("\n\n"))
                 return HitList.HitList(search_file,words_per_hit,self)
         else:
