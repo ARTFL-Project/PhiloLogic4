@@ -7,6 +7,7 @@ $(document).ready(function() {
         search_report = '#' + db_locals['search_reports'][i] + '_button';
         $(search_report).show();
     }
+    
     $("#q").focus(function() {
         if ($(".philologic_response").is('*')) {
             show_more_options("report");
@@ -58,10 +59,11 @@ $(document).ready(function() {
             return false;
         }
     }).data("ui-autocomplete")._renderItem = function (ul, item) {
-         return $("<li></li>")
-             .data("item.autocomplete", item)
-             .append("<a>" + item.label + "</a>")
-             .appendTo(ul);
+        term = item.label.replace(/^[^<]*/g, '');
+        return $("<li></li>")
+            .data("item.autocomplete", item)
+            .append("<a>" + term + "</a>")
+            .appendTo(ul);
      };
     var fields = [];
     $('#metadata_fields input').each(function(){
@@ -98,7 +100,7 @@ $(document).ready(function() {
     }
     
     //  Clear search form
-    $("#reset_form").click(function() {
+    $("#reset_form, #reset_form1").click(function() {
         $("#method").find("input:radio").attr("checked", false).end();
         $("#method1").attr('checked', true);
         $("#method").buttonset('refresh');
@@ -109,8 +111,11 @@ $(document).ready(function() {
         $("#pagenum1").attr('checked', true);
         $("#page_num").buttonset('refresh');
         $('#search')[0].reset();
-        showHide('concordance');
-        $("#search_elements").fadeIn();
+        if ($(this).attr('id') != 'reset_form1') {
+            showHide('concordance');
+            $("#search_elements").fadeIn();
+        }
+        $("#reset_form1").css('color', '#555555 !important');
     });
     
     //  This is to select the right option when clicking on the input box  
@@ -123,8 +128,33 @@ $(document).ready(function() {
         $("#method2").attr('checked', true).button("refresh");
     });
     
+    $('.syntax').offset({"left":  $('#q').offset().left});
+    
+    $('.syntax_title').mouseup(function() {
+        if ($('#syntax_explain').length == 0) {
+            var text = "<div id='syntax_explain'>PhiloLogic4 uses a new query syntax. Here are the basics:<br>";
+            text += "- Placeholder<br>- Placeholder<br>- Placeholder</div>";
+            $('.syntax').append(text);
+            $('#syntax_explain').fadeIn('fast');
+        }
+        $(document).mousedown(function() {
+            $('#syntax_explain').fadeOut('fast', function() {
+                $(this).remove();
+            });
+        });
+    });
+    
+//    Check if the search form has any input has been prefilled
+    $('input:text').each(function(){
+        if ($(this).val().length) {
+            if ($(this).attr('id') != 'word_num') {
+                $('#reset_form1').find('.ui-button-text').blink()
+                return false;
+            }
+        }
+    });
+    
 });
-
 
 function autocomplete_metadata(metadata, field, db_url) {
     $("#" + field).autocomplete({
@@ -134,19 +164,22 @@ function autocomplete_metadata(metadata, field, db_url) {
         dataType: "json",
         focus: function( event, ui ) {
             q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            q = q.replace(/ CUTHERE /, ' ');
             $("#" + field).val(q);
             return false;
         },
         select: function( event, ui ) {
             q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            q = q.replace(/ CUTHERE /, ' ');
             $("#" + field).val(q);
             return false;
         }
     }).data("ui-autocomplete")._renderItem = function (ul, item) {
-         return $("<li></li>")
-             .data("item.autocomplete", item)
-             .append("<a>" + item.label + "</a>")
-             .appendTo(ul);
+        term = item.label.replace(/.*(?=CUTHERE)CUTHERE /, '');
+        return $("<li></li>")
+            .data("item.autocomplete", item)
+            .append("<a>" + term + "</a>")
+            .appendTo(ul);
      };
 }
 
@@ -184,7 +217,7 @@ function showHide(value) {
 
 //  Function to show or hide search options
 function show_more_options(display) {
-    $(".more_options").button('option', 'label', 'Hide search options');    
+    $(".more_options").button('option', 'label', 'Hide search options');
     $("#report").slideDown('fast');
     if (display == "all") {
         var report = $('input[name=report]:checked', '#search').val();
@@ -229,3 +262,32 @@ function hide_search_on_click() {
         hide_search_form();
     }); 
 }
+
+(function($)
+{
+    $.fn.blink = function(options) {
+        var defaults = { delay:1500 };
+        var options = $.extend(defaults, options);
+
+        return this.each(function() {
+            var obj = $(this);
+            var state = false;
+            var colorchange = setInterval(function() {
+                if(state)
+                {
+                    $(obj).animate({color: '#555555 !important'}, 1500);
+                    state = false;
+                }
+                else
+                {
+                    $(obj).animate({color: 'rgb(255,0,0) !important'}, 1500);
+                    state = true;
+                }
+            }, options.delay);
+            $('#reset_form, #reset_form1').click(function() {
+                $(obj).css('color', '#555555 !important');
+                clearInterval(colorchange);
+            });
+        });
+    }
+}(jQuery))

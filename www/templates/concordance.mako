@@ -8,7 +8,7 @@
              start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
              r_status = "."
              if not results.done:
-                r_status += " Still working.  Refresh for a more accurate count of the results."
+                r_status += " Still working.  Reload the page for a more accurate count of the results."
             %>
             Hits <span class="start">${start}</span> - <span class="end">${end}</span> of ${len(results)}${r_status}
         </p>
@@ -25,8 +25,10 @@
                  <%
                   n += 1
                  %>
-                 <span class='hit_n'>${n}.</span> ${f.cite.make_abs_div_cite(db,i)}
-                 <a href="#" class="more_context">More</a>
+                 <div class="citation">
+                    <span class='hit_n'>${n}.</span> ${f.cite.make_abs_div_cite(db,i)}
+                    <span class="more_context">More</span>
+                </div>
                  <div class='philologic_context'>${fetch_concordance(i, path, q)}</div>
                 </li>
             % endfor

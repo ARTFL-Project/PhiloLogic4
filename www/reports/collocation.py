@@ -37,15 +37,15 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=200, fu
     ## set up filtering of most frequent 200 terms ##
     filter_list = set([])
     if word_filter:
-        filter_list_path = path + '/data/frequencies/word_frequencies'
+        filter_list_path = path + '/data/stopwords.txt'
         filter_words_file = open(filter_list_path)
         line_count = 0 
         for line in filter_words_file:
             line_count += 1
             word = line.split()[0]
             filter_list.add(word.decode('utf-8', 'ignore'))
-            if line_count > filter_num:
-                    break
+            #if line_count > filter_num:
+            #        break
     
     ## start going though hits ##
     left_collocates = defaultdict(int)

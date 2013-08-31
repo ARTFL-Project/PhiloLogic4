@@ -4,13 +4,21 @@
         <div class="initial_form">
             <table style="margin: 0 auto">
                 <tr class="table_row" ><td><span class="search_field" style="margin-right: 10px;">Search Terms:</span></td>
-                <td class="second_column"><input type='text' name='q' id='q' class="search_box"></td>
+                <td class="second_column">
+					<input type='text' name='q' id='q' class="search_box"><br>
+				</td>
                 <td><input id="button1" type='submit' value="Search"/></td>
                 <td><span class="more_options">Show search options</span></td>
+				<td><button type="reset" id="reset_form1">Clear form</button></td>
                 </tr>
             </table>
+			<div class="syntax" style="width:514px;margin-top:-12px;">
+				<span class='syntax_title'>
+					Click for tips on the query syntax
+				</span>
+			</div>
             <div id="report" class="report">
-                <h3 style="padding-left: 5px;">Choose a search report:</h3>
+                <h3 style="padding-left: 5px;margin-top: 0px;">Choose a search report:</h3>
                 <span id="concordance_button" style="display: none;">
                     <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
                     <label for="concordance">Concordance Report</label>
@@ -94,7 +102,10 @@
 						else:
 							alias = facet
 						%>
-                        <tr class="table_row"><td class="first_column"><span class="search_field">${alias}:</span></td><td><input type='text' name='${facet}' id="${facet}" class="search_box"></td></tr>
+                        <tr class="table_row">
+							<td class="first_column"><span class="search_field">${alias}:</span></td>
+							<td><input type='text' name='${facet}' id="${facet}" class="search_box"></td>
+						</tr>
                     % endfor
                 </table>
             </div>
@@ -129,13 +140,24 @@
                 </tr>
                 
                 <tr class="table_row" id="time_series_num">
-                <td class="first_column">Date range:</td><td><span class="search_field">from </span><input type='text' name="start_date" id="start_date" style="width:35px;"><span class="search_field"> to </span><input type='text' name="end_date" id="end_date" style="width:35px;">
-                <tr class="table_row" id="year_interval"><td class="first_column"><span class="search_field">Year interval:</span></td><td><span id="year_interval">
-                <input type="radio" name="year_interval" id="year0" value="1" checked="checked"><label for="year0">every year</label>
-                <input type="radio" name="year_interval" id="year1" value="10" checked="checked"><label for="year1">every 10 years</label>
-                <input type="radio" name="year_interval" id="year2" value="25"><label for="year2">every 25 years</label>
-                </span>
-                </td></tr>
+					<td class="first_column">Date range:</td>
+					<td>
+						<span class="search_field">from </span>
+						<input type='text' name="start_date" id="start_date" style="width:35px;">
+						<span class="search_field"> to </span>
+						<input type='text' name="end_date" id="end_date" style="width:35px;">
+                <tr class="table_row" id="year_interval">
+					<td class="first_column">
+						<span class="search_field">Year interval:</span>
+					</td>
+					<td>
+						<span id="year_interval">
+							<input type="radio" name="year_interval" id="year0" value="1" checked="checked"><label for="year0">every year</label>
+							<input type="radio" name="year_interval" id="year1" value="10" checked="checked"><label for="year1">every 10 years</label>
+							<input type="radio" name="year_interval" id="year2" value="25"><label for="year2">every 25 years</label>
+						</span>
+					</td>
+				</tr>
                 
                 <tr class="table_row" id="results_per_page"><td class="first_column"><span class="search_field">Results per page:</span></td>
                 <td><span id='page_num'>
@@ -149,4 +171,4 @@
         </div>
     </form>
 </div>
-<div id="waiting" style="display:none;z-index:99;position:absolute;"><img src="http://pantagruel.ci.uchicago.edu/philo4/Frantext_clovis/js/ajax-loader.gif" alt="Loading..."/></div>
+<div id="waiting" style="display:none;z-index:99;position:absolute;"><img src="${db.locals['db_url']}/js/ajax-loader.gif" alt="Loading..."/></div>
