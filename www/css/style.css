@@ -200,7 +200,7 @@ div.main_body {
 .initial_report {
     border-style:solid;
     border-width:1px;
-    border-color: #CCCCCC;
+    border-color: #A0A0A0;
     border-left:0px;
     border-right:0px;
     border-top:0px;
@@ -226,18 +226,18 @@ div.main_body {
         list-style-type: none;
 }
 .philologic_occurrence {
-        padding-top: 7px;
+        padding-top: 8px;
         padding-bottom : 8px;
-        border-style:solid;
-        border-width:1px;
-        border-color: #CCCCCC;
-        border-left:0px;
-        border-right:0px;
-        border-top:0px;
+        border-bottom-style:solid;
+        border-bottom-width:1px;
+        border-bottom-color: #A0A0A0;
         overflow: hidden;
 }
 .philologic_context {
     text-align: justify;
+    margin-top: 1px;
+    margin-bottom: 5px;
+    /*background-color: #FCFCFC;*/
 }
 .word_cloud {
     float: right;
@@ -260,9 +260,17 @@ div.main_body {
     text-decoration: none !important;
 }
 .more_context {
-    padding-left: 24px;
-    color: FFCC99 !important;
     font-weight: 300 !important;
+    float: right;
+    margin-top: -.45em;
+    margin-right: -1px;
+}
+.citation {
+    padding-top: 5px;
+    margin-top: -7px;
+    height: 21px;
+    border-bottom: 1px solid #E8E8E8;
+    background-color: rgb(248,248,248);
 }
 .collocate {
     color:#1E90FF;
@@ -332,7 +340,16 @@ div.main_body {
     display: none;
 }
 .frequency_table {
-    padding: 0px 10px 10px 10px;
+    padding: 0px 5px 10px 10px;
+    line-height: 250%;
+    /*overflow-y: scroll;*/
+}
+.freq_sidebar_text {
+    display: inline-block !important;
+    max-width: 320px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 
@@ -540,6 +557,9 @@ ul.ui-autocomplete.ui-menu {
     overflow-y: auto;
     overflow-x: hidden;
 }
+.ui-corner-all, .ui-corner-bottom, .ui-corner-top, .ui-corner-left, .ui-corner-right {
+    border-radius: 0px !important;
+}
 
 
 /*Pages links*/
@@ -606,7 +626,6 @@ ul.ui-autocomplete.ui-menu {
     border-style: solid;
     border-color: #CCCCCC;
     border-width: 1px;
-    border-radius:5px;
     line-height: 170%;
     box-shadow: 5px 9px 15px -5px #888888;
     padding-bottom: 5px;
@@ -676,7 +695,6 @@ b p.inserted-page {
     border: solid;
     border-color: #BFBFBF;
     border-width: 18px;
-    border-radius: 6px;
     z-index: 101;
     left: 25%;
     box-shadow: 0px 0px 15px #888888;
@@ -710,4 +728,24 @@ b p.inserted-page {
 .return_to_colloc:hover {
     text-decoration: underline;
     cursor: pointer;
+}
+
+.syntax_title {
+    font-size: 100%;
+}
+.syntax_title:hover {
+    text-decoration: underline;
+}
+#syntax_explain {
+    padding: 5px 5px 5px 5px;
+    display: none;
+    position: absolute;
+    z-index: 1000;
+    background-color: white;
+    border-style: solid;
+    border-color: #CCCCCC;
+    border-width: 1px;
+    line-height: 170%;
+    box-shadow: 5px 9px 15px -5px #888888;
+    color: black;
 }

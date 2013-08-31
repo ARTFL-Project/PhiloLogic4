@@ -5,7 +5,7 @@
         <a href="${db.locals['db_url']}/">Return to search form</a>
         <p>
             <span class="return_to_colloc">
-                Return to collocation results
+                Return to previous results page
             </span>
         </p>
     </div>
@@ -30,11 +30,13 @@
                     n += 1
                     occurences += i.collocate_num
                     %>
-                    <span class='hit_n'>${n}.</span> ${f.cite.make_abs_div_cite(db,i)}
-                    % if i.collocate_num > 1:
-                        <span style="padding-left:20px"><b>At least ${i.collocate_num} occurences of collocate in hit</b></span>
-                    % endif
-                    <a href="javascript:void(0)" class="more_context">More</a>
+                    <div class='citation'>
+                        <span class='hit_n'>${n}.</span> ${f.cite.make_abs_div_cite(db,i)}
+                        % if i.collocate_num > 1:
+                            <span style="padding-left:20px"><b>At least ${i.collocate_num} occurences of collocate in hit</b></span>
+                        % endif
+                        <span class="more_context" style="margin-top:-.5em;">More</span>
+                    </div>
                     <div class='philologic_context'>
                        ${colloc_concordance(i, path, q, db)}
                    </div>
