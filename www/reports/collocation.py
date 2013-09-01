@@ -62,8 +62,8 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=200, fu
         conc_text = f.get_text(hit, byte_start, 400, path)
         conc_left, conc_middle, conc_right = chunkifier(conc_text, bytes, db)
         
-        left_words = tokenize(conc_left, filter_list, within_x_words, 'left')
-        right_words = tokenize(conc_right, filter_list, within_x_words, 'right')
+        left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
+        right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)
         
         query_words = set([w.decode('utf-8') for w in q['q'].split('|')])
         
@@ -109,17 +109,17 @@ def chunkifier(conc_text, bytes, db):
     
     return conc_start, conc_middle, conc_end
 
-def tokenize(text, filter_list, within_x_words, direction):
+def tokenize(text, filter_list, within_x_words, direction, db):
     text = clean_text(text)
     text = text.lower()
     
     if direction == 'left':
         text = left_truncate.sub("", text) ## hack off left-most word (potentially truncated)
-        word_list = tokenize_text(text) 
+        word_list = tokenize_text(text, db) 
         word_list.reverse() ## left side needs to be reversed
     else:
         text = right_truncate.sub("", text) ## hack off right-most word (potentially truncated)
-        word_list = tokenize_text(text)
+        word_list = tokenize_text(text, db)
       
     word_list = filter(word_list, filter_list, within_x_words)
 
@@ -176,11 +176,12 @@ def clean_word(word):
     word = word.replace('\r', '')
     return word
 
-def tokenize_text(text):
+def tokenize_text(text, db):
     """Returns a list of individual tokens"""
     ## Still used in collocations
+    token_regex = re.compile(r"%s"% db.locals["word_regex"] + "|" + db.locals["punct_regex"] + '| ', re.U)
     text = text.lower()
-    text_tokens = re.split(r"([^ \.,;:?!\'\-\"\n\r\t\(\)]+)|([\.;:?!])", text) ## this splits on whitespaces and punctuation
+    text_tokens = token_regex.split(text) ## this splits on whitespaces and punctuation
     text_tokens = [clean_word(token) for token in text_tokens if token] ## remove empty strings
     return text_tokens
 

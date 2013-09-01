@@ -22,6 +22,10 @@
         </p>
     </div>
     <% occurences = 0 %>
+    <%
+    import sys
+    print >> sys.stderr, "IN TEMPLATE", type(results)
+    %>
     <div class="results_container">
         <ol class='colloc_concordance'>
             % for i in results[start - 1:end]:

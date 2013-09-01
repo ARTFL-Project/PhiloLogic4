@@ -31,7 +31,7 @@ def fetch_colloc_concordance(results, path, q, db, filter_words=200):
     collocate_num = q['collocate_num']
     
     ## set up filtering of most frequent 200 terms ##
-    filter_list_path = path + '/data/frequencies/word_frequencies'
+    filter_list_path = path + '/data/stopwords.txt'
     filter_words_file = open(filter_list_path)
 
     line_count = 0
@@ -51,12 +51,12 @@ def fetch_colloc_concordance(results, path, q, db, filter_words=200):
         conc_text = f.get_text(hit, byte_start, 400, path)
         conc_left, conc_middle, conc_right = chunkifier(conc_text, bytes, db)
         if direction =='left':
-            words = tokenize(conc_left, filter_list, within_x_words, direction)
+            words = tokenize(conc_left, filter_list, within_x_words, direction, db)
         elif direction == 'right':
-            words = tokenize(conc_right, filter_list, within_x_words, direction)
+            words = tokenize(conc_right, filter_list, within_x_words, direction, db)
         else:
-            words = tokenize(conc_left, filter_list, within_x_words, 'left')
-            words.extend(tokenize(conc_right, filter_list, within_x_words, 'right'))
+            words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
+            words.extend(tokenize(conc_right, filter_list, within_x_words, 'right', db))
         if collocate in set(words):
             count = words.count(collocate)
             hit.collocate_num = count
@@ -64,7 +64,8 @@ def fetch_colloc_concordance(results, path, q, db, filter_words=200):
 
         if len(new_hitlist) > (q["start"] + q["results_per_page"]):
             break
-            
+    
+    print >> sys.stderr, "CONC_COLLOC", len(new_hitlist)   
     return collocation_hitlist(new_hitlist, collocate_num)
 
 def colloc_concordance(hit, path, q, db):
