@@ -7,7 +7,7 @@
     </div>
     <div class="page_display">
         <div class="prev_obj_wrapper">
-            <div class='prev_and_toc'>
+            <div id= "prev_and_toc">
                 <div id='prev_and_toc_button'>
                     <div class='t_o_c_button'>
                         <input type="checkbox" id="show_table_of_contents">
@@ -21,7 +21,7 @@
             </div>
         </div>
         <div class="next_obj_wrapper">
-            <div class='next_and_read'>
+            <div id ="next_and_read">
                 <span class="next_obj" id="${next}">&gt;</span>
                 <div class='read_button'>
                     <span id="overlay_toggler"><label for="overlay_toggler">
