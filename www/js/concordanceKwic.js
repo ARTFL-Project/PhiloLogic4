@@ -14,6 +14,9 @@ $(document).ready(function() {
             };
         $(".kwic_biblio").hoverIntent(config);
     }
+    var citation_width = $('.citation').width() - $('.more_context').width() - $('.hit_n').width() - 30;
+    console.log(citation_width)
+    $('.cite').width(citation_width);
 });
 
 
