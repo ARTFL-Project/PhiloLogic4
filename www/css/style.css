@@ -269,8 +269,14 @@ div.main_body {
     padding-top: 5px;
     margin-top: -7px;
     height: 21px;
-    border-bottom: 1px solid #E8E8E8;
-    background-color: rgb(248,248,248);
+}
+.cite_gradient {
+    background-color: #F8F8F8; /* fallback color if gradients are not supported */
+    background-image: -webkit-linear-gradient(top, #F8F8F8, white); /* For Chrome and Safari */
+    background-image:    -moz-linear-gradient(top, #F8F8F8, white); /* For old Fx (3.6 to 15) */
+    background-image:     -ms-linear-gradient(top, #F8F8F8, white); /* For pre-releases of IE 10*/
+    background-image:      -o-linear-gradient(top, #F8F8F8, white); /* For old Opera (11.1 to 12.0) */ 
+    background-image:         linear-gradient(to bottom, #F8F8F8, white); /* Standard syntax; must be last */
 }
 .collocate {
     color:#1E90FF;
