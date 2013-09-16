@@ -1,7 +1,4 @@
 /* Get the footer to stick at the bottom */
-s {
-  text-decoration: none;
-}
 #container {
     position: relative;
     min-height: 100%;
@@ -197,7 +194,7 @@ div.main_body {
 .philologic_response {
     margin-top: 60px;
 }
-.initial_report {
+#initial_report {
     border-style:solid;
     border-width:1px;
     border-color: #A0A0A0;
@@ -205,15 +202,15 @@ div.main_body {
     border-right:0px;
     border-top:0px;
 }
-.kwic_concordance {
-        font-family: 'Droid Sans Mono', sans-serif;
-        font-size: 13px;
-        border-bottom-style:solid;
-        border-bottom-width:1px;
-        border-bottom-color: #CCCCCC;
-        padding-top:7px;
-        padding-bottom:8px;
-        margin-right: 20px;
+#kwic_concordance {
+    font-family: 'Droid Sans Mono', sans-serif;
+    font-size: 13px;
+    border-bottom-style:solid;
+    border-bottom-width:1px;
+    border-bottom-color: #CCCCCC;
+    padding-top:7px;
+    padding-bottom:8px;
+    margin-right: 20px;
 }
 .kwic_line {
     padding-top: 1px;
@@ -222,22 +219,21 @@ div.main_body {
 .kwic_biblio {
     font-weight:400 !important;
 }
-.philologic_concordance, .colloc_concordance {
-        list-style-type: none;
+#philologic_concordance, #colloc_concordance {
+    list-style-type: none;
 }
 .philologic_occurrence {
-        padding-top: 8px;
-        padding-bottom : 8px;
-        border-bottom-style:solid;
-        border-bottom-width:1px;
-        border-bottom-color: #A0A0A0;
-        overflow: hidden;
+    padding-top: 8px;
+    padding-bottom : 8px;
+    border-bottom-style:solid;
+    border-bottom-width:1px;
+    border-bottom-color: #A0A0A0;
+    overflow: hidden;
 }
 .philologic_context {
     text-align: justify;
     margin-top: 1px;
     margin-bottom: 5px;
-    /*background-color: #FCFCFC;*/
 }
 .word_cloud {
     float: right;
@@ -359,172 +355,6 @@ div.main_body {
 }
 
 
-/*Search form*/
-.form_body {
-    margin-left: -420px;
-    margin-top: -20px;
-    left: 50%;
-    width: 840px;
-    position: absolute;
-    display: none;
-    z-index: 90;
-    background-color: #FAFAFA;
-    border-right-style: solid;
-    border-right-width: 1px;
-    border-right-color: #ECECEC;
-    border-bottom-style: double;
-    border-bottom-width: 5px;
-    border-bottom-color: #ECECEC;
-    border-top-style: solid;
-    border-top-width: 1px;
-    border-top-color: #ECECEC;
-    box-shadow: 0px 9px 15px -5px #C8C8C8;
-    color: #555 !important;
-}
-.search_elements {
-    margin-top: 20px;
-    padding-left: 30px;
-    border-top: solid;
-    border-top-width: 1px;
-    border-top-color: #ECECEC;
-    float:left;
-}
-.search_box {
-    width: 250px;
-}
-.show_search_form {
-    font-size: 100%;
-    color: #800000;
-    font-weight: 600;
-    width: inherit;
-    text-decoration: none !important;
-}
-.report {
-    width: auto;
-    max-width: 960px;
-    display: none;
-    margin-bottom: 10px;
-    padding-left: 20px;
-}
-.hide_search_form {
-    float:right;
-    margin-top:-30px;
-    font-weight: 400;
-}
-.initial_form {
-    margin-left: 5px;
-}
-.search_field {
-    font-weight: 400;
-}
-.more_options {
-    float: right;
-    padding-right: 10px;
-}
-.search_explain {
-    margin-left: 420px;
-	width: 399px;
-	margin-top: 20px;
-	padding-top:10px;
-	padding-left: 10px;
-	text-align: justify;
-    font-family: inherit !important;
-	padding-right: 10px;
-	border-top: solid;
-    border-top-width: 1px;
-    border-top-color: #ECECEC;
-	position: absolute;
-}
-.explain_conc, .explain_relev, .explain_freq, .explain_colloc, .explain_time, .explain_kwic {
-    display: none;
-    margin-left: 50px;
-}
-.conc_question, .kwic_question, .relev_question, .colloc_question, .time_question, .freq_question {
-    margin-left: 50px;
-}
-
-
-
-/*Document viewing styles*/
-.title {
-    font-size: 140%;
-    padding-bottom: 20px;
-}
-.table_of_contents {
-    border-top: solid 1px #ECECEC;
-    padding-top: 8px;
-    padding-left: 10px;
-    line-height: 170%;
-}
-#toc_container {
-    overflow-y: auto;
-    background: white;
-    margin-top: 20px;
-}
-.page_number, obj_nav {
-    text-align: center;
-    margin-bottom: 10px;
-}
-.current_page {
-    font-size: 105% !important;
-    text-align: center;
-    margin-bottom: 10px;
-}
-.prev_page, .fake_prev_page, .prev_obj {
-    font-size: 500%;
-    color: #D8D8D8  !important;
-    cursor: pointer;
-    display:inline-block;
-}
-.prev_page:hover, .next_page:hover, .fake_prev_page:hover, .fake_next_page:hover, .prev_obj:hover, .next_obj:hover {
-    text-decoration: none !important;
-    color: #A8A8A8 !important;
-}
-.next_page, .fake_next_page, .next_obj {
-    font-size: 500%;
-    color: #D8D8D8  !important;
-    cursor: pointer;
-}
-#next_and_read {
-    margin-top: 30px;
-    top: 0;
-}
-#prev_and_toc {
-    margin-top: 30px;
-}
-.book_page {
-    margin: 0 auto;
-    padding: 20px 20px 20px 20px;
-    width: 600px;
-    background-color: #FAFAFA !important;
-    box-shadow: 0px 0px 15px #888888;
-    line-height: 140% !important;
-    text-align: justify;
-    font-size: 105%;
-    min-height: 650px;
-    z-index: 100;
-}
-.obj_text {
-    vertical-align:middle;
-}
-.next_obj_wrapper, .prev_obj_wrapper, .next_page_wrapper, .prev_page_wrapper {
-    position: absolute;
-}
-.fixed_sidebar {
-    position: fixed;
-    top: 0;
-}
-.read_button {
-    margin-top: -40px;
-    margin-left: 50px;
-}
-.t_o_c_button {
-    display: inline-block;
-    margin-top: -40px;
-    padding-right: 10px;
-}
-
-
 /*jQueryUI styling*/
 .ui-button,  .ui-button-text, .ui-button, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {  
     font-size: inherit !important;
@@ -585,11 +415,11 @@ ul.ui-autocomplete.ui-menu {
 
 
 /*Random stuff to be organized*/
-.bibliographic_results {
+#bibliographic_results {
     list-style-type: none;
     border-top: solid 1px #ECECEC;
 }
-.description {
+#description {
     font-size: 140%;
 }
 .highlight {
@@ -616,11 +446,7 @@ ul.ui-autocomplete.ui-menu {
 .current_results_page {
     font-size: 170%;
 }
-.t_o_c_title, .object_title {
-    font-size: 140%;
-    line-height: 120%;
-    padding-bottom: 8px;
-}
+
 
 
 /*Contextual menu on selection*/
@@ -654,8 +480,6 @@ ul.ui-autocomplete.ui-menu {
     border-collapse:collapse;
     border-color: #CCCCCC;
 }
-
-
 
 
 /* Ugly looking workaround while waiting for next release of jQueryUI with selectmenu*/
@@ -696,34 +520,7 @@ b p.inserted-page {
   display:inline;
 }
 
-.image_container {
-    position: absolute;
-    border: solid;
-    border-color: #BFBFBF;
-    border-width: 18px;
-    z-index: 101;
-    left: 25%;
-    box-shadow: 0px 0px 15px #888888;
-    margin-top: -10px;
-}
-.page_image_link {
-    color: #800000;
-    text-decoration: none;
-    font-weight: 700 !important;
-}
-.page_image_link:hover {
-    text-decoration: underline;
-    cursor: pointer;
-}
-.close_page_image {
-    position: absolute;
-    margin-top: -16px;
-    z-index: 200;
-    left: 100%;
-}
-.close_page_image:hover {
-    cursor: pointer;
-}
+
 
 .return_to_colloc {
     color: #800000;
@@ -736,22 +533,3 @@ b p.inserted-page {
     cursor: pointer;
 }
 
-.syntax_title {
-    font-size: 100%;
-}
-.syntax_title:hover {
-    text-decoration: underline;
-}
-#syntax_explain {
-    padding: 5px 5px 5px 5px;
-    display: none;
-    position: absolute;
-    z-index: 1000;
-    background-color: white;
-    border-style: solid;
-    border-color: #CCCCCC;
-    border-width: 1px;
-    line-height: 170%;
-    box-shadow: 5px 9px 15px -5px #888888;
-    color: black;
-}

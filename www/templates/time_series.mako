@@ -30,8 +30,8 @@ function drawChart(mydata, count_type) {
 }
 </script>
 <div class='philologic_response'>
-    <div class='initial_report'>
-        <p class='description'>
+    <div id='initial_report'>
+        <p id='description'>
             Use of the term(s) "${q['q'].decode('utf_8')}" throughout time
         </p>
     </div>
