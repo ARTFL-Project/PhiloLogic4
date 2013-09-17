@@ -47,7 +47,6 @@ $(document).ready(function() {
     var text = 'Click to see a full-sized version of this image';
     $('.plate_img').attr('title', text).tooltip({ position: { my: "left center", at: "right center" } });
     
-    var timeoutId;
     var prev = $('#prev_and_toc');
     var next = $('#next_and_read');
     var top = next.offset().top - parseFloat(next.css('marginTop').replace(/auto/, 0));
@@ -266,7 +265,7 @@ function t_o_c_handler(db_url) {
 
 function show_hide_toc(top_right) {
     var position = top_right - ($('#toc_container').width() - $('.table_of_contents').width()) - 15;
-    var scrollto_id = '#' + $("#obj_text").attr('id');
+    var scrollto_id = '#' + $("#obj_text").data('philoId');
     if ($("#t_b_c_box").text() == "Show table of contents") {
         $("#t_b_c_box").html("Hide table of contents");
         $('#toc_container').animate({
