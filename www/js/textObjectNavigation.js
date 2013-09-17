@@ -4,26 +4,26 @@ var toc_open = false;
 
 $(document).ready(function() {
     
-    var page_pos = $('.book_page').offset().left;
-    $('.book_page').css('margin-left', page_pos);
+    var page_pos = $('#book_page').offset().left;
+    $('#book_page').css('margin-left', page_pos);
     left_pos();
     right_pos();
 
     // Change pages
-    $(".fake_prev_page, .fake_next_page").on('click', function() {
+    $("#fake_prev_page, #fake_next_page").on('click', function() {
         var direction = $(this).attr('class');
-        var page_count = $(".obj_text").children('div').size();
-        var visible = $(".obj_text").children("div:visible")
+        var page_count = $("#obj_text").children('div').size();
+        var visible = $("#obj_text").children("div:visible")
         if (direction == "fake_prev_page") {
-            $(".obj_text").children().filter("div:visible").hide().prev().fadeIn('fast');
+            $("#obj_text").children().filter("div:visible").hide().prev().fadeIn('fast');
         } else {
-            $(".obj_text").children().filter("div:visible").hide().next().fadeIn('fast');
+            $("#obj_text").children().filter("div:visible").hide().next().fadeIn('fast');
         }
     });
     
     // This is to display the table of contents in the document viewer
     var db_url = db_locals['db_url'];
-    if ($('.next_obj').length) {
+    if ($('#next_obj').length) {
         retrieve_obj(db_url);
         t_o_c_handler(db_url);
         if ($('.highlight').length) {
@@ -32,7 +32,7 @@ $(document).ready(function() {
             });
         }
         back_forward_button_reload(db_url);
-    } else if ($('.next_page').length) {
+    } else if ($('#next_page').length) {
         retrieve_page(db_url);
         t_o_c_handler(db_url);
         if ($('.highlight').length) {
@@ -70,12 +70,12 @@ $(document).ready(function() {
 
 function follow_scroll(prev, next, top) {
     if (latestKnownScrollY >= top) {
-        next.attr('class', 'next_and_read fixed_sidebar');
-        prev.attr('class', 'prev_and_toc fixed_sidebar');
+        next.css('position', 'fixed');
+        prev.css({'position': 'fixed', 'top': 0});
     } else {
         // otherwise remove it
-        next.attr('class', 'next_and_read');
-        prev.attr('class', 'prev_and_toc');
+        next.css('position', 'static');
+        prev.css({'position': 'static', 'top': ''});
     }
     if (toc_open) {
         toc_height();
@@ -84,8 +84,8 @@ function follow_scroll(prev, next, top) {
 
 function toc_height() {
     var position = $('#toc_container').offset().top;
-    var toc_header_height = $(".prev_and_toc").height() + parseInt($(".prev_and_toc").css("margin-top")) + parseInt($("#toc_container").css("margin-top"));
-    var other_content = $(".prev_obj_wrapper").position().top - latestKnownScrollY;
+    var toc_header_height = $("#prev_and_toc").height() + parseInt($("#prev_and_toc").css("margin-top")) + parseInt($("#toc_container").css("margin-top"));
+    var other_content = $("#prev_obj_wrapper").position().top - latestKnownScrollY;
     if (other_content > 0) { toc_header_height += other_content; }
     var maxPossibleHeight = window_height - toc_header_height;
     var bottomPosition = window_height + latestKnownScrollY;
@@ -100,12 +100,12 @@ function toc_height() {
 
 
 function right_pos() {
-    var right_pos = $('.book_page').offset().left + $('.book_page').width();
-    $('.next_obj_wrapper').css('margin-left', right_pos + 33);
+    var right_pos = $('#book_page').offset().left + $('#book_page').width();
+    $('#next_obj_wrapper').css('margin-left', right_pos + 33);
 }
 function left_pos() {
-    var prev_obj_pos = $('.prev_obj').offset().left + $('.prev_obj').width();
-    var page_pos = $('.book_page').offset().left;
+    var prev_obj_pos = $('#prev_obj').offset().left + $('#prev_obj').width();
+    var page_pos = $('#book_page').offset().left;
     var distance = page_pos - prev_obj_pos;
     $('#prev_and_toc_button').css('margin-left', distance - 40);
 }
@@ -116,7 +116,7 @@ function scroll_to_highlight() {
 }
 
 function page_image_link() {
-    $('.page_image_link, .plate_img_link').click(function(e) {
+    $('#page_image_link, .plate_img_link').click(function(e) {
         e.preventDefault();
         var href = $(this).attr('href');
         var image = $("<img />").attr('src', href).load(function() {
@@ -175,7 +175,7 @@ function plate_hover() {
 function display_overlay() {
     $("#overlay_toggler").click(function() {
         if ($("#overlay").is('*')) {
-            $(".book_page").css('box-shadow', '0px 0px 15px #888888');
+            $("#book_page").css('box-shadow', '0px 0px 15px #888888');
             $("#overlay").fadeOut('fast', function() {
                 $(this).remove();
                 $("#read").html('Start reading mode').fadeIn('fast');
@@ -183,12 +183,12 @@ function display_overlay() {
         } else {
             var docHeight = $(document).height();
             $("body").append("<div id='overlay' style='display:none;'></div>");
-            $(".book_page").css('position', 'relative').css('box-shadow', '0px 0px 15px #FFFFFF');
+            $("#book_page").css('position', 'relative').css('box-shadow', '0px 0px 15px #FFFFFF');
             $("#read").html('Exit reading mode').fadeIn('fast');
-            $(".read_button, .next_obj").css('z-index', 100).css('position', 'relative');
-            $('.next_and_read').css('z-index', 100);
-            $('.initial_form').css('z-index', 98);
-            $('.book_page').css('z-index', 100);
+            $("#read_button, #next_obj").css('z-index', 100).css('position', 'relative');
+            $('#next_and_read').css('z-index', 100);
+            $('#initial_form').css('z-index', 98);
+            $('#book_page').css('z-index', 100);
             $("#overlay")
                .height(docHeight)
                .css({
@@ -207,21 +207,21 @@ function display_overlay() {
 
 /// Go to next or previous object in text display
 function retrieve_obj(db_url){
-    $(".prev_obj, .next_obj").on('click', function() {
+    $("#prev_obj, #next_obj").on('click', function() {
         var my_path = db_url.replace(/\/\d+.*$/, '/');
-        var philo_id = $(this).attr('id');
+        var philo_id = $(this).data('philoId');
         var script = my_path + '/scripts/go_to_obj.py?philo_id=' + philo_id;
         $.getJSON(script, function(data) {
-            var scrollto_id = '#' + $(".obj_text").attr('id');
+            var scrollto_id = '#' + $("#obj_text").data('philoId');
             $('#toc_container').find($(scrollto_id)).attr('style', 'color: #800000;');
-            $('.obj_text').fadeOut('fast', function() {
+            $('#obj_text').fadeOut('fast', function() {
                 $(this).html(data['text']).fadeIn('fast');
                 $('#footer').css('top', '');
-                $('.obj_text').attr("id", philo_id.replace(/ /g, '_'));
-                $('.prev_obj').attr('id', data['prev']);
-                $('.next_obj').attr('id', data["next"]);
+                $('#obj_text').data("philoId", philo_id.replace(/ /g, '_'));
+                $('#prev_obj').data('philoId', data['prev']);
+                $('#next_obj').data('philoId', data["next"]);
                 $("html, body").animate({ scrollTop: 0 }, "fast");
-                var scrollto_id = '#' + $(".obj_text").attr('id');
+                var scrollto_id = '#' + $("#obj_text").data('philoId');
                 if ($('#toc_container').find($(scrollto_id)).length) {
                     $('#toc_container').scrollTo($(scrollto_id), 500);
                     $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
@@ -234,19 +234,19 @@ function retrieve_obj(db_url){
     });
 }
 function retrieve_page(db_url) {
-    $(".prev_page, .next_page").on('click', function() {
+    $("#prev_page, #next_page").on('click', function() {
         var my_path = db_url.replace(/(\/\d+)+$/, '/');
         var doc_id = db_url.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
-        var page = $(".book_page").attr('id');
+        var page = $("#book_page").attr('id');
         var go_to_page = $(this).attr('id');
         var myscript = my_path + "/scripts/go_to_page.py?philo_id=" + doc_id + "&go_to_page=" + go_to_page + "&doc_page=" + page;
         $.getJSON(myscript, function(data) {
-            $(".book_page").attr('id', data[2]);
-            $('.obj_text').fadeOut('fast', function () {
+            $("#book_page").attr('id', data[2]);
+            $('#obj_text').fadeOut('fast', function () {
                 $(this).html(data[3]).fadeIn('fast');
                 $('#footer').css('top', '');
-                $(".prev_page").attr("id", data[0]);
-                $('.next_page').attr('id', data[1]);
+                $("#prev_page").attr("id", data[0]);
+                $('#next_page').attr('id', data[1]);
                 page_image_link();
                 var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
                 History.pushState(null, '', new_url);
@@ -259,8 +259,8 @@ function back_forward_button_reload(db_url) {
     $(window).on('popstate', function() {
         var id_to_load = window.location.pathname.replace(/.*dispatcher.py\//, '').replace(/\//g, '_');
         id_to_load = id_to_load.replace(/(_0_?)*$/g, '');
-        console.log(id_to_load, $('.obj_text').attr('id').replace(/(_0)*$/g, ''));
-        if (id_to_load != $('.obj_text').attr('id').replace(/(_0)*$/g, '')) {
+        console.log(id_to_load, $('#obj_text').data('philoId').replace(/(_0)*$/g, ''));
+        if (id_to_load != $('#obj_text').data('philoId').replace(/(_0)*$/g, '')) {
             window.location = window.location.href;
         }
     });
@@ -269,7 +269,7 @@ function back_forward_button_reload(db_url) {
 /// Have previous and next links follow scroll in page and object navigation ///
 function t_o_c_handler(db_url) {
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
-    var text_position = $('.book_page').offset().left - 10;
+    var text_position = $('#book_page').offset().left - 10;
     var position = $('#toc_container').offset().top;
     var bottomPosition = $(window).height();
     var footer_pos = $("#footer").offset().top - 30;
@@ -300,7 +300,7 @@ function t_o_c_handler(db_url) {
 
 function show_hide_toc(top_right) {
     var position = top_right - ($('#toc_container').width() - $('.table_of_contents').width()) - 15;
-    var scrollto_id = '#' + $(".obj_text").attr('id');
+    var scrollto_id = '#' + $("#obj_text").attr('id');
     if ($("#t_b_c_box").text() == "Show table of contents") {
         $("#t_b_c_box").html("Hide table of contents");
         $('#toc_container').animate({

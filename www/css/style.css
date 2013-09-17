@@ -191,7 +191,7 @@ div.main_body {
 
 
 /*Results formatting*/
-.philologic_response {
+#philologic_response {
     margin-top: 60px;
 }
 #initial_report {
