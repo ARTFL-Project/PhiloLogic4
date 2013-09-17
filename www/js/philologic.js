@@ -19,7 +19,7 @@ $(document).ready(function() {
             var width = $(window).width() / 3;
             $("#waiting").css("margin-left", width).css('margin-top', 100).show();
         });
-    $("#reset_form, #reset_form1, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options, .more_context").button();
+    $("#reset_form, #reset_form1, #freq_sidebar, #show_table_of_contents, #hide_search_form, #more_options, .more_context").button();
     $("#page_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
     $("#word_num").spinner({
         spin: function(event, ui) {
@@ -35,9 +35,9 @@ $(document).ready(function() {
     $("#word_num").val(10);
     $('.ui-spinner').css('width', '45px')
     $(':text').addClass("ui-corner-all");
-    $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
+    $("#show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
-    $('.search_explain').accordion({
+    $('#search_explain').accordion({
         collapsible: true,
         heightStyle: "content",
         active: false
@@ -49,7 +49,7 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     ///////// Frequency / Frequency per 10,000 switcher ////////////////////////
     ////////////////////////////////////////////////////////////////////////////
-    if ($('.philologic_frequency_report').length) {
+    if ($('#philologic_frequency_report').length) {
         frequency_switcher(db_url);
     }
     ////////////////////////////////////////////////////////////////////////////
