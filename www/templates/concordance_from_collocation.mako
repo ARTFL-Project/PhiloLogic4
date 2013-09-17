@@ -9,8 +9,8 @@
             </span>
         </p>
     </div>
-    <div class='initial_report'>
-        <p class='description'>
+    <div id='initial_report'>
+        <p id='description'>
             <%
              start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
             %>
@@ -22,12 +22,8 @@
         </p>
     </div>
     <% occurences = 0 %>
-    <%
-    import sys
-    print >> sys.stderr, "IN TEMPLATE", type(results)
-    %>
     <div class="results_container">
-        <ol class='colloc_concordance'>
+        <ol id='colloc_concordance'>
             % for i in results[start - 1:end]:
                 <li class='philologic_occurrence'>
                     <%

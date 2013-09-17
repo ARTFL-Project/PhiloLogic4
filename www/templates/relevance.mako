@@ -2,9 +2,9 @@
 <%include file="search_boxes.mako"/>
 <script type="text/javascript" src="${db.locals['db_url']}/js/rankedRelevance.js"></script>
 <div class='philologic_response'>
-    <div class='initial_report'>
+    <div id='initial_report'>
         <%include file="show_frequency.mako"/> 
-        <p class='description'>
+        <p id='description'>
         <%
             start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
          %>

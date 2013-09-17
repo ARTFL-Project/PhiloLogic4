@@ -1,8 +1,8 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
 <div class='philologic_response'>
-    <div class='initial_report'>
-        <p class='description'>
+    <div id='initial_report'>
+        <p id='description'>
             Frequency by ${frequency_field}
         </p>
         Top 100 ${frequency_field}s displayed

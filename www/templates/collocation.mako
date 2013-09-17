@@ -9,8 +9,8 @@ var hit_len = ${hit_len};
 <script type="text/javascript" src="${db.locals['db_url']}/js/jquery.tagcloud.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/collocation.js"></script>
 <div class='philologic_response'>
-    <div class='initial_report'>
-        <p class='description'>
+    <div id='initial_report'>
+        <p id='description'>
             Displaying the top 100 collocates for <span id="colloc_hits">${hit_len}</span> occurrences of "${q['q'].decode('utf-8', 'ignore')}":
         </p>
         <div id="progress_bar" style="position:absolute;margin-top:-15px;">

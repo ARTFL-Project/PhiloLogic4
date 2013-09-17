@@ -2,8 +2,8 @@
 <%include file="search_boxes.mako"/>
 <script type="text/javascript" src="${db.locals['db_url']}/js/concordanceKwic.js"></script>
 <div class='philologic_response'>
-    <div class='initial_report'>
-       <p class='description'>
+    <div id='initial_report'>
+       <p id='description'>
             <%
              start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
              r_status = "."
@@ -13,13 +13,13 @@
             Hits <span class="start">${start}</span> - <span class="end">${end}</span> of ${len(results)}${r_status}
         </p>
         <%include file="show_frequency.mako"/>
-        <div id="report_switch" class="report_switch">
+        <div id="report_switch">
             <input type="radio" name="report_switch" id="concordance_switch" value="?${q['q_string'].replace('report=kwic', 'report=concordance')}" checked="checked"><label for="concordance_switch">View occurences with context</label>
             <input type="radio" name="report_switch" id="kwic_switch" value="?${q['q_string'].replace('report=concordance', 'report=kwic')}"><label for="kwic_switch">View occurences line by line (KWIC)</label>
         </div>
     </div>
     <div id="results_container" class="results_container">
-        <ol class='philologic_concordance'>
+        <ol id='philologic_concordance'>
             % for i in results[start - 1:end]:
                 <li class='philologic_occurrence'>
                  <%
