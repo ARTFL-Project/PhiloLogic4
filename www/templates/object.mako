@@ -23,11 +23,6 @@
         <div id="next_obj_wrapper">
             <div id ="next_and_read">
                 <span id="next_obj" data-philo_id="${next}">&gt;</span>
-                <div id='read_button'>
-                    <span id="overlay_toggler"><label for="overlay_toggler">
-                    <span id="read">Start reading mode</span></label>
-                    </span>
-                </div>
             </div>
         </div>
         <div id="book_page">

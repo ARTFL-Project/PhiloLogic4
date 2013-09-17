@@ -6,7 +6,7 @@ $(document).ready(function() {
     
     var page_pos = $('#book_page').offset().left;
     $('#book_page').css('margin-left', page_pos);
-    left_pos();
+    left_pos(page_pos);
     right_pos();
 
     // Change pages
@@ -42,7 +42,6 @@ $(document).ready(function() {
         }
     }
     
-    display_overlay();
     page_image_link();
     
     var text = 'Click to see a full-sized version of this image';
@@ -101,13 +100,12 @@ function toc_height() {
 
 function right_pos() {
     var right_pos = $('#book_page').offset().left + $('#book_page').width();
-    $('#next_obj_wrapper').css('margin-left', right_pos + 33);
+    $('#next_obj_wrapper').css('margin-left', right_pos + 30);
 }
-function left_pos() {
-    var prev_obj_pos = $('#prev_obj').offset().left + $('#prev_obj').width();
-    var page_pos = $('#book_page').offset().left;
-    var distance = page_pos - prev_obj_pos;
-    $('#prev_and_toc_button').css('margin-left', distance - 40);
+function left_pos(page_pos) {
+    var prev_obj_width = $('#prev_obj').width();
+    var distance = page_pos - 60;
+    $('#prev_obj').css('margin-left', distance);
 }
 
 function scroll_to_highlight() {
@@ -171,39 +169,7 @@ function plate_hover() {
     });
 }
 
-// Display overlay to enable a reading mode //
-function display_overlay() {
-    $("#overlay_toggler").click(function() {
-        if ($("#overlay").is('*')) {
-            $("#book_page").css('box-shadow', '0px 0px 15px #888888');
-            $("#overlay").fadeOut('fast', function() {
-                $(this).remove();
-                $("#read").html('Start reading mode').fadeIn('fast');
-            });
-        } else {
-            var docHeight = $(document).height();
-            $("body").append("<div id='overlay' style='display:none;'></div>");
-            $("#book_page").css('position', 'relative').css('box-shadow', '0px 0px 15px #FFFFFF');
-            $("#read").html('Exit reading mode').fadeIn('fast');
-            $("#read_button, #next_obj").css('z-index', 100).css('position', 'relative');
-            $('#next_and_read').css('z-index', 100);
-            $('#initial_form').css('z-index', 98);
-            $('#book_page').css('z-index', 100);
-            $("#overlay")
-               .height(docHeight)
-               .css({
-                  'opacity' : 0.7,
-                  'position': 'absolute',
-                  'top': 0,
-                  'left': 0,
-                  'background-color': 'black',
-                  'width': '100%',
-                  'z-index': 99
-                });
-            $("#overlay").fadeIn('fast');
-        }
-    });
-}
+
 
 /// Go to next or previous object in text display
 function retrieve_obj(db_url){

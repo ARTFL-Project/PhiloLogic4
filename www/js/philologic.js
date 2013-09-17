@@ -19,7 +19,7 @@ $(document).ready(function() {
             var width = $(window).width() / 3;
             $("#waiting").css("margin-left", width).css('margin-top', 100).show();
         });
-    $("#reset_form, #reset_form1, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, #more_options, .more_context").button();
+    $("#reset_form, #reset_form1, #freq_sidebar, #show_table_of_contents, #hide_search_form, #more_options, .more_context").button();
     $("#page_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
     $("#word_num").spinner({
         spin: function(event, ui) {
