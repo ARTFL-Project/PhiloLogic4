@@ -40,5 +40,5 @@ if __name__ == "__main__":
         parser.feed(open(fn).read())
         print fn
         print "\ttag\tstart\tend\tempty\tmalformed"
-        for tag in census.tags.keys():
+        for tag in sorted(census.tags.keys()):
             print "\t%s\t%d\t%d\t%d\t%d" % (tag,census.tags[tag]["start"],census.tags[tag]["end"],census.tags[tag]["empty"],census.tags[tag]["malformed"])
