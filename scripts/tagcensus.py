@@ -41,4 +41,9 @@ if __name__ == "__main__":
         print fn
         print "\ttag\tstart\tend\tempty\tmalformed"
         for tag in sorted(census.tags.keys()):
-            print "\t%s\t%d\t%d\t%d\t%d" % (tag,census.tags[tag]["start"],census.tags[tag]["end"],census.tags[tag]["empty"],census.tags[tag]["malformed"])
+            status = ""
+            if census.tags[tag]["start"] != census.tags[tag]["end"]:
+                status += "*"
+            if census.tags[tag]["malformed"]:
+                status += "X"
+            print "%s\t%s\t%d\t%d\t%d\t%d" % (status,tag,census.tags[tag]["start"],census.tags[tag]["end"],census.tags[tag]["empty"],census.tags[tag]["malformed"])
