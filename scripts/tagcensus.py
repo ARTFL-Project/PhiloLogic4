@@ -33,17 +33,38 @@ class TagCensus:
     def close(self):
         pass
 
+def print_census(census):
+    print "\ttag\tstart\tend\tempty\tmalformed"
+    for tag in sorted(census.tags.keys()):
+        status = ""
+        if census.tags[tag]["start"] != census.tags[tag]["end"]:
+            status += "*"
+        if census.tags[tag]["malformed"]:
+            status += "X"
+        print "%s\t%s\t%d\t%d\t%d\t%d" % (status,tag,census.tags[tag]["start"],census.tags[tag]["end"],census.tags[tag]["empty"],census.tags[tag]["malformed"])
+
+
 if __name__ == "__main__":
+    file_count = 0
+    total = None
     for fn in sys.argv[1:]:
+        file_count += 1
         census = TagCensus()
         parser = st.ShlaxIngestor(target=census)
         parser.feed(open(fn).read())
         print fn
-        print "\ttag\tstart\tend\tempty\tmalformed"
-        for tag in sorted(census.tags.keys()):
-            status = ""
-            if census.tags[tag]["start"] != census.tags[tag]["end"]:
-                status += "*"
-            if census.tags[tag]["malformed"]:
-                status += "X"
-            print "%s\t%s\t%d\t%d\t%d\t%d" % (status,tag,census.tags[tag]["start"],census.tags[tag]["end"],census.tags[tag]["empty"],census.tags[tag]["malformed"])
+        print_census(census)
+        if total:
+            for tag in census.tags.keys():
+                if tag not in total.tags:
+                    total.tags[tag] = {"start":0,"end":0,"empty":0,"malformed":0}
+                total.tags[tag]["start"] += census.tags[tag]["start"]
+                total.tags[tag]["end"] += census.tags[tag]["end"]
+                total.tags[tag]["empty"] += census.tags[tag]["empty"]
+                total.tags[tag]["malformed"] += census.tags[tag]["malformed"]
+
+        else:
+            total = census
+    if file_count > 1:
+        print "TOTAL: %d FILES" % (file_count)
+        print_census(total)
