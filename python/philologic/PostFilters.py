@@ -63,6 +63,14 @@ def normalized_metadata_frequencies(loader_obj):
         except:
             print >> sys.stderr, "error writing normalized_" + field + "_frequencies"
 
+# Some post-merge cleanup for normalize_divs in LoadFilters--should always be paired and use same arguments.
+def normalize_divs_post(*columns):
+    def normalize_these_columns_post(loader):
+        for k,v in loader.metadata_types.items():
+            if k in columns:
+                loader.metadata_types[k] = "div3"
+    return normalize_these_columns_post
+
 def metadata_relevance_table(loader_obj):
     if loader_obj.default_object_level:
         conn = sqlite3.connect(loader_obj.destination + '/toms.db')
