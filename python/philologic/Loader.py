@@ -25,17 +25,17 @@ index_cutoff = 10 # index frequency cutoff.  Don't. alter.
 
 ## If you are going to change the order of these filters (which is not recommended)
 ## please consult the documentation for each of these filters in LoadFilters.py
-default_filters = [
+default_filters = [normalize_unicode_raw_words,
                    make_word_counts, 
                    generate_words_sorted,
                    make_token_counts,
-                   sorted_toms, 
+                   make_sorted_toms("doc"), 
                    prev_next_obj, 
                    word_frequencies_per_obj('doc'),
                    generate_pages, 
                    make_max_id]
 
-default_post_filters = [word_frequencies, normalized_word_frequencies, metadata_frequencies]
+default_post_filters = [word_frequencies, normalized_word_frequencies, metadata_frequencies, normalized_metadata_frequencies,metadata_relevance_table]
 
 ## While these tables are loaded by default, you can override that default, although be aware
 ## that you will only have reduced functionality if you do. It is strongly recommended that you 

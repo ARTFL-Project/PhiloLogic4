@@ -4,11 +4,11 @@ import errno
 import philologic
 from optparse import OptionParser
 from glob import glob
-from philologic.Loader import Loader
 from philologic.LoadFilters import *
+from philologic.PostFilters import *
 from philologic.Parser import Parser
 from philologic.ParserHelpers import *
-
+from philologic.Loader import Loader
 
 #########################
 ## Command-line parsing #
@@ -22,7 +22,6 @@ parser.add_option("-t", "--templates", default=False, dest="template_dir", help=
 parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
 parser.add_option("--no-template", action="store_true", default=False, dest="no_template", help="build a database without templates for HTML rendering")
 
-
 ##########################
 ## System Configuration **
 ##########################
@@ -34,8 +33,8 @@ database_root = None
 # Please follow the instructions in INSTALLING before use.
 
 # Set the URL path to the same root directory for your philologic install.
-url_root = None 
-# http://localhost/philologic is appropriate if you don't have a DNS hostname.
+url_root = None
+# http://localhost/philologic/ is appropriate if you don't have a DNS hostname.
 
 if database_root is None or url_root is None:
     print >> sys.stderr, "Please configure the loader script before use.  See INSTALLING in your PhiloLogic distribution."
@@ -54,10 +53,11 @@ template_dir = database_root + "_system_dir/_install_dir/"
 try:
     dbname = args[0]
     args.pop(0)
-    if args[-1].endswith('/') or os.path.isdir(args[-1]):   
-        files = glob(args[-1] + '/*')
-    else:
-        files = args[:]
+    files = args[:]
+#    if args[-1].endswith('/') or os.path.isdir(args[-1]):   
+#        files = glob(args[-1] + '/*')
+#    else:
+#        files = args[:]
 except IndexError:
     print >> sys.stderr, "\nError: you did not supply a database name or a path for your file(s) to be loaded\n"
     parser.print_help()
@@ -88,14 +88,16 @@ log = options.log or False
 debug = options.debug or False
 
 # Define text objects for ranked relevancy: by default it's ['doc']. Disable by supplying empty list
-r_r_obj = ['doc'] 
+default_object_level = 'doc' 
 
 # Data tables to store.
 tables = ['toms', 'pages', 'ranked_relevance']
 
 # Define filters as a list of functions to call, either those in Loader or outside
-filters = [make_word_counts, generate_words_sorted,make_token_counts,sorted_toms,
-                prev_next_obj, word_frequencies_per_obj(*r_r_obj),generate_pages, make_max_id]  
+filters = [normalize_unicode_raw_words,make_word_counts, generate_words_sorted,make_token_counts,make_sorted_toms("doc","div1","div2","div3"),
+           prev_next_obj, word_frequencies_per_obj("doc"),generate_pages, make_max_id]  
+
+post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies,metadata_relevance_table]
 
 # Define text objects to generate plain text files for various machine learning tasks
 plain_text_obj = []
@@ -103,8 +105,6 @@ if plain_text_obj:
     filters.extend([store_in_plain_text(*plaint_text_obj)])
 
 extra_locals = {"db_url": url_root + dbname}
-if r_r_obj:
-    extra_locals['ranked_relevance_objects'] = r_r_obj
 
 ## Define which search reports to enable
 ## Note that this can still be configured in your database db_locals.py file
@@ -115,46 +115,26 @@ extra_locals['search_reports'] = search_reports
 ## Set-up database load ###
 ###########################
 
-Philo_Types = ["doc","div","para","word"] # every object type you'll be indexing.  pages don't count, yet.
+Philo_Types = ["doc","div"] # every object type you'll be indexing.  pages don't count, yet.
 
-XPaths = {  ".":"doc", # Always fire a doc against the document root.
-            ".//front":"div",
-            ".//div":"div",
-            ".//div1":"div",
-            ".//div2":"div",
-            ".//div3":"div",
-            ".//p":"para",
-            ".//sp":"para",
-            ".//w":"word",
-            #"stage":"para"
-            ".//pb":"page",
-         } 
+XPaths =  [("doc","."),("div",".//div1"),("div",".//div2"),("div",".//div3"),("page",".//pb")]         
 
-Metadata_XPaths = { # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
-             "doc" : [(ContentExtractor,"./teiHeader/fileDesc/titleStmt/author","author"),
-                      (ContentExtractor,"./teiHeader/fileDesc/titleStmt/title", "title"),
-                      (ContentExtractor,"./teiHeader/sourceDesc/biblFull/publicationStmt/date", "date"),
-                      (AttributeExtractor,"./text/body/volume@n","volume"),
-                      (AttributeExtractor,".@xml:id","id")],
-             "div" : [(ContentExtractor,"./head","head"),
-                      (ContentExtractor,"./head//*","head"),
-                      (AttributeExtractor,".@n","n"),
-                      (AttributeExtractor,".@xml:id","id")],
-             "para": [(ContentExtractor,"./speaker", "who"),
-                      (ContentExtractor,"./head","head")],
-             "word": [(AttributeExtractor,".@lemma","lemma"),
-#                      (ContentExtractor,".","token"),
-                      (AttributeExtractor,".@ana","ana")],
-             "page": [(AttributeExtractor,".@n","n"),
-                      (AttributeExtractor,".@src","img")],
-           }
+Metadata_XPaths = [ # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
+    # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
+    ("doc","./teiHeader//titleStmt/title","title"),
+    ("doc","./teiHeader//titleStmt/author","author"),
+    ("doc","./teiHeader//profileDesc/creation/date","date"),
+    ("div","./head","head"),
+    ("div",".@n","n"),
+    ("div",".@id","id"),
+    ("page",".@n","n"),
+    ("page",".@fac","img")
+]
 
-non_nesting_tags = ["div1","div2","div3","p","P"]
-self_closing_tags = ["pb","p","Xdiv","note","span","br","P","BR",]
 pseudo_empty_tags = ["milestone"]
-
-word_regex = r"([^ \.,;:?!\"\n\r\t\(\)]+)"
-punct_regex = r"([\.;:?!])"
+suppress_tags = ["teiHeader",".//head"]
+word_regex = r"([\w]+)"
+punct_regex = r"([\.?!])"
 
 token_regex = word_regex + "|" + punct_regex 
 extra_locals["word_regex"] = word_regex
@@ -193,23 +173,29 @@ if template_dir:
 ####################
 
 l = Loader(data_destination,
-           Philo_Types,
+           token_regex,
            XPaths,
            Metadata_XPaths,
            filters, 
-           token_regex,
-           non_nesting_tags,
-           self_closing_tags,
            pseudo_empty_tags,
+           suppress_tags,
+           default_object_level=default_object_level,
            debug=debug)
+
+#destination,token_regex=default_token_regex,xpaths=default_xpaths,
+#                 metadata_xpaths=default_metadata,filters=default_filters,
+#                 pseudo_empty_tags=[],suppress_tags=[],console_output=True,
+#                 log=False, debug=False)
+
 l.add_files(files)
 filenames = l.list_files()
-load_metadata = [{"filename":f} for f in sorted(filenames,reverse=True)]
+print filenames
+load_metadata = [{"filename":f} for f in sorted(filenames)]
 l.parse_files(workers,load_metadata)
 l.merge_objects()
 l.analyze()
-l.make_tables(tables, *r_r_obj)
-l.finish(**extra_locals)
+l.make_tables(tables)
+l.finish(post_filters,**extra_locals)
 
 print "\nDone indexing."
 print "Your database is viewable at " + db_url + "\n"

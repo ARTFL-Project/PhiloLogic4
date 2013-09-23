@@ -58,6 +58,7 @@ Default_Token_Regex = r"([\w]+)|([\.;:?!])"
 class ExpatWrapper:
     
     def start_element(self,name, attrs):
+        print >> sys.stderr, name,attrs
         buffer = self.p.GetInputContext()
         tag_end = buffer.index(">")        
         content = buffer[:tag_end]
@@ -81,7 +82,7 @@ class ExpatWrapper:
         self.target.feed("text",data,self.p.CurrentByteIndex,None,None)
     def __init__(self,target):
         self.target = target
-        self.p = expat.ParserCreate()    
+        self.p = expat.ParserCreate(namespace_separator=" ")    
         self.p.StartElementHandler = self.start_element
         self.p.EndElementHandler = self.end_element
         self.p.CharacterDataHandler = self.char_data
