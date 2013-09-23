@@ -15,7 +15,7 @@
                     </div>
                     <div id="prev_obj" data-philo-id="${prev}">&lt;</div>
                 </div>
-                <div id="table_toggler" class="table_toggler">
+                <div id="table_toggler">
                     <div id="toc_container" style='float:left;'></div>
                 </div>
             </div>

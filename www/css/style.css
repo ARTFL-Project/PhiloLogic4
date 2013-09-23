@@ -345,6 +345,7 @@ div.main_body {
     padding: 0px 5px 10px 10px;
     line-height: 250%;
     /*overflow-y: scroll;*/
+    margin-top: 10px;
 }
 .freq_sidebar_text {
     display: inline-block !important;
@@ -519,7 +520,12 @@ label.custom-select {
 b p.inserted-page {
   display:inline;
 }
-
+s {
+    text-decoration: none;
+}
+l, s {
+    display: block;
+}
 
 
 .return_to_colloc {

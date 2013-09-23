@@ -1,6 +1,6 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
-<div class='philologic_response'>
+<div id='philologic_response'>
     <div>
         <a href="${db.locals['db_url']}/">Return to search form</a>
         <p>
