@@ -11,7 +11,7 @@ $(document).ready(function() {
         update_colloc(db_url, all_colloc, left_colloc, right_colloc, hit_len, 0, 100);
     } else {
         var collocation = JSON.parse(sessionStorage[window.location.href]);
-        $('.philologic_collocation').html(collocation);
+        $('#philologic_collocation').html(collocation);
         $("span[id^='all_'], span[id^='left_'], span[id^='right_']").css('opacity', '');
     }
 });

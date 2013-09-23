@@ -131,16 +131,11 @@ $(document).ready(function() {
     $('#syntax').offset({"left":  $('#q').offset().left});
     
     $('#syntax_title').mouseup(function() {
-        if ($('#syntax_explain').length == 0) {
-            var text = "<div id='syntax_explain'>PhiloLogic4 uses a new query syntax. Here are the basics:<br>";
-            text += "- Placeholder<br>- Placeholder<br>- Placeholder</div>";
-            $('.syntax').append(text);
+        if ($('#syntax_explain').not(':visible')) {
             $('#syntax_explain').fadeIn('fast');
         }
         $(document).mousedown(function() {
-            $('#syntax_explain').fadeOut('fast', function() {
-                $(this).remove();
-            });
+            $('#syntax_explain').fadeOut('fast');
         });
     });
     

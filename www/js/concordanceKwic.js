@@ -14,11 +14,19 @@ $(document).ready(function() {
             };
         $(".kwic_biblio").hoverIntent(config);
     }
-    var citation_width = $('.citation').width() - $('.more_context').width() - $('.hit_n').width() - 30;
-    console.log(citation_width)
-    $('.cite').width(citation_width);
+    getCitationWidth()
+    $(window).resize(function() {
+        getCitationWidth();
+    });
 });
 
+
+
+function getCitationWidth() {
+    var citation_width = $('.citation').width() - $('.more_context').width() - $('.hit_n').width() - 30;
+    $('.cite').width(citation_width);
+    console.log('success', citation_width)
+}
 
 /// Switch betwwen concordance and KWIC reports
 function concordance_kwic_switch(db_url) {
@@ -52,6 +60,7 @@ function concordance_kwic_switch(db_url) {
             $("#report").buttonset("refresh");
             display_options_on_selected();
             more_context();
+            getCitationWidth();
             $('.more').find('a').each(function() {
                 if (switchto.match(/kwic/)) {
                     var new_href = $(this).attr('href').replace('concordance', 'kwic');
@@ -93,4 +102,71 @@ function showBiblio() {
 
 function hideBiblio() {
     $(this).children("#full_biblio").fadeOut(200)
+}
+
+//    These functions are for the sidebar frequencies
+function sidebar_reports(q_string, db_url, pathname) {
+    //$('.frequency_container').css('height', $('.philologic_concordance').height() - 20 + 'px');
+    $("#toggle_frequency").click(function() {
+        toggle_frequency(q_string, db_url, pathname);
+    });
+    $("#frequency_field").change(function() {
+        toggle_frequency(q_string, db_url, pathname);
+    });
+    $(".hide_frequency").click(function() {
+        hide_frequency();
+    });
+    //$('.frequency_table').css('height', $('.philologic_concordance').height() - 20 + 'px');
+}
+function toggle_frequency(q_string, db_url, pathname) {
+    var field =  $("#frequency_field").val();
+    if (field != 'collocate') {
+        var script_call = db_url + "/scripts/get_frequency.py?" + q_string + "&frequency_field=" + field;
+    } else {
+        var script_call = db_url + "/scripts/get_collocate.py?" + q_string
+    }
+    $(".loading").empty().hide();
+    var spinner = '<img src="' + db_url + '/js/ajax-loader.gif" alt="Loading..."  height="25px" width="25px"/>';
+    $(".results_container").animate({
+        "margin-right": "420px"},
+        150, function() {
+                getCitationWidth();
+            }
+    );
+    var width = $(".sidebar_display").width() / 2;
+    $(".loading").append(spinner).css("margin-left", width).css("margin-top", "10px").show();
+    $.getJSON(script_call, function(data) {
+        var newlist = "";
+        $(".loading").hide().empty();
+        if (field == "collocate") {
+            newlist += "<p class='freq_sidebar_status'>Collocates within 10 words left or right</p>";
+        }
+        $.each(data, function(index, item) {
+            var url = '<a class="freq_sidebar_text" href="' + item[2] + '">' + item[0] + '</a>';
+            newlist += '<li style="white-space:nowrap;">' + url + '<span style="float:right;display:inline-block;padding-right: 5px;">' + item[1] + '</span></li>';
+        });
+        $("#freq").hide().empty().html(newlist).fadeIn('fast');
+    });
+    $(".hide_frequency").show();
+    $(".frequency_container").show();
+    // Workaround padding weirdness in Firefox and Internet Explorer
+    if (/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent) || /MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+        $(".frequency_table").css('padding-left', '20px');
+    }
+    $(".hide_frequency").click(function() {
+        hide_frequency();
+    });
+    sidebar_reports(q_string, db_url, pathname);
+}
+function hide_frequency() {
+    $(".hide_frequency").hide();
+    $("#freq").empty().hide();
+    $('.frequency_container').hide();
+    $(".loading").empty();
+    $(".results_container").animate({
+        "margin-right": "0px"},
+        150, function() {
+                getCitationWidth();
+        }
+    );
 }
