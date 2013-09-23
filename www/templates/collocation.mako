@@ -8,7 +8,7 @@ var hit_len = ${hit_len};
 </script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/jquery.tagcloud.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/collocation.js"></script>
-<div class='philologic_response'>
+<div id='philologic_response'>
     <div id='initial_report'>
         <p id='description'>
             Displaying the top 100 collocates for <span id="colloc_hits">${hit_len}</span> occurrences of "${q['q'].decode('utf-8', 'ignore')}":
@@ -19,7 +19,7 @@ var hit_len = ${hit_len};
         The 200 most common words are being filtered from this report.
     </div>
     <div class="results_container">
-        <div class='philologic_collocation'>
+        <div id='philologic_collocation'>
             <div id="word_cloud" class="word_cloud">
                 <div id="collocate_counts" class="collocation_counts">
                 </div>

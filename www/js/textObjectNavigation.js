@@ -90,7 +90,7 @@ function toc_height() {
     var footer_pos = $("#footer").offset().top;        
     var footer_offset = 0;
     if (bottomPosition > footer_pos) {
-        footer_offset = bottomPosition - footer_pos;            
+        footer_offset = bottomPosition - footer_pos + 22;            
     }
     var max_height = maxPossibleHeight - footer_offset;
     $('#toc_container').css('max-height', max_height);

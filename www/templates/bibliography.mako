@@ -1,7 +1,7 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
 <script type="text/javascript" src="${db.locals['db_url']}/js/bibliography.js"></script>
-<div class='philologic_response'>
+<div id='philologic_response'>
     <div id='initial_report'>
         <p id='description'>
         <%
@@ -14,7 +14,7 @@
         </p>
         <%include file="show_frequency.mako"/>
     </div>
-    <div class="results_container">
+    <div id="results_container">
         <div id='bibliographic_results'>
             <ol id='philologic_cite_list'>
                 % for i in results[start-1:end]:

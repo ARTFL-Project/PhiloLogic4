@@ -22,7 +22,7 @@ def make_abs_div_cite(db,i):
         sub_section_name = section_name
 #    speaker_name = i.who                                                                                                                                                                                                                                                          
     #cite = u"<span class='philologic_cite'>%s <a href='%s' title='title'>%s</a>" % (i.doc.author,doc_href,i.doc.title)                                                                                                                                                            
-    cite = u"<span class='philologic_cite'>%s<i>%s</i>" % (i.author,i.title)
+    cite = u"<span class='philologic_cite'>%s <i>%s</i>" % (i.author,i.title)
     if section_name:
         cite += u" <a href='%s'>%s</a>" % (section_href,section_name)
     if sub_section_name:
@@ -37,13 +37,6 @@ def make_abs_div_cite(db,i):
 #                page_href = u'<a href="%s&doc_page=%s&">' % (doc_href,page_n)
 #                cite += u", %spage %s.</a>" % (page_href, page_n)
     
-    orig_class = i['class']
-    if orig_class != "unclassified":
-        cite += ' (<i>' + orig_class + '</i>)'
-    
-    cite_author = i.articleAuthor
-    if cite_author != "unknown":
-        cite += u' ' + u"<span class='philologic_cite'>%s" % (cite_author)
 
 #    cite += u" (%s)" % i.pos
     
