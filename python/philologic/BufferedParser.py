@@ -11,14 +11,20 @@ class ExpatWrapper:
         buffer = self.p.GetInputContext()
         tag_end = buffer.index(">") + 1
         content = buffer[:tag_end]
+        name = re.sub(r"^.*?:","",name)
 #        utf8_attrs = {}
-#        for k,v in attrs.items():
+        for k,v in attrs.items():
+            no_ns_k = re.sub(r"^.*?:","",k)
+            if no_ns_k != k:
+                del attrs[k]
+                attrs[no_ns_k] = v
 #            utf8_attrs[k] = v.encode("utf-8")
         self.target.feed("start",content,self.p.CurrentByteIndex,name,attrs.copy())
     def end_element(self,name):
         closer = "</%s>" % name.encode("utf-8")
         closer_len = len(closer)
         buffer = self.p.GetInputContext()
+        name = re.sub(r"^.*?:","",name)
 #        print >> sys.stderr, buffer[:closer_len], " vs ", closer, " ?"
         if buffer[:closer_len] == closer:
 #            print >> sys.stderr, "MATCH"
@@ -33,7 +39,7 @@ class ExpatWrapper:
         self.target.feed("text",data,self.p.CurrentByteIndex,None,None)
     def __init__(self,target):
         self.target = target
-        self.p = expat.ParserCreate()    
+        self.p = expat.ParserCreate()
         self.p.StartElementHandler = self.start_element
         self.p.EndElementHandler = self.end_element
         self.p.CharacterDataHandler = self.char_data
