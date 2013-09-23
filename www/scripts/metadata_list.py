@@ -35,6 +35,7 @@ def highlighter(words, norm_tok, substr_tok):
 def format_query(q, field, db):
     parsed = parse_query(q)
     parsed_split = []
+    unique_matches = set()
     for label,token in parsed:
         l,t = label,token
         if l == "QUOTE":
@@ -48,7 +49,7 @@ def format_query(q, field, db):
     label, token = parsed_split[-1]
     prefix = " ".join('"'+t[1]+'"' if t[0] == "QUOTE_S" else t[1] for t in parsed_split[:-1])
     if prefix:
-        prefix = prefix + " "
+        prefix = prefix + " CUTHERE "
     expanded = []
     if label == "QUOTE_S" or label == "TERM":
         norm_tok = token.decode("utf-8").lower()

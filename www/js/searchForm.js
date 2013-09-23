@@ -7,39 +7,40 @@ $(document).ready(function() {
         search_report = '#' + db_locals['search_reports'][i] + '_button';
         $(search_report).show();
     }
+    
     $("#q").focus(function() {
         if ($(".philologic_response").is('*')) {
             show_more_options("report");
             hide_search_on_click();
         }
     });
-    $('.more_options').click(function() {
-        $('.search_elements').css('z-index', 150);
+    $('#more_options').click(function() {
+        $('#search_elements').css('z-index', 150);
         $('.book_page').css('z-index', 90);
-        if ($(".more_options").text() == "Show search options") {
+        if ($(this).text() == "Show search options") {
             show_more_options("all");
-            $('.search_explain').slideDown();
+            $('#search_explain').slideDown();
             hide_search_on_click();
         } else {
             hide_search_form();
         }
     });
     $("#report").buttonset();
-    $('.form_body').show();
+    $('#form_body').show();
     $("#search_elements").hide();
-    $('.conc_question, .freq_question, .colloc_question, .time_question, .relev_question, .kwic_question').hide();
-    $('.search_explain').hide();
+    $('#conc_question, #freq_question, #colloc_question, #time_question, #relev_question, #kwic_question').hide();
+    $('#search_explain').hide();
     showHide($('input[name=report]:checked', '#search').val());
     $('#report').click(function() {
         var report = $('input[name=report]:checked', '#search').val();
         if ($("#search_elements:visible")) {
             showHide(report);
             $("#search_elements").slideDown();
-            $('.search_explain').slideDown();
+            $('#search_explain').slideDown();
         } else {
             showHide(report);
             $("#search_elements").fadeIn();
-            $('.search_explain').fadeIn();
+            $('#search_explain').fadeIn();
         }
     });
       
@@ -58,10 +59,11 @@ $(document).ready(function() {
             return false;
         }
     }).data("ui-autocomplete")._renderItem = function (ul, item) {
-         return $("<li></li>")
-             .data("item.autocomplete", item)
-             .append("<a>" + item.label + "</a>")
-             .appendTo(ul);
+        term = item.label.replace(/^[^<]*/g, '');
+        return $("<li></li>")
+            .data("item.autocomplete", item)
+            .append("<a>" + term + "</a>")
+            .appendTo(ul);
      };
     var fields = [];
     $('#metadata_fields input').each(function(){
@@ -98,7 +100,7 @@ $(document).ready(function() {
     }
     
     //  Clear search form
-    $("#reset_form").click(function() {
+    $("#reset_form, #reset_form1").click(function() {
         $("#method").find("input:radio").attr("checked", false).end();
         $("#method1").attr('checked', true);
         $("#method").buttonset('refresh');
@@ -109,8 +111,11 @@ $(document).ready(function() {
         $("#pagenum1").attr('checked', true);
         $("#page_num").buttonset('refresh');
         $('#search')[0].reset();
-        showHide('concordance');
-        $("#search_elements").fadeIn();
+        if ($(this).attr('id') != 'reset_form1') {
+            showHide('concordance');
+            $("#search_elements").fadeIn();
+        }
+        $("#reset_form1").css('color', '#555555 !important');
     });
     
     //  This is to select the right option when clicking on the input box  
@@ -123,8 +128,33 @@ $(document).ready(function() {
         $("#method2").attr('checked', true).button("refresh");
     });
     
+    $('#syntax').offset({"left":  $('#q').offset().left});
+    
+    $('#syntax_title').mouseup(function() {
+        if ($('#syntax_explain').length == 0) {
+            var text = "<div id='syntax_explain'>PhiloLogic4 uses a new query syntax. Here are the basics:<br>";
+            text += "- Placeholder<br>- Placeholder<br>- Placeholder</div>";
+            $('.syntax').append(text);
+            $('#syntax_explain').fadeIn('fast');
+        }
+        $(document).mousedown(function() {
+            $('#syntax_explain').fadeOut('fast', function() {
+                $(this).remove();
+            });
+        });
+    });
+    
+//    Check if the search form has any input has been prefilled
+    $('input:text').each(function(){
+        if ($(this).val().length) {
+            if ($(this).attr('id') != 'word_num') {
+                $('#reset_form1').find('.ui-button-text').blink()
+                return false;
+            }
+        }
+    });
+    
 });
-
 
 function autocomplete_metadata(metadata, field, db_url) {
     $("#" + field).autocomplete({
@@ -134,64 +164,67 @@ function autocomplete_metadata(metadata, field, db_url) {
         dataType: "json",
         focus: function( event, ui ) {
             q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            q = q.replace(/ CUTHERE /, ' ');
             $("#" + field).val(q);
             return false;
         },
         select: function( event, ui ) {
             q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            q = q.replace(/ CUTHERE /, ' ');
             $("#" + field).val(q);
             return false;
         }
     }).data("ui-autocomplete")._renderItem = function (ul, item) {
-         return $("<li></li>")
-             .data("item.autocomplete", item)
-             .append("<a>" + item.label + "</a>")
-             .appendTo(ul);
+        term = item.label.replace(/.*(?=CUTHERE)CUTHERE /, '');
+        return $("<li></li>")
+            .data("item.autocomplete", item)
+            .append("<a>" + term + "</a>")
+            .appendTo(ul);
      };
 }
 
 // Display different search parameters based on the type of report used
 function showHide(value) {
     $("#results_per_page, #collocation_num, #time_series_num, #year_interval,#frequency_num, #method, #metadata_fields").hide();
-    $('.explain_relev, .explain_conc, .explain_time, .explain_colloc, .explain_kwic, explain_freq').hide();
-    $('.relev_question, .conc_question, .colloc_question, .time_question, .kwic_question, explain_freq').hide();    
+    $('#explain_relev, #explain_conc, #explain_time, #explain_colloc, #explain_kwic, #explain_freq').hide();
+    $('#relev_question, #conc_question, #colloc_question, #time_question, #kwic_question, #freq_question').hide();    
 
     if (value == 'frequency') {
         $("#frequency_num, #method, #metadata_fields").show();
-        $('.freq_question').fadeIn();
+        $('#freq_question').fadeIn();
     }
     if (value == 'collocation') {
         $("#collocation_num, #method, #metadata_fields").show();
-        $('.colloc_question').fadeIn();
+        $('#colloc_question').fadeIn();
     }
     if (value == 'kwic') {
         $("#results_per_page, #method, #metadata_fields").show();
-        $('.kwic_question').fadeIn();
+        $('#kwic_question').fadeIn();
     }
     if (value == 'concordance') {
         $("#results_per_page, #method, #metadata_fields").show();
-        $('.conc_question').fadeIn();
+        $('#conc_question').fadeIn();
     }
     if (value == 'relevance') {
         $("#results_per_page").show();
-        $('.relev_question').fadeIn();
+        $('#relev_question').fadeIn();
     }
     if (value == "time_series") {
         $("#time_series_num, #year_interval").show();
-        $('.time_question').fadeIn();
+        $('#time_question').fadeIn();
     }
 }
 
 //  Function to show or hide search options
 function show_more_options(display) {
-    $(".more_options").button('option', 'label', 'Hide search options');    
+    $("#more_options").button('option', 'label', 'Hide search options');
     $("#report").slideDown('fast');
     if (display == "all") {
         var report = $('input[name=report]:checked', '#search').val();
         showHide(report);
         $("#search_elements").slideDown();
     }
-    $('.form_body').css('z-index', 99);
+    $('#form_body').css('z-index', 99);
     $("body").append("<div id='search_overlay' style='display:none;'></div>");
     var header_height = $('#header').height();
     var footer_height = $('#footer').height();
@@ -212,7 +245,7 @@ function show_more_options(display) {
 }
 function hide_search_form() {
     $("#report").slideUp();
-    $('.search_explain').accordion({
+    $('#search_explain').accordion({
         collapsible: true,
         heightStyle: "content",
         active: false
@@ -221,11 +254,40 @@ function hide_search_form() {
     $("#search_overlay").fadeOut('fast', function() {
         $(this).remove();
     });
-    $(".more_options").button('option', 'label', 'Show search options');
-    $('.search_explain').slideUp();
+    $("#more_options").button('option', 'label', 'Show search options');
+    $('#search_explain').slideUp();
 }
 function hide_search_on_click() {
     $("#search_overlay, #header, #footer").click(function() {
         hide_search_form();
     }); 
 }
+
+(function($)
+{
+    $.fn.blink = function(options) {
+        var defaults = { delay:1500 };
+        var options = $.extend(defaults, options);
+
+        return this.each(function() {
+            var obj = $(this);
+            var state = false;
+            var colorchange = setInterval(function() {
+                if(state)
+                {
+                    $(obj).animate({color: '#555555 !important'}, 1500);
+                    state = false;
+                }
+                else
+                {
+                    $(obj).animate({color: 'rgb(255,0,0) !important'}, 1500);
+                    state = true;
+                }
+            }, options.delay);
+            $('#reset_form, #reset_form1').click(function() {
+                $(obj).css('color', '#555555 !important');
+                clearInterval(colorchange);
+            });
+        });
+    }
+}(jQuery))

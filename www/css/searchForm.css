@@ -1,0 +1,97 @@
+#form_body {
+    margin-left: -420px;
+    margin-top: -20px;
+    left: 50%;
+    width: 840px;
+    position: absolute;
+    display: none;
+    z-index: 90;
+    background-color: #FAFAFA;
+    border-right-style: solid;
+    border-right-width: 1px;
+    border-right-color: #ECECEC;
+    border-bottom-style: double;
+    border-bottom-width: 5px;
+    border-bottom-color: #ECECEC;
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: #ECECEC;
+    box-shadow: 0px 9px 15px -5px #C8C8C8;
+    color: #555 !important;
+}
+#search_elements {
+    margin-top: 20px;
+    padding-left: 30px;
+    border-top: solid;
+    border-top-width: 1px;
+    border-top-color: #ECECEC;
+    float:left;
+}
+.search_box {
+    width: 250px;
+}
+#show_search_form {
+    font-size: 100%;
+    color: #800000;
+    font-weight: 600;
+    width: inherit;
+    text-decoration: none !important;
+}
+#report {
+    width: auto;
+    max-width: 960px;
+    display: none;
+    margin-bottom: 10px;
+    padding-left: 20px;
+}
+#initial_form {
+    margin-left: 5px;
+}
+#search_field {
+    font-weight: 400;
+}
+#more_options {
+    float: right;
+    padding-right: 10px;
+}
+#search_explain {
+    margin-left: 420px;
+	width: 399px;
+	margin-top: 20px;
+	padding-top:10px;
+	padding-left: 10px;
+	text-align: justify;
+    font-family: inherit !important;
+	padding-right: 10px;
+	border-top: solid;
+    border-top-width: 1px;
+    border-top-color: #ECECEC;
+	position: absolute;
+}
+#explain_conc, #explain_relev, #explain_freq, #explain_colloc, #explain_time, #explain_kwic {
+    display: none;
+    margin-left: 50px;
+}
+#conc_question, #kwic_question, #relev_question, #colloc_question, #time_question, #freq_question {
+    margin-left: 50px;
+}
+
+#syntax_title {
+    font-size: 100%;
+}
+#syntax_title:hover {
+    text-decoration: underline;
+}
+#syntax_explain {
+    padding: 5px 5px 5px 5px;
+    display: none;
+    position: absolute;
+    z-index: 1000;
+    background-color: white;
+    border-style: solid;
+    border-color: #CCCCCC;
+    border-width: 1px;
+    line-height: 170%;
+    box-shadow: 5px 9px 15px -5px #888888;
+    color: black;
+}

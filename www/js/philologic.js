@@ -19,7 +19,7 @@ $(document).ready(function() {
             var width = $(window).width() / 3;
             $("#waiting").css("margin-left", width).css('margin-top', 100).show();
         });
-    $("#reset_form, #freq_sidebar, #show_table_of_contents, #overlay_toggler, #hide_search_form, .more_options").button();
+    $("#reset_form, #reset_form1, #freq_sidebar, #show_table_of_contents, #hide_search_form, #more_options, .more_context").button();
     $("#page_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
     $("#word_num").spinner({
         spin: function(event, ui) {
@@ -35,9 +35,9 @@ $(document).ready(function() {
     $("#word_num").val(10);
     $('.ui-spinner').css('width', '45px')
     $(':text').addClass("ui-corner-all");
-    $(".show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
+    $("#show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
-    $('.search_explain').accordion({
+    $('#search_explain').accordion({
         collapsible: true,
         heightStyle: "content",
         active: false
@@ -49,7 +49,7 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     ///////// Frequency / Frequency per 10,000 switcher ////////////////////////
     ////////////////////////////////////////////////////////////////////////////
-    if ($('.philologic_frequency_report').length) {
+    if ($('#philologic_frequency_report').length) {
         frequency_switcher(db_url);
     }
     ////////////////////////////////////////////////////////////////////////////
@@ -87,14 +87,14 @@ function more_context() {
     $(".more_context").click(function(e) {
         var context_link = $(this).text();
         if (context_link == 'More') {
-            $(this).siblings('.philologic_context').children('.begin_concordance').show();
-            $(this).siblings('.philologic_context').children('.end_concordance').show();
-            $(this).empty().fadeIn(100).append('Less');
+            $(this).parent().siblings('.philologic_context').children('.begin_concordance').show();
+            $(this).parent().siblings('.philologic_context').children('.end_concordance').show();
+            $(this).find('.ui-button-text').empty().fadeIn(100).append('Less');
         } 
         else {
-            $(this).siblings('.philologic_context').children('.begin_concordance').hide();
-            $(this).siblings('.philologic_context').children('.end_concordance').hide();
-            $(this).empty().fadeIn(100).append('More');
+            $(this).parent().siblings('.philologic_context').children('.begin_concordance').hide();
+            $(this).parent().siblings('.philologic_context').children('.end_concordance').hide();
+            $(this).find('.ui-button-text').empty().fadeIn(100).append('More');
         }
         e.preventDefault();
     });
@@ -102,6 +102,7 @@ function more_context() {
 
 //    These functions are for the sidebar frequencies
 function sidebar_reports(q_string, db_url, pathname) {
+    //$('.frequency_container').css('height', $('.philologic_concordance').height() - 20 + 'px');
     $("#toggle_frequency").click(function() {
         toggle_frequency(q_string, db_url, pathname);
     });
@@ -111,6 +112,7 @@ function sidebar_reports(q_string, db_url, pathname) {
     $(".hide_frequency").click(function() {
         hide_frequency();
     });
+    //$('.frequency_table').css('height', $('.philologic_concordance').height() - 20 + 'px');
 }
 function toggle_frequency(q_string, db_url, pathname) {
     var field =  $("#frequency_field").val();
@@ -133,12 +135,8 @@ function toggle_frequency(q_string, db_url, pathname) {
             newlist += "<p class='freq_sidebar_status'>Collocates within 10 words left or right</p>";
         }
         $.each(data, function(index, item) {
-            if (item[0].length > 30) {
-                var url = '<a href="' + item[2] + '">' + item[0].slice(0,32) + '[...]</a>'
-            } else {
-                var url = '<a href="' + item[2] + '">' + item[0] + '</a>'
-            } 
-            newlist += '<p><li>' + url + '<span style="float:right;">' + item[1] + '</span></li></p>';
+            var url = '<a class="freq_sidebar_text" href="' + item[2] + '">' + item[0] + '</a>';
+            newlist += '<li style="white-space:nowrap;">' + url + '<span style="float:right;display:inline-block;padding-right: 5px;">' + item[1] + '</span></li>';
         });
         $("#freq").hide().empty().html(newlist).fadeIn('fast');
     });
@@ -185,9 +183,15 @@ function display_options_on_selected() {
                     }
                     my_table += report_link;
                 }
+                var url = "?q=&report=concordance&method=proxy&head=" + text;
+                var report_link = '<a href="' + url + '" target="_blank" class="selected_tag">Run a headword search for this selection</a><br>';
+                my_table += report_link;
             } else {
                 var url = "?report=relevance&method=proxy&q=" + text;
                 var report_link = '<a href="' + url + '" target="_blank" class="selected_tag">Run a ranked relevance search for this selection</a><br>';
+                my_table += report_link;
+                url = "?q=&report=concordance&method=proxy&head=" + text;
+                report_link = '<a href="' + url + '" target="_blank" class="selected_tag">Run a headword search for this selection</a><br>';
                 my_table += report_link;
             }
             if (text.split(' ').length == 1) {

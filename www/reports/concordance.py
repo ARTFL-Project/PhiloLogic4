@@ -25,7 +25,7 @@ def concordance(environ,start_response):
 def fetch_concordance(hit, path, q):
     ## Determine length of text needed
     byte_distance = hit.bytes[-1] - hit.bytes[0]
-    length = 1000 + byte_distance + 1000
+    length = 750 + byte_distance + 750
     
     bytes, byte_start = adjust_bytes(hit.bytes, length)
     conc_text = f.get_text(hit, byte_start, length, path)
@@ -38,7 +38,7 @@ def fetch_concordance(hit, path, q):
         count = 0
         for char in reversed(conc_text[:start_highlight]):
             count += 1
-            if count > 200 and char == ' ':
+            if count > 100 and char == ' ':
                 break
         begin = start_highlight - count
         end = 0

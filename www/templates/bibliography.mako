@@ -2,8 +2,8 @@
 <%include file="search_boxes.mako"/>
 <script type="text/javascript" src="${db.locals['db_url']}/js/bibliography.js"></script>
 <div class='philologic_response'>
-    <div class='initial_report'>
-        <p class='description'>
+    <div id='initial_report'>
+        <p id='description'>
         <%
         start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
         r_status = "."
@@ -15,8 +15,8 @@
         <%include file="show_frequency.mako"/>
     </div>
     <div class="results_container">
-        <div class='bibliographic_results'>
-            <ol class='philologic_cite_list'>
+        <div id='bibliographic_results'>
+            <ol id='philologic_cite_list'>
                 % for i in results[start-1:end]:
                     <li class='philologic_occurrence'>
                         <%

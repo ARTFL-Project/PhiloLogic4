@@ -23,22 +23,30 @@ def make_abs_div_cite(db,i):
 #    speaker_name = i.who                                                                                                                                                                                                                                                          
     #cite = u"<span class='philologic_cite'>%s <a href='%s' title='title'>%s</a>" % (i.doc.author,doc_href,i.doc.title)                                                                                                                                                            
     cite = u"<span class='philologic_cite'>%s<i>%s</i>" % (i.author,i.title)
-
     if section_name:
-        cite += u" - <a href='%s'>%s</a>" % (section_href,section_name)
+        cite += u" <a href='%s'>%s</a>" % (section_href,section_name)
     if sub_section_name:
-        cite += u" - <a href='%s'>%s</a>" % (sub_section_href,sub_section_name)
-
-#    cite += u" (%s)" % i.pos
+        cite += u" <a href='%s'>%s</a>" % (sub_section_href,sub_section_name)
     
     page_obj = i.get_page()
     if page_obj:
             if page_obj['n']:
                 page_n = page_obj['n'].decode('utf-8', 'ignore')
-                cite += u", page %s." % page_n
+                cite += u" [page %s] " % page_n
 #                bytes = '&'.join(['byte=%d' % int(byte) for byte in i.bytes])
 #                page_href = u'<a href="%s&doc_page=%s&">' % (doc_href,page_n)
 #                cite += u", %spage %s.</a>" % (page_href, page_n)
+    
+    orig_class = i['class']
+    if orig_class != "unclassified":
+        cite += ' (<i>' + orig_class + '</i>)'
+    
+    cite_author = i.articleAuthor
+    if cite_author != "unknown":
+        cite += u' ' + u"<span class='philologic_cite'>%s" % (cite_author)
+
+#    cite += u" (%s)" % i.pos
+    
 
     cite += "</span>"
     return cite

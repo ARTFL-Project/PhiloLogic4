@@ -5,9 +5,16 @@
     <%
      n += 1
     %>
-    <span class='hit_n'>${n}.</span> ${f.cite.make_abs_div_cite(db,i)}
-    <a href="#" class="more_context">More</a>
-    <div class='philologic_context'>${fetch_concordance(i, path, q)}</div>
+    <div class="citation">
+        <span class='hit_n'>${n}.</span> ${f.cite.make_abs_div_cite(db,i)}
+        <span class="more_context">More</span>
+    </div>
+     <div class='philologic_context'>${fetch_concordance(i, path, q)}</div>
    </li>
   % endfor
- </ol>
+</ol>
+<script>
+    $(document).ready(function() {
+        $('.more_context').button();
+    });
+</script>
