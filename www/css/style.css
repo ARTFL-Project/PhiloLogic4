@@ -42,7 +42,7 @@ html, body {
     display: inline;
     font-size: 70%;
 }
-#header .region-content, #footer .region-content {
+#header, #footer {
   min-width: 725px;
   padding-left:20px;
   padding-right: 20px;
@@ -51,7 +51,6 @@ html, body {
     overflow: hidden;
     white-space: nowrap;
     padding-top: 15px;
-    padding-left: 20px;
 }
 #header h1 {
   font-size: 2.5em;
@@ -67,33 +66,33 @@ html, body {
  font-size: .4em;
  font-style: italic;
 }
-#footer ul.primary-links li a, #footer ul.primary-links li a:link
+ul.primary-links li a, #footer ul.primary-links li a:link
 , #footer ul.primary-links li a:visited {
   color: #800000;
 }
 
-#footer ul.primary-links li {
+ul.primary-links li {
   border-left: 1px solid #800000;
   padding: 0 .5em 0 .75em;
 }
 
-#footer ul.primary-links li.first {
+ul.primary-links li.first {
   border: 0;
   padding-left: 0;
 }
-#footer #footer-message {
-    color: #800000;
-    font-size: .9em;
-    margin: 0 0 0 2em;
+#footer-message {
     float: right;
+    margin-top: -10px;
+    padding-right: 10px;
 }
 #footer .block {
     clear: both;
     margin-bottom: 1.3em;
 }
-#footer .bottom-border {
+.bottom-border {
     min-height: 20px;
-    padding: 22px 2em;
+    padding-top: 30px;
+    padding-right: 30px;
 }
 #footer .primary-links {
   float: left;
