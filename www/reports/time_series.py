@@ -39,12 +39,16 @@ def generate_frequency(q, db):
     for i in c.fetchall():
         count = int(i['token_count'])
         try:
-            if q["year_interval"] == "1":
+            if i['date'] != None:
                 date = int(i['date'])
-            elif q["year_interval"] == "25":
-                date = round_quarter(int(i["date"]))
+                if q["year_interval"] == "1":
+                    date = date
+                elif q["year_interval"] == "25":
+                    date = round_quarter(date)
+                else:
+                    date = round_decade(date)
             else:
-                date = round_decade(int(i["date"]))
+                continue
         except ValueError: ## No valid date
             continue
         if not start <= date <= end :
