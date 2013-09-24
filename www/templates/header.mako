@@ -27,10 +27,8 @@
                     <div class="region-content">
                         <ul class="links secondary-links">
                             <li class="menu-121 first"><a href="http://humanities.uchicago.edu/orgs/ARTFL/" title="The ARTFL Project">THE ARTFL PROJECT</a></li>
-                            <li class="menu-120"><a href="http://philologic.uchicago.edu/manual.php" title="How to use the PhiloLogic Search Engine">PHILOLOGIC USER MANUAL</a></li>
-                            <li class="menu-119"><a href="http://www.lib.uchicago.edu/efts/ARTFL/newhome/subscribe/" title="Subscribe to the ARTFL Project">SUBSCRIPTION INFORMATION</a></li>
+                            <li class="menu-120"><a href="http://philologic.uchicago.edu/manual.php" title="How to use the PhiloLogic Search Engine">PHILOLOGIC4 USER MANUAL</a></li>
                             <li class="menu-118"><a href="http://www.uchicago.edu/" title="University of Chicago">UNIVERSITY OF CHICAGO</a></li>
-                            <li class="menu-117 last"><a href="http://www.atilf.fr/" title="Analyse et Traitment Informatique de la Langue Française">ATILF - CNRS</a></li>
                         </ul>             
                     </div>
                 </div>    
