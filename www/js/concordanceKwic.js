@@ -77,6 +77,7 @@ function concordance_kwic_switch(db_url) {
             more_context();
             $('.close_concordance').button();
             closeConcordance();
+            $('.close_concordance').hide();
             getCitationWidth();
             $('.more').find('a').each(function() {
                 if (switchto.match(/kwic/)) {
