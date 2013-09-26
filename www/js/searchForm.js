@@ -109,17 +109,13 @@ $(document).ready(function() {
         $("#method").find("input:radio").attr("checked", false).end();
         $("#method1").attr('checked', true);
         $("#method").buttonset('refresh');
-        $("#report").find("input:radio").attr("checked", false).end();
-        $("#report1").attr('checked', true);
-        $("#report").buttonset('refresh');
+        $("#concordance").trigger('click');
         $("#page_num").find("input:radio").attr("checked", false).end();
         $("#pagenum1").attr('checked', true);
         $("#page_num").buttonset('refresh');
         $('#search')[0].reset();
-        if ($(this).attr('id') != 'reset_form1') {
-            showHide('concordance');
-            $("#search_elements").fadeIn();
-        }
+        showHide('concordance');
+        $("#search_elements").fadeIn();
         $("#reset_form1").css('color', '#555555 !important');
     });
     
