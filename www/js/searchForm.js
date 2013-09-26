@@ -109,14 +109,15 @@ $(document).ready(function() {
         $("#method").find("input:radio").attr("checked", false).end();
         $("#method1").attr('checked', true);
         $("#method").buttonset('refresh');
-        $("#concordance").trigger('click');
         $("#page_num").find("input:radio").attr("checked", false).end();
-        $("#pagenum1").attr('checked', true);
+        $("#pagenum2").attr('checked', true);
         $("#page_num").buttonset('refresh');
         $('#search')[0].reset();
-        showHide('concordance');
         $("#search_elements").fadeIn();
         $("#reset_form1").css('color', '#555555 !important');
+        $("#report").find("input:radio").attr("checked", false).end();
+        $('#concordance').attr('checked', true);
+        $('#concordance')[0].click().buttonset('refresh');
     });
     
     //  This is to select the right option when clicking on the input box  
