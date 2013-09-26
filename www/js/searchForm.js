@@ -9,11 +9,12 @@ $(document).ready(function() {
     }
     
     $("#q").focus(function() {
-        if ($(".philologic_response").is('*')) {
+        if ($("#philologic_response").is('*')) {
             show_more_options("report");
             hide_search_on_click();
         }
     });
+    var report_width_adjust = false;
     $('#more_options').click(function() {
         $('#search_elements').css('z-index', 150);
         $('.book_page').css('z-index', 90);
@@ -21,6 +22,10 @@ $(document).ready(function() {
             show_more_options("all");
             $('#search_explain').slideDown();
             hide_search_on_click();
+            if (report_width_adjust === false) {
+                adjustReportWidth();
+                report_width_adjust = true;
+            }
         } else {
             hide_search_form();
         }
@@ -148,8 +153,23 @@ $(document).ready(function() {
             }
         }
     });
+    $(window).load(function() {
+        if ($("#search_elements").css('display') != 'none') {
+            adjustReportWidth();
+        }
+    });
     
 });
+
+//    Adjust width of report buttons
+function adjustReportWidth() {
+    var button_length = 0;
+    $("#report").find('label').each(function() {
+        button_length += $(this).width();
+    });
+    length_to_add = ($("#form_body").width() - button_length - 60) / $("#report").find('label').length;
+    $('#report').find("label").each(function() {$(this).css("width", "+=" + length_to_add);});
+}
 
 function autocomplete_metadata(metadata, field, db_url) {
     $("#" + field).autocomplete({

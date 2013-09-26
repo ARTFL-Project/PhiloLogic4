@@ -14,18 +14,33 @@ $(document).ready(function() {
             };
         $(".kwic_biblio").hoverIntent(config);
     }
+    
+    closeConcordance();
+    $('.close_concordance').hide();
+    
     getCitationWidth()
     $(window).resize(function() {
         getCitationWidth();
     });
 });
 
-
+function closeConcordance() {
+    $(".close_concordance").click(function() {
+        console.log('hi')
+        var $conc = $(this).parents('.philologic_occurrence ');
+        $conc.animate({
+            left: parseInt($conc.css('left'),10) == 0 ?
+                -$conc.outerWidth() :
+                0
+        }, function() {
+            $(this).animate({height: "hide"}, 200, "easeInQuad");
+        });
+    });
+}
 
 function getCitationWidth() {
-    var citation_width = $('.citation').width() - $('.more_context').width() - $('.hit_n').width() - 30;
+    var citation_width = $('.citation').width() - $('.more_context_and_close').width() - $('.hit_n').width() - 30;
     $('.cite').width(citation_width);
-    console.log('success', citation_width)
 }
 
 /// Switch betwwen concordance and KWIC reports
@@ -60,6 +75,8 @@ function concordance_kwic_switch(db_url) {
             $("#report").buttonset("refresh");
             display_options_on_selected();
             more_context();
+            $('.close_concordance').button();
+            closeConcordance();
             getCitationWidth();
             $('.more').find('a').each(function() {
                 if (switchto.match(/kwic/)) {

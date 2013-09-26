@@ -74,6 +74,7 @@
 }
 #conc_question, #kwic_question, #relev_question, #colloc_question, #time_question, #freq_question {
     margin-left: 50px;
+    margin-right: 15px;
 }
 
 #syntax_title {

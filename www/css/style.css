@@ -20,6 +20,10 @@ html, body {
     height:100%;
 }
 
+/*body {*/
+/*    background-color: #F8F8F8;*/
+/*}*/
+
 /* The following is for the header and footer */
 #header {
   background: url(images/header_pattern.png);
@@ -34,7 +38,7 @@ html, body {
 
 .secondary-links {
     margin:0;
-    padding:0;
+    padding-right: 20px;
     float:right;
     height: 10px;
 }
@@ -44,13 +48,12 @@ html, body {
 }
 #header, #footer {
   min-width: 725px;
-  padding-left:20px;
-  padding-right: 20px;
 }
 .site-name {
     overflow: hidden;
     white-space: nowrap;
     padding-top: 15px;
+    padding-left: 20px;
 }
 #header h1 {
   font-size: 2.5em;
@@ -83,7 +86,6 @@ ul.primary-links li.first {
 #footer-message {
     float: right;
     margin-top: -10px;
-    padding-right: 10px;
 }
 #footer .block {
     clear: both;
@@ -98,14 +100,15 @@ ul.primary-links li.first {
   float: left;
 }
 .footer-nav {
-  font-size: 80%;
+  font-size: 90%;
+  padding-left: 30px;
 }
 
 /* Links */
 a:link, a:visited {
   color: #800000;
   text-decoration: none;
-  font-weight: 700 !important;
+  font-weight: 700;
 }
 a:hover {
   color: #800000;
@@ -187,7 +190,47 @@ div.main_body {
         padding: 2px;
 }
 
+/*jQueryUI styling*/
+.ui-button,  .ui-button-text, .ui-button, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {  
+    font-size: inherit !important;
+    font-family: inherit !important;
+}
+.ui-widget {
+    font-size: inherit !important;
+    font-family: inherit !important; 
+}
 
+ul.ui-autocomplete.ui-menu {  
+    font-size: inherit !important;
+    font-family: inherit !important;
+}
+.ui-tooltip {
+    font-size: 12px !important;
+    font-family: inherit !important;
+}
+.ui-progressbar {
+    height: 1em;
+    position: relative;
+}
+.progress-label {
+    position: absolute;
+    left: 50%;
+    top: -2px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+}
+.ui-progressbar-value {
+    font-size: 70% !important;
+    text-align: center;
+}
+.ui-autocomplete {
+    max-height: 280px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.ui-corner-all, .ui-corner-bottom, .ui-corner-top, .ui-corner-left, .ui-corner-right {
+    border-radius: 0px !important;
+}
 
 /*Results formatting*/
 #philologic_response {
@@ -220,19 +263,33 @@ div.main_body {
 }
 #philologic_concordance, #colloc_concordance {
     list-style-type: none;
+    background-color: #F8F8F8;
+    background-image: -webkit-linear-gradient(left, white, #F8F8F8, white); /* For Chrome and Safari */
+    background-image:    -moz-linear-gradient(left, white, #F8F8F8, white); /* For old Fx (3.6 to 15) */
+    background-image:     -ms-linear-gradient(left, white, #F8F8F8, white); /* For pre-releases of IE 10*/
+    background-image:      -o-linear-gradient(left, white, #F8F8F8, white); /* For old Opera (11.1 to 12.0) */ 
+    background-image:         linear-gradient(to right, white, #F8F8F8, white); /* Standard syntax; must be last */
+    overflow: hidden;
 }
 .philologic_occurrence {
-    padding-top: 8px;
-    padding-bottom : 8px;
-    border-bottom-style:solid;
-    border-bottom-width:1px;
-    border-bottom-color: #A0A0A0;
-    overflow: hidden;
+    padding-top: 7px;
+    padding-bottom : 2px;
+    /*padding-left: 4px;*/
+    margin-left: 3px;
+    margin-right: 3px;
+    box-shadow: 0px 0px 4px #D8D8D8;
+    margin-bottom: 6px;
+    margin-top: 8px;
+    background-color: white;
+    left: 0;
+    position: relative;
 }
 .philologic_context {
     text-align: justify;
-    margin-top: 1px;
-    margin-bottom: 5px;
+    padding-right: 4px;
+    padding-left: 4px;
+    padding-top:4px;
+    /*margin-bottom: 5px;*/
 }
 .word_cloud {
     float: right;
@@ -254,16 +311,22 @@ div.main_body {
     color: black !important;
     text-decoration: none !important;
 }
-.more_context {
+.more_context_and_close {
     font-weight: 300 !important;
     float: right;
     margin-top: -.45em;
     margin-right: -1px;
 }
+.more_context {
+    margin-right: -4px;
+    z-index: 2;
+}
 .citation {
     padding-top: 5px;
     margin-top: -7px;
     height: 21px;
+    padding-left: 4px;
+    /*border-bottom: solid 1px #E8E8E8;*/
 }
 .cite_gradient {
     background-color: #F8F8F8; /* fallback color if gradients are not supported */
@@ -271,7 +334,7 @@ div.main_body {
     background-image:    -moz-linear-gradient(top, #F8F8F8, white); /* For old Fx (3.6 to 15) */
     background-image:     -ms-linear-gradient(top, #F8F8F8, white); /* For pre-releases of IE 10*/
     background-image:      -o-linear-gradient(top, #F8F8F8, white); /* For old Opera (11.1 to 12.0) */ 
-    background-image:         linear-gradient(to bottom, #F8F8F8, white); /* Standard syntax; must be last */
+    background-image:         linear-gradient(to bottom, #FAFAFA, white); /* Standard syntax; must be last */
 }
 .collocate {
     color:#1E90FF;
@@ -352,49 +415,6 @@ div.main_body {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-}
-
-
-/*jQueryUI styling*/
-.ui-button,  .ui-button-text, .ui-button, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {  
-    font-size: inherit !important;
-    font-family: inherit !important;
-}
-.ui-widget {
-    font-size: inherit !important;
-    font-family: inherit !important; 
-}
-
-ul.ui-autocomplete.ui-menu {  
-    font-size: inherit !important;
-    font-family: inherit !important;
-}
-.ui-tooltip {
-    font-size: 12px !important;
-    font-family: inherit !important;
-}
-.ui-progressbar {
-    height: 1em;
-    position: relative;
-}
-.progress-label {
-    position: absolute;
-    left: 50%;
-    top: -2px;
-    font-weight: bold;
-    text-shadow: 1px 1px 0 #fff;
-}
-.ui-progressbar-value {
-    font-size: 70% !important;
-    text-align: center;
-}
-.ui-autocomplete {
-    max-height: 280px;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-.ui-corner-all, .ui-corner-bottom, .ui-corner-top, .ui-corner-left, .ui-corner-right {
-    border-radius: 0px !important;
 }
 
 
@@ -539,4 +559,19 @@ l, s {
 }
 #time_series_report {
     margin-left: -50px;
+}
+
+/*Citations*/
+.section_name, .sub_section_name {
+    font-weight: 400 !important;
+}
+.cite_separation {
+    color: darkgray;
+    margin-left: 8px;
+    margin-right: 8px;
+    padding-left: 1px;
+    padding-right: 1px;
+    font-weight: 300 !important;
+    border-left: solid 1px darkgray;
+    border-right: solid 1px darkgray;
 }

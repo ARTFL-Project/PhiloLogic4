@@ -48,23 +48,23 @@
                 <h3 style="padding-left: 5px;margin-top: 0px;">Choose a search report:</h3>
                 <span id="concordance_button" style="display: none;">
                     <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
-                    <label for="concordance">Concordance Report</label>
+                    <label for="concordance">Concordance</label>
                 </span>
                 <span id="kwic_button" style="display: none;">
                     <input type="radio" name="report" id="kwic" value='kwic'>
-                    <label for="kwic">Key Word in Context (KWIC) Report</label>
+                    <label for="kwic">Key Word in Context (KWIC)</label>
                 </span>
                 <span id="relevance_button" style="display: none;">
                     <input type="radio" name="report" id="relevance" value='relevance'>
-                    <label for="relevance">Ranked Relevance Report</label>
+                    <label for="relevance">Ranked Relevance</label>
                 </span>
                 <span id="collocation_button" style="display: none;">
                     <input type="radio" name="report" id="collocation" value='collocation'>
-                    <label for="collocation">Collocation Table</label>
+                    <label for="collocation">Collocation</label>
                 </span>
                 <span id="time_series_button" style="display: none;">
                     <input type="radio" name="report" id="time_series" value='time_series'>
-                    <label for="time_series">Time Series Report</label>
+                    <label for="time_series">Time Series</label>
                 </span>
             </div>
          </div>
