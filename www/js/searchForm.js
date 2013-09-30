@@ -216,6 +216,7 @@ function showHide(value) {
     if (value == 'concordance') {
         $("#results_per_page, #method, #metadata_fields").show();
         $('#conc_question').fadeIn();
+        $('#start_date, #end_date').val('');
     }
     if (value == 'relevance') {
         $("#results_per_page").show();
@@ -224,6 +225,7 @@ function showHide(value) {
     if (value == "time_series") {
         $("#time_series_num, #year_interval").show();
         $('#time_question').fadeIn();
+        $('#date').val('');
     }
 }
 
