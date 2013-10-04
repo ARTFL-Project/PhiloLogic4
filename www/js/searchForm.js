@@ -117,7 +117,7 @@ $(document).ready(function() {
         $("#reset_form1").css('color', '#555555 !important');
         $("#report").find("input:radio").attr("checked", false).end();
         $('#concordance').attr('checked', true);
-        $('#concordance')[0].click().buttonset('refresh');
+        $('#concordance')[0].click();
     });
     
     //  This is to select the right option when clicking on the input box  

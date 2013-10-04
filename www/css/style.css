@@ -20,9 +20,9 @@ html, body {
     height:100%;
 }
 
-/*body {*/
-/*    background-color: #F8F8F8;*/
-/*}*/
+body {
+    background-color: #FCFCFC;
+}
 
 /* The following is for the header and footer */
 #header {
@@ -263,12 +263,12 @@ ul.ui-autocomplete.ui-menu {
 }
 #philologic_concordance, #colloc_concordance {
     list-style-type: none;
-    background-color: #F8F8F8;
-    background-image: -webkit-linear-gradient(left, white, #F8F8F8, white); /* For Chrome and Safari */
-    background-image:    -moz-linear-gradient(left, white, #F8F8F8, white); /* For old Fx (3.6 to 15) */
-    background-image:     -ms-linear-gradient(left, white, #F8F8F8, white); /* For pre-releases of IE 10*/
-    background-image:      -o-linear-gradient(left, white, #F8F8F8, white); /* For old Opera (11.1 to 12.0) */ 
-    background-image:         linear-gradient(to right, white, #F8F8F8, white); /* Standard syntax; must be last */
+    /*background-color: #F8F8F8;*/
+    /*background-image: -webkit-linear-gradient(left, white, #F8F8F8, white); /* For Chrome and Safari */*/
+    /*background-image:    -moz-linear-gradient(left, white, #F8F8F8, white); /* For old Fx (3.6 to 15) */*/
+    /*background-image:     -ms-linear-gradient(left, white, #F8F8F8, white); /* For pre-releases of IE 10*/*/
+    /*background-image:      -o-linear-gradient(left, white, #F8F8F8, white); /* For old Opera (11.1 to 12.0) */ */
+    /*background-image:         linear-gradient(to right, white, #F8F8F8, white); /* Standard syntax; must be last */*/
     overflow: hidden;
 }
 .philologic_occurrence {
@@ -277,7 +277,7 @@ ul.ui-autocomplete.ui-menu {
     /*padding-left: 4px;*/
     margin-left: 3px;
     margin-right: 3px;
-    box-shadow: 0px 0px 4px #D8D8D8;
+    box-shadow: 0px 0px 3px #A8A8A8;
     margin-bottom: 6px;
     margin-top: 8px;
     background-color: white;
@@ -329,7 +329,7 @@ ul.ui-autocomplete.ui-menu {
     /*border-bottom: solid 1px #E8E8E8;*/
 }
 .cite_gradient {
-    background-color: #F8F8F8; /* fallback color if gradients are not supported */
+    background-color: #FAFAFA; /* fallback color if gradients are not supported */
     background-image: -webkit-linear-gradient(top, #FAFAFA, white); /* For Chrome and Safari */
     background-image:    -moz-linear-gradient(top, #FAFAFA, white); /* For old Fx (3.6 to 15) */
     background-image:     -ms-linear-gradient(top, #FAFAFA, white); /* For pre-releases of IE 10*/
@@ -590,7 +590,7 @@ l, s {
 }
 .graph_bar {
     height: 0px;
-    background-color:#E8EDF0;
+    background-color:lightblue;
     position:absolute;
     bottom:0;
 }
@@ -612,16 +612,16 @@ l, s {
 }
 .graph_years {
     font-size: 90%;
-    -webkit-transform: rotate(-60deg);
-    -moz-transform: rotate(-60deg);
-    -ms-transform: rotate(-60deg);
-    -o-transform: rotate(-60deg);
-    transform: rotate(-60deg);
+    -webkit-transform: rotate(-55deg);
+    -moz-transform: rotate(-55deg);
+    -ms-transform: rotate(-55deg);
+    -o-transform: rotate(-55deg);
+    transform: rotate(-55deg);
 }
 #first_division, #middle_division, #top_division {
     position: absolute;
-    z-index: 100;
-    border-top: dashed 1px #C8C8C8;
+    z-index: 50;
+    border-top: dashed 1px #B8B8B8;
 }
 #first_division {
     bottom: 33%;
@@ -634,4 +634,6 @@ l, s {
 }
 #top_number, #middle_number, #first_number {
     margin-top: -16px;
+    position: absolute;
+    z-index: 100;
 }
