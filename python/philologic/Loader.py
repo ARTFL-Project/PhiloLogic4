@@ -28,10 +28,9 @@ index_cutoff = 10 # index frequency cutoff.  Don't. alter.
 default_filters = [normalize_unicode_raw_words,
                    make_word_counts, 
                    generate_words_sorted,
-                   make_token_counts,
+                   make_object_ancestors('doc', 'div1', 'div2', 'div3'),
                    make_sorted_toms("doc"), 
                    prev_next_obj, 
-                   word_frequencies_per_obj('doc'),
                    generate_pages, 
                    make_max_id]
 
@@ -40,7 +39,7 @@ default_post_filters = [word_frequencies, normalized_word_frequencies, metadata_
 ## While these tables are loaded by default, you can override that default, although be aware
 ## that you will only have reduced functionality if you do. It is strongly recommended that you 
 ## at least keep the 'toms' table from toms.db.
-default_tables = ['toms', 'pages', 'ranked_relevance']
+default_tables = ['words', 'toms', 'pages']
 
 default_xpaths = [("doc",".")]
 default_metadata = [("doc",".//titleStmt/title","title"),("doc",".//titleStmt/author","author")]
@@ -323,8 +322,8 @@ class Loader(object):
         print "%s: all indices built. moving into place." % time.ctime()
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1") 
-        if self.clean:
-            os.system('rm all_words_sorted')
+        #if self.clean:
+        #    os.system('rm all_words_sorted')
 
     def make_tables(self, tables, **extra_tables):
         print '\n### SQL Load ###'
@@ -333,6 +332,9 @@ class Loader(object):
             self.dbh = sqlite3.connect("../toms.db")
             self.dbh.text_factory = str
             self.dbh.row_factory = sqlite3.Row
+            if table == 'words':
+                file_in = self.workdir + '/all_words_sorted'
+                self.make_sql_table(table, file_in)
             if table == 'pages':
                 file_in = self.workdir + '/all_pages'                
                 self.make_sql_table(table, file_in, indices=["philo_id"],depth=9)
@@ -340,10 +342,6 @@ class Loader(object):
                 file_in = self.workdir + '/all_toms_sorted'
                 indices = ['philo_type', 'philo_id'] + self.metadata_fields
                 self.make_sql_table(table, file_in, indices=indices)
-            elif table == "ranked_relevance":
-                files_in = [self.workdir + '%s.counts' % obj for obj in self.freq_object_levels]
-                for file_in in files_in:
-                    self.make_sql_table(table, file_in, indices=['philo_name', 'philo_id'])
         if extra_tables:
             for fn, table in extra_tables.items():
                 fn(self)
