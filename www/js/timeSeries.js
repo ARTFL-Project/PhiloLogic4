@@ -17,21 +17,17 @@ $(document).ready(function() {
     drawFromData(mydata, interval, 'relative_time');
     
     
-    var hide_chart = false;
     $(window).resize(function() {
-        if (hide_chart === false) {
-            $('#test_time_series').fadeOut('fast');
-            hide_chart = true;
-        }
         waitForFinalEvent(function() {
             var diff = parseInt($('body').width()) - body_width;
             var chart_width = body_width - 90 + diff;
             $('#test_time_series, #first_division, #middle_division, #top_division').width(chart_width + 'px');
             $('.graph_bar, .graph_years').remove();
-            $('#test_time_series').show();
-            drawFromData(mydata, interval);
-            hide_chart = false;
-        }, 100, $('#test_time_series').attr('id'));
+            $('#test_time_series').fadeOut('fast', function() {
+                $(this).show();
+                drawFromData(mydata, interval);
+            });
+        }, 500, $('#test_time_series').attr('id'));
     });
     
 });
