@@ -30,7 +30,10 @@
                     <span class="cite" style="display: inline-block;overflow:hidden;white-space: nowrap;text-overflow:ellipsis;-o-text-overflow:ellipsis;">
                         ${f.cite.make_abs_div_cite(db,i)}
                     </span>
-                    <span class="more_context">More</span>
+                    <span class="more_context_and_close">
+                        <span class="more_context">More</span>
+                        <span class="close_concordance">X</span>
+                    </span>
                 </div>
                  <div class='philologic_context'>${fetch_concordance(i, path, q)}</div>
                 </li>

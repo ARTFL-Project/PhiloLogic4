@@ -1,7 +1,7 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
 <script type="text/javascript" src="${db.locals['db_url']}/js/rankedRelevance.js"></script>
-<div class='philologic_response'>
+<div id='philologic_response'>
     <div id='initial_report'>
         <%include file="show_frequency.mako"/> 
         <p id='description'>

@@ -19,7 +19,7 @@ $(document).ready(function() {
             var width = $(window).width() / 3;
             $("#waiting").css("margin-left", width).css('margin-top', 100).show();
         });
-    $("#reset_form, #reset_form1, #freq_sidebar, #show_table_of_contents, #hide_search_form, #more_options, .more_context").button();
+    $("#reset_form, #reset_form1, #freq_sidebar, #show_table_of_contents, #hide_search_form, #more_options, .more_context, .close_concordance").button();
     $("#page_num, #field, #method, #year_interval, #time_series_buttons, #report_switch, #frequency_report_switch").buttonset();
     $("#word_num").spinner({
         spin: function(event, ui) {
@@ -87,13 +87,13 @@ function more_context() {
     $(".more_context").click(function() {
         var context_link = $(this).text();
         if (context_link == 'More') {
-            $(this).parent().siblings('.philologic_context').children('.begin_concordance').show();
-            $(this).parent().siblings('.philologic_context').children('.end_concordance').show();
+            $(this).parents().siblings('.philologic_context').children('.begin_concordance').show();
+            $(this).parents().siblings('.philologic_context').children('.end_concordance').show();
             $(this).find('.ui-button-text').empty().fadeIn(100).append('Less');
         } 
         else {
-            $(this).parent().siblings('.philologic_context').children('.begin_concordance').hide();
-            $(this).parent().siblings('.philologic_context').children('.end_concordance').hide();
+            $(this).parents().siblings('.philologic_context').children('.begin_concordance').hide();
+            $(this).parents().siblings('.philologic_context').children('.end_concordance').hide();
             $(this).find('.ui-button-text').empty().fadeIn(100).append('More');
         }
     });
@@ -167,3 +167,17 @@ function getSelectedText() {
     }
     return '';
 }
+
+// Delay function calls in repeated actions
+var waitForFinalEvent = (function () {
+  var timers = {};
+  return function (callback, ms, uniqueId) {
+    if (!uniqueId) {
+      uniqueId = "Don't call this twice without a uniqueId";
+    }
+    if (timers[uniqueId]) {
+      clearTimeout (timers[uniqueId]);
+    }
+    timers[uniqueId] = setTimeout(callback, ms);
+  };
+})();
