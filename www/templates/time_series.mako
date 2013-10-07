@@ -1,49 +1,34 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">
-google.load("visualization", "1", {packages:["corechart"]});
-$(document).ready(function(){
-    var mydata = eval($("#relative_time").val());
-    google.setOnLoadCallback(drawChart(mydata, "Rate per 10000 words"));
-    $('#absolute_time').click(function() {
-        var mydata = eval($(this).val());
-        $("#chart").fadeOut('fast').empty().show();
-        google.setOnLoadCallback(drawChart(mydata,"Count"));
-        $("#chart").hide().fadeIn('fast');
-    });
-    $('#relative_time').click(function() {
-        var mydata = eval($(this).val());
-        $("#chart").fadeOut('fast').empty().show();
-        google.setOnLoadCallback(drawChart(mydata,"Rate per 10000 words"));
-        $("#chart").hide().fadeIn('fast');
-    });
-});
-function drawChart(mydata, count_type) {
-    var data = google.visualization.arrayToDataTable(mydata);
-    var chart = new google.visualization.ColumnChart(document.getElementById('chart'));
-    var options = {
-      hAxis: {title: 'Date', titleTextStyle: {color: 'black'}},
-      vAxis: {title: count_type, titleTextStyle: {color: 'black'}}
-    }
-    chart.draw(data, options);
-}
-</script>
-<div class='philologic_response'>
+<script type="text/javascript" src="${db.locals['db_url']}/js/timeSeries.js"></script>
+<div id='philologic_response'>
     <div id='initial_report'>
         <p id='description'>
             Use of the term(s) "${q['q'].decode('utf_8')}" throughout time
         </p>
+        <div id="time_series_buttons">
+                <input type="radio" name="freq_type" id="relative_time" data-value='${relative_frequencies}' data-interval="${q['year_interval']}" checked="checked">
+                <label for="relative_time">Average Use</label>
+                <input type="radio" name="freq_type" id="absolute_time" data-value='${frequencies}' data-interval="${q['year_interval']}">
+                <label for="absolute_time">Total Use</label>
+            </div>
     </div>
     <div class="results_container">
-        <div class='time_series_report'>
-            <div id="time_series_buttons">
-                <input type="radio" name="freq_type" id="relative_time" value='${relative_frequencies}' checked="checked">
-                <label for="relative_time">Relative frequency</label>
-                <input type="radio" name="freq_type" id="absolute_time" value='${frequencies}'>
-                <label for="absolute_time">Absolute frequency</label>
-            </div>
+        <div id='time_series_report' style='display:none;'>
             <div id="chart" style="width: 900px; height: 500px;"></div>
+        </div>
+        <div id="test_time_series">
+            <div id="top_division">
+                <div id='top_number'></div>
+            </div>
+            <div id="middle_division">
+                <div id="middle_number"></div>
+            </div>
+            <div id="first_division">
+                <div id="first_number"></div>
+            </div>
+            <div id="side_text"></div>
         </div>
     </div>
 </div>

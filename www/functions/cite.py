@@ -20,15 +20,17 @@ def make_abs_div_cite(db,i):
         sub_section_name = section_names[1]
     except IndexError:
         sub_section_name = section_name
-#    speaker_name = i.who                                                                                                                                                                                                                                                          
-    #cite = u"<span class='philologic_cite'>%s <a href='%s' title='title'>%s</a>" % (i.doc.author,doc_href,i.doc.title)                                                                                                                                                            
+#    speaker_name = i.who                                                                                                                                                                                                                                                                                                                                                                                              
     title = '<a href="%s">%s</a>' % (doc_href, i.title)
     cite = u"<span class='philologic_cite'>%s <i>%s</i>" % (i.author,title)
+    separation = '<span class="cite_separation"></span>'
     if section_name:
-        cite += u" <a href='%s'>%s</a>" % (section_href,section_name)
+        cite += u"%s<a href='%s' class='section_name'>%s</a>" % (separation,section_href,section_name)
     if sub_section_name:
-        cite += u" <a href='%s'>%s</a>" % (sub_section_href,sub_section_name)
+        cite += u"%s<a href='%s' class='sub_section_name'>%s</a>" % (separation,sub_section_href,sub_section_name)
     
+    if db.locals['debug'] == True:
+        cite += " %s" % i.filename
     page_obj = i.get_page()
     if page_obj:
             if page_obj['n']:
@@ -49,6 +51,8 @@ def make_abs_doc_cite(db,i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
     doc_href = make_absolute_object_link(db,i.philo_id[:1], i.bytes)
     record = u"%s, <i><a href='%s'>%s</a></i> [%s]" % (i.author, doc_href,i.title, i.date)
+    if db.locals['debug'] == True:
+        record += " %s" % i.filename
     return record
 
 ### LINKING ###

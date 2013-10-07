@@ -53,12 +53,4 @@ def get_text_obj(obj, path, query_args=False):
     else:
         bytes = []
     formatted = format(raw_text,bytes).decode("utf-8","ignore")
-    page_obj = obj.get_page()
-    if page_obj:
-            if page_obj['n'] and page_obj['img']:
-                find_head = re.search("<b class=\"headword\">([^\n\r]*?)<br/></b>",formatted)
-                if find_head:
-                    href = 'http://artflx.uchicago.edu/images/encyclopedie/' + page_obj["img"]
-                    page = "[page " + page_obj["n"] + "]"
-                    formatted = formatted[:find_head.end(1)] + " <a href='%s' class='page_image_link'>%s</a>" % (href,page) + formatted[find_head.end(1):]
     return formatted

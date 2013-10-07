@@ -48,23 +48,23 @@
                 <h3 style="padding-left: 5px;margin-top: 0px;">Choose a search report:</h3>
                 <span id="concordance_button" style="display: none;">
                     <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
-                    <label for="concordance">Concordance Report</label>
+                    <label for="concordance">Concordance</label>
                 </span>
                 <span id="kwic_button" style="display: none;">
                     <input type="radio" name="report" id="kwic" value='kwic'>
-                    <label for="kwic">Key Word in Context (KWIC) Report</label>
+                    <label for="kwic">Key Word in Context (KWIC)</label>
                 </span>
                 <span id="relevance_button" style="display: none;">
                     <input type="radio" name="report" id="relevance" value='relevance'>
-                    <label for="relevance">Ranked Relevance Report</label>
+                    <label for="relevance">Ranked Relevance</label>
                 </span>
                 <span id="collocation_button" style="display: none;">
                     <input type="radio" name="report" id="collocation" value='collocation'>
-                    <label for="collocation">Collocation Table</label>
+                    <label for="collocation">Collocation</label>
                 </span>
                 <span id="time_series_button" style="display: none;">
                     <input type="radio" name="report" id="time_series" value='time_series'>
-                    <label for="time_series">Time Series Report</label>
+                    <label for="time_series">Time Series</label>
                 </span>
             </div>
          </div>
@@ -180,8 +180,8 @@
 					<td>
 						<span id="year_interval">
 							<input type="radio" name="year_interval" id="year0" value="1" checked="checked"><label for="year0">every year</label>
-							<input type="radio" name="year_interval" id="year1" value="10" checked="checked"><label for="year1">every 10 years</label>
-							<input type="radio" name="year_interval" id="year2" value="25"><label for="year2">every 25 years</label>
+							<input type="radio" name="year_interval" id="year1" value="10" checked="checked"><label for="year1">every decade</label>
+							<input type="radio" name="year_interval" id="year2" value="100"><label for="year2">every century</label>
 						</span>
 					</td>
 				</tr>
@@ -192,8 +192,6 @@
                     <input type="radio" name="pagenum" id="pagenum2" value='50' checked="checked"><label for="pagenum2">50</label>
                     <input type="radio" name="pagenum" id="pagenum3" value='100'><label for="pagenum3">100</label>
                 </span></td></tr>
-                <tr class="table_row"><td class="first_column"><input id="button" type='submit' value="Search"/></td>
-                <td><button type="reset" id="reset_form">Clear form</button></td></tr>
             </table>
         </div>
     </form>

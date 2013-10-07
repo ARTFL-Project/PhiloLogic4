@@ -9,11 +9,12 @@ $(document).ready(function() {
     }
     
     $("#q").focus(function() {
-        if ($(".philologic_response").is('*')) {
+        if ($("#philologic_response").is('*')) {
             show_more_options("report");
             hide_search_on_click();
         }
     });
+    var report_width_adjust = false;
     $('#more_options').click(function() {
         $('#search_elements').css('z-index', 150);
         $('.book_page').css('z-index', 90);
@@ -21,6 +22,10 @@ $(document).ready(function() {
             show_more_options("all");
             $('#search_explain').slideDown();
             hide_search_on_click();
+            if (report_width_adjust === false) {
+                adjustReportWidth();
+                report_width_adjust = true;
+            }
         } else {
             hide_search_form();
         }
@@ -104,18 +109,15 @@ $(document).ready(function() {
         $("#method").find("input:radio").attr("checked", false).end();
         $("#method1").attr('checked', true);
         $("#method").buttonset('refresh');
-        $("#report").find("input:radio").attr("checked", false).end();
-        $("#report1").attr('checked', true);
-        $("#report").buttonset('refresh');
         $("#page_num").find("input:radio").attr("checked", false).end();
-        $("#pagenum1").attr('checked', true);
+        $("#pagenum2").attr('checked', true);
         $("#page_num").buttonset('refresh');
         $('#search')[0].reset();
-        if ($(this).attr('id') != 'reset_form1') {
-            showHide('concordance');
-            $("#search_elements").fadeIn();
-        }
+        $("#search_elements").fadeIn();
         $("#reset_form1").css('color', '#555555 !important');
+        $("#report").find("input:radio").attr("checked", false).end();
+        $('#concordance').attr('checked', true);
+        $('#concordance')[0].click();
     });
     
     //  This is to select the right option when clicking on the input box  
@@ -148,8 +150,23 @@ $(document).ready(function() {
             }
         }
     });
+    $(window).load(function() {
+        if ($("#search_elements").css('display') != 'none') {
+            adjustReportWidth();
+        }
+    });
     
 });
+
+//    Adjust width of report buttons
+function adjustReportWidth() {
+    var button_length = 0;
+    $("#report").find('label').each(function() {
+        button_length += $(this).width();
+    });
+    length_to_add = ($("#form_body").width() - button_length - 60) / $("#report").find('label').length;
+    $('#report').find("label").each(function() {$(this).css("width", "+=" + length_to_add);});
+}
 
 function autocomplete_metadata(metadata, field, db_url) {
     $("#" + field).autocomplete({
@@ -199,6 +216,7 @@ function showHide(value) {
     if (value == 'concordance') {
         $("#results_per_page, #method, #metadata_fields").show();
         $('#conc_question').fadeIn();
+        $('#start_date, #end_date').val('');
     }
     if (value == 'relevance') {
         $("#results_per_page").show();
@@ -207,6 +225,7 @@ function showHide(value) {
     if (value == "time_series") {
         $("#time_series_num, #year_interval").show();
         $('#time_question').fadeIn();
+        $('#date').val('');
     }
 }
 
