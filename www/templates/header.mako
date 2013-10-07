@@ -31,9 +31,9 @@
                             <li class="menu-118"><a href="http://www.uchicago.edu/" title="University of Chicago">UNIVERSITY OF CHICAGO</a></li>
                         </ul>             
                     </div>
-                </div>    
-                <div class="site-name">
-                    <h1 style="position: absolute"><a href="${db.locals['db_url']}/" title="${dbname}">${dbname.title()} Beta 2</a></h1>           
+                </div>
+                <div id="site-name">
+                    <h1><a href="${db.locals['db_url']}/" title="${dbname}">${dbname.title()} Beta 2</a></h1>           
                 </div>
                 
             </div>

@@ -9,9 +9,9 @@
                             <a href="http://github.com/ARTFL-Project/PhiloLogic4" title="Philologic 4: Open Source ARTFL Search and Retrieval Engine">PhiloLogic4</a><br>
                             <a href="/content/contact-us" title="Contact information for the ARTFL Project">contact us</a>                   
                         </div>
-                        <p id="footer-message" style="margin-top:0px;">
-                            <img src="${db.locals['db_url']}/css/images/philopowered.png" style="display:block;margin-top:-5px;" />
-                        </p>
+                    </div>
+                    <div id="philo_branding">
+                            <img src="${db.locals['db_url']}/css/images/philo.png" height="50" width="135"/>
                     </div>
                 </div>
             </div> <!-- /footer -->
