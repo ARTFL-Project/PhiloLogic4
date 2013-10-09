@@ -277,7 +277,6 @@ ul.ui-autocomplete.ui-menu {
 .philologic_occurrence {
     padding-top: 7px;
     padding-bottom : 2px;
-    /*padding-left: 4px;*/
     margin-left: 3px;
     margin-right: 3px;
     box-shadow: 0px 0px 3px #A8A8A8;
@@ -294,6 +293,9 @@ ul.ui-autocomplete.ui-menu {
     padding-top:4px;
     /*margin-bottom: 5px;*/
 }
+.hit_n {
+    vertical-align: 5px;    /*align numbers*/
+}
 .word_cloud {
     float: right;
     width:400px !important;
@@ -309,6 +311,7 @@ ul.ui-autocomplete.ui-menu {
     -webkit-transition: 200ms linear;
     -ms-transition: 200ms linear;
     -moz-transition: 200ms linear;
+    transition: 200ms linear;
 }
 .cloud_term:hover {
     color: black !important;
@@ -380,13 +383,16 @@ ul.ui-autocomplete.ui-menu {
 
 
 /*All the sidebar classes*/
-.hide_frequency {
+#hide_frequency {
     font-family: 'Droid Sans Mono', sans-serif !important;
     font-size: 130%;
     float: right;
     color: Gray;
+    margin-right: 2px;
+    margin-top: 2px;
+    display: none;
 }
-.hide_frequency:hover {
+#hide_frequency:hover {
     color: Black;
     cursor: pointer;
 }
@@ -399,15 +405,13 @@ ul.ui-autocomplete.ui-menu {
 	margin: 0em 0em 0.5em 0em;
 }
 .frequency_container {
-    border-style: solid;
-    border-width: 1px;
-    border-color: #ECECEC;
+    box-shadow: 0px 0px 3px #A8A8A8;
     padding-top: 10px;
     background-color: #FAFAFA;
     display: none;
 }
 .frequency_table {
-    padding: 0px 5px 10px 10px;
+    padding: 0px 5px 10px 5px;
     line-height: 250%;
     /*overflow-y: scroll;*/
     margin-top: 10px;

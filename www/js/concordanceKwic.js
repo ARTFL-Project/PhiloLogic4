@@ -146,7 +146,7 @@ function toggle_frequency(q_string, db_url, pathname) {
     $(".loading").empty().hide();
     var spinner = '<img src="' + db_url + '/js/ajax-loader.gif" alt="Loading..."  height="25px" width="25px"/>';
     $(".results_container").animate({
-        "margin-right": "420px"},
+        "margin-right": "410px"},
         150, function() {
                 getCitationWidth();
             }
@@ -161,23 +161,21 @@ function toggle_frequency(q_string, db_url, pathname) {
         }
         $.each(data, function(index, item) {
             var url = '<a class="freq_sidebar_text" href="' + item[2] + '">' + item[0] + '</a>';
-            newlist += '<li style="white-space:nowrap;">' + url + '<span style="float:right;display:inline-block;padding-right: 5px;">' + item[1] + '</span></li>';
+            newlist += '<li style="white-space:nowrap;">';
+            newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:10px;"></span>';
+            newlist += url + '<span style="float:right;display:inline-block;padding-right: 5px;">' + item[1] + '</span></li>';
         });
         $("#freq").hide().empty().html(newlist).fadeIn('fast');
     });
-    $(".hide_frequency").show();
+    $("#hide_frequency").show();
     $(".frequency_container").show();
-    // Workaround padding weirdness in Firefox and Internet Explorer
-    if (/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent) || /MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
-        $(".frequency_table").css('padding-left', '20px');
-    }
-    $(".hide_frequency").click(function() {
+    $("#hide_frequency").click(function() {
         hide_frequency();
     });
     sidebar_reports(q_string, db_url, pathname);
 }
 function hide_frequency() {
-    $(".hide_frequency").hide();
+    $("#hide_frequency").hide();
     $("#freq").empty().hide();
     $('.frequency_container').hide();
     $(".loading").empty();
