@@ -16,7 +16,7 @@ var hit_len = ${hit_len};
         <div id="progress_bar" style="position:absolute;margin-top:-15px;">
             <div class="progress-label"></div>
         </div>
-        The 200 most common words are being filtered from this report.
+        The 100 most common words are being filtered from this report.
     </div>
     <div class="results_container">
         <div id='philologic_collocation'>

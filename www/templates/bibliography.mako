@@ -22,7 +22,7 @@
                         <%
                         n += 1
                         %>
-                        <span class='hit_n'>${n}.</span>
+                        <span style="padding-left: 5px;">${n}.</span>
                         ##<input type="checkbox" name="philo_id" value="${i.philo_id}">
                         % if i.type == 'doc':
                             <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,i)}</span>
