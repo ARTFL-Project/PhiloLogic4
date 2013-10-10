@@ -33,7 +33,7 @@
                     </div>
                 </div>
                 <div id="site-name">
-                    <h1><a href="${db.locals['db_url']}/" title="${dbname}">${dbname.title()} Beta 2</a></h1>           
+                    <h1><a href="${db.locals['db_url']}/" title="${dbname}">${dbname.title()} Beta 3</a></h1>           
                 </div>
                 
             </div>

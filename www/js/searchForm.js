@@ -2,9 +2,10 @@ $(document).ready(function() {
     
     var db_url = db_locals['db_url'];
     var q_string = window.location.search.substr(1);
-
+    
+    
     for (i in db_locals['search_reports']) {
-        search_report = '#' + db_locals['search_reports'][i] + '_button';
+        var search_report = '#' + db_locals['search_reports'][i] + '_button';
         $(search_report).show();
     }
     
@@ -161,10 +162,14 @@ $(document).ready(function() {
 //    Adjust width of report buttons
 function adjustReportWidth() {
     var button_length = 0;
+    var report_num = 0
     $("#report").find('label').each(function() {
-        button_length += $(this).width();
+        if ($(this).is(':visible')) {
+            button_length += $(this).width();
+            report_num += 1;
+        }
     });
-    length_to_add = ($("#form_body").width() - button_length - 60) / $("#report").find('label').length;
+    length_to_add = ($("#form_body").width() - button_length - 60) / report_num;
     $('#report').find("label").each(function() {$(this).css("width", "+=" + length_to_add);});
 }
 
@@ -203,28 +208,33 @@ function showHide(value) {
 
     if (value == 'frequency') {
         $("#frequency_num, #method, #metadata_fields").show();
-        $('#freq_question').fadeIn();
+        $('#metadata_fields').find('tr').has('#date').show();
+        $('#freq_question').show();
     }
     if (value == 'collocation') {
         $("#collocation_num, #method, #metadata_fields").show();
-        $('#colloc_question').fadeIn();
+        $('#metadata_fields').find('tr').has('#date').show();
+        $('#colloc_question').show();
     }
     if (value == 'kwic') {
         $("#results_per_page, #method, #metadata_fields").show();
-        $('#kwic_question').fadeIn();
+        $('#metadata_fields').find('tr').has('#date').show();
+        $('#kwic_question').show();
     }
     if (value == 'concordance') {
         $("#results_per_page, #method, #metadata_fields").show();
-        $('#conc_question').fadeIn();
+        $('#metadata_fields').find('tr').has('#date').show();
+        $('#conc_question').show();
         $('#start_date, #end_date').val('');
     }
     if (value == 'relevance') {
         $("#results_per_page").show();
-        $('#relev_question').fadeIn();
+        $('#relev_question').show();
     }
     if (value == "time_series") {
-        $("#time_series_num, #year_interval").show();
-        $('#time_question').fadeIn();
+        $('#metadata_fields').find('tr').has('#date').hide();
+        $("#time_series_num, #year_interval, #method, #metadata_fields").show();
+        $('#time_question').show();
         $('#date').val('');
     }
 }
