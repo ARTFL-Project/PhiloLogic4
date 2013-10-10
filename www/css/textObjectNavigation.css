@@ -2,10 +2,17 @@
     font-size: 140%;
     padding-bottom: 20px;
 }
-#t_o_c_title, #object_title {
+#t_o_c_title {
     font-size: 140%;
     line-height: 120%;
     padding-bottom: 8px;
+}
+#object_title {
+    font-size: 140%;
+    line-height: 120%;
+    padding-top: 10px;
+    margin-bottom: 20px;
+    text-align: center;
 }
 #table_of_contents {
     border-top: solid 1px #ECECEC;
@@ -68,6 +75,7 @@
 #t_o_c_button {
     display: inline-block;
     float: left;
+    margin-left: -25px;
 }
 
 #image_container {

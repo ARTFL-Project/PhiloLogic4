@@ -3,7 +3,7 @@
 <script type="text/javascript" src="${db.locals['db_url']}/js/textObjectNavigation.js"></script>
 <div id='philologic_response'>
     <div id='object_title'>
-        <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,obj)} <b>Volume ${obj.volume}</b></span>
+        <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,obj)}</span>
     </div>
     <div id="page_display">
         <div id="prev_obj_wrapper">
@@ -22,7 +22,7 @@
         </div>
         <div id="next_obj_wrapper">
             <div id ="next_and_read">
-                <span id="next_obj" data-philo_id="${next}">&gt;</span>
+                <span id="next_obj" data-philo-id="${next}">&gt;</span>
             </div>
         </div>
         <div id="book_page">

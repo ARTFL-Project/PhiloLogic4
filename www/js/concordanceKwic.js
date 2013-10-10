@@ -24,24 +24,7 @@ $(document).ready(function() {
     });
 });
 
-function closeConcordance() {
-    $(".close_concordance").click(function() {
-        console.log('hi')
-        var $conc = $(this).parents('.philologic_occurrence ');
-        $conc.animate({
-            left: parseInt($conc.css('left'),10) == 0 ?
-                -$conc.outerWidth() :
-                0
-        }, function() {
-            $(this).animate({height: "hide"}, 200, "easeInQuad");
-        });
-    });
-}
 
-function getCitationWidth() {
-    var citation_width = $('.citation').width() - $('.more_context_and_close').width() - $('.hit_n').width() - 30;
-    $('.cite').width(citation_width);
-}
 
 /// Switch betwwen concordance and KWIC reports
 function concordance_kwic_switch(db_url) {

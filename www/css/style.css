@@ -59,10 +59,10 @@ body {
 }
 #header h1 {
   font-size: 2.5em;
-  color: #800000;
+  color: #990000;
 }
 #header h1 a:link, #header h1 a:visited, #header h1 a:hover {
- color: #800000;
+ color: #990000;
 }
 #header h1 a:hover, #header h1 a:active {
  text-decoration: none; color: #999999;
@@ -73,11 +73,11 @@ body {
 }
 ul.primary-links li a, #footer ul.primary-links li a:link
 , #footer ul.primary-links li a:visited {
-  color: #800000;
+  color: #990000;
 }
 
 ul.primary-links li {
-  border-left: 1px solid #800000;
+  border-left: 1px solid #990000;
   padding: 0 .5em 0 .75em;
 }
 
@@ -109,16 +109,16 @@ ul.primary-links li.first {
 
 /* Links */
 a:link, a:visited {
-  color: #800000;
+  color: #990000;
   text-decoration: none;
   font-weight: 700;
 }
 a:hover {
-  color: #800000;
+  color: #990000;
   text-decoration: underline;
 }
 a.active, a:link.active, a:visited.active, a:hover.active {
-  color: #800000;
+  color: #990000;
 }
 
 /* Fonts */
@@ -266,22 +266,13 @@ ul.ui-autocomplete.ui-menu {
 }
 #philologic_concordance, #colloc_concordance {
     list-style-type: none;
-    /*background-color: #F8F8F8;*/
-    /*background-image: -webkit-linear-gradient(left, white, #F8F8F8, white); /* For Chrome and Safari */*/
-    /*background-image:    -moz-linear-gradient(left, white, #F8F8F8, white); /* For old Fx (3.6 to 15) */*/
-    /*background-image:     -ms-linear-gradient(left, white, #F8F8F8, white); /* For pre-releases of IE 10*/*/
-    /*background-image:      -o-linear-gradient(left, white, #F8F8F8, white); /* For old Opera (11.1 to 12.0) */ */
-    /*background-image:         linear-gradient(to right, white, #F8F8F8, white); /* Standard syntax; must be last */*/
     overflow: hidden;
 }
 .philologic_occurrence {
     padding-top: 7px;
     padding-bottom : 2px;
-    margin-left: 3px;
-    margin-right: 3px;
+    margin: 8px 1px 6px 1px;
     box-shadow: 0px 0px 3px #A8A8A8;
-    margin-bottom: 6px;
-    margin-top: 8px;
     background-color: white;
     left: 0;
     position: relative;
@@ -554,13 +545,13 @@ l, s {
 }
 
 
-.return_to_colloc {
+#return_to_colloc {
     color: #800000;
     text-decoration: none;
     font-weight: 700 !important;
     font-size: 140%;
 }
-.return_to_colloc:hover {
+#return_to_colloc:hover {
     text-decoration: underline;
     cursor: pointer;
 }
