@@ -103,7 +103,7 @@ class Loader(object):
                     if param not in self.metadata_types:
                         self.metadata_types[param] = t
         
-        #sys.stdout = OutputHandler(console=console_output, log=log)
+        sys.stdout = OutputHandler(console=console_output, log=log)
 
     def setup_dir(self,path):
         os.mkdir(path)
@@ -143,7 +143,6 @@ class Loader(object):
                                  "results":self.workdir + os.path.basename(x) + ".results"} for n,x in enumerate(self.list_files())]
 
         else:
-             print repr(data_dicts)
              self.filequeue =   [{"orig":os.path.abspath(d["filename"]),
                                  "name":os.path.basename(d["filename"]),
                                  "size":os.path.getsize(self.textdir + (d["filename"])),
@@ -260,14 +259,7 @@ class Loader(object):
 #        pages_status = subprocess.call(pagesargs,0,"cat",stdout=pages_result,shell=True)
         pages_status = os.system(pagesargs + " > " + self.workdir + "all_pages")
         print "%s: word join returned %d" % (time.ctime(), pages_status)
-        
-        ## Generate sorted file for word frequencies    
-        for text_obj in self.freq_object_levels:
-            wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + "*.%s.freq_counts" % text_obj
-            print "%s: sorting words frequencies" % time.ctime()
-            words_status = os.system(wordsargs + " > " + self.workdir + "%s.counts" % text_obj)
-            print "%s: %s word count frequencies sort returned %d" % (time.ctime(), text_obj, words_status)
-
+         
     def analyze(self):
         print "\n### Create inverted index ###"
         print self.omax
