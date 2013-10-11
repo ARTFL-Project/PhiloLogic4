@@ -75,7 +75,7 @@ class BufferedParser(object):
         """Top level function for reading a file and printing out the output."""
         self.input = input
         lexer = ExpatWrapper(self)
-        print repr(self.input), repr(self.output)
+        #print repr(self.input), repr(self.output)
         return lexer.parse(self.input)
         
     def make_extractor(self,new_element,obj_type,mxp,field):

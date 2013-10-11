@@ -143,7 +143,6 @@ class Loader(object):
                                  "results":self.workdir + os.path.basename(x) + ".results"} for n,x in enumerate(self.list_files())]
 
         else:
-             print repr(data_dicts)
              self.filequeue =   [{"orig":os.path.abspath(d["filename"]),
                                  "name":os.path.basename(d["filename"]),
                                  "size":os.path.getsize(self.textdir + (d["filename"])),
