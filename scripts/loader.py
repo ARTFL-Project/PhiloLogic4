@@ -4,11 +4,11 @@ import errno
 import philologic
 from optparse import OptionParser
 from glob import glob
-from philologic.LoadFilters import *
+from LoadFilters import *
 from philologic.PostFilters import *
 from philologic.Parser import Parser
 from philologic.ParserHelpers import *
-from philologic.Loader import Loader
+from Loader import Loader
 
 #########################
 ## Command-line parsing #
@@ -27,13 +27,13 @@ parser.add_option("--no-template", action="store_true", default=False, dest="no_
 ##########################
 
 # Set the filesytem path to the root web directory for your PhiloLogic install.
-database_root = None
+database_root = ""
 # /var/www/html/philologic/ is conventional for linux,
 # /Library/WebServer/Documents/philologic for Mac OS.
 # Please follow the instructions in INSTALLING before use.
 
 # Set the URL path to the same root directory for your philologic install.
-url_root = None
+url_root = ''
 # http://localhost/philologic/ is appropriate if you don't have a DNS hostname.
 
 if database_root is None or url_root is None:
@@ -91,13 +91,13 @@ debug = options.debug or False
 default_object_level = 'doc' 
 
 # Data tables to store.
-tables = ['toms', 'pages', 'ranked_relevance']
+tables = ['words', 'toms', 'pages']
 
 # Define filters as a list of functions to call, either those in Loader or outside
-filters = [normalize_unicode_raw_words,make_word_counts, generate_words_sorted,make_token_counts,make_sorted_toms("doc","div1","div2","div3"),
-           prev_next_obj, word_frequencies_per_obj("doc"),generate_pages, make_max_id]  
-
-post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies,metadata_relevance_table]
+filters = [normalize_unicode_raw_words,make_word_counts, generate_words_sorted,make_object_ancestors('doc', 'div1', 'div2', 'div3'), make_sorted_toms("doc","div1","div2","div3","para"),
+           prev_next_obj,generate_pages, make_max_id]
+print make_object_ancestors('doc', 'div1', 'div2', 'div3')
+post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]
 
 # Define text objects to generate plain text files for various machine learning tasks
 plain_text_obj = []
@@ -115,18 +115,19 @@ extra_locals['search_reports'] = search_reports
 ## Set-up database load ###
 ###########################
 
-Philo_Types = ["doc","div"] # every object type you'll be indexing.  pages don't count, yet.
+Philo_Types = ["doc","div" "para"] # every object type you'll be indexing.  pages don't count, yet.
 
-XPaths =  [("doc","."),("div",".//div1"),("div",".//div2"),("div",".//div3"),("page",".//pb")]         
+XPaths =  [("doc","."),("div",".//div1"),("div",".//div2"),("div",".//div3"),("para",".//sp"),("page",".//pb")]         
 
 Metadata_XPaths = [ # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
     # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
     ("doc","./teiHeader//titleStmt/title","title"),
     ("doc","./teiHeader//titleStmt/author","author"),
-    ("doc","./teiHeader//profileDesc/creation/date","date"),
+    ("doc", "./text/front//docDate/@value", "date"),
     ("div","./head","head"),
     ("div",".@n","n"),
     ("div",".@id","id"),
+    ("para", ".@who", "who"),
     ("page",".@n","n"),
     ("page",".@fac","img")
 ]
