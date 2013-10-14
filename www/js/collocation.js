@@ -88,11 +88,11 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
             alert('Your browser does not support HTML5 localStorage. Try upgrading.');
         } else {
             try {
-                sessionStorage[window.location.href] = JSON.stringify($('.philologic_collocation').html());
+                sessionStorage[window.location.href] = JSON.stringify($('#philologic_collocation').html());
             } catch(e) {
                 if (e == QUOTA_EXCEEDED_ERR) {
                     sessionStorage.clear();
-                    sessionStorage[window.location.href] = JSON.stringify($('.philologic_collocation').html());
+                    sessionStorage[window.location.href] = JSON.stringify($('#philologic_collocation').html());
                 }
             }
         }

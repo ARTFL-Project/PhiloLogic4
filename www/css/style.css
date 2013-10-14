@@ -26,12 +26,22 @@ body {
 
 /* The following is for the header and footer */
 #header {
-  background: url(images/header_pattern.png);
-  height: 75px;
-  box-shadow: 0px 8px 15px -5px #C8C8C8;
+    background-image: url(images/header_pattern.png);
+    background-image: -webkit-linear-gradient(top, #ffdb9e, #ffffff); /* For Chrome and Safari */
+    background-image:    -moz-linear-gradient(top, #ffdb9e, #ffffff); /* For old Fx (3.6 to 15) */
+    background-image:     -ms-linear-gradient(top, #ffdb9e, #ffffff); /* For pre-releases of IE 10*/
+    background-image:      -o-linear-gradient(top, #ffdb9e, #ffffff); /* For old Opera (11.1 to 12.0) */ 
+    background-image:         linear-gradient(to bottom, #ffdb9e, #ffffff); /* Standard syntax; must be last */
+    height: 75px;
+    box-shadow: 0px 8px 15px -5px #C8C8C8;
 }
 #footer {
     background-image: url(images/footer_pattern.png);
+    background-image: -webkit-linear-gradient(top, #ffffff, #ffdb9e); /* For Chrome and Safari */
+    background-image:    -moz-linear-gradient(top, #ffffff, #ffdb9e); /* For old Fx (3.6 to 15) */
+    background-image:     -ms-linear-gradient(top, #ffffff, #ffdb9e); /* For pre-releases of IE 10*/
+    background-image:      -o-linear-gradient(top, #ffffff, #ffdb9e); /* For old Opera (11.1 to 12.0) */ 
+    background-image:         linear-gradient(to bottom, #ffffff, #ffdb9e); /* Standard syntax; must be last */
     height: 75px;
     box-shadow: 0px -8px 15px -5px #C8C8C8;
 }
@@ -331,7 +341,7 @@ ul.ui-autocomplete.ui-menu {
     background-image:    -moz-linear-gradient(top, #FAFAFA, white); /* For old Fx (3.6 to 15) */
     background-image:     -ms-linear-gradient(top, #FAFAFA, white); /* For pre-releases of IE 10*/
     background-image:      -o-linear-gradient(top, #FAFAFA, white); /* For old Opera (11.1 to 12.0) */ 
-    background-image:         linear-gradient(to bottom, #FAFAFA, white); /* Standard syntax; must be last */
+    background-image:         linear-gradient(to bottom, #F8F8F8, #FAFAFA 70%, white); /* Standard syntax; must be last */
 }
 .collocate {
     color:#1E90FF;
@@ -577,9 +587,7 @@ l, s {
 /*Time series stuff*/
 #test_time_series {
     margin-left: 20px;
-    margin-top: 50px;
-    margin-bottom: 50px;
-    height: 600px;
+    margin-top: 30px;
     border-left: solid 1px #A0A0A0;
     border-bottom: solid 1px #A0A0A0;
     position: relative;
@@ -588,7 +596,12 @@ l, s {
 }
 .graph_bar {
     height: 0px;
-    background-color:lightblue;
+    background-color: ffdb9e; /* fallback color if gradients are not supported */
+    background-image: -webkit-linear-gradient(top, #ffdb9e, #fff2db); /* For Chrome and Safari */
+    background-image:    -moz-linear-gradient(top, #ffdb9e, #fff2db); /* For old Fx (3.6 to 15) */
+    background-image:     -ms-linear-gradient(top, #ffdb9e, #fff2db); /* For pre-releases of IE 10*/
+    background-image:      -o-linear-gradient(top, #ffdb9e, #fff2db); /* For old Opera (11.1 to 12.0) */ 
+    background-image:         linear-gradient(to bottom, #ffdb9e, #fff2db); /* Standard syntax; must be last */
     position:absolute;
     bottom:0;
 }
@@ -628,7 +641,7 @@ l, s {
     bottom: 66%;
 }
 #top_division {
-    bottom: 98%;
+    bottom: 98.7%;
 }
 #top_number, #middle_number, #first_number {
     margin-top: -16px;
