@@ -1,7 +1,7 @@
 $(document).ready(function() {
     $('#form_body').hide();
     $('.close_concordance').hide();
-    $('#philologic_response').css('margin-top', '0px');
+    //$('#philologic_response').css('margin-top', '0px');
     more_context();
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var db_url = db_locals['db_url'];

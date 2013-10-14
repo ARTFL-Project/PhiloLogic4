@@ -1,6 +1,8 @@
 $(document).ready(function() {
     var mydata = eval($("#relative_time").data('value'));
     var interval = $("#relative_time").data('interval');
+    var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 200;
+    $('#test_time_series').css('height', height);
     $('#absolute_time').click(function() {
         var mydata = eval($(this).data('value'));
         var interval = $("#absolute_time").data('interval')
@@ -23,6 +25,8 @@ $(document).ready(function() {
             var chart_width = body_width - 90 + diff;
             $('#test_time_series, #first_division, #middle_division, #top_division').width(chart_width + 'px');
             $('.graph_bar, .graph_years').remove();
+            var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 200;
+            $('#test_time_series').css('height', height);
             $('#test_time_series').fadeOut('fast', function() {
                 $(this).show();
                 drawFromData(mydata, interval);
@@ -100,7 +104,7 @@ function drawFromData(data, interval, frequency_type) {
     }
     
     
-    multiplier = 590 / max_count; 
+    multiplier = ($('#test_time_series').height() - 10) / max_count; 
     
     $('.graph_bar').each(function() {
         var count = $(this).data('count');
