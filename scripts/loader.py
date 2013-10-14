@@ -4,11 +4,11 @@ import errno
 import philologic
 from optparse import OptionParser
 from glob import glob
-from LoadFilters import *
+from philologic.LoadFilters import *
 from philologic.PostFilters import *
 from philologic.Parser import Parser
 from philologic.ParserHelpers import *
-from Loader import Loader
+from philologic.Loader import Loader
 
 #########################
 ## Command-line parsing #
@@ -27,13 +27,13 @@ parser.add_option("--no-template", action="store_true", default=False, dest="no_
 ##########################
 
 # Set the filesytem path to the root web directory for your PhiloLogic install.
-database_root = ""
+database_root = None
 # /var/www/html/philologic/ is conventional for linux,
 # /Library/WebServer/Documents/philologic for Mac OS.
 # Please follow the instructions in INSTALLING before use.
 
 # Set the URL path to the same root directory for your philologic install.
-url_root = ''
+url_root = None
 # http://localhost/philologic/ is appropriate if you don't have a DNS hostname.
 
 if database_root is None or url_root is None:
@@ -96,7 +96,6 @@ tables = ['words', 'toms', 'pages']
 # Define filters as a list of functions to call, either those in Loader or outside
 filters = [normalize_unicode_raw_words,make_word_counts, generate_words_sorted,make_object_ancestors('doc', 'div1', 'div2', 'div3'), make_sorted_toms("doc","div1","div2","div3","para"),
            prev_next_obj,generate_pages, make_max_id]
-print make_object_ancestors('doc', 'div1', 'div2', 'div3')
 post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]
 
 # Define text objects to generate plain text files for various machine learning tasks
@@ -108,7 +107,7 @@ extra_locals = {"db_url": url_root + dbname}
 
 ## Define which search reports to enable
 ## Note that this can still be configured in your database db_locals.py file
-search_reports = ['concordance', 'kwic', 'relevance', 'collocation', 'time_series']
+search_reports = ['concordance', 'kwic', 'collocation', 'time_series']
 extra_locals['search_reports'] = search_reports
 
 ###########################
@@ -150,7 +149,7 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
     
 db_destination = database_root + dbname
 data_destination = db_destination + "/data"
-db_url = url_root + "/" + dbname
+db_url = url_root + dbname
 
 try:
     os.mkdir(db_destination)
@@ -190,7 +189,6 @@ l = Loader(data_destination,
 
 l.add_files(files)
 filenames = l.list_files()
-print filenames
 load_metadata = [{"filename":f} for f in sorted(filenames)]
 l.parse_files(workers,load_metadata)
 l.merge_objects()
