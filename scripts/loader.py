@@ -91,13 +91,12 @@ debug = options.debug or False
 default_object_level = 'doc' 
 
 # Data tables to store.
-tables = ['toms', 'pages', 'ranked_relevance']
+tables = ['words', 'toms', 'pages']
 
 # Define filters as a list of functions to call, either those in Loader or outside
-filters = [normalize_unicode_raw_words,make_word_counts, generate_words_sorted,make_token_counts,make_sorted_toms("doc","div1","div2","div3"),
-           prev_next_obj, word_frequencies_per_obj("doc"),generate_pages, make_max_id]  
-
-post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies,metadata_relevance_table]
+filters = [normalize_unicode_raw_words,make_word_counts, generate_words_sorted,make_object_ancestors('doc', 'div1', 'div2', 'div3'), make_sorted_toms("doc","div1","div2","div3","para"),
+           prev_next_obj,generate_pages, make_max_id]
+post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]
 
 # Define text objects to generate plain text files for various machine learning tasks
 plain_text_obj = []
@@ -108,25 +107,26 @@ extra_locals = {"db_url": url_root + dbname}
 
 ## Define which search reports to enable
 ## Note that this can still be configured in your database db_locals.py file
-search_reports = ['concordance', 'kwic', 'relevance', 'collocation', 'time_series']
+search_reports = ['concordance', 'kwic', 'collocation', 'time_series']
 extra_locals['search_reports'] = search_reports
 
 ###########################
 ## Set-up database load ###
 ###########################
 
-Philo_Types = ["doc","div"] # every object type you'll be indexing.  pages don't count, yet.
+Philo_Types = ["doc","div" "para"] # every object type you'll be indexing.  pages don't count, yet.
 
-XPaths =  [("doc","."),("div",".//div1"),("div",".//div2"),("div",".//div3"),("page",".//pb")]         
+XPaths =  [("doc","."),("div",".//div1"),("div",".//div2"),("div",".//div3"),("para",".//sp"),("page",".//pb")]         
 
 Metadata_XPaths = [ # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
     # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
     ("doc","./teiHeader//titleStmt/title","title"),
     ("doc","./teiHeader//titleStmt/author","author"),
-    ("doc","./teiHeader//profileDesc/creation/date","date"),
+    ("doc", "./text/front//docDate/@value", "date"),
     ("div","./head","head"),
     ("div",".@n","n"),
     ("div",".@id","id"),
+    ("para", ".@who", "who"),
     ("page",".@n","n"),
     ("page",".@fac","img")
 ]
@@ -149,7 +149,7 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
     
 db_destination = database_root + dbname
 data_destination = db_destination + "/data"
-db_url = url_root + "/" + dbname
+db_url = url_root + dbname
 
 try:
     os.mkdir(db_destination)
@@ -189,7 +189,6 @@ l = Loader(data_destination,
 
 l.add_files(files)
 filenames = l.list_files()
-print filenames
 load_metadata = [{"filename":f} for f in sorted(filenames)]
 l.parse_files(workers,load_metadata)
 l.merge_objects()
