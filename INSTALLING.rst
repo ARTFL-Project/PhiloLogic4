@@ -3,11 +3,26 @@ Installation
 
 As described in main ``README`` document, installing `PhiloLogic` follows
 each of its parts installations. For the sake of example, we will assume
-that you have cloned whole `PhiloLogic4` repository in your home,
-at ``~/PhiloLogic4`` path::
+that you have a copy of `PhiloLogic4` content in your home,
+at ``~/PhiloLogic4`` path.
+
+
+Downloading
+-----------
+
+Getting a copy of `PhiloLogic4` could be achieved from different ways.
+One is by 'cloning' GitHub's repository::
 
     cd $HOME
     git clone https://github.com/ARTFL-Project/PhiloLogic4
+
+An other would be to directly download an archive from GitHub's ``master``
+branch::
+
+    cd $HOME
+    wget --output-document=PhiloLogic4.tar.gz https://github.com/ARTFL-Project/PhiloLogic4/archive/master.tar.gz
+    tar -xzf PhiloLogic4.tar.gz
+    mv PhiloLogic4-master PhiloLogic4
 
 
 Installing library system-wide
