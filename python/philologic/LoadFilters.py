@@ -4,6 +4,7 @@ import os
 import re
 import cPickle
 import unicodedata
+from subprocess import Popen, PIPE
 from philologic.OHCOVector import Record
 from ast import literal_eval as eval
 
@@ -42,6 +43,60 @@ def make_word_counts(loader_obj, text, depth=4):
     output_file.close()
     os.remove(text['raw'])
     os.rename(temp_file, text['raw'])
+
+def tree_tagger(tt_path,param_file,maxlines=20000):
+  def tag_words(loader_obj,text):  
+    # Set up the treetagger process
+    tt_args = [tt_path,"-token","-lemma","-prob","-threshold",".01",param_file]
+    ttout_fh = open(text["raw"]+".ttout","w")
+    tt_worker = Popen(tt_args,stdin=PIPE,stdout=ttout_fh)
+    raw_fh = open(text["raw"],"r")
+    line_count = 0
+
+    # read through the object file, pass the words to treetagger
+    for line in raw_fh:
+        type, word, id, attrib = line.split('\t')        
+        id = id.split()
+        if type == "word":
+            print word
+            # close and re-open the treetagger process to prevent garbage output.
+            if line_count > maxlines:
+                tt_worker.stdin.close()
+                tt_worker.wait()
+                new_ttout_fh = open(text["raw"]+".ttout","a")
+                tt_worker = Popen(tt_args, stdin=PIPE,stdout=new_ttout_fh)
+                line_count = 0
+            print >> tt_worker.stdin, word
+            line_count += 1
+
+    # finish tagging        
+    tt_worker.stdin.close()
+    tt_worker.wait()
+
+    # go back through the object file, and add the treetagger results to each word
+    tmp_fh = open(text["raw"]+".tmp","w")
+    tag_fh = open(text["raw"] + ".ttout","r")    
+    for line in open(text["raw"],"r"):
+        type, word, id, attrib = line.split('\t')
+        id = id.split()
+        record = Record(type,word,id)
+        record.attrib = eval(attrib)                
+        if type == "word":
+            tag_l = tag_fh.readline()
+            next_word,tag = tag_l.split("\t")[0:2]
+            pos,lem,prob = tag.split(" ")
+            if next_word != word:
+                print >> sys.stderr, "TREETAGGER ERROR:",next_word," != ",word,pos,lem
+                return
+            else:
+                print next_word,pos,lem
+                record.attrib["pos"] = pos
+                record.attrib["lemma"] = lem
+                print >> tmp_fh, record    
+    os.remove(text["raw"])
+    os.rename(text["raw"] + ".tmp",text["raw"])
+    os.remove(text["raw"] + ".ttout")
+  return tag_words
     
 def fix_pages(loader_obj,text,depth=4):
     """Unfinished, do not use"""
