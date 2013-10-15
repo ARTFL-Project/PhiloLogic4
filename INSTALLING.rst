@@ -2,7 +2,12 @@ Installation
 ============
 
 As described in main ``README`` document, installing `PhiloLogic` follows
-each of its parts installations.
+each of its parts installations. For the sake of example, we will assume
+that you have cloned whole `PhiloLogic4` repository in your home,
+at ``~/PhiloLogic4`` path::
+
+    cd $HOME
+    git clone https://github.com/ARTFL-Project/PhiloLogic4
 
 
 Installing library system-wide
@@ -16,13 +21,13 @@ It processes in two classical steps:
 
 with shell commands::
 
-    cd libphilo
+    cd ~/PhiloLogic4/libphilo
     make
     sudo make install
 
-The binaries resulting of compilation process are ``libphilo/search4``
-and ``libphilo/db/pack4``. They are then copied into the execution directory,
-usually ``/bin``.
+The binaries resulting of compilation process are
+``~/PhiloLogic4/libphilo/search4`` and ``~/PhiloLogic4/libphilo/db/pack4``.
+They are then copied into the execution directory, usually ``/bin``.
 
 .. note::
 
@@ -37,15 +42,15 @@ Once ``libphilo`` is installed, we need to install its `Python` bindings.
 Once again, this step requires administrator privileges.
 Installing bindings is reached by calling ``setup.py``::
 
-    cd python
+    cd ~/PhiloLogic4/python
     sudo python setup.py install
 
 
 Installing web application
 --------------------------
 
-Installing the web application consists on
-copying ``www`` directory content in desired web app. location subdirectory.
+Installing the web application consists on copying ``~/PhiloLogic4/www``
+directory content in desired web app. location subdirectory.
 As the application could use many databases, it's common to install it
 in its own subdirectory, at same level as all databases.
 The loader used for database initialization needs that the web app. files
@@ -59,12 +64,12 @@ be similar to this::
          \--- _system_dir
             \--- _install_dir
 
-where content of ``_install_dir`` subdirectory is identical to `PhiloLogic`
-``www`` source directory. For a web directory located at ``/var/www/html``,
-this could be achieved by::
+where content of ``_install_dir`` subdirectory is identical
+to ``~/PhiloLogic4/www`` source directory. For a web directory located
+at ``/var/www/html``, this could be achieved by::
 
     sudo mkdir -p /var/www/html/philologic/_system_dir/_install_dir
-    sudo cp -r /path/to/philologic4/sources/www/* /var/www/html/philologic/_system_dir/_install_dir/
+    sudo cp -r ~/PhiloLogic4/www/* /var/www/html/philologic/_system_dir/_install_dir/
 
 .. note::
 
@@ -77,7 +82,7 @@ Initializing web application with a given database
 
 Once web app. is copied in its ``_system_dir/_install_dir`` directory,
 the last step consists on initializing it with a database.
-This is the role of ``scripts/loader.py`` module,
+This is the role of ``~/PhiloLogic4/scripts/loader.py`` module,
 whose call takes two main arguments:
 
 1. the name of the database to create, which will be the subdirectory
@@ -88,7 +93,7 @@ But first, we need to configure this ``loader.py`` module, by editing
 some of its internals in a fresh new copy::
 
     cd /var/www/html/philologic
-    cp /path/to/philologic/sources/scripts/loader.py ./_system_dir/
+    cp ~/PhiloLogic4/scripts/loader.py ./_system_dir/
 
 The main variables to edit in this module are located at lines 25-44, as
 ``database_root``, ``url_root`` and others::
@@ -107,7 +112,7 @@ and ``url_root`` set to e.g. ``'http://localhost/philologic'``::
     database_root = '/var/www/html/philologic/'
     url_root = 'http://localhost/philologic'
 
-Then, we can call ``loader.py``:
+Then, we can call ``loader.py``::
 
     cd _system_dir
     python loader.py database1 /path/to/corpus1.xml /path/to/corpus2.xml
