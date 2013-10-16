@@ -6,6 +6,11 @@ each of its parts installations. For the sake of example, we will assume
 that you have a copy of `PhiloLogic4` content in your home,
 at ``~/PhiloLogic4`` path.
 
+.. note::
+
+    Please ensure your current system has required dependancies listed
+    in ``requirement.rst`` document.
+
 
 Downloading
 -----------
