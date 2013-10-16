@@ -71,30 +71,32 @@ or via `pip`_::
     sudo pip install .
 
 
-Installing web application
---------------------------
+Installing web application for a new database
+---------------------------------------------
 
-Installing the web application consists on copying ``~/PhiloLogic4/www``
-directory content in desired web app. location subdirectory.
-As the application could use many databases, it's common to install it
-in its own subdirectory, at same level as all databases.
-The loader used for database initialization needs that the web app. files
-are located in ``_system_dir/_install_dir``, such that the whole tree will
-be similar to this::
+A new database, filled with one or more `TEI-XML` corpus file, will be served
+by a its own dedicated version of `PhiloLogic` web application.
+The structure of such a database, located for e.g. in a ``mydatabase``
+directory behind web directory served by `Apache httpd`_, which is usually
+``/var/www/`` or ``/var/www/html``, follows. For the sake of example, lets say
+that our new database will stand at ``/var/www/html/mydatabase``.
+This directory will contain *both* `PhiloLogic` web application,
+and stuff generated for its serving, in a ``data`` subdirectory.
+The filling of this ``/var/www/html/mydatabase`` will be done by
+a *customized* version of ``~/PhiloLogic4/scripts/loader.py`` script.
+At the end of generation, this directory will look like this tree::
 
-    --- [web directory]
-      \--- [philologic]
-         \--- database1
-         \--- database2
-         \--- _system_dir
-            \--- _install_dir
-
-where content of ``_install_dir`` subdirectory is identical
-to ``~/PhiloLogic4/www`` source directory. For a web directory located
-at ``/var/www/html``, this could be achieved by::
-
-    sudo mkdir -p /var/www/html/philologic/_system_dir/_install_dir
-    sudo cp -r ~/PhiloLogic4/www/* /var/www/html/philologic/_system_dir/_install_dir/
+    --- /var/www/html
+      \--- mydatabase
+        \--- css
+        \--- data
+        \--- functions
+        \--- js
+        \--- reports
+        \--- scripts
+        \--- templates
+        \--- .htaccess
+        \--- dispatcher.py
 
 .. note::
 
@@ -102,52 +104,116 @@ at ``/var/www/html``, this could be achieved by::
     including needed dependencies.
 
 
-Initializing web application with a given database
---------------------------------------------------
+Dependencies
+^^^^^^^^^^^^
 
-Once web app. is copied in its ``_system_dir/_install_dir`` directory,
-the last step consists on initializing it with a database.
-This is the role of ``~/PhiloLogic4/scripts/loader.py`` module,
-whose call takes two main arguments:
+.. note::
 
-1. the name of the database to create, which will be the subdirectory
-   into ``philologic`` directory,
-2. the path to the `TEI-XML` file(s) from which fulfill database content.
+    See ``requirement.rst`` document of a synthetical list of these dependencies.
 
-But first, we need to configure this ``loader.py`` module, by editing
-some of its internals in a fresh new copy::
+`PhiloLogic4` web application obviously require both ``libphilo`` and
+``philologic`` `Python` module to be installed (see above), but it also
+depends on `Mako`_ templating engine. If `Mako`_ is not provided by
+your operating system package, or provided version is too old,
+we advice to install a fresh one via `pip`_::
 
-    cd /var/www/html/philologic
-    cp ~/PhiloLogic4/scripts/loader.py ./_system_dir/
+    sudo pip install Mako
 
-The main variables to edit in this module are located at lines 25-44, as
-``database_root``, ``url_root`` and others::
+Running the ``loader.py`` depends it-self on `lxml`_, and previous remark for
+`Mako` also applies here::
 
-    database_root = None
-    url_root = None
-    template_dir = database_root + '_system_dir/_install_dir'
+    sudo pip install lxml
 
-Following previous example, we must set ``database_root`` variable
-to ``'/var/www/html/philologic/'`` -- with an ending slash! --,
-and ``url_root`` set to e.g. ``'http://localhost/philologic'``::
+
+Customize ``loader.py``
+^^^^^^^^^^^^^^^^^^^^^^^
+
+So the ``loader.py`` is the central piece of software generating database and
+web application from web application *template* and `TEI-XML` corpus files,
+and you **must customize** it. Given a set of this `TEI-XML` files,
+located for e.g. at ``~/mycorpus/xml`` directory, we could put a copy
+of ``~/PhiloLogic4/scripts/loader.py`` in ``~/mycorpus``::
+
+    cp ~/PhiloLogic4/scripts/loader.py ~/mycorpus/
+
+It could be possible to also tweak the web application template to better
+fullfill your corpora specificities or needs, but for the sake of current
+example, we assume you'll started with bare ``~/PhiloLogic4/www``'s one.
+
+The main *required* variables of ``loader.py`` to be set are located
+around lines 25-44, and are ``database_root``, ``url_root``
+and ``template_dir``. Following previous example, we must set
+``database_root`` variable to ``'/var/www/html/mydatabase/'``
+-- with an ending slash! --, and ``url_root`` set to e.g.
+``'http://localhost/mydatabase'``. Also, as we use ``~/PhiloLogic4/www``
+sources as bare web application template, we must tweaked ``template_dir``
+as follows::
 
     # variables are set to None by default,
     # and *must* be set to values according to *your* current installation,
     # for example:
-    database_root = '/var/www/html/philologic/'
-    url_root = 'http://localhost/philologic'
+    database_root = '/var/www/html/mydatabase/'
+    url_root = 'http://localhost/mydatabase'
+    template_dir = '~/PhiloLogic4/www'
 
-Then, we can call ``loader.py``::
 
-    cd _system_dir
-    python loader.py database1 /path/to/corpus1.xml /path/to/corpus2.xml
+Loading
+^^^^^^^
 
-This will compute databases indexes needed by `PhiloLogic` for this
-specific corpus.
+Once all files are in place and ``loader.py`` script customized, it's time
+for `PhiloLogic` to generates all stuff it needs, by executing script
+on `TEI-XML` files::
+
+    python ~/mycorpus/loader.py [database name] [path to TEI-XML files]
+
+This script required the following arguments:
+
+1.  the name of the database to create, which will be the subdirectory
+    into ``/var/www/html`` directory, i.e. ``mydatabase``,
+2.  the paths to each of `TEI-XML` files from which fulfill database content,
+    i.e. ``~/mycorpus/xml/*.xml``.
+
+The full list of arguments ``loader.py`` accepts is set in its body
+around 15-25 lines, and showable when running ``loader.py`` without
+a database name::
+
+    python ~/mycorpus/loader.py
+
+The script also accepts optional arguments, among others most common are
+``--cores`` and ``--debug``:
+
+``-c WORKERS`` / ``--cores=WORKERS``:
+    This option set the number of workers the ``loader.py`` will use.
+    It is mostly usefull for multi-cores hardware.
+
+``-d`` / ``--debug``
+    Set both ``loader.py`` and web application in debug mode.
+
+So our command line for loading would be::
+
+    cd /var/www/html
+    python ~/mycorpus/loader.py mydatabase ~/mycorpus/xml/*.xml
+
+The above command should have populated the ``/var/www/html/mydatabase``
+directory with both web application and data files::
+
+    ls -l /var/www/html/mydatabase
 
 .. note::
 
-    See ``apache`` document for further details about setting up `Apache`
+    See ``LOADING.rst`` document for details about loading.
+
+
+Serving database with `Apache httpd`
+------------------------------------
+
+By default, all the previous steps would transparently let `Apache httpd`_
+serve our database without any additional change.
+Check ``http://localhost/mydatabase/`` URL in a web browser to test it!
+
+.. note::
+
+    See ``apache.rst`` document for further details about setting up `Apache`
     web server.
 
 
@@ -155,4 +221,6 @@ specific corpus.
 
 .. _git: http://git-scm.com/
 .. _pip: http://www.pip-installer.org/
-
+.. _Apache httpd: http://httpd.apache.org/
+.. _Mako: http://makotemplates.org/
+.. _lxml: http://lxml.de/
