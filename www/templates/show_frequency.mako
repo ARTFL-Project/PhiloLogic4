@@ -20,7 +20,7 @@
     </div>
     <div class="loading" style="display:none;z-index:99;position:absolute;margin-left:20px;"></div>
     <div id="hide_frequency">X</div>
-    <div class="frequency_container" style="margin:1px 1px 0px 1px">
+    <div class="frequency_container">
         <ol id="freq" class="frequency_table"></ol>
     </div>
 </div>

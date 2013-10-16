@@ -14,7 +14,7 @@ from collocation import tokenize, filter
 from functions.ObjectFormatter import adjust_bytes, format_strip, convert_entities
 
 
-end_highlight_match = re.compile(r'<span class="highlight">[^<]*?(</span>)')
+end_highlight_match = re.compile(r'.*<span class="highlight">[^<]*?(</span>)')
 token_regex = re.compile(r'(\W)', re.U)
 
 def concordance_from_collocation(environ,start_response):
@@ -56,7 +56,7 @@ def fetch_colloc_concordance(results, path, q, db, filter_words=100):
         conc_text = f.get_text(hit, byte_start, 400, path)
         conc_text = format_strip(conc_text, bytes)
         conc_text = convert_entities(conc_text)
-        conc_text = unicodedata.normalize('NFC', conc_text)
+        #conc_text = unicodedata.normalize('NFC', conc_text)
         start_highlight = conc_text.find('<span class="highlight"')
         m = end_highlight_match.search(conc_text)
         end_highlight = m.end(len(m.groups()) - 1)
