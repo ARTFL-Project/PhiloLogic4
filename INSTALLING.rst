@@ -65,6 +65,11 @@ Installing bindings is reached by calling ``setup.py``::
     cd ~/PhiloLogic4/python
     sudo python setup.py install
 
+or via `pip`_::
+
+    cd ~/PhiloLogic4/python
+    sudo pip install .
+
 
 Installing web application
 --------------------------
@@ -146,9 +151,8 @@ specific corpus.
     web server.
 
 
-----
-
 .. Links:
 
 .. _git: http://git-scm.com/
+.. _pip: http://www.pip-installer.org/
 
