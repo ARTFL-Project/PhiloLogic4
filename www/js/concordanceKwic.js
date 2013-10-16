@@ -107,7 +107,6 @@ function hideBiblio() {
 
 //    These functions are for the sidebar frequencies
 function sidebar_reports(q_string, db_url, pathname) {
-    //$('.frequency_container').css('height', $('.philologic_concordance').height() - 20 + 'px');
     $("#toggle_frequency").click(function() {
         toggle_frequency(q_string, db_url, pathname);
     });
@@ -117,7 +116,6 @@ function sidebar_reports(q_string, db_url, pathname) {
     $(".hide_frequency").click(function() {
         hide_frequency();
     });
-    //$('.frequency_table').css('height', $('.philologic_concordance').height() - 20 + 'px');
 }
 function toggle_frequency(q_string, db_url, pathname) {
     var field =  $("#frequency_field").val();

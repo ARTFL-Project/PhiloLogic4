@@ -388,14 +388,19 @@ ul.ui-autocomplete.ui-menu {
     font-family: 'Droid Sans Mono', sans-serif !important;
     font-size: 130%;
     float: right;
-    color: Gray;
-    margin-right: 2px;
-    margin-top: 2px;
+    color: #555;
+    margin-top: 9px;
+    height: 21px;
+    border-top: 0px;
+    border-right: 0px;
     display: none;
 }
 #hide_frequency:hover {
     color: Black;
     cursor: pointer;
+}
+#hide_frequency > .ui-button-text {
+    padding: .1em 1em;
 }
 .sidebar_display {
     float: right;
@@ -407,15 +412,15 @@ ul.ui-autocomplete.ui-menu {
 }
 .frequency_container {
     box-shadow: 0px 0px 3px #A8A8A8;
-    padding-top: 10px;
+    margin: 0px 1px 0px 1px;
     background-color: #FAFAFA;
     display: none;
 }
 .frequency_table {
-    padding: 0px 5px 10px 5px;
+    padding: 25px 5px 10px 5px;
     line-height: 250%;
     /*overflow-y: scroll;*/
-    margin-top: 10px;
+    margin-top: 9px;
 }
 .freq_sidebar_text {
     display: inline-block !important;
