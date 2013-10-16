@@ -70,8 +70,6 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
         m = end_highlight_match.search(conc_text)
         end_highlight = m.end(len(m.groups()) - 1)
         conc_left = conc_text[:start_highlight]
-        #conc_middle = conc_text[start_highlight:end_highlight]
-        #conc_middle = conc_middle.replace('<span class="highlight">','').replace('</span>', '')
         conc_right = conc_text[end_highlight:]
         
         left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
