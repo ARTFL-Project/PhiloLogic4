@@ -2,14 +2,9 @@ Installation
 ============
 
 As described in main ``README`` document, installing `PhiloLogic` follows
-each of its parts installations. For the sake of example, we will assume
+each of its parts installations [1]_. For the sake of example, we will assume
 that you have a copy of `PhiloLogic4` content in your home,
 at ``~/PhiloLogic4`` path.
-
-.. note::
-
-    Please ensure your current system has required dependancies listed
-    in ``requirement.rst`` document.
 
 
 Downloading
@@ -34,7 +29,8 @@ Installing library system-wide
 ------------------------------
 
 Installing ``libphilo`` system-wide requires administrator privileges.
-It processes in two classical steps:
+This library, written in `C`, depends on `gdbm`_, which *must* be installed [1]_.
+Installation processes in two classical steps:
 
 1. first compiling the library into binaries,
 2. then installing the fresh built material into system,
@@ -51,24 +47,26 @@ They are then copied into the execution directory, usually ``/bin``.
 
 .. note::
 
-    See ``libphilo/README`` document for further details,
-    including needed dependencies.
+    See ``libphilo/README`` document for further details.
 
 
-Installing library's `Python` binding system-wide
--------------------------------------------------
+Installing `Python` ``philologic`` library system-wide
+------------------------------------------------------
 
-Once ``libphilo`` is installed, we need to install its `Python` bindings.
-Once again, this step requires administrator privileges.
-Installing bindings is reached by calling ``setup.py``::
+Once ``libphilo`` is installed, we need to install its `Python` bindings
+and library: ``philologic``. Once again, this step requires administrator
+privileges. Installation could be reached through its
+``~/PhiloLogic4/python/setup.py`` package setup::
 
     cd ~/PhiloLogic4/python
     sudo python setup.py install
 
-or via `pip`_::
+or via `pip`_ [2]_::
 
     cd ~/PhiloLogic4/python
     sudo pip install .
+
+Usage of this ``philologic`` library requires `lxml`_ (see below) [1]_.
 
 
 Installing web application for a new database
@@ -107,15 +105,11 @@ At the end of generation, this directory will look like this tree::
 Dependencies
 ^^^^^^^^^^^^
 
-.. note::
-
-    See ``requirement.rst`` document of a synthetical list of these dependencies.
-
-`PhiloLogic4` web application obviously require both ``libphilo`` and
-``philologic`` `Python` module to be installed (see above), but it also
-depends on `Mako`_ templating engine. If `Mako`_ is not provided by
+`PhiloLogic4` web application obviously requires both ``libphilo`` and
+``philologic`` libraries to be installed (see above), but it also
+depends on `Mako`_ templating engine [1]_. If `Mako`_ is not provided by
 your operating system package, or provided version is too old,
-we advice to install a fresh one via `pip`_::
+we advice to install a fresh one via `pip`_ [2]_::
 
     sudo pip install Mako
 
@@ -138,7 +132,7 @@ of ``~/PhiloLogic4/scripts/loader.py`` in ``~/mycorpus``::
 
 It could be possible to also tweak the web application template to better
 fullfill your corpora specificities or needs, but for the sake of current
-example, we assume you'll started with bare ``~/PhiloLogic4/www``'s one.
+example, we assume you'll simply started with bare ``~/PhiloLogic4/www``'s one.
 
 The main *required* variables of ``loader.py`` to be set are located
 around lines 25-44, and are ``database_root``, ``url_root``
@@ -189,6 +183,10 @@ The script also accepts optional arguments, among others most common are
 ``-d`` / ``--debug``
     Set both ``loader.py`` and web application in debug mode.
 
+.. note::
+
+    See ``LOADING.rst`` document for details about loading.
+
 So our command line for loading would be::
 
     cd /var/www/html
@@ -198,10 +196,6 @@ The above command should have populated the ``/var/www/html/mydatabase``
 directory with both web application and data files::
 
     ls -l /var/www/html/mydatabase
-
-.. note::
-
-    See ``LOADING.rst`` document for details about loading.
 
 
 Serving database with `Apache httpd`
@@ -217,9 +211,21 @@ Check ``http://localhost/mydatabase/`` URL in a web browser to test it!
     web server.
 
 
+----
+
+.. Footnotes:
+
+.. [1]
+    See ``requirement.rst`` document of a synthetical list of all dependencies.
+.. [2]
+    Installing a `Python` package via `pip`_ allows an easy deinstallation.
+    It's also an easy way to get the last version of a package,
+    or a specific one.
+
 .. Links:
 
 .. _git: http://git-scm.com/
+.. _gdbm: http://www.gnu.org.ua/software/gdbm/
 .. _pip: http://www.pip-installer.org/
 .. _Apache httpd: http://httpd.apache.org/
 .. _Mako: http://makotemplates.org/
