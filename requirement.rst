@@ -21,7 +21,8 @@ on your system:
 +-----------------------+-----------------------+-------------------------+
 
 
-Also, installation could require other softwares:
+Also, *installation* of both dependancies and component could require
+other softwares:
 
 +-----------------------------------+-------------------+
 | component                         | installer         |
@@ -42,8 +43,8 @@ Also, installation could require other softwares:
 
 .. [1]
     Using `pip`_ to install a `Python` package allows its future
-    deinstallation. Depending on your operating system and Python,
-    `pip`_ could be or not already installed, and offered as a distribution
+    deinstallation. Depending on your operating system and Python environement,
+    `pip`_ could already be installed or not, and available as a distribution
     package. See `pip`_ documentation in last resort.
 .. [2]
     If 3rd party `Python` package, such as `Mako`_ or `lxml`_ is available

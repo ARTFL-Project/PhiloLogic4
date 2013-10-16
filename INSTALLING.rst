@@ -16,7 +16,7 @@ Downloading
 -----------
 
 Getting a copy of `PhiloLogic4` could be achieved from different ways.
-One is by 'cloning' GitHub's repository::
+One is by 'cloning' GitHub's repository via `git`_::
 
     cd $HOME
     git clone https://github.com/ARTFL-Project/PhiloLogic4
@@ -144,4 +144,11 @@ specific corpus.
 
     See ``apache`` document for further details about setting up `Apache`
     web server.
+
+
+----
+
+.. Links:
+
+.. _git: http://git-scm.com/
 
