@@ -101,7 +101,7 @@ class BufferedParser(object):
         else:
             def extract_text(future_event,future_element):
                 if future_event[0] == "text":
-                    if future_element in new_element.findall(mxp):
+                    if new_element.findall(mxp):
                         destination[field] = destination.get(field,"") + future_event[1]
                         #print >> self.output, repr(new_element),repr(future_element),mxp,future_event[1]
                 if future_event[0] == "end":
