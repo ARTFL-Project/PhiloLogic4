@@ -58,6 +58,7 @@ def tree_tagger(tt_path,param_file,maxlines=20000):
         type, word, id, attrib = line.split('\t')        
         id = id.split()
         if type == "word":
+            word = word.decode('utf-8', 'ignore').lower().encode('utf-8')
             # close and re-open the treetagger process to prevent garbage output.
             if line_count > maxlines:
                 tt_worker.stdin.close()
@@ -84,7 +85,7 @@ def tree_tagger(tt_path,param_file,maxlines=20000):
             tag_l = tag_fh.readline()
             next_word,tag = tag_l.split("\t")[0:2]
             pos,lem,prob = tag.split(" ")
-            if next_word != word:
+            if next_word != word.decode('utf-8', 'ignore').lower().encode('utf-8'):
                 print >> sys.stderr, "TREETAGGER ERROR:",next_word," != ",word,pos,lem
                 return
             else:

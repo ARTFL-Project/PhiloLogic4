@@ -326,7 +326,7 @@ class Loader(object):
             self.dbh.row_factory = sqlite3.Row
             if table == 'words':
                 file_in = self.workdir + '/all_words_sorted'
-                self.make_sql_table(table, file_in)
+                self.make_sql_table(table, file_in, indices=["philo_name"])
             if table == 'pages':
                 file_in = self.workdir + '/all_pages'                
                 self.make_sql_table(table, file_in, indices=["philo_id"],depth=9)
