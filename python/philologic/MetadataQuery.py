@@ -204,6 +204,7 @@ def query_lowlevel(db,param_dict):
     return results
 
 def query_recursive(db,param_dict,parent):
+#    print >> sys.stderr, "query_recursive:",param_dict,parent
     r = query_lowlevel(db,param_dict)
     if parent:
         try:
@@ -211,9 +212,10 @@ def query_recursive(db,param_dict,parent):
         except StopIteration:
             return
         for inner_hit in r:
+#            print >> sys.stderr, "corpus_cmp:",outer_hit["philo_id"], inner_hit["philo_id"]
             while corpus_cmp(str_to_hit(outer_hit["philo_id"]),str_to_hit(inner_hit["philo_id"])) < 0:
                 try:
-                    outer_hit = next(r)
+                    outer_hit = next(parent)
                 except StopIteration:
                     return
             if corpus_cmp(str_to_hit(outer_hit["philo_id"]),str_to_hit(inner_hit["philo_id"])) > 0:
@@ -225,6 +227,7 @@ def query_recursive(db,param_dict,parent):
             yield row
 
 def metadata_query(db,filename,param_dicts):
+#    print >> sys.stderr, "metadata_query:",param_dicts
     prev = None
     for d in param_dicts:
         query = query_recursive(db,d,prev)

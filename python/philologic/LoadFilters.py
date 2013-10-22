@@ -47,7 +47,7 @@ def make_word_counts(loader_obj, text, depth=4):
 def tree_tagger(tt_path,param_file,maxlines=20000):
   def tag_words(loader_obj,text):  
     # Set up the treetagger process
-    tt_args = [tt_path,"-token","-lemma","-prob","-threshold",".01",param_file]
+    tt_args = [tt_path,"-token","-lemma","-prob",'-no-unknown', "-threshold",".01",param_file]
     ttout_fh = open(text["raw"]+".ttout","w")
     tt_worker = Popen(tt_args,stdin=PIPE,stdout=ttout_fh)
     raw_fh = open(text["raw"],"r")
@@ -58,7 +58,6 @@ def tree_tagger(tt_path,param_file,maxlines=20000):
         type, word, id, attrib = line.split('\t')        
         id = id.split()
         if type == "word":
-            print word
             # close and re-open the treetagger process to prevent garbage output.
             if line_count > maxlines:
                 tt_worker.stdin.close()
@@ -89,10 +88,11 @@ def tree_tagger(tt_path,param_file,maxlines=20000):
                 print >> sys.stderr, "TREETAGGER ERROR:",next_word," != ",word,pos,lem
                 return
             else:
-                print next_word,pos,lem
                 record.attrib["pos"] = pos
                 record.attrib["lemma"] = lem
-                print >> tmp_fh, record    
+                print >> tmp_fh, record
+        else:
+            print >> tmp_fh, record
     os.remove(text["raw"])
     os.rename(text["raw"] + ".tmp",text["raw"])
     os.remove(text["raw"] + ".ttout")
