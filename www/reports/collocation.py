@@ -86,7 +86,7 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
     if full_report:
         return dict(all_collocates), dict(left_collocates), dict(right_collocates)
     else:
-        return sorted(all_collocates.items(), key=lambda x: x[1], reverse=True)
+        return sorted(all_collocates.items(), key=lambda x: x[1], reverse=True)[:100]
 
 
 def tokenize(text, filter_list, within_x_words, direction, db):
