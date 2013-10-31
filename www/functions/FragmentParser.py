@@ -20,8 +20,8 @@ class FragmentParser:
         for k,v in attrib.items():
             no_ns_k = re.sub(r"^.*?:","",k)
             if no_ns_k != k:
-                del attrs[k]
-                attrs[no_ns_k] = v
+                del attrib[k]
+                attrib[no_ns_k] = v
         new_el = etree.SubElement(self.current_el,tag,attrib)
         new_el.text = u""
         new_el.tail = u""
