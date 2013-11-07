@@ -10,11 +10,11 @@ import subprocess
 import sqlite3
 from ast import literal_eval as eval
 
-from philologic.BufferedParser import BufferedParser
-from philologic.LoadFilters import *
-from philologic.PostFilters import *
-from philologic.utils import OutputHandler
+import philologic.Parser
+import philologic.LoadFilters
+import philologic.PostFilters
 
+from philologic.utils import OutputHandler
 
 sort_by_word = "-k 2,2"
 sort_by_id = "-k 3,3n -k 4,4n -k 5,5n -k 6,6n -k 7,7n -k 8,8n -k 9,9n"
@@ -40,33 +40,37 @@ default_post_filters = [word_frequencies, normalized_word_frequencies, metadata_
 ## While these tables are loaded by default, you can override that default, although be aware
 ## that you will only have reduced functionality if you do. It is strongly recommended that you 
 ## at least keep the 'toms' table from toms.db.
-default_tables = ['toms', 'pages', 'ranked_relevance']
-
-default_xpaths = [("doc",".")]
-default_metadata = [("doc",".//titleStmt/title","title"),("doc",".//titleStmt/author","author")]
-default_token_regex = r"(\w+)|([\.?!])"
+default_tables = ['toms', 'pages', 'words']
 
 class Loader(object):
 
-    def __init__(self,destination,token_regex=default_token_regex,xpaths=default_xpaths,
-                 metadata_xpaths=default_metadata,filters=default_filters,
-                 pseudo_empty_tags=[],suppress_tags=[],default_object_level="doc",freq_object_levels = [],
-                 console_output=True,log=False, debug=False):
+    def __init__(self,destination,tables = default_tables,
+                 post_filters = default_post_filters, debug=False, **parser_defaults):
         self.omax = [1,1,1,1,1,1,1,1,1]
         self.debug = debug
         self.parse_pool = None 
-        self.parser_factory = BufferedParser
-        self.default_object_level = default_object_level
-        self.freq_object_levels = freq_object_levels or [self.default_object_level]
         self.types = object_types
+        self.tables = tables
 
-        self.token_regex = token_regex
-        self.xpaths = xpaths
-        self.metadata_xpaths = metadata_xpaths
-        self.default_filters = filters
-
-        self.pseudo_empty_tags = pseudo_empty_tags
-        self.suppress_tags = suppress_tags
+        self.parser_defaults = {}
+        
+        if "parser_factory" not in parser_defaults:
+            parser_defaults["parser_factory"] = Parser.Parser            
+        if "token_regex" not in parser_defaults:
+            parser_defaults["token_regex"] = Parser.DefaultTokenRegex
+        if "xpaths" not in parser_defaults:
+            parser_defaults["xpaths"] = Parser.DefaultXPaths
+        if "metadata_xpaths" not in parser_defaults:
+            parser_defaults["metadata_xpaths"] = Parser.DefaultMetadataXpaths
+        if "pseudo_empty_tags" not in parser_defaults:
+            parser_defaults["pseudo_empty_tags"] = []
+        if "suppress_tags" not in parser_defaults:
+            parser_defaults["suppres_tags"] = []
+        if "load_filters" not in parser_defaults:
+            parser_defaults["load_fiilters"] = LoadFilters.DefaultLoadFilters
+        
+        for option in ["parser_factory","token_regex","xpaths","metadata_xpaths","pseudo_empty_tags","suppress_tags","load_filters"]:
+            self.parser_defaults[option] = parser_defaults[option]
 
         if debug == True:
             self.clean = False
@@ -91,9 +95,11 @@ class Loader(object):
         self.metadata_types = {}
         self.normalized_fields = []
         indexed_types = []
-        for o_type, path, param in self.metadata_xpaths:
+
+        for o_type, path, param in self.parser_defaults["metadata_xpaths"]:
             if o_type not in indexed_types and o_type != "page":
                 indexed_types.append(o_type)
+
         for t in indexed_types:
             self.metadata_hierarchy.append([])
             for e_type,path,param in self.metadata_xpaths:
@@ -168,13 +174,14 @@ class Loader(object):
         
         while done < total:
             while self.filequeue and workers < max_workers:
-    
                 # we want to have up to max_workers processes going at once.
+                
                 text = self.filequeue.pop(0) # parent and child will both know the relevant filenames
                 metadata = data_dicts.pop(0)
                 options = text["options"]
-                #print >> sys.stderr, text
-                #print >> sys.stderr, metadata
+                if "options" in metadata: #cleanup, should do above.
+                    del metadata["options"]
+
                 pid = os.fork() # fork returns 0 to the child, the id of the child to the parent.  
                 # so pid is true in parent, false in child.
     
@@ -188,23 +195,25 @@ class Loader(object):
                     i = open(text["newpath"],"r",)
                     o = open(text["raw"], "w",) # only print out raw utf-8, so we don't need a codec layer now.
                     print "%s: parsing %d : %s" % (time.ctime(),text["id"],text["name"])
-                                        
-                    if "xpaths" not in options:
-                        options["xpaths"] = self.xpaths                        
-                    if "metadata_xpaths" not in options:
-                        options["metadata_xpaths"] = self.metadata_xpaths
+
+                    parser_factory = self.parser_factory
+                    if "parser_factory" in options:
+                        parser_factory = options["parser_factory"]
+
                     if "token_regex" not in options:
-                        options["token_regex"] = self.token_regex
+                        options["token_regex"] = self.parser_defaults["token_regex"]
+                    if "xpaths" not in options:
+                        options["xpaths"] = self.parser_defaults["xpaths"]                 
+                    if "metadata_xpaths" not in options:
+                        options["metadata_xpaths"] = self.parser_defaults["metadata_xpaths"]
                     if "suppress_tags" not in options:
-                        options["suppress_tags"] = self.suppress_tags
+                        options["suppress_tags"] = self.parser_defaults["suppress_tags"]
                     if "pseudo_empty_tags" not in options:
-                        options["pseudo_empty_tags"] = self.pseudo_empty_tags
-                       
-                    filters = self.default_filters
-                    if "filters" in options:
-                        filters = options["filters"]
-                    parser = self.parser_factory(o,text["id"],text["size"],known_metadata=metadata,**options)
-#                    parser = Parser.Parser({"filename":text["name"]},text["id"],xpaths=xpaths,metadata_xpaths=metadata_xpaths,token_regex=token_regex,non_nesting_tags=non_nesting_tags,self_closing_tags=self_closing_tags,pseudo_empty_tags=pseudo_empty_tags,output=o)
+                        options["pseudo_empty_tags"] = self.parser_defaults["pseudo_empty_tags"]
+                    if "load_filters" not in options:
+                        options["load_filters"] = self.parser_defaults["load_filters"]
+
+                    parser = parser_factory(o,text["id"],text["size"],known_metadata=metadata,**options)
                     try:
                         r = parser.parse(i)
                     except RuntimeError:
@@ -218,8 +227,7 @@ class Loader(object):
                     
                     if self.clean:
                         command = 'rm %s' % text['raw']
-                        os.system(command)
-                    
+                        os.system(command)                    
                     
                     exit()
     
@@ -326,10 +334,10 @@ class Loader(object):
         if self.clean:
             os.system('rm all_words_sorted')
 
-    def make_tables(self, tables, **extra_tables):
+    def make_tables(self, **extra_tables):
         print '\n### SQL Load ###'
         print "Loading in the following tables:"
-        for table in tables:            
+        for table in self.tables:            
             self.dbh = sqlite3.connect("../toms.db")
             self.dbh.text_factory = str
             self.dbh.row_factory = sqlite3.Row
