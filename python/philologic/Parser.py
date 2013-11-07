@@ -48,7 +48,7 @@ class ExpatWrapper:
         self.p.ParseFile(file)        
         return self.target.close()
 
-class BufferedParser(object):
+class Parser(object):
     def __init__(self,output,docid,filesize,token_regex = r"(\w+)|([\.\?\!])", xpaths = [("doc","./")],metadata_xpaths=[],suppress_tags = [],pseudo_empty_tags=[], known_metadata = {}):
         self.types = ["doc","div1","div2","div3","para","sent","word"]
         self.parallel_type = "page"
@@ -75,7 +75,6 @@ class BufferedParser(object):
         """Top level function for reading a file and printing out the output."""
         self.input = input
         lexer = ExpatWrapper(self)
-        print repr(self.input), repr(self.output)
         return lexer.parse(self.input)
         
     def make_extractor(self,new_element,obj_type,mxp,field):
@@ -261,7 +260,7 @@ DefaultTokenRegex = r"(\w+)|([\.?!])"
 
 DefaultXPaths =  [("doc","."),("div",".//div1"),("div",".//div2"),("div",".//div3"),("page",".//pb")]         
 
-DefaultMetadata_XPaths = [ # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
+DefaultMetadataXPaths = [ # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
     # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
     ("doc","./teiHeader//titleStmt/title","title"),
     ("doc","./teiHeader//titleStmt/author","author"),
@@ -278,7 +277,7 @@ if __name__ == "__main__":
         print >> sys.stderr, docid,fn
         size = os.path.getsize(fn)
         fh = open(fn)
-        parser = BufferedParser(sys.stdout,docid,size,token_regex = r"(\w+)|([\.\?\!])",
+        parser = Parser(sys.stdout,docid,size,token_regex = r"(\w+)|([\.\?\!])",
                                                       xpaths=[("doc","."),("div",".//div1"),("div",".//div2"),("page",".//pb")],
                                                       metadata_xpaths=[("doc",".//titlestmt/title","title"),("doc",".//titlestmt/author","author"),("div","./head","headword"),("div",".@n","n"),("div",".@id","id")],
                                                       suppress_tags=["teiheader","head"])

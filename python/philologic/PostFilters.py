@@ -6,8 +6,6 @@ import unicodedata
 from collections import defaultdict
 
 
-DefaultPostFilters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]
-
 
 def word_frequencies(loader_obj):
     frequencies = loader_obj.destination + '/frequencies'
@@ -74,3 +72,6 @@ def normalize_divs_post(*columns):
             if k in columns:
                 loader.metadata_types[k] = "div3"
     return normalize_these_columns_post
+
+
+DefaultPostFilters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]

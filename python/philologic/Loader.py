@@ -12,9 +12,9 @@ from ast import literal_eval as eval
 from optparse import OptionParser
 from glob import glob
 
-import philologic.Parser
-import philologic.LoadFilters
-import philologic.PostFilters
+import philologic.Parser as Parser
+import philologic.LoadFilters as LoadFilters
+import philologic.PostFilters as PostFilters
 
 from philologic.utils import OutputHandler
 
@@ -32,81 +32,12 @@ index_cutoff = 10 # index frequency cutoff.  Don't. alter.
 
 default_tables = ['toms', 'pages', 'words']
 
-def handle_command_line(argv):
-    usage = "usage: %prog [options] database_name files"
-    parser = OptionParser(usage=usage)
-    parser.add_option("-q", "--quiet", action="store_true", dest="quiet", help="suppress all output")
-    parser.add_option("-l", "--log", default=False, dest="log", help="enable logging and specify file path")
-    parser.add_option("-c", "--cores", type="int", default="2", dest="workers", help="define the number of cores for parsing")
-    parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
-    
-    ## Parse command-line arguments
-    (options, args) = parser.parse_args(argv[1:])
-    try:
-        dbname = args[0]
-        args.pop(0)
-        files = args[:]
-        if args[-1].endswith('/') or os.path.isdir(args[-1]):   
-            files = glob(args[-1] + '/*')
-        else:
-            files = args[:]
-    except IndexError:
-        print >> sys.stderr, "\nError: you did not supply a database name or a path for your file(s) to be loaded\n"
-        parser.print_help()
-        sys.exit()
-    ## Number of cores used for parsing: you can define your own value on the
-    ## command-line, stay with the default, or define your own value here
-    workers = options.workers or 2
-    
-    ## This defines which set of templates to use with your database: you can stay with
-    ## the default or specify another path from the command-line. Alternatively, you
-    ## can edit it here.
-    if options.no_template:
-        no_templates = True
-    else:
-        no_templates = False
-        
-    ## Define the type of output you want. By default, you get console output for your database
-    ## load. You can however set a quiet option on the command-line, or set console_output
-    ## to False here.
-    console_output = True
-    if options.quiet:
-        console_output = False
-        
-    ## Define a path for a log of your database load. This option can be defined on the command-line
-    ## or here. It's disabled by default.
-    log = options.log or False
-    
-    ## Set debugging if you want to keep all the parsing data, as well as debug the templates
-    debug = options.debug or False
-    
-    return workers, console_output, log, debug
-
-
-def setup_db_dir(db_destination, template_dir):
-    try:
-        os.mkdir(db_destination)
-    except OSError:
-        print "The %s database already exists" % dbname
-        print "Do you want to delete this database? Yes/No"
-        choice = raw_input().lower()
-        if choice.startswith('y'):
-            os.system('rm -rf %s' % db_destination)
-            os.mkdir(db_destination)
-        else:
-            sys.exit()
-    
-    if template_dir:
-        os.system("cp -r %s* %s" % (template_dir,db_destination))
-        os.system("cp %s.htaccess %s" % (template_dir,db_destination))
-
-
 
 class Loader(object):
 
 
     def __init__(self,destination,tables = default_tables,
-                 post_filters = default_post_filters, debug=False, **parser_defaults):
+                 post_filters = None, debug=False, **parser_defaults):
         self.omax = [1,1,1,1,1,1,1,1,1]
         self.debug = debug
         self.parse_pool = None 
@@ -122,16 +53,20 @@ class Loader(object):
         if "xpaths" not in parser_defaults:
             parser_defaults["xpaths"] = Parser.DefaultXPaths
         if "metadata_xpaths" not in parser_defaults:
-            parser_defaults["metadata_xpaths"] = Parser.DefaultMetadataXpaths
+            parser_defaults["metadata_xpaths"] = Parser.DefaultMetadataXPaths
         if "pseudo_empty_tags" not in parser_defaults:
             parser_defaults["pseudo_empty_tags"] = []
         if "suppress_tags" not in parser_defaults:
-            parser_defaults["suppres_tags"] = []
+            parser_defaults["suppress_tags"] = []
         if "load_filters" not in parser_defaults:
-            parser_defaults["load_fiilters"] = LoadFilters.DefaultLoadFilters
+            parser_defaults["load_filters"] = LoadFilters.DefaultLoadFilters
         
         for option in ["parser_factory","token_regex","xpaths","metadata_xpaths","pseudo_empty_tags","suppress_tags","load_filters"]:
             self.parser_defaults[option] = parser_defaults[option]
+
+        if not post_filters:
+            post_filters = PostFilters.DefaultPostFilters
+        self.post_filters = post_filters
 
         if debug == True:
             self.clean = False
@@ -163,7 +98,7 @@ class Loader(object):
 
         for t in indexed_types:
             self.metadata_hierarchy.append([])
-            for e_type,path,param in self.metadata_xpaths:
+            for e_type,path,param in self.parser_defaults["metadata_xpaths"]:
                 if t == e_type:
                     if param not in self.metadata_fields:
                         self.metadata_fields.append(param)
@@ -171,7 +106,7 @@ class Loader(object):
                     if param not in self.metadata_types:
                         self.metadata_types[param] = t
         
-        sys.stdout = OutputHandler(console=console_output, log=log)
+        #sys.stdout = OutputHandler(console=console_output, log=log)
 
     def setup_dir(self,path):
         os.mkdir(path)
@@ -256,10 +191,11 @@ class Loader(object):
                     o = open(text["raw"], "w",) # only print out raw utf-8, so we don't need a codec layer now.
                     print "%s: parsing %d : %s" % (time.ctime(),text["id"],text["name"])
 
-                    parser_factory = self.parser_factory
-                    if "parser_factory" in options:
-                        parser_factory = options["parser_factory"]
-
+                    if "parser_factory" not in options:
+                        options["parser_factory"] = self.parser_defaults["parser_factory"]
+                    parser_factory = options["parser_factory"]                        
+                    del options["parser_factory"]
+                        
                     if "token_regex" not in options:
                         options["token_regex"] = self.parser_defaults["token_regex"]
                     if "xpaths" not in options:
@@ -270,8 +206,11 @@ class Loader(object):
                         options["suppress_tags"] = self.parser_defaults["suppress_tags"]
                     if "pseudo_empty_tags" not in options:
                         options["pseudo_empty_tags"] = self.parser_defaults["pseudo_empty_tags"]
+                    
                     if "load_filters" not in options:
                         options["load_filters"] = self.parser_defaults["load_filters"]
+                    filters = options["load_filters"]
+                    del options["load_filters"]
 
                     parser = parser_factory(o,text["id"],text["size"],known_metadata=metadata,**options)
                     try:
@@ -461,9 +400,9 @@ class Loader(object):
         os.chmod(self.destination + "/hitlists/", 0777)
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
         
-        if post_filters:
+        if self.post_filters:
             print 'Running the following post-processing filters:'
-            for f in post_filters:
+            for f in self.post_filters:
                 print f.__name__ + '...',
                 f(self)
                 print 'done.'
@@ -476,23 +415,85 @@ class Loader(object):
         print >> db_locals, "db_path = '%s'" % self.destination
         print >> db_locals, "normalized_fields = %s" % self.normalized_fields
         print >> db_locals, "debug = %s" % self.debug
-        print >> db_locals, "default_object_level = '%s'" % self.default_object_level
-        print >> db_locals, "freq_object_levels = %s" % self.freq_object_levels
         for k,v in extra_locals.items():
             print >> db_locals, "%s = %s" % (k,repr(v))
 
         print "wrote metadata info to %s." % (self.destination + "/db.locals.py")
            
+
+
+def handle_command_line(argv):
+    usage = "usage: %prog [options] database_name files"
+    parser = OptionParser(usage=usage)
+    parser.add_option("-q", "--quiet", action="store_true", dest="quiet", help="suppress all output")
+    parser.add_option("-l", "--log", default=False, dest="log", help="enable logging and specify file path")
+    parser.add_option("-c", "--cores", type="int", default="2", dest="workers", help="define the number of cores for parsing")
+    parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
+    
+    ## Parse command-line arguments
+    (options, args) = parser.parse_args(argv[1:])
+    try:
+        dbname = args[0]
+        args.pop(0)
+        files = args[:]
+        if args[-1].endswith('/') or os.path.isdir(args[-1]):   
+            files = glob(args[-1] + '/*')
+        else:
+            files = args[:]
+    except IndexError:
+        print >> sys.stderr, "\nError: you did not supply a database name or a path for your file(s) to be loaded\n"
+        parser.print_help()
+        sys.exit()
+    ## Number of cores used for parsing: you can define your own value on the
+    ## command-line, stay with the default, or define your own value here
+    workers = options.workers or 2
+    
+        
+    ## Define the type of output you want. By default, you get console output for your database
+    ## load. You can however set a quiet option on the command-line, or set console_output
+    ## to False here.
+    console_output = True
+    if options.quiet:
+        console_output = False
+        
+    ## Define a path for a log of your database load. This option can be defined on the command-line
+    ## or here. It's disabled by default.
+    log = options.log or False
+    
+    ## Set debugging if you want to keep all the parsing data, as well as debug the templates
+    debug = options.debug or False
+    
+    return dbname,files, workers, console_output, log, debug
+
+
+def setup_db_dir(db_destination, template_dir):
+    try:
+        os.mkdir(db_destination)
+    except OSError:
+        ## maybe test to see what db_destination is
+        print "The database folder could not be created at %s" % db_destination
+        print "Do you want to delete this database? Yes/No"
+        choice = raw_input().lower()
+        if choice.startswith('y'):
+            os.system('rm -rf %s' % db_destination)
+            os.mkdir(db_destination)
+        else:
+            sys.exit()
+    
+    if template_dir:
+        os.system("cp -r %s* %s" % (template_dir,db_destination))
+        os.system("cp %s.htaccess %s" % (template_dir,db_destination))
+
                 
 # a quick utility function
-def load(path,files,filters=default_filters,xpaths=None,metadata_xpaths=None,workers=4):
-    l = Loader(path)    
-    l.add_files(files)
-    l.parse_files(workers,filters,xpaths,metadata_xpaths)
-    l.merge_objects()
-    l.analyze()
-    l.make_tables()
-    l.finish()
+#def load(path,files,filters=default_filters,xpaths=None,metadata_xpaths=None,workers=4):
+#    l = Loader(path)    
+#    l.add_files(files)
+#    l.parse_files(workers,filters,xpaths,metadata_xpaths)
+#    l.merge_objects()
+#    l.analyze()
+#    l.make_tables()
+#    l.finish()
         
 if __name__ == "__main__":
     os.environ["LC_ALL"] = "C" # Exceedingly important to get uniform sort order.
