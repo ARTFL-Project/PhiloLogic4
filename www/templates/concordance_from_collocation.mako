@@ -1,10 +1,10 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
-<div class='philologic_response'>
+<div id='philologic_response' style="margin-top:0px;">
     <div>
         <a href="${db.locals['db_url']}/">Return to search form</a>
         <p>
-            <span class="return_to_colloc">
+            <span id="return_to_colloc">
                 Return to previous results page
             </span>
         </p>
@@ -15,14 +15,12 @@
              start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
             %>
             ${q['collocate_num']} occurences of collocate "${q['collocate'].decode('utf-8', 'ignore')}" in the vicinity of "${q['q'].decode('utf-8', 'ignore')}":
-            <div class="description">
-                <span id='colloc_in_hits'></span> occurences in
-                hits <span class="start">${start}</span> - <span class="end">${end}</span>
-            </div>
+            <br><br><span id='colloc_in_hits'></span> occurences in
+            hits <span class="start">${start}</span> - <span class="end">${end}</span>
         </p>
     </div>
     <% occurences = 0 %>
-    <div class="results_container">
+    <div id="results_container" class="results_container">
         <ol id='colloc_concordance'>
             % for i in results[start - 1:end]:
                 <li class='philologic_occurrence'>
@@ -30,13 +28,19 @@
                     n += 1
                     occurences += i.collocate_num
                     %>
-                    <div class='citation'>
-                        <span class='hit_n'>${n}.</span> ${f.cite.make_abs_div_cite(db,i)}
-                        % if i.collocate_num > 1:
-                            <span style="padding-left:20px"><b>At least ${i.collocate_num} occurences of collocate in hit</b></span>
-                        % endif
-                        <span class="more_context" style="margin-top:-.5em;">More</span>
+                    <div class="citation cite_gradient" style="overflow:hidden;">
+                        <span class='hit_n'>${n}.</span>
+                        <span class="cite" style="display: inline-block;overflow:hidden;white-space: nowrap;text-overflow:ellipsis;-o-text-overflow:ellipsis;">
+                            ${f.cite.make_abs_div_cite(db,i)}
+                        </span>
+                        <span class="more_context_and_close">
+                            <span class="more_context">More</span>
+                            <span class="close_concordance">X</span>
+                        </span>
                     </div>
+                    % if i.collocate_num > 1:
+                        <div style="padding-left:5px;"><b>At least ${i.collocate_num} occurences of collocate in hit</b></div>
+                    % endif
                     <div class='philologic_context'>
                        ${colloc_concordance(i, path, q, db)}
                    </div>

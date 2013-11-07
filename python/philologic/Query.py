@@ -17,7 +17,7 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
     origpid = os.getpid()
     if not filename:
         hfile = str(origpid) + ".hitlist"
-    dir = "/var/lib/philologic/hitlists/"
+    dir = db.locals["db_path"] + "/hitlists/"
     filename = filename or (dir + hfile)
     hl = open(filename, "w")
     err = open("/dev/null", "w")

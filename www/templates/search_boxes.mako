@@ -1,3 +1,4 @@
+## -*- coding: utf-8 -*-
 <script type="text/javascript" src="${db.locals['db_url']}/js/searchForm.js"></script>
 <div id="form_body">
     <form id="search" action="${db.locals['db_url'] + "/dispatcher.py/"}">
@@ -16,28 +17,54 @@
 				<span id='syntax_title'>
 					Click for tips on the query syntax
 				</span>
+				<div id="syntax_explain" style="display:none;">
+					<p style="margin-top:-5px;">
+						In PhiloLogic4, the search syntax and semantics are largely the same for both word/phrase searching and metadata queries, with a few exceptions. The basic rules are:
+						<ol style="list-style:decimal;padding-left:20px;">
+							<li> plain terms such as <tt>genre humain</tt> or <tt>esprit systematique</tt> are split on the space character and evaluated without regard to case or accent.</li>
+							<li> quoted terms like <tt>"esprit de systeme"</tt> are precise matches against case and accent. In phrases they match individual tokens; in metadata fields they must
+							match the entire string value, i.e., <tt>"Histoire de la philosophie"</tt> or <tt>"Geographie sacree"</tt>.</li>
+							<li> "egrep-style" regular expressions (described below) are permitted in plain terms, but not quoted terms; thus, they cannot cross a token/word boundary, e.g., <tt>libert.</tt> or <tt>nous m[aeiou].*er</tt>
+							<li> the vertical bar symbol <tt>|</tt> (on US keyboards, use the <tt>Shift + \</tt> keys) stands for a logical Boolean OR operator, and can concatenate plain, quoted, or regex terms (e.g., <tt>liberte de penser | parler</tt> or <tt>philosophie eclectique | academique</tt>).</li>
+							<li> a space corresponds to a user-selected phrase operator in word search, controlled by the within/exactly/same-sentence option on the search form.  In metadata queries, it corresponds to the Boolean AND operator (e.g., <tt>diderot mallet</tt>).
+							<li> the Boolean NOT operator is only permitted at the end of metadata fields; it accepts a single term or an OR expression: e.g., <tt>Geographie | Histoire NOT moderne</tt>.</li>
+						</ol>
+					</p>
+					<p>
+						Basic regexp syntax, adapted from
+						<a href="http://www.gnu.org/software/findutils/manual/html_node/find_html/egrep-regular-expression-syntax.html#egrep-regular-expression-syntax">the egrep regular expression syntax</a>.
+						<ul style="margin-left: -25px">
+						<li>The character <tt>.</tt> matches any single character except newline. Bracket expressions can match sets or ranges of characters: [aeiou] or [a-z], but will only match a single character unless followed by one of the quantifiers below.</li>
+						<li> <tt>*</tt> indicates that the regular expression should match zero or more occurrences of the previous character or bracketed group.</li>
+						<li> <tt>+</tt> indicates that the regular expression should match one or more occurrences of the previous character or bracketed group.</li>
+						<li> <tt>?</tt> indicates that the regular expression should match zero or one occurrence of the previous character or bracketed group.</li></ul>
+						<div style="margin-top: -12px;">
+							Thus, <tt>.*</tt> is an approximate "match anything" wildcard operator, rather than the more traditional (but less precise) <tt>*</tt> in many other search engines.
+						</div>
+					</p>
+				</div>
 			</div>
             <div id="report" class="report">
                 <h3 style="padding-left: 5px;margin-top: 0px;">Choose a search report:</h3>
                 <span id="concordance_button" style="display: none;">
                     <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
-                    <label for="concordance">Concordance Report</label>
+                    <label for="concordance">Concordance</label>
                 </span>
                 <span id="kwic_button" style="display: none;">
                     <input type="radio" name="report" id="kwic" value='kwic'>
-                    <label for="kwic">Key Word in Context (KWIC) Report</label>
+                    <label for="kwic">Key Word in Context (KWIC)</label>
                 </span>
                 <span id="relevance_button" style="display: none;">
                     <input type="radio" name="report" id="relevance" value='relevance'>
-                    <label for="relevance">Ranked Relevance Report</label>
+                    <label for="relevance">Ranked Relevance</label>
                 </span>
                 <span id="collocation_button" style="display: none;">
                     <input type="radio" name="report" id="collocation" value='collocation'>
-                    <label for="collocation">Collocation Table</label>
+                    <label for="collocation">Collocation</label>
                 </span>
                 <span id="time_series_button" style="display: none;">
                     <input type="radio" name="report" id="time_series" value='time_series'>
-                    <label for="time_series">Time Series Report</label>
+                    <label for="time_series">Time Series</label>
                 </span>
             </div>
          </div>
@@ -153,8 +180,8 @@
 					<td>
 						<span id="year_interval">
 							<input type="radio" name="year_interval" id="year0" value="1" checked="checked"><label for="year0">every year</label>
-							<input type="radio" name="year_interval" id="year1" value="10" checked="checked"><label for="year1">every 10 years</label>
-							<input type="radio" name="year_interval" id="year2" value="25"><label for="year2">every 25 years</label>
+							<input type="radio" name="year_interval" id="year1" value="10" checked="checked"><label for="year1">every decade</label>
+							<input type="radio" name="year_interval" id="year2" value="100"><label for="year2">every century</label>
 						</span>
 					</td>
 				</tr>
@@ -165,8 +192,6 @@
                     <input type="radio" name="pagenum" id="pagenum2" value='50' checked="checked"><label for="pagenum2">50</label>
                     <input type="radio" name="pagenum" id="pagenum3" value='100'><label for="pagenum3">100</label>
                 </span></td></tr>
-                <tr class="table_row"><td class="first_column"><input id="button" type='submit' value="Search"/></td>
-                <td><button type="reset" id="reset_form">Clear form</button></td></tr>
             </table>
         </div>
     </form>

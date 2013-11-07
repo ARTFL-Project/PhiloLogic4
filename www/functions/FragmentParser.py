@@ -1,4 +1,5 @@
 import sys
+import re
 from lxml import etree
 from philologic import shlaxtree as st
 
@@ -16,6 +17,11 @@ class FragmentParser:
     def start(self,tag,attrib):
         #print >> sys.stderr, "START: " + tag + repr(attrib)
         self.stack.append(tag)
+        for k,v in attrib.items():
+            no_ns_k = re.sub(r"^.*?:","",k)
+            if no_ns_k != k:
+                del attrib[k]
+                attrib[no_ns_k] = v
         new_el = etree.SubElement(self.current_el,tag,attrib)
         new_el.text = u""
         new_el.tail = u""

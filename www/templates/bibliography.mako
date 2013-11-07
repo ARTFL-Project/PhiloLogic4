@@ -1,7 +1,7 @@
 <%include file="header.mako"/>
 <%include file="search_boxes.mako"/>
 <script type="text/javascript" src="${db.locals['db_url']}/js/bibliography.js"></script>
-<div class='philologic_response'>
+<div id='philologic_response'>
     <div id='initial_report'>
         <p id='description'>
         <%
@@ -14,7 +14,7 @@
         </p>
         <%include file="show_frequency.mako"/>
     </div>
-    <div class="results_container">
+    <div class="results_container" id="results_container">
         <div id='bibliographic_results'>
             <ol id='philologic_cite_list'>
                 % for i in results[start-1:end]:
@@ -22,10 +22,10 @@
                         <%
                         n += 1
                         %>
-                        <span class='hit_n'>${n}.</span>
+                        <span style="padding-left: 5px;">${n}.</span>
                         ##<input type="checkbox" name="philo_id" value="${i.philo_id}">
                         % if i.type == 'doc':
-                            <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,i)} <b>Volume ${i.volume}</b></span>
+                            <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,i)}</span>
                         % else:
                             <span class='philologic_cite'>${f.cite.make_abs_div_cite(db,i)}</span>
                         % endif

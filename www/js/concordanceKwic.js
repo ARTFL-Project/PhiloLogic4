@@ -14,10 +14,16 @@ $(document).ready(function() {
             };
         $(".kwic_biblio").hoverIntent(config);
     }
-    var citation_width = $('.citation').width() - $('.more_context').width() - $('.hit_n').width() - 30;
-    console.log(citation_width)
-    $('.cite').width(citation_width);
+    
+    closeConcordance();
+    $('.close_concordance').hide();
+    
+    getCitationWidth()
+    $(window).resize(function() {
+        getCitationWidth();
+    });
 });
+
 
 
 /// Switch betwwen concordance and KWIC reports
@@ -52,6 +58,10 @@ function concordance_kwic_switch(db_url) {
             $("#report").buttonset("refresh");
             display_options_on_selected();
             more_context();
+            $('.close_concordance').button();
+            closeConcordance();
+            $('.close_concordance').hide();
+            getCitationWidth();
             $('.more').find('a').each(function() {
                 if (switchto.match(/kwic/)) {
                     var new_href = $(this).attr('href').replace('concordance', 'kwic');
@@ -94,3 +104,4 @@ function showBiblio() {
 function hideBiblio() {
     $(this).children("#full_biblio").fadeOut(200)
 }
+

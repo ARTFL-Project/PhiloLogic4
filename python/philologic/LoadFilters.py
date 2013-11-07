@@ -9,6 +9,14 @@ from philologic.OHCOVector import Record
 from ast import literal_eval as eval
 
 
+
+## If you are going to change the order of these filters (which is not recommended)
+## please consult the documentation for each of these filters in LoadFilters.py
+DefaultLoadFilters = [normalize_unicode_raw_words,make_word_counts, generate_words_sorted,
+                        make_object_ancestors('doc', 'div1', 'div2', 'div3'), make_sorted_toms("doc","div1","div2","div3"),
+                        prev_next_obj,generate_pages, make_max_id]
+
+
 ## Default filters
 def normalize_unicode_raw_words(loader_obj, text):
     tmp_file = open(text["raw"] + ".tmp","w")
@@ -47,7 +55,7 @@ def make_word_counts(loader_obj, text, depth=4):
 def tree_tagger(tt_path,param_file,maxlines=20000):
   def tag_words(loader_obj,text):  
     # Set up the treetagger process
-    tt_args = [tt_path,"-token","-lemma","-prob","-threshold",".01",param_file]
+    tt_args = [tt_path,"-token","-lemma","-prob",'-no-unknown', "-threshold",".01",param_file]
     ttout_fh = open(text["raw"]+".ttout","w")
     tt_worker = Popen(tt_args,stdin=PIPE,stdout=ttout_fh)
     raw_fh = open(text["raw"],"r")
@@ -58,7 +66,7 @@ def tree_tagger(tt_path,param_file,maxlines=20000):
         type, word, id, attrib = line.split('\t')        
         id = id.split()
         if type == "word":
-            print word
+            word = word.decode('utf-8', 'ignore').lower().encode('utf-8')
             # close and re-open the treetagger process to prevent garbage output.
             if line_count > maxlines:
                 tt_worker.stdin.close()
@@ -85,14 +93,15 @@ def tree_tagger(tt_path,param_file,maxlines=20000):
             tag_l = tag_fh.readline()
             next_word,tag = tag_l.split("\t")[0:2]
             pos,lem,prob = tag.split(" ")
-            if next_word != word:
+            if next_word != word.decode('utf-8', 'ignore').lower().encode('utf-8'):
                 print >> sys.stderr, "TREETAGGER ERROR:",next_word," != ",word,pos,lem
                 return
             else:
-                print next_word,pos,lem
                 record.attrib["pos"] = pos
                 record.attrib["lemma"] = lem
-                print >> tmp_fh, record    
+                print >> tmp_fh, record
+        else:
+            print >> tmp_fh, record
     os.remove(text["raw"])
     os.rename(text["raw"] + ".tmp",text["raw"])
     os.remove(text["raw"] + ".ttout")
@@ -135,8 +144,11 @@ def prev_next_obj(loader_obj, text, depth=4):
             record_dict[type] = record
     object_types.reverse()
     for obj in object_types:
-        record_dict[obj].attrib['next'] = ''
-        print >> output_file, record_dict[obj]
+        try:
+            record_dict[obj].attrib['next'] = ''
+            print >> output_file, record_dict[obj]
+        except KeyError:
+            pass
     output_file.close()
     os.remove(text['sortedtoms'])
     type_pattern = "|".join("^%s" % t for t in loader_obj.types)
@@ -178,29 +190,7 @@ def make_max_id(loader_obj, text):
     cPickle.dump(max_id,rf) # write the result out--really just the resulting omax vector, which the parent will merge in below.
     rf.close()
     
-## Additional Filters
-def make_token_counts(loader_obj, text, depth=4):
-    old_word = None
-    record_list = []
-    temp_file = text['words'] + '.tmp'
-    output_file = open(temp_file, 'w')
-    for line in open(text['words']):
-        type, word, id, attrib = line.split('\t')
-        id = id.split()
-        record = Record(type, word, id)
-        record.attrib = eval(attrib)
-        if word == old_word or old_word == None:
-            record_list.append(record)
-        else:
-            count_tokens(record_list, depth, output_file)
-            record_list = []
-            record_list.append(record)
-        old_word = word
-    if len(record_list) != 0:
-        count_tokens(record_list, depth, output_file)
-    record_list = []
-    os.remove(text['words'])
-    os.rename(temp_file, text['words'])
+
 
 def normalize_unicode_words(loader_obj, text):
     tmp_file = open(text["words"] + ".tmp","w")
@@ -270,71 +260,29 @@ def normalize_unicode_columns(*columns):
         os.rename(text["sortedtoms"] + ".tmp",text["sortedtoms"])
     return smash_these_unicode_columns
     
-## Helper functions
-def count_tokens(record_list, depth, output_file):
-    object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
-    new_record_list = []
-    record_dict = {}
-    for new_record in record_list:
-        new_record.attrib['doc_token_count'] = len(record_list)
-        for d in range(depth):
-            philo_id = tuple(new_record.id[:d+1])
-            if philo_id not in record_dict:
-                record_dict[philo_id] = 1
-            else:
-                record_dict[philo_id] += 1
-    for new_record in record_list:
-        for d in range(depth):
-            philo_id = tuple(new_record.id[:d+1])
-            token_count = object_types[len(philo_id)-1] + '_token_count'
-            new_record.attrib[token_count] = record_dict[philo_id]
-        print >> output_file, new_record
 
-def word_frequencies_per_obj(*obj_types):
-    object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
-    def inner_word_frequencies_per_obj(loader_obj,text):
-        files_path = loader_obj.destination + '/WORK/'
-        obj_types = loader_obj.freq_object_levels
-        try:
-            os.mkdir(files_path)        
-        except OSError:
-            ## Path was already created                                                                                                                                       
-            pass
-        for obj in obj_types:
-            d = object_types.index(obj)+1
-            file = text['name'] + '.%s.freq_counts' % obj
-            output = open(files_path + file, 'w')
-            old_philo_id = []
-            old_word = ''
-            records = {}
-            for line in open(text['words']):
-                type, word, id, attrib = line.split('\t')
-                attrib = eval(attrib)
-                ## Dismiss all irrelevant fields while making sure we still have 9 fields in the end
-                philo_id = id.split()[:d] + [0 for i in range(7-d)] + [0,0]
-                record = Record(type, word, philo_id)
-                count_key = obj + '_token_count'
-                byte = attrib['byte_start']
-                del attrib['byte_start']
-                record.attrib = {'token_count': attrib[count_key]}
-                if philo_id[:d] != old_philo_id[:d] or word != old_word:
-                    if records and old_word:
-                        for w in records:
-                            print >> output, records[w]
-                            records = {}
-                if word not in records:
-                    record.attrib['bytes'] = []
-                    record.attrib['bytes']= str(byte)
-                    records[word] = record
-                else:
-                    records[word].attrib['bytes'] += ' ' + str(byte)
-                old_philo_id = philo_id
-                old_word = word
-            for w in records:
-                print >> output, records[w]
-            output.close()
+def make_object_ancestors(*types):
+    ## We should add support for a 'div' type in the future
+    type_depth = {'doc':1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5,
+                        'sent': 6, 'word': 7}
     
-    return inner_word_frequencies_per_obj
+    def inner_make_object_ancestors(loader_obj, text):
+        temp_file = text['words'] + '.tmp'
+        output_file = open(temp_file, 'w')
+        for line in open(text['words']):
+            type, word, id, attrib = line.split('\t')
+            id = id.split()
+            record = Record(type, word, id)
+            record.attrib = eval(attrib)
+            for type in types:
+                zeros_to_add = ['0' for i in range(7 - type_depth[type])]
+                philo_id = id[:type_depth[type]] + zeros_to_add
+                record.attrib[type + '_ancestor'] = ' '.join(philo_id)
+            print >> output_file, record
+        output_file.close()
+        os.remove(text['words'])
+        os.rename(temp_file, text['words'])
+    return inner_make_object_ancestors
 
 
 def evaluate_word(word, word_pattern):

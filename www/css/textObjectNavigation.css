@@ -1,0 +1,108 @@
+#doc_title {
+    font-size: 140%;
+    padding-bottom: 20px;
+}
+#t_o_c_title {
+    font-size: 140%;
+    line-height: 120%;
+    padding-bottom: 8px;
+}
+#object_title {
+    font-size: 140%;
+    line-height: 120%;
+    padding-top: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+#table_of_contents {
+    border-top: solid 1px #ECECEC;
+    padding-top: 8px;
+    padding-left: 10px;
+    line-height: 170%;
+}
+#toc_container {
+    overflow-y: auto;
+    margin-top: 20px;
+}
+#page_number, obj_nav {
+    text-align: center;
+    margin-bottom: 10px;
+}
+#current_page {
+    font-size: 105% !important;
+    text-align: center;
+    margin-bottom: 10px;
+}
+#prev_page, #fake_prev_page, #prev_obj {
+    font-size: 500%;
+    color: #D8D8D8  !important;
+    cursor: pointer;
+}
+#prev_page:hover, #next_page:hover, #fake_prev_page:hover, #fake_next_page:hover, #prev_obj:hover, #next_obj:hover {
+    text-decoration: none !important;
+    color: #A8A8A8 !important;
+}
+#next_page, #fake_next_page, #next_obj {
+    font-size: 500%;
+    color: #D8D8D8  !important;
+    cursor: pointer;
+}
+#next_and_read {
+    margin-top: 30px;
+    top: 0;
+}
+#prev_and_toc {
+    margin-top: 30px;
+}
+#book_page {
+    margin: 0 auto;
+    padding: 20px 20px 20px 20px;
+    width: 600px;
+    background-color: #FAFAFA !important;
+    box-shadow: 0px 0px 15px #888888;
+    line-height: 140% !important;
+    text-align: justify;
+    font-size: 105%;
+    min-height: 650px;
+    z-index: 100;
+}
+#obj_text {
+    vertical-align:middle;
+}
+#next_obj_wrapper, #prev_obj_wrapper, #next_page_wrapper, #prev_page_wrapper {
+    position: absolute;
+}
+#t_o_c_button {
+    display: inline-block;
+    float: left;
+    margin-left: -25px;
+}
+
+#image_container {
+    position: absolute;
+    border: solid;
+    border-color: #BFBFBF;
+    border-width: 18px;
+    z-index: 101;
+    left: 25%;
+    box-shadow: 0px 0px 15px #888888;
+    margin-top: -10px;
+}
+.page_image_link {
+    color: #800000;
+    text-decoration: none;
+    font-weight: 700 !important;
+}
+.page_image_link:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+.close_page_image {
+    position: absolute;
+    margin-top: -16px;
+    z-index: 200;
+    left: 100%;
+}
+.close_page_image:hover {
+    cursor: pointer;
+}

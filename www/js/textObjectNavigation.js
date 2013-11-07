@@ -4,10 +4,10 @@ var toc_open = false;
 
 $(document).ready(function() {
     
-    var page_pos = $('#book_page').offset().left;
-    $('#book_page').css('margin-left', page_pos);
-    left_pos(page_pos);
-    right_pos();
+    positionPrevNext();
+    $(window).resize(function() {
+        positionPrevNext();
+    })
 
     // Change pages
     $("#fake_prev_page, #fake_next_page").on('click', function() {
@@ -59,12 +59,28 @@ $(document).ready(function() {
         window_height = $(window).height();
     });
     
+    checkEndOfDoc();
+    
 });
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+function positionPrevNext() {
+    var page_pos = $('#book_page').offset().left - 25;
+    left_pos(page_pos);
+    right_pos();
+}
+
+function checkEndOfDoc() {
+    if ($('#next_obj').data('philoId') == "") {
+        $('#next_obj_wrapper').hide();
+    } else {
+        $('#next_obj_wrapper').show();
+    }
+}
 
 function follow_scroll(prev, next, top) {
     if (latestKnownScrollY >= top) {
@@ -90,7 +106,7 @@ function toc_height() {
     var footer_pos = $("#footer").offset().top;        
     var footer_offset = 0;
     if (bottomPosition > footer_pos) {
-        footer_offset = bottomPosition - footer_pos;            
+        footer_offset = bottomPosition - footer_pos + 22;            
     }
     var max_height = maxPossibleHeight - footer_offset;
     $('#toc_container').css('max-height', max_height);
@@ -178,7 +194,7 @@ function retrieve_obj(db_url){
         var script = my_path + '/scripts/go_to_obj.py?philo_id=' + philo_id;
         $.getJSON(script, function(data) {
             var scrollto_id = '#' + $("#obj_text").data('philoId');
-            $('#toc_container').find($(scrollto_id)).attr('style', 'color: #800000;');
+            $('#toc_container').find($(scrollto_id)).attr('style', 'color: #990000;');
             $('#obj_text').fadeOut('fast', function() {
                 $(this).html(data['text']).fadeIn('fast');
                 $('#footer').css('top', '');
@@ -194,6 +210,7 @@ function retrieve_obj(db_url){
                 page_image_link();
                 var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
                 History.pushState(null, '', new_url);
+                checkEndOfDoc();
             });
         });
     });
@@ -224,7 +241,6 @@ function back_forward_button_reload(db_url) {
     $(window).on('popstate', function() {
         var id_to_load = window.location.pathname.replace(/.*dispatcher.py\//, '').replace(/\//g, '_');
         id_to_load = id_to_load.replace(/(_0_?)*$/g, '');
-        console.log(id_to_load, $('#obj_text').data('philoId').replace(/(_0)*$/g, ''));
         if (id_to_load != $('#obj_text').data('philoId').replace(/(_0)*$/g, '')) {
             window.location = window.location.href;
         }

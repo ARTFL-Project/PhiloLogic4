@@ -4,7 +4,11 @@ import os
 import sqlite3
 import unicodedata
 from collections import defaultdict
-    
+
+
+DefaultPostFilters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]
+
+
 def word_frequencies(loader_obj):
     frequencies = loader_obj.destination + '/frequencies'
     os.system('mkdir %s' % frequencies)
@@ -70,17 +74,3 @@ def normalize_divs_post(*columns):
             if k in columns:
                 loader.metadata_types[k] = "div3"
     return normalize_these_columns_post
-
-def metadata_relevance_table(loader_obj):
-    if loader_obj.default_object_level:
-        conn = sqlite3.connect(loader_obj.destination + '/toms.db')
-        c = conn.cursor()
-        c.execute('create table metadata_relevance as select * from toms where philo_type=?', (loader_obj.default_object_level,))
-        conn.commit()
-        for metadata in loader_obj.metadata_fields:
-            try:
-                c.execute('create index %s_metadata_relevance on metadata_relevance(%s)' % (metadata, metadata))
-            except sqlite3.OperationalError: # column doesn't exist for some reason
-                pass
-        conn.commit()
-        conn.close()

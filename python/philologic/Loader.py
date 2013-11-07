@@ -9,6 +9,8 @@ import cPickle
 import subprocess
 import sqlite3
 from ast import literal_eval as eval
+from optparse import OptionParser
+from glob import glob
 
 import philologic.Parser
 import philologic.LoadFilters
@@ -23,26 +25,85 @@ object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
 blocksize = 2048 # index block size.  Don't alter.
 index_cutoff = 10 # index frequency cutoff.  Don't. alter.
 
-## If you are going to change the order of these filters (which is not recommended)
-## please consult the documentation for each of these filters in LoadFilters.py
-default_filters = [normalize_unicode_raw_words,
-                   make_word_counts, 
-                   generate_words_sorted,
-                   make_token_counts,
-                   make_sorted_toms("doc"), 
-                   prev_next_obj, 
-                   word_frequencies_per_obj('doc'),
-                   generate_pages, 
-                   make_max_id]
-
-default_post_filters = [word_frequencies, normalized_word_frequencies, metadata_frequencies, normalized_metadata_frequencies,metadata_relevance_table]
 
 ## While these tables are loaded by default, you can override that default, although be aware
 ## that you will only have reduced functionality if you do. It is strongly recommended that you 
 ## at least keep the 'toms' table from toms.db.
+
 default_tables = ['toms', 'pages', 'words']
 
+def handle_command_line(argv):
+    usage = "usage: %prog [options] database_name files"
+    parser = OptionParser(usage=usage)
+    parser.add_option("-q", "--quiet", action="store_true", dest="quiet", help="suppress all output")
+    parser.add_option("-l", "--log", default=False, dest="log", help="enable logging and specify file path")
+    parser.add_option("-c", "--cores", type="int", default="2", dest="workers", help="define the number of cores for parsing")
+    parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
+    
+    ## Parse command-line arguments
+    (options, args) = parser.parse_args(argv[1:])
+    try:
+        dbname = args[0]
+        args.pop(0)
+        files = args[:]
+        if args[-1].endswith('/') or os.path.isdir(args[-1]):   
+            files = glob(args[-1] + '/*')
+        else:
+            files = args[:]
+    except IndexError:
+        print >> sys.stderr, "\nError: you did not supply a database name or a path for your file(s) to be loaded\n"
+        parser.print_help()
+        sys.exit()
+    ## Number of cores used for parsing: you can define your own value on the
+    ## command-line, stay with the default, or define your own value here
+    workers = options.workers or 2
+    
+    ## This defines which set of templates to use with your database: you can stay with
+    ## the default or specify another path from the command-line. Alternatively, you
+    ## can edit it here.
+    if options.no_template:
+        no_templates = True
+    else:
+        no_templates = False
+        
+    ## Define the type of output you want. By default, you get console output for your database
+    ## load. You can however set a quiet option on the command-line, or set console_output
+    ## to False here.
+    console_output = True
+    if options.quiet:
+        console_output = False
+        
+    ## Define a path for a log of your database load. This option can be defined on the command-line
+    ## or here. It's disabled by default.
+    log = options.log or False
+    
+    ## Set debugging if you want to keep all the parsing data, as well as debug the templates
+    debug = options.debug or False
+    
+    return workers, console_output, log, debug
+
+
+def setup_db_dir(db_destination, template_dir):
+    try:
+        os.mkdir(db_destination)
+    except OSError:
+        print "The %s database already exists" % dbname
+        print "Do you want to delete this database? Yes/No"
+        choice = raw_input().lower()
+        if choice.startswith('y'):
+            os.system('rm -rf %s' % db_destination)
+            os.mkdir(db_destination)
+        else:
+            sys.exit()
+    
+    if template_dir:
+        os.system("cp -r %s* %s" % (template_dir,db_destination))
+        os.system("cp %s.htaccess %s" % (template_dir,db_destination))
+
+
+
 class Loader(object):
+
 
     def __init__(self,destination,tables = default_tables,
                  post_filters = default_post_filters, debug=False, **parser_defaults):
@@ -110,7 +171,7 @@ class Loader(object):
                     if param not in self.metadata_types:
                         self.metadata_types[param] = t
         
-        #sys.stdout = OutputHandler(console=console_output, log=log)
+        sys.stdout = OutputHandler(console=console_output, log=log)
 
     def setup_dir(self,path):
         os.mkdir(path)
@@ -150,7 +211,6 @@ class Loader(object):
                                  "results":self.workdir + os.path.basename(x) + ".results"} for n,x in enumerate(self.list_files())]
 
         else:
-             print repr(data_dicts)
              self.filequeue =   [{"orig":os.path.abspath(d["filename"]),
                                  "name":os.path.basename(d["filename"]),
                                  "size":os.path.getsize(self.textdir + (d["filename"])),
@@ -269,14 +329,7 @@ class Loader(object):
 #        pages_status = subprocess.call(pagesargs,0,"cat",stdout=pages_result,shell=True)
         pages_status = os.system(pagesargs + " > " + self.workdir + "all_pages")
         print "%s: word join returned %d" % (time.ctime(), pages_status)
-        
-        ## Generate sorted file for word frequencies    
-        for text_obj in self.freq_object_levels:
-            wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + "*.%s.freq_counts" % text_obj
-            print "%s: sorting words frequencies" % time.ctime()
-            words_status = os.system(wordsargs + " > " + self.workdir + "%s.counts" % text_obj)
-            print "%s: %s word count frequencies sort returned %d" % (time.ctime(), text_obj, words_status)
-
+         
     def analyze(self):
         print "\n### Create inverted index ###"
         print self.omax
@@ -331,8 +384,8 @@ class Loader(object):
         print "%s: all indices built. moving into place." % time.ctime()
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1") 
-        if self.clean:
-            os.system('rm all_words_sorted')
+        #if self.clean:
+        #    os.system('rm all_words_sorted')
 
     def make_tables(self, **extra_tables):
         print '\n### SQL Load ###'
@@ -341,6 +394,9 @@ class Loader(object):
             self.dbh = sqlite3.connect("../toms.db")
             self.dbh.text_factory = str
             self.dbh.row_factory = sqlite3.Row
+            if table == 'words':
+                file_in = self.workdir + '/all_words_sorted'
+                self.make_sql_table(table, file_in, indices=["philo_name"])
             if table == 'pages':
                 file_in = self.workdir + '/all_pages'                
                 self.make_sql_table(table, file_in, indices=["philo_id"],depth=9)
@@ -348,10 +404,6 @@ class Loader(object):
                 file_in = self.workdir + '/all_toms_sorted'
                 indices = ['philo_type', 'philo_id'] + self.metadata_fields
                 self.make_sql_table(table, file_in, indices=indices)
-            elif table == "ranked_relevance":
-                files_in = [self.workdir + '%s.counts' % obj for obj in self.freq_object_levels]
-                for file_in in files_in:
-                    self.make_sql_table(table, file_in, indices=['philo_name', 'philo_id'])
         if extra_tables:
             for fn, table in extra_tables.items():
                 fn(self)
@@ -402,16 +454,16 @@ class Loader(object):
         if self.clean:
             os.system('rm %s' % file_in)
 
-    def finish(self, Post_Filters=default_post_filters, **extra_locals):
+    def finish(self, **extra_locals):
         print "\n### Finishing up ###"
         os.mkdir(self.destination + "/src/")
         os.mkdir(self.destination + "/hitlists/")
         os.chmod(self.destination + "/hitlists/", 0777)
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
         
-        if Post_Filters:
+        if post_filters:
             print 'Running the following post-processing filters:'
-            for f in Post_Filters:
+            for f in post_filters:
                 print f.__name__ + '...',
                 f(self)
                 print 'done.'

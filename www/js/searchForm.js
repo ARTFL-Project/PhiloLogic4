@@ -2,18 +2,20 @@ $(document).ready(function() {
     
     var db_url = db_locals['db_url'];
     var q_string = window.location.search.substr(1);
-
+    
+    
     for (i in db_locals['search_reports']) {
-        search_report = '#' + db_locals['search_reports'][i] + '_button';
+        var search_report = '#' + db_locals['search_reports'][i] + '_button';
         $(search_report).show();
     }
     
     $("#q").focus(function() {
-        if ($(".philologic_response").is('*')) {
+        if ($("#philologic_response").is('*')) {
             show_more_options("report");
             hide_search_on_click();
         }
     });
+    var report_width_adjust = false;
     $('#more_options').click(function() {
         $('#search_elements').css('z-index', 150);
         $('.book_page').css('z-index', 90);
@@ -21,6 +23,10 @@ $(document).ready(function() {
             show_more_options("all");
             $('#search_explain').slideDown();
             hide_search_on_click();
+            if (report_width_adjust === false) {
+                adjustReportWidth();
+                report_width_adjust = true;
+            }
         } else {
             hide_search_form();
         }
@@ -104,18 +110,15 @@ $(document).ready(function() {
         $("#method").find("input:radio").attr("checked", false).end();
         $("#method1").attr('checked', true);
         $("#method").buttonset('refresh');
-        $("#report").find("input:radio").attr("checked", false).end();
-        $("#report1").attr('checked', true);
-        $("#report").buttonset('refresh');
         $("#page_num").find("input:radio").attr("checked", false).end();
-        $("#pagenum1").attr('checked', true);
+        $("#pagenum2").attr('checked', true);
         $("#page_num").buttonset('refresh');
         $('#search')[0].reset();
-        if ($(this).attr('id') != 'reset_form1') {
-            showHide('concordance');
-            $("#search_elements").fadeIn();
-        }
+        $("#search_elements").fadeIn();
         $("#reset_form1").css('color', '#555555 !important');
+        $("#report").find("input:radio").attr("checked", false).end();
+        $('#concordance').attr('checked', true);
+        $('#concordance')[0].click();
     });
     
     //  This is to select the right option when clicking on the input box  
@@ -131,16 +134,11 @@ $(document).ready(function() {
     $('#syntax').offset({"left":  $('#q').offset().left});
     
     $('#syntax_title').mouseup(function() {
-        if ($('#syntax_explain').length == 0) {
-            var text = "<div id='syntax_explain'>PhiloLogic4 uses a new query syntax. Here are the basics:<br>";
-            text += "- Placeholder<br>- Placeholder<br>- Placeholder</div>";
-            $('.syntax').append(text);
+        if ($('#syntax_explain').not(':visible')) {
             $('#syntax_explain').fadeIn('fast');
         }
         $(document).mousedown(function() {
-            $('#syntax_explain').fadeOut('fast', function() {
-                $(this).remove();
-            });
+            $('#syntax_explain').fadeOut('fast');
         });
     });
     
@@ -153,8 +151,27 @@ $(document).ready(function() {
             }
         }
     });
+    $(window).load(function() {
+        if ($("#search_elements").css('display') != 'none') {
+            adjustReportWidth();
+        }
+    });
     
 });
+
+//    Adjust width of report buttons
+function adjustReportWidth() {
+    var button_length = 0;
+    var report_num = 0
+    $("#report").find('label').each(function() {
+        if ($(this).is(':visible')) {
+            button_length += $(this).width();
+            report_num += 1;
+        }
+    });
+    length_to_add = ($("#form_body").width() - button_length - 60) / report_num;
+    $('#report').find("label").each(function() {$(this).css("width", "+=" + length_to_add);});
+}
 
 function autocomplete_metadata(metadata, field, db_url) {
     $("#" + field).autocomplete({
@@ -191,27 +208,34 @@ function showHide(value) {
 
     if (value == 'frequency') {
         $("#frequency_num, #method, #metadata_fields").show();
-        $('#freq_question').fadeIn();
+        $('#metadata_fields').find('tr').has('#date').show();
+        $('#freq_question').show();
     }
     if (value == 'collocation') {
         $("#collocation_num, #method, #metadata_fields").show();
-        $('#colloc_question').fadeIn();
+        $('#metadata_fields').find('tr').has('#date').show();
+        $('#colloc_question').show();
     }
     if (value == 'kwic') {
         $("#results_per_page, #method, #metadata_fields").show();
-        $('#kwic_question').fadeIn();
+        $('#metadata_fields').find('tr').has('#date').show();
+        $('#kwic_question').show();
     }
     if (value == 'concordance') {
         $("#results_per_page, #method, #metadata_fields").show();
-        $('#conc_question').fadeIn();
+        $('#metadata_fields').find('tr').has('#date').show();
+        $('#conc_question').show();
+        $('#start_date, #end_date').val('');
     }
     if (value == 'relevance') {
         $("#results_per_page").show();
-        $('#relev_question').fadeIn();
+        $('#relev_question').show();
     }
     if (value == "time_series") {
-        $("#time_series_num, #year_interval").show();
-        $('#time_question').fadeIn();
+        $('#metadata_fields').find('tr').has('#date').hide();
+        $("#time_series_num, #year_interval, #method, #metadata_fields").show();
+        $('#time_question').show();
+        $('#date').val('');
     }
 }
 

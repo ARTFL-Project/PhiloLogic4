@@ -74,6 +74,7 @@
 }
 #conc_question, #kwic_question, #relev_question, #colloc_question, #time_question, #freq_question {
     margin-left: 50px;
+    margin-right: 15px;
 }
 
 #syntax_title {
@@ -83,7 +84,7 @@
     text-decoration: underline;
 }
 #syntax_explain {
-    padding: 5px 5px 5px 5px;
+    padding: 10px 10px 10px 10px;
     display: none;
     position: absolute;
     z-index: 1000;
@@ -94,4 +95,7 @@
     line-height: 170%;
     box-shadow: 5px 9px 15px -5px #888888;
     color: black;
+	text-align: justify;
+	overflow-y: auto;
+	height: 500px;
 }
