@@ -9,6 +9,14 @@ from philologic.OHCOVector import Record
 from ast import literal_eval as eval
 
 
+
+## If you are going to change the order of these filters (which is not recommended)
+## please consult the documentation for each of these filters in LoadFilters.py
+DefaultLoadFilters = [normalize_unicode_raw_words,make_word_counts, generate_words_sorted,
+                        make_object_ancestors('doc', 'div1', 'div2', 'div3'), make_sorted_toms("doc","div1","div2","div3"),
+                        prev_next_obj,generate_pages, make_max_id]
+
+
 ## Default filters
 def normalize_unicode_raw_words(loader_obj, text):
     tmp_file = open(text["raw"] + ".tmp","w")
@@ -136,8 +144,11 @@ def prev_next_obj(loader_obj, text, depth=4):
             record_dict[type] = record
     object_types.reverse()
     for obj in object_types:
-        record_dict[obj].attrib['next'] = ''
-        print >> output_file, record_dict[obj]
+        try:
+            record_dict[obj].attrib['next'] = ''
+            print >> output_file, record_dict[obj]
+        except KeyError:
+            pass
     output_file.close()
     os.remove(text['sortedtoms'])
     type_pattern = "|".join("^%s" % t for t in loader_obj.types)

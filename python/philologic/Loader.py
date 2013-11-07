@@ -9,6 +9,8 @@ import cPickle
 import subprocess
 import sqlite3
 from ast import literal_eval as eval
+from optparse import OptionParser
+from glob import glob
 
 from philologic.BufferedParser import BufferedParser
 from philologic.LoadFilters import *
@@ -23,18 +25,6 @@ object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
 blocksize = 2048 # index block size.  Don't alter.
 index_cutoff = 10 # index frequency cutoff.  Don't. alter.
 
-## If you are going to change the order of these filters (which is not recommended)
-## please consult the documentation for each of these filters in LoadFilters.py
-default_filters = [normalize_unicode_raw_words,
-                   make_word_counts, 
-                   generate_words_sorted,
-                   make_object_ancestors('doc', 'div1', 'div2', 'div3'),
-                   make_sorted_toms("doc"), 
-                   prev_next_obj, 
-                   generate_pages, 
-                   make_max_id]
-
-default_post_filters = [word_frequencies, normalized_word_frequencies, metadata_frequencies, normalized_metadata_frequencies,metadata_relevance_table]
 
 ## While these tables are loaded by default, you can override that default, although be aware
 ## that you will only have reduced functionality if you do. It is strongly recommended that you 
@@ -45,12 +35,85 @@ default_xpaths = [("doc",".")]
 default_metadata = [("doc",".//titleStmt/title","title"),("doc",".//titleStmt/author","author")]
 default_token_regex = r"(\w+)|([\.?!])"
 
+
+
+
+
+def handle_command_line(argv):
+    usage = "usage: %prog [options] database_name files"
+    parser = OptionParser(usage=usage)
+    parser.add_option("-q", "--quiet", action="store_true", dest="quiet", help="suppress all output")
+    parser.add_option("-l", "--log", default=False, dest="log", help="enable logging and specify file path")
+    parser.add_option("-c", "--cores", type="int", default="2", dest="workers", help="define the number of cores for parsing")
+    parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
+    
+    ## Parse command-line arguments
+    (options, args) = parser.parse_args(argv[1:])
+    try:
+        dbname = args[0]
+        args.pop(0)
+        files = args[:]
+        if args[-1].endswith('/') or os.path.isdir(args[-1]):   
+            files = glob(args[-1] + '/*')
+        else:
+            files = args[:]
+    except IndexError:
+        print >> sys.stderr, "\nError: you did not supply a database name or a path for your file(s) to be loaded\n"
+        parser.print_help()
+        sys.exit()
+    ## Number of cores used for parsing: you can define your own value on the
+    ## command-line, stay with the default, or define your own value here
+    workers = options.workers or 2
+    
+    ## This defines which set of templates to use with your database: you can stay with
+    ## the default or specify another path from the command-line. Alternatively, you
+    ## can edit it here.
+    if options.no_template:
+        no_templates = True
+    else:
+        no_templates = False
+        
+    ## Define the type of output you want. By default, you get console output for your database
+    ## load. You can however set a quiet option on the command-line, or set console_output
+    ## to False here.
+    console_output = True
+    if options.quiet:
+        console_output = False
+        
+    ## Define a path for a log of your database load. This option can be defined on the command-line
+    ## or here. It's disabled by default.
+    log = options.log or False
+    
+    ## Set debugging if you want to keep all the parsing data, as well as debug the templates
+    debug = options.debug or False
+    
+    return workers, console_output, log, debug
+
+
+def setup_db_dir(db_destination, template_dir):
+    try:
+        os.mkdir(db_destination)
+    except OSError:
+        print "The %s database already exists" % dbname
+        print "Do you want to delete this database? Yes/No"
+        choice = raw_input().lower()
+        if choice.startswith('y'):
+            os.system('rm -rf %s' % db_destination)
+            os.mkdir(db_destination)
+        else:
+            sys.exit()
+    
+    if template_dir:
+        os.system("cp -r %s* %s" % (template_dir,db_destination))
+        os.system("cp %s.htaccess %s" % (template_dir,db_destination))
+
+
+
 class Loader(object):
 
     def __init__(self,destination,token_regex=default_token_regex,xpaths=default_xpaths,
-                 metadata_xpaths=default_metadata,filters=default_filters,
-                 pseudo_empty_tags=[],suppress_tags=[],default_object_level="doc",freq_object_levels = [],
-                 console_output=True,log=False, debug=False):
+                 metadata_xpaths=default_metadata,filters=default_filters,post_filters=post_filters,
+                 pseudo_empty_tags=[],suppress_tags=[],console_output=True,log=False, debug=False):
         self.omax = [1,1,1,1,1,1,1,1,1]
         self.debug = debug
         self.parse_pool = None 
@@ -384,16 +447,16 @@ class Loader(object):
         if self.clean:
             os.system('rm %s' % file_in)
 
-    def finish(self, Post_Filters=default_post_filters, **extra_locals):
+    def finish(self, **extra_locals):
         print "\n### Finishing up ###"
         os.mkdir(self.destination + "/src/")
         os.mkdir(self.destination + "/hitlists/")
         os.chmod(self.destination + "/hitlists/", 0777)
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
         
-        if Post_Filters:
+        if post_filters:
             print 'Running the following post-processing filters:'
-            for f in Post_Filters:
+            for f in post_filters:
                 print f.__name__ + '...',
                 f(self)
                 print 'done.'
