@@ -172,14 +172,11 @@ def generate_pages(loader_obj, text):
     os.system(pagescommand)
     
 def make_max_id(loader_obj, text):
-    max_id = None
+    max_id = [0,0,0,0,0,0,0,0,0]
     for line in open(text["words"]):
         (key,type,id,attr) = line.split("\t")
         id = [int(i) for i in id.split(" ")]
-        if not max_id:
-            max_id = id
-        else:
-            max_id = [max(new,prev) for new,prev in zip(id,max_id)]
+        max_id = [max(new,prev) for new,prev in zip(id,max_id)]
     rf = open(text["results"],"w")
     cPickle.dump(max_id,rf) # write the result out--really just the resulting omax vector, which the parent will merge in below.
     rf.close()
