@@ -111,6 +111,7 @@ setup_db_dir(db_destination, template_dir)
 l = Loader(data_destination,
            post_filters=post_filters,
            tables=tables,
+           suppress_tags=suppress_tags,
            debug=debug)
 
 l.add_files(files)
