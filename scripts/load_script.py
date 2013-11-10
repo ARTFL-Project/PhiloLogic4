@@ -10,7 +10,12 @@ from philologic.ParserHelpers import *
 from philologic.Loader import Loader, handle_command_line, setup_db_dir
 
 
+## Flush buffer output
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
+## Parse command line
 dbname, files, workers, console_output, log, debug = handle_command_line(sys.argv)
+
 
 
 ##########################
