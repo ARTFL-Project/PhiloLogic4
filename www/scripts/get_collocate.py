@@ -4,6 +4,7 @@ import os
 import sys
 sys.path.append('..')
 from functions.wsgi_handler import parse_cgi
+from wsgiref.handlers import CGIHandler
 import reports as r
 import cgi
 import json
