@@ -1,5 +1,5 @@
 <%include file="header.mako"/>
-<%include file="search_boxes.mako"/>
+<%include file="search_form.mako"/>
 <script>
 var all_colloc = ${dumps(all_colloc)};
 var left_colloc = ${dumps(left_colloc)};

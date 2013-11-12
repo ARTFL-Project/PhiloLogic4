@@ -1,5 +1,5 @@
 <%include file="header.mako"/>
-<%include file="search_boxes.mako"/>
+<%include file="search_form.mako"/>
 <script type="text/javascript" src="${db.locals['db_url']}/js/textObjectNavigation.js"></script>
 <div id='philologic_response'>
     <div id='object_title'>

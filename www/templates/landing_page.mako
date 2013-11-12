@@ -7,5 +7,5 @@ $(window).load(function() {
     $('#search_elements').show();
 });	  	
 </script>
-<%include file="search_boxes.mako"/>
+<%include file="search_form.mako"/>
 <%include file="footer.mako"/>
