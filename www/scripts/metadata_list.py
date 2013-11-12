@@ -83,14 +83,16 @@ def autocomplete_metadata(metadata, field, db):
     words = format_query(metadata, field, db)[:100]
     return json.dumps(words)
 
-if __name__ == "__main__":
-    environ = os.environ
+def metadata_list(environ,start_response):
+    status = '200 OK'
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response(status,headers)
     environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/metadata_list.py', '')
     db, path_components, q = parse_cgi(environ)
-    form = cgi.FieldStorage()
-    metadata = form.getvalue('term')
-    field = form.getvalue('field')
-    content = autocomplete_metadata(metadata, field, db)
-    print "Content-Type: text/html\n"
-    print content
-    
+    cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
+    metadata = cgi.get('term',[''])[0]
+    field = cgi.get('field',[''])[0]
+    yield = autocomplete_metadata(metadata, field, db)
+
+if __name__ == "__main__":
+    CGIHandler().run(metadata_list)
