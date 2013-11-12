@@ -5,16 +5,18 @@ import sys
 sys.path.append('..')
 from functions.wsgi_handler import parse_cgi
 from mako.template import Template
+from wsgiref.handlers import CGIHandler
 import reports as r
 import cgi
 import json
 
-    
-if __name__ == "__main__":
-    environ = os.environ
+def get_frequency(environ,start_response):
+    status = '200 OK'
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response(status,headers)
     environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/get_frequency.py', '')
-    form = cgi.FieldStorage()
-    frequency_field = form.getvalue('frequency_field')
+    cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
+    frequency_field = cgi.get('frequency_field',[''])[0]
     db, path_components, q = parse_cgi(environ)
     q['field'] = frequency_field
     if q['q'] == '' and q["no_q"]:
@@ -22,5 +24,7 @@ if __name__ == "__main__":
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
     field, results = r.generate_frequency(hits, q, db)
-    print "Content-Type: text/html\n"
-    print json.dumps(results,indent=2)
+    yield json.dumps(results,indent=2)
+
+if __name__ == "__main__":
+    CGIHandler().run(get_frequency)

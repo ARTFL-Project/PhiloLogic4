@@ -10,16 +10,19 @@ from philologic.HitWrapper import ObjectWrapper
 import functions as f
 import json
 
-    
-if __name__ == "__main__":
-    environ = os.environ
+def go_to_obj(environ,start_response):
+    status = '200 OK'
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response(status,headers)    
     environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/go_to_obj.py', '')
-    path = os.getcwd().replace('scripts', '')
     db, path_components, q = parse_cgi(environ)
+    path = db.locals['db_path']
+    path = path[:path.rfind("/data")]
     philo_obj = ObjectWrapper(q['philo_id'].split(), db)
-    print >> sys.stderr, "BYTE", philo_obj.byte_start
     prev_obj = ' '.join(philo_obj.prev.split()[:7])
     next_obj = ' '.join(philo_obj.next.split()[:7])
     text = f.get_text_obj(philo_obj, path)
-    print "Content-Type: text/html\n"
-    print json.dumps({'text': text, "prev": prev_obj, "next": next_obj})
+    yield json.dumps({'text': text, "prev": prev_obj, "next": next_obj})
+
+if __name__ == "__main__":
+    CGIHandler().run(go_to_obj)
