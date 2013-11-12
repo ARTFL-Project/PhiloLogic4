@@ -17,6 +17,21 @@ if __name__ == "__main__":
     path = environ["SCRIPT_FILENAME"]
     db, path_components, q = parse_cgi(environ)
     obj = ObjectWrapper(q['philo_id'].split(), db)
-    mytemplate = Template(filename=path + "templates/toc.mako")
+    results = r.navigate_doc(obj, db)
+    html = '<div id="table_of_contents" class="table_of_contents" style="display:block;">'
+    for i in results:
+        id = i.philo_id[:7]
+        link_id = '_'.join([str(j) for j in i.philo_id])
+        href = f.link.make_absolute_object_link(db,id)
+        head_or_type = i.head or "[%s]" % i.type
+        if i.type == "div2":
+            spacing = "&nbsp;-&nbsp;"
+        elif i.type == "div3":
+            spacing = "&nbsp;&nbsp;&nbsp;-&nbsp;"       
+        else:
+            spacing = ""
+        html += spacing
+        html += '<a href="%s" id="%s">%s</a><br>' % (href, link_id, head_or_type)
+    html += "</div>"
     print "Content-Type: text/html\n"
-    print mytemplate.render(obj=obj,db=db,f=f,navigate_doc=r.navigate_doc).encode('utf-8', 'ignore')
+    print html.encode('utf-8', 'ignore')

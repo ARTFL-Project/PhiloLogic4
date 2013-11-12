@@ -41,7 +41,7 @@ def navigation(environ,start_response):
     #                                    db=db,q=q,template_name='pages.mako')
     if obj.philo_type == 'doc':
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,template_name='t_o_c_template.mako')
+                       db=db,q=q,template_name='t_o_c.mako')
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
     #obj_text = obj_pager(db, obj, obj_text)  ## this creates virtual pages
     prev = ' '.join(obj.prev.split()[:7])
