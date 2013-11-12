@@ -76,13 +76,16 @@ def autocomplete_term(q, db):
     all_words = format_query(q, db)[:100] 
     return json.dumps(all_words)
 
-if __name__ == "__main__":
-    environ = os.environ
+def term_list(environ,start_response):
+    status = '200 OK'
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response(status,headers)
     environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/term_list.py', '')
     db, path_components, q = parse_cgi(environ)
-    form = cgi.FieldStorage()
-    term = form.getvalue('term')
-    content = autocomplete_term(term, db)
-    print "Content-Type: text/html\n"
-    print content
+    cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
+    term = cgi.get('term',[''])[0]
+    yield autocomplete_term(term,db)
+
+if __name__ == "__main__":
+    CGIHandler().run(term_list)
     

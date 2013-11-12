@@ -8,9 +8,10 @@ import reports as r
 import cgi
 import json
 
-    
-if __name__ == "__main__":
-    environ = os.environ
+def get_collocate(environ,start_response):
+    status = '200 OK'
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response(status,headers)
     environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/get_collocate.py', '')
     db, path_components, q = parse_cgi(environ)
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
@@ -19,5 +20,8 @@ if __name__ == "__main__":
     for word, num in results:
         url = r.link_to_concordance(q, word, 'all', num)
         results_with_links.append((word, num, url))
-    print "Content-Type: text/html\n"
-    print json.dumps(results_with_links,indent=2)
+    yield json.dumps(results_with_links,indent=2)
+    
+if __name__ == "__main__":
+    CGIHandler().run(get_collocate)
+
