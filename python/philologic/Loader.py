@@ -9,12 +9,14 @@ import cPickle
 import subprocess
 import sqlite3
 from ast import literal_eval as eval
+from optparse import OptionParser
+from glob import glob
 
-from philologic.BufferedParser import BufferedParser
-from philologic.LoadFilters import *
-from philologic.PostFilters import *
+import philologic.Parser as Parser
+import philologic.LoadFilters as LoadFilters
+import philologic.PostFilters as PostFilters
+
 from philologic.utils import OutputHandler
-
 
 sort_by_word = "-k 2,2"
 sort_by_id = "-k 3,3n -k 4,4n -k 5,5n -k 6,6n -k 7,7n -k 8,8n -k 9,9n"
@@ -23,49 +25,48 @@ object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
 blocksize = 2048 # index block size.  Don't alter.
 index_cutoff = 10 # index frequency cutoff.  Don't. alter.
 
-## If you are going to change the order of these filters (which is not recommended)
-## please consult the documentation for each of these filters in LoadFilters.py
-default_filters = [normalize_unicode_raw_words,
-                   make_word_counts, 
-                   generate_words_sorted,
-                   make_object_ancestors('doc', 'div1', 'div2', 'div3'),
-                   make_sorted_toms("doc"), 
-                   prev_next_obj, 
-                   generate_pages, 
-                   make_max_id]
-
-default_post_filters = [word_frequencies, normalized_word_frequencies, metadata_frequencies, normalized_metadata_frequencies,metadata_relevance_table]
 
 ## While these tables are loaded by default, you can override that default, although be aware
 ## that you will only have reduced functionality if you do. It is strongly recommended that you 
 ## at least keep the 'toms' table from toms.db.
-default_tables = ['words', 'toms', 'pages']
 
-default_xpaths = [("doc",".")]
-default_metadata = [("doc",".//titleStmt/title","title"),("doc",".//titleStmt/author","author")]
-default_token_regex = r"(\w+)|([\.?!])"
+default_tables = ['toms', 'pages', 'words']
+
 
 class Loader(object):
 
-    def __init__(self,destination,token_regex=default_token_regex,xpaths=default_xpaths,
-                 metadata_xpaths=default_metadata,filters=default_filters,
-                 pseudo_empty_tags=[],suppress_tags=[],default_object_level="doc",freq_object_levels = [],
-                 console_output=True,log=False, debug=False):
+
+    def __init__(self,destination,tables = default_tables,
+                 post_filters = None, debug=False, **parser_defaults):
         self.omax = [1,1,1,1,1,1,1,1,1]
         self.debug = debug
         self.parse_pool = None 
-        self.parser_factory = BufferedParser
-        self.default_object_level = default_object_level
-        self.freq_object_levels = freq_object_levels or [self.default_object_level]
         self.types = object_types
+        self.tables = tables
 
-        self.token_regex = token_regex
-        self.xpaths = xpaths
-        self.metadata_xpaths = metadata_xpaths
-        self.default_filters = filters
+        self.parser_defaults = {}
+        
+        if "parser_factory" not in parser_defaults:
+            parser_defaults["parser_factory"] = Parser.Parser            
+        if "token_regex" not in parser_defaults:
+            parser_defaults["token_regex"] = Parser.DefaultTokenRegex
+        if "xpaths" not in parser_defaults:
+            parser_defaults["xpaths"] = Parser.DefaultXPaths
+        if "metadata_xpaths" not in parser_defaults:
+            parser_defaults["metadata_xpaths"] = Parser.DefaultMetadataXPaths
+        if "pseudo_empty_tags" not in parser_defaults:
+            parser_defaults["pseudo_empty_tags"] = []
+        if "suppress_tags" not in parser_defaults:
+            parser_defaults["suppress_tags"] = []
+        if "load_filters" not in parser_defaults:
+            parser_defaults["load_filters"] = LoadFilters.DefaultLoadFilters
+        
+        for option in ["parser_factory","token_regex","xpaths","metadata_xpaths","pseudo_empty_tags","suppress_tags","load_filters"]:
+            self.parser_defaults[option] = parser_defaults[option]
 
-        self.pseudo_empty_tags = pseudo_empty_tags
-        self.suppress_tags = suppress_tags
+        if not post_filters:
+            post_filters = PostFilters.DefaultPostFilters
+        self.post_filters = post_filters
 
         if debug == True:
             self.clean = False
@@ -90,12 +91,14 @@ class Loader(object):
         self.metadata_types = {}
         self.normalized_fields = []
         indexed_types = []
-        for o_type, path, param in self.metadata_xpaths:
+
+        for o_type, path, param in self.parser_defaults["metadata_xpaths"]:
             if o_type not in indexed_types and o_type != "page":
                 indexed_types.append(o_type)
+
         for t in indexed_types:
             self.metadata_hierarchy.append([])
-            for e_type,path,param in self.metadata_xpaths:
+            for e_type,path,param in self.parser_defaults["metadata_xpaths"]:
                 if t == e_type:
                     if param not in self.metadata_fields:
                         self.metadata_fields.append(param)
@@ -103,7 +106,7 @@ class Loader(object):
                     if param not in self.metadata_types:
                         self.metadata_types[param] = t
         
-        sys.stdout = OutputHandler(console=console_output, log=log)
+        #sys.stdout = OutputHandler(console=console_output, log=log)
 
     def setup_dir(self,path):
         os.mkdir(path)
@@ -166,13 +169,14 @@ class Loader(object):
         
         while done < total:
             while self.filequeue and workers < max_workers:
-    
                 # we want to have up to max_workers processes going at once.
+                
                 text = self.filequeue.pop(0) # parent and child will both know the relevant filenames
                 metadata = data_dicts.pop(0)
                 options = text["options"]
-                #print >> sys.stderr, text
-                #print >> sys.stderr, metadata
+                if "options" in metadata: #cleanup, should do above.
+                    del metadata["options"]
+
                 pid = os.fork() # fork returns 0 to the child, the id of the child to the parent.  
                 # so pid is true in parent, false in child.
     
@@ -186,23 +190,29 @@ class Loader(object):
                     i = open(text["newpath"],"r",)
                     o = open(text["raw"], "w",) # only print out raw utf-8, so we don't need a codec layer now.
                     print "%s: parsing %d : %s" % (time.ctime(),text["id"],text["name"])
-                                        
-                    if "xpaths" not in options:
-                        options["xpaths"] = self.xpaths                        
-                    if "metadata_xpaths" not in options:
-                        options["metadata_xpaths"] = self.metadata_xpaths
+
+                    if "parser_factory" not in options:
+                        options["parser_factory"] = self.parser_defaults["parser_factory"]
+                    parser_factory = options["parser_factory"]                        
+                    del options["parser_factory"]
+                        
                     if "token_regex" not in options:
-                        options["token_regex"] = self.token_regex
+                        options["token_regex"] = self.parser_defaults["token_regex"]
+                    if "xpaths" not in options:
+                        options["xpaths"] = self.parser_defaults["xpaths"]                 
+                    if "metadata_xpaths" not in options:
+                        options["metadata_xpaths"] = self.parser_defaults["metadata_xpaths"]
                     if "suppress_tags" not in options:
-                        options["suppress_tags"] = self.suppress_tags
+                        options["suppress_tags"] = self.parser_defaults["suppress_tags"]
                     if "pseudo_empty_tags" not in options:
-                        options["pseudo_empty_tags"] = self.pseudo_empty_tags
-                       
-                    filters = self.default_filters
-                    if "filters" in options:
-                        filters = options["filters"]
-                    parser = self.parser_factory(o,text["id"],text["size"],known_metadata=metadata,**options)
-#                    parser = Parser.Parser({"filename":text["name"]},text["id"],xpaths=xpaths,metadata_xpaths=metadata_xpaths,token_regex=token_regex,non_nesting_tags=non_nesting_tags,self_closing_tags=self_closing_tags,pseudo_empty_tags=pseudo_empty_tags,output=o)
+                        options["pseudo_empty_tags"] = self.parser_defaults["pseudo_empty_tags"]
+                    
+                    if "load_filters" not in options:
+                        options["load_filters"] = self.parser_defaults["load_filters"]
+                    filters = options["load_filters"]
+                    del options["load_filters"]
+
+                    parser = parser_factory(o,text["id"],text["size"],known_metadata=metadata,**options)
                     try:
                         r = parser.parse(i)
                     except RuntimeError:
@@ -216,8 +226,7 @@ class Loader(object):
                     
                     if self.clean:
                         command = 'rm %s' % text['raw']
-                        os.system(command)
-                    
+                        os.system(command)                    
                     
                     exit()
     
@@ -317,10 +326,10 @@ class Loader(object):
         #if self.clean:
         #    os.system('rm all_words_sorted')
 
-    def make_tables(self, tables, **extra_tables):
+    def make_tables(self, **extra_tables):
         print '\n### SQL Load ###'
         print "Loading in the following tables:"
-        for table in tables:            
+        for table in self.tables:            
             self.dbh = sqlite3.connect("../toms.db")
             self.dbh.text_factory = str
             self.dbh.row_factory = sqlite3.Row
@@ -384,16 +393,16 @@ class Loader(object):
         if self.clean:
             os.system('rm %s' % file_in)
 
-    def finish(self, Post_Filters=default_post_filters, **extra_locals):
+    def finish(self, **extra_locals):
         print "\n### Finishing up ###"
         os.mkdir(self.destination + "/src/")
         os.mkdir(self.destination + "/hitlists/")
         os.chmod(self.destination + "/hitlists/", 0777)
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
         
-        if Post_Filters:
+        if self.post_filters:
             print 'Running the following post-processing filters:'
-            for f in Post_Filters:
+            for f in self.post_filters:
                 print f.__name__ + '...',
                 f(self)
                 print 'done.'
@@ -406,23 +415,85 @@ class Loader(object):
         print >> db_locals, "db_path = '%s'" % self.destination
         print >> db_locals, "normalized_fields = %s" % self.normalized_fields
         print >> db_locals, "debug = %s" % self.debug
-        print >> db_locals, "default_object_level = '%s'" % self.default_object_level
-        print >> db_locals, "freq_object_levels = %s" % self.freq_object_levels
         for k,v in extra_locals.items():
             print >> db_locals, "%s = %s" % (k,repr(v))
 
         print "wrote metadata info to %s." % (self.destination + "/db.locals.py")
            
+
+
+def handle_command_line(argv):
+    usage = "usage: %prog [options] database_name files"
+    parser = OptionParser(usage=usage)
+    parser.add_option("-q", "--quiet", action="store_true", dest="quiet", help="suppress all output")
+    parser.add_option("-l", "--log", default=False, dest="log", help="enable logging and specify file path")
+    parser.add_option("-c", "--cores", type="int", default="2", dest="workers", help="define the number of cores for parsing")
+    parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
+    
+    ## Parse command-line arguments
+    (options, args) = parser.parse_args(argv[1:])
+    try:
+        dbname = args[0]
+        args.pop(0)
+        files = args[:]
+        if args[-1].endswith('/') or os.path.isdir(args[-1]):   
+            files = glob(args[-1] + '/*')
+        else:
+            files = args[:]
+    except IndexError:
+        print >> sys.stderr, "\nError: you did not supply a database name or a path for your file(s) to be loaded\n"
+        parser.print_help()
+        sys.exit()
+    ## Number of cores used for parsing: you can define your own value on the
+    ## command-line, stay with the default, or define your own value here
+    workers = options.workers or 2
+    
+        
+    ## Define the type of output you want. By default, you get console output for your database
+    ## load. You can however set a quiet option on the command-line, or set console_output
+    ## to False here.
+    console_output = True
+    if options.quiet:
+        console_output = False
+        
+    ## Define a path for a log of your database load. This option can be defined on the command-line
+    ## or here. It's disabled by default.
+    log = options.log or False
+    
+    ## Set debugging if you want to keep all the parsing data, as well as debug the templates
+    debug = options.debug or False
+    
+    return dbname,files, workers, console_output, log, debug
+
+
+def setup_db_dir(db_destination, template_dir):
+    try:
+        os.mkdir(db_destination)
+    except OSError:
+        ## maybe test to see what db_destination is
+        print "The database folder could not be created at %s" % db_destination
+        print "Do you want to delete this database? Yes/No"
+        choice = raw_input().lower()
+        if choice.startswith('y'):
+            os.system('rm -rf %s' % db_destination)
+            os.mkdir(db_destination)
+        else:
+            sys.exit()
+    
+    if template_dir:
+        os.system("cp -r %s* %s" % (template_dir,db_destination))
+        os.system("cp %s.htaccess %s" % (template_dir,db_destination))
+
                 
 # a quick utility function
-def load(path,files,filters=default_filters,xpaths=None,metadata_xpaths=None,workers=4):
-    l = Loader(path)    
-    l.add_files(files)
-    l.parse_files(workers,filters,xpaths,metadata_xpaths)
-    l.merge_objects()
-    l.analyze()
-    l.make_tables()
-    l.finish()
+#def load(path,files,filters=default_filters,xpaths=None,metadata_xpaths=None,workers=4):
+#    l = Loader(path)    
+#    l.add_files(files)
+#    l.parse_files(workers,filters,xpaths,metadata_xpaths)
+#    l.merge_objects()
+#    l.analyze()
+#    l.make_tables()
+#    l.finish()
         
 if __name__ == "__main__":
     os.environ["LC_ALL"] = "C" # Exceedingly important to get uniform sort order.

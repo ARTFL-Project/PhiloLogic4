@@ -9,6 +9,8 @@ from philologic.OHCOVector import Record
 from ast import literal_eval as eval
 
 
+
+
 ## Default filters
 def normalize_unicode_raw_words(loader_obj, text):
     tmp_file = open(text["raw"] + ".tmp","w")
@@ -136,8 +138,11 @@ def prev_next_obj(loader_obj, text, depth=4):
             record_dict[type] = record
     object_types.reverse()
     for obj in object_types:
-        record_dict[obj].attrib['next'] = ''
-        print >> output_file, record_dict[obj]
+        try:
+            record_dict[obj].attrib['next'] = ''
+            print >> output_file, record_dict[obj]
+        except KeyError:
+            pass
     output_file.close()
     os.remove(text['sortedtoms'])
     type_pattern = "|".join("^%s" % t for t in loader_obj.types)
@@ -167,14 +172,11 @@ def generate_pages(loader_obj, text):
     os.system(pagescommand)
     
 def make_max_id(loader_obj, text):
-    max_id = None
+    max_id = [0,0,0,0,0,0,0,0,0]
     for line in open(text["words"]):
         (key,type,id,attr) = line.split("\t")
         id = [int(i) for i in id.split(" ")]
-        if not max_id:
-            max_id = id
-        else:
-            max_id = [max(new,prev) for new,prev in zip(id,max_id)]
+        max_id = [max(new,prev) for new,prev in zip(id,max_id)]
     rf = open(text["results"],"w")
     cPickle.dump(max_id,rf) # write the result out--really just the resulting omax vector, which the parent will merge in below.
     rf.close()
@@ -327,3 +329,11 @@ def store_in_plain_text(*types):
                 output.close()
                 
     return inner_store_in_plain_text
+
+
+
+## If you are going to change the order of these filters (which is not recommended)
+## please consult the documentation for each of these filters in LoadFilters.py
+DefaultLoadFilters = [normalize_unicode_raw_words,make_word_counts, generate_words_sorted,
+                        make_object_ancestors('doc', 'div1', 'div2', 'div3'), make_sorted_toms("doc","div1","div2","div3"),
+                        prev_next_obj,generate_pages, make_max_id]
