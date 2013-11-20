@@ -6,7 +6,7 @@
     position: absolute;
     display: none;
     z-index: 90;
-    background-color: #FAFAFA;
+    background-color: white;
     border-right-style: solid;
     border-right-width: 1px;
     border-right-color: #ECECEC;
@@ -40,12 +40,13 @@
 #report {
     width: auto;
     max-width: 960px;
-    display: none;
-    margin-bottom: 10px;
-    padding-left: 20px;
+    margin-top: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-right: 0px;
 }
 #initial_form {
-    margin-left: 5px;
+    /*margin-left: 5px;*/
 }
 #search_field {
     font-weight: 400;
@@ -78,7 +79,7 @@
 }
 
 #syntax_title {
-    font-size: 100%;
+    font-size: 90%;
 }
 #syntax_title:hover {
     text-decoration: underline;
@@ -98,4 +99,19 @@
 	text-align: justify;
 	overflow-y: auto;
 	height: 500px;
+}
+#frequency_task {
+    display: none;
+    margin-top: 20px;
+    border-top:solid 1px #ECECEC;
+    padding-top: 10px;
+    padding-left: 25px;
+}
+#bottom_search {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    padding-bottom: 10px;
+    right: 0;
+    margin-right: 25px;
 }

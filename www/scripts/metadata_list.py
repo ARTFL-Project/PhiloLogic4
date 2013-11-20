@@ -8,6 +8,7 @@ import json
 import subprocess
 import re
 import unicodedata
+import urlparse
 from wsgiref.handlers import CGIHandler
 from philologic.QuerySyntax import parse_query
 from philologic.Query import word_pattern_search
@@ -93,7 +94,7 @@ def metadata_list(environ,start_response):
     cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
     metadata = cgi.get('term',[''])[0]
     field = cgi.get('field',[''])[0]
-    yield = autocomplete_metadata(metadata, field, db)
+    yield autocomplete_metadata(metadata, field, db)
 
 if __name__ == "__main__":
     CGIHandler().run(metadata_list)
