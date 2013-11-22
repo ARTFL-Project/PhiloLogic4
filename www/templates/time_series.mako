@@ -8,11 +8,11 @@
             Use of the term(s) "${q['q'].decode('utf_8')}" throughout time
         </p>
         <div id="time_series_buttons">
-                <input type="radio" name="freq_type" id="relative_time" data-value='${relative_frequencies}' data-interval="${q['year_interval']}" checked="checked">
-                <label for="relative_time">Average Use</label>
-                <input type="radio" name="freq_type" id="absolute_time" data-value='${frequencies}' data-interval="${q['year_interval']}">
-                <label for="absolute_time">Total Use</label>
-            </div>
+            <input type="radio" name="freq_type" id="absolute_time" data-value='${frequencies}' data-interval="${q['year_interval']}" checked="checked">
+            <label for="absolute_time">Absolute Frequency</label>
+            <input type="radio" name="freq_type" id="relative_time" data-value='${relative_frequencies}' data-interval="${q['year_interval']}">
+            <label for="relative_time">Relative Frequency</label>
+        </div>
     </div>
     <div class="results_container">
         <div id='time_series_report' style='display:none;'>

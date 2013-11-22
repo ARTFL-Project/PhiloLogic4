@@ -15,7 +15,6 @@ $(document).ready(function() {
             hide_search_on_click();
         }
     });
-    var report_width_adjust = false;
     $('#more_options').click(function() {
         $('#search_elements').css('z-index', 150);
         $('.book_page').css('z-index', 90);
@@ -23,10 +22,6 @@ $(document).ready(function() {
             show_more_options("all");
             $('#search_explain').slideDown();
             hide_search_on_click();
-            if (report_width_adjust === false) {
-                adjustReportWidth();
-                report_width_adjust = true;
-            }
         } else {
             hide_search_form();
         }
@@ -41,12 +36,16 @@ $(document).ready(function() {
         var report = $('input[name=report]:checked', '#search').val();
         if ($("#search_elements:visible")) {
             showHide(report);
-            $("#search_elements").slideDown();
-            $('#search_explain').slideDown();
+            if (report != "frequencies") {
+                $("#search_elements").slideDown();
+                $('#search_explain').slideDown();
+            }
         } else {
             showHide(report);
-            $("#search_elements").fadeIn();
-            $('#search_explain').fadeIn();
+            if (report != "frequencies") {
+                $("#search_elements").fadeIn();
+                $('#search_explain').fadeIn();
+            }
         }
     });
       
@@ -152,9 +151,7 @@ $(document).ready(function() {
         }
     });
     $(window).load(function() {
-        if ($("#search_elements").css('display') != 'none') {
-            adjustReportWidth();
-        }
+        adjustReportWidth();
     });
     
 });
@@ -163,14 +160,16 @@ $(document).ready(function() {
 function adjustReportWidth() {
     var button_length = 0;
     var report_num = 0
+    $("#report").find('label').first().css('border-left', '0px');
     $("#report").find('label').each(function() {
         if ($(this).is(':visible')) {
             button_length += $(this).width();
             report_num += 1;
+            $(this).css({'border-bottom': '0px', 'border-top': '0px'});
         }
     });
-    length_to_add = ($("#form_body").width() - button_length - 60) / report_num;
-    $('#report').find("label").each(function() {$(this).css("width", "+=" + length_to_add);});
+    length_to_add = ($("#report").width() - button_length) / report_num;
+    $('#report').find("label").each(function() {$(this).css("width", "+=" + (length_to_add));});
 }
 
 function autocomplete_metadata(metadata, field, db_url) {
@@ -204,45 +203,56 @@ function autocomplete_metadata(metadata, field, db_url) {
 function showHide(value) {
     $("#results_per_page, #collocation_num, #time_series_num, #year_interval,#frequency_num, #method, #metadata_fields").hide();
     $('#explain_relev, #explain_conc, #explain_time, #explain_colloc, #explain_kwic, #explain_freq').hide();
-    $('#relev_question, #conc_question, #colloc_question, #time_question, #kwic_question, #freq_question').hide();    
+    $('#relev_question, #conc_question, #colloc_question, #time_question, #kwic_question, #freq_question').hide();
+    $('#frequency_task, #bottom_search').hide()
 
     if (value == 'frequency') {
         $("#frequency_num, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
         $('#freq_question').show();
+        $('#search_terms_container').slideDown('fast');
     }
     if (value == 'collocation') {
         $("#collocation_num, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
         $('#colloc_question').show();
+        $('#search_terms_container').slideDown('fast');
     }
     if (value == 'kwic') {
         $("#results_per_page, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
         $('#kwic_question').show();
+        $('#search_terms_container').slideDown('fast');
     }
     if (value == 'concordance') {
         $("#results_per_page, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
         $('#conc_question').show();
         $('#start_date, #end_date').val('');
+        $('#search_terms_container').slideDown('fast');
     }
     if (value == 'relevance') {
         $("#results_per_page").show();
         $('#relev_question').show();
     }
     if (value == "time_series") {
-        $('#metadata_fields').find('tr').has('#date').hide();
         $("#time_series_num, #year_interval, #method, #metadata_fields").show();
+        $('#metadata_fields').find('tr').has('#date').hide();
         $('#time_question').show();
         $('#date').val('');
+        $('#search_terms_container').slideDown('fast');
+    }
+    if (value == "frequencies") {
+        $('#search_terms_container').slideUp('fast');
+        $('#search_elements').hide();
+        $('#frequency_task').show();
+        $('#bottom_search').show();   
     }
 }
 
 //  Function to show or hide search options
 function show_more_options(display) {
     $("#more_options").button('option', 'label', 'Hide search options');
-    $("#report").slideDown('fast');
     if (display == "all") {
         var report = $('input[name=report]:checked', '#search').val();
         showHide(report);
@@ -268,7 +278,6 @@ function show_more_options(display) {
     $("#search_overlay").fadeIn('fast');
 }
 function hide_search_form() {
-    $("#report").slideUp();
     $('#search_explain').accordion({
         collapsible: true,
         heightStyle: "content",

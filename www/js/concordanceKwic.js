@@ -22,6 +22,9 @@ $(document).ready(function() {
     $(window).resize(function() {
         getCitationWidth();
     });
+    $(window).load(function() {
+        adjustReportWidth();
+    })
 });
 
 

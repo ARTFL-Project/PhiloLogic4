@@ -3,49 +3,8 @@
 <div id="form_body">
     <form id="search" action="${db.locals['db_url'] + "/dispatcher.py/"}">
         <div id="initial_form">
-            <table style="margin: 0 auto">
-                <tr class="table_row" ><td><span id="search_field" style="margin-right: 10px;">Search Terms:</span></td>
-                <td class="second_column">
-					<input type='text' name='q' id='q' class="search_box"><br>
-				</td>
-                <td><input id="button1" type='submit' value="Search"/></td>
-                <td><span id="more_options">Show search options</span></td>
-				<td><button type="reset" id="reset_form1">Clear form</button></td>
-                </tr>
-            </table>
-			<div id="syntax" style="width:514px;margin-top:-12px;">
-				<span id='syntax_title'>
-					Click for tips on the query syntax
-				</span>
-				<div id="syntax_explain" style="display:none;">
-					<p style="margin-top:-5px;">
-						In PhiloLogic4, the search syntax and semantics are largely the same for both word/phrase searching and metadata queries, with a few exceptions. The basic rules are:
-						<ol style="list-style:decimal;padding-left:20px;">
-							<li> plain terms such as <tt>genre humain</tt> or <tt>esprit systematique</tt> are split on the space character and evaluated without regard to case or accent.</li>
-							<li> quoted terms like <tt>"esprit de systeme"</tt> are precise matches against case and accent. In phrases they match individual tokens; in metadata fields they must
-							match the entire string value, i.e., <tt>"Histoire de la philosophie"</tt> or <tt>"Geographie sacree"</tt>.</li>
-							<li> "egrep-style" regular expressions (described below) are permitted in plain terms, but not quoted terms; thus, they cannot cross a token/word boundary, e.g., <tt>libert.</tt> or <tt>nous m[aeiou].*er</tt>
-							<li> the vertical bar symbol <tt>|</tt> (on US keyboards, use the <tt>Shift + \</tt> keys) stands for a logical Boolean OR operator, and can concatenate plain, quoted, or regex terms (e.g., <tt>liberte de penser | parler</tt> or <tt>philosophie eclectique | academique</tt>).</li>
-							<li> a space corresponds to a user-selected phrase operator in word search, controlled by the within/exactly/same-sentence option on the search form.  In metadata queries, it corresponds to the Boolean AND operator (e.g., <tt>diderot mallet</tt>).
-							<li> the Boolean NOT operator is only permitted at the end of metadata fields; it accepts a single term or an OR expression: e.g., <tt>Geographie | Histoire NOT moderne</tt>.</li>
-						</ol>
-					</p>
-					<p>
-						Basic regexp syntax, adapted from
-						<a href="http://www.gnu.org/software/findutils/manual/html_node/find_html/egrep-regular-expression-syntax.html#egrep-regular-expression-syntax">the egrep regular expression syntax</a>.
-						<ul style="margin-left: -25px">
-						<li>The character <tt>.</tt> matches any single character except newline. Bracket expressions can match sets or ranges of characters: [aeiou] or [a-z], but will only match a single character unless followed by one of the quantifiers below.</li>
-						<li> <tt>*</tt> indicates that the regular expression should match zero or more occurrences of the previous character or bracketed group.</li>
-						<li> <tt>+</tt> indicates that the regular expression should match one or more occurrences of the previous character or bracketed group.</li>
-						<li> <tt>?</tt> indicates that the regular expression should match zero or one occurrence of the previous character or bracketed group.</li></ul>
-						<div style="margin-top: -12px;">
-							Thus, <tt>.*</tt> is an approximate "match anything" wildcard operator, rather than the more traditional (but less precise) <tt>*</tt> in many other search engines.
-						</div>
-					</p>
-				</div>
-			</div>
-            <div id="report" class="report">
-                <h3 style="padding-left: 5px;margin-top: 0px;">Choose a search report:</h3>
+            <div id="report" class="report" style="margin-top:0px">
+                <!--<h3 style="padding-left: 5px;margin-top: 10px;">Choose a search report:</h3>-->
                 <span id="concordance_button" style="display: none;">
                     <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
                     <label for="concordance">Concordance</label>
@@ -66,6 +25,53 @@
                     <input type="radio" name="report" id="time_series" value='time_series'>
                     <label for="time_series">Time Series</label>
                 </span>
+                <span id="frequencies_button" style="display: none;">
+                    <input type="radio" name="report" id="frequencies" value="frequencies">
+                    <label for="frequencies">Frequencies</label>
+                </span>
+            </div>
+            <div id="search_terms_container">
+                <table style="margin: 0 auto" id="search_terms">
+                    <tr class="table_row" ><td><span id="search_field" style="margin-right: 10px;">Search Terms:</span></td>
+                    <td class="second_column">
+                        <input type='text' name='q' id='q' class="search_box"><br>
+                    </td>
+                    <td><input id="button1" type='submit' value="Search"/></td>
+                    <td><span id="more_options">Show search options</span></td>
+                    <td><button type="reset" id="reset_form1">Clear form</button></td>
+                    </tr>
+                </table>
+                <div id="syntax" style="width:514px;margin-top:-12px;">
+                    <span id='syntax_title'>
+                        Click for tips on the query syntax
+                    </span>
+                    <div id="syntax_explain" style="display:none;">
+                        <p style="margin-top:-5px;">
+                            In PhiloLogic4, the search syntax and semantics are largely the same for both word/phrase searching and metadata queries, with a few exceptions. The basic rules are:
+                            <ol style="list-style:decimal;padding-left:20px;">
+                                <li> plain terms such as <tt>genre humain</tt> or <tt>esprit systematique</tt> are split on the space character and evaluated without regard to case or accent.</li>
+                                <li> quoted terms like <tt>"esprit de systeme"</tt> are precise matches against case and accent. In phrases they match individual tokens; in metadata fields they must
+                                match the entire string value, i.e., <tt>"Histoire de la philosophie"</tt> or <tt>"Geographie sacree"</tt>.</li>
+                                <li> "egrep-style" regular expressions (described below) are permitted in plain terms, but not quoted terms; thus, they cannot cross a token/word boundary, e.g., <tt>libert.</tt> or <tt>nous m[aeiou].*er</tt>
+                                <li> the vertical bar symbol <tt>|</tt> (on US keyboards, use the <tt>Shift + \</tt> keys) stands for a logical Boolean OR operator, and can concatenate plain, quoted, or regex terms (e.g., <tt>liberte de penser | parler</tt> or <tt>philosophie eclectique | academique</tt>).</li>
+                                <li> a space corresponds to a user-selected phrase operator in word search, controlled by the within/exactly/same-sentence option on the search form.  In metadata queries, it corresponds to the Boolean AND operator (e.g., <tt>diderot mallet</tt>).
+                                <li> the Boolean NOT operator is only permitted at the end of metadata fields; it accepts a single term or an OR expression: e.g., <tt>Geographie | Histoire NOT moderne</tt>.</li>
+                            </ol>
+                        </p>
+                        <p>
+                            Basic regexp syntax, adapted from
+                            <a href="http://www.gnu.org/software/findutils/manual/html_node/find_html/egrep-regular-expression-syntax.html#egrep-regular-expression-syntax">the egrep regular expression syntax</a>.
+                            <ul style="margin-left: -25px">
+                            <li>The character <tt>.</tt> matches any single character except newline. Bracket expressions can match sets or ranges of characters: [aeiou] or [a-z], but will only match a single character unless followed by one of the quantifiers below.</li>
+                            <li> <tt>*</tt> indicates that the regular expression should match zero or more occurrences of the previous character or bracketed group.</li>
+                            <li> <tt>+</tt> indicates that the regular expression should match one or more occurrences of the previous character or bracketed group.</li>
+                            <li> <tt>?</tt> indicates that the regular expression should match zero or one occurrence of the previous character or bracketed group.</li></ul>
+                            <div style="margin-top: -12px;">
+                                Thus, <tt>.*</tt> is an approximate "match anything" wildcard operator, rather than the more traditional (but less precise) <tt>*</tt> in many other search engines.
+                            </div>
+                        </p>
+                    </div>
+                </div>
             </div>
          </div>
          <div id="search_explain">
@@ -104,7 +110,7 @@
                 during a set time period.
             </div>
         </div>
-         <div id="search_elements">
+        <div id="search_elements">
             <h3>Refine your search with the following options and fields:</h3>
             <div id='method'>
                 <table>
@@ -137,7 +143,8 @@
                 </table>
             </div>
             <table> 
-                <tr class="table_row" id="collocation_num"><td class="first_column">Within </td>
+                <tr class="table_row" id="collocation_num">
+                    <td class="first_column">Within </td>
                     <td>
                         <label for="word_num"></label>
                         <input id="word_num" name="word_num" />
@@ -193,6 +200,27 @@
                     <input type="radio" name="pagenum" id="pagenum3" value='100'><label for="pagenum3">100</label>
                 </span></td></tr>
             </table>
+        </div>
+        <div id="frequency_task">
+            <div id="task_on_metadata_fields">
+                <table class="table_row">
+                    % for facet in db.locals["metadata_fields"]:
+						<%
+						if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
+							alias = db.locals["metadata_aliases"][facet]
+						else:
+							alias = facet
+						%>
+                        <tr class="table_row">
+							<td class="first_column"><span class="search_field">${alias}:</span></td>
+							<td><input type='text' name='${facet}' id="${facet}" class="search_box"></td>
+						</tr>
+                    % endfor
+                </table>
+            </div>
+            <div id="bottom_search">
+                <input id="button2" type='submit' value="Run Task"/>
+            </div>
         </div>
     </form>
 </div>
