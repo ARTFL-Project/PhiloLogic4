@@ -36,13 +36,14 @@ default_tables = ['toms', 'pages', 'words']
 class Loader(object):
 
 
-    def __init__(self,destination,tables = default_tables,
+    def __init__(self,destination,tables = default_tables,default_object_level='doc',
                  post_filters = None, debug=False, **parser_defaults):
         self.omax = [1,1,1,1,1,1,1,1,1]
         self.debug = debug
         self.parse_pool = None 
         self.types = object_types
         self.tables = tables
+        self.default_object_level = default_object_level
 
         self.parser_defaults = {}
         
@@ -326,7 +327,7 @@ class Loader(object):
         #if self.clean:
         #    os.system('rm all_words_sorted')
 
-    def make_tables(self, **extra_tables):
+    def make_tables(self):
         print '\n### SQL Load ###'
         print "Loading in the following tables:"
         for table in self.tables:            
@@ -335,7 +336,7 @@ class Loader(object):
             self.dbh.row_factory = sqlite3.Row
             if table == 'words':
                 file_in = self.workdir + '/all_words_sorted'
-                self.make_sql_table(table, file_in, indices=["philo_name"])
+                self.make_sql_table(table, file_in, indices=[("philo_name", "%s_ancestor" % self.default_object_level), ('philo_id')])
             if table == 'pages':
                 file_in = self.workdir + '/all_pages'                
                 self.make_sql_table(table, file_in, indices=["philo_id"],depth=9)
@@ -343,10 +344,7 @@ class Loader(object):
                 file_in = self.workdir + '/all_toms_sorted'
                 indices = ['philo_type', 'philo_id'] + self.metadata_fields
                 self.make_sql_table(table, file_in, indices=indices)
-        if extra_tables:
-            for fn, table in extra_tables.items():
-                fn(self)
-                
+   
     def make_sql_table(self, table, file_in, indices=[], depth=7):
         conn = self.dbh
         c = conn.cursor()
@@ -384,7 +382,11 @@ class Loader(object):
         
         for index in indices:
             try:
-                c.execute('create index if not exists %s_%s_index on %s (%s)' % (table,index,table,index))
+                if isinstance(index, str):
+                    index = (index,) 
+                index_name = '%s_%s_index' % (table,'_'.join(index))
+                index = ','.join(index)
+                c.execute('create index if not exists %s on %s (%s)' % (index_name,table,index))
             except sqlite3.OperationalError:
                 pass
         conn.commit()

@@ -272,6 +272,7 @@ DefaultMetadataXPaths = [ # metadata per type.  '.' is in this case the base ele
     ("page",".@fac","img")
 ]
 
+
 if __name__ == "__main__":    
     for docid,fn in enumerate(sys.argv[1:],1):
         print >> sys.stderr, docid,fn
