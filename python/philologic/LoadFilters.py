@@ -9,8 +9,6 @@ from philologic.OHCOVector import Record
 from ast import literal_eval as eval
 
 
-
-
 ## Default filters
 def normalize_unicode_raw_words(loader_obj, text):
     tmp_file = open(text["raw"] + ".tmp","w")
@@ -25,134 +23,32 @@ def normalize_unicode_raw_words(loader_obj, text):
     os.remove(text["raw"])
     os.rename(text["raw"] + ".tmp",text["raw"])
 
-def make_word_counts(loader_obj, text, depth=4):
-    object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
-    counts = [0 for i in range(depth)]
-    temp_file = text['raw'] + '.tmp'
-    output_file = open(temp_file, 'w')
-    for line in open(text['raw']):
-        type, word, id, attrib = line.split('\t')
-        id = id.split()
-        record = Record(type, word, id)
-        record.attrib = eval(attrib)
-        for d,count in enumerate(counts):
-            if type == 'word':
-                counts[d] += 1
-            elif type == object_types[d]:
-                record.attrib['word_count'] = counts[d]
-                counts[d] = 0
-        print >> output_file, record
-    output_file.close()
-    os.remove(text['raw'])
-    os.rename(temp_file, text['raw'])
-
-def tree_tagger(tt_path,param_file,maxlines=20000):
-  def tag_words(loader_obj,text):  
-    # Set up the treetagger process
-    tt_args = [tt_path,"-token","-lemma","-prob",'-no-unknown', "-threshold",".01",param_file]
-    ttout_fh = open(text["raw"]+".ttout","w")
-    tt_worker = Popen(tt_args,stdin=PIPE,stdout=ttout_fh)
-    raw_fh = open(text["raw"],"r")
-    line_count = 0
-
-    # read through the object file, pass the words to treetagger
-    for line in raw_fh:
-        type, word, id, attrib = line.split('\t')        
-        id = id.split()
-        if type == "word":
-            word = word.decode('utf-8', 'ignore').lower().encode('utf-8')
-            # close and re-open the treetagger process to prevent garbage output.
-            if line_count > maxlines:
-                tt_worker.stdin.close()
-                tt_worker.wait()
-                new_ttout_fh = open(text["raw"]+".ttout","a")
-                tt_worker = Popen(tt_args, stdin=PIPE,stdout=new_ttout_fh)
-                line_count = 0
-            print >> tt_worker.stdin, word
-            line_count += 1
-
-    # finish tagging        
-    tt_worker.stdin.close()
-    tt_worker.wait()
-
-    # go back through the object file, and add the treetagger results to each word
-    tmp_fh = open(text["raw"]+".tmp","w")
-    tag_fh = open(text["raw"] + ".ttout","r")    
-    for line in open(text["raw"],"r"):
-        type, word, id, attrib = line.split('\t')
-        id = id.split()
-        record = Record(type,word,id)
-        record.attrib = eval(attrib)                
-        if type == "word":
-            tag_l = tag_fh.readline()
-            next_word,tag = tag_l.split("\t")[0:2]
-            pos,lem,prob = tag.split(" ")
-            if next_word != word.decode('utf-8', 'ignore').lower().encode('utf-8'):
-                print >> sys.stderr, "TREETAGGER ERROR:",next_word," != ",word,pos,lem
-                return
-            else:
-                record.attrib["pos"] = pos
-                record.attrib["lemma"] = lem
-                print >> tmp_fh, record
-        else:
-            print >> tmp_fh, record
-    os.remove(text["raw"])
-    os.rename(text["raw"] + ".tmp",text["raw"])
-    os.remove(text["raw"] + ".ttout")
-  return tag_words
-    
-def fix_pages(loader_obj,text,depth=4):
-    """Unfinished, do not use"""
-    object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word'][:depth]
-    current_page = 0;
-    temp_file = open(text["sortedtoms"] + ".tmp","w")
-    for line in open(text["sortedtoms"]):
-        type, word, id, attrib = line.split('\t')
-        id = id.split()
-        record = Record(type, word, id)
-        record.attrib = eval(attrib) 
-                
-
-def prev_next_obj(loader_obj, text, depth=4):
-    object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word'][:depth]
-    record_dict = {}
-    temp_file = text['raw'] + '.tmp'
-    output_file = open(temp_file, 'w')
-    for line in open(text['sortedtoms']):
-        type, word, id, attrib = line.split('\t')
-        id = id.split()
-        record = Record(type, word, id)
-        record.attrib = eval(attrib) 
-        if type in record_dict:
-            record_dict[type].attrib['next'] = ' '.join(id)
-            if type in object_types:
-                print >> output_file, record_dict[type]
-            else:
-                del record_dict[type].attrib['next']
-                del record_dict[type].attrib['prev']
-                print >> output_file, record_dict[type]
-            record.attrib['prev'] = ' '.join(record_dict[type].id)
-            record_dict[type] = record
-        else:
-            record.attrib['prev'] = ''
-            record_dict[type] = record
-    object_types.reverse()
-    for obj in object_types:
-        try:
-            record_dict[obj].attrib['next'] = ''
-            print >> output_file, record_dict[obj]
-        except KeyError:
-            pass
-    output_file.close()
-    os.remove(text['sortedtoms'])
-    type_pattern = "|".join("^%s" % t for t in loader_obj.types)
-    tomscommand = "cat %s | egrep \"%s\" | sort %s > %s" % (temp_file,type_pattern,loader_obj.sort_by_id,text["sortedtoms"])
-    os.system(tomscommand)
-    os.remove(temp_file)
-
 def generate_words_sorted(loader_obj, text):
     wordcommand = "cat %s | egrep \"^word\" | sort %s %s > %s" % (text["raw"],loader_obj.sort_by_word,loader_obj.sort_by_id,text["words"])
-    os.system(wordcommand)        
+    os.system(wordcommand)
+
+def make_object_ancestors(*types):
+    ## We should add support for a 'div' type in the future
+    type_depth = {'doc':1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5,
+                        'sent': 6, 'word': 7}
+    
+    def inner_make_object_ancestors(loader_obj, text):
+        temp_file = text['words'] + '.tmp'
+        output_file = open(temp_file, 'w')
+        for line in open(text['words']):
+            type, word, id, attrib = line.split('\t')
+            id = id.split()
+            record = Record(type, word, id)
+            record.attrib = eval(attrib)
+            for type in types:
+                zeros_to_add = ['0' for i in range(7 - type_depth[type])]
+                philo_id = id[:type_depth[type]] + zeros_to_add
+                record.attrib[type + '_ancestor'] = ' '.join(philo_id)
+            print >> output_file, record
+        output_file.close()
+        os.remove(text['words'])
+        os.rename(temp_file, text['words'])
+    return inner_make_object_ancestors
 
 def make_sorted_toms(*types):
     def sorted_toms(loader_obj, text):
@@ -160,12 +56,47 @@ def make_sorted_toms(*types):
         tomscommand = "cat %s | egrep \"%s\" | sort %s > %s" % (text["raw"],type_pattern,loader_obj.sort_by_id,text["sortedtoms"])
         os.system(tomscommand)
     return sorted_toms
-    
-def old_sorted_toms(loader_obj, text):
-    # should be entirely superseded by make_sorted_toms
-    type_pattern = "|".join("^%s" % t for t in loader_obj.types)
-    tomscommand = "cat %s | egrep \"%s\" | sort %s > %s" % (text["raw"],type_pattern,loader_obj.sort_by_id,text["sortedtoms"])
-    os.system(tomscommand)
+
+def prev_next_obj(*types):
+    """Store the previous and next object for every object passed to this function
+    By default, this is doc, div1, div2, div3."""
+    types = list(types)
+    def inner_prev_next_obj(loader_obj, text):
+        record_dict = {}
+        temp_file = text['raw'] + '.tmp'
+        output_file = open(temp_file, 'w')
+        for line in open(text['sortedtoms']):
+            type, word, id, attrib = line.split('\t')
+            id = id.split()
+            record = Record(type, word, id)
+            record.attrib = eval(attrib) 
+            if type in record_dict:
+                record_dict[type].attrib['next'] = ' '.join(id)
+                if type in types:
+                    print >> output_file, record_dict[type]
+                else:
+                    del record_dict[type].attrib['next']
+                    del record_dict[type].attrib['prev']
+                    print >> output_file, record_dict[type]
+                record.attrib['prev'] = ' '.join(record_dict[type].id)
+                record_dict[type] = record
+            else:
+                record.attrib['prev'] = ''
+                record_dict[type] = record
+        types.reverse()
+        for obj in types:
+            try:
+                record_dict[obj].attrib['next'] = ''
+                print >> output_file, record_dict[obj]
+            except KeyError:
+                pass
+        output_file.close()
+        os.remove(text['sortedtoms'])
+        type_pattern = "|".join("^%s" % t for t in loader_obj.types)
+        tomscommand = "cat %s | egrep \"%s\" | sort %s > %s" % (temp_file,type_pattern,loader_obj.sort_by_id,text["sortedtoms"])
+        os.system(tomscommand)
+        os.remove(temp_file)
+    return inner_prev_next_obj     
     
 def generate_pages(loader_obj, text):
     pagescommand = "cat %s | egrep \"^page\" > %s" % (text["raw"],text["pages"])
@@ -183,20 +114,9 @@ def make_max_id(loader_obj, text):
     
 
 
-def normalize_unicode_words(loader_obj, text):
-    tmp_file = open(text["words"] + ".tmp","w")
-    for line in open(text["words"]):
-        type, word, id, attrib = line.split('\t')
-        id = id.split()
-        word = word.decode("utf-8").lower().encode("utf-8")
-        record = Record(type, word, id)
-        print >> tmp_file, record
-    os.remove(text["words"])
-    os.rename(text["words"] + ".tmp",text["words"])   
-
 ##Useful for nested metadata.  Should always pair with normalize_divs_post in postFilters
 def normalize_divs(*columns):
-    def normalize_these_columns(loader_obj,text,depth=5):
+    def normalize_these_columns(loader_obj,text):
         current_values = {}
         tmp_file = open(text["sortedtoms"] + ".tmp","w")
         for column in columns:
@@ -252,29 +172,62 @@ def normalize_unicode_columns(*columns):
     return smash_these_unicode_columns
     
 
-def make_object_ancestors(*types):
-    ## We should add support for a 'div' type in the future
-    type_depth = {'doc':1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5,
-                        'sent': 6, 'word': 7}
+
+### Optional filters
+def tree_tagger(tt_path,param_file,maxlines=20000):
+    def tag_words(loader_obj,text):  
+        # Set up the treetagger process
+        tt_args = [tt_path,"-token","-lemma","-prob",'-no-unknown', "-threshold",".01",param_file]
+        ttout_fh = open(text["raw"]+".ttout","w")
+        tt_worker = Popen(tt_args,stdin=PIPE,stdout=ttout_fh)
+        raw_fh = open(text["raw"],"r")
+        line_count = 0
     
-    def inner_make_object_ancestors(loader_obj, text):
-        temp_file = text['words'] + '.tmp'
-        output_file = open(temp_file, 'w')
-        for line in open(text['words']):
+        # read through the object file, pass the words to treetagger
+        for line in raw_fh:
+            type, word, id, attrib = line.split('\t')        
+            id = id.split()
+            if type == "word":
+                word = word.decode('utf-8', 'ignore').lower().encode('utf-8')
+                # close and re-open the treetagger process to prevent garbage output.
+                if line_count > maxlines:
+                    tt_worker.stdin.close()
+                    tt_worker.wait()
+                    new_ttout_fh = open(text["raw"]+".ttout","a")
+                    tt_worker = Popen(tt_args, stdin=PIPE,stdout=new_ttout_fh)
+                    line_count = 0
+                print >> tt_worker.stdin, word
+                line_count += 1
+    
+        # finish tagging        
+        tt_worker.stdin.close()
+        tt_worker.wait()
+    
+        # go back through the object file, and add the treetagger results to each word
+        tmp_fh = open(text["raw"]+".tmp","w")
+        tag_fh = open(text["raw"] + ".ttout","r")    
+        for line in open(text["raw"],"r"):
             type, word, id, attrib = line.split('\t')
             id = id.split()
-            record = Record(type, word, id)
-            record.attrib = eval(attrib)
-            for type in types:
-                zeros_to_add = ['0' for i in range(7 - type_depth[type])]
-                philo_id = id[:type_depth[type]] + zeros_to_add
-                record.attrib[type + '_ancestor'] = ' '.join(philo_id)
-            print >> output_file, record
-        output_file.close()
-        os.remove(text['words'])
-        os.rename(temp_file, text['words'])
-    return inner_make_object_ancestors
-
+            record = Record(type,word,id)
+            record.attrib = eval(attrib)                
+            if type == "word":
+                tag_l = tag_fh.readline()
+                next_word,tag = tag_l.split("\t")[0:2]
+                pos,lem,prob = tag.split(" ")
+                if next_word != word.decode('utf-8', 'ignore').lower().encode('utf-8'):
+                    print >> sys.stderr, "TREETAGGER ERROR:",next_word," != ",word,pos,lem
+                    return
+                else:
+                    record.attrib["pos"] = pos
+                    record.attrib["lemma"] = lem
+                    print >> tmp_fh, record
+            else:
+                print >> tmp_fh, record
+        os.remove(text["raw"])
+        os.rename(text["raw"] + ".tmp",text["raw"])
+        os.remove(text["raw"] + ".ttout")
+    return tag_words
 
 def evaluate_word(word, word_pattern):
     word = word.decode('utf-8', 'ignore')
@@ -334,6 +287,6 @@ def store_in_plain_text(*types):
 
 ## If you are going to change the order of these filters (which is not recommended)
 ## please consult the documentation for each of these filters in LoadFilters.py
-DefaultLoadFilters = [normalize_unicode_raw_words,make_word_counts, generate_words_sorted,
-                        make_object_ancestors('doc', 'div1', 'div2', 'div3'), make_sorted_toms("doc","div1","div2","div3"),
-                        prev_next_obj,generate_pages, make_max_id]
+DefaultLoadFilters = [normalize_unicode_raw_words, generate_words_sorted,make_object_ancestors('doc', 'div1', 'div2', 'div3'),
+                      make_sorted_toms("doc","div1","div2","div3"), prev_next_obj('doc', 'div1', 'div2', 'div3'),
+                      generate_pages, make_max_id]
