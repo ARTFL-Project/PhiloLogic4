@@ -39,15 +39,18 @@ if database_root is None or url_root is None:
 template_dir = database_root + "_system_dir/_install_dir/"
 # The load process will fail if you haven't set up the template_dir at the correct location.
 
-# Define text objects for ranked relevancy: by default it's ['doc']. Disable by supplying empty list
-default_object_level = 'doc' 
+# Define default object level
+default_object_level = 'doc'
+
+# Define navigable objects
+navigable_objects = ('doc', 'div1', 'div2', 'div3')
 
 # Data tables to store.
 tables = ['words', 'toms', 'pages']
 
 # Define filters as a list of functions to call, either those in Loader or outside
-filters = [normalize_unicode_raw_words,make_word_counts, generate_words_sorted,make_object_ancestors('doc', 'div1', 'div2', 'div3'), make_sorted_toms("doc","div1","div2","div3","para"),
-           prev_next_obj,generate_pages, make_max_id]
+filters = [normalize_unicode_raw_words,generate_words_sorted,make_object_ancestors(*navigable_objects),
+           make_sorted_toms(*navigable_objects),prev_next_obj,generate_pages, make_max_id]
 post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]
 
 # Define text objects to generate plain text files for various machine learning tasks
@@ -55,11 +58,12 @@ plain_text_obj = []
 if plain_text_obj:
     filters.extend([store_in_plain_text(*plaint_text_obj)])
 
-extra_locals = {"db_url": url_root + dbname}
-
 ## Define which search reports to enable
-## Note that this can still be configured in your database db_locals.py file
+## This can still be configured in your database db_locals.py file after the load
 search_reports = ['concordance', 'kwic', 'collocation', 'time_series']
+
+
+extra_locals = {"db_url": url_root + dbname}
 extra_locals['search_reports'] = search_reports
 extra_locals['default_object_level'] = default_object_level
 
@@ -67,11 +71,9 @@ extra_locals['default_object_level'] = default_object_level
 ## Set-up database load ###
 ###########################
 
-Philo_Types = ["doc","div" "para"] # every object type you'll be indexing.  pages don't count, yet.
+xpaths =  [("doc","."),("div",".//div1"),("div",".//div2"),("div",".//div3"),("para",".//sp"),("page",".//pb")]         
 
-XPaths =  [("doc","."),("div",".//div1"),("div",".//div2"),("div",".//div3"),("para",".//sp"),("page",".//pb")]         
-
-Metadata_XPaths = [ # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
+metadata_xpaths = [ # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
     # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
     ("doc","./teiHeader//titleStmt/title","title"),
     ("doc","./teiHeader//titleStmt/author","author"),
@@ -114,9 +116,15 @@ setup_db_dir(db_destination, template_dir)
 ####################
 
 l = Loader(data_destination,
+           filters=filters,
            post_filters=post_filters,
            tables=tables,
+           xpaths=xpaths,
+           metadata_xpaths=metadata_xpaths,
+           pseudo_empty_tags=pseudo_empty_tags,
            suppress_tags=suppress_tags,
+           token_regex=token_regex,
+           default_object_level=default_object_level,
            debug=debug)
 
 l.add_files(files)
@@ -125,8 +133,6 @@ load_metadata = [{"filename":f} for f in sorted(filenames)]
 l.parse_files(workers,load_metadata)
 l.merge_objects()
 l.analyze()
-l.make_tables()
+l.setup_sql_load()
+l.post_processing()
 l.finish(**extra_locals)
-
-print "\nDone indexing."
-print "Your database is viewable at " + db_url + "\n"
