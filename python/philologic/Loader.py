@@ -15,6 +15,7 @@ from glob import glob
 import philologic.Parser as Parser
 import philologic.LoadFilters as LoadFilters
 import philologic.PostFilters as PostFilters
+from philologic.PostFilters import make_sql_table
 
 from philologic.utils import OutputHandler
 
@@ -31,6 +32,7 @@ index_cutoff = 10 # index frequency cutoff.  Don't. alter.
 ## at least keep the 'toms' table from toms.db.
 
 default_tables = ['toms', 'pages', 'words']
+
 
 
 class Loader(object):
@@ -106,7 +108,7 @@ class Loader(object):
                         self.metadata_hierarchy[-1].append(param)
                     if param not in self.metadata_types:
                         self.metadata_types[param] = t
-        
+
         #sys.stdout = OutputHandler(console=console_output, log=log)
 
     def setup_dir(self,path):
@@ -327,73 +329,38 @@ class Loader(object):
         #if self.clean:
         #    os.system('rm all_words_sorted')
 
-    def make_tables(self):
-        print '\n### SQL Load ###'
-        print "Loading in the following tables:"
-        for table in self.tables:            
-            self.dbh = sqlite3.connect("../toms.db")
-            self.dbh.text_factory = str
-            self.dbh.row_factory = sqlite3.Row
+    def setup_sql_load(self):
+        self.dbh = sqlite3.connect("%s/toms.db" % self.destination)
+        self.dbh.text_factory = str
+        self.dbh.row_factory = sqlite3.Row
+        for table in self.tables:
             if table == 'words':
-                file_in = self.workdir + '/all_words_sorted'
-                self.make_sql_table(table, file_in, indices=[("philo_name", "%s_ancestor" % self.default_object_level), ('philo_id')])
+                file_in = self.destination + '/WORK/all_words_sorted'
+                indices = [("philo_name", "%s_ancestor" % self.default_object_level), ('philo_id')]
+                depth = 7
             if table == 'pages':
-                file_in = self.workdir + '/all_pages'                
-                self.make_sql_table(table, file_in, indices=["philo_id"],depth=9)
+                file_in = self.destination + '/WORK/all_pages'                
+                indices = [("philo_id",)]
+                depth = 9
             elif table == 'toms':
-                file_in = self.workdir + '/all_toms_sorted'
-                indices = ['philo_type', 'philo_id'] + self.metadata_fields
-                self.make_sql_table(table, file_in, indices=indices)
-   
-    def make_sql_table(self, table, file_in, indices=[], depth=7):
-        conn = self.dbh
-        c = conn.cursor()
-        columns = 'philo_type,philo_name,philo_id,philo_seq'
-        query = 'create table if not exists %s (%s)' % (table, columns)
-        c.execute(query)
-        print "%s table in toms.db database file..." % table,
-        
-        sequence = 0
-        for line in open(file_in):
-            philo_type, philo_name, id, attrib = line.split("\t",3)
-            fields = id.split(" ",8)
-            if len(fields) == 9:
-                row = {}
-                philo_id = " ".join(fields[:depth])
-                row["philo_type"] = philo_type
-                row["philo_name"] = philo_name
-                row["philo_id"] = philo_id
-                row["philo_seq"] = sequence
-                row.update(eval(attrib))
-                columns = "(%s)" % ",".join([i for i in row])
-                insert = "INSERT INTO %s %s values (%s);" % (table, columns,",".join(["?" for i in row]))
-                values = [v for k,v in row.items()]
-                try:
-                    c.execute(insert,values)
-                except sqlite3.OperationalError:
-                    c.execute("PRAGMA table_info(%s)" % table)
-                    column_list = [i[1] for i in c.fetchall()]
-                    for column in row:
-                        if column not in column_list:
-                            c.execute("ALTER TABLE %s ADD COLUMN %s;" % (table,column))
-                    c.execute(insert,values)
-                sequence += 1       
-        conn.commit()
-        
-        for index in indices:
-            try:
-                if isinstance(index, str):
-                    index = (index,) 
-                index_name = '%s_%s_index' % (table,'_'.join(index))
-                index = ','.join(index)
-                c.execute('create index if not exists %s on %s (%s)' % (index_name,table,index))
-            except sqlite3.OperationalError:
-                pass
-        conn.commit()
-        print 'done.'
-        
-        if self.clean:
-            os.system('rm %s' % file_in)
+                file_in = self.destination + '/WORK/all_toms_sorted'
+                indices = [('philo_type',), ('philo_id',)] + self.metadata_fields
+                depth = 7
+            post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
+            self.post_filters.insert(0, post_filter)
+            
+    def post_processing(self, *extra_filters):
+        print '\n### Post-processing filters ###'
+        for f in self.post_filters:
+            f(self)
+            print 'done.'
+            
+        if extra_filters:
+            print 'Running the following additional filters:'
+            for f in extra_filters:
+                print f.__name__ + '...',
+                f(self)
+                print 'done.'
 
     def finish(self, **extra_locals):
         print "\n### Finishing up ###"
@@ -401,13 +368,6 @@ class Loader(object):
         os.mkdir(self.destination + "/hitlists/")
         os.chmod(self.destination + "/hitlists/", 0777)
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
-        
-        if self.post_filters:
-            print 'Running the following post-processing filters:'
-            for f in self.post_filters:
-                print f.__name__ + '...',
-                f(self)
-                print 'done.'
         
         db_locals = open(self.destination + "/db.locals.py","w") 
 
@@ -420,16 +380,14 @@ class Loader(object):
         for k,v in extra_locals.items():
             print >> db_locals, "%s = %s" % (k,repr(v))
 
-        print "wrote metadata info to %s." % (self.destination + "/db.locals.py")
-           
-
+        print "wrote metadata info to %s." % (self.destination + "/db.locals.py")        
 
 def handle_command_line(argv):
     usage = "usage: %prog [options] database_name files"
     parser = OptionParser(usage=usage)
     parser.add_option("-q", "--quiet", action="store_true", dest="quiet", help="suppress all output")
     parser.add_option("-l", "--log", default=False, dest="log", help="enable logging and specify file path")
-    parser.add_option("-c", "--cores", type="int", default="2", dest="workers", help="define the number of cores for parsing")
+    parser.add_option("-w", "--workers", type="int", default="2", dest="workers", help="define the number of cores for parsing")
     parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
     
     ## Parse command-line arguments
@@ -446,7 +404,8 @@ def handle_command_line(argv):
         print >> sys.stderr, "\nError: you did not supply a database name or a path for your file(s) to be loaded\n"
         parser.print_help()
         sys.exit()
-    ## Number of cores used for parsing: you can define your own value on the
+        
+    ## Number of workers used for parsing: you can define your own value on the
     ## command-line, stay with the default, or define your own value here
     workers = options.workers or 2
     
