@@ -133,8 +133,6 @@ load_metadata = [{"filename":f} for f in sorted(filenames)]
 l.parse_files(workers,load_metadata)
 l.merge_objects()
 l.analyze()
-l.make_tables()
+l.setup_sql_load()
+l.post_processing()
 l.finish(**extra_locals)
-
-print "\nDone indexing."
-print "Your database is viewable at " + db_url + "\n"
