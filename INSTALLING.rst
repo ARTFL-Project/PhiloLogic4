@@ -113,7 +113,7 @@ we advice to install a fresh one via `pip`_ [2]_::
 
     sudo pip install Mako
 
-Running the ``loader.py`` depends it-self on `lxml`_, and previous remark for
+Running the ``loader.py`` depends itself on `lxml`_, and previous remark for
 `Mako` also applies here::
 
     sudo pip install lxml
@@ -174,9 +174,9 @@ a database name::
     python ~/mycorpus/loader.py
 
 The script also accepts optional arguments, among others most common are
-``--cores`` and ``--debug``:
+``--workers`` and ``--debug``:
 
-``-c WORKERS`` / ``--cores=WORKERS``:
+``-w WORKERS`` / ``--workers=WORKERS``:
     This option set the number of workers the ``loader.py`` will use.
     It is mostly usefull for multi-cores hardware.
 
