@@ -56,6 +56,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
             except sqlite3.OperationalError:
                 pass
         conn.commit()
+        conn.close()
         
         if loader_obj.clean:
             os.system('rm %s' % file_in)
