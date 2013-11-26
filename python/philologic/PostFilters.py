@@ -7,11 +7,13 @@ from collections import defaultdict
 
 
 
-def make_sql_table(table, file_in, db_file=None, indices=[], depth=7):
+def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
     def inner_make_sql_table(loader_obj):
         print "Loading the %s SQLite table..." % table,
-        if db_file == None:
-            conn = loader_obj.dbh
+        db_destination = os.path.join(loader_obj.destination, db_file)
+        conn = sqlite.connect(db_destination)
+        conn.text_factory = str
+        conn.row_factory = sqlite3.Row
         c = conn.cursor()
         columns = 'philo_type,philo_name,philo_id,philo_seq'
         query = 'create table if not exists %s (%s)' % (table, columns)
@@ -54,6 +56,7 @@ def make_sql_table(table, file_in, db_file=None, indices=[], depth=7):
             except sqlite3.OperationalError:
                 pass
         conn.commit()
+        conn.close()
         
         if loader_obj.clean:
             os.system('rm %s' % file_in)

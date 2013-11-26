@@ -330,15 +330,12 @@ class Loader(object):
         #    os.system('rm all_words_sorted')
 
     def setup_sql_load(self):
-        self.dbh = sqlite3.connect("%s/toms.db" % self.destination)
-        self.dbh.text_factory = str
-        self.dbh.row_factory = sqlite3.Row
         for table in self.tables:
             if table == 'words':
                 file_in = self.destination + '/WORK/all_words_sorted'
-                indices = [("philo_name", "%s_ancestor" % self.default_object_level), ('philo_id')]
+                indices = [("philo_name", "%s_ancestor" % self.default_object_level), ('philo_id',)]
                 depth = 7
-            if table == 'pages':
+            elif table == 'pages':
                 file_in = self.destination + '/WORK/all_pages'                
                 indices = [("philo_id",)]
                 depth = 9
