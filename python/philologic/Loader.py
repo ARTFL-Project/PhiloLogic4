@@ -330,9 +330,6 @@ class Loader(object):
         #    os.system('rm all_words_sorted')
 
     def setup_sql_load(self):
-        self.dbh = sqlite3.connect("%s/toms.db" % self.destination)
-        self.dbh.text_factory = str
-        self.dbh.row_factory = sqlite3.Row
         for table in self.tables:
             if table == 'words':
                 file_in = self.destination + '/WORK/all_words_sorted'
