@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="${db.locals['db_url']}/css/style.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="${db.locals['db_url']}/css/textObjectNavigation.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="${db.locals['db_url']}/css/searchForm.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="${db.locals['db_url']}/css/selectric.css" type="text/css" media="screen, projection">
 <script>
     var db_locals = ${db_locals}; /* loading the db_locals Python variable in javascript */
 </script>
@@ -17,6 +18,7 @@
 <script type="text/javascript" src="${db.locals['db_url']}/js/jquery.hoverIntent.minified.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/jquery.scrollTo.min.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/history.js/jquery.history.js"></script>
+<script type="text/javascript" src="${db.locals['db_url']}/js/jquery.selectric.min.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/philologic.js"></script>
 </head>
 <body onunload="">

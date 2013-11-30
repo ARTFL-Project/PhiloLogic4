@@ -10,8 +10,8 @@
     border-right-style: solid;
     border-right-width: 1px;
     border-right-color: #ECECEC;
-    border-bottom-style: double;
-    border-bottom-width: 5px;
+    border-bottom-style: single;
+    border-bottom-width: 1px;
     border-bottom-color: #ECECEC;
     border-top-style: solid;
     border-top-width: 1px;
@@ -20,7 +20,7 @@
     color: #555 !important;
 }
 #search_elements {
-    margin-top: 20px;
+    margin-top: 10px;
     padding-left: 30px;
     border-top: solid;
     border-top-width: 1px;
@@ -29,6 +29,7 @@
 }
 .search_box {
     width: 250px;
+    vertical-align: middle;
 }
 #show_search_form {
     font-size: 100%;
@@ -45,20 +46,36 @@
     white-space: nowrap;
     margin-right: 0px;
 }
-#initial_form {
-    /*margin-left: 5px;*/
-}
 #search_field {
     font-weight: 400;
+    /*margin-right: 10px;*/
 }
 #more_options {
-    float: right;
-    padding-right: 10px;
+    width: 200px;
+    /*padding-right: 10px;*/
+    /*background-color: #F0F0F0;*/
+    /*width: 840px;*/
+    /*text-align: center;*/
+    /*/*font-size: 80% !important;*/*/
+    /*height: 16px !important;*/
+    /*border-right-width: 0px !important;*/
+    /*border-left-width: 0px !important;*/
+    /*background: white !important;*/
+}
+#more_options:hover {
+    cursor: pointer;
+    background-color: #E0E0E0;
+}
+#search_terms_container {
+    margin-top: 15px;
+}
+#search_terms {
+    text-align: center;
 }
 #search_explain {
     margin-left: 420px;
 	width: 399px;
-	margin-top: 20px;
+	margin-top: 10px;
 	padding-top:10px;
 	padding-left: 10px;
 	text-align: justify;
@@ -102,7 +119,7 @@
 }
 #frequency_task {
     display: none;
-    margin-top: 20px;
+    margin-top: 10px;
     border-top:solid 1px #ECECEC;
     padding-top: 10px;
     padding-left: 25px;
