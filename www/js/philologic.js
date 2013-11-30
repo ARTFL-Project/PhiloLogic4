@@ -45,40 +45,11 @@ $(document).ready(function() {
         active: false
     });
     ////////////////////////////////////////////////////////////////////////////
-    
-    
-    
-    ////////////////////////////////////////////////////////////////////////////
-    ///////// Frequency / Frequency per 10,000 switcher ////////////////////////
-    ////////////////////////////////////////////////////////////////////////////
-    if ($('#philologic_frequency_report').length) {
-        frequency_switcher(db_url);
-    }
-    ////////////////////////////////////////////////////////////////////////////
 
     display_options_on_selected();
     
 });
 
-
-////////////////////////////////////////////////////////////////////////////////
-//////////// FUNCTIONS /////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-
-// Switch between absolute frequency and frequency per 10,000 words
-function frequency_switch(db_url) {
-    $('#frequency_report_switch').on("change", function(){
-        var switchto = $('input[name=freq_switch]:checked').val();
-        var width = $(window).width() / 3;
-        $("#waiting").css("margin-left", width).show();
-        $("#waiting").css("margin-top", 200).show();
-        $.get(db_url + "/scripts/frequency_switcher.py" + switchto, function(data) {
-            $("#results_container").hide().html(data).fadeIn('fast');
-            $("#waiting").hide();
-        });
-    });
-}
 
 ///////////////////////////////////////////////////
 ////// Functions shared by various reports ////////
@@ -208,11 +179,19 @@ var waitForFinalEvent = (function () {
 
 //    These functions are for the sidebar frequencies
 function sidebar_reports(q_string, db_url, pathname) {
-    $("#toggle_frequency").click(function() {
-        toggle_frequency(q_string, db_url, pathname);
-    });
-    $("#frequency_field").change(function() {
-        toggle_frequency(q_string, db_url, pathname);
+    $('#frequency_field').selectric({
+        onOpen: function() {
+            sidebar_field = $('#sidebar_button').find('.selected').text();
+        },
+        onClose: function() {
+            new_sidebar_field = $('#sidebar_button').find('.selected').text();
+            if (sidebar_field != new_sidebar_field) {
+                toggle_frequency(q_string, db_url, pathname);
+            }
+            else if ($('#frequency_table').is(':empty') && sidebar_field != new_sidebar_field) {
+                toggle_frequency(q_string, db_url, pathname);
+            }
+        }
     });
     $("#hide_frequency").click(function() {
         hide_frequency();
@@ -233,24 +212,24 @@ function toggle_frequency(q_string, db_url, pathname) {
                 getCitationWidth();
             }
     );
-    var width = $(".sidebar_display").width() / 2;
+    var width = $("#sidebar_display").width() / 2;
     $(".loading").append(spinner).css("margin-left", width).css("margin-top", "10px").show();
     $.getJSON(script_call, function(data) {
         var newlist = "";
         $(".loading").hide().empty();
         if (field == "collocate") {
-            newlist += "<p class='freq_sidebar_status'>Collocates within 10 words left or right</p>";
+            newlist += "<p id='freq_sidebar_status'>Collocates within 10 words left or right</p>";
         }
         $.each(data, function(index, item) {
-            var url = '<a class="freq_sidebar_text" href="' + item[2] + '">' + item[0] + '</a>';
+            var url = '<a id="freq_sidebar_text" href="' + item[2] + '">' + item[0] + '</a>';
             newlist += '<li style="white-space:nowrap;">';
             newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:10px;"></span>';
             newlist += url + '<span style="float:right;display:inline-block;padding-right: 5px;">' + item[1] + '</span></li>';
         });
-        $("#freq").hide().empty().html(newlist).fadeIn('fast');
+        $("#frequency_table").hide().empty().html(newlist).fadeIn('fast');
     });
     $("#hide_frequency").show();
-    $(".frequency_container").show();
+    $("#frequency_container").show();
     $("#hide_frequency").click(function() {
         hide_frequency();
     });
@@ -258,8 +237,8 @@ function toggle_frequency(q_string, db_url, pathname) {
 }
 function hide_frequency() {
     $("#hide_frequency").hide();
-    $("#freq").empty().hide();
-    $('.frequency_container').hide();
+    $("#frequency_table").empty().hide();
+    $('#frequency_container').hide();
     $(".loading").empty();
     $(".results_container").animate({
         "margin-right": "0px"},

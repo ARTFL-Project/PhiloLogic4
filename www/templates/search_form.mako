@@ -31,17 +31,14 @@
                 </span>
             </div>
             <div id="search_terms_container">
-                <table style="margin: 0 auto" id="search_terms">
-                    <tr class="table_row" ><td><span id="search_field" style="margin-right: 10px;">Search Terms:</span></td>
-                    <td class="second_column">
-                        <input type='text' name='q' id='q' class="search_box"><br>
-                    </td>
-                    <td><input id="button1" type='submit' value="Search"/></td>
-                    <td><span id="more_options">Show search options</span></td>
-                    <td><button type="reset" id="reset_form1">Clear form</button></td>
-                    </tr>
-                </table>
-                <div id="syntax" style="width:514px;margin-top:-12px;">
+                <div id="search_terms">
+                    <span id="search_field">Search Terms:</span>
+                    <input type='text' name='q' id='q' class="search_box">
+                    <input id="button1" type='submit' value="Search"/>
+                    <button type="reset" id="reset_form1">Clear form</button>
+                    <span id="more_options">Show search options</span>
+                </div>
+                <div id="syntax" style="width:514px;">
                     <span id='syntax_title'>
                         Click for tips on the query syntax
                     </span>
@@ -73,8 +70,9 @@
                     </div>
                 </div>
             </div>
-         </div>
-         <div id="search_explain">
+            <!--<div id="more_options"><span class="ui-icon ui-icon-arrowthick-1-s" style="vertical-align: top; margin:0 auto;margin-top: -5px;"></span></div>-->
+        </div>
+        <div id="search_explain">
             <h3 id="conc_question">What does a concordance report do?</h3>
             <div id="explain_conc">
                Concordance search finds every single occurrence of the search term(s)
@@ -151,28 +149,6 @@
                         (1-20) words
                     </td>
                 </tr>
-               
-                <tr class="table_row" id="frequency_num">
-                    <td class="first_column">
-                        <span class="search_field">Frequency by:</span>
-                    </td>
-                    <td>
-                        <label class="custom-select">
-                            <select id='field' name="field">
-                                % for facet in db.locals["metadata_fields"]:
-									<%
-									if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
-										alias = db.locals["metadata_aliases"][facet]
-									else:
-										alias = facet
-									%>
-                                    <option value='${facet}'>${alias}                                    
-                                % endfor
-                            </select>
-                        </label>
-                    </td>
-                </tr>
-                
                 <tr class="table_row" id="time_series_num">
 					<td class="first_column">Date range:</td>
 					<td>
