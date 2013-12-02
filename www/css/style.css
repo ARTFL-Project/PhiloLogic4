@@ -386,13 +386,13 @@ ul.ui-autocomplete.ui-menu {
 /*All the sidebar classes*/
 #hide_frequency {
     font-family: 'Droid Sans Mono', sans-serif !important;
-    font-size: 130%;
+    /*font-size: 130%;*/
     float: right;
     color: #555;
-    height: 21px;
-    border-top: 0px;
-    border-right: 0px;
+    margin-top: -29px;
     display: none;
+    padding-bottom: 3px;
+    padding-top: 3px;
 }
 #hide_frequency:hover {
     color: Black;
@@ -415,10 +415,9 @@ ul.ui-autocomplete.ui-menu {
     display: none;
 }
 #frequency_table {
-    padding: 25px 5px 10px 5px;
-    line-height: 250%;
+    padding: 5px 5px 5px 5px;
+    line-height: 230%;
     /*overflow-y: scroll;*/
-    margin-top: 9px;
 }
 #freq_sidebar_text {
     display: inline-block !important;
@@ -436,11 +435,13 @@ ul.ui-autocomplete.ui-menu {
     box-shadow: 0px 0px 3px #A8A8A8;
     z-index: 1000;
     margin-right: 31px;
-    line-height: 200%;
+    line-height: 230%;
     color: #555;
+    margin-top: 38px;
 }
 .sidebar_option {
     padding-left: 1em;
+    border-top: solid 1px #ECECEC;
 }
 .sidebar_option:hover {
     cursor: pointer;
