@@ -179,26 +179,29 @@ var waitForFinalEvent = (function () {
 
 //    These functions are for the sidebar frequencies
 function sidebar_reports(q_string, db_url, pathname) {
-    $('#frequency_field').selectric({
-        onOpen: function() {
-            sidebar_field = $('#sidebar_button').find('.selected').text();
-        },
-        onClose: function() {
-            new_sidebar_field = $('#sidebar_button').find('.selected').text();
-            if (sidebar_field != new_sidebar_field) {
-                toggle_frequency(q_string, db_url, pathname);
-            }
-            else if ($('#frequency_table').is(':empty') && sidebar_field != new_sidebar_field) {
-                toggle_frequency(q_string, db_url, pathname);
-            }
+    $("#frequency_by").button().click(function(e) {
+        e.stopPropagation();
+        if ($('#frequency_field').css('display') == 'none') {
+            $('#frequency_field').css('width', $("#frequency_by").width());
+            $('#frequency_field').fadeIn('fast');
+        } else {
+            $('#frequency_field').fadeOut('fast');
         }
+    });
+    $(document).click(function() {
+        $('#frequency_field').fadeOut('fast');
+    });
+    $('.sidebar_option').click(function(evt) {
+        $('#frequency_field').fadeOut('fast');
+        value = $(this).data('value');
+        $('#displayed_sidebar_value').html(value);
+        toggle_frequency(q_string, db_url, pathname,value);
     });
     $("#hide_frequency").click(function() {
         hide_frequency();
     });
 }
-function toggle_frequency(q_string, db_url, pathname) {
-    var field =  $("#frequency_field").val();
+function toggle_frequency(q_string, db_url, pathname, field) {
     if (field != 'collocate') {
         var script_call = db_url + "/scripts/get_frequency.py?" + q_string + "&frequency_field=" + field;
     } else {
@@ -233,7 +236,6 @@ function toggle_frequency(q_string, db_url, pathname) {
     $("#hide_frequency").click(function() {
         hide_frequency();
     });
-    sidebar_reports(q_string, db_url, pathname);
 }
 function hide_frequency() {
     $("#hide_frequency").hide();

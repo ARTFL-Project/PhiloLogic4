@@ -18,7 +18,7 @@ $(document).ready(function() {
     closeConcordance();
     $('.close_concordance').hide();
     
-    getCitationWidth()
+    getCitationWidth();
     $(window).resize(function() {
         getCitationWidth();
     });
