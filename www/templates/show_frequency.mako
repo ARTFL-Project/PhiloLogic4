@@ -1,8 +1,8 @@
 <div id="sidebar_area" style="float: right;margin-top: -8px;">
     <div id="sidebar_button" style="float: right;padding-top: 8px;">
         <span id="frequency_by" style='margin-right: 0px;'>
-            Display frequencies by <span id="displayed_sidebar_value">${db.locals["metadata_fields"][0]}</span>
-            <span style="vertical-align: middle;font-size: 50%;">&nbsp&nbsp&nbsp&#9660;</span>
+            Display frequency by <span id="displayed_sidebar_value">${db.locals["metadata_fields"][0]}</span>
+            <span style="vertical-align: middle;font-size: 60%;">&nbsp&nbsp&nbsp&#9660;</span>
         </span>
         <span id="hide_frequency">X</span>
     </div>

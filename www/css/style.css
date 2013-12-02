@@ -386,7 +386,6 @@ ul.ui-autocomplete.ui-menu {
 /*All the sidebar classes*/
 #hide_frequency {
     font-family: 'Droid Sans Mono', sans-serif !important;
-    /*font-size: 130%;*/
     float: right;
     color: #555;
     margin-top: -29px;
