@@ -403,8 +403,7 @@ ul.ui-autocomplete.ui-menu {
 }
 #sidebar_display {
     margin-top: 38px;
-    min-width: 200px;
-    max-width: 400px;
+    width: 400px;
 }
 #sidebar_display #freq_sidebar_status {
 	margin: 0em 0em 0.5em 0em;
@@ -427,6 +426,26 @@ ul.ui-autocomplete.ui-menu {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+#frequency_field {
+    display: none;
+    position: absolute;
+    max-width: 400px;
+    right: 0;
+    background-color: #F8F8F8;
+    box-shadow: 0px 0px 3px #A8A8A8;
+    z-index: 1000;
+    margin-right: 31px;
+    line-height: 200%;
+    color: #555;
+}
+.sidebar_option {
+    padding-left: 1em;
+}
+.sidebar_option:hover {
+    cursor: pointer;
+    background-color: #EBEBEB;
+    color: black;
 }
 
 
