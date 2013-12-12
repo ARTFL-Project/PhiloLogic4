@@ -377,7 +377,7 @@ class Loader(object):
         for k,v in extra_locals.items():
             print >> db_locals, "%s = %s" % (k,repr(v))
 
-        print "wrote metadata info to %s." % (self.destination + "/db.locals.py")        
+        print "wrote database info to %s." % (self.destination + "/db.locals.py")        
 
 def handle_command_line(argv):
     usage = "usage: %prog [options] database_name files"
