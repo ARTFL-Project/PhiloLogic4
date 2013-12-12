@@ -6,7 +6,6 @@ import philologic
 from philologic.LoadFilters import *
 from philologic.PostFilters import *
 from philologic.Parser import Parser
-from philologic.ParserHelpers import *
 from philologic.Loader import Loader, handle_command_line, setup_db_dir
 
 
