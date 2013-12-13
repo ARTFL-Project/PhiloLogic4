@@ -22,26 +22,32 @@ $(document).ready(function() {
     });
     $("#report").buttonset();
     $('#form_body').show();
-    $("#search_elements").hide();
-    $('#conc_question, #freq_question, #colloc_question, #time_question, #relev_question, #kwic_question').hide();
-    $('#search_explain').hide();
-    showHide($('input[name=report]:checked', '#search').val());
-    $('#report').find('label').click(function() {
-        var report = $(this).attr('for');
-        if ($("#search_elements:visible")) {
-            showHide(report);
-            if (report != "frequencies") {
-                $("#search_elements").slideDown();
-                $('#search_explain').slideDown();
+    if (global_report == "landing_page") {
+        showHide('concordance');
+        $('#search_explain').show();
+        $('#search_elements').show();
+    } else {
+        $("#search_elements").hide();
+        $('#conc_question, #freq_question, #colloc_question, #time_question, #relev_question, #kwic_question').hide();
+        $('#search_explain').hide();
+        showHide($('input[name=report]:checked', '#search').val());
+        $('#report').find('label').click(function() {
+            var report = $(this).attr('for');
+            if ($("#search_elements:visible")) {
+                showHide(report);
+                if (report != "frequencies") {
+                    $("#search_elements").slideDown();
+                    $('#search_explain').slideDown();
+                }
+            } else {
+                showHide(report);
+                if (report != "frequencies") {
+                    $("#search_elements").fadeIn();
+                    $('#search_explain').fadeIn();
+                }
             }
-        } else {
-            showHide(report);
-            if (report != "frequencies") {
-                $("#search_elements").fadeIn();
-                $('#search_explain').fadeIn();
-            }
-        }
-    });
+        });
+    }
       
     $("#q").autocomplete({
         source: db_url + "/scripts/term_list.py",
@@ -213,7 +219,7 @@ function showHide(value) {
     $('#relev_question, #conc_question, #colloc_question, #time_question, #kwic_question').hide();
     $('#frequency_task, #bottom_search').hide()
     if (value == 'collocation') {
-        $("#collocation_num, #method, #metadata_fields").show();
+        $("#collocation_num, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
         $('#colloc_question').show();
         $('#search_terms_container').slideDown('fast');

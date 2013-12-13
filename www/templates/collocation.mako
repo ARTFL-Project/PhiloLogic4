@@ -1,13 +1,13 @@
 <%include file="header.mako"/>
 <%include file="search_form.mako"/>
-<script>
-var all_colloc = ${dumps(all_colloc)};
-var left_colloc = ${dumps(left_colloc)};
-var right_colloc = ${dumps(right_colloc)};
-var hit_len = ${hit_len};
-</script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/jquery.tagcloud.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/collocation.js"></script>
+<script>
+    var all_colloc = ${dumps(all_colloc)};
+    var left_colloc = ${dumps(left_colloc)};
+    var right_colloc = ${dumps(right_colloc)};
+    var hit_len = ${hit_len};
+</script>
 <div id='philologic_response'>
     <div id='initial_report'>
         <p id='description'>

@@ -17,7 +17,7 @@ from collections import defaultdict
 left_truncate = re.compile ("^\w+", re.U)
 right_truncate = re.compile("\w+$", re.U)
 word_identifier = re.compile("\w", re.U)
-end_highlight_match = re.compile(r'.*<span class="highlight">[^<]*?(</span>)')
+highlight_match = re.compile(r'<span class="highlight">[^<]*?</span>')
 token_regex = re.compile(r'\W', re.U)
 
 
@@ -32,7 +32,8 @@ def collocation(environ,start_response):
     return render_template(all_colloc=all_colloc, left_colloc=left_colloc, right_colloc=right_colloc,
                            db=db,dbname=dbname,q=q,link=link_to_concordance,f=f,path=path,
                            results_per_page=q['results_per_page'],hit_len=hit_len,
-                           order=sort_to_display,dumps=json.dumps,template_name='collocation.mako')
+                           order=sort_to_display,dumps=json.dumps,template_name='collocation.mako',
+                           report="collocation")
 
 def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True):
     within_x_words = q['word_num']    
@@ -67,8 +68,7 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
         conc_text = convert_entities(conc_text)
         conc_text = unicodedata.normalize('NFC', conc_text)
         start_highlight = conc_text.find('<span class="highlight"')
-        m = end_highlight_match.search(conc_text)
-        end_highlight = m.end(len(m.groups()) - 1)
+        end_highlight = [m.end(0) for m in highlight_match.finditer(conc_text)][-1]
         conc_left = conc_text[:start_highlight]
         conc_right = conc_text[end_highlight:]
         

@@ -1,11 +1,12 @@
-<div id="sidebar_area" style="float: right;margin-top: -8px;">
-    <div id="sidebar_button" style="float: right;padding-top: 8px;">
-        <span id="frequency_by" style='margin-right: 0px;'>
+<div id="sidebar_area">
+    <ul id="sidebar_button">
+        <li id="frequency_by" style='margin-right: 0px;display: inline-block;'>
             Display frequency by <span id="displayed_sidebar_value">${db.locals["metadata_fields"][0]}</span>
-            <span style="vertical-align: middle;font-size: 60%;">&nbsp&nbsp&nbsp&#9660;</span>
-        </span>
-        <span id="hide_frequency">X</span>
-    </div>
+            <span style="vertical-align: middle;font-size: 60%;margin-right: 0;">&nbsp&nbsp&nbsp&#9660;</span>
+        </li>
+        <li id="hide_sidebar">X</li>
+    </ul>
+    
     <ol id="frequency_field">
             % for facet in db.locals["metadata_fields"]:
                 <%

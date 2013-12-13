@@ -20,7 +20,7 @@ def kwic(environ,start_response):
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
                                 path=path, results_per_page=q['results_per_page'],
-                                template_name='kwic.mako')
+                                template_name='kwic.mako', report="kwic")
 
 def fetch_kwic(results, path, q, byte_query, db, start, end, length=500):
     kwic_results = []

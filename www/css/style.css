@@ -32,7 +32,7 @@ body {
     background-image:     -ms-linear-gradient(top, #ffdb9e, #ffffff); /* For pre-releases of IE 10*/
     background-image:      -o-linear-gradient(top, #ffdb9e, #ffffff); /* For old Opera (11.1 to 12.0) */ 
     background-image:         linear-gradient(to bottom, #ffdb9e, #ffffff); /* Standard syntax; must be last */
-    height: 75px;
+    height: 65px;
     box-shadow: 0px 8px 15px -5px #C8C8C8;
 }
 #footer {
@@ -42,7 +42,7 @@ body {
     background-image:     -ms-linear-gradient(top, #ffffff, #ffdb9e); /* For pre-releases of IE 10*/
     background-image:      -o-linear-gradient(top, #ffffff, #ffdb9e); /* For old Opera (11.1 to 12.0) */ 
     background-image:         linear-gradient(to bottom, #ffffff, #ffdb9e); /* Standard syntax; must be last */
-    height: 75px;
+    height: 65px;
     box-shadow: 0px -8px 15px -5px #C8C8C8;
 }
 
@@ -65,10 +65,10 @@ body {
     text-align: center;
     position: absolute;
     padding-left: 30px;
-    margin-top: 20px;
+    margin-top:10px;
 }
 #header h1 {
-  font-size: 2.5em;
+  font-size: 2.2em;
   color: #990000;
 }
 #header h1 a:link, #header h1 a:visited, #header h1 a:hover {
@@ -97,7 +97,7 @@ ul.primary-links li.first {
 }
 #philo_branding {
     float: right;
-    margin-top: -15px;
+    margin-top: -20px;
     margin-right: -10px;
 }
 #footer .block {
@@ -384,21 +384,22 @@ ul.ui-autocomplete.ui-menu {
 
 
 /*All the sidebar classes*/
-#hide_frequency {
-    font-family: 'Droid Sans Mono', sans-serif !important;
+#sidebar_area {
     float: right;
-    color: #555;
-    margin-top: -29px;
+    margin-top: -14px;
+}
+#sidebar_button {
+    float: right;
+    margin: 0;
+    padding: 0;
+    padding-top: 14px;
+}
+#hide_sidebar {
+    font-family: 'Droid Sans Mono', sans-serif !important;
+    font-size: 90% !important;
     display: none;
-    padding-bottom: 3px;
-    padding-top: 3px;
-}
-#hide_frequency:hover {
-    color: Black;
-    cursor: pointer;
-}
-#hide_frequency > .ui-button-text {
-    padding: .1em 1em;
+    border-bottom: 0px;
+    margin-right: 0;
 }
 #sidebar_display {
     margin-top: 38px;
@@ -409,7 +410,7 @@ ul.ui-autocomplete.ui-menu {
 }
 #frequency_container {
     box-shadow: 0px 0px 3px #A8A8A8;
-    margin: 45px 1px 0px 1px;
+    margin: 52px 1px 0px 1px;
     background-color: #FAFAFA;
     display: none;
 }
@@ -436,7 +437,7 @@ ul.ui-autocomplete.ui-menu {
     margin-right: 31px;
     line-height: 230%;
     color: #555;
-    margin-top: 38px;
+    top: 253px;
 }
 .sidebar_option {
     padding-left: 1em;

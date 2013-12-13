@@ -8,4 +8,4 @@ def bibliography(f,path, db, dbname, q, environ):
     else:
         hits = db.query(**q["metadata"])
     return render_template(results=hits,db=db,dbname=dbname,q=q, template_name='bibliography.mako',
-                           results_per_page=q['results_per_page'], f=f)
+                           results_per_page=q['results_per_page'], f=f, report="bibliography")

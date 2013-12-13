@@ -13,7 +13,8 @@ def time_series(environ,start_response):
     frequencies, relative_frequencies = generate_frequency(q, db)
     #frequencies, relative_frequencies = time_frequency(q, db)
     return render_template(frequencies=frequencies,relative_frequencies=relative_frequencies,
-                           db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako')
+                           db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
+                           report="time_series")
 
 def generate_frequency(q, db):
     """reads through a hitlist."""
