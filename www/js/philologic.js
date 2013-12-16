@@ -43,6 +43,7 @@ $(document).ready(function() {
         heightStyle: "content",
         active: false
     });
+    $('#page_links').find('a').each(function(){$(this).button()});
     ////////////////////////////////////////////////////////////////////////////
     
     //display_options_on_selected();

@@ -453,10 +453,13 @@ ul.ui-autocomplete.ui-menu {
 /*Pages links*/
 .more {
     font-size: 130%;
-    margin-left: auto;
-    margin-right: auto;
-    width:8%;
-    padding-top: 10px;
+    text-align: center;
+    margin-top: 20px;
+}
+#page_links a {
+    color: #555 !important;
+    font-weight: 300;
+    margin: -3px;
 }
 .more .previous {
     float:left;
@@ -495,8 +498,8 @@ ul.ui-autocomplete.ui-menu {
     margin-right: auto;
     width: 30%;
 }
-.current_results_page {
-    font-size: 170%;
+#current_results_page {
+    background: white !important;
 }
 
 
