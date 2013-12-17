@@ -65,7 +65,7 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
     }
     var script_call = script + '&colloc_start=' + colloc_start + '&colloc_end=' + colloc_end
     if (colloc_start <= results_len) {
-        $.when($.getJSON(script_call).done(function(data) {
+        $.getJSON(script_call, function(data) {
             all_new_colloc = update_table(all_colloc, data[0], q_string, "all");
             left_new_collc = update_table(left_colloc, data[1], q_string, "left");
             right_new_colloc = update_table(right_colloc, data[2], q_string, "right");
@@ -77,7 +77,7 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
                 $('#progress_bar').progressbar({value: colloc_end});
                 $('.progress-label').text(percent.toString().split('.')[0] + '%');
             }
-        }));
+        });
     }
     else {
         var total = $('#progress_bar').progressbar("option", "max");

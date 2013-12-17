@@ -11,7 +11,7 @@
              if not results.done:
                 r_status += " Still working.  Reload the page for a more accurate count of the results."
             %>
-            Hits <span class="start">${start}</span> - <span class="end">${end}</span> of ${len(results)}${r_status}
+            Hits <span class="start">${start}</span> - <span class="end">${end}</span> of <span id="total_results">${len(results)}</span>${r_status}
         </p>
         <%include file="show_frequency.mako"/>
         <div id="report_switch">

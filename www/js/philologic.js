@@ -200,17 +200,14 @@ function sidebar_reports(q_string, db_url, pathname) {
         value = $(this).data('value');
         $('#displayed_sidebar_value').html(value);
         toggle_frequency(q_string, db_url, pathname,value);
+        var full_results;
+        populate_sidebar(q_string, db_url, value, 0, full_results);
     });
     $("#hide_sidebar").click(function() {
         hide_frequency();
     });
 }
 function toggle_frequency(q_string, db_url, pathname, field) {
-    if (field != 'collocate') {
-        var script_call = db_url + "/scripts/get_frequency.py?" + q_string + "&frequency_field=" + field;
-    } else {
-        var script_call = db_url + "/scripts/get_collocate.py?" + q_string
-    }
     $(".loading").empty().hide();
     var spinner = '<img src="' + db_url + '/js/ajax-loader.gif" alt="Loading..."  height="25px" width="25px"/>';
     $("#results_container").animate({
@@ -221,25 +218,6 @@ function toggle_frequency(q_string, db_url, pathname, field) {
     );
     var width = $("#sidebar_display").width() / 2;
     $(".loading").append(spinner).css("margin-left", width).css("margin-top", "10px").show();
-    $.getJSON(script_call, function(data) {
-        var newlist = "";
-        $(".loading").hide().empty();
-        if (field == "collocate") {
-            newlist += "<p id='freq_sidebar_status'>Collocates within 10 words left or right</p>";
-        }
-        $.each(data, function(index, item) {
-            var url = '<a id="freq_sidebar_text" href="' + item[2] + '">' + item[0] + '</a>';
-            newlist += '<li style="white-space:nowrap;">';
-            newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:10px;"></span>';
-            newlist += url + '<span style="float:right;display:inline-block;padding-right: 5px;">' + item[1] + '</span></li>';
-        });
-        $("#frequency_table").hide().empty().html(newlist).fadeIn('fast');
-    });
-    $("#hide_sidebar").css('display', 'inline-block');
-    $("#frequency_container").show();
-    $("#hide_sidebar").click(function() {
-        hide_frequency();
-    });
 }
 function hide_frequency() {
     $("#hide_sidebar").hide();
@@ -252,4 +230,71 @@ function hide_frequency() {
                 getCitationWidth();
         }
     );
+}
+function populate_sidebar(q_string, db_url, field, interval_start, interval_end, full_results) {
+    if (field != 'collocate') {
+        var script_call = db_url + "/scripts/get_frequency.py?" + q_string + "&frequency_field=" + field;
+    } else {
+        var script_call = db_url + "/scripts/get_collocate.py?" + q_string
+    }
+    var total_results = parseInt($('#total_results').text());
+    if (interval_start === 0) {
+        interval_end = 100;
+    } else if (interval_end === 100) {
+        interval_end = 1100;
+    } else {
+        interval_start += 1000;
+        interval_end += 1000;
+    }
+    if (interval_start < total_results) {
+        script_call += "&interval_start=" + interval_start + "&interval_end=" + interval_end;
+        if (interval_start === 0) {
+            interval_start = 100;
+        }
+        $.getJSON(script_call, function(data) {
+            var newlist = "";
+            if (field == "collocate") {
+                newlist += "<p id='freq_sidebar_status'>Collocates within 10 words left or right</p>";
+            }
+            new_full_results = update_sidebar(full_results, data, newlist);
+            populate_sidebar(q_string, db_url, field, interval_start, interval_end, new_full_results);
+        });
+    } else {
+        $(".loading").hide().empty();
+        
+    }
+}
+function update_sidebar(full_results, new_data, newlist) {
+    if (typeof full_results === 'undefined') {
+        full_results = new_data;
+    } else {
+        for (key in new_data) {
+            if (key in full_results) {
+                full_results[key]['count'] += new_data[key]['count'];
+            }
+            else {
+                full_results[key] = new_data[key];
+            }
+        }
+    }
+    var sorted_list = [];
+    for (key in full_results) {
+        sorted_list.push([key, full_results[key]]);
+    }
+    sorted_list.sort(function(a,b) {return b[1].count - a[1].count});
+    
+    for (item in sorted_list.slice(0,100)) {
+        var url = '<a id="freq_sidebar_text" href="' + sorted_list[item][1]['url'] + '">' + sorted_list[item][0] + '</a>';
+        newlist += '<li style="white-space:nowrap;">';
+        newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:10px;"></span>';
+        newlist += url + '<span style="float:right;display:inline-block;padding-right: 5px;">' + sorted_list[item][1]['count'] + '</span></li>';
+    }
+    $("#frequency_table").hide().empty().html(newlist).fadeIn('fast');
+    $("#hide_sidebar").css('display', 'inline-block');
+    $("#frequency_container").show();
+    $("#hide_sidebar").click(function() {
+        hide_frequency();
+    });
+    
+    return full_results;
 }

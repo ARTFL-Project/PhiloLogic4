@@ -28,14 +28,15 @@ def frequency(environ,start_response):
         return render_template(db=db,dbname=dbname,q=q,frequency_field=field,counts=counts,
                                template_name='frequency.mako')
 
-def generate_frequency(results, q, db):
+def generate_frequency(results, q, db, start, end):
     """reads through a hitlist. looks up q["field"] in each hit, and builds up a list of 
        unique values and their frequencies."""
     field = q["field"]
     if field == None:
         field = 'title'
     counts = defaultdict(int)
-    for n in results:
+    print >> sys.stderr, "ZERROR", type(start), end
+    for n in results[start:end]:
         key = n[field] or "NULL" # NULL is a magic value for queries, don't change it recklessly.
         counts[key] += 1
 
@@ -43,8 +44,8 @@ def generate_frequency(results, q, db):
         for key, count in counts.iteritems():
             counts[key] = relative_frequency(field, key, count, db)
 
-    table = []
-    for k,v in sorted(counts.iteritems(),key=lambda x: x[1], reverse=True)[:100]:
+    table = {}
+    for k,v in counts.iteritems():
         # for each item in the table, we modify the query params to generate a link url.
         if k == "NULL":
             q["metadata"][field] = k # NULL is a magic boolean keyword, not a string value.
@@ -57,7 +58,7 @@ def generate_frequency(results, q, db):
         # This is the place to modify the displayed label of frequency table item.
         label = k #for example, replace NULL with '[None]', 'N.A.', 'Untitled', etc.
             
-        table.append( (label,v,url) )
+        table[label] = {'count': v, 'url': url}
 
     return field, table
     
