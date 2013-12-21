@@ -55,6 +55,13 @@ $(document).ready(function() {
         searchFormOverlap(form_offset);
     });
     
+    // Initialize progress bar for sidebar
+    var total_results = parseInt($('#total_results').text());
+    $('#progress_bar').progressbar({max: total_results});
+    $('#progress_bar').progressbar({value: 100});
+    var percent = 100 / total_results * 100;
+    $('.progress-label').text(percent.toString().split('.')[0] + '%');
+    
 });
 
 
@@ -200,8 +207,9 @@ function sidebar_reports(q_string, db_url, pathname) {
         value = $(this).data('value');
         $('#displayed_sidebar_value').html(value);
         toggle_frequency(q_string, db_url, pathname,value);
+        var total_results = parseInt($('#total_results').text());
         var full_results;
-        populate_sidebar(q_string, db_url, value, 0, full_results);
+        populate_sidebar(q_string, db_url, value, total_results, 0, full_results);
     });
     $("#hide_sidebar").click(function() {
         hide_frequency();
@@ -217,7 +225,6 @@ function toggle_frequency(q_string, db_url, pathname, field) {
             }
     );
     var width = $("#sidebar_display").width() / 2;
-    $(".loading").append(spinner).css("margin-left", width).css("margin-top", "10px").show();
 }
 function hide_frequency() {
     $("#hide_sidebar").hide();
@@ -231,13 +238,12 @@ function hide_frequency() {
         }
     );
 }
-function populate_sidebar(q_string, db_url, field, interval_start, interval_end, full_results) {
+function populate_sidebar(q_string, db_url, field, total_results, interval_start, interval_end, full_results) {
     if (field != 'collocate') {
         var script_call = db_url + "/scripts/get_frequency.py?" + q_string + "&frequency_field=" + field;
     } else {
         var script_call = db_url + "/scripts/get_collocate.py?" + q_string
     }
-    var total_results = parseInt($('#total_results').text());
     if (interval_start === 0) {
         interval_end = 100;
     } else if (interval_end === 100) {
@@ -257,10 +263,20 @@ function populate_sidebar(q_string, db_url, field, interval_start, interval_end,
                 newlist += "<p id='freq_sidebar_status'>Collocates within 10 words left or right</p>";
             }
             new_full_results = update_sidebar(full_results, data, newlist);
-            populate_sidebar(q_string, db_url, field, interval_start, interval_end, new_full_results);
+            populate_sidebar(q_string, db_url, field, total_results, interval_start, interval_end, new_full_results);
+            var total = $('#progress_bar').progressbar("option", "max");
+            var percent = interval_end / total * 100;
+            if (interval_end < total) {
+                $('#progress_bar').progressbar({value: interval_end});
+                $('.progress-label').text(percent.toString().split('.')[0] + '%');
+            }
         });
     } else {
-        $(".loading").hide().empty();
+        var total = $('#progress_bar').progressbar("option", "max");
+        $('#progress_bar').progressbar({value: total});
+        $('.progress-label').text('Complete!');
+        $("#progress_bar").delay(500).slideUp();
+        //$(".loading").hide().empty();
         
     }
 }

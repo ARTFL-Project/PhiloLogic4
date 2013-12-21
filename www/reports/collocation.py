@@ -57,9 +57,9 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
     all_collocates = defaultdict(int)
     
     count = 0
-    if not full_report:
-        q['colloc_start'] = None
-        q['colloc_end'] = None
+    #if not full_report:
+    #    q['colloc_start'] = None
+    #    q['colloc_end'] = None
     for hit in results[q['colloc_start']:q['colloc_end']]:
         ## get my chunk of text ##
         bytes, byte_start = adjust_bytes(hit.bytes, 400)

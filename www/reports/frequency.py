@@ -35,7 +35,6 @@ def generate_frequency(results, q, db, start, end):
     if field == None:
         field = 'title'
     counts = defaultdict(int)
-    print >> sys.stderr, "ZERROR", type(start), end
     for n in results[start:end]:
         key = n[field] or "NULL" # NULL is a magic value for queries, don't change it recklessly.
         counts[key] += 1
