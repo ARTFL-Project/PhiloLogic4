@@ -58,7 +58,6 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
     
     count = 0
     for hit in results[q['colloc_start']:q['colloc_end']]:
-        ## get my chunk of text ##
         bytes, byte_start = adjust_bytes(hit.bytes, 400)
         conc_text = f.get_text(hit, byte_start, 400, path)
         conc_text = format_strip(conc_text, bytes)

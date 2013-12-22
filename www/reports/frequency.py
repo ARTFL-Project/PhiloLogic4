@@ -28,14 +28,14 @@ def frequency(environ,start_response):
         return render_template(db=db,dbname=dbname,q=q,frequency_field=field,counts=counts,
                                template_name='frequency.mako')
 
-def generate_frequency(results, q, db, start, end):
+def generate_frequency(results, q, db):
     """reads through a hitlist. looks up q["field"] in each hit, and builds up a list of 
        unique values and their frequencies."""
     field = q["field"]
     if field == None:
         field = 'title'
     counts = defaultdict(int)
-    for n in results[start:end]:
+    for n in results[q['interval_start']:q['interval_end']]:
         key = n[field] or "NULL" # NULL is a magic value for queries, don't change it recklessly.
         counts[key] += 1
 

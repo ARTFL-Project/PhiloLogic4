@@ -205,9 +205,14 @@ function sidebar_reports(q_string, db_url, pathname) {
     $('.sidebar_option').click(function(evt) {
         $('#frequency_field').slideUp('fast', 'swing');
         value = $(this).data('value');
+        
+        // store the selected field to check whether to kill the ajax calls in populate_sidebar
+        $('#frequency_by').data('selected', value);
+        
         $('#displayed_sidebar_value').html(value);
-        toggle_frequency(q_string, db_url, pathname,value);
+        show_sidebar(q_string, db_url, pathname,value);
         var total_results = parseInt($('#total_results').text());
+        $('#frequency_table').empty();
         $('.progress-label').text('0%');
         $('#progress_bar').progressbar({value: 0});
         $("#progress_bar").show();
@@ -218,7 +223,7 @@ function sidebar_reports(q_string, db_url, pathname) {
         hide_frequency();
     });
 }
-function toggle_frequency(q_string, db_url, pathname, field) {
+function show_sidebar() {
     $("#results_container").animate({
         "margin-right": "410px"},
         150, function() {
@@ -228,7 +233,7 @@ function toggle_frequency(q_string, db_url, pathname, field) {
     );
 }
 function hide_frequency() {
-    $("#hide_sidebar").hide();
+    $("#hide_sidebar").hide().data('interrupt', true);;
     $("#frequency_table").empty().hide();
     $('#frequency_container').hide();
     $(".results_container").animate({
@@ -258,17 +263,21 @@ function populate_sidebar(q_string, db_url, field, total_results, interval_start
             interval_start = 100;
         }
         $.getJSON(script_call, function(data) {
-            var newlist = "";
-            if (field == "collocate") {
-                newlist += "<p id='freq_sidebar_status'>Collocates within 10 words left or right</p>";
-            }
-            new_full_results = update_sidebar(full_results, data, newlist);
-            populate_sidebar(q_string, db_url, field, total_results, interval_start, interval_end, new_full_results);
-            var total = $('#progress_bar').progressbar("option", "max");
-            var percent = interval_end / total * 100;
-            if (interval_end < total) {
-                $('#progress_bar').progressbar({value: interval_end});
-                $('.progress-label').text(percent.toString().split('.')[0] + '%');
+            if ($('#hide_sidebar').data('interrupt') != true && $('#frequency_by').data('selected') == field) {
+                var newlist = "";
+                if (field == "collocate") {
+                    newlist += "<p id='freq_sidebar_status'>Collocates within 10 words left or right</p>";
+                }
+                new_full_results = update_sidebar(full_results, data, newlist);
+                populate_sidebar(q_string, db_url, field, total_results, interval_start, interval_end, new_full_results);
+                var total = $('#progress_bar').progressbar("option", "max");
+                var percent = interval_end / total * 100;
+                if (interval_end < total) {
+                    $('#progress_bar').progressbar({value: interval_end});
+                    $('.progress-label').text(percent.toString().split('.')[0] + '%');
+                }
+            } else {
+                $('#hide_sidebar').data('interrupt', false);
             }
         });
     } else {
