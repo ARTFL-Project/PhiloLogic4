@@ -38,7 +38,7 @@ def collocation(environ,start_response):
 def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True):
     within_x_words = q['word_num']    
     
-    ## set up filtering of most frequent 200 terms ##
+    ## set up filtering of most frequent 100 terms ##
     filter_list = set([])
     if word_filter:
         filter_list_path = path + '/data/frequencies/word_frequencies'
@@ -57,9 +57,6 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
     all_collocates = defaultdict(int)
     
     count = 0
-    #if not full_report:
-    #    q['colloc_start'] = None
-    #    q['colloc_end'] = None
     for hit in results[q['colloc_start']:q['colloc_end']]:
         ## get my chunk of text ##
         bytes, byte_start = adjust_bytes(hit.bytes, 400)

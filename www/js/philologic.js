@@ -208,6 +208,9 @@ function sidebar_reports(q_string, db_url, pathname) {
         $('#displayed_sidebar_value').html(value);
         toggle_frequency(q_string, db_url, pathname,value);
         var total_results = parseInt($('#total_results').text());
+        $('.progress-label').text('0%');
+        $('#progress_bar').progressbar({value: 0});
+        $("#progress_bar").show();
         var full_results;
         populate_sidebar(q_string, db_url, value, total_results, 0, full_results);
     });
@@ -216,21 +219,18 @@ function sidebar_reports(q_string, db_url, pathname) {
     });
 }
 function toggle_frequency(q_string, db_url, pathname, field) {
-    $(".loading").empty().hide();
-    var spinner = '<img src="' + db_url + '/js/ajax-loader.gif" alt="Loading..."  height="25px" width="25px"/>';
     $("#results_container").animate({
         "margin-right": "410px"},
         150, function() {
                 getCitationWidth();
+                $('#frequency_container').height($('#results_container').height() -14 + 'px');
             }
     );
-    var width = $("#sidebar_display").width() / 2;
 }
 function hide_frequency() {
     $("#hide_sidebar").hide();
     $("#frequency_table").empty().hide();
     $('#frequency_container').hide();
-    $(".loading").empty();
     $(".results_container").animate({
         "margin-right": "0px"},
         150, function() {
@@ -245,12 +245,12 @@ function populate_sidebar(q_string, db_url, field, total_results, interval_start
         var script_call = db_url + "/scripts/get_collocate.py?" + q_string
     }
     if (interval_start === 0) {
-        interval_end = 100;
-    } else if (interval_end === 100) {
-        interval_end = 1100;
+        interval_end = 50;
+    } else if (interval_end === 50) {
+        interval_end = 2050;
     } else {
-        interval_start += 1000;
-        interval_end += 1000;
+        interval_start += 2000;
+        interval_end += 2000;
     }
     if (interval_start < total_results) {
         script_call += "&interval_start=" + interval_start + "&interval_end=" + interval_end;
@@ -276,7 +276,6 @@ function populate_sidebar(q_string, db_url, field, total_results, interval_start
         $('#progress_bar').progressbar({value: total});
         $('.progress-label').text('Complete!');
         $("#progress_bar").delay(500).slideUp();
-        //$(".loading").hide().empty();
         
     }
 }
@@ -299,10 +298,10 @@ function update_sidebar(full_results, new_data, newlist) {
     }
     sorted_list.sort(function(a,b) {return b[1].count - a[1].count});
     
-    for (item in sorted_list.slice(0,100)) {
+    for (item in sorted_list) {
         var url = '<a id="freq_sidebar_text" href="' + sorted_list[item][1]['url'] + '">' + sorted_list[item][0] + '</a>';
         newlist += '<li style="white-space:nowrap;">';
-        newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:10px;"></span>';
+        newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:8px;"></span>';
         newlist += url + '<span style="float:right;display:inline-block;padding-right: 5px;">' + sorted_list[item][1]['count'] + '</span></li>';
     }
     $("#frequency_table").hide().empty().html(newlist).fadeIn('fast');

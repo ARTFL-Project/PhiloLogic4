@@ -20,7 +20,6 @@
         <li class="sidebar_option" id="side_opt_collocate" data-value='collocate'>Display <span style="font-weight: 700;">collocates</span></li>
     </ol>
     <div id="sidebar_display">
-        <div class="loading" style="display:none;z-index:99;position:absolute;margin-left:20px;"></div>
         <div id="frequency_container">
             <div id="progress_bar">
                 <div class="progress-label"></div>
