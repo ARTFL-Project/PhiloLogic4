@@ -12,7 +12,6 @@
         </span>
         <span class="more_context_and_close">
             <span class="more_context">More</span>
-            <span class="close_concordance">X</span>
         </span>
     </div>
      <div class='philologic_context'>${fetch_concordance(i, path, q)}</div>

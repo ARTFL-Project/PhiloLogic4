@@ -36,20 +36,20 @@
                     <tr>
                         <td class="table_column">
                             <span id="all_num${pos}">
-                                <a href="${link(q, all[0], 'all', all[1])}">${all[0]}</a>
-                                <span id="all_count_${pos}">(${all[1]})</span>
+                                <a href="${all[1]['url']}">${all[0]}</a>
+                                <span id="all_count_${pos}">(${all[1]['count']})</span>
                             </span>
                         </td>
                         <td class="table_column">
                             <span id="left_num${pos}">
-                                <a href="${link(q, left[0], 'left', left[1])}">${left[0]}</a>
-                                <span id="left_count_${pos}">(${left[1]})</span>
+                                <a href="${left[1]['url']}">${left[0]}</a>
+                                <span id="left_count_${pos}">(${left[1]['count']})</span>
                             </span>
                         </td>
                         <td class="table_column">
                             <span id="right_num${pos}">
-                                <a href="${link(q, right[0], 'right', right[1])}">${right[0]}</a>
-                                <span id="right_count_${pos}">(${right[1]})</span>
+                                <a href="${right[1]['url']}">${right[0]}</a>
+                                <span id="right_count_${pos}">(${right[1]['count']})</span>
                             </span>
                         </td>
                     </tr>

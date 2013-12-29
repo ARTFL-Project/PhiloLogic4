@@ -17,40 +17,19 @@ $(document).ready(function() {
 });
 
 // Set of functions for updating collocation tables
-function colloc_linker(word, q_string, direction, num) {
-    q_string = q_string.replace('collocation', 'concordance_from_collocation');
-    q_string += '&collocate=' + encodeURIComponent(word);
-    q_string += '&direction=' + direction;
-    q_string += '&collocate_num=' + num;
-    link = '<a href="?' + q_string + '">' + word + '</a>'
-    return link
-}
-
-function update_table(full_results, new_hash, q_string, column) {
-    $('[id^=' + column+ '_]').hide();
-    for (key in new_hash) {
-        if (key in full_results) {
-            full_results[key] += new_hash[key];
+function update_table(sorted_lists) {
+    for (column in sorted_lists) {
+        var pos = 0;
+        var sorted_list = sorted_lists[column];
+        for (i in sorted_list) {
+            pos += 1;
+            var link = "<a href=" + sorted_list[i][1]['url'] + ">" + sorted_list[i][0] + "</a>";
+            var count_id = column + '_count_' + sorted_list[i][1]['count'];
+            data = link + '<span id="' + count_id + '"> (' + sorted_list[i][1]['count'] + ')</span>';
+            $('#' + column + '_num' + pos).html(data);
         }
-        else {
-            full_results[key] = new_hash[key];
-        }
+        $('[id^=' + column+ '_]').hide(function() {$(this).fadeIn(800)});
     }
-    var sorted_list = [];
-    for (key in full_results) {
-        sorted_list.push([key, full_results[key]]);
-    }
-    sorted_list.sort(function(a,b) {return b[1] - a[1]});
-    var pos = 0;
-    for (i in sorted_list) {
-        pos += 1;
-        var link = colloc_linker(sorted_list[i][0], q_string, column, sorted_list[i][1]);
-        var count_id = column + '_count_' + sorted_list[i][1];
-        data = link + '<span id="' + count_id + '"> (' + sorted_list[i][1] + ')</span>';
-        $('#' + column + '_num' + pos).html(data);
-    }
-    $('[id^=' + column+ '_]').fadeIn(800);
-    return full_results;
 }
 
 function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end) {
@@ -63,12 +42,20 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
         colloc_start += 1000;
         colloc_end += 1000;
     }
-    var script_call = script + '&colloc_start=' + colloc_start + '&colloc_end=' + colloc_end
+    var script_call = script + '&interval_start=' + colloc_start + '&interval_end=' + colloc_end
     if (colloc_start <= results_len) {
         $.getJSON(script_call, function(data) {
-            all_new_colloc = update_table(all_colloc, data[0], q_string, "all");
-            left_new_collc = update_table(left_colloc, data[1], q_string, "left");
-            right_new_colloc = update_table(right_colloc, data[2], q_string, "right");
+            all_list = merge_results(all_colloc, data[0]);
+            var all_sorted = all_list[0];
+                all_new_colloc = all_list[1];
+            left_list = merge_results(left_colloc, data[1]);
+            var left_sorted = left_list[0];
+                left_new_colloc = left_list[1];
+            right_list = merge_results(right_colloc, data[2]);
+            var right_sorted = right_list[0];
+                right_new_colloc = right_list[1];
+            sorted_lists = {'all': all_sorted, 'left': left_sorted, 'right': right_sorted};
+            update_table(sorted_lists);
             update_colloc(db_url, all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
             collocation_cloud();
             var total = $('#progress_bar').progressbar("option", "max");

@@ -16,11 +16,7 @@ def get_collocate(environ,start_response):
     db, path_components, q = parse_cgi(environ)
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
     results = r.fetch_collocation(hits, environ["SCRIPT_FILENAME"], q, db, full_report=False)
-    results_with_links = {}
-    for word, num in results:
-        url = r.link_to_concordance(q, word, 'all', num)
-        results_with_links[word] = {'count': num, 'url': url}
-    yield json.dumps(results_with_links,indent=2)
+    yield json.dumps(results,indent=2)
     
 if __name__ == "__main__":
     CGIHandler().run(get_collocate)
