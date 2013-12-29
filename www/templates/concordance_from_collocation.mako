@@ -35,7 +35,6 @@
                         </span>
                         <span class="more_context_and_close">
                             <span class="more_context">More</span>
-                            <span class="close_concordance">X</span>
                         </span>
                     </div>
                     % if i.collocate_num > 1:

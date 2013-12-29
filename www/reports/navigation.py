@@ -17,37 +17,15 @@ def navigation(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
     obj = db[path_components]
-    #if obj.philo_type == 'doc' and q['doc_page']:
-    #    page_text = f.get_page_text(db, obj, q['doc_page'], path, q['byte'])
-    #    #page_text = obj.get_page() This does not fetch the right page, just the first page of the object
-    #    if page_text:
-    #        doc_id = str(obj.philo_id[0]) + ' %'
-    #        prev_page, next_page = get_neighboring_pages(db, doc_id, q['doc_page'])    
-    #        return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
-    #                               dbname=dbname,current_page=q['doc_page'],f=f,navigate_doc=navigate_doc,
-    #                               db=db,q=q,template_name='pages.mako')
-    #    else:
-    #        path_components += ['2']
-    #        obj = db[path_components]
-    #if has_pages(obj, db):
-    #    page_num = get_page_num(obj,db)
-    #    if page_num:
-    #        page_text = f.get_page_text(db, obj, q['doc_page'], path, q['byte'])
-    #        if page_text:  ## In case the page does not contain any text
-    #            doc_id = str(obj.philo_id[0]) + ' %'
-    #            prev_page, next_page = get_neighboring_pages(db, doc_id, page_num)
-    #            return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
-    #                                    dbname=dbname,current_page=page_num,f=f,navigate_doc=navigate_doc,
-    #                                    db=db,q=q,template_name='pages.mako')
     if obj.philo_type == 'doc':
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,template_name='t_o_c.mako')
+                       db=db,q=q,template_name='t_o_c.mako', report="t_o_c")
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
-    #obj_text = obj_pager(db, obj, obj_text)  ## this creates virtual pages
     prev = ' '.join(obj.prev.split()[:7])
     next = ' '.join(obj.next.split()[:7])
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,obj_text=obj_text,prev=prev,next=next,template_name='object.mako')
+                       db=db,q=q,obj_text=obj_text,prev=prev,next=next,template_name='object.mako',
+                       report="object")
 
 def navigate_doc(obj, db):
     conn = db.dbh 

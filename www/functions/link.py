@@ -97,7 +97,7 @@ def page_linker(page, results_per_page, q):
     return page_link
 
 def find_page_number(results_len, results_per_page):
-    print >> sys.stderr, "LEN", (results_len, results_per_page)
+    #print >> sys.stderr, "LEN", (results_len, results_per_page)
     page_num = results_len / results_per_page
     remainder = results_len % results_per_page
     if remainder:
@@ -105,7 +105,7 @@ def find_page_number(results_len, results_per_page):
     return page_num
 
 def pager(start, results_per_page, q, results):
-    print >> sys.stderr, "RPP", repr(results_per_page)
+    #print >> sys.stderr, "RPP", repr(results_per_page)
     results_len = len(results)
     page_num = find_page_number(results_len, results_per_page) or 1 ## We shouldn't have to specify the "or" once we have a no_results template
     current_page = start / results_per_page + 1 or 1

@@ -5,7 +5,6 @@ import sys
 import urlparse
 sys.path.append('..')
 from functions.wsgi_handler import parse_cgi
-from mako.template import Template
 from wsgiref.handlers import CGIHandler
 import reports as r
 import cgi

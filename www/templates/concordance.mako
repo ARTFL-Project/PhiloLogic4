@@ -1,5 +1,6 @@
 <%include file="header.mako"/>
 <%include file="search_form.mako"/>
+<script type="text/javascript" src="${db.locals['db_url']}/js/jquery.hoverIntent.minified.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/concordanceKwic.js"></script>
 <div id='philologic_response'>
     <div id='initial_report'>
@@ -10,7 +11,7 @@
              if not results.done:
                 r_status += " Still working.  Reload the page for a more accurate count of the results."
             %>
-            Hits <span class="start">${start}</span> - <span class="end">${end}</span> of ${len(results)}${r_status}
+            Hits <span class="start">${start}</span> - <span class="end">${end}</span> of <span id="total_results">${len(results)}</span>${r_status}
         </p>
         <%include file="show_frequency.mako"/>
         <div id="report_switch">
@@ -32,7 +33,6 @@
                     </span>
                     <span class="more_context_and_close">
                         <span class="more_context">More</span>
-                        <span class="close_concordance">X</span>
                     </span>
                 </div>
                  <div class='philologic_context'>${fetch_concordance(i, path, q)}</div>

@@ -15,9 +15,6 @@ $(document).ready(function() {
         $(".kwic_biblio").hoverIntent(config);
     }
     
-    closeConcordance();
-    $('.close_concordance').hide();
-    
     getCitationWidth();
     $(window).resize(function() {
         getCitationWidth();
@@ -61,9 +58,6 @@ function concordance_kwic_switch(db_url) {
             $("#report").buttonset("refresh");
             display_options_on_selected();
             more_context();
-            $('.close_concordance').button();
-            closeConcordance();
-            $('.close_concordance').hide();
             getCitationWidth();
             $('.more').find('a').each(function() {
                 if (switchto.match(/kwic/)) {

@@ -20,7 +20,7 @@ def concordance(environ,start_response):
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
                                f=f, path=path, results_per_page=q['results_per_page'],
-                               template_name="concordance.mako")
+                               template_name="concordance.mako", report="concordance")
 
 def fetch_concordance(hit, path, q):
     ## Determine length of text needed

@@ -12,12 +12,13 @@ from render_template import render_template
 from functions.ObjectFormatter import adjust_bytes, format_strip, convert_entities
 from bibliography import bibliography
 from collections import defaultdict
+from operator import itemgetter
 
 ## Precompiled regexes for performance
 left_truncate = re.compile ("^\w+", re.U)
 right_truncate = re.compile("\w+$", re.U)
 word_identifier = re.compile("\w", re.U)
-end_highlight_match = re.compile(r'.*<span class="highlight">[^<]*?(</span>)')
+highlight_match = re.compile(r'<span class="highlight">[^<]*?</span>')
 token_regex = re.compile(r'\W', re.U)
 
 
@@ -32,12 +33,13 @@ def collocation(environ,start_response):
     return render_template(all_colloc=all_colloc, left_colloc=left_colloc, right_colloc=right_colloc,
                            db=db,dbname=dbname,q=q,link=link_to_concordance,f=f,path=path,
                            results_per_page=q['results_per_page'],hit_len=hit_len,
-                           order=sort_to_display,dumps=json.dumps,template_name='collocation.mako')
+                           order=sort_to_display,dumps=json.dumps,template_name='collocation.mako',
+                           report="collocation")
 
 def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True):
     within_x_words = q['word_num']    
     
-    ## set up filtering of most frequent 200 terms ##
+    ## set up filtering of most frequent 100 terms ##
     filter_list = set([])
     if word_filter:
         filter_list_path = path + '/data/frequencies/word_frequencies'
@@ -56,19 +58,14 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
     all_collocates = defaultdict(int)
     
     count = 0
-    if not full_report:
-        q['colloc_start'] = None
-        q['colloc_end'] = None
-    for hit in results[q['colloc_start']:q['colloc_end']]:
-        ## get my chunk of text ##
+    for hit in results[q['interval_start']:q['interval_end']]:
         bytes, byte_start = adjust_bytes(hit.bytes, 400)
         conc_text = f.get_text(hit, byte_start, 400, path)
         conc_text = format_strip(conc_text, bytes)
         conc_text = convert_entities(conc_text)
         conc_text = unicodedata.normalize('NFC', conc_text)
         start_highlight = conc_text.find('<span class="highlight"')
-        m = end_highlight_match.search(conc_text)
-        end_highlight = m.end(len(m.groups()) - 1)
+        end_highlight = [m.end(0) for m in highlight_match.finditer(conc_text)][-1]
         conc_left = conc_text[:start_highlight]
         conc_right = conc_text[end_highlight:]
         
@@ -81,12 +78,15 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
 
         for r_word in right_words:
             right_collocates[r_word] += 1
-            all_collocates[r_word] += 1    
-
+            all_collocates[r_word] += 1  
+    
     if full_report:
-        return dict(all_collocates), dict(left_collocates), dict(right_collocates)
+        all_collocates = link_to_concordance('all', q, all_collocates, limit=100) 
+        left_collocates = link_to_concordance('left', q, left_collocates, limit=100)
+        right_collocates = link_to_concordance('right', q, right_collocates, limit=100)
+        return all_collocates, left_collocates, right_collocates
     else:
-        return sorted(all_collocates.items(), key=lambda x: x[1], reverse=True)[:100]
+        return link_to_concordance('all', q, all_collocates, limit=200)
 
 
 def tokenize(text, filter_list, within_x_words, direction, db):
@@ -133,15 +133,19 @@ def tokenize_text(text, db):
     return text_tokens
 
 def sort_to_display(all_collocates, left_collocates, right_collocates):
-    left_colloc = sorted(left_collocates.items(), key=lambda x: x[1], reverse=True)[:100]
-    right_colloc = sorted(right_collocates.items(), key=lambda x: x[1], reverse=True)[:100]
-    all_colloc = sorted(all_collocates.items(), key=lambda x: x[1], reverse=True)[:100]
+    left_colloc = sorted(left_collocates.items(), key=lambda x: x[1]['count'], reverse=True)
+    right_colloc = sorted(right_collocates.items(), key=lambda x: x[1]['count'], reverse=True)
+    all_colloc = sorted(all_collocates.items(), key=lambda x: x[1]['count'], reverse=True)
     return zip(all_colloc, left_colloc, right_colloc)
     
 
-def link_to_concordance(q, collocate, direction, collocate_num):
-    collocate_values = [collocate.encode('utf-8', 'ignore'), direction, q['word_num'], collocate_num]
-    return f.link.make_query_link(q['q'], method=q['method'], arg=q['arg'], report="concordance_from_collocation",
-                                  collocate=collocate_values,**q['metadata'])
+def link_to_concordance(direction, q, collocate_list, limit=100):
+    new_dict = {}
+    for collocate, count in sorted(collocate_list.iteritems(), key=itemgetter(1), reverse=True)[:limit]:
+        collocate_values = [collocate.encode('utf-8', 'ignore'), direction, q['word_num'], q['word_num']]
+        link = f.link.make_query_link(q['q'], method=q['method'], arg=q['arg'], report="concordance_from_collocation",
+                                      collocate=collocate_values,**q['metadata'])
+        new_dict[collocate] = {'count': collocate_list[collocate], "url": link}
+    return new_list
     
 
