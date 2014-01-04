@@ -13,7 +13,7 @@ from philologic.DB import DB
 from philologic.QuerySyntax import parse_query
 from philologic.Query import word_pattern_search
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
-from bibliography import bibliography
+from bibliography import fetch_bibliography as bibliography
 import re
 import subprocess
 import unicodedata

@@ -1,4 +1,8 @@
 $(document).ready(function() {
+    
+    //jQueryUI theming
+    $('#time_series_buttons').buttonset();
+    
     var mydata = eval($("#absolute_time").data('value'));
     var interval = $("#absolute_time").data('interval');
     var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 200;

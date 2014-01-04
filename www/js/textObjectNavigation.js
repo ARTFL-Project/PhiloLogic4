@@ -4,6 +4,9 @@ var toc_open = false;
 
 $(document).ready(function() {
     
+    // jQueryUI theming
+    $('#show_table_of_contents').button();
+    
     positionPrevNext();
     $(window).resize(function() {
         positionPrevNext();

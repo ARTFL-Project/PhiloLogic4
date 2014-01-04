@@ -1,5 +1,38 @@
 $(document).ready(function() {
     
+    // jQueryUI theming
+    $( "#button, #button1" )
+        .button()
+        .click(function( event ) {
+            hide_search_form();
+            var width = $(window).width() / 3;
+            $("#waiting").css("margin-left", width).css('margin-top', 100).show();
+        });
+    $("#reset_form, #reset_form1, #hide_search_form, #more_options, .more_context").button();
+    $('#button2').button();
+    $("#page_num, #field, #method, #year_interval").buttonset();
+    $("#word_num").spinner({
+        spin: function(event, ui) {
+                if ( ui.value > 10 ) {
+                    $(this).spinner( "value", 1 );
+                    return false;
+                } else if ( ui.value < 1 ) {
+                    $(this).spinner( "value", 10 );
+                    return false;
+                }
+            }
+    });
+    $("#word_num").val(5);
+    $("#show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
+    $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
+    $('#search_explain').accordion({
+        collapsible: true,
+        heightStyle: "content",
+        active: false
+    });
+    $('.ui-spinner').css('width', '45px')
+    $(':text').addClass("ui-corner-all");
+    
     var db_url = db_locals['db_url'];
     var q_string = window.location.search.substr(1);
     
@@ -26,28 +59,29 @@ $(document).ready(function() {
         showHide('concordance');
         $('#search_explain').show();
         $('#search_elements').show();
+        $('#conc_question').show();
     } else {
         $("#search_elements").hide();
         $('#conc_question, #freq_question, #colloc_question, #time_question, #relev_question, #kwic_question').hide();
         $('#search_explain').hide();
         showHide($('input[name=report]:checked', '#search').val());
-        $('#report').find('label').click(function() {
-            var report = $(this).attr('for');
-            if ($("#search_elements:visible")) {
-                showHide(report);
-                if (report != "frequencies") {
-                    $("#search_elements").slideDown();
-                    $('#search_explain').slideDown();
-                }
-            } else {
-                showHide(report);
-                if (report != "frequencies") {
-                    $("#search_elements").fadeIn();
-                    $('#search_explain').fadeIn();
-                }
-            }
-        });
     }
+    $('#report').find('label').click(function() {
+        var report = $(this).attr('for');
+        if ($("#search_elements:visible")) {
+            showHide(report);
+            if (report != "frequencies") {
+                $("#search_elements").slideDown();
+                $('#search_explain').slideDown();
+            }
+        } else {
+            showHide(report);
+            if (report != "frequencies") {
+                $("#search_elements").fadeIn();
+                $('#search_explain').fadeIn();
+            }
+        }
+    });
       
     $("#q").autocomplete({
         source: db_url + "/scripts/term_list.py",
@@ -151,7 +185,12 @@ $(document).ready(function() {
         }
     });
     
-    //$('#more_options').css('width', $('#form_body').css('width'));
+    /// Make sure search form doesn't cover footer
+    var form_offset = $('#form_body').offset().top + $('#form_body').height();
+    searchFormOverlap(form_offset);
+    $(window).resize(function() {
+        searchFormOverlap(form_offset);
+    });
     
     $(window).load(function() {
         adjustReportWidth();
@@ -159,6 +198,16 @@ $(document).ready(function() {
     });
     
 });
+
+
+function searchFormOverlap(form_offset) {
+    var footer_offset = $('#footer').offset().top;
+    if (form_offset > footer_offset) {
+        $('#footer').css('top', form_offset + 20);
+    } else {
+        $('#footer').css('top', 'auto');
+    }
+}
 
 //    Adjust width of report buttons
 function adjustReportWidth() {

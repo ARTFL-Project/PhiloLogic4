@@ -8,7 +8,7 @@ import os
 import re
 import unicodedata
 from functions.wsgi_handler import wsgi_response
-from bibliography import bibliography
+from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from collocation import tokenize, filter
 from functions.ObjectFormatter import adjust_bytes, format_strip, convert_entities
