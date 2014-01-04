@@ -17,7 +17,9 @@
             %>
             <li class="sidebar_option" id="side_opt_${facet}" data-value='${facet}'>Display frequency by <span style="font-weight: 700;">${alias}</span></li>
         % endfor
-        <li class="sidebar_option" id="side_opt_collocate" data-value='collocate'>Display <span style="font-weight: 700;">collocates</span></li>
+        % if report != 'bibliography':
+            <li class="sidebar_option" id="side_opt_collocate" data-value='collocate'>Display <span style="font-weight: 700;">collocates</span></li>
+        % endif
     </ol>
     <div id="sidebar_display">
         <div id="frequency_container">

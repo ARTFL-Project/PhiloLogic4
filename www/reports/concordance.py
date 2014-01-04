@@ -6,7 +6,7 @@ import functions as f
 import os
 import re
 from functions.wsgi_handler import wsgi_response
-from bibliography import bibliography
+from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from functions.ObjectFormatter import format_concordance, format_strip, convert_entities, adjust_bytes
 from functions.FragmentParser import parse

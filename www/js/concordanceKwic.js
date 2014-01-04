@@ -1,4 +1,9 @@
 $(document).ready(function() {
+    
+    // jQueryUI theming
+    $("#report_switch").buttonset();
+    $('#page_links').find('a').each(function(){$(this).button()});
+    
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var db_url = db_locals['db_url'];
     var q_string = window.location.search.substr(1);

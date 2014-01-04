@@ -92,11 +92,6 @@
   	        Just like the concordance search, Key Word in Context (KWIC) search finds every occurence of the search terms,
                 but displays the results in a much more compact format, one line per result item.
             </div>
-            <h3 id="freq_question">What does a frequency report do?</h3>
-            <div id="explain_freq">
-                Frequency report will display a table with frequency counts of the search term(s) ordered
-                by the selected metadata field.
-            </div>
             <h3 id="colloc_question">What does a collocation report do?</h3>
             <div id='explain_colloc'>
                 Collocation report will display words in the immediate vicinity of the search term(s).
@@ -146,7 +141,7 @@
                     <td>
                         <label for="word_num"></label>
                         <input id="word_num" name="word_num" />
-                        (1-20) words
+                        (1-10) words
                     </td>
                 </tr>
                 <tr class="table_row" id="time_series_num">

@@ -10,7 +10,7 @@ import unicodedata
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
 from functions.ObjectFormatter import adjust_bytes, format_strip, convert_entities
-from bibliography import bibliography
+from bibliography import fetch_bibliography as bibliography
 from collections import defaultdict
 from operator import itemgetter
 

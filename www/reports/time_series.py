@@ -4,17 +4,20 @@ import sys
 sys.path.append('..')
 import functions as f
 from functions.wsgi_handler import wsgi_response
+from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from collections import defaultdict
 import json
 
 def time_series(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
-    frequencies, relative_frequencies = generate_frequency(q, db)
-    #frequencies, relative_frequencies = time_frequency(q, db)
-    return render_template(frequencies=frequencies,relative_frequencies=relative_frequencies,
-                           db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
-                           report="time_series")
+    if q['q'] == '':
+        return bibliography(f,path, db, dbname,q,environ)
+    else:
+        frequencies, relative_frequencies = generate_frequency(q, db)
+        return render_template(frequencies=frequencies,relative_frequencies=relative_frequencies,
+                               db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
+                               report="time_series")
 
 def generate_frequency(q, db):
     """reads through a hitlist."""
