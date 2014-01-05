@@ -1,5 +1,6 @@
 #!/usr/bin env python
 from __future__ import division
+import os
 import sys
 sys.path.append('..')
 import functions as f
@@ -11,6 +12,7 @@ import json
 
 def time_series(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
+    path = os.getcwd().replace('functions/', '')
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
     else:

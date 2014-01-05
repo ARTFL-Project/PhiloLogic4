@@ -123,13 +123,6 @@ a:link, a:visited {
   text-decoration: none;
   font-weight: 700;
 }
-a:hover {
-  color: #990000;
-  text-decoration: underline;
-}
-a.active, a:link.active, a:visited.active, a:hover.active {
-  color: #990000;
-}
 
 /* Fonts */
 body {

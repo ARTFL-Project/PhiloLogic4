@@ -10,7 +10,7 @@
     border-right-style: solid;
     border-right-width: 1px;
     border-right-color: #ECECEC;
-    border-bottom-style: single;
+    border-bottom-style: solid;
     border-bottom-width: 1px;
     border-bottom-color: #ECECEC;
     border-top-style: solid;
@@ -48,19 +48,9 @@
 }
 #search_field {
     font-weight: 400;
-    /*margin-right: 10px;*/
 }
 #more_options {
     width: 200px;
-    /*padding-right: 10px;*/
-    /*background-color: #F0F0F0;*/
-    /*width: 840px;*/
-    /*text-align: center;*/
-    /*/*font-size: 80% !important;*/*/
-    /*height: 16px !important;*/
-    /*border-right-width: 0px !important;*/
-    /*border-left-width: 0px !important;*/
-    /*background: white !important;*/
 }
 #more_options:hover {
     cursor: pointer;
@@ -86,12 +76,13 @@
     border-top-color: #ECECEC;
 	position: absolute;
 }
-#explain_conc, #explain_relev, #explain_freq, #explain_colloc, #explain_time, #explain_kwic {
+#explain_conc, #explain_relev, #explain_colloc, #explain_time, #explain_kwic {
     display: none;
-    margin-left: 50px;
+    margin-left: 65px;
+    margin-right: 15px;
 }
-#conc_question, #kwic_question, #relev_question, #colloc_question, #time_question, #freq_question {
-    margin-left: 50px;
+#concordance_question, #kwic_question, #relev_question, #colloc_question, #time_question {
+    margin-left: 65px;
     margin-right: 15px;
 }
 
