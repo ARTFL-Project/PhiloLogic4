@@ -73,7 +73,7 @@
             <!--<div id="more_options"><span class="ui-icon ui-icon-arrowthick-1-s" style="vertical-align: top; margin:0 auto;margin-top: -5px;"></span></div>-->
         </div>
         <div id="search_explain">
-            <h3 id="conc_question">What does a concordance report do?</h3>
+            <h3 id="concordance_question">What does a concordance report do?</h3>
             <div id="explain_conc">
                Concordance search finds every single occurrence of the search term(s)
                throughout the database filtered by optional metadata criteria.<p/>

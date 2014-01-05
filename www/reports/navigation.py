@@ -81,36 +81,3 @@ def get_page_num(obj, db):
             return c.fetchone()[0]
         except:
             return None
-
-def obj_pager(db, obj, obj_text, word_num=500):
-    pages =[]
-    token_regex = db.locals['punct_regex'] + '|' + db.locals['word_regex']
-    words = [i for i in re.split(token_regex, obj_text) if i]
-    page = []
-    for w in words:
-        page.append(w)
-        if len(page) > word_num:
-            if re.match(db.locals['punct_regex'], w):    
-                page = ''.join(page)
-                pages.append(page)
-                page = []
-    if len(page):
-        pages.append(''.join(page))
-    page_divs = ''
-    highlight = False
-    highlight_tag = re.compile('class="highlight"')
-    for p in pages[1:-1]:
-        if highlight_tag.search(p):
-            highlight = True
-            page_divs += "<div>" + p + '</div>'
-        else:
-            page_divs += "<div style='display:none;'>" + p + '</div>'
-    if highlight:
-        page_divs = '<div style="display:none;">%s</div>' % pages[0] + page_divs
-    else:
-        page_divs = '<div>%s</div>' % pages[0] + page_divs
-    next_id = obj.next.split(" ")[:7]
-    next_url = f.link.make_absolute_object_link(db, next_id)
-    next_link = '<a href="%s">NEXT</a>' % next_url
-    page_divs += "<div style='display:none;'>%s%s</div>" % (page[-1], next_link)
-    return page_divs
