@@ -293,6 +293,7 @@ function show_hide_toc(top_right) {
             );
         $('#toc_container').scrollTo($(scrollto_id), 500);
         $('#toc_container').find($(scrollto_id)).attr('style', 'color: black;');
+        $(scrollto_id).delay(500).animate({backgroundColor: '#ffdb9e'}, 300).animate({backgroundColor: ''}, 300);
     } else {
         $("#t_b_c_box").html("Show table of contents");
         $('#toc_container').animate({

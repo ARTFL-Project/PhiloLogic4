@@ -5,6 +5,15 @@ import re
 import sys
 import htmlentitydefs
 
+
+begin_match = re.compile(r'^[^<]*?>')
+start_cutoff_match = re.compile(r'^[^ <]+')
+end_match = re.compile(r'<[^>]*?\Z')
+space_match = re.compile(r" ?([-'])+ ")
+term_match = re.compile(r"\w+", re.U)
+
+entities_match = re.compile("&#?\w+;")
+
 def get_text(obj,words):
     pass
 
@@ -128,16 +137,16 @@ def format_concordance(text,bytes=[]):
 
 def format_strip(text,bytes=[], chars=40):
     removed_from_start = 0
-    begin = re.search(r'^[^<]*?>', text)
+    begin = begin_match.search(text)
     if begin:
         removed_from_start = len(begin.group(0))
         text = text[begin.end(0):]
-    start_cutoff = re.search(r'^[^ <]+', text)
+    start_cutoff = start_cutoff_match.search(text)
     if start_cutoff:
         removed_from_start += len(start_cutoff.group(0))
         text = text[start_cutoff.end(0):]
     removed_from_end = 0
-    end = re.search(r'<[^>]*?\Z', text)
+    end = end_match.search(text)
     if end:
         removed_from_end = len(end.group(0))
         text = text[:end.start(0)]
@@ -153,7 +162,7 @@ def format_strip(text,bytes=[], chars=40):
     xml = FragmentParser.parse(text)
     output = clean_tags(xml)
     ## remove spaces around hyphens and apostrophes
-    output = re.sub(r" ?([-'])+ ", '\\1', output)
+    output = space_match.sub('\\1', output)
     return output
 
 def clean_tags(element):
@@ -161,7 +170,7 @@ def clean_tags(element):
     for child in element:
         text += clean_tags(child)
     if element.tag == "philoHighlight":
-        word_match = re.match(r"\w+", element.tail, re.U)
+        word_match = term_match.match(element.tail)
         if word_match:
             return '<span class="highlight">' + element.text + text + element.tail[:word_match.end()] + "</span>" + element.tail[word_match.end():]
         text = element.text + text + element.tail
@@ -188,4 +197,4 @@ def convert_entities(text):
             except KeyError:
                 pass
         return text # leave as is
-    return re.sub("&#?\w+;", fixup, text)
+    return entities_match.sub(fixup, text)

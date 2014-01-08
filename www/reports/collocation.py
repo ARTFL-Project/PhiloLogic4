@@ -146,6 +146,6 @@ def link_to_concordance(direction, q, collocate_list, limit=100):
         link = f.link.make_query_link(q['q'], method=q['method'], arg=q['arg'], report="concordance_from_collocation",
                                       collocate=collocate_values,**q['metadata'])
         new_dict[collocate] = {'count': collocate_list[collocate], "url": link}
-    return new_list
+    return new_dict
     
 
