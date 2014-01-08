@@ -11,6 +11,8 @@ from render_template import render_template
 from functions.ObjectFormatter import format_concordance, format_strip, convert_entities, adjust_bytes
 from functions.FragmentParser import parse
 
+highlight_match = re.compile(r'<span class="highlight">[^<]*?(</span>)')
+
 def concordance(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
@@ -32,7 +34,7 @@ def fetch_concordance(hit, path, q):
     conc_text = format_strip(conc_text, bytes)
     conc_text = convert_entities(conc_text)
     start_highlight = conc_text.find('<span class="highlight"')
-    m = re.search(r'<span class="highlight">[^<]*?(</span>)',conc_text)
+    m = highlight_match.search(conc_text)
     if m:
         end_highlight = m.end(len(m.groups()) - 1)
         count = 0
