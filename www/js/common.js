@@ -150,3 +150,12 @@ function merge_results(full_results, new_data) {
     
     return [sorted_list, full_results]
 }
+
+// This is to create links for collocations
+function colloc_linker(word, q_string, direction, num) {
+    q_string = q_string.replace(/report=[^&]+/, 'report=concordance_from_collocation');
+    q_string += '&collocate=' + encodeURIComponent(word);
+    q_string += '&direction=' + direction;
+    q_string += '&collocate_num=' + num;
+    return q_string
+}

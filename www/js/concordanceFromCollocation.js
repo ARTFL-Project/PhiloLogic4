@@ -1,4 +1,7 @@
 $(document).ready(function() {
+    
+    $('#page_links').find('a').each(function(){$(this).button()});
+    
     $('#form_body').hide();
     $('.close_concordance').hide();
     //$('#philologic_response').css('margin-top', '0px');

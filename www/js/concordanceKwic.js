@@ -26,7 +26,17 @@ $(document).ready(function() {
     });
     $(window).load(function() {
         adjustReportWidth();
-    })
+         // Get the total results when available
+        if ($('#incomplete').text() != '.') {
+            $.getJSON(db_url + '/scripts/get_total_results.py?' + q_string, function(data) {
+                $('#total_results, #incomplete').fadeOut('fast', function() {
+                    $("#total_results").text(data);
+                    $('#incomplete').text('.')
+                }).fadeIn('fast');
+            });
+        }
+    });
+    
 });
 
 

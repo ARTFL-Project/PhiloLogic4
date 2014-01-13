@@ -142,7 +142,7 @@ def sort_to_display(all_collocates, left_collocates, right_collocates):
 def link_to_concordance(direction, q, collocate_list, limit=100):
     new_dict = {}
     for collocate, count in sorted(collocate_list.iteritems(), key=itemgetter(1), reverse=True)[:limit]:
-        collocate_values = [collocate.encode('utf-8', 'ignore'), direction, q['word_num'], q['word_num']]
+        collocate_values = [collocate.encode('utf-8', 'ignore'), direction, q['word_num'], count]
         link = f.link.make_query_link(q['q'], method=q['method'], arg=q['arg'], report="concordance_from_collocation",
                                       collocate=collocate_values,**q['metadata'])
         new_dict[collocate] = {'count': collocate_list[collocate], "url": link}

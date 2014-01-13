@@ -27,7 +27,7 @@ def concordance_from_collocation(environ,start_response):
         colloc_results = fetch_colloc_concordance(hits, path, q, db)
         return render_template(results=colloc_results,db=db,dbname=dbname,q=q,colloc_concordance=colloc_concordance,
                                f=f,path=path, results_per_page=q['results_per_page'],
-                               template_name="concordance_from_collocation.mako")
+                               report="concordance_from_collocation",template_name="concordance_from_collocation.mako")
         
 def fetch_colloc_concordance(results, path, q, db, filter_words=100):
     within_x_words = q['word_num']

@@ -157,7 +157,6 @@
 					</td>
 					<td>
 						<span id="year_interval">
-							<input type="radio" name="year_interval" id="year0" value="1" checked="checked"><label for="year0">every year</label>
 							<input type="radio" name="year_interval" id="year1" value="10" checked="checked"><label for="year1">every decade</label>
 							<input type="radio" name="year_interval" id="year2" value="100"><label for="year2">every century</label>
 						</span>
@@ -172,27 +171,9 @@
                 </span></td></tr>
             </table>
         </div>
-        <div id="frequency_task">
-            <div id="task_on_metadata_fields">
-                <table class="table_row">
-                    % for facet in db.locals["metadata_fields"]:
-						<%
-						if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
-							alias = db.locals["metadata_aliases"][facet]
-						else:
-							alias = facet
-						%>
-                        <tr class="table_row">
-							<td class="first_column"><span class="search_field">${alias}:</span></td>
-							<td><input type='text' name='${facet}' id="${facet}" class="search_box"></td>
-						</tr>
-                    % endfor
-                </table>
-            </div>
-            <div id="bottom_search">
-                <input id="button2" type='submit' value="Run Task"/>
-            </div>
-        </div>
+		<div id="bottom_search">
+			<input id="button2" type='submit' value="Run Task"/>
+		</div>
     </form>
 </div>
 <div id="waiting" style="display:none;z-index:99;position:absolute;"><img src="${db.locals['db_url']}/js/ajax-loader.gif" alt="Loading..."/></div>
