@@ -6,6 +6,9 @@
         <p id='description'>
             Use of the term(s) "${q['q'].decode('utf_8')}" throughout time
         </p>
+        <div id="progress_bar" style="margin-top:-10px;margin-bottom: 10px" data-total='${total}'>
+            <div class="progress-label"></div>
+        </div>
         <div id="time_series_buttons">
             <input type="radio" name="freq_type" id="absolute_time" data-value='${frequencies}' data-interval="${q['year_interval']}" checked="checked">
             <label for="absolute_time">Absolute Frequency</label>

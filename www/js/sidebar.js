@@ -3,12 +3,6 @@ $(document).ready(function() {
     //jQueryUI theming
     $('#frequency_by, #hide_sidebar').button();
     
-    // Initialize progress bar for sidebar
-    var total_results = parseInt($('#total_results').text());
-    $('#progress_bar').progressbar({max: total_results});
-    $('#progress_bar').progressbar({value: 100});
-    var percent = 100 / total_results * 100;
-    $('.progress-label').text(percent.toString().split('.')[0] + '%');
 });
 
 
@@ -32,9 +26,11 @@ function sidebar_reports(q_string, db_url, pathname) {
         // store the selected field to check whether to kill the ajax calls in populate_sidebar
         $('#frequency_by').data('selected', value);
         
+        // Get total results
+        var total_results = parseInt($('#total_results').text());
+        
         $('#displayed_sidebar_value').html(value);
         show_sidebar(q_string, db_url, pathname,value);
-        var total_results = parseInt($('#total_results').text());
         $('#frequency_table').empty();
         if (value != 'collocate') {
             var script_call = db_url + "/scripts/get_frequency.py?" + q_string + "&frequency_field=" + value;
@@ -43,6 +39,11 @@ function sidebar_reports(q_string, db_url, pathname) {
         }
         $('#progress_bar').hide();
         if (typeof sessionStorage[script_call] == "undefined") {
+            // Initialize progress bar for sidebar
+            $('#progress_bar').progressbar({max: total_results});
+            $('#progress_bar').progressbar({value: 100});
+            var percent = 100 / total_results * 100;
+            $('.progress-label').text(percent.toString().split('.')[0] + '%');
             $('.progress-label').text('0%');
             $('#progress_bar').progressbar({value: 0});
             $("#progress_bar").show();
@@ -136,8 +137,12 @@ function update_sidebar(sorted_list, field) {
     var newlist = "";
     if (field == "collocate") {
         newlist += "<p id='freq_sidebar_status'>Collocates within 5 words left or right</p>";
+        q_string = window.location.search.substr(1);
     }
     for (item in sorted_list.slice(0,300)) {
+        if (field == 'collocate') {
+            sorted_list[item][1]['url'] = "?" + colloc_linker(sorted_list[item][0], q_string, "all", sorted_list[item][1]['count'])
+        }
         var url = '<a id="freq_sidebar_text" href="' + sorted_list[item][1]['url'] + '">' + sorted_list[item][0] + '</a>';
         newlist += '<li style="white-space:nowrap;">';
         newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:8px;"></span>';

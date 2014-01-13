@@ -273,7 +273,7 @@ function showHide(value) {
     $("#results_per_page, #collocation_num, #time_series_num, #year_interval, #method, #metadata_fields").hide();
     $('[id^="explain_"]').hide();
     $("[id$='_question']").hide();
-    $('#frequency_task, #bottom_search').hide()
+    $('#bottom_search').hide()
     if (value == 'collocation') {
         $("#collocation_num, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
@@ -299,10 +299,8 @@ function showHide(value) {
         $('#search_terms_container').slideDown('fast');
     }
     if (value == "frequencies") {
-        $('#search_terms_container').slideUp('fast');
-        $('#search_elements').hide();
-        $('#frequency_task').show();
-        $('#bottom_search').show();   
+        $('#search_terms_container, #search_explain, #method, #results_per_page').hide();
+        $('#metadata_fields, #bottom_search').show();   
     }
     adjustBottomBorder();
 }

@@ -10,10 +10,10 @@
              start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
              r_status = "."
              if not results.done:
-                r_status += " Still working.  Refresh for a more accurate count of the results."
+                r_status += " Still working..."
              current_pos = start
             %>
-            Hits <span class="start">${start}</span> - <span class="end">${end}</span> of ${len(results)}${r_status}
+            Hits <span class="start">${start}</span> - <span class="end">${end}</span> of <span id="total_results">${len(results)}</span><span id="incomplete">${r_status}</span>
         </p>
         <%include file="show_frequency.mako"/>
         <div id="report_switch">

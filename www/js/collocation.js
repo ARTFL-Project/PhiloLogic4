@@ -12,20 +12,20 @@ $(document).ready(function() {
     } else {
         var collocation = JSON.parse(sessionStorage[window.location.href]);
         $('#philologic_collocation').html(collocation);
-        $("span[id^='all_'], span[id^='left_'], span[id^='right_']").css('opacity', '');
+        $("span[id^='all_'], span[id^='left_'], span[id^='right_']").css({'opacity': '', 'overflow': ''});
     }
 });
 
 // Set of functions for updating collocation tables
-function update_table(sorted_lists) {
+function update_table(sorted_lists, q_string, db_url) {
     for (column in sorted_lists) {
         var pos = 0;
         var sorted_list = sorted_lists[column];
-        for (i in sorted_list) {
+        for (i in sorted_list.slice(0, 50)) {
             pos += 1;
-            var link = "<a href=" + sorted_list[i][1]['url'] + ">" + sorted_list[i][0] + "</a>";
+            var link = '<a href="' + db_url + '/dispatcher.py?' + colloc_linker(sorted_list[i][0], q_string, column, sorted_list[i][1]['count']) + '">' + sorted_list[i][0] + '</a>';
             var count_id = column + '_count_' + sorted_list[i][1]['count'];
-            data = link + '<span id="' + count_id + '"> (' + sorted_list[i][1]['count'] + ')</span>';
+            data = link + '<span id="' + count_id + '">&nbsp(' + sorted_list[i][1]['count'] + ')</span>';
             $('#' + column + '_num' + pos).html(data);
         }
         $('[id^=' + column+ '_]').hide(function() {$(this).fadeIn(800)});
@@ -55,7 +55,7 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
             var right_sorted = right_list[0];
                 right_new_colloc = right_list[1];
             sorted_lists = {'all': all_sorted, 'left': left_sorted, 'right': right_sorted};
-            update_table(sorted_lists);
+            update_table(sorted_lists, q_string, db_url);
             update_colloc(db_url, all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
             collocation_cloud();
             var total = $('#progress_bar').progressbar("option", "max");
@@ -77,10 +77,9 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
             try {
                 sessionStorage[window.location.href] = JSON.stringify($('#philologic_collocation').html());
             } catch(e) {
-                if (e == QUOTA_EXCEEDED_ERR) {
-                    sessionStorage.clear();
-                    sessionStorage[window.location.href] = JSON.stringify($('#philologic_collocation').html());
-                }
+                sessionStorage.clear();
+                console.log("sessionStorage was full, clearing it for space...");
+                sessionStorage[window.location.href] = JSON.stringify($('#philologic_collocation').html());
             }
         }
     }
