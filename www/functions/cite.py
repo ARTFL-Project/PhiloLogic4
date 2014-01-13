@@ -22,7 +22,7 @@ def make_abs_div_cite(db,i):
         sub_section_name = section_name
 #    speaker_name = i.who                                                                                                                                                                                                                                                                                                                                                                                              
     title = '<a href="%s">%s</a>' % (doc_href, i.title)
-    cite = u"<span class='philologic_cite'>%s <i>%s</i> [%s]" % (i.author,title,i.create_date)
+    cite = u"<span class='philologic_cite'>%s <i>%s</i> [%s]" % (i.author,title,i.date)
     separation = '<span class="cite_separation"></span>'
     if section_name:
         cite += u"%s<a href='%s' class='section_name'>%s</a>" % (separation,section_href,section_name)
@@ -50,7 +50,7 @@ def make_abs_div_cite(db,i):
 def make_abs_doc_cite(db,i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
     doc_href = make_absolute_object_link(db,i.philo_id[:1], i.bytes)
-    record = u"%s, <i><a href='%s'>%s</a></i> [%s]" % (i.author, doc_href,i.title, i.create_date)
+    record = u"%s, <i><a href='%s'>%s</a></i> [%s]" % (i.author, doc_href,i.title, i.date)
     if db.locals['debug'] == True:
         record += " %s" % i.filename
     return record
