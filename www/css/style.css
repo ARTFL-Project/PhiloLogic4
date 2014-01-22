@@ -612,6 +612,8 @@ l, s {
     transform: rotate(-90deg);
 }
 .graph_years {
+    position: absolute;
+    bottom: -30px;
     font-size: 90%;
     -webkit-transform: rotate(-55deg);
     -moz-transform: rotate(-55deg);

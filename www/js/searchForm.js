@@ -94,11 +94,6 @@ $(document).ready(function() {
         source: db_url + "/scripts/term_list.py",
         minLength: 2,
         "dataType": "json",
-        focus: function( event, ui ) {
-            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-            $("#q").val(q);
-            return false;
-        },
         select: function( event, ui ) {
             q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
             $("#q").val(q);
@@ -247,12 +242,6 @@ function autocompleteMetadata(metadata, field, db_url) {
         minLength: 2,
         timeout: 1000,
         dataType: "json",
-        focus: function( event, ui ) {
-            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-            q = q.replace(/ CUTHERE /, ' ');
-            $("#" + field).val(q);
-            return false;
-        },
         select: function( event, ui ) {
             q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
             q = q.replace(/ CUTHERE /, ' ');

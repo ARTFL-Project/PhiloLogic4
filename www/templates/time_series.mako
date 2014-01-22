@@ -12,7 +12,7 @@
         <div id="time_series_buttons">
             <input type="radio" name="freq_type" id="absolute_time" data-value='${frequencies}' data-interval="${q['year_interval']}" checked="checked">
             <label for="absolute_time">Absolute Frequency</label>
-            <input type="radio" name="freq_type" id="relative_time" data-value='${relative_frequencies}' data-interval="${q['year_interval']}">
+            <input type="radio" name="freq_type" id="relative_time" data-datecount='${date_counts}' data-interval="${q['year_interval']}">
             <label for="relative_time">Relative Frequency</label>
         </div>
     </div>
