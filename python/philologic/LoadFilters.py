@@ -22,6 +22,27 @@ def normalize_unicode_raw_words(loader_obj, text):
         print >> tmp_file, record
     os.remove(text["raw"])
     os.rename(text["raw"] + ".tmp",text["raw"])
+    
+def make_word_counts(loader_obj, text, depth=4):
+    object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
+    counts = [0 for i in range(depth)]
+    temp_file = text['raw'] + '.tmp'
+    output_file = open(temp_file, 'w')
+    for line in open(text['raw']):
+        type, word, id, attrib = line.split('\t')
+        id = id.split()
+        record = Record(type, word, id)
+        record.attrib = eval(attrib)
+        for d,count in enumerate(counts):
+            if type == 'word':
+                counts[d] += 1
+            elif type == object_types[d]:
+                record.attrib['word_count'] = counts[d]
+                counts[d] = 0
+        print >> output_file, record
+    output_file.close()
+    os.remove(text['raw'])
+    os.rename(temp_file, text['raw'])
 
 def generate_words_sorted(loader_obj, text):
     wordcommand = "cat %s | egrep \"^word\" | sort %s %s > %s" % (text["raw"],loader_obj.sort_by_word,loader_obj.sort_by_id,text["words"])
@@ -287,6 +308,6 @@ def store_in_plain_text(*types):
 
 ## If you are going to change the order of these filters (which is not recommended)
 ## please consult the documentation for each of these filters in LoadFilters.py
-DefaultLoadFilters = [normalize_unicode_raw_words, generate_words_sorted,make_object_ancestors('doc', 'div1', 'div2', 'div3'),
-                      make_sorted_toms("doc","div1","div2","div3"), prev_next_obj('doc', 'div1', 'div2', 'div3'),
-                      generate_pages, make_max_id]
+DefaultLoadFilters = [normalize_unicode_raw_words, make_word_counts,generate_words_sorted,
+                      make_object_ancestors('doc', 'div1', 'div2', 'div3'), make_sorted_toms("doc","div1","div2","div3"),
+                      prev_next_obj('doc', 'div1', 'div2', 'div3'), generate_pages, make_max_id]
