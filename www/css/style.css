@@ -77,40 +77,15 @@ body {
 #header h1 a:hover, #header h1 a:active {
  text-decoration: none; color: #999999;
 }
-#header h1 .site-slogan {
- font-size: .4em;
- font-style: italic;
-}
-ul.primary-links li a, #footer ul.primary-links li a:link
-, #footer ul.primary-links li a:visited {
-  color: #990000;
-}
-
-ul.primary-links li {
-  border-left: 1px solid #990000;
-  padding: 0 .5em 0 .75em;
-}
-
-ul.primary-links li.first {
-  border: 0;
-  padding-left: 0;
-}
 #philo_branding {
     float: right;
     margin-top: -20px;
     margin-right: -10px;
 }
-#footer .block {
-    clear: both;
-    margin-bottom: 1.3em;
-}
 .bottom-border {
     min-height: 20px;
     padding-top: 30px;
     padding-right: 30px;
-}
-#footer .primary-links {
-  float: left;
 }
 .footer-nav {
   font-size: 90%;
@@ -137,10 +112,6 @@ body {
 table {
   font-size:inherit;
   font-weight: inherit;
-}
-
-.site-name {
-    font-weight: 400 !important;
 }
 
 input[type=text] {
@@ -185,15 +156,6 @@ div.main_body {
 
 .small-caps {
     font-variant:small-caps;
-}
-
-/* For pop-in notes */
-.hiddennote {
-        display: none;
-        margin: 5px;
-        border: 1px solid #242e55;
-        background-color: #dde3ef;
-        padding: 2px;
 }
 
 /*jQueryUI styling*/
@@ -250,46 +212,9 @@ ul.ui-autocomplete.ui-menu {
     border-right:0px;
     border-top:0px;
 }
-#kwic_concordance {
-    font-family: 'Droid Sans Mono', sans-serif;
-    font-size: 13px;
-    border-bottom-style:solid;
-    border-bottom-width:1px;
-    border-bottom-color: #CCCCCC;
-    padding-top:7px;
-    padding-bottom:8px;
-    margin-right: 20px;
-}
-.kwic_line {
-    padding-top: 1px;
-    padding-bottom: 1px;
-}
-.kwic_biblio {
-    font-weight:400 !important;
-}
-#philologic_concordance, #colloc_concordance {
-    list-style-type: none;
-    overflow: hidden;
-}
-.philologic_occurrence {
-    padding-top: 7px;
-    padding-bottom : 2px;
-    margin: 8px 1px 6px 1px;
-    box-shadow: 0px 0px 3px #A8A8A8;
-    background-color: white;
-    left: 0;
-    position: relative;
-}
-.philologic_context {
-    text-align: justify;
-    padding-right: 4px;
-    padding-left: 4px;
-    padding-top:4px;
-    /*margin-bottom: 5px;*/
-}
-.hit_n {
-    vertical-align: 5px;    /*align numbers*/
-}
+
+
+/* Collocation classes */
 .word_cloud {
     float: right;
     width:400px !important;
@@ -311,36 +236,6 @@ ul.ui-autocomplete.ui-menu {
     color: black !important;
     text-decoration: none !important;
 }
-.more_context_and_close {
-    font-weight: 300 !important;
-    float: right;
-    margin-top: -.45em;
-    margin-right: -1px;
-}
-.more_context {
-    margin-right: -4px;
-    z-index: 2;
-}
-.citation {
-    padding-top: 5px;
-    margin-top: -7px;
-    height: 21px;
-    padding-left: 4px;
-    /*border-bottom: solid 1px #E8E8E8;*/
-}
-.cite_gradient {
-    background-color: #FAFAFA; /* fallback color if gradients are not supported */
-    background-image: -webkit-linear-gradient(top, #FAFAFA, white); /* For Chrome and Safari */
-    background-image:    -moz-linear-gradient(top, #FAFAFA, white); /* For old Fx (3.6 to 15) */
-    background-image:     -ms-linear-gradient(top, #FAFAFA, white); /* For pre-releases of IE 10*/
-    background-image:      -o-linear-gradient(top, #FAFAFA, white); /* For old Opera (11.1 to 12.0) */ 
-    background-image:         linear-gradient(to bottom, #F8F8F8, #FAFAFA 70%, white); /* Standard syntax; must be last */
-}
-.collocate {
-    color:#1E90FF;
-    font-weight:400;
-}
-
 
 /*Tables*/
 .table_row {
@@ -376,74 +271,7 @@ ul.ui-autocomplete.ui-menu {
 }
 
 
-/*All the sidebar classes*/
-#sidebar_area {
-    float: right;
-    margin-top: -14px;
-}
-#sidebar_button {
-    float: right;
-    margin: 0;
-    padding: 0;
-    padding-top: 14px;
-}
-#hide_sidebar {
-    font-family: 'Droid Sans Mono', sans-serif !important;
-    font-size: 90% !important;
-    display: none;
-    border-bottom: 0px;
-    margin-right: 0;
-}
-#sidebar_display {
-    margin-top: 38px;
-    width: 400px;
-}
-#sidebar_display #freq_sidebar_status {
-	margin: 0em 0em 0.5em 0em;
-}
-#frequency_container {
-    box-shadow: 0px 0px 3px #A8A8A8;
-    margin: 52px 1px 0px 1px;
-    background-color: #FAFAFA;
-    overflow-y: scroll;
-    display: none;
-}
-#frequency_table {
-    padding: 5px 5px 5px 5px;
-    line-height: 230%;
-    /*overflow-y: scroll;*/
-}
-#freq_sidebar_text {
-    display: inline-block !important;
-    max-width: 320px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-#frequency_field {
-    display: none;
-    position: absolute;
-    max-width: 400px;
-    right: 0;
-    background-color: #F8F8F8;
-    box-shadow: 0px 0px 3px #A8A8A8;
-    z-index: 1000;
-    margin-right: 31px;
-    line-height: 130%;
-    color: #555;
-    top: 243px;
-}
-.sidebar_option {
-    padding-left: 1em;
-    padding-bottom: 5px;
-    padding-top: 5px;
-    border-top: solid 1px #ECECEC;
-}
-.sidebar_option:hover {
-    cursor: pointer;
-    background-color: #EBEBEB;
-    color: black;
-}
+
 
 
 /*Pages links*/
@@ -474,8 +302,8 @@ ul.ui-autocomplete.ui-menu {
     font-size: 140%;
 }
 .highlight {
-        color: #EF4500;
-        font-weight: 400;
+    color: #EF4500;
+    font-weight: 400;
 }
 
 .separation {
@@ -488,11 +316,6 @@ ul.ui-autocomplete.ui-menu {
 }
 .bibliography {
         padding-bottom: 10px;
-}
-.loading {
-    margin-left: auto;
-    margin-right: auto;
-    width: 30%;
 }
 #current_results_page {
     background: white !important;
@@ -559,82 +382,3 @@ l, s {
     margin-left: -50px;
 }
 
-/*Citations*/
-.section_name, .sub_section_name {
-    font-weight: 400 !important;
-}
-.cite_separation {
-    color: darkgray;
-    margin-left: 8px;
-    margin-right: 8px;
-    padding-left: 1px;
-    padding-right: 1px;
-    font-weight: 300 !important;
-    border-left: solid 1px darkgray;
-    border-right: solid 1px darkgray;
-}
-
-/*Time series stuff*/
-#test_time_series {
-    margin-left: 20px;
-    margin-top: 30px;
-    border-left: solid 1px #A0A0A0;
-    border-bottom: solid 1px #A0A0A0;
-    position: relative;
-    padding-left: 1px;
-    padding-right: 1px;
-}
-.graph_bar {
-    height: 0px;
-    background-color: ffdb9e; /* fallback color if gradients are not supported */
-    background-image: -webkit-linear-gradient(top, #ffdb9e, #fff2db); /* For Chrome and Safari */
-    background-image:    -moz-linear-gradient(top, #ffdb9e, #fff2db); /* For old Fx (3.6 to 15) */
-    background-image:     -ms-linear-gradient(top, #ffdb9e, #fff2db); /* For pre-releases of IE 10*/
-    background-image:      -o-linear-gradient(top, #ffdb9e, #fff2db); /* For old Opera (11.1 to 12.0) */ 
-    background-image:         linear-gradient(to bottom, #ffdb9e, #fff2db); /* Standard syntax; must be last */
-    position:absolute;
-    bottom:0;
-}
-.graph_bar:hover {
-    cursor: pointer;
-}
-#side_text {
-    position: absolute;
-    bottom: 50%;
-    margin-left: -115px;
-    font-size: 90%;
-    width: 200px;
-    text-align: center;
-    -webkit-transform: rotate(-90deg);
-    -moz-transform: rotate(-90deg);
-    -ms-transform: rotate(-90deg);
-    -o-transform: rotate(-90deg);
-    transform: rotate(-90deg);
-}
-.graph_years {
-    font-size: 90%;
-    -webkit-transform: rotate(-55deg);
-    -moz-transform: rotate(-55deg);
-    -ms-transform: rotate(-55deg);
-    -o-transform: rotate(-55deg);
-    transform: rotate(-55deg);
-}
-#first_division, #middle_division, #top_division {
-    position: absolute;
-    z-index: 50;
-    border-top: dashed 1px #B8B8B8;
-}
-#first_division {
-    bottom: 33%;
-}
-#middle_division {
-    bottom: 66%;
-}
-#top_division {
-    bottom: 98.7%;
-}
-#top_number, #middle_number, #first_number {
-    margin-top: -16px;
-    position: absolute;
-    z-index: 100;
-}

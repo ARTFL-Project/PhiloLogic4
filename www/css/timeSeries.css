@@ -1,0 +1,66 @@
+#test_time_series {
+    margin-left: 20px;
+    margin-top: 30px;
+    border-left: solid 1px #A0A0A0;
+    border-bottom: solid 1px #A0A0A0;
+    position: relative;
+    padding-left: 1px;
+    padding-right: 1px;
+}
+.graph_bar {
+    height: 0px;
+    background-color: ffdb9e; /* fallback color if gradients are not supported */
+    background-image: -webkit-linear-gradient(top, #ffdb9e, #fff2db); /* For Chrome and Safari */
+    background-image:    -moz-linear-gradient(top, #ffdb9e, #fff2db); /* For old Fx (3.6 to 15) */
+    background-image:     -ms-linear-gradient(top, #ffdb9e, #fff2db); /* For pre-releases of IE 10*/
+    background-image:      -o-linear-gradient(top, #ffdb9e, #fff2db); /* For old Opera (11.1 to 12.0) */ 
+    background-image:         linear-gradient(to bottom, #ffdb9e, #fff2db); /* Standard syntax; must be last */
+    position:absolute;
+    bottom:0;
+    overflow: visible !important; /* make sure years don't temporarily disappear when switching between absolute and relative frequencies */
+}
+.graph_bar:hover {
+    cursor: pointer;
+}
+#side_text {
+    position: absolute;
+    bottom: 50%;
+    margin-left: -115px;
+    font-size: 90%;
+    width: 200px;
+    text-align: center;
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+}
+.graph_years {
+    position: absolute;
+    bottom: -30px;
+    font-size: 90%;
+    -webkit-transform: rotate(-55deg);
+    -moz-transform: rotate(-55deg);
+    -ms-transform: rotate(-55deg);
+    -o-transform: rotate(-55deg);
+    transform: rotate(-55deg);
+}
+#first_division, #middle_division, #top_division {
+    position: absolute;
+    z-index: 50;
+    border-top: dashed 1px #B8B8B8;
+}
+#first_division {
+    bottom: 33%;
+}
+#middle_division {
+    bottom: 66%;
+}
+#top_division {
+    bottom: 98.7%;
+}
+#top_number, #middle_number, #first_number {
+    margin-top: -16px;
+    position: absolute;
+    z-index: 100;
+}
