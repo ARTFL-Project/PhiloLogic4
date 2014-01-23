@@ -70,10 +70,10 @@ def format_parsed_query(parsed_split,db):
             norm_tok = token.decode("utf-8").lower()
             norm_tok = [i for i in unicodedata.normalize("NFKD",norm_tok) if not unicodedata.combining(i)]
             norm_tok = "".join(norm_tok).encode("utf-8")
-            print >> sys.stderr, "TERMS:", norm_tok
+            #print >> sys.stderr, "TERMS:", norm_tok
             matches = word_pattern_search(norm_tok,db.locals["db_path"]+"/frequencies/normalized_word_frequencies")
-            print >> sys.stderr, "MATCHES:"
-            print >> sys.stderr, matches                
+            #print >> sys.stderr, "MATCHES:"
+            #print >> sys.stderr, matches                
             for m in matches:
                 if m not in expanded:
                     expanded += [m]                                              
@@ -90,7 +90,7 @@ def format_parsed_query(parsed_split,db):
         prior_label = label
 #        print clauses
 #        print "\n".join("\n".join(c for c in clause) for clause in clauses) 
-    print >> sys.stderr, command
+    #print >> sys.stderr, command
     return command
 
 def format_query(qstring,db):
@@ -104,14 +104,14 @@ def format_query(qstring,db):
         else:
             parsed_split += [(l,t)]
     command = format_parsed_query(parsed_split,db)
-    print >> sys.stderr, "QUERY_COMMAND",repr(command)
+    #print >> sys.stderr, "QUERY_COMMAND",repr(command)
     return command
 
 def word_pattern_search(term, path):
     command = ['egrep', '-wi', "^%s" % term, '%s' % path]
     process = subprocess.Popen(command, stdout=subprocess.PIPE)
     match, stderr = process.communicate()
-    print >> sys.stderr, "RESULTS:",repr(match)
+    #print >> sys.stderr, "RESULTS:",repr(match)
     match = match.split('\n')
     match.remove('')
     ## HACK: The extra decode/encode are there to fix errors when this list is converted to a json object

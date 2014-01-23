@@ -11,7 +11,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
     def inner_make_sql_table(loader_obj):
         print "Loading the %s SQLite table..." % table,
         db_destination = os.path.join(loader_obj.destination, db_file)
-        conn = sqlite.connect(db_destination)
+        conn = sqlite3.connect(db_destination)
         conn.text_factory = str
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
