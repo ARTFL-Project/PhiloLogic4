@@ -1,9 +1,9 @@
 $(document).ready(function() {
     
+    var db_url = db_locals['db_url'];
+    
     //jQueryUI theming
     $('#time_series_buttons').buttonset();
-    
-    var db_url = db_locals['db_url'];
     
     if (sessionStorage[window.location.href] == null) {
         // Make relative frequency unclickable until full results are in
@@ -34,6 +34,7 @@ $(document).ready(function() {
     } else {
         var time_series = JSON.parse(sessionStorage[window.location.href]);
         $('#philologic_response').html(time_series);
+        frequencySwitcher();
     }
     
     
@@ -63,7 +64,7 @@ $(document).ready(function() {
 
 function frequencySwitcher() {
     $('#absolute_time, #relative_time').click(function() {
-        var abs_data = $.parseJSON($(this).data('value'));
+        var abs_data = eval($(this).data('value'));
         var interval = $(this).data('interval');
         drawFromData(abs_data, interval, $(this).attr('id'));
     });
@@ -121,7 +122,7 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         $("#progress_bar").delay(500).slideUp();
         
         // Make sure all animations and CSS transformations are complete
-        setTimeout(saveTimeSeries, 5000);
+        // setTimeout(saveTimeSeries, 5000); // buggy for now
     }
 }
 
@@ -218,7 +219,7 @@ function drawFromData(data, interval, frequency_type) {
             $('.graph_bar').eq(i).find('.graph_years').css('margin-left', year_width + 'px');
         } else {
             $('.graph_bar').eq(i).data('count', count);
-            if (interval == "absolute time") {
+            if (frequency_type == "absolute time") {
                 $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences');
             } else {
                 $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences per 1,000,000 words')

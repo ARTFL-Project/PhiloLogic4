@@ -31,13 +31,6 @@
     width: 250px;
     vertical-align: middle;
 }
-#show_search_form {
-    font-size: 100%;
-    color: #800000;
-    font-weight: 600;
-    width: inherit;
-    text-decoration: none !important;
-}
 #report {
     width: auto;
     max-width: 960px;
@@ -107,13 +100,6 @@
 	text-align: justify;
 	overflow-y: auto;
 	height: 500px;
-}
-#frequency_task {
-    display: none;
-    margin-top: 10px;
-    border-top:solid 1px #ECECEC;
-    padding-top: 10px;
-    padding-left: 25px;
 }
 #bottom_search {
     display: none;
