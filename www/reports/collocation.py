@@ -13,13 +13,18 @@ from functions.ObjectFormatter import adjust_bytes, format_strip, convert_entiti
 from bibliography import fetch_bibliography as bibliography
 from collections import defaultdict
 from operator import itemgetter
+from lxml.etree import XML, XMLParser, strip_tags, tostring
 
 ## Precompiled regexes for performance
 left_truncate = re.compile ("^\w+", re.U)
 right_truncate = re.compile("\w+$", re.U)
 word_identifier = re.compile("\w", re.U)
 highlight_match = re.compile(r'<span class="highlight">[^<]*?</span>')
-token_regex = re.compile(r'\W', re.U)
+token_regex = re.compile(r'[\W\d]+', re.U)
+
+begin_match = re.compile(r'^[^<]*?>')
+start_cutoff_match = re.compile(r'^[^ <]+')
+end_match = re.compile(r'<[^>]*?\Z')
 
 
 def collocation(environ,start_response):
@@ -61,6 +66,21 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
     for hit in results[q['interval_start']:q['interval_end']]:
         bytes, byte_start = adjust_bytes(hit.bytes, 400)
         conc_text = f.get_text(hit, byte_start, 400, path)
+        
+        ### Isolate left and right concordances
+        #conc_left = conc_text[:bytes[0]]
+        #conc_left = begin_match.sub('', conc_left)
+        #conc_left = start_cutoff_match.sub('', conc_left)
+        #conc_right = end_match.sub('', conc_text[bytes[-1]:])
+        #conc_right = left_truncate.sub('', conc_right)
+        #
+        ### Clean left and right concordances
+        #parser = XMLParser(recover=True)
+        #left_tree = XML('<div>' + conc_left, parser=parser)
+        #conc_left = tostring(left_tree, method='text', encoding='utf-8').decode('utf-8', 'ignore')
+        #right_tree = XML('<div>' + conc_right, parser=parser)
+        #conc_right = tostring(right_tree, method='text', encoding='utf-8').decode('utf-8', 'ignore')
+        
         conc_text = format_strip(conc_text, bytes)
         conc_text = convert_entities(conc_text)
         conc_text = unicodedata.normalize('NFC', conc_text)
@@ -81,9 +101,9 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
             all_collocates[r_word] += 1  
     
     if full_report:
-        all_collocates = link_to_concordance('all', q, all_collocates, limit=100) 
-        left_collocates = link_to_concordance('left', q, left_collocates, limit=100)
-        right_collocates = link_to_concordance('right', q, right_collocates, limit=100)
+        #all_collocates = link_to_concordance('all', q, all_collocates, limit=100) 
+        #left_collocates = link_to_concordance('left', q, left_collocates, limit=100)
+        #right_collocates = link_to_concordance('right', q, right_collocates, limit=100)
         return all_collocates, left_collocates, right_collocates
     else:
         return link_to_concordance('all', q, all_collocates, limit=200)
@@ -117,25 +137,17 @@ def filter(word_list, filter_list, within_x_words):
             words_to_pass.append(word)
     return words_to_pass
 
-def clean_word(word):
-    ## Only used in the tokenize_text function below
-    """Removes any potential non-word characters"""
-    word = re.sub("[0-9]* ", "", word)
-    word = word.replace('\n', '')
-    word = word.replace('\r', '')
-    return word
-
 def tokenize_text(text, db):
     """Returns a list of individual tokens"""
     ## Still used in collocations
     text_tokens = token_regex.split(text)
-    text_tokens = [clean_word(token) for token in text_tokens if token] ## remove empty strings
+    text_tokens = [token for token in text_tokens if token] ## remove empty strings
     return text_tokens
 
 def sort_to_display(all_collocates, left_collocates, right_collocates):
-    left_colloc = sorted(left_collocates.items(), key=lambda x: x[1]['count'], reverse=True)
-    right_colloc = sorted(right_collocates.items(), key=lambda x: x[1]['count'], reverse=True)
-    all_colloc = sorted(all_collocates.items(), key=lambda x: x[1]['count'], reverse=True)
+    left_colloc = sorted(left_collocates.items(), key=itemgetter(1), reverse=True)[:100]
+    right_colloc = sorted(right_collocates.items(), key=itemgetter(1), reverse=True)[:100]
+    all_colloc = sorted(all_collocates.items(), key=itemgetter(1), reverse=True)[:100]
     return zip(all_colloc, left_colloc, right_colloc)
     
 

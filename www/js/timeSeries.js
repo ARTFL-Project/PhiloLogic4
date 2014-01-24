@@ -74,11 +74,11 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
     var q_string = window.location.search.substr(1);
     var script = db_url + "/scripts/time_series_fetcher.py?" + q_string
     if (interval_start === 0) {
-        interval_start = 5000;
-        interval_end = 15000;
+        interval_start = 10000;
+        interval_end = 30000;
     } else {
-        interval_start += 10000;
-        interval_end += 10000;
+        interval_start += 20000;
+        interval_end += 20000;
     }
     if (interval_start < total_results) {
         script_call = script + "&interval_start=" + interval_start + "&interval_end=" + interval_end;

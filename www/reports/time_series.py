@@ -48,9 +48,9 @@ def generate_time_series(q, db, results):
     absolute_count = defaultdict(int)
     date_counts = {}
     if not q['interval_start']:
-        q['interval_end'] = 5000  ## override defaults since this is faster than collocations
+        q['interval_end'] = 10000  ## override defaults since this is faster than collocations
     for i in results[q['interval_start']:q['interval_end']]:
-        date = i['create_date']
+        date = i.doc['create_date']
         try:
             if date != None:
                 date = int(date)

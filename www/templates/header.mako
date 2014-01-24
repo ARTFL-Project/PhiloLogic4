@@ -17,7 +17,7 @@
 <link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="${db.locals['db_url']}/css/style.css" type="text/css" media="screen, projection">
 <link rel="stylesheet" href="${db.locals['db_url']}/css/searchForm.css" type="text/css" media="screen, projection">
-% if report == "concordance" or report == "kwic" or report == "concordance_from_collocation":
+% if report == "concordance" or report == "kwic" or report == "concordance_from_collocation" or report == "bibliography":
     <link rel="stylesheet" href="${db.locals['db_url']}/css/concordanceKwic.css" type="text/css" media="screen, projection">
 % elif report == "time_series":
     <link rel="stylesheet" href="${db.locals['db_url']}/css/timeSeries.css" type="text/css" media="screen, projection">
@@ -42,7 +42,7 @@
                     </ul>             
                 </div>
                 <div id="site-name">
-                    <h1><a href="${db.locals['db_url']}/" title="Frantext test">Frantext test Beta 3</a></h1>           
+                    <h1><a href="${db.locals['db_url']}/" title="${dbname}">${dbname}</a></h1>           
                 </div>
                 
             </div>

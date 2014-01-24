@@ -36,20 +36,20 @@
                     <tr>
                         <td class="table_column">
                             <span id="all_num${pos}">
-                                <a href="${all[1]['url']}">${all[0]}</a>
-                                <span id="all_count_${pos}">(${all[1]['count']})</span>
+                                <span id="all_word_${pos}">${all[0]}</span>
+                                <span id="all_count_${pos}">(${all[1]})</span>
                             </span>
                         </td>
                         <td class="table_column">
                             <span id="left_num${pos}">
-                                <a href="${left[1]['url']}">${left[0]}</a>
-                                <span id="left_count_${pos}">(${left[1]['count']})</span>
+                                <span id="left_word_${pos}">${left[0]}</span>
+                                <span id="left_count_${pos}">(${left[1]})</span>
                             </span>
                         </td>
                         <td class="table_column">
                             <span id="right_num${pos}">
-                                <a href="${right[1]['url']}">${right[0]}</a>
-                                <span id="right_count_${pos}">(${right[1]['count']})</span>
+                                <span id="right_word_${pos}">${right[0]}</span>
+                                <span id="right_count_${pos}">(${right[1]})</span>
                             </span>
                         </td>
                     </tr>

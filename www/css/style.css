@@ -217,7 +217,7 @@ ul.ui-autocomplete.ui-menu {
 /* Collocation classes */
 .word_cloud {
     float: right;
-    width:400px !important;
+    width:450px !important;
     height: auto;
 }
 .collocation_counts {
@@ -225,6 +225,10 @@ ul.ui-autocomplete.ui-menu {
     display:none;
     text-align: justify;
     line-height: 200%;
+}
+.colloc_link {
+    color: #990000;
+    cursor: pointer;
 }
 .cloud_term {
     -webkit-transition: 200ms linear;
@@ -235,6 +239,7 @@ ul.ui-autocomplete.ui-menu {
 .cloud_term:hover {
     color: black !important;
     text-decoration: none !important;
+    cursor: pointer;
 }
 
 /*Tables*/
