@@ -64,7 +64,7 @@ def parse_cgi(environ):
     
     # This is for dynamically updating results in collocations and the sidebar
     query['interval_start'] = int(cgi.get('interval_start', [0])[0])
-    query['interval_end'] = int(cgi.get('interval_end', [50])[0])
+    query['interval_end'] = int(cgi.get('interval_end', [3000])[0])
     
     ## This is for frequency searches: raw count or per n number of words
     query["rate"] = cgi.get("rate", [None])[0]

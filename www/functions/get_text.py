@@ -7,6 +7,8 @@ from ObjectFormatter import format, format_concordance
 
 def get_text(hit, byte_start, length, path):
     #print >> sys.stderr, "HIT: ", hit.philo_id
+    ## We know we want docs, so minimize the number iterations in HitWrapper to get the filename
+    hit.philo_id = tuple((str(hit.philo_id[0]) + ' 0 0 0 0 0 0').split())
     file_path = path + '/data/TEXT/' + hit.filename
     #print >> sys.stderr, "FILE_PATH: ",file_path
     file = open(file_path)

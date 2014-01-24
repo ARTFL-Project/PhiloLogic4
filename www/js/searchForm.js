@@ -194,11 +194,8 @@ $(document).ready(function() {
         searchFormOverlap(form_offset);
     });
     
-    $(window).load(function() {
-        adjustReportWidth();
-        adjustBottomBorder();
-    });
-    
+    adjustReportWidth();
+    adjustBottomBorder();
 });
 
 

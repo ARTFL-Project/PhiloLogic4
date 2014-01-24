@@ -82,17 +82,17 @@ function hide_frequency() {
 }
 function populate_sidebar(script_call, field, total_results, interval_start, interval_end, full_results) {
     if (interval_start === 0) {
-        interval_end = 50;
-    } else if (interval_end === 50) {
-        interval_end = 2050;
+        interval_end = 1000;
+    } else if (interval_end === 1000) {
+        interval_end = 11000;
     } else {
-        interval_start += 2000;
-        interval_end += 2000;
+        interval_start += 10000;
+        interval_end += 10000;
     }
     if (interval_start < total_results) {
         script_call_interval = script_call + "&interval_start=" + interval_start + "&interval_end=" + interval_end;
         if (interval_start === 0) {
-            interval_start = 100;
+            interval_start = 1000;
         }
         $.getJSON(script_call_interval, function(data) {
             if ($('#hide_sidebar').data('interrupt') != true && $('#frequency_by').data('selected') == field) {
