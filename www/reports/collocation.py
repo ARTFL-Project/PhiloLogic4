@@ -101,9 +101,6 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
             all_collocates[r_word] += 1  
     
     if full_report:
-        #all_collocates = link_to_concordance('all', q, all_collocates, limit=100) 
-        #left_collocates = link_to_concordance('left', q, left_collocates, limit=100)
-        #right_collocates = link_to_concordance('right', q, right_collocates, limit=100)
         return all_collocates, left_collocates, right_collocates
     else:
         return link_to_concordance('all', q, all_collocates, limit=200)
@@ -113,11 +110,9 @@ def tokenize(text, filter_list, within_x_words, direction, db):
     text = text.lower()
     
     if direction == 'left':
-        #text = left_truncate.sub("", text) ## hack off left-most word (potentially truncated)
         word_list = tokenize_text(text, db) 
         word_list.reverse() ## left side needs to be reversed
     else:
-        #text = right_truncate.sub("", text) ## hack off right-most word (potentially truncated)
         word_list = tokenize_text(text, db)
       
     word_list = filter(word_list, filter_list, within_x_words)
@@ -149,15 +144,3 @@ def sort_to_display(all_collocates, left_collocates, right_collocates):
     right_colloc = sorted(right_collocates.items(), key=itemgetter(1), reverse=True)[:100]
     all_colloc = sorted(all_collocates.items(), key=itemgetter(1), reverse=True)[:100]
     return zip(all_colloc, left_colloc, right_colloc)
-    
-
-def link_to_concordance(direction, q, collocate_list, limit=100):
-    new_dict = {}
-    for collocate, count in sorted(collocate_list.iteritems(), key=itemgetter(1), reverse=True)[:limit]:
-        collocate_values = [collocate.encode('utf-8', 'ignore'), direction, q['word_num'], count]
-        link = f.link.make_query_link(q['q'], method=q['method'], arg=q['arg'], report="concordance_from_collocation",
-                                      collocate=collocate_values,**q['metadata'])
-        new_dict[collocate] = {'count': collocate_list[collocate], "url": link}
-    return new_dict
-    
-

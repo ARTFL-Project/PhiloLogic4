@@ -99,7 +99,8 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
             var total = $('#progress_bar').progressbar("option", "max");
             var percent = interval_end / total * 100;
             if (interval_end < total) {
-                $('#progress_bar').progressbar({value: interval_end});
+                var progress_width = $('#progress_bar').width() * percent / 100;
+                $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'slow');
                 $('.progress-label').text(percent.toString().split('.')[0] + '%');
             }
         });
