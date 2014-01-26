@@ -36,10 +36,9 @@ def collocation(environ,start_response):
     all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q, db)
     hit_len = len(hits)
     return render_template(all_colloc=all_colloc, left_colloc=left_colloc, right_colloc=right_colloc,
-                           db=db,dbname=dbname,q=q,link=link_to_concordance,f=f,path=path,
-                           results_per_page=q['results_per_page'],hit_len=hit_len,
-                           order=sort_to_display,dumps=json.dumps,template_name='collocation.mako',
-                           report="collocation")
+                           db=db,dbname=dbname,q=q,f=f,path=path, results_per_page=q['results_per_page'],
+                           hit_len=hit_len, order=sort_to_display,dumps=json.dumps,
+                           template_name='collocation.mako', report="collocation")
 
 def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True):
     within_x_words = q['word_num']    
