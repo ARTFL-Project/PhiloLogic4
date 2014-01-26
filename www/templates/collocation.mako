@@ -36,19 +36,19 @@
                     <tr>
                         <td class="table_column">
                             <span id="all_num${pos}">
-                                <span id="all_word_${pos}">${all[0]}</span>
+                                <span id="all_word_${pos}" data-word="${all[0]}" data-direction="all" data-count="${all[1]}">${all[0]}</span>
                                 <span id="all_count_${pos}">(${all[1]})</span>
                             </span>
                         </td>
                         <td class="table_column">
                             <span id="left_num${pos}">
-                                <span id="left_word_${pos}">${left[0]}</span>
+                                <span id="left_word_${pos}" data-word="${left[0]}" data-direction="left" data-count="${left[1]}">${left[0]}</span>
                                 <span id="left_count_${pos}">(${left[1]})</span>
                             </span>
                         </td>
                         <td class="table_column">
                             <span id="right_num${pos}">
-                                <span id="right_word_${pos}">${right[0]}</span>
+                                <span id="right_word_${pos}" data-word="${right[0]}" data-direction="right" data-count="${right[1]}">${right[0]}</span>
                                 <span id="right_count_${pos}">(${right[1]})</span>
                             </span>
                         </td>
