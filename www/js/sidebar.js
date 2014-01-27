@@ -45,7 +45,7 @@ function sidebar_reports(q_string, db_url, pathname) {
             var percent = 100 / total_results * 100;
             $('.progress-label').text(percent.toString().split('.')[0] + '%');
             $('.progress-label').text('0%');
-            $('#progress_bar').progressbar({value: 0});
+            $('#progress_bar').progressbar({value: 0.1});
             $("#progress_bar").show();
             var full_results;
             populate_sidebar(script_call, value, total_results, 0, full_results);
@@ -84,10 +84,10 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
     if (interval_start === 0) {
         interval_end = 1000;
     } else if (interval_end === 1000) {
-        interval_end = 11000;
+        interval_end = 21000;
     } else {
-        interval_start += 10000;
-        interval_end += 10000;
+        interval_start += 20000;
+        interval_end += 20000;
     }
     if (interval_start < total_results) {
         script_call_interval = script_call + "&interval_start=" + interval_start + "&interval_end=" + interval_end;
@@ -104,7 +104,8 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
                 var total = $('#progress_bar').progressbar("option", "max");
                 var percent = interval_end / total * 100;
                 if (interval_end < total) {
-                    $('#progress_bar').progressbar({value: interval_end});
+                    var progress_width = $('#progress_bar').width() * percent / 100;
+                    $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'fast', 'easeOutQuint', {queue: false});
                     $('.progress-label').text(percent.toString().split('.')[0] + '%');
                 }
             } else {

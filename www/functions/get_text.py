@@ -6,11 +6,8 @@ from os.path import exists
 from ObjectFormatter import format, format_concordance
 
 def get_text(hit, byte_start, length, path):
-    #print >> sys.stderr, "HIT: ", hit.philo_id
     ## We know we want docs, so minimize the number iterations in HitWrapper to get the filename
-    hit.philo_id = tuple((str(hit.philo_id[0]) + ' 0 0 0 0 0 0').split())
-    file_path = path + '/data/TEXT/' + hit.filename
-    #print >> sys.stderr, "FILE_PATH: ",file_path
+    file_path = path + '/data/TEXT/' + hit.doc.filename
     file = open(file_path)
     file.seek(byte_start)
     return file.read(length)
@@ -34,7 +31,7 @@ def get_page_text(db, obj, page_num, path, bytes):
         return format(text).decode("utf-8","ignore")
     
 def get_text_obj(obj, path, query_args=False):
-    filename = obj.filename
+    filename = obj.doc.filename
     if filename and exists(path + "/data/TEXT/" + filename):
         path += "/data/TEXT/" + filename
     else:

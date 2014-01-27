@@ -157,8 +157,9 @@
 					</td>
 					<td>
 						<span id="year_interval">
-							<input type="radio" name="year_interval" id="year1" value="10" checked="checked"><label for="year1">every decade</label>
-							<input type="radio" name="year_interval" id="year2" value="100"><label for="year2">every century</label>
+							<input type="radio" name="year_interval" id="year1" value="10" checked="checked"><label for="year1">Decade</label>
+                                <input type="radio" name="year_interval" id="year3" value="25"><label for="year3">Half Century</label>
+							<input type="radio" name="year_interval" id="year2" value="100"><label for="year2">Century</label>
 						</span>
 					</td>
 				</tr>

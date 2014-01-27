@@ -80,6 +80,20 @@ class LXMLTreeDriver:
             self.target.data(content.decode("utf-8","ignore"))
     def close(self):
         return self.target.close()
+    
+    
+class FragmentStripper:
+    
+    def __init__(self):
+        self.buffer = ''
+        
+    def feed(self, *event):
+        (kind,content,offset,name,attributes) = event
+        if kind == "text":
+            self.buffer += content
+            
+    def close(self):
+        return self.buffer
 
 def parse(text):
     parser = FragmentParser()
@@ -88,3 +102,8 @@ def parse(text):
     feeder.feed(text)
     return feeder.close()
     
+def strip_tags(text):
+    parser = FragmentStripper()
+    feeder = st.ShlaxIngestor(target=parser)
+    feeder.feed(text)
+    return feeder.close()

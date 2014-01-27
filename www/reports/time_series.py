@@ -57,9 +57,16 @@ def generate_time_series(q, db, results):
                 if not start <= date <= end :
                     continue
                 if q["year_interval"] == "10":
-                    date = int(str(date)[:3] + '0')
+                    date = int(str(date)[:-1] + '0')
                 elif q['year_interval'] == "100":
-                    date = int(str(date)[:2] + '00')
+                    date = int(str(date)[:-2] + '00')
+                elif q['year_interval'] == '25':
+                    decade = int(str(date)[-2:])
+                    if decade < 50:
+                        date = int(str(date)[-2:] + '00')
+                    else:
+                        date = int(str(date)[-2:] + '50')
+                    
             else:
                 continue
         except ValueError: ## No valid date

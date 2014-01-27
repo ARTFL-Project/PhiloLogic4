@@ -30,7 +30,7 @@ def make_abs_div_cite(db,i):
         cite += u"%s<a href='%s' class='sub_section_name'>%s</a>" % (separation,sub_section_href,sub_section_name)
     
     #if db.locals['debug'] == True:
-    #    cite += " %s" % i.filename
+    #    cite += " %s" % i.doc.filename
     page_obj = i.get_page()
     if page_obj:
         if page_obj['n']:
@@ -52,7 +52,7 @@ def make_abs_doc_cite(db,i):
     doc_href = make_absolute_object_link(db,i.philo_id[:1], i.bytes)
     record = u"%s, <i><a href='%s'>%s</a></i> [%s]" % (i.doc.author, doc_href,i.doc.title, i.doc.create_date)
     if db.locals['debug'] == True:
-        record += " %s" % i.filename
+        record += " %s" % i.doc.filename
     return record
 
 ### LINKING ###

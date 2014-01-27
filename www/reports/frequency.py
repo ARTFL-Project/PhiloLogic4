@@ -31,12 +31,13 @@ def frequency(environ,start_response):
 def generate_frequency(results, q, db):
     """reads through a hitlist. looks up q["field"] in each hit, and builds up a list of 
        unique values and their frequencies."""
+    object_level = db.locals['default_object_level'] ## This will speed up sql searches
     field = q["field"]
     if field == None:
         field = 'title'
     counts = defaultdict(int)
     for n in results[q['interval_start']:q['interval_end']]:
-        key = n[field] or "NULL" # NULL is a magic value for queries, don't change it recklessly.
+        key = n[object_level][field] or "NULL" # NULL is a magic value for queries, don't change it recklessly.
         counts[key] += 1
 
     if q['rate'] == 'relative':

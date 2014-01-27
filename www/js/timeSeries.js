@@ -99,7 +99,8 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
             var total = $('#progress_bar').progressbar("option", "max");
             var percent = interval_end / total * 100;
             if (interval_end < total) {
-                $('#progress_bar').progressbar({value: interval_end});
+                var progress_width = $('#progress_bar').width() * percent / 100;
+                $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'slow', 'easeOutQuart', {queue: false});
                 $('.progress-label').text(percent.toString().split('.')[0] + '%');
             }
         });
@@ -181,14 +182,21 @@ function clickOnChart(interval) {
     $('.graph_bar').click(function() {
         var year = String($(this).data('year'));
         if (interval == '10') {
-            year = year.slice(0,3) + '0';
+            year = year.slice(0,-1) + '0';
             var next = String(parseInt(year) + 9);
             year = year + '-' + next
         }
         else if (interval == '100') {
-            year = year.slice(0,2) + '00';
+            year = year.slice(0,-2) + '00';
             var next = String(parseInt(year) + 99);
             year = year + '-' + next
+        } else if (interval == '25') {
+            var decade = parseInt(year.slice(-2));
+            if (decade < 50) {
+                year = year.slice(0,-2) + '00' + '-' + year.slice(0,-2) + '49';
+            } else {
+                year = year.slice(0,-2) + '50' + '-' + year.slice(0,-2) + '99';
+            }
         }
         var href = window.location.href.replace(/time_series/, 'concordance');
         href = href.replace(/create_date=[^&]*/, 'create_date=' + year)
@@ -219,7 +227,7 @@ function drawFromData(data, interval, frequency_type) {
             $('.graph_bar').eq(i).find('.graph_years').css('margin-left', year_width + 'px');
         } else {
             $('.graph_bar').eq(i).data('count', count);
-            if (frequency_type == "absolute time") {
+            if (frequency_type == "absolute_time") {
                 $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences');
             } else {
                 $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences per 1,000,000 words')
