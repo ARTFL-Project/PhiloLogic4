@@ -105,7 +105,7 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
                 var percent = interval_end / total * 100;
                 if (interval_end < total) {
                     var progress_width = $('#progress_bar').width() * percent / 100;
-                    $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'fast');
+                    $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'fast', 'easeOutQuint', {queue: false});
                     $('.progress-label').text(percent.toString().split('.')[0] + '%');
                 }
             } else {

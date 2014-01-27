@@ -263,12 +263,14 @@ function showHide(value) {
     if (value == 'collocation') {
         $("#collocation_num, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
+        $('#metadata_fields').find('tr').has('#create_date').show();
         $('#colloc_question').show();
         $('#search_terms_container').slideDown('fast');
     }
     if (value == 'kwic' || value == "concordance") {
         $("#results_per_page, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
+        $('#metadata_fields').find('tr').has('#create_date').show();
         $('#' + value + '_question').show();
         $('#start_date, #end_date').val('');
         $('#search_terms_container').slideDown('fast');
@@ -280,8 +282,10 @@ function showHide(value) {
     if (value == "time_series") {
         $("#time_series_num, #year_interval, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').hide();
+        $('#metadata_fields').find('tr').has('#create_date').hide(); // Temporary hack for Frantext
         $('#time_question').show();
         $('#date').val('');
+        $('#create_date').val('');  // Temporary hack for Frantext
         $('#search_terms_container').slideDown('fast');
     }
     if (value == "frequencies") {

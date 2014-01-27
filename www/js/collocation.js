@@ -61,10 +61,10 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
     var script = db_url + "/scripts/collocation_fetcher.py?" + q_string
     if (colloc_start == 0) {
         colloc_start = 3000;
-        colloc_end = 13000;
+        colloc_end = 23000;
     } else {
-        colloc_start += 10000;
-        colloc_end += 10000;
+        colloc_start += 20000;
+        colloc_end += 20000;
     }
     var script_call = script + '&interval_start=' + colloc_start + '&interval_end=' + colloc_end
     if (colloc_start <= results_len) {
@@ -86,7 +86,7 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
             var percent = colloc_end / total * 100;
             if (colloc_end < total) {
                 var progress_width = $('#progress_bar').width() * percent / 100;
-                $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'slow');
+                $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'slow', 'easeOutQuart', {queue: false});
                 $('.progress-label').text(percent.toString().split('.')[0] + '%');
             }
         });

@@ -9,14 +9,14 @@ import json
 import unicodedata
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
-from functions.ObjectFormatter import adjust_bytes, format_strip, convert_entities
+from functions.ObjectFormatter import adjust_bytes, convert_entities
+from functions.FragmentParser import strip_tags
 from bibliography import fetch_bibliography as bibliography
 from collections import defaultdict
 from operator import itemgetter
-from lxml.etree import XML, XMLParser, strip_tags, tostring
 
 ## Precompiled regexes for performance
-left_truncate = re.compile ("^\w+", re.U)
+left_truncate = re.compile (r"^\w+", re.U)
 right_truncate = re.compile("\w+$", re.U)
 word_identifier = re.compile("\w", re.U)
 highlight_match = re.compile(r'<span class="highlight">[^<]*?</span>')
@@ -25,6 +25,7 @@ token_regex = re.compile(r'[\W\d]+', re.U)
 begin_match = re.compile(r'^[^<]*?>')
 start_cutoff_match = re.compile(r'^[^ <]+')
 end_match = re.compile(r'<[^>]*?\Z')
+no_tag = re.compile(r'<[^>]+>')
 
 
 def collocation(environ,start_response):
@@ -66,27 +67,15 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
         bytes, byte_start = adjust_bytes(hit.bytes, 400)
         conc_text = f.get_text(hit, byte_start, 400, path)
         
-        ### Isolate left and right concordances
-        #conc_left = conc_text[:bytes[0]]
-        #conc_left = begin_match.sub('', conc_left)
-        #conc_left = start_cutoff_match.sub('', conc_left)
-        #conc_right = end_match.sub('', conc_text[bytes[-1]:])
-        #conc_right = left_truncate.sub('', conc_right)
-        #
-        ### Clean left and right concordances
-        #parser = XMLParser(recover=True)
-        #left_tree = XML('<div>' + conc_left, parser=parser)
-        #conc_left = tostring(left_tree, method='text', encoding='utf-8').decode('utf-8', 'ignore')
-        #right_tree = XML('<div>' + conc_right, parser=parser)
-        #conc_right = tostring(right_tree, method='text', encoding='utf-8').decode('utf-8', 'ignore')
-        
-        conc_text = format_strip(conc_text, bytes)
-        conc_text = convert_entities(conc_text)
-        conc_text = unicodedata.normalize('NFC', conc_text)
-        start_highlight = conc_text.find('<span class="highlight"')
-        end_highlight = [m.end(0) for m in highlight_match.finditer(conc_text)][-1]
-        conc_left = conc_text[:start_highlight]
-        conc_right = conc_text[end_highlight:]
+        ## Isolate left and right concordances
+        conc_left = convert_entities(conc_text[:bytes[0]].decode('utf-8', 'ignore'))
+        conc_left = begin_match.sub('', conc_left)
+        conc_left = start_cutoff_match.sub('', conc_left)
+        conc_right = convert_entities(conc_text[bytes[-1]:].decode('utf-8', 'ignore'))
+        conc_right = end_match.sub('', conc_right)
+        conc_right = left_truncate.sub('', conc_right)
+        conc_left = strip_tags(conc_left)
+        conc_right = strip_tags(conc_right)
         
         left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
         right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)

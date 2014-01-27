@@ -11,11 +11,23 @@ from functions.wsgi_handler import wsgi_response
 from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from collocation import tokenize, filter
-from functions.ObjectFormatter import adjust_bytes, format_strip, convert_entities
+from functions.ObjectFormatter import adjust_bytes, convert_entities
+from functions.FragmentParser import strip_tags
 
 
 end_highlight_match = re.compile(r'.*<span class="highlight">[^<]*?(</span>)')
 token_regex = re.compile(r'(\W)', re.U)
+
+left_truncate = re.compile (r"^\w+", re.U)
+right_truncate = re.compile("\w+$", re.U)
+word_identifier = re.compile("\w", re.U)
+highlight_match = re.compile(r'<span class="highlight">[^<]*?</span>')
+#token_regex = re.compile(r'[\W\d]+', re.U)
+
+begin_match = re.compile(r'^[^<]*?>')
+start_cutoff_match = re.compile(r'^[^ <]+')
+end_match = re.compile(r'<[^>]*?\Z')
+no_tag = re.compile(r'<[^>]+>')
 
 def concordance_from_collocation(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
@@ -54,14 +66,17 @@ def fetch_colloc_concordance(results, path, q, db, filter_words=100):
         ## get my chunk of text ##
         bytes, byte_start = adjust_bytes(hit.bytes, 400)
         conc_text = f.get_text(hit, byte_start, 400, path)
-        conc_text = format_strip(conc_text, bytes)
-        conc_text = convert_entities(conc_text)
-        #conc_text = unicodedata.normalize('NFC', conc_text)
-        start_highlight = conc_text.find('<span class="highlight"')
-        m = end_highlight_match.search(conc_text)
-        end_highlight = m.end(len(m.groups()) - 1)
-        conc_left = conc_text[:start_highlight]
-        conc_right = conc_text[end_highlight:]
+        
+        ## Isolate left and right concordances
+        conc_left = convert_entities(conc_text[:bytes[0]].decode('utf-8', 'ignore'))
+        conc_left = begin_match.sub('', conc_left)
+        conc_left = start_cutoff_match.sub('', conc_left)
+        conc_right = convert_entities(conc_text[bytes[-1]:].decode('utf-8', 'ignore'))
+        conc_right = end_match.sub('', conc_right)
+        conc_right = left_truncate.sub('', conc_right)
+        conc_left = strip_tags(conc_left)
+        conc_right = strip_tags(conc_right)
+        
         if direction =='left':
             words = tokenize(conc_left, filter_list, within_x_words, direction, db)
         elif direction == 'right':
