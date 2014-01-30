@@ -4,7 +4,6 @@
     <form id="search" action="${db.locals['db_url'] + "/dispatcher.py/"}">
         <div id="initial_form">
             <div id="report" class="report" style="margin-top:0px">
-                <!--<h3 style="padding-left: 5px;margin-top: 10px;">Choose a search report:</h3>-->
                 <span id="concordance_button" style="display: none;">
                     <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
                     <label for="concordance">Concordance</label>
@@ -70,7 +69,6 @@
                     </div>
                 </div>
             </div>
-            <!--<div id="more_options"><span class="ui-icon ui-icon-arrowthick-1-s" style="vertical-align: top; margin:0 auto;margin-top: -5px;"></span></div>-->
         </div>
         <div id="search_explain">
             <h3 id="concordance_question">What does a concordance report do?</h3>
@@ -107,15 +105,21 @@
             <h3>Refine your search with the following options and fields:</h3>
             <div id='method'>
                 <table>
-                    <tr><td class="first_column"><span class="search_field">Search Terms</span></td>
+                    <tr>
+                        <td class="first_column">
+                            <span class="search_field">Search Terms</span>
+                        </td>
                     <td>
-                    <input type="radio" name="method" id="method1" value='proxy' checked="checked"><label for="method1">Within</label>
-                    <input type='text' name='arg_proxy' id='arg_proxy' style="margin-left:15px !important;width:30px; text-align: center;">
-                    <span style="padding-left:5px;">words</span>
-                    <br><input type="radio" name="method" id="method2" value='phrase'><label for="method2">Exactly</label>
-                    <input type='text' name='arg_phrase' id='arg_phrase' style="margin-left:11px !important;width:30px; text-align: center;">
-                    <span style="padding-left:5px;">words</span>
-                    <br><input type="radio" name="method" id="method3" value='cooc'><label for="method3">In the same sentence</label>
+                        <input type="radio" name="method" id="method1" value='proxy' checked="checked">
+                        <label for="method1">Within</label>
+                        <input type='text' name='arg_proxy' id='arg_proxy' style="margin-left:15px !important;width:30px; text-align: center;">
+                        <span style="padding-left:5px;">words</span>
+                        <br><input type="radio" name="method" id="method2" value='phrase'>
+                        <label for="method2">Exactly</label>
+                        <input type='text' name='arg_phrase' id='arg_phrase' style="margin-left:11px !important;width:30px; text-align: center;">
+                        <span style="padding-left:5px;">words</span>
+                        <br><input type="radio" name="method" id="method3" value='cooc'>
+                        <label for="method3">In the same sentence</label>
                     </td></tr>
                 </table>
             </div>
@@ -129,7 +133,9 @@
 							alias = facet
 						%>
                         <tr class="table_row">
-							<td class="first_column"><span class="search_field">${alias}:</span></td>
+							<td class="first_column">
+                                <span class="search_field">${alias}:</span>
+                            </td>
 							<td><input type='text' name='${facet}' id="${facet}" class="search_box"></td>
 						</tr>
                     % endfor
@@ -157,19 +163,30 @@
 					</td>
 					<td>
 						<span id="year_interval">
-							<input type="radio" name="year_interval" id="year1" value="10" checked="checked"><label for="year1">Decade</label>
-                                <input type="radio" name="year_interval" id="year3" value="25"><label for="year3">Half Century</label>
-							<input type="radio" name="year_interval" id="year2" value="100"><label for="year2">Century</label>
+							<input type="radio" name="year_interval" id="year1" value="10" checked="checked">
+                            <label for="year1">Decade</label>
+                            <input type="radio" name="year_interval" id="year3" value="25">
+                            <label for="year3">Half Century</label>
+							<input type="radio" name="year_interval" id="year2" value="100">
+                            <label for="year2">Century</label>
 						</span>
 					</td>
 				</tr>
-                
-                <tr class="table_row" id="results_per_page"><td class="first_column"><span class="search_field">Results per page:</span></td>
-                <td><span id='page_num'>
-                    <input type="radio" name="pagenum" id="pagenum1" value='20'><label for="pagenum1">20</label>
-                    <input type="radio" name="pagenum" id="pagenum2" value='50' checked="checked"><label for="pagenum2">50</label>
-                    <input type="radio" name="pagenum" id="pagenum3" value='100'><label for="pagenum3">100</label>
-                </span></td></tr>
+                <tr class="table_row" id="results_per_page">
+                    <td class="first_column">
+                        <span class="search_field">Results per page:</span>
+                    </td>
+                    <td>
+                        <span id='page_num'>
+                            <input type="radio" name="pagenum" id="pagenum1" value='25' checked="checked">
+                            <label for="pagenum1">25</label>
+                            <input type="radio" name="pagenum" id="pagenum2" value='50'>
+                            <label for="pagenum2">50</label>
+                            <input type="radio" name="pagenum" id="pagenum3" value='100'>
+                            <label for="pagenum3">100</label>
+                        </span>
+                    </td>
+                </tr>
             </table>
         </div>
 		<div id="bottom_search">
@@ -177,4 +194,6 @@
 		</div>
     </form>
 </div>
-<div id="waiting" style="display:none;z-index:99;position:absolute;"><img src="${db.locals['db_url']}/js/ajax-loader.gif" alt="Loading..."/></div>
+<div id="waiting" style="display:none;z-index:99;position:absolute;">
+    <img src="${db.locals['db_url']}/js/ajax-loader.gif" alt="Loading..."/>
+</div>

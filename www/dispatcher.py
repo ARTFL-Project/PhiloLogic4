@@ -24,14 +24,16 @@ def philo_dispatcher(environ,start_response):
         yield reports.landing_page(environ,start_response)
         
 if __name__ == "__main__":
-    middleware = ProfileMiddleware(
-               philo_dispatcher,
-               log_filename='/tmp/philo4.log',
-               cachegrind_filename='/tmp/cachegrind.out.bar',
-               discard_first_request=False,
-               flush_at_shutdown=False,
-               path='/__profile__',
-               unwind=True,
-              )
-    CGIHandler().run(middleware)
+    #if 'PATH_INFO' not in os.environ:
+    #    os.environ["PATH_INFO"] = ''
+    #middleware = ProfileMiddleware(
+    #           philo_dispatcher,
+    #           log_filename='/tmp/philo4.log',
+    #           cachegrind_filename='/tmp/cachegrind.out.bar',
+    #           discard_first_request=False,
+    #           flush_at_shutdown=False,
+    #           path='/__profile__',
+    #           unwind=True,
+    #          )
+    CGIHandler().run(philo_dispatcher)
     clean_hitlists()

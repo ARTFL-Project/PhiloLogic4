@@ -1,9 +1,7 @@
 #kwic_concordance {
     font-family: 'Droid Sans Mono', sans-serif;
     font-size: 13px;
-    border-bottom-style:solid;
-    border-bottom-width:1px;
-    border-bottom-color: #CCCCCC;
+    border-bottom: solid 1px #CCCCCC;
     padding-top:7px;
     padding-bottom:8px;
     margin-right: 20px;

@@ -19,9 +19,9 @@ html, body {
     padding: 0;
     height:100%;
 }
-
 body {
     background-color: #FCFCFC;
+    font-family: 'Averia Serif Libre', cursive;
 }
 
 /* The following is for the header and footer */
@@ -45,7 +45,6 @@ body {
     height: 65px;
     box-shadow: 0px -8px 15px -5px #C8C8C8;
 }
-
 .secondary-links {
     margin:0;
     padding-right: 20px;
@@ -69,13 +68,10 @@ body {
 }
 #header h1 {
   font-size: 2.2em;
-  color: #990000;
-}
-#header h1 a:link, #header h1 a:visited, #header h1 a:hover {
- color: #990000;
+  color: #900;
 }
 #header h1 a:hover, #header h1 a:active {
- text-decoration: none; color: #999999;
+ text-decoration: none; color: #999;
 }
 #philo_branding {
     float: right;
@@ -100,15 +96,11 @@ a:link, a:visited {
 }
 
 /* Fonts */
-body {
-  font-family: 'Averia Serif Libre', cursive;
-}
 .main_body{
     font-weight:300;
     font-size: 14px;
     line-height: 130%;
 }
-
 table {
   font-size:inherit;
   font-weight: inherit;
@@ -125,8 +117,6 @@ input[type=text] {
 input[type=text]:focus {
     background-color: #F2F9FF;
 }
-
-
 h1 {
   margin: 0;
   padding: 0;
@@ -145,30 +135,18 @@ ol {
     margin: 0px;
     padding: 0px;
 }
-
-
 div.main_body {
     padding-top: 20px;
     padding-bottom: 10px;
     margin-left:30px;
     margin-right: 30px;
 }
-
 .small-caps {
     font-variant:small-caps;
 }
 
 /*jQueryUI styling*/
-.ui-button,  .ui-button-text, .ui-button, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {  
-    font-size: inherit !important;
-    font-family: inherit !important;
-}
-.ui-widget {
-    font-size: inherit !important;
-    font-family: inherit !important; 
-}
-
-ul.ui-autocomplete.ui-menu {  
+.ui-button,  .ui-button-text, .ui-button, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button, .ui-widget, ul.ui-autocomplete.ui-menu {  
     font-size: inherit !important;
     font-family: inherit !important;
 }
@@ -217,7 +195,7 @@ ul.ui-autocomplete.ui-menu {
 /* Collocation classes */
 .word_cloud {
     float: right;
-    width:450px !important;
+    width: 480px !important;
     height: auto;
 }
 .collocation_counts {
@@ -258,9 +236,7 @@ ul.ui-autocomplete.ui-menu {
 }
 .table_header {
     background-color: #ECECEC;
-    border-style:solid;
-    border-width:1px;
-    border-color: LightGray;
+    border: solid 1px LightGray;
 }
 .table_column {
     padding-top: 10px;
@@ -269,15 +245,9 @@ ul.ui-autocomplete.ui-menu {
     display:table-cell;
     text-align: center;
     vertical-align: middle;
-    border-style:solid;
-    border-width:1px;
-    border-color: LightGray;
+    border: solid 1px LightGray;
     background-color: #FAFAFA;
 }
-
-
-
-
 
 /*Pages links*/
 .more {
@@ -297,7 +267,6 @@ ul.ui-autocomplete.ui-menu {
     float: right;
 }
 
-
 /*Random stuff to be organized*/
 #bibliographic_results {
     list-style-type: none;
@@ -310,13 +279,12 @@ ul.ui-autocomplete.ui-menu {
     color: #EF4500;
     font-weight: 400;
 }
-
 .separation {
         width:40%;
         text-align:left;
         margin-left:20px;
-        color: #000000;
-        background-color: #000000;
+        color: #000;
+        background-color: #000;
         height: 1px;
 }
 .bibliography {
@@ -326,17 +294,13 @@ ul.ui-autocomplete.ui-menu {
     background: white !important;
 }
 
-
-
 /*Contextual menu on selection*/
 .highlight_options {
     position: absolute;
     z-index: 1000;
     display: none;
     background-color: #FAFAFA;
-    border-style: solid;
-    border-color: #CCCCCC;
-    border-width: 1px;
+    border: solid 1px #CCCCCC;
     line-height: 170%;
     box-shadow: 5px 9px 15px -5px #888888;
     padding-bottom: 5px;
@@ -357,9 +321,8 @@ ul.ui-autocomplete.ui-menu {
 }
 .context_table {
     border-collapse:collapse;
-    border-color: #CCCCCC;
+    border-color: #CCC;
 }
-
 
 /* hack for inserted page links at top of object */
 b p.inserted-page {

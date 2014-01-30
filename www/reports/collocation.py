@@ -19,13 +19,11 @@ from operator import itemgetter
 left_truncate = re.compile (r"^\w+", re.U)
 right_truncate = re.compile("\w+$", re.U)
 word_identifier = re.compile("\w", re.U)
-highlight_match = re.compile(r'<span class="highlight">[^<]*?</span>')
 token_regex = re.compile(r'[\W\d]+', re.U)
 
 begin_match = re.compile(r'^[^<]*?>')
 start_cutoff_match = re.compile(r'^[^ <]+')
 end_match = re.compile(r'<[^>]*?\Z')
-no_tag = re.compile(r'<[^>]+>')
 
 
 def collocation(environ,start_response):
@@ -91,7 +89,7 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
     if full_report:
         return all_collocates, left_collocates, right_collocates
     else:
-        return link_to_concordance('all', q, all_collocates, limit=200)
+        return all_collocates
 
 
 def tokenize(text, filter_list, within_x_words, direction, db):

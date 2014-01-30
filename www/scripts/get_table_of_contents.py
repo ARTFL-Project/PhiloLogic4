@@ -28,14 +28,18 @@ def get_table_of_contents(environ, start_response):
         link_id = '_'.join([str(j) for j in i.philo_id])
         href = f.link.make_absolute_object_link(db,id)
         head_or_type = i.head or "[%s]" % i.type
+        html += "<span style=''>"
+        style = ""
         if i.type == "div2":
-            spacing = "&nbsp;-&nbsp;"
+            #style += "padding-left: 15px;width:90%;"
+            space = '&nbsp&nbsp&nbsp<span class="ui-icon ui-icon-radio-on" style="display: inline-block;vertical-align:-3px;">&nbsp</span>'
         elif i.type == "div3":
-            spacing = "&nbsp;&nbsp;&nbsp;-&nbsp;"       
+            #style += "padding-left: 30px;width:80%;"
+            space = '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span class="ui-icon ui-icon-radio-off" style="display: inline-block;vertical-align:-3px;">&nbsp</span>'
         else:
-            spacing = ""
-        html += spacing
-        html += '<a href="%s" id="%s">%s</a><br>' % (href, link_id, head_or_type)
+            space = '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:-3px;">&nbsp</span>'
+        #html += spacing
+        html += space + '<a href="%s" id="%s">%s</a></span><br>' % (href, link_id, head_or_type)
     html += "</div>"
     yield html.encode('utf-8', 'ignore')
     
