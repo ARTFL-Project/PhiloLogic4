@@ -7,24 +7,16 @@
     display: none;
     z-index: 90;
     background-color: white;
-    border-right-style: solid;
-    border-right-width: 1px;
-    border-right-color: #ECECEC;
-    border-bottom-style: solid;
-    border-bottom-width: 1px;
-    border-bottom-color: #ECECEC;
-    border-top-style: solid;
-    border-top-width: 1px;
-    border-top-color: #ECECEC;
+    border-right: solid 1px #ECECEC;
+    border-bottom: solid 1px #ECECEC;
+    border-top: solid 1px #ECECEC;
     box-shadow: 0px 9px 15px -5px #C8C8C8;
     color: #555 !important;
 }
 #search_elements {
     margin-top: 10px;
     padding-left: 30px;
-    border-top: solid;
-    border-top-width: 1px;
-    border-top-color: #ECECEC;
+    border-top: solid 1px #ECECEC;
     float:left;
 }
 .search_box {
@@ -64,17 +56,13 @@
 	text-align: justify;
     font-family: inherit !important;
 	padding-right: 10px;
-	border-top: solid;
-    border-top-width: 1px;
-    border-top-color: #ECECEC;
+	border-top: solid 1px #ECECEC;
 	position: absolute;
 }
 #explain_conc, #explain_relev, #explain_colloc, #explain_time, #explain_kwic {
     display: none;
-    margin-left: 65px;
-    margin-right: 15px;
 }
-#concordance_question, #kwic_question, #relev_question, #colloc_question, #time_question {
+#concordance_question, #kwic_question, #relev_question, #colloc_question, #time_question, #explain_conc, #explain_relev, #explain_colloc, #explain_time, #explain_kwic {
     margin-left: 65px;
     margin-right: 15px;
 }
@@ -86,16 +74,14 @@
     text-decoration: underline;
 }
 #syntax_explain {
-    padding: 10px 10px 10px 10px;
+    padding: 10px;
     display: none;
     position: absolute;
     z-index: 1000;
     background-color: white;
-    border-style: solid;
-    border-color: #CCCCCC;
-    border-width: 1px;
+    border: solid 1px #CCC;
     line-height: 170%;
-    box-shadow: 5px 9px 15px -5px #888888;
+    box-shadow: 5px 9px 15px -5px #888;
     color: black;
 	text-align: justify;
 	overflow-y: auto;

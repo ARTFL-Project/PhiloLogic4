@@ -21,7 +21,7 @@ function sidebar_reports(q_string, db_url, pathname) {
     });
     $('.sidebar_option').click(function(evt) {
         $('#frequency_field').slideUp('fast', 'swing');
-        value = $(this).data('value');
+        var value = $(this).data('value');
         
         // store the selected field to check whether to kill the ajax calls in populate_sidebar
         $('#frequency_by').data('selected', value);
@@ -29,10 +29,10 @@ function sidebar_reports(q_string, db_url, pathname) {
         // Get total results
         var total_results = parseInt($('#total_results').text());
         
-        $('#displayed_sidebar_value').html(value);
+        $('#displayed_sidebar_value').html($(this).data('display'));
         show_sidebar(q_string, db_url, pathname,value);
         $('#frequency_table').empty();
-        if (value != 'collocate') {
+        if (value != 'collocation_report') {
             var script_call = db_url + "/scripts/get_frequency.py?" + q_string + "&frequency_field=" + value;
         } else {
             var script_call = db_url + "/scripts/collocation_fetcher.py?" + q_string + "&full_report=False";
@@ -80,6 +80,51 @@ function hide_frequency() {
         }
     );
 }
+
+function mergeResults(full_results, new_data) {
+    if (typeof full_results === 'undefined') {
+        full_results = new_data;
+    } else {
+        for (key in new_data) {
+            if (key in full_results) {
+                full_results[key]['count'] += new_data[key]['count'];
+            }
+            else {
+                full_results[key] = new_data[key];
+            }
+        }
+    }
+    var sorted_list = [];
+    for (key in full_results) {
+        sorted_list.push([key, full_results[key]]);
+    }
+    sorted_list.sort(function(a,b) {return b[1].count - a[1].count});
+    
+    return [sorted_list, full_results]
+}
+
+function mergeCollocResults(full_results, new_data) {
+    if (typeof full_results === 'undefined') {
+        full_results = new_data;
+    } else {
+        for (key in new_data) {
+            if (key in full_results) {
+                full_results[key] += new_data[key];
+            }
+            else {
+                full_results[key] = new_data[key];
+            }
+        }
+    }
+    var sorted_list = [];
+    for (key in full_results) {
+        sorted_list.push([key, full_results[key]]);
+    }
+    sorted_list.sort(function(a,b) {return b[1] - a[1]});
+    
+    return [sorted_list, full_results]
+}
+
 function populate_sidebar(script_call, field, total_results, interval_start, interval_end, full_results) {
     if (interval_start === 0) {
         interval_end = 1000;
@@ -96,7 +141,11 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
         }
         $.getJSON(script_call_interval, function(data) {
             if ($('#hide_sidebar').data('interrupt') != true && $('#frequency_by').data('selected') == field) {
-                var merge = merge_results(full_results, data);
+                if (field != "collocation_report") {
+                    var merge = mergeResults(full_results, data);
+                } else {
+                    var merge = mergeCollocResults(full_results, data);
+                }
                 sorted_list = merge[0];
                 new_full_results = merge[1];
                 update_sidebar(sorted_list, field);
@@ -136,18 +185,24 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
 
 function update_sidebar(sorted_list, field) {
     var newlist = "";
-    if (field == "collocate") {
+    if (field == "collocation_report") {
         newlist += "<p id='freq_sidebar_status'>Collocates within 5 words left or right</p>";
         q_string = window.location.search.substr(1);
     }
-    for (item in sorted_list.slice(0,300)) {
-        if (field == 'collocate') {
-            sorted_list[item][1]['url'] = "?" + colloc_linker(sorted_list[item][0], q_string, "all", sorted_list[item][1]['count'])
+    sorted_list = sorted_list.slice(0,300);
+    for (var item=0; item < sorted_list.length; item++) {
+        var result = sorted_list[item][0];
+        if (field == 'collocation_report') {
+            var count = sorted_list[item][1];
+            var link = "?" + colloc_linker(result, q_string, "all", count);
+        } else {
+            var link = sorted_list[item][1]['url'];
+            var count = sorted_list[item][1]['count'];
         }
-        var url = '<a id="freq_sidebar_text" href="' + sorted_list[item][1]['url'] + '">' + sorted_list[item][0] + '</a>';
+        var full_link = '<a id="freq_sidebar_text" href="' + link + '">' + result + '</a>';
         newlist += '<li style="white-space:nowrap;">';
         newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:8px;"></span>';
-        newlist += url + '<span style="float:right;display:inline-block;padding-right: 5px;">' + sorted_list[item][1]['count'] + '</span></li>';
+        newlist += full_link + '<span style="float:right;display:inline-block;padding-right: 5px;">' + count + '</span></li>';
     }
     $("#frequency_table").hide().empty().html(newlist).fadeIn('fast');
     $("#hide_sidebar").css('display', 'inline-block');

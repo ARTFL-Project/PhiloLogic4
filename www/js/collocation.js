@@ -42,6 +42,7 @@ function mergeCollocResults(full_results, new_data) {
     
     return [sorted_list, full_results]
 }
+
 function update_table(sorted_lists, q_string, db_url) {
     for (column in sorted_lists) {
         var pos = 0;
@@ -61,10 +62,10 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
     var script = db_url + "/scripts/collocation_fetcher.py?" + q_string
     if (colloc_start == 0) {
         colloc_start = 3000;
-        colloc_end = 23000;
+        colloc_end = 13000;
     } else {
-        colloc_start += 20000;
-        colloc_end += 20000;
+        colloc_start += 10000;
+        colloc_end += 10000;
     }
     var script_call = script + '&interval_start=' + colloc_start + '&interval_end=' + colloc_end
     if (colloc_start <= results_len) {
@@ -100,6 +101,7 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
         // Active links on collocations
         $('span[id^=all_word], span[id^=left_word], span[id^=right_word]').addClass('colloc_link');
         clickOnColloc('.colloc_link');
+        clickOnColloc('.cloud_term');
         
         // Make sure all animations and CSS transformations are complete
         setTimeout(saveCollocations, 3000);
@@ -221,7 +223,7 @@ function removeDiacritics (str) {
 
 function collocation_cloud(full_results, colloc_end, results_len) {
     $.fn.tagcloud.defaults = {
-        size: {start: 1.1, end: 3.4, unit: 'em'},
+        size: {start: 1.0, end: 3.5, unit: 'em'},
         color: {start: '#F9D69A', end: '#800000'}
       };
     $('#collocate_counts').hide().empty();
@@ -230,7 +232,7 @@ function collocation_cloud(full_results, colloc_end, results_len) {
         sorted_list.push([key, full_results[key]]);
     }
     sorted_list.sort(function(a,b) {return b[1] - a[1]});
-    sorted_list = sorted_list.slice(0, 100);
+    sorted_list = sorted_list.slice(0, 130);
     sorted_list.sort(function(a,b) {
         var x = removeDiacritics(a[0]);
         var y = removeDiacritics(b[0]);

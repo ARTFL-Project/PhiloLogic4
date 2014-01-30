@@ -8,6 +8,7 @@ $(document).ready(function() {
     var q_string = window.location.search.substr(1);
     ////////////////////////////////////////////////////////////////////////////
     
+    
     //display_options_on_selected();
     
 });
@@ -127,29 +128,6 @@ var waitForFinalEvent = (function () {
   };
 })();
 
-
-// This function is used to merge results from collocations and frequencies
-function merge_results(full_results, new_data) {
-    if (typeof full_results === 'undefined') {
-        full_results = new_data;
-    } else {
-        for (key in new_data) {
-            if (key in full_results) {
-                full_results[key]['count'] += new_data[key]['count'];
-            }
-            else {
-                full_results[key] = new_data[key];
-            }
-        }
-    }
-    var sorted_list = [];
-    for (key in full_results) {
-        sorted_list.push([key, full_results[key]]);
-    }
-    sorted_list.sort(function(a,b) {return b[1].count - a[1].count});
-    
-    return [sorted_list, full_results]
-}
 
 // This is to create links for collocations
 function colloc_linker(word, q_string, direction, num) {

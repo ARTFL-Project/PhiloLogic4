@@ -71,9 +71,9 @@ def byte_query(hit_bytes):
     return '?' + '&'.join(['byte=%d' % int(byte) for byte in hit_bytes])
 
 def page_interval(num, results, start, end):
-    while len(results) == 0:
-        if results.done:
-            break
+    #while len(results) == 0:
+    #    if results.done:
+    #        break
     if start <= 0:
         start = 1
     if end <= 0:

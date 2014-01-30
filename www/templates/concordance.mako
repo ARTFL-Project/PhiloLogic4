@@ -12,7 +12,7 @@
              if not results.done:
                 r_status += " Still working..."
             %>
-            Hits <span class="start">${start}</span> - <span class="end">${end}</span> of <span id="total_results">${len(results)}</span><span id="incomplete">${r_status}</span>
+            Hits <span class="start">${start}</span> - <span class="end">${end}</span> of <span id="total_results">${len(results) or results_per_page}</span><span id="incomplete">${r_status}</span>
         </p>
         <%include file="show_frequency.mako"/>
         <div id="report_switch">

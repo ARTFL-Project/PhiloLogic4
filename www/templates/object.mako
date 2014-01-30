@@ -13,7 +13,7 @@
                 <div id='prev_and_toc_button'>
                     <div id='t_o_c_button'>
                         <input type="checkbox" id="show_table_of_contents">
-                        <label for="show_table_of_contents"><span id="t_b_c_box">Show table of contents</span></label>
+                        <label for="show_table_of_contents"><span id="t_b_c_box">Table of contents</span></label>
                     </div>
                     <div id="prev_obj" data-philo-id="${prev}">&lt;</div>
                 </div>

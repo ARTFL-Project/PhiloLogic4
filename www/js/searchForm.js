@@ -1,14 +1,7 @@
 $(document).ready(function() {
     
     ////// jQueryUI theming //////
-    $( "#button, #button1" )
-        .button()
-        .click(function( event ) {
-            hideSearchForm();
-            var width = $(window).width() / 3;
-            $("#waiting").css("margin-left", width).css('margin-top', 100).show();
-        });
-    $("#reset_form, #reset_form1, #hide_search_form, #more_options, .more_context").button();
+    $("#button, #button1, #reset_form, #reset_form1, #hide_search_form, #more_options, .more_context").button();
     $('#button2').button();
     $("#page_num, #field, #method, #year_interval").buttonset();
     $("#word_num").spinner({
@@ -196,8 +189,14 @@ $(document).ready(function() {
     
     adjustReportWidth();
     adjustBottomBorder();
+    
+    // Add spinner to indicate that a query is running in the background
+    $('#button, #button1').click(function( event ) {
+        var width = $(window).width() / 2 - 100;
+        hideSearchForm();
+        $("#waiting").css("margin-left", width).css('margin-top', 100).show();
+    });
 });
-
 
 function searchFormOverlap(form_offset) {
     var footer_offset = $('#footer').offset().top;

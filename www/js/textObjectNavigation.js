@@ -7,9 +7,10 @@ $(document).ready(function() {
     // jQueryUI theming
     $('#show_table_of_contents').button();
     
-    positionPrevNext();
+    adjustPageWidth(),
     $(window).resize(function() {
-        positionPrevNext();
+        adjustPageWidth();
+        window_height = $(window).height();
     })
 
     // Change pages
@@ -28,21 +29,7 @@ $(document).ready(function() {
     var db_url = db_locals['db_url'];
     if ($('#next_obj').length) {
         retrieve_obj(db_url);
-        t_o_c_handler(db_url);
-        if ($('.highlight').length) {
-            $(window).load(function() {
-                scroll_to_highlight();
-            });
-        }
         back_forward_button_reload(db_url);
-    } else if ($('#next_page').length) {
-        retrieve_page(db_url);
-        t_o_c_handler(db_url);
-        if ($('.highlight').length) {
-            $(window).load(function() {
-                scroll_to_highlight();
-            });
-        }
     }
     
     page_image_link();
@@ -58,11 +45,14 @@ $(document).ready(function() {
         follow_scroll(prev, next, top);
     });
     
-    $(window).resize(function() {
-        window_height = $(window).height();
-    });
-    
     checkEndOfDoc();
+    
+    $(window).load(function() {
+        if ($('.highlight').length) {
+            scroll_to_highlight();
+        }
+        t_o_c_handler(db_url);
+    });
     
 });
 
@@ -70,6 +60,27 @@ $(document).ready(function() {
 ////////////////////////////////////////////////////////////////////////////////
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+function adjustPageWidth() {
+    var window_width = $(window).width();
+    if (window_width < 1204) {
+        var right_margin = parseInt($("#book_page").css('margin-right')) - (1204 - window_width);
+        var adjusted_width = $("#book_page").width() - (window_width - 1204);
+        if (right_margin < 80) {
+            adjusted_width = 'auto';
+            right_margin = 80;
+        }
+        $('#book_page').css({'margin-left': '200px', 'margin-right': right_margin, 'width': adjusted_width});
+    } else {
+        var adjusted_width = window_width - 500;
+        if (adjusted_width > 700) {
+            adjusted_width = 700;  
+        }
+        $("#book_page").css({'margin': '0 auto', 'width': adjusted_width});
+    }
+    positionPrevNext();
+    $('#toc_container').css('width', $('#book_page').css('margin-left'));
+}
 
 function positionPrevNext() {
     var page_pos = $('#book_page').offset().left - 25;
@@ -253,7 +264,7 @@ function back_forward_button_reload(db_url) {
 /// Have previous and next links follow scroll in page and object navigation ///
 function t_o_c_handler(db_url) {
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
-    var text_position = $('#book_page').offset().left - 10;
+    var text_position = $('#book_page').offset().left - 20;
     var position = $('#toc_container').offset().top;
     var bottomPosition = $(window).height();
     var footer_pos = $("#footer").offset().top - 30;
@@ -285,17 +296,17 @@ function t_o_c_handler(db_url) {
 function show_hide_toc(top_right) {
     var position = top_right - ($('#toc_container').width() - $('.table_of_contents').width()) - 15;
     var scrollto_id = '#' + $("#obj_text").data('philoId');
-    if ($("#t_b_c_box").text() == "Show table of contents") {
+    if ($("#t_b_c_box").text() == "Table of contents") {
         $("#t_b_c_box").html("Hide table of contents");
         $('#toc_container').animate({
             'margin-left': '-30px'
             }, 450
             );
         $('#toc_container').scrollTo($(scrollto_id), 500);
-        $('#toc_container').find($(scrollto_id)).attr('style', 'color: black;');
+        $('#toc_container').find($(scrollto_id)).css('color', 'black');
         $(scrollto_id).delay(500).animate({backgroundColor: '#ffdb9e'}, 300).animate({backgroundColor: ''}, 300);
     } else {
-        $("#t_b_c_box").html("Show table of contents");
+        $("#t_b_c_box").html("Table of contents");
         $('#toc_container').animate({
                 'margin-left': '-700px'
         }, 450);
