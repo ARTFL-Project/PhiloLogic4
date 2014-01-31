@@ -60,12 +60,12 @@ def generate_time_series(q, db, results):
                     date = int(str(date)[:-1] + '0')
                 elif q['year_interval'] == "100":
                     date = int(str(date)[:-2] + '00')
-                elif q['year_interval'] == '25':
+                elif q['year_interval'] == '50':
                     decade = int(str(date)[-2:])
                     if decade < 50:
-                        date = int(str(date)[-2:] + '00')
+                        date = int(str(date)[:-2] + '00')
                     else:
-                        date = int(str(date)[-2:] + '50')
+                        date = int(str(date)[:-2] + '50')
                     
             else:
                 continue

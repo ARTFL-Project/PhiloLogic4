@@ -37,11 +37,6 @@ $(document).ready(function() {
         frequencySwitcher();
     }
     
-    
-    $('.graph_bar').click(function() {
-        window.location = $(this).data('href');
-    });
-    
     $(window).resize(function() {
         waitForFinalEvent(function() {
             var diff = parseInt($('body').width()) - body_width;
@@ -190,7 +185,7 @@ function clickOnChart(interval) {
             year = year.slice(0,-2) + '00';
             var next = String(parseInt(year) + 99);
             year = year + '-' + next
-        } else if (interval == '25') {
+        } else if (interval == '50') {
             var decade = parseInt(year.slice(-2));
             if (decade < 50) {
                 year = year.slice(0,-2) + '00' + '-' + year.slice(0,-2) + '49';
