@@ -5,9 +5,19 @@ import sys
 from json import dumps
 from mako.lookup import TemplateLookup
 from mako import exceptions
+import py_compile
+
+def compiled_template_permissions(source, output_path):
+    fh = open(output_path, 'w')
+    fh.write(source)
+    fh.close()
+    py_compile.compile(output_path)
+    os.chmod(output_path, 0777)
+    os.chmod(output_path + 'c', 0777)
 
 template_path = os.getcwd() + '/templates/'
-template_lookup = TemplateLookup(template_path, module_directory='%s/compiled_templates/' % template_path)
+template_lookup = TemplateLookup(template_path, module_directory='%s/compiled_templates/' % template_path,
+                                 collection_size=50, module_writer=compiled_template_permissions)
 
 def render_template(*args, **data):
     db = data["db"]
