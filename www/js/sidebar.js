@@ -200,7 +200,7 @@ function update_sidebar(sorted_list, field) {
             var count = sorted_list[item][1]['count'];
         }
         var full_link = '<a id="freq_sidebar_text" href="' + link + '">' + result + '</a>';
-        newlist += '<li style="white-space:nowrap;">';
+        newlist += '<li>'; // style="white-space:nowrap;">';
         newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:8px;"></span>';
         newlist += full_link + '<span style="float:right;display:inline-block;padding-right: 5px;">' + count + '</span></li>';
     }

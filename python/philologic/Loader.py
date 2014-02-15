@@ -441,9 +441,11 @@ def setup_db_dir(db_destination, template_dir):
     if template_dir:
         os.system("cp -r %s* %s" % (template_dir,db_destination))
         os.system("cp %s.htaccess %s" % (template_dir,db_destination))
-        os.system("mkdir -p %s/data/hitlists" % db_destination)
-        os.system("chmod -R 777 %s/data/hitlists" % db_destination)
+        #os.system("mkdir -p %s/data/hitlists" % db_destination)
+        #os.system("chmod -R 777 %s/data/hitlists" % db_destination)
         os.system("chmod -R 777 %s/templates" % db_destination)
+        os.system("mkdir %s/templates/compiled_templates" % db_destination)
+        os.system("chmod -R 777 %s/templates/compiled_templates" % db_destination)
 
                 
 # a quick utility function
