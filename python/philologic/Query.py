@@ -115,7 +115,8 @@ def word_pattern_search(term, path):
     match = match.split('\n')
     match.remove('')
     ## HACK: The extra decode/encode are there to fix errors when this list is converted to a json object
-    return [m.split("\t")[1].strip().decode('utf-8', 'ignore').encode('utf-8') for m in match]
+    #return [m.split("\t")[1].strip().decode('utf-8', 'ignore').encode('utf-8') for m in match]
+    return [m.split("\t")[1].strip() for m in match]
 
 def old_format_query(qstring):
     q = [level.split("|") for level in qstring.split(" ") ]
