@@ -3,6 +3,9 @@ $(document).ready(function() {
     //jQueryUI theming
     $('#frequency_by, #hide_sidebar').button();
     
+    // Load slimScroll plugin
+    $.getScript(db_locals['db_url'] + '/js/jquery.slimscroll.min.js');
+    
 });
 
 
@@ -54,6 +57,7 @@ function sidebar_reports(q_string, db_url, pathname) {
             $('#frequency_table').html(table); 
             $('#frequency_container').show();
             $("#hide_sidebar").css('display', 'inline-block');
+            //$('#frequency_table').slimScroll({height: $('#frequency_container').height()});
         }
     });
     $("#hide_sidebar").click(function() {
@@ -168,6 +172,7 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
         $('#progress_bar').progressbar({value: total});
         $('.progress-label').text('Complete!');
         $("#progress_bar").delay(500).slideUp();
+        $('#frequency_table').slimScroll({height: $('#frequency_container').height()});
         if (typeof(localStorage) == 'undefined' ) {
             alert('Your browser does not support HTML5 localStorage. Try upgrading.');
         } else {
