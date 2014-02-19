@@ -87,6 +87,11 @@ $(document).ready(function() {
         source: db_url + "/scripts/term_list.py",
         minLength: 2,
         "dataType": "json",
+        focus: function( event, ui ) {
+            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            //$("#" + field).val(q); This is too sensitive, so disabled
+            return false;
+        },
         select: function( event, ui ) {
             q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
             $("#q").val(q);
@@ -139,7 +144,7 @@ $(document).ready(function() {
         $("#method1").attr('checked', true);
         $("#method").buttonset('refresh');
         $("#page_num").find("input:radio").attr("checked", false).end();
-        $("#pagenum2").attr('checked', true);
+        $("#pagenum1").attr('checked', true);
         $("#page_num").buttonset('refresh');
         $('#search')[0].reset();
         $("#search_elements").fadeIn();
@@ -238,9 +243,18 @@ function autocompleteMetadata(metadata, field, db_url) {
         minLength: 2,
         timeout: 1000,
         dataType: "json",
+        focus: function( event, ui ) {
+            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            q = q.replace(/ CUTHERE /, ' ');
+            //$("#" + field).val(q); This is too sensitive, so disabled
+            return false;
+        },
         select: function( event, ui ) {
             q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
             q = q.replace(/ CUTHERE /, ' ');
+            q = q.split('|');
+            q[q.length-1] = '\"' + q[q.length-1].replace(/^\s*/g, '') + '\"'; 
+            q = q.join('|');
             $("#" + field).val(q);
             return false;
         }

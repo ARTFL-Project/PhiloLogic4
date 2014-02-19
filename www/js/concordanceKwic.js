@@ -29,6 +29,9 @@ $(document).ready(function() {
         if ($('#incomplete').text() != '.') {
             $.getJSON(db_url + '/scripts/get_total_results.py?' + q_string, function(data) {
                 $('#total_results, #incomplete').fadeOut('fast', function() {
+                    if (parseInt($('#end').text()) > data) {
+                        $('#end').text(data);
+                    }
                     $("#total_results").text(data);
                     $('#incomplete').text('.')
                 }).fadeIn('fast');
@@ -106,13 +109,13 @@ function back_forward_button_concordance_reload() {
 
 // These functions are for the kwic bibliography which is shortened by default
 function showBiblio() {
-    $(this).children("#full_biblio").css('position', 'absolute').css('text-decoration', 'underline')
-    $(this).children("#full_biblio").css('background', 'LightGray')
-    $(this).children("#full_biblio").css('box-shadow', '5px 5px 15px #C0C0C0')
-    $(this).children("#full_biblio").css('display', 'inline')
+    $(this).children(".full_biblio").css('position', 'absolute').css('text-decoration', 'underline')
+    $(this).children(".full_biblio").css('background', 'LightGray')
+    $(this).children(".full_biblio").css('box-shadow', '5px 5px 15px #C0C0C0')
+    $(this).children(".full_biblio").css('display', 'inline')
 }
 
 function hideBiblio() {
-    $(this).children("#full_biblio").fadeOut(200)
+    $(this).children(".full_biblio").fadeOut(200)
 }
 
