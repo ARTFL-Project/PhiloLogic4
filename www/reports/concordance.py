@@ -10,12 +10,19 @@ from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from functions.ObjectFormatter import format_concordance, format_strip, convert_entities, adjust_bytes
 from functions.FragmentParser import parse
+import json
 
 highlight_match = re.compile(r'<span class="highlight">[^<]*?(</span>)')
 
 def concordance(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
+    if q['format'] == "json":
+        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+        start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
+        formatted_results = [{"citation": f.cite.make_abs_div_cite(db,i),
+                              "text": fetch_concordance(i, path, db)} for i in hits[start - 1:end]]
+        return json.dumps(formatted_results)
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
     else:

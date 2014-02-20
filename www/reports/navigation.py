@@ -10,6 +10,7 @@ import functions as f
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
 from philologic import HitWrapper
+import json
 
 philo_types = set(['div1', 'div2', 'div3'])
 
@@ -17,6 +18,9 @@ def navigation(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
     obj = db[path_components]
+    if q['format'] == "json":
+        obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
+        return json.dumps(obj_text)
     if obj.philo_type == 'doc':
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
                        db=db,q=q,template_name='t_o_c.mako', report="t_o_c")
