@@ -6,9 +6,6 @@ import urlparse
 import reports
 from wsgiref.handlers import CGIHandler
 from cgi import FieldStorage
-from functions import clean_hitlists
-from repoze.profile import ProfileMiddleware
-
 
 def philo_dispatcher(environ,start_response):
     report = FieldStorage().getvalue('report')
@@ -24,16 +21,5 @@ def philo_dispatcher(environ,start_response):
         yield reports.landing_page(environ,start_response)
         
 if __name__ == "__main__":
-    #if 'PATH_INFO' not in os.environ:
-    #    os.environ["PATH_INFO"] = ''
-    #middleware = ProfileMiddleware(
-    #           philo_dispatcher,
-    #           log_filename='/tmp/philo4.log',
-    #           cachegrind_filename='/tmp/cachegrind.out.bar',
-    #           discard_first_request=False,
-    #           flush_at_shutdown=False,
-    #           path='/__profile__',
-    #           unwind=True,
-    #          )
     CGIHandler().run(philo_dispatcher)
     clean_hitlists()
