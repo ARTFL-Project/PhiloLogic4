@@ -25,8 +25,11 @@ def frequency(environ,start_response):
 def generate_frequency(results, q, db):
     """reads through a hitlist. looks up q["field"] in each hit, and builds up a list of 
        unique values and their frequencies."""
-    object_level = db.locals['default_object_level'] ## This will speed up sql searches
     field = q["field"]
+    if field == "title" or field == "author" or field == "date":
+        object_level = db.locals['default_object_level'] ## This will speed up sql searches
+    else:
+        object_level = "para"
     if field == None:
         field = 'title'
     counts = defaultdict(int)

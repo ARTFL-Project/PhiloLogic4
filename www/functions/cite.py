@@ -20,14 +20,19 @@ def make_abs_div_cite(db,i):
         sub_section_name = section_names[1]
     except IndexError:
         sub_section_name = section_name
-#    speaker_name = i.who                                                                                                                                                                                                                                                                                                                                                                                              
     title = '<a href="%s">%s</a>' % (doc_href, i.doc.title)
-    cite = u"<span class='philologic_cite'>%s <i>%s</i> [%s]" % (i.doc.author,title,i.doc.create_date)
+    cite = u"<span class='philologic_cite'>%s <i>%s</i>" % (i.doc.author,title)
+    date = i.doc.date
+    if date:
+        cite += " [%s]" % str(date)
     separation = '<span class="cite_separation"></span>'
     if section_name:
         cite += u"%s<a href='%s' class='section_name'>%s</a>" % (separation,section_href,section_name)
     if sub_section_name:
         cite += u"%s<a href='%s' class='sub_section_name'>%s</a>" % (separation,sub_section_href,sub_section_name)
+    speaker_name = i.para.who
+    if speaker_name:
+        cite += " %s" % speaker_name
     
     #if db.locals['debug'] == True:
     #    cite += " %s" % i.doc.filename

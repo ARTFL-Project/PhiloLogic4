@@ -11,7 +11,7 @@ $(document).ready(function() {
     back_forward_button_concordance_reload();
     more_context();
     sidebar_reports(q_string, db_url, pathname);
-    if ($('.kwic_concordance').length) {
+    if ($('#kwic_concordance').length) {
         var config = {    
                 over: showBiblio, 
                 timeout: 100,  
