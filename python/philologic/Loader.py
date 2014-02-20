@@ -66,7 +66,10 @@ class Loader(object):
         
         for option in ["parser_factory","token_regex","xpaths","metadata_xpaths","pseudo_empty_tags","suppress_tags","load_filters"]:
             self.parser_defaults[option] = parser_defaults[option]
-
+        
+        print >> sys.stderr, 'PARSER DEFAULTS', parser_defaults["load_filters"][4].func_closure[0].cell_contents
+        print >> sys.stderr, 'BEGIN', self.parser_defaults["load_filters"][4].func_closure[0].cell_contents
+        
         if not post_filters:
             post_filters = PostFilters.DefaultPostFilters
         self.post_filters = post_filters
@@ -122,6 +125,7 @@ class Loader(object):
     def add_files(self,files):
         for f in files:
             os.system("cp %s %s" % (f,self.textdir))
+        os.system("chmod 775 %s*" % self.textdir)
             
     def status(self):
         pass
@@ -214,6 +218,8 @@ class Loader(object):
                         options["load_filters"] = self.parser_defaults["load_filters"]
                     filters = options["load_filters"]
                     del options["load_filters"]
+                    
+                    print >> sys.stderr, 'END', self.parser_defaults["load_filters"][4].func_closure[0].cell_contents, filters[4].func_closure[0].cell_contents
 
                     parser = parser_factory(o,text["id"],text["size"],known_metadata=metadata,**options)
                     try:

@@ -87,27 +87,29 @@ class Parser(object):
         value_buffer = []
         if attr_pattern_match:
             xp_prefix = mxp[:attr_pattern_match.start(0)]
-            attr_name = attr_pattern_match.group(1)
+            attr_name = attr_pattern_match.group(1).decode("utf-8")
             def extract_attr(future_event,future_element):
                 if future_event[0] == "start":
-                    if future_element in new_element.findall(xp_prefix) and future_element.get(attr_name,""):
-                        value_buffer.append(future_element.get(attr_name))
+#                    print >> sys.stderr, "ATTR_EXTRACTOR", xp_prefix,attr_name,future_element 
+#                    print >> sys.stderr, "START EVENT:", future_event
+#                    if new_element.findall(xp_prefix):
+#                        print >> sys.stderr, "START MATCH", new_element.findall(xp_prefix)
+#                        print >> sys.stderr, "EVENT:", future_event
+                    if future_element in new_element.findall(xp_prefix):
+#                        print >> sys.stderr, "CANDIDATE"
+                        if future_element.get(attr_name,""):
+#                            print >> sys.stderr, "CAPTURE"
+                            destination[field] = future_element.get(attr_name)
+                            return True
 #                        destination[field] = destination.get(field,"") + future_element.get(attr_name)
 #                        print >> self.output, repr(new_element), repr(future_element), attr_name,future_element.get(attr_name)
-                if future_event[0] == "end":
-                    if future_element in new_element.findall(xp_prefix):
-                        if destination.get(field,""):
-                            pass
-                        else:
-                            destination[field] = "".join(value_buffer)
-                        # return True so that the Parser can remove the callback.
-                        return True
                 return False
             return extract_attr
         else:
             def extract_text(future_event,future_element):
                 if future_event[0] == "text":
-                    if future_element in new_element.findall(mxp):
+#                    if future_element in new_element.findall(mxp):
+                    if new_element.findall(mxp):
 #                        destination[field] = destination.get(field,"") + future_event[1]
                         value_buffer.append(future_event[1])
                         #print >> self.output, repr(new_element),repr(future_element),mxp,future_event[1]
@@ -218,7 +220,10 @@ class Parser(object):
             # check for metadata on the new element.
             for open_object in self.handlers.keys():
                 for handler in self.handlers[open_object]:
-                    handler(event,new_element)
+#                    handler(event,new_element)
+                    if handler(event,new_element):
+                        # If a handler returns True in the end phase, delete it to prevent future evaluation.
+                        self.handlers[open_object].remove(handler)
             # objects that don't correspond to real elements can't attach handlers, or clean themselves up.
             # Let OHCOVector handle them numerically instead.
             if (obj_type == self.parallel_type) or (new_element.tag in self.pseudo_empty_tags):
