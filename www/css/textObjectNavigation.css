@@ -62,7 +62,7 @@
     background-color: #FAFAFA !important;
     box-shadow: 0px 0px 15px #888;
     line-height: 140% !important;
-    text-align: justify;
+    /*text-align: justify;*/
     font-size: 105%;
     min-height: 650px;
     z-index: 100;
@@ -77,6 +77,45 @@
     display: inline-block;
     float: left;
     margin-left: -25px;
+}
+
+/* Styling for theater */
+b.headword {
+    font-weight: 700 !important;
+    font-size: 130%;
+}
+lb {
+    display: block;
+}
+sp lb:first-of-type {
+    content: "";
+    white-space: normal;
+}
+ab::before {
+    content:"\A";
+    white-space:pre;
+}
+sp::before {
+    content:"\A";
+    white-space:pre;
+}
+fw, join {
+    display: none;
+}
+stage::before, stage::after {
+    content:"\A";
+    white-space:pre;
+}
+speaker+stage::before,  speaker+stage::after, sp stage::before {
+    content: "";
+    white-space: normal;
+}
+stage {
+    font-style: italic;
+}
+div1 div2::before {
+    content:"\A";
+    white-space:pre;
 }
 
 #image_container {
