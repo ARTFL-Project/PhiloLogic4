@@ -62,7 +62,7 @@
     background-color: #FAFAFA !important;
     box-shadow: 0px 0px 15px #888;
     line-height: 140% !important;
-    text-align: justify;
+    /*text-align: justify;*/
     font-size: 105%;
     min-height: 650px;
     z-index: 100;
@@ -77,6 +77,24 @@
     display: inline-block;
     float: left;
     margin-left: -25px;
+}
+b.headword {
+    font-weight: 700 !important;
+    font-size: 130%;
+}
+lb {
+    display: block;
+}
+sp:before {
+    content:"\A";
+    white-space:pre;
+}
+speaker:after {
+    content:"\A";
+    white-space:pre;
+}
+stage {
+    font-style: italic;
 }
 
 #image_container {
