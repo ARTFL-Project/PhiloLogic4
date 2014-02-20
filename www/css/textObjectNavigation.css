@@ -78,6 +78,8 @@
     float: left;
     margin-left: -25px;
 }
+
+/* Styling for theater */
 b.headword {
     font-weight: 700 !important;
     font-size: 130%;
@@ -85,16 +87,35 @@ b.headword {
 lb {
     display: block;
 }
-sp:before {
+sp lb:first-of-type {
+    content: "";
+    white-space: normal;
+}
+ab::before {
     content:"\A";
     white-space:pre;
 }
-speaker:after {
+sp::before {
     content:"\A";
     white-space:pre;
+}
+fw, join {
+    display: none;
+}
+stage::before, stage::after {
+    content:"\A";
+    white-space:pre;
+}
+speaker+stage::before,  speaker+stage::after, sp stage::before {
+    content: "";
+    white-space: normal;
 }
 stage {
     font-style: italic;
+}
+div1 div2::before {
+    content:"\A";
+    white-space:pre;
 }
 
 #image_container {
