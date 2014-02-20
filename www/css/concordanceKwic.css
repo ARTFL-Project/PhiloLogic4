@@ -74,14 +74,10 @@
     background-image:      -o-linear-gradient(top, #FAFAFA, white); /* For old Opera (11.1 to 12.0) */ 
     background-image:         linear-gradient(to bottom, #F8F8F8, #FAFAFA 70%, white); /* Standard syntax; must be last */
 }
-
-
 .collocate {
     color:#1E90FF;
     font-weight:400;
 }
-
-
 
 /*All the sidebar classes*/
 #sidebar_area {
@@ -112,7 +108,7 @@
     box-shadow: 0px 0px 3px #A8A8A8;
     margin: 52px 1px 0px 1px;
     background-color: #FAFAFA;
-    overflow-y: scroll;
+    /*overflow-y: scroll;*/
     display: none;
 }
 #frequency_table {

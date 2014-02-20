@@ -46,7 +46,7 @@ $(document).ready(function() {
         $('.book_page').css('z-index', 90);
         if ($(this).text() == "Show search options") {
             showMoreOptions("all");
-            $('#search_explain').slideDown(); 
+            $('#search_explain').fadeIn(300); 
         } else {
             hideSearchForm();
         }
@@ -55,22 +55,22 @@ $(document).ready(function() {
     $('#form_body').show();
     if (global_report == "landing_page") {
         showHide('concordance');
-        $('#search_explain').show();
-        $('#search_elements').show();
-        $('#conc_question').show();
+        $('#search_explain').fadeIn(300);
+        $('#search_elements').css({'max-height': '614px', 'opacity': 100});
+        $('#conc_question').fadeIn(300);
     } else {
-        $("#search_elements").hide();
+        $('#initial_form').css({'max-height': '94px', 'opacity': 100});
         $("[id$='_question']").hide();
         $('#search_explain').hide();
         showHide($('input[name=report]:checked', '#search').val());
     }
     $('#report').find('label').click(function() {
         var report = $(this).attr('for');
-        if ($("#search_elements:visible")) {
+        if ($("#search_elements").css('max-height') != 0) {
             showHide(report);
             if (report != "frequencies") {
-                $("#search_elements").slideDown();
-                $('#search_explain').slideDown();
+                $("#search_elements").css({'max-height': '614px', 'opacity': 100});
+                $('#search_explain').fadeIn(300);
             }
             showMoreOptions();
         } else {
@@ -82,36 +82,14 @@ $(document).ready(function() {
             showMoreOptions();
         }
     });
-      
-    $("#q").autocomplete({
-        source: db_url + "/scripts/term_list.py",
-        minLength: 2,
-        "dataType": "json",
-        focus: function( event, ui ) {
-            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-            //$("#" + field).val(q); This is too sensitive, so disabled
-            return false;
-        },
-        select: function( event, ui ) {
-            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-            $("#q").val(q);
-            return false;
-        }
-    }).data("ui-autocomplete")._renderItem = function (ul, item) {
-        term = item.label.replace(/^[^<]*/g, '');
-        return $("<li></li>")
-            .data("item.autocomplete", item)
-            .append("<a>" + term + "</a>")
-            .appendTo(ul);
-     };
-    var fields = [];
-    $('#metadata_fields input').each(function(){
-        fields.push($(this).attr('name'));
-    });
-    for (i in fields) {
-        var  metadata = $("#" + fields[i]).val();
-        var field = fields[i];
-        autocompleteMetadata(metadata, field, db_url)
+    
+    
+    // Set-up autocomplete for words and metadata
+    autoCompleteWord(db_url);
+    for (i in db_locals["metadata_fields"]) {
+        var  metadata = $("#" + db_locals["metadata_fields"][i]).val();
+        var field = db_locals["metadata_fields"][i];
+        autoCompleteMetadata(metadata, field, db_url)
     }
     
     //  This will prefill the search form with the current query
@@ -237,7 +215,31 @@ function adjustBottomBorder() {
     });
 }
 
-function autocompleteMetadata(metadata, field, db_url) {
+function autoCompleteWord(db_url) {
+    $("#q").autocomplete({
+        source: db_url + "/scripts/term_list.py",
+        minLength: 2,
+        "dataType": "json",
+        focus: function( event, ui ) {
+            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            //$("#" + field).val(q); This is too sensitive, so disabled
+            return false;
+        },
+        select: function( event, ui ) {
+            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            $("#q").val(q);
+            return false;
+        }
+    }).data("ui-autocomplete")._renderItem = function (ul, item) {
+        term = item.label.replace(/^[^<]*/g, '');
+        return $("<li></li>")
+            .data("item.autocomplete", item)
+            .append("<a>" + term + "</a>")
+            .appendTo(ul);
+    };
+}
+
+function autoCompleteMetadata(metadata, field, db_url) {
     $("#" + field).autocomplete({
         source: db_url + "/scripts/metadata_list.py?field=" + field,
         minLength: 2,
@@ -278,7 +280,7 @@ function showHide(value) {
         $('#metadata_fields').find('tr').has('#date').show();
         $('#metadata_fields').find('tr').has('#create_date').show();
         $('#colloc_question').show();
-        $('#search_terms_container').slideDown('fast');
+        $('#search_terms_container').slideDown(300);
     }
     if (value == 'kwic' || value == "concordance") {
         $("#results_per_page, #method, #metadata_fields").show();
@@ -286,7 +288,7 @@ function showHide(value) {
         $('#metadata_fields').find('tr').has('#create_date').show();
         $('#' + value + '_question').show();
         $('#start_date, #end_date').val('');
-        $('#search_terms_container').slideDown('fast');
+        $('#search_terms_container').slideDown(300);
     }
     if (value == 'relevance') {
         $("#results_per_page").show();
@@ -299,7 +301,7 @@ function showHide(value) {
         $('#time_question').show();
         $('#date').val('');
         $('#create_date').val('');  // Temporary hack for Frantext
-        $('#search_terms_container').slideDown('fast');
+        $('#search_terms_container').slideDown(300);
     }
     if (value == "frequencies") {
         $('#search_terms_container, #search_explain, #method, #results_per_page').hide();
@@ -314,10 +316,10 @@ function showMoreOptions(display) {
     if (display == "all") {
         var report = $('input[name=report]:checked', '#search').val();
         showHide(report);
-        $("#search_elements").slideDown();
+        $("#search_elements").css({'max-height': '614px', 'opacity': 100});
     }
     $('#form_body').css('z-index', 99);
-    $("body").append("<div id='search_overlay' style='display:none;'></div>");
+    $("body").append("<div id='search_overlay'></div>");
     var header_height = $('#header').height();
     var footer_height = $('#footer').height();
     var overlay_height = $(document).height() - header_height - footer_height;
@@ -325,15 +327,9 @@ function showMoreOptions(display) {
     .height(overlay_height)
     .css({
        'opacity' : 0.2,
-       'position': 'absolute',
-       'top': 0,
-       'left': 0,
-       'background-color': 'lightGrey',
-       'width': '100%',
        'margin-top': header_height,
-       'z-index': 90
      });
-    $("#search_overlay").fadeIn('fast');
+    //$("#search_overlay").fadeIn('fast');
     $("#search_overlay, #header, #footer").click(function() {
         hideSearchForm();
     });
@@ -345,12 +341,11 @@ function hideSearchForm() {
         heightStyle: "content",
         active: false
     });
-    $("#search_elements").slideUp();
-    $("#search_overlay").fadeOut('fast', function() {
-        $(this).remove();
-    });
+    $("#search_elements").css({'max-height': 0, 'opacity': 0});
+    $("#search_overlay").css('opacity', 0);
+    setTimeout(function() {$("#search_overlay").remove();}, 300);
     $("#more_options").button('option', 'label', 'Show search options');
-    $('#search_explain').slideUp();
+    $('#search_explain').fadeOut(300);
 }
 
 (function($)

@@ -23,16 +23,18 @@ $(document).ready(function() {
 function more_context() {
     $(".more_context").click(function() {
         var context_link = $(this).text();
-        if (context_link == 'More') {
-            $(this).parents().siblings('.philologic_context').children('.begin_concordance').show();
-            $(this).parents().siblings('.philologic_context').children('.end_concordance').show();
-            $(this).find('.ui-button-text').empty().fadeIn(100).append('Less');
-        } 
-        else {
-            $(this).parents().siblings('.philologic_context').children('.begin_concordance').hide();
-            $(this).parents().siblings('.philologic_context').children('.end_concordance').hide();
-            $(this).find('.ui-button-text').empty().fadeIn(100).append('More');
-        }
+        $(this).parents().siblings('.philologic_context').fadeOut(100, function() {
+            if (context_link == 'More') {
+                $(this).children('.begin_concordance').show();
+                $(this).children('.end_concordance').show();
+                $(this).prev('div').find('.ui-button-text').empty().fadeIn(100).append('Less');
+            } 
+            else {
+                $(this).children('.begin_concordance').hide();
+                $(this).children('.end_concordance').hide();
+                $(this).prev('div').find('.ui-button-text').empty().fadeIn(100).append('More');
+            }
+        }).fadeIn(100);
     });
 }
 

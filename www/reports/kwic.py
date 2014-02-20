@@ -9,11 +9,19 @@ from functions.wsgi_handler import wsgi_response
 from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
+import json
 
 
 def kwic(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
+    if q['format'] == "json":
+        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+        start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
+        kwic_results = fetch_kwic(hits, path, q, f.link.byte_query, db, start-1, end, length=250)
+        formatted_results = [{"citation": i[0],
+                              "text": i[1]} for i in kwic_results]
+        return json.dumps(formatted_results)
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
     else:
@@ -62,11 +70,14 @@ def fetch_kwic(results, path, q, byte_query, db, start, end, length=500):
         if len(biblio) < 20:
             diff = 20 - len(biblio)
             biblio += ' ' * diff
-        short_biblio = '<span id="short_biblio" style="white-space:pre-wrap;">%s</span>' % biblio[:shortest_biblio]
-        full_biblio = '<span id="full_biblio" style="display:none;">%s</span>' % biblio
+        short_biblio = '<span class="short_biblio" style="white-space:pre-wrap;">%s</span>' % biblio[:shortest_biblio]
+        full_biblio = '<span class="full_biblio" style="display:none;">%s</span>' % biblio
         kwic_biblio = full_biblio + short_biblio
-        kwic_biblio_link = '<a href="%s" class="kwic_biblio" style="white-space:pre-wrap;">' % href + kwic_biblio + '</a>: '
-        kwic_results[pos] = kwic_biblio_link + '<span id="kwic_text">%s</span>' % text
+        if q['format'] == "json":
+            kwic_results[pos] = (kwic_biblio, text)
+        else:
+            kwic_biblio_link = '<a href="%s" class="kwic_biblio" style="white-space:pre-wrap;">' % href + kwic_biblio + '</a>: '
+            kwic_results[pos] = kwic_biblio_link + '<span id="kwic_text">%s</span>' % text
     return kwic_results
 
 

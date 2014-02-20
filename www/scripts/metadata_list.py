@@ -43,7 +43,7 @@ def format_query(q, field, db):
         if l == "QUOTE":
             if t[-1] != '"':
                 t += '"'
-            subtokens = t[1:-1].split(" ")
+            subtokens = t[1:-1].split("|")
             parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
         else:
             parsed_split += [(l,t)]
