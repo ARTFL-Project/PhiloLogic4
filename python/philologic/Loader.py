@@ -12,9 +12,10 @@ from ast import literal_eval as eval
 from optparse import OptionParser
 from glob import glob
 
-import philologic.Parser
-import philologic.LoadFilters
-import philologic.PostFilters
+import philologic.Parser as Parser
+import philologic.LoadFilters as LoadFilters
+import philologic.PostFilters as PostFilters
+from philologic.PostFilters import make_sql_table
 
 from philologic.utils import OutputHandler
 
@@ -32,86 +33,19 @@ index_cutoff = 10 # index frequency cutoff.  Don't. alter.
 
 default_tables = ['toms', 'pages', 'words']
 
-def handle_command_line(argv):
-    usage = "usage: %prog [options] database_name files"
-    parser = OptionParser(usage=usage)
-    parser.add_option("-q", "--quiet", action="store_true", dest="quiet", help="suppress all output")
-    parser.add_option("-l", "--log", default=False, dest="log", help="enable logging and specify file path")
-    parser.add_option("-c", "--cores", type="int", default="2", dest="workers", help="define the number of cores for parsing")
-    parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
-    
-    ## Parse command-line arguments
-    (options, args) = parser.parse_args(argv[1:])
-    try:
-        dbname = args[0]
-        args.pop(0)
-        files = args[:]
-        if args[-1].endswith('/') or os.path.isdir(args[-1]):   
-            files = glob(args[-1] + '/*')
-        else:
-            files = args[:]
-    except IndexError:
-        print >> sys.stderr, "\nError: you did not supply a database name or a path for your file(s) to be loaded\n"
-        parser.print_help()
-        sys.exit()
-    ## Number of cores used for parsing: you can define your own value on the
-    ## command-line, stay with the default, or define your own value here
-    workers = options.workers or 2
-    
-    ## This defines which set of templates to use with your database: you can stay with
-    ## the default or specify another path from the command-line. Alternatively, you
-    ## can edit it here.
-    if options.no_template:
-        no_templates = True
-    else:
-        no_templates = False
-        
-    ## Define the type of output you want. By default, you get console output for your database
-    ## load. You can however set a quiet option on the command-line, or set console_output
-    ## to False here.
-    console_output = True
-    if options.quiet:
-        console_output = False
-        
-    ## Define a path for a log of your database load. This option can be defined on the command-line
-    ## or here. It's disabled by default.
-    log = options.log or False
-    
-    ## Set debugging if you want to keep all the parsing data, as well as debug the templates
-    debug = options.debug or False
-    
-    return workers, console_output, log, debug
-
-
-def setup_db_dir(db_destination, template_dir):
-    try:
-        os.mkdir(db_destination)
-    except OSError:
-        print "The %s database already exists" % dbname
-        print "Do you want to delete this database? Yes/No"
-        choice = raw_input().lower()
-        if choice.startswith('y'):
-            os.system('rm -rf %s' % db_destination)
-            os.mkdir(db_destination)
-        else:
-            sys.exit()
-    
-    if template_dir:
-        os.system("cp -r %s* %s" % (template_dir,db_destination))
-        os.system("cp %s.htaccess %s" % (template_dir,db_destination))
-
 
 
 class Loader(object):
 
 
-    def __init__(self,destination,tables = default_tables,
-                 post_filters = default_post_filters, debug=False, **parser_defaults):
+    def __init__(self,destination,tables = default_tables,default_object_level='doc',
+                 post_filters = None, debug=False, **parser_defaults):
         self.omax = [1,1,1,1,1,1,1,1,1]
         self.debug = debug
         self.parse_pool = None 
         self.types = object_types
         self.tables = tables
+        self.default_object_level = default_object_level
 
         self.parser_defaults = {}
         
@@ -122,16 +56,23 @@ class Loader(object):
         if "xpaths" not in parser_defaults:
             parser_defaults["xpaths"] = Parser.DefaultXPaths
         if "metadata_xpaths" not in parser_defaults:
-            parser_defaults["metadata_xpaths"] = Parser.DefaultMetadataXpaths
+            parser_defaults["metadata_xpaths"] = Parser.DefaultMetadataXPaths
         if "pseudo_empty_tags" not in parser_defaults:
             parser_defaults["pseudo_empty_tags"] = []
         if "suppress_tags" not in parser_defaults:
-            parser_defaults["suppres_tags"] = []
+            parser_defaults["suppress_tags"] = []
         if "load_filters" not in parser_defaults:
-            parser_defaults["load_fiilters"] = LoadFilters.DefaultLoadFilters
+            parser_defaults["load_filters"] = LoadFilters.DefaultLoadFilters
         
         for option in ["parser_factory","token_regex","xpaths","metadata_xpaths","pseudo_empty_tags","suppress_tags","load_filters"]:
             self.parser_defaults[option] = parser_defaults[option]
+        
+        print >> sys.stderr, 'PARSER DEFAULTS', parser_defaults["load_filters"][4].func_closure[0].cell_contents
+        print >> sys.stderr, 'BEGIN', self.parser_defaults["load_filters"][4].func_closure[0].cell_contents
+        
+        if not post_filters:
+            post_filters = PostFilters.DefaultPostFilters
+        self.post_filters = post_filters
 
         if debug == True:
             self.clean = False
@@ -163,15 +104,15 @@ class Loader(object):
 
         for t in indexed_types:
             self.metadata_hierarchy.append([])
-            for e_type,path,param in self.metadata_xpaths:
+            for e_type,path,param in self.parser_defaults["metadata_xpaths"]:
                 if t == e_type:
                     if param not in self.metadata_fields:
                         self.metadata_fields.append(param)
                         self.metadata_hierarchy[-1].append(param)
                     if param not in self.metadata_types:
                         self.metadata_types[param] = t
-        
-        sys.stdout = OutputHandler(console=console_output, log=log)
+
+        #sys.stdout = OutputHandler(console=console_output, log=log)
 
     def setup_dir(self,path):
         os.mkdir(path)
@@ -184,6 +125,7 @@ class Loader(object):
     def add_files(self,files):
         for f in files:
             os.system("cp %s %s" % (f,self.textdir))
+        os.system("chmod 775 %s*" % self.textdir)
             
     def status(self):
         pass
@@ -256,10 +198,11 @@ class Loader(object):
                     o = open(text["raw"], "w",) # only print out raw utf-8, so we don't need a codec layer now.
                     print "%s: parsing %d : %s" % (time.ctime(),text["id"],text["name"])
 
-                    parser_factory = self.parser_factory
-                    if "parser_factory" in options:
-                        parser_factory = options["parser_factory"]
-
+                    if "parser_factory" not in options:
+                        options["parser_factory"] = self.parser_defaults["parser_factory"]
+                    parser_factory = options["parser_factory"]                        
+                    del options["parser_factory"]
+                        
                     if "token_regex" not in options:
                         options["token_regex"] = self.parser_defaults["token_regex"]
                     if "xpaths" not in options:
@@ -270,8 +213,13 @@ class Loader(object):
                         options["suppress_tags"] = self.parser_defaults["suppress_tags"]
                     if "pseudo_empty_tags" not in options:
                         options["pseudo_empty_tags"] = self.parser_defaults["pseudo_empty_tags"]
+                    
                     if "load_filters" not in options:
                         options["load_filters"] = self.parser_defaults["load_filters"]
+                    filters = options["load_filters"]
+                    del options["load_filters"]
+                    
+                    print >> sys.stderr, 'END', self.parser_defaults["load_filters"][4].func_closure[0].cell_contents, filters[4].func_closure[0].cell_contents
 
                     parser = parser_factory(o,text["id"],text["size"],known_metadata=metadata,**options)
                     try:
@@ -387,72 +335,35 @@ class Loader(object):
         #if self.clean:
         #    os.system('rm all_words_sorted')
 
-    def make_tables(self, **extra_tables):
-        print '\n### SQL Load ###'
-        print "Loading in the following tables:"
-        for table in self.tables:            
-            self.dbh = sqlite3.connect("../toms.db")
-            self.dbh.text_factory = str
-            self.dbh.row_factory = sqlite3.Row
+    def setup_sql_load(self):
+        for table in self.tables:
             if table == 'words':
-                file_in = self.workdir + '/all_words_sorted'
-                self.make_sql_table(table, file_in, indices=["philo_name"])
-            if table == 'pages':
-                file_in = self.workdir + '/all_pages'                
-                self.make_sql_table(table, file_in, indices=["philo_id"],depth=9)
+                file_in = self.destination + '/WORK/all_words_sorted'
+                indices = [("philo_name", "%s_ancestor" % self.default_object_level), ('philo_id',)]
+                depth = 7
+            elif table == 'pages':
+                file_in = self.destination + '/WORK/all_pages'                
+                indices = [("philo_id",)]
+                depth = 9
             elif table == 'toms':
-                file_in = self.workdir + '/all_toms_sorted'
-                indices = ['philo_type', 'philo_id'] + self.metadata_fields
-                self.make_sql_table(table, file_in, indices=indices)
-        if extra_tables:
-            for fn, table in extra_tables.items():
-                fn(self)
-                
-    def make_sql_table(self, table, file_in, indices=[], depth=7):
-        conn = self.dbh
-        c = conn.cursor()
-        columns = 'philo_type,philo_name,philo_id,philo_seq'
-        query = 'create table if not exists %s (%s)' % (table, columns)
-        c.execute(query)
-        print "%s table in toms.db database file..." % table,
-        
-        sequence = 0
-        for line in open(file_in):
-            philo_type, philo_name, id, attrib = line.split("\t",3)
-            fields = id.split(" ",8)
-            if len(fields) == 9:
-                row = {}
-                philo_id = " ".join(fields[:depth])
-                row["philo_type"] = philo_type
-                row["philo_name"] = philo_name
-                row["philo_id"] = philo_id
-                row["philo_seq"] = sequence
-                row.update(eval(attrib))
-                columns = "(%s)" % ",".join([i for i in row])
-                insert = "INSERT INTO %s %s values (%s);" % (table, columns,",".join(["?" for i in row]))
-                values = [v for k,v in row.items()]
-                try:
-                    c.execute(insert,values)
-                except sqlite3.OperationalError:
-                    c.execute("PRAGMA table_info(%s)" % table)
-                    column_list = [i[1] for i in c.fetchall()]
-                    for column in row:
-                        if column not in column_list:
-                            c.execute("ALTER TABLE %s ADD COLUMN %s;" % (table,column))
-                    c.execute(insert,values)
-                sequence += 1       
-        conn.commit()
-        
-        for index in indices:
-            try:
-                c.execute('create index if not exists %s_%s_index on %s (%s)' % (table,index,table,index))
-            except sqlite3.OperationalError:
-                pass
-        conn.commit()
-        print 'done.'
-        
-        if self.clean:
-            os.system('rm %s' % file_in)
+                file_in = self.destination + '/WORK/all_toms_sorted'
+                indices = [('philo_type',), ('philo_id',)] + self.metadata_fields
+                depth = 7
+            post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
+            self.post_filters.insert(0, post_filter)
+            
+    def post_processing(self, *extra_filters):
+        print '\n### Post-processing filters ###'
+        for f in self.post_filters:
+            f(self)
+            print 'done.'
+            
+        if extra_filters:
+            print 'Running the following additional filters:'
+            for f in extra_filters:
+                print f.__name__ + '...',
+                f(self)
+                print 'done.'
 
     def finish(self, **extra_locals):
         print "\n### Finishing up ###"
@@ -460,13 +371,6 @@ class Loader(object):
         os.mkdir(self.destination + "/hitlists/")
         os.chmod(self.destination + "/hitlists/", 0777)
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
-        
-        if post_filters:
-            print 'Running the following post-processing filters:'
-            for f in post_filters:
-                print f.__name__ + '...',
-                f(self)
-                print 'done.'
         
         db_locals = open(self.destination + "/db.locals.py","w") 
 
@@ -476,23 +380,89 @@ class Loader(object):
         print >> db_locals, "db_path = '%s'" % self.destination
         print >> db_locals, "normalized_fields = %s" % self.normalized_fields
         print >> db_locals, "debug = %s" % self.debug
-        print >> db_locals, "default_object_level = '%s'" % self.default_object_level
-        print >> db_locals, "freq_object_levels = %s" % self.freq_object_levels
         for k,v in extra_locals.items():
             print >> db_locals, "%s = %s" % (k,repr(v))
 
-        print "wrote metadata info to %s." % (self.destination + "/db.locals.py")
-           
+        print "wrote database info to %s." % (self.destination + "/db.locals.py")        
+
+def handle_command_line(argv):
+    usage = "usage: %prog [options] database_name files"
+    parser = OptionParser(usage=usage)
+    parser.add_option("-q", "--quiet", action="store_true", dest="quiet", help="suppress all output")
+    parser.add_option("-l", "--log", default=False, dest="log", help="enable logging and specify file path")
+    parser.add_option("-w", "--workers", type="int", default="2", dest="workers", help="define the number of cores for parsing")
+    parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
+    
+    ## Parse command-line arguments
+    (options, args) = parser.parse_args(argv[1:])
+    try:
+        dbname = args[0]
+        args.pop(0)
+        files = args[:]
+        if args[-1].endswith('/') or os.path.isdir(args[-1]):   
+            files = glob(args[-1] + '/*')
+        else:
+            files = args[:]
+    except IndexError:
+        print >> sys.stderr, "\nError: you did not supply a database name or a path for your file(s) to be loaded\n"
+        parser.print_help()
+        sys.exit()
+        
+    ## Number of workers used for parsing: you can define your own value on the
+    ## command-line, stay with the default, or define your own value here
+    workers = options.workers or 2
+    
+        
+    ## Define the type of output you want. By default, you get console output for your database
+    ## load. You can however set a quiet option on the command-line, or set console_output
+    ## to False here.
+    console_output = True
+    if options.quiet:
+        console_output = False
+        
+    ## Define a path for a log of your database load. This option can be defined on the command-line
+    ## or here. It's disabled by default.
+    log = options.log or False
+    
+    ## Set debugging if you want to keep all the parsing data, as well as debug the templates
+    debug = options.debug or False
+    
+    return dbname,files, workers, console_output, log, debug
+
+
+def setup_db_dir(db_destination, template_dir):
+    try:
+        os.mkdir(db_destination)
+    except OSError:
+        ## maybe test to see what db_destination is
+        print "The database folder could not be created at %s" % db_destination
+        print "Do you want to delete this database? Yes/No"
+        choice = raw_input().lower()
+        if choice.startswith('y'):
+            os.system('rm -rf %s' % db_destination)
+            os.mkdir(db_destination)
+        else:
+            sys.exit()
+    
+    if template_dir:
+        os.system("cp -r %s* %s" % (template_dir,db_destination))
+        os.system("cp %s.htaccess %s" % (template_dir,db_destination))
+        #os.system("mkdir -p %s/data/hitlists" % db_destination)
+        #os.system("chmod -R 777 %s/data/hitlists" % db_destination)
+        os.system("chmod -R 777 %s/templates" % db_destination)
+        os.system("mkdir %s/templates/compiled_templates" % db_destination)
+        os.system("chmod -R 777 %s/templates/compiled_templates" % db_destination)
+
                 
 # a quick utility function
-def load(path,files,filters=default_filters,xpaths=None,metadata_xpaths=None,workers=4):
-    l = Loader(path)    
-    l.add_files(files)
-    l.parse_files(workers,filters,xpaths,metadata_xpaths)
-    l.merge_objects()
-    l.analyze()
-    l.make_tables()
-    l.finish()
+#def load(path,files,filters=default_filters,xpaths=None,metadata_xpaths=None,workers=4):
+#    l = Loader(path)    
+#    l.add_files(files)
+#    l.parse_files(workers,filters,xpaths,metadata_xpaths)
+#    l.merge_objects()
+#    l.analyze()
+#    l.make_tables()
+#    l.finish()
         
 if __name__ == "__main__":
     os.environ["LC_ALL"] = "C" # Exceedingly important to get uniform sort order.

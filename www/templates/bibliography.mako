@@ -1,5 +1,6 @@
 <%include file="header.mako"/>
-<%include file="search_boxes.mako"/>
+<%include file="search_form.mako"/>
+<script type="text/javascript" src="${db.locals['db_url']}/js/sidebar.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/bibliography.js"></script>
 <div id='philologic_response'>
     <div id='initial_report'>
@@ -10,7 +11,7 @@
         if not results.done:
            r_status += " Still working.  Refresh for a more accurate count of the results."
         %>
-        Bibliography Report: Hits <span class="start">${start}</span> - <span class="end">${end}</span> of ${len(results)}${r_status}
+        Bibliography Report: Hits <span class="start">${start}</span> - <span class="end">${end}</span> of <span id="total_results">${len(results)}</span>${r_status}
         </p>
         <%include file="show_frequency.mako"/>
     </div>
@@ -18,7 +19,7 @@
         <div id='bibliographic_results'>
             <ol id='philologic_cite_list'>
                 % for i in results[start-1:end]:
-                    <li class='philologic_occurrence'>
+                    <li class='philologic_occurrence' style="padding-top: 10px; padding-bottom: 10px;">
                         <%
                         n += 1
                         %>

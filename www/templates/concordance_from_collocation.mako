@@ -1,5 +1,5 @@
 <%include file="header.mako"/>
-<%include file="search_boxes.mako"/>
+<%include file="search_form.mako"/>
 <div id='philologic_response' style="margin-top:0px;">
     <div>
         <a href="${db.locals['db_url']}/">Return to search form</a>
@@ -35,7 +35,6 @@
                         </span>
                         <span class="more_context_and_close">
                             <span class="more_context">More</span>
-                            <span class="close_concordance">X</span>
                         </span>
                     </div>
                     % if i.collocate_num > 1:

@@ -8,6 +8,8 @@ import json
 import subprocess
 import re
 import unicodedata
+import urlparse
+from wsgiref.handlers import CGIHandler
 from philologic.QuerySyntax import parse_query
 from philologic.Query import word_pattern_search
 from functions.wsgi_handler import parse_cgi

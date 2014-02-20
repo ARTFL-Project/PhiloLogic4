@@ -10,6 +10,7 @@ import functions as f
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
 from philologic import HitWrapper
+import json
 
 philo_types = set(['div1', 'div2', 'div3'])
 
@@ -17,37 +18,18 @@ def navigation(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
     obj = db[path_components]
-    #if obj.philo_type == 'doc' and q['doc_page']:
-    #    page_text = f.get_page_text(db, obj, q['doc_page'], path, q['byte'])
-    #    #page_text = obj.get_page() This does not fetch the right page, just the first page of the object
-    #    if page_text:
-    #        doc_id = str(obj.philo_id[0]) + ' %'
-    #        prev_page, next_page = get_neighboring_pages(db, doc_id, q['doc_page'])    
-    #        return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
-    #                               dbname=dbname,current_page=q['doc_page'],f=f,navigate_doc=navigate_doc,
-    #                               db=db,q=q,template_name='pages.mako')
-    #    else:
-    #        path_components += ['2']
-    #        obj = db[path_components]
-    #if has_pages(obj, db):
-    #    page_num = get_page_num(obj,db)
-    #    if page_num:
-    #        page_text = f.get_page_text(db, obj, q['doc_page'], path, q['byte'])
-    #        if page_text:  ## In case the page does not contain any text
-    #            doc_id = str(obj.philo_id[0]) + ' %'
-    #            prev_page, next_page = get_neighboring_pages(db, doc_id, page_num)
-    #            return render_template(obj=obj,page_text=page_text,prev_page=prev_page,next_page=next_page,
-    #                                    dbname=dbname,current_page=page_num,f=f,navigate_doc=navigate_doc,
-    #                                    db=db,q=q,template_name='pages.mako')
+    if q['format'] == "json":
+        obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
+        return json.dumps(obj_text)
     if obj.philo_type == 'doc':
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,template_name='t_o_c_template.mako')
+                       db=db,q=q,template_name='t_o_c.mako', report="t_o_c")
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
-    #obj_text = obj_pager(db, obj, obj_text)  ## this creates virtual pages
     prev = ' '.join(obj.prev.split()[:7])
     next = ' '.join(obj.next.split()[:7])
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,obj_text=obj_text,prev=prev,next=next,template_name='object.mako')
+                       db=db,q=q,obj_text=obj_text,prev=prev,next=next,template_name='object.mako',
+                       report="object")
 
 def navigate_doc(obj, db):
     conn = db.dbh 
@@ -103,36 +85,3 @@ def get_page_num(obj, db):
             return c.fetchone()[0]
         except:
             return None
-
-def obj_pager(db, obj, obj_text, word_num=500):
-    pages =[]
-    token_regex = db.locals['punct_regex'] + '|' + db.locals['word_regex']
-    words = [i for i in re.split(token_regex, obj_text) if i]
-    page = []
-    for w in words:
-        page.append(w)
-        if len(page) > word_num:
-            if re.match(db.locals['punct_regex'], w):    
-                page = ''.join(page)
-                pages.append(page)
-                page = []
-    if len(page):
-        pages.append(''.join(page))
-    page_divs = ''
-    highlight = False
-    highlight_tag = re.compile('class="highlight"')
-    for p in pages[1:-1]:
-        if highlight_tag.search(p):
-            highlight = True
-            page_divs += "<div>" + p + '</div>'
-        else:
-            page_divs += "<div style='display:none;'>" + p + '</div>'
-    if highlight:
-        page_divs = '<div style="display:none;">%s</div>' % pages[0] + page_divs
-    else:
-        page_divs = '<div>%s</div>' % pages[0] + page_divs
-    next_id = obj.next.split(" ")[:7]
-    next_url = f.link.make_absolute_object_link(db, next_id)
-    next_link = '<a href="%s">NEXT</a>' % next_url
-    page_divs += "<div style='display:none;'>%s%s</div>" % (page[-1], next_link)
-    return page_divs

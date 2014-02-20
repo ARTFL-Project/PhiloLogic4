@@ -13,7 +13,7 @@ from philologic.DB import DB
 from philologic.QuerySyntax import parse_query
 from philologic.Query import word_pattern_search
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
-from bibliography import bibliography
+from bibliography import fetch_bibliography as bibliography
 import re
 import subprocess
 import unicodedata
@@ -29,8 +29,9 @@ def relevance(environ,start_response):
         return bibliography(f,path, db, dbname,q,environ)
     else:
         results = retrieve_hits(q, db)
-    return render_template(results=results,db=db,dbname=dbname,q=q,fetch_relevance=fetch_relevance,f=f,format=format,
-                                path=path, results_per_page=q['results_per_page'], template_name='relevance.mako')
+    return render_template(results=results,db=db,dbname=dbname,q=q,fetch_relevance=fetch_relevance,
+                           f=f,format=format,path=path, results_per_page=q['results_per_page'],
+                           template_name='relevance.mako', report='relevance')
 
 def format_query(q, db):
     parsed = parse_query(q)

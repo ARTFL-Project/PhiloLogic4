@@ -8,6 +8,8 @@ import json
 import subprocess
 import re
 import unicodedata
+import urlparse
+from wsgiref.handlers import CGIHandler
 from philologic.QuerySyntax import parse_query
 from philologic.Query import word_pattern_search
 from functions.wsgi_handler import parse_cgi
@@ -41,7 +43,7 @@ def format_query(q, field, db):
         if l == "QUOTE":
             if t[-1] != '"':
                 t += '"'
-            subtokens = t[1:-1].split(" ")
+            subtokens = t[1:-1].split("|")
             parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
         else:
             parsed_split += [(l,t)]
@@ -92,7 +94,7 @@ def metadata_list(environ,start_response):
     cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
     metadata = cgi.get('term',[''])[0]
     field = cgi.get('field',[''])[0]
-    yield = autocomplete_metadata(metadata, field, db)
+    yield autocomplete_metadata(metadata, field, db)
 
 if __name__ == "__main__":
     CGIHandler().run(metadata_list)

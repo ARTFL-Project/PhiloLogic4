@@ -1,4 +1,9 @@
 $(document).ready(function() {
+    
+    // jQueryUI theming
+    $("#report_switch").buttonset();
+    $('#page_links').find('a').each(function(){$(this).button()});
+    
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var db_url = db_locals['db_url'];
     var q_string = window.location.search.substr(1);
@@ -15,13 +20,25 @@ $(document).ready(function() {
         $(".kwic_biblio").hoverIntent(config);
     }
     
-    closeConcordance();
-    $('.close_concordance').hide();
-    
-    getCitationWidth()
+    getCitationWidth();
     $(window).resize(function() {
         getCitationWidth();
     });
+    $(window).load(function() {
+         // Get the total results when available
+        if ($('#incomplete').text() != '.') {
+            $.getJSON(db_url + '/scripts/get_total_results.py?' + q_string, function(data) {
+                $('#total_results, #incomplete').fadeOut('fast', function() {
+                    if (parseInt($('#end').text()) > data) {
+                        $('#end').text(data);
+                    }
+                    $("#total_results").text(data);
+                    $('#incomplete').text('.')
+                }).fadeIn('fast');
+            });
+        }
+    });
+    
 });
 
 
@@ -58,9 +75,6 @@ function concordance_kwic_switch(db_url) {
             $("#report").buttonset("refresh");
             display_options_on_selected();
             more_context();
-            $('.close_concordance').button();
-            closeConcordance();
-            $('.close_concordance').hide();
             getCitationWidth();
             $('.more').find('a').each(function() {
                 if (switchto.match(/kwic/)) {
@@ -95,13 +109,13 @@ function back_forward_button_concordance_reload() {
 
 // These functions are for the kwic bibliography which is shortened by default
 function showBiblio() {
-    $(this).children("#full_biblio").css('position', 'absolute').css('text-decoration', 'underline')
-    $(this).children("#full_biblio").css('background', 'LightGray')
-    $(this).children("#full_biblio").css('box-shadow', '5px 5px 15px #C0C0C0')
-    $(this).children("#full_biblio").css('display', 'inline')
+    $(this).children(".full_biblio").css('position', 'absolute').css('text-decoration', 'underline')
+    $(this).children(".full_biblio").css('background', 'LightGray')
+    $(this).children(".full_biblio").css('box-shadow', '5px 5px 15px #C0C0C0')
+    $(this).children(".full_biblio").css('display', 'inline')
 }
 
 function hideBiblio() {
-    $(this).children("#full_biblio").fadeOut(200)
+    $(this).children(".full_biblio").fadeOut(200)
 }
 

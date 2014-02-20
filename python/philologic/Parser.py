@@ -48,7 +48,7 @@ class ExpatWrapper:
         self.p.ParseFile(file)        
         return self.target.close()
 
-class BufferedParser(object):
+class Parser(object):
     def __init__(self,output,docid,filesize,token_regex = r"(\w+)|([\.\?\!])", xpaths = [("doc","./")],metadata_xpaths=[],suppress_tags = [],pseudo_empty_tags=[], known_metadata = {}):
         self.types = ["doc","div1","div2","div3","para","sent","word"]
         self.parallel_type = "page"
@@ -73,9 +73,9 @@ class BufferedParser(object):
 
     def parse(self,input):
         """Top level function for reading a file and printing out the output."""
+        print >> sys.stderr, "SingleParser parsing"
         self.input = input
         lexer = ExpatWrapper(self)
-        print repr(self.input), repr(self.output)
         return lexer.parse(self.input)
         
     def make_extractor(self,new_element,obj_type,mxp,field):
@@ -84,28 +84,41 @@ class BufferedParser(object):
         destination = self.v[obj_type]  # Note that this object will still exist after the OHCOVector has printed and discarded it.
         # Thus, extracting to a 'closed" object will silently discard values.  Which I think is the least bad option.
         attr_pattern_match = re.search(r"@([^\/\[\]]+)$",mxp)
+        value_buffer = []
         if attr_pattern_match:
             xp_prefix = mxp[:attr_pattern_match.start(0)]
-            attr_name = attr_pattern_match.group(1)
+            attr_name = attr_pattern_match.group(1).decode("utf-8")
             def extract_attr(future_event,future_element):
                 if future_event[0] == "start":
-                    if future_element in new_element.findall(xp_prefix) and future_element.get(attr_name,""):
-                        destination[field] = destination.get(field,"") + future_element.get(attr_name)
-#                        print >> self.output, repr(new_element), repr(future_element), attr_name,future_element.get(attr_name)
-                if future_event[0] == "end":
+#                    print >> sys.stderr, "ATTR_EXTRACTOR", xp_prefix,attr_name,future_element 
+#                    print >> sys.stderr, "START EVENT:", future_event
+#                    if new_element.findall(xp_prefix):
+#                        print >> sys.stderr, "START MATCH", new_element.findall(xp_prefix)
+#                        print >> sys.stderr, "EVENT:", future_event
                     if future_element in new_element.findall(xp_prefix):
-                        # return True so that the Parser can remove the callback.
-                        return True
+#                        print >> sys.stderr, "CANDIDATE"
+                        if future_element.get(attr_name,""):
+#                            print >> sys.stderr, "CAPTURE"
+                            destination[field] = future_element.get(attr_name)
+                            return True
+#                        destination[field] = destination.get(field,"") + future_element.get(attr_name)
+#                        print >> self.output, repr(new_element), repr(future_element), attr_name,future_element.get(attr_name)
                 return False
             return extract_attr
         else:
             def extract_text(future_event,future_element):
                 if future_event[0] == "text":
-                    if future_element in new_element.findall(mxp):
-                        destination[field] = destination.get(field,"") + future_event[1]
+#                    if future_element in new_element.findall(mxp):
+                    if new_element.findall(mxp):
+#                        destination[field] = destination.get(field,"") + future_event[1]
+                        value_buffer.append(future_event[1])
                         #print >> self.output, repr(new_element),repr(future_element),mxp,future_event[1]
                 if future_event[0] == "end":
                     if future_element in new_element.findall(mxp):
+                        if destination.get(field,""):
+                            pass
+                        else:
+                            destination[field] = "".join(value_buffer)
                         # return True so that the Parser can remove the callback.
                         return True
                 return False
@@ -207,7 +220,10 @@ class BufferedParser(object):
             # check for metadata on the new element.
             for open_object in self.handlers.keys():
                 for handler in self.handlers[open_object]:
-                    handler(event,new_element)
+#                    handler(event,new_element)
+                    if handler(event,new_element):
+                        # If a handler returns True in the end phase, delete it to prevent future evaluation.
+                        self.handlers[open_object].remove(handler)
             # objects that don't correspond to real elements can't attach handlers, or clean themselves up.
             # Let OHCOVector handle them numerically instead.
             if (obj_type == self.parallel_type) or (new_element.tag in self.pseudo_empty_tags):
@@ -261,7 +277,7 @@ DefaultTokenRegex = r"(\w+)|([\.?!])"
 
 DefaultXPaths =  [("doc","."),("div",".//div1"),("div",".//div2"),("div",".//div3"),("page",".//pb")]         
 
-DefaultMetadata_XPaths = [ # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
+DefaultMetadataXPaths = [ # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
     # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
     ("doc","./teiHeader//titleStmt/title","title"),
     ("doc","./teiHeader//titleStmt/author","author"),
@@ -273,14 +289,15 @@ DefaultMetadata_XPaths = [ # metadata per type.  '.' is in this case the base el
     ("page",".@fac","img")
 ]
 
+
 if __name__ == "__main__":    
     for docid,fn in enumerate(sys.argv[1:],1):
         print >> sys.stderr, docid,fn
         size = os.path.getsize(fn)
         fh = open(fn)
-        parser = BufferedParser(sys.stdout,docid,size,token_regex = r"(\w+)|([\.\?\!])",
-                                                      xpaths=[("doc","."),("div",".//div1"),("div",".//div2"),("page",".//pb")],
-                                                      metadata_xpaths=[("doc",".//titlestmt/title","title"),("doc",".//titlestmt/author","author"),("div","./head","headword"),("div",".@n","n"),("div",".@id","id")],
+        parser = Parser(sys.stdout,docid,size,token_regex = r"(\w+)|([\.\?\!])",
+                                                      xpaths=DefaultXPaths,
+                                                      metadata_xpaths=DefaultMetadataXPaths,
                                                       suppress_tags=["teiheader","head"])
         lexer = ExpatWrapper(parser)
         lexer.parse(fh)

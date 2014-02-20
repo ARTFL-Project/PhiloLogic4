@@ -7,6 +7,7 @@ import re
 import sys
 import os
 from philologic.DB import DB
+from philologic.Query import word_pattern_search
 from query_parser import query_parser
 
 
@@ -52,7 +53,7 @@ def parse_cgi(environ):
     query["byte"] = '+'.join(cgi.get("byte",['']))
     
     ## This defines within how many words for collocation tables
-    query["word_num"] = cgi.get("word_num",[10])[0]
+    query["word_num"] = cgi.get("word_num",[5])[0]
     if query["word_num"]:
         query["word_num"] = int(query["word_num"])
     
@@ -60,8 +61,10 @@ def parse_cgi(environ):
     query["collocate"] = cgi.get("collocate",[None])[0]
     query['direction'] = cgi.get("direction",[None])[0]
     query['collocate_num'] = cgi.get("collocate_num", [None])[0]
-    query['colloc_start'] = int(cgi.get('colloc_start', [0])[0])
-    query['colloc_end'] = int(cgi.get('colloc_end', [100])[0])
+    
+    # This is for dynamically updating results in collocations and the sidebar
+    query['interval_start'] = int(cgi.get('interval_start', [0])[0])
+    query['interval_end'] = int(cgi.get('interval_end', [3000])[0])
     
     ## This is for frequency searches: raw count or per n number of words
     query["rate"] = cgi.get("rate", [None])[0]

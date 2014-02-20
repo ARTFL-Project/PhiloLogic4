@@ -1,5 +1,7 @@
 <%include file="header.mako"/>
-<%include file="search_boxes.mako"/>
+<%include file="search_form.mako"/>
+<link rel="stylesheet" href="${db.locals['db_url']}/css/textObjectNavigation.css" type="text/css" media="screen, projection">
+<script type="text/javascript" src="${db.locals['db_url']}/js/jquery.scrollTo.min.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/textObjectNavigation.js"></script>
 <div id='philologic_response'>
     <div id='object_title'>
@@ -11,7 +13,7 @@
                 <div id='prev_and_toc_button'>
                     <div id='t_o_c_button'>
                         <input type="checkbox" id="show_table_of_contents">
-                        <label for="show_table_of_contents"><span id="t_b_c_box">Show table of contents</span></label>
+                        <label for="show_table_of_contents"><span id="t_b_c_box">Table of contents</span></label>
                     </div>
                     <div id="prev_obj" data-philo-id="${prev}">&lt;</div>
                 </div>

@@ -1,5 +1,7 @@
 <%include file="header.mako"/>
-<%include file="search_boxes.mako"/>
+<%include file="search_form.mako"/>
+<script type="text/javascript" src="${db.locals['db_url']}/js/jquery.hoverIntent.minified.js"></script>
+<script type="text/javascript" src="${db.locals['db_url']}/js/sidebar.js"></script>
 <script type="text/javascript" src="${db.locals['db_url']}/js/concordanceKwic.js"></script>
 <div id='philologic_response'>
     <div id='initial_report'>
@@ -8,10 +10,18 @@
              start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
              r_status = "."
              if not results.done:
-                r_status += " Still working.  Refresh for a more accurate count of the results."
+                r_status += " Still working..."
              current_pos = start
             %>
-            Hits <span class="start">${start}</span> - <span class="end">${end}</span> of ${len(results)}${r_status}
+            % if end != 0:
+                % if end < results_per_page or end < len(results):
+                    Hits <span id="start">${start}</span> - <span id="end">${len(results)}</span> of <span id="total_results">${len(results) or results_per_page}</span><span id="incomplete">${r_status}</span>
+                % else:
+                    Hits <span id="start">${start}</span> - <span id="end">${end}</span> of <span id="total_results">${len(results) or results_per_page}</span><span id="incomplete">${r_status}</span>         
+                % endif
+            % else:
+                No results for your query.
+            % endif
         </p>
         <%include file="show_frequency.mako"/>
         <div id="report_switch">
