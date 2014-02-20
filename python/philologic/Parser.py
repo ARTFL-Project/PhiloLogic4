@@ -84,41 +84,36 @@ class Parser(object):
         destination = self.v[obj_type]  # Note that this object will still exist after the OHCOVector has printed and discarded it.
         # Thus, extracting to a 'closed" object will silently discard values.  Which I think is the least bad option.
         attr_pattern_match = re.search(r"@([^\/\[\]]+)$",mxp)
-        value_buffer = []
         if attr_pattern_match:
             xp_prefix = mxp[:attr_pattern_match.start(0)]
             attr_name = attr_pattern_match.group(1).decode("utf-8")
             def extract_attr(future_event,future_element):
                 if future_event[0] == "start":
-#                    print >> sys.stderr, "ATTR_EXTRACTOR", xp_prefix,attr_name,future_element 
-#                    print >> sys.stderr, "START EVENT:", future_event
-#                    if new_element.findall(xp_prefix):
-#                        print >> sys.stderr, "START MATCH", new_element.findall(xp_prefix)
-#                        print >> sys.stderr, "EVENT:", future_event
-                    if future_element in new_element.findall(xp_prefix):
-#                        print >> sys.stderr, "CANDIDATE"
+#                    if future_element in new_element.findall(xp_prefix):
+                    if new_element.findall(xp_prefix) == [future_element]:
                         if future_element.get(attr_name,""):
-#                            print >> sys.stderr, "CAPTURE"
                             destination[field] = future_element.get(attr_name)
                             return True
-#                        destination[field] = destination.get(field,"") + future_element.get(attr_name)
-#                        print >> self.output, repr(new_element), repr(future_element), attr_name,future_element.get(attr_name)
                 return False
             return extract_attr
         else:
+            value_buffer = []
             def extract_text(future_event,future_element):
                 if future_event[0] == "text":
 #                    if future_element in new_element.findall(mxp):
                     if new_element.findall(mxp):
-#                        destination[field] = destination.get(field,"") + future_event[1]
                         value_buffer.append(future_event[1])
-                        #print >> self.output, repr(new_element),repr(future_element),mxp,future_event[1]
+#                        print >> sys.stderr, "CAPTURE", repr(value_buffer)
                 if future_event[0] == "end":
-                    if future_element in new_element.findall(mxp):
+#                    print >> sys.stderr, "TEXT_EXTR_END: ", future_event, new_element, future_element
+                    if new_element.findall(mxp) == [future_element]:
+#                        print >> sys.stderr, "CLOSE ELEMENT"
                         if destination.get(field,""):
+#                            print >> sys.stderr, "CONFLICT?"
                             pass
                         else:
                             destination[field] = "".join(value_buffer)
+#                            print >> sys.stderr, "SUCCESS", field, destination[field], repr(value_buffer)
                         # return True so that the Parser can remove the callback.
                         return True
                 return False
@@ -129,7 +124,7 @@ class Parser(object):
         def suppress_tokens(future_event,future_element):
             if future_event[0] == "text":
                 if future_element in new_element.findall(path):
-                    print "SUPPRESS", path
+#                    print >> sys.stderr, "SUPPRESS", path
                     return False
             return True
         return suppress_tokens
@@ -210,10 +205,12 @@ class Parser(object):
                                 self.v.pull(obj_type,event[2])
                                 return True
                         return False
-                    self.handlers[new_element] = [cleanup]     
+#                    self.handlers[new_element] = [cleanup]
+                    self.handlers[new_element] = []
                     for m_obj_type,m_xpath,field in self.metadata_xpaths:      
                         if m_obj_type == obj_type:
                             self.handlers[new_element] += [self.make_extractor(new_element,m_obj_type,m_xpath,field)]
+                    self.handlers[new_element] += [cleanup]
                     # only emit one object per element.
                     break
 
@@ -256,6 +253,7 @@ class Parser(object):
                 # do any cleanup for the element that just ended
                 for open_object in self.handlers.keys():
                     for handler in self.handlers[open_object]:
+#                        print >> sys.stderr, handler, [c.cell_contents for c in handler.func_closure]
                         if handler(event,popped):
                             # If a handler returns True in the end phase, delete it to prevent future evaluation.
                             self.handlers[open_object].remove(handler)
