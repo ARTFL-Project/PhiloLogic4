@@ -7,6 +7,7 @@ import unicodedata
 from subprocess import Popen, PIPE
 from philologic.OHCOVector import Record
 from ast import literal_eval as eval
+import sys
 
 
 ## Default filters
@@ -72,6 +73,7 @@ def make_object_ancestors(*types):
     return inner_make_object_ancestors
 
 def make_sorted_toms(*types):
+    print >> sys.stderr, "TOMS_TYPES_INIT", types
     def sorted_toms(loader_obj, text):
         type_pattern = "|".join("^%s" % t for t in types)
         tomscommand = "cat %s | egrep \"%s\" | sort %s > %s" % (text["raw"],type_pattern,loader_obj.sort_by_id,text["sortedtoms"])
