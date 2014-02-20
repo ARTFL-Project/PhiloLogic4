@@ -30,7 +30,7 @@ def kwic(environ,start_response):
                                 path=path, results_per_page=q['results_per_page'],
                                 template_name='kwic.mako', report="kwic")
 
-def fetch_kwic(results, path, q, byte_query, db, start, end, length=500):
+def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
     kwic_results = []
     shortest_biblio = 0
 
