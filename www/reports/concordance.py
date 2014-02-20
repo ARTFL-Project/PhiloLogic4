@@ -34,7 +34,7 @@ def concordance(environ,start_response):
 def fetch_concordance(hit, path, q):
     ## Determine length of text needed
     byte_distance = hit.bytes[-1] - hit.bytes[0]
-    length = 4750 + byte_distance + 4750
+    length = 750 + byte_distance + 750
     
     bytes, byte_start = adjust_bytes(hit.bytes, length)
     conc_text = f.get_text(hit, byte_start, length, path)
