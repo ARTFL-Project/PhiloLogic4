@@ -63,6 +63,7 @@
     font-family: inherit !important;
 	padding-right: 10px;
 	border-top: solid 1px #ECECEC;
+    display: none;
 	position: absolute;
 }
 #explain_conc, #explain_relev, #explain_colloc, #explain_time, #explain_kwic {

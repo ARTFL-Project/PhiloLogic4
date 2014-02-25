@@ -30,7 +30,7 @@ def make_abs_div_cite(db,i):
         cite += u"%s<a href='%s' class='section_name'>%s</a>" % (separation,section_href,section_name)
     if sub_section_name:
         cite += u"%s<a href='%s' class='sub_section_name'>%s</a>" % (separation,sub_section_href,sub_section_name)
-    speaker_name = i.para.who
+    speaker_name = i.para.who.replace('#', '').replace('_', ' ') ## This is a folger shakespeare hack
     if speaker_name:
         cite += " %s" % speaker_name
     

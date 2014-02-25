@@ -275,6 +275,7 @@ div.main_body {
 }
 #description {
     font-size: 140%;
+    padding-top: 15px;
 }
 .highlight {
     color: #EF4500;

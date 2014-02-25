@@ -1,8 +1,5 @@
 <%include file="header.mako"/>
 <%include file="search_form.mako"/>
-<link rel="stylesheet" href="${db.locals['db_url']}/css/textObjectNavigation.css" type="text/css" media="screen, projection">
-<script type="text/javascript" src="${db.locals['db_url']}/js/jquery.scrollTo.min.js"></script>
-<script type="text/javascript" src="${db.locals['db_url']}/js/textObjectNavigation.js"></script>
 <div id='philologic_response'>
     <div id='object_title'>
         <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,obj)}</span>

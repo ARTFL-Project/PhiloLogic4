@@ -89,6 +89,9 @@ def parse_cgi(environ):
     query['filename'] = cgi.get('filename', [''])[0]
     query['go_to_page'] = cgi.get('go_to_page', [''])[0]
     
+    ## This is the field to use to group results by author
+    query['group_by_author'] = cgi.get('group_by_author', [None])[0]
+    
 #    query["dbname"] = dbname
     query["dbpath"] = dbfile
     query["start"] = int(cgi.get('start',[0])[0]) # special range handling done in each service now.

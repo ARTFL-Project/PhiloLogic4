@@ -4,7 +4,7 @@ $(document).ready(function() {
     $('#frequency_by, #hide_sidebar').button();
     
     // Load slimScroll plugin
-    $.getScript(db_locals['db_url'] + '/js/jquery.slimscroll.min.js');
+    $.getScript(db_locals['db_url'] + '/js/plugins/jquery.slimscroll.min.js');
     
 });
 

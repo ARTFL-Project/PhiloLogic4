@@ -56,11 +56,11 @@ function concordance_kwic_switch(db_url) {
             $("#waiting").hide();
             if (switchto.match(/kwic/)) {
                 var config = {    
-                    over: showBiblio, 
-                    timeout: 100,  
-                    out: hideBiblio   
-                };
-                $(".kwic_biblio").hoverIntent(config);
+                over: showBiblio, 
+                timeout: 100,  
+                out: hideBiblio   
+            };
+            $(".kwic_biblio").hoverIntent(config);
                 $('#concordance').removeAttr("checked");
                 $('#kwic').prop("checked", true)
                 var new_url = History.getState().url.replace(/report=concordance/, 'report=kwic');
@@ -109,6 +109,7 @@ function back_forward_button_concordance_reload() {
 
 // These functions are for the kwic bibliography which is shortened by default
 function showBiblio() {
+    console.log($(this))
     $(this).children(".full_biblio").css('position', 'absolute').css('text-decoration', 'underline')
     $(this).children(".full_biblio").css('background', 'LightGray')
     $(this).children(".full_biblio").css('box-shadow', '5px 5px 15px #C0C0C0')

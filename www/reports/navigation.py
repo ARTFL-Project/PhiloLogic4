@@ -28,8 +28,8 @@ def navigation(environ,start_response):
     prev = ' '.join(obj.prev.split()[:7])
     next = ' '.join(obj.next.split()[:7])
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,obj_text=obj_text,prev=prev,next=next,template_name='object.mako',
-                       report="object")
+                       db=db,q=q,obj_text=obj_text,prev=prev,next=next,
+                       template_name='object.mako', report="navigation")
 
 def navigate_doc(obj, db):
     conn = db.dbh 
