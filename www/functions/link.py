@@ -30,7 +30,7 @@ def make_query_link(query,method=None,methodarg=None,report=None,start=None,end=
     if end:
         q_params.append(("end", str(end)))
     if results_per_page:
-        q_params.append(("results_per_page", str(results_per_page)))
+        q_params.append(("pagenum", str(results_per_page)))
     if theme_rheme:
         q_params.append(("theme_rheme", theme_rheme))
     if collocate:
