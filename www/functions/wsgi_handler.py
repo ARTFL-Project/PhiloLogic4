@@ -46,7 +46,7 @@ def parse_cgi(environ):
         query['arg'] = 0
     query["report"] = cgi.get("report",[None])[0]
     query["format"] = cgi.get("format",[None])[0]
-    query["results_per_page"] = int(cgi.get("pagenum",[50])[0])
+    query["results_per_page"] = int(cgi.get("pagenum",[25])[0])
     
     ## Hack so that even if there are multiple byte offsets
     ## we still have it stored as a string in query
@@ -89,7 +89,7 @@ def parse_cgi(environ):
     query['filename'] = cgi.get('filename', [''])[0]
     query['go_to_page'] = cgi.get('go_to_page', [''])[0]
     
-    ## This is the field to use to group results by author
+    ## This is the field to use to group results by author in the mobile component
     query['group_by_author'] = cgi.get('group_by_author', [None])[0]
     
 #    query["dbname"] = dbname
