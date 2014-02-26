@@ -204,6 +204,7 @@ function update_sidebar(sorted_list, field) {
             var link = sorted_list[item][1]['url'];
             var count = sorted_list[item][1]['count'];
         }
+        result = result.replace('#', ''); // Folger Shakespeare display hack for speaker
         var full_link = '<a id="freq_sidebar_text" href="' + link + '">' + result + '</a>';
         newlist += '<li>'; // style="white-space:nowrap;">';
         newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:8px;"></span>';

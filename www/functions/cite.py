@@ -20,19 +20,20 @@ def make_abs_div_cite(db,i):
         sub_section_name = section_names[1]
     except IndexError:
         sub_section_name = section_name
-    title = '<a href="%s">%s</a>' % (doc_href, i.doc.title)
-    cite = u"<span class='philologic_cite'>%s <i>%s</i>" % (i.doc.author,title)
+    title = '<a href="%s">%s</a>' % (doc_href, i.doc.title.strip())
+    cite = u"<span class='philologic_cite'>%s <i>%s</i>" % (i.doc.author.strip(),title)
     date = i.doc.date
     if date:
         cite += " [%s]" % str(date)
-    separation = '<span class="cite_separation"></span>'
     if section_name:
-        cite += u"%s<a href='%s' class='section_name'>%s</a>" % (separation,section_href,section_name)
+        cite += u"<a href='%s' class='section_name'>%s</a>" % (section_href,section_name.strip())
     if sub_section_name:
-        cite += u"%s<a href='%s' class='sub_section_name'>%s</a>" % (separation,sub_section_href,sub_section_name)
-    speaker_name = i.para.who.replace('#', '').replace('_', ' ') ## This is a folger shakespeare hack
+        cite += u"<a href='%s' class='sub_section_name'>%s</a>" % (sub_section_href,sub_section_name.strip())
+    speaker_name = i.para.who
     if speaker_name:
-        cite += " %s" % speaker_name
+        speaker_href = make_absolute_object_link(db, i.philo_id[:5], i.bytes)
+        speaker_name = speaker_name.replace('#', '').replace('_', ' ') ## This is a folger shakespeare hack
+        cite += "<a href='%s' class='who_section'>%s</a>" % (speaker_href, speaker_name)
     
     #if db.locals['debug'] == True:
     #    cite += " %s" % i.doc.filename
@@ -55,7 +56,10 @@ def make_abs_div_cite(db,i):
 def make_abs_doc_cite(db,i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
     doc_href = make_absolute_object_link(db,i.philo_id[:1], i.bytes)
-    record = u"%s, <i><a href='%s'>%s</a></i> [%s]" % (i.doc.author, doc_href,i.doc.title, i.doc.create_date)
+    record = u"%s, <i><a href='%s'>%s</a></i>" % (i.doc.author, doc_href,i.doc.title)
+    date = i.doc.date
+    if date:
+        record += " [%s]" % date
     if db.locals['debug'] == True:
         record += " %s" % i.doc.filename
     return record

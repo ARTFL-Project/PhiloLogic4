@@ -2,6 +2,8 @@
 <%include file="search_form.mako"/>
 <script>
     $(document).ready(function() {
+        var new_margin = parseInt($('#philologic_response').css("margin-top")) + 10;
+        $('#philologic_response').css("margin-top", new_margin + "px");
         var pathname = window.location.pathname.replace('dispatcher.py/', '');
         var my_path = pathname.replace(/\/\d+.*$/, '/');
         var doc_id = pathname.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
@@ -13,7 +15,7 @@
     })
 </script>
 <div id='philologic_response'>
-    <div class='t_o_c_title'>
+    <div id='t_o_c_title'>
         <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,obj)}</span>
     </div>
 </div>

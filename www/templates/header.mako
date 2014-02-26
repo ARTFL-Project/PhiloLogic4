@@ -8,7 +8,7 @@
     <!--Load db_locals and global_report variable to use in the JavaScript code-->
     <script>
         var db_locals = ${db_locals}; /* loading the db_locals Python variable in javascript */
-        global_report = "${report}";    
+        var global_report = "${report}";    
     </script>
     
     <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono|Averia+Serif+Libre:300,400,700,300italic,400italic,700italic&subset=latin,latin-ext,cyrillic-ext,greek-ext,greek,cyrillic' rel='stylesheet' type='text/css'>
@@ -21,7 +21,7 @@
         <link rel="stylesheet" href="${db.locals['db_url']}/css/concordanceKwic.css" type="text/css" media="screen, projection">
     % elif report == "time_series":
         <link rel="stylesheet" href="${db.locals['db_url']}/css/timeSeries.css" type="text/css" media="screen, projection">
-    % elif report == "navigation":
+    % elif report == "navigation" or report == "t_o_c":
         <link rel="stylesheet" href="${db.locals['db_url']}/css/textObjectNavigation.css" type="text/css" media="screen, projection">
     % endif
     
@@ -34,7 +34,7 @@
             "kwic": ["common.js", "sidebar.js", "/plugins/jquery.hoverIntent.minified.js", "concordanceKwic.js"], "time_series": ["common.js", "timeSeries.js"],
             "collocation": ["common.js", "plugins/jquery.tagcloud.js", "collocation.js"], "ranked_relevance": ["common.js", "rankedRelevance.js"],
             "bibliography": ["common.js", "sidebar.js", "bibliography.js"], "navigation": ["common.js", "/plugins/jquery.scrollTo.min.js", "textObjectNavigation.js"],
-            "concordance_from_collocation": ["common.js", "concordanceFromCollocation.js"]}
+            "concordance_from_collocation": ["common.js", "concordanceFromCollocation.js"], "t_o_c": ["common.js"]}
     %>
     % for script in reports[report]:
         <script type="text/javascript" src="${db.locals['db_url']}/js/${script}"></script>
