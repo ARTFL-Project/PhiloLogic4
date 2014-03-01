@@ -22,27 +22,25 @@
 }
 #toc_container {
     overflow-y: auto;
-    margin-top: 20px;
+    margin-top: 40px;
 }
 #page_number, obj_nav {
     text-align: center;
     margin-bottom: 10px;
 }
-#current_page {
-    font-size: 105% !important;
-    text-align: center;
-    margin-bottom: 10px;
-}
-#prev_page, #fake_prev_page, #prev_obj {
+#prev_obj {
     font-size: 500%;
     color: #D8D8D8  !important;
     cursor: pointer;
+    position: absolute;
+    margin-top: 30px;
+    left: 17%;
 }
-#prev_page:hover, #next_page:hover, #fake_prev_page:hover, #fake_next_page:hover, #prev_obj:hover, #next_obj:hover {
+#prev_obj:hover, #next_obj:hover {
     text-decoration: none !important;
     color: #A8A8A8 !important;
 }
-#next_page, #fake_next_page, #next_obj {
+#next_obj {
     font-size: 500%;
     color: #D8D8D8  !important;
     cursor: pointer;
@@ -54,23 +52,10 @@
 #prev_and_toc {
     margin-top: 30px;
 }
-#book_page {
-    margin: 0px 400px 0px 200px;
-    padding: 20px 20px 20px 20px;
-    width: 600px;
-    max-width: 700px !important;
-    background-color: #FAFAFA !important;
-    box-shadow: 0px 0px 15px #888;
-    line-height: 140% !important;
-    /*text-align: justify;*/
-    font-size: 105%;
-    min-height: 650px;
-    z-index: 100;
+#next_obj_wrapper {
+    right: 17%;   
 }
-#obj_text {
-    vertical-align:middle;
-}
-#next_obj_wrapper, #prev_obj_wrapper, #next_page_wrapper, #prev_page_wrapper {
+#next_obj_wrapper, #prev_obj_wrapper {
     position: absolute;
 }
 #t_o_c_button {
@@ -78,6 +63,69 @@
     float: left;
     margin-left: -25px;
 }
+#book_page {
+    margin: 0 auto;
+    padding: 20px 20px 20px 20px;
+    background-color: #FAFAFA !important;
+    box-shadow: 0px 0px 15px #888;
+    line-height: 140% !important;
+    font-size: 105%;
+    min-height: 650px;
+    z-index: 100;
+}
+@media (min-width: 1230px) {
+    #book_page {
+        width: 700px;
+    }
+}
+@media (max-width: 1230px) and (min-width: 1130px) {
+    #book_page {
+        width: 600px;
+    }
+    #prev_obj {
+        left: 18.5%;
+    }
+    #next_obj_wrapper {
+        right: 18.5%;   
+    }
+}
+@media (max-width: 1130px) and (min-width: 1040px) {
+    #book_page {
+        width: 530px;
+    }
+    #prev_obj {
+        left: 19%;
+    }
+    #next_obj_wrapper {
+        right: 19%;
+    }
+}
+@media (max-width: 1040px) and (min-width: 910px) {
+    #book_page {
+        width: 460px;
+    }
+    #prev_obj {
+        left: 19%;
+    }
+    #next_obj_wrapper {
+        right: 19%;
+    }
+}
+@media (max-width: 910px) {
+    #book_page {
+        width: 380px;
+    }
+    #prev_obj {
+        left: 20.5%;
+    }
+    #next_obj_wrapper {
+        right: 20.5%;
+    }
+}
+#obj_text {
+    vertical-align:middle;
+}
+
 
 /* Styling for theater */
 b.headword {

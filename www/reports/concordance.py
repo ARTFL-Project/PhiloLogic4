@@ -12,7 +12,7 @@ from functions.ObjectFormatter import format_concordance, format_strip, convert_
 from functions.FragmentParser import parse
 import json
 
-highlight_match = re.compile(r'<span class="highlight">[^<]*?(</span>)')
+highlight_match = re.compile(r'(<span class="highlight">[^<]*?</span>)')
 
 def concordance(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
@@ -28,22 +28,22 @@ def concordance(environ,start_response):
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
-                               f=f, path=path, results_per_page=q['results_per_page'],
+                               f=f, path=path, results_per_page=q['results_per_page'],javascript="concordance.js",
                                template_name="concordance.mako", report="concordance")
 
 def fetch_concordance(hit, path, q):
     ## Determine length of text needed
     byte_distance = hit.bytes[-1] - hit.bytes[0]
-    length = 750 + byte_distance + 750
+    length = 4750 + byte_distance + 4750
     
     bytes, byte_start = adjust_bytes(hit.bytes, length)
     conc_text = f.get_text(hit, byte_start, length, path)
     conc_text = format_strip(conc_text, bytes)
     conc_text = convert_entities(conc_text)
     start_highlight = conc_text.find('<span class="highlight"')
-    m = highlight_match.search(conc_text)
+    m = highlight_match.finditer(conc_text)
     if m:
-        end_highlight = m.end(len(m.groups()) - 1)
+        end_highlight = [i.end() for i in m][-1]
         count = 0
         for char in reversed(conc_text[:start_highlight]):
             count += 1

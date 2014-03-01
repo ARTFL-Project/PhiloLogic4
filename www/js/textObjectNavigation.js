@@ -7,24 +7,10 @@ $(document).ready(function() {
     // jQueryUI theming
     $('#show_table_of_contents').button();
     
-    adjustPageWidth(),
     $(window).resize(function() {
-        adjustPageWidth();
         window_height = $(window).height();
-    })
-
-    // Change pages
-    $("#fake_prev_page, #fake_next_page").on('click', function() {
-        var direction = $(this).attr('class');
-        var page_count = $("#obj_text").children('div').size();
-        var visible = $("#obj_text").children("div:visible")
-        if (direction == "fake_prev_page") {
-            $("#obj_text").children().filter("div:visible").hide().prev().fadeIn('fast');
-        } else {
-            $("#obj_text").children().filter("div:visible").hide().next().fadeIn('fast');
-        }
     });
-    
+    //
     // This is to display the table of contents in the document viewer
     var db_url = db_locals['db_url'];
     if ($('#next_obj').length) {
@@ -37,12 +23,13 @@ $(document).ready(function() {
     var text = 'Click to see a full-sized version of this image';
     $('.plate_img').attr('title', text).tooltip({ position: { my: "left center", at: "right center" } });
     
-    var prev = $('#prev_and_toc');
+    var toc = $('#prev_and_toc');
+    var prev = $('#prev_obj');
     var next = $('#next_and_read');
     var top = next.offset().top - parseFloat(next.css('marginTop').replace(/auto/, 0));
     $(window).scroll(function() {
         latestKnownScrollY = window.pageYOffset;
-        follow_scroll(prev, next, top);
+        follow_scroll(toc, prev, next, top);
     });
     
     checkEndOfDoc();
@@ -61,33 +48,6 @@ $(document).ready(function() {
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-function adjustPageWidth() {
-    var window_width = $(window).width();
-    if (window_width < 1204) {
-        var right_margin = parseInt($("#book_page").css('margin-right')) - (1204 - window_width);
-        var adjusted_width = $("#book_page").width() - (window_width - 1204);
-        if (right_margin < 80) {
-            adjusted_width = 'auto';
-            right_margin = 80;
-        }
-        $('#book_page').css({'margin-left': '200px', 'margin-right': right_margin, 'width': adjusted_width});
-    } else {
-        var adjusted_width = window_width - 500;
-        if (adjusted_width > 700) {
-            adjusted_width = 700;  
-        }
-        $("#book_page").css({'margin': '0 auto', 'width': adjusted_width});
-    }
-    positionPrevNext();
-    $('#toc_container').css('width', $('#book_page').css('margin-left'));
-}
-
-function positionPrevNext() {
-    var page_pos = $('#book_page').offset().left - 25;
-    left_pos(page_pos);
-    right_pos();
-}
-
 function checkEndOfDoc() {
     if ($('#next_obj').data('philoId') == "") {
         $('#next_obj_wrapper').hide();
@@ -96,14 +56,16 @@ function checkEndOfDoc() {
     }
 }
 
-function follow_scroll(prev, next, top) {
+function follow_scroll(toc, prev, next, top) {
     if (latestKnownScrollY >= top) {
         next.css('position', 'fixed');
+        toc.css({'position': 'fixed', 'top': 0});
         prev.css({'position': 'fixed', 'top': 0});
     } else {
         // otherwise remove it
         next.css('position', 'static');
-        prev.css({'position': 'static', 'top': ''});
+        toc.css({'position': 'static', 'top': ''});
+        prev.css({'position': 'absolute', 'top': ''});
     }
     if (toc_open) {
         toc_height();
@@ -206,10 +168,13 @@ function retrieve_obj(db_url){
         var my_path = db_url.replace(/\/\d+.*$/, '/');
         var philo_id = $(this).data('philoId');
         var script = my_path + '/scripts/go_to_obj.py?philo_id=' + philo_id;
+        var width = $(window).width() / 2 - 100;
+        $("#waiting").css("margin-left", width).css('margin-top', 100).show();
         $.getJSON(script, function(data) {
             var scrollto_id = '#' + $("#obj_text").data('philoId');
             $('#toc_container').find($(scrollto_id)).attr('style', 'color: #990000;');
             $('#obj_text').fadeOut('fast', function() {
+                $("#waiting").fadeOut('fast');
                 $(this).html(data['text']).fadeIn('fast');
                 $('#footer').css('top', '');
                 $('#obj_text').data("philoId", philo_id.replace(/ /g, '_'));
@@ -274,7 +239,6 @@ function t_o_c_handler(db_url) {
         var max_height = footer_pos - position;
     }
     $('#toc_container').css('max-height', max_height);
-    $('#toc_container').css('width', text_position);
     var my_path = pathname.replace(/\/\d+.*$/, '/');
     var doc_id = pathname.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
     var philo_id = doc_id + ' 0 0 0 0 0 0'

@@ -1,7 +1,5 @@
 <%include file="header.mako"/>
 <%include file="search_form.mako"/>
-<script type="text/javascript" src="${db.locals['db_url']}/js/jquery.tagcloud.js"></script>
-<script type="text/javascript" src="${db.locals['db_url']}/js/collocation.js"></script>
 <script>
     var all_colloc = ${dumps(all_colloc)};
     var left_colloc = ${dumps(left_colloc)};

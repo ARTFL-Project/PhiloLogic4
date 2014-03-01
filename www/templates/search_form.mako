@@ -1,5 +1,4 @@
 ## -*- coding: utf-8 -*-
-<script type="text/javascript" src="${db.locals['db_url']}/js/searchForm.js"></script>
 <div id="form_body">
     <form id="search" action="${db.locals['db_url'] + "/dispatcher.py/"}">
         <div id="initial_form">
@@ -195,5 +194,5 @@
     </form>
 </div>
 <div id="waiting" style="display:none;z-index:99;position:absolute;">
-    <img src="${db.locals['db_url']}/js/ajax-loader.gif" alt="Loading..."/>
+    <img src="${db.locals['db_url']}/js/gif/ajax-loader.gif" alt="Loading..."/>
 </div>
