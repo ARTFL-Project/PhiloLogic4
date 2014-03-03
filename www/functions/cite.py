@@ -64,6 +64,14 @@ def make_abs_doc_cite(db,i):
         record += " %s" % i.doc.filename
     return record
 
+def make_abs_doc_cite_mobile(db, i):
+    """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
+    record = u"%s, <i><a data-id='%s' class='biblio_cite'>%s</a></i>" % (i.doc.author, ' '.join([str(j) for j in i.philo_id]),i.doc.title)
+    date = i.doc.date
+    if date:
+        record += " [%s]" % date
+    return record
+
 ### LINKING ###
 
 def hit_to_link(db,hit):

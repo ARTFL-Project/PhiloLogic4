@@ -9,6 +9,7 @@ from philologic.HitWrapper import ObjectWrapper
 from mako.template import Template
 import reports as r
 import functions as f
+import json
 
 obj_level = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4}
 
@@ -22,26 +23,41 @@ def get_table_of_contents(environ, start_response):
     path = path[:path.rfind("/data")]
     obj = ObjectWrapper(q['philo_id'].split(), db)
     results = r.navigate_doc(obj, db)
-    html = '<div id="table_of_contents" class="table_of_contents" style="display:block;">'
-    for i in results:
-        id = i.philo_id[:7]
-        link_id = '_'.join([str(j) for j in i.philo_id])
-        href = f.link.make_absolute_object_link(db,id)
-        head_or_type = i.head or "[%s]" % i.type
-        html += "<span style=''>"
-        style = ""
-        if i.type == "div2":
-            #style += "padding-left: 15px;width:90%;"
-            space = '&nbsp&nbsp&nbsp<span class="ui-icon ui-icon-radio-on" style="display: inline-block;vertical-align:-3px;">&nbsp</span>'
-        elif i.type == "div3":
-            #style += "padding-left: 30px;width:80%;"
-            space = '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span class="ui-icon ui-icon-radio-off" style="display: inline-block;vertical-align:-3px;">&nbsp</span>'
-        else:
-            space = '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:-3px;">&nbsp</span>'
-        #html += spacing
-        html += space + '<a href="%s" id="%s">%s</a></span><br>' % (href, link_id, head_or_type)
-    html += "</div>"
-    yield html.encode('utf-8', 'ignore')
+    if q['format'] == "json":
+        html = ''
+        for i in results:
+            id = i.philo_id[:7]
+            link_id = '_'.join([str(j) for j in i.philo_id])
+            href = f.link.make_absolute_object_link(db,id)
+            head_or_type = i.head or "[%s]" % i.type
+            html += "<span>"
+            style = ""
+            if i.type == "div2":
+                space = '&nbsp&nbsp&nbsp'
+            elif i.type == "div3":
+                space = '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'
+            else:
+                space = ''
+            html += space + '<a href="%s" id="%s" style="text-decoration: none;">%s</a></span><br>' % (href, link_id, head_or_type)
+        yield json.dumps(html)
+    else:
+        html = '<div id="table_of_contents" class="table_of_contents" style="display:block;">'
+        for i in results:
+            id = i.philo_id[:7]
+            link_id = '_'.join([str(j) for j in i.philo_id])
+            href = f.link.make_absolute_object_link(db,id)
+            head_or_type = i.head or "[%s]" % i.type
+            html += "<span style=''>"
+            style = ""
+            if i.type == "div2":
+                space = '&nbsp&nbsp&nbsp<span class="ui-icon ui-icon-radio-on" style="display: inline-block;vertical-align:-3px;">&nbsp</span>'
+            elif i.type == "div3":
+                space = '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span class="ui-icon ui-icon-radio-off" style="display: inline-block;vertical-align:-3px;">&nbsp</span>'
+            else:
+                space = '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:-3px;">&nbsp</span>'
+            html += space + '<a href="%s" id="%s">%s</a></span><br>' % (href, link_id, head_or_type)
+        html += "</div>"
+        yield html.encode('utf-8', 'ignore')
     
 if __name__ == "__main__":
     CGIHandler().run(get_table_of_contents)
