@@ -128,9 +128,25 @@
 
 
 /* Styling for theater */
+castitem::after {
+    content:"\A";
+    white-space:pre;
+}
+castlist>castitem:first-of-type::before {
+    content:"\A";
+    white-space:pre;
+}
+castgroup::before {
+    content:"\A";
+    white-space:pre;
+}
 b.headword {
     font-weight: 700 !important;
     font-size: 130%;
+}
+b.headword::before {
+    content:"\A";
+    white-space:pre;
 }
 lb {
     display: block;
@@ -143,6 +159,9 @@ ab::before {
     content:"\A";
     white-space:pre;
 }
+sp {
+    display: block;
+}
 sp::before {
     content:"\A";
     white-space:pre;
@@ -150,13 +169,17 @@ sp::before {
 fw, join {
     display: none;
 }
-stage::before, stage::after {
+stage::before {
     content:"\A";
     white-space:pre;
 }
-speaker+stage::before,  speaker+stage::after, sp stage::before {
+speaker+stage::before {
     content: "";
     white-space: normal;
+}
+ab+stage::before {
+    content:"\A";
+    white-space:pre;
 }
 stage {
     font-style: italic;
@@ -164,6 +187,9 @@ stage {
 div1 div2::before {
     content:"\A";
     white-space:pre;
+}
+speaker {
+    font-weight: 700;
 }
 
 #image_container {
