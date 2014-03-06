@@ -31,10 +31,10 @@ def concordance(environ,start_response):
                                f=f, path=path, results_per_page=q['results_per_page'],javascript="concordance.js",
                                template_name="concordance.mako", report="concordance")
 
-def fetch_concordance(hit, path, q):
+def fetch_concordance(hit, path, q, context_size=5000):
     ## Determine length of text needed
     byte_distance = hit.bytes[-1] - hit.bytes[0]
-    length = 4750 + byte_distance + 4750
+    length = context_size + byte_distance + context_size
     
     bytes, byte_start = adjust_bytes(hit.bytes, length)
     conc_text = f.get_text(hit, byte_start, length, path)
@@ -47,13 +47,13 @@ def fetch_concordance(hit, path, q):
         count = 0
         for char in reversed(conc_text[:start_highlight]):
             count += 1
-            if count > 100 and char == ' ':
+            if count > (context_size/10) and char == ' ':
                 break
         begin = start_highlight - count
         end = 0
         for char in conc_text[end_highlight:]:
             end += 1
-            if end > 200 and char == ' ':
+            if end > (context_size/5) and char == ' ':
                 break
         end += end_highlight
         first_span = '<span class="begin_concordance" style="display:none;">'

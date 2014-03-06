@@ -17,7 +17,7 @@ def bibliography(environ, start_response):
         if q["group_by_author"]:
             formatted_results = group_by_author(hits, db)
         else:
-            formatted_results = [{"citation": f.cite.make_abs_div_cite(db,i)} for i in hits]
+            formatted_results = [{"citation": f.cite.make_abs_doc_cite_mobile(db,i)} for i in hits]
         return json.dumps(formatted_results)
     else:
         return fetch_bibliography(f,path, db, dbname,q,environ)

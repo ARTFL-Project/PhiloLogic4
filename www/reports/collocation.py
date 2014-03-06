@@ -47,13 +47,16 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
     if word_filter:
         if stopwords:
             filter_list_path = path + '/data/stopwords.txt'
-            filter_words_file = open(filter_list_path)
-            line_count = 0
-            filter_num = float("inf")
+            if os.path.isfile(filter_list_path):
+                filter_words_file = open(filter_list_path)
+                filter_num = float("inf")
+            else:
+                filter_list_path = path + '/data/frequencies/word_frequencies'
+                filter_words_file = open(filter_list_path)
         else:
             filter_list_path = path + '/data/frequencies/word_frequencies'
             filter_words_file = open(filter_list_path)
-            line_count = 0 
+        line_count = 0 
         for line in filter_words_file:
             line_count += 1
             word = line.split()[0]
