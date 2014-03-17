@@ -191,6 +191,9 @@ div1 div2::before {
 speaker {
     font-weight: 700;
 }
+l, s {
+    display: block;
+}
 
 #image_container {
     position: absolute;

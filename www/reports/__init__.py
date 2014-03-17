@@ -1,4 +1,4 @@
-from concordance import concordance
+from concordance import concordance, fetch_concordance
 from frequency import frequency, generate_frequency
 from kwic import kwic
 from collocation import collocation, fetch_collocation

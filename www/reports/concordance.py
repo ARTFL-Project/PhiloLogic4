@@ -8,11 +8,9 @@ import re
 from functions.wsgi_handler import wsgi_response
 from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
-from functions.ObjectFormatter import format_concordance, format_strip, convert_entities, adjust_bytes
+from functions.ObjectFormatter import format_concordance, convert_entities, adjust_bytes
 from functions.FragmentParser import parse
 import json
-
-highlight_match = re.compile(r'(<span class="highlight">[^<]*?</span>)')
 
 def concordance(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
@@ -31,33 +29,13 @@ def concordance(environ,start_response):
                                f=f, path=path, results_per_page=q['results_per_page'],javascript="concordance.js",
                                template_name="concordance.mako", report="concordance")
 
-def fetch_concordance(hit, path, q, context_size=5000):
+def fetch_concordance(hit, path, q, context_size=1500):
     ## Determine length of text needed
     byte_distance = hit.bytes[-1] - hit.bytes[0]
     length = context_size + byte_distance + context_size
-    
     bytes, byte_start = adjust_bytes(hit.bytes, length)
     conc_text = f.get_text(hit, byte_start, length, path)
-    conc_text = format_strip(conc_text, bytes)
+    conc_text = format_concordance(conc_text, bytes)
     conc_text = convert_entities(conc_text)
-    start_highlight = conc_text.find('<span class="highlight"')
-    m = highlight_match.finditer(conc_text)
-    if m:
-        end_highlight = [i.end() for i in m][-1]
-        count = 0
-        for char in reversed(conc_text[:start_highlight]):
-            count += 1
-            if count > (context_size/10) and char == ' ':
-                break
-        begin = start_highlight - count
-        end = 0
-        for char in conc_text[end_highlight:]:
-            end += 1
-            if end > (context_size/5) and char == ' ':
-                break
-        end += end_highlight
-        first_span = '<span class="begin_concordance" style="display:none;">'
-        second_span = '<span class="end_concordance" style="display:none;">'
-        conc_text =  first_span + conc_text[:begin] + '</span>' + conc_text[begin:end] + second_span + conc_text[end:] + '</span>'
         
     return conc_text

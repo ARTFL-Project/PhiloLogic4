@@ -9,7 +9,7 @@ $(document).ready(function() {
     var q_string = window.location.search.substr(1);
     concordance_kwic_switch(db_url);
     back_forward_button_concordance_reload();
-    more_context();
+    //more_context();
     sidebar_reports(q_string, db_url, pathname);
     if ($('#kwic_concordance').length) {
         var config = {    
@@ -37,6 +37,11 @@ $(document).ready(function() {
                 }).fadeIn('fast');
             });
         }
+    });
+    
+    // Fetch more context for concordances after page load
+    $(window).load(function() {
+       fetchMoreContext(); 
     });
     
 });

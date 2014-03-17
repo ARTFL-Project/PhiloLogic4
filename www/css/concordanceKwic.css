@@ -149,3 +149,15 @@
     background-color: #EBEBEB;
     color: black;
 }
+
+/* Concordance styling for theater */
+speaker {
+    font-weight: 700;
+}
+/*speaker {
+    content: "\A";
+    white-space: pre;
+}*/
+l, ab {
+    display: block;
+}
