@@ -53,16 +53,6 @@
     padding-left: 8px;
     border-left: double 3px darkgray;
 }
-/*.cite_separation {
-    color: darkgray;
-    margin-left: 8px;
-    margin-right: 8px;
-    padding-left: 1px;
-    padding-right: 1px;
-    font-weight: 300 !important;
-    border-left: solid 1px darkgray;
-    border-right: solid 1px darkgray;
-}*/
 .citation {
     padding-top: 5px;
     margin-top: -7px;
@@ -154,10 +144,12 @@
 speaker {
     font-weight: 700;
 }
-/*speaker {
-    content: "\A";
-    white-space: pre;
-}*/
+sp {
+    display: block;
+}
 l, ab {
     display: block;
+}
+sp+l, sp+ab {
+    display: inline;
 }

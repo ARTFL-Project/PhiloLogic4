@@ -11,10 +11,12 @@
             ${f.cite.make_abs_div_cite(db,i)}
         </span>
         <span class="more_context_and_close">
-            <span class="more_context">More</span>
+            <span class="more_context" style="color:lightGray;">More</span>
         </span>
     </div>
-     <div class='philologic_context'>${fetch_concordance(i, path, q)}</div>
+     <div class='philologic_context'>
+        <div class="default_length">${fetch_concordance(i, path, q)}</div>
+    </div>
    </li>
   % endfor
 </ol>

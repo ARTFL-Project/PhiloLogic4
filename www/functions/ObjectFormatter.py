@@ -115,11 +115,11 @@ def format_concordance(text,bytes=[]):
         text = new_text + text[last_offset:]
     xml = FragmentParser.parse(text)
     length = 0
-    allowed_tags = set(['philoHighlight', 'l', 'ab', 'w', 'speaker', 'i', 'sc', 'scx'])
+    allowed_tags = set(['philoHighlight', 'l', 'ab', 'w', 'sp', 'speaker', 'i', 'sc', 'scx'])
     text = u''
     for el in xml.iter():
         if el.tag not in allowed_tags:
-            el.tag = 'notag'
+            el.tag = 'span'
         if el.tag == "sc" or el.tag == "scx":
             el.tag = "span"
             el.attrib["class"] = "small-caps"
@@ -140,8 +140,7 @@ def format_concordance(text,bytes=[]):
 
 def format_strip(text,bytes=[], chars=40, concordance_report=False):
     """Remove formatting to for HTML rendering
-    Called from: -concordance.py
-                 -kwic.py
+    Called from: -kwic.py
                  -relevance.py
                  -frequency.py"""
     removed_from_start = 0
@@ -175,22 +174,6 @@ def format_strip(text,bytes=[], chars=40, concordance_report=False):
     ## remove spaces around hyphens and apostrophes
     output = space_match.sub('\\1', output)
     return output
-
-def clean_tags_for_concordance(element):
-    """This function allows for specific tags to go through"""
-    allowed_tags = set(['l', 'ab', 'speaker', 'i'])
-    text = u''
-    for child in element:
-        text += clean_tags_for_concordance(child)
-    if element.tag == "philoHighlight":
-        word_match = term_match.match(element.tail)
-        if word_match:
-            return '<span class="highlight">' + element.text + text + element.tail[:word_match.end()] + "</span>" + element.tail[word_match.end():]
-        text = element.text + text + element.tail
-        return '<span class="highlight">' + element.text + text + "</span>" + element.tail
-    if element.tag in allowed_tags:
-        return '<%s>' % element.tag + element.text + text + '</%s>' % element.tag + element.tail
-    return element.text + text + element.tail
 
 def clean_tags(element):
     text = u''
