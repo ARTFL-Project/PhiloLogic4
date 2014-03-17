@@ -189,14 +189,15 @@ def query_lowlevel(db,param_dict):
         for v in values:
             parsed = parse_query(v)            
             clause,some_vars = make_clause(column,parsed,norm_path)
+#            print >> sys.stderr, "METADATA_QUERY:",clause,some_vars
             clauses.append(clause)
             vars += some_vars
     if clauses:
-        query = "SELECT philo_id FROM toms WHERE " + " AND ".join("(%s)" % c for c in clauses) + ";"
+        query = "SELECT philo_id FROM toms WHERE " + " AND ".join("(%s)" % c for c in clauses) + " order by rowid;"
     else:
-        query = "SELECT philo_id FROM toms;"
+        query = "SELECT philo_id FROM toms order by rowid;"
 #    vars = [v.decode("utf-8") for v in vars]
-    #print >> sys.stderr, "%s %% %s" % (query,vars)
+    #print >> sys.stderr, "INNER QUERY: ", "%s %% %s" % (query,vars)
     #for v in vars:
     #    print >> sys.stderr, "%s : %s" % (type(v),repr(v))
 
@@ -229,11 +230,13 @@ def query_recursive(db,param_dict,parent):
 def metadata_query(db,filename,param_dicts):
 #    print >> sys.stderr, "metadata_query:",param_dicts
     prev = None
+    #print >> sys.stderr, "METADATA_HITLIST: ",filename, param_dicts
     for d in param_dicts:
         query = query_recursive(db,d,prev)
         prev = query
     corpus_fh = open(filename,"wb")
     for corpus_obj in query:
+        #print >> sys.stderr, corpus_obj,
         obj_id = [int(x) for x in corpus_obj["philo_id"].split(" ")]
         corpus_fh.write(struct.pack("=7i",*obj_id))
     corpus_fh.close()
