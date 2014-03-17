@@ -90,7 +90,7 @@ def format_parsed_query(parsed_split,db):
         prior_label = label
 #        print clauses
 #        print "\n".join("\n".join(c for c in clause) for clause in clauses) 
-    #print >> sys.stderr, command
+#    print >> sys.stderr, "COMMAND", command
     return command
 
 def format_query(qstring,db):
