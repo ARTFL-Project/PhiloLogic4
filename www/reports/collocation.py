@@ -43,7 +43,7 @@ def fetch_collocation(results, path, q, db, length=2500, word_filter=True, filte
     within_x_words = q['word_num']    
     
     ## set up filtering with stopwords or 100 most frequent terms ##
-    filter_list = set([])
+    filter_list = set([q['q']])
     if word_filter:
         if stopwords:
             filter_list_path = path + '/data/stopwords.txt'

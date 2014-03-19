@@ -41,14 +41,14 @@ def concordance_from_collocation(environ,start_response):
                                f=f,path=path, results_per_page=q['results_per_page'], javascript="concordanceFromCollocation.js",
                                report="concordance_from_collocation",template_name="concordance_from_collocation.mako")
         
-def fetch_colloc_concordance(results, path, q, db, word_filter=True, filter_num=100, stopwords=True):
+def fetch_colloc_concordance(results, path, q, db, length=2500, word_filter=True, filter_num=100, stopwords=True):
     within_x_words = q['word_num']
     direction = q['direction']
     collocate = unicodedata.normalize('NFC', q['collocate'].decode('utf-8', 'ignore'))
     collocate_num = q['collocate_num']
     
    ## set up filtering with stopwords or 100 most frequent terms ##
-    filter_list = set([])
+    filter_list = set([q['q']])
     if word_filter:
         if stopwords:
             filter_list_path = path + '/data/stopwords.txt'
@@ -69,8 +69,8 @@ def fetch_colloc_concordance(results, path, q, db, word_filter=True, filter_num=
     new_hitlist = []
     for hit in results:
         ## get my chunk of text ##
-        bytes, byte_start = adjust_bytes(hit.bytes, 400)
-        conc_text = f.get_text(hit, byte_start, 400, path)
+        bytes, byte_start = adjust_bytes(hit.bytes, length)
+        conc_text = f.get_text(hit, byte_start, length, path)
         
         ## Isolate left and right concordances
         conc_left = convert_entities(conc_text[:bytes[0]].decode('utf-8', 'ignore'))
@@ -102,14 +102,18 @@ def fetch_colloc_concordance(results, path, q, db, word_filter=True, filter_num=
 
 def colloc_concordance(hit, path, q, db):
     conc_text = fetch_concordance(hit, path, q)
-    split_text = token_regex.split(conc_text)
-    keep_text = []
-    for w in split_text:
-        if w:
-            if w.lower() == q['collocate'].decode('utf-8', 'ignore'):
-                w = '<span class="collocate">%s</span>' % w
-            keep_text.append(w)
-    conc_text = ''.join(keep_text)
+    #split_text = token_regex.split(conc_text)
+    #keep_text = []
+    #for w in split_text:
+    #    if w:
+    #        if w.lower() == q['collocate'].decode('utf-8', 'ignore'):
+    #            w = '<span class="collocate">%s</span>' % w
+    #        keep_text.append(w)
+    
+    #conc_text = ''.join(keep_text)
+    collocate = q['collocate'].decode('utf-8', 'ignore')
+    collocate_match = re.compile(r'(.*\W)(%s)(\W.*)' % collocate, flags=re.U|re.I)
+    conc_text = collocate_match.sub(r'\1<span class="collocate">\2</span>\3', conc_text)
     return conc_text  
     
 class collocation_hitlist(object):
