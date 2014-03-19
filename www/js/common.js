@@ -438,25 +438,38 @@ function hideSearchForm() {
 
 
 // Show more context in concordance and concordance from collocation searches
-function more_context() {
-    $(".more_context").click(function() {
-        var context_link = $(this).text();
-        $(this).parents().siblings('.philologic_context').fadeOut(100, function() {
-            if (context_link == 'More') {
-                $(this).children('.begin_concordance').show();
-                $(this).children('.end_concordance').show();
-                $(this).prev('div').find('.ui-button-text').empty().fadeIn(100).append('Less');
-            } 
-            else {
-                $(this).children('.begin_concordance').hide();
-                $(this).children('.end_concordance').hide();
-                $(this).prev('div').find('.ui-button-text').empty().fadeIn(100).append('More');
-            }
-        }).fadeIn(100);
+function fetchMoreContext() {
+    var db_url = db_locals['db_url'];
+    var q_string = window.location.search.substr(1);
+    var script = db_url + '/scripts/get_more_context.py?' + q_string;
+    $.getJSON(script, function(data) {
+        for (var i=0; i < data.length; i++) {
+            var more = '<div class="more_length" style="display:none;"' + data[i] + '</div>';
+            $('.philologic_context').eq(i).append(more);
+        }
+        moreContext();
+        $('.more_context').animate({color: '#555 !important'},400);
     });
 }
 
-
+function moreContext() {
+    $(".more_context").click(function() {
+        var context_link = $(this).text();
+        var more_context = $(this);
+        var parent_div = $(this).parents().siblings('.philologic_context')
+        if (context_link == 'More') {
+            parent_div.children('.default_length').fadeOut(100, function() {
+                parent_div.children('.more_length').fadeIn(100);
+            });
+            parent_div.prev('div').find('.ui-button-text').empty().fadeIn(100).append('Less');
+        } else {
+            parent_div.children('.more_length').fadeOut(100, function() {
+                parent_div.children('.default_length').show();
+            });
+            parent_div.prev('div').find('.ui-button-text').empty().fadeIn(100).append('More');
+        }
+    });
+}
 
 /// Contextual menu when selecting a word in the text /////
 function display_options_on_selected() {

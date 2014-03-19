@@ -39,11 +39,11 @@ def collocation(environ,start_response):
                            hit_len=hit_len, order=sort_to_display,dumps=json.dumps,javascript="collocation.js",
                            template_name='collocation.mako', report="collocation")
 
-def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True, stopwords=True):
+def fetch_collocation(results, path, q, db, length=2500, word_filter=True, filter_num=100, full_report=True, stopwords=True):
     within_x_words = q['word_num']    
     
     ## set up filtering with stopwords or 100 most frequent terms ##
-    filter_list = set([])
+    filter_list = set([q['q']])
     if word_filter:
         if stopwords:
             filter_list_path = path + '/data/stopwords.txt'
@@ -71,8 +71,8 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
     
     count = 0
     for hit in results[q['interval_start']:q['interval_end']]:
-        bytes, byte_start = adjust_bytes(hit.bytes, 400)
-        conc_text = f.get_text(hit, byte_start, 400, path)
+        bytes, byte_start = adjust_bytes(hit.bytes, length)
+        conc_text = f.get_text(hit, byte_start, length, path)
         
         ## Isolate left and right concordances
         conc_left = convert_entities(conc_text[:bytes[0]].decode('utf-8', 'ignore'))
