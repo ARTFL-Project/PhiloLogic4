@@ -6,9 +6,8 @@ from frantext_preproc import make_load_metadata
 from philologic.LoadFilters import *
 from philologic.PostFilters import *
 from philologic.Parser import Parser
-from philologic.ParserHelpers import *
 from philologic.Loader import Loader, handle_command_line, setup_db_dir
-import SingleParser
+
 
 ## Flush buffer output
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
@@ -36,7 +35,7 @@ if database_root is None or url_root is None:
     print >> sys.stderr, "Please configure the loader script before use.  See INSTALLING in your PhiloLogic distribution."
     exit()
 
-template_dir = "/disk1/PhiloLogic4/www/"
+template_dir = database_root + "_system_dir/_install_dir/"
 # The load process will fail if you haven't set up the template_dir at the correct location.
 
 # Define default object level
@@ -46,11 +45,10 @@ default_object_level = 'doc'
 navigable_objects = ('doc', 'div1', 'div2', 'div3')
 
 # Data tables to store.
-tables = ['words', 'toms', 'pages']
-#tables = ['toms','pages']
+tables = ['toms', 'pages']
 
 # Define filters as a list of functions to call, either those in Loader or outside
-filters = [normalize_unicode_raw_words,generate_words_sorted,make_object_ancestors(*navigable_objects),
+filters = [normalize_unicode_raw_words,make_word_counts,generate_words_sorted,make_object_ancestors(*navigable_objects),
            make_sorted_toms(*navigable_objects),prev_next_obj,generate_pages, make_max_id]
 post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]
 
@@ -126,15 +124,11 @@ l = Loader(data_destination,
            suppress_tags=suppress_tags,
            token_regex=token_regex,
            default_object_level=default_object_level,
-           debug=debug,
-           parser_factory = SingleParser.Parser)
+           debug=debug)
 
 l.add_files(files)
 filenames = l.list_files()
-print filenames
 load_metadata = make_load_metadata(filenames,l.textdir)
-for f in load_metadata:
-    print f["filename"],f["create_date"]
 l.parse_files(workers,load_metadata)
 l.merge_objects()
 l.analyze()

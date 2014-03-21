@@ -73,7 +73,7 @@ class Parser(object):
 
     def parse(self,input):
         """Top level function for reading a file and printing out the output."""
-        print >> sys.stderr, "SingleParser parsing"
+        #print >> sys.stderr, "SingleParser parsing"
         self.input = input
         lexer = ExpatWrapper(self)
         return lexer.parse(self.input)
