@@ -100,17 +100,8 @@ def fetch_colloc_concordance(results, path, q, db, length=2500, word_filter=True
     h = collocation_hitlist(new_hitlist, collocate_num)
     return h
 
-def colloc_concordance(hit, path, q, db):
-    conc_text = fetch_concordance(hit, path, q)
-    #split_text = token_regex.split(conc_text)
-    #keep_text = []
-    #for w in split_text:
-    #    if w:
-    #        if w.lower() == q['collocate'].decode('utf-8', 'ignore'):
-    #            w = '<span class="collocate">%s</span>' % w
-    #        keep_text.append(w)
-    
-    #conc_text = ''.join(keep_text)
+def colloc_concordance(hit, path, q, context_size):
+    conc_text = fetch_concordance(hit, path, context_size)
     collocate = q['collocate'].decode('utf-8', 'ignore')
     collocate_match = re.compile(r'(.*\W)(%s)(\W.*)' % collocate, flags=re.U|re.I)
     conc_text = collocate_match.sub(r'\1<span class="collocate">\2</span>\3', conc_text)

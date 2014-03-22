@@ -41,7 +41,7 @@
                         <div style="padding-left:5px;"><b>At least ${i.collocate_num} occurences of collocate in hit</b></div>
                     % endif
                     <div class='philologic_context'>
-                        <div class="default_length">${colloc_concordance(i, path, q, db)}</div>
+                        <div class="default_length">${colloc_concordance(i, path, q, db.locals['concordance_length'])}</div>
                     </div>
                 </li>
             % endfor

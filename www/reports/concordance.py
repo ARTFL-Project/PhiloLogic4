@@ -12,6 +12,8 @@ from functions.ObjectFormatter import format_concordance, convert_entities, adju
 from functions.FragmentParser import parse
 import json
 
+strip_start_punctuation = re.compile("^[,?;.:!']")
+
 def concordance(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
@@ -19,7 +21,7 @@ def concordance(environ,start_response):
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
         formatted_results = [{"citation": f.cite.make_abs_div_cite(db,i),
-                              "text": fetch_concordance(i, path, db)} for i in hits[start - 1:end]]
+                              "text": fetch_concordance(i, path, db.locals["concordance_length"])} for i in hits[start - 1:end]]
         return json.dumps(formatted_results)
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
@@ -29,7 +31,7 @@ def concordance(environ,start_response):
                                f=f, path=path, results_per_page=q['results_per_page'],javascript="concordance.js",
                                template_name="concordance.mako", report="concordance")
 
-def fetch_concordance(hit, path, q, context_size=1500):
+def fetch_concordance(hit, path, context_size):
     ## Determine length of text needed
     byte_distance = hit.bytes[-1] - hit.bytes[0]
     length = context_size + byte_distance + context_size
@@ -37,5 +39,5 @@ def fetch_concordance(hit, path, q, context_size=1500):
     conc_text = f.get_text(hit, byte_start, length, path)
     conc_text = format_concordance(conc_text, bytes)
     conc_text = convert_entities(conc_text)
-        
+    conc_text = strip_start_punctuation.sub("", conc_text)
     return conc_text

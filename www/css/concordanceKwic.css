@@ -153,3 +153,6 @@ l, ab {
 sp+l, sp+ab {
     display: inline;
 }
+stage {
+    font-style: italic;
+}

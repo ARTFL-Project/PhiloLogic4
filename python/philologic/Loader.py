@@ -375,6 +375,7 @@ class Loader(object):
         print >> db_locals, "db_path = '%s'" % self.destination
         print >> db_locals, "normalized_fields = %s" % self.normalized_fields
         print >> db_locals, "debug = %s" % self.debug
+        print >> db_locals, "concordance_length = 600"
         for k,v in extra_locals.items():
             print >> db_locals, "%s = %s" % (k,repr(v))
 
