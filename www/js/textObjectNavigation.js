@@ -61,11 +61,13 @@ function follow_scroll(toc, prev, next, top) {
         next.css('position', 'fixed');
         toc.css({'position': 'fixed', 'top': 0});
         prev.css({'position': 'fixed', 'top': 0});
+        $('#toc_container').css({'margin-left': ''});
     } else {
         // otherwise remove it
         next.css('position', 'static');
         toc.css({'position': 'static', 'top': ''});
         prev.css({'position': 'absolute', 'top': ''});
+        $('#toc_container').css({'margin-left': '-25px'});
     }
     if (toc_open) {
         toc_height();
@@ -245,8 +247,7 @@ function t_o_c_handler(db_url) {
     var script = my_path + '/scripts/get_table_of_contents.py?philo_id=' + philo_id;
     $('#t_b_c_box').attr('style', 'color: LightGray;');
     $.get(script, function(data) {
-        $('#toc_container').css('position', 'absolute');
-        $('#toc_container').hide().css('margin-left', '-700px').html(data).show();
+        $('#toc_container').html(data);
         $('#t_b_c_box').animate({color: '#555 !important'},400, function() {
             $("#show_table_of_contents").click(function() {
                 toc_height();
@@ -262,18 +263,15 @@ function show_hide_toc(top_right) {
     var scrollto_id = '#' + $("#obj_text").data('philoId');
     if ($("#t_b_c_box").text() == "Table of contents") {
         $("#t_b_c_box").html("Hide table of contents");
-        $('#toc_container').animate({
-            'margin-left': '-30px'
-            }, 450
-            );
+        $('#toc_container').css('left', '-3%');
         $('#toc_container').scrollTo($(scrollto_id), 500);
         $('#toc_container').find($(scrollto_id)).css('color', 'black');
         $(scrollto_id).delay(500).animate({backgroundColor: '#ffdb9e'}, 300).animate({backgroundColor: ''}, 300);
     } else {
-        $("#t_b_c_box").html("Table of contents");
-        $('#toc_container').animate({
-                'margin-left': '-700px'
-        }, 450);
+        $('#toc_container').css('left', '-315px');
         $('#show_table_of_contents').button('refresh');
+        setTimeout(function() {     // Avoid weird effect on toc_container
+            $("#t_b_c_box").html("Table of contents");
+        }, 100);
     }
 }

@@ -14,15 +14,40 @@
     margin-bottom: 20px;
     text-align: center;
 }
-#table_of_contents {
-    border-top: solid 1px #ECECEC;
-    padding-top: 8px;
-    padding-left: 5px;
-    line-height: 170%;
-}
 #toc_container {
     overflow-y: auto;
-    margin-top: 40px;
+    margin-top: 20px;
+    margin-left: 10px;
+    padding: 10px;
+    left: -315px;
+    width: 250px;
+    position: absolute;
+    background: #FAFAFA !important;
+    box-shadow: 0px 0px 15px #888;
+    -moz-transition: left 400ms ease;
+    -webkit-transition: left 400ms ease;
+    -ms-transition: left 400ms ease;
+    transition: left 400ms ease;
+}
+#show_table_of_contents {
+    margin-left: -25px;
+    white-space: nowrap;
+}
+#table_of_contents {
+    line-height: 170%;
+}
+#table_of_contents a {
+    padding: 5px;
+    -moz-transition: background 350ms ease;
+    -webkit-transition: background 350ms ease;
+    -ms-transition: background 350ms ease;
+    transition: background 350ms ease;
+}
+#table_of_contents a:hover {
+    background: #DADADA !important;
+}
+#table_of_contents span {
+    display: inline-block;
 }
 #page_number, obj_nav {
     text-align: center;
@@ -51,17 +76,13 @@
 }
 #prev_and_toc {
     margin-top: 30px;
+    width: 100%;
 }
 #next_obj_wrapper {
     right: 17%;   
 }
 #next_obj_wrapper, #prev_obj_wrapper {
     position: absolute;
-}
-#t_o_c_button {
-    display: inline-block;
-    float: left;
-    margin-left: -25px;
 }
 #book_page {
     margin: 0 auto;
