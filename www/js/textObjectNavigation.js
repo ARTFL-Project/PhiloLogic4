@@ -123,7 +123,7 @@ function retrieveObj(db_url){
                 $("#waiting").fadeOut('fast');
                 $(this).html(data['text']).fadeIn('fast');
                 $('#footer').css('top', '');
-                $('#obj_text').data("philoId", philo_id.replace(/ /g, '_'));
+                $('#obj_text').data("philoId", philo_id);
                 $('#prev_obj').data('philoId', data['prev']);
                 $('#next_obj').data('philoId', data["next"]);
                 $("html, body").animate({ scrollTop: 0 }, "fast");
