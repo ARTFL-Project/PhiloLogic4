@@ -12,7 +12,10 @@ def compiled_template_permissions(source, output_path):
     fh.write(source)
     fh.close()
     py_compile.compile(output_path)
-    os.chmod(output_path, 0777)
+    try:
+        os.chmod(output_path, 0777)
+    except OSError:
+        pass
     os.chmod(output_path + 'c', 0777)
 
 template_path = os.getcwd() + '/templates/'

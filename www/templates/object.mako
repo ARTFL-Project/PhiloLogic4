@@ -24,7 +24,9 @@
             </div>
         </div>
         <div id="book_page">
-            <div id="obj_text" data-philo-id="${'_'.join([str(j) for j in obj.philo_id])}">${obj_text}</div>
+            <div id="prev_obj_text" data-philo-id="${prev}" style="display:none;"></div>
+            <div id="obj_text" data-philo-id="${' '.join([str(j) for j in obj.philo_id])}" data-prev="${prev}" data-next="${next}">${obj_text}</div>
+            <div id="next_obj_text" data-philo-id="${next}" style="display: none;"></div>
         </div>
     </div>
 </div>
