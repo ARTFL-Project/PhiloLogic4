@@ -117,7 +117,7 @@ function retrieveObj(db_url){
         var width = $(window).width() / 2 - 100;
         $("#waiting").css("margin-left", width).css('margin-top', 100).show();
         $.getJSON(script, function(data) {
-            var scrollto_id = '#' + $("#obj_text").data('philoId');
+            var scrollto_id = '#' + $("#obj_text").data('philoId').replace(/ /g, '_');
             $('#toc_container').find($(scrollto_id)).attr('style', 'color: #990000;');
             $('#obj_text').fadeOut('fast', function() {
                 $("#waiting").fadeOut('fast');
@@ -127,7 +127,7 @@ function retrieveObj(db_url){
                 $('#prev_obj').data('philoId', data['prev']);
                 $('#next_obj').data('philoId', data["next"]);
                 $("html, body").animate({ scrollTop: 0 }, "fast");
-                var scrollto_id = '#' + $("#obj_text").data('philoId');
+                var scrollto_id = '#' + $("#obj_text").data('philoId').replace(/ /g, '_');
                 if ($('#toc_container').find($(scrollto_id)).length) {
                     $('#toc_container').scrollTo($(scrollto_id), 500);
                     $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
