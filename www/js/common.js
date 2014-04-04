@@ -15,6 +15,7 @@ $(document).ready(function() {
     //// Search Form related code ////
     //////////////////////////////////
     
+    // Check if on a mobile device
     if (global_report == "landing_page" && isMobile()) {
         if (sessionStorage[window.location.href] == null) {
             var mobile_choice = '<div id="mobile_choice"><div style="margin-bottom:1em">Do you want to use the mobile version of PhiloLogic4?</div></div>';
@@ -75,10 +76,6 @@ $(document).ready(function() {
     
     ////////////////////////////////////////
     
-    
-    // Initialize important variables
-    var db_url = db_locals['db_url'];
-    var q_string = window.location.search.substr(1);
     
     // Display report tabs according to db.locals.py config
     for (i in db_locals['search_reports']) {
@@ -331,14 +328,12 @@ function showHide(value) {
     if (value == 'collocation') {
         $("#collocation_num, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
-        $('#metadata_fields').find('tr').has('#create_date').show();
         $('#colloc_question').show();
         $('#search_terms_container').slideDown(300);
     }
     if (value == 'kwic' || value == "concordance") {
         $("#results_per_page, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
-        $('#metadata_fields').find('tr').has('#create_date').show();
         $('#' + value + '_question').show();
         $('#start_date, #end_date').val('');
         $('#search_terms_container').slideDown(300);
@@ -350,10 +345,8 @@ function showHide(value) {
     if (value == "time_series") {
         $("#time_series_num, #year_interval, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').hide();
-        $('#metadata_fields').find('tr').has('#create_date').hide(); // Temporary hack for Frantext
         $('#time_question').show();
         $('#date').val('');
-        $('#create_date').val('');  // Temporary hack for Frantext
         $('#search_terms_container').slideDown(300);
     }
     if (value == "frequencies") {
@@ -371,18 +364,7 @@ function showMoreOptions(display) {
         showHide(report);
         $("#search_elements").css({'max-height': '614px', 'opacity': 100});
     }
-    $('#form_body').css('z-index', 99);
-    $("body").append("<div id='search_overlay'></div>");
-    var header_height = $('#header').height();
-    var footer_height = $('#footer').height();
-    var overlay_height = $(document).height() - header_height - footer_height;
-    $("#search_overlay")
-    .height(overlay_height)
-    .css({
-       'opacity' : 0.2,
-       'margin-top': header_height
-     });
-    //$("#search_overlay").fadeIn('fast');
+    $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2});
     $("#search_overlay, #header, #footer").click(function() {
         hideSearchForm();
     });
@@ -396,7 +378,6 @@ function hideSearchForm() {
     });
     $("#search_elements").css({'max-height': 0, 'opacity': 0});
     $("#search_overlay").css('opacity', 0);
-    setTimeout(function() {$("#search_overlay").remove();}, 300);
     $("#more_options").button('option', 'label', 'Show search options');
     $('#search_explain').fadeOut(300);
 }

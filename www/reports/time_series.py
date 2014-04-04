@@ -13,7 +13,7 @@ from operator import itemgetter
 import json
 import re
 
-sub_date = re.compile('create_date=[^&]*')
+sub_date = re.compile('date=[^&]*')
 
 def time_series(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
@@ -22,12 +22,12 @@ def time_series(environ,start_response):
         return bibliography(f,path, db, dbname,q,environ)
     else:
         if q['start_date']:
-            q['metadata']['create_date'] = '%s-' % q['start_date']
+            q['metadata']['date'] = '%s-' % q['start_date']
         if q['end_date']:
-            if 'create_date' in q['metadata']:
-                q['metadata']['create_date']+= '%s' % q['end_date']
+            if 'date' in q['metadata']:
+                q['metadata']['date']+= '%s' % q['end_date']
             else:
-                q['metadata']['create_date'] = '-%s' % q['end_date']
+                q['metadata']['date'] = '-%s' % q['end_date']
         
         results = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         frequencies, date_counts = generate_time_series(q, db, results)
@@ -50,7 +50,7 @@ def generate_time_series(q, db, results):
     if not q['interval_start']:
         q['interval_end'] = 10000  ## override defaults since this is faster than collocations
     for i in results[q['interval_start']:q['interval_end']]:
-        date = i.doc['create_date']
+        date = i.doc['date']
         try:
             if date != None:
                 date = int(date)
@@ -86,8 +86,8 @@ def date_total_count(date, db, interval):
         dates.append(date + 9)
     else:
         dates.append(date + 99)
-    #query = '''select count(*) from words where doc_ancestor in (select philo_id from toms where create_date between "%d" and "%d")''' % (tuple(dates))
-    query = 'select sum(word_count) from toms where create_date between "%d" and "%d"' % tuple(dates)
+    #query = '''select count(*) from words where doc_ancestor in (select philo_id from toms where date between "%d" and "%d")''' % (tuple(dates))
+    query = 'select sum(word_count) from toms where date between "%d" and "%d"' % tuple(dates)
     
     c = db.dbh.cursor()
     c.execute(query)

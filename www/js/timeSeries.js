@@ -194,7 +194,7 @@ function clickOnChart(interval) {
             }
         }
         var href = window.location.href.replace(/time_series/, 'concordance');
-        href = href.replace(/create_date=[^&]*/, 'create_date=' + year)
+        href = href.replace(/date=[^&]*/, 'date=' + year)
         window.location = href;
     });
 }
