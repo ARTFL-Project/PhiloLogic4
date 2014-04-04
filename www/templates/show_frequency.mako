@@ -8,7 +8,7 @@
     </ul>
     
     <ol id="frequency_field">
-        % for facet in db.locals["metadata_fields"]:
+        % for facet in db.locals["facets"]:
             <%
             if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
                 alias = db.locals["metadata_aliases"][facet]

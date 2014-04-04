@@ -20,7 +20,9 @@
     margin-left: -29px;
     padding: 10px;
     left: -315px;
-    width: 250px;
+    min-width: 200px;
+    white-space: nowrap;
+    max-width: 250px;
     position: absolute;
     background: #FAFAFA !important;
     box-shadow: 0px 0px 15px #888;
@@ -52,15 +54,6 @@
 #page_number, obj_nav {
     text-align: center;
     margin-bottom: 10px;
-}
-#obj_text {
-    /*height: auto;*/
-}
-#prev_obj_text, #obj_text, #next_obj_text {
-    /*-moz-transition: opacity 350ms ease;*/
-    /*-webkit-transition: opacity 350ms ease;*/
-    /*-ms-transition: opacity 350ms ease;*/
-    /*transition: opacity 350ms ease;*/
 }
 #prev_obj {
     position: absolute;
