@@ -364,7 +364,7 @@ function showMoreOptions(display) {
         showHide(report);
         $("#search_elements").css({'max-height': '614px', 'opacity': 100});
     }
-    $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2});
+    $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': '100%'});
     $("#search_overlay, #header, #footer").click(function() {
         hideSearchForm();
     });
@@ -377,7 +377,7 @@ function hideSearchForm() {
         active: false
     });
     $("#search_elements").css({'max-height': 0, 'opacity': 0});
-    $("#search_overlay").css('opacity', 0);
+    $("#search_overlay").css({'height': '0px', 'opacity': 0});
     $("#more_options").button('option', 'label', 'Show search options');
     $('#search_explain').fadeOut(300);
 }
