@@ -1,4 +1,5 @@
 ## -*- coding: utf-8 -*-
+<div id='search_overlay'></div>
 <div id="form_body">
     <form id="search" action="${db.locals['db_url'] + "/dispatcher.py/"}">
         <div id="initial_form">

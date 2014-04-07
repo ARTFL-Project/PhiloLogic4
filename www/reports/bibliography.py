@@ -13,12 +13,18 @@ def bibliography(environ, start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
     if q['format'] == "json":
+        wrapper = []
         hits = fetch_bibliography(f,path, db, dbname,q,environ)
         if q["group_by_author"]:
-            formatted_results = group_by_author(hits, db)
+            wrapper = group_by_author(hits, db)
         else:
-            formatted_results = [{"citation": f.cite.make_abs_doc_cite_mobile(db,i)} for i in hits]
-        return json.dumps(formatted_results)
+            for i in hits[0:100]:
+                full_metadata = {}
+                for metadata in db.locals['metadata_fields']:
+                    full_metadata[metadata] = i[metadata]
+                full_metadata['philo_id'] = ' '.join([str(j) for j in i.philo_id])
+                wrapper.append(full_metadata)
+        return json.dumps(wrapper)
     else:
         return fetch_bibliography(f,path, db, dbname,q,environ)
 
@@ -37,11 +43,13 @@ def group_by_author(hits, db, author="author"):
     object_level = db.locals['default_object_level']
     grouped_results = {}
     for hit in hits:
-        author_name = hit[object_level][author]
+        author_name = hit[object_level][author].strip()
+        if author_name == '':
+            author_name = "Anonymous"
         if author_name not in grouped_results:
             grouped_results[author_name] = []
         grouped_results[author_name].append({'title': hit[object_level]['title'], 'philo_id': hit[object_level].philo_id})
-    return grouped_results        
+    return sorted(grouped_results.iteritems(), key=lambda x: x[0])
     
     
 

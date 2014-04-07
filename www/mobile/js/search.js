@@ -22,8 +22,10 @@ $(document).ready(function() {
     // Load all titles from database
     $.getJSON("../dispatcher.py/?report=bibliography&format=json", function(data) {
         var html = '<ul data-role="listview" style="margin-top: .5em;">';
-        for (i in data) {
-            html += '<li>' + data[i].citation + '</li>';
+        data = data.slice(0,100);
+        for (var i=0; i < data.length; i++) {
+            citation = makeCitation(data[i]);
+            html += '<li>' + citation + '</li>';
         }
         html += '</ul>';
         $('#browse_title').append(html).find('ul').listview();
@@ -35,8 +37,9 @@ $(document).ready(function() {
         if ($('#browse_author').children().length == 0) {
             $.getJSON("../dispatcher.py/?report=bibliography&format=json&group_by_author=bibliography", function(data) {
                 var html = '<ul data-role="listview" data-autodividers="true" data-filter="true" style="margin-top: .5em;">';
-                for (i in data) {
-                    html += '<li data-philoid=' + data[i].philo_id + '>' + i + '</li>';
+                console.log(data)
+                for (var i=0; i < data.length; i++) {
+                    html += '<li>' + data[i][0] + ' (' + data[i][1].length + ')</li>';
                 }
                 html += '</ul>';
                 $('#browse_author').append(html).find('ul').listview();
@@ -100,14 +103,17 @@ $(document).ready(function() {
     });
 });
 
+function makeCitation(doc) {
+    var citation = doc.author + ', <i><a data-id="' + doc.philo_id + '" class="biblio_cite">' + doc.title + '</a></i>';
+    return citation;
+}
+
 function browseBibliography() {
     $('.biblio_cite').click(function() {
         var philo_id = $(this).data('id');
         var script = "../scripts/get_table_of_contents.py?format=json&philo_id=" + philo_id;
-        console.log(script)
         $.getJSON(script, function(data) {
             $('#toc_navigation').html(data);
-            console.log(data)
         });
         $.mobile.pageContainer.pagecontainer("change", $("#table_of_contents"), {transition: "slide"});
     })

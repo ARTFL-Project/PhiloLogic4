@@ -41,21 +41,21 @@ def get_table_of_contents(environ, start_response):
             html += space + '<a href="%s" id="%s" style="text-decoration: none;">%s</a></span><br>' % (href, link_id, head_or_type)
         yield json.dumps(html)
     else:
-        html = '<div id="table_of_contents" class="table_of_contents" style="display:block;">'
+        html = '<div id="table_of_contents" class="table_of_contents">'
         for i in results:
             id = i.philo_id[:7]
             link_id = '_'.join([str(j) for j in i.philo_id])
             href = f.link.make_absolute_object_link(db,id)
             head_or_type = i.head or "[%s]" % i.type
-            html += "<span style=''>"
+            html += '<span class="toc_link">'
             style = ""
             if i.type == "div2":
-                space = '&nbsp&nbsp&nbsp<span class="ui-icon ui-icon-radio-on" style="display: inline-block;vertical-align:-3px;">&nbsp</span>'
+                space = '<span class="ui-icon ui-icon-radio-on" style="float:left;position:relative;top:3px;margin-left: 1em;"></span>'
             elif i.type == "div3":
-                space = '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<span class="ui-icon ui-icon-radio-off" style="display: inline-block;vertical-align:-3px;">&nbsp</span>'
+                space = '<span class="ui-icon ui-icon-radio-off" style="float:left;top:3px;position:relative;margin-left: 2em;"></span>'
             else:
-                space = '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:-3px;">&nbsp</span>'
-            html += space + '<a href="%s" id="%s">%s</a></span><br>' % (href, link_id, head_or_type)
+                space = '<span class="ui-icon ui-icon-bullet" style="float:left;position:relative;top: 3px;"></span>'
+            html += space + '<a href="%s" id="%s">%s</a></span>' % (href, link_id, head_or_type)
         html += "</div>"
         yield html.encode('utf-8', 'ignore')
     

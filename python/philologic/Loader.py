@@ -372,6 +372,7 @@ class Loader(object):
         print >> db_locals, "metadata_fields = %s" % self.metadata_fields
         print >> db_locals, "metadata_hierarchy = %s" % self.metadata_hierarchy
         print >> db_locals, "metadata_types = %s" % self.metadata_types
+        print >> db_locals, "facets = %s" % self.metadata_fields
         print >> db_locals, "db_path = '%s'" % self.destination
         print >> db_locals, "normalized_fields = %s" % self.normalized_fields
         print >> db_locals, "debug = %s" % self.debug

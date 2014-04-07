@@ -8,13 +8,12 @@
         <div id="prev_obj_wrapper">
             <div id= "prev_and_toc">
                 <div id='prev_and_toc_button'>
-                    <div id='t_o_c_button'>
-                        <input type="checkbox" id="show_table_of_contents">
+                    <div id='show_table_of_contents'>
                         <label for="show_table_of_contents"><span id="t_b_c_box">Table of contents</span></label>
                     </div>
                 </div>
                 <div id="table_toggler">
-                    <div id="toc_container" style='float:left;'></div>
+                    <div id="toc_container"></div>
                 </div>
             </div>
         </div>
@@ -25,7 +24,9 @@
             </div>
         </div>
         <div id="book_page">
-            <div id="obj_text" data-philo-id="${'_'.join([str(j) for j in obj.philo_id])}">${obj_text}</div>
+            <div id="prev_obj_text" data-philo-id="${prev}" style="display:none;"></div>
+            <div id="obj_text" data-philo-id="${' '.join([str(j) for j in obj.philo_id])}" data-prev="${prev}" data-next="${next}">${obj_text}</div>
+            <div id="next_obj_text" data-philo-id="${next}" style="display: none;"></div>
         </div>
     </div>
 </div>

@@ -41,7 +41,8 @@ def concordance_from_collocation(environ,start_response):
                                f=f,path=path, results_per_page=q['results_per_page'], javascript="concordanceFromCollocation.js",
                                report="concordance_from_collocation",template_name="concordance_from_collocation.mako")
         
-def fetch_colloc_concordance(results, path, q, db, length=2500, word_filter=True, filter_num=100, stopwords=True):
+def fetch_colloc_concordance(results, path, q, db, word_filter=True, filter_num=100, stopwords=True):
+    length = db.locals['concordance_length']
     within_x_words = q['word_num']
     direction = q['direction']
     collocate = unicodedata.normalize('NFC', q['collocate'].decode('utf-8', 'ignore'))
@@ -52,13 +53,16 @@ def fetch_colloc_concordance(results, path, q, db, length=2500, word_filter=True
     if word_filter:
         if stopwords:
             filter_list_path = path + '/data/stopwords.txt'
-            filter_words_file = open(filter_list_path)
-            line_count = 0
-            filter_num = float("inf")
+            if os.path.isfile(filter_list_path):
+                filter_words_file = open(filter_list_path)
+                filter_num = float("inf")
+            else:
+                filter_list_path = path + '/data/frequencies/word_frequencies'
+                filter_words_file = open(filter_list_path)
         else:
             filter_list_path = path + '/data/frequencies/word_frequencies'
             filter_words_file = open(filter_list_path)
-            line_count = 0 
+        line_count = 0 
         for line in filter_words_file:
             line_count += 1
             word = line.split()[0]

@@ -39,7 +39,8 @@ def collocation(environ,start_response):
                            hit_len=hit_len, order=sort_to_display,dumps=json.dumps,javascript="collocation.js",
                            template_name='collocation.mako', report="collocation")
 
-def fetch_collocation(results, path, q, db, length=2500, word_filter=True, filter_num=100, full_report=True, stopwords=True):
+def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True, stopwords=True):
+    length = db.locals['concordance_length']
     within_x_words = q['word_num']    
     
     ## set up filtering with stopwords or 100 most frequent terms ##
