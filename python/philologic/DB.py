@@ -118,6 +118,11 @@ class DB:
                                 else:
                                     metadata_dicts[i]["philo_type"] = ['"%s"' % self.locals["metadata_types"][k]]
                 metadata_dicts = [d for d in metadata_dicts if d]
+                if "philo_id" in metadata:
+                    if metadata_dicts:
+                        metadata_dicts[-1]["philo_id"] = metadata["philo_id"]
+                    else:
+                        metadata_dicts.append( {"philo_id":metadata["philo_id"]} )
                 corpus = MetadataQuery.metadata_query(self,corpus_file,metadata_dicts)
             else:
 #                print >> sys.stderr, "cached @ %s" % corpus_file
