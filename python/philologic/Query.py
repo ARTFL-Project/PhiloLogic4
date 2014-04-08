@@ -7,7 +7,6 @@ import struct
 import HitList
 import re
 import unicodedata
-from MetadataQuery import patterns
 from QuerySyntax import parse_query
 
 def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,limit=3000,filename=""):
