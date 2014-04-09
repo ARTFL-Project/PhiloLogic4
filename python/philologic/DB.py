@@ -146,16 +146,21 @@ class DB:
                 return Query.query(self,qs,corpus_file,self.width,method,method_arg,limit,filename=search_file)
             else:
                 parsed = QuerySyntax.parse_query(qs)
-                parsed_split = []
-                for label,token in parsed:
-                    l,t = label,token
-                    if l == "QUOTE":
-                        subtokens = t[1:-1].split(" ")
-                        parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
-                    else:
-                        parsed_split += [(l,t)]
-                command = Query.format_parsed_query(parsed_split,self)
-                words_per_hit = len(command.split("\n\n"))
+                grouped = QuerySyntax.group_terms(parsed)
+                split = Query.split_terms(grouped)
+                words_per_hit = len(split)
+#                parsed = QuerySyntax.parse_query(qs)
+#                parsed_split = []
+#                for label,token in parsed:
+#                    l,t = label,token
+#                    if l == "QUOTE":
+#                        subtokens = t[1:-1].split(" ")
+#                        parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
+#                    else:
+#                        parsed_split += [(l,t)]
+#                command = Query.format_parsed_query(parsed_split,self)
+#                words_per_hit = len(command.split("\n\n"))
+        
                 return HitList.HitList(search_file,words_per_hit,self)
         else:
             if corpus:

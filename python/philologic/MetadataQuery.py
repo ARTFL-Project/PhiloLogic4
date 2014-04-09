@@ -101,7 +101,7 @@ def expand_grouped_query(grouped,norm_path):
                 norm_term = [c for c in unicodedata.normalize("NFKD",norm_term) if not unicodedata.combining(c)]
                 norm_term = u"".join(norm_term).encode("utf-8")
                 expanded_terms = metadata_pattern_search(norm_term,norm_path)
-                if expanded_terms: # this should get merged into expanded_terms
+                if expanded_terms: 
                     expanded_tokens = [ ("QUOTE",'"'+e+'"') for e in expanded_terms]
                     fully_expanded_tokens = []
                     first = True
