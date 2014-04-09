@@ -87,9 +87,10 @@
     background-color: #FAFAFA !important;
     box-shadow: 0px 0px 15px #888;
     line-height: 140% !important;
-    font-size: 105%;
+    font-size: 1.1em;
     min-height: 650px;
     z-index: 100;
+    text-align: justify;
 }
 @media (min-width: 1230px) {
     #book_page {
@@ -209,7 +210,7 @@ div1 div2::before {
 speaker {
     font-weight: 700;
 }
-l, s {
+l {
     display: block;
 }
 

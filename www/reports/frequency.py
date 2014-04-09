@@ -8,6 +8,8 @@ from render_template import render_template
 from collections import defaultdict
 import json
 
+object_level = ['doc', 'div1', 'div2', 'div3', 'para']
+
 def frequency(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
@@ -26,15 +28,17 @@ def generate_frequency(results, q, db):
     """reads through a hitlist. looks up q["field"] in each hit, and builds up a list of 
        unique values and their frequencies."""
     field = q["field"]
-    if field == "title" or field == "author" or field == "date":
-        object_level = db.locals['default_object_level'] ## This will speed up sql searches
-    else:
-        object_level = "para"
     if field == None:
         field = 'title'
     counts = defaultdict(int)
     for n in results[q['interval_start']:q['interval_end']]:
-        key = n[object_level][field] or "NULL" # NULL is a magic value for queries, don't change it recklessly.
+        ## This is to minimize the number of SQL queries
+        for depth in object_level:
+            key = n[depth][field]
+            if key:
+                break
+        if not key:
+            key = "NULL" # NULL is a magic value for queries, don't change it recklessly.
         counts[key] += 1
 
     if q['rate'] == 'relative':

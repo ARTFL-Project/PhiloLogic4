@@ -14,7 +14,6 @@ $(document).ready(function() {
     // This is to display the table of contents in the document viewer
     var db_url = db_locals['db_url'];
     if ($('#next_obj').length) {
-        //retrieve_obj(db_url);
         back_forward_button_reload(db_url);
     }
     
@@ -32,14 +31,14 @@ $(document).ready(function() {
         follow_scroll(toc, prev, next, top);
     });
     
-    checkEndOfDoc();
+    checkEndBeginningOfDoc();
     
     $(window).load(function() {
         if ($('.highlight').length) {
             scroll_to_highlight();
         }
         t_o_c_handler(db_url);
-        retrieveObj(db_url, true);
+        retrieveObj(db_url);
     });
     
 });
@@ -49,11 +48,16 @@ $(document).ready(function() {
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-function checkEndOfDoc() {
+function checkEndBeginningOfDoc() {
     if ($('#next_obj').data('philoId') == "") {
         $('#next_obj_wrapper').hide();
     } else {
         $('#next_obj_wrapper').show();
+    }
+    if ($("#prev_obj").data('philoId') == "") {
+        $("#prev_obj").hide();
+    } else {
+        $("#prev_obj").show();
     }
 }
 
@@ -62,13 +66,11 @@ function follow_scroll(toc, prev, next, top) {
         next.css('position', 'fixed');
         toc.css({'position': 'fixed', 'top': 0});
         prev.css({'position': 'fixed', 'top': 0});
-        //$('#toc_container').css({'margin-left': '-29px'});
     } else {
         // otherwise remove it
         next.css('position', 'static');
         toc.css({'position': 'static', 'top': ''});
         prev.css({'position': 'absolute', 'top': ''});
-        //$('#toc_container').css({'margin-left': '-25px'});
     }
     if (toc_open) {
         toc_height();
@@ -87,19 +89,8 @@ function toc_height() {
     if (bottomPosition > footer_pos) {
         footer_offset = bottomPosition - footer_pos + 22;            
     }
-    var max_height = maxPossibleHeight - footer_offset;
+    var max_height = maxPossibleHeight - footer_offset - 30;
     $('#toc_container').css('max-height', max_height);
-}
-
-
-function right_pos() {
-    var right_pos = $('#book_page').offset().left + $('#book_page').width();
-    $('#next_obj_wrapper').css('margin-left', right_pos + 30);
-}
-function left_pos(page_pos) {
-    var prev_obj_width = $('#prev_obj').width();
-    var distance = page_pos - 60;
-    $('#prev_obj').css('margin-left', distance);
 }
 
 function scroll_to_highlight() {
@@ -135,7 +126,7 @@ function retrieveObj(db_url){
                 page_image_link();
                 var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
                 History.pushState(null, '', new_url);
-                checkEndOfDoc();
+                checkEndBeginningOfDoc();
             });
         });
     });

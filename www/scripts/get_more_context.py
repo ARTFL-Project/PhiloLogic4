@@ -26,7 +26,12 @@ def get_more_context(environ,start_response):
     hit_range = range(start, end)
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
     context_size = db.locals['concordance_length'] * 3
-    html_list = [r.fetch_concordance(hits[i], environ["SCRIPT_FILENAME"], context_size) for i in hit_range]
+    html_list = []
+    for i in hit_range:
+        try:
+            html_list.append(r.fetch_concordance(hits[i], environ["SCRIPT_FILENAME"], context_size))
+        except IndexError:
+            break
     yield json.dumps(html_list)
 
 if __name__ == "__main__":
