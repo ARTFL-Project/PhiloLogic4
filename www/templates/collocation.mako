@@ -8,13 +8,18 @@
 </script>
 <div id='philologic_response'>
     <div id='initial_report'>
-        <p id='description'>
-            Displaying the top 100 collocates for <span id="colloc_hits">${hit_len}</span> occurrences of "${q['q'].decode('utf-8', 'ignore')}":
-        </p>
-        <div id="progress_bar" style="position:absolute;margin-top:-15px;">
+        <div id='description'>
+            <div id="search_arguments">
+                Bibliographic criteria: <b>${biblio_criteria or "None"}</b><br>
+                Displaying the top 100 collocates for <span id="colloc_hits">${hit_len}</span> occurrences of "${q['q'].decode('utf-8', 'ignore')}":
+            </div>
+        </div>
+        <div id="progress_bar" style="position:absolute;margin-top:-5px">
             <div class="progress-label"></div>
         </div>
-        The 100 most common words are being filtered from this report.
+        <div style="padding-top: 15px;">
+            The 100 most common words are being filtered from this report.
+        </div>
     </div>
     <div class="results_container">
         <div id='philologic_collocation'>

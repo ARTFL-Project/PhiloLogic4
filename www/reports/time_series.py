@@ -28,11 +28,11 @@ def time_series(environ,start_response):
                 q['metadata']['date']+= '%s' % q['end_date']
             else:
                 q['metadata']['date'] = '-%s' % q['end_date']
-        
+        biblio_criteria = " ".join([k + "=" + v for k,v in q["metadata"].iteritems() if v])
         results = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         frequencies, date_counts = generate_time_series(q, db, results)
         return render_template(frequencies=frequencies,db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
-                               javascript="timeSeries.js", date_counts=date_counts, total=len(results),report="time_series")
+                               biblio_criteria=biblio_criteria, date_counts=date_counts, total=len(results),report="time_series")
 
 def generate_time_series(q, db, results):    
     """reads through a hitlist."""

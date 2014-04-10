@@ -2,7 +2,7 @@
 <%include file="search_form.mako"/>
 <div id='philologic_response'>
     <div id='initial_report'>
-       <p id='description'>
+       <div id='description'>
             <%
              start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
              r_status = "."
@@ -10,6 +10,10 @@
                 r_status += " Still working..."
              current_pos = start
             %>
+            <div id="search_arguments">
+                Bibliographic criteria: <b>${biblio_criteria or "None"}</b><br>
+                Searching database for <b>${q['q']}</b>
+            </div>
             % if end != 0:
                 % if end < results_per_page or end < len(results):
                     Hits <span id="start">${start}</span> - <span id="end">${end}</span> of <span id="total_results">${len(results) or results_per_page}</span><span id="incomplete">${r_status}</span>
@@ -19,7 +23,7 @@
             % else:
                 No results for your query.
             % endif
-        </p>
+        </div>
         <%include file="show_frequency.mako"/>
         <div id="report_switch">
             <input type="radio" name="report_switch" id="concordance_switch" value="?${q['q_string'].replace('report=kwic', 'report=concordance')}"><label for="concordance_switch">View occurences with context</label>
