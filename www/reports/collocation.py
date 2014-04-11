@@ -32,21 +32,32 @@ def collocation(environ,start_response):
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ) ## the default should be an error message
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+    biblio_criteria = " ".join([k + "=" + v for k,v in q["metadata"].iteritems() if v])
     all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q, db)
     hit_len = len(hits)
     return render_template(all_colloc=all_colloc, left_colloc=left_colloc, right_colloc=right_colloc,
                            db=db,dbname=dbname,q=q,f=f,path=path, results_per_page=q['results_per_page'],
-                           hit_len=hit_len, order=sort_to_display,dumps=json.dumps,
+                           hit_len=hit_len, order=sort_to_display,dumps=json.dumps,biblio_criteria=biblio_criteria,
                            template_name='collocation.mako', report="collocation")
 
-def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True):
+def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True, stopwords=True):
+    length = db.locals['concordance_length']
     within_x_words = q['word_num']    
     
-    ## set up filtering of most frequent 100 terms ##
-    filter_list = set([])
+    ## set up filtering with stopwords or 100 most frequent terms ##
+    filter_list = set([q['q']])
     if word_filter:
-        filter_list_path = path + '/data/frequencies/word_frequencies'
-        filter_words_file = open(filter_list_path)
+        if stopwords:
+            filter_list_path = path + '/data/stopwords.txt'
+            if os.path.isfile(filter_list_path):
+                filter_words_file = open(filter_list_path)
+                filter_num = float("inf")
+            else:
+                filter_list_path = path + '/data/frequencies/word_frequencies'
+                filter_words_file = open(filter_list_path)
+        else:
+            filter_list_path = path + '/data/frequencies/word_frequencies'
+            filter_words_file = open(filter_list_path)
         line_count = 0 
         for line in filter_words_file:
             line_count += 1
@@ -62,8 +73,8 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
     
     count = 0
     for hit in results[q['interval_start']:q['interval_end']]:
-        bytes, byte_start = adjust_bytes(hit.bytes, 400)
-        conc_text = f.get_text(hit, byte_start, 400, path)
+        bytes, byte_start = adjust_bytes(hit.bytes, length)
+        conc_text = f.get_text(hit, byte_start, length, path)
         
         ## Isolate left and right concordances
         conc_left = convert_entities(conc_text[:bytes[0]].decode('utf-8', 'ignore'))

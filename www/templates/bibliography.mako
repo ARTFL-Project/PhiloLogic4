@@ -1,18 +1,19 @@
 <%include file="header.mako"/>
 <%include file="search_form.mako"/>
-<script type="text/javascript" src="${db.locals['db_url']}/js/sidebar.js"></script>
-<script type="text/javascript" src="${db.locals['db_url']}/js/bibliography.js"></script>
 <div id='philologic_response'>
     <div id='initial_report'>
-        <p id='description'>
+        <div id='description'>
         <%
         start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
         r_status = "."
         if not results.done:
            r_status += " Still working.  Refresh for a more accurate count of the results."
         %>
-        Bibliography Report: Hits <span class="start">${start}</span> - <span class="end">${end}</span> of <span id="total_results">${len(results)}</span>${r_status}
-        </p>
+        <div id="search_arguments">
+                Bibliographic criteria: <b>${biblio_criteria or "None"}</b><br>
+        </div>
+        Hits <span class="start">${start}</span> - <span class="end">${end}</span> of <span id="total_results">${len(results)}</span>${r_status}
+        </div>
         <%include file="show_frequency.mako"/>
     </div>
     <div class="results_container" id="results_container">

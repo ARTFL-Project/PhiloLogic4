@@ -38,34 +38,43 @@ def concordance_from_collocation(environ,start_response):
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         colloc_results = fetch_colloc_concordance(hits, path, q, db)
         return render_template(results=colloc_results,db=db,dbname=dbname,q=q,colloc_concordance=colloc_concordance,
-                               f=f,path=path, results_per_page=q['results_per_page'],
+                               f=f,path=path, results_per_page=q['results_per_page'], javascript="concordanceFromCollocation.js",
                                report="concordance_from_collocation",template_name="concordance_from_collocation.mako")
         
-def fetch_colloc_concordance(results, path, q, db, filter_words=100):
+def fetch_colloc_concordance(results, path, q, db, word_filter=True, filter_num=100, stopwords=True):
+    length = db.locals['concordance_length']
     within_x_words = q['word_num']
     direction = q['direction']
     collocate = unicodedata.normalize('NFC', q['collocate'].decode('utf-8', 'ignore'))
     collocate_num = q['collocate_num']
     
-    ## set up filtering of most frequent 200 terms ##
-    filter_list_path = path + '/data/frequencies/word_frequencies'
-    filter_words_file = open(filter_list_path)
-
-    line_count = 0
-    filter_list = set([])
-
-    for line in filter_words_file:
-        line_count += 1
-        word = line.split()[0]
-        filter_list.add(word.decode('utf-8', 'ignore'))
-        if line_count > filter_words:
+   ## set up filtering with stopwords or 100 most frequent terms ##
+    filter_list = set([q['q']])
+    if word_filter:
+        if stopwords:
+            filter_list_path = path + '/data/stopwords.txt'
+            if os.path.isfile(filter_list_path):
+                filter_words_file = open(filter_list_path)
+                filter_num = float("inf")
+            else:
+                filter_list_path = path + '/data/frequencies/word_frequencies'
+                filter_words_file = open(filter_list_path)
+        else:
+            filter_list_path = path + '/data/frequencies/word_frequencies'
+            filter_words_file = open(filter_list_path)
+        line_count = 0 
+        for line in filter_words_file:
+            line_count += 1
+            word = line.split()[0]
+            filter_list.add(word.decode('utf-8', 'ignore'))
+            if line_count > filter_num:
                 break
     
     new_hitlist = []
     for hit in results:
         ## get my chunk of text ##
-        bytes, byte_start = adjust_bytes(hit.bytes, 400)
-        conc_text = f.get_text(hit, byte_start, 400, path)
+        bytes, byte_start = adjust_bytes(hit.bytes, length)
+        conc_text = f.get_text(hit, byte_start, length, path)
         
         ## Isolate left and right concordances
         conc_left = convert_entities(conc_text[:bytes[0]].decode('utf-8', 'ignore'))
@@ -95,16 +104,11 @@ def fetch_colloc_concordance(results, path, q, db, filter_words=100):
     h = collocation_hitlist(new_hitlist, collocate_num)
     return h
 
-def colloc_concordance(hit, path, q, db):
-    conc_text = fetch_concordance(hit, path, q)
-    split_text = token_regex.split(conc_text)
-    keep_text = []
-    for w in split_text:
-        if w:
-            if w.lower() == q['collocate'].decode('utf-8', 'ignore'):
-                w = '<span class="collocate">%s</span>' % w
-            keep_text.append(w)
-    conc_text = ''.join(keep_text)
+def colloc_concordance(hit, path, q, context_size):
+    conc_text = fetch_concordance(hit, path, context_size)
+    collocate = q['collocate'].decode('utf-8', 'ignore')
+    collocate_match = re.compile(r'(.*\W)(%s)(\W.*)' % collocate, flags=re.U|re.I)
+    conc_text = collocate_match.sub(r'\1<span class="collocate">\2</span>\3', conc_text)
     return conc_text  
     
 class collocation_hitlist(object):

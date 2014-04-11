@@ -91,12 +91,16 @@ def format(text,bytes=[]):
 
 def format_concordance(text,bytes=[]):
     removed_from_start = 0
-    begin = re.search('^[^<]*?>', text)
+    begin = begin_match.search(text)
     if begin:
         removed_from_start = len(begin.group(0))
         text = text[begin.end(0):]
+    start_cutoff = start_cutoff_match.search(text)
+    if start_cutoff:
+        removed_from_start += len(start_cutoff.group(0))
+        text = text[start_cutoff.end(0):]
     removed_from_end = 0
-    end = re.search('<[^>]*?$', text)
+    end = end_match.search(text)
     if end:
         removed_from_end = len(end.group(0))
         text = text[:end.start(0)]
@@ -111,31 +115,34 @@ def format_concordance(text,bytes=[]):
         text = new_text + text[last_offset:]
     xml = FragmentParser.parse(text)
     length = 0
+    allowed_tags = set(['philoHighlight', 'l', 'ab', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx'])
+    text = u''
     for el in xml.iter():
+        if el.tag not in allowed_tags:
+            el.tag = 'span'
         if el.tag == "sc" or el.tag == "scx":
             el.tag = "span"
             el.attrib["class"] = "small-caps"
-        elif el.tag == "head":
-            el.tag = "span"
-        elif el.tag == "pb":
-            el.tag = 'span'
-        elif el.tag == 'p':
-            el.tag ="span"
-        elif el.tag == "philoHighlight":        
+        if el.tag == "philoHighlight":        
             word_match = re.match(r"\w+", el.tail, re.U)
             if word_match:
                 el.text = el.tail[:word_match.end()]
                 el.tail = el.tail[word_match.end():]
             el.tag = "span"
             el.attrib["class"] = "highlight"
-    
     output = etree.tostring(xml)
     output = re.sub(r'\A<div class="philologic-fragment">', '', output)
     output = re.sub(r'</div>\Z', '', output)
+    ## remove spaces around hyphens and apostrophes
+    output = space_match.sub('\\1', output)
     return output
 
 
-def format_strip(text,bytes=[], chars=40):
+def format_strip(text,bytes=[], chars=40, concordance_report=False):
+    """Remove formatting to for HTML rendering
+    Called from: -kwic.py
+                 -relevance.py
+                 -frequency.py"""
     removed_from_start = 0
     begin = begin_match.search(text)
     if begin:
@@ -160,7 +167,10 @@ def format_strip(text,bytes=[], chars=40):
                 last_offset = b
         text = new_text + text[last_offset:]
     xml = FragmentParser.parse(text)
-    output = clean_tags(xml)
+    if concordance_report:
+        output = clean_tags_for_concordance(xml)
+    else:
+        output = clean_tags(xml)
     ## remove spaces around hyphens and apostrophes
     output = space_match.sub('\\1', output)
     return output

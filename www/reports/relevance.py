@@ -30,7 +30,7 @@ def relevance(environ,start_response):
     else:
         results = retrieve_hits(q, db)
     return render_template(results=results,db=db,dbname=dbname,q=q,fetch_relevance=fetch_relevance,
-                           f=f,format=format,path=path, results_per_page=q['results_per_page'],
+                           f=f,format=format,path=path, results_per_page=q['results_per_page'],javascript="rankedRelevance.js",
                            template_name='relevance.mako', report='relevance')
 
 def format_query(q, db):

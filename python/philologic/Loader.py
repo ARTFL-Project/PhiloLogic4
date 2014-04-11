@@ -66,10 +66,7 @@ class Loader(object):
         
         for option in ["parser_factory","token_regex","xpaths","metadata_xpaths","pseudo_empty_tags","suppress_tags","load_filters"]:
             self.parser_defaults[option] = parser_defaults[option]
-        
-        print >> sys.stderr, 'PARSER DEFAULTS', parser_defaults["load_filters"][4].func_closure[0].cell_contents
-        print >> sys.stderr, 'BEGIN', self.parser_defaults["load_filters"][4].func_closure[0].cell_contents
-        
+               
         if not post_filters:
             post_filters = PostFilters.DefaultPostFilters
         self.post_filters = post_filters
@@ -218,9 +215,7 @@ class Loader(object):
                         options["load_filters"] = self.parser_defaults["load_filters"]
                     filters = options["load_filters"]
                     del options["load_filters"]
-                    
-                    print >> sys.stderr, 'END', self.parser_defaults["load_filters"][4].func_closure[0].cell_contents, filters[4].func_closure[0].cell_contents
-
+                     
                     parser = parser_factory(o,text["id"],text["size"],known_metadata=metadata,**options)
                     try:
                         r = parser.parse(i)
@@ -377,9 +372,11 @@ class Loader(object):
         print >> db_locals, "metadata_fields = %s" % self.metadata_fields
         print >> db_locals, "metadata_hierarchy = %s" % self.metadata_hierarchy
         print >> db_locals, "metadata_types = %s" % self.metadata_types
+        print >> db_locals, "facets = %s" % self.metadata_fields
         print >> db_locals, "db_path = '%s'" % self.destination
         print >> db_locals, "normalized_fields = %s" % self.normalized_fields
         print >> db_locals, "debug = %s" % self.debug
+        print >> db_locals, "concordance_length = 600"
         for k,v in extra_locals.items():
             print >> db_locals, "%s = %s" % (k,repr(v))
 

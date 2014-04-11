@@ -9,4 +9,4 @@ from render_template import render_template
 def landing_page(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     return render_template(db=db,dbname=dbname,form=True, q=q, template_name='landing_page.mako',
-                           report="landing_page")
+                           javascript="landingPage.js", report="landing_page")

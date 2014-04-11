@@ -9,7 +9,6 @@ $(document).ready(function() {
     var q_string = window.location.search.substr(1);
     concordance_kwic_switch(db_url);
     back_forward_button_concordance_reload();
-    more_context();
     sidebar_reports(q_string, db_url, pathname);
     if ($('#kwic_concordance').length) {
         var config = {    
@@ -39,6 +38,11 @@ $(document).ready(function() {
         }
     });
     
+    // Fetch more context for concordances after page load
+    $(window).load(function() {
+       fetchMoreContext(); 
+    });
+    
 });
 
 
@@ -56,11 +60,11 @@ function concordance_kwic_switch(db_url) {
             $("#waiting").hide();
             if (switchto.match(/kwic/)) {
                 var config = {    
-                    over: showBiblio, 
-                    timeout: 100,  
-                    out: hideBiblio   
-                };
-                $(".kwic_biblio").hoverIntent(config);
+                over: showBiblio, 
+                timeout: 100,  
+                out: hideBiblio   
+            };
+            $(".kwic_biblio").hoverIntent(config);
                 $('#concordance').removeAttr("checked");
                 $('#kwic').prop("checked", true)
                 var new_url = History.getState().url.replace(/report=concordance/, 'report=kwic');
@@ -74,7 +78,7 @@ function concordance_kwic_switch(db_url) {
             }
             $("#report").buttonset("refresh");
             display_options_on_selected();
-            more_context();
+            fetchMoreContext();
             getCitationWidth();
             $('.more').find('a').each(function() {
                 if (switchto.match(/kwic/)) {
@@ -109,6 +113,7 @@ function back_forward_button_concordance_reload() {
 
 // These functions are for the kwic bibliography which is shortened by default
 function showBiblio() {
+    console.log($(this))
     $(this).children(".full_biblio").css('position', 'absolute').css('text-decoration', 'underline')
     $(this).children(".full_biblio").css('background', 'LightGray')
     $(this).children(".full_biblio").css('box-shadow', '5px 5px 15px #C0C0C0')

@@ -98,7 +98,7 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
         $('.progress-label').text('Complete!');
         $("#progress_bar").delay(500).fadeOut('slow');
         
-        // Active links on collocations
+        // Activate links on collocations
         $('span[id^=all_word], span[id^=left_word], span[id^=right_word]').addClass('colloc_link');
         clickOnColloc('.colloc_link');
         clickOnColloc('.cloud_term');

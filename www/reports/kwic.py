@@ -26,11 +26,12 @@ def kwic(environ,start_response):
         return bibliography(f,path, db, dbname,q,environ)
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+        biblio_criteria = " ".join([k + "=" + v for k,v in q["metadata"].iteritems() if v])
         return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
-                                path=path, results_per_page=q['results_per_page'],
+                                path=path, results_per_page=q['results_per_page'], biblio_criteria=biblio_criteria,
                                 template_name='kwic.mako', report="kwic")
 
-def fetch_kwic(results, path, q, byte_query, db, start, end, length=500):
+def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
     kwic_results = []
     shortest_biblio = 0
 

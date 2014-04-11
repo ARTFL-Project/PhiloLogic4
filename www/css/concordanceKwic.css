@@ -47,18 +47,11 @@
 }
 
 /*Citations*/
-.section_name, .sub_section_name {
+.section_name, .sub_section_name, .who_section {
     font-weight: 400 !important;
-}
-.cite_separation {
-    color: darkgray;
     margin-left: 8px;
-    margin-right: 8px;
-    padding-left: 1px;
-    padding-right: 1px;
-    font-weight: 300 !important;
-    border-left: solid 1px darkgray;
-    border-right: solid 1px darkgray;
+    padding-left: 8px;
+    border-left: double 3px darkgray;
 }
 .citation {
     padding-top: 5px;
@@ -133,7 +126,7 @@
     margin-right: 31px;
     line-height: 130%;
     color: #555;
-    top: 243px;
+    top: 258px;
 }
 .sidebar_option {
     padding-left: 1em;
@@ -145,4 +138,21 @@
     cursor: pointer;
     background-color: #EBEBEB;
     color: black;
+}
+
+/* Concordance styling for theater */
+speaker {
+    font-weight: 700;
+}
+sp {
+    display: block;
+}
+l, ab {
+    display: block;
+}
+sp+l, sp+ab {
+    display: inline;
+}
+stage {
+    font-style: italic;
 }

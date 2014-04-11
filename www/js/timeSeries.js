@@ -194,7 +194,7 @@ function clickOnChart(interval) {
             }
         }
         var href = window.location.href.replace(/time_series/, 'concordance');
-        href = href.replace(/create_date=[^&]*/, 'create_date=' + year)
+        href = href.replace(/date=[^&]*/, 'date=' + year)
         window.location = href;
     });
 }
@@ -243,7 +243,6 @@ function drawFromData(data, interval, frequency_type) {
     } else {
         var count = 0;
         $('.graph_years').eq(0).show();
-        //$('.graph_years').eq($('.graph_years').length - 1).show();
         var num = truncate($('.graph_years').length / 10);
         $('.graph_years').each(function() {
             count += 1;
@@ -280,7 +279,7 @@ function drawFromData(data, interval, frequency_type) {
         var count = $(this).data('count');
         var height = count * multiplier;
         $(this).attr('data-height', height)
-        $(this).eq(0).animate({height: height + 'px'});
+        $(this).eq(0).css('height', height + 'px');
     });
     $('.graph_bar').tooltip({ position: { my: "left top+10", at: "left bottom", collision: "flipfit" } }, { track: true });
     clickOnChart(interval);
