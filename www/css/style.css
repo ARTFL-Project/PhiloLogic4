@@ -13,6 +13,9 @@
     bottom: -1px;
     position: absolute;
     width: 100%;
+    -moz-transition: top 250ms;
+    -webkit-transition: top 250ms;
+    transition: top 250ms;
 }
 html, body {
     margin:0;
@@ -277,8 +280,12 @@ div.main_body {
     border-top: solid 1px #ECECEC;
 }
 #description {
-    font-size: 140%;
+    font-size: 1.1em;
     padding-top: 15px;
+    margin-bottom: 10px;
+}
+#search_arguments {
+    margin-bottom: 10px;
 }
 .highlight {
     color: #EF4500;

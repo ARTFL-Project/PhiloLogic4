@@ -2,10 +2,13 @@
 <%include file="search_form.mako"/>
 <div id='philologic_response'>
     <div id='initial_report'>
-        <p id='description'>
-            Use of the term(s) "${q['q'].decode('utf_8')}" throughout time
-        </p>
-        <div id="progress_bar" style="margin-top:-10px;margin-bottom: 10px" data-total='${total}'>
+        <div id='description'>
+            <div id="search_arguments">
+                Bibliographic criteria: <b>${biblio_criteria or "None"}</b><br>
+                Use of the term(s) <b>${q['q'].decode('utf_8')}</b> throughout time
+            </div>
+        </div>
+        <div id="progress_bar" style="margin-top:-5px;margin-bottom: 10px" data-total='${total}'>
             <div class="progress-label"></div>
         </div>
         <div id="time_series_buttons">

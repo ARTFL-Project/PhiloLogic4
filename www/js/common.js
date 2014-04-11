@@ -97,11 +97,14 @@ $(document).ready(function() {
     $("#report").buttonset();
     $('#form_body').show();
     if (global_report == "landing_page") {
+        $('#more_options').hide();
         showHide('concordance');
         $(window).load(function() {
             $('#search_explain').fadeIn(300);
-            $('#search_elements').css({'max-height': '614px', 'opacity': 100});
+            $('#search_elements').css({'max-height': '10000px', 'opacity': 100});
             $('#conc_question').fadeIn(300);
+            setTimeout(searchFormOverlap, 250);
+            //showMoreOptions();
         });
     } else {
         $('#initial_form').css({'max-height': '94px', 'opacity': 100});
@@ -114,7 +117,7 @@ $(document).ready(function() {
         if ($("#search_elements").css('max-height') != 0) {
             showHide(report);
             if (report != "frequencies") {
-                $("#search_elements").css({'max-height': '614px', 'opacity': 100});
+                $("#search_elements").css({'max-height': '10000px', 'opacity': 100});
                 $('#search_explain').fadeIn(300);
             }
             showMoreOptions();
@@ -209,8 +212,6 @@ $(document).ready(function() {
     });
     
     /// Make sure search form doesn't cover footer
-    var form_offset = $('#form_body').offset().top + $('#form_body').height();
-    searchFormOverlap(form_offset);
     $(window).resize(function() {
         searchFormOverlap(form_offset);
     });
@@ -231,7 +232,8 @@ function isMobile() {
   return (index > -1);
 }
 
-function searchFormOverlap(form_offset) {
+function searchFormOverlap() {
+    var form_offset = $('#form_body').offset().top + $('#form_body').height();
     var footer_offset = $('#footer').offset().top;
     if (form_offset > footer_offset) {
         $('#footer').css('top', form_offset + 20);
@@ -362,9 +364,10 @@ function showMoreOptions(display) {
     if (display == "all") {
         var report = $('input[name=report]:checked', '#search').val();
         showHide(report);
-        $("#search_elements").css({'max-height': '614px', 'opacity': 100});
+        $("#search_elements").css({'max-height': '10000px', 'opacity': 100});
     }
     $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': '100%'});
+    setTimeout(searchFormOverlap, 250);
     $("#search_overlay, #header, #footer").click(function() {
         hideSearchForm();
     });
@@ -380,6 +383,7 @@ function hideSearchForm() {
     $("#search_overlay").css({'height': '0px', 'opacity': 0});
     $("#more_options").button('option', 'label', 'Show search options');
     $('#search_explain').fadeOut(300);
+    setTimeout(searchFormOverlap, 250);
 }
 
 (function($)
