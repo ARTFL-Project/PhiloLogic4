@@ -118,6 +118,11 @@ class DB:
                                 else:
                                     metadata_dicts[i]["philo_type"] = ['"%s"' % self.locals["metadata_types"][k]]
                 metadata_dicts = [d for d in metadata_dicts if d]
+                if "philo_id" in metadata:
+                    if metadata_dicts:
+                        metadata_dicts[-1]["philo_id"] = metadata["philo_id"]
+                    else:
+                        metadata_dicts.append( {"philo_id":metadata["philo_id"]} )
                 corpus = MetadataQuery.metadata_query(self,corpus_file,metadata_dicts)
             else:
 #                print >> sys.stderr, "cached @ %s" % corpus_file
@@ -141,16 +146,21 @@ class DB:
                 return Query.query(self,qs,corpus_file,self.width,method,method_arg,limit,filename=search_file)
             else:
                 parsed = QuerySyntax.parse_query(qs)
-                parsed_split = []
-                for label,token in parsed:
-                    l,t = label,token
-                    if l == "QUOTE":
-                        subtokens = t[1:-1].split(" ")
-                        parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
-                    else:
-                        parsed_split += [(l,t)]
-                command = Query.format_parsed_query(parsed_split,self)
-                words_per_hit = len(command.split("\n\n"))
+                grouped = QuerySyntax.group_terms(parsed)
+                split = Query.split_terms(grouped)
+                words_per_hit = len(split)
+#                parsed = QuerySyntax.parse_query(qs)
+#                parsed_split = []
+#                for label,token in parsed:
+#                    l,t = label,token
+#                    if l == "QUOTE":
+#                        subtokens = t[1:-1].split(" ")
+#                        parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
+#                    else:
+#                        parsed_split += [(l,t)]
+#                command = Query.format_parsed_query(parsed_split,self)
+#                words_per_hit = len(command.split("\n\n"))
+        
                 return HitList.HitList(search_file,words_per_hit,self)
         else:
             if corpus:

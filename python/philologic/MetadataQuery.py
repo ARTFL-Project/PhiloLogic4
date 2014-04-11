@@ -6,136 +6,174 @@ import sqlite3
 import HitList
 import unicodedata
 import subprocess
-from QuerySyntax import parse_query
+from QuerySyntax import parse_query, group_terms
 
-tests = ['hello','"hello"','hi|hello','hi|"hello"','1-5','hello-hi','1-5|"hi|hello"','NULL',"NOT NULL",'hi|NULL', 'hello NOT hi','"hello" NOT hi',"NOT 1-5|hi","1-5 NOT 4", "hello NOT"]
-pattern = r'(\"[^\"]*?\")|([|])|(.*?\-.*?)|(.+)'
+def metadata_query(db,filename,param_dicts):
+    print >> sys.stderr, "METADATA_QUERY:",param_dicts
+    prev = None
+    #print >> sys.stderr, "METADATA_HITLIST: ",filename, param_dicts
+    for d in param_dicts:
+        query = query_recursive(db,d,prev)
+        prev = query
+    corpus_fh = open(filename,"wb")
+    for corpus_obj in query:
+        #print >> sys.stderr, corpus_obj,
+        obj_id = [int(x) for x in corpus_obj["philo_id"].split(" ")]
+        corpus_fh.write(struct.pack("=7i",*obj_id))
+    corpus_fh.close()
+    flag = open(filename + ".done","w")
+    flag.write("1")
+    flag.close()
+    return HitList.HitList(filename,0,db)
 
-patterns = [("QUOTE",r'".+?"'),
-            ("NOT","NOT"),
-            ('OR',r'\|'),
-            ('RANGE',r'[^|\s]+?\-[^|\s]+'),
-            ('NULL',r'NULL'),
-            ('TERM',r'[^\-|\s"]+')]
+def query_recursive(db,param_dict,parent):
+#    print >> sys.stderr, "query_recursive:",param_dict,parent
+    r = query_lowlevel(db,param_dict)
+    if parent:
+        try:
+            outer_hit = next(parent)
+        except StopIteration:
+            return
+        for inner_hit in r:
+#            print >> sys.stderr, "corpus_cmp:",outer_hit["philo_id"], inner_hit["philo_id"]
+            while corpus_cmp(str_to_hit(outer_hit["philo_id"]),str_to_hit(inner_hit["philo_id"])) < 0:
+                try:
+                    outer_hit = next(parent)
+                except StopIteration:
+                    return
+            if corpus_cmp(str_to_hit(outer_hit["philo_id"]),str_to_hit(inner_hit["philo_id"])) > 0:
+                continue
+            else:
+                yield inner_hit
+    else:
+        for row in r:
+            yield row
+            
+def query_lowlevel(db,param_dict):
+    vars = []
+    clauses = []
+    # if column = _philo_id I can do a special query here
+    for column,values in param_dict.items():
+        norm_path = db.locals["db_path"]+"/frequencies/normalized_" + column + "_frequencies"
+        for v in values:
+            parsed = parse_query(v)            
+            print >> sys.stderr, "METADATA_TOKENS:", parsed
+            grouped = group_terms(parsed)
+            print >> sys.stderr, "METADATA_SYNTAX:", grouped
+            expanded = expand_grouped_query(grouped,norm_path)
+            print >> sys.stderr, "METADATA_SYNTAX:", expanded
+            sql_clause = make_grouped_sql_clause(expanded,column)
+            print >> sys.stderr, "SQL_SYNTAX:", sql_clause
+            clauses.append(sql_clause)            
+#            clause,some_vars = make_clause(column,parsed,norm_path)
+#            print >> sys.stderr, "METADATA_QUERY:",clause,some_vars
+#            clauses.append(clause)
+#            vars += some_vars
+    if clauses:
+        query = "SELECT philo_id FROM toms WHERE " + " AND ".join("(%s)" % c for c in clauses) + " order by rowid;"
+    else:
+        query = "SELECT philo_id FROM toms order by rowid;"
+#    vars = [v.decode("utf-8") for v in vars]
+    print >> sys.stderr, "INNER QUERY: ", "%s %% %s" % (query,vars)
+    #for v in vars:
+    #    print >> sys.stderr, "%s : %s" % (type(v),repr(v))
 
-def make_clause(column,tokens,norm_path):
+    results = db.dbh.execute(query,vars)
+    return results
+
+def expand_grouped_query(grouped,norm_path):
+    expanded = []
+    pure = True
+    # first test to see if this is a "pure" query, which can be entirely evaluated in egrep
+    # this requires that it is only AND and OR's, for now--I may be able to add the others later
+    for group in grouped:
+        for kind,token in group:
+            if kind == "RANGE" or kind == "NULL":
+                pure = False
+    if pure:
+        # will implement this later
+        pass
+    for group in grouped:
+        expanded_group = []
+        for kind,token in group:
+            if kind == "TERM":
+                norm_term = token.decode("utf-8").lower()
+                norm_term = [c for c in unicodedata.normalize("NFKD",norm_term) if not unicodedata.combining(c)]
+                norm_term = u"".join(norm_term).encode("utf-8")
+                expanded_terms = metadata_pattern_search(norm_term,norm_path)
+                if expanded_terms: 
+                    expanded_tokens = [ ("QUOTE",'"'+e+'"') for e in expanded_terms]
+                    fully_expanded_tokens = []
+                    first = True
+                    for e in expanded_tokens:
+                        if first:
+                            first = False
+                        else:
+                            fully_expanded_tokens.append( ("OR","|") )
+                        fully_expanded_tokens.append(e)                        
+                else: # if we have no matches, just put an inexact match in as placeholder.  Will fail later.
+                    fully_expanded_tokens = [ ("QUOTE",'"'+norm_term+'"') ]
+                expanded_group.extend(fully_expanded_tokens)
+            else:
+                if kind != "OR":
+                    expanded_group.append( (kind,token) )
+        expanded.append(expanded_group)
+    return expanded
+
+def make_grouped_sql_clause(expanded,column):
     clauses = ""
     vars = []
-    conj = "AND"
-    neg = False
-    start_or = False
-    in_or = False
-    end_or = False
-    #print >> sys.stderr, "TOKENS",tokens
-    for i,t in enumerate(tokens):
-        if t[0] == "NOT":
-            neg = True
-            clause = ""
-        elif t[0] == "QUOTE":
-            if neg:
-                clause = "%s != ?" % (column)
-                vars.append(t[1][1:-1])
-            else:
-                clause = "%s == ?" % (column)
-                vars.append(t[1][1:-1])
-        elif t[0] == "OR":
-            clause = ""
-            if neg:
-                conj = "AND"
-            else:
-                conj = "OR"
-        elif t[0] == "RANGE":
-            lower,upper = t[1].split("-")
-            if neg:
-                clause = "%s <= ? OR %s >= ?" % (column,column)
-                vars.append(lower)
-                vars.append(upper)
-            else:
-                clause = "%s >= ? AND %s <= ?" % (column,column)
-                vars.append(lower)
-                vars.append(upper)
-        elif t[0] == "NULL":
-            if neg:
-                clause = "%s IS NOT NULL" % column
-            else:
-                clause = "%s IS NULL" % column
-        elif t[0] == "TERM":
-            norm_term = t[1].decode("utf-8").lower()
-            norm_term = [c for c in unicodedata.normalize("NFKD",norm_term) if not unicodedata.combining(c)]
-            norm_term = u"".join(norm_term).encode("utf-8")
-            expanded_terms = metadata_pattern_search(norm_term,norm_path)
-            #print >> sys.stderr, "EXPANDED_TERMS:", expanded_terms
-
-            if not expanded_terms:
-                clause = "%s == ?" % column
-                vars.append(norm_term)
-
-            else:   
-                sub_clauses = []
-                for t in expanded_terms:
-                    vars.append(t)               
-                    if neg:
-                        sub_clauses.append("%s != ?" % column)
-                        sub_conj = "AND"
-                        clause = (" " + "AND" + " ").join(sub_clauses)
+    esc = escape_sql_string
+    first_group = True
+    for group in expanded:
+        clause = ""
+        neg = False                
+        first_token,first_value = group[0]
+        if first_token == "NOT":
+            if len(group) > 1:
+                second_token,second_value = group[1]
+                if second_token == "RANGE":
+                    lower,upper = second_value.split("-")
+                    clause += "(%s < %s OR %s > %s)" % (column, esc(lower), column, esc(upper) )
+                    if first_group: 
+                        first_group = False
+                        clauses += clause
                     else:
-                        sub_clauses.append("%s == ?" % column)
-                        sub_conj = "OR"
-                clause = "(" + (" " + sub_conj + " ").join(sub_clauses) + ")"
-
-        if in_or:
-            if i+1 == len(tokens):
-                end_or = True
-            elif i+1 < len(tokens):
-                if tokens[i][0] != "OR":
-                    end_or = True
-
-        if in_or == False and i+1 < len(tokens) and tokens[i+1][0] == "OR":
-            in_or = True
-            clause = "(" + clause
-
-        if end_or:
-            clause = clause + ")"
-            in_or = False
-            end_or = False
-
-        if clause and clauses:
-            clauses += " " + conj + " " + clause
-            clause = ""
-            if conj == "OR":
-                conj = "AND"
-
-        elif clause:
-            clauses += clause
-            clause = ""
-
-    return (clauses,vars)
-
-def parse(column,orig,norm_path):  
-    """Deprecated"""
-    temp = orig[:]
-    temp_result = []
-    length = len(temp)
-    while len(temp) > 0:
-        for pattern in patterns:
-            r = re.match(pattern[1],temp)
-            if r:
-                if pattern[0] == "TERM":
-                    notscan = re.match("(.*?)( NOT )",r.group())
-                    if notscan:
-                        temp_result.append(("TERM",notscan.group(1)))
-                        temp_result.append(("NOT"," NOT "))
-                        temp = temp[notscan.end():]
-                    else:
-                        temp_result.append((pattern[0],r.group())),
-                        temp = temp[r.end():]
-                else:
-                    temp_result.append((pattern[0],r.group())),
-                    temp = temp[r.end():]
-                break
+                        clauses += "AND %s" % clause
+                    continue                    
+            clause += "%s NOT IN (" % column
         else:
-            temp = temp[1:]
-    return (column,temp_result,norm_path)
+            if first_token == "RANGE":
+                lower,upper = first_value.split("-")
+                clause += "(%s >= %s AND %s <= %s)" % (column, esc(lower), column, esc(upper) )
+                if first_group: 
+                    first_group = False
+                    clauses += clause
+                else:
+                    clauses += "AND %s" % clause
+                continue
+            clause += "%s IN (" % column
+        # if we don't have a range, we have something that we can evaluate
+        # as an exact IN/NOT IN expression
+        first_value = True
+        for kind,token in group:
+            if kind == "OR" or kind == "NOT":
+                continue
+            if first_value:
+                first_value = False
+            else:
+                clause += ", "
+            if kind == "QUOTE":
+                clause += esc(token[1:-1])
+            if kind == "NULL":
+                clause += "NULL"
+        clause += ")"
+        if first_group:
+            first_group = False
+            clauses += "%s" % clause
+        else:
+            clauses += " AND %s" % clause
+    return "(%s)" % clauses
 
 def metadata_pattern_search(term, path):
     command = ['egrep', '-wi', "%s" % term, '%s' % path]
@@ -147,6 +185,11 @@ def metadata_pattern_search(term, path):
     match.remove('')
     ## HACK: The extra decode/encode are there to fix errors when this list is converted to a json object
     return [m.split("\t")[1].strip().decode('utf-8', 'ignore').encode('utf-8') for m in match]
+
+def escape_sql_string(s):
+    s = s.replace("'","''")    
+    return "'%s'" % s
+
 
 def hit_to_string(hit,width):
     if isinstance(hit,sqlite3.Row):
@@ -181,74 +224,4 @@ def corpus_cmp(x,y):
         depth = len(x)
     return obj_cmp(x[:depth],y[:depth])
 
-def query_lowlevel(db,param_dict):
-    vars = []
-    clauses = []
-    for column,values in param_dict.items():
-        norm_path = db.locals["db_path"]+"/frequencies/normalized_" + column + "_frequencies"
-        for v in values:
-            parsed = parse_query(v)            
-            clause,some_vars = make_clause(column,parsed,norm_path)
-#            print >> sys.stderr, "METADATA_QUERY:",clause,some_vars
-            clauses.append(clause)
-            vars += some_vars
-    if clauses:
-        query = "SELECT philo_id FROM toms WHERE " + " AND ".join("(%s)" % c for c in clauses) + " order by rowid;"
-    else:
-        query = "SELECT philo_id FROM toms order by rowid;"
-#    vars = [v.decode("utf-8") for v in vars]
-    #print >> sys.stderr, "INNER QUERY: ", "%s %% %s" % (query,vars)
-    #for v in vars:
-    #    print >> sys.stderr, "%s : %s" % (type(v),repr(v))
-
-    results = db.dbh.execute(query,vars)
-    return results
-
-def query_recursive(db,param_dict,parent):
-#    print >> sys.stderr, "query_recursive:",param_dict,parent
-    r = query_lowlevel(db,param_dict)
-    if parent:
-        try:
-            outer_hit = next(parent)
-        except StopIteration:
-            return
-        for inner_hit in r:
-#            print >> sys.stderr, "corpus_cmp:",outer_hit["philo_id"], inner_hit["philo_id"]
-            while corpus_cmp(str_to_hit(outer_hit["philo_id"]),str_to_hit(inner_hit["philo_id"])) < 0:
-                try:
-                    outer_hit = next(parent)
-                except StopIteration:
-                    return
-            if corpus_cmp(str_to_hit(outer_hit["philo_id"]),str_to_hit(inner_hit["philo_id"])) > 0:
-                continue
-            else:
-                yield inner_hit
-    else:
-        for row in r:
-            yield row
-
-def metadata_query(db,filename,param_dicts):
-#    print >> sys.stderr, "metadata_query:",param_dicts
-    prev = None
-    #print >> sys.stderr, "METADATA_HITLIST: ",filename, param_dicts
-    for d in param_dicts:
-        query = query_recursive(db,d,prev)
-        prev = query
-    corpus_fh = open(filename,"wb")
-    for corpus_obj in query:
-        #print >> sys.stderr, corpus_obj,
-        obj_id = [int(x) for x in corpus_obj["philo_id"].split(" ")]
-        corpus_fh.write(struct.pack("=7i",*obj_id))
-    corpus_fh.close()
-    flag = open(filename + ".done","w")
-    flag.write("1")
-    flag.close()
-    return HitList.HitList(filename,0,db)
-
-if __name__ == "__main__":
-    results = []
-    if len(sys.argv) > 1:
-        param_dict = cgi.parse_qs(sys.argv[1])
-        db = sqlite3.connect("toms.db")
-
-
+            
