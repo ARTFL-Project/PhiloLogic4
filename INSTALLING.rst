@@ -119,22 +119,22 @@ Running the ``loader.py`` depends itself on `lxml`_, and previous remark for
     sudo pip install lxml
 
 
-Customize ``loader.py``
+Customize ``load_script.py``
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-So the ``loader.py`` is the central piece of software generating database and
+So the ``load_script.py`` is the central piece of software generating database and
 web application from web application *template* and `TEI-XML` corpus files,
 and you **must customize** it. Given a set of this `TEI-XML` files,
 located for e.g. at ``~/mycorpus/xml`` directory, we could put a copy
-of ``~/PhiloLogic4/scripts/loader.py`` in ``~/mycorpus``::
+of ``~/PhiloLogic4/scripts/load_script.py`` in ``~/mycorpus``::
 
-    cp ~/PhiloLogic4/scripts/loader.py ~/mycorpus/
+    cp ~/PhiloLogic4/scripts/load_script.py ~/mycorpus/
 
 It could be possible to also tweak the web application template to better
 fullfill your corpora specificities or needs, but for the sake of current
 example, we assume you'll simply started with bare ``~/PhiloLogic4/www``'s one.
 
-The main *required* variables of ``loader.py`` to be set are located
+The main *required* variables of ``load_script.py`` to be set are located
 around lines 25-44, and are ``database_root``, ``url_root``
 and ``template_dir``. Following previous example, we must set
 ``database_root`` variable to ``'/var/www/html/mydatabase/'``
@@ -154,11 +154,11 @@ as follows::
 Loading
 ^^^^^^^
 
-Once all files are in place and ``loader.py`` script customized, it's time
+Once all files are in place and ``load_script.py`` script customized, it's time
 for `PhiloLogic` to generates all stuff it needs, by executing script
 on `TEI-XML` files::
 
-    python ~/mycorpus/loader.py [database name] [path to TEI-XML files]
+    python ~/mycorpus/load_script.py [database name] [path to TEI-XML files]
 
 This script required the following arguments:
 
@@ -167,11 +167,11 @@ This script required the following arguments:
 2.  the paths to each of `TEI-XML` files from which fulfill database content,
     i.e. ``~/mycorpus/xml/*.xml``.
 
-The full list of arguments ``loader.py`` accepts is set in its body
+The full list of arguments ``load_script.py`` accepts is set in its body
 around 15-25 lines, and showable when running ``loader.py`` without
 a database name::
 
-    python ~/mycorpus/loader.py
+    python ~/mycorpus/load_script.py
 
 The script also accepts optional arguments, among others most common are
 ``--workers`` and ``--debug``:
@@ -181,7 +181,7 @@ The script also accepts optional arguments, among others most common are
     It is mostly usefull for multi-cores hardware.
 
 ``-d`` / ``--debug``
-    Set both ``loader.py`` and web application in debug mode.
+    Set both ``load_script.py`` and web application in debug mode.
 
 .. note::
 
@@ -190,7 +190,7 @@ The script also accepts optional arguments, among others most common are
 So our command line for loading would be::
 
     cd /var/www/html
-    python ~/mycorpus/loader.py mydatabase ~/mycorpus/xml/*.xml
+    python ~/mycorpus/load_script.py mydatabase ~/mycorpus/xml/*.xml
 
 The above command should have populated the ``/var/www/html/mydatabase``
 directory with both web application and data files::

@@ -22,3 +22,36 @@ def parse_query(qstring):
         else:
             buf = buf[1:]
     return parsed
+
+def group_terms(parsed):
+    grouped = []
+    current_clause = []
+    last_term = None
+    for kind,val in parsed:
+        if last_term == "RANGE":
+            # immediately detach ranges for now.
+            grouped.append(current_clause)
+            current_clause = []
+
+        if kind == "TERM" or kind == "QUOTE" or kind == "NULL":
+            if  last_term != "OR" and last_term != "NOT":
+                grouped.append(current_clause)
+                current_clause = []
+        elif kind == "OR":
+            pass
+        elif kind == "RANGE":
+            # RANGE should immediately detach a new clause and then close it.
+            if last_term != "NOT":
+                grouped.append(current_clause)
+                current_clause = []
+        elif kind == "NOT":
+            # NOT should immediately detach a new clause
+            grouped.append(current_clause)
+            current_clause = []
+
+        current_clause.append((kind,val))
+        last_term = kind
+    grouped.append(current_clause)
+    # filter out possible empty groups
+    grouped = [g for g in grouped if g != []]
+    return grouped
