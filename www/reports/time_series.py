@@ -29,12 +29,12 @@ def time_series(environ,start_response):
             else:
                 q['metadata']['date'] = '-%s' % q['end_date']
         biblio_criteria = []
-        metadata = q["metadata"]
-        metadata["start_date"] = q["start_date"]
-        metadata["end_date"] = q["end_date"]
-        for k,v in metadata.iteritems():
-            if v and k != "date":
-                close_icon = '<span class="ui-icon ui-icon-circle-close remove_metadata" data-metadata="%s"></span>' % k
+        for k,v in q['metadata'].iteritems():
+            if v:
+                if k != "date":
+                    close_icon = '<span class="ui-icon ui-icon-circle-close remove_metadata" data-metadata="%s"></span>' % k
+                else:
+                    close_icon = '<span class="ui-icon ui-icon-circle-close remove_metadata" data-metadata="%s_time_series"></span>' % k
                 biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b> %s</span>' % (k.title(), v.decode('utf-8', 'ignore'), close_icon))
         biblio_criteria = ' '.join(biblio_criteria)
         results = db.query(q["q"],q["method"],q["arg"],**q["metadata"])

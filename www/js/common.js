@@ -235,8 +235,12 @@ function metadataRemove() {
     $('.remove_metadata').click(function() {
         var href = window.location.href;
         var metadata = $(this).data("metadata");
-        var match = href.match("&" + metadata + "=[^&]+");
-        href = href.replace(match, "&" + metadata + "=");
+        if (metadata == "date_time_series") {
+            var href = href.replace(/(&\w+_date=)[^&]*/g, "$1"); 
+        } else {
+            var match = href.match("&" + metadata + "=[^&]+");
+            href = href.replace(match, "&" + metadata + "=");
+        }
         window.location = href;
     });
 }
