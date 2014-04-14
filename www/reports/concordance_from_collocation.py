@@ -32,6 +32,7 @@ no_tag = re.compile(r'<[^>]+>')
 def concordance_from_collocation(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
+    config = f.WebConfig(db.locals)
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
     else:
@@ -39,7 +40,7 @@ def concordance_from_collocation(environ,start_response):
         colloc_results = fetch_colloc_concordance(hits, path, q, db)
         return render_template(results=colloc_results,db=db,dbname=dbname,q=q,colloc_concordance=colloc_concordance,
                                f=f,path=path, results_per_page=q['results_per_page'], javascript="concordanceFromCollocation.js",
-                               report="concordance_from_collocation",template_name="concordance_from_collocation.mako")
+                               config=config,report="concordance_from_collocation",template_name="concordance_from_collocation.mako")
         
 def fetch_colloc_concordance(results, path, q, db, word_filter=True, filter_num=100, stopwords=True):
     length = db.locals['concordance_length']

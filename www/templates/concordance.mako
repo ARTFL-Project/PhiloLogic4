@@ -46,7 +46,7 @@
                     </span>
                 </div>
                 <div class='philologic_context'>
-                    <div class="default_length">${fetch_concordance(i, path, db.locals['concordance_length'])}</div>
+                    <div class="default_length">${fetch_concordance(i, path, config.concordance_length)}</div>
                 </div>
                 </li>
             % endfor

@@ -7,7 +7,7 @@
  
     <!--Load db_locals and global_report variable to use in the JavaScript code-->
     <script>
-        var db_locals = ${db_locals}; /* loading the db_locals Python variable in javascript */
+        var webConfig = ${config.config}; /* loading the db_locals Python variable in javascript */
         var global_report = "${report}";    
     </script>
     

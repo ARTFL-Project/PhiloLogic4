@@ -1,6 +1,6 @@
 $(document).ready(function() {
     
-    var db_url = db_locals['db_url'];
+    var db_url = webConfig['db_url'];
     
     //jQueryUI theming
     $('#time_series_buttons').buttonset();

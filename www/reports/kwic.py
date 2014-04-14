@@ -15,6 +15,7 @@ import json
 def kwic(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
+    config = f.WebConfig(db.locals)
     if q['format'] == "json":
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
@@ -34,7 +35,7 @@ def kwic(environ,start_response):
         biblio_criteria = ' '.join(biblio_criteria)
         return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
                                 path=path, results_per_page=q['results_per_page'], biblio_criteria=biblio_criteria,
-                                template_name='kwic.mako', report="kwic")
+                                config=config, template_name='kwic.mako', report="kwic")
 
 def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
     kwic_results = []

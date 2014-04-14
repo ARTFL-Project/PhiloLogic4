@@ -4,7 +4,7 @@ $(document).ready(function() {
     // Important variables /////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
-    var db_url = db_locals['db_url'];
+    var db_url = webConfig['db_url'];
     var q_string = window.location.search.substr(1);
     ////////////////////////////////////////////////////////////////////////////
     
@@ -78,8 +78,8 @@ $(document).ready(function() {
     
     
     // Display report tabs according to db.locals.py config
-    for (i in db_locals['search_reports']) {
-        var search_report = '#' + db_locals['search_reports'][i] + '_button';
+    for (i in webConfig['search_reports']) {
+        var search_report = '#' + webConfig['search_reports'][i] + '_button';
         $(search_report).show();
     }
     
@@ -134,9 +134,9 @@ $(document).ready(function() {
     
     // Set-up autocomplete for words and metadata
     autoCompleteWord(db_url);
-    for (i in db_locals["metadata_fields"]) {
-        var  metadata = $("#" + db_locals["metadata_fields"][i]).val();
-        var field = db_locals["metadata_fields"][i];
+    for (i in webConfig["metadata"]) {
+        var  metadata = $("#" + webConfig["metadata"][i]).val();
+        var field = webConfig["metadata"][i];
         autoCompleteMetadata(metadata, field, db_url)
     }
     
@@ -438,7 +438,7 @@ function hideSearchForm() {
 
 // Show more context in concordance and concordance from collocation searches
 function fetchMoreContext() {
-    var db_url = db_locals['db_url'];
+    var db_url = webConfig['db_url'];
     var q_string = window.location.search.substr(1);
     var script = db_url + '/scripts/get_more_context.py?' + q_string;
     $.getJSON(script, function(data) {
