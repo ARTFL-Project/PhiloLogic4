@@ -219,6 +219,9 @@ $(document).ready(function() {
     adjustReportWidth();
     adjustBottomBorder();
     
+    
+    metadataRemove();
+    
     // Add spinner to indicate that a query is running in the background
     $('#button, #button1').click(function( event ) {
         var width = $(window).width() / 2 - 100;
@@ -226,6 +229,17 @@ $(document).ready(function() {
         $("#waiting").css("margin-left", width).css('margin-top', 100).show();
     });
 });
+
+// Remove metadata criteria on click
+function metadataRemove() {
+    $('.remove_metadata').click(function() {
+        var href = window.location.href;
+        var metadata = $(this).data("metadata");
+        var match = href.match("&" + metadata + "=[^&]+");
+        href = href.replace(match, "&" + metadata + "=");
+        window.location = href;
+    });
+}
 
 function isMobile() {
   var index = navigator.appVersion.indexOf("Mobile");

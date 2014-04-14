@@ -32,7 +32,12 @@ def collocation(environ,start_response):
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ) ## the default should be an error message
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-    biblio_criteria = " ".join([k + "=" + v for k,v in q["metadata"].iteritems() if v])
+    biblio_criteria = []
+    for k,v in q["metadata"].iteritems():
+        if v:
+            close_icon = '<span class="ui-icon ui-icon-circle-close remove_metadata" data-metadata="%s"></span>' % k
+            biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b> %s</span>' % (k.title(), v.decode('utf-8', 'ignore'), close_icon))
+    biblio_criteria = ' '.join(biblio_criteria)
     all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q, db)
     hit_len = len(hits)
     return render_template(all_colloc=all_colloc, left_colloc=left_colloc, right_colloc=right_colloc,

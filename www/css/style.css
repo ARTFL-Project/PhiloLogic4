@@ -360,3 +360,20 @@ s {
     margin-left: -50px;
 }
 
+/*Metadata criteria in results*/
+.biblio_criteria {
+    padding: 2px;
+    background-color: #FFEED1;
+    color: #555;
+    border: solid #ffdb9e 1px;
+}
+#search_arguments {
+    line-height: 150%;
+}
+.remove_metadata {
+    display:inline-block !important;
+    vertical-align: text-top;
+}
+.remove_metadata:hover {
+    cursor: pointer;
+}

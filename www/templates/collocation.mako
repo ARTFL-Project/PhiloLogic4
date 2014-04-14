@@ -10,8 +10,8 @@
     <div id='initial_report'>
         <div id='description'>
             <div id="search_arguments">
-                Bibliographic criteria: <b>${biblio_criteria or "None"}</b><br>
-                Displaying the top 100 collocates for <span id="colloc_hits">${hit_len}</span> occurrences of "${q['q'].decode('utf-8', 'ignore')}":
+                Displaying the top 100 collocates for <span id="colloc_hits">${hit_len}</span> occurrences of <b>${q['q'].decode('utf-8', 'ignore')}</b><br>
+                Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
             </div>
         </div>
         <div id="progress_bar" style="position:absolute;margin-top:-5px">

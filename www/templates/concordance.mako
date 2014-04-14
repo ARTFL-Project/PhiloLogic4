@@ -10,8 +10,8 @@
                 r_status += " Still working..."
             %>
             <div id="search_arguments">
-                Bibliographic criteria: <b>${biblio_criteria or "None"}</b><br>
-                Searching database for <b>${q['q']}</b>
+                Searching database for <b>${q['q']}</b><br>
+                Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
             </div>
             % if end != 0:
                 % if end < results_per_page or end < len(results):

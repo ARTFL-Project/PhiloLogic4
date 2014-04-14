@@ -4,8 +4,8 @@
     <div id='initial_report'>
         <div id='description'>
             <div id="search_arguments">
-                Bibliographic criteria: <b>${biblio_criteria or "None"}</b><br>
-                Use of the term(s) <b>${q['q'].decode('utf_8')}</b> throughout time
+                Use of the term(s) <b>${q['q'].decode('utf_8')}</b> throughout time<br>
+                Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
             </div>
         </div>
         <div id="progress_bar" style="margin-top:-5px;margin-bottom: 10px" data-total='${total}'>

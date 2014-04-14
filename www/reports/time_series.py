@@ -28,7 +28,15 @@ def time_series(environ,start_response):
                 q['metadata']['date']+= '%s' % q['end_date']
             else:
                 q['metadata']['date'] = '-%s' % q['end_date']
-        biblio_criteria = " ".join([k + "=" + v for k,v in q["metadata"].iteritems() if v])
+        biblio_criteria = []
+        metadata = q["metadata"]
+        metadata["start_date"] = q["start_date"]
+        metadata["end_date"] = q["end_date"]
+        for k,v in metadata.iteritems():
+            if v and k != "date":
+                close_icon = '<span class="ui-icon ui-icon-circle-close remove_metadata" data-metadata="%s"></span>' % k
+                biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b> %s</span>' % (k.title(), v.decode('utf-8', 'ignore'), close_icon))
+        biblio_criteria = ' '.join(biblio_criteria)
         results = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         frequencies, date_counts = generate_time_series(q, db, results)
         return render_template(frequencies=frequencies,db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
