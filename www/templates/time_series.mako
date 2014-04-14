@@ -4,7 +4,7 @@
     <div id='initial_report'>
         <div id='description'>
             <div id="search_arguments">
-                Use of the term(s) <b>${q['q'].decode('utf_8')}</b> throughout time<br>
+                Use of the term(s) <b>${q['q'].decode('utf_8')}</b> between <b>${q['start_date']}</b> and <b>${q['end_date']}</b><br>
                 Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
             </div>
         </div>
