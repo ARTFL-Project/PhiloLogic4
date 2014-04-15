@@ -4,7 +4,14 @@
     <div id='initial_report'>
         <div id='description'>
             <div id="search_arguments">
-                Use of the term(s) <b>${q['q'].decode('utf_8')}</b> between <b>${q['start_date']}</b> and <b>${q['end_date']}</b><br>
+                Use of the term(s) <b>${q['q'].decode('utf_8')}</b> between
+                <span class="biblio_criteria"><b>${q['start_date']}</b>
+                    <span class="ui-icon ui-icon-circle-close" id="remove_metadata_date_start"></span>
+                </span>&nbsp and
+                <span class="biblio_criteria"><b>${q['end_date']}</b>
+                    <span class="ui-icon ui-icon-circle-close" id="remove_metadata_date_end"></span>
+                </span>
+                <br>
                 Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
             </div>
         </div>

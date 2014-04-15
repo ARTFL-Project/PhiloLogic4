@@ -125,10 +125,10 @@
             </div>
             <div id="metadata_fields">
                 <table class="table_row">
-                    % for facet in db.locals["metadata_fields"]:
+                    % for facet in config.metadata:
 						<%
-						if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
-							alias = db.locals["metadata_aliases"][facet]
+						if config.metadata_aliases and facet in config.metadata:
+							alias = config.metadata_aliases[facet]
 						else:
 							alias = facet
 						%>

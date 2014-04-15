@@ -36,6 +36,7 @@ def fetch_bibliography(f,path, db, dbname, q, environ):
     if q['format'] == "json":
         return hits
     else:
+        config = f.WebConfig(db.locals)
         biblio_criteria = []
         for k,v in q["metadata"].iteritems():
             if v:
@@ -44,7 +45,7 @@ def fetch_bibliography(f,path, db, dbname, q, environ):
         biblio_criteria = ' '.join(biblio_criteria)
         return render_template(results=hits,db=db,dbname=dbname,q=q, template_name='bibliography.mako',
                            results_per_page=q['results_per_page'], f=f, biblio_criteria=biblio_criteria,
-                           report="bibliography")
+                           config=config, report="bibliography")
     
 def group_by_author(hits, db, author="author"):
     object_level = db.locals['default_object_level']

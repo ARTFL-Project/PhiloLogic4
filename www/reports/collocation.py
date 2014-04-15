@@ -37,6 +37,8 @@ def collocation(environ,start_response):
     for k,v in q["metadata"].iteritems():
         if v:
             close_icon = '<span class="ui-icon ui-icon-circle-close remove_metadata" data-metadata="%s"></span>' % k
+            if k in config.metadata_aliases:
+                k = config.metadata_aliases[k]
             biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b> %s</span>' % (k.title(), v.decode('utf-8', 'ignore'), close_icon))
     biblio_criteria = ' '.join(biblio_criteria)
     all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q, db)

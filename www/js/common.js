@@ -239,6 +239,17 @@ function metadataRemove() {
         href = href.replace(match, "&" + metadata + "=");
         window.location = href;
     });
+    if (global_report == "time_series") {
+        $('#remove_metadata_date_start, #remove_metadata_date_end').click(function() {
+            var href = window.location.href;
+            if ($(this).attr('id') == "remove_metadata_date_start") {
+                href = href.replace(/(&start_date=)[^&]+/, '$1');
+            } else {
+                href = href.replace(/(&end_date=)[^&]+/, '$1');
+            }
+            window.location = href;
+        });
+    }
 }
 
 function isMobile() {

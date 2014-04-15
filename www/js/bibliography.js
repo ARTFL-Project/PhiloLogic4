@@ -10,6 +10,6 @@ $(document).ready(function() {
     var q_string = window.location.search.substr(1);
     $('#sidebar_area').css('margin-top', '-42px');
     $('#sidebar_button').css('margin-top', '-1px');
-    $('#frequency_field').css('top', '230px');
+    $('#frequency_field').css('top', '253px');
     sidebar_reports(q_string, db_url, pathname);
 })

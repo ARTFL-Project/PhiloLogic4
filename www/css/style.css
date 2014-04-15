@@ -370,10 +370,10 @@ s {
 #search_arguments {
     line-height: 150%;
 }
-.remove_metadata {
+.remove_metadata, #remove_metadata_date_start, #remove_metadata_date_end {
     display:inline-block !important;
     vertical-align: text-top;
 }
-.remove_metadata:hover {
+.remove_metadata:hover, #remove_metadata_date_start:hover, #remove_metadata_date_end:hover {
     cursor: pointer;
 }

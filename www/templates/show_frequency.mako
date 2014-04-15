@@ -1,17 +1,17 @@
 <div id="sidebar_area">
     <ul id="sidebar_button">
         <li id="frequency_by" style='margin-right: 0px;display: inline-block;'>
-            Display frequency by <span id="displayed_sidebar_value">${db.locals["metadata_fields"][0]}</span>
+            Display frequency by <span id="displayed_sidebar_value">${config["metadata"][0].title()}</span>
             <span style="vertical-align: middle;font-size: 60%;margin-right: 0;">&nbsp&nbsp&nbsp&#9660;</span>
         </li>
         <li id="hide_sidebar">X</li>
     </ul>
     
     <ol id="frequency_field">
-        % for facet in db.locals["facets"]:
+        % for facet in config["facets"]:
             <%
-            if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
-                alias = db.locals["metadata_aliases"][facet]
+            if facet in config["metadata_aliases"]:
+                alias = config["metadata_aliases"][facet]
             else:
                 alias = facet
             %>
