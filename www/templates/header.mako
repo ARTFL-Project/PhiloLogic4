@@ -7,7 +7,7 @@
  
     <!--Load db_locals and global_report variable to use in the JavaScript code-->
     <script>
-        var webConfig = ${config.config}; /* loading the db_locals Python variable in javascript */
+        var webConfig = ${dict([(option, config[option]) for option in config.options])}; /* loading the db_locals Python variable in javascript */
         var global_report = "${report}";    
     </script>
     
@@ -53,7 +53,7 @@
                     </ul>             
                 </div>
                 <div id="site-name">
-                    <h1><a href="${db.locals['db_url']}/" title="${dbname}">${dbname.title()}</a></h1>           
+                    <h1><a href="${db.locals['db_url']}/" title="${dbname}">${config.dbname.title()}</a></h1>           
                 </div>
                 
             </div>

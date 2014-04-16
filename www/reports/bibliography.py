@@ -36,7 +36,7 @@ def fetch_bibliography(f,path, db, dbname, q, environ):
     if q['format'] == "json":
         return hits
     else:
-        config = f.WebConfig(db.locals)
+        config = f.WebConfig()
         biblio_criteria = []
         for k,v in q["metadata"].iteritems():
             if v:

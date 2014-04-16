@@ -29,7 +29,7 @@ end_match = re.compile(r'<[^>]*?\Z')
 def collocation(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
-    config = f.WebConfig(db.locals)
+    config = f.WebConfig()
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ) ## the default should be an error message
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])

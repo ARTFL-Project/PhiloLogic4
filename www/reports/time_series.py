@@ -18,7 +18,7 @@ sub_date = re.compile('date=[^&]*')
 def time_series(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
-    config = f.WebConfig(db.locals)
+    config = f.WebConfig()
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
     else:

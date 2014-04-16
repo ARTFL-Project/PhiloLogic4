@@ -24,7 +24,7 @@ def navigation(environ,start_response):
         return json.dumps(obj_text)
     if obj.philo_type == 'doc':
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,template_name='t_o_c.mako', report="t_o_c")
+                       db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c")
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
     prev = ' '.join(obj.prev.split()[:7])
     next = ' '.join(obj.next.split()[:7])
