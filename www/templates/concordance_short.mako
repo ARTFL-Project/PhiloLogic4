@@ -8,14 +8,14 @@
     <div class="citation cite_gradient" style="overflow:hidden;">
         <span class='hit_n'>${n}.</span>
         <span class="cite" style="display: inline-block;overflow:hidden;white-space: nowrap;text-overflow:ellipsis;-o-text-overflow:ellipsis;">
-            ${f.cite.make_abs_div_cite(db,i)}
+            ${f.cite.make_abs_div_cite(db,config, i)}
         </span>
         <span class="more_context_and_close">
             <span class="more_context" style="color:lightGray;">More</span>
         </span>
     </div>
      <div class='philologic_context'>
-        <div class="default_length">${fetch_concordance(i, path, db.locals['concordance_length'])}</div>
+        <div class="default_length">${fetch_concordance(i, path, config.concordance_length)}</div>
     </div>
    </li>
   % endfor

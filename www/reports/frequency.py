@@ -33,7 +33,13 @@ def generate_frequency(results, q, db):
         ## This is to minimize the number of SQL queries
         if field in db.locals['metadata_types']:
             depth = db.locals['metadata_types'][field]
-            key = n[depth][field]
+            if depth == "div":
+                for d in ["div3", "div2", "div1"]:
+                    key = n[d][field]
+                    if key:
+                        break
+            else:
+                key = n[depth][field]
         else:
             key = n[field]
         if not key:
