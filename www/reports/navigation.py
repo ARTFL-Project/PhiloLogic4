@@ -18,7 +18,7 @@ def navigation(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
     obj = db[path_components]
-    config = f.WebConfig(db.locals)
+    config = f.WebConfig()
     if q['format'] == "json":
         obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
         return json.dumps(obj_text)

@@ -5,9 +5,9 @@
     <title>${dbname}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
  
-    <!--Load db_locals and global_report variable to use in the JavaScript code-->
+    <!--Load the web config and global_report variable to use in the JavaScript code-->
     <script>
-        var webConfig = ${dict([(option, config[option]) for option in config.options])}; /* loading the db_locals Python variable in javascript */
+        var webConfig = ${dict([(option, config[option]) for option in config.options])}; /* loading the web_config in javascript */
         var global_report = "${report}";    
     </script>
     

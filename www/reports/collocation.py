@@ -49,7 +49,8 @@ def collocation(environ,start_response):
                            config=config, template_name='collocation.mako', report="collocation")
 
 def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True, stopwords=True):
-    length = db.locals['concordance_length']
+    config = f.WebConfig()
+    length = config['concordance_length']
     within_x_words = q['word_num']    
     
     ## set up filtering with stopwords or 100 most frequent terms ##

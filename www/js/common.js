@@ -77,7 +77,7 @@ $(document).ready(function() {
     ////////////////////////////////////////
     
     
-    // Display report tabs according to db.locals.py config
+    // Display report tabs according to web_config.cfg
     for (i in webConfig['search_reports']) {
         var search_report = '#' + webConfig['search_reports'][i] + '_button';
         $(search_report).show();
