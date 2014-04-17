@@ -2,7 +2,7 @@
 <%include file="search_form.mako"/>
 <div id='philologic_response' style="margin-top:0px;">
     <div>
-        <a href="${db.locals['db_url']}/">Return to search form</a>
+        <a href="${config.db_url}/">Return to search form</a>
         <p>
             <span id="return_to_colloc">
                 Return to previous results page
@@ -55,5 +55,5 @@
 <script>
 var occurences = ${occurences};
 </script>
-<script type="text/javascript" src="${db.locals['db_url']}/js/concordanceFromCollocation.js"></script>
+<script type="text/javascript" src="${config.db_url}/js/concordanceFromCollocation.js"></script>
 <%include file="footer.mako"/>

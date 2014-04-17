@@ -8,11 +8,11 @@ import os
 from philologic.DB import DB
 from link import *
 
-def make_abs_div_cite(db,i):
+def make_abs_div_cite(db, config, i):
     """ Returns a representation of a PhiloLogic object and all it's ancestors suitable for a precise concordance citation. """
-    doc_href = make_absolute_object_link(db,i.philo_id[:1],i.bytes)
-    section_href = make_absolute_object_link(db,i.philo_id[:2], i.bytes)
-    sub_section_href = make_absolute_object_link(db,i.philo_id[:3], i.bytes)
+    doc_href = make_absolute_object_link(config,i.philo_id[:1],i.bytes)
+    section_href = make_absolute_object_link(config,i.philo_id[:2], i.bytes)
+    sub_section_href = make_absolute_object_link(config,i.philo_id[:3], i.bytes)
 #    para_href = make_object_link(i.philo_id[:5], i.bytes)                                                                                                                                                                                                                         
     section_names = [i.div1.head,i.div2.head,i.div3.head]
     section_name = section_names[0]
@@ -31,8 +31,7 @@ def make_abs_div_cite(db,i):
         cite += u"<a href='%s' class='sub_section_name'>%s</a>" % (sub_section_href,sub_section_name.strip())
     speaker_name = i.para.who
     if speaker_name:
-        speaker_href = make_absolute_object_link(db, i.philo_id[:5], i.bytes)
-        speaker_name = speaker_name.replace('#', '').replace('_', ' ') ## This is a folger shakespeare hack
+        speaker_href = make_absolute_object_link(config, i.philo_id[:5], i.bytes)
         cite += "<a href='%s' class='who_section'>%s</a>" % (speaker_href, speaker_name)
     
     #if db.locals['debug'] == True:
@@ -53,9 +52,9 @@ def make_abs_div_cite(db,i):
     cite += "</span>"
     return cite
 
-def make_abs_doc_cite(db,i):
+def make_abs_doc_cite(db,config, i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
-    doc_href = make_absolute_object_link(db,i.philo_id[:1], i.bytes)
+    doc_href = make_absolute_object_link(config,i.philo_id[:1], i.bytes)
     record = u"%s, <i><a href='%s'>%s</a></i>" % (i.doc.author, doc_href,i.doc.title)
     date = i.doc.date
     if date:

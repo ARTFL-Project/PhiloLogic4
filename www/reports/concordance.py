@@ -18,7 +18,6 @@ def concordance(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
-    print >> sys.stderr, "CONFIGGG", config.db_url
     if q['format'] == "json":
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])

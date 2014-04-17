@@ -1,7 +1,7 @@
 ## -*- coding: utf-8 -*-
 <div id='search_overlay'></div>
 <div id="form_body">
-    <form id="search" action="${db.locals['db_url'] + "/dispatcher.py/"}">
+    <form id="search" action="${config.db_url + "/dispatcher.py/"}">
         <div id="initial_form">
             <div id="report" class="report" style="margin-top:0px">
                 <span id="concordance_button" style="display: none;">
@@ -195,5 +195,5 @@
     </form>
 </div>
 <div id="waiting" style="display:none;z-index:99;position:absolute;">
-    <img src="${db.locals['db_url']}/js/gif/ajax-loader.gif" alt="Loading..."/>
+    <img src="${config.db_url}/js/gif/ajax-loader.gif" alt="Loading..."/>
 </div>
