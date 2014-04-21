@@ -2,7 +2,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>${dbname}</title>
+    <title>${dbname.title()}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
  
     <!--Load the web config and global_report variable to use in the JavaScript code-->
@@ -14,6 +14,8 @@
     <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono|Averia+Serif+Libre:300,400,700,300italic,400italic,700italic&subset=latin,latin-ext,cyrillic-ext,greek-ext,greek,cyrillic' rel='stylesheet' type='text/css'>
     
     <!--Load all required CSS-->
+    <link rel="shortcut icon" href="${config.db_url}/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="${config.db_url}/favicon.ico" type="image/x-icon">   
     <link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="${config.db_url}/css/style.css" type="text/css" media="screen, projection">
     <link rel="stylesheet" href="${config.db_url}/css/searchForm.css" type="text/css" media="screen, projection">
@@ -53,7 +55,7 @@
                     </ul>             
                 </div>
                 <div id="site-name">
-                    <h1><a href="${config.db_url}/" title="${dbname}">${config.dbname.title()}</a></h1>           
+                    <h1><a href="${config.db_url}/" title="${dbname.title()}">${config.dbname.title()}</a></h1>           
                 </div>
                 
             </div>
