@@ -27,9 +27,9 @@
                         <span style="padding-left: 5px;">${n}.</span>
                         ##<input type="checkbox" name="philo_id" value="${i.philo_id}">
                         % if i.type == 'doc':
-                            <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,i)}</span>
+                            <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db, config, i)}</span>
                         % else:
-                            <span class='philologic_cite'>${f.cite.make_abs_div_cite(db,i)}</span>
+                            <span class='philologic_cite'>${f.cite.make_abs_div_cite(db, config, i)}</span>
                         % endif
                     </li>
                 % endfor

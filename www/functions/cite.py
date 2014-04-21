@@ -22,6 +22,7 @@ def make_abs_div_cite(db, config, i):
         sub_section_name = section_name
     title = '<a href="%s">%s</a>' % (doc_href, i.doc.title.strip())
     cite = u"<span class='philologic_cite'>%s <i>%s</i>" % (i.doc.author.strip(),title)
+    #cite = u"<span class='philologic_cite'><i>%s</i>" % (title)
     date = i.doc.date
     if date:
         cite += " [%s]" % str(date)
@@ -34,20 +35,11 @@ def make_abs_div_cite(db, config, i):
         speaker_href = make_absolute_object_link(config, i.philo_id[:5], i.bytes)
         cite += "<a href='%s' class='who_section'>%s</a>" % (speaker_href, speaker_name)
     
-    #if db.locals['debug'] == True:
-    #    cite += " %s" % i.doc.filename
     page_obj = i.get_page()
     if page_obj:
         if page_obj['n']:
             page_n = page_obj['n'].decode('utf-8', 'ignore')
-            cite += u" [page %s] " % page_n
-#                bytes = '&'.join(['byte=%d' % int(byte) for byte in i.bytes])
-#                page_href = u'<a href="%s&doc_page=%s&">' % (doc_href,page_n)
-#                cite += u", %spage %s.</a>" % (page_href, page_n)
-    
-
-#    cite += u" (%s)" % i.pos
-    
+            cite += u" [page %s] " % page_n    
 
     cite += "</span>"
     return cite

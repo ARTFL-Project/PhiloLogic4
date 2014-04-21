@@ -376,7 +376,7 @@ class Loader(object):
         print >> db_locals, "db_path = '%s'" % self.destination
         print >> db_locals, "debug = %s" % self.debug
         for k,v in extra_locals.items():
-            if k != "db_url":
+            if k != "db_url" or k != "search_reports":  ## This should be changed in the load_script
                 print >> db_locals, "%s = %s" % (k,repr(v))
         print "wrote database info to %s." % (self.destination + "/db.locals.py")
         

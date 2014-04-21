@@ -19,6 +19,7 @@ def get_table_of_contents(environ, start_response):
     start_response(status,headers)
     environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/get_table_of_contents.py', '')
     db, path_components, q = parse_cgi(environ)
+    config = f.WebConfig()
     path = db.locals['db_path']
     path = path[:path.rfind("/data")]
     obj = ObjectWrapper(q['philo_id'].split(), db)
@@ -45,7 +46,7 @@ def get_table_of_contents(environ, start_response):
         for i in results:
             id = i.philo_id[:7]
             link_id = '_'.join([str(j) for j in i.philo_id])
-            href = f.link.make_absolute_object_link(db,id)
+            href = f.link.make_absolute_object_link(config, id)
             head_or_type = i.head or "[%s]" % i.type
             html += '<span class="toc_link">'
             style = ""

@@ -8,8 +8,10 @@ class WebConfig(object):
     def __init__(self):
         self.config = {}
         path = os.getcwd().replace('functions', "").replace('scripts', '').replace('reports', '') + "/data/web_config.cfg"
-        print >> sys.stderr, "OS PATH", path
-        execfile(path, globals(), self.config)
+        try:
+            execfile(path, globals(), self.config)
+        except SyntaxError:
+            raise SyntaxError
         self.options = set(['db_url', 'dbname', 'concordance_length', 'facets', 'metadata',
                         'search_reports', 'metadata_aliases'])
     

@@ -127,7 +127,7 @@
                 <table class="table_row">
                     % for facet in config.metadata:
 						<%
-						if config.metadata_aliases and facet in config.metadata:
+						if facet in config.metadata_aliases:
 							alias = config.metadata_aliases[facet]
 						else:
 							alias = facet
