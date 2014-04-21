@@ -12,6 +12,11 @@ $(document).ready(function() {
 function sidebar_reports(q_string, db_url, pathname) {
     $("#frequency_by").click(function(e) {
         e.stopPropagation();
+        if ($('#hide_sidebar').css('display') == 'none') {
+            $('#frequency_field').css('right', '0');
+        } else {
+            $('#frequency_field').css('right', '39px');
+        }
         if ($('#frequency_field').css('display') == 'none') {
             $('#frequency_field').css('width', $("#frequency_by").width());
             $('#frequency_field').slideDown('fast', 'swing');
@@ -32,7 +37,13 @@ function sidebar_reports(q_string, db_url, pathname) {
         // Get total results
         var total_results = parseInt($('#total_results').text());
         
-        $('#displayed_sidebar_value').html($(this).data('display'));
+        // Show which option was chosen
+        var display_value = $(this).data('display');
+        if (typeof webConfig.metadata_aliases[display_value] != 'undefined') {
+            display_value = webConfig.metadata_aliases[display_value];
+        }
+        $('#displayed_sidebar_value').html(display_value);
+        
         show_sidebar(q_string, db_url, pathname,value);
         $('#frequency_table').empty();
         if (value != 'collocation_report') {
@@ -57,7 +68,6 @@ function sidebar_reports(q_string, db_url, pathname) {
             $('#frequency_table').html(table); 
             $('#frequency_container').show();
             $("#hide_sidebar").css('display', 'inline-block');
-            //$('#frequency_table').slimScroll({height: $('#frequency_container').height()});
         }
     });
     $("#hide_sidebar").click(function() {
@@ -204,9 +214,8 @@ function update_sidebar(sorted_list, field) {
             var link = sorted_list[item][1]['url'];
             var count = sorted_list[item][1]['count'];
         }
-        result = result.replace('#', ''); // Folger Shakespeare display hack for speaker
         var full_link = '<a id="freq_sidebar_text" href="' + link + '">' + result + '</a>';
-        newlist += '<li>'; // style="white-space:nowrap;">';
+        newlist += '<li>';
         newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:8px;"></span>';
         newlist += full_link + '<span style="float:right;display:inline-block;padding-right: 5px;">' + count + '</span></li>';
     }
