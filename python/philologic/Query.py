@@ -12,16 +12,14 @@ from QuerySyntax import parse_query, group_terms
 def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,limit=3000,filename=""):
     sys.stdout.flush()
     tstart = datetime.now()
-    print >> sys.stderr, "STARTING query for %s at" % repr(terms), tstart
 
     parsed = parse_query(terms)
     grouped = group_terms(parsed)
     split = split_terms(grouped)
 
-#    expandedterms = format_query(terms,db) # format_query is SLOW!   
-    print >> sys.stderr, "QUERY FORMATTED at ", datetime.now() - tstart
+#    print >> sys.stderr, "QUERY FORMATTED at ", datetime.now() - tstart
     words_per_hit = len(split)
-    print >> sys.stderr, "QUERY SPLIT at ", datetime.now() - tstart, repr(split)
+ #   print >> sys.stderr, "QUERY SPLIT at ", datetime.now() - tstart, repr(split)
     origpid = os.getpid()
     if not filename:
         hfile = str(origpid) + ".hitlist"
@@ -40,27 +38,32 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
             os._exit(0)
         else:
             #now we're detached from the parent, and can do our work.
-            print >> sys.stderr, "WORKER DETACHED at ", datetime.now() - tstart
+#            print >> sys.stderr, "WORKER DETACHED at ", datetime.now() - tstart
             args = ["search4", db.path,"--limit",str(limit)]
             if corpus_file and corpus_size:
                 args.extend(("--corpusfile", corpus_file , "--corpussize" , str(corpus_size)))
             if method and method_arg:
                 args.extend((method,str(method_arg)))
             worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err)
-            print >> sys.stderr, "SUBPROC RUNNING at ", datetime.now() - tstart
+#            print >> sys.stderr, "SUBPROC RUNNING at ", datetime.now() - tstart
 #            worker.communicate(format_query(terms,db))
 # ouch! I was running format_query twice!
 #            worker.communicate(expandedterms) # I/O is taking a long time too!            
-            print >> sys.stderr, "STARTING QUERY EXPANSION at ", datetime.now() - tstart
+#            print >> sys.stderr, "STARTING QUERY EXPANSION at ", datetime.now() - tstart
             expand_query(split,freq_file,worker.stdin)
             worker.stdin.close()
-            print >> sys.stderr, "SUBPROC INPUT CLOSED at ", datetime.now() - tstart
-            worker.wait()
+#            print >> sys.stderr, "SUBPROC INPUT CLOSED at ", datetime.now() - tstart
+            returncode = worker.wait()
+#            print >> sys.stderr, "SUBPROC RETURNED %d" % returncode
+            if returncode == -11:
+                print >> sys.stderr, "SEGFAULT"
+                seg_flag = open(filename + ".error","w")
+                seg_flag.close()
             #do something to mark query as finished
             flag = open(filename + ".done","w")
             flag.write(" ".join(args) + "\n")
             flag.close()
-            print >> sys.stderr, "SUBPROC DONE at ", datetime.now() - tstart
+#            print >> sys.stderr, "SUBPROC DONE at ", datetime.now() - tstart
             os._exit(0)
     else:
         hl.close()
@@ -94,7 +97,7 @@ def expand_query(split, freq_file, dest_fh):
         if len(group) == 1: # if we have a one-token group, don't need to sort and uniq
             filters = subprocess.Popen("cut -f 2", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)            
         else: # otherwise we need to merge the egrep results and remove duplicates.
-            filters = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest.fh, shell=True)
+            filters = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
 
         for kind,token in group: # or, splits, and ranges should have been taken care of by now.
             if kind == "TERM" or kind == "RANGE":
@@ -105,10 +108,11 @@ def expand_query(split, freq_file, dest_fh):
                 grep_proc = subprocess.Popen(grep_command,stdout=filters.stdin)
                 grep_proc.wait()
             elif kind == "QUOTE":
-                filters.write(token + "\n") 
+                filters.stdin.write(token + "\n") 
             # what to do about NOT?
         filters.stdin.close()    
         filters.wait()
+    dest_fh.close()
     return
 
 def format_parsed_query(parsed_split,db):
