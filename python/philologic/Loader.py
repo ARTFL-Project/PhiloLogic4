@@ -93,21 +93,6 @@ class Loader(object):
         self.metadata_hierarchy = []
         self.metadata_types = {}
         self.normalized_fields = []
-        indexed_types = []
-
-        for o_type, path, param in self.parser_defaults["metadata_xpaths"]:
-            if o_type not in indexed_types and o_type != "page":
-                indexed_types.append(o_type)
-
-        for t in indexed_types:
-            self.metadata_hierarchy.append([])
-            for e_type,path,param in self.parser_defaults["metadata_xpaths"]:
-                if t == e_type:
-                    if param not in self.metadata_fields:
-                        self.metadata_fields.append(param)
-                        self.metadata_hierarchy[-1].append(param)
-                    if param not in self.metadata_types:
-                        self.metadata_types[param] = t
 
         #sys.stdout = OutputHandler(console=console_output, log=log)
 
@@ -163,8 +148,36 @@ class Loader(object):
                                  "pages":self.workdir + os.path.basename(d["filename"]) + ".pages",
                                  "results":self.workdir + os.path.basename(d["filename"]) + ".results"} for n,d in enumerate(data_dicts)]
                 
+        indexed_types = []
 
-        
+        for o_type, path, param in self.parser_defaults["metadata_xpaths"]:
+            if o_type not in indexed_types and o_type != "page":
+                indexed_types.append(o_type)
+
+        if "doc" not in indexed_types:
+            indexed_types = ["doc"] + indexed_types
+
+        for t in indexed_types:
+            self.metadata_hierarchy.append([])
+            for e_type,path,param in self.parser_defaults["metadata_xpaths"]:
+                if t == e_type:
+                    if param not in self.metadata_fields:
+                        self.metadata_fields.append(param)
+                        self.metadata_hierarchy[-1].append(param)
+                    if param not in self.metadata_types:
+                        self.metadata_types[param] = t
+                    else: # we have a serious error here!  Should raise going forward.
+                        pass 
+            if t == "doc":
+                for d in data_dicts:
+                    for k in d.keys():
+                        if k not in self.metadata_fields:
+                            self.metadata_fields.append(k)
+                            self.metadata_hierarchy[-1].append(k)
+                        if k not in self.metadata_types:
+                            self.metadata_types[k] = t
+                            # don't need to check for conflicts, since doc is first.                            
+                            
         print "%s: parsing %d files." % (time.ctime(),len(self.filequeue))
         procs = {}
         workers = 0
