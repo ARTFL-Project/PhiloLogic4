@@ -10,7 +10,7 @@
                 r_status += " Still working..."
             %>
             <div id="search_arguments">
-                Searching database for <b>${q['q']}</b><br>
+                Searching database for <b>${q['q'].decode('utf-8', 'ignore')}</b><br>
                 Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
             </div>
             % if end != 0:

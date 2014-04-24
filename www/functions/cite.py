@@ -21,8 +21,8 @@ def make_abs_div_cite(db, config, i):
     except IndexError:
         sub_section_name = section_name
     title = '<a href="%s">%s</a>' % (doc_href, i.doc.title.strip())
-    cite = u"<span class='philologic_cite'>%s <i>%s</i>" % (i.doc.author.strip(),title)
-    #cite = u"<span class='philologic_cite'><i>%s</i>" % (title)
+    #cite = u"<span class='philologic_cite'>%s <i>%s</i>" % (i.doc.author.strip(),title)
+    cite = u"<span class='philologic_cite'><i>%s</i>" % (title)
     date = i.doc.date
     if date:
         cite += " [%s]" % str(date)

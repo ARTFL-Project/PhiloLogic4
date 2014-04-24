@@ -19,11 +19,7 @@
     border-top: solid 1px #ECECEC;
     float:left;
     overflow: hidden;
-    opacity: 0;
-    max-height: 0;
-    -moz-transition: all 250ms ease-out;
-    -webkit-transition: all 250ms ease-out;
-    transition: all 250ms ease-out;
+    display: none;
 }
 .search_box {
     width: 250px;
