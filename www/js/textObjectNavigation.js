@@ -12,7 +12,7 @@ $(document).ready(function() {
     });
     //
     // This is to display the table of contents in the document viewer
-    var db_url = db_locals['db_url'];
+    var db_url = webConfig['db_url'];
     if ($('#next_obj').length) {
         back_forward_button_reload(db_url);
     }

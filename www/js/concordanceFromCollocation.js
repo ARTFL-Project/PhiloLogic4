@@ -5,7 +5,7 @@ $(document).ready(function() {
     $('#form_body').hide();
     $('.close_concordance').hide();
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
-    var db_url = db_locals['db_url'];
+    var db_url = webConfig['db_url'];
     var q_string = window.location.search.substr(1);
     getCitationWidth()
     $(window).resize(function() {

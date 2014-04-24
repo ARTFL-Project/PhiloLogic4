@@ -11,7 +11,7 @@
                         </div>
                     </div>
                     <div id="philo_branding">
-                            <img src="${db.locals['db_url']}/css/images/philo.png" height="45" width="125"/>
+                            <img src="${config.db_url}/css/images/philo.png" height="45" width="125"/>
                     </div>
                 </div>
             </div> <!-- /footer -->

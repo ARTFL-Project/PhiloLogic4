@@ -18,21 +18,37 @@ sub_date = re.compile('date=[^&]*')
 def time_series(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
+    config = f.WebConfig()
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
     else:
-        if q['start_date']:
-            q['metadata']['date'] = '%s-' % q['start_date']
-        if q['end_date']:
-            if 'date' in q['metadata']:
-                q['metadata']['date']+= '%s' % q['end_date']
-            else:
-                q['metadata']['date'] = '-%s' % q['end_date']
-        biblio_criteria = " ".join([k + "=" + v for k,v in q["metadata"].iteritems() if v])
+        c = db.dbh.cursor()
+        c.execute('select date from toms where philo_type="doc"')
+        dates = []
+        for i in c.fetchall():
+            try:
+                dates.append(int(i[0]))
+            except ValueError:
+                pass
+        if not q['start_date']:
+            q['start_date'] = str(min(dates))
+        q['metadata']['date'] = '%s' % q['start_date']
+        if not q['end_date']:
+            q['end_date'] = str(max(dates))
+        q['metadata']['date'] += '-%s' % q['end_date']
+        biblio_criteria = []
+        for k,v in q['metadata'].iteritems():
+            if v and k != "date":
+                close_icon = '<span class="ui-icon ui-icon-circle-close remove_metadata" data-metadata="%s"></span>' % k
+                if k in config.metadata_aliases:
+                    k = config.metadata_aliases[k]
+                biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b> %s</span>' % (k.title(), v.decode('utf-8', 'ignore'), close_icon))
+        biblio_criteria = ' '.join(biblio_criteria)
         results = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         frequencies, date_counts = generate_time_series(q, db, results)
         return render_template(frequencies=frequencies,db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
-                               biblio_criteria=biblio_criteria, date_counts=date_counts, total=len(results),report="time_series")
+                               biblio_criteria=biblio_criteria, date_counts=date_counts,
+                               config=config, total=len(results),report="time_series")
 
 def generate_time_series(q, db, results):    
     """reads through a hitlist."""

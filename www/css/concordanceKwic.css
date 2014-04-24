@@ -126,7 +126,7 @@
     margin-right: 31px;
     line-height: 130%;
     color: #555;
-    top: 258px;
+    top: 305px;
 }
 .sidebar_option {
     padding-left: 1em;
@@ -139,7 +139,6 @@
     background-color: #EBEBEB;
     color: black;
 }
-
 /* Concordance styling for theater */
 speaker {
     font-weight: 700;

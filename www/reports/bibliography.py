@@ -36,10 +36,16 @@ def fetch_bibliography(f,path, db, dbname, q, environ):
     if q['format'] == "json":
         return hits
     else:
-        biblio_criteria = " ".join([k + "=" + v for k,v in q["metadata"].iteritems() if v])
+        config = f.WebConfig()
+        biblio_criteria = []
+        for k,v in q["metadata"].iteritems():
+            if v:
+                close_icon = '<span class="ui-icon ui-icon-circle-close remove_metadata" data-metadata="%s"></span>' % k
+                biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b> %s</span>' % (k.title(), v.decode('utf-8', 'ignore'), close_icon))
+        biblio_criteria = ' '.join(biblio_criteria)
         return render_template(results=hits,db=db,dbname=dbname,q=q, template_name='bibliography.mako',
                            results_per_page=q['results_per_page'], f=f, biblio_criteria=biblio_criteria,
-                           report="bibliography")
+                           config=config, report="bibliography")
     
 def group_by_author(hits, db, author="author"):
     object_level = db.locals['default_object_level']

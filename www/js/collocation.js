@@ -1,7 +1,7 @@
 $(document).ready(function() {
     if (sessionStorage[window.location.href] == null) {
         collocation_cloud(mergeCollocResults(all_colloc)[1]);
-        var db_url = db_locals['db_url'];
+        var db_url = webConfig['db_url'];
         var colloc_hits = parseInt($('#colloc_hits').html());
         $('#progress_bar').css('width', $('#collocation_table').width() - 5);
         $('#progress_bar').progressbar({max: colloc_hits});
