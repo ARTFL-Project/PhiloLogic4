@@ -10,14 +10,18 @@
         </p>
     </div>
     <div id='initial_report'>
-        <p id='description'>
+        <div id='description'>
             <%
              start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
             %>
-            ${q['collocate_num']} occurences of collocate "${q['collocate'].decode('utf-8', 'ignore')}" in the vicinity of "${q['q'].decode('utf-8', 'ignore')}":
+            <div id="search_arguments">
+                Displaying ${q['collocate_num']} occurences of collocate <b>${q['collocate'].decode('utf-8', 'ignore')}</b> in the vicinity of <b>${q['q'].decode('utf-8', 'ignore')}</b><br>
+                Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
+            </div>
+            
             <br><br><span id='colloc_in_hits'></span> occurences in
             hits <span class="start">${start}</span> - <span class="end">${end}</span>
-        </p>
+        </div>
     </div>
     <% occurences = 0 %>
     <div id="results_container" class="results_container">
@@ -31,7 +35,7 @@
                     <div class="citation cite_gradient" style="overflow:hidden;">
                         <span class='hit_n'>${n}.</span>
                         <span class="cite" style="display: inline-block;overflow:hidden;white-space: nowrap;text-overflow:ellipsis;-o-text-overflow:ellipsis;">
-                            ${f.cite.make_abs_div_cite(db,i)}
+                            ${f.cite.make_abs_div_cite(db,config, i)}
                         </span>
                         <span class="more_context_and_close">
                             <span class="more_context">More</span>

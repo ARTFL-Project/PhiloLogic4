@@ -116,10 +116,9 @@ $(document).ready(function() {
     }
     $('#report').find('label').click(function() {
         var report = $(this).attr('for');
-        if ($("#search_elements").css('max-height') != 0) {
+        if ($("#search_elements").css('display') != 'none') {
             showHide(report);
             if (report != "frequencies") {
-                var form_height = $(window).height() - $('#header').height() - $('#footer').height() - $('#initial_form').height();
                 $("#search_elements").css('opacity', 0)
                     .slideDown(200)
                     .animate(
@@ -356,7 +355,7 @@ function autoCompleteMetadata(metadata, field, db_url) {
 
 // Display different search parameters based on the type of report used
 function showHide(value) {
-    $("#results_per_page, #collocation_num, #time_series_num, #year_interval, #method, #metadata_fields").hide();
+    $("#results_per_page, #collocation_num, #time_series_num, #date_range, #method, #metadata_fields").hide();
     $('[id^="explain_"]').hide();
     $("[id$='_question']").hide();
     $('#bottom_search').hide()
@@ -378,7 +377,7 @@ function showHide(value) {
         $('#relev_question').show();
     }
     if (value == "time_series") {
-        $("#time_series_num, #year_interval, #method, #metadata_fields").show();
+        $("#time_series_num, #date_range, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').hide();
         $('#time_question').show();
         $('#date').val('');
@@ -393,7 +392,6 @@ function showHide(value) {
 
 //  Function to show or hide search options
 function showMoreOptions(display) {
-    var form_height = $(window).height() - $('#header').height() - $('#footer').height() - $('#initial_form').height();
     $("#more_options").button('option', 'label', 'Hide search options');
     if (display == "all") {
         var report = $('input[name=report]:checked', '#search').val();
@@ -405,7 +403,7 @@ function showMoreOptions(display) {
               { queue: false, duration: 200 }
             );
     }
-    $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': '100%'});
+    $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': 'auto'});
     setTimeout(searchFormOverlap, 200);
     $("#search_overlay, #header, #footer").click(function() {
         hideSearchForm();

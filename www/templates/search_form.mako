@@ -157,7 +157,7 @@
 						<input type='text' name="start_date" id="start_date" style="width:35px;">
 						<span class="search_field"> to </span>
 						<input type='text' name="end_date" id="end_date" style="width:35px;">
-                <tr class="table_row" id="year_interval">
+                <tr class="table_row" id="date_range">
 					<td class="first_column">
 						<span class="search_field">Year interval:</span>
 					</td>
