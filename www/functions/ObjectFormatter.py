@@ -35,7 +35,6 @@ def adjust_bytes(bytes, length):
     return new_bytes, byte_start
 
 def format(text,bytes=[]):
-#    print >> sys.stderr, "TEXT:",text
     parser = etree.XMLParser(recover=True)
     if bytes:
         new_text = ""
@@ -46,7 +45,6 @@ def format(text,bytes=[]):
         text = new_text + text[last_offset:]
     text = "<div>" + text + "</div>"
     xml = FragmentParser.parse(text)
-    print >> sys.stderr, "RAW_XML",etree.tostring(xml)
     for el in xml.iter():        
         try:
             if el.tag == "sc" or el.tag == "scx":
@@ -56,6 +54,8 @@ def format(text,bytes=[]):
                 el.tag = "b"
                 el.attrib["class"] = "headword"
                 el.append(etree.Element("br"))
+            elif el.tag == "ab":
+                el.tag = "l"
             elif el.tag == "pb" and "fac" in el.attrib and "n" in el.attrib:
                 el.tag = "p"
                 el.append(etree.Element("a"))
@@ -120,6 +120,8 @@ def format_concordance(text,bytes=[]):
     for el in xml.iter():
         if el.tag not in allowed_tags:
             el.tag = 'span'
+        if "id" in el.attrib:  ## kill ids in order to avoid the risk of having duplicate ids in the HTML
+            del el.attrib["id"]
         if el.tag == "sc" or el.tag == "scx":
             el.tag = "span"
             el.attrib["class"] = "small-caps"

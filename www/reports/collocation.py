@@ -33,20 +33,15 @@ def collocation(environ,start_response):
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ) ## the default should be an error message
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-    biblio_criteria = []
-    for k,v in q["metadata"].iteritems():
-        if v:
-            close_icon = '<span class="ui-icon ui-icon-circle-close remove_metadata" data-metadata="%s"></span>' % k
-            if k in config.metadata_aliases:
-                k = config.metadata_aliases[k]
-            biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b> %s</span>' % (k.title(), v.decode('utf-8', 'ignore'), close_icon))
-    biblio_criteria = ' '.join(biblio_criteria)
+    biblio_criteria = f.biblio_criteria(q, config)
+    search_examples = f.search_examples(db, config)
     all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q, db)
     hit_len = len(hits)
     return render_template(all_colloc=all_colloc, left_colloc=left_colloc, right_colloc=right_colloc,
                            db=db,dbname=dbname,q=q,f=f,path=path, results_per_page=q['results_per_page'],
                            hit_len=hit_len, order=sort_to_display,dumps=json.dumps,biblio_criteria=biblio_criteria,
-                           config=config, template_name='collocation.mako', report="collocation")
+                           search_examples=search_examples,config=config, template_name='collocation.mako',
+                           report="collocation")
 
 def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True, stopwords=True):
     config = f.WebConfig()

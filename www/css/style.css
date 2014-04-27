@@ -129,15 +129,13 @@ input[type=text]:focus {
 h1 {
   margin: 0;
   padding: 0;
-  font-weight: normal;
   color: #555;
   line-height: 1.2em;
 }
 h3 {
     font-family: inherit !important;
     font-size: inherit !important;
-    font-weight: 400 !important;
-    text-decoration: underline;
+    font-weight: 700 !important;
 }
 ol {
     list-style-type: none;

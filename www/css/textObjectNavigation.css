@@ -174,10 +174,6 @@ sp lb:first-of-type {
     content: "";
     white-space: normal;
 }
-ab::before {
-    content:"\A";
-    white-space:pre;
-}
 sp {
     display: block;
 }
@@ -188,17 +184,9 @@ sp::before {
 fw, join {
     display: none;
 }
-stage::before {
-    content:"\A";
-    white-space:pre;
-}
 speaker+stage::before {
     content: "";
     white-space: normal;
-}
-ab+stage::before {
-    content:"\A";
-    white-space:pre;
 }
 stage {
     font-style: italic;
@@ -212,6 +200,12 @@ speaker {
 }
 l {
     display: block;
+}
+l::before {
+    content:attr(n) "\0020\0020\0020";
+    font-family: 'Droid Sans Mono', sans-serif;
+    color: #bababa;
+    font-size: .7em;
 }
 
 #image_container {

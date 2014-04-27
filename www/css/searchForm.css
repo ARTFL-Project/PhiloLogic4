@@ -17,7 +17,6 @@
     margin-top: 10px;
     padding-left: 30px;
     border-top: solid 1px #ECECEC;
-    float:left;
     overflow: hidden;
     display: none;
 }
@@ -50,24 +49,17 @@
     text-align: center;
 }
 #search_explain {
-    margin-left: 420px;
-	width: 399px;
-	margin-top: 10px;
-	padding-top:10px;
-	padding-left: 10px;
-	text-align: justify;
-    font-family: inherit !important;
-	padding-right: 10px;
-	border-top: solid 1px #ECECEC;
-    display: none;
-	position: absolute;
+    float: right;
+    margin-top: -5px;
+    margin-right: 10px;
 }
-#explain_conc, #explain_relev, #explain_colloc, #explain_time, #explain_kwic {
-    display: none;
+#search_explain .ui-button-text {
+    padding: 0.4em;
+    font-weight: 700;
 }
-#concordance_question, #kwic_question, #relev_question, #colloc_question, #time_question, #explain_conc, #explain_relev, #explain_colloc, #explain_time, #explain_kwic {
-    margin-left: 65px;
-    margin-right: 15px;
+#explain_concordance, #explain_relevance, #explain_collocation, #explain_time_series, #explain_kwic {
+    display: none;
+	font-weight: 300;
 }
 
 #syntax_title {
@@ -107,7 +99,4 @@
     width: 100%;
     height: 0px;
     z-index: 90;
-  /*  -moz-transition: opacity 250ms;
-    -webkit-transition: opacity 250ms;
-    transition: opacity 250ms;*/
 }

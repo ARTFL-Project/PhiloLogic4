@@ -22,15 +22,17 @@ def navigation(environ,start_response):
     if q['format'] == "json":
         obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
         return json.dumps(obj_text)
+    search_examples = f.search_examples(db, config)
     if obj.philo_type == 'doc':
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c")
+                       search_examples=search_examples, db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c")
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
     prev = ' '.join(obj.prev.split()[:7])
     next = ' '.join(obj.next.split()[:7])
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
                        db=db,q=q,obj_text=obj_text,prev=prev,next=next,config=config,
-                       template_name='object.mako', report="navigation")
+                       search_examples=search_examples, template_name='object.mako',
+                       report="navigation")
 
 def navigate_doc(obj, db):
     conn = db.dbh 
