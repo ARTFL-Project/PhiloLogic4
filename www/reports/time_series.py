@@ -94,9 +94,10 @@ def date_total_count(date, db, interval):
     dates = [date]
     if interval == '10':
         dates.append(date + 9)
+    elif interval == "50":
+        dates.append(date + 49)
     else:
         dates.append(date + 99)
-    #query = '''select count(*) from words where doc_ancestor in (select philo_id from toms where date between "%d" and "%d")''' % (tuple(dates))
     query = 'select sum(word_count) from toms where date between "%d" and "%d"' % tuple(dates)
     
     c = db.dbh.cursor()

@@ -2,7 +2,7 @@
 <%include file="search_form.mako"/>
 <div id='philologic_response'>
     <div id='object_title'>
-        <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,config, obj)}</span>
+        <span class='philologic_cite'>${f.biblio_citation(db,config, obj)}</span>
     </div>
     <div id="page_display">
         <div id="prev_obj_wrapper">

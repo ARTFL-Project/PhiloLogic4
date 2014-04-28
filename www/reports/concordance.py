@@ -21,7 +21,7 @@ def concordance(environ,start_response):
     if q['format'] == "json":
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
-        formatted_results = [{"citation": f.cite.make_abs_div_cite(db,i),
+        formatted_results = [{"citation": f.concordance_citation(db,config, i),
                               "text": fetch_concordance(i, path, config.concordance_length)} for i in hits[start - 1:end]]
         return json.dumps(formatted_results)
     if q['q'] == '':
