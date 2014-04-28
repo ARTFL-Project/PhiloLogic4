@@ -38,10 +38,9 @@ def fetch_bibliography(f,path, db, dbname, q, environ):
     else:
         config = f.WebConfig()
         biblio_criteria = f.biblio_criteria(q, config)
-        search_examples = f.search_examples(db, config)
         return render_template(results=hits,db=db,dbname=dbname,q=q, template_name='bibliography.mako',
                            results_per_page=q['results_per_page'], f=f, biblio_criteria=biblio_criteria,
-                           search_examples=search_examples, config=config, report="bibliography")
+                           config=config, report="bibliography")
     
 def group_by_author(hits, db, author="author"):
     object_level = db.locals['default_object_level']

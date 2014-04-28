@@ -29,11 +29,9 @@ def concordance(environ,start_response):
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         biblio_criteria = f.biblio_criteria(q, config)
-        search_examples = f.search_examples(db, config)
         return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
                                f=f, path=path, results_per_page=q['results_per_page'],biblio_criteria=biblio_criteria,
-                               search_examples=search_examples, config=config,template_name="concordance.mako",
-                               report="concordance")
+                               config=config,template_name="concordance.mako", report="concordance")
 
 def fetch_concordance(hit, path, context_size):
     ## Determine length of text needed

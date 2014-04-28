@@ -28,10 +28,9 @@ def kwic(environ,start_response):
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         biblio_criteria = f.biblio_criteria(q, config)
-        search_examples = f.search_examples(db, config)
         return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
                                 path=path, results_per_page=q['results_per_page'], biblio_criteria=biblio_criteria,
-                                search_examples=search_examples,config=config, template_name='kwic.mako', report="kwic")
+                                config=config, template_name='kwic.mako', report="kwic")
 
 def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
     kwic_results = []

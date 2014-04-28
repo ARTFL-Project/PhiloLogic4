@@ -382,6 +382,7 @@ class Loader(object):
         
         ## Write configuration variables for the Web application
         web_config = open(self.destination + "/web_config.cfg", "w")
+        print >> web_config, "# -*- coding: utf-8 -*-"
         print >> web_config, "####################################################"
         print >> web_config, "#### Web configuration options for PhiloLogic4 #####"
         print >> web_config, "####################################################"
@@ -393,7 +394,7 @@ class Loader(object):
         print >> web_config, "\n# The db_url variable is the root URL for your database on the web"
         print >> web_config, "db_url = '%s'" % extra_locals['db_url']
         print >> web_config, "\n# The search_reports variable sets which search report is viewable in the search form"
-        print >> web_config, "# The default value is a Python list: ['concordance', 'kwic', 'collocation', 'time_series']"
+        print >> web_config, "# If the value is None, PhiloLogic4 will use this default: ['concordance', 'kwic', 'collocation', 'time_series']"
         print >> web_config, "search_reports = None"
         print >> web_config, "\n# The metadata variable sets which metadata field is viewable in the search form"
         print >> web_config, "metadata = %s" % self.metadata_fields
@@ -402,11 +403,18 @@ class Loader(object):
         print >> web_config, "# metadata_aliases = {'who': 'Speaker', 'create_date', 'Date'}"
         print >> web_config, "metadata_aliases = None"
         print >> web_config, "\n# The facets variable sets which metadata field can be used as a facet"
-        print >> web_config, "# The default value is the value of metadata"
+        print >> web_config, "# If the value is None, PhiloLogic4 will use the value of metadata"
         print >> web_config, "facets = None"
         print >> web_config, "\n# The concordance_length variable sets the length in bytes of each concordance result"
-        print >> web_config, "# The default value is 300"
+        print >> web_config, "# If the value is None, PhiloLogic4 will use a default of 300"
         print >> web_config, "concordance_length = None"
+        print >> web_config, "\n# The search_examples variable defines which examples should be provided"
+        print >> web_config, "# for each searchable field in the search form."
+        print >> web_config, "# If None is the value, or there are any missing examples, defaults will be generated"
+        print >> web_config, "# at runtime by picking the first result for any given field."
+        print >> web_config, "# If you wish to change these default values, you should configure them here like so:"
+        print >> web_config, '# search_examples = {"author": "Jean-Jacques Rousseau", "title": "Du contrat social"}'
+        print >> web_config, "search_examples = None"
         print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")
 
                 

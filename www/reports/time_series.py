@@ -37,12 +37,11 @@ def time_series(environ,start_response):
             q['end_date'] = str(max(dates))
         q['metadata']['date'] += '-%s' % q['end_date']
         biblio_criteria = f.biblio_criteria(q, config, time_series=True)
-        search_examples = f.search_examples(db, config)
         results = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         frequencies, date_counts = generate_time_series(q, db, results)
         return render_template(frequencies=frequencies,db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
                                biblio_criteria=biblio_criteria, date_counts=date_counts,
-                               search_examples=search_examples, config=config, total=len(results),report="time_series")
+                               config=config, total=len(results),report="time_series")
 
 def generate_time_series(q, db, results):    
     """reads through a hitlist."""

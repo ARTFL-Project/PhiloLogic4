@@ -138,7 +138,7 @@
                             </td>
 							<td>
                                 <input type='text' name='${facet}' id="${facet}" class="search_box">
-                                (e.g., ${search_examples[facet]})
+                                (e.g., ${config.search_examples[facet]})
                             </td>
 						</tr>
                     % endfor
