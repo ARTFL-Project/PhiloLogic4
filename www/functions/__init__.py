@@ -1,5 +1,4 @@
 import link
-import cite
 import IRHitWrapper
 from cite import concordance_citation, biblio_citation
 from get_text import get_text, get_page_text, get_text_obj

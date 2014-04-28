@@ -403,7 +403,8 @@ function showMoreOptions(display) {
               { queue: false, duration: 200 }
             );
     }
-    $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': 'auto'});
+    var height = $(document).height() - $(header).height() - $(footer).height();
+    $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': height});
     setTimeout(searchFormOverlap, 200);
     $("#search_overlay, #header, #footer").click(function() {
         hideSearchForm();
