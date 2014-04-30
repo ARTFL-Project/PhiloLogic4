@@ -28,7 +28,7 @@
 </script>
 <div id='philologic_response'>
     <div id='t_o_c_title'>
-        <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,config, obj)}</span>
+        <span class='philologic_cite'>${f.biblio_citation(db,config, obj)}</span>
     </div>
     % if db.locals['debug'] == True:
         <button id="show_header">Show Header</button>

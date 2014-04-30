@@ -77,7 +77,6 @@ function concordance_kwic_switch(db_url) {
                 History.pushState(null, '', new_url);
             }
             $("#report").buttonset("refresh");
-            display_options_on_selected();
             fetchMoreContext();
             getCitationWidth();
             $('.more').find('a').each(function() {

@@ -46,7 +46,7 @@ $(document).ready(function() {
     
     ////// jQueryUI theming //////
     $("#button, #button1, #reset_form, #reset_form1, #hide_search_form, #more_options, .more_context").button();
-    $('#button2').button();
+    $('#button2, #search_explain').button();
     $("#page_num, #field, #method, #year_interval").buttonset();
     $("#word_num").spinner({
         spin: function(event, ui) {
@@ -62,12 +62,7 @@ $(document).ready(function() {
     $("#word_num").val(5);
     $("#show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
     $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
-    $('#search_explain').accordion({
-        collapsible: true,
-        heightStyle: "content",
-        active: false,
-        animate: "swing"
-    });
+    
     $('.ui-spinner').css('width', '45px')
     $(':text').addClass("ui-corner-all");
     
@@ -86,7 +81,6 @@ $(document).ready(function() {
         $('.book_page').css('z-index', 90);
         if ($(this).text() == "Show search options") {
             showMoreOptions("all");
-            $('#search_explain').fadeIn(200); 
         } else {
             hideSearchForm();
         }
@@ -98,42 +92,35 @@ $(document).ready(function() {
         $('#more_options').hide();
         showHide('concordance');
         $(window).load(function() {
-            $('#search_explain').fadeIn(200);
             $('#search_elements').css('opacity', 0)
-                .slideDown(200)
+                .slideDown({'duration': 600, 'easing': 'easeOutSine'})
                 .animate(
                   { opacity: 1 },
-                  { queue: false, duration: 200 }
+                  { queue: false, duration: 600, 'easing': 'easeOutSine' }
                 );
-            $('#conc_question').fadeIn(200);
-            setTimeout(searchFormOverlap, 200);
+            setTimeout(searchFormOverlap, 600);
         });
     } else {
         $('#initial_form').css({'max-height': '94px', 'opacity': 100});
-        $("[id$='_question']").hide();
-        $('#search_explain').hide();
         showHide($('input[name=report]:checked', '#search').val());
     }
     $('#report').find('label').click(function() {
         var report = $(this).attr('for');
-        if ($("#search_elements").css('max-height') != 0) {
+        if ($("#search_elements").css('display') != 'none') {
             showHide(report);
             if (report != "frequencies") {
-                var form_height = $(window).height() - $('#header').height() - $('#footer').height() - $('#initial_form').height();
                 $("#search_elements").css('opacity', 0)
-                    .slideDown(200)
+                    .slideDown({'duration': 300, 'easing': 'easeOutSine'})
                     .animate(
                       { opacity: 1 },
-                      { queue: false, duration: 200 }
+                      { queue: false, duration: 300, 'easing': 'easeOutSine' }
                     );
-                $('#search_explain').fadeIn(200);
             }
             showMoreOptions();
         } else {
             showHide(report);
             if (report != "frequencies") {
                 $("#search_elements").fadeIn();
-                $('#search_explain').fadeIn();
             }
             showMoreOptions();
         }
@@ -200,6 +187,7 @@ $(document).ready(function() {
     
     $('#syntax').offset({"left":  $('#q').offset().left});
     
+    
     $('#syntax_title').mouseup(function() {
         if ($('#syntax_explain').not(':visible')) {
             $('#syntax_explain').fadeIn('fast');
@@ -221,14 +209,31 @@ $(document).ready(function() {
     
     /// Make sure search form doesn't cover footer
     $(window).resize(function() {
-        searchFormOverlap(form_offset);
+        searchFormOverlap();
     });
     
     adjustReportWidth();
     adjustBottomBorder();
     
-    
     metadataRemove();
+    
+    // Display help menu on click
+    $('#search_explain').click(function(e) {
+        e.preventDefault();
+        $('div[id^="explain"]').hide();
+        var report = $("#report").find('input:checked').attr('id');
+        $("#explain_" + report).show();
+        var title = $("#explain_" + report).data('title');
+        $('#search_explain_content').show().dialog({
+            position: { my: "center", at: "top+300", of: window },
+            //title: title,
+            draggable: false,
+            resizable: false,
+            height:"auto",
+            width: 400,
+            modal: true,
+        });
+    });
     
     // Add spinner to indicate that a query is running in the background
     $('#button, #button1').click(function( event ) {
@@ -356,36 +361,30 @@ function autoCompleteMetadata(metadata, field, db_url) {
 
 // Display different search parameters based on the type of report used
 function showHide(value) {
-    $("#results_per_page, #collocation_num, #time_series_num, #year_interval, #method, #metadata_fields").hide();
-    $('[id^="explain_"]').hide();
-    $("[id$='_question']").hide();
+    $("#results_per_page, #collocation_num, #time_series_num, #date_range, #method, #metadata_fields").hide();
     $('#bottom_search').hide()
     if (value == 'collocation') {
         $("#collocation_num, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
-        $('#colloc_question').show();
         $('#search_terms_container').slideDown(300);
     }
     if (value == 'kwic' || value == "concordance") {
         $("#results_per_page, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
-        $('#' + value + '_question').show();
         $('#start_date, #end_date').val('');
         $('#search_terms_container').slideDown(300);
     }
     if (value == 'relevance') {
         $("#results_per_page").show();
-        $('#relev_question').show();
     }
     if (value == "time_series") {
-        $("#time_series_num, #year_interval, #method, #metadata_fields").show();
+        $("#time_series_num, #date_range, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').hide();
-        $('#time_question').show();
         $('#date').val('');
         $('#search_terms_container').slideDown(300);
     }
     if (value == "frequencies") {
-        $('#search_terms_container, #search_explain, #method, #results_per_page').hide();
+        $('#search_terms_container, #method, #results_per_page').hide();
         $('#metadata_fields, #bottom_search').show();   
     }
     adjustBottomBorder();
@@ -393,36 +392,30 @@ function showHide(value) {
 
 //  Function to show or hide search options
 function showMoreOptions(display) {
-    var form_height = $(window).height() - $('#header').height() - $('#footer').height() - $('#initial_form').height();
     $("#more_options").button('option', 'label', 'Hide search options');
     if (display == "all") {
         var report = $('input[name=report]:checked', '#search').val();
         showHide(report);
         $("#search_elements").css('opacity', 0)
-            .slideDown(200)
+            .slideDown({'duration': 300, 'easing': 'easeOutSine'})
             .animate(
               { opacity: 1 },
-              { queue: false, duration: 200 }
+              { queue: false, duration: 300, 'easing': 'easeOutSine' }
             );
     }
-    $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': '100%'});
-    setTimeout(searchFormOverlap, 200);
+    var height = $(document).height() - $(header).height() - $(footer).height();
+    $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': height});
+    setTimeout(searchFormOverlap, 300);
     $("#search_overlay, #header, #footer").click(function() {
         hideSearchForm();
     });
 }
 
 function hideSearchForm() {
-    $('#search_explain').accordion({
-        collapsible: true,
-        heightStyle: "content",
-        active: false
-    });
-    $("#search_elements").slideUp(200);
+    $("#search_elements").slideUp(300);
     $("#search_overlay").css({'height': '0px', 'opacity': 0});
     $("#more_options").button('option', 'label', 'Show search options');
-    $('#search_explain').fadeOut(200);
-    setTimeout(searchFormOverlap, 200);
+    setTimeout(searchFormOverlap, 300);
 }
 
 (function($)

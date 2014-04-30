@@ -2,6 +2,8 @@
 
 import os
 import sys
+from json import dumps
+from search_utilities import search_examples
 
 class WebConfig(object):
     
@@ -12,8 +14,13 @@ class WebConfig(object):
             execfile(path, globals(), self.config)
         except SyntaxError:
             raise SyntaxError
+        for i in self.config['metadata']:
+            if i not in self.config['search_examples']:
+                self.config['search_examples'][i] = search_examples(i)
+            else:
+                self.config['search_examples'][i] = self.config['search_examples'][i].decode('utf-8', 'ignore')
         self.options = set(['db_url', 'dbname', 'concordance_length', 'facets', 'metadata',
-                        'search_reports', 'metadata_aliases'])
+                        'search_reports', 'metadata_aliases', 'search_examples'])
     
     def __getattr__(self, attr):
         if attr in self.options:
@@ -24,9 +31,9 @@ class WebConfig(object):
                 else:
                     return config_option
             except KeyError:
-                print >> sys.stderr, "### Web Configuration Warning ###"
-                print >> sys.stderr, "The %s variable does not exist in your web_config.cfg file" % attr
-                print >> sys.stderr, "If you wish to override the default value, please add it to your web_config.cfg file"
+                #print >> sys.stderr, "### Web Configuration Warning ###"
+                #print >> sys.stderr, "The %s variable does not exist in your web_config.cfg file" % attr
+                #print >> sys.stderr, "If you wish to override the default value, please add it to your web_config.cfg file"
                 config_option = self.load_defaults(attr)
                 return config_option
         else:
@@ -43,9 +50,9 @@ class WebConfig(object):
                 else:
                     return config_option
             except KeyError:
-                print >> sys.stderr, "### Web Configuration Warning ###"
-                print >> sys.stderr, "The %s variable does not exist in your web_config file.cfg" % item
-                print >> sys.stderr, "If you wish to override the default value, please add it to your web_config.cfg file"
+                #print >> sys.stderr, "### Web Configuration Warning ###"
+                #print >> sys.stderr, "The %s variable does not exist in your web_config file.cfg" % item
+                #print >> sys.stderr, "If you wish to override the default value, please add it to your web_config.cfg file"
                 config_option = self.load_defaults(item)
                 return config_option
         else:
@@ -64,3 +71,7 @@ class WebConfig(object):
             return {}
         else:
             return False
+        
+    def JSONify(self):
+        config_obj = dict([(option, self[option]) for option in self.options])
+        return dumps(config_obj)

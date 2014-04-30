@@ -2,12 +2,12 @@
 <!doctype html>
 <html>
 <head>
-    <title>${dbname.title()}</title>
+    <title>${config.dbname.decode('utf-8', 'ignore')}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
  
     <!--Load the web config and global_report variable to use in the JavaScript code-->
     <script>
-        var webConfig = ${dict([(option, config[option]) for option in config.options])}; /* loading the web_config in javascript */
+        var webConfig = ${config.JSONify()}; /* loading the web_config in javascript */
         var global_report = "${report}";    
     </script>
     
@@ -16,7 +16,7 @@
     <!--Load all required CSS-->
     <link rel="shortcut icon" href="${config.db_url}/favicon.ico" type="image/x-icon">
     <link rel="icon" href="${config.db_url}/favicon.ico" type="image/x-icon">   
-    <link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css" rel="stylesheet" />
+    <link type="text/css" href="${config.db_url}/css/philologic-theme/jquery-ui-1.10.4.custom.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="${config.db_url}/css/style.css" type="text/css" media="screen, projection">
     <link rel="stylesheet" href="${config.db_url}/css/searchForm.css" type="text/css" media="screen, projection">
     % if report == "concordance" or report == "kwic" or report == "concordance_from_collocation" or report == "bibliography":
@@ -29,7 +29,7 @@
     
     <!--Load all required JavaScript-->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" type="text/javascript"></script>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
     <script type="text/javascript" src="${config.db_url}/js/plugins/jquery.history.js"></script>
     <%
     reports = {"landing_page": ["common.js"], "concordance": ["common.js", "sidebar.js", "/plugins/jquery.hoverIntent.minified.js", "concordanceKwic.js"],
@@ -55,7 +55,7 @@
                     </ul>             
                 </div>
                 <div id="site-name">
-                    <h1><a href="${config.db_url}/" title="${dbname.title()}">${config.dbname.title()}</a></h1>           
+                    <a href="${config.db_url}/" title="${dbname}">${config.dbname.decode('utf-8', 'ignore')}</a>           
                 </div>
                 
             </div>

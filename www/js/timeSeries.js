@@ -117,9 +117,6 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         $('#progress_bar').progressbar({value: total});
         $('.progress-label').text('Complete!');
         $("#progress_bar").delay(500).slideUp();
-        
-        // Make sure all animations and CSS transformations are complete
-        // setTimeout(saveTimeSeries, 5000); // buggy for now
     }
 }
 

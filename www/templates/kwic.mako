@@ -36,9 +36,9 @@
                 <div class="kwic_line">
                     % if len(str(end)) > len(str(current_pos)):
                         <% spaces = ' ' * (len(str(end)) - len(str(current_pos))) %>
-                        <span id="position" style="white-space:pre-wrap;">${current_pos}.${spaces}</span>
+                        <span style="white-space:pre-wrap;">${current_pos}.${spaces}</span>
                     % else:
-                        <span id="position">${current_pos}.</span>    
+                        <span>${current_pos}.</span>    
                     % endif
                     ${i}
                     <% current_pos += 1 %>
