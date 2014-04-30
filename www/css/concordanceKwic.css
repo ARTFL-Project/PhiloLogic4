@@ -47,6 +47,13 @@
 }
 
 /*Citations*/
+.cite {
+    display: inline-block;
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    -o-text-overflow:ellipsis; 
+}
 .philologic_cite a:not(:first-child) {
     font-weight: 400 !important;
     margin-left: 8px;

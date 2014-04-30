@@ -198,15 +198,6 @@ div1 div2::before {
 speaker {
     font-weight: 700;
 }
-l {
-    display: block;
-}
-l::before {
-    content:attr(n) "\0020\0020\0020";
-    font-family: 'Droid Sans Mono', sans-serif;
-    color: #bababa;
-    font-size: .7em;
-}
 
 #image_container {
     position: absolute;

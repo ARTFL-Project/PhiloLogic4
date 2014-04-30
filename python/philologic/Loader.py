@@ -368,7 +368,8 @@ class Loader(object):
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
         
         ## Write local variables used by libphilo
-        db_locals = open(self.destination + "/db.locals.py","w")        
+        db_locals = open(self.destination + "/db.locals.py","w")
+        print >> db_locals, "# -*- coding: utf-8 -*-"
         print >> db_locals, "metadata_fields = %s" % self.metadata_fields
         print >> db_locals, "metadata_hierarchy = %s" % self.metadata_hierarchy
         print >> db_locals, "metadata_types = %s" % self.metadata_types

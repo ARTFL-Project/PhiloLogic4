@@ -93,12 +93,12 @@ $(document).ready(function() {
         showHide('concordance');
         $(window).load(function() {
             $('#search_elements').css('opacity', 0)
-                .slideDown(200)
+                .slideDown({'duration': 600, 'easing': 'easeOutSine'})
                 .animate(
                   { opacity: 1 },
-                  { queue: false, duration: 200 }
+                  { queue: false, duration: 600, 'easing': 'easeOutSine' }
                 );
-            setTimeout(searchFormOverlap, 200);
+            setTimeout(searchFormOverlap, 600);
         });
     } else {
         $('#initial_form').css({'max-height': '94px', 'opacity': 100});
@@ -110,10 +110,10 @@ $(document).ready(function() {
             showHide(report);
             if (report != "frequencies") {
                 $("#search_elements").css('opacity', 0)
-                    .slideDown(200)
+                    .slideDown({'duration': 300, 'easing': 'easeOutSine'})
                     .animate(
                       { opacity: 1 },
-                      { queue: false, duration: 200 }
+                      { queue: false, duration: 300, 'easing': 'easeOutSine' }
                     );
             }
             showMoreOptions();
@@ -397,25 +397,25 @@ function showMoreOptions(display) {
         var report = $('input[name=report]:checked', '#search').val();
         showHide(report);
         $("#search_elements").css('opacity', 0)
-            .slideDown(200)
+            .slideDown({'duration': 300, 'easing': 'easeOutSine'})
             .animate(
               { opacity: 1 },
-              { queue: false, duration: 200 }
+              { queue: false, duration: 300, 'easing': 'easeOutSine' }
             );
     }
     var height = $(document).height() - $(header).height() - $(footer).height();
     $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': height});
-    setTimeout(searchFormOverlap, 200);
+    setTimeout(searchFormOverlap, 300);
     $("#search_overlay, #header, #footer").click(function() {
         hideSearchForm();
     });
 }
 
 function hideSearchForm() {
-    $("#search_elements").slideUp(200);
+    $("#search_elements").slideUp(300);
     $("#search_overlay").css({'height': '0px', 'opacity': 0});
     $("#more_options").button('option', 'label', 'Show search options');
-    setTimeout(searchFormOverlap, 200);
+    setTimeout(searchFormOverlap, 300);
 }
 
 (function($)

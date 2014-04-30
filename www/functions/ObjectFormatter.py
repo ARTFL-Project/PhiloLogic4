@@ -120,6 +120,8 @@ def format_concordance(text,bytes=[]):
     for el in xml.iter():
         if el.tag not in allowed_tags:
             el.tag = 'span'
+        elif el.tag == "ab":
+            el.tag = "l"
         if "id" in el.attrib:  ## kill ids in order to avoid the risk of having duplicate ids in the HTML
             del el.attrib["id"]
         if el.tag == "sc" or el.tag == "scx":

@@ -374,3 +374,13 @@ s {
 .remove_metadata:hover, #remove_metadata_date_start:hover, #remove_metadata_date_end:hover {
     cursor: pointer;
 }
+/*Text formatting*/
+l {
+    display: block;
+}
+l::before {
+    content:attr(n) "\0020\0020\0020";
+    font-family: 'Droid Sans Mono', sans-serif;
+    color: #bababa;
+    font-size: .7em;
+}

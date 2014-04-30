@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import os
+import sys
+import sqlite3
 from philologic.DB import DB
 
 def biblio_criteria(q, config, time_series=False):
@@ -30,7 +32,13 @@ def search_examples(field):
     else:
         c = db.dbh.cursor()
         object_type = db.locals['metadata_types'][field]
-        c.execute('select %s from toms where philo_type="%s" and %s!="" limit 1' % (field, object_type, field))
+        try:
+            if object_type != 'div':
+                c.execute('select %s from toms where philo_type="%s" and %s!="" limit 1' % (field, object_type, field))
+            else:
+                c.execute('select %s from toms where philo_type="div1" or philo_type="div2" or philo_type="div3" and %s!="" limit 1' % (field, field))
+        except sqlite3.OperationalError:
+            example = ''
         try:
             example = c.fetchone()[0].decode('utf-8', 'ignore')
         except TypeError:

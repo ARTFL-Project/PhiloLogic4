@@ -2,7 +2,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>${config.dbname}</title>
+    <title>${config.dbname.decode('utf-8', 'ignore')}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
  
     <!--Load the web config and global_report variable to use in the JavaScript code-->
@@ -55,7 +55,7 @@
                     </ul>             
                 </div>
                 <div id="site-name">
-                    <a href="${config.db_url}/" title="${dbname}">${config.dbname}</a>           
+                    <a href="${config.db_url}/" title="${dbname}">${config.dbname.decode('utf-8', 'ignore')}</a>           
                 </div>
                 
             </div>

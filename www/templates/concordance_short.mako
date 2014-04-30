@@ -7,7 +7,7 @@
     %>
     <div class="citation cite_gradient" style="overflow:hidden;">
         <span class='hit_n'>${n}.</span>
-        <span class="cite" style="display: inline-block;overflow:hidden;white-space: nowrap;text-overflow:ellipsis;-o-text-overflow:ellipsis;">
+        <span class="cite">
             ${f.concordance_citation(db,config, i)}
         </span>
         <span class="more_context_and_close">
