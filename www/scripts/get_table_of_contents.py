@@ -47,7 +47,7 @@ def get_table_of_contents(environ, start_response):
             id = i.philo_id[:7]
             link_id = '_'.join([str(j) for j in i.philo_id])
             href = f.link.make_absolute_object_link(config, id)
-            head_or_type = i.head or "[%s]" % i.type
+            head_or_type = i[i.type].head or "[%s]" % i.type
             html += '<span class="toc_link">'
             style = ""
             if i.type == "div2":
