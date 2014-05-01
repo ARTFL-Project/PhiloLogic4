@@ -14,11 +14,14 @@ class WebConfig(object):
             execfile(path, globals(), self.config)
         except SyntaxError:
             raise SyntaxError
+        if self.config['search_examples'] == None:
+            self.config['search_examples'] = {}
         for i in self.config['metadata']:
             if i not in self.config['search_examples']:
                 self.config['search_examples'][i] = search_examples(i)
             else:
                 self.config['search_examples'][i] = self.config['search_examples'][i].decode('utf-8', 'ignore')
+                
         self.options = set(['db_url', 'dbname', 'concordance_length', 'facets', 'metadata',
                         'search_reports', 'metadata_aliases', 'search_examples'])
     

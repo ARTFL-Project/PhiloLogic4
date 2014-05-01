@@ -41,6 +41,6 @@ def search_examples(field):
             example = ''
         try:
             example = c.fetchone()[0].decode('utf-8', 'ignore')
-        except TypeError:
+        except (TypeError, AttributeError):
             example = ''
         return example
