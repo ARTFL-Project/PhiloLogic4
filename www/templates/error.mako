@@ -11,6 +11,6 @@ $(document).ready(function() {
         We've encountered an error with your search. The issue has been
         logged and will be fixed as soon as possible.
     </div>
-    <p><a href="${db.locals['db_url']}/">Return to search form</a></p>
+    <p><a href="${config.db_url}/">Return to search form</a></p>
 </div>
 <%include file="footer.mako"/>

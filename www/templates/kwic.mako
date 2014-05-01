@@ -11,8 +11,8 @@
              current_pos = start
             %>
             <div id="search_arguments">
-                Bibliographic criteria: <b>${biblio_criteria or "None"}</b><br>
-                Searching database for <b>${q['q']}</b>
+                Searching database for <b>${q['q'].decode('utf-8', 'ignore')}</b></br>
+                Bibliographic criteria: ${biblio_criteria or "None"}
             </div>
             % if end != 0:
                 % if end < results_per_page or end < len(results):
@@ -36,9 +36,9 @@
                 <div class="kwic_line">
                     % if len(str(end)) > len(str(current_pos)):
                         <% spaces = ' ' * (len(str(end)) - len(str(current_pos))) %>
-                        <span id="position" style="white-space:pre-wrap;">${current_pos}.${spaces}</span>
+                        <span style="white-space:pre-wrap;">${current_pos}.${spaces}</span>
                     % else:
-                        <span id="position">${current_pos}.</span>    
+                        <span>${current_pos}.</span>    
                     % endif
                     ${i}
                     <% current_pos += 1 %>

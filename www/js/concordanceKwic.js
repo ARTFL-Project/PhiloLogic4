@@ -5,7 +5,7 @@ $(document).ready(function() {
     $('#page_links').find('a').each(function(){$(this).button()});
     
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
-    var db_url = db_locals['db_url'];
+    var db_url = webConfig['db_url'];
     var q_string = window.location.search.substr(1);
     concordance_kwic_switch(db_url);
     back_forward_button_concordance_reload();
@@ -77,7 +77,6 @@ function concordance_kwic_switch(db_url) {
                 History.pushState(null, '', new_url);
             }
             $("#report").buttonset("refresh");
-            display_options_on_selected();
             fetchMoreContext();
             getCitationWidth();
             $('.more').find('a').each(function() {

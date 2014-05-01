@@ -10,7 +10,7 @@
            r_status += " Still working.  Refresh for a more accurate count of the results."
         %>
         <div id="search_arguments">
-                Bibliographic criteria: <b>${biblio_criteria or "None"}</b><br>
+                Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}<br>
         </div>
         Hits <span class="start">${start}</span> - <span class="end">${end}</span> of <span id="total_results">${len(results)}</span>${r_status}
         </div>
@@ -27,9 +27,9 @@
                         <span style="padding-left: 5px;">${n}.</span>
                         ##<input type="checkbox" name="philo_id" value="${i.philo_id}">
                         % if i.type == 'doc':
-                            <span class='philologic_cite'>${f.cite.make_abs_doc_cite(db,i)}</span>
+                            <span class='philologic_cite'>${f.biblio_citation(db, config, i)}</span>
                         % else:
-                            <span class='philologic_cite'>${f.cite.make_abs_div_cite(db,i)}</span>
+                            <span class='philologic_cite'>${f.concordance_citation(db, config, i)}</span>
                         % endif
                     </li>
                 % endfor

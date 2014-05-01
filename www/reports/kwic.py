@@ -15,6 +15,7 @@ import json
 def kwic(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
+    config = f.WebConfig()
     if q['format'] == "json":
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
@@ -26,10 +27,10 @@ def kwic(environ,start_response):
         return bibliography(f,path, db, dbname,q,environ)
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        biblio_criteria = " ".join([k + "=" + v for k,v in q["metadata"].iteritems() if v])
+        biblio_criteria = f.biblio_criteria(q, config)
         return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
                                 path=path, results_per_page=q['results_per_page'], biblio_criteria=biblio_criteria,
-                                template_name='kwic.mako', report="kwic")
+                                config=config, template_name='kwic.mako', report="kwic")
 
 def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
     kwic_results = []
@@ -64,6 +65,8 @@ def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
         
     if shortest_biblio < 20:
         shortest_biblio = 20
+    elif shortest_biblio > 40:
+        shortest_biblio = 40
     
     ## Populate Kwic_results with bibliography    
     for pos, result in enumerate(kwic_results):
@@ -78,7 +81,7 @@ def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
             kwic_results[pos] = (kwic_biblio, text)
         else:
             kwic_biblio_link = '<a href="%s" class="kwic_biblio" style="white-space:pre-wrap;">' % href + kwic_biblio + '</a>: '
-            kwic_results[pos] = kwic_biblio_link + '<span id="kwic_text">%s</span>' % text
+            kwic_results[pos] = kwic_biblio_link + '<span>%s</span>' % text
     return kwic_results
 
 

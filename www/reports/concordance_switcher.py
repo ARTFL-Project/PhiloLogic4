@@ -18,14 +18,15 @@ if __name__ == "__main__":
     form = cgi.FieldStorage()
     dbname = os.path.basename(environ["SCRIPT_FILENAME"])
     path = os.getcwd().replace('reports', '')
+    config = f.WebConfig()
     db, path_components, q = parse_cgi(environ)
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
     print "Content-Type: text/html\n"
     if q['report'] == 'concordance':
         mytemplate = Template(filename=path + "templates/concordance_short.mako")
         print mytemplate.render(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,f=f,
-                                path=path, results_per_page=q['results_per_page']).encode('utf-8', 'ignore')
+                                config=config, path=path, results_per_page=q['results_per_page']).encode('utf-8', 'ignore')
     else:
         mytemplate = Template(filename=path + "templates/kwic_short.mako")
         print mytemplate.render(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
-                                path=path, results_per_page=q['results_per_page']).encode('utf-8', 'ignore')
+                                config=config, path=path, results_per_page=q['results_per_page']).encode('utf-8', 'ignore')

@@ -380,20 +380,58 @@ class Loader(object):
         os.chmod(self.destination + "/hitlists/", 0777)
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
         
-        db_locals = open(self.destination + "/db.locals.py","w") 
-
+        ## Write local variables used by libphilo
+        db_locals = open(self.destination + "/db.locals.py","w")
+        print >> db_locals, "# -*- coding: utf-8 -*-"
         print >> db_locals, "metadata_fields = %s" % self.metadata_fields
         print >> db_locals, "metadata_hierarchy = %s" % self.metadata_hierarchy
         print >> db_locals, "metadata_types = %s" % self.metadata_types
-        print >> db_locals, "facets = %s" % self.metadata_fields
-        print >> db_locals, "db_path = '%s'" % self.destination
         print >> db_locals, "normalized_fields = %s" % self.normalized_fields
+        print >> db_locals, "db_path = '%s'" % self.destination
         print >> db_locals, "debug = %s" % self.debug
-        print >> db_locals, "concordance_length = 600"
         for k,v in extra_locals.items():
-            print >> db_locals, "%s = %s" % (k,repr(v))
+            if k != "db_url" or k != "search_reports":  ## This should be changed in the load_script
+                print >> db_locals, "%s = %s" % (k,repr(v))
+        print "wrote database info to %s." % (self.destination + "/db.locals.py")
+        
+        ## Write configuration variables for the Web application
+        web_config = open(self.destination + "/web_config.cfg", "w")
+        print >> web_config, "# -*- coding: utf-8 -*-"
+        print >> web_config, "####################################################"
+        print >> web_config, "#### Web configuration options for PhiloLogic4 #####"
+        print >> web_config, "####################################################"
+        print >> web_config, "### All variables must be in valid Python syntax ###"
+        print >> web_config, "####################################################\n"
+        dbname = os.path.basename(re.sub("/data/?$", "", self.destination))
+        print >> web_config, "\n# The dbname variable is the title name in the HTML header"
+        print >> web_config, "dbname = '%s'" % dbname
+        print >> web_config, "\n# The db_url variable is the root URL for your database on the web"
+        print >> web_config, "db_url = '%s'" % extra_locals['db_url']
+        print >> web_config, "\n# The search_reports variable sets which search report is viewable in the search form"
+        print >> web_config, "# If the value is None, PhiloLogic4 will use this default: ['concordance', 'kwic', 'collocation', 'time_series']"
+        print >> web_config, "search_reports = None"
+        print >> web_config, "\n# The metadata variable sets which metadata field is viewable in the search form"
+        print >> web_config, "metadata = %s" % self.metadata_fields
+        print >> web_config, "\n# The metadata_aliases variable allows to display a metadata variable under a different name in the HTML"
+        print >> web_config, "# For example, you could rename the who metadata to Speaker, and the create_date variable to Date like so:"
+        print >> web_config, "# metadata_aliases = {'who': 'Speaker', 'create_date', 'Date'}"
+        print >> web_config, "metadata_aliases = None"
+        print >> web_config, "\n# The facets variable sets which metadata field can be used as a facet"
+        print >> web_config, "# If the value is None, PhiloLogic4 will use the value of metadata"
+        print >> web_config, "facets = None"
+        print >> web_config, "\n# The concordance_length variable sets the length in bytes of each concordance result"
+        print >> web_config, "# If the value is None, PhiloLogic4 will use a default of 300"
+        print >> web_config, "concordance_length = None"
+        print >> web_config, "\n# The search_examples variable defines which examples should be provided"
+        print >> web_config, "# for each searchable field in the search form."
+        print >> web_config, "# If None is the value, or there are any missing examples, defaults will be generated"
+        print >> web_config, "# at runtime by picking the first result for any given field."
+        print >> web_config, "# If you wish to change these default values, you should configure them here like so:"
+        print >> web_config, '# search_examples = {"author": "Jean-Jacques Rousseau", "title": "Du contrat social"}'
+        print >> web_config, "search_examples = None"
+        print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")
 
-        print "wrote database info to %s." % (self.destination + "/db.locals.py")        
+                
 
 def handle_command_line(argv):
     usage = "usage: %prog [options] database_name files"

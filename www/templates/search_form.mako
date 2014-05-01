@@ -1,7 +1,7 @@
 ## -*- coding: utf-8 -*-
 <div id='search_overlay'></div>
 <div id="form_body">
-    <form id="search" action="${db.locals['db_url'] + "/dispatcher.py/"}">
+    <form id="search" action="${config.db_url + "/dispatcher.py/"}">
         <div id="initial_form">
             <div id="report" class="report" style="margin-top:0px">
                 <span id="concordance_button" style="display: none;">
@@ -70,39 +70,39 @@
                 </div>
             </div>
         </div>
-        <div id="search_explain">
-            <h3 id="concordance_question">What does a concordance report do?</h3>
-            <div id="explain_conc">
-               Concordance search finds every single occurrence of the search term(s)
-               throughout the database filtered by optional metadata criteria.<p/>
-
-               Metadata-only searches are also permitted; simply leave the main "Search Terms" box empty, and enter your desired metadata criteria as usual.
-            </div>
-            <h3 id="relev_question">What does a ranked relevance report do?</h3>
-            <div id="explain_relev">
-                Ranked relevance search ranks documents by pertinence based on the frequency
-                of the search term(s).
-                <br>Note that this type of search is done on individual words, and therefore will not
-                be aware of phrases or expressions.
-            </div>
-            <h3 id="kwic_question">What does a Key Word in Context (KWIC) report do?</h3>
-            <div id="explain_kwic">
-  	        Just like the concordance search, Key Word in Context (KWIC) search finds every occurence of the search terms,
-                but displays the results in a much more compact format, one line per result item.
-            </div>
-            <h3 id="colloc_question">What does a collocation report do?</h3>
-            <div id='explain_colloc'>
-                Collocation report will display words in the immediate vicinity of the search term(s).
-                You can define how close these words must be.
-            </div>
-            <h3 id="time_question">What does a time series report do?</h3>
-            <div id='explain_time'>
-                Time Series report displays a graph showing the frequency of the search term(s) throughout the database
-                during a set time period.
-            </div>
-        </div>
         <div id="search_elements">
-            <h3>Refine your search with the following options and fields:</h3>
+            <h3>Refine your search with the following options and fields:<button id="search_explain">?</button></h3>
+            <div id="search_explain_content">
+                <div id="explain_concordance">
+                    <h3>What does a concordance report do?</h3>
+                    <p>Concordance search finds every single occurrence of the search term(s)
+                    throughout the database filtered by optional metadata criteria.</p>
+                    <p>Metadata-only searches are also permitted; simply leave the main "Search Terms" box empty,
+                    and enter your desired metadata criteria as usual.</p>
+                </div>
+                <div id="explain_relevance">
+                    <h3>What does a ranked relevance report do?</h3>
+                    <p>Ranked relevance search ranks documents by pertinence based on the frequency
+                    of the search term(s).</p>
+                    <p>Note that this type of search is done on individual words, and therefore will not
+                    be aware of phrases or expressions.</p>
+                </div>
+                <div id="explain_kwic">
+                    <h3>What does a Key Word in Context (KWIC) report do?</h3>
+                    <p>Just like the concordance search, Key Word in Context (KWIC) search finds every occurence of the search terms,
+                    but displays the results in a much more compact format, one line per result item.</p>
+                </div>
+                <div id='explain_collocation'>
+                    <h3>What does a collocation report do?</h3>
+                    <p>Collocation report will display words in the immediate vicinity of the search term(s).
+                    You can define how close these words must be.</p>
+                </div>
+                <div id='explain_time_series'>
+                    <h3>What does a time series report do?</h3>
+                    <p>Time Series report displays a graph showing the frequency of the search term(s) throughout the database
+                    during a set time period.</p>
+                </div>
+            </div>
             <div id='method'>
                 <table>
                     <tr>
@@ -125,10 +125,10 @@
             </div>
             <div id="metadata_fields">
                 <table class="table_row">
-                    % for facet in db.locals["metadata_fields"]:
+                    % for facet in config.metadata:
 						<%
-						if "metadata_aliases" in db.locals and facet in db.locals["metadata_aliases"]:
-							alias = db.locals["metadata_aliases"][facet]
+						if facet in config.metadata_aliases:
+							alias = config.metadata_aliases[facet]
 						else:
 							alias = facet
 						%>
@@ -136,7 +136,10 @@
 							<td class="first_column">
                                 <span class="search_field">${alias}:</span>
                             </td>
-							<td><input type='text' name='${facet}' id="${facet}" class="search_box"></td>
+							<td>
+                                <input type='text' name='${facet}' id="${facet}" class="search_box">
+                                (e.g., ${config.search_examples[facet]})
+                            </td>
 						</tr>
                     % endfor
                 </table>
@@ -157,7 +160,7 @@
 						<input type='text' name="start_date" id="start_date" style="width:35px;">
 						<span class="search_field"> to </span>
 						<input type='text' name="end_date" id="end_date" style="width:35px;">
-                <tr class="table_row" id="year_interval">
+                <tr class="table_row" id="date_range">
 					<td class="first_column">
 						<span class="search_field">Year interval:</span>
 					</td>
@@ -195,5 +198,5 @@
     </form>
 </div>
 <div id="waiting" style="display:none;z-index:99;position:absolute;">
-    <img src="${db.locals['db_url']}/js/gif/ajax-loader.gif" alt="Loading..."/>
+    <img src="${config.db_url}/js/gif/ajax-loader.gif" alt="Loading..."/>
 </div>

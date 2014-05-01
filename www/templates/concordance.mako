@@ -10,8 +10,8 @@
                 r_status += " Still working..."
             %>
             <div id="search_arguments">
-                Bibliographic criteria: <b>${biblio_criteria or "None"}</b><br>
-                Searching database for <b>${q['q']}</b>
+                Searching database for <b>${q['q'].decode('utf-8', 'ignore')}</b><br>
+                Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
             </div>
             % if end != 0:
                 % if end < results_per_page or end < len(results):
@@ -38,15 +38,15 @@
                  %>
                  <div class="citation cite_gradient" style="overflow:hidden;">
                     <span class='hit_n'>${n}.</span>
-                    <span class="cite" style="display: inline-block;overflow:hidden;white-space: nowrap;text-overflow:ellipsis;-o-text-overflow:ellipsis;">
-                        ${f.cite.make_abs_div_cite(db,i)}
+                    <span class="cite">
+                        ${f.concordance_citation(db, config, i)}
                     </span>
                     <span class="more_context_and_close">
                         <span class="more_context" style="color:lightGray;">More</span>
                     </span>
                 </div>
                 <div class='philologic_context'>
-                    <div class="default_length">${fetch_concordance(i, path, db.locals['concordance_length'])}</div>
+                    <div class="default_length">${fetch_concordance(i, path, config.concordance_length)}</div>
                 </div>
                 </li>
             % endfor

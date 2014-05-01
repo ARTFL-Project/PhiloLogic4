@@ -47,7 +47,14 @@
 }
 
 /*Citations*/
-.section_name, .sub_section_name, .who_section {
+.cite {
+    display: inline-block;
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    -o-text-overflow:ellipsis; 
+}
+.philologic_cite a:not(:first-child) {
     font-weight: 400 !important;
     margin-left: 8px;
     padding-left: 8px;
@@ -126,7 +133,7 @@
     margin-right: 31px;
     line-height: 130%;
     color: #555;
-    top: 258px;
+    top: 305px;
 }
 .sidebar_option {
     padding-left: 1em;
@@ -139,7 +146,6 @@
     background-color: #EBEBEB;
     color: black;
 }
-
 /* Concordance styling for theater */
 speaker {
     font-weight: 700;

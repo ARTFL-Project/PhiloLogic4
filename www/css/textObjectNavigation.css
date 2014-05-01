@@ -174,10 +174,6 @@ sp lb:first-of-type {
     content: "";
     white-space: normal;
 }
-ab::before {
-    content:"\A";
-    white-space:pre;
-}
 sp {
     display: block;
 }
@@ -188,17 +184,9 @@ sp::before {
 fw, join {
     display: none;
 }
-stage::before {
-    content:"\A";
-    white-space:pre;
-}
 speaker+stage::before {
     content: "";
     white-space: normal;
-}
-ab+stage::before {
-    content:"\A";
-    white-space:pre;
 }
 stage {
     font-style: italic;
@@ -209,9 +197,6 @@ div1 div2::before {
 }
 speaker {
     font-weight: 700;
-}
-l {
-    display: block;
 }
 
 #image_container {

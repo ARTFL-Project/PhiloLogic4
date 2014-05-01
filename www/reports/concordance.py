@@ -17,20 +17,21 @@ strip_start_punctuation = re.compile("^[,?;.:!']")
 def concordance(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
+    config = f.WebConfig()
     if q['format'] == "json":
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
-        formatted_results = [{"citation": f.cite.make_abs_div_cite(db,i),
-                              "text": fetch_concordance(i, path, db.locals["concordance_length"])} for i in hits[start - 1:end]]
+        formatted_results = [{"citation": f.concordance_citation(db,config, i),
+                              "text": fetch_concordance(i, path, config.concordance_length)} for i in hits[start - 1:end]]
         return json.dumps(formatted_results)
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        biblio_criteria = " ".join([k + "=" + v for k,v in q["metadata"].iteritems() if v])
+        biblio_criteria = f.biblio_criteria(q, config)
         return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
                                f=f, path=path, results_per_page=q['results_per_page'],biblio_criteria=biblio_criteria,
-                               template_name="concordance.mako", report="concordance")
+                               config=config,template_name="concordance.mako", report="concordance")
 
 def fetch_concordance(hit, path, context_size):
     ## Determine length of text needed

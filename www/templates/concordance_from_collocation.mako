@@ -2,7 +2,7 @@
 <%include file="search_form.mako"/>
 <div id='philologic_response' style="margin-top:0px;">
     <div>
-        <a href="${db.locals['db_url']}/">Return to search form</a>
+        <a href="${config.db_url}/">Return to search form</a>
         <p>
             <span id="return_to_colloc">
                 Return to previous results page
@@ -10,14 +10,18 @@
         </p>
     </div>
     <div id='initial_report'>
-        <p id='description'>
+        <div id='description'>
             <%
              start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
             %>
-            ${q['collocate_num']} occurences of collocate "${q['collocate'].decode('utf-8', 'ignore')}" in the vicinity of "${q['q'].decode('utf-8', 'ignore')}":
+            <div id="search_arguments">
+                Displaying ${q['collocate_num']} occurences of collocate <b>${q['collocate'].decode('utf-8', 'ignore')}</b> in the vicinity of <b>${q['q'].decode('utf-8', 'ignore')}</b><br>
+                Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
+            </div>
+            
             <br><br><span id='colloc_in_hits'></span> occurences in
             hits <span class="start">${start}</span> - <span class="end">${end}</span>
-        </p>
+        </div>
     </div>
     <% occurences = 0 %>
     <div id="results_container" class="results_container">
@@ -31,7 +35,7 @@
                     <div class="citation cite_gradient" style="overflow:hidden;">
                         <span class='hit_n'>${n}.</span>
                         <span class="cite" style="display: inline-block;overflow:hidden;white-space: nowrap;text-overflow:ellipsis;-o-text-overflow:ellipsis;">
-                            ${f.cite.make_abs_div_cite(db,i)}
+                            ${f.concordance_citation(db,config, i)}
                         </span>
                         <span class="more_context_and_close">
                             <span class="more_context">More</span>
@@ -41,7 +45,7 @@
                         <div style="padding-left:5px;"><b>At least ${i.collocate_num} occurences of collocate in hit</b></div>
                     % endif
                     <div class='philologic_context'>
-                        <div class="default_length">${colloc_concordance(i, path, q, db.locals['concordance_length'])}</div>
+                        <div class="default_length">${colloc_concordance(i, path, q, config['concordance_length'])}</div>
                     </div>
                 </li>
             % endfor
@@ -55,5 +59,5 @@
 <script>
 var occurences = ${occurences};
 </script>
-<script type="text/javascript" src="${db.locals['db_url']}/js/concordanceFromCollocation.js"></script>
+<script type="text/javascript" src="${config.db_url}/js/concordanceFromCollocation.js"></script>
 <%include file="footer.mako"/>

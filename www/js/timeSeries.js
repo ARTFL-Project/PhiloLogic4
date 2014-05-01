@@ -1,6 +1,6 @@
 $(document).ready(function() {
     
-    var db_url = db_locals['db_url'];
+    var db_url = webConfig['db_url'];
     
     //jQueryUI theming
     $('#time_series_buttons').buttonset();
@@ -9,7 +9,7 @@ $(document).ready(function() {
         // Make relative frequency unclickable until full results are in
         $("label[for='relative_time']").css({'pointer-events': "none", "color": "#D8D8D8"});
         
-        var interval = $("#absolute_time").data('interval');
+        // Calculate width and height of chart
         var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 200;
         $('#test_time_series').css('height', height);
         var body_width = parseInt($('body').width());
@@ -21,6 +21,7 @@ $(document).ready(function() {
         var merge_abs = merge_time_results(full_results, abs_data);
         var sorted_abs = merge_abs[0]
         var full_abs = merge_abs[1]
+        var interval = $("#absolute_time").data('interval');
         drawFromData(sorted_abs, interval, 'absolute_time');
         var total = parseInt($('#progress_bar').data('total'));
         $('#progress_bar').progressbar({max: total});
@@ -116,9 +117,6 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         $('#progress_bar').progressbar({value: total});
         $('.progress-label').text('Complete!');
         $("#progress_bar").delay(500).slideUp();
-        
-        // Make sure all animations and CSS transformations are complete
-        // setTimeout(saveTimeSeries, 5000); // buggy for now
     }
 }
 
@@ -271,7 +269,6 @@ function drawFromData(data, interval, frequency_type) {
         $('#middle_number').html(middle_number + ' occurrences');
         $('#first_number').html(bottom_number + ' occurrences');
     }
-    
     
     multiplier = ($('#test_time_series').height() - 10) / max_count; 
     

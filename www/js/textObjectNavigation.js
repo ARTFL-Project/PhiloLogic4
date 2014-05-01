@@ -12,7 +12,7 @@ $(document).ready(function() {
     });
     //
     // This is to display the table of contents in the document viewer
-    var db_url = db_locals['db_url'];
+    var db_url = webConfig['db_url'];
     if ($('#next_obj').length) {
         back_forward_button_reload(db_url);
     }
@@ -167,6 +167,7 @@ function t_o_c_handler(db_url) {
                 toc_height();
                 toc_open = true;
                 show_hide_toc(text_position);
+                TocLinkHandler(db_url);
             });
         });
     });
@@ -188,6 +189,40 @@ function show_hide_toc(top_right) {
             $("#t_b_c_box").html("Table of contents");
         }, 100);
     }
+}
+
+function TocLinkHandler(db_url) {
+    $('#table_of_contents a').click(function(e) {
+        e.preventDefault();
+        var my_path = db_url.replace(/\/\d+.*$/, '/');
+        var philo_id = $(this).attr('id').replace(/_/g, ' ');
+        var script = my_path + '/scripts/go_to_obj.py?philo_id=' + philo_id;
+        var width = $(window).width() / 2 - 100;
+        $("#waiting").css("margin-left", width).css('margin-top', 100).show();
+        $.getJSON(script, function(data) {
+            var scrollto_id = '#' + $("#obj_text").data('philoId').replace(/ /g, '_');
+            $('#toc_container').find($(scrollto_id)).attr('style', 'color: #990000;');
+            $('#obj_text').fadeOut('fast', function() {
+                $("#waiting").fadeOut('fast');
+                $(this).html(data['text']).fadeIn('fast');
+                $('#footer').css('top', '');
+                $('#obj_text').data("philoId", philo_id);
+                $('#prev_obj').data('philoId', data['prev']);
+                $('#next_obj').data('philoId', data["next"]);
+                $("html, body").animate({ scrollTop: 0 }, "fast");
+                var scrollto_id = '#' + $("#obj_text").data('philoId').replace(/ /g, '_');
+                if ($('#toc_container').find($(scrollto_id)).length) {
+                    $('#toc_container').scrollTo($(scrollto_id), 500);
+                    $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
+                }
+                page_image_link();
+                var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
+                History.pushState(null, '', new_url);
+                checkEndBeginningOfDoc();
+            });
+        });
+        
+    })
 }
 
 // Encyclopedie functions

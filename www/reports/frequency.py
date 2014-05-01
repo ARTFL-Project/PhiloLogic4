@@ -8,8 +8,6 @@ from render_template import render_template
 from collections import defaultdict
 import json
 
-object_level = ['doc', 'div1', 'div2', 'div3', 'para']
-
 def frequency(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
@@ -33,10 +31,17 @@ def generate_frequency(results, q, db):
     counts = defaultdict(int)
     for n in results[q['interval_start']:q['interval_end']]:
         ## This is to minimize the number of SQL queries
-        for depth in object_level:
-            key = n[depth][field]
-            if key:
-                break
+        if field in db.locals['metadata_types']:
+            depth = db.locals['metadata_types'][field]
+            if depth == "div":
+                for d in ["div3", "div2", "div1"]:
+                    key = n[d][field]
+                    if key:
+                        break
+            else:
+                key = n[depth][field]
+        else:
+            key = n[field]
         if not key:
             key = "NULL" # NULL is a magic value for queries, don't change it recklessly.
         counts[key] += 1

@@ -32,17 +32,25 @@ no_tag = re.compile(r'<[^>]+>')
 def concordance_from_collocation(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
+    config = f.WebConfig()
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        colloc_results = fetch_colloc_concordance(hits, path, q, db)
+        colloc_results = fetch_colloc_concordance(hits, path, q, db, config)
+        biblio_criteria = []
+        for k,v in q["metadata"].iteritems():
+            if v:
+                if k in config.metadata_aliases:
+                    k = config.metadata_aliases[k]
+                biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b></span>' % (k.title(), v.decode('utf-8', 'ignore'), ))
+        biblio_criteria = ' '.join(biblio_criteria)
         return render_template(results=colloc_results,db=db,dbname=dbname,q=q,colloc_concordance=colloc_concordance,
-                               f=f,path=path, results_per_page=q['results_per_page'], javascript="concordanceFromCollocation.js",
-                               report="concordance_from_collocation",template_name="concordance_from_collocation.mako")
+                               f=f,path=path, results_per_page=q['results_per_page'], config=config,report="concordance_from_collocation",
+                               biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako")
         
-def fetch_colloc_concordance(results, path, q, db, word_filter=True, filter_num=100, stopwords=True):
-    length = db.locals['concordance_length']
+def fetch_colloc_concordance(results, path, q, db, config, word_filter=True, filter_num=100, stopwords=True):
+    length = config['concordance_length']
     within_x_words = q['word_num']
     direction = q['direction']
     collocate = unicodedata.normalize('NFC', q['collocate'].decode('utf-8', 'ignore'))
