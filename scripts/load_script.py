@@ -115,7 +115,7 @@ setup_db_dir(db_destination, template_dir)
 ####################
 
 l = Loader(data_destination,
-           filters=filters,
+           load_filters=filters,
            post_filters=post_filters,
            tables=tables,
            xpaths=xpaths,
