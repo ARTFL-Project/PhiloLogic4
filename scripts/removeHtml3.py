@@ -15,7 +15,7 @@ import shutil
 import codecs
 import string
 #import ents2
-import otherentitydefs
+#import otherentitydefs
 import htmlentitydefs
 import difflib
 #import greek2unicode
@@ -104,9 +104,11 @@ for file in sys.argv[1:]:
 	filecount += 1
 	filerange = str(filecount) + "/" + str(totalfiles)
 
-	if file.lower().endswith((('.tei',".xml"))):
-		newfilepath = file + ".utf8"
 
+#	if file.lower().endswith((('.tei',".xml"))):
+	if True:
+#		newfilepath = file + ".utf8"
+		newfilepath = file + ".utf8"
 		# check if file exists
 
 		if os.path.isfile(newfilepath):
