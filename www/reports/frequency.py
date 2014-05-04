@@ -34,18 +34,24 @@ def generate_frequency(results, q, db):
         if field in db.locals['metadata_types']:
             depth = db.locals['metadata_types'][field]
             if depth == "div":
+                key = []
                 for d in ["div3", "div2", "div1"]:
-                    key = n[d][field]
-                    if key:
-                        break
+                    k = n[d][field]
+                    if k:
+                        key.append(k)
             else:
                 key = n[depth][field]
         else:
             key = n[field]
         if not key:
             key = "NULL" # NULL is a magic value for queries, don't change it recklessly.
-        counts[key] += 1
-
+        if key:
+            if isinstance(key, list):
+                for k in key:
+                    counts[k] += 1
+            else:
+                counts[key] += 1
+            
     if q['rate'] == 'relative':
         for key, count in counts.iteritems():
             counts[key] = relative_frequency(field, key, count, db)
