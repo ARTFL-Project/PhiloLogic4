@@ -53,6 +53,7 @@ function sidebar_reports(q_string, db_url, pathname) {
         }
         $('#progress_bar').hide();
         if (typeof sessionStorage[script_call] == "undefined") {
+            $('#frequency_container').show();
             // Initialize progress bar for sidebar
             $('#progress_bar').progressbar({max: total_results});
             $('#progress_bar').progressbar({value: 100});
@@ -65,7 +66,7 @@ function sidebar_reports(q_string, db_url, pathname) {
             populate_sidebar(script_call, value, total_results, 0, full_results);
         } else {
             var table = JSON.parse(sessionStorage[script_call]);
-            $('#frequency_table').html(table); 
+            $('#frequency_table').html(table).show(); 
             $('#frequency_container').show();
             $("#hide_sidebar").css('display', 'inline-block');
         }
