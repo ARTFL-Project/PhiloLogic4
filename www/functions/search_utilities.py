@@ -32,6 +32,7 @@ def search_examples(field):
     else:
         c = db.dbh.cursor()
         object_type = db.locals['metadata_types'][field]
+        print >> sys.stderr, "FIELD", field
         try:
             if object_type != 'div':
                 c.execute('select %s from toms where philo_type="%s" and %s!="" limit 1' % (field, object_type, field))
