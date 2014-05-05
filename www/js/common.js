@@ -346,7 +346,7 @@ function autoCompleteMetadata(metadata, field, db_url) {
             q = q.replace(/ CUTHERE /, ' ');
             q = q.split('|');
             q[q.length-1] = '\"' + q[q.length-1].replace(/^\s*/g, '') + '\"'; 
-            q = q.join('|');
+            q = q.join('|').replace(/""/g, '"');
             $("#" + field).val(q);
             return false;
         }

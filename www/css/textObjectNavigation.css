@@ -19,17 +19,25 @@
     margin-top: 20px;
     margin-left: -29px;
     padding: 10px;
-    left: -315px;
     min-width: 200px;
     max-width: 600px;
     opacity: 0;
     position: absolute;
     background: #FAFAFA !important;
     box-shadow: 0px 0px 15px #888;
+    -webkit-transform: translate(-315px);
+    -ms-transform: translate(-315px);
+    -moz-transform: translate(-315px);
     -moz-transition: all 400ms ease;
     -webkit-transition: all 400ms ease;
     -ms-transition: all 400ms ease;
     transition: all 400ms ease;
+}
+#toc_container.show {
+    -moz-transform: translate(0px);
+    -ms-transform: translate(0px);
+    -webkit-transform: translate(0px);
+    opacity: 100;
 }
 #show_table_of_contents {
     margin-left: -25px;

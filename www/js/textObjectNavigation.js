@@ -178,12 +178,13 @@ function show_hide_toc(top_right) {
     var scrollto_id = '#' + $("#obj_text").data('philoId').replace(/ /g, '_');
     if ($("#t_b_c_box").text() == "Table of contents") {
         $("#t_b_c_box").html("Hide table of contents");
-        $('#toc_container').css({'opacity': 100, 'left': '0'});
+        //$('#toc_container').css({'opacity': 100, 'transform': 'translateX(0px)'});
+        $('#toc_container').addClass('show');
         $('#toc_container').scrollTo($(scrollto_id), 500);
         $('#toc_container').find($(scrollto_id)).css('color', 'black');
         $(scrollto_id).delay(500).animate({backgroundColor: '#ffdb9e'}, 300).animate({backgroundColor: '#FAFAFA'}, 300);
     } else {
-        $('#toc_container').css({'opacity': 0, 'left': '-315px'});
+        $('#toc_container').removeClass('show');
         $('#show_table_of_contents').button('refresh');
         setTimeout(function() {     // Avoid weird effect on toc_container
             $("#t_b_c_box").html("Table of contents");

@@ -8,6 +8,8 @@ from render_template import render_template
 from collections import defaultdict
 import json
 
+object_types = set(["doc", "div1", "div2", "div3", "para", "sent", "word"])
+
 def frequency(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
@@ -26,32 +28,29 @@ def generate_frequency(results, q, db):
     """reads through a hitlist. looks up q["field"] in each hit, and builds up a list of 
        unique values and their frequencies."""
     field = q["field"]
-    if field == None:
-        field = 'title'
+    depth = ''
+    if field.split('.')[0] in object_types and field.split('.')[-1] in db.locals['metadata_fields']:
+        depth = field.split('.')[0]
+        field = field.split('.')[-1]
     counts = defaultdict(int)
     for n in results[q['interval_start']:q['interval_end']]:
         ## This is to minimize the number of SQL queries
-        if field in db.locals['metadata_types']:
+        if field in db.locals['metadata_types'] and not depth:
             depth = db.locals['metadata_types'][field]
+        if depth:
             if depth == "div":
-                key = []
                 for d in ["div3", "div2", "div1"]:
-                    k = n[d][field]
-                    if k:
-                        key.append(k)
+                    key = n[d][field]
+                    if key:
+                        break
             else:
                 key = n[depth][field]
         else:
             key = n[field]
         if not key:
             key = "NULL" # NULL is a magic value for queries, don't change it recklessly.
-        if key:
-            if isinstance(key, list):
-                for k in key:
-                    counts[k] += 1
-            else:
-                counts[key] += 1
-            
+        counts[key] += 1
+
     if q['rate'] == 'relative':
         for key, count in counts.iteritems():
             counts[key] = relative_frequency(field, key, count, db)

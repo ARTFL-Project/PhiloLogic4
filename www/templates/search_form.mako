@@ -113,11 +113,11 @@
                         <input type="radio" name="method" id="method1" value='proxy' checked="checked">
                         <label for="method1">Within</label>
                         <input type='text' name='arg_proxy' id='arg_proxy' style="margin-left:15px !important;width:30px; text-align: center;">
-                        <span style="padding-left:5px;">words</span>
+                        <span style="padding-left:5px;">words in the same sentence</span>
                         <br><input type="radio" name="method" id="method2" value='phrase'>
                         <label for="method2">Exactly</label>
                         <input type='text' name='arg_phrase' id='arg_phrase' style="margin-left:11px !important;width:30px; text-align: center;">
-                        <span style="padding-left:5px;">words</span>
+                        <span style="padding-left:5px;">words in the same sentence</span>
                         <br><input type="radio" name="method" id="method3" value='cooc'>
                         <label for="method3">In the same sentence</label>
                     </td></tr>
