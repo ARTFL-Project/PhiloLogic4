@@ -108,7 +108,7 @@ def expand_query(split, freq_file, dest_fh):
                 grep_proc = subprocess.Popen(grep_command,stdout=filters.stdin)
                 grep_proc.wait()
             elif kind == "QUOTE":
-                filters.stdin.write(token + "\n") 
+                filters.stdin.write(token[1:-1] + "\n") 
             # what to do about NOT?
         filters.stdin.close()    
         filters.wait()
