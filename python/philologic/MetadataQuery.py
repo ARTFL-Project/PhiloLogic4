@@ -128,8 +128,10 @@ def make_grouped_sql_clause(expanded,column):
     for group in expanded:
         clause = ""
         neg = False                
+        has_null = False
         first_token,first_value = group[0]
         if first_token == "NOT":
+            neg = True
             if len(group) > 1:
                 second_token,second_value = group[1]
                 if second_token == "RANGE":
@@ -159,20 +161,29 @@ def make_grouped_sql_clause(expanded,column):
         for kind,token in group:
             if kind == "OR" or kind == "NOT":
                 continue
+            if kind == "NULL":
+#                clause += "NULL"
+                has_null = True # this is a hack--NULL is both in the IN clause, where it is ineffectual
+                continue
             if first_value:
                 first_value = False
             else:
                 clause += ", "
             if kind == "QUOTE":
                 clause += esc(token[1:-1])
-            if kind == "NULL":
-                clause += "NULL"
+                # but harmless, as well was its own clause below.  Fix later, if possible.
         clause += ")"
+        if has_null:
+            if not neg:
+                clause += "OR %s IS NULL" % column
+            else:
+                clause += "AND %s IS NOT NULL" % column
         if first_group:
             first_group = False
-            clauses += "%s" % clause
+            clauses += "(%s)" % clause
         else:
-            clauses += " AND %s" % clause
+            clauses += " AND (%s)" % clause
+    print >> sys.stderr, column, ":: ",clauses
     return "(%s)" % clauses
 
 def metadata_pattern_search(term, path):

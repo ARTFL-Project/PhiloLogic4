@@ -73,10 +73,11 @@ def make_object_ancestors(*types):
     return inner_make_object_ancestors
 
 def make_sorted_toms(*types):
-    print >> sys.stderr, "TOMS_TYPES_INIT", types
+    print >> sys.stderr, "TOMS_TYPES_INIT_OUTER", types
     def sorted_toms(loader_obj, text):
         type_pattern = "|".join("^%s" % t for t in types)
         tomscommand = "cat %s | egrep \"%s\" | sort %s > %s" % (text["raw"],type_pattern,loader_obj.sort_by_id,text["sortedtoms"])
+        print >> sys.stderr, tomscommand
         os.system(tomscommand)
     return sorted_toms
 
