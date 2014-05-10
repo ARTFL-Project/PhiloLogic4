@@ -184,6 +184,9 @@ $(document).ready(function() {
         $("#arg_proxy").val('');
         $("#method2").attr('checked', true).button("refresh");
     });
+    $('#method3').click(function() {
+        $("#arg_proxy, #arg_phrase").val('');
+    });
     
     $('#syntax').offset({"left":  $('#q').offset().left});
     
@@ -236,7 +239,9 @@ $(document).ready(function() {
     });
     
     // Add spinner to indicate that a query is running in the background
+    // and close autocomplete
     $('#button, #button1').click(function( event ) {
+        $('.ui-autocomplete').remove();
         var width = $(window).width() / 2 - 100;
         hideSearchForm();
         $("#waiting").css("margin-left", width).css('margin-top', 100).show();

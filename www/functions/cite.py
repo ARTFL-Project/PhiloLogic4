@@ -45,8 +45,7 @@ def concordance_citation(db, config, i):
 def biblio_citation(db, config, i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
     doc_href = make_absolute_object_link(config,i.philo_id[:1], i.bytes)
-    #record = u"%s, <i><a href='%s'>%s</a></i>" % (i.doc.author, doc_href,i.doc.title)
-    record = u"William Shakespeare, <i><a href='%s'>%s</a></i>" % (doc_href,i.doc.title)
+    record = u"%s, <i><a href='%s'>%s</a></i>" % (i.doc.author, doc_href,i.doc.title)
     date = i.doc.date
     if date:
         record += " [%s]" % date
