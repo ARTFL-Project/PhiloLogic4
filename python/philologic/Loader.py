@@ -246,6 +246,7 @@ class Loader(object):
                         os.system(command)                    
                     
                     os.system('gzip -c -5 %s > %s' % (text['words'], text['words'] + '.gz'))
+                    os.system('rm %s' % text['words'])
                     
                     exit()
     
