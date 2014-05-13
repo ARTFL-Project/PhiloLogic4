@@ -245,6 +245,8 @@ class Loader(object):
                         command = 'rm %s' % text['raw']
                         os.system(command)                    
                     
+                    os.system('gzip -c -5 %s > %s' % (text['words'], text['words'] + '.gz'))
+                    
                     exit()
     
             #if we are at max_workers children, or we're out of texts, the parent waits for any child to exit.
@@ -261,28 +263,29 @@ class Loader(object):
     
     def merge_objects(self):
         print "\n### Merge parser output ###"
-        wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + "*.words.sorted"
-#        words_result = open(self.workdir + "all_words_sorted","w")
+        words_files = []
+        from glob import glob
+        for f in glob(self.workdir + '/*words.sorted.gz'):
+            f = os.path.basename(f)
+            words_files.append('<(zcat %s)' % f)
+        words_files = ' '.join(words_files)
+        wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + words_files
         print "%s: sorting words" % time.ctime()
-#        words_status = subprocess.call(wordargs,0,"sort",stdout=words_result,shell=True)
-        words_status = os.system(wordsargs + " > " + self.workdir + "all_words_sorted")
+        command = '/bin/bash -c "%s > %sall_words_sorted"' % (wordsargs, self.workdir)
+        words_status = os.system(command)
         print "%s: word sort returned %d" % (time.ctime(),words_status)
         if self.clean:
-            os.system('rm *.words.sorted')
+            os.system('rm *.words.sorted.gz')
 
         tomsargs = "sort -m " + sort_by_id + " " + "*.toms.sorted"
-#        toms_result = open(self.workdir + "all_toms_sorted","w")
-        print "%s: sorting objects" % time.ctime()
-#        toms_status = subprocess.call(tomsargs,0,"sort",stdout=toms_result,shell=True)                                 
+        print "%s: sorting objects" % time.ctime()                                 
         toms_status = os.system(tomsargs + " > " + self.workdir + "all_toms_sorted")
         print "%s: object sort returned %d" % (time.ctime(),toms_status)
         if self.clean:
             os.system('rm *.toms.sorted')
         
         pagesargs = "cat *.pages"
-#        pages_result = open(self.workdir + "all_pages","w")
         print "%s: joining pages" % time.ctime()
-#        pages_status = subprocess.call(pagesargs,0,"cat",stdout=pages_result,shell=True)
         pages_status = os.system(pagesargs + " > " + self.workdir + "all_pages")
         print "%s: word join returned %d" % (time.ctime(), pages_status)
          
