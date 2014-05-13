@@ -165,13 +165,17 @@
 						<span class="search_field">Year interval:</span>
 					</td>
 					<td>
+                        <% time_options = {1: "Year", 10: "Decade", 50: "Half Century", 100: "Century"} %>
 						<span id="year_interval">
-							<input type="radio" name="year_interval" id="year1" value="10" checked="checked">
-                            <label for="year1">Decade</label>
-                            <input type="radio" name="year_interval" id="year3" value="50">
-                            <label for="year3">Half Century</label>
-							<input type="radio" name="year_interval" id="year2" value="100">
-                            <label for="year2">Century</label>
+                            % for pos, year in enumerate(config.time_series_intervals):
+                                % if pos == 0:
+                                    <input type="radio" name="year_interval" id="year0" value="${year}" checked="checked">
+                                    <label for="year0">${time_options[year]}</label>
+                                % else:
+                                    <input type="radio" name="year_interval" id="year${pos}" value="${year}">
+                                    <label for="year${pos}">${time_options[year]}</label>
+                                % endif
+                            % endfor
 						</span>
 					</td>
 				</tr>

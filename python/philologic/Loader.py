@@ -433,6 +433,10 @@ class Loader(object):
         print >> web_config, "# If you wish to change these default values, you should configure them here like so:"
         print >> web_config, '# search_examples = {"author": "Jean-Jacques Rousseau", "title": "Du contrat social"}'
         print >> web_config, "search_examples = None"
+        print >> web_config, "\n# The time_series_intervals variable defines the year intervals in the time series report"
+        print >> web_config, "# If None is the value, PhiloLogic will use [10, 50, 100] as defaults"
+        print >> web_config, "# The only valid intervals are 1, 10, 50 and 100. Invalid intervals will be ignored."
+        print >> web_config, "time_series_intervals = None"
         print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")
 
                 

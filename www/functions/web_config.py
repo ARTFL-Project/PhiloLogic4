@@ -5,6 +5,8 @@ import sys
 from json import dumps
 from search_utilities import search_examples
 
+valid_time_series_intervals = set([1, 10, 50, 100])
+
 class WebConfig(object):
     
     def __init__(self):
@@ -23,7 +25,7 @@ class WebConfig(object):
                 self.config['search_examples'][i] = self.config['search_examples'][i].decode('utf-8', 'ignore')
                 
         self.options = set(['db_url', 'dbname', 'concordance_length', 'facets', 'metadata',
-                        'search_reports', 'metadata_aliases', 'search_examples'])
+                        'search_reports', 'metadata_aliases', 'search_examples', 'time_series_intervals'])
     
     def __getattr__(self, attr):
         if attr in self.options:
@@ -32,6 +34,8 @@ class WebConfig(object):
                 if config_option == None:
                     return self.load_defaults(attr)
                 else:
+                    if attr == "time_series_intervals":
+                        config_option = [i for i in config_option if i in valid_time_series_intervals]
                     return config_option
             except KeyError:
                 #print >> sys.stderr, "### Web Configuration Warning ###"
@@ -51,6 +55,8 @@ class WebConfig(object):
                 if config_option == None:
                     return self.load_defaults(item)
                 else:
+                    if item == "time_series_intervals":
+                        config_option = [i for i in config_option if i in valid_time_series_intervals]
                     return config_option
             except KeyError:
                 #print >> sys.stderr, "### Web Configuration Warning ###"
@@ -72,6 +78,8 @@ class WebConfig(object):
             return ['concordance', 'kwic', 'collocation', 'time_series']
         elif key == "metadata_aliases":
             return {}
+        elif key == "time_series_intervals":
+            return [10, 50, 100]
         else:
             return False
         
