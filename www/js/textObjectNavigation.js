@@ -173,16 +173,18 @@ function t_o_c_handler(db_url) {
     });
 }
 
+
 function show_hide_toc(top_right) {
     var position = top_right - ($('#toc_container').width() - $('.table_of_contents').width()) - 15;
-    var scrollto_id = '#' + $("#obj_text").data('philoId').replace(/ /g, '_');
     if ($("#t_b_c_box").text() == "Table of contents") {
         $("#t_b_c_box").html("Hide table of contents");
-        //$('#toc_container').css({'opacity': 100, 'transform': 'translateX(0px)'});
         $('#toc_container').addClass('show');
-        $('#toc_container').scrollTo($(scrollto_id), 500);
-        $('#toc_container').find($(scrollto_id)).css('color', 'black');
-        $(scrollto_id).delay(500).animate({backgroundColor: '#ffdb9e'}, 300).animate({backgroundColor: '#FAFAFA'}, 300);
+        setTimeout(function() {
+            var scrollto_id = '#' + $("#obj_text").data('philoId').replace(/ /g, '_');
+            $('#toc_container').scrollTo($(scrollto_id), 500);
+            $('#toc_container').find($(scrollto_id)).css('color', 'black');
+            $(scrollto_id).delay(500).animate({backgroundColor: '#ffdb9e'}, 300).animate({backgroundColor: '#FAFAFA'}, 300);
+        }, 400);
     } else {
         $('#toc_container').removeClass('show');
         $('#show_table_of_contents').button('refresh');

@@ -40,15 +40,25 @@ def navigate_doc(obj, db):
     next_doc_id = doc_id + 1
     c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % doc_id)
     start_rowid = c.fetchone()[0]
-    c.execute('select rowid from toms where philo_id="%s 0 0 0 0 0 0"' % next_doc_id)
+    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % next_doc_id)
     end_rowid = c.fetchone()[0]
-    c.execute("select philo_id, philo_name, philo_type, byte_start from toms where rowid between %d and %d and philo_name='div'" % (start_rowid, end_rowid))
+    try:
+        c.execute("select philo_id, philo_name, philo_type, head from toms where rowid between ? and ? and philo_name!='__philo_virtual' and  philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
+    except sqlite3.OperationalError:
+        c.execute("select philo_id, philo_name, philo_type from toms where rowid between ? and ? and philo_name!='__philo_virtual' and  philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
     text_hierarchy = []
-    for id, philo_name, philo_type, byte in c.fetchall():
-        if philo_type not in philo_types or philo_name == '__philo_virtual':
+    for i in c.fetchall():
+        if i['philo_name'] == '__philo_virtual':
             continue
         else:
-            text_hierarchy.append(db[id])
+            philo_id = i['philo_id']
+            philo_type = i['philo_type']
+            try:
+                head = i['head'].decode('utf-8', 'ignore')
+            except:
+                head = philo_type
+            text_hierarchy.append((philo_id, philo_type, head))
+    print >> sys.stderr, "NUM", start_rowid, end_rowid, len(text_hierarchy)
     return text_hierarchy
     
 def get_neighboring_pages(db, doc_id, doc_page):
