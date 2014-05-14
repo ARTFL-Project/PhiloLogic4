@@ -10,7 +10,9 @@
         var philo_id = doc_id + ' 0 0 0 0 0 0'
         var script = my_path + '/scripts/get_table_of_contents.py?philo_id=' + philo_id;
         $.get(script, function(data) {
-            $('#philologic_response').append(data);
+            toc_container = '<div id="toc_wrapper" style="display:none">' + data + "</div>";
+            $('#philologic_response').append(toc_container);
+            $("#toc_wrapper").fadeIn();
         });
         $('#show_header').button();
         $('#show_header').click(function() {
