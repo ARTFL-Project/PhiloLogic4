@@ -26,20 +26,18 @@ def get_table_of_contents(environ, start_response):
     results = r.navigate_doc(obj, db)
     if q['format'] == "json":
         html = ''
-        for i in results:
-            id = i.philo_id[:7]
-            link_id = '_'.join([str(j) for j in i.philo_id])
-            href = f.link.make_absolute_object_link(db,id)
-            head_or_type = i.head or "[%s]" % i.type
+        for philo_id, philo_type, head in results:
+            link_id = philo_id.replace(' ', '_')
+            href = f.link.make_absolute_object_link(config, philo_id.split()[:7])
             html += "<span>"
             style = ""
-            if i.type == "div2":
+            if philo_type == "div2":
                 space = '&nbsp&nbsp&nbsp'
-            elif i.type == "div3":
+            elif philo_type == "div3":
                 space = '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'
             else:
                 space = ''
-            html += space + '<a href="%s" id="%s" style="text-decoration: none;">%s</a></span><br>' % (href, link_id, head_or_type)
+            html += space + '<a href="%s" id="%s" style="text-decoration: none;">%s</a></span><br>' % (href, link_id, head)
         yield json.dumps(html)
     else:
         div1_markup = '<span class="ui-icon ui-icon-bullet" style="float:left;position:relative;top: 3px;"></span>'
