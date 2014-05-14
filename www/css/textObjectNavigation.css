@@ -23,6 +23,7 @@
     max-width: 600px;
     opacity: 0;
     position: absolute;
+    z-index: 101;
     background: #FAFAFA !important;
     box-shadow: 0px 0px 15px #888;
     -webkit-transform: translate(-315px);

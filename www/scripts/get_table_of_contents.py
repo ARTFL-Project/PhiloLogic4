@@ -42,22 +42,23 @@ def get_table_of_contents(environ, start_response):
             html += space + '<a href="%s" id="%s" style="text-decoration: none;">%s</a></span><br>' % (href, link_id, head_or_type)
         yield json.dumps(html)
     else:
-        html = '<div id="table_of_contents" class="table_of_contents">'
-        for i in results:
-            id = i.philo_id[:7]
-            link_id = '_'.join([str(j) for j in i.philo_id])
-            href = f.link.make_absolute_object_link(config, id)
-            head_or_type = i[i.type].head or "[%s]" % i.type
-            html += '<span class="toc_link">'
-            style = ""
-            if i.type == "div2":
-                space = '<span class="ui-icon ui-icon-radio-on" style="float:left;position:relative;top:3px;margin-left: 1em;"></span>'
-            elif i.type == "div3":
-                space = '<span class="ui-icon ui-icon-radio-off" style="float:left;top:3px;position:relative;margin-left: 2em;"></span>'
+        div1_markup = '<span class="ui-icon ui-icon-bullet" style="float:left;position:relative;top: 3px;"></span>'
+        div2_markup = '<span class="ui-icon ui-icon-radio-on" style="float:left;position:relative;top:3px;margin-left: 1em;"></span>'
+        div3_markup = '<span class="ui-icon ui-icon-radio-off" style="float:left;top:3px;position:relative;margin-left: 2em;"></span>'
+        html = ['<div id="table_of_contents" class="table_of_contents">']
+        for philo_id, philo_type, head in results:
+            link_id = philo_id.replace(' ', '_')
+            href = f.link.make_absolute_object_link(config, philo_id.split()[:7])
+            html.append('<span class="toc_link">')
+            if philo_type == "div2":
+                space = div2_markup
+            elif philo_type == "div3":
+                space = div3_markup
             else:
-                space = '<span class="ui-icon ui-icon-bullet" style="float:left;position:relative;top: 3px;"></span>'
-            html += space + '<a href="%s" id="%s">%s</a></span>' % (href, link_id, head_or_type)
-        html += "</div>"
+                space = div1_markup
+            html.append(space + '<a href="%s" id="%s">%s</a></span>' % (href, link_id, head))
+        html.append("</div>")
+        html = ''.join(html)
         yield html.encode('utf-8', 'ignore')
     
 if __name__ == "__main__":
