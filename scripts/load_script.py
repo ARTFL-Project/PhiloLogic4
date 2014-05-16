@@ -128,6 +128,10 @@ l = Loader(data_destination,
 
 l.add_files(files)
 filenames = l.list_files()
+## The following line create a list of the files to parse and sorts the files by filename
+## Should you need to supply a custom sort order from the command line you need to supply the files variable,
+## defined at the top of this script, instead of filenames, like so: 
+## load_metadata = [{"filename":f} for f in files] 
 load_metadata = [{"filename":f} for f in sorted(filenames)]
 l.parse_files(workers,load_metadata)
 l.merge_objects()
