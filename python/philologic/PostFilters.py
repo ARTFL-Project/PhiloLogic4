@@ -3,11 +3,12 @@ import sys
 import os
 import sqlite3
 import unicodedata
+import gzip
 from collections import defaultdict
 
 
 
-def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
+def make_sql_table(table, file_in, db_file="toms.db", gzip=False, indices=[], depth=7):
     def inner_make_sql_table(loader_obj):
         print "Loading the %s SQLite table..." % table,
         db_destination = os.path.join(loader_obj.destination, db_file)
@@ -20,7 +21,11 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
         c.execute(query)
         
         sequence = 0
-        for line in open(file_in):
+        if gzip:
+            file_in_handle = gzip.open(file_in, "rb")
+        else:
+            file_in_handle = open(file_in)
+        for line in file_in_handle:
             philo_type, philo_name, id, attrib = line.split("\t",3)
             fields = id.split(" ",8)
             if len(fields) == 9:
