@@ -262,21 +262,63 @@ class Loader(object):
             self.omax = [max(x,y) for x,y in zip(vec,self.omax)]
         print "%s: done parsing" % time.ctime()
     
-    def merge_objects(self):
-        print "\n### Merge parser output ###"
+    def merge_words(self, file_num):
+        """This function runs a multi-stage merge sort on words"""
+        lists_of_words_files = []
         words_files = []
-        from glob import glob
+        if file_num > 500:
+            file_num = 500 # We want to be conservative and avoid running out of file descriptors
+        
+        # First we split the sort workload into chunks of 500 (default defined in the file_num keyword)
         for f in glob(self.workdir + '/*words.sorted.gz'):
             f = os.path.basename(f)
-            words_files.append('<(zcat %s)' % f)
-        words_files = ' '.join(words_files)
-        wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + words_files
-        print "%s: sorting words" % time.ctime()
-        command = '/bin/bash -c "%s > %sall_words_sorted"' % (wordsargs, self.workdir)
-        words_status = os.system(command)
-        print "%s: word sort returned %d" % (time.ctime(),words_status)
+            words_files.append(('<(zcat %s)' % f, self.workdir + '/' + f))
+            if len(words_files) ==  file_num:
+                lists_of_words_files.append(words_files)
+                words_files = []
+        if len(words_files):
+            lists_of_words_files.append(words_files)
+            
+        # Then we run the merge sort on each chunk of 500 files and compress the result
+        for pos, wordlist in enumerate(lists_of_words_files):
+            command_list = ' '.join([i[0] for i in wordlist])
+            file_list = ' '.join([i[1] for i in wordlist])
+            output = self.workdir + "words.sorted.%d.split" % pos
+            wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + command_list
+            command = '/bin/bash -c "%s | gzip -c -5 > %s.gz"' % (wordsargs, output)
+            words_status = os.system(command)
+            if self.clean:
+                os.system("rm %s" % file_list)
+            delete_status = os.system('rm %s' % output)
         if self.clean:
             os.system('rm *.words.sorted.gz')
+
+        # We check if there was more than one batch sorted
+        if len(lists_of_words_files) > 1:
+            # if so we run the last merge sort on the resulting sorted files
+            final_sorted_files = []
+            for f in glob(self.workdir + '/*split.gz'):
+                f = os.path.basename(f)
+                final_sorted_files.append('<(zcat %s)' % f)
+            final_sorted_files = ' '.join(final_sorted_files)
+            final_wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + final_sorted_files
+            command = '/bin/bash -c "%s | gzip -c -5 > %s/all_words_sorted.gz"' % (final_wordsargs, self.workdir)
+            words_status = os.system(command)
+        else:
+            # if not skip the last step and rename the file to all_words_sorted.gz
+            os.system('mv %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
+        if words_status != 0:
+            print "Word sorting failed\nInterrupting database load..."
+            sys.exit()
+        if self.clean:
+            os.system('rm %s' % self.workdir + '/*split.gz')
+        return words_status
+    
+    def merge_objects(self, file_num=500):
+        print "\n### Merge parser output ###"
+        print "%s: sorting words" % time.ctime()
+        words_status = self.merge_words(file_num=file_num)
+        print "%s: word sort returned %d" % (time.ctime(),words_status)
 
         tomsargs = "sort -m " + sort_by_id + " " + "*.toms.sorted"
         print "%s: sorting objects" % time.ctime()                                 
@@ -304,7 +346,7 @@ class Loader(object):
         offset = 0
         
         # unix one-liner for a frequency table
-        os.system("cut -f 2 %s | uniq -c | sort -rn -k 1,1> %s" % ( self.workdir + "/all_words_sorted", self.workdir + "/all_frequencies") )
+        os.system('/bin/bash -c "cut -f 2 <(zcat %s) | uniq -c | sort -rn -k 1,1> %s"' % ( self.workdir + "/all_words_sorted.gz", self.workdir + "/all_frequencies") )
         
         # now scan over the frequency table to figure out how wide (in bits) the frequency fields are, and how large the block file will be.
         for line in open(self.workdir + "/all_frequencies"):    
@@ -340,7 +382,7 @@ class Loader(object):
         print >> dbs, "#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl)
         dbs.close()
         print "%s: analysis done" % time.ctime()
-        os.system("pack4 " + self.workdir + "dbspecs4.h < " + self.workdir + "/all_words_sorted")
+        os.system('/bin/bash -c "zcat ' + self.workdir + '/all_words_sorted.gz | pack4 ' + self.workdir + 'dbspecs4.h"')
         print "%s: all indices built. moving into place." % time.ctime()
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1") 
@@ -350,18 +392,21 @@ class Loader(object):
     def setup_sql_load(self):
         for table in self.tables:
             if table == 'words':
-                file_in = self.destination + '/WORK/all_words_sorted'
+                file_in = self.destination + '/WORK/all_words_sorted.gz'
                 indices = [("philo_name", "%s_ancestor" % self.default_object_level), ('philo_id',)]
                 depth = 7
+                compressed = True
             elif table == 'pages':
                 file_in = self.destination + '/WORK/all_pages'                
                 indices = [("philo_id",)]
                 depth = 9
+                compressed = False
             elif table == 'toms':
                 file_in = self.destination + '/WORK/all_toms_sorted'
                 indices = [('philo_type',), ('philo_id',)] + self.metadata_fields
                 depth = 7
-            post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
+                compressed = False
+            post_filter = make_sql_table(table, file_in, gzip=compressed, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)
             
     def post_processing(self, *extra_filters):
