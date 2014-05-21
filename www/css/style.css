@@ -384,3 +384,6 @@ l::before {
     color: #bababa;
     font-size: .7em;
 }
+w::before {
+    margin:0;padding:0;float:left;
+}

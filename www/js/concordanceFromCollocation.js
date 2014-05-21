@@ -16,6 +16,7 @@ $(document).ready(function() {
     $('#return_to_colloc').click(function() {
         History.back();
     });
+    $('.more_context').hide();
     //$(window).load(function() {
     //    fetchMoreContext();
     //});

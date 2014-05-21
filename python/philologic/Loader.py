@@ -263,7 +263,9 @@ class Loader(object):
         print "%s: done parsing" % time.ctime()
     
     def merge_words(self, file_num):
-        """This function runs a multi-stage merge sort on words"""
+        """This function runs a multi-stage merge sort on words
+        Since PhilLogic can potentially merge thousands of files, we need to split
+        the sorting stage into multiple steps to avoid running out of file descriptors"""
         lists_of_words_files = []
         words_files = []
         if file_num > 500:
@@ -553,6 +555,8 @@ def setup_db_dir(db_destination, template_dir):
         os.system("chmod -R 777 %s/templates" % db_destination)
         os.system("mkdir %s/templates/compiled_templates" % db_destination)
         os.system("chmod -R 777 %s/templates/compiled_templates" % db_destination)
+        os.system("touch %s/data/error.log" % db_destination)
+        os.system("chmod 777 %s/data/error.log" % db_destination)
 
                 
 # a quick utility function
