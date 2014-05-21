@@ -4,6 +4,10 @@ import os
 import sys
 import urlparse
 import reports
+import traceback as tb
+from functions import log_config
+import logging
+import time
 from wsgiref.handlers import CGIHandler
 from cgi import FieldStorage
 from functions import clean_hitlists
@@ -17,7 +21,11 @@ def philo_dispatcher(environ,start_response):
     if path_components:
         yield getattr(reports, report or "navigation")(environ,start_response)
     elif environ["QUERY_STRING"]:
-        yield getattr(reports, report or "concordance")(environ,start_response)
+        try:
+            yield getattr(reports, report or "concordance")(environ,start_response)
+        except Exception as e:
+            logging.error("\n### ERROR %s ###" % time.ctime(), exc_info=True)
+            yield getattr(reports, "error")(environ,start_response)
     else:
         yield reports.landing_page(environ,start_response)
         
