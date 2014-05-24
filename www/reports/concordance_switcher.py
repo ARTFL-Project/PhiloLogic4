@@ -9,6 +9,7 @@ from functions.wsgi_handler import parse_cgi
 from bibliography import bibliography
 from render_template import render_template
 from concordance import fetch_concordance
+from error import noHits
 from kwic import fetch_kwic
 from mako.template import Template
     
@@ -20,7 +21,10 @@ if __name__ == "__main__":
     path = os.getcwd().replace('reports', '')
     config = f.WebConfig()
     db, path_components, q = parse_cgi(environ)
-    hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+    try:
+        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+    except:
+        hits = noHits()
     print "Content-Type: text/html\n"
     if q['report'] == 'concordance':
         mytemplate = Template(filename=path + "templates/concordance_short.mako")

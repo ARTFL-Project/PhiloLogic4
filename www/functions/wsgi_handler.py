@@ -30,6 +30,7 @@ def parse_cgi(environ):
     cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
    
     query = {}
+    query["report"] = cgi.get("report",[None])[0]
     query["q_string"] = environ["QUERY_STRING"] ## this might be useful to have around
     query["q"] = cgi.get("q",[None])[0]
     query["method"] = cgi.get("method",[None])[0]
