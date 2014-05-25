@@ -18,7 +18,7 @@ $(document).ready(function() {
             var mobile_choice = '<div id="mobile_choice"><div style="margin-bottom:1em">Do you want to use the mobile version of PhiloLogic4?</div></div>';
             $('body').append(mobile_choice);
             $("#mobile_choice").dialog({
-                position: { my: "center", at: "top+300", of: window },
+                position: { my: "center", at: "top+250", of: window },
                 title: "PhiloLogic4 alert",
                 resizable: false,
                 height:170,
@@ -87,18 +87,19 @@ $(document).ready(function() {
     });
     $("#report").buttonset();
     $('#form_body').show();
-    var form_height = $(window).height() - $('#header').height() - $('#footer').height() - $('#initial_form').height();
     if (global_report == "landing_page") {
         $('#more_options').hide();
         showHide('concordance');
         $(window).load(function() {
-            $('#search_elements').css('opacity', 0)
-                .slideDown({'duration': 600, 'easing': 'easeOutSine'})
-                .animate(
-                  { opacity: 1 },
-                  { queue: false, duration: 600, 'easing': 'easeOutSine' }
-                );
-            setTimeout(searchFormOverlap, 600);
+            console.log("hey")
+            $('#search_elements')
+                .velocity("slideDown",
+                           {duration: 400, 'easing': 'easeIn'}
+                           )
+                .velocity("fadeIn",
+                           {queue: false, duration: 400, 'easing': 'easeIn'}
+                           );
+            setTimeout(searchFormOverlap, 400);
         });
     } else {
         $('#initial_form').css({'max-height': '94px', 'opacity': 100});
@@ -109,18 +110,22 @@ $(document).ready(function() {
         if ($("#search_elements").css('display') != 'none') {
             showHide(report);
             if (report != "frequencies") {
-                $("#search_elements").css('opacity', 0)
-                    .slideDown({'duration': 300, 'easing': 'easeOutSine'})
-                    .animate(
-                      { opacity: 1 },
-                      { queue: false, duration: 300, 'easing': 'easeOutSine' }
-                    );
+                $("#search_elements")
+                    .velocity("fadeIn",
+                               {duration: 250, 'easing': 'easeIn'}
+                               );
             }
             showMoreOptions();
         } else {
             showHide(report);
             if (report != "frequencies") {
-                $("#search_elements").fadeIn();
+                $("#search_elements")
+                .velocity("slideDown",
+                           {duration: 250, 'easing': 'easeIn'}
+                           )
+                .velocity("fadeIn",
+                           {queue: false, duration: 250, 'easing': 'easeIn'}
+                           );
             }
             showMoreOptions();
         }
@@ -371,13 +376,13 @@ function showHide(value) {
     if (value == 'collocation') {
         $("#collocation_num, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
-        $('#search_terms_container').slideDown(300);
+        $('#search_terms_container').slideDown(250);
     }
     if (value == 'kwic' || value == "concordance") {
         $("#results_per_page, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
         $('#start_date, #end_date').val('');
-        $('#search_terms_container').slideDown(300);
+        $('#search_terms_container').slideDown(250);
     }
     if (value == 'relevance') {
         $("#results_per_page").show();
@@ -386,7 +391,7 @@ function showHide(value) {
         $("#time_series_num, #date_range, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').hide();
         $('#date').val('');
-        $('#search_terms_container').slideDown(300);
+        $('#search_terms_container').slideDown(250);
     }
     if (value == "frequencies") {
         $('#search_terms_container, #method, #results_per_page').hide();
@@ -401,26 +406,27 @@ function showMoreOptions(display) {
     if (display == "all") {
         var report = $('input[name=report]:checked', '#search').val();
         showHide(report);
-        $("#search_elements").css('opacity', 0)
-            .slideDown({'duration': 300, 'easing': 'easeOutSine'})
-            .animate(
-              { opacity: 1 },
-              { queue: false, duration: 300, 'easing': 'easeOutSine' }
-            );
+        $("#search_elements")
+            .velocity("slideDown",
+                      {duration: 250, 'easing': 'easeIn'}
+                      )
+            .velocity("fadeIn",
+                       {queue: false, duration: 250, 'easing': 'easeIn'}
+                       );
     }
     var height = $(document).height() - $(header).height() - $(footer).height();
     $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': height});
-    setTimeout(searchFormOverlap, 300);
+    setTimeout(searchFormOverlap, 250);
     $("#search_overlay, #header, #footer").click(function() {
         hideSearchForm();
     });
 }
 
 function hideSearchForm() {
-    $("#search_elements").slideUp(300);
+    $("#search_elements").velocity('slideUp', {duration: 250, easing: 'easeOut'});
     $("#search_overlay").css({'height': '0px', 'opacity': 0});
     $("#more_options").button('option', 'label', 'Show search options');
-    setTimeout(searchFormOverlap, 300);
+    setTimeout(searchFormOverlap, 250);
 }
 
 (function($)

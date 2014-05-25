@@ -19,6 +19,7 @@
     border-top: solid 1px #ECECEC;
     overflow: hidden;
     display: none;
+    opacity: 0;
 }
 .search_box {
     width: 250px;
