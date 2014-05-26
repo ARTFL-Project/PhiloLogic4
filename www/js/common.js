@@ -47,7 +47,7 @@ $(document).ready(function() {
     ////// jQueryUI theming //////
     $("#button, #button1, #reset_form, #reset_form1, #hide_search_form, #more_options, .more_context").button();
     $('#button2, #search_explain').button();
-    $("#page_num, #field, #method, #year_interval").buttonset();
+    $("#report, #page_num, #field, #method, #year_interval").buttonset();
     $("#word_num").spinner({
         spin: function(event, ui) {
                 if ( ui.value > 10 ) {
@@ -65,9 +65,7 @@ $(document).ready(function() {
     
     $('.ui-spinner').css('width', '45px')
     $(':text').addClass("ui-corner-all");
-    
     ////////////////////////////////////////
-    
     
     // Display report tabs according to web_config.cfg
     for (i in webConfig['search_reports']) {
@@ -75,7 +73,8 @@ $(document).ready(function() {
         $(search_report).show();
     }
     
-    
+    // Give higher priority to search form over text display
+    // TODO: remove this
     $('#more_options').click(function() {
         $('#search_elements').css('z-index', 150);
         $('.book_page').css('z-index', 90);
@@ -85,8 +84,11 @@ $(document).ready(function() {
             hideSearchForm();
         }
     });
-    $("#report").buttonset();
+    
+    // Show search form by default
     $('#form_body').show();
+    
+    // If report is the landing page, show the full search form
     if (global_report == "landing_page") {
         $('#more_options').hide();
         showHide('concordance');
@@ -105,6 +107,8 @@ $(document).ready(function() {
         $('#initial_form').css({'max-height': '94px', 'opacity': 100});
         showHide($('input[name=report]:checked', '#search').val());
     }
+    
+    // Handler for clicks on report tabs
     $('#report').find('label').click(function() {
         var report = $(this).attr('for');
         if ($("#search_elements").css('display') != 'none') {
@@ -131,6 +135,11 @@ $(document).ready(function() {
         }
     });
     
+    // Close search form when clicking outside it
+    $("#search_overlay, #header, #footer").click(function(e) {
+        e.stopPropagation();
+        hideSearchForm();
+    });
     
     // Set-up autocomplete for words and metadata
     autoCompleteWord(db_url);
@@ -173,7 +182,7 @@ $(document).ready(function() {
         $("#pagenum1").attr('checked', true);
         $("#page_num").buttonset('refresh');
         $('#search')[0].reset();
-        $("#search_elements").fadeIn();
+        $("#search_elements").velocity('fadeIn');
         $("#reset_form1").css('color', '#555555 !important');
         $("#report").find("input:radio").attr("checked", false).end();
         $('#concordance').attr('checked', true);
@@ -417,18 +426,20 @@ function showMoreOptions(display) {
     var height = $(document).height() - $(header).height() - $(footer).height();
     $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': height});
     setTimeout(searchFormOverlap, 250);
-    $("#search_overlay, #header, #footer").click(function() {
-        hideSearchForm();
-    });
 }
 
 function hideSearchForm() {
     $("#search_elements").velocity('slideUp', {duration: 250, easing: 'easeOut'});
+    $("#search_elements").velocity('fadeOut', {duration: 250, easing: 'easeOut', queue: false});
     $("#search_overlay").css({'height': '0px', 'opacity': 0});
     $("#more_options").button('option', 'label', 'Show search options');
     setTimeout(searchFormOverlap, 250);
 }
 
+
+// This function is used to make the clear form button blink when there are
+// search parameters
+// To be superseded by the display of search criteria in search results.
 (function($)
 {
     $.fn.blink = function(options) {
