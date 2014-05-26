@@ -112,7 +112,7 @@ function retrieveObj(db_url){
             var scrollto_id = '#' + $("#obj_text").data('philoId').replace(/ /g, '_');
             $('#toc_container').find($(scrollto_id)).attr('style', 'color: #990000;');
             $('#obj_text').fadeOut('fast', function() {
-                $(this).html(data['text']).fadeIn('fast');
+                $(this).replaceHtml(data['text']).fadeIn('fast');
                 $('#footer').css('top', '');
                 $('#obj_text').data("philoId", philo_id);
                 $('#prev_obj').data('philoId', data['prev']);
@@ -206,7 +206,7 @@ function TocLinkHandler(db_url) {
             $('#toc_container').find($(scrollto_id)).attr('style', 'color: #990000;');
             $("#waiting").fadeOut('fast');
             $('#obj_text').fadeOut('fast', function() {
-                $(this).html(data['text']).fadeIn('fast');
+                $(this).replaceHtml(data['text']).fadeIn('fast');
                 $('#footer').css('top', '');
                 $('#obj_text').data("philoId", philo_id);
                 $('#prev_obj').data('philoId', data['prev']);
@@ -282,3 +282,18 @@ function plate_hover() {
         $(this).tooltip({content: text});
     });
 }
+
+// Custom HTML replace function for text objects since jQuery's html is too slow:
+// See here: https://groups.google.com/forum/#!msg/jquery-en/RG_dJD8DlSc/R4pDTgtzU4MJ
+$.fn.replaceHtml = function( html ) {
+    var stack = [];
+    return this.each( function(i, el) {
+        var oldEl = el;
+        var newEl = oldEl.cloneNode(false);
+        newEl.innerHTML = html;
+        oldEl.parentNode.replaceChild(newEl, oldEl);
+        /* Since we just removed the old element from the DOM, return a reference
+        to the new element, which can be used to restore variable references. */
+        stack.push( newEl );
+    }).pushStack( stack );
+};
