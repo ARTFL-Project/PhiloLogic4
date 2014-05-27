@@ -9,7 +9,9 @@
             <div id= "prev_and_toc">
                 <div id='prev_and_toc_button'>
                     <div id='show_table_of_contents'>
-                        <label for="show_table_of_contents"><span id="t_b_c_box">Table of contents</span></label>
+                        <label for="show_table_of_contents">
+                            <span id="t_b_c_box" data-open="false">Table of contents</span>
+                        </label>
                     </div>
                 </div>
                 <div id="table_toggler">

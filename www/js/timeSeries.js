@@ -253,7 +253,7 @@ function drawFromData(data, interval, frequency_type) {
     
     // Draw three lines along the X axis to help visualize frequencies
     if (frequency_type == "relative_time") {
-        $('#side_text').html('Occurrences per 1,000,000 words');
+        $('#side_text').html('Occurrences per 1,000,000 words'); // TODO: move to translation file
         var top_number = Math.round(max_count);
         var middle_number = Math.round(max_count / 3 * 2);
         var bottom_number = Math.round(max_count / 3);
@@ -261,7 +261,7 @@ function drawFromData(data, interval, frequency_type) {
         $('#middle_number').html(middle_number + ' occurrences per 1,000,000 words');
         $('#first_number').html(bottom_number + ' occurrences per 1,000,000 words');
     } else {
-        $('#side_text').html('Total occurrences');
+        $('#side_text').html('Total occurrences'); // TODO: move to translation file
         var top_number = Math.round(max_count);
         var middle_number = Math.round(max_count / 3 * 2);
         var bottom_number = Math.round(max_count / 3);

@@ -175,8 +175,9 @@ function t_o_c_handler(db_url) {
 
 function show_hide_toc(top_right) {
     var position = top_right - ($('#toc_container').width() - $('.table_of_contents').width()) - 15;
-    if ($("#t_b_c_box").text() == "Table of contents") {
-        $("#t_b_c_box").html("Hide table of contents");
+    if ($("#t_b_c_box").data('open') == false) {
+        $("#t_b_c_box").data('open', true);
+        $("#t_b_c_box").html("Close table of contents"); // To move to translation file
         $('#toc_container').addClass('show');
         setTimeout(function() {
             var scrollto_id = '#' + $("#obj_text").data('philoId').replace(/ /g, '_');
@@ -186,6 +187,8 @@ function show_hide_toc(top_right) {
         }, 400);
     } else {
         $('#toc_container').removeClass('show');
+        $("#t_b_c_box").data('open', false);
+        $("#t_b_c_box").html("Table of contents") // To move to translation file
         $('#show_table_of_contents').button('refresh');
         setTimeout(function() {     // Avoid weird effect on toc_container
             $("#t_b_c_box").html("Table of contents");
@@ -291,7 +294,9 @@ $.fn.replaceHtml = function( html ) {
         var oldEl = el;
         var newEl = oldEl.cloneNode(false);
         newEl.innerHTML = html;
-        oldEl.parentNode.replaceChild(newEl, oldEl);
+        try {
+            oldEl.parentNode.replaceChild(newEl, oldEl);   
+        } catch(e) {}
         /* Since we just removed the old element from the DOM, return a reference
         to the new element, which can be used to restore variable references. */
         stack.push( newEl );
