@@ -5,6 +5,7 @@ import sys
 sys.path.append('..')
 import functions as f
 import json
+from philologic.HitList import NoHits
 from functions.wsgi_handler import wsgi_response, parse_cgi
 from concordance import fetch_concordance
 from kwic import fetch_kwic
@@ -12,20 +13,6 @@ from collocation import fetch_collocation, sort_to_display
 from time_series import generate_time_series
 from render_template import render_template
 
-
-class noHits(object):
-    
-    def __init__(self):
-        self.done = True
-    
-    def __len__(self):
-        return 0
-    
-    def __getitem__(self, item):
-        return ''
-    
-    def __iter__(self):
-        return ''
 
 def error(environ,start_response):
     config = f.WebConfig()
@@ -38,7 +25,7 @@ def error(environ,start_response):
     report = q['report']
     path = os.getcwd().replace('functions/', '')
     biblio_criteria = f.biblio_criteria(q, config)
-    hits = noHits()
+    hits = NoHits()
     if report == "concordance":
         return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
                                f=f, path=path, results_per_page=q['results_per_page'],biblio_criteria=biblio_criteria,
