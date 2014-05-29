@@ -27,8 +27,11 @@ def kwic(environ,start_response):
         return bibliography(f,path, db, dbname,q,environ)
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        biblio_criteria = f.biblio_criteria(q, config)
-        return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
+        return render_kwic(hits, db, dbname, q, path, config)
+        
+def render_kwic(hits, db, dbname, q, path, config):
+    biblio_criteria = f.biblio_criteria(q, config)
+    return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
                                 path=path, results_per_page=q['results_per_page'], biblio_criteria=biblio_criteria,
                                 config=config, template_name='kwic.mako', report="kwic")
 

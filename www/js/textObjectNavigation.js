@@ -126,6 +126,7 @@ function retrieveObj(db_url){
                 var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
                 History.pushState(null, '', new_url);
                 checkEndBeginningOfDoc();
+                $('body').velocity('scroll', {duration: 200, offset: 0, easing: 'easeOut'});
             });
         });
     });
@@ -223,6 +224,7 @@ function TocLinkHandler(db_url) {
                 var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
                 History.pushState(null, '', new_url);
                 checkEndBeginningOfDoc();
+                $('body').velocity('scroll', {duration: 200, offset: 0, easing: 'easeOut'});
             });
         });
         

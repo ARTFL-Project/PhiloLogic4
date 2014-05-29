@@ -6,6 +6,7 @@ from json import dumps
 from mako.lookup import TemplateLookup
 from mako import exceptions
 import py_compile
+from error import error_handling
 
 def compiled_template_permissions(source, output_path):
     fh = open(output_path, 'w')
@@ -30,8 +31,9 @@ def render_template(*args, **data):
         try:
             return template.render(*args, **data).encode("UTF-8", "ignore")
         except:
-            template = template_lookup.get_template("error.mako")
-            return template.render(*args, **data).encode("UTF-8", "ignore")
+            from functions.log_config import logging
+            logging.error("Query string: %s" % os.environ["QUERY_STRING"], exc_info=True)
+            return error_handling(data['db'], data['dbname'], data['q'])
     else:
         try:
             return template.render(*args, **data).encode("UTF-8", "ignore")
