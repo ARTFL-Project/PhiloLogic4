@@ -39,7 +39,7 @@ def concordance_citation(db, config, i):
         if page_obj['n']:
             page_n = page_obj['n'].decode('utf-8', 'ignore')
             citation += u" [page %s] " % page_n    
-    citation = u'<span class="philologic_cite">' + citation + "</span>" + repr(i.philo_id)
+    citation = u'<span class="philologic_cite">' + citation + "</span>"
     return citation
 
 def biblio_citation(db, config, i):
