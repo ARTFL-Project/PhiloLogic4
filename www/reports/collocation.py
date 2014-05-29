@@ -33,6 +33,9 @@ def collocation(environ,start_response):
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ) ## the default should be an error message
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+    return render_collocation(hits, db, dbname, q, path, config)
+    
+def render_collocation(hits, db, dbname, q, path, config):
     biblio_criteria = f.biblio_criteria(q, config)
     all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q, db)
     hit_len = len(hits)
@@ -63,7 +66,10 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
         line_count = 0 
         for line in filter_words_file:
             line_count += 1
-            word = line.split()[0]
+            try:
+                word = line.split()[0]
+            except IndexError:
+                continue
             filter_list.add(word.decode('utf-8', 'ignore'))
             if line_count > filter_num:
                 break

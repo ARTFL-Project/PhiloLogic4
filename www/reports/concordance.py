@@ -28,8 +28,11 @@ def concordance(environ,start_response):
         return bibliography(f,path, db, dbname,q,environ)
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        biblio_criteria = f.biblio_criteria(q, config)
-        return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
+        return render_concordance(hits, db, dbname, q, path, config)
+        
+def render_concordance(hits, db, dbname, q, path, config):
+    biblio_criteria = f.biblio_criteria(q, config)
+    return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
                                f=f, path=path, results_per_page=q['results_per_page'],biblio_criteria=biblio_criteria,
                                config=config,template_name="concordance.mako", report="concordance")
 

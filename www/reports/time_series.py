@@ -22,26 +22,33 @@ def time_series(environ,start_response):
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
     else:
-        c = db.dbh.cursor()
-        c.execute('select date from toms where philo_type="doc"')
-        dates = []
-        for i in c.fetchall():
-            try:
-                dates.append(int(i[0]))
-            except ValueError:
-                pass
-        if not q['start_date']:
-            q['start_date'] = str(min(dates))
-        q['metadata']['date'] = '%s' % q['start_date']
-        if not q['end_date']:
-            q['end_date'] = str(max(dates))
-        q['metadata']['date'] += '-%s' % q['end_date']
-        biblio_criteria = f.biblio_criteria(q, config, time_series=True)
-        results = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        frequencies, date_counts = generate_time_series(q, db, results)
-        return render_template(frequencies=frequencies,db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
-                               biblio_criteria=biblio_criteria, date_counts=date_counts,
-                               config=config, total=len(results),report="time_series")
+        q = handle_dates(q, db)
+        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+        return render_time_series(hits, db, dbname, q, path, config)
+        
+def handle_dates(q, db):
+    c = db.dbh.cursor()
+    c.execute('select date from toms where philo_type="doc"')
+    dates = []
+    for i in c.fetchall():
+        try:
+            dates.append(int(i[0]))
+        except ValueError:
+            pass
+    if not q['start_date']:
+        q['start_date'] = str(min(dates))
+    q['metadata']['date'] = '%s' % q['start_date']
+    if not q['end_date']:
+        q['end_date'] = str(max(dates))
+    q['metadata']['date'] += '-%s' % q['end_date']
+    return q
+
+def render_time_series(hits, db, dbname, q, path, config):
+    biblio_criteria = f.biblio_criteria(q, config, time_series=True)
+    frequencies, date_counts = generate_time_series(q, db, hits)
+    return render_template(frequencies=frequencies,db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
+                           biblio_criteria=biblio_criteria, date_counts=date_counts,
+                           config=config, total=len(hits),report="time_series")
 
 def generate_time_series(q, db, results):    
     """reads through a hitlist."""
