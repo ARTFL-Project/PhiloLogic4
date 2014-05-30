@@ -24,7 +24,6 @@ def error_handling(db, dbname, q):
     config = f.WebConfig()
     report = q['report']
     path = os.getcwd().replace('functions/', '')
-    hits = NoHits()
     if report == "concordance":
         return r.render_concordance(hits, db, dbname, q, path, config)
     elif report == "kwic":
