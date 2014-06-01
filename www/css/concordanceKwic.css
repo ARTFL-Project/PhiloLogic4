@@ -100,7 +100,7 @@
 #sidebar_display {
     margin-top: 38px;
     width: 400px;
-    transition: opacity 250ms;
+    transition: opacity 200ms;
     opacity: 0;
 }
 #sidebar_display #freq_sidebar_status {

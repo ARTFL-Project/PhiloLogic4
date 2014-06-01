@@ -80,7 +80,7 @@ function show_sidebar() {
     if ($('#frequency_container').css('display') == 'none') {
         $("#results_container, .cite").velocity({
             "width": "-=410"},
-            250, function() {
+            150, function() {
                     $('#frequency_container').height($('#results_container').height() -14 + 'px');
                     $('#frequency_container').show();
                     $('#sidebar_display').css('opacity', 1);
@@ -96,7 +96,7 @@ function hide_frequency() {
         $('#sidebar_display').css('opacity', 0);
         $("#results_container, .cite").velocity({
             "width": "+=410"},
-            250);    
+            150);    
         }
 }
 
