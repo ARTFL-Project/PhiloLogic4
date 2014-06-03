@@ -29,6 +29,8 @@ def generate_frequency(results, q, db):
        unique values and their frequencies."""
     field = q["field"]
     depth = ''
+    ## Testing for a possible object depth attribute such as div1.head or para.who and
+    ## apply the corresponding depth for the SQL query
     if field.split('.')[0] in object_types and field.split('.')[-1] in db.locals['metadata_fields']:
         depth = field.split('.')[0]
         field = field.split('.')[-1]
@@ -77,6 +79,7 @@ def relative_frequency(field, label, count, db):
     c = db.dbh.cursor()
     if label == 'NULL':
         label = ''
-    query = '''select sum(word_count) from toms where %s="%s"''' % (field, label)
-    c.execute(query)
-    return count / c.fetchone()[0] * 10000
+    query = 'select sum(word_count) from toms where %s=?' % field
+    c.execute(query, (label,))
+    result = count / c.fetchone()[0] * 10000
+    return "%.2f" % round(result, 3)

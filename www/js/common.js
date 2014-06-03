@@ -254,11 +254,19 @@ $(document).ready(function() {
     
     // Add spinner to indicate that a query is running in the background
     // and close autocomplete
-    $('#button, #button1').click(function( event ) {
+    $('#search').submit(function(e) {
         $('.ui-autocomplete').remove();
         var width = $(window).width() / 2 - 100;
         hideSearchForm();
         $("#waiting").css("margin-left", width).css('margin-top', 100).show();
+        new_q_string = $(this).serialize();
+        // Set a timeout in case the browser hangs: redirect to no hits after 10 seconds
+        setTimeout(function() {
+            e.preventDefault();
+            $("#waiting").fadeOut();
+            var selected_report = $('#report').find('input:checked').attr('id');
+            window.location = "?" + new_q_string.replace(/report=[^&]*/, 'report=error') + "&error_report=" + selected_report;
+        }, 10000);
     });
 });
 
@@ -362,8 +370,8 @@ function autoCompleteMetadata(metadata, field, db_url) {
         },
         select: function( event, ui ) {
             q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-            q = q.replace(/ CUTHERE /, ' ');
             q = q.split('|');
+            q[q.length - 1] = q[q.length - 1].replace(/.*CUTHERE /, '');
             q[q.length-1] = '\"' + q[q.length-1].replace(/^\s*/g, '') + '\"'; 
             q = q.join('|').replace(/""/g, '"');
             $("#" + field).val(q);

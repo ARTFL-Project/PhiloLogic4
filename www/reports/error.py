@@ -21,9 +21,14 @@ def error(environ,start_response):
     
 def error_handling(db, dbname, q):
     hits = NoHits()
-    config = f.WebConfig()
-    report = q['report']
     path = os.getcwd().replace('functions/', '')
+    config = f.WebConfig()
+    if q["error_report"]:
+        report = q["error_report"]
+    else:
+        report = q['report']
+    print >> sys.stderr, "ERRORRRRR", report
+    hits = NoHits()
     if report == "concordance":
         return r.render_concordance(hits, db, dbname, q, path, config)
     elif report == "kwic":
