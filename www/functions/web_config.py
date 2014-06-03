@@ -11,7 +11,7 @@ class WebConfig(object):
     
     def __init__(self):
         self.config = {}
-        path = os.getcwd().replace('functions', "").replace('scripts', '').replace('reports', '') + "/data/web_config.cfg"
+        path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '') + "/data/web_config.cfg" 
         try:
             execfile(path, globals(), self.config)
         except SyntaxError:
