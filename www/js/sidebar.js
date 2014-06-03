@@ -219,12 +219,19 @@ function update_sidebar(sorted_list, field) {
             var link = sorted_list[item][1]['url'];
             var count = sorted_list[item][1]['count'];
         }
-        var full_link = '<a id="freq_sidebar_text" href="' + link + '">' + result + '</a>';
+        // The following if clause is a workaround for a bug with NULL queries
+        // TODO: remove once the bug is fixed in the library.
+        var full_link;
+        if (result == "NULL") {
+            full_link = '<span style="vertical-align: 10px">' + result + '</span>';
+        } else {
+            full_link = '<a id="freq_sidebar_text" href="' + link + '">' + result + '</a>';
+        }
         newlist += '<li>';
         newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:8px;"></span>';
         newlist += full_link + '<span style="float:right;display:inline-block;padding-right: 5px;">' + count + '</span></li>';
     }
-    $("#frequency_table").hide().empty().html(newlist).fadeIn('fast');
+    $("#frequency_table").hide().empty().html(newlist).velocity('fadeIn', {duration: 200});
     $("#hide_sidebar").css('display', 'inline-block');
     $("#frequency_container").show();
 }
