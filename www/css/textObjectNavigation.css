@@ -190,6 +190,9 @@ sp::before {
     content:"\A";
     white-space:pre;
 }
+stage+sp:nth-of-type(n+2)::before {
+    content: "";
+}
 fw, join {
     display: none;
 }
@@ -199,6 +202,10 @@ speaker+stage::before {
 }
 stage {
     font-style: italic;
+}
+stage::after {
+    content:"\A";
+    white-space:pre;
 }
 div1 div2::before {
     content:"\A";

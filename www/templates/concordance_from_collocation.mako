@@ -17,10 +17,8 @@
             <div id="search_arguments">
                 Displaying ${q['collocate_num']} occurences of collocate <b>${q['collocate'].decode('utf-8', 'ignore')}</b> in the vicinity of <b>${q['q'].decode('utf-8', 'ignore')}</b><br>
                 Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
-            </div>
-            
-            <br><br><span id='colloc_in_hits'></span> occurences in
-            hits <span class="start">${start}</span> - <span class="end">${end}</span>
+            </div> 
+            Hits <span class="start">${start}</span> - <span class="end">${end}</span>
         </div>
     </div>
     <% occurences = 0 %>

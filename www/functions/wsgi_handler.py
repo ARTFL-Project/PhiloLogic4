@@ -34,7 +34,13 @@ def parse_cgi(environ):
     query["q_string"] = environ["QUERY_STRING"] ## this might be useful to have around
     query["q"] = cgi.get("q",[None])[0]
     if isinstance(query["q"], str):
-         query['q'] = query["q"].replace("'", " ") ## HACK ALERT: this is for French.
+        query['q'] = query["q"].replace("'", " ") ## HACK ALERT: this is for French.
+        query['q'] = query['q'].replace(';', '')
+        query['q'] = query['q'].replace(',', '')
+        query['q'] = query['q'].replace('!', '')
+        query['q'] = query['q'].replace('?', '')
+        query['q'] = query['q'].replace(':', '')
+        #query['q'] = re.sub('\.([^*]*)', ' \\1', query['q'])
     query["method"] = cgi.get("method",[None])[0]
     query['arg'] = cgi.get("arg", [None])[0]
     if query["method"] == "proxy":

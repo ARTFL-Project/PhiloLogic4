@@ -12,7 +12,7 @@ $(document).ready(function() {
         getCitationWidth();
     });
     //sidebar_reports(q_string, db_url, pathname);
-    $('#colloc_in_hits').append(occurences);
+    //$('#colloc_in_hits').append(occurences);
     $('#return_to_colloc').click(function() {
         History.back();
     });

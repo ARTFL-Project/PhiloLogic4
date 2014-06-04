@@ -27,7 +27,6 @@ def error_handling(db, dbname, q):
         report = q["error_report"]
     else:
         report = q['report']
-    print >> sys.stderr, "ERRORRRRR", report
     hits = NoHits()
     if report == "concordance":
         return r.render_concordance(hits, db, dbname, q, path, config)
