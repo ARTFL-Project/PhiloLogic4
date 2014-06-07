@@ -93,7 +93,6 @@ $(document).ready(function() {
         $('#more_options').hide();
         showHide('concordance');
         $(window).load(function() {
-            console.log("hey")
             $('#search_elements')
                 .velocity("slideDown",
                            {duration: 400, 'easing': 'easeIn'}

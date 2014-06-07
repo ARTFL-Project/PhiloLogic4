@@ -6,6 +6,7 @@ import functions as f
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
 from collections import defaultdict
+from math import log10
 import json
 
 object_types = set(["doc", "div1", "div2", "div3", "para", "sent", "word"])
@@ -35,6 +36,8 @@ def generate_frequency(results, q, db):
         depth = field.split('.')[0]
         field = field.split('.')[-1]
     counts = defaultdict(int)
+    key_map = {}
+    reverse_key_map = {}
     for n in results[q['interval_start']:q['interval_end']]:
         ## This is to minimize the number of SQL queries
         if field in db.locals['metadata_types'] and not depth:
@@ -51,17 +54,39 @@ def generate_frequency(results, q, db):
             key = n[field]
         if not key:
             key = "NULL" # NULL is a magic value for queries, don't change it recklessly.
+        if depth != "doc" and key != "NULL":
+            key = (key, n.doc.title)
         counts[key] += 1
-
+    
     if q['rate'] == 'relative':
         for key, count in counts.iteritems():
-            counts[key] = relative_frequency(field, key, count, db)
+            if isinstance(key, tuple):
+                k = key[0]
+                counts[key] = relative_frequency(field, k, count, db, doc=key[1])
+            else:
+                counts[key] = relative_frequency(field, key, count, db)
+    elif q['rate'] == 'tf_idf':
+        c = db.dbh.cursor()
+        c.execute('select count(distinct philo_id) from toms where philo_type="doc"')
+        total_docs = int(c.fetchone()[0])
+        idf = 1 + log10(total_docs / len(counts))
+        print >> sys.stderr, "TFIDF", total_docs, idf
+        for key, count in counts.iteritems():
+            if isinstance(key, tuple):
+                k = key[0]
+                counts[key] = tf_idf(field, k, count, db, idf, doc=key[1])
+            else:
+                counts[key] = tf_idf(field, key, count, db, idf)
 
     table = {}
     for k,v in counts.iteritems():
         # for each item in the table, we modify the query params to generate a link url.
         if k == "NULL":
             q["metadata"][field] = k # NULL is a magic boolean keyword, not a string value.
+        if isinstance(k, tuple):
+            key, title = k
+            q['metadata']['title'] = '"%s"' % title.encode('utf-8', 'ignore')
+            q["metadata"][field] = '"%s"' % key.encode('utf-8', 'ignore') # we want to do exact queries on defined values.
         else:
             q["metadata"][field] = '"%s"' % k.encode('utf-8', 'ignore') # we want to do exact queries on defined values.
         # Now build the url from q.
@@ -69,17 +94,39 @@ def generate_frequency(results, q, db):
 
         # Contruct the label for the item.
         # This is the place to modify the displayed label of frequency table item.
-        label = k #for example, replace NULL with '[None]', 'N.A.', 'Untitled', etc.
+        if isinstance(k, tuple):
+            label = '%s (%s)' % k
+        else:
+            label = k #for example, replace NULL with '[None]', 'N.A.', 'Untitled', etc.
             
         table[label] = {'count': v, 'url': url}
 
     return field, table
     
-def relative_frequency(field, label, count, db):
+def relative_frequency(field, label, count, db, doc=False):
     c = db.dbh.cursor()
     if label == 'NULL':
         label = ''
-    query = 'select sum(word_count) from toms where %s=?' % field
-    c.execute(query, (label,))
+    if doc:
+        query = 'select sum(word_count) from toms where %=? and title=?' % field
+        c.execute(query, (label, doc))
+    else:
+        query = 'select sum(word_count) from toms where %s=?' % field
+        c.execute(query, (label,))
     result = count / c.fetchone()[0] * 10000
     return "%.2f" % round(result, 3)
+
+def tf_idf(field, label, count, db, idf, doc=False):
+    c = db.dbh.cursor()
+    if label == 'NULL':
+        label = ''
+    if doc:
+        query = 'select sum(word_count) from toms where %=? and title=?' % field
+        c.execute(query, (label, doc))
+    else:
+        query = 'select sum(word_count) from toms where %s=?' % field
+        c.execute(query, (label,))
+    result = count / c.fetchone()[0] * idf
+    print >> sys.stderr, "RESULT", result
+    return "%.6f" % round(result, 8)
+

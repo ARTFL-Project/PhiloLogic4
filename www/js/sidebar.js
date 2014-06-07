@@ -73,6 +73,12 @@ function sidebar_reports(q_string, db_url, pathname) {
             var table = JSON.parse(sessionStorage[script_call]);
             $('#frequency_table').html(table).show(); 
             $("#hide_sidebar").css('display', 'inline-block');
+            var container_height = $('#results_container').height() - 14;
+            var freq_height = $('#frequency_container').height();
+            if (freq_height > container_height) {
+                container_height = freq_height;
+            }
+            $('#frequency_table').slimScroll({height: container_height});
         }
     });
 }
@@ -187,7 +193,7 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
         $('#progress_bar').progressbar({value: total});
         $('.progress-label').text('Complete!');
         $("#progress_bar").delay(500).slideUp();
-        $('#frequency_table').slimScroll({height: $('#frequency_container').height()});
+        $('#frequency_table').slimScroll({height: $('#results_container').height() - 14});
         if (typeof(localStorage) == 'undefined' ) {
             alert('Your browser does not support HTML5 localStorage. Try upgrading.');
         } else {
