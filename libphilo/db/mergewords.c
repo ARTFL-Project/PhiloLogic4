@@ -68,15 +68,17 @@ word_rec fetch_word(dbh *db, char *word) {
     rec.block_count = 0;
   }
   
-  rec.current_block = 0;
+  rec.current_block = 0; // is this redundant with header_position?
+  rec.header_position = 0; 
   rec.block_position = 0; // position 0 means the header is the next hit, and the block hasn't been fetched yet.
   rec.current_hit = calloc(1,db->dbspec->fields * sizeof(uint32_t));
+  rec.next_header = calloc(1,db->dbspec->fields * sizeof(uint32_t));
   return rec;
 }
 
 void read_hit(dbh *db, bitsvector *v, uint32_t *hits) {
   int i;
-  for (i = 0; i < db->dbspec->bitlengths[i]; i++) {
+  for (i = 0; i < db->dbspec->fields; i++) {
     hits[i] = bitsvectorGet(v,db->dbspec->bitlengths[i]);
   }
 }
@@ -98,8 +100,10 @@ uint32_t *word_next_hit(dbh *db, word_rec *rec) {
     }
 
   } else if (rec->type == 1) {   
-    if (rec->header_position < rec->block_count) { // if we aren't past the last block
+    fprintf(stderr,"type %d; in block %d of %d", rec->type, rec->current_block, rec->block_count);
+    if (rec->header_position <= rec->block_count) { // if we aren't past the last block
       if (rec->block_position == 0) { // if we need to start a new block...
+	fprintf(stderr,", reading header for block %d\n",rec->current_block);
 
 	// read the header.
 	read_hit(db,rec->header,rec->current_hit); 
@@ -114,42 +118,56 @@ uint32_t *word_next_hit(dbh *db, word_rec *rec) {
 
 	// peek at the next header hit, if we're not on the last block
 	if (rec->header_position < rec->block_count) {
+	  fprintf(stderr,", looking ahead at next block");
 	  peek = rec->header; // save the state of the header vector
 	  read_hit(db,rec->header,rec->next_header); // read the next block
 	  rec->header = peek; // rewind
 	} else { // if we're on the last block
 	  rec->next_header = NULL;
 	}
+	fprintf(stderr," returning\n");
 	return rec->current_hit;
       }
       else { // if we've read the header of the current block..
-
+	
 	// we may still need to load it from disk.
-	if (rec->block_position = 1) {
+	if (rec->block_position == 1) {
+	  fprintf(stderr,"loading block from disk\n");
 	  buffer = malloc(sizeof(char) * db->dbspec->block_size);
+	  res = fseeko(db->block_file,rec->start_offset,0);
 	  res = fread(buffer,sizeof(char),db->dbspec->block_size, db->block_file);
 	  rec->block = bitsvectorNew(buffer);	
 	} 
+	// we should check to see if we're still in a block--don't know why this doesn't segfault.
+	if ( bitsvectorTell(rec->block) + db->dbspec->bitwidth > db->dbspec->block_size << 3) {
+	  fprintf(stderr,"end of block, advancing to next block");
+	  rec->current_block += 1;
+	  rec->block_position = 0;
+	  return word_next_hit(db,rec);
+	}
+	fprintf(stderr,",reading block hit %d at bit %d of %d",rec->block_position,bitsvectorTell(rec->block),db->dbspec->block_size << 3);
 	// once it's loaded, read it into a temp buffer.
-	temp_hit = malloc(db->dbspec->fields * sizeof(uint32_t));
-	read_hit(db,rec->block,temp_hit);
+	read_hit(db,rec->block,rec->current_hit);
 	// a hit consisting of all binary 1's is actually an end-of-block flag
 	for (i = 0; i < db->dbspec->fields; i++) {
-	  if (temp_hit[i] != (( 1 << db->dbspec->bitlengths[i] ) - 1 )) {
+	  if (rec->current_hit[i] != (( 1 << db->dbspec->bitlengths[i] ) - 1 )) {
+	    fprintf(stderr,":valid");
 	    // the hit is good, return it.
 	    rec->block_position += 1;
-	    rec->current_hit = temp_hit;
+	    fprintf(stderr,"; advancing to block hit %d\n",rec->block_position);
 	    return rec->current_hit;
 	  }
 	}
+	fprintf(stderr,":invalid, advancing to next block\n");
 	// the hit is fake, we need to go to the next block.
-	rec->block_count += 1;
+	rec->current_block += 1;
 	rec->block_position = 0;
 	// call ourselves recursively, we can check there if we've gone off the last block.
 	return word_next_hit(db,rec);
       }
     }
     else { // if we're off the end of the block list      
+      fprintf(stderr,"no more blocks.  returning NULL\n");
       return NULL;
     }
   }
@@ -172,6 +190,20 @@ word_rec new_word_rec(dbh *db, char *word) {
   return rec;
 }
 
+void dump_hits(dbh *db, uint32_t *hits, int count) {
+  int i,j;
+  for(i = 0; i < count; i++) {
+
+    for (j = 0; j < db->dbspec->fields; j++) {
+
+      if (j != 0) { fprintf(stderr," "); }
+
+      fprintf(stderr,"%d", hits[j+(i*db->dbspec->fields)]);
+    }
+    fprintf(stderr,"\n");
+  }
+}
+
 word_heap new_heap(dbh * db) {
   word_heap heap;
   heap.db = db;
@@ -187,11 +219,27 @@ word_heap new_heap(dbh * db) {
 
 void start_stream(word_heap *heap) {
   int i;
+  int j;
+  word_rec *r;
   for (i = 0; i < heap->rec_count; i++) {
-    if (heap->records[i].type == 0) {
-      fprintf(stdout,"dumping header for %s\n",heap->records[i].word);
+    r = &heap->records[i];
+    if (r->type == 0) {
+      fprintf(stdout,"dumping header for %s\n",r->word);
+      while (word_next_hit(heap->db,r)) {
+	fprintf(stderr,"%s ",r->word);
+	dump_hits(heap->db,r->current_hit,1);
+      }
     } else {
-      fprintf(stdout,"dumping block 1 for %s\n",heap->records[i].word); 
+      fprintf(stdout,"dumping block 1 for %s\n",r->word);       
+      while (word_next_hit(heap->db,r) ) {
+	if (r->current_block > 0) {
+	  fprintf(stderr,"end of block");
+	  break;
+	}
+	fprintf(stderr,"%s ",r->word);
+	dump_hits(heap->db,r->current_hit,1);
+      }
+      fprintf(stderr,"end of hits for %s",r->word);
     }
   }
 }
@@ -230,17 +278,6 @@ word_rec pop_record(word_heap * heap) {
   return ret;
 }
 
-void dump_hits(dbh *db, uint32_t *hits, int count) {
-  int i,j;
-  for(i = 0; i < count; i++) {
-    for (j = 0; j < db->dbspec->fields; j++) {
-      if (j != 0) { fprintf(stdout," "); }
-      fprintf(stdout,"%d", hits[j+i*db->dbspec->fields]);
-    }
-    fprintf(stdout,"\n");
-  }
-}
-
 int main(int argc, char **argv) {
 
   char buffer[256];
@@ -263,14 +300,12 @@ int main(int argc, char **argv) {
 
     if (rec.type == 0) {
       fprintf(stderr, "%s: %d hits in header\n", rec.word, (int)rec.freq);
-      dump_hits(db, rec.header_hits, rec.freq);
     } else {
       fprintf(stderr, "%s: %d hits in %d blocks @ %d\n", rec.word, (int)rec.freq, rec.block_count, (int)rec.start_offset);
-      dump_hits(db, rec.header_hits, rec.block_count);
     }
     add_record(&heap,&rec);
   }
-  fprintf(stdout, "word_heap has %d records\n", i);
+  fprintf(stdout, "word_heap has %d records\n", heap.rec_count);
   for (j = 0; j < heap.rec_count; j++) {
     fprintf(stderr,"%s\n",heap.records[j].word); 
   }
