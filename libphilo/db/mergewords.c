@@ -233,7 +233,9 @@ int parent(int i) {
 
 int up_heap(word_heap *heap, int i) {
   word_rec rec;
+  int p = parent(i);
   // bounds check
+  if (i = 0) { return 0; }
   if (heap->cmp(heap->db,heap->records[i].current_hit,heap->records[parent(i)].current_hit) > 0) {
     rec = heap->records[i];
     heap->records[i] = heap->records[parent(i)];
@@ -248,6 +250,7 @@ int down_heap(word_heap *heap, int i) {
   word_rec rec;
   int child;
   // bounds check
+  if (rchild(i) >= heap->rec_count) { return 0;}
   if ( (heap->cmp(heap->db,heap->records[i].current_hit,heap->records[lchild(i)].current_hit) <= 0) ||
        (heap->cmp(heap->db,heap->records[i].current_hit,heap->records[rchild(i)].current_hit) <= 0) ) {
     if (heap->cmp(heap->db,heap->records[lchild(i)].current_hit,heap->records[rchild(i)].current_hit) <= 0) {
@@ -276,8 +279,9 @@ void add_record(word_heap *heap, word_rec *rec) {
   heap->records[heap->rec_count] = *rec;
   heap->rec_count += 1;
   /* while the new record is less than its parent */
-  /* exchange the new record with it's parent */
-  
+  /* exchange the new record with it's parent */ 
+  // NEED TO GET FIRST HIT FOR THIS TO WORK
+  up_heap(heap,heap->rec_count - 1);
 }
 
 word_rec pop_record(word_heap * heap) {
@@ -290,11 +294,11 @@ word_rec pop_record(word_heap * heap) {
   /* replace the root node of the heap with the last node*/
   heap->records[0] = heap->records[heap->rec_count - 1];
   heap->rec_count -= 1; /*don't clear the old last node, we'll use it as swap space */
-  /* while the (former last) new root node is less than either of its children*/
-  
+  /* while the (former last) new root node is less than either of its children*/ 
   /* switch its position with that child.  Keep iterating on the former last node, not the root) */
-
+  down_heap(heap,0);
   /* return the prior root node; we may update it and re-insert */  
+  // no we won't
   memset(heap->records + heap->rec_count + 1, 0, sizeof(word_rec));
   return ret;
 }
@@ -306,6 +310,7 @@ void start_stream(word_heap *heap) {
   uint32_t *hit;
   //  for (i = 0; i < heap->rec_count; i++) {
   while ( heap->rec_count >0) {
+    down_heap(heap,0); // does nothing on first iteration.
     r = &heap->records[0];
     hit = word_next_hit(heap->db,r);
     if ( (hit == NULL) || (r->current_block > 0) ) {
