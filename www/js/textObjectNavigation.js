@@ -287,20 +287,3 @@ function plate_hover() {
         $(this).tooltip({content: text});
     });
 }
-
-// Custom HTML replace function for text objects since jQuery's html is too slow:
-// See here: https://groups.google.com/forum/#!msg/jquery-en/RG_dJD8DlSc/R4pDTgtzU4MJ
-$.fn.replaceHtml = function( html ) {
-    var stack = [];
-    return this.each( function(i, el) {
-        var oldEl = el;
-        var newEl = oldEl.cloneNode(false);
-        newEl.innerHTML = html;
-        try {
-            oldEl.parentNode.replaceChild(newEl, oldEl);   
-        } catch(e) {}
-        /* Since we just removed the old element from the DOM, return a reference
-        to the new element, which can be used to restore variable references. */
-        stack.push( newEl );
-    }).pushStack( stack );
-};

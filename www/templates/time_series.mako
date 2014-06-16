@@ -3,16 +3,16 @@
 <div id='philologic_response'>
     <div id='initial_report'>
         <div id='description'>
-            <div id="search_arguments">
-                Use of the term(s) <b>${q['q'].decode('utf_8')}</b> between
+            <div id="search_arguments" data-start="${q['start_date']}" data-end="${q['end_date']}", data-interval="${q['year_interval']}">
+                ${total} occurrences for <b>${q['q'].decode('utf_8')}</b><br>
+                Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}<br>
+                Use of the term(s) between
                 <span class="biblio_criteria"><b>${q['start_date']}</b>
                     <span class="ui-icon ui-icon-circle-close" id="remove_metadata_date_start"></span>
                 </span>&nbsp and
                 <span class="biblio_criteria"><b>${q['end_date']}</b>
                     <span class="ui-icon ui-icon-circle-close" id="remove_metadata_date_end"></span>
                 </span>
-                <br>
-                Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
             </div>
         </div>
         <div id="progress_bar" style="margin-top:-5px;margin-bottom: 10px" data-total='${total}'>

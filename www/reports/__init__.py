@@ -10,3 +10,4 @@ from time_series import time_series, generate_time_series, render_time_series, h
 from bibliography import bibliography
 from frequencies import frequencies
 from error import error
+from access import access

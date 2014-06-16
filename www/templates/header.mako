@@ -37,7 +37,7 @@
             "kwic": ["common.js", "sidebar.js", "/plugins/jquery.hoverIntent.minified.js", "concordanceKwic.js"], "time_series": ["common.js", "timeSeries.js"],
             "collocation": ["common.js", "plugins/jquery.tagcloud.js", "collocation.js"], "ranked_relevance": ["common.js", "rankedRelevance.js"],
             "bibliography": ["common.js", "sidebar.js", "bibliography.js"], "navigation": ["common.js", "/plugins/jquery.scrollTo.min.js", "textObjectNavigation.js"],
-            "concordance_from_collocation": ["common.js", "concordanceFromCollocation.js"], "t_o_c": ["common.js"], "error": []}
+            "concordance_from_collocation": ["common.js", "concordanceFromCollocation.js"], "t_o_c": ["common.js"], "error": [], "access": []}
     %>
     % for script in reports[report]:
         <script type="text/javascript" src="${config.db_url}/js/${script}"></script>

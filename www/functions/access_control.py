@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 
-from os.path import dirname
+import os
 from philologic.DB import DB
-import sqlite3
 import sys
 import socket
 import re
 
 def access_control(environ,start_response):
-    dbfile = dirname(environ["SCRIPT_FILENAME"]) + '/data'
-    db = DB(dbfile,encoding='utf-8')
+    path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '') + '/data/'
+    db = DB(path,encoding='utf-8')
     if "open_access" in db.locals:  ## failsafe in case the variable is not db.locals.py
         if db.locals['open_access']:
             return True
@@ -21,9 +20,11 @@ def access_control(environ,start_response):
 
     
 def check_access(db, environ):
-    access_db = db.locals['access_db']
-    conn = sqlite3.connect(access_db)
-    c = conn.cursor()
+    access = {}
+    access_file = db.locals['access_file']
+    execfile(access_file, globals(), access)
+    domain_list = set(access["domain_list"])
+    blocked_ips = set(access["blocked_ips"])
     
     incoming_address = environ['REMOTE_ADDR']
     fq_domain_name = socket.getfqdn(incoming_address).split(',')[-1]
@@ -40,15 +41,12 @@ def check_access(db, environ):
         else:
                 match_domain = fq_domain_name
                 print >> sys.stderr, "MATCH DOMAIN:", match_domain
+    
+    access_response = False
+    if incoming_address not in blocked_ips:
+        if incoming_address in domain_list or match_domain in domain_list:
+            access_response = True
 
+    print >> sys.stderr, "ACCESS RESPONSE: ", access_response
 
-    c.execute('SELECT access_value FROM domain_list WHERE client_address  = \'' + incoming_address + '\' OR client_address = \'' + match_domain + '\'')
-
-    access_response = c.fetchall()
-
-    print >> sys.stderr, "SQL ACCESS RESPONSE: ", access_response
-
-    if not access_response:
-        return False
-    else:
-        return True
+    return access_response

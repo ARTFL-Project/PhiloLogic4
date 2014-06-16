@@ -40,12 +40,41 @@ $(document).ready(function() {
     
     // Fetch more context for concordances after page load
     $(window).load(function() {
-       fetchMoreContext(); 
+        fetchMoreContext();
+        fetchresultsBibliography(pathname);
     });
     
 });
 
-
+// Fetch results bibliography from results
+function fetchresultsBibliography(pathname) {
+    var philo_ids = [];
+    $('.cite').each(function() {
+        philo_ids.push($(this).data('id'));
+    });
+    var script = pathname + '/scripts/get_results_bibliography.py?';
+    var key = "&philo_id=";
+    for (var i = 0; i < philo_ids.length; i++) {
+        script += key + philo_ids[i];
+    }
+    $.getJSON(script, function(data) {
+        var ol = '<ol>';
+        for (var i = 0; i < data.length; i++) {
+            var li = "<li><span class='dot'></span>" + data[i][0] + " <b>(" + data[i][1] + " hits)</b></li>";
+            ol += li;
+        }
+        ol += "</ol>";
+        $('#results-bibliography').append(ol);
+        //$("#show-results-bibliography").click(function() {
+        //    var list = $('#results-bibliography').find('ol');
+        //    if (list.css('display') == "none") {
+        //        list.velocity('slideDown');
+        //    } else {
+        //        list.velocity('slideUp');
+        //    }
+        //});
+    });
+}
 
 /// Switch betwwen concordance and KWIC reports
 function concordance_kwic_switch(db_url) {

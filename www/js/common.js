@@ -482,7 +482,6 @@ function hideSearchForm() {
 ////// Functions shared by various reports ////////
 ///////////////////////////////////////////////////
 
-
 // Show more context in concordance and concordance from collocation searches
 function fetchMoreContext() {
     var db_url = webConfig['db_url'];
@@ -556,3 +555,20 @@ function colloc_linker(word, q_string, direction, num) {
     q_string += '&collocate_num=' + num;
     return q_string
 }
+
+// Custom HTML replace function for text objects since jQuery's html is too slow:
+// See here: https://groups.google.com/forum/#!msg/jquery-en/RG_dJD8DlSc/R4pDTgtzU4MJ
+$.fn.replaceHtml = function( html ) {
+    var stack = [];
+    return this.each( function(i, el) {
+        var oldEl = el;
+        var newEl = oldEl.cloneNode(false);
+        newEl.innerHTML = html;
+        try {
+            oldEl.parentNode.replaceChild(newEl, oldEl);   
+        } catch(e) {}
+        /* Since we just removed the old element from the DOM, return a reference
+        to the new element, which can be used to restore variable references. */
+        stack.push( newEl );
+    }).pushStack( stack );
+};

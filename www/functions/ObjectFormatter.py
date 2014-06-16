@@ -85,7 +85,7 @@ def format(text,bytes=[]):
             pass
     output = etree.tostring(xml)
     ## remove spaces around hyphens and apostrophes
-    output = re.sub(r" ?([-';.])+ ", '\\1', output)
+    output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
     return convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
 
 

@@ -1,43 +1,34 @@
 <%include file="header.mako"/>
-<%include file="search_form.mako"/>
-<script>
-$(document).ready(function() {
-    $("#form_body").hide();
-    $("#password_submit,#password_reset").button();
-    $("#password_submit").click(function(){
-	var username=$("#username").val();
-	var password=$("#password").val();
-	var command="${db.locals['db_url']}/scripts/password_entry.py?username=" + username + "&password=" + password;
-	console.log(username, password, command)
-	$.getJSON(command, function(data){
-		if (data == 'ok') {
-			console.log('it worked')
-			location.reload();
-	 	} else {
-			alert('tough, your information has been sent to the NSA')
-		}
-		});	
-	});
-
-    $("#password_reset").click(function(){
-	//alert("keep clicking, chump...")
-	$("#password_access :text").val("");
-	$("#password_access input").empty();
-	});
-});
-</script>
-<div id="error_container" style="max-width:500px !important;font-size:120%;">
+<div id="error_container" style="max-width:530px !important;font-size:150%;">
     <div id="error_message" class="ui-state-error" style="text-align:justify;padding: 5px 5px 5px 5px;">
         <span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>
-	You have been deemed unworthy to access this page. Go away and never return.
+        Access Restricted to ARTFL subscribing institutions
     </div>
-    <center>
-    <p>Piss off ${client_address}.</p>
-    <img src="http://leahdaly.files.wordpress.com/2013/06/maori-warrior.jpg" style="max-height:400px">
-    </center>
+</div>
+<div>
+    <p>
+        Please <a href="http://artfl-project.uchicago.edu/node/24">contact ARTFL</a>
+        for more information or to have your computer enabled if your institution   
+        is an <a href="http://artfl-project.uchicago.edu/node/2">ARTFL subscriber</a>
+    <p>
+        If you belong to a subscribing institution and are attempting to access
+        ARTFL from your Internet Service Provider, please note that you should    
+        use your institution's <b>proxy server</b> and should contact your
+        networking support office.  Your proxy server must be configured to
+        include <tt>${hostname}</tt> to access this database.
+    <p>
+        Password-Controlled Access is not yet enabled in PhiloLogic4
+    <p>
+        Please consult   
+        <A HREF="http://artfl-project.uchicago.edu/node/14">
+        Subscription Information</A> to see how your institution can   
+        gain access to ARTFL resources.
+    <p>
+    <hr>The ARTFL Project, University of Chicago <hr>
+    <p>Requesting Computer Address: ${client_address}
 </div>
 
-<div id="password_form" style="max-width:500px !important;font-size:110%;">
+<div id="password_form" style="display:none; max-width:500px !important;font-size:110%;">
     <div id="error_message" class="" style="text-align:justify;padding: 5px 5px 5px 5px;">
         <span class="" style="float: left; margin-right: .3em;"></span>
 	<br/>
@@ -45,7 +36,7 @@ $(document).ready(function() {
         If you have a username and password, please enter them here:
 	</center>
     </div>
-	<form id="password_access" action="${db.locals['db_url'] + "/scripts/password_entry.py/"}">
+	<form id="password_access">
 	     <div id="enter_user_pass">
 	          <table style="margin: 0 auto">
 		     <tr class="user_pass" >

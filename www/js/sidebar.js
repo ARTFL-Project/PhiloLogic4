@@ -215,7 +215,11 @@ function update_sidebar(sorted_list, field) {
         newlist += "<p id='freq_sidebar_status'>Collocates within 5 words left or right</p>";
         q_string = window.location.search.substr(1);
     }
-    sorted_list = sorted_list.slice(0,300);
+    var limit = false;
+    if (sorted_list.length > 5000) {
+        sorted_list = sorted_list.slice(0,5000);
+        limit = 5000;
+    }
     for (var item=0; item < sorted_list.length; item++) {
         var result = sorted_list[item][0];
         if (field == 'collocation_report') {
@@ -229,15 +233,17 @@ function update_sidebar(sorted_list, field) {
         // TODO: remove once the bug is fixed in the library.
         var full_link;
         if (result == "NULL") {
-            full_link = '<span style="vertical-align: 10px">' + result + '</span>';
+            full_link = '<span style="vertical-align: 10px"><span class="dot"></span>' + result + '</span>';
         } else {
-            full_link = '<a id="freq_sidebar_text" href="' + link + '">' + result + '</a>';
+            full_link = '<a id="freq_sidebar_text" href="' + link + '"><span class="dot"></span>' + result + '</a>';
         }
         newlist += '<li>';
-        newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:8px;"></span>';
         newlist += full_link + '<span style="float:right;display:inline-block;padding-right: 5px;">' + count + '</span></li>';
     }
-    $("#frequency_table").hide().empty().html(newlist).velocity('fadeIn', {duration: 200});
+    if (limit) {
+        newlist += '<p>For performance reasons, this list is limited at 5000 results</p>';
+    }
+    $("#frequency_table").replaceHtml(newlist);
     $("#hide_sidebar").css('display', 'inline-block');
     $("#frequency_container").show();
 }

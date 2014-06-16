@@ -36,8 +36,6 @@ def generate_frequency(results, q, db):
         depth = field.split('.')[0]
         field = field.split('.')[-1]
     counts = defaultdict(int)
-    key_map = {}
-    reverse_key_map = {}
     for n in results[q['interval_start']:q['interval_end']]:
         ## This is to minimize the number of SQL queries
         if field in db.locals['metadata_types'] and not depth:
@@ -121,12 +119,11 @@ def tf_idf(field, label, count, db, idf, doc=False):
     if label == 'NULL':
         label = ''
     if doc:
-        query = 'select sum(word_count) from toms where %=? and title=?' % field
+        query = 'select sum(word_count) from toms where %s=? and title=?' % field
         c.execute(query, (label, doc))
     else:
         query = 'select sum(word_count) from toms where %s=?' % field
         c.execute(query, (label,))
-    result = count / c.fetchone()[0] * idf
-    print >> sys.stderr, "RESULT", result
-    return "%.6f" % round(result, 8)
+    result = count / c.fetchone()[0] * idf *10000
+    return "%.2f" % round(result, 3)
 
