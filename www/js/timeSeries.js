@@ -15,10 +15,20 @@ $(document).ready(function() {
         var body_width = parseInt($('body').width());
         $('#test_time_series, #first_division, #middle_division, #top_division').width(body_width-90 + 'px');
         
+        
+        // Generate range of all dates
+        year_interval = parseInt($('#search_arguments').data('interval'));
+        start_date = normalizeDate($('#search_arguments').data('start'), year_interval);
+        end_date = normalizeDate($('#search_arguments').data('end'), year_interval);
+        var date_list = []
+        for (var i = start_date; i < end_date; i += year_interval) {
+            date_list.push(i);
+        }
+        
         // Default data display
         var full_results;
         var abs_data = eval($("#absolute_time").data('value'));
-        var merge_abs = merge_time_results(full_results, abs_data);
+        var merge_abs = merge_time_results(full_results, abs_data, date_list);
         var sorted_abs = merge_abs[0]
         var full_abs = merge_abs[1]
         var interval = $("#absolute_time").data('interval');
@@ -31,7 +41,8 @@ $(document).ready(function() {
         $('#progress_bar').width($('#initial_report').width());
         $('#progressive_bar').show();
         var date_counts = eval($('#relative_time').data('datecount'));
-        progressiveLoad(db_url, total, interval, 0, 5000, full_abs, date_counts);   
+        
+        progressiveLoad(db_url, total, interval, 0, 5000, full_abs, date_counts, date_list);   
     } else {
         var time_series = JSON.parse(sessionStorage[window.location.href]);
         $('#philologic_response').html(time_series);
@@ -57,6 +68,22 @@ $(document).ready(function() {
     
 });
 
+function normalizeDate(year, interval) {
+    year = year.toString();
+    if (interval == 10) {
+        year = year.slice(0,-1) + '0';
+    } else if (interval == '100') {
+        year = year.slice(0,-2) + '00';
+    } else if (interval == '50') {
+        var decade = parseInt(year.slice(-2));
+        if (decade < 50) {
+            year = year.slice(0,-2) + '00';
+        } else {
+            year = year.slice(0,-2) + '50';
+        }
+    }
+    return parseInt(year)
+}
 
 function frequencySwitcher() {
     $('#absolute_time, #relative_time').click(function() {
@@ -66,24 +93,23 @@ function frequencySwitcher() {
     });
 }
 
-function progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_full_results, full_date_counts) {
+function progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_full_results, full_date_counts, date_list) {
     var q_string = window.location.search.substr(1);
     var script = db_url + "/scripts/time_series_fetcher.py?" + q_string
+    var initial_end = interval_end;
     if (interval_start === 0) {
-        interval_start = 10000;
-        interval_end = 30000;
+        interval_start = 5000;
+        interval_end = 25000;
     } else {
         interval_start += 20000;
         interval_end += 20000;
     }
-    if (interval_start < total_results) {
+    if (initial_end < total_results) {
         script_call = script + "&interval_start=" + interval_start + "&interval_end=" + interval_end;
         $.getJSON(script_call, function(data) {
-            var abs_merge = merge_time_results(abs_full_results, data[0]);
+            var abs_merge = merge_time_results(abs_full_results, data[0], date_list);
             abs_sorted_list = abs_merge[0];
             abs_new_full_results = abs_merge[1];            
-            $('.graph_years').remove();
-            $('.graph_bar').remove();
             drawFromData(abs_sorted_list, interval, "absolute_time");
             
             // Update date_counts
@@ -91,7 +117,7 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
                 full_date_counts[date] = data[1][date]
             }
             
-            progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_new_full_results, full_date_counts);
+            progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_new_full_results, full_date_counts, date_list);
             var total = $('#progress_bar').progressbar("option", "max");
             var percent = interval_end / total * 100;
             if (interval_end < total) {
@@ -144,8 +170,17 @@ function relativeCount(absolute_counts, date_counts) {
     return relative_counts
 }
 
+function addMissingDates(full_results, date_list) {
+    for (var i = 0; i < date_list.length; i++) {
+        if (!(date_list[i] in full_results)) {
+            full_results[date_list[i]] = 0;
+        }
+    }
+    return full_results
+}
+
 // Taken from common.js. Differs in that it sorts by date and not count
-function merge_time_results(full_results, new_data) {
+function merge_time_results(full_results, new_data, date_list) {
     if (typeof full_results === 'undefined') {
         full_results = new_data;
     } else {
@@ -158,6 +193,7 @@ function merge_time_results(full_results, new_data) {
             }
         }
     }
+    full_results = addMissingDates(full_results, date_list);
     var sorted_list = sortResults(full_results);
     return [sorted_list, full_results]
 }
@@ -171,30 +207,49 @@ function sortResults(full_results) {
     return sorted_list
 }
 
+function yearToTimeSpan(year, interval) {
+    year = String(year);
+    if (interval == '10') {
+        year = year.slice(0,-1) + '0';
+        var next = String(parseInt(year) + 9);
+        year = year + '-' + next;
+    }
+    else if (interval == '100') {
+        year = year.slice(0,-2) + '00';
+        var next = String(parseInt(year) + 99);
+        year = year + '-' + next
+    } else if (interval == '50') {
+        var decade = parseInt(year.slice(-2));
+        if (decade < 50) {
+            year = year.slice(0,-2) + '00' + '-' + year.slice(0,-2) + '49';
+        } else {
+            year = year.slice(0,-2) + '50' + '-' + year.slice(0,-2) + '99';
+        }
+    }
+    console.log(year)
+    return year
+}
+
 function clickOnChart(interval) {
     $('.graph_bar').click(function() {
         var year = String($(this).data('year'));
-        if (interval == '10') {
-            year = year.slice(0,-1) + '0';
-            var next = String(parseInt(year) + 9);
-            year = year + '-' + next
-        }
-        else if (interval == '100') {
-            year = year.slice(0,-2) + '00';
-            var next = String(parseInt(year) + 99);
-            year = year + '-' + next
-        } else if (interval == '50') {
-            var decade = parseInt(year.slice(-2));
-            if (decade < 50) {
-                year = year.slice(0,-2) + '00' + '-' + year.slice(0,-2) + '49';
-            } else {
-                year = year.slice(0,-2) + '50' + '-' + year.slice(0,-2) + '99';
-            }
-        }
+        year = yearToTimeSpan(year, interval);
         var href = window.location.href.replace(/time_series/, 'concordance');
         href = href.replace(/date=[^&]*/, 'date=' + year)
         window.location = href;
     });
+}
+
+function getYearsToDisplay(data) {
+    var num;
+    if (data.length < 10) {
+        num = "all";
+    } else {
+        num = 10;
+    }
+    for (var i; i < data.length; i++) {
+        //
+    }
 }
 
 function drawFromData(data, interval, frequency_type) {
@@ -202,28 +257,31 @@ function drawFromData(data, interval, frequency_type) {
     var width = adjustWidth(data.length);
     var margin = 0;
     
+    var years_to_display = getYearsToDisplay(data);
+    
     for (var i=0; i < data.length; i++) {
         var count = Math.round(data[i][1]);
+        var year = data[i][0];
+        var year_to_display = yearToTimeSpan(year, interval);
         // Test if the chart has already been drawn
         if ($('.graph_bar').length < (data.length)) {
-            var year = data[i][0];
             if (i > 0) {
                 margin += width + 1;
             }
-            var graph_bar = "<span class='graph_bar' title='" + count + " occurrences' style='margin-left:" + margin + "px' data-count='" + Math.round(count, false) + "' data-year='" + year + "'></span>";
+            var graph_bar = "<span class='graph_bar' title='" + count + " occurrences in years '" + year_to_display + "' style='margin-left:" + margin + "px' data-count='" + Math.round(count, false) + "' data-year='" + year + "'></span>";
             $('#test_time_series').append(graph_bar);
             $('.graph_bar').eq(i).width(width + 'px');
             $('.graph_bar').eq(i).data('href', data[i][1]['url']);
             var year = '<span class="graph_years">' + year + '</span>';
             $('.graph_bar').eq(i).append(year);
-            var year_width = (width - 30) / 2;
+            var year_width = (width - 25) / 2;
             $('.graph_bar').eq(i).find('.graph_years').css('margin-left', year_width + 'px');
         } else {
             $('.graph_bar').eq(i).data('count', count);
             if (frequency_type == "absolute_time") {
-                $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences');
+                $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences in years ' + year_to_display);
             } else {
-                $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences per 1,000,000 words')
+                $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences per 1,000,000 words in years ' + year_to_display);
             }
             
         }
