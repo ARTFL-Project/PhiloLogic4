@@ -50,10 +50,12 @@ $(document).ready(function() {
 function fetchresultsBibliography(pathname) {
     var philo_ids = [];
     $('.cite').each(function() {
-        philo_ids.push($(this).data('id'));
+        var id = $(this).data('id').split(' ').slice(0,7).toString();
+        console.log(id)
+        philo_ids.push(id);
     });
     var script = pathname + '/scripts/get_results_bibliography.py?';
-    var key = "&philo_id=";
+    var key = "&id=";
     for (var i = 0; i < philo_ids.length; i++) {
         script += key + philo_ids[i];
     }
