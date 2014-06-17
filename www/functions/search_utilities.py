@@ -19,7 +19,7 @@ def biblio_criteria(q, config, time_series=False):
     return ' '.join(biblio)
 
 def search_examples(field):
-    path = os.getcwd().replace('functions', "").replace('scripts', '').replace('reports', '') + '/data/'
+    path = os.path.abspath(os.path.dirname(__file__)).replace('functions', "") + '/data/'
     db = DB(path,encoding='utf-8')
     if field == "word":
         word_path = path + '/frequencies/word_frequencies'

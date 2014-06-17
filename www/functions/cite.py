@@ -21,7 +21,11 @@ def concordance_citation(db, config, i):
     except IndexError:
         sub_section_name = section_name
     title = '<a href="%s">%s</a>' % (doc_href, i.doc.title.strip())
-    citation = "%s <i>%s</i>" % (i.doc.author.strip(),title)
+    author = i.doc.author
+    if author:
+        citation = "%s <i>%s</i>" % (author.strip(),title)
+    else:
+        citation = "<i>%s</i>" % title
     date = i.doc.date
     if date:
         citation += " [%s]" % str(date)
@@ -45,12 +49,31 @@ def concordance_citation(db, config, i):
 def biblio_citation(db, config, i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
     doc_href = make_absolute_object_link(config,i.philo_id[:1], i.bytes)
-    record = u"%s, <i><a href='%s'>%s</a></i>" % (i.doc.author, doc_href,i.doc.title)
+    author = i.doc.author
+    if author:
+        record = u"%s, <i><a href='%s'>%s</a></i>" % (i.doc.author, doc_href,i.doc.title)
+    else:
+        record = u"<i><a href='%s'>%s</a></i>" % (doc_href,i.doc.title)
     date = i.doc.date
     if date:
-        record += " [%s]" % date
-    if db.locals['debug'] == True:
-        record += " %s" % i.doc.filename
+        record += " [<b>%s</b>] " % date
+    more_metadata = []
+    collection = i.doc.collection
+    if collection:
+        more_metadata.append(collection)
+    publisher = i.doc.publisher
+    if publisher:
+        more_metadata.append(publisher)
+    pub_place = i.doc.pub_place
+    if pub_place:
+        more_metadata.append(pub_place)
+    if more_metadata:
+        record += '(%s)' % ', '.join(more_metadata)
+    genre = i.doc.text_genre
+    if genre:
+        record += ' [genre: %s]' % genre
+    #if db.locals['debug'] == True:
+    #    record += " %s" % i.doc.filename
     return record
 
 def make_abs_doc_cite_mobile(db, i):

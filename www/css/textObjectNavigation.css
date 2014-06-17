@@ -3,7 +3,7 @@
     padding-bottom: 20px;
 }
 #t_o_c_title {
-    font-size: 140%;
+    font-size: 130%;
     line-height: 120%;
     padding-bottom: 8px;
 }
@@ -190,6 +190,9 @@ sp::before {
     content:"\A";
     white-space:pre;
 }
+stage+sp:nth-of-type(n+2)::before {
+    content: "";
+}
 fw, join {
     display: none;
 }
@@ -200,12 +203,25 @@ speaker+stage::before {
 stage {
     font-style: italic;
 }
+stage::after {
+    content:"\A";
+    white-space:pre;
+}
 div1 div2::before {
     content:"\A";
     white-space:pre;
 }
 speaker {
     font-weight: 700;
+}
+pb {
+    display: block;
+    text-align: center;
+    margin: 10px;
+}
+pb::before {
+    content:"-" attr(n) "-";
+    white-space:pre;
 }
 
 #image_container {

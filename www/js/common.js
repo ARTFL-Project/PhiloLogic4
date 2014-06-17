@@ -93,7 +93,6 @@ $(document).ready(function() {
         $('#more_options').hide();
         showHide('concordance');
         $(window).load(function() {
-            console.log("hey")
             $('#search_elements')
                 .velocity("slideDown",
                            {duration: 400, 'easing': 'easeIn'}
@@ -254,11 +253,19 @@ $(document).ready(function() {
     
     // Add spinner to indicate that a query is running in the background
     // and close autocomplete
-    $('#button, #button1').click(function( event ) {
+    $('#search').submit(function(e) {
         $('.ui-autocomplete').remove();
         var width = $(window).width() / 2 - 100;
         hideSearchForm();
         $("#waiting").css("margin-left", width).css('margin-top', 100).show();
+        new_q_string = $(this).serialize();
+        // Set a timeout in case the browser hangs: redirect to no hits after 10 seconds
+        setTimeout(function() {
+            e.preventDefault();
+            $("#waiting").fadeOut();
+            var selected_report = $('#report').find('input:checked').attr('id');
+            window.location = "?" + new_q_string.replace(/report=[^&]*/, 'report=error') + "&error_report=" + selected_report;
+        }, 10000);
     });
 });
 
@@ -362,8 +369,8 @@ function autoCompleteMetadata(metadata, field, db_url) {
         },
         select: function( event, ui ) {
             q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-            q = q.replace(/ CUTHERE /, ' ');
             q = q.split('|');
+            q[q.length - 1] = q[q.length - 1].replace(/.*CUTHERE /, '');
             q[q.length-1] = '\"' + q[q.length-1].replace(/^\s*/g, '') + '\"'; 
             q = q.join('|').replace(/""/g, '"');
             $("#" + field).val(q);
@@ -475,7 +482,6 @@ function hideSearchForm() {
 ////// Functions shared by various reports ////////
 ///////////////////////////////////////////////////
 
-
 // Show more context in concordance and concordance from collocation searches
 function fetchMoreContext() {
     var db_url = webConfig['db_url'];
@@ -549,3 +555,20 @@ function colloc_linker(word, q_string, direction, num) {
     q_string += '&collocate_num=' + num;
     return q_string
 }
+
+// Custom HTML replace function for text objects since jQuery's html is too slow:
+// See here: https://groups.google.com/forum/#!msg/jquery-en/RG_dJD8DlSc/R4pDTgtzU4MJ
+$.fn.replaceHtml = function( html ) {
+    var stack = [];
+    return this.each( function(i, el) {
+        var oldEl = el;
+        var newEl = oldEl.cloneNode(false);
+        newEl.innerHTML = html;
+        try {
+            oldEl.parentNode.replaceChild(newEl, oldEl);   
+        } catch(e) {}
+        /* Since we just removed the old element from the DOM, return a reference
+        to the new element, which can be used to restore variable references. */
+        stack.push( newEl );
+    }).pushStack( stack );
+};

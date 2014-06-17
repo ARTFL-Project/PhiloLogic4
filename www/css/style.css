@@ -181,6 +181,10 @@ div.main_body {
     overflow-y: auto;
     overflow-x: hidden;
 }
+/*.ui-state-default, .ui-state-active {*/
+/*    border: 0px !important;*/
+/*    box-shadow: 0px 0px 3px #A8A8A8;*/
+/*}*/
 
 /*Results formatting*/
 #philologic_response {
@@ -302,6 +306,19 @@ div.main_body {
 #current_results_page {
     background: white !important;
 }
+#results-bibliography {
+    margin-top: 25px;
+    margin-bottom: 35px;
+}
+#show-results-bibliography {
+    font-size: 1.3em;
+}
+#results-bibliography li {
+    box-shadow: 0px 0px 3px #A8A8A8;
+    padding: 5px;
+    margin-top: 8px;
+    line-height: 200%;
+}
 
 /*Contextual menu on selection*/
 .highlight_options {
@@ -339,6 +356,15 @@ b p.inserted-page {
 }
 s {
     text-decoration: none;
+}
+
+.dot {
+    display: inline-block;
+    background: black;
+    width: 8px;
+    height: 8px;
+    border-radius:50%;
+    margin-right: 5px;
 }
 
 
@@ -384,6 +410,13 @@ l::before {
     color: #bababa;
     font-size: .7em;
 }
+l[type="split"]::before {
+    content: "";
+}
 w::before {
     margin:0;padding:0;float:left;
+}
+br {
+    content: " ";
+    display: block;
 }

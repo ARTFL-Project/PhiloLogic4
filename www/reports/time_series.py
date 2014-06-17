@@ -42,6 +42,7 @@ def handle_dates(q, db):
         q['end_date'] = str(max(dates))
     q['metadata']['date'] += '-%s' % q['end_date']
     return q
+    
 
 def render_time_series(hits, db, dbname, q, path, config):
     biblio_criteria = f.biblio_criteria(q, config, time_series=True)
@@ -51,7 +52,7 @@ def render_time_series(hits, db, dbname, q, path, config):
                            config=config, total=len(hits),report="time_series")
 
 def generate_time_series(q, db, results):    
-    """reads through a hitlist."""
+    """reads through a hitlist."""    
     try:
         start = int(q['start_date'])
     except ValueError:
@@ -63,14 +64,12 @@ def generate_time_series(q, db, results):
     
     absolute_count = defaultdict(int)
     date_counts = {}
-    if not q['interval_start']:
-        q['interval_end'] = 10000  ## override defaults since this is faster than collocations
     for i in results[q['interval_start']:q['interval_end']]:
         date = i.doc['date']
         try:
             if date != None:
                 date = int(date)
-                if not start <= date <= end :
+                if not date < end :
                     continue
                 if q["year_interval"] == "10":
                     date = int(str(date)[:-1] + '0')
@@ -93,18 +92,23 @@ def generate_time_series(q, db, results):
         if date not in date_counts:
             date_counts[date] = date_total_count(date, db, q['year_interval'])
     
+    print >> sys.stderr, absolute_count
     return json.dumps(absolute_count), json.dumps(date_counts)
 
 
 def date_total_count(date, db, interval):
-    dates = [date]
-    if interval == '10':
-        dates.append(date + 9)
-    elif interval == "50":
-        dates.append(date + 49)
+    
+    if interval != '1':
+        dates = [date]
+        if interval == '10':
+            dates.append(date + 9)
+        elif interval == "50":
+            dates.append(date + 49)
+        else:
+            dates.append(date + 99)
+        query = 'select sum(word_count) from toms where date between "%d" and "%d"' % tuple(dates)
     else:
-        dates.append(date + 99)
-    query = 'select sum(word_count) from toms where date between "%d" and "%d"' % tuple(dates)
+        query = "select sum(word_count) from toms where date='%s'" % date
     
     c = db.dbh.cursor()
     c.execute(query)

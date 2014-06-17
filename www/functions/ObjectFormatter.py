@@ -85,7 +85,7 @@ def format(text,bytes=[]):
             pass
     output = etree.tostring(xml)
     ## remove spaces around hyphens and apostrophes
-    output = re.sub(r" ?([-';.])+ ", '\\1', output)
+    output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
     return convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
 
 
@@ -115,7 +115,7 @@ def format_concordance(text,bytes=[]):
         text = new_text + text[last_offset:]
     xml = FragmentParser.parse(text)
     length = 0
-    allowed_tags = set(['philoHighlight', 'l', 'ab', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx'])
+    allowed_tags = set(['philoHighlight', 'l', 'ab', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx', 'br'])
     text = u''
     for el in xml.iter():
         if el.tag not in allowed_tags:

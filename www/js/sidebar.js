@@ -6,6 +6,11 @@ $(document).ready(function() {
     // Load slimScroll plugin
     $.getScript(webConfig['db_url'] + '/js/plugins/jquery.slimscroll.min.js');
     
+    $("#hide_sidebar").click(function(e) {
+        e.stopPropagation();
+        hide_frequency();
+    });
+    
 });
 
 
@@ -53,7 +58,6 @@ function sidebar_reports(q_string, db_url, pathname) {
         }
         $('#progress_bar').hide();
         if (typeof sessionStorage[script_call] == "undefined") {
-            $('#frequency_container').show();
             // Initialize progress bar for sidebar
             $('#progress_bar').progressbar({max: total_results});
             $('#progress_bar').progressbar({value: 100});
@@ -62,38 +66,44 @@ function sidebar_reports(q_string, db_url, pathname) {
             $('.progress-label').text('0%');
             $('#progress_bar').progressbar({value: 0.1});
             $("#progress_bar").show();
+            $('#hide_sidebar').data('interrupt', false)
             var full_results;
             populate_sidebar(script_call, value, total_results, 0, full_results);
         } else {
             var table = JSON.parse(sessionStorage[script_call]);
             $('#frequency_table').html(table).show(); 
-            $('#frequency_container').show();
             $("#hide_sidebar").css('display', 'inline-block');
+            var container_height = $('#results_container').height() - 14;
+            var freq_height = $('#frequency_container').height();
+            if (freq_height > container_height) {
+                container_height = freq_height;
+            }
+            $('#frequency_table').slimScroll({height: container_height});
         }
-    });
-    $("#hide_sidebar").click(function() {
-        hide_frequency();
     });
 }
 function show_sidebar() {
-    $("#results_container").animate({
-        "margin-right": "410px"},
-        150, function() {
-                getCitationWidth();
-                $('#frequency_container').height($('#results_container').height() -14 + 'px');
-            }
-    );
+    if ($('#frequency_container').css('display') == 'none') {
+        $("#results_container, .cite").velocity({
+            "width": "-=410"},
+            150, function() {
+                    $('#frequency_container').height($('#results_container').height() -14 + 'px');
+                    $('#frequency_container').show();
+                    $('#sidebar_display').css('opacity', 1);
+                }
+        );
+    }
 }
 function hide_frequency() {
-    $("#hide_sidebar").hide().data('interrupt', true);;
-    $("#frequency_table").empty().hide();
-    $('#frequency_container').hide();
-    $(".results_container").animate({
-        "margin-right": "0px"},
-        150, function() {
-                getCitationWidth();
+    if ($('#frequency_container').css('display') != 'none') {
+        $("#hide_sidebar").hide().data('interrupt', true);;
+        $("#frequency_table").empty().hide();
+        $('#frequency_container').hide();
+        $('#sidebar_display').css('opacity', 0);
+        $("#results_container, .cite").velocity({
+            "width": "+=410"},
+            150);    
         }
-    );
 }
 
 function mergeResults(full_results, new_data) {
@@ -183,7 +193,7 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
         $('#progress_bar').progressbar({value: total});
         $('.progress-label').text('Complete!');
         $("#progress_bar").delay(500).slideUp();
-        $('#frequency_table').slimScroll({height: $('#frequency_container').height()});
+        $('#frequency_table').slimScroll({height: $('#results_container').height() - 14});
         if (typeof(localStorage) == 'undefined' ) {
             alert('Your browser does not support HTML5 localStorage. Try upgrading.');
         } else {
@@ -205,7 +215,11 @@ function update_sidebar(sorted_list, field) {
         newlist += "<p id='freq_sidebar_status'>Collocates within 5 words left or right</p>";
         q_string = window.location.search.substr(1);
     }
-    sorted_list = sorted_list.slice(0,300);
+    var limit = false;
+    if (sorted_list.length > 5000) {
+        sorted_list = sorted_list.slice(0,5000);
+        limit = 5000;
+    }
     for (var item=0; item < sorted_list.length; item++) {
         var result = sorted_list[item][0];
         if (field == 'collocation_report') {
@@ -215,15 +229,21 @@ function update_sidebar(sorted_list, field) {
             var link = sorted_list[item][1]['url'];
             var count = sorted_list[item][1]['count'];
         }
-        var full_link = '<a id="freq_sidebar_text" href="' + link + '">' + result + '</a>';
+        // The following if clause is a workaround for a bug with NULL queries
+        // TODO: remove once the bug is fixed in the library.
+        var full_link;
+        if (result == "NULL") {
+            full_link = '<span style="vertical-align: 10px"><span class="dot"></span>' + result + '</span>';
+        } else {
+            full_link = '<a id="freq_sidebar_text" href="' + link + '"><span class="dot"></span>' + result + '</a>';
+        }
         newlist += '<li>';
-        newlist += '<span class="ui-icon ui-icon-bullet" style="display: inline-block;vertical-align:8px;"></span>';
         newlist += full_link + '<span style="float:right;display:inline-block;padding-right: 5px;">' + count + '</span></li>';
     }
-    $("#frequency_table").hide().empty().html(newlist).fadeIn('fast');
+    if (limit) {
+        newlist += '<p>For performance reasons, this list is limited at 5000 results</p>';
+    }
+    $("#frequency_table").replaceHtml(newlist);
     $("#hide_sidebar").css('display', 'inline-block');
     $("#frequency_container").show();
-    $("#hide_sidebar").click(function() {
-        hide_frequency();
-    });
 }
