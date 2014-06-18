@@ -19,10 +19,10 @@
                 </div>
             </div>
         </div>
-        <div id="prev_obj" data-philo-id="${prev}">&lt;</div>
+        <div id="prev_obj" data-philo-id="${prev}" data-script="${generate_ajax_scripts(config, prev)}">&lt;</div>
         <div id="next_obj_wrapper">
             <div id ="next_and_read">
-                <span id="next_obj" data-philo-id="${next}">&gt;</span>
+                <span id="next_obj" data-philo-id="${next}" data-script="${generate_ajax_scripts(config, next)}">&gt;</span>
             </div>
         </div>
         <div id="book_page">

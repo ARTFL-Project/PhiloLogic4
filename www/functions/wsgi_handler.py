@@ -113,9 +113,13 @@ def parse_cgi(environ):
     num_empty = 0
     for field in metadata_fields:
         if field in cgi and cgi[field]:
+            ## Hack to remove hyphens in Frantext
+            if field != "date" and isinstance(cgi[field][0], str or unicode):
+                if not cgi[field][0].startswith('"'):
+                    cgi[field][0] = cgi[field][0].replace('-', ' ')
             ## these ifs are to fix the no results you get when you do a metadata query
             if query["q"] != '':
-                query["metadata"][field] = cgi[field][0]
+                query["metadata"][field] = cgi[field][0]                    
             elif cgi[field][0] != '':
                 query["metadata"][field] = cgi[field][0]
         if field not in cgi or not cgi[field][0]: ## in case of an empty query
@@ -125,9 +129,6 @@ def parse_cgi(environ):
         query["no_q"] = True
     else:
         query["no_q"] = False
-    
-    #if query['q']:
-    #    query['q'] = query_parser(query['q'])
     
     try:
         path_components = [c for c in environ["PATH_INFO"].split("/") if c]

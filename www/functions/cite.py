@@ -15,11 +15,11 @@ def concordance_citation(db, config, i):
     section_href = make_absolute_object_link(config,i.philo_id[:2], i.bytes)
     sub_section_href = make_absolute_object_link(config,i.philo_id[:3], i.bytes)
     section_names = [i.div1.head,i.div2.head,i.div3.head]
-    section_name = section_names[0]
+    section_name = section_names[0] or "Section"
     try:
-        sub_section_name = section_names[1]
+        sub_section_name = section_names[1] or ""
     except IndexError:
-        sub_section_name = section_name
+        sub_section_name = ""
     title = '<a href="%s">%s</a>' % (doc_href, i.doc.title.strip())
     author = i.doc.author
     if author:
@@ -28,7 +28,10 @@ def concordance_citation(db, config, i):
         citation = "<i>%s</i>" % title
     date = i.doc.date
     if date:
-        citation += " [%s]" % str(date)
+        try:
+            citation += " [%s]" % str(date)
+        except:
+            pass
     if section_name:
         citation += u"<a href='%s'>%s</a>" % (section_href,section_name.strip())
     if sub_section_name:
@@ -56,7 +59,10 @@ def biblio_citation(db, config, i):
         record = u"<i><a href='%s'>%s</a></i>" % (doc_href,i.doc.title)
     date = i.doc.date
     if date:
-        record += " [<b>%s</b>] " % date
+        try:
+            record += " [<b>%s</b>] " % date
+        except:
+            pass
     more_metadata = []
     collection = i.doc.collection
     if collection:

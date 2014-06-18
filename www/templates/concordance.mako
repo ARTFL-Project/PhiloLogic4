@@ -52,9 +52,9 @@
             % endfor
         </ol>
     </div>
-    <div id="results-bibliography">
+  <!--  <div id="results-bibliography">
         <span id="show-results-bibliography">Results Bibliography in current page:</span>
-    </div>
+    </div>-->
     <div class="more">
         <%include file="results_paging.mako" args="start=start,results_per_page=results_per_page,q=q,results=results"/> 
         <div style='clear:both;'></div>

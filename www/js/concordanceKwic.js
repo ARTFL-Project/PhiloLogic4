@@ -41,7 +41,7 @@ $(document).ready(function() {
     // Fetch more context for concordances after page load
     $(window).load(function() {
         fetchMoreContext();
-        fetchresultsBibliography(pathname);
+        //fetchresultsBibliography(pathname);
     });
     
 });
@@ -51,7 +51,6 @@ function fetchresultsBibliography(pathname) {
     var philo_ids = [];
     $('.cite').each(function() {
         var id = $(this).data('id').split(' ').slice(0,7).toString();
-        console.log(id)
         philo_ids.push(id);
     });
     var script = pathname + '/scripts/get_results_bibliography.py?';
@@ -62,7 +61,7 @@ function fetchresultsBibliography(pathname) {
     $.getJSON(script, function(data) {
         var ol = '<ol>';
         for (var i = 0; i < data.length; i++) {
-            var li = "<li><span class='dot'></span>" + data[i][0] + " <b>(" + data[i][1] + " hits)</b></li>";
+            var li = "<li><span class='dot'></span>" + data[i][0] + "</li>";
             ol += li;
         }
         ol += "</ol>";

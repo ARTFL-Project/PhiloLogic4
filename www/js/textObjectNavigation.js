@@ -105,6 +105,7 @@ function retrieveObj(db_url){
         var my_path = db_url.replace(/\/\d+.*$/, '/');
         var philo_id = $(this).data('philoId');
         var script = my_path + '/scripts/go_to_obj.py?philo_id=' + philo_id;
+        //var script = $(this).data('script');
         var width = $(window).width() / 2 - 100;
         $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 150).show();
         $.getJSON(script, function(data) {
@@ -120,7 +121,7 @@ function retrieveObj(db_url){
                 var scrollto_id = '#' + $("#obj_text").data('philoId').replace(/ /g, '_');
                 if ($('#toc_container').find($(scrollto_id)).length) {
                     $('#toc_container').scrollTo($(scrollto_id), 500);
-                    $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
+                    $('#toc_container').find($(scrollto_id)).attr('style', 'background: #DADADA !important; font-weight: 700 !important;');
                 }
                 page_image_link();
                 var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
@@ -183,7 +184,7 @@ function show_hide_toc(top_right) {
         setTimeout(function() {
             var scrollto_id = '#' + $("#obj_text").data('philoId').replace(/ /g, '_');
             $('#toc_container').scrollTo($(scrollto_id), 500);
-            $('#toc_container').find($(scrollto_id)).css('color', 'black');
+            $('#toc_container').find($(scrollto_id)).attr('style', 'background: #DADADA !important');
             $(scrollto_id).delay(500).animate({backgroundColor: '#ffdb9e'}, 300).animate({backgroundColor: '#FAFAFA'}, 300);
         }, 400);
     } else {
@@ -218,7 +219,7 @@ function TocLinkHandler(db_url) {
                 var scrollto_id = '#' + $("#obj_text").data('philoId').replace(/ /g, '_');
                 if ($('#toc_container').find($(scrollto_id)).length) {
                     $('#toc_container').scrollTo($(scrollto_id), 500);
-                    $('#toc_container').find($(scrollto_id)).attr('style', 'color: black; font-weight: 700 !important;');
+                    $('#toc_container').find($(scrollto_id)).attr('style', 'background: #DADADA !important; font-weight: 700 !important;');
                 }
                 page_image_link();
                 var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');

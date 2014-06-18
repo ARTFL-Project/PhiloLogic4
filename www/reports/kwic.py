@@ -40,16 +40,22 @@ def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
     shortest_biblio = 0
 
     for hit in results[start:end]:
-        biblio = hit.doc.author + ', ' +  hit.doc.title
-        
-        ## additional clean-up for titles
-        biblio = ' '.join(biblio.split()) ## maybe hackish, but it works
+        author = hit.doc.author
+        if author:
+            short_author = author
+            if len(author) > 15:
+                short_author = short_author[:15] + '&#8230;'
+        title = hit.doc.title
+        if title:
+            short_title = title
+            if len(title) > 12:
+                short_title = short_title[:12] + '&#8230;'
+        biblio = short_author + ' ' +  short_title
         
         get_query = byte_query(hit.bytes)
         href = "./" + '/'.join([str(i) for i in hit.philo_id[:2]]) + get_query
         
         ## Find shortest bibliography entry
-        biblio = biblio
         if shortest_biblio == 0:
             shortest_biblio = len(biblio)
         if len(biblio) < shortest_biblio:
@@ -64,20 +70,25 @@ def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
         conc_text = f.get_text(hit, byte_start, length, path)
         conc_text = format_strip(conc_text, bytes)
         conc_text = KWIC_formatter(conc_text, len(hit.bytes))
-        kwic_results.append((biblio, href, conc_text, hit))
+        kwic_results.append(((author, short_author), (title, short_title), href, conc_text, hit))
         
     if shortest_biblio < 20:
         shortest_biblio = 20
-    elif shortest_biblio > 40:
-        shortest_biblio = 40
+    elif shortest_biblio > 30:
+        shortest_biblio = 30
     
+    ## Reset variables to avoid collisions
+    author = ""
+    title = ""
     ## Populate Kwic_results with bibliography    
     for pos, result in enumerate(kwic_results):
-        biblio, href, text, hit = result
+        author, title, href, text, hit = result
+        short_biblio = author[1] + ' ' + title[1]
+        biblio = author[0] + ', ' +  title[0]
         if len(biblio) < 20:
             diff = 20 - len(biblio)
             biblio += ' ' * diff
-        short_biblio = '<span class="short_biblio" style="white-space:pre-wrap;">%s</span>' % biblio[:shortest_biblio]
+        short_biblio = '<span class="short_biblio" style="white-space:pre-wrap;">%s</span>' % short_biblio[:shortest_biblio]
         full_biblio = '<span class="full_biblio" style="display:none;">%s</span>' % biblio
         kwic_biblio = full_biblio + short_biblio
         if q['format'] == "json":

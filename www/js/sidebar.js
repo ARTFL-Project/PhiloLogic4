@@ -233,7 +233,7 @@ function update_sidebar(sorted_list, field) {
         // TODO: remove once the bug is fixed in the library.
         var full_link;
         if (result == "NULL") {
-            full_link = '<span style="vertical-align: 10px"><span class="dot"></span>' + result + '</span>';
+            full_link = '<span style="vertical-align: 10px"><span class="dot"></span>N/A</span>'; // Set to N/A for display only
         } else {
             full_link = '<a id="freq_sidebar_text" href="' + link + '"><span class="dot"></span>' + result + '</a>';
         }
