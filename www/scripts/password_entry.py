@@ -9,33 +9,42 @@ from cgi import FieldStorage
 from wsgiref.handlers import CGIHandler
 import json
 
+
+def check_login(path, username, password):
+    password_file = open(path + "/data/user_pass")
+    access = False
+    user_exists = False
+    for line in password_file:
+        user, passwd = tuple(line.strip().split())
+        if user == username:
+            print >> sys.stderr, "FOUND YOU", user, passwd, password
+            user_exists = True
+            if passwd == password:
+                access = True
+                break
+            else:
+                access = False
+                break
+    return access, user_exists
+    
+
 def password_entry(environ, start_response):
-	status = '200 OK'
-	headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-	start_response(status,headers)
-	form = FieldStorage()
-	username = form.getvalue('username')
-	password = form.getvalue('password')
-	environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/password_entry.py', '')
-	db, path_components, q = parse_cgi(environ)
-	conn = sqlite3.connect(db.locals['db_path'] + '/access.db')
-	print >> sys.stderr, 'CONNECTING TO', db.locals['db_path'] + '/access.db'
-	c = conn.cursor()
-	c.execute('select * from userlogin where username=? and password=?', (username, password))
-	if c.fetchone():
-		print >> sys.stderr, "SUCCESSFUL LOGIN:  ", username, password
-		client_address = environ["REMOTE_ADDR"]
-		status_info = "password ip:"+username
-		conn.execute('INSERT INTO domain_list(client_address, access_value, status) VALUES (?,?,?);', (client_address,'true',status_info))
-		conn.commit()
-		conn.close()
-		print >> sys.stderr, "UPDATING SQLITE WITH: ", client_address
-		yield json.dumps('ok')
-	else:
-		print >> sys.stderr, "LOGIN ATTEMPT:  ", username, password 
-		yield json.dumps('not')
-	
-	
+    status = '200 OK'
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response(status,headers)
+    form = FieldStorage()
+    username = form.getvalue('username')
+    password = form.getvalue('password')
+    print >> sys.stderr, "PASSWORD", password
+    path = environ["SCRIPT_FILENAME"].replace('scripts/password_entry.py', '')  
+    access, user_exists = check_login(path, username, password)
+    if access:
+        write_access = open("/tmp/philo4_access", "a")
+        print >> write_access, environ["REMOTE_ADDR"]
+        yield json.dumps('ok')
+    else:
+        yield json.dumps('not')
+
 
 if __name__ == "__main__":
 	CGIHandler().run(password_entry)
