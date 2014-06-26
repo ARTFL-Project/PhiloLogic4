@@ -54,7 +54,7 @@ def get_table_of_contents(environ, start_response):
                 space = div3_markup
             else:
                 space = div1_markup
-            html.append(space + '<a href="%s" id="%s">%s</a></span>' % (href, link_id, head))
+            html.append(space + '<a href="%s" id="%s">%s</a></span>' % (href, link_id, head or philo_type.upper()))
         html.append("</div>")
         html = ''.join(html)
         yield html.encode('utf-8', 'ignore')

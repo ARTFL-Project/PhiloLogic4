@@ -13,6 +13,14 @@
 .kwic_biblio {
     font-weight:400 !important;
 }
+.short_biblio {
+    width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    vertical-align: bottom;
+}
 #philologic_concordance, #colloc_concordance {
     list-style-type: none;
     overflow: hidden;

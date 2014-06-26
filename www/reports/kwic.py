@@ -37,29 +37,17 @@ def render_kwic(hits, db, dbname, q, path, config):
 
 def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
     kwic_results = []
-    shortest_biblio = 0
-
+    
+    default_short_citation_len = 30
+    short_citation_len = 0
     for hit in results[start:end]:
-        author = hit.doc.author
-        if author:
-            short_author = author
-            if len(author) > 15:
-                short_author = short_author[:15] + '&#8230;'
-        title = hit.doc.title
-        if title:
-            short_title = title
-            if len(title) > 12:
-                short_title = short_title[:12] + '&#8230;'
-        biblio = short_author + ' ' +  short_title
+        full_citation, short_citation, href = f.kwic_citation(db, hit, default_short_citation_len)
         
-        get_query = byte_query(hit.bytes)
-        href = "./" + '/'.join([str(i) for i in hit.philo_id[:2]]) + get_query
-        
-        ## Find shortest bibliography entry
-        if shortest_biblio == 0:
-            shortest_biblio = len(biblio)
-        if len(biblio) < shortest_biblio:
-            shortest_biblio = len(biblio)
+        ## Find longest short_citation
+        if short_citation_len == 0:
+            short_citation_len = len(short_citation)
+        elif len(short_citation) > short_citation_len:
+            short_citation_len = len(short_citation)
             
         ## Determine length of text needed
         byte_distance = hit.bytes[-1] - hit.bytes[0]
@@ -70,25 +58,22 @@ def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
         conc_text = f.get_text(hit, byte_start, length, path)
         conc_text = format_strip(conc_text, bytes)
         conc_text = KWIC_formatter(conc_text, len(hit.bytes))
-        kwic_results.append(((author, short_author), (title, short_title), href, conc_text, hit))
-        
-    if shortest_biblio < 20:
-        shortest_biblio = 20
-    elif shortest_biblio > 30:
-        shortest_biblio = 30
+        kwic_results.append((full_citation, short_citation, href, conc_text, hit))
     
-    ## Reset variables to avoid collisions
-    author = ""
-    title = ""
+    #default_short_citation_len += 2 ## We add 2 to account for the comma and space separating both fields
+    if short_citation_len < default_short_citation_len:
+        default_short_citation_len = short_citation_len
+    
     ## Populate Kwic_results with bibliography    
     for pos, result in enumerate(kwic_results):
-        author, title, href, text, hit = result
-        short_biblio = author[1] + ' ' + title[1]
-        biblio = author[0] + ', ' +  title[0]
-        if len(biblio) < 20:
-            diff = 20 - len(biblio)
-            biblio += ' ' * diff
-        short_biblio = '<span class="short_biblio" style="white-space:pre-wrap;">%s</span>' % short_biblio[:shortest_biblio]
+        biblio, short_biblio, href, text, hit = result
+        #print >> sys.stderr, "LEN", len(short_biblio),
+        if len(short_biblio) < default_short_citation_len:
+            #print >> sys.stderr, "DEFAULT", default_short_citation_len,
+            diff = default_short_citation_len - len(short_biblio)
+            short_biblio += '&nbsp;' * diff
+        #print >> sys.stderr
+        short_biblio = '<span class="short_biblio">%s</span>' % short_biblio
         full_biblio = '<span class="full_biblio" style="display:none;">%s</span>' % biblio
         kwic_biblio = full_biblio + short_biblio
         if q['format'] == "json":
@@ -109,7 +94,7 @@ def KWIC_formatter(output, hit_num, chars=40):
     end_hit = output.rindex('</span>') + 7
     tag_length = 7 * hit_num
     start_output = output[start_hit - chars:start_hit]
-    start_output = re.sub('^[^ ]+? ', ' ', start_output, 1) # Do we want to keep this?
+    #start_output = re.sub('^[^ ]+? ', ' ', start_output, 1) # Do we want to keep this?
     if len(start_output) < chars:
         white_space = ' ' * (chars - len(start_output))
         start_output = white_space + start_output

@@ -82,6 +82,36 @@ def biblio_citation(db, config, i):
     #    record += " %s" % i.doc.filename
     return record
 
+def kwic_citation(db, i, short_citation_length):
+    full_citation = ""
+    short_citation = []
+    author = i.doc.author
+    title = i.doc.title
+    if author:
+        full_citation += author + ", "
+        short_citation.append(author)
+    full_citation += title
+    short_citation.append(title)
+        
+    if len(', '.join(short_citation)) > short_citation_length:
+        short_author, short_title = tuple(short_citation)
+        if len(short_author) > 10:
+            short_author = short_author[:10] + "&#8230;"
+            short_citation[0] = short_author
+        title_len = short_citation_length - len(short_author)
+        if len(short_title) > title_len:
+            short_citation[1] = short_title[:title_len]
+    short_citation = ', '.join(short_citation)
+    print >> sys.stderr, "SHORT", short_citation.encode('utf-8')
+    
+    ## Generate link to a div1 object
+    get_query = byte_query(i.bytes)
+    href = "./" + '/'.join([str(j) for j in i.div1.philo_id]) + get_query
+    
+    return full_citation, short_citation, href
+    
+    
+
 def make_abs_doc_cite_mobile(db, i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
     record = u"%s, <i><a data-id='%s' class='biblio_cite'>%s</a></i>" % (i.doc.author, ' '.join([str(j) for j in i.philo_id]),i.doc.title)
