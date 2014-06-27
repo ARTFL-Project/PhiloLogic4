@@ -139,7 +139,6 @@ h3 {
 }
 ol {
     list-style-type: none;
-    margin: 0px;
     padding: 0px;
 }
 div.main_body {
@@ -181,10 +180,21 @@ div.main_body {
     overflow-y: auto;
     overflow-x: hidden;
 }
-/*.ui-state-default, .ui-state-active {*/
+.ui-corner-all, .ui-corner-bottom, .ui-corner-top, .ui-corner-right, .ui-corner-left, .ui-corner-tr {*/
+    border-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+    border-top-left-radius: 0px !important;
+    border-top-right-radius: 0px !important;
+}
+/*.ui-state-default, .ui-state-active, .ui-widget-content {*/
 /*    border: 0px !important;*/
 /*    box-shadow: 0px 0px 3px #A8A8A8;*/
 /*}*/
+.ui-menu-item {
+    font-size: .9em !important;
+    padding: .6em .5em .5em .9em !important;
+}
 
 /*Results formatting*/
 #philologic_response {

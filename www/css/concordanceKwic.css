@@ -24,6 +24,7 @@
 #philologic_concordance, #colloc_concordance {
     list-style-type: none;
     overflow: hidden;
+    margin-top: 3px;
 }
 .philologic_occurrence {
     padding-top: 7px;
@@ -93,17 +94,17 @@
     margin-top: -14px;
 }
 #sidebar_button {
-    float: right;
-    margin: 0;
+    position: absolute;
+    right: 0;
+    margin-right: 30px;
     padding: 0;
-    padding-top: 14px;
 }
 #hide_sidebar {
     font-family: 'Droid Sans Mono', sans-serif !important;
-    font-size: 90% !important;
     display: none;
     border-bottom: 0px;
     margin-right: 0;
+    margin-top: -25px;
 }
 #sidebar_display {
     margin-top: 38px;
@@ -123,6 +124,7 @@
 #frequency_table {
     padding: 5px 5px 5px 5px;
     line-height: 230%;
+    margin-top: 0px;
 }
 #freq_sidebar_text {
     display: inline-block !important;
@@ -130,30 +132,6 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-}
-#frequency_field {
-    display: none;
-    position: absolute;
-    max-width: 400px;
-    right: 0;
-    background-color: #F8F8F8;
-    box-shadow: 0px 0px 3px #A8A8A8;
-    z-index: 1000;
-    margin-right: 31px;
-    line-height: 130%;
-    color: #555;
-    top: 305px;
-}
-.sidebar_option {
-    padding-left: 1em;
-    padding-bottom: 5px;
-    padding-top: 5px;
-    border-top: solid 1px #ECECEC;
-}
-.sidebar_option:hover {
-    cursor: pointer;
-    background-color: #EBEBEB;
-    color: black;
 }
 /* Concordance styling for theater */
 speaker {

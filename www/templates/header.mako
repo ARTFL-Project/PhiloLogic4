@@ -16,7 +16,7 @@
     <!--Load all required CSS-->
     <link rel="shortcut icon" href="${config.db_url}/favicon.ico" type="image/x-icon">
     <link rel="icon" href="${config.db_url}/favicon.ico" type="image/x-icon">   
-    <link type="text/css" href="${config.db_url}/css/philologic-theme/jquery-ui-1.10.4.custom.min.css" rel="stylesheet" />
+    <link type="text/css" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css" rel="stylesheet" />
     <link rel="stylesheet" href="${config.db_url}/css/style.css" type="text/css" media="screen, projection">
     <link rel="stylesheet" href="${config.db_url}/css/searchForm.css" type="text/css" media="screen, projection">
     % if report == "concordance" or report == "kwic" or report == "concordance_from_collocation" or report == "bibliography":
@@ -29,7 +29,7 @@
     
     <!--Load all required JavaScript-->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
     <script type="text/javascript" src="${config.db_url}/js/plugins/jquery.history.js"></script>
     <script type="text/javascript" src="${config.db_url}/js/plugins/jquery.velocity.min.js"></script>
     <%
