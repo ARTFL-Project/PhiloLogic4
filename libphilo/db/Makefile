@@ -6,7 +6,10 @@ CPPFLAGS=
 LDFLAGS= 
 PH_LDMODULEFLAGS=-shared
 PH_FPIC=-fPIC
-all: unpack.o db.o bitsvector.o pack4 parsedb mergewords
+all: unpack.o db.o bitsvector.o pack4 parsedb mergewords corpus_search
+
+corpus_search: corpus_search.c db.o unpack.o bitsvector.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o corpus_search corpus_search.c db.o unpack.o bitsvector.o -lgdbm
 
 mergewords: mergewords.c db.o unpack.o bitsvector.o
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o mergewords mergewords.c db.o unpack.o bitsvector.o -lgdbm
