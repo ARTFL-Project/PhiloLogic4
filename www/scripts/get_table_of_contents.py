@@ -37,7 +37,7 @@ def get_table_of_contents(environ, start_response):
                 space = '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'
             else:
                 space = ''
-            html += space + '<a href="%s" id="%s" style="text-decoration: none;">%s</a></span><br>' % (href, link_id, head)
+            html += space + '<a href="%s" id="%s" style="text-decoration: none;">%s</a></span><br>' % (href, link_id, head or philo_type.upper())
         yield json.dumps(html)
     else:
         div1_markup = '<span class="ui-icon ui-icon-bullet" style="float:left;position:relative;top: 3px;"></span>'

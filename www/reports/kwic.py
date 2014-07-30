@@ -21,7 +21,7 @@ def kwic(environ,start_response):
         start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
         kwic_results = fetch_kwic(hits, path, q, f.link.byte_query, db, start-1, end, length=250)
         formatted_results = [{"citation": i[0],
-                              "text": i[1]} for i in kwic_results]
+                              "text": i[1], "philo_id": i[2], "start":start, "hit_count": len(hits)} for i in kwic_results]
         return json.dumps(formatted_results)
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)

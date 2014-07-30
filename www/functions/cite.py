@@ -109,8 +109,6 @@ def kwic_citation(db, i, short_citation_length):
     href = "./" + '/'.join([str(j) for j in i.div1.philo_id]) + get_query
     
     return full_citation, short_citation, href
-    
-    
 
 def make_abs_doc_cite_mobile(db, i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
@@ -118,4 +116,35 @@ def make_abs_doc_cite_mobile(db, i):
     date = i.doc.date
     if date:
         record += " [%s]" % date
+    return record
+
+def make_abs_doc_shrtcit_mobile(db, i):
+    """ Returns a representation of a PhiloLogic object suitable for a (short) bibliographic report. """
+    cmc_author = i.doc.author.split(",", 1)[0]
+    section_names = [i.div1.head,i.div2.head,i.div3.head]
+    section_names[0] = section_names[0].replace("\n", " ")
+    record = cmc_author + ", " + i.doc.title + ": " + section_names[0]
+    return record
+    
+def make_abs_doc_cite_biblio_mobile(db, i):
+    """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
+    record = u"%s|<i><span class='biblio_cite'>%s</span></i>" % (i.doc.author,i.doc.title)
+    date = i.doc.date
+    if date:
+        record += " [<b>%s</b>] " % date
+    more_metadata = []
+    collection = i.doc.collection
+    if collection:
+        more_metadata.append(collection)
+    publisher = i.doc.publisher
+    if publisher:
+        more_metadata.append(publisher)
+    pub_place = i.doc.pub_place
+    if pub_place:
+        more_metadata.append(pub_place)
+    if more_metadata:
+        record += '(%s)' % ', '.join(more_metadata)
+    genre = i.doc.text_genre
+    if genre:
+        record += ' [genre: %s]' % genre
     return record
