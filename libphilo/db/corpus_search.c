@@ -36,6 +36,7 @@ typedef struct word_heap {
 typedef struct corpus {
   char * fn;
   FILE * fh;
+  uint32_t *current_hit;
 } corpus;
 
 enum stage_kind {
@@ -343,7 +344,7 @@ void add_record(word_heap *heap, word_rec *rec) {
   /* first make space if needed */
   if (heap->rec_count <= heap->rec_alloced) {
     /* should check for success here; running out of memory is a concern */
-//    heap->records = realloc(heap->records,sizeof(word_rec)*(heap->rec_count+1) );
+    // heap->records = realloc(heap->records,sizeof(word_rec)*(heap->rec_count+1) );
     /* should also consider expanding by a larger factor, in case of thousands of records */
     heap->rec_alloced = heap->rec_count + 1;
   }
@@ -409,40 +410,77 @@ uint32_t * heap_next_hit(word_heap *heap) {
   }
 }
 
-void start_stream(word_heap *heap) {
-  // OBSOLETE?
-  int i;
-  int j;
-  word_rec *r;
-  uint32_t *hit;
-  //  for (i = 0; i < heap->rec_count; i++) {
-  while ( heap->rec_count >0) {
-    r = &heap->records[0];
-    fprintf(stdout, "%s ",r->word);
-    dump_hits(stdout,heap->db,r->current_hit,1);
-    hit = word_next_hit(heap->db,r);
-    fprintf(stderr,"pulling next hit from %s\n",r->word);
-    if ( (hit == NULL) || (r->current_block > 0) ) {
-      fprintf(stderr,"done with %s\n",r->word);
-      pop_record(heap);
-      continue;
-    } else {
-      down_heap(heap,0); // does nothing on first iteration.
-    }
-  }
+uint32_t * corpus_next_hit(corpus *corpus) {
+  // requires that corpus has a readable fh and malloc'd current_hit.  Does not require current_hit to be init'd.
+  size_t res = fread(corpus->current_hit,sizeof(uint32_t), 7, corpus->fh); // read 1 7-wide hit into current_hit
+  if (res < 7) {
+    return NULL;
+  } else {
+    return corpus->current_hit;
+  }  
+}
+
+uint32_t * search_stage_next_hit(search_stage * stage) {
+  return NULL;
+}
+
+uint32_t * search_next_hit(search_stage *stages,int size) {  
+  // advance the last stage // MUST do this at least once.
+  // current = last 
+  // search checks proceed from right to left
+  // when we advance a stage, we have to check it against it's parent
+
+  // while true:
+  //   if current = 0: break
+  //   prev = current - 1
+  //   res = check (prev,current)  // attach the check function to current or prev?
+  //   if res < 0:
+  //     advance prev
+  //     current = prev  // having advanced the prev stage, we should check and focus on it.
+  //   else if res > 0:
+  //     advance current // we can just keep pushing the current stage forward and checking.
+  //   else if res == 0: // otherwise this stage is a match, but we have to check that we haven't passed any succeeding stages.
+  //     if current == last:
+  //       return current
+  //     else:
+  //       current = current + 1
 }
 
 int main(int argc, char **argv) {
 
   char buffer[256];
   dbh *db;
+  char * corpus_fn;
+  char * search_method_name;
+  char * search_method_arg;
   char word[256];
   int32_t *hits;
   word_rec *rec;
   word_heap heap;
   int i,j;
-
-  db = init_dbh_folder(argv[1]);
+  int optc;
+  
+  while ((optc = getopt(argc, argv, "c:m:a:")) != -1) {
+    switch (optc) {
+    case 'c': // corpus file
+      corpus_fn = optarg;
+      break;
+    case 'm': // search method
+      search_method_name = optarg;      
+      break;
+    case 'a': // search method argument
+      search_method_arg = optarg;
+      break;
+    case ':': // missing option argument
+      break;
+    case '?': // unrecognized
+      break;
+    default:
+      break;
+    }
+  }
+  // optind should now point at the non-option arg, which is the db folder path
+  db = init_dbh_folder(argv[optind]);
   heap = new_heap(db);
   while(fgets(buffer,256,stdin)) {
     sscanf(buffer,"%s256",word);

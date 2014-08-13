@@ -319,7 +319,7 @@ void add_record(word_heap *heap, word_rec *rec) {
   /* first make space if needed */
   if (heap->rec_count <= heap->rec_alloced) {
     /* should check for success here; running out of memory is a concern */
-    heap->records = realloc(heap->records,sizeof(word_rec)*(heap->rec_count+1) );
+//    heap->records = realloc(heap->records,sizeof(word_rec)*(heap->rec_count+1) );
     /* should also consider expanding by a larger factor, in case of thousands of records */
     heap->rec_alloced = heap->rec_count + 1;
   }
@@ -348,7 +348,7 @@ word_rec pop_record(word_heap * heap) {
   /* switch its position with that child.  Keep iterating on the former last node, not the root) */
   down_heap(heap,0);
   /* return the prior root node; we may update it and re-insert */  
-  // no we won't
+  // no we won't; clean up memory here?  
   memset(heap->records + heap->rec_count + 1, 0, sizeof(word_rec));
   return ret;
 }
@@ -366,6 +366,7 @@ uint32_t * heap_next_hit(word_heap *heap) {
     if (hit == NULL) {
       // if we are done with the word, pop it off
       pop_record(heap);
+      // need to free it and its block.
     } else {
       // otherwise, we've modified the 0 records and may need to move it.
       down_heap(heap,0); 
