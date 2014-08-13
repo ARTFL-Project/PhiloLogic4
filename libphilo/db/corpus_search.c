@@ -480,6 +480,7 @@ int main(int argc, char **argv) {
       stages[0].data.corp = corp;
       stages[0].fnc = hit_cmp;
       stage_c = 1;
+      search_stage_next_hit(&stages[0]);
       break;
     case 'm': // search method
       search_method_name = optarg;      
