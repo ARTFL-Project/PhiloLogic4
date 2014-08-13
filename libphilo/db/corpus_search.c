@@ -46,7 +46,7 @@ enum stage_kind {
 
 typedef struct search_stage {
   enum stage_kind kind;
-  int (*fnc)(uint32_t *,uint32_t *);
+  int (*fnc)(dbh *,uint32_t *,uint32_t *);  //may be unused for now, since positional args are a no-go
   union {
     word_heap heap;
     corpus corp;
@@ -421,7 +421,11 @@ uint32_t * corpus_next_hit(corpus *corpus) {
 }
 
 uint32_t * search_stage_next_hit(search_stage * stage) {
-  return NULL;
+  if (stage->kind == CORPUS) {
+  	return corpus_next_hit (&stage->data.corp);
+  } else if (stage->kind == HEAP) {
+    return heap_next_hit (&stage->data.heap);
+  }
 }
 
 uint32_t * search_next_hit(search_stage *stages,int size) {  
@@ -444,6 +448,7 @@ uint32_t * search_next_hit(search_stage *stages,int size) {
   //       return current
   //     else:
   //       current = current + 1
+  return NULL;
 }
 
 int main(int argc, char **argv) {
@@ -459,11 +464,22 @@ int main(int argc, char **argv) {
   word_heap heap;
   int i,j;
   int optc;
+  search_stage stages[20];
+  int stage_c = 0;
+  corpus corp;
   
   while ((optc = getopt(argc, argv, "c:m:a:")) != -1) {
     switch (optc) {
     case 'c': // corpus file
       corpus_fn = optarg;
+      corp.fn = corpus_fn;
+      corp.fh = fopen(corp.fn,"r");
+      corpus_next_hit(&corp);
+      // probably init corpus by hand here, since it can't come from anywhere else.
+      stages[0].kind = CORPUS;
+      stages[0].data.corp = corp;
+      stages[0].fnc = hit_cmp;
+      stage_c = 1;
       break;
     case 'm': // search method
       search_method_name = optarg;      
