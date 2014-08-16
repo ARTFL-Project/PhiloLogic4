@@ -23,7 +23,7 @@ def navigation(environ,start_response):
     next = ' '.join(obj.next.split()[:7])
     if q['format'] == "json":
         obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
-        return json.dumps({'text': obj_text, 'prev': prev, 'next': next})
+        return json.dumps({'text': obj_text, 'prev': prev, 'next': next, 'shrtcit':  f.cite.make_abs_doc_shrtcit_mobile(db,obj)})
     if obj.philo_type == 'doc':
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
                        db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c")

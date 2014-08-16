@@ -18,10 +18,6 @@ $(document).ready(function() {
         $(".kwic_biblio").hoverIntent(config);
     }
     
-    getCitationWidth();
-    $(window).resize(function() {
-        getCitationWidth();
-    });
     $(window).load(function() {
          // Get the total results when available
         if ($('#incomplete').text() != '.') {

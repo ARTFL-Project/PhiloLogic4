@@ -122,8 +122,8 @@ def make_abs_doc_shrtcit_mobile(db, i):
     """ Returns a representation of a PhiloLogic object suitable for a (short) bibliographic report. """
     cmc_author = i.doc.author.split(",", 1)[0]
     section_names = [i.div1.head,i.div2.head,i.div3.head]
-    section_names[0] = section_names[0].replace("\n", " ")
-    record = cmc_author + ", " + i.doc.title + ": " + section_names[0]
+    head = section_names[2] or section_names[1] or section_names[0]
+    record = cmc_author + ", " + i.doc.title + ": " + head
     return record
     
 def make_abs_doc_cite_biblio_mobile(db, i):

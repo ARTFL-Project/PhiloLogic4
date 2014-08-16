@@ -224,7 +224,7 @@ function removeDiacritics (str) {
 function collocation_cloud(full_results, colloc_end, results_len) {
     $.fn.tagcloud.defaults = {
         size: {start: 1.0, end: 3.5, unit: 'em'},
-        color: {start: '#F9D69A', end: '#800000'}
+        color: {start: '#C4DFF3', end: '#286895'}
       };
     $('#collocate_counts').hide().empty();
     var sorted_list = [];

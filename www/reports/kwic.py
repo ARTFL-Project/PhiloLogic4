@@ -77,7 +77,7 @@ def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
         full_biblio = '<span class="full_biblio" style="display:none;">%s</span>' % biblio
         kwic_biblio = full_biblio + short_biblio
         if q['format'] == "json":
-            kwic_results[pos] = (kwic_biblio, text)
+            kwic_results[pos] = (kwic_biblio, text, hit.philo_id)
         else:
             kwic_biblio_link = '<a href="%s" class="kwic_biblio" style="white-space:pre-wrap;">' % href + kwic_biblio + '</a>: '
             kwic_results[pos] = kwic_biblio_link + '<span>%s</span>' % text

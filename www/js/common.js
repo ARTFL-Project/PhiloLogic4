@@ -12,61 +12,6 @@ $(document).ready(function() {
     //// Search Form related code ////
     //////////////////////////////////
     
-    // Check if on a mobile device
-    if (global_report == "landing_page" && isMobile()) {
-        if (sessionStorage[window.location.href] == null) {
-            var mobile_choice = '<div id="mobile_choice"><div style="margin-bottom:1em">Do you want to use the mobile version of PhiloLogic4?</div></div>';
-            $('body').append(mobile_choice);
-            $("#mobile_choice").dialog({
-                position: { my: "center", at: "top+250", of: window },
-                title: "PhiloLogic4 alert",
-                resizable: false,
-                height:170,
-                width: 430,
-                modal: true,
-                buttons: {
-                  "Use mobile version": function() {
-                    sessionStorage[window.location.href] = "mobile";
-                    $('body').fadeOut(function() {
-                        window.location = 'mobile/philologic.html';
-                    });
-                  },
-                  "Use desktop version": function() {
-                    sessionStorage[window.location.href] = "desktop";
-                    $(this).dialog("close");
-                  }
-                }
-            });
-        } else if (sessionStorage[window.location.href] == 'mobile') {
-            $('body').fadeOut(function() {
-                window.location = 'mobile/philologic.html';
-            });
-        }
-    }
-    
-    ////// jQueryUI theming //////
-    $("#button, #button1, #reset_form, #reset_form1, #hide_search_form, #more_options, .more_context").button();
-    $('#button2, #search_explain').button();
-    $("#report, #page_num, #field, #method, #year_interval").buttonset();
-    $("#word_num").spinner({
-        spin: function(event, ui) {
-                if ( ui.value > 10 ) {
-                    $(this).spinner( "value", 1 );
-                    return false;
-                } else if ( ui.value < 1 ) {
-                    $(this).spinner( "value", 10 );
-                    return false;
-                }
-            }
-    });
-    $("#word_num").val(5);
-    $("#show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
-    $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
-    
-    $('.ui-spinner').css('width', '45px')
-    $(':text').addClass("ui-corner-all");
-    ////////////////////////////////////////
-    
     // Display report tabs according to web_config.cfg
     for (i in webConfig['search_reports']) {
         var search_report = '#' + webConfig['search_reports'][i] + '_button';
@@ -93,23 +38,16 @@ $(document).ready(function() {
         $('#more_options').hide();
         showHide('concordance');
         $(window).load(function() {
-            $('#search_elements')
-                .velocity("slideDown",
-                           {duration: 400, 'easing': 'easeIn'}
-                           )
-                .velocity("fadeIn",
-                           {queue: false, duration: 400, 'easing': 'easeIn'}
-                           );
-            setTimeout(searchFormOverlap, 400);
+            $('#search_elements').velocity("slideDown",{duration: 400, 'easing': 'easeIn'});
         });
     } else {
-        $('#initial_form').css({'max-height': '94px', 'opacity': 100});
+        //$('#initial_form').css({'max-height': '94px', 'opacity': 100});
         showHide($('input[name=report]:checked', '#search').val());
     }
     
     // Handler for clicks on report tabs
-    $('#report').find('label').click(function() {
-        var report = $(this).attr('for');
+    $('#report label').click(function() {
+        var report = $(this).find('input').attr('id');
         if ($("#search_elements").css('display') != 'none') {
             showHide(report);
             if (report != "frequencies") {
@@ -123,12 +61,7 @@ $(document).ready(function() {
             showHide(report);
             if (report != "frequencies") {
                 $("#search_elements")
-                .velocity("slideDown",
-                           {duration: 250, 'easing': 'easeIn'}
-                           )
-                .velocity("fadeIn",
-                           {queue: false, duration: 250, 'easing': 'easeIn'}
-                           );
+                .velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
             }
             showMoreOptions();
         }
@@ -157,11 +90,9 @@ $(document).ready(function() {
         if (value) {
             if (key == 'report') {
                 $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
-                $("#report").buttonset("refresh");
             }
             else if (key == 'pagenum' || key == 'method' || key == 'year_interval') {
                 $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
-                $('input[name=' + key + '][value=' + value + ']').button('refresh');
             }
             else if (key == 'field') {
                 $('select[name=' + key + ']').val(value);
@@ -201,55 +132,7 @@ $(document).ready(function() {
         $("#arg_proxy, #arg_phrase").val('');
     });
     
-    $('#syntax').offset({"left":  $('#q').offset().left});
-    
-    
-    $('#syntax_title').mouseup(function() {
-        if ($('#syntax_explain').not(':visible')) {
-            $('#syntax_explain').fadeIn('fast');
-        }
-        $(document).mousedown(function() {
-            $('#syntax_explain').fadeOut('fast');
-        });
-    });
-    
-//    Check if the search form has any input has been prefilled
-    $('input:text').each(function(){
-        if ($(this).val().length) {
-            if ($(this).attr('id') != 'word_num') {
-                $('#reset_form1').find('.ui-button-text').blink()
-                return false;
-            }
-        }
-    });
-    
-    /// Make sure search form doesn't cover footer
-    $(window).resize(function() {
-        searchFormOverlap();
-    });
-    
-    adjustReportWidth();
-    adjustBottomBorder();
-    
     metadataRemove();
-    
-    // Display help menu on click
-    $('#search_explain').click(function(e) {
-        e.preventDefault();
-        $('div[id^="explain"]').hide();
-        var report = $("#report").find('input:checked').attr('id');
-        $("#explain_" + report).show();
-        var title = $("#explain_" + report).data('title');
-        $('#search_explain_content').show().dialog({
-            position: { my: "center", at: "top+300", of: window },
-            //title: title,
-            draggable: false,
-            resizable: false,
-            height:"auto",
-            width: 400,
-            modal: true,
-        });
-    });
     
     // Add spinner to indicate that a query is running in the background
     // and close autocomplete
@@ -291,45 +174,6 @@ function metadataRemove() {
     }
 }
 
-function isMobile() {
-  var index = navigator.appVersion.indexOf("Mobile");
-  return (index > -1);
-}
-
-function searchFormOverlap() {
-    var form_offset = $('#form_body').offset().top + $('#form_body').height();
-    var footer_offset = $('#footer').offset().top;
-    if (form_offset > footer_offset) {
-        $('#footer').css('top', form_offset + 20);
-    } else {
-        $('#footer').css('top', 'auto');
-    }
-}
-
-//    Adjust width of report buttons
-function adjustReportWidth() {
-    var button_length = 0;
-    var report_num = 0
-    $("#report").find('label').first().css('border-left', '0px');
-    $("#report").find('label').each(function() {
-        if ($(this).is(':visible')) {
-            button_length += $(this).width();
-            report_num += 1;
-            $(this).css({'border-top': '0px'});
-        }
-    });
-    length_to_add = ($("#report").width() - button_length) / report_num;
-    $('#report').find("label").each(function() {$(this).css("width", "+=" + (length_to_add));});
-}
-function adjustBottomBorder() {
-    $('#report').find('label').each(function() {
-        if ($(this).hasClass('ui-state-active')) {
-            $(this).css('border-bottom-width', '0px');
-        } else {
-            $(this).css('border-bottom', '1px solid #D3D3D3');
-        }
-    });
-}
 
 function autoCompleteWord(db_url) {
     $("#q").autocomplete({
@@ -413,7 +257,6 @@ function showHide(value) {
         $('#search_terms_container, #method, #results_per_page').hide();
         $('#metadata_fields, #bottom_search').show();   
     }
-    adjustBottomBorder();
 }
 
 //  Function to show or hide search options
@@ -442,39 +285,6 @@ function hideSearchForm() {
     $("#more_options").button('option', 'label', 'Show search options');
     setTimeout(searchFormOverlap, 250);
 }
-
-
-// This function is used to make the clear form button blink when there are
-// search parameters
-// To be superseded by the display of search criteria in search results.
-(function($)
-{
-    $.fn.blink = function(options) {
-        var defaults = { delay:1500 };
-        var options = $.extend(defaults, options);
-
-        return this.each(function() {
-            var obj = $(this);
-            var state = false;
-            var colorchange = setInterval(function() {
-                if(state)
-                {
-                    $(obj).animate({color: '#555555 !important'}, 1500);
-                    state = false;
-                }
-                else
-                {
-                    $(obj).animate({color: 'rgb(255,0,0) !important'}, 1500);
-                    state = true;
-                }
-            }, options.delay);
-            $('#reset_form, #reset_form1').click(function() {
-                $(obj).css('color', '#555555 !important');
-                clearInterval(colorchange);
-            });
-        });
-    }
-}(jQuery))
 
 
 
@@ -524,11 +334,6 @@ function getSelectedText() {
         return document.selection.createRange().text;
     }
     return '';
-}
-
-function getCitationWidth() {
-    var citation_width = $('.citation').width() - $('.more_context_and_close').width() - $('.hit_n').width() - 30;
-    $('.cite').width(citation_width);
 }
 
 

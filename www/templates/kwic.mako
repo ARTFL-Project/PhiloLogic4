@@ -1,6 +1,6 @@
 <%include file="header.mako"/>
 <%include file="search_form.mako"/>
-<div id='philologic_response'>
+<div class="container-fluid" id='philologic_response'>
     <div id='initial_report'>
        <div id='description'>
             <%
@@ -24,10 +24,41 @@
                 No results for your query.
             % endif
         </div>
-        <%include file="show_frequency.mako"/>
-        <div id="report_switch">
-            <input type="radio" name="report_switch" id="concordance_switch" value="?${q['q_string'].replace('report=kwic', 'report=concordance')}"><label for="concordance_switch">View occurences with context</label>
-            <input type="radio" name="report_switch" id="kwic_switch" value="?${q['q_string'].replace('report=concordance', 'report=kwic')}" checked="checked"><label for="kwic_switch">View occurences line by line (KWIC)</label>
+    </div>
+    <div class="row" id="act-on-report">
+        <div class="col-xs-12 col-md-6">
+            <div id="report_switch" class="btn-group" data-toggle="buttons">
+                <label class="btn btn-primary">
+                    <input type="radio" name="report_switch" id="concordance_switch" value="?${q['q_string'].replace('report=kwic', 'report=concordance')}">
+                    View occurences with context
+                </label>
+                <label class="btn btn-primary active">
+                    <input type="radio" name="report_switch" id="kwic_switch" value="?${q['q_string'].replace('report=concordance', 'report=kwic')}" checked=>
+                    View occurences line by line (KWIC)
+                </label>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-offset-2">
+            <div class="btn-group pull-right">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    Display frequency by ${config["metadata"][0].title()}<span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu" id="frequency_field">
+                    % for facet in config["facets"]:
+                        <%
+                        if facet in config["metadata_aliases"]:
+                            alias = config["metadata_aliases"][facet]
+                        else:
+                            alias = facet
+                        %>
+                        <li><a class="sidebar_option" id="side_opt_${facet}" data-value='${facet}' data-display='${facet}'>Display frequency by ${alias}</a></li>
+                    % endfor
+                    % if report != 'bibliography':
+                        <li class="divider"></li>
+                        <li><a class="sidebar_option" id="side_opt_collocate" data-value='collocation_report' data-display='collocate'>Display collocates</a></li>
+                    % endif
+                </ul>
+            </div>
         </div>
     </div>
     <div id="results_container" class="results_container">
