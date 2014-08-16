@@ -153,7 +153,15 @@
 #obj_text {
     vertical-align:middle;
 }
-
+#t-o-c {
+    display: none;
+}
+#hide-toc:hover {
+    cursor: pointer; 
+}
+#toc-content {
+    padding: 10px;
+}
 
 /* Styling for theater */
 castitem::after {

@@ -4,12 +4,18 @@ var toc_open = false;
 
 $(document).ready(function() {
     
-    // jQueryUI theming
-    $('#show_table_of_contents, #prev_obj, #next_obj').button();
     
-    $(window).resize(function() {
-        window_height = $(window).height();
+    $("#show-toc").click(function() {
+        $("#center-content").removeClass('col-xs-offset-2');
+        $('#t-o-c').show();
+        $(this).hide();
     });
+    $("#hide-toc").click(function() {
+        $("#center-content").addClass('col-xs-offset-2');
+        $('#t-o-c').hide();
+        $("#show-toc").fadeIn('fast');
+    });
+    
     //
     // This is to display the table of contents in the document viewer
     var db_url = webConfig['db_url'];
@@ -22,14 +28,14 @@ $(document).ready(function() {
     var text = 'Click to see a full-sized version of this image';
     $('.plate_img').attr('title', text).tooltip({ position: { my: "left center", at: "right center" } });
     
-    var toc = $('#prev_and_toc');
-    var prev = $('#prev_obj');
-    var next = $('#next_and_read');
-    var top = next.offset().top - parseFloat(next.css('marginTop').replace(/auto/, 0));
-    $(window).scroll(function() {
-        latestKnownScrollY = window.pageYOffset;
-        follow_scroll(toc, prev, next, top);
-    });
+    //var toc = $('#prev_and_toc');
+    //var prev = $('#prev_obj');
+    //var next = $('#next_and_read');
+    //var top = next.offset().top - parseFloat(next.css('marginTop').replace(/auto/, 0));
+    //$(window).scroll(function() {
+    //    latestKnownScrollY = window.pageYOffset;
+    //    follow_scroll(toc, prev, next, top);
+    //});
     
     checkEndBeginningOfDoc();
     
@@ -37,7 +43,7 @@ $(document).ready(function() {
         if ($('.highlight').length) {
             scrollToHighlight();
         }
-        t_o_c_handler(db_url);
+        retrieveTableOfContents();
         retrieveObj(db_url);
     });
     
@@ -59,6 +65,20 @@ function checkEndBeginningOfDoc() {
     } else {
         $("#prev_obj").show();
     }
+}
+
+function retrieveTableOfContents() {
+    var pathname = window.location.pathname.replace('dispatcher.py/', '');
+    var my_path = pathname.replace(/\/\d+.*$/, '/');
+    var doc_id = pathname.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
+    var philo_id = doc_id + ' 0 0 0 0 0 0'
+    var script = my_path + '/scripts/get_table_of_contents.py?philo_id=' + philo_id;
+    console.log(script)
+    $("#show-toc").removeAttr("disabled");
+    $.get(script, function(data) {
+        $('#toc-content').html(data);
+        TocLinkHandler(db_url);
+    });
 }
 
 function follow_scroll(toc, prev, next, top) {
