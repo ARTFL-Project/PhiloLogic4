@@ -90,17 +90,15 @@
 #next_obj_wrapper, #prev_obj_wrapper {
     position: absolute;
 }
-#book_page {
-    margin: 0 auto;
+#center-content, #toc-wrapper {
+    transition: all 300ms;
+}
+#book-page {
     padding: 20px 20px 20px 20px;
-    background-color: #FAFAFA !important;
-    box-shadow: 0px 0px 15px #888;
     line-height: 140% !important;
-    font-size: 1.1em;
-    min-height: 650px;
-    z-index: 100;
     text-align: justify;
 }
+
 @media (min-width: 1230px) {
     #book_page {
         width: 700px;
@@ -153,11 +151,9 @@
 #obj_text {
     vertical-align:middle;
 }
-#t-o-c {
-    display: none;
-}
-#hide-toc:hover {
-    cursor: pointer; 
+
+.nav-btn {
+    margin-top: 20px;
 }
 #toc-content {
     padding: 10px;

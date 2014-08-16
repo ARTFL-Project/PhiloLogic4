@@ -6,15 +6,28 @@ $(document).ready(function() {
     
     
     $("#show-toc").click(function() {
-        $("#center-content").removeClass('col-xs-offset-2');
-        $('#t-o-c').show();
+        $("#center-content").removeClass('col-xs-offset-2 col-sm-offset-2');
+        $("#center-content").css('margin-left', '-15px');
+        $('#toc-wrapper').show().css('margin-left', '0px');
         $(this).hide();
     });
     $("#hide-toc").click(function() {
-        $("#center-content").addClass('col-xs-offset-2');
-        $('#t-o-c').hide();
-        $("#show-toc").fadeIn('fast');
+        var tocWidth = $('#toc-wrapper').width() + 30; // account for container margin
+        $('#toc-wrapper').css('margin-left', '-' + tocWidth + 'px');
+        $("#center-content").addClass('col-xs-offset-2 col-sm-offset-2');
+        $("#center-content").css('margin-left', '16.66666667%');
+        setTimeout(function() {$("#show-toc").fadeIn('fast')}, 300);
     });
+    
+    // Previous and next button follow scroll
+    $('.nav-btn button, #toc-container').affix({
+        offset: {
+        top: function() {
+            return (this.top = $('#center-content').offset().top)
+            }
+        }
+    });
+    
     
     //
     // This is to display the table of contents in the document viewer
@@ -77,6 +90,9 @@ function retrieveTableOfContents() {
     $("#show-toc").removeAttr("disabled");
     $.get(script, function(data) {
         $('#toc-content').html(data);
+        // Add a negative left margin to hide on the left side
+        var tocWidth = $('#toc-wrapper').width() + 30; // account for container margin
+        $('#toc-wrapper').css('margin-left', '-' + tocWidth + 'px');
         TocLinkHandler(db_url);
     });
 }
