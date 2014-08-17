@@ -372,7 +372,7 @@ br {
     padding: 10px 0px 10px 0px;
 }
 
-/*Theme*/
+/*THEME*/
 .navbar-inverse, .panel-default > .panel-heading {
     background: #276B9B !important;
 }
@@ -383,7 +383,7 @@ br {
     border-radius: 0px !important;
 }
 .btn-primary {
-    background: rgb(65,128,171);
+    background: #4180ab;
     transition: background-color 200ms;
 }
 .btn-primary:hover, .biblio-criteria {
@@ -395,11 +395,23 @@ br {
 .navbar-brand, .navbar-inverse a {
     color: #ECEDEE !important;
 }
+a {
+    color: #276B9B;
+}
+a:hover {
+    color: #4180ab !important;
+}
 /*Metadata criteria in results*/
 .biblio-criteria {
     padding: 2px;
     color: #fff;
     border: solid #276B9B 1px;
+}
+/*TOC styling*/
+.toc-div1 > a:hover, .toc-div2 > a:hover, .toc-div3 > a:hover {
+    text-decoration: none;
+    background: #649DC5;
+    color: #fff !important;
 }
 
 

@@ -29,13 +29,8 @@ def navigation(environ,start_response):
                        db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c")
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,obj_text=obj_text,prev=prev,next=next,config=config,generate_ajax_scripts=generate_ajax_scripts,
+                       db=db,q=q,obj_text=obj_text,prev=prev,next=next,config=config,
                        template_name='object.mako', report="navigation")
-
-def generate_ajax_scripts(config, philo_id):
-    script = config.db_url + '/scripts/go_to_obj.py?philo_id=' + philo_id
-    return script
-
 
 def navigate_doc(obj, db):
     """This function fetches all philo_ids for div elements within a doc"""
