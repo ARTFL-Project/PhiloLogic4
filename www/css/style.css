@@ -298,7 +298,7 @@ s {
     text-decoration: none;
 }
 
-.dot {
+.dot, .bullet-point {
     display: inline-block;
     background: black;
     width: 8px;

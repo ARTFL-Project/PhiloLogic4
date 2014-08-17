@@ -39,9 +39,9 @@ def get_table_of_contents(environ, start_response):
         wrapper = json.dumps({'toc': html, 'citation': f.cite.make_abs_doc_cite_biblio_mobile(db, obj)})
         yield wrapper
     else:
-        div1_markup = '<div class="toc-div1">'
-        div2_markup = '<div class="toc-div2">'
-        div3_markup = '<div class="toc-div3">'
+        div1_markup = '<div class="toc-div1"><span class="bullet-point-div1"></span>'
+        div2_markup = '<div class="toc-div2"><span class="bullet-point-div2"></span>'
+        div3_markup = '<div class="toc-div3"><span class="bullet-point-div3"></span>'
         html = ['']
         for philo_id, philo_type, head in results:
             link_id = philo_id.replace(' ', '_')

@@ -10,31 +10,30 @@
         var philo_id = doc_id + ' 0 0 0 0 0 0'
         var script = my_path + '/scripts/get_table_of_contents.py?philo_id=' + philo_id;
         $.get(script, function(data) {
-            toc_container = '<div id="toc_wrapper" style="display:none">' + data + "</div>";
-            $('#philologic_response').append(toc_container);
+            $("#toc-content").html(data);
             $("#toc_wrapper").fadeIn();
         });
-        $('#show_header').button();
-        $('#show_header').click(function() {
-            if ($('#show_header span').text() == "Show Header") {
+        $('#show-header').click(function() {
+            if ($('#show-header').text() == "Show Header") {
                 $.get(my_path + '/scripts/get_header.py?philo_id=' + philo_id, function(data) {
-                    $('#tei_header').append(data).show();
-                    $('#show_header span').html("Hide Header");                
+                    $('#tei-header').append(data).show();
+                    $('#show-header').html("Hide Header");                
                 });
             } else {
-                $('#tei_header').hide().empty();
-                $('#show_header span').html("Show Header");
+                $('#tei-header').hide().empty();
+                $('#show-header').html("Show Header");
             }
         });
     })
 </script>
-<div id='philologic_response'>
-    <div id='t_o_c_title'>
+<div id='philologic_response' class="container-fluid">
+    <div id='toc-title'>
         <span class='philologic_cite'>${f.biblio_citation(db,config, obj)}</span>
     </div>
     % if db.locals['debug'] == True:
-        <button id="show_header">Show Header</button>
-        <div id="tei_header" style="white-space: pre; font-family: 'Droid Sans Mono', sans-serif; font-size: 80%; display: none;"></div>
+        <button id="show-header" class="btn btn-primary">Show Header</button>
+        <div id="tei-header" style="white-space: pre; font-family: 'Droid Sans Mono', sans-serif; font-size: 80%; display: none;"></div>
     % endif
+    <div id="toc-content"></div>
 </div>
 <%include file="footer.mako"/>

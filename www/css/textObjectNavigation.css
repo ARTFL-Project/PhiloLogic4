@@ -1,4 +1,4 @@
-#object-title {
+#object-title, #toc-title {
     font-size: 140%;
     line-height: 120%;
     margin: 20px 0px 20px 0px;
@@ -36,11 +36,31 @@
 .toc-div1 > a, .toc-div2 > a, .toc-div3 > a {
     padding: 5px 5px 5px 0px;
 }
+.bullet-point-div1, .bullet-point-div2, .bullet-point-div3 {
+    display: inline-block;
+    background: #fff;
+    border: solid 2px #000;
+    width: 8px;
+    height: 8px;
+    border-radius:50%;
+    margin-right: 5px;
+}
+.bullet-point-div1 {
+    background: #000;
+}
+.bullet-point-div2 {
+    background: #fff;
+    border: solid 2px #000;
+}
+.bullet-point-div3 {
+    background: #fff;
+    border: solid 1px #000;
+}
 .toc-div2 {
-    text-indent: 0.5em;
+    text-indent: 1em;
 }
 .toc-div3 {
-    text-indent: 0.75em;
+    text-indent: 2em;
 }
 
 
