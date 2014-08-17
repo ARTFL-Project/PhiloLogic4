@@ -96,13 +96,6 @@ body {
   padding-left: 30px;
 }
 
-/* Links */
-/*a:link, a:visited {*/
-/*  color: #990000;*/
-/*  text-decoration: none;*/
-/*  font-weight: 700;*/
-/*}*/
-
 /* Fonts */
 .main_body{
     font-weight:300;
@@ -298,7 +291,7 @@ s {
     text-decoration: none;
 }
 
-.dot, .bullet-point {
+.dot {
     display: inline-block;
     background: black;
     width: 8px;

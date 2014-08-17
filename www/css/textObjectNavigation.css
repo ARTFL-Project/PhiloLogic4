@@ -33,6 +33,11 @@
     line-height: 180%;
     text-align: justify;
 }
+.toc-div1, .toc-div2, .toc-div3 {
+    /*text-overflow: ellipsis;*/
+    /*overflow: hidden;*/
+    /*white-space: nowrap;*/
+}
 .toc-div1 > a, .toc-div2 > a, .toc-div3 > a {
     padding: 5px 5px 5px 0px;
 }

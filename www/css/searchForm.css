@@ -6,9 +6,12 @@
 	box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
     color: #555 !important;
 }
+#initial-form {
+	padding-bottom: 15px;
+}
 #search_elements {
-    margin-top: 10px;
-    padding-left: 30px;
+    padding-left: 20px;
+	padding-bottom: 10px;
     border-top: solid 1px #ECECEC;
     overflow: hidden;
     display: none;
@@ -92,7 +95,7 @@
 	padding-top: 10px;
 	padding-bottom: 10px;
 }
-#initial_form .btn-primary.active {
+#initial-form .btn-primary.active {
 	box-shadow: 0px 0px;
 	border-top: 0px;
 }
@@ -104,4 +107,25 @@
 }
 #tip-btn:hover #tip {
 	display: none;
+}
+
+@media (max-width: 992px) {
+	#search-buttons {
+		padding-top: 15px;
+	}
+}
+@media (max-width: 768px) {
+	#right-act-on-report .btn-group {
+		float:left !important;
+	}
+	/*#report > label {*/
+	/*	width: 50%;*/
+	/*	float: left;*/
+	/*}*/
+	/*#report > label:nth-of-type(3) {*/
+	/*	display: block;*/
+	/*}*/
+	#search_elements {
+		padding-right: 20px;
+	}
 }

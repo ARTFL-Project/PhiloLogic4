@@ -24,8 +24,8 @@
             % endif
        </div>
     </div>
-    <div class="row" id="act-on-report">
-        <div class="col-xs-12 col-md-6">
+    <div class="row hidden-xs" id="act-on-report">
+        <div class="col-sm-9 col-md-8 col-lg-6">
             <div id="report_switch" class="btn-group" data-toggle="buttons">
                 <label class="btn btn-primary active">
                     <input type="radio" name="report_switch" id="concordance_switch" value="?${q['q_string'].replace('report=kwic', 'report=concordance')}" checked>
@@ -37,7 +37,7 @@
                 </label>
             </div>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-offset-2">
+        <div class="col-sm-3 col-md-3 col-md-offset-1 col-lg-4 col-lg-offset-2" id="right-act-on-report">
             <div class="btn-group pull-right">
                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                     Display frequency by ${config["metadata"][0].title()}<span class="caret"></span>

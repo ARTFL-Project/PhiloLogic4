@@ -6,6 +6,9 @@ $(document).ready(function() {
     
     
     $("#show-toc").click(function() {
+        //Apply width on children for text-overflow: ellipsis
+        //var width = $('.toc-div1').width();
+        //$('.toc-div1, .toc-div2, .toc-div3').css({"width": width + 'px', "overflow": "hidden", "text-overflow": "ellipsis", "white-space": "nowrap"});
         $("#center-content").removeClass('col-xs-offset-2 col-sm-offset-2');
         $("#center-content").css('margin-left', '-15px');
         $('#toc-wrapper').show().css('margin-left', '0px');
@@ -80,7 +83,6 @@ function retrieveTableOfContents(db_url) {
     var doc_id = pathname.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
     var philo_id = doc_id + ' 0 0 0 0 0 0'
     var script = my_path + '/scripts/get_table_of_contents.py?philo_id=' + philo_id;
-    console.log(script)
     $("#show-toc").removeAttr("disabled");
     $.get(script, function(data) {
         $('#toc-content').html(data);

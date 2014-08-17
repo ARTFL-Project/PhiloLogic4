@@ -3,13 +3,13 @@
 <div class="container">
     <div id="form_body">
         <form id="search" action="${config.db_url + "/dispatcher.py/"}" role="form">
-            <div id="initial_form">
+            <div id="initial-form">
                 <div id="report" class="btn-group btn-group-justified" data-toggle="buttons">
                     <label class="btn btn-primary active">
                         <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
                         Concordance
                     </label>
-                    <label class="btn btn-primary">
+                    <label class="btn btn-primary hidden-xs">
                         <input type="radio" name="report" id="kwic" value='kwic'>
                         KWIC
                     </label>
@@ -17,7 +17,7 @@
                         <input type="radio" name="report" id="collocation" value='collocation'>
                         Collocation
                     </label>
-                    <label class="btn btn-primary">
+                    <label class="btn btn-primary hidden-xs">
                         <input type="radio" name="report" id="time_series" value='time_series'>
                         Time Series
                     </label>
@@ -37,7 +37,7 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="col-xs-12 col-sm-12 col-md-5">
+                        <div class="col-xs-12 col-sm-12 col-md-5" id="search-buttons">
                             <input id="button1" type='submit' class="btn btn-primary" value="Search"/>
                             <button type="reset" id="reset_form1" class="btn btn-danger">Clear form</button>
                             <button id="more_options" class="btn btn-danger">Show search options</button>
@@ -87,7 +87,7 @@
                 <h5>Refine your search with the following options and fields:
                 </h5>             
                 <!--This row defines the search method options-->
-                <div class="row" id='method'>
+                <div class="row hidden-xs" id='method'>
                     <div class="col-xs-12 col-sm-2">
                         Search Terms
                     </div>
