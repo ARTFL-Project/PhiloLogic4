@@ -5,22 +5,30 @@
         <form id="search" action="${config.db_url + "/dispatcher.py/"}" role="form">
             <div id="initial-form">
                 <div id="report" class="btn-group btn-group-justified" data-toggle="buttons">
-                    <label class="btn btn-primary active">
-                        <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
-                        Concordance
-                    </label>
-                    <label class="btn btn-primary hidden-xs">
-                        <input type="radio" name="report" id="kwic" value='kwic'>
-                        KWIC
-                    </label>
-                    <label class="btn btn-primary">
-                        <input type="radio" name="report" id="collocation" value='collocation'>
-                        Collocation
-                    </label>
-                    <label class="btn btn-primary hidden-xs">
-                        <input type="radio" name="report" id="time_series" value='time_series'>
-                        Time Series
-                    </label>
+                    % if "concordance" in config.search_reports:
+                        <label class="btn btn-primary active">
+                            <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
+                            Concordance
+                        </label>
+                    % endif
+                    % if "kwic" in config.search_reports:
+                        <label class="btn btn-primary hidden-xs">
+                            <input type="radio" name="report" id="kwic" value='kwic'>
+                            KWIC
+                        </label>
+                    % endif
+                    % if "collocation" in config.search_reports:
+                        <label class="btn btn-primary">
+                            <input type="radio" name="report" id="collocation" value='collocation'>
+                            Collocation
+                        </label>
+                    % endif
+                    % if "time_series" in config.search_reports:
+                        <label class="btn btn-primary hidden-xs">
+                            <input type="radio" name="report" id="time_series" value='time_series'>
+                            Time Series
+                        </label>
+                    % endif
                 </div>
                 <div id="search_terms_container">
                     <div id="search_terms" class="row">
@@ -40,7 +48,7 @@
                         <div class="col-xs-12 col-sm-12 col-md-5" id="search-buttons">
                             <input id="button1" type='submit' class="btn btn-primary" value="Search"/>
                             <button type="reset" id="reset_form1" class="btn btn-danger">Clear form</button>
-                            <button id="more_options" class="btn btn-danger">Show search options</button>
+                            <button type="button" id="show-search-form" class="btn btn-danger" data-display="none">Show search options</button>
                         </div>
                     </div>
                     <div id="syntax" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="syntaxLabel" aria-hidden="true">

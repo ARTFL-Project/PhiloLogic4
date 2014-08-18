@@ -1,10 +1,5 @@
 $(document).ready(function() {
     
-    //jQueryUI theming
-    $('#hide_sidebar').button();
-    $("#select_facet").selectmenu({width: "auto"});
-    $("#select_facet-button").css("border-bottom", "0px");
-    
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var db_url = webConfig['db_url'];
     var q_string = window.location.search.substr(1);

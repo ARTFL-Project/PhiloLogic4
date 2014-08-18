@@ -12,26 +12,18 @@ $(document).ready(function() {
     //// Search Form related code ////
     //////////////////////////////////
     
-    // Display report tabs according to web_config.cfg
-    for (i in webConfig['search_reports']) {
-        var search_report = '#' + webConfig['search_reports'][i] + '_button';
-        $(search_report).show();
-    }
-    
     // Give higher priority to search form over text display
-    // TODO: remove this
-    $('#more_options').click(function() {
+    $('#show-search-form').click(function() {
         $('#search_elements').css('z-index', 150);
         $('.book_page').css('z-index', 90);
-        if ($(this).text() == "Show search options") {
+        if ($(this).data('display') == "none") {
             showMoreOptions("all");
+            $(this).data('display', 'block');
         } else {
             hideSearchForm();
+            $(this).data('display', 'none');
         }
     });
-    
-    // Show search form by default
-    $('#form_body').show();
     
     // If report is the landing page, show the full search form
     if (global_report == "landing_page") {
@@ -41,7 +33,6 @@ $(document).ready(function() {
             $('#search_elements').velocity("slideDown",{duration: 400, 'easing': 'easeIn'});
         });
     } else {
-        //$('#initial_form').css({'max-height': '94px', 'opacity': 100});
         showHide($('input[name=report]:checked', '#search').val());
     }
     
@@ -264,31 +255,22 @@ function showHide(value) {
 
 //  Function to show or hide search options
 function showMoreOptions(display) {
-    $("#more_options").button('option', 'label', 'Hide search options');
     if (display == "all") {
-        var report = $('input[name=report]:checked', '#search').val();
+        var report = $('#report label.active input').attr('id');
+        console.log(report)
         showHide(report);
-        $("#search_elements")
-            .velocity("slideDown",
-                      {duration: 250, 'easing': 'easeIn'}
-                      )
-            .velocity("fadeIn",
-                       {queue: false, duration: 250, 'easing': 'easeIn'}
-                       );
+        $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
     }
     var height = $(document).height() - $(header).height() - $(footer).height();
     $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': height});
-    setTimeout(searchFormOverlap, 250);
+    //setTimeout(searchFormOverlap, 250);
 }
 
 function hideSearchForm() {
     $("#search_elements").velocity('slideUp', {duration: 250, easing: 'easeOut'});
-    $("#search_elements").velocity('fadeOut', {duration: 250, easing: 'easeOut', queue: false});
     $("#search_overlay").css({'height': '0px', 'opacity': 0});
-    $("#more_options").button('option', 'label', 'Show search options');
-    setTimeout(searchFormOverlap, 250);
+    //setTimeout(searchFormOverlap, 250);
 }
-
 
 
 ///////////////////////////////////////////////////
@@ -306,54 +288,29 @@ function fetchMoreContext() {
             $('.philologic_context').eq(i).append(more);
         }
         moreContext();
-        $('.more_context').animate({color: '#555 !important'},400);
+        $('.more_context').removeAttr('disabled');
     });
 }
 
 function moreContext() {
     $(".more_context").click(function() {
         var context_link = $(this).text();
-        var more_context = $(this);
         var parent_div = $(this).parents().siblings('.philologic_context')
-        if (context_link == 'More') {
+        if ($(this).data('context') == 'short') {
             parent_div.children('.default_length').fadeOut(100, function() {
                 parent_div.children('.more_length').fadeIn(100);
             });
-            parent_div.prev('div').find('.ui-button-text').empty().fadeIn(100).append('Less');
+            $(this).empty().fadeIn(100).append('Less');
+            $(this).data('context', 'long');
         } else {
             parent_div.children('.more_length').fadeOut(100, function() {
                 parent_div.children('.default_length').show();
             });
-            parent_div.prev('div').find('.ui-button-text').empty().fadeIn(100).append('More');
+            $(this).empty().fadeIn(100).append('More');
+            $(this).data('context', 'short');
         }
     });
 }
-
-
-function getSelectedText() {
-    if (window.getSelection) {
-        return window.getSelection().toString();
-    } else if (document.selection) {
-        return document.selection.createRange().text;
-    }
-    return '';
-}
-
-
-// Delay function calls in repeated actions
-var waitForFinalEvent = (function () {
-  var timers = {};
-  return function (callback, ms, uniqueId) {
-    if (!uniqueId) {
-      uniqueId = "Don't call this twice without a uniqueId";
-    }
-    if (timers[uniqueId]) {
-      clearTimeout (timers[uniqueId]);
-    }
-    timers[uniqueId] = setTimeout(callback, ms);
-  };
-})();
-
 
 // This is to create links for collocations
 function colloc_linker(word, q_string, direction, num) {

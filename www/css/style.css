@@ -55,6 +55,9 @@ ol {
 .small-caps {
     font-variant:small-caps;
 }
+#philologic_response {
+    margin-top: 80px;
+}
 
 /*jQueryUI styling*/
 .ui-button,  .ui-button-text, .ui-button, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button, .ui-widget, ul.ui-autocomplete.ui-menu {  

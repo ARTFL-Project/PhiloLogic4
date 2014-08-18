@@ -47,9 +47,10 @@
 	position: absolute;
 	right: 0;
 	top: 0;
-	height: 31px;
+	height: 34px;
 	border-color: #eee;
 	border-width: 0px 0px 0px 1px;
+	transition: all 250ms;
 }
 .citation-overflow {
 	position: absolute;
@@ -80,7 +81,6 @@
 .citation-container {
 	margin-top: -7px;
 	padding-top: 7px;
-	padding-bottom: 2px;
 	border-bottom: 1px solid #eee;
 }
 .citation {

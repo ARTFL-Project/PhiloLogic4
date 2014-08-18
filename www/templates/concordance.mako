@@ -74,9 +74,9 @@
                                <span class="cite" data-id="${' '.join(str(s) for s in i.philo_id)}">
                                    ${n}.&nbsp ${f.concordance_citation(db, config, i)}
                                </span>
-                               <span class="btn btn-default more_context">
+                               <button class="btn btn-default more_context" disabled="disabled" data-context="short">
                                    More
-                               </span>
+                               </button>
                            </div>
                         </div>
                        <div class='philologic_context'>

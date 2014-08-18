@@ -1,9 +1,5 @@
 $(document).ready(function() {
     
-    // jQueryUI theming
-    $("#report_switch").buttonset();
-    $('#page_links').find('a').each(function(){$(this).button()});
-    
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var db_url = webConfig['db_url'];
     var q_string = window.location.search.substr(1);
@@ -36,7 +32,6 @@ $(document).ready(function() {
     // Fetch more context for concordances after page load
     $(window).load(function() {
         fetchMoreContext();
-        //fetchresultsBibliography(pathname);
     });
     
 });

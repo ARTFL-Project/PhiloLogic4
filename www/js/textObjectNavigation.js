@@ -6,9 +6,6 @@ $(document).ready(function() {
     
     
     $("#show-toc").click(function() {
-        //Apply width on children for text-overflow: ellipsis
-        //var width = $('.toc-div1').width();
-        //$('.toc-div1, .toc-div2, .toc-div3').css({"width": width + 'px', "overflow": "hidden", "text-overflow": "ellipsis", "white-space": "nowrap"});
         $("#center-content").removeClass('col-xs-offset-2 col-sm-offset-2');
         $("#center-content").css('margin-left', '-15px');
         $('#toc-wrapper').show().css('margin-left', '0px');
@@ -36,7 +33,7 @@ $(document).ready(function() {
         }
     });
     
-    // This is to display the table of contents in the document viewer
+    // Handle page reload properly
     var db_url = webConfig['db_url'];
     if ($('#next_obj').length) {
         back_forward_button_reload(db_url);
@@ -47,6 +44,7 @@ $(document).ready(function() {
     var text = 'Click to see a full-sized version of this image';
     $('.plate_img').attr('title', text).tooltip({ position: { my: "left center", at: "right center" } });
     
+    // Only enable back/forward buttons if necessary 
     checkEndBeginningOfDoc();
     
     $(window).load(function() {

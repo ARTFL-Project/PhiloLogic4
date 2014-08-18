@@ -5,7 +5,6 @@ $(document).ready(function() {
 	var username = encodeURIComponent($("#username").val());
 	var password = encodeURIComponent($("#password").val());
 	var command = webConfig['db_url'] + "/scripts/password_entry.py?username=" + username + "&password=" + password;
-	console.log(username, password, command)
 	$.getJSON(command, function(data){
 		if (data == 'ok') {
 			console.log('it worked')
