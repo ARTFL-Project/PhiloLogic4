@@ -460,19 +460,19 @@ uint32_t * search_next_hit(search_stage *stages,int size) {
     }
 
     // otherwise, we need to check the curr hit against it's prev.
-    check_res = prev->fnc(stage_current_hit(prev),stage_current_hit(curr));
-    if (res < 0) {         // if curr is ahead of prev, advance prev
+    check_res = prev->fnc(NULL, stage_current_hit(prev),stage_current_hit(curr));
+    if (check_res < 0) {         // if curr is ahead of prev, advance prev
       advance_res = stage_next_hit(prev);
       if (c > 1) {         // since we've moved prev, if it is not the innermost hit, we have to check it against it's own prev stage
         c -= 1;
       }                    // if we are at the innermost stage, do nothing, just keep advancing with curr = 1, prev - 0
-    } else if (res == 0) { // if curr and prev are within the window defined by prev's search check function...
+    } else if (check_res == 0) { // if curr and prev are within the window defined by prev's search check function...
       if (c == size - 1) { // if we're on the outermost hit, it's good to output
 	return stage_current_hit(curr);
       } else {             // if we are on an inner hit, we can move our c counter outward.
 	c += 1;
       }
-    } else if (res > 0) {  // if prev is ahead of curr, advance curr
+    } else if (check_res > 0) {  // if prev is ahead of curr, advance curr
       advance_res = stage_next_hit(curr);
     }
   }
@@ -522,7 +522,7 @@ int main(int argc, char **argv) {
       stages[0].data.corp = corp;
       stages[0].fnc = hit_cmp;
       stage_c = 1;
-      search_stage_next_hit(&stages[0]);
+      stage_next_hit(&stages[0]);
       break;
     case 'm': // search method
       search_method_name = optarg;      
