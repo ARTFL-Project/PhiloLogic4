@@ -420,7 +420,7 @@ uint32_t * corpus_next_hit(corpus *corpus) {
   }  
 }
 
-uint32_t * search_stage_next_hit(search_stage * stage) {
+uint32_t * stage_next_hit(search_stage * stage) {
   if (stage->kind == CORPUS) {
   	return corpus_next_hit (&stage->data.corp);
   } else if (stage->kind == HEAP) {
@@ -428,12 +428,54 @@ uint32_t * search_stage_next_hit(search_stage * stage) {
   }
 }
 
-uint32_t * search_next_hit(search_stage *stages,int size) {  
-  // advance the last stage // MUST do this at least once.
-  // current = last 
-  // search checks proceed from right to left
-  // when we advance a stage, we have to check it against it's parent
+uint32_t * stage_current_hit(search_stage * stage) {
 
+}
+
+
+
+uint32_t * search_next_hit(search_stage *stages,int size) {  
+  int c = size - 1;        // our position in the stages array; start at the end
+  int check_res;           // the result of the previous stage's search predicate function
+  uint32_t * advance_res;  // the result of advancing the current or previous stage--not actually used directly.
+
+  search_stage * curr = &stages[c];
+  search_stage * prev;     // not assigned until we know it is safe.
+
+  advance_res = stage_next_hit(curr); // advance the last stage. must do this at least once. 
+  if (size == 1) {                    // if this is a one-stage search, we're done.
+    return stage_current_hit(curr);   // if current hit is NULL this returns NULL, so don't need to check explicitly.
+  }
+
+  // otherwise, search checks proceed from right to left, or outer to inner, or size - 1 to 1.
+  // when we advance a stage, we have to check it against it's preceding/inner stage
+
+  while (1) {
+    curr = &stages[c];
+    prev = &stages[c - 1]; // we know that this is safe, because we always check that c > 1 before decrementing.
+
+    // curr is always the stage that was just advanced.  So we can check to see if it has run out of hits.
+    if (stage_current_hit(curr) == NULL) {
+      return NULL;  
+    }
+
+    // otherwise, we need to check the curr hit against it's prev.
+    check_res = prev->fnc(stage_current_hit(prev),stage_current_hit(curr));
+    if (res < 0) {         // if curr is ahead of prev, advance prev
+      advance_res = stage_next_hit(prev);
+      if (c > 1) {         // since we've moved prev, if it is not the innermost hit, we have to check it against it's own prev stage
+        c -= 1;
+      }                    // if we are at the innermost stage, do nothing, just keep advancing with curr = 1, prev - 0
+    } else if (res == 0) { // if curr and prev are within the window defined by prev's search check function...
+      if (c == size - 1) { // if we're on the outermost hit, it's good to output
+	return stage_current_hit(curr);
+      } else {             // if we are on an inner hit, we can move our c counter outward.
+	c += 1;
+      }
+    } else if (res > 0) {  // if prev is ahead of curr, advance curr
+      advance_res = stage_next_hit(curr);
+    }
+  }
   // while true:
   //   if current = 0: break
   //   prev = current - 1
