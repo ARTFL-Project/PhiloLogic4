@@ -226,7 +226,6 @@ function yearToTimeSpan(year, interval) {
             year = year.slice(0,-2) + '50' + '-' + year.slice(0,-2) + '99';
         }
     }
-    console.log(year)
     return year
 }
 

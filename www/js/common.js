@@ -89,7 +89,10 @@ $(document).ready(function() {
         var key = key_value[0]
         if (value) {
             if (key == 'report') {
-                $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
+                $('#report input').removeAttr('checked');
+                $('#report label').removeClass('active');
+                $('#' + value).attr('checked', 'checked');
+                $('#' + value).parent().addClass('active');
             }
             else if (key == 'pagenum' || key == 'method' || key == 'year_interval') {
                 $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
@@ -107,14 +110,14 @@ $(document).ready(function() {
     $("#reset_form, #reset_form1").click(function() {
         $("#method").find("input:radio").attr("checked", false).end();
         $("#method1").attr('checked', true);
-        $("#method").buttonset('refresh');
+        //$("#method").buttonset('refresh');
         $("#page_num").find("input:radio").attr("checked", false).end();
         $("#pagenum1").attr('checked', true);
-        $("#page_num").buttonset('refresh');
+        //$("#page_num").buttonset('refresh');
         $('#search')[0].reset();
         $("#search_elements").velocity('fadeIn');
         $("#reset_form1").css('color', '#555555 !important');
-        $("#report").find("input:radio").attr("checked", false).end();
+        $("#report input:radio").attr("checked", false).end();
         $('#concordance').attr('checked', true);
         $('#concordance')[0].click();
     });

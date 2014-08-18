@@ -1,99 +1,40 @@
 /* Get the footer to stick at the bottom */
-#container {
-    position: relative;
-    min-height: 100%;
-    height: auto !important;
-    height: 100%;
+* {
+    margin: 0;
 }
 #wrapper {
-    padding-bottom: 100px;
+    min-height: 100%;
+    height: 100%;
+    height: auto !important;
+    position:relative;
+    margin: 0 auto -50px;
+}
+.push {
+    height: 80px;
 }
 #footer {
-    bottom: 0 !important;
-    bottom: -1px;
+    bottom: 0;
+    left: 0;
     position: absolute;
     width: 100%;
-    -moz-transition: top 250ms;
-    -webkit-transition: top 250ms;
-    transition: top 250ms;
 }
-/*html, body {
-    margin:0;
-    padding: 0;
+#footer .navbar {
+    margin-bottom: 0px;
+    border: 0px;
+    border-radius: 0px;
+}
+html, body {
     height:100%;
-}*/
+}
 body {
-    /*background-color: #FCFCFC;*/
     font-family: 'Averia Serif Libre', cursive;
-}
-
-/* The following is for the header and footer */
-#header {
-    background-image: url(images/header_pattern.png);
-    background-image: -webkit-linear-gradient(top, #ffdb9e, #ffffff); /* For Chrome and Safari */
-    background-image:    -moz-linear-gradient(top, #ffdb9e, #ffffff); /* For old Fx (3.6 to 15) */
-    background-image:     -ms-linear-gradient(top, #ffdb9e, #ffffff); /* For pre-releases of IE 10*/
-    background-image:      -o-linear-gradient(top, #ffdb9e, #ffffff); /* For old Opera (11.1 to 12.0) */ 
-    background-image:         linear-gradient(to bottom, #ffdb9e, #ffffff); /* Standard syntax; must be last */
-    height: 65px;
-    box-shadow: 0px 8px 15px -5px #C8C8C8;
-}
-#footer {
-    background-image: url(images/footer_pattern.png);
-    background-image: -webkit-linear-gradient(top, #ffffff, #ffdb9e); /* For Chrome and Safari */
-    background-image:    -moz-linear-gradient(top, #ffffff, #ffdb9e); /* For old Fx (3.6 to 15) */
-    background-image:     -ms-linear-gradient(top, #ffffff, #ffdb9e); /* For pre-releases of IE 10*/
-    background-image:      -o-linear-gradient(top, #ffffff, #ffdb9e); /* For old Opera (11.1 to 12.0) */ 
-    background-image:         linear-gradient(to bottom, #ffffff, #ffdb9e); /* Standard syntax; must be last */
-    height: 65px;
-    box-shadow: 0px -8px 15px -5px #C8C8C8;
 }
 #header, #footer {
     z-index: 1000;
 }
-.secondary-links {
-    margin:0;
-    padding-right: 20px;
-    float:right;
-    height: 10px;
-}
-.secondary-links li {
-    display: inline;
-    font-size: 70%;
-}
-#header, #footer {
-  /*min-width: 725px;*/
-}
-#site-name {
-    overflow: hidden;
-    white-space: nowrap;
-    text-align: center;
-    position: absolute;
-    padding-left: 30px;
-    top:15px;
-    font-size: 1.8em;
-    margin: 0 auto;
-}
-#header h1 {
-  font-size: 2.2em;
-  color: #900;
-}
-#header h1 a:hover, #header h1 a:active {
- text-decoration: none; color: #999;
-}
-#philo_branding {
-    float: right;
-    margin-top: -20px;
-    margin-right: -10px;
-}
-.bottom-border {
-    min-height: 20px;
-    padding-top: 30px;
-    padding-right: 30px;
-}
-.footer-nav {
-  font-size: 90%;
-  padding-left: 30px;
+#header .navbar {
+    border: 0px;
+    border-bottom: 0.01em solid black;
 }
 
 /* Fonts */
@@ -101,22 +42,11 @@ body {
     font-weight:300;
     font-size: 14px;
     line-height: 130%;
+    margin-bottom: 20px;
 }
 table {
   font-size:inherit;
   font-weight: inherit;
-}
-
-h1 {
-  margin: 0;
-  padding: 0;
-  color: #555;
-  line-height: 1.2em;
-}
-h5 {
-    font-weight: 700;
-    padding-top: 10px;
-    padding-bottom: 10px;
 }
 ol {
     list-style-type: none;
@@ -194,35 +124,6 @@ ol {
 }
 .table td, .table th {
     text-align: center;
-}
-
-/*Tables*/
-.table_row {
-    height: 50px !important;
-}
-.first_column {
-    width: 175px;
-}
-.second_column {
-    width: 210px;
-}
-.philologic_table {
-    border-collapse:collapse;
-    width:auto;
-}
-.table_header {
-    background-color: #ECECEC;
-    border: solid 1px LightGray;
-}
-.table_column {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    width: 25%;
-    display:table-cell;
-    text-align: center;
-    vertical-align: middle;
-    border: solid 1px LightGray;
-    background-color: #FAFAFA;
 }
 
 /*Pages links*/
@@ -408,7 +309,3 @@ a:hover {
 }
 
 
-#philo-header .navbar {
-    border: 0px;
-    border-bottom: 0.01em solid black;
-}

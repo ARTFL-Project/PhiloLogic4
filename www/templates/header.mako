@@ -58,21 +58,22 @@
 </head>
 <body onunload="">
         <div id="wrapper">
-            <div id="philo-header">
+            <div id="header">
                 <div class="navbar navbar-inverse navbar-static-top" role="navigation">
-                  <div class="container-fluid">
-                    <div class="navbar-header">
-                        <a href="${config.db_url}/" class="navbar-brand" style="font-size: 160%" title="${dbname}">${config.dbname.decode('utf-8', 'ignore')}</a>
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+                            <a href="${config.db_url}/" class="navbar-brand" style="font-size: 160%" title="${dbname}">${config.dbname.decode('utf-8', 'ignore')}</a>
+                        </div>
+                        <div class="navbar-right">
+                            <a href="http://artfl-project.uchicago.edu">The ARTFL Project</a>
+                            <a href="http://www.uchicago.edu">University of Chicago</a>
+                        </div>
                     </div>
-                    <div class="navbar-right">
-                        <a href="http://artfl-project.uchicago.edu">The ARTFL Project</a>
-                        <a href="http://www.uchicago.edu">University of Chicago</a>
-                    </div>
-                  </div>
                 </div>
             </div>
-        <div class="container-fluid">
-    
+            <div id="main_body">
+                <div class="container-fluid">
+        
             <!--    <div class="region-content">-->
             <!--        <ul class="links secondary-links">-->
             <!--            <li class="menu-121 first"><a href="http://humanities.uchicago.edu/orgs/ARTFL/" title="The ARTFL Project">THE ARTFL PROJECT</a></li>-->
@@ -85,4 +86,4 @@
             <!--    </div>-->
             <!--    -->
             <!--</div>-->
-            <div class="main_body">
+            
