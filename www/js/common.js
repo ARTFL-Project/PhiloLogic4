@@ -31,6 +31,8 @@ $(document).ready(function() {
         showHide('concordance');
         $(window).load(function() {
             $('#search_elements').velocity("slideDown",{duration: 400, 'easing': 'easeIn'});
+            // Keep footer at bottom and make sure content doesn't overlap footer
+            setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
         });
     } else {
         showHide($('input[name=report]:checked', '#search').val());
@@ -144,7 +146,26 @@ $(document).ready(function() {
             window.location = "?" + new_q_string.replace(/report=[^&]*/, 'report=error') + "&error_report=" + selected_report;
         }, 10000);
     });
+    
+    
+    
+    // Keep footer at bottom and make sure content doesn't overlap footer
+    //setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
+    $(window).resize(function() {
+        searchFormOverlap(); 
+    });
+    
 });
+
+function searchFormOverlap() {
+    var form_offset = $('#form_body').offset().top + $('#form_body').height();
+    var footer_offset = $('#footer').offset().top;
+    if (form_offset > footer_offset) {
+        $('#footer').css('top', form_offset + 20);
+    } else {
+        $('#footer').css('top', 'auto');
+    }
+}
 
 // Remove metadata criteria on click
 function metadataRemove() {

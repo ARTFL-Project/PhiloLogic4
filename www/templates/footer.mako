@@ -1,7 +1,7 @@
 ## -*- coding: utf-8 -*-
                 </div> <!--container-fluid-->
             </div> <!-- /main_body -->
-            <div class="push"></div>
+            <div id="push"></div>
             <div id="footer">
                 <div class="navbar navbar-inverse">
                     <div class="container-fluid" style="padding-top: 5px">
@@ -10,7 +10,7 @@
                             <a href="http://artfl-project.uchicago.edu/content/contact-us" title="Contact information for the ARTFL Project">contact us</a>                   
                         </div>
                         <div class="navbar-right">
-                                <img src="${config.db_url}/css/images/philo.png" height="45" width="125"/>
+                                <img src="${config.db_url}/css/images/philo.png" height="40" width="110"/>
                         </div>
                     </div>
                 </div>

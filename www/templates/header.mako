@@ -1,9 +1,9 @@
 ## -*- coding: utf-8 -*-
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>${config.dbname.decode('utf-8', 'ignore')}</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
  
     <!--Load the web config and global_report variable to use in the JavaScript code-->

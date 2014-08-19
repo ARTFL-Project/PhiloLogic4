@@ -5,12 +5,12 @@
         <span class='philologic_cite'>${f.biblio_citation(db,config, obj)}</span>
     </div>
     <div class="clearfix" style="position: absolute;left: 0;">
-        <div id="toc-button" class="pull-left">
+        <div id="toc-button" class="pull-left hidden-xs">
             <button class="btn btn-primary btn-sm" id="show-toc" disabled="disabled">Table of contents</button>
         </div>
     </div>
     <div class="row" style="margin-top: 50px">
-        <div id="toc-wrapper" class="col-xs-3 col-sm-4" style="display: none;">
+        <div id="toc-wrapper" class="hidden-xs col-sm-4" style="display: none;">
             <div class="panel panel-default" id="toc-container">
                 <button type="button" class="btn btn-primary btn-xs pull-right" id="hide-toc">
                     <span class="glyphicon glyphicon-remove"></span>
@@ -18,7 +18,7 @@
                 <div id="toc-content"></div>
             </div>
         </div>
-        <div class="col-xs-9 col-xs-offset-2 col-sm-8 col-sm-offset-2" id="center-content">
+        <div class="col-xs-12 col-sm-8 col-sm-offset-2" id="center-content">
             <div class="row">
                 <div class="col-xs-1 nav-btn">
                     <button type="button" class="btn btn-primary" id="prev-obj" data-philo-id="${prev}" style="height: 34px;"> <!--Fix weird height issue-->

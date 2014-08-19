@@ -1,6 +1,6 @@
 ## -*- coding: utf-8 -*-
 <div id='search_overlay'></div>
-<div class="container">
+<div class="container" style="overflow: hidden;">
     <div id="form_body">
         <form id="search" action="${config.db_url + "/dispatcher.py/"}" role="form">
             <div id="initial-form">
