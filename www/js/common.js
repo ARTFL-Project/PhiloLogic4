@@ -12,10 +12,10 @@ $(document).ready(function() {
     //// Search Form related code ////
     //////////////////////////////////
     
-    // Give higher priority to search form over text display
+    // Show search form on click
     $('#show-search-form').click(function() {
         $('#search_elements').css('z-index', 150);
-        $('.book_page').css('z-index', 90);
+        $('.book_page').css('z-index', 90); // Give higher priority to search form over text display
         if ($(this).data('display') == "none") {
             showMoreOptions("all");
             $(this).data('display', 'block');
@@ -27,7 +27,6 @@ $(document).ready(function() {
     
     // If report is the landing page, show the full search form
     if (global_report == "landing_page") {
-        $('#more_options').hide();
         showHide('concordance');
         $(window).load(function() {
             $('#search_elements').velocity("slideDown",{duration: 400, 'easing': 'easeIn'});
@@ -35,6 +34,7 @@ $(document).ready(function() {
             setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
         });
     } else {
+        $('#show-search-form').show();
         showHide($('input[name=report]:checked', '#search').val());
     }
     
@@ -146,8 +146,6 @@ $(document).ready(function() {
             window.location = "?" + new_q_string.replace(/report=[^&]*/, 'report=error') + "&error_report=" + selected_report;
         }, 10000);
     });
-    
-    
     
     // Keep footer at bottom and make sure content doesn't overlap footer
     //setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated

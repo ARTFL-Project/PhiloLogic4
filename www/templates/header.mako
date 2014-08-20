@@ -55,18 +55,4 @@
                 </div>
             </div>
             <div id="main_body">
-                <div class="container-fluid">
-        
-            <!--    <div class="region-content">-->
-            <!--        <ul class="links secondary-links">-->
-            <!--            <li class="menu-121 first"><a href="http://humanities.uchicago.edu/orgs/ARTFL/" title="The ARTFL Project">THE ARTFL PROJECT</a></li>-->
-            <!--            <li class="menu-120"><a href="http://philologic.uchicago.edu/manual.php" title="How to use the PhiloLogic Search Engine">PHILOLOGIC4 USER MANUAL</a></li>-->
-            <!--            <li class="menu-118"><a href="http://www.uchicago.edu/" title="University of Chicago">UNIVERSITY OF CHICAGO</a></li>-->
-            <!--        </ul>             -->
-            <!--    </div>-->
-            <!--    <div id="site-name">-->
-            <!--        <a href="${config.db_url}/" title="${dbname}">${config.dbname.decode('utf-8', 'ignore')}</a>           -->
-            <!--    </div>-->
-            <!--    -->
-            <!--</div>-->
-            
+                <div class="container-fluid">            

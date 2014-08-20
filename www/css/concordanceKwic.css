@@ -95,40 +95,14 @@
 }
 
 /*All the sidebar classes*/
-#sidebar_area {
-    float: right;
-    margin-top: -14px;
-}
-#sidebar_button {
-    position: absolute;
-    right: 0;
-    margin-right: 30px;
-    padding: 0;
-}
-#hide_sidebar {
-    font-family: 'Droid Sans Mono', sans-serif !important;
-    display: none;
-    border-bottom: 0px;
-    margin-right: 0;
-    margin-top: -25px;
-}
-#sidebar_display {
-    margin-top: 38px;
-    width: 400px;
-    transition: opacity 200ms;
-    opacity: 0;
-}
 #sidebar_display #freq_sidebar_status {
 	margin: 0em 0em 0.5em 0em;
 }
 #frequency_container {
-    box-shadow: 0px 0px 3px #A8A8A8;
-    margin: 52px 1px 0px 1px;
-    background-color: #FAFAFA;
     display: none;
 }
 #frequency_table {
-    padding: 5px 5px 5px 5px;
+    padding: 5px;
     line-height: 230%;
     margin-top: 0px;
 }

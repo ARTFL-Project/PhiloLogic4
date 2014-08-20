@@ -37,10 +37,12 @@
                 </label>
             </div>
         </div>
-        <div class="col-sm-3 col-md-3 col-md-offset-1 col-lg-4 col-lg-offset-2" id="right-act-on-report">
+        <div class="col-sm-3 col-md-4 col-lg-4 col-lg-offset-2" id="right-act-on-report">
             <div class="btn-group pull-right">
                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    Display frequency by ${config["metadata"][0].title()}<span class="caret"></span>
+                    Display frequency by
+                    <span id="selected-sidebar-option" data-selected="${config['facets'][0]}">${config["metadata_aliases"][config["facets"][0]].title()}</span>
+                    <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu" id="frequency_field">
                     % for facet in config["facets"]:
@@ -50,18 +52,21 @@
                         else:
                             alias = facet
                         %>
-                        <li><a class="sidebar_option" id="side_opt_${facet}" data-value='${facet}' data-display='${facet}'>Display frequency by ${alias}</a></li>
+                        <li><a class="sidebar-option" id="side_opt_${facet}" data-value='${facet}' data-display='${facet}'>Display frequency by ${alias}</a></li>
                     % endfor
                     % if report != 'bibliography':
                         <li class="divider"></li>
-                        <li><a class="sidebar_option" id="side_opt_collocate" data-value='collocation_report' data-display='collocate'>Display collocates</a></li>
+                        <li><a class="sidebar-option" id="side_opt_collocate" data-value='collocation_report' data-display='collocate'>Display collocates</a></li>
                     % endif
                 </ul>
+                <button type="button" id="hide-sidebar-button" class="btn btn-default" style="display: none";>
+                    <span class="glyphicon glyphicon-remove" style="vertical-align: text-top"></span>
+                </button>
             </div>
         </div>
     </div>
-    <div id="results_container" class="results_container row">
-        <div class="col-xs-12">
+    <div class="row">
+        <div id="results_container" class="col-xs-12">
             <ol id='philologic_concordance' class="panel panel-default">
                 % for i in results[start - 1:end]:
                     <li class='philologic_occurrence panel panel-default'>

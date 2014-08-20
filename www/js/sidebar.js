@@ -7,14 +7,15 @@ $(document).ready(function() {
     // Load slimScroll plugin
     $.getScript(webConfig['db_url'] + '/js/plugins/jquery.slimscroll.min.js');
     
-    $("#select_facet").on("selectmenuselect", function( event, ui ) {
-        console.log(ui.item.value)
-        sidebarReports(q_string, db_url, ui.item.value)
-    } );
-    
-    $("#hide_sidebar").click(function(e) {
-        e.stopPropagation();
-        hide_frequency();
+    $('.sidebar-option').click(function() {
+        var facet = $(this).data('value');
+        var alias = $(this).data('display');
+        $('#selected-sidebar-option').html(webConfig.metadata_aliases[alias]);
+        showSidebar();
+        sidebarReports(q_string, db_url, facet);
+    });
+    $('#hide-sidebar-button').click(function() {
+        hideSidebar();
     });
     
 });
@@ -22,12 +23,12 @@ $(document).ready(function() {
 
 function sidebarReports(q_string, db_url, value) {
     // store the selected field to check whether to kill the ajax calls in populate_sidebar
-    $('#frequency_by').data('selected', value);
+    console.log(value)
+    $('#selected-sidebar-option').data('selected', value);
     
     // Get total results
     var total_results = parseInt($('#total_results').text());
     
-    show_sidebar();
     $('#frequency_table').empty().show();
     if (value != 'collocation_report') {
         var script_call = db_url + "/scripts/get_frequency.py?" + q_string + "&frequency_field=" + value;
@@ -44,7 +45,7 @@ function sidebarReports(q_string, db_url, value) {
         $('.progress-label').text('0%');
         $('#progress_bar').progressbar({value: 0.1});
         $("#progress_bar").show();
-        $('#hide_sidebar').data('interrupt', false)
+        $('#selected-sidebar-option').data('interrupt', false)
         var full_results;
         populate_sidebar(script_call, value, total_results, 0, full_results);
     } else {
@@ -59,28 +60,25 @@ function sidebarReports(q_string, db_url, value) {
         $('#frequency_table').slimScroll({height: container_height});
     }
 }
-function show_sidebar() {
-    if ($('#frequency_container').css('display') == 'none') {
-        $("#results_container, .cite").velocity({
-            "width": "-=410"},
-            150, function() {
-                    $('#frequency_container').height($('#results_container').height() -14 + 'px');
-                    $('#frequency_container').show();
-                    $('#sidebar_display').css('opacity', 1);
-                }
-        );
+function showSidebar() {
+    if ($('#sidebar').css('display') == 'none') {
+        $('#results_container').removeClass('col-xs-12').addClass('col-xs-8');
+        $('#sidebar').show();
+        $('#hide-sidebar-button').show();
     }
 }
-function hide_frequency() {
-    if ($('#frequency_container').css('display') != 'none') {
-        $("#hide_sidebar").hide().data('interrupt', true);;
-        $("#frequency_table").empty().hide();
-        $('#frequency_container').hide();
-        $('#sidebar_display').css('opacity', 0);
-        $("#results_container, .cite").velocity({
-            "width": "+=410"},
-            150);    
-        }
+function hideSidebar() {
+    $('#results_container').removeClass('col-xs-8').addClass('col-xs-12');
+    $('#hide-sidebar-button').hide();
+    $('#sidebar').hide()
+    //$("#hide_sidebar").hide().data('interrupt', true);
+    //$("#frequency_table").empty().hide();
+    //$('#frequency_container').hide();
+    //$('#sidebar_display').css('opacity', 0);
+    //$("#results_container, .cite").velocity({
+    //    "width": "+=410"},
+    //    150);    
+    //}
 }
 
 function mergeResults(full_results, new_data) {
@@ -142,7 +140,7 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
             interval_start = 1000;
         }
         $.getJSON(script_call_interval, function(data) {
-            if ($('#hide_sidebar').data('interrupt') != true && $('#frequency_by').data('selected') == field) {
+            if ($('#selected-sidebar-option').data('interrupt') != true && $('#selected-sidebar-option').data('selected') == field) {
                 if (field != "collocation_report") {
                     var merge = mergeResults(full_results, data);
                 } else {
@@ -162,7 +160,7 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
             } else {
                 // This won't affect the full collocation report which can't be interrupted
                 // when on the page
-                $('#hide_sidebar').data('interrupt', false);
+                $('#selected-sidebar-option').data('interrupt', false);
             }
         });
     } else {
