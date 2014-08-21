@@ -79,7 +79,7 @@ def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
         if q['format'] == "json":
             kwic_results[pos] = (kwic_biblio, text, hit.philo_id)
         else:
-            kwic_biblio_link = '<a href="%s" class="kwic_biblio" style="white-space:pre-wrap;">' % href + kwic_biblio + '</a>: '
+            kwic_biblio_link = '<a href="%s" class="kwic_biblio">' % href + kwic_biblio + '</a>: '
             kwic_results[pos] = kwic_biblio_link + '<span>%s</span>' % text
     return kwic_results
 
@@ -98,7 +98,7 @@ def KWIC_formatter(output, hit_num, chars=40):
     if len(start_output) < chars:
         white_space = ' ' * (chars - len(start_output))
         start_output = white_space + start_output
-    start_output = '<span style="white-space:pre-wrap;">' + start_output + '</span>'
+    start_output = '<span>' + start_output + '</span>'
     end_output = re.sub('[^ ]+\Z', ' ', output[end_hit:], 1)
     match = output[start_hit:end_hit]
     return start_output + match + end_output[:chars+tag_length]

@@ -9,6 +9,7 @@
 .kwic_line {
     padding-top: 1px;
     padding-bottom: 1px;
+	white-space: nowrap;
 }
 .kwic_biblio {
     font-weight:400 !important;
@@ -87,8 +88,6 @@
     padding-left: 4px;
 	display: inline-block;
 }
-
-
 .collocate {
     color:#1E90FF;
     font-weight:400;

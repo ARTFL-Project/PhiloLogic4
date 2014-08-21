@@ -96,9 +96,7 @@ function concordance_kwic_switch(db_url) {
                 var new_url = History.getState().url.replace(/report=kwic/, 'report=concordance');
                 History.pushState(null, '', new_url);
             }
-            $("#report").buttonset("refresh");
             fetchMoreContext();
-            getCitationWidth();
             $('.more').find('a').each(function() {
                 if (switchto.match(/kwic/)) {
                     var new_href = $(this).attr('href').replace('concordance', 'kwic');

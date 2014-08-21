@@ -12,6 +12,7 @@ $(document).ready(function() {
         var alias = $(this).data('display');
         $('#selected-sidebar-option').html(webConfig.metadata_aliases[alias]);
         showSidebar();
+        console.log(q_string, db_url, facet)
         sidebarReports(q_string, db_url, facet);
     });
     $('#hide-sidebar-button').click(function() {
@@ -23,7 +24,6 @@ $(document).ready(function() {
 
 function sidebarReports(q_string, db_url, value) {
     // store the selected field to check whether to kill the ajax calls in populate_sidebar
-    console.log(value)
     $('#selected-sidebar-option').data('selected', value);
     
     // Get total results

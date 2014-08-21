@@ -25,23 +25,25 @@
             % endif
         </div>
     </div>
-    <div class="row" id="act-on-report">
-        <div class="col-xs-12 col-md-6">
+    <div class="row hidden-xs" id="act-on-report">
+        <div class="col-sm-9 col-md-8 col-lg-6">
             <div id="report_switch" class="btn-group" data-toggle="buttons">
-                <label class="btn btn-primary">
-                    <input type="radio" name="report_switch" id="concordance_switch" value="?${q['q_string'].replace('report=kwic', 'report=concordance')}">
+                <label class="btn btn-primary active">
+                    <input type="radio" name="report_switch" id="concordance_switch" value="?${q['q_string'].replace('report=kwic', 'report=concordance')}" checked>
                     View occurences with context
                 </label>
-                <label class="btn btn-primary active">
-                    <input type="radio" name="report_switch" id="kwic_switch" value="?${q['q_string'].replace('report=concordance', 'report=kwic')}" checked=>
+                <label class="btn btn-primary">
+                    <input type="radio" name="report_switch" id="kwic_switch" value="?${q['q_string'].replace('report=concordance', 'report=kwic')}">
                     View occurences line by line (KWIC)
                 </label>
             </div>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-offset-2">
+        <div class="col-sm-3 col-md-4 col-lg-4 col-lg-offset-2" id="right-act-on-report">
             <div class="btn-group pull-right">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    Display frequency by ${config["metadata"][0].title()}<span class="caret"></span>
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    Display frequency by
+                    <span id="selected-sidebar-option" data-selected="${config['facets'][0]}">${config["metadata_aliases"][config["facets"][0]].title()}</span>
+                    <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu" id="frequency_field">
                     % for facet in config["facets"]:
@@ -51,31 +53,37 @@
                         else:
                             alias = facet
                         %>
-                        <li><a class="sidebar_option" id="side_opt_${facet}" data-value='${facet}' data-display='${facet}'>Display frequency by ${alias}</a></li>
+                        <li><a class="sidebar-option" id="side_opt_${facet}" data-value='${facet}' data-display='${facet}'>Display frequency by ${alias}</a></li>
                     % endfor
                     % if report != 'bibliography':
                         <li class="divider"></li>
-                        <li><a class="sidebar_option" id="side_opt_collocate" data-value='collocation_report' data-display='collocate'>Display collocates</a></li>
+                        <li><a class="sidebar-option" id="side_opt_collocate" data-value='collocation_report' data-display='collocate'>Display collocates</a></li>
                     % endif
                 </ul>
+                <button type="button" id="hide-sidebar-button" class="btn btn-primary" style="display: none";>
+                    <span class="glyphicon glyphicon-remove-circle" style="vertical-align: text-top"></span>
+                </button>
             </div>
         </div>
     </div>
-    <div id="results_container" class="results_container">
-        <div id="kwic_concordance">
-            % for i in fetch_kwic(results, path, q, f.link.byte_query, db, start-1, end):
-                <div class="kwic_line">
-                    % if len(str(end)) > len(str(current_pos)):
-                        <% spaces = ' ' * (len(str(end)) - len(str(current_pos))) %>
-                        <span style="white-space:pre-wrap;">${current_pos}.${spaces}</span>
-                    % else:
-                        <span>${current_pos}.</span>    
-                    % endif
-                    ${i}
-                    <% current_pos += 1 %>
-                </div>
-            % endfor
+    <div class="row">
+        <div id="results_container" class="col-xs-12" style="overflow: hidden;">
+            <div id="kwic_concordance" style="display: table-cell;">
+                % for i in fetch_kwic(results, path, q, f.link.byte_query, db, start-1, end):
+                    <div class="kwic_line">
+                        % if len(str(end)) > len(str(current_pos)):
+                            <% spaces = '&nbsp' * (len(str(end)) - len(str(current_pos))) %>
+                            <span>${current_pos}.${spaces}</span>
+                        % else:
+                            <span>${current_pos}.</span>    
+                        % endif
+                        ${i}
+                        <% current_pos += 1 %>
+                    </div>
+                % endfor
+            </div>
         </div>
+        <%include file="show_frequency.mako"/>
     </div>
 <!--    <div id="results-bibliography">
         <span id="show-results-bibliography">Results Bibliography in current page:</span>

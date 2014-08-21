@@ -100,9 +100,6 @@ ol {
     padding: .6em .5em .5em .9em !important;
 }
 
-
-
-
 /* Collocation classes */
 .collocation_counts {
     padding: 5px 10px 10px 10px;
@@ -186,7 +183,6 @@ ol {
     line-height: 200%;
 }
 
-
 /* hack for inserted page links at top of object */
 b p.inserted-page {
   display:inline;
@@ -203,8 +199,6 @@ s {
     border-radius:50%;
     margin-right: 5px;
 }
-
-
 
 #return_to_colloc {
     color: #800000;
