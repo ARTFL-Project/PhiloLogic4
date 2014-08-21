@@ -1,37 +1,26 @@
 #form_body {
-    margin-left: -420px;
     margin-top: -20px;
-    left: 50%;
-    width: 840px;
-    position: absolute;
-    display: none;
+	position: absolute;
+	background: #fff;
+	left: 30px;
+	right: 30px;
     z-index: 90;
-    background-color: white;
-    border-right: solid 1px #ECECEC;
-    border-bottom: solid 1px #ECECEC;
-    border-top: solid 1px #ECECEC;
-    box-shadow: 0px 9px 15px -5px #C8C8C8;
+	box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
     color: #555 !important;
 }
+#initial-form {
+	padding-bottom: 15px;
+}
 #search_elements {
-    margin-top: 10px;
-    padding-left: 30px;
+    padding-left: 20px;
+	padding-bottom: 10px;
     border-top: solid 1px #ECECEC;
     overflow: hidden;
     display: none;
-    opacity: 0;
 }
 .search_box {
     width: 250px;
     vertical-align: middle;
-}
-#report {
-    width: auto;
-    max-width: 960px;
-    margin-top: 10px;
-    overflow: hidden;
-    white-space: nowrap;
-    margin-right: 0px;
 }
 #search_field {
     font-weight: 400;
@@ -62,7 +51,6 @@
     display: none;
 	font-weight: 300;
 }
-
 #syntax_title {
     font-size: 90%;
 }
@@ -100,4 +88,69 @@
     width: 100%;
     height: 0px;
     z-index: 90;
+}
+#metadata_fields {
+	margin-top: 10px;
+}
+#metadata_fields .row, #time_series_num.row, #date_range.row, #results_per_page.row {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+#initial-form .btn-primary.active {
+	box-shadow: 0px 0px;
+	border-top: 0px;
+}
+#tip-text {
+	display: none;
+}
+#tip-btn:hover #tip-text {
+	display: inline;
+}
+#tip-btn:hover #tip {
+	display: none;
+}
+
+/*Responsiveness*/
+@media (min-width: 1201px) {
+	#form_body {
+		left: 100px;
+		right: 100px;
+	}
+}
+@media (max-width: 1200px) {
+	#form_body {
+		left: 70px;
+		right: 70px;
+	}
+}
+@media (max-width: 992px) {
+	#search-buttons {
+		padding-top: 15px;
+	}
+	#search_terms > div:nth-of-type(2) {
+		padding-right: 20px;
+		padding-left: 20px;
+	}
+	#form_body {
+		left: 40px;
+		right: 40px;
+	}
+	#philologic_response {
+		margin-top: 130px;
+	}
+}
+@media (max-width: 768px) {
+	#right-act-on-report .btn-group {
+		float:left !important;
+	}
+	#search_elements {
+		padding-right: 20px;
+	}
+	#philologic_response {
+		margin-top: 160px;
+	}
+	#form_body {
+		left: 30px;
+		right: 30px;
+	}
 }

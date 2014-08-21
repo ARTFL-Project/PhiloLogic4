@@ -553,7 +553,6 @@ def setup_db_dir(db_destination, template_dir):
         os.system("chmod -R 777 %s/templates" % db_destination)
         os.system("mkdir -p %s/templates/compiled_templates" % db_destination)
         os.system("chmod -R 777 %s/templates/compiled_templates" % db_destination)
-        os.system("chmod g+s %s/templates/compiled_templates" % db_destination)
         os.system("mkdir -p %s/data/log" % db_destination)
         os.system("chmod -R 777 %s/data/log" % db_destination)
         os.system("touch %s/data/log/error.log" % db_destination)

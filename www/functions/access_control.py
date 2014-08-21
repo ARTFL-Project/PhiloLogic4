@@ -12,12 +12,25 @@ def access_control(environ,start_response):
     if "open_access" in db.locals:  ## failsafe in case the variable is not db.locals.py
         if db.locals['open_access']:
             return True
+        elif check_previous_session(environ):
+            return True
         else:
             access_value = check_access(db, environ)
             return access_value
     else:
         return True
 
+def check_previous_session(environ):
+    if os.path.isfile("/tmp/philo4_access"):
+        tmp_file = open("/tmp/philo4_access")
+        previous_session = False
+        for line in tmp_file:
+            ip = line.strip()
+            if ip == environ["REMOTE_ADDR"]:
+                previous_session = True
+        return previous_session
+    else:
+        return False
     
 def check_access(db, environ):
     access = {}

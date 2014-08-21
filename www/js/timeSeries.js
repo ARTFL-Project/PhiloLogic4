@@ -2,12 +2,7 @@ $(document).ready(function() {
     
     var db_url = webConfig['db_url'];
     
-    //jQueryUI theming
-    $('#time_series_buttons').buttonset();
-    
     if (sessionStorage[window.location.href] == null) {
-        // Make relative frequency unclickable until full results are in
-        $("label[for='relative_time']").css({'pointer-events': "none", "color": "#D8D8D8"});
         
         // Calculate width and height of chart
         var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 200;
@@ -59,13 +54,12 @@ $(document).ready(function() {
             $('#test_time_series').css('height', height);
             $('#test_time_series').fadeOut('fast', function() {
                 $(this).show();
-                var frequency = $('input[name="freq_type"]:checked').attr('id');
+                var frequency = $('#time_series_buttons label.active').attr('id');
                 data = eval($('#' + frequency).data('value'));
                 drawFromData(data, interval);
             });
         }, 500, $('#test_time_series').attr('id'));
     });
-    
 });
 
 function normalizeDate(year, interval) {
@@ -132,7 +126,7 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         $('#absolute_time').data('value', JSON.stringify(abs_results));
         
         // Generate relative frequencies from absolute frequencies and make button clickable again
-        $("label[for='relative_time']").animate({"color": "#555"}).css('pointer-events', "auto");
+        $("#relative_time").removeAttr("disabled");
         relative_results = relativeCount(abs_results, full_date_counts);
         $('#relative_time').data('value', JSON.stringify(relative_results))
         
@@ -226,7 +220,6 @@ function yearToTimeSpan(year, interval) {
             year = year.slice(0,-2) + '50' + '-' + year.slice(0,-2) + '99';
         }
     }
-    console.log(year)
     return year
 }
 

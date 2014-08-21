@@ -29,33 +29,30 @@ def get_table_of_contents(environ, start_response):
         for philo_id, philo_type, head in results:
             link_id = philo_id.replace(' ', '_')
             href = f.link.make_absolute_object_link(config, philo_id.split()[:7])
-            html += "<span>"
-            style = ""
+            if philo_type == "div1":
+                html += '<div class="toc-div1">'
             if philo_type == "div2":
-                space = '&nbsp&nbsp&nbsp'
+                html += '<div class="toc-div2">'
             elif philo_type == "div3":
-                space = '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'
-            else:
-                space = ''
-            html += space + '<a href="%s" id="%s" style="text-decoration: none;">%s</a></span><br>' % (href, link_id, head)
-        yield json.dumps(html)
+                html += '<div class="toc-div3">'
+            html += '<a href="%s" id="%s" style="text-decoration: none;">%s</a></div>' % (href, link_id, head or philo_type.upper())
+        wrapper = json.dumps({'toc': html, 'citation': f.cite.make_abs_doc_cite_biblio_mobile(db, obj)})
+        yield wrapper
     else:
-        div1_markup = '<span class="ui-icon ui-icon-bullet" style="float:left;position:relative;top: 3px;"></span>'
-        div2_markup = '<span class="ui-icon ui-icon-radio-on" style="float:left;position:relative;top:3px;margin-left: 1em;"></span>'
-        div3_markup = '<span class="ui-icon ui-icon-radio-off" style="float:left;top:3px;position:relative;margin-left: 2em;"></span>'
-        html = ['<div id="table_of_contents" class="table_of_contents">']
+        div1_markup = '<div class="toc-div1"><span class="bullet-point-div1"></span>'
+        div2_markup = '<div class="toc-div2"><span class="bullet-point-div2"></span>'
+        div3_markup = '<div class="toc-div3"><span class="bullet-point-div3"></span>'
+        html = ['']
         for philo_id, philo_type, head in results:
             link_id = philo_id.replace(' ', '_')
             href = f.link.make_absolute_object_link(config, philo_id.split()[:7])
-            html.append('<span class="toc_link">')
             if philo_type == "div2":
                 space = div2_markup
             elif philo_type == "div3":
                 space = div3_markup
             else:
                 space = div1_markup
-            html.append(space + '<a href="%s" id="%s">%s</a></span>' % (href, link_id, head))
-        html.append("</div>")
+            html.append(space + '<a href="%s" id="%s">%s</a></div>' % (href, link_id, head or philo_type.upper()))
         html = ''.join(html)
         yield html.encode('utf-8', 'ignore')
     

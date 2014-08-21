@@ -21,8 +21,14 @@ def concordance(environ,start_response):
     if q['format'] == "json":
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
-        formatted_results = [{"citation": f.concordance_citation(db,config, i),
-                              "text": fetch_concordance(i, path, config.concordance_length)} for i in hits[start - 1:end]]
+        formatted_results = []
+        for i in hits[start-1:end]:
+            text = fetch_concordance(i, path, config.concordance_length)
+            full_metadata = {}
+            for metadata in config.metadata:
+                full_metadata[metadata] = i[metadata]
+            result = {"citation": f.cite.make_abs_doc_cite_mobile(db,i), "shrtcit": f.cite.make_abs_doc_shrtcit_mobile(db,i), "text": text, "hit_count": len(hits), "philo_id": i.philo_id, "start":start}
+            formatted_results.append(result)
         return json.dumps(formatted_results)
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)

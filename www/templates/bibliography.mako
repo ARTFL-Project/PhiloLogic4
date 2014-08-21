@@ -1,6 +1,6 @@
 <%include file="header.mako"/>
 <%include file="search_form.mako"/>
-<div id='philologic_response'>
+<div class="container-fluid" id='philologic_response'>
     <div id='initial_report'>
         <div id='description'>
         <%
@@ -16,11 +16,35 @@
         </div>
         <%include file="show_frequency.mako"/>
     </div>
-    <div class="results_container" id="results_container">
-        <div id='bibliographic_results'>
-            <ol id='philologic_cite_list'>
+    <div class="row" id="act-on-report">
+        <div class="col-xs-12">
+            <div class="btn-group pull-right">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    Display frequency by ${config["metadata"][0].title()}<span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu" id="frequency_field">
+                    % for facet in config["facets"]:
+                        <%
+                        if facet in config["metadata_aliases"]:
+                            alias = config["metadata_aliases"][facet]
+                        else:
+                            alias = facet
+                        %>
+                        <li><a class="sidebar_option" id="side_opt_${facet}" data-value='${facet}' data-display='${facet}'>Display frequency by ${alias}</a></li>
+                    % endfor
+                    % if report != 'bibliography':
+                        <li class="divider"></li>
+                        <li><a class="sidebar_option" id="side_opt_collocate" data-value='collocation_report' data-display='collocate'>Display collocates</a></li>
+                    % endif
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="results_container row" id="results_container">
+        <div id='bibliographic-results' class="col-xs-12">
+            <ol class="panel panel-default">
                 % for i in results[start-1:end]:
-                    <li class='philologic_occurrence' style="padding-top: 10px; padding-bottom: 10px;">
+                    <li class='biblio-occurrence panel panel-default'>
                         <%
                         n += 1
                         %>
