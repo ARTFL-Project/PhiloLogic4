@@ -19,9 +19,11 @@ $(document).ready(function() {
         if ($(this).data('display') == "none") {
             showMoreOptions("all");
             $(this).data('display', 'block');
+            $('#show-search-form').html('Hide search options');
         } else {
             hideSearchForm();
             $(this).data('display', 'none');
+            $('#show-search-form').html('Show search options');
         }
     });
     
@@ -86,9 +88,22 @@ $(document).ready(function() {
                 $('#report label').removeClass('active');
                 $('#' + value).attr('checked', 'checked');
                 $('#' + value).parent().addClass('active');
+            } else if (key == "method") {
+                $('#method-buttons input').removeAttr('checked');
+                $('#method-buttons label').removeClass('active');
+                $('#method-buttons input[name=method][value=' + value + ']').attr('checked', 'checked');
+                $('#method-buttons input[name=method][value=' + value + ']').parent().addClass('active');
+            } else if (key =='pagenum') {
+                $('#page_num input').removeAttr('checked');
+                $('#page_num label').removeClass('active');
+                $('#page_num input[name=pagenum][value=' + value + ']').attr('checked', 'checked');
+                $('#page_num input[name=pagenum][value=' + value + ']').parent().addClass('active');
             }
-            else if (key == 'pagenum' || key == 'method' || key == 'year_interval') {
-                $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
+            else if (key == 'year_interval') {
+                $('#year_interval input').removeAttr('checked');
+                $('#year_interval label').removeClass('active');
+                $('#year_interval input[name=year_interval][value=' + value + ']').attr('checked', 'checked');
+                $('#year_interval input[name=year_interval][value=' + value + ']').parent().addClass('active');
             }
             else if (key == 'field') {
                 $('select[name=' + key + ']').val(value);
@@ -100,31 +115,30 @@ $(document).ready(function() {
     }
     
     //  Clear search form
-    $("#reset_form, #reset_form1").click(function() {
-        $("#method").find("input:radio").attr("checked", false).end();
-        $("#method1").attr('checked', true);
-        //$("#method").buttonset('refresh');
-        $("#page_num").find("input:radio").attr("checked", false).end();
-        $("#pagenum1").attr('checked', true);
-        //$("#page_num").buttonset('refresh');
-        $('#search')[0].reset();
-        $("#search_elements").velocity('fadeIn');
-        $("#reset_form1").css('color', '#555555 !important');
-        $("#report input:radio").attr("checked", false).end();
-        $('#concordance').attr('checked', true);
-        $('#concordance')[0].click();
+    $("#reset_form").click(function() {
+        $('#form_body input').removeAttr('checked');
+        $('#form_body .btn').removeClass('active');
+        $('#report input:first, #method-buttons input:first, #page_num input:first, #year_interval input:first').attr('checked', 'checked');
+        $('#report input:first, #method-buttons input:first, #page_num input:first, #year_interval input:first').parent().addClass('active');
+        showHide($('#report input:first').attr('id'));
     });
     
     //  This is to select the right option when clicking on the input box  
     $("#arg_proxy").focus(function() {
         $("#arg_phrase").val('');
-        $("#method1").attr('checked', true).button("refresh");
+        $('#method-buttons input').removeAttr('checked');
+        $('#method-buttons label').removeClass('active');
+        $('#method-buttons input[name=method][value=proxy]').attr('checked', 'checked');
+        $('#method-buttons input[name=method][value=proxy]').parent().addClass('active');
     });
     $("#arg_phrase").focus(function() {
         $("#arg_proxy").val('');
-        $("#method2").attr('checked', true).button("refresh");
+        $('#method-buttons input').removeAttr('checked');
+        $('#method-buttons label').removeClass('active');
+        $('#method-buttons input[name=method][value=phrase]').attr('checked', 'checked');
+        $('#method-buttons input[name=method][value=phrase]').parent().addClass('active');
     });
-    $('#method3').click(function() {
+    $('#method3').parent().click(function() {
         $("#arg_proxy, #arg_phrase").val('');
     });
     
@@ -276,7 +290,6 @@ function showHide(value) {
 function showMoreOptions(display) {
     if (display == "all") {
         var report = $('#report label.active input').attr('id');
-        console.log(report)
         showHide(report);
         $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
     }
@@ -339,6 +352,21 @@ function colloc_linker(word, q_string, direction, num) {
     q_string += '&collocate_num=' + num;
     return q_string
 }
+
+// Delay function calls in repeated actions:
+// used in Time Series to redraw chart after resize
+var waitForFinalEvent = (function () {
+  var timers = {};
+  return function (callback, ms, uniqueId) {
+    if (!uniqueId) {
+      uniqueId = "Don't call this twice without a uniqueId";
+    }
+    if (timers[uniqueId]) {
+      clearTimeout (timers[uniqueId]);
+    }
+    timers[uniqueId] = setTimeout(callback, ms);
+  };
+})();
 
 // Custom HTML replace function for text objects since jQuery's html is too slow:
 // See here: https://groups.google.com/forum/#!msg/jquery-en/RG_dJD8DlSc/R4pDTgtzU4MJ

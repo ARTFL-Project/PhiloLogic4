@@ -52,7 +52,7 @@
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
                             <!--<input id="button1" type='submit' class="btn btn-primary" value="Search"/>-->
-                            <button type="reset" id="reset_form1" class="btn btn-danger">Clear form</button>
+                            <button type="reset" id="reset_form" class="btn btn-danger">Clear form</button>
                             <button type="button" id="show-search-form" class="btn btn-danger" data-display="none" style="display: none">Show search options</button>
                         </div>
                     </div>
@@ -66,7 +66,7 @@
                     <div class="col-xs-12 col-sm-2">
                         Search Terms
                     </div>
-                    <div class="col-xs-12 col-sm-3 col-lg-2">
+                    <div class="col-xs-12 col-sm-3 col-lg-2" id="method-buttons">
                         <div class="btn-group-vertical" data-toggle="buttons">
                             <label class="btn btn-primary active">
                                 <input type="radio" name="method" id="method1" value='proxy' checked="checked">
@@ -83,9 +83,9 @@
                         </div>
                     </div>
                     <div class="col-xs-12 col-sm-7 col-lg-8">
-                        <input type='text' name='arg_proxy' id='arg_proxy' class="form-control" style="width:30px; text-align: center;">
+                        <input type='text' name='arg_proxy' id='arg_proxy' class="form-control" style="width:40px; text-align: center;">
                         <span style="padding-left: 10px">words in the same sentence</span><br>  
-                        <input type='text' name='arg_phrase' id='arg_phrase' class="form-control" style="width:30px; text-align: center;">
+                        <input type='text' name='arg_phrase' id='arg_phrase' class="form-control" style="width:40px; text-align: center;">
                         <span style="padding-left: 10px">words in the same sentence</span>
                     </div>
                 </div>

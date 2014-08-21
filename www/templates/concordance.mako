@@ -39,7 +39,7 @@
         </div>
         <div class="col-sm-3 col-md-4 col-lg-4 col-lg-offset-2" id="right-act-on-report">
             <div class="btn-group pull-right">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                     Display frequency by
                     <span id="selected-sidebar-option" data-selected="${config['facets'][0]}">${config["metadata_aliases"][config["facets"][0]].title()}</span>
                     <span class="caret"></span>
@@ -59,8 +59,8 @@
                         <li><a class="sidebar-option" id="side_opt_collocate" data-value='collocation_report' data-display='collocate'>Display collocates</a></li>
                     % endif
                 </ul>
-                <button type="button" id="hide-sidebar-button" class="btn btn-default" style="display: none";>
-                    <span class="glyphicon glyphicon-remove" style="vertical-align: text-top"></span>
+                <button type="button" id="hide-sidebar-button" class="btn btn-primary" style="display: none";>
+                    <span class="glyphicon glyphicon-remove-circle" style="vertical-align: text-top"></span>
                 </button>
             </div>
         </div>
@@ -79,7 +79,7 @@
                                <span class="cite" data-id="${' '.join(str(s) for s in i.philo_id)}">
                                    ${n}.&nbsp ${f.concordance_citation(db, config, i)}
                                </span>
-                               <button class="btn btn-default more_context" disabled="disabled" data-context="short">
+                               <button class="btn btn-primary more_context" disabled="disabled" data-context="short">
                                    More
                                </button>
                            </div>

@@ -19,11 +19,15 @@
             <div id="progress_bar" style="margin-top:-5px;margin-bottom: 10px" data-total='${total}'>
                 <div class="progress-label"></div>
             </div>
-            <div id="time_series_buttons">
-                <input type="radio" name="freq_type" id="absolute_time" data-value='${frequencies}' data-interval="${q['year_interval']}" checked="checked">
-                <label for="absolute_time">Absolute Frequency</label>
-                <input type="radio" name="freq_type" id="relative_time" data-datecount='${date_counts}' data-interval="${q['year_interval']}">
-                <label for="relative_time">Relative Frequency</label>
+            <div id="time_series_buttons" class="btn-group" data-toggle="buttons">
+                <label class="btn btn-primary active" id="absolute_time" data-value='${frequencies}' data-interval="${q['year_interval']}" checked="checked">
+                    <input type="radio" name="freq_type" >
+                    Absolute Frequency
+                </label>
+                <label class="btn btn-primary" disabled="disabled" id="relative_time" data-datecount='${date_counts}' data-interval="${q['year_interval']}">
+                    <input type="radio" name="freq_type">
+                    Relative Frequency
+                </label>
             </div>
         </div>
     </div>

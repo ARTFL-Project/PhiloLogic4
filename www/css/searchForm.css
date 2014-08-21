@@ -150,4 +150,8 @@
 	#philologic_response {
 		margin-top: 160px;
 	}
+	#form_body {
+		left: 30px;
+		right: 30px;
+	}
 }

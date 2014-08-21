@@ -298,6 +298,9 @@ a {
 a:hover {
     color: #4180ab !important;
 }
+a.sidebar-option:hover {
+    cursor: pointer;
+}
 /*Metadata criteria in results*/
 .biblio-criteria {
     padding: 2px;
