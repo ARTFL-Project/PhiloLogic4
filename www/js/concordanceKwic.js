@@ -1,9 +1,5 @@
 $(document).ready(function() {
     
-    // jQueryUI theming
-    $("#report_switch").buttonset();
-    $('#page_links').find('a').each(function(){$(this).button()});
-    
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var db_url = webConfig['db_url'];
     var q_string = window.location.search.substr(1);
@@ -18,10 +14,6 @@ $(document).ready(function() {
         $(".kwic_biblio").hoverIntent(config);
     }
     
-    getCitationWidth();
-    $(window).resize(function() {
-        getCitationWidth();
-    });
     $(window).load(function() {
          // Get the total results when available
         if ($('#incomplete').text() != '.') {
@@ -40,7 +32,6 @@ $(document).ready(function() {
     // Fetch more context for concordances after page load
     $(window).load(function() {
         fetchMoreContext();
-        //fetchresultsBibliography(pathname);
     });
     
 });
@@ -105,9 +96,7 @@ function concordance_kwic_switch(db_url) {
                 var new_url = History.getState().url.replace(/report=kwic/, 'report=concordance');
                 History.pushState(null, '', new_url);
             }
-            $("#report").buttonset("refresh");
             fetchMoreContext();
-            getCitationWidth();
             $('.more').find('a').each(function() {
                 if (switchto.match(/kwic/)) {
                     var new_href = $(this).attr('href').replace('concordance', 'kwic');

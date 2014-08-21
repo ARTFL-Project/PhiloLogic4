@@ -54,7 +54,7 @@ def format(text,bytes=[]):
                 el.tag = "b"
                 el.attrib["class"] = "headword"
                 el.append(etree.Element("br"))
-            elif el.tag == "ab":
+            elif el.tag == "ab" or el.tag == "ln":
                 el.tag = "l"
             elif el.tag == "pb" and "fac" in el.attrib and "n" in el.attrib:
                 el.tag = "p"
@@ -115,12 +115,12 @@ def format_concordance(text,bytes=[]):
         text = new_text + text[last_offset:]
     xml = FragmentParser.parse(text)
     length = 0
-    allowed_tags = set(['philoHighlight', 'l', 'ab', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx', 'br'])
+    allowed_tags = set(['philoHighlight', 'l', 'ab', 'ln', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx', 'br'])
     text = u''
     for el in xml.iter():
         if el.tag not in allowed_tags:
             el.tag = 'span'
-        elif el.tag == "ab":
+        elif el.tag == "ab" or el.tag == "ln":
             el.tag = "l"
         if "id" in el.attrib:  ## kill ids in order to avoid the risk of having duplicate ids in the HTML
             del el.attrib["id"]

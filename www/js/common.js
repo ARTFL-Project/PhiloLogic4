@@ -12,104 +12,37 @@ $(document).ready(function() {
     //// Search Form related code ////
     //////////////////////////////////
     
-    // Check if on a mobile device
-    if (global_report == "landing_page" && isMobile()) {
-        if (sessionStorage[window.location.href] == null) {
-            var mobile_choice = '<div id="mobile_choice"><div style="margin-bottom:1em">Do you want to use the mobile version of PhiloLogic4?</div></div>';
-            $('body').append(mobile_choice);
-            $("#mobile_choice").dialog({
-                position: { my: "center", at: "top+250", of: window },
-                title: "PhiloLogic4 alert",
-                resizable: false,
-                height:170,
-                width: 430,
-                modal: true,
-                buttons: {
-                  "Use mobile version": function() {
-                    sessionStorage[window.location.href] = "mobile";
-                    $('body').fadeOut(function() {
-                        window.location = 'mobile/philologic.html';
-                    });
-                  },
-                  "Use desktop version": function() {
-                    sessionStorage[window.location.href] = "desktop";
-                    $(this).dialog("close");
-                  }
-                }
-            });
-        } else if (sessionStorage[window.location.href] == 'mobile') {
-            $('body').fadeOut(function() {
-                window.location = 'mobile/philologic.html';
-            });
-        }
-    }
-    
-    ////// jQueryUI theming //////
-    $("#button, #button1, #reset_form, #reset_form1, #hide_search_form, #more_options, .more_context").button();
-    $('#button2, #search_explain').button();
-    $("#report, #page_num, #field, #method, #year_interval").buttonset();
-    $("#word_num").spinner({
-        spin: function(event, ui) {
-                if ( ui.value > 10 ) {
-                    $(this).spinner( "value", 1 );
-                    return false;
-                } else if ( ui.value < 1 ) {
-                    $(this).spinner( "value", 10 );
-                    return false;
-                }
-            }
-    });
-    $("#word_num").val(5);
-    $("#show_search_form").tooltip({ position: { my: "left+10 center", at: "right" } });
-    $(".tooltip_link").tooltip({ position: { my: "left top+5", at: "left bottom", collision: "flipfit" } }, { track: true });
-    
-    $('.ui-spinner').css('width', '45px')
-    $(':text').addClass("ui-corner-all");
-    ////////////////////////////////////////
-    
-    // Display report tabs according to web_config.cfg
-    for (i in webConfig['search_reports']) {
-        var search_report = '#' + webConfig['search_reports'][i] + '_button';
-        $(search_report).show();
-    }
-    
-    // Give higher priority to search form over text display
-    // TODO: remove this
-    $('#more_options').click(function() {
+    // Show search form on click
+    $('#show-search-form').click(function() {
         $('#search_elements').css('z-index', 150);
-        $('.book_page').css('z-index', 90);
-        if ($(this).text() == "Show search options") {
+        $('.book_page').css('z-index', 90); // Give higher priority to search form over text display
+        if ($(this).data('display') == "none") {
             showMoreOptions("all");
+            $(this).data('display', 'block');
+            $('#show-search-form').html('Hide search options');
         } else {
             hideSearchForm();
+            $(this).data('display', 'none');
+            $('#show-search-form').html('Show search options');
         }
     });
-    
-    // Show search form by default
-    $('#form_body').show();
     
     // If report is the landing page, show the full search form
     if (global_report == "landing_page") {
-        $('#more_options').hide();
         showHide('concordance');
         $(window).load(function() {
-            $('#search_elements')
-                .velocity("slideDown",
-                           {duration: 400, 'easing': 'easeIn'}
-                           )
-                .velocity("fadeIn",
-                           {queue: false, duration: 400, 'easing': 'easeIn'}
-                           );
-            setTimeout(searchFormOverlap, 400);
+            $('#search_elements').velocity("slideDown",{duration: 400, 'easing': 'easeIn'});
+            // Keep footer at bottom and make sure content doesn't overlap footer
+            setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
         });
     } else {
-        $('#initial_form').css({'max-height': '94px', 'opacity': 100});
+        $('#show-search-form').show();
         showHide($('input[name=report]:checked', '#search').val());
     }
     
     // Handler for clicks on report tabs
-    $('#report').find('label').click(function() {
-        var report = $(this).attr('for');
+    $('#report label').click(function() {
+        var report = $(this).find('input').attr('id');
         if ($("#search_elements").css('display') != 'none') {
             showHide(report);
             if (report != "frequencies") {
@@ -123,12 +56,7 @@ $(document).ready(function() {
             showHide(report);
             if (report != "frequencies") {
                 $("#search_elements")
-                .velocity("slideDown",
-                           {duration: 250, 'easing': 'easeIn'}
-                           )
-                .velocity("fadeIn",
-                           {queue: false, duration: 250, 'easing': 'easeIn'}
-                           );
+                .velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
             }
             showMoreOptions();
         }
@@ -156,12 +84,26 @@ $(document).ready(function() {
         var key = key_value[0]
         if (value) {
             if (key == 'report') {
-                $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
-                $("#report").buttonset("refresh");
+                $('#report input').removeAttr('checked');
+                $('#report label').removeClass('active');
+                $('#' + value).attr('checked', 'checked');
+                $('#' + value).parent().addClass('active');
+            } else if (key == "method") {
+                $('#method-buttons input').removeAttr('checked');
+                $('#method-buttons label').removeClass('active');
+                $('#method-buttons input[name=method][value=' + value + ']').attr('checked', 'checked');
+                $('#method-buttons input[name=method][value=' + value + ']').parent().addClass('active');
+            } else if (key =='pagenum') {
+                $('#page_num input').removeAttr('checked');
+                $('#page_num label').removeClass('active');
+                $('#page_num input[name=pagenum][value=' + value + ']').attr('checked', 'checked');
+                $('#page_num input[name=pagenum][value=' + value + ']').parent().addClass('active');
             }
-            else if (key == 'pagenum' || key == 'method' || key == 'year_interval') {
-                $('input[name=' + key + '][value=' + value + ']').attr("checked", true);
-                $('input[name=' + key + '][value=' + value + ']').button('refresh');
+            else if (key == 'year_interval') {
+                $('#year_interval input').removeAttr('checked');
+                $('#year_interval label').removeClass('active');
+                $('#year_interval input[name=year_interval][value=' + value + ']').attr('checked', 'checked');
+                $('#year_interval input[name=year_interval][value=' + value + ']').parent().addClass('active');
             }
             else if (key == 'field') {
                 $('select[name=' + key + ']').val(value);
@@ -173,83 +115,34 @@ $(document).ready(function() {
     }
     
     //  Clear search form
-    $("#reset_form, #reset_form1").click(function() {
-        $("#method").find("input:radio").attr("checked", false).end();
-        $("#method1").attr('checked', true);
-        $("#method").buttonset('refresh');
-        $("#page_num").find("input:radio").attr("checked", false).end();
-        $("#pagenum1").attr('checked', true);
-        $("#page_num").buttonset('refresh');
-        $('#search')[0].reset();
-        $("#search_elements").velocity('fadeIn');
-        $("#reset_form1").css('color', '#555555 !important');
-        $("#report").find("input:radio").attr("checked", false).end();
-        $('#concordance').attr('checked', true);
-        $('#concordance')[0].click();
+    $("#reset_form").click(function() {
+        $('#form_body input').removeAttr('checked');
+        $('#form_body .btn').removeClass('active');
+        $('#report input:first, #method-buttons input:first, #page_num input:first, #year_interval input:first').attr('checked', 'checked');
+        $('#report input:first, #method-buttons input:first, #page_num input:first, #year_interval input:first').parent().addClass('active');
+        showHide($('#report input:first').attr('id'));
     });
     
     //  This is to select the right option when clicking on the input box  
     $("#arg_proxy").focus(function() {
         $("#arg_phrase").val('');
-        $("#method1").attr('checked', true).button("refresh");
+        $('#method-buttons input').removeAttr('checked');
+        $('#method-buttons label').removeClass('active');
+        $('#method-buttons input[name=method][value=proxy]').attr('checked', 'checked');
+        $('#method-buttons input[name=method][value=proxy]').parent().addClass('active');
     });
     $("#arg_phrase").focus(function() {
         $("#arg_proxy").val('');
-        $("#method2").attr('checked', true).button("refresh");
+        $('#method-buttons input').removeAttr('checked');
+        $('#method-buttons label').removeClass('active');
+        $('#method-buttons input[name=method][value=phrase]').attr('checked', 'checked');
+        $('#method-buttons input[name=method][value=phrase]').parent().addClass('active');
     });
-    $('#method3').click(function() {
+    $('#method3').parent().click(function() {
         $("#arg_proxy, #arg_phrase").val('');
     });
     
-    $('#syntax').offset({"left":  $('#q').offset().left});
-    
-    
-    $('#syntax_title').mouseup(function() {
-        if ($('#syntax_explain').not(':visible')) {
-            $('#syntax_explain').fadeIn('fast');
-        }
-        $(document).mousedown(function() {
-            $('#syntax_explain').fadeOut('fast');
-        });
-    });
-    
-//    Check if the search form has any input has been prefilled
-    $('input:text').each(function(){
-        if ($(this).val().length) {
-            if ($(this).attr('id') != 'word_num') {
-                $('#reset_form1').find('.ui-button-text').blink()
-                return false;
-            }
-        }
-    });
-    
-    /// Make sure search form doesn't cover footer
-    $(window).resize(function() {
-        searchFormOverlap();
-    });
-    
-    adjustReportWidth();
-    adjustBottomBorder();
-    
     metadataRemove();
-    
-    // Display help menu on click
-    $('#search_explain').click(function(e) {
-        e.preventDefault();
-        $('div[id^="explain"]').hide();
-        var report = $("#report").find('input:checked').attr('id');
-        $("#explain_" + report).show();
-        var title = $("#explain_" + report).data('title');
-        $('#search_explain_content').show().dialog({
-            position: { my: "center", at: "top+300", of: window },
-            //title: title,
-            draggable: false,
-            resizable: false,
-            height:"auto",
-            width: 400,
-            modal: true,
-        });
-    });
     
     // Add spinner to indicate that a query is running in the background
     // and close autocomplete
@@ -267,7 +160,24 @@ $(document).ready(function() {
             window.location = "?" + new_q_string.replace(/report=[^&]*/, 'report=error') + "&error_report=" + selected_report;
         }, 10000);
     });
+    
+    // Keep footer at bottom and make sure content doesn't overlap footer
+    //setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
+    $(window).resize(function() {
+        searchFormOverlap(); 
+    });
+    
 });
+
+function searchFormOverlap() {
+    var form_offset = $('#form_body').offset().top + $('#form_body').height();
+    var footer_offset = $('#footer').offset().top;
+    if (form_offset > footer_offset) {
+        $('#footer').css('top', form_offset + 20);
+    } else {
+        $('#footer').css('top', 'auto');
+    }
+}
 
 // Remove metadata criteria on click
 function metadataRemove() {
@@ -291,45 +201,6 @@ function metadataRemove() {
     }
 }
 
-function isMobile() {
-  var index = navigator.appVersion.indexOf("Mobile");
-  return (index > -1);
-}
-
-function searchFormOverlap() {
-    var form_offset = $('#form_body').offset().top + $('#form_body').height();
-    var footer_offset = $('#footer').offset().top;
-    if (form_offset > footer_offset) {
-        $('#footer').css('top', form_offset + 20);
-    } else {
-        $('#footer').css('top', 'auto');
-    }
-}
-
-//    Adjust width of report buttons
-function adjustReportWidth() {
-    var button_length = 0;
-    var report_num = 0
-    $("#report").find('label').first().css('border-left', '0px');
-    $("#report").find('label').each(function() {
-        if ($(this).is(':visible')) {
-            button_length += $(this).width();
-            report_num += 1;
-            $(this).css({'border-top': '0px'});
-        }
-    });
-    length_to_add = ($("#report").width() - button_length) / report_num;
-    $('#report').find("label").each(function() {$(this).css("width", "+=" + (length_to_add));});
-}
-function adjustBottomBorder() {
-    $('#report').find('label').each(function() {
-        if ($(this).hasClass('ui-state-active')) {
-            $(this).css('border-bottom-width', '0px');
-        } else {
-            $(this).css('border-bottom', '1px solid #D3D3D3');
-        }
-    });
-}
 
 function autoCompleteWord(db_url) {
     $("#q").autocomplete({
@@ -413,69 +284,25 @@ function showHide(value) {
         $('#search_terms_container, #method, #results_per_page').hide();
         $('#metadata_fields, #bottom_search').show();   
     }
-    adjustBottomBorder();
 }
 
 //  Function to show or hide search options
 function showMoreOptions(display) {
-    $("#more_options").button('option', 'label', 'Hide search options');
     if (display == "all") {
-        var report = $('input[name=report]:checked', '#search').val();
+        var report = $('#report label.active input').attr('id');
         showHide(report);
-        $("#search_elements")
-            .velocity("slideDown",
-                      {duration: 250, 'easing': 'easeIn'}
-                      )
-            .velocity("fadeIn",
-                       {queue: false, duration: 250, 'easing': 'easeIn'}
-                       );
+        $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
     }
     var height = $(document).height() - $(header).height() - $(footer).height();
     $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': height});
-    setTimeout(searchFormOverlap, 250);
+    //setTimeout(searchFormOverlap, 250);
 }
 
 function hideSearchForm() {
     $("#search_elements").velocity('slideUp', {duration: 250, easing: 'easeOut'});
-    $("#search_elements").velocity('fadeOut', {duration: 250, easing: 'easeOut', queue: false});
     $("#search_overlay").css({'height': '0px', 'opacity': 0});
-    $("#more_options").button('option', 'label', 'Show search options');
-    setTimeout(searchFormOverlap, 250);
+    //setTimeout(searchFormOverlap, 250);
 }
-
-
-// This function is used to make the clear form button blink when there are
-// search parameters
-// To be superseded by the display of search criteria in search results.
-(function($)
-{
-    $.fn.blink = function(options) {
-        var defaults = { delay:1500 };
-        var options = $.extend(defaults, options);
-
-        return this.each(function() {
-            var obj = $(this);
-            var state = false;
-            var colorchange = setInterval(function() {
-                if(state)
-                {
-                    $(obj).animate({color: '#555555 !important'}, 1500);
-                    state = false;
-                }
-                else
-                {
-                    $(obj).animate({color: 'rgb(255,0,0) !important'}, 1500);
-                    state = true;
-                }
-            }, options.delay);
-            $('#reset_form, #reset_form1').click(function() {
-                $(obj).css('color', '#555555 !important');
-                clearInterval(colorchange);
-            });
-        });
-    }
-}(jQuery))
-
 
 
 ///////////////////////////////////////////////////
@@ -493,46 +320,41 @@ function fetchMoreContext() {
             $('.philologic_context').eq(i).append(more);
         }
         moreContext();
-        $('.more_context').animate({color: '#555 !important'},400);
+        $('.more_context').removeAttr('disabled');
     });
 }
 
 function moreContext() {
     $(".more_context").click(function() {
         var context_link = $(this).text();
-        var more_context = $(this);
         var parent_div = $(this).parents().siblings('.philologic_context')
-        if (context_link == 'More') {
+        if ($(this).data('context') == 'short') {
             parent_div.children('.default_length').fadeOut(100, function() {
                 parent_div.children('.more_length').fadeIn(100);
             });
-            parent_div.prev('div').find('.ui-button-text').empty().fadeIn(100).append('Less');
+            $(this).empty().fadeIn(100).append('Less');
+            $(this).data('context', 'long');
         } else {
             parent_div.children('.more_length').fadeOut(100, function() {
                 parent_div.children('.default_length').show();
             });
-            parent_div.prev('div').find('.ui-button-text').empty().fadeIn(100).append('More');
+            $(this).empty().fadeIn(100).append('More');
+            $(this).data('context', 'short');
         }
     });
 }
 
-
-function getSelectedText() {
-    if (window.getSelection) {
-        return window.getSelection().toString();
-    } else if (document.selection) {
-        return document.selection.createRange().text;
-    }
-    return '';
+// This is to create links for collocations
+function colloc_linker(word, q_string, direction, num) {
+    q_string = q_string.replace(/report=[^&]+/, 'report=concordance_from_collocation');
+    q_string += '&collocate=' + encodeURIComponent(word);
+    q_string += '&direction=' + direction;
+    q_string += '&collocate_num=' + num;
+    return q_string
 }
 
-function getCitationWidth() {
-    var citation_width = $('.citation').width() - $('.more_context_and_close').width() - $('.hit_n').width() - 30;
-    $('.cite').width(citation_width);
-}
-
-
-// Delay function calls in repeated actions
+// Delay function calls in repeated actions:
+// used in Time Series to redraw chart after resize
 var waitForFinalEvent = (function () {
   var timers = {};
   return function (callback, ms, uniqueId) {
@@ -545,16 +367,6 @@ var waitForFinalEvent = (function () {
     timers[uniqueId] = setTimeout(callback, ms);
   };
 })();
-
-
-// This is to create links for collocations
-function colloc_linker(word, q_string, direction, num) {
-    q_string = q_string.replace(/report=[^&]+/, 'report=concordance_from_collocation');
-    q_string += '&collocate=' + encodeURIComponent(word);
-    q_string += '&direction=' + direction;
-    q_string += '&collocate_num=' + num;
-    return q_string
-}
 
 // Custom HTML replace function for text objects since jQuery's html is too slow:
 // See here: https://groups.google.com/forum/#!msg/jquery-en/RG_dJD8DlSc/R4pDTgtzU4MJ
