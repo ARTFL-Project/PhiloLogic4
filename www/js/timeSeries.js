@@ -1,3 +1,5 @@
+"use strict";
+
 $(document).ready(function() {
     
     var db_url = webConfig['db_url'];
@@ -12,11 +14,11 @@ $(document).ready(function() {
         
         
         // Generate range of all dates
-        year_interval = parseInt($('#search_arguments').data('interval'));
-        start_date = normalizeDate($('#search_arguments').data('start'), year_interval);
-        end_date = normalizeDate($('#search_arguments').data('end'), year_interval);
+        var year_interval = parseInt($('#search_arguments').data('interval'));
+        var start_date = normalizeDate($('#search_arguments').data('start'), year_interval);
+        var end_date = parseInt($('#search_arguments').data('end'));
         var date_list = []
-        for (var i = start_date; i < end_date; i += year_interval) {
+        for (var i = start_date; i <= end_date; i += year_interval) {
             date_list.push(i);
         }
         
@@ -33,7 +35,7 @@ $(document).ready(function() {
         $('#progress_bar').progressbar({value: 5000});
         var percent = 5000 / total * 100;
         $('.progress-label').text(percent.toString().split('.')[0] + '%');
-        $('#progress_bar').width($('#initial_report').width());
+        $('#progress_bar').width($('#description').width());
         $('#progressive_bar').show();
         var date_counts = eval($('#relative_time').data('datecount'));
         
@@ -92,22 +94,22 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
     var script = db_url + "/scripts/time_series_fetcher.py?" + q_string
     var initial_end = interval_end;
     if (interval_start === 0) {
-        interval_start = 5000;
-        interval_end = 25000;
+        interval_start = 3000;
+        interval_end = 23000;
     } else {
         interval_start += 20000;
         interval_end += 20000;
     }
     if (initial_end < total_results) {
-        script_call = script + "&interval_start=" + interval_start + "&interval_end=" + interval_end;
+        var script_call = script + "&interval_start=" + interval_start + "&interval_end=" + interval_end;
         $.getJSON(script_call, function(data) {
             var abs_merge = merge_time_results(abs_full_results, data[0], date_list);
-            abs_sorted_list = abs_merge[0];
-            abs_new_full_results = abs_merge[1];            
+            var abs_sorted_list = abs_merge[0];
+            var abs_new_full_results = abs_merge[1];            
             drawFromData(abs_sorted_list, interval, "absolute_time");
             
             // Update date_counts
-            for (date in data[1]) {
+            for (var date in data[1]) {
                 full_date_counts[date] = data[1][date]
             }
             
@@ -122,12 +124,12 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         });
     } else {
         // Store final sorted results
-        abs_results = sortResults(abs_full_results)
+        var abs_results = sortResults(abs_full_results)
         $('#absolute_time').data('value', JSON.stringify(abs_results));
         
         // Generate relative frequencies from absolute frequencies and make button clickable again
         $("#relative_time").removeAttr("disabled");
-        relative_results = relativeCount(abs_results, full_date_counts);
+        var relative_results = relativeCount(abs_results, full_date_counts);
         $('#relative_time').data('value', JSON.stringify(relative_results))
         
         // Create click event handler to switch between frequency types
@@ -178,7 +180,7 @@ function merge_time_results(full_results, new_data, date_list) {
     if (typeof full_results === 'undefined') {
         full_results = new_data;
     } else {
-        for (key in new_data) {
+        for (var key in new_data) {
             if (key in full_results) {
                 full_results[key] += new_data[key];
             }
@@ -194,7 +196,7 @@ function merge_time_results(full_results, new_data, date_list) {
 
 function sortResults(full_results) {
     var sorted_list = [];
-    for (key in full_results) {
+    for (var key in full_results) {
         sorted_list.push([key, full_results[key]]);
     }
     sorted_list.sort(function(a,b) {return a[0] - b[0]});
@@ -202,22 +204,45 @@ function sortResults(full_results) {
 }
 
 function yearToTimeSpan(year, interval) {
+    var end_date = parseInt($('#search_arguments').data('end'));
     year = String(year);
     if (interval == '10') {
         year = year.slice(0,-1) + '0';
-        var next = String(parseInt(year) + 9);
+        var next = parseInt(year) + 9;
+        if (next > end_date) {
+            next = String(end_date)
+        } else {
+            next = String(next);   
+        }
         year = year + '-' + next;
     }
     else if (interval == '100') {
         year = year.slice(0,-2) + '00';
-        var next = String(parseInt(year) + 99);
+        var next = parseInt(year) + 99;
+        if (next > end_date) {
+            next = String(end_date)
+        } else {
+            next = String(next);   
+        }
         year = year + '-' + next
     } else if (interval == '50') {
         var decade = parseInt(year.slice(-2));
         if (decade < 50) {
-            year = year.slice(0,-2) + '00' + '-' + year.slice(0,-2) + '49';
+            var next = parseInt(year.slice(0,-2) + '49');
+            if (next > end_date) {
+                next = String(end_date)
+            } else {
+                next = String(next);   
+            }
+            year = year.slice(0,-2) + '00' + '-' + next;
         } else {
-            year = year.slice(0,-2) + '50' + '-' + year.slice(0,-2) + '99';
+            var next = year.slice(0,-2) + '99';
+            if (next > end_date) {
+                next = String(end_date)
+            } else {
+                next = String(next);   
+            }
+            year = year.slice(0,-2) + '50' + '-' + next;
         }
     }
     return year
@@ -233,25 +258,10 @@ function clickOnChart(interval) {
     });
 }
 
-function getYearsToDisplay(data) {
-    var num;
-    if (data.length < 10) {
-        num = "all";
-    } else {
-        num = 10;
-    }
-    for (var i; i < data.length; i++) {
-        //
-    }
-}
-
 function drawFromData(data, interval, frequency_type) {
     var max_count = 0;
     var width = adjustWidth(data.length);
-    var margin = 0;
-    
-    var years_to_display = getYearsToDisplay(data);
-    
+    var margin = 0;  
     for (var i=0; i < data.length; i++) {
         var count = Math.round(data[i][1]);
         var year = data[i][0];
@@ -321,7 +331,7 @@ function drawFromData(data, interval, frequency_type) {
         $('#first_number').html(bottom_number + ' occurrences');
     }
     
-    multiplier = ($('#test_time_series').height() - 10) / max_count; 
+    var multiplier = ($('#test_time_series').height() - 10) / max_count; 
     
     $('.graph_bar').each(function() {
         var count = $(this).data('count');
@@ -341,6 +351,6 @@ function adjustWidth(elem_num) {
 }
 
 function truncate(num) {
-    new_num = String(num).replace(/(\d+).*/, '$1');
+    var new_num = String(num).replace(/(\d+).*/, '$1');
     return parseInt(new_num);  
 }

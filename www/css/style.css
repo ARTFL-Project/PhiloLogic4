@@ -258,7 +258,7 @@ br {
 	margin-right: 15px;
 	overflow: hidden;
 }
-#bibliographic-results li {
+.bibliographic-results li {
     margin-top: 20px;
     padding: 10px 0px 10px 0px;
 }

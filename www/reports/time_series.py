@@ -64,12 +64,13 @@ def generate_time_series(q, db, results):
     
     absolute_count = defaultdict(int)
     date_counts = {}
+    print >> sys.stderr, "INTERVAL", q["year_interval"]
     for i in results[q['interval_start']:q['interval_end']]:
         date = i.doc['date']
         try:
             if date != None:
                 date = int(date)
-                if not date < end :
+                if not date <= end :
                     continue
                 if q["year_interval"] == "10":
                     date = int(str(date)[:-1] + '0')

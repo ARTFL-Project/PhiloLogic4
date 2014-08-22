@@ -107,7 +107,7 @@
 }
 #freq_sidebar_text {
     display: inline-block !important;
-    max-width: 320px;
+    max-width: 80%;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;

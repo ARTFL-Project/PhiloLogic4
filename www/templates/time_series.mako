@@ -8,11 +8,11 @@
                     ${total} occurrences for <b>${q['q'].decode('utf_8')}</b><br>
                     Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}<br>
                     Use of the term(s) between
-                    <span class="biblio_criteria"><b>${q['start_date']}</b>
-                        <span class="ui-icon ui-icon-circle-close" id="remove_metadata_date_start"></span>
+                    <span class="biblio-criteria"><b>${q['start_date']}</b>
+                        <span class="glyphicon glyphicon-remove-circle remove_metadata" id="remove_metadata_date_start"></span>
                     </span>&nbsp and
-                    <span class="biblio_criteria"><b>${q['end_date']}</b>
-                        <span class="ui-icon ui-icon-circle-close" id="remove_metadata_date_end"></span>
+                    <span class="biblio-criteria"><b>${q['end_date']}</b>
+                        <span class="glyphicon glyphicon-remove-circle remove_metadata" id="remove_metadata_date_end"></span>
                     </span>
                 </div>
             </div>

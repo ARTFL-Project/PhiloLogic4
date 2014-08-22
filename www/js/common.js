@@ -1,3 +1,5 @@
+"use strict";
+
 $(document).ready(function() {
     
     ////////////////////////////////////////////////////////////////////////////
@@ -86,23 +88,24 @@ $(document).ready(function() {
             if (key == 'report') {
                 $('#report input').removeAttr('checked');
                 $('#report label').removeClass('active');
-                $('#' + value).attr('checked', 'checked');
+                $('#' + value).prop('checked', true);
                 $('#' + value).parent().addClass('active');
             } else if (key == "method") {
                 $('#method-buttons input').removeAttr('checked');
                 $('#method-buttons label').removeClass('active');
-                $('#method-buttons input[name=method][value=' + value + ']').attr('checked', 'checked');
+                $('#method-buttons input[name=method][value=' + value + ']').prop('checked', true);
                 $('#method-buttons input[name=method][value=' + value + ']').parent().addClass('active');
             } else if (key =='pagenum') {
                 $('#page_num input').removeAttr('checked');
                 $('#page_num label').removeClass('active');
-                $('#page_num input[name=pagenum][value=' + value + ']').attr('checked', 'checked');
+                $('#page_num input[name=pagenum][value=' + value + ']').prop('checked', true);
                 $('#page_num input[name=pagenum][value=' + value + ']').parent().addClass('active');
             }
             else if (key == 'year_interval') {
+                console.log(key, value)
                 $('#year_interval input').removeAttr('checked');
                 $('#year_interval label').removeClass('active');
-                $('#year_interval input[name=year_interval][value=' + value + ']').attr('checked', 'checked');
+                $('#year_interval input[name=year_interval][value=' + value + ']').prop('checked', true);
                 $('#year_interval input[name=year_interval][value=' + value + ']').parent().addClass('active');
             }
             else if (key == 'field') {
@@ -118,7 +121,7 @@ $(document).ready(function() {
     $("#reset_form").click(function() {
         $('#form_body input').removeAttr('checked');
         $('#form_body .btn').removeClass('active');
-        $('#report input:first, #method-buttons input:first, #page_num input:first, #year_interval input:first').attr('checked', 'checked');
+        $('#report input:first, #method-buttons input:first, #page_num input:first, #year_interval input:first').prop('checked', true);
         $('#report input:first, #method-buttons input:first, #page_num input:first, #year_interval input:first').parent().addClass('active');
         showHide($('#report input:first').attr('id'));
     });
@@ -128,14 +131,14 @@ $(document).ready(function() {
         $("#arg_phrase").val('');
         $('#method-buttons input').removeAttr('checked');
         $('#method-buttons label').removeClass('active');
-        $('#method-buttons input[name=method][value=proxy]').attr('checked', 'checked');
+        $('#method-buttons input[name=method][value=proxy]').prop('checked', true);
         $('#method-buttons input[name=method][value=proxy]').parent().addClass('active');
     });
     $("#arg_phrase").focus(function() {
         $("#arg_proxy").val('');
         $('#method-buttons input').removeAttr('checked');
         $('#method-buttons label').removeClass('active');
-        $('#method-buttons input[name=method][value=phrase]').attr('checked', 'checked');
+        $('#method-buttons input[name=method][value=phrase]').prop('checked', true);
         $('#method-buttons input[name=method][value=phrase]').parent().addClass('active');
     });
     $('#method3').parent().click(function() {
