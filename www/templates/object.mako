@@ -4,11 +4,11 @@
     <div id='object-title'>
         <span class='philologic_cite'>${f.biblio_citation(db,config, obj)}</span>
     </div>
-    <div class="row" id="nav-buttons">
+    <div class="row hidden-sm" id="nav-buttons">
         <button type="button" class="btn btn-primary btn-sm" id="back-to-top">
             Back to top
         </button>
-        <div class="hidden-sm col-sm-offset-4 col-sm-8">
+        <div class="col-sm-offset-4 col-sm-8">
             <div class="btn-group-sm">
                 <button type="button" class="btn btn-primary" id="prev-obj" data-philo-id="${prev}">
                     &lt;

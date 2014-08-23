@@ -22,8 +22,10 @@
 #obj_text {
     vertical-align:middle;
 }
+#toc-wrapper {
+    position: absolute;
+}
 #toc-container {
-    /*top: 32px;*/
     display: inline-block;
 }
 #back-to-top {
@@ -36,8 +38,7 @@
     margin-right: -30px;
     position: absolute;
     width: 100%;
-    /*top: 0;*/
-    z-index: 300;
+    z-index: 99;
 }
 #prev-obj, #next-obj {
     font-weight: 700;

@@ -1,13 +1,11 @@
 "use strict";
 
-
 var window_height = $(window).height();
 
 $(document).ready(function() {
     
-    
     $("#show-toc").click(function() {
-        $("#center-content").removeClass('col-md-offset-2');
+        $("#center-content").removeClass('col-md-offset-2').addClass('col-md-offset-4');
         $('#nav-buttons').addClass('col-md-offset-4');
         $('#toc-wrapper').show().css('margin-left', '0px');
         $('#toc-container').css('top', '32px');
@@ -20,7 +18,7 @@ $(document).ready(function() {
     $("#hide-toc").click(function() {
         var tocWidth = $('#toc-wrapper').width() + 30; // account for container margin
         $('#toc-wrapper').css('margin-left', '-' + tocWidth + 'px');
-        $("#center-content").addClass('col-md-offset-2');
+        $("#center-content").removeClass('col-md-offset-4').addClass('col-md-offset-2');
         $('#nav-buttons').removeClass('col-md-offset-4');
     });
     
@@ -49,7 +47,7 @@ $(document).ready(function() {
             background: "inherit",
             opacity: 1
         });
-        $('#toc-container').css('top', 'auto');
+        //$('#toc-container').css('top', 'auto');
         $('#back-to-top').fadeOut(250);
     })
     
