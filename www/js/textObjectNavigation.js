@@ -1,37 +1,61 @@
-var latestKnownScrollY = 0;
+"use strict";
+
+
 var window_height = $(window).height();
-var toc_open = false;
 
 $(document).ready(function() {
     
     
     $("#show-toc").click(function() {
-        $("#center-content").removeClass('col-xs-offset-2 col-sm-offset-2');
-        $("#center-content").css('margin-left', '-15px');
+        $("#center-content").removeClass('col-md-offset-2');
+        $('#nav-buttons').addClass('col-md-offset-4');
         $('#toc-wrapper').show().css('margin-left', '0px');
+        $('#toc-container').css('top', '32px');
         var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
         if ($('#toc-content').find($(scrollto_id)).length) {
             $('#toc-content').scrollTo($(scrollto_id), 500);
             $('#toc-content').find($(scrollto_id)).attr('style', 'background: #eee !important; font-weight: 700 !important;');
         }
-        $(this).hide();
     });
     $("#hide-toc").click(function() {
         var tocWidth = $('#toc-wrapper').width() + 30; // account for container margin
         $('#toc-wrapper').css('margin-left', '-' + tocWidth + 'px');
-        $("#center-content").addClass('col-xs-offset-2 col-sm-offset-2');
-        $("#center-content").css('margin-left', '16.66666667%');
-        setTimeout(function() {$("#show-toc").fadeIn('fast')}, 300);
+        $("#center-content").addClass('col-md-offset-2');
+        $('#nav-buttons').removeClass('col-md-offset-4');
     });
     
     // Previous and next button follow scroll
-    $('.nav-btn button, #toc-container').affix({
+    $('#nav-buttons, #toc-container').affix({
         offset: {
         top: function() {
-            return (this.top = $('#book-page').offset().top)
+            return (this.top = $('#nav-buttons').offset().top)
             }
         }
     });
+    
+    $('#nav-buttons').on('affix.bs.affix', function() {
+        $(this).css({
+            position: "fixed",
+            top: 0,
+            background: '#276b9b',
+            opacity: '0.9'
+        });
+        $('#back-to-top').fadeIn(250);
+    });
+    $('#nav-buttons').on('affix-top.bs.affix', function() {
+        $(this).css({
+            position: "absolute",
+            top: 'auto',
+            background: "inherit",
+            opacity: 1
+        });
+        $('#toc-container').css('top', 'auto');
+        $('#back-to-top').fadeOut(250);
+    })
+    
+    $('#back-to-top').click(function() {
+        $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
+    })
     
     // Handle page reload properly
     var db_url = webConfig['db_url'];

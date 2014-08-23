@@ -221,7 +221,7 @@ function autoCompleteWord(db_url) {
             return false;
         }
     }).data("ui-autocomplete")._renderItem = function (ul, item) {
-        term = item.label.replace(/^[^<]*/g, '');
+        var term = item.label.replace(/^[^<]*/g, '');
         return $("<li></li>")
             .data("item.autocomplete", item)
             .append("<a>" + term + "</a>")
@@ -236,13 +236,13 @@ function autoCompleteMetadata(metadata, field, db_url) {
         timeout: 1000,
         dataType: "json",
         focus: function( event, ui ) {
-            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
             q = q.replace(/ CUTHERE /, ' ');
             //$("#" + field).val(q); This is too sensitive, so disabled
             return false;
         },
         select: function( event, ui ) {
-            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
             q = q.split('|');
             q[q.length - 1] = q[q.length - 1].replace(/.*CUTHERE /, '');
             q[q.length-1] = '\"' + q[q.length-1].replace(/^\s*/g, '') + '\"'; 
@@ -251,7 +251,7 @@ function autoCompleteMetadata(metadata, field, db_url) {
             return false;
         }
     }).data("ui-autocomplete")._renderItem = function (ul, item) {
-        term = item.label.replace(/.*(?=CUTHERE)CUTHERE /, '');
+        var term = item.label.replace(/.*(?=CUTHERE)CUTHERE /, '');
         return $("<li></li>")
             .data("item.autocomplete", item)
             .append("<a>" + term + "</a>")
