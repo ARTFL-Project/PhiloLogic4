@@ -5,10 +5,14 @@ var window_height = $(window).height();
 $(document).ready(function() {
     
     $("#show-toc").click(function() {
+        // Make sure the TOC is no higher than viewport
+        var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').offset().top - 30;
+        $('#toc-content').css('max-height', toc_height + 'px');
+        // Show TOC
         $("#center-content").removeClass('col-md-offset-2').addClass('col-md-offset-4');
         $('#nav-buttons').addClass('col-md-offset-4');
-        $('#toc-wrapper').show().css('margin-left', '0px');
-        $('#toc-container').css('top', '32px');
+        $('#toc-container').css({'margin-left': '0px', 'top': '32px'});
+        //$('#toc-container').css('top', '32px');
         var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
         if ($('#toc-content').find($(scrollto_id)).length) {
             $('#toc-content').scrollTo($(scrollto_id), 500);
@@ -17,7 +21,7 @@ $(document).ready(function() {
     });
     $("#hide-toc").click(function() {
         var tocWidth = $('#toc-wrapper').width() + 30; // account for container margin
-        $('#toc-wrapper').css('margin-left', '-' + tocWidth + 'px');
+        $('#toc-container').css('margin-left', '-' + tocWidth + 'px');
         $("#center-content").removeClass('col-md-offset-4').addClass('col-md-offset-2');
         $('#nav-buttons').removeClass('col-md-offset-4');
     });
@@ -32,22 +36,11 @@ $(document).ready(function() {
     });
     
     $('#nav-buttons').on('affix.bs.affix', function() {
-        $(this).css({
-            position: "fixed",
-            top: 0,
-            background: '#276b9b',
-            opacity: '0.9'
-        });
+        $(this).addClass('fixed');
         $('#back-to-top').fadeIn(250);
     });
     $('#nav-buttons').on('affix-top.bs.affix', function() {
-        $(this).css({
-            position: "absolute",
-            top: 'auto',
-            background: "inherit",
-            opacity: 1
-        });
-        //$('#toc-container').css('top', 'auto');
+        $(this).removeClass('fixed');
         $('#back-to-top').fadeOut(250);
     })
     
@@ -104,11 +97,12 @@ function retrieveTableOfContents(db_url) {
     var philo_id = doc_id + ' 0 0 0 0 0 0'
     var script = my_path + '/scripts/get_table_of_contents.py?philo_id=' + philo_id;
     $("#show-toc").removeAttr("disabled");
+    $('#toc-container').hide();
     $.get(script, function(data) {
         $('#toc-content').html(data);
         // Add a negative left margin to hide on the left side
         var tocWidth = $('#toc-wrapper').width() + 30; // account for container margin
-        $('#toc-wrapper').css('margin-left', '-' + tocWidth + 'px');
+        $('#toc-container').css('margin-left', '-' + tocWidth + 'px').css('display', 'inline-block');
         TocLinkHandler(db_url);
     });
 }
