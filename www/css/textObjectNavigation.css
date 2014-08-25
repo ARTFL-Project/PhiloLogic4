@@ -8,58 +8,85 @@
     text-align: center;
     margin-bottom: 10px;
 }
-#center-content, #toc-wrapper {
+#all-content {
+    margin-top: 50px; 
+}
+#center-content, #nav-buttons {
     transition: all 300ms;
 }
 #book-page {
-    padding: 20px 20px 20px 20px;
-    line-height: 140% !important;
-    text-align: justify;
+    text-align: center;
 }
 #obj_text {
     vertical-align:middle;
 }
-.nav-btn button{
-    top: 0;
-}
-#toc-container {
-    top: 0;
-    display: inline-block;
-}
 
 /*TOC styling*/
+#toc-wrapper {
+    position: absolute;
+    opacity: 0;
+    z-index: 60;
+}
+#toc-wrapper.show {
+    width: auto;
+}
+#toc-container {
+    /*display: inline-block;*/
+    background: rgba(39, 107, 155, .9);
+}
+#toc-container a {
+    color: #fff;
+}
+a.current-obj {
+    background: rgba(256, 256, 256, .9);
+    color: rgb(39, 107, 155) !important;
+}
 #toc-content {
-    padding: 10px;
+    display: inline-block;
+    overflow: scroll;
+    padding: 23px 10px 10px 10px;
     line-height: 180%;
     text-align: justify;
 }
-.toc-div1, .toc-div2, .toc-div3 {
-    /*text-overflow: ellipsis;*/
-    /*overflow: hidden;*/
-    /*white-space: nowrap;*/
+#back-to-top {
+    position: absolute;
+    left: 15px;
+    z-index: 5;
+    display: none;
+}
+#nav-buttons {
+    margin-left: -30px;
+    margin-right: -30px;
+    position: absolute;
+    width: 100%;
+    z-index: 80;
+}
+#nav-buttons.fixed {
+    position: fixed;
+    top: 0;
+    background: rgba(39, 107, 155, .9);
 }
 .toc-div1 > a, .toc-div2 > a, .toc-div3 > a {
     padding: 5px 5px 5px 0px;
 }
 .bullet-point-div1, .bullet-point-div2, .bullet-point-div3 {
     display: inline-block;
-    background: #fff;
-    border: solid 2px #000;
     width: 8px;
     height: 8px;
     border-radius:50%;
     margin-right: 5px;
 }
 .bullet-point-div1 {
-    background: #000;
+    border: solid 1px #fff;
+    background: #fff;
 }
 .bullet-point-div2 {
-    background: #fff;
-    border: solid 2px #000;
+    /*background: #fff;*/
+    border: solid 2px #fff;
 }
 .bullet-point-div3 {
-    background: #fff;
-    border: solid 1px #000;
+    /*background: #fff;*/
+    border: solid 1px #fff;
 }
 .toc-div2 {
     text-indent: 1em;
@@ -68,6 +95,32 @@
     text-indent: 2em;
 }
 
+/*TOC report styling*/
+#toc-report .bullet-point-div1 {
+    border: solid 1px #000;
+    background: #000;
+}
+#toc-report .bullet-point-div2 {
+    border: solid 2px #000;
+    background: #fff;
+}
+#toc-report .bullet-point-div3 {
+    border: solid 1px #000;
+    background: #fff;
+}
+
+
+#prev-obj, #next-obj {
+    font-weight: 700;
+    font-size: 120%;
+    padding: 1px 10px 2px;
+}
+#text-obj-content {
+    display: inline-block;
+    text-align: justify;
+    padding: 20px;
+    line-height: 140% !important;
+}
 
 /* Styling for theater */
 castitem::after {
@@ -163,4 +216,11 @@ pb::before {
 }
 .close_page_image:hover {
     cursor: pointer;
+}
+
+@media (max-width: 992px) {
+    #toc-wrapper {
+        z-index: 60;
+        /*width: auto;*/
+    }
 }

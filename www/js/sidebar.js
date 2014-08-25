@@ -1,3 +1,5 @@
+"use strict";
+
 $(document).ready(function() {
     
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
@@ -72,13 +74,6 @@ function hideSidebar() {
     $('#hide-sidebar-button').hide();
     $('#sidebar').hide()
     //$("#hide_sidebar").hide().data('interrupt', true);
-    //$("#frequency_table").empty().hide();
-    //$('#frequency_container').hide();
-    //$('#sidebar_display').css('opacity', 0);
-    //$("#results_container, .cite").velocity({
-    //    "width": "+=410"},
-    //    150);    
-    //}
 }
 
 function mergeResults(full_results, new_data) {
@@ -95,7 +90,7 @@ function mergeResults(full_results, new_data) {
         }
     }
     var sorted_list = [];
-    for (key in full_results) {
+    for (var key in full_results) {
         sorted_list.push([key, full_results[key]]);
     }
     sorted_list.sort(function(a,b) {return b[1].count - a[1].count});
@@ -135,7 +130,7 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
         interval_end += 20000;
     }
     if (interval_start < total_results) {
-        script_call_interval = script_call + "&interval_start=" + interval_start + "&interval_end=" + interval_end;
+        var script_call_interval = script_call + "&interval_start=" + interval_start + "&interval_end=" + interval_end;
         if (interval_start === 0) {
             interval_start = 1000;
         }
@@ -146,8 +141,8 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
                 } else {
                     var merge = mergeCollocResults(full_results, data);
                 }
-                sorted_list = merge[0];
-                new_full_results = merge[1];
+                var sorted_list = merge[0];
+                var new_full_results = merge[1];
                 update_sidebar(sorted_list, field);
                 populate_sidebar(script_call, field, total_results, interval_start, interval_end, new_full_results);
                 var total = $('#progress_bar').progressbar("option", "max");

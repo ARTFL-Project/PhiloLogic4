@@ -41,7 +41,7 @@ def parse_cgi(environ):
         query['q'] = query['q'].replace('?', '')
         query['q'] = query['q'].replace(':', '')
         #query['q'] = re.sub('\.([^*]*)', ' \\1', query['q'])
-    query["method"] = cgi.get("method",[None])[0]
+    query["method"] = cgi.get("method",[None])[0] or "proxy"
     query['arg'] = cgi.get("arg", [None])[0]
     if query["method"] == "proxy":
         if query['arg'] is None:

@@ -14,13 +14,14 @@
         </div>
         Hits <span class="start">${start}</span> - <span class="end">${end}</span> of <span id="total_results">${len(results)}</span>${r_status}
         </div>
-        <%include file="show_frequency.mako"/>
     </div>
     <div class="row" id="act-on-report">
         <div class="col-xs-12">
             <div class="btn-group pull-right">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    Display frequency by ${config["metadata"][0].title()}<span class="caret"></span>
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    Display frequency by
+                    <span id="selected-sidebar-option" data-selected="${config['facets'][0]}">${config["metadata_aliases"][config["facets"][0]].title()}</span>
+                    <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu" id="frequency_field">
                     % for facet in config["facets"]:
@@ -30,19 +31,22 @@
                         else:
                             alias = facet
                         %>
-                        <li><a class="sidebar_option" id="side_opt_${facet}" data-value='${facet}' data-display='${facet}'>Display frequency by ${alias}</a></li>
+                        <li><a class="sidebar-option" id="side_opt_${facet}" data-value='${facet}' data-display='${facet}'>Display frequency by ${alias}</a></li>
                     % endfor
                     % if report != 'bibliography':
                         <li class="divider"></li>
-                        <li><a class="sidebar_option" id="side_opt_collocate" data-value='collocation_report' data-display='collocate'>Display collocates</a></li>
+                        <li><a class="sidebar-option" id="side_opt_collocate" data-value='collocation_report' data-display='collocate'>Display collocates</a></li>
                     % endif
                 </ul>
+                <button type="button" id="hide-sidebar-button" class="btn btn-primary" style="display: none";>
+                    <span class="glyphicon glyphicon-remove-circle" style="vertical-align: text-top"></span>
+                </button>
             </div>
         </div>
     </div>
-    <div class="results_container row" id="results_container">
-        <div id='bibliographic-results' class="col-xs-12">
-            <ol class="panel panel-default">
+    <div class="row">
+        <div id='results_container' class="col-xs-12">
+            <ol class="panel panel-default bibliographic-results">
                 % for i in results[start-1:end]:
                     <li class='biblio-occurrence panel panel-default'>
                         <%
@@ -58,7 +62,8 @@
                     </li>
                 % endfor
             </ol>
-       </div>
+        </div>
+        <%include file="show_frequency.mako"/>
    </div>
    <div class="more">
         <%include file="results_paging.mako" args="start=start,results_per_page=results_per_page,q=q,results=results"/> 

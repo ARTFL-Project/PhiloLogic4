@@ -1,37 +1,44 @@
-var latestKnownScrollY = 0;
+"use strict";
+
 var window_height = $(window).height();
-var toc_open = false;
 
 $(document).ready(function() {
     
-    
     $("#show-toc").click(function() {
-        $("#center-content").removeClass('col-xs-offset-2 col-sm-offset-2');
-        $("#center-content").css('margin-left', '-15px');
-        $('#toc-wrapper').show().css('margin-left', '0px');
-        var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
-        if ($('#toc-content').find($(scrollto_id)).length) {
-            $('#toc-content').scrollTo($(scrollto_id), 500);
-            $('#toc-content').find($(scrollto_id)).attr('style', 'background: #eee !important; font-weight: 700 !important;');
+        if ($("#toc-container").data("status") == "closed") {
+            showTOC();
+            $("#toc-container").data("status", "open");
+        } else {
+            hideTOC();
+            $("#toc-container").data("status", "closed");
         }
-        $(this).hide();
     });
     $("#hide-toc").click(function() {
-        var tocWidth = $('#toc-wrapper').width() + 30; // account for container margin
-        $('#toc-wrapper').css('margin-left', '-' + tocWidth + 'px');
-        $("#center-content").addClass('col-xs-offset-2 col-sm-offset-2');
-        $("#center-content").css('margin-left', '16.66666667%');
-        setTimeout(function() {$("#show-toc").fadeIn('fast')}, 300);
+        hideTOC()
+        $("#toc-container").data("status", "closed");
     });
     
     // Previous and next button follow scroll
-    $('.nav-btn button, #toc-container').affix({
+    $('#nav-buttons, #toc-container').affix({
         offset: {
         top: function() {
-            return (this.top = $('#book-page').offset().top)
+            return (this.top = $('#nav-buttons').offset().top)
             }
         }
     });
+    
+    $('#nav-buttons').on('affix.bs.affix', function() {
+        $(this).addClass('fixed');
+        $('#back-to-top').fadeIn(250);
+    });
+    $('#nav-buttons').on('affix-top.bs.affix', function() {
+        $(this).removeClass('fixed');
+        $('#back-to-top').fadeOut(250);
+    })
+    
+    $('#back-to-top').click(function() {
+        $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
+    })
     
     // Handle page reload properly
     var db_url = webConfig['db_url'];
@@ -82,13 +89,40 @@ function retrieveTableOfContents(db_url) {
     var philo_id = doc_id + ' 0 0 0 0 0 0'
     var script = my_path + '/scripts/get_table_of_contents.py?philo_id=' + philo_id;
     $("#show-toc").removeAttr("disabled");
+    $('#toc-container').hide();
     $.get(script, function(data) {
         $('#toc-content').html(data);
         // Add a negative left margin to hide on the left side
-        var tocWidth = $('#toc-wrapper').width() + 30; // account for container margin
-        $('#toc-wrapper').css('margin-left', '-' + tocWidth + 'px');
+        var tocWidth = $('#toc-wrapper').outerWidth() + 30; // account for container margin
+        $('#toc-container').css('margin-left', '-' + tocWidth + 'px').css('display', 'inline-block');
         TocLinkHandler(db_url);
     });
+}
+
+function hideTOC() {
+    var tocWidth = $('#toc-container').outerWidth() + 30; // account for container margin
+    $('#toc-container').velocity({'margin-left': '-' + tocWidth + 'px'}, {"duration": 300});
+    $('#nav-buttons').removeClass('col-md-offset-4');
+    setTimeout(function() {  // Delay removing style to allow sliding out before hiding
+        //$('#toc-wrapper').removeClass('show');
+    }, 300);
+}
+function showTOC() {
+    // Make sure the TOC is no higher than viewport
+    var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').offset().top - 30;
+    $('#toc-content').css('max-height', toc_height + 'px');
+    // Show TOC
+    $('#toc-wrapper').css('opacity', 1);
+    $('#nav-buttons').addClass('col-md-offset-4');
+    $('#toc-container').velocity({'margin-left': '0px', 'top': '32px'}, {"duration": 300});
+    $('#toc-wrapper').addClass('show');
+    var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
+    setTimeout(function() {
+        if ($('#toc-content').find($(scrollto_id)).length) {
+            $('#toc-content').scrollTo($(scrollto_id), 500);
+            $('#toc-content').find($(scrollto_id)).addClass('current-obj');
+        }  
+    }, 300);
 }
 
 function scrollToHighlight() {
@@ -138,7 +172,7 @@ function TocLinkHandler(db_url) {
 function newTextObjectCallback(data, philo_id, my_path) {
     $("#waiting").fadeOut('fast');
     var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
-    $('#toc-content').find($(scrollto_id)).removeAttr('style');
+    $('#toc-content').find($(scrollto_id)).removeClass('current-obj');
     $('#text-obj-content').fadeOut('fast', function() {
         $(this).replaceHtml(data['text']).fadeIn('fast');
         $('#text-obj-content').data("philoId", philo_id);
@@ -147,7 +181,7 @@ function newTextObjectCallback(data, philo_id, my_path) {
         var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
         if ($('#toc-content').find($(scrollto_id)).length) {
             $('#toc-content').scrollTo($(scrollto_id), 500);
-            $('#toc-content').find($(scrollto_id)).attr('style', 'background: #eee !important; font-weight: 700 !important;');
+            $('#toc-content').find($(scrollto_id)).addClass('current-obj');
         }
         page_image_link();
         var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
