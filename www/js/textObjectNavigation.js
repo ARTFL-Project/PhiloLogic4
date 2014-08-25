@@ -5,25 +5,17 @@ var window_height = $(window).height();
 $(document).ready(function() {
     
     $("#show-toc").click(function() {
-        // Make sure the TOC is no higher than viewport
-        var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').offset().top - 30;
-        $('#toc-content').css('max-height', toc_height + 'px');
-        // Show TOC
-        $("#center-content").removeClass('col-md-offset-2').addClass('col-md-offset-4');
-        $('#nav-buttons').addClass('col-md-offset-4');
-        $('#toc-container').css({'margin-left': '0px', 'top': '32px'});
-        //$('#toc-container').css('top', '32px');
-        var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
-        if ($('#toc-content').find($(scrollto_id)).length) {
-            $('#toc-content').scrollTo($(scrollto_id), 500);
-            $('#toc-content').find($(scrollto_id)).attr('style', 'background: #eee !important; font-weight: 700 !important;');
+        if ($("#toc-container").data("status") == "closed") {
+            showTOC();
+            $("#toc-container").data("status", "open");
+        } else {
+            hideTOC();
+            $("#toc-container").data("status", "closed");
         }
     });
     $("#hide-toc").click(function() {
-        var tocWidth = $('#toc-wrapper').width() + 30; // account for container margin
-        $('#toc-container').css('margin-left', '-' + tocWidth + 'px');
-        $("#center-content").removeClass('col-md-offset-4').addClass('col-md-offset-2');
-        $('#nav-buttons').removeClass('col-md-offset-4');
+        hideTOC()
+        $("#toc-container").data("status", "closed");
     });
     
     // Previous and next button follow scroll
@@ -101,10 +93,36 @@ function retrieveTableOfContents(db_url) {
     $.get(script, function(data) {
         $('#toc-content').html(data);
         // Add a negative left margin to hide on the left side
-        var tocWidth = $('#toc-wrapper').width() + 30; // account for container margin
+        var tocWidth = $('#toc-wrapper').outerWidth() + 30; // account for container margin
         $('#toc-container').css('margin-left', '-' + tocWidth + 'px').css('display', 'inline-block');
         TocLinkHandler(db_url);
     });
+}
+
+function hideTOC() {
+    var tocWidth = $('#toc-container').outerWidth() + 30; // account for container margin
+    $('#toc-container').velocity({'margin-left': '-' + tocWidth + 'px'}, {"duration": 300});
+    $('#nav-buttons').removeClass('col-md-offset-4');
+    setTimeout(function() {  // Delay removing style to allow sliding out before hiding
+        //$('#toc-wrapper').removeClass('show');
+    }, 300);
+}
+function showTOC() {
+    // Make sure the TOC is no higher than viewport
+    var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').offset().top - 30;
+    $('#toc-content').css('max-height', toc_height + 'px');
+    // Show TOC
+    $('#toc-wrapper').css('opacity', 1);
+    $('#nav-buttons').addClass('col-md-offset-4');
+    $('#toc-container').velocity({'margin-left': '0px', 'top': '32px'}, {"duration": 300});
+    $('#toc-wrapper').addClass('show');
+    var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
+    setTimeout(function() {
+        if ($('#toc-content').find($(scrollto_id)).length) {
+            $('#toc-content').scrollTo($(scrollto_id), 500);
+            $('#toc-content').find($(scrollto_id)).addClass('current-obj');
+        }  
+    }, 300);
 }
 
 function scrollToHighlight() {
@@ -154,7 +172,7 @@ function TocLinkHandler(db_url) {
 function newTextObjectCallback(data, philo_id, my_path) {
     $("#waiting").fadeOut('fast');
     var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
-    $('#toc-content').find($(scrollto_id)).removeAttr('style');
+    $('#toc-content').find($(scrollto_id)).removeClass('current-obj');
     $('#text-obj-content').fadeOut('fast', function() {
         $(this).replaceHtml(data['text']).fadeIn('fast');
         $('#text-obj-content').data("philoId", philo_id);
@@ -163,7 +181,7 @@ function newTextObjectCallback(data, philo_id, my_path) {
         var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
         if ($('#toc-content').find($(scrollto_id)).length) {
             $('#toc-content').scrollTo($(scrollto_id), 500);
-            $('#toc-content').find($(scrollto_id)).attr('style', 'background: #eee !important; font-weight: 700 !important;');
+            $('#toc-content').find($(scrollto_id)).addClass('current-obj');
         }
         page_image_link();
         var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
