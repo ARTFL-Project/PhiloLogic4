@@ -34,7 +34,7 @@
     /*display: inline-block;*/
     background: rgba(39, 107, 155, .9);
 }
-#toc-content a {
+#toc-container a {
     color: #fff;
 }
 a.current-obj {
@@ -71,7 +71,6 @@ a.current-obj {
 }
 .bullet-point-div1, .bullet-point-div2, .bullet-point-div3 {
     display: inline-block;
-    background: #fff;
     width: 8px;
     height: 8px;
     border-radius:50%;
@@ -94,6 +93,20 @@ a.current-obj {
 }
 .toc-div3 {
     text-indent: 2em;
+}
+
+/*TOC report styling*/
+#toc-report .bullet-point-div1 {
+    border: solid 1px #000;
+    background: #000;
+}
+#toc-report .bullet-point-div2 {
+    border: solid 2px #000;
+    background: #fff;
+}
+#toc-report .bullet-point-div3 {
+    border: solid 1px #000;
+    background: #fff;
 }
 
 
