@@ -23,18 +23,29 @@ $(document).ready(function() {
         offset: {
         top: function() {
             return (this.top = $('#nav-buttons').offset().top)
-            }
+            },
+        bottom: function() {
+            return (this.bottom = $('#footer').outerHeight(true))
+          }
         }
     });
     
     $('#nav-buttons').on('affix.bs.affix', function() {
         $(this).addClass('fixed');
-        $('#back-to-top').fadeIn(250);
+        adjustTocHeight();
+        $("#toc-container").css({'position': 'fixed'}); // Force position fixed because of bottom event hack
+        $('#back-to-top').velocity('fadeIn', {duration: 200});
     });
     $('#nav-buttons').on('affix-top.bs.affix', function() {
         $(this).removeClass('fixed');
-        $('#back-to-top').fadeOut(250);
-    })
+        adjustTocHeight();
+        $('#back-to-top').velocity('fadeOut', {duration: 200});
+        $("#toc-container").css({'position': 'static'}); // Force position static because of bottom event hack
+    });
+    $('#toc-container').on('affixed-bottom.bs.affix', function() {
+        adjustTocHeight(50);
+        $(this).css({'position': 'fixed'}); // Force position fixed in order to override the position relative set on this event
+    });
     
     $('#back-to-top').click(function() {
         $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
@@ -42,8 +53,8 @@ $(document).ready(function() {
     
     // Handle page reload properly
     var db_url = webConfig['db_url'];
-    if ($('#next_obj').length) {
-        back_forward_button_reload(db_url);
+    if ($('#book-page').length) {
+        backForwardButtonReload(db_url);
     }
     
     page_image_link();
@@ -103,18 +114,12 @@ function hideTOC() {
     var tocWidth = $('#toc-container').outerWidth() + 30; // account for container margin
     $('#toc-container').velocity({'margin-left': '-' + tocWidth + 'px'}, {"duration": 300});
     $('#nav-buttons').removeClass('col-md-offset-4');
-    setTimeout(function() {  // Delay removing style to allow sliding out before hiding
-        //$('#toc-wrapper').removeClass('show');
-    }, 300);
 }
 function showTOC() {
-    // Make sure the TOC is no higher than viewport
-    var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').offset().top - 30;
-    $('#toc-content').css('max-height', toc_height + 'px');
-    // Show TOC
+    adjustTocHeight()
     $('#toc-wrapper').css('opacity', 1);
     $('#nav-buttons').addClass('col-md-offset-4');
-    $('#toc-container').velocity({'margin-left': '0px', 'top': '32px'}, {"duration": 300});
+    $('#toc-container').velocity({'margin-left': '0px'}, {"duration": 300});
     $('#toc-wrapper').addClass('show');
     var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
     setTimeout(function() {
@@ -123,6 +128,15 @@ function showTOC() {
             $('#toc-content').find($(scrollto_id)).addClass('current-obj');
         }  
     }, 300);
+}
+function adjustTocHeight(num) {
+    // Make sure the TOC is no higher than viewport
+    if (typeof num =="undefined") {
+        var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').position().top - 30;
+    } else {
+        var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').position().top - 30 - num;
+    }
+    $('#toc-content').css('height', toc_height + 'px');
 }
 
 function scrollToHighlight() {
@@ -144,7 +158,7 @@ function retrieveObj(db_url){
     });
 }
 
-function back_forward_button_reload(db_url) {
+function backForwardButtonReload(db_url) {
     $(window).on('popstate', function() {
         var id_to_load = window.location.pathname.replace(/.*dispatcher.py\//, '').replace(/\//g, ' ');
         id_to_load = id_to_load.replace(/( 0 ?)*$/g, '');
