@@ -31,7 +31,7 @@
                 <div id="toc-content"></div>
             </div>
         </div>
-        <div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-offset-2 col-md-8" id="center-content">
+        <div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-offset-2 col-md-8 col-lg-offset-3 col-lg-6" id="center-content">
             <div class="row">
                 <div class="col-xs-12">
                     <div id="book-page">

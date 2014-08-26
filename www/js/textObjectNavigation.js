@@ -136,7 +136,7 @@ function adjustTocHeight(num) {
     } else {
         var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').position().top - 30 - num;
     }
-    $('#toc-content').css('height', toc_height + 'px');
+    $('#toc-content').velocity({'height': toc_height + 'px'});
 }
 
 function scrollToHighlight() {
