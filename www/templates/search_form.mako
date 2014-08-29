@@ -53,7 +53,7 @@
                         <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
                             <!--<input id="button1" type='submit' class="btn btn-primary" value="Search"/>-->
                             <button type="reset" id="reset_form" class="btn btn-danger">Clear</button>
-                            <button type="button" id="show-search-form" class="btn btn-danger" data-display="none" style="display: none">Show search options</button>
+                            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" style="display: none">Show search options</button>
                         </div>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                 </h5>             
                 <!--This row defines the search method options-->
                 <div class="row hidden-xs" id='method'>
-                    <div class="col-xs-12 col-sm-2">
+                    <div class="col-xs-12 col-sm-2" style="margin-top: 40px;">
                         Search Terms
                     </div>
                     <div class="col-xs-12 col-sm-3 col-lg-2" id="method-buttons">

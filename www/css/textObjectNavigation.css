@@ -1,4 +1,4 @@
-#object-title, #toc-title {
+#object-title {
     font-size: 140%;
     line-height: 120%;
     margin: 20px 0px 20px 0px;
@@ -27,6 +27,11 @@
 #toc-wrapper.show {
     width: auto;
 }
+#toc-report-title {
+    font-size: 1.2em;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
 #toc-container {
     background: rgba(39, 107, 155, .9);
     top: 32px !important;
@@ -41,9 +46,10 @@ a.current-obj {
 #toc-content {
     display: inline-block;
     overflow: scroll;
-    padding: 23px 10px 10px 10px;
+    padding: 10px;
     line-height: 180%;
     text-align: justify;
+    width: 100%;
 }
 #back-to-top {
     position: absolute;

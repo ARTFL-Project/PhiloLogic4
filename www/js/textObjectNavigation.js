@@ -7,15 +7,12 @@ $(document).ready(function() {
     $("#show-toc").click(function() {
         if ($("#toc-container").data("status") == "closed") {
             showTOC();
-            $("#toc-container").data("status", "open");
         } else {
             hideTOC();
-            $("#toc-container").data("status", "closed");
         }
     });
     $("#hide-toc").click(function() {
         hideTOC()
-        $("#toc-container").data("status", "closed");
     });
     
     // Previous and next button follow scroll
@@ -106,17 +103,26 @@ function retrieveTableOfContents(db_url) {
         // Add a negative left margin to hide on the left side
         var tocWidth = $('#toc-wrapper').outerWidth() + 30; // account for container margin
         $('#toc-container').css('margin-left', '-' + tocWidth + 'px').css('display', 'inline-block');
+        adjustTocHeight(100); // adjust height before showing
         TocLinkHandler(db_url);
     });
 }
 
 function hideTOC() {
+    if ($(document).height() == $(window).height()) {
+        $('#toc-container').css('position', 'static');
+    }
+    $("#toc-container").data("status", "closed");
     var tocWidth = $('#toc-container').outerWidth() + 30; // account for container margin
     $('#toc-container').velocity({'margin-left': '-' + tocWidth + 'px'}, {"duration": 300});
     $('#nav-buttons').removeClass('col-md-offset-4');
 }
 function showTOC() {
-    adjustTocHeight()
+    if ($(document).height() == $(window).height()) {
+        $('#toc-container').css('position', 'static');
+    }
+    $("#toc-container").data("status", "open");
+    adjustTocHeight();
     $('#toc-wrapper').css('opacity', 1);
     $('#nav-buttons').addClass('col-md-offset-4');
     $('#toc-container').velocity({'margin-left': '0px'}, {"duration": 300});
@@ -131,10 +137,13 @@ function showTOC() {
 }
 function adjustTocHeight(num) {
     // Make sure the TOC is no higher than viewport
-    if (typeof num =="undefined") {
-        var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').position().top - 30;
+    if ($(document).height() == $(window).height()) {
+        var toc_height = $('#footer').offset().top - $('#nav-buttons').position().top - $('#nav-buttons').height() - $('#toc-titlebar').height() - 30;
     } else {
-        var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').position().top - 30 - num;
+        var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').position().top - $('#toc-titlebar').height() - 40;
+    }
+    if (typeof num !="undefined") {
+        toc_height = toc_height - num;
     }
     $('#toc-content').velocity({'height': toc_height + 'px'});
 }

@@ -1,15 +1,17 @@
 #form_body {
-    margin-top: -20px;
 	position: absolute;
 	background: #fff;
 	left: 30px;
 	right: 30px;
     z-index: 90;
+	/*background: rgba(39, 107, 155, .9);*/
 	box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
-    color: #555 !important;
+    /*color: #fff !important;*/
 }
 #initial-form {
-	padding-bottom: 15px;
+	/*background: rgb(39, 107, 155);*/
+	/*color: #fff;*/
+	/*padding-bottom: 15px;*/
 }
 #search_elements {
     padding-left: 20px;
@@ -33,7 +35,8 @@
     background-color: #E0E0E0;
 }
 #search_terms_container {
-    margin-top: 15px;
+    padding-top: 15px;
+	padding-bottom: 15px;
 }
 #search_terms {
     text-align: center;
@@ -84,10 +87,11 @@
     position: absolute;
     top: 0;
     left: 0;
-    background-color: lightGrey;
+    background-color: #000;
     width: 100%;
     height: 0px;
     z-index: 90;
+	transition: opacity 250ms;
 }
 #metadata_fields {
 	margin-top: 10px;

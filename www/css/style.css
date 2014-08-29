@@ -56,7 +56,13 @@ ol {
     font-variant:small-caps;
 }
 #philologic_response {
-    margin-top: 80px;
+    margin-top: 100px;
+}
+
+.navbar {
+    box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
+    margin-bottom: 0px;
+    z-index: 0;
 }
 
 /*jQueryUI styling*/
@@ -277,11 +283,15 @@ br {
     background: #4180ab;
     transition: background-color 200ms;
 }
-.btn-primary:hover, .biblio-criteria {
+.btn-primary:hover {
     background: #649DC5;
 }
 .btn-primary.active {
     background: #276B9B;
+}
+.biblio-criteria {
+    background: #d9534f;
+    border: solid 1px #d43f3a;
 }
 .navbar-brand, .navbar-inverse a {
     color: #ECEDEE !important;
@@ -297,9 +307,10 @@ a.sidebar-option:hover {
 }
 /*Metadata criteria in results*/
 .biblio-criteria {
-    padding: 2px;
+    padding: 6px;
     color: #fff;
-    border: solid #276B9B 1px;
+    background: #d9534f;
+    border: solid 1px #d43f3a;
 }
 /*TOC styling*/
 .toc-div1 > a:hover, .toc-div2 > a:hover, .toc-div3 > a:hover {

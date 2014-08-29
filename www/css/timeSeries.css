@@ -10,7 +10,7 @@
 }
 .graph_bar {
     height: 0px;
-    background-color: ffdb9e; /* fallback color if gradients are not supported */
+    background-color: #ffdb9e; /* fallback color if gradients are not supported */
     background-image: -webkit-linear-gradient(top, #ffdb9e, #fff2db); /* For Chrome and Safari */
     background-image:    -moz-linear-gradient(top, #ffdb9e, #fff2db); /* For old Fx (3.6 to 15) */
     background-image:     -ms-linear-gradient(top, #ffdb9e, #fff2db); /* For pre-releases of IE 10*/

@@ -17,7 +17,6 @@ $(document).ready(function() {
     // Show search form on click
     $('#show-search-form').click(function() {
         $('#search_elements').css('z-index', 150);
-        $('.book_page').css('z-index', 90); // Give higher priority to search form over text display
         if ($(this).data('display') == "none") {
             showMoreOptions("all");
             $(this).data('display', 'block');
@@ -55,6 +54,8 @@ $(document).ready(function() {
             }
             showMoreOptions();
         } else {
+            $("#show-search-form").data('display', 'block');
+            $('#show-search-form').html('Hide search options');
             showHide(report);
             if (report != "frequencies") {
                 $("#search_elements")
@@ -67,6 +68,8 @@ $(document).ready(function() {
     // Close search form when clicking outside it
     $("#search_overlay, #header, #footer").click(function(e) {
         e.stopPropagation();
+        $('#show-search-form').data('display', 'none');
+        $('#show-search-form').html('Show search options');
         hideSearchForm();
     });
     
@@ -102,7 +105,6 @@ $(document).ready(function() {
                 $('#page_num input[name=pagenum][value=' + value + ']').parent().addClass('active');
             }
             else if (key == 'year_interval') {
-                console.log(key, value)
                 $('#year_interval input').removeAttr('checked');
                 $('#year_interval label').removeClass('active');
                 $('#year_interval input[name=year_interval][value=' + value + ']').prop('checked', true);
@@ -144,6 +146,7 @@ $(document).ready(function() {
     $('#method3').parent().click(function() {
         $("#arg_proxy, #arg_phrase").val('');
     });
+    
     
     metadataRemove();
     
@@ -262,17 +265,14 @@ function autoCompleteMetadata(metadata, field, db_url) {
 // Display different search parameters based on the type of report used
 function showHide(value) {
     $("#results_per_page, #collocation_num, #time_series_num, #date_range, #method, #metadata_fields").hide();
-    $('#bottom_search').hide()
     if (value == 'collocation') {
         $("#collocation_num, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
-        $('#search_terms_container').slideDown(250);
     }
     if (value == 'kwic' || value == "concordance") {
         $("#results_per_page, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
         $('#start_date, #end_date').val('');
-        $('#search_terms_container').slideDown(250);
     }
     if (value == 'relevance') {
         $("#results_per_page").show();
@@ -281,29 +281,34 @@ function showHide(value) {
         $("#time_series_num, #date_range, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').hide();
         $('#date').val('');
-        $('#search_terms_container').slideDown(250);
     }
     if (value == "frequencies") {
         $('#search_terms_container, #method, #results_per_page').hide();
-        $('#metadata_fields, #bottom_search').show();   
+        $('#metadata_fields').show();   
     }
 }
 
 //  Function to show or hide search options
 function showMoreOptions(display) {
+    var height = $("#search_overlay").parent().height() + 30;
     if (display == "all") {
         var report = $('#report label.active input').attr('id');
         showHide(report);
         $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
     }
-    var height = $(document).height() - $(header).height() - $(footer).height();
-    $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': height});
+    if (global_report != "landing_page") {
+        $("#search_overlay").css({'top': '50px', 'opacity': 0.2, 'height': height});
+    }
+    
     //setTimeout(searchFormOverlap, 250);
 }
 
 function hideSearchForm() {
     $("#search_elements").velocity('slideUp', {duration: 250, easing: 'easeOut'});
-    $("#search_overlay").css({'height': '0px', 'opacity': 0});
+    $("#search_overlay").css({'opacity': 0});
+    setTimeout(function() {
+        $("#search_overlay").css('height', '0px');
+    }, 250);
     //setTimeout(searchFormOverlap, 250);
 }
 

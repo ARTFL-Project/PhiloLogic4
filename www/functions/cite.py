@@ -85,15 +85,15 @@ def biblio_citation(db, config, i):
 def kwic_citation(db, i, short_citation_length):
     full_citation = ""
     short_citation = []
-    author = i.doc.author
-    title = i.doc.title
+    author = i.doc.author or ''
     if author:
         full_citation += author + ", "
-        short_citation.append(author)
+    short_citation.append(author)
+    title = i.doc.title
     full_citation += title
     short_citation.append(title)
         
-    if len(', '.join(short_citation)) > short_citation_length:
+    if len(', '.join([s for s in short_citation if s])) > short_citation_length:
         short_author, short_title = tuple(short_citation)
         if len(short_author) > 10:
             short_author = short_author[:10] + "&#8230;"
@@ -101,8 +101,7 @@ def kwic_citation(db, i, short_citation_length):
         title_len = short_citation_length - len(short_author)
         if len(short_title) > title_len:
             short_citation[1] = short_title[:title_len]
-    short_citation = ', '.join(short_citation)
-    print >> sys.stderr, "SHORT", short_citation.encode('utf-8')
+    short_citation = ', '.join([s for s in short_citation if s])
     
     ## Generate link to a div1 object
     get_query = byte_query(i.bytes)

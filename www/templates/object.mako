@@ -23,7 +23,7 @@
     <div class="row" id="all-content">
         <div id="toc-wrapper" class="col-xs-4">
             <div class="panel panel-default" id="toc-container" data-status="closed">
-                <div style="padding-bottom: 10px">
+                <div id="toc-titlebar">
                     <button type="button" class="btn btn-primary btn-xs pull-right" id="hide-toc">
                         <span class="glyphicon glyphicon-remove"></span>
                     </button>
