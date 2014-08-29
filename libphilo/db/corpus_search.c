@@ -46,7 +46,7 @@ enum stage_kind {
 
 typedef struct search_stage {
   enum stage_kind kind;
-  int (*fnc)(dbh *,uint32_t *,uint32_t *);  //may be unused for now, since positional args are a no-go
+  int (*check)(dbh *,uint32_t *,uint32_t *);
   union {
     word_heap heap;
     corpus corp;
@@ -388,7 +388,7 @@ word_rec * add_word(word_heap *heap, char *word) {
   free(rec);
 }
 
-uint32_t * heap_next_hit(word_heap *heap) {
+uint32_t * heap_advance(word_heap *heap) {
   word_rec *r;
   uint32_t *hit;
   if (heap->rec_count == 0) {
@@ -410,7 +410,7 @@ uint32_t * heap_next_hit(word_heap *heap) {
   }
 }
 
-uint32_t * corpus_next_hit(corpus *corpus) {
+uint32_t * corpus_advance(corpus *corpus) {
   // requires that corpus has a readable fh and malloc'd current_hit.  Does not require current_hit to be init'd.
   size_t res = fread(corpus->current_hit,sizeof(uint32_t), 7, corpus->fh); // read 1 7-wide hit into current_hit
   if (res < 7) {
@@ -420,21 +420,41 @@ uint32_t * corpus_next_hit(corpus *corpus) {
   }  
 }
 
-uint32_t * stage_next_hit(search_stage * stage) {
+uint32_t * stage_advance(search_stage * stage) {
   if (stage->kind == CORPUS) {
-  	return corpus_next_hit (&stage->data.corp);
+  	return corpus_advance (&stage->data.corp);
   } else if (stage->kind == HEAP) {
-    return heap_next_hit (&stage->data.heap);
+    return heap_advance (&stage->data.heap);
   }
 }
 
 uint32_t * stage_current_hit(search_stage * stage) {
-
+  if (stage->kind == CORPUS) {
+    return stage->data.corp.current_hit;
+  } else if (stage->kind == HEAP) {
+    return stage->data.heap.current_hit;
+  }
 }
 
+uint32_t * init_stage_heap(search_stage * stage, word_heap * heap) {
+  stage->kind = HEAP;
+  stage->data.heap = *heap; //worrisome
+  stage->check = hit_cmp; // wrong method
+  return stage_advance(stage);
+}
 
+uint32_t * init_stage_corp(search_stage * stage, corpus *corpus) {
+  stage->kind = CORPUS;
+  stage->data.corp = *corpus; //worrisome
+  stage->check = hit_cmp;  // ok?
+  return stage_advance(stage);
+}
 
-uint32_t * search_next_hit(search_stage *stages,int size) {  
+int dump_search_result(search_stage * stages, int size) {
+  return 0;
+}
+
+uint32_t * search_advance(search_stage *stages,int size) {  
   int c = size - 1;        // our position in the stages array; start at the end
   int check_res;           // the result of the previous stage's search predicate function
   uint32_t * advance_res;  // the result of advancing the current or previous stage--not actually used directly.
@@ -442,7 +462,7 @@ uint32_t * search_next_hit(search_stage *stages,int size) {
   search_stage * curr = &stages[c];
   search_stage * prev;     // not assigned until we know it is safe.
 
-  advance_res = stage_next_hit(curr); // advance the last stage. must do this at least once. 
+  advance_res = stage_advance(curr); // advance the last stage. must do this at least once. 
   if (size == 1) {                    // if this is a one-stage search, we're done.
     return stage_current_hit(curr);   // if current hit is NULL this returns NULL, so don't need to check explicitly.
   }
@@ -460,22 +480,25 @@ uint32_t * search_next_hit(search_stage *stages,int size) {
     }
 
     // otherwise, we need to check the curr hit against it's prev.
-    check_res = prev->fnc(NULL, stage_current_hit(prev),stage_current_hit(curr));
+    check_res = prev->check(NULL, stage_current_hit(prev),stage_current_hit(curr));
     if (check_res < 0) {         // if curr is ahead of prev, advance prev
-      advance_res = stage_next_hit(prev);
-      if (c > 1) {         // since we've moved prev, if it is not the innermost hit, we have to check it against it's own prev stage
+      advance_res = stage_advance(prev);
+      if (c > 1) {               // since we've advanced prev, if it is not the innermost hit, we have to check it against it's own prev stage in the next loop cycle
         c -= 1;
-      }                    // if we are at the innermost stage, do nothing, just keep advancing with curr = 1, prev - 0
+      }                          // if we are at the innermost stage, do nothing, just keep advancing with curr = 1, prev - 0
     } else if (check_res == 0) { // if curr and prev are within the window defined by prev's search check function...
-      if (c == size - 1) { // if we're on the outermost hit, it's good to output
+      if (c == size - 1) {       // if we're on the outermost hit, it's good to output
 	return stage_current_hit(curr);
-      } else {             // if we are on an inner hit, we can move our c counter outward.
+      } else {                   // if we are on an inner hit, we can move our c counter outward.
 	c += 1;
       }
     } else if (check_res > 0) {  // if prev is ahead of curr, advance curr
-      advance_res = stage_next_hit(curr);
+      advance_res = stage_advance(curr);
     }
   }
+}
+
+// NOTES for above:
   // while true:
   //   if current = 0: break
   //   prev = current - 1
@@ -490,8 +513,7 @@ uint32_t * search_next_hit(search_stage *stages,int size) {
   //       return current
   //     else:
   //       current = current + 1
-  return NULL;
-}
+
 
 int main(int argc, char **argv) {
 
@@ -506,6 +528,7 @@ int main(int argc, char **argv) {
   word_heap heap;
   int i,j;
   int optc;
+  int read;
   search_stage stages[20];
   int stage_c = 0;
   corpus corp;
@@ -516,13 +539,9 @@ int main(int argc, char **argv) {
       corpus_fn = optarg;
       corp.fn = corpus_fn;
       corp.fh = fopen(corp.fn,"r");
-      corpus_next_hit(&corp);
       // probably init corpus by hand here, since it can't come from anywhere else.
-      stages[0].kind = CORPUS;
-      stages[0].data.corp = corp;
-      stages[0].fnc = hit_cmp;
+      init_stage_corp(&stages[0],&corp);
       stage_c = 1;
-      stage_next_hit(&stages[0]);
       break;
     case 'm': // search method
       search_method_name = optarg;      
@@ -542,32 +561,38 @@ int main(int argc, char **argv) {
   db = init_dbh_folder(argv[optind]);
   heap = new_heap(db);
   while(fgets(buffer,256,stdin)) {
-    sscanf(buffer,"%s256",word);
-    rec = add_word(&heap,word);
-    
-    fprintf(stderr, "looking up %s : \n",word);
 
-    //word_lookup(db,word);
-    //rec = fetch_word(db,word);
-    //rec = new_word_rec(db,word);
-    if (rec == NULL) {
+    if (strcmp("\n",buffer) == 0) {
+      init_stage_heap(&stages[stage_c],&heap);
 
-    } else if (rec->type == 0) {
-      //fprintf(stderr, "%s: %d hits in header\n", rec.word, (int)rec.freq);
+      if (stage_advance(&stages[stage_c]) == NULL) { // an empty stage can immediately exit.
+	exit(0);
+      } else {
+	stage_c += 1;
+	if (stage_c == 20) { // if we've exceeded the max stage limit, unlikely.
+	  exit(1);
+	}
+	heap = new_heap(db);
+      }
     } else {
-      //fprintf(stderr, "%s: %d hits in %d blocks @ %d\n", rec.word, (int)rec.freq, rec.block_count, (int)rec.start_offset);
+      sscanf(buffer,"%s256",word);
+      rec = add_word(&heap,word);    
+      fprintf(stderr, "looking up %s : \n",word);
+
+      if (rec == NULL) {
+
+      } else if (rec->type == 0) {
+
+      } else {
+
+      }
     }
-    //add_record(&heap,&rec);
   }
-  fprintf(stderr, "word_heap has %lld total hits in %d records\n", heap.total_freq, (int)heap.rec_count);
-  for (j = 0; j < heap.rec_count; j++) {
-    //fprintf(stderr,"%s\n",heap.records[j].word); 
+  // clean up last stage
+  init_stage_heap(&stages[stage_c],&heap);
+  while (stage_advance(&stages[stage_c]) != NULL) {
+    // print the current hit;
+    dump_search_result(stages,stage_c);
   }
-  while (heap_next_hit(&heap) != NULL) {
-    //fprintf(stdout, "word\t%s\t", heap.current_word);    
-    //dump_hits(stdout,heap.db,heap.current_hit,1);
-    fprintf(stdout,"word\t%s\t%d %d %d %d %d %d %d %d %d\n", heap.current_word,heap.current_hit[0], heap.current_hit[1], heap.current_hit[2], heap.current_hit[3], heap.current_hit[4], heap.current_hit[5], heap.current_hit[6], heap.current_hit[7], heap.current_hit[8]);
-  }
-  //  start_stream(&heap);
   return 0;
 }
