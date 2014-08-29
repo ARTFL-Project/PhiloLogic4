@@ -450,7 +450,11 @@ uint32_t * init_stage_corp(search_stage * stage, corpus *corpus) {
   return stage_advance(stage);
 }
 
-int dump_search_result(search_stage * stages, int size) {
+int dump_search_result_ascii(search_stage * stages, int size) {
+  return 0;
+}
+
+int dump_search_result_binary(search_stage *stages, int size) {
   return 0;
 }
 
@@ -522,6 +526,8 @@ int main(int argc, char **argv) {
   char * corpus_fn;
   char * search_method_name;
   char * search_method_arg;
+  char * output_arg;
+  int (*dump_search_result)(search_stage *,int);
   char word[256];
   int32_t *hits;
   word_rec *rec;
@@ -533,7 +539,9 @@ int main(int argc, char **argv) {
   int stage_c = 0;
   corpus corp;
   
-  while ((optc = getopt(argc, argv, "c:m:a:")) != -1) {
+  dump_search_result = &dump_search_result_ascii;
+
+  while ((optc = getopt(argc, argv, "c:m:a:o:")) != -1) {
     switch (optc) {
     case 'c': // corpus file
       corpus_fn = optarg;
@@ -549,6 +557,9 @@ int main(int argc, char **argv) {
     case 'a': // search method argument
       search_method_arg = optarg;
       break;
+    case 'o': // output mode
+      output_arg = optarg;
+      if (strcmp(output_arg, "ascii") == 0) dump_search_result = &dump_search_result_ascii;
     case ':': // missing option argument
       break;
     case '?': // unrecognized
