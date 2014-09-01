@@ -17,7 +17,6 @@ $(document).ready(function() {
     // Show search form on click
     $('#show-search-form').click(function() {
         $('#search_elements').css('z-index', 150);
-        $('.book_page').css('z-index', 90); // Give higher priority to search form over text display
         if ($(this).data('display') == "none") {
             showMoreOptions("all");
             $(this).data('display', 'block');
@@ -55,6 +54,8 @@ $(document).ready(function() {
             }
             showMoreOptions();
         } else {
+            $("#show-search-form").data('display', 'block');
+            $('#show-search-form').html('Hide search options');
             showHide(report);
             if (report != "frequencies") {
                 $("#search_elements")
@@ -67,6 +68,8 @@ $(document).ready(function() {
     // Close search form when clicking outside it
     $("#search_overlay, #header, #footer").click(function(e) {
         e.stopPropagation();
+        $('#show-search-form').data('display', 'none');
+        $('#show-search-form').html('Show search options');
         hideSearchForm();
     });
     
@@ -102,7 +105,6 @@ $(document).ready(function() {
                 $('#page_num input[name=pagenum][value=' + value + ']').parent().addClass('active');
             }
             else if (key == 'year_interval') {
-                console.log(key, value)
                 $('#year_interval input').removeAttr('checked');
                 $('#year_interval label').removeClass('active');
                 $('#year_interval input[name=year_interval][value=' + value + ']').prop('checked', true);
@@ -110,6 +112,10 @@ $(document).ready(function() {
             }
             else if (key == 'field') {
                 $('select[name=' + key + ']').val(value);
+            }
+            else if (key == "q") {
+                $('#q').val(value);
+                $('#q2').val(value);
             }
             else {
                 $('#' + key).val(value);
@@ -145,6 +151,7 @@ $(document).ready(function() {
         $("#arg_proxy, #arg_phrase").val('');
     });
     
+    
     metadataRemove();
     
     // Add spinner to indicate that a query is running in the background
@@ -163,6 +170,41 @@ $(document).ready(function() {
             window.location = "?" + new_q_string.replace(/report=[^&]*/, 'report=error') + "&error_report=" + selected_report;
         }, 10000);
     });
+    
+    // Fixed search bar only in KWIC, concordance and collocation reports //
+    if (global_report == "concordance" || global_report == "kwic" || global_report == "collocation") {
+        $('#fixed-search').affix({
+            offset: {
+            top: function() {
+                return (this.top = $('#description').offset().top)
+                },
+            bottom: function() {
+                return (this.bottom = $('#footer').outerHeight(true))
+              }
+            }
+        });
+        $('#fixed-search').on('affix.bs.affix', function() {
+            $(this).addClass('fixed');
+            $(this).css('opacity', 1);
+        });
+        $('#fixed-search').on('affixed-top.bs.affix', function() {
+            $(this).css('opacity', 0);
+            setTimeout(function() {
+               $(this).removeClass('fixed'); 
+            });
+        });
+        $("#back-to-full-search").click(function() {
+            $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
+            setTimeout(function() {
+                showMoreOptions("all");
+                $("#show-search-form").data('display', 'block');
+                $('#show-search-form').html('Hide search options');
+            }, 800);            
+        });
+        $("#top-of-page").click(function() {
+            $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
+        });
+    }
     
     // Keep footer at bottom and make sure content doesn't overlap footer
     //setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
@@ -211,13 +253,34 @@ function autoCompleteWord(db_url) {
         minLength: 2,
         "dataType": "json",
         focus: function( event, ui ) {
-            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
             //$("#" + field).val(q); This is too sensitive, so disabled
             return false;
         },
         select: function( event, ui ) {
-            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
             $("#q").val(q);
+            return false;
+        }
+    }).data("ui-autocomplete")._renderItem = function (ul, item) {
+        var term = item.label.replace(/^[^<]*/g, '');
+        return $("<li></li>")
+            .data("item.autocomplete", item)
+            .append("<a>" + term + "</a>")
+            .appendTo(ul);
+    };
+    $("#q2").autocomplete({
+        source: db_url + "/scripts/term_list.py",
+        minLength: 2,
+        "dataType": "json",
+        focus: function( event, ui ) {
+            var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            //$("#" + field).val(q); This is too sensitive, so disabled
+            return false;
+        },
+        select: function( event, ui ) {
+            var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            $("#q2").val(q);
             return false;
         }
     }).data("ui-autocomplete")._renderItem = function (ul, item) {
@@ -262,17 +325,14 @@ function autoCompleteMetadata(metadata, field, db_url) {
 // Display different search parameters based on the type of report used
 function showHide(value) {
     $("#results_per_page, #collocation_num, #time_series_num, #date_range, #method, #metadata_fields").hide();
-    $('#bottom_search').hide()
     if (value == 'collocation') {
         $("#collocation_num, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
-        $('#search_terms_container').slideDown(250);
     }
     if (value == 'kwic' || value == "concordance") {
         $("#results_per_page, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
         $('#start_date, #end_date').val('');
-        $('#search_terms_container').slideDown(250);
     }
     if (value == 'relevance') {
         $("#results_per_page").show();
@@ -281,29 +341,34 @@ function showHide(value) {
         $("#time_series_num, #date_range, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').hide();
         $('#date').val('');
-        $('#search_terms_container').slideDown(250);
     }
     if (value == "frequencies") {
         $('#search_terms_container, #method, #results_per_page').hide();
-        $('#metadata_fields, #bottom_search').show();   
+        $('#metadata_fields').show();   
     }
 }
 
 //  Function to show or hide search options
 function showMoreOptions(display) {
+    var height = $("#search_overlay").parent().height() + 30;
     if (display == "all") {
         var report = $('#report label.active input').attr('id');
         showHide(report);
         $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
     }
-    var height = $(document).height() - $(header).height() - $(footer).height();
-    $("#search_overlay").css({'top': $('#header').height() + 'px', 'opacity': 0.2, 'height': height});
+    if (global_report != "landing_page") {
+        $("#search_overlay").css({'top': '50px', 'opacity': 0.2, 'height': height});
+    }
+    
     //setTimeout(searchFormOverlap, 250);
 }
 
 function hideSearchForm() {
     $("#search_elements").velocity('slideUp', {duration: 250, easing: 'easeOut'});
-    $("#search_overlay").css({'height': '0px', 'opacity': 0});
+    $("#search_overlay").css({'opacity': 0});
+    setTimeout(function() {
+        $("#search_overlay").css('height', '0px');
+    }, 250);
     //setTimeout(searchFormOverlap, 250);
 }
 

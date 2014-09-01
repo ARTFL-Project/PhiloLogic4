@@ -28,12 +28,12 @@
     <div class="row hidden-xs" id="act-on-report">
         <div class="col-sm-9 col-md-8 col-lg-6">
             <div id="report_switch" class="btn-group" data-toggle="buttons">
-                <label class="btn btn-primary active">
-                    <input type="radio" name="report_switch" id="concordance_switch" value="?${q['q_string'].replace('report=kwic', 'report=concordance')}" checked>
+                <label class="btn btn-primary">
+                    <input type="radio" name="report_switch" id="concordance_switch" value="?${q['q_string'].replace('report=kwic', 'report=concordance')}">
                     View occurences with context
                 </label>
-                <label class="btn btn-primary">
-                    <input type="radio" name="report_switch" id="kwic_switch" value="?${q['q_string'].replace('report=concordance', 'report=kwic')}">
+                <label class="btn btn-primary active">
+                    <input type="radio" name="report_switch" id="kwic_switch" value="?${q['q_string'].replace('report=concordance', 'report=kwic')}" checked="checked">
                     View occurences line by line (KWIC)
                 </label>
             </div>

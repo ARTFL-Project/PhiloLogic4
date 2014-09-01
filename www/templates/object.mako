@@ -23,7 +23,7 @@
     <div class="row" id="all-content">
         <div id="toc-wrapper" class="col-xs-4">
             <div class="panel panel-default" id="toc-container" data-status="closed">
-                <div style="padding-bottom: 10px">
+                <div id="toc-titlebar">
                     <button type="button" class="btn btn-primary btn-xs pull-right" id="hide-toc">
                         <span class="glyphicon glyphicon-remove"></span>
                     </button>
@@ -31,7 +31,7 @@
                 <div id="toc-content"></div>
             </div>
         </div>
-        <div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-offset-2 col-md-8" id="center-content">
+        <div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-offset-2 col-md-8 col-lg-offset-3 col-lg-6" id="center-content">
             <div class="row">
                 <div class="col-xs-12">
                     <div id="book-page">

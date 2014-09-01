@@ -1,4 +1,4 @@
-#object-title, #toc-title {
+#object-title {
     font-size: 140%;
     line-height: 120%;
     margin: 20px 0px 20px 0px;
@@ -10,9 +10,6 @@
 }
 #all-content {
     margin-top: 50px; 
-}
-#center-content, #nav-buttons {
-    transition: all 300ms;
 }
 #book-page {
     text-align: center;
@@ -30,9 +27,14 @@
 #toc-wrapper.show {
     width: auto;
 }
+#toc-report-title {
+    font-size: 1.2em;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
 #toc-container {
-    /*display: inline-block;*/
     background: rgba(39, 107, 155, .9);
+    top: 32px !important;
 }
 #toc-container a {
     color: #fff;
@@ -44,9 +46,10 @@ a.current-obj {
 #toc-content {
     display: inline-block;
     overflow: scroll;
-    padding: 23px 10px 10px 10px;
+    padding: 10px;
     line-height: 180%;
     text-align: justify;
+    width: 100%;
 }
 #back-to-top {
     position: absolute;
@@ -60,11 +63,12 @@ a.current-obj {
     position: absolute;
     width: 100%;
     z-index: 80;
+    transition: background 200ms;
 }
 #nav-buttons.fixed {
     position: fixed;
     top: 0;
-    background: rgba(39, 107, 155, .9);
+    background: rgba(39, 107, 155, .7);
 }
 .toc-div1 > a, .toc-div2 > a, .toc-div3 > a {
     padding: 5px 5px 5px 0px;

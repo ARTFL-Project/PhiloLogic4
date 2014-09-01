@@ -1,8 +1,8 @@
 ## -*- coding: utf-8 -*-
 <div id='search_overlay'></div>
 <div class="container" style="overflow: hidden;">
+    <form id="search" action="${config.db_url + "/dispatcher.py/"}" role="form">
     <div id="form_body">
-        <form id="search" action="${config.db_url + "/dispatcher.py/"}" role="form">
             <div id="initial-form">
                 <div id="report" class="btn-group btn-group-justified" data-toggle="buttons">
                     % if "concordance" in config.search_reports:
@@ -53,7 +53,7 @@
                         <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
                             <!--<input id="button1" type='submit' class="btn btn-primary" value="Search"/>-->
                             <button type="reset" id="reset_form" class="btn btn-danger">Clear</button>
-                            <button type="button" id="show-search-form" class="btn btn-danger" data-display="none" style="display: none">Show search options</button>
+                            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" style="display: none">Show search options</button>
                         </div>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                 </h5>             
                 <!--This row defines the search method options-->
                 <div class="row hidden-xs" id='method'>
-                    <div class="col-xs-12 col-sm-2">
+                    <div class="col-xs-12 col-sm-2" style="margin-top: 40px;">
                         Search Terms
                     </div>
                     <div class="col-xs-12 col-sm-3 col-lg-2" id="method-buttons">
@@ -189,8 +189,30 @@
             <div id="bottom_search">
                 <input id="button2" type='submit' value="Run Task"/>
             </div>
-        </form>
-    </div>
+        </div>
+        <div id="fixed-search" class="row">
+            <div class="col-xs-4 col-sm-3">
+                <button type="button" id="top-of-page" class="btn btn-primary btn-sm">
+                    Back to top
+                </button>
+            </div>
+            <div class="col-xs-8 col-sm-6">
+                <div class="input-group">
+                    <input type='text' name='q' id='q2' class="form-control input-sm">
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-primary btn-sm" id="button-search2">
+                            <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
+                        </button>
+                    </span> 
+                </div>
+            </div>
+            <div class="hidden-xs col-sm-3">
+                <button type="button" id="back-to-full-search" class="btn btn-primary btn-sm pull-right">
+                    Back to full search form
+                </button>
+            </div>
+        </div>
+    </form>
     <div id="waiting" style="display:none;z-index:99;position:absolute;">
         <img src="${config.db_url}/js/gif/ajax-loader.gif" alt="Loading..."/>
     </div>
