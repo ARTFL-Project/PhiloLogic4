@@ -68,7 +68,7 @@ a.current-obj {
 #nav-buttons.fixed {
     position: fixed;
     top: 0;
-    background: rgba(39, 107, 155, .9);
+    background: rgba(39, 107, 155, .7);
 }
 .toc-div1 > a, .toc-div2 > a, .toc-div3 > a {
     padding: 5px 5px 5px 0px;

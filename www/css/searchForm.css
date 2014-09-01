@@ -114,6 +114,23 @@
 	display: none;
 }
 
+/*Fixed search bar*/
+#fixed-search {
+	padding-top: 1px;
+	padding-bottom: 1px;
+	background: rgba(39, 107, 155, .7);
+	width: 100%;
+    z-index: -10;
+	left: 15px;
+	position: absolute;
+    transition: opacity 200ms;
+	top: 0;
+}
+#fixed-search.fixed {
+	z-index: 200;
+	position: fixed;
+}
+
 /*Responsiveness*/
 @media (min-width: 1201px) {
 	#form_body {

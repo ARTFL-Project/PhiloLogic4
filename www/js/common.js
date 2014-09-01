@@ -113,6 +113,10 @@ $(document).ready(function() {
             else if (key == 'field') {
                 $('select[name=' + key + ']').val(value);
             }
+            else if (key == "q") {
+                $('#q').val(value);
+                $('#q2').val(value);
+            }
             else {
                 $('#' + key).val(value);
             }
@@ -167,6 +171,41 @@ $(document).ready(function() {
         }, 10000);
     });
     
+    // Fixed search bar only in KWIC, concordance and collocation reports //
+    if (global_report == "concordance" || global_report == "kwic" || global_report == "collocation") {
+        $('#fixed-search').affix({
+            offset: {
+            top: function() {
+                return (this.top = $('#description').offset().top)
+                },
+            bottom: function() {
+                return (this.bottom = $('#footer').outerHeight(true))
+              }
+            }
+        });
+        $('#fixed-search').on('affix.bs.affix', function() {
+            $(this).addClass('fixed');
+            $(this).css('opacity', 1);
+        });
+        $('#fixed-search').on('affixed-top.bs.affix', function() {
+            $(this).css('opacity', 0);
+            setTimeout(function() {
+               $(this).removeClass('fixed'); 
+            });
+        });
+        $("#back-to-full-search").click(function() {
+            $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
+            setTimeout(function() {
+                showMoreOptions("all");
+                $("#show-search-form").data('display', 'block');
+                $('#show-search-form').html('Hide search options');
+            }, 800);            
+        });
+        $("#top-of-page").click(function() {
+            $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
+        });
+    }
+    
     // Keep footer at bottom and make sure content doesn't overlap footer
     //setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
     $(window).resize(function() {
@@ -214,13 +253,34 @@ function autoCompleteWord(db_url) {
         minLength: 2,
         "dataType": "json",
         focus: function( event, ui ) {
-            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
             //$("#" + field).val(q); This is too sensitive, so disabled
             return false;
         },
         select: function( event, ui ) {
-            q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
             $("#q").val(q);
+            return false;
+        }
+    }).data("ui-autocomplete")._renderItem = function (ul, item) {
+        var term = item.label.replace(/^[^<]*/g, '');
+        return $("<li></li>")
+            .data("item.autocomplete", item)
+            .append("<a>" + term + "</a>")
+            .appendTo(ul);
+    };
+    $("#q2").autocomplete({
+        source: db_url + "/scripts/term_list.py",
+        minLength: 2,
+        "dataType": "json",
+        focus: function( event, ui ) {
+            var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            //$("#" + field).val(q); This is too sensitive, so disabled
+            return false;
+        },
+        select: function( event, ui ) {
+            var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+            $("#q2").val(q);
             return false;
         }
     }).data("ui-autocomplete")._renderItem = function (ul, item) {
