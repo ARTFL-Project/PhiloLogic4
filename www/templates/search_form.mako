@@ -51,7 +51,6 @@
                             </div>
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
-                            <!--<input id="button1" type='submit' class="btn btn-primary" value="Search"/>-->
                             <button type="reset" id="reset_form" class="btn btn-danger">Clear</button>
                             <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" style="display: none">Show search options</button>
                         </div>
@@ -185,9 +184,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div id="bottom_search">
-                <input id="button2" type='submit' value="Run Task"/>
             </div>
         </div>
         <div id="fixed-search" class="row">

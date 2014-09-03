@@ -128,3 +128,21 @@ sp+l, sp+ab {
 stage {
     font-style: italic;
 }
+
+@media (max-width: 768px) {
+	.more_context {
+        display: none;
+    }
+    .cite {
+        text-overflow: inherit;
+        overflow: auto;
+        white-space: normal;
+		line-height: 170%;
+    }
+	.more {
+		padding-bottom: 30px;
+	}
+	.citation-overflow {
+		display: none;
+	}
+}

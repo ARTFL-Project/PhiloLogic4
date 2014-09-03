@@ -32,7 +32,10 @@ $(document).ready(function() {
     if (global_report == "landing_page") {
         showHide('concordance');
         $(window).load(function() {
-            $('#search_elements').velocity("slideDown",{duration: 400, 'easing': 'easeIn'});
+            setTimeout(function() {
+                $('#search_elements').velocity("slideDown",{duration: 400, 'easing': 'easeIn'});
+            }, 50)
+            
             // Keep footer at bottom and make sure content doesn't overlap footer
             setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
         });
@@ -355,9 +358,10 @@ function showMoreOptions(display) {
         var report = $('#report label.active input').attr('id');
         showHide(report);
         $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
+        
     }
     if (global_report != "landing_page") {
-        $("#search_overlay").css({'top': '50px', 'opacity': 0.2, 'height': height});
+        setTimeout(function() {$("#search_overlay").css({'top': '50px', 'opacity': 0.2, 'height': height})}, 250);
     }
     
     //setTimeout(searchFormOverlap, 250);
@@ -365,10 +369,12 @@ function showMoreOptions(display) {
 
 function hideSearchForm() {
     $("#search_elements").velocity('slideUp', {duration: 250, easing: 'easeOut'});
-    $("#search_overlay").css({'opacity': 0});
+    setTimeout(function() {
+        $("#search_overlay").css({'opacity': 0});
+    }, 250);
     setTimeout(function() {
         $("#search_overlay").css('height', '0px');
-    }, 250);
+    }, 500);
     //setTimeout(searchFormOverlap, 250);
 }
 

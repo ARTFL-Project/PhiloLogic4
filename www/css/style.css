@@ -38,19 +38,25 @@ body {
 }
 
 /* Fonts */
-.main_body{
+#main-body{
     font-weight:300;
     font-size: 14px;
     line-height: 130%;
-    margin-bottom: 20px;
 }
-table {
-  font-size:inherit;
-  font-weight: inherit;
+@media (max-width: 768px) {
+    #main-body, .btn {
+        font-size: 12px !important;
+    }
+    #results_container {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .form-control {
+        height: 31px;
+    }
 }
 ol {
-    list-style-type: none;
-    padding: 0px;
+    padding: 0;
 }
 .small-caps {
     font-variant:small-caps;

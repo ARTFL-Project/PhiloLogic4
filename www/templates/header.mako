@@ -54,5 +54,5 @@
                     </div>
                 </div>
             </div>
-            <div id="main_body">
+            <div id="main-body">
                 <div class="container-fluid">            
