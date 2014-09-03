@@ -9,6 +9,7 @@ from functions.wsgi_handler import wsgi_response
 from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
+from functions import concatenate_files
 import json
 
 
@@ -31,6 +32,7 @@ def kwic(environ,start_response):
         
 def render_kwic(hits, db, dbname, q, path, config):
     biblio_criteria = f.biblio_criteria(q, config)
+    concatenate_files(path, "kwic", debug=db.locals["debug"])
     return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
                                 path=path, results_per_page=q['results_per_page'], biblio_criteria=biblio_criteria,
                                 config=config, template_name='kwic.mako', report="kwic")

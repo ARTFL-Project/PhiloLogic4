@@ -13,6 +13,7 @@ from render_template import render_template
 from collocation import tokenize, filter
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
+from functions import concatenate_files
 
 
 end_highlight_match = re.compile(r'.*<span class="highlight">[^<]*?(</span>)')
@@ -45,6 +46,7 @@ def concordance_from_collocation(environ,start_response):
                     k = config.metadata_aliases[k]
                 biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b></span>' % (k.title(), v.decode('utf-8', 'ignore'), ))
         biblio_criteria = ' '.join(biblio_criteria)
+        concatenate_files(path, "concordance_from_collocation", debug=db.locals["debug"])
         return render_template(results=colloc_results,db=db,dbname=dbname,q=q,colloc_concordance=colloc_concordance,
                                f=f,path=path, results_per_page=q['results_per_page'], config=config,report="concordance_from_collocation",
                                biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako")

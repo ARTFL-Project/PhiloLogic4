@@ -5,6 +5,7 @@ import sys
 sys.path.append('..')
 import functions as f
 from functions.wsgi_handler import wsgi_response
+from functions import concatenate_files
 from render_template import render_template
 import json
 
@@ -37,6 +38,7 @@ def fetch_bibliography(f,path, db, dbname, q, environ):
     if q['format'] == "json":
         return hits
     else:
+        concatenate_files(path, "bibliography", debug=db.locals["debug"])
         config = f.WebConfig()
         biblio_criteria = f.biblio_criteria(q, config)
         return render_template(results=hits,db=db,dbname=dbname,q=q, template_name='bibliography.mako',

@@ -22,15 +22,7 @@
         
     
     <link type="text/css" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css" rel="stylesheet" />
-    <link rel="stylesheet" href="${config.db_url}/css/style.css" type="text/css" media="screen, projection">
-    <link rel="stylesheet" href="${config.db_url}/css/searchForm.css" type="text/css" media="screen, projection">
-    % if report == "concordance" or report == "kwic" or report == "concordance_from_collocation" or report == "bibliography":
-        <link rel="stylesheet" href="${config.db_url}/css/concordanceKwic.css" type="text/css" media="screen, projection">
-    % elif report == "time_series":
-        <link rel="stylesheet" href="${config.db_url}/css/timeSeries.css" type="text/css" media="screen, projection">
-    % elif report == "navigation" or report == "t_o_c":
-        <link rel="stylesheet" href="${config.db_url}/css/textObjectNavigation.css" type="text/css" media="screen, projection">
-    % endif
+    <link rel="stylesheet" href="${config.db_url}/css/${report}.css" type="text/css" media="screen, projection">
     
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>

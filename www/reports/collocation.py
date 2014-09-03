@@ -12,6 +12,7 @@ from render_template import render_template
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
 from bibliography import fetch_bibliography as bibliography
+from functions import concatenate_files
 from collections import defaultdict
 from operator import itemgetter
 
@@ -37,6 +38,7 @@ def collocation(environ,start_response):
     
 def render_collocation(hits, db, dbname, q, path, config):
     biblio_criteria = f.biblio_criteria(q, config)
+    concatenate_files(path, "collocation", debug=db.locals["debug"])
     all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q, db)
     hit_len = len(hits)
     return render_template(all_colloc=all_colloc, left_colloc=left_colloc, right_colloc=right_colloc,
