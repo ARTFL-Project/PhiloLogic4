@@ -117,6 +117,7 @@ $(document).ready(function() {
                 $('select[name=' + key + ']').val(value);
             }
             else if (key == "q") {
+                console.log(value)
                 $('#q').val(value);
                 $('#q2').val(value);
             }
@@ -157,6 +158,20 @@ $(document).ready(function() {
     
     metadataRemove();
     
+    
+    // Catch Enter keypress when focused on fixed search bar input
+    $("#q2").keyup(function(e) {
+        e.preventDefault();
+        if (e.keyCode == 13) {
+            $('#button-search2').trigger('click');
+        }
+    });
+    // Trigger form submit using value from fixed search bar
+    $('#button-search2').click(function() {
+        $('#q').val($("#q2").val());
+        $("#search").trigger('submit');
+    });
+    
     // Add spinner to indicate that a query is running in the background
     // and close autocomplete
     $('#search').submit(function(e) {
@@ -164,7 +179,7 @@ $(document).ready(function() {
         var width = $(window).width() / 2 - 100;
         hideSearchForm();
         $("#waiting").css("margin-left", width).css('margin-top', 100).show();
-        new_q_string = $(this).serialize();
+        var new_q_string = $(this).serialize();
         // Set a timeout in case the browser hangs: redirect to no hits after 10 seconds
         setTimeout(function() {
             e.preventDefault();

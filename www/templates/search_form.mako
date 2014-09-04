@@ -194,9 +194,9 @@
             </div>
             <div class="col-xs-8 col-sm-6">
                 <div class="input-group">
-                    <input type='text' name='q' id='q2' class="form-control input-sm">
+                    <input type='text' id='q2' class="form-control input-sm">
                     <span class="input-group-btn">
-                        <button type="submit" class="btn btn-primary btn-sm" id="button-search2">
+                        <button type="button" class="btn btn-primary btn-sm" id="button-search2">
                             <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
                         </button>
                     </span> 
