@@ -15,4 +15,4 @@ def landing_page(environ,start_response):
     path = os.getcwd()
     concatenate_files(path, "landing_page", debug=db.locals["debug"])
     return render_template(db=db,dbname=dbname,form=True, q=q, template_name='landing_page.mako',
-                           config=config, report="landing_page")
+                           config=config, report="landing_page", scripts=f.concatenate.report_files['js']["landing_page"])

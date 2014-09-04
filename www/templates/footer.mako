@@ -64,6 +64,12 @@
         <script type="text/javascript" src="http://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
         <script type="text/javascript" src="${config.db_url}/js/plugins/jquery.history.js"></script>
         <script type="text/javascript" src="${config.db_url}/js/plugins/jquery.velocity.min.js"></script>
-        <script src="${config.db_url}/js/${report}.js" type="text/javascript"></script>
+        % if not db.locals['debug']:
+            <script src="${config.db_url}/js/${report}.js" type="text/javascript"></script>
+        % else:
+            % for script in scripts:
+                <script src="${config.db_url}/js/${script}" type="text/javascript"></script>
+            % endfor
+        % endif
     </body>
 </html>

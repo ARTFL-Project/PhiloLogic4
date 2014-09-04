@@ -49,7 +49,8 @@ def concordance_from_collocation(environ,start_response):
         concatenate_files(path, "concordance_from_collocation", debug=db.locals["debug"])
         return render_template(results=colloc_results,db=db,dbname=dbname,q=q,colloc_concordance=colloc_concordance,
                                f=f,path=path, results_per_page=q['results_per_page'], config=config,report="concordance_from_collocation",
-                               biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako")
+                               biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako",
+                               scripts=f.concatenate.report_files['js']["concordance_from_collocation"])
         
 def fetch_colloc_concordance(results, path, q, db, config, word_filter=True, filter_num=100, stopwords=True):
     length = config['concordance_length']

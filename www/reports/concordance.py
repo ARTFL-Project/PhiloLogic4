@@ -42,7 +42,7 @@ def render_concordance(hits, db, dbname, q, path, config):
     biblio_criteria = f.biblio_criteria(q, config)
     return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
                                f=f, path=path, results_per_page=q['results_per_page'],biblio_criteria=biblio_criteria,
-                               config=config,template_name="concordance.mako", report="concordance")
+                               config=config,template_name="concordance.mako", report="concordance", scripts=f.concatenate.report_files['js']["concordance"])
 
 def fetch_concordance(hit, path, context_size):
     ## Determine length of text needed

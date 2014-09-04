@@ -43,7 +43,7 @@ def fetch_bibliography(f,path, db, dbname, q, environ):
         biblio_criteria = f.biblio_criteria(q, config)
         return render_template(results=hits,db=db,dbname=dbname,q=q, template_name='bibliography.mako',
                            results_per_page=q['results_per_page'], f=f, biblio_criteria=biblio_criteria,
-                           config=config, report="bibliography")
+                           config=config, report="bibliography", scripts=f.concatenate.report_files['js']["bibliography"])
     
 def group_by_author(hits, db, author="author"):
     object_level = db.locals['default_object_level']
