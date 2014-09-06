@@ -49,7 +49,6 @@
 	right: 0;
 	top: 0;
 	height: 34px;
-	border-color: #eee;
 	border-width: 0px 0px 0px 1px;
 	transition: all 250ms;
 }
@@ -59,12 +58,6 @@
 	right:0;
 	height: 23px;
 	width: 100%; 
-	background: -moz-linear-gradient(left, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 86%, rgba(255,255,255,1) 94%, rgba(255,255,255,1) 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,0)), color-stop(86%,rgba(255,255,255,0)), color-stop(94%,rgba(255,255,255,1)), color-stop(100%,rgba(255,255,255,1))); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* IE10+ */
-	background: linear-gradient(to right, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* W3C */
 }
 .cite {
     display: inline-block;
@@ -82,14 +75,13 @@
 .citation-container {
 	margin-top: -7px;
 	padding-top: 7px;
-	border-bottom: 1px solid #eee;
+	border-bottom: 1px solid;
 }
 .citation {
     padding-left: 4px;
 	display: inline-block;
 }
 .collocate {
-    color:#1E90FF;
     font-weight:400;
 }
 
@@ -127,4 +119,22 @@ sp+l, sp+ab {
 }
 stage {
     font-style: italic;
+}
+
+@media (max-width: 768px) {
+	.more_context {
+        display: none;
+    }
+    .cite {
+        text-overflow: inherit;
+        overflow: auto;
+        white-space: normal;
+		line-height: 170%;
+    }
+	.more {
+		padding-bottom: 30px;
+	}
+	.citation-overflow {
+		display: none;
+	}
 }

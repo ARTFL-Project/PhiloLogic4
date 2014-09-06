@@ -51,7 +51,6 @@
                             </div>
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
-                            <!--<input id="button1" type='submit' class="btn btn-primary" value="Search"/>-->
                             <button type="reset" id="reset_form" class="btn btn-danger">Clear</button>
                             <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" style="display: none">Show search options</button>
                         </div>
@@ -186,9 +185,6 @@
                     </div>
                 </div>
             </div>
-            <div id="bottom_search">
-                <input id="button2" type='submit' value="Run Task"/>
-            </div>
         </div>
         <div id="fixed-search" class="row">
             <div class="col-xs-4 col-sm-3">
@@ -198,9 +194,9 @@
             </div>
             <div class="col-xs-8 col-sm-6">
                 <div class="input-group">
-                    <input type='text' name='q' id='q2' class="form-control input-sm">
+                    <input type='text' id='q2' class="form-control input-sm">
                     <span class="input-group-btn">
-                        <button type="submit" class="btn btn-primary btn-sm" id="button-search2">
+                        <button type="button" class="btn btn-primary btn-sm" id="button-search2">
                             <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
                         </button>
                     </span> 

@@ -8,6 +8,7 @@ import re
 import sys
 import functions as f
 from functions.wsgi_handler import wsgi_response
+from functions import concatenate_files
 from render_template import render_template
 from philologic import HitWrapper
 import json
@@ -22,15 +23,40 @@ def navigation(environ,start_response):
     prev = ' '.join(obj.prev.split()[:7])
     next = ' '.join(obj.next.split()[:7])
     if q['format'] == "json":
+        if check_philo_virtual(db, path_components):
+            obj = db[path_components[:-1]]
         obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
         return json.dumps({'text': obj_text, 'prev': prev, 'next': next, 'shrtcit':  f.cite.make_abs_doc_shrtcit_mobile(db,obj)})
     if obj.philo_type == 'doc':
+        concatenate_files(path, "t_o_c", debug=db.locals["debug"])
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c")
+                       db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c",
+                       scripts=f.concatenate.report_files['js']["t_o_c"])
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
+    concatenate_files(path, "navigation", debug=db.locals["debug"])
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
                        db=db,q=q,obj_text=obj_text,prev=prev,next=next,config=config,
-                       template_name='object.mako', report="navigation")
+                       template_name='object.mako', report="navigation", scripts=f.concatenate.report_files['js']["navigation"])
+
+def check_philo_virtual(db, path_components):
+    object_type = ''
+    if len(path_components) == 2:
+        object_type = "div1"
+    if len(path_components) == 3:
+        object_type = "div2"
+    if len(path_components) == 4:
+        object_type = "div3"
+    c = db.dbh.cursor()
+    query = 'select philo_name from toms where philo_id like "' + ' '.join(path_components) + ' %" and philo_type="' + object_type + '"'
+    c.execute(query)
+    try:
+        name = c.fetchone()[0]
+        if name == "__philo_virtual":
+            return True
+        else:
+            return False
+    except TypeError:
+        return False
 
 def navigate_doc(obj, db):
     """This function fetches all philo_ids for div elements within a doc"""

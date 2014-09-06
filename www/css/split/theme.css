@@ -1,0 +1,121 @@
+/*THEME*/
+.navbar-inverse, .panel-default > .panel-heading {
+    background: #276B9B !important;
+}
+.navbar-brand:hover, .navbar-inverse .navbar-nav>li>a:hover, .panel-default > .panel-heading {
+    color: #fff !important;
+}
+.navbar {
+    box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
+}
+.btn-primary {
+    background: #4180ab;
+    transition: background-color 200ms;
+}
+.btn-primary:hover {
+    background: #649DC5;
+}
+.btn-primary.active {
+    background: #276B9B;
+}
+.biblio-criteria {
+    background: #d9534f;
+    border: solid 1px #d43f3a;
+}
+.navbar-brand, .navbar-inverse a {
+    color: #ECEDEE !important;
+}
+a {
+    color: #276B9B;
+}
+a:hover {
+    color: #4180ab !important;
+}
+
+/*Metadata criteria in results*/
+.biblio-criteria {
+    color: #fff;
+    background: #d9534f;
+    border: solid 1px #d43f3a;
+}
+/*TOC styling*/
+.toc-div1 > a:hover, .toc-div2 > a:hover, .toc-div3 > a:hover {
+    text-decoration: none;
+    background: #649DC5;
+    color: #fff !important;
+}
+
+/*Concordance Kwic styling*/
+.more_context, .citation-container {
+    border-color: #eee;
+}
+.citation-overflow {
+    background: -moz-linear-gradient(left, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 86%, rgba(255,255,255,1) 94%, rgba(255,255,255,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,0)), color-stop(86%,rgba(255,255,255,0)), color-stop(94%,rgba(255,255,255,1)), color-stop(100%,rgba(255,255,255,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* IE10+ */
+	background: linear-gradient(to right, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* W3C */
+}
+.collocate {
+    color:#1E90FF;
+}
+
+/*Search form*/
+#form_body {
+    box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
+    background: #fff;
+}
+#initial-form {
+	/*background: rgb(39, 107, 155);*/
+	/*color: #fff;*/
+	/*padding-bottom: 15px;*/
+}
+#search_elements {
+    border-top-color: #eee;
+}
+#more_options:hover {
+    background-color: #eee;
+}
+#fixed-search, #nav-buttons.fixed {
+    background: rgba(39, 107, 155, .7);
+}
+
+/*Text object navigation*/
+#toc-container {
+    background: rgba(39, 107, 155, .9);
+}
+a.current-obj {
+    background: rgba(256, 256, 256, .9);
+    color: rgb(39, 107, 155) !important;
+}
+.bullet-point-div1 {
+    background: #fff;
+}
+.bullet-point-div1, .bullet-point-div2, .bullet-point-div3 {
+    border-color: #fff;
+}
+
+/*TOC report styling*/
+#toc-report .bullet-point-div1 {
+    border: solid 1px #000;
+    background: #000;
+}
+#toc-report .bullet-point-div2 {
+    border: solid 2px #000;
+    background: #fff;
+}
+#toc-report .bullet-point-div3 {
+    border: solid 1px #000;
+    background: #fff;
+}
+
+/*Time series*/
+.graph_bar {
+    background-color: #ffdb9e; /* fallback color if gradients are not supported */
+    background-image: -webkit-linear-gradient(top, #ffdb9e, #fff2db); /* For Chrome and Safari */
+    background-image:    -moz-linear-gradient(top, #ffdb9e, #fff2db); /* For old Fx (3.6 to 15) */
+    background-image:     -ms-linear-gradient(top, #ffdb9e, #fff2db); /* For pre-releases of IE 10*/
+    background-image:      -o-linear-gradient(top, #ffdb9e, #fff2db); /* For old Opera (11.1 to 12.0) */ 
+    background-image:         linear-gradient(to bottom, #ffdb9e, #fff2db); /* Standard syntax; must be last */
+}

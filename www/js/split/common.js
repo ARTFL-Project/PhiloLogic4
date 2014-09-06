@@ -32,7 +32,10 @@ $(document).ready(function() {
     if (global_report == "landing_page") {
         showHide('concordance');
         $(window).load(function() {
-            $('#search_elements').velocity("slideDown",{duration: 400, 'easing': 'easeIn'});
+            setTimeout(function() {
+                $('#search_elements').velocity("slideDown",{duration: 400, 'easing': 'easeIn'});
+            }, 50)
+            
             // Keep footer at bottom and make sure content doesn't overlap footer
             setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
         });
@@ -114,6 +117,7 @@ $(document).ready(function() {
                 $('select[name=' + key + ']').val(value);
             }
             else if (key == "q") {
+                console.log(value)
                 $('#q').val(value);
                 $('#q2').val(value);
             }
@@ -154,6 +158,20 @@ $(document).ready(function() {
     
     metadataRemove();
     
+    
+    // Catch Enter keypress when focused on fixed search bar input
+    $("#q2").keyup(function(e) {
+        e.preventDefault();
+        if (e.keyCode == 13) {
+            $('#button-search2').trigger('click');
+        }
+    });
+    // Trigger form submit using value from fixed search bar
+    $('#button-search2').click(function() {
+        $('#q').val($("#q2").val());
+        $("#search").trigger('submit');
+    });
+    
     // Add spinner to indicate that a query is running in the background
     // and close autocomplete
     $('#search').submit(function(e) {
@@ -161,7 +179,7 @@ $(document).ready(function() {
         var width = $(window).width() / 2 - 100;
         hideSearchForm();
         $("#waiting").css("margin-left", width).css('margin-top', 100).show();
-        new_q_string = $(this).serialize();
+        var new_q_string = $(this).serialize();
         // Set a timeout in case the browser hangs: redirect to no hits after 10 seconds
         setTimeout(function() {
             e.preventDefault();
@@ -185,10 +203,10 @@ $(document).ready(function() {
         });
         $('#fixed-search').on('affix.bs.affix', function() {
             $(this).addClass('fixed');
-            $(this).css('opacity', 1);
+            $(this).css({'opacity': 1, "pointer-events": "auto"});
         });
         $('#fixed-search').on('affixed-top.bs.affix', function() {
-            $(this).css('opacity', 0);
+            $(this).css({'opacity': 0, "pointer-events": "none"});
             setTimeout(function() {
                $(this).removeClass('fixed'); 
             });
@@ -355,9 +373,10 @@ function showMoreOptions(display) {
         var report = $('#report label.active input').attr('id');
         showHide(report);
         $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
+        
     }
     if (global_report != "landing_page") {
-        $("#search_overlay").css({'top': '50px', 'opacity': 0.2, 'height': height});
+        setTimeout(function() {$("#search_overlay").css({'top': '50px', 'opacity': 0.2, 'height': height})}, 250);
     }
     
     //setTimeout(searchFormOverlap, 250);
@@ -365,10 +384,12 @@ function showMoreOptions(display) {
 
 function hideSearchForm() {
     $("#search_elements").velocity('slideUp', {duration: 250, easing: 'easeOut'});
-    $("#search_overlay").css({'opacity': 0});
+    setTimeout(function() {
+        $("#search_overlay").css({'opacity': 0});
+    }, 250);
     setTimeout(function() {
         $("#search_overlay").css('height', '0px');
-    }, 250);
+    }, 500);
     //setTimeout(searchFormOverlap, 250);
 }
 

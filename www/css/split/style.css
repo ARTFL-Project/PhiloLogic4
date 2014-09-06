@@ -38,19 +38,25 @@ body {
 }
 
 /* Fonts */
-.main_body{
+#main-body{
     font-weight:300;
     font-size: 14px;
     line-height: 130%;
-    margin-bottom: 20px;
 }
-table {
-  font-size:inherit;
-  font-weight: inherit;
+@media (max-width: 768px) {
+    #main-body, .btn {
+        font-size: 12px !important;
+    }
+    #results_container {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .form-control {
+        height: 31px;
+    }
 }
 ol {
-    list-style-type: none;
-    padding: 0px;
+    padding: 0;
 }
 .small-caps {
     font-variant:small-caps;
@@ -60,7 +66,6 @@ ol {
 }
 
 .navbar {
-    box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
     margin-bottom: 0px;
     z-index: 0;
 }
@@ -244,6 +249,9 @@ l::before {
 l[type="split"]::before {
     content: "";
 }
+lb[type="hyphenInWord"] {
+    display: inline;
+}
 w::before {
     margin:0;padding:0;float:left;
 }
@@ -268,55 +276,16 @@ br {
     margin-top: 20px;
     padding: 10px 0px 10px 0px;
 }
-
-/*THEME*/
-.navbar-inverse, .panel-default > .panel-heading {
-    background: #276B9B !important;
-}
-.navbar-brand:hover, .navbar-inverse .navbar-nav>li>a:hover, .panel-default > .panel-heading {
-    color: #fff !important;
+a.sidebar-option:hover {
+    cursor: pointer;
 }
 .btn, .panel {
     border-radius: 0px !important;
 }
-.btn-primary {
-    background: #4180ab;
-    transition: background-color 200ms;
-}
-.btn-primary:hover {
-    background: #649DC5;
-}
-.btn-primary.active {
-    background: #276B9B;
-}
-.biblio-criteria {
-    background: #d9534f;
-    border: solid 1px #d43f3a;
-}
-.navbar-brand, .navbar-inverse a {
-    color: #ECEDEE !important;
-}
-a {
-    color: #276B9B;
-}
-a:hover {
-    color: #4180ab !important;
-}
-a.sidebar-option:hover {
-    cursor: pointer;
-}
+
 /*Metadata criteria in results*/
 .biblio-criteria {
     padding: 6px;
-    color: #fff;
-    background: #d9534f;
-    border: solid 1px #d43f3a;
-}
-/*TOC styling*/
-.toc-div1 > a:hover, .toc-div2 > a:hover, .toc-div3 > a:hover {
-    text-decoration: none;
-    background: #649DC5;
-    color: #fff !important;
 }
 
 

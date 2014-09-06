@@ -42,7 +42,15 @@
             <div class="btn-group pull-right">
                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                     Display frequency by
-                    <span id="selected-sidebar-option" data-selected="${config['facets'][0]}">${config["metadata_aliases"][config["facets"][0]].title()}</span>
+                    <span id="selected-sidebar-option" data-selected="${config['facets'][0]}">
+                        <%
+                        try:
+                            default_value = config["metadata_aliases"][config["facets"][0]].title()
+                        except KeyError:
+                            default_value = config['facets'][0].title()
+                        %>
+                        ${default_value}
+                    </span>
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu" id="frequency_field">

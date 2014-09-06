@@ -5,6 +5,7 @@ import sys
 sys.path.append('..')
 import functions as f
 from functions.wsgi_handler import wsgi_response
+from functions import concatenate_files
 from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from collections import defaultdict
@@ -45,11 +46,12 @@ def handle_dates(q, db):
     
 
 def render_time_series(hits, db, dbname, q, path, config):
+    concatenate_files(path, "time_series", debug=db.locals["debug"])
     biblio_criteria = f.biblio_criteria(q, config, time_series=True)
     frequencies, date_counts = generate_time_series(q, db, hits)
     return render_template(frequencies=frequencies,db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
                            biblio_criteria=biblio_criteria, date_counts=date_counts,
-                           config=config, total=len(hits),report="time_series")
+                           config=config, total=len(hits),report="time_series", scripts=f.concatenate.report_files['js']["time_series"])
 
 def generate_time_series(q, db, results):    
     """reads through a hitlist."""    

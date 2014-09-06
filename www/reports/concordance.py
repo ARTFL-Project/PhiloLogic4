@@ -10,6 +10,7 @@ from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from functions.ObjectFormatter import format_concordance, convert_entities, adjust_bytes
 from functions.FragmentParser import parse
+from functions import concatenate_files
 import json
 
 strip_start_punctuation = re.compile("^[,?;.:!']")
@@ -37,10 +38,11 @@ def concordance(environ,start_response):
         return render_concordance(hits, db, dbname, q, path, config)
         
 def render_concordance(hits, db, dbname, q, path, config):
+    concatenate_files(path, "concordance", debug=db.locals["debug"])
     biblio_criteria = f.biblio_criteria(q, config)
     return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
                                f=f, path=path, results_per_page=q['results_per_page'],biblio_criteria=biblio_criteria,
-                               config=config,template_name="concordance.mako", report="concordance")
+                               config=config,template_name="concordance.mako", report="concordance", scripts=f.concatenate.report_files['js']["concordance"])
 
 def fetch_concordance(hit, path, context_size):
     ## Determine length of text needed
