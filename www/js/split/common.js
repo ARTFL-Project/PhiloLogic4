@@ -203,10 +203,10 @@ $(document).ready(function() {
         });
         $('#fixed-search').on('affix.bs.affix', function() {
             $(this).addClass('fixed');
-            $(this).css('opacity', 1);
+            $(this).css({'opacity': 1, "pointer-events": "auto"});
         });
         $('#fixed-search').on('affixed-top.bs.affix', function() {
-            $(this).css('opacity', 0);
+            $(this).css({'opacity': 0, "pointer-events": "none"});
             setTimeout(function() {
                $(this).removeClass('fixed'); 
             });
