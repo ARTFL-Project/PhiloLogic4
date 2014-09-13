@@ -67,7 +67,7 @@
         % if not db.locals['debug']:
             <script src="${config.db_url}/js/${report}.js" type="text/javascript"></script>
         % else:
-            % for script in scripts:
+            % for script in ressources['js'][report]:
                 <script src="${config.db_url}/js/${script}" type="text/javascript"></script>
             % endfor
         % endif

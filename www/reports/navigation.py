@@ -31,12 +31,12 @@ def navigation(environ,start_response):
         concatenate_files(path, "t_o_c", debug=db.locals["debug"])
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
                        db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c",
-                       scripts=f.concatenate.report_files['js']["t_o_c"])
+                       ressources=f.concatenate.report_files)
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
     concatenate_files(path, "navigation", debug=db.locals["debug"])
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
                        db=db,q=q,obj_text=obj_text,prev=prev,next=next,config=config,
-                       template_name='object.mako', report="navigation", scripts=f.concatenate.report_files['js']["navigation"])
+                       template_name='object.mako', report="navigation", ressources=f.concatenate.report_files)
 
 def check_philo_virtual(db, path_components):
     object_type = ''

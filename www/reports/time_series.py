@@ -51,7 +51,7 @@ def render_time_series(hits, db, dbname, q, path, config):
     frequencies, date_counts = generate_time_series(q, db, hits)
     return render_template(frequencies=frequencies,db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
                            biblio_criteria=biblio_criteria, date_counts=date_counts,
-                           config=config, total=len(hits),report="time_series", scripts=f.concatenate.report_files['js']["time_series"])
+                           config=config, total=len(hits),report="time_series", ressources=f.concatenate.report_files)
 
 def generate_time_series(q, db, results):    
     """reads through a hitlist."""    

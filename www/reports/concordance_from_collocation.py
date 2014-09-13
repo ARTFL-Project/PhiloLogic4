@@ -50,7 +50,7 @@ def concordance_from_collocation(environ,start_response):
         return render_template(results=colloc_results,db=db,dbname=dbname,q=q,colloc_concordance=colloc_concordance,
                                f=f,path=path, results_per_page=q['results_per_page'], config=config,report="concordance_from_collocation",
                                biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako",
-                               scripts=f.concatenate.report_files['js']["concordance_from_collocation"])
+                               ressources=f.concatenate.report_files)
         
 def fetch_colloc_concordance(results, path, q, db, config, word_filter=True, filter_num=100, stopwords=True):
     length = config['concordance_length']
