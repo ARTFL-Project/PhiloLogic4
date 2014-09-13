@@ -45,7 +45,7 @@ def render_collocation(hits, db, dbname, q, path, config):
                            db=db,dbname=dbname,q=q,f=f,path=path, results_per_page=q['results_per_page'],
                            hit_len=hit_len, order=sort_to_display,dumps=json.dumps,biblio_criteria=biblio_criteria,
                            config=config, template_name='collocation.mako', report="collocation",
-                           scripts=f.concatenate.report_files['js']["collocation"])
+                           ressources=f.concatenate.report_files)
 
 def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True, stopwords=True):
     config = f.WebConfig()

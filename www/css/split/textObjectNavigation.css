@@ -1,9 +1,3 @@
-#object-title {
-    font-size: 140%;
-    line-height: 120%;
-    margin: 20px 0px 20px 0px;
-    text-align: center;
-}
 #page_number {
     text-align: center;
     margin-bottom: 10px;
@@ -32,8 +26,20 @@
     margin-top: 10px;
     margin-bottom: 10px;
 }
+#object-title {
+    font-size: 140%;
+    line-height: 120%;
+    margin: 20px 0px 20px 0px;
+    text-align: center;
+}
+@media (min-width: 768px) and (max-width: 992px) {
+    #toc-report-title, #object-title {
+        margin-top: 30px;
+    }
+}
 #toc-container {
     top: 32px !important;
+    max-width: 350px;
 }
 #toc-container a {
     color: #fff;
@@ -83,11 +89,17 @@
 .bullet-point-div3 {
     border: solid 1px;
 }
+.toc-div2, .toc-div3 {
+    text-indent: -.9em;  /*Account for the bullet point*/
+}
 .toc-div2 {
-    text-indent: 1em;
+    padding-left: .9em;
+}
+.toc-div2 {
+    padding-left: 1.9em;
 }
 .toc-div3 {
-    text-indent: 2em;
+    padding-left: 2.9em;
 }
 
 

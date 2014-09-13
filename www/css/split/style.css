@@ -55,8 +55,11 @@ body {
         height: 31px;
     }
 }
-ol {
+ol, ul {
     padding: 0;
+}
+li {
+	list-style-type: none;
 }
 .small-caps {
     font-variant:small-caps;
@@ -227,7 +230,7 @@ s {
 
 
 #search_arguments {
-    line-height: 150%;
+    line-height: 180%;
 }
 .remove_metadata, #remove_metadata_date_start, #remove_metadata_date_end {
     display:inline-block !important;
@@ -279,13 +282,13 @@ br {
 a.sidebar-option:hover {
     cursor: pointer;
 }
-.btn, .panel {
+.btn, .panel, .panel-heading {
     border-radius: 0px !important;
 }
 
 /*Metadata criteria in results*/
 .biblio-criteria {
-    padding: 6px;
+    padding: 3px;
 }
 
 

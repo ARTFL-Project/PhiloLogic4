@@ -28,21 +28,8 @@ $(document).ready(function() {
         }
     });
     
-    // If report is the landing page, show the full search form
-    if (global_report == "landing_page") {
-        showHide('concordance');
-        $(window).load(function() {
-            setTimeout(function() {
-                $('#search_elements').velocity("slideDown",{duration: 400, 'easing': 'easeIn'});
-            }, 50)
-            
-            // Keep footer at bottom and make sure content doesn't overlap footer
-            setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
-        });
-    } else {
-        $('#show-search-form').show();
-        showHide($('input[name=report]:checked', '#search').val());
-    }
+    $('#show-search-form').show();
+    showHide($('input[name=report]:checked', '#search').val());
     
     // Handler for clicks on report tabs
     $('#report label').click(function() {
@@ -347,7 +334,8 @@ function showHide(value) {
         $("#collocation_num, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
     }
-    if (value == 'kwic' || value == "concordance") {
+    if (value == 'kwic' || value == "concordance" || value == "bibliography") {
+        console.log(value)
         $("#results_per_page, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
         $('#start_date, #end_date').val('');
@@ -368,9 +356,9 @@ function showHide(value) {
 
 //  Function to show or hide search options
 function showMoreOptions(display) {
-    var height = $("#search_overlay").parent().height() + 30;
+    var height = $("#wrapper").height() - 50;
     if (display == "all") {
-        var report = $('#report label.active input').attr('id');
+        var report = $('#report label.active input').attr('id') || global_report;
         showHide(report);
         $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
         
@@ -378,19 +366,18 @@ function showMoreOptions(display) {
     if (global_report != "landing_page") {
         setTimeout(function() {$("#search_overlay").css({'top': '50px', 'opacity': 0.2, 'height': height})}, 250);
     }
-    
-    //setTimeout(searchFormOverlap, 250);
+    setTimeout(searchFormOverlap, 250);
 }
 
 function hideSearchForm() {
     $("#search_elements").velocity('slideUp', {duration: 250, easing: 'easeOut'});
     setTimeout(function() {
         $("#search_overlay").css({'opacity': 0});
-    }, 250);
+    }, 300);
     setTimeout(function() {
         $("#search_overlay").css('height', '0px');
     }, 500);
-    //setTimeout(searchFormOverlap, 250);
+    setTimeout(searchFormOverlap, 250);
 }
 
 

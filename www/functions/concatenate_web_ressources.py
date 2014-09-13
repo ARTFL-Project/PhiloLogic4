@@ -2,7 +2,7 @@
 
 import os.path
 
-report_files = {"css": {"landing_page": ["split/style.css", "split/searchForm.css", "split/theme.css"],
+report_files = {"css": {"landing_page": ["split/style.css", "split/searchForm.css", "split/landingPage.css", "split/theme.css"],
                         "concordance": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/theme.css"],
                         "kwic": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/theme.css"],
                         "concordance_from_collocation": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/theme.css"],
