@@ -48,7 +48,8 @@
 	transition: all 250ms;
 }
 .cite {
-	padding-left: 5px;
+	padding-left: 1.6em;
+	text-indent: -1.2em;
 	padding-top: 7px;
 	display: inline-block;
 }
