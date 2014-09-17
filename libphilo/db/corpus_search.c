@@ -575,28 +575,20 @@ int main(int argc, char **argv) {
 
     if (strcmp("\n",buffer) == 0) {
       init_stage_heap(&stages[stage_c],&heap);
-
+      
       if (stage_advance(&stages[stage_c]) == NULL) { // an empty stage can immediately exit.
-	exit(0);
+		exit(0);
       } else {
-	stage_c += 1;
-	if (stage_c == 20) { // if we've exceeded the max stage limit, unlikely.
-	  exit(1);
-	}
-	heap = new_heap(db);
+		stage_c += 1;
+		if (stage_c == 20) { // if we've exceeded the max stage limit, unlikely.
+	  	  exit(1);
+		}
+		heap = new_heap(db);
       }
     } else {
       sscanf(buffer,"%s256",word);
       rec = add_word(&heap,word);    
       fprintf(stderr, "looking up %s : \n",word);
-
-      if (rec == NULL) {
-
-      } else if (rec->type == 0) {
-
-      } else {
-
-      }
     }
   }
   // clean up last stage
