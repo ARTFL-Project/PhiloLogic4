@@ -30,9 +30,18 @@ def parse_cgi(environ):
     cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
    
     query = {}
+    query["report"] = cgi.get("report",[None])[0]
     query["q_string"] = environ["QUERY_STRING"] ## this might be useful to have around
     query["q"] = cgi.get("q",[None])[0]
-    query["method"] = cgi.get("method",[None])[0]
+    if isinstance(query["q"], str):
+        query['q'] = query["q"].replace("'", " ") ## HACK ALERT: this is for French.
+        query['q'] = query['q'].replace(';', '')
+        query['q'] = query['q'].replace(',', '')
+        query['q'] = query['q'].replace('!', '')
+        query['q'] = query['q'].replace('?', '')
+        query['q'] = query['q'].replace(':', '')
+        #query['q'] = re.sub('\.([^*]*)', ' \\1', query['q'])
+    query["method"] = cgi.get("method",[None])[0] or "proxy"
     query['arg'] = cgi.get("arg", [None])[0]
     if query["method"] == "proxy":
         if query['arg'] is None:
@@ -45,6 +54,7 @@ def parse_cgi(environ):
     if query['arg'] is None:
         query['arg'] = 0
     query["report"] = cgi.get("report",[None])[0]
+    query["error_report"] = cgi.get("error_report",[None])[0]
     query["format"] = cgi.get("format",[None])[0]
     query["results_per_page"] = int(cgi.get("pagenum",[25])[0])
     
@@ -103,9 +113,13 @@ def parse_cgi(environ):
     num_empty = 0
     for field in metadata_fields:
         if field in cgi and cgi[field]:
+            ## Hack to remove hyphens in Frantext
+            if field != "date" and isinstance(cgi[field][0], str or unicode):
+                if not cgi[field][0].startswith('"'):
+                    cgi[field][0] = cgi[field][0].replace('-', ' ')
             ## these ifs are to fix the no results you get when you do a metadata query
             if query["q"] != '':
-                query["metadata"][field] = cgi[field][0]
+                query["metadata"][field] = cgi[field][0]                    
             elif cgi[field][0] != '':
                 query["metadata"][field] = cgi[field][0]
         if field not in cgi or not cgi[field][0]: ## in case of an empty query
@@ -115,9 +129,6 @@ def parse_cgi(environ):
         query["no_q"] = True
     else:
         query["no_q"] = False
-    
-    #if query['q']:
-    #    query['q'] = query_parser(query['q'])
     
     try:
         path_components = [c for c in environ["PATH_INFO"].split("/") if c]

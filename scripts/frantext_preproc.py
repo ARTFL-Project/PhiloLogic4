@@ -38,14 +38,12 @@ metadata_xpaths = {}
 
 metadata_xpaths = {"author":
                 [
-                 ".//titleStmt/author/", ## good 'un                                                                                                                                                                                  
-                 ".//sourceDesc/bibl/author/",
-                 ".//publicationStmt/sourceDesc/bibl/author/",
-                 ".//sourceDesc/bibl/author/",
-                 ".//sourceDesc/bibl/author[@type='artfl']",
                  ".//sourceDesc/bibl/author[@type='marc100']",
-                 ".//sourceDesc/biblStruct/monogr/author/name/",
-                 ".//sourceDesc/biblFull/titleStmt/author/", ## good 'un                                                                                                                                                              
+                 ".//sourceDesc/bibl/author[@type='artfl']",
+                 ".//sourceDesc/bibl/author/",
+		 ".//titleStmt/author/", ## good 'un
+		 ".//sourceDesc/biblStruct/monogr/author/name/",
+                 ".//sourceDesc/biblFull/titleStmt/author/", ## good 'un
                  ".//sourceDesc/biblFull/titleStmt/respStmt/name/",
                  ".//sourceDesc/biblFull/titleStmt/author/",
                  ".//sourceDesc/bibl/titleStmt/author/"
@@ -53,68 +51,118 @@ metadata_xpaths = {"author":
 
                 "title":
                 [
-                 ".//titleStmt/title/", ## good 'un                                                                                                                                                                                   
-                 ".//titleStmt/title[@type='245'][@i2='2']",
-                 ".//titleStmt/title[@type='artfl']",
+                 ".//sourceDesc/bibl/title[@type='marc245']",
+                 ".//sourceDesc/bibl/title[@type='artfl']",
                  ".//sourceDesc/bibl/title/",
-                 ".//sourceDesc/bibl/titleStmt/title/",
-                 ".//sourceDesc/biblFull/titleStmt/title[@type='245'][@i2='2']"
-                 ".//sourceDesc/bibl/titleStmt/title/",
-                 ".//sourceDesc/biblstruct/monogr/title/",
+		 ".//titleStmt/title/", ## good 'un
+		 ".//sourceDesc/bibl/titleStmt/title/",
+		 ".//sourceDesc/biblstruct/monogr/title/",
                  ".//sourceDesc/biblFull/titleStmt/title/"
                 ],
 
                 "author_dates":
                 [
                  ".//sourceDesc/bibl/author/date/",
-                 ".//titleStmt/author/date/"
+		 ".//titlestmt/author/date/"
                 ],
 
-                   "create_date":
-                       [
+                 "date":
+                [
                  ".//profileDesc/creation/date/",
-                 ".//sourceDesc/bibl/date/", ## good 'un                                                                                                                                                                              
-                 ".//sourceDesc/biblFull/publicationStmt/date/", ## good 'un                                                                                                                                                          
-                 ".//publicationStmt/date/", ## good 'un                                                                                                                                                                              
-                 ".//sourceDesc/bibl/creation/date/", ## good 'un                                                                                                                                                                     
-                 ".//sourceDesc/bibl/imprint/date/",  ## good 'un                                                                                                                                                                     
+		 ".//fileDesc/sourceDesc/bibl/imprint/date/",
+		 ".//sourceDesc/biblFull/publicationStmt/date/",
+		 ".//publicationStmt/date/",
+		 ".//sourceDesc/bibl/creation/date/", ## good 'un
+		 ".//sourceDesc/bibl/date/", ## good 'un
+                 ".//sourceDesc/bibl/imprint/date/",  ## good 'un
                  ".//sourceDesc/biblFull/publicationStmt/date/",
                  ".//profileDesc/dummy/creation/date/"
                 ],
 
                 "publisher":
                 [
-                 ".//publicationStmt/publisher",
+		 ".//sourceDesc/bibl/imprint[@type='marc534']",
+		 ".//sourceDesc/bibl/imprint[@type='artfl']",
                  ".//sourceDesc/bibl/imprint/publisher",
-                 ".//sourceDesc/biblFull/publicationStmt/publisher",
-                 ".//sourceDesc/bibl/imprinttypeartfl/",
-                 ".//sourceDesc/biblstruct/monogr/imprint/publisher/name/",
-                 ".//sourceDesc/biblFull/titleStmt/publicationStmt/publisher/",
-                 ".//sourceDesc/bibl/publicationStmt/publisher/",
-                 ".//sourceDesc/bibl/publisher/"
+		 ".//sourceDesc/biblstruct/monogr/imprint/publisher/name/",
+		 ".//sourceDesc/biblfull/publicationstmt/publisher/",
+		 ".//sourceDesc/bibl/publicationstmt/publisher/",
+		 ".//sourceDesc/bibl/publisher/",
+		 ".//publicationstmt/publisher/"
                 ],
+
                 "pub_place":
                 [
-                 ".//publicationStmt/pubPlace/",
-                 ".//publicationStmt/sourceDesc/bibl/imprint/pubPlace/",
-                 ".//sourceDesc/biblFull/publicationStmt/pubPlace/",
                  ".//sourceDesc/bibl/imprint/pubPlace/",
-                 ".//sourceDesc/biblstruct/monogr/imprint/pubPlace/",
+                 ".//sourceDesc/biblStruct/monog/imprint/pubPlace/",
                  ".//sourceDesc/biblFull/publicationStmt/pubPlace/",
-                 ".//sourceDesc/biblFull/titleStmt/publicationStmt/pubPlace/",
                  ".//sourceDesc/bibl/pubPlace/",
-                 ".//sourceDesc/bibl/publicationStmt/pubPlace/",
-                 ".//publicationStmt/pubAddress/"
+                 ".//sourceDesc/bibl/publicationStmt/pubPlace/"
                 ],
+
+                "pub_date":
+                [
+                 ".//sourceDesc/bibl/imprint/date/",
+                 ".//sourceDesc/biblStruct/monog/imprint/date/",
+                 ".//sourceDesc/biblFull/publicationStmt/date/",
+                 ".//sourceDesc/bibFulll/imprint/date/",
+                 ".//sourceDesc/bibl/date/",
+                ],
+
+		"extent":
+		[
+		".//sourceDesc/bibl/extent/",
+		".//sourceDesc/biblStruct/monog//extent/",
+		".//sourceDesc/biblFull/extent/",
+		],
+
+		"editor":
+		[
+		".//sourceDesc/bibl/editor/",
+		".//sourceDesc/biblFull/titleStmt/editor/",
+		".//sourceDesc/bibl/title/Stmt/editor/"
+		],
+
+		"identifiers":
+		[
+		".//publicationStmt/idno/"
+		],
 
                 "text_genre":
                 [
                  ".//profileDesc/textClass/keywords[@scheme='genre']/term/"
                 ],
 
+                "keywords":
+                [
+                 ".//profileDesc/textClass/keywords/list/item/"
+                ],
+
+                "language":
+                [
+                 ".//profileDesc/langusage/language/"
+                ],
+
+                "notes":
+                [
+                 ".//fileDesc/notesStmt/note/",
+                 ".//publicationStmt/notesStmt/note/"
+                ],
+
                 "auth_gender":
                 [
                  ".//profileDesc/textClass/keywords[@scheme='authorgender']/term/"
+                ],
+
+                "collection":
+                [
+                 #".//sourceDesc/bibl/title[@type='artfl']",
+		".//seriesStmt/title/"
+                ],
+
+                "period":
+                [
+                 ".//profileDesc/textClass/keywords[@scheme='period']/list/item/"
                 ],
 
                 "text_form":
@@ -138,10 +186,17 @@ metadata_xpaths = {"author":
 
 def clean_up(i):
     out = dict(i)
-    date = i["create_date"]
+    ## getting rid of newlines and leftover CONVERT-TARGETs ##
+    for field in out:
+	if re.search("CONVERT-TARGET",out[field]):
+		out[field] = ""
+	if re.search("\n",out[field]):
+		out[field] = re.sub("\n", " ",out[field])
+		out[field] = re.sub("\s{2,}", " ",out[field])
+    date = i["date"]
     date_m = re.search("[0-9]{3,4}",date)
     if date_m:
-        out["create_date"] = date_m.group()
+        out["date"] = date_m.group()
     
     return out
 
@@ -153,6 +208,7 @@ def clean_up(i):
 
 import os,sys,re
 from elementtree import ElementTree as etree
+#import xml.etree.ElementTree as etree
 
 def get_header(fn):
         fh = open(fn)
@@ -189,10 +245,10 @@ def make_load_metadata(filenames,prefix=""):
 	   if field not in data:
 		data[field] = ""
 	data = clean_up(data)
-#	print data
+	#print data
 	all_data.append(data)
-#    print "sorting"
-    all_data.sort(key=lambda d: (d['create_date'],d['author'],d['title'],d['filename']) )
+    #print "sorting"
+    all_data.sort(key=lambda d: (d['date'],d['author'],d['title'],d['filename'],d['text_genre'],d['auth_gender'],d['period'],d['publisher'],d['pub_place'],d['pub_date'],d['editor'],d['author_dates'],d['identifiers'],d['collection'],d['extent'],d['notes'],d['keywords']) )
 #    for d in all_data:
 #        print d['create_date'],d['author'],d['title'],d['filename']
     return all_data
@@ -202,4 +258,5 @@ def make_load_metadata(filenames,prefix=""):
 if __name__ == "__main__":
     all_data = make_load_metadata(sys.argv[1:])
     for d in all_data:                                                                                                                                                                                                               
-        print d['create_date'],d['author'],d['title'],d['filename']   
+        #print d['date'],d['author'],d['title'],d['text_genre'],d['auth_gender'],d['period'],d['publisher'],d['pub_place'],d['pub_date'],d['editor'],d['author_dates'],d['identifiers'],d['collection'],d['extent'],d['notes'],d['keywords'],d['filename']  
+	print d['text_genre']

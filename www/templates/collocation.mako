@@ -6,7 +6,7 @@
     var right_colloc = ${dumps(right_colloc)};
     var hit_len = ${hit_len};
 </script>
-<div id='philologic_response'>
+<div class="container-fluid" id='philologic_response'>
     <div id='initial_report'>
         <div id='description'>
             <div id="search_arguments">
@@ -22,42 +22,48 @@
         </div>
     </div>
     <div class="results_container">
-        <div id='philologic_collocation'>
-            <div id="word_cloud" class="word_cloud">
-                <div id="collocate_counts" class="collocation_counts">
+        <div id='philologic_collocation' class="row">
+            <div class="col-xs-12 col-sm-3 col-sm-push-9 col-md-4 col-md-push-8">
+                <div id="word_cloud" class="word_cloud">
+                    <div id="collocate_counts" class="collocation_counts">
+                    </div>
                 </div>
             </div>
-            <table class="philologic_table" id="collocation_table">
-                <tr>
-                 <th class="table_header">within ${q['word_num']} words on either side</th>
-                 <th class="table_header">within ${q['word_num']} words to left</th>
-                 <th class="table_header">within ${q['word_num']} words to right</th>
-                </tr>
-                <% pos = 0 %>
-                % for all, left, right in order(all_colloc, left_colloc, right_colloc):
-                    <% pos += 1 %>
-                    <tr>
-                        <td class="table_column">
-                            <span id="all_num${pos}">
-                                <span id="all_word_${pos}" data-word="${all[0]}" data-direction="all" data-count="${all[1]}">${all[0]}</span>
-                                <span id="all_count_${pos}">(${all[1]})</span>
-                            </span>
-                        </td>
-                        <td class="table_column">
-                            <span id="left_num${pos}">
-                                <span id="left_word_${pos}" data-word="${left[0]}" data-direction="left" data-count="${left[1]}">${left[0]}</span>
-                                <span id="left_count_${pos}">(${left[1]})</span>
-                            </span>
-                        </td>
-                        <td class="table_column">
-                            <span id="right_num${pos}">
-                                <span id="right_word_${pos}" data-word="${right[0]}" data-direction="right" data-count="${right[1]}">${right[0]}</span>
-                                <span id="right_count_${pos}">(${right[1]})</span>
-                            </span>
-                        </td>
-                    </tr>
-                % endfor
-            </table>
+            <div class="col-xs-12 col-sm-9 col-sm-pull-3 col-md-8 col-md-pull-4">
+                <div class="table-reponsive">
+                    <table class="table table-bordered" id="collocation_table">
+                        <tr>
+                         <th>within ${q['word_num']} words on either side</th>
+                         <th>within ${q['word_num']} words to left</th>
+                         <th>within ${q['word_num']} words to right</th>
+                        </tr>
+                        <% pos = 0 %>
+                        % for all, left, right in order(all_colloc, left_colloc, right_colloc):
+                            <% pos += 1 %>
+                            <tr>
+                                <td>
+                                    <span id="all_num${pos}">
+                                        <span id="all_word_${pos}" data-word="${all[0]}" data-direction="all" data-count="${all[1]}">${all[0]}</span>
+                                        <span id="all_count_${pos}">(${all[1]})</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span id="left_num${pos}">
+                                        <span id="left_word_${pos}" data-word="${left[0]}" data-direction="left" data-count="${left[1]}">${left[0]}</span>
+                                        <span id="left_count_${pos}">(${left[1]})</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span id="right_num${pos}">
+                                        <span id="right_word_${pos}" data-word="${right[0]}" data-direction="right" data-count="${right[1]}">${right[0]}</span>
+                                        <span id="right_count_${pos}">(${right[1]})</span>
+                                    </span>
+                                </td>
+                            </tr>
+                        % endfor
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>

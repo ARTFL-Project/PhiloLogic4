@@ -45,11 +45,11 @@ default_object_level = 'doc'
 navigable_objects = ('doc', 'div1', 'div2', 'div3')
 
 # Data tables to store.
-tables = ['words', 'toms', 'pages']
+tables = ['toms', 'pages']
 
 # Define filters as a list of functions to call, either those in Loader or outside
 filters = [normalize_unicode_raw_words,make_word_counts,generate_words_sorted,make_object_ancestors(*navigable_objects),
-           make_sorted_toms(*navigable_objects),prev_next_obj,generate_pages, make_max_id]
+           make_sorted_toms(*navigable_objects),prev_next_obj(*navigable_objects),generate_pages, make_max_id]
 post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]
 
 # Define text objects to generate plain text files for various machine learning tasks
@@ -128,6 +128,10 @@ l = Loader(data_destination,
 
 l.add_files(files)
 filenames = l.list_files()
+## The following line creates a list of the files to parse and sorts the files by filename
+## Should you need to supply a custom sort order from the command line you need to supply the files variable,
+## defined at the top of this script, instead of filenames, like so: 
+## load_metadata = [{"filename":f} for f in files] 
 load_metadata = [{"filename":f} for f in sorted(filenames)]
 l.parse_files(workers,load_metadata)
 l.merge_objects()

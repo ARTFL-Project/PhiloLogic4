@@ -129,3 +129,24 @@ class HitList(object):
         buffer = self.fh.read(self.hitsize)
         self.position += 1
         return(struct.unpack(self.format,buffer))
+
+
+class NoHits(object):
+    
+    def __init__(self):
+        self.done = True
+    
+    def __len__(self):
+        return 0
+    
+    def __getitem__(self, item):
+        return ''
+    
+    def __iter__(self):
+        return ''
+    
+    def finish(self):
+        return
+    
+    def update(self):
+        return

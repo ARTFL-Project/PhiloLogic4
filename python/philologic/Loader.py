@@ -97,7 +97,7 @@ class Loader(object):
         #sys.stdout = OutputHandler(console=console_output, log=log)
 
     def setup_dir(self,path):
-        os.mkdir(path)
+        os.system("mkdir -p %s" % path)
         self.workdir = path + "/WORK/"
         self.textdir = path + "/TEXT/"
         os.mkdir(self.workdir)
@@ -245,6 +245,9 @@ class Loader(object):
                         command = 'rm %s' % text['raw']
                         os.system(command)                    
                     
+                    os.system('gzip -c -5 %s > %s' % (text['words'], text['words'] + '.gz'))
+                    os.system('rm %s' % text['words'])
+                    
                     exit()
     
             #if we are at max_workers children, or we're out of texts, the parent waits for any child to exit.
@@ -259,30 +262,75 @@ class Loader(object):
             self.omax = [max(x,y) for x,y in zip(vec,self.omax)]
         print "%s: done parsing" % time.ctime()
     
-    def merge_objects(self):
-        print "\n### Merge parser output ###"
-        wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + "*.words.sorted"
-#        words_result = open(self.workdir + "all_words_sorted","w")
-        print "%s: sorting words" % time.ctime()
-#        words_status = subprocess.call(wordargs,0,"sort",stdout=words_result,shell=True)
-        words_status = os.system(wordsargs + " > " + self.workdir + "all_words_sorted")
-        print "%s: word sort returned %d" % (time.ctime(),words_status)
+    def merge_words(self, file_num):
+        """This function runs a multi-stage merge sort on words
+        Since PhilLogic can potentially merge thousands of files, we need to split
+        the sorting stage into multiple steps to avoid running out of file descriptors"""
+        lists_of_words_files = []
+        words_files = []
+        if file_num > 500:
+            file_num = 500 # We want to be conservative and avoid running out of file descriptors
+        
+        # First we split the sort workload into chunks of 500 (default defined in the file_num keyword)
+        for f in glob(self.workdir + '/*words.sorted.gz'):
+            f = os.path.basename(f)
+            words_files.append(('<(zcat %s)' % f, self.workdir + '/' + f))
+            if len(words_files) ==  file_num:
+                lists_of_words_files.append(words_files)
+                words_files = []
+        if len(words_files):
+            lists_of_words_files.append(words_files)
+            
+        # Then we run the merge sort on each chunk of 500 files and compress the result
+        for pos, wordlist in enumerate(lists_of_words_files):
+            command_list = ' '.join([i[0] for i in wordlist])
+            file_list = ' '.join([i[1] for i in wordlist])
+            output = self.workdir + "words.sorted.%d.split" % pos
+            wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + command_list
+            command = '/bin/bash -c "%s | gzip -c -5 > %s.gz"' % (wordsargs, output)
+            words_status = os.system(command)
+            if self.clean:
+                os.system("rm %s" % file_list)
+            delete_status = os.system('rm %s' % output)
         if self.clean:
-            os.system('rm *.words.sorted')
+            os.system('rm *.words.sorted.gz')
+
+        # We check if there was more than one batch sorted
+        if len(lists_of_words_files) > 1:
+            # if so we run the last merge sort on the resulting sorted files
+            final_sorted_files = []
+            for f in glob(self.workdir + '/*split.gz'):
+                f = os.path.basename(f)
+                final_sorted_files.append('<(zcat %s)' % f)
+            final_sorted_files = ' '.join(final_sorted_files)
+            final_wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + final_sorted_files
+            command = '/bin/bash -c "%s | gzip -c -5 > %s/all_words_sorted.gz"' % (final_wordsargs, self.workdir)
+            words_status = os.system(command)
+        else:
+            # if not skip the last step and rename the file to all_words_sorted.gz
+            os.system('mv %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
+        if words_status != 0:
+            print "Word sorting failed\nInterrupting database load..."
+            sys.exit()
+        if self.clean:
+            os.system('rm %s' % self.workdir + '/*split.gz')
+        return words_status
+    
+    def merge_objects(self, file_num=500):
+        print "\n### Merge parser output ###"
+        print "%s: sorting words" % time.ctime()
+        words_status = self.merge_words(file_num=file_num)
+        print "%s: word sort returned %d" % (time.ctime(),words_status)
 
         tomsargs = "sort -m " + sort_by_id + " " + "*.toms.sorted"
-#        toms_result = open(self.workdir + "all_toms_sorted","w")
-        print "%s: sorting objects" % time.ctime()
-#        toms_status = subprocess.call(tomsargs,0,"sort",stdout=toms_result,shell=True)                                 
+        print "%s: sorting objects" % time.ctime()                                 
         toms_status = os.system(tomsargs + " > " + self.workdir + "all_toms_sorted")
         print "%s: object sort returned %d" % (time.ctime(),toms_status)
         if self.clean:
             os.system('rm *.toms.sorted')
         
         pagesargs = "cat *.pages"
-#        pages_result = open(self.workdir + "all_pages","w")
         print "%s: joining pages" % time.ctime()
-#        pages_status = subprocess.call(pagesargs,0,"cat",stdout=pages_result,shell=True)
         pages_status = os.system(pagesargs + " > " + self.workdir + "all_pages")
         print "%s: word join returned %d" % (time.ctime(), pages_status)
          
@@ -300,7 +348,7 @@ class Loader(object):
         offset = 0
         
         # unix one-liner for a frequency table
-        os.system("cut -f 2 %s | uniq -c | sort -rn -k 1,1> %s" % ( self.workdir + "/all_words_sorted", self.workdir + "/all_frequencies") )
+        os.system('/bin/bash -c "cut -f 2 <(zcat %s) | uniq -c | sort -rn -k 1,1> %s"' % ( self.workdir + "/all_words_sorted.gz", self.workdir + "/all_frequencies") )
         
         # now scan over the frequency table to figure out how wide (in bits) the frequency fields are, and how large the block file will be.
         for line in open(self.workdir + "/all_frequencies"):    
@@ -336,7 +384,7 @@ class Loader(object):
         print >> dbs, "#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl)
         dbs.close()
         print "%s: analysis done" % time.ctime()
-        os.system("pack4 " + self.workdir + "dbspecs4.h < " + self.workdir + "/all_words_sorted")
+        os.system('/bin/bash -c "zcat ' + self.workdir + '/all_words_sorted.gz | pack4 ' + self.workdir + 'dbspecs4.h"')
         print "%s: all indices built. moving into place." % time.ctime()
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1") 
@@ -346,18 +394,21 @@ class Loader(object):
     def setup_sql_load(self):
         for table in self.tables:
             if table == 'words':
-                file_in = self.destination + '/WORK/all_words_sorted'
+                file_in = self.destination + '/WORK/all_words_sorted.gz'
                 indices = [("philo_name", "%s_ancestor" % self.default_object_level), ('philo_id',)]
                 depth = 7
+                compressed = True
             elif table == 'pages':
                 file_in = self.destination + '/WORK/all_pages'                
                 indices = [("philo_id",)]
                 depth = 9
+                compressed = False
             elif table == 'toms':
                 file_in = self.destination + '/WORK/all_toms_sorted'
                 indices = [('philo_type',), ('philo_id',)] + self.metadata_fields
                 depth = 7
-            post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
+                compressed = False
+            post_filter = make_sql_table(table, file_in, gzip=compressed, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)
             
     def post_processing(self, *extra_filters):
@@ -429,6 +480,10 @@ class Loader(object):
         print >> web_config, "# If you wish to change these default values, you should configure them here like so:"
         print >> web_config, '# search_examples = {"author": "Jean-Jacques Rousseau", "title": "Du contrat social"}'
         print >> web_config, "search_examples = None"
+        print >> web_config, "\n# The time_series_intervals variable defines the year intervals in the time series report"
+        print >> web_config, "# If None is the value, PhiloLogic will use [10, 50, 100] as defaults"
+        print >> web_config, "# The only valid intervals are 1, 10, 50 and 100. Invalid intervals will be ignored."
+        print >> web_config, "time_series_intervals = None"
         print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")
 
                 
@@ -495,11 +550,19 @@ def setup_db_dir(db_destination, template_dir):
     if template_dir:
         os.system("cp -r %s* %s" % (template_dir,db_destination))
         os.system("cp %s.htaccess %s" % (template_dir,db_destination))
-        #os.system("mkdir -p %s/data/hitlists" % db_destination)
-        #os.system("chmod -R 777 %s/data/hitlists" % db_destination)
         os.system("chmod -R 777 %s/templates" % db_destination)
-        os.system("mkdir %s/templates/compiled_templates" % db_destination)
+        os.system("mkdir -p %s/templates/compiled_templates" % db_destination)
         os.system("chmod -R 777 %s/templates/compiled_templates" % db_destination)
+	os.system("chmod -R 777 %s/css" % db_destination)
+	os.system("chmod -R 777 %s/js" % db_destination)
+        os.system("mkdir -p %s/data/log" % db_destination)
+        os.system("chmod -R 777 %s/data/log" % db_destination)
+        os.system("touch %s/data/log/error.log" % db_destination)
+        os.system("chmod 777 %s/data/log/error.log" % db_destination)
+        os.system("touch %s/data/log/info.log" % db_destination)
+        os.system("chmod 777 %s/data/log/info.log" % db_destination)
+        os.system("touch %s/data/log/usage.log" % db_destination)
+        os.system("chmod 777 %s/data/log/usage.log" % db_destination)
 
                 
 # a quick utility function

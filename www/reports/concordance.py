@@ -10,6 +10,7 @@ from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from functions.ObjectFormatter import format_concordance, convert_entities, adjust_bytes
 from functions.FragmentParser import parse
+from functions import concatenate_files
 import json
 
 strip_start_punctuation = re.compile("^[,?;.:!']")
@@ -21,17 +22,27 @@ def concordance(environ,start_response):
     if q['format'] == "json":
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
         start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
-        formatted_results = [{"citation": f.concordance_citation(db,config, i),
-                              "text": fetch_concordance(i, path, config.concordance_length)} for i in hits[start - 1:end]]
+        formatted_results = []
+        for i in hits[start-1:end]:
+            text = fetch_concordance(i, path, config.concordance_length)
+            full_metadata = {}
+            for metadata in config.metadata:
+                full_metadata[metadata] = i[metadata]
+            result = {"citation": f.cite.make_abs_doc_cite_mobile(db,i), "shrtcit": f.cite.make_abs_doc_shrtcit_mobile(db,i), "text": text, "hit_count": len(hits), "philo_id": i.philo_id, "start":start}
+            formatted_results.append(result)
         return json.dumps(formatted_results)
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        biblio_criteria = f.biblio_criteria(q, config)
-        return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
+        return render_concordance(hits, db, dbname, q, path, config)
+        
+def render_concordance(hits, db, dbname, q, path, config):
+    concatenate_files(path, "concordance", debug=db.locals["debug"])
+    biblio_criteria = f.biblio_criteria(q, config)
+    return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
                                f=f, path=path, results_per_page=q['results_per_page'],biblio_criteria=biblio_criteria,
-                               config=config,template_name="concordance.mako", report="concordance")
+                               config=config,template_name="concordance.mako", report="concordance", ressources=f.concatenate.report_files)
 
 def fetch_concordance(hit, path, context_size):
     ## Determine length of text needed

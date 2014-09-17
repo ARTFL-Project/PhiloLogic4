@@ -43,7 +43,6 @@ def make_query_link(query,method=None,methodarg=None,report=None,start=None,end=
 def url_encode(q_params):
     encoded_str = []
     for k, v in q_params:
-        #print >> sys.stderr, "KEY", k, "VALUE", v.encode('utf-8')
         if v:
             encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(v, safe='/'))
         else: ## Value is None
@@ -57,7 +56,7 @@ def make_object_link(philo_id, hit_bytes):
 
 def make_absolute_object_link(config, id, bytes = []):
     """ Takes a valid PhiloLogic object, and returns an absolute URL representation of such. """
-    href = config["db_url"] +"/dispatcher.py/" + "/".join(str(x) for x in id)
+    href = config.db_url + '/dispatcher.py/' + "/".join(str(x) for x in id)
     if bytes:
         href += byte_query(bytes)
     return href
@@ -71,9 +70,6 @@ def byte_query(hit_bytes):
     return '?' + '&'.join(['byte=%d' % int(byte) for byte in hit_bytes])
 
 def page_interval(num, results, start, end):
-    #while len(results) == 0:
-    #    if results.done:
-    #        break
     if start <= 0:
         start = 1
     if end <= 0:
@@ -97,7 +93,6 @@ def page_linker(page, results_per_page, q):
     return page_link
 
 def find_page_number(results_len, results_per_page):
-    #print >> sys.stderr, "LEN", (results_len, results_per_page)
     page_num = results_len / results_per_page
     remainder = results_len % results_per_page
     if remainder:
@@ -105,7 +100,6 @@ def find_page_number(results_len, results_per_page):
     return page_num
 
 def pager(start, results_per_page, q, results):
-    #print >> sys.stderr, "RPP", repr(results_per_page)
     results_len = len(results)
     page_num = find_page_number(results_len, results_per_page) or 1 ## We shouldn't have to specify the "or" once we have a no_results template
     current_page = start / results_per_page + 1 or 1

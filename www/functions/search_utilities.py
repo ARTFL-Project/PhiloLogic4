@@ -12,14 +12,14 @@ def biblio_criteria(q, config, time_series=False):
         del q["metadata"]["date"]
     for k,v in q["metadata"].iteritems():
         if v:
-            close_icon = '<span class="ui-icon ui-icon-circle-close remove_metadata" data-metadata="%s"></span>' % k
+            close_icon = '<span class="glyphicon glyphicon-remove-circle remove_metadata" data-metadata="%s"></span>' % k
             if k in config.metadata_aliases:
                 k = config.metadata_aliases[k]
-            biblio.append('<span class="biblio_criteria">%s: <b>%s</b> %s</span>' % (k.title(), v.decode('utf-8', 'ignore'), close_icon))
+            biblio.append('<span class="biblio-criteria">%s: <b>%s</b> %s</span>' % (k.title(), v.decode('utf-8', 'ignore'), close_icon))
     return ' '.join(biblio)
 
 def search_examples(field):
-    path = os.getcwd().replace('functions', "").replace('scripts', '').replace('reports', '') + '/data/'
+    path = os.path.abspath(os.path.dirname(__file__)).replace('functions', "") + '/data/'
     db = DB(path,encoding='utf-8')
     if field == "word":
         word_path = path + '/frequencies/word_frequencies'

@@ -8,6 +8,7 @@ import re
 import sys
 import functions as f
 from functions.wsgi_handler import wsgi_response
+from functions import concatenate_files
 from render_template import render_template
 from philologic import HitWrapper
 import json
@@ -19,30 +20,71 @@ def navigation(environ,start_response):
     path = os.getcwd().replace('functions/', '')
     obj = db[path_components]
     config = f.WebConfig()
-    if q['format'] == "json":
-        obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
-        return json.dumps(obj_text)
-    if obj.philo_type == 'doc':
-        return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c")
-    obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
     prev = ' '.join(obj.prev.split()[:7])
     next = ' '.join(obj.next.split()[:7])
+    if q['format'] == "json":
+        if check_philo_virtual(db, path_components):
+            obj = db[path_components[:-1]]
+        obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
+        return json.dumps({'text': obj_text, 'prev': prev, 'next': next, 'shrtcit':  f.cite.make_abs_doc_shrtcit_mobile(db,obj)})
+    if obj.philo_type == 'doc':
+        concatenate_files(path, "t_o_c", debug=db.locals["debug"])
+        return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
+                       db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c",
+                       ressources=f.concatenate.report_files)
+    obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
+    concatenate_files(path, "navigation", debug=db.locals["debug"])
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
                        db=db,q=q,obj_text=obj_text,prev=prev,next=next,config=config,
-                       template_name='object.mako', report="navigation")
+                       template_name='object.mako', report="navigation", ressources=f.concatenate.report_files)
+
+def check_philo_virtual(db, path_components):
+    object_type = ''
+    if len(path_components) == 2:
+        object_type = "div1"
+    if len(path_components) == 3:
+        object_type = "div2"
+    if len(path_components) == 4:
+        object_type = "div3"
+    c = db.dbh.cursor()
+    query = 'select philo_name from toms where philo_id like "' + ' '.join(path_components) + ' %" and philo_type="' + object_type + '"'
+    c.execute(query)
+    try:
+        name = c.fetchone()[0]
+        if name == "__philo_virtual":
+            return True
+        else:
+            return False
+    except TypeError:
+        return False
 
 def navigate_doc(obj, db):
+    """This function fetches all philo_ids for div elements within a doc"""
     conn = db.dbh 
     c = conn.cursor()
-    query =  str(obj.philo_id[0]) + " _%"
-    c.execute("select philo_id, philo_name, philo_type, byte_start from toms where philo_id like ?", (query,))
+    doc_id =  int(obj.philo_id[0])
+    next_doc_id = doc_id + 1
+    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % doc_id)
+    start_rowid = c.fetchone()[0]
+    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % next_doc_id)
+    end_rowid = c.fetchone()[0]
+    try:
+        c.execute("select philo_id, philo_name, philo_type, head from toms where rowid between ? and ? and philo_name!='__philo_virtual' and  philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
+    except sqlite3.OperationalError:
+        c.execute("select philo_id, philo_name, philo_type from toms where rowid between ? and ? and philo_name!='__philo_virtual' and  philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
     text_hierarchy = []
-    for id, philo_name, philo_type, byte in c.fetchall():
-        if philo_type not in philo_types or philo_name == '__philo_virtual':
+    for i in c.fetchall():
+        if i['philo_name'] == '__philo_virtual':
             continue
         else:
-            text_hierarchy.append(db[id])
+            philo_id = i['philo_id']
+            philo_type = i['philo_type']
+            try:
+                head = i['head'].decode('utf-8', 'ignore')
+            except:
+                head = philo_type
+            text_hierarchy.append((philo_id, philo_type, head))
+    print >> sys.stderr, "NUM", start_rowid, end_rowid, len(text_hierarchy)
     return text_hierarchy
     
 def get_neighboring_pages(db, doc_id, doc_page):

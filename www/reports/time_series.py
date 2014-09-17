@@ -5,6 +5,7 @@ import sys
 sys.path.append('..')
 import functions as f
 from functions.wsgi_handler import wsgi_response
+from functions import concatenate_files
 from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from collections import defaultdict
@@ -22,29 +23,38 @@ def time_series(environ,start_response):
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
     else:
-        c = db.dbh.cursor()
-        c.execute('select date from toms where philo_type="doc"')
-        dates = []
-        for i in c.fetchall():
-            try:
-                dates.append(int(i[0]))
-            except ValueError:
-                pass
-        if not q['start_date']:
-            q['start_date'] = str(min(dates))
-        q['metadata']['date'] = '%s' % q['start_date']
-        if not q['end_date']:
-            q['end_date'] = str(max(dates))
-        q['metadata']['date'] += '-%s' % q['end_date']
-        biblio_criteria = f.biblio_criteria(q, config, time_series=True)
-        results = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        frequencies, date_counts = generate_time_series(q, db, results)
-        return render_template(frequencies=frequencies,db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
-                               biblio_criteria=biblio_criteria, date_counts=date_counts,
-                               config=config, total=len(results),report="time_series")
+        q = handle_dates(q, db)
+        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+        return render_time_series(hits, db, dbname, q, path, config)
+        
+def handle_dates(q, db):
+    c = db.dbh.cursor()
+    c.execute('select date from toms where philo_type="doc"')
+    dates = []
+    for i in c.fetchall():
+        try:
+            dates.append(int(i[0]))
+        except ValueError:
+            pass
+    if not q['start_date']:
+        q['start_date'] = str(min(dates))
+    q['metadata']['date'] = '%s' % q['start_date']
+    if not q['end_date']:
+        q['end_date'] = str(max(dates))
+    q['metadata']['date'] += '-%s' % q['end_date']
+    return q
+    
+
+def render_time_series(hits, db, dbname, q, path, config):
+    concatenate_files(path, "time_series", debug=db.locals["debug"])
+    biblio_criteria = f.biblio_criteria(q, config, time_series=True)
+    frequencies, date_counts = generate_time_series(q, db, hits)
+    return render_template(frequencies=frequencies,db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
+                           biblio_criteria=biblio_criteria, date_counts=date_counts,
+                           config=config, total=len(hits),report="time_series", ressources=f.concatenate.report_files)
 
 def generate_time_series(q, db, results):    
-    """reads through a hitlist."""
+    """reads through a hitlist."""    
     try:
         start = int(q['start_date'])
     except ValueError:
@@ -56,14 +66,13 @@ def generate_time_series(q, db, results):
     
     absolute_count = defaultdict(int)
     date_counts = {}
-    if not q['interval_start']:
-        q['interval_end'] = 10000  ## override defaults since this is faster than collocations
+    print >> sys.stderr, "INTERVAL", q["year_interval"]
     for i in results[q['interval_start']:q['interval_end']]:
         date = i.doc['date']
         try:
             if date != None:
                 date = int(date)
-                if not start <= date <= end :
+                if not date <= end :
                     continue
                 if q["year_interval"] == "10":
                     date = int(str(date)[:-1] + '0')
@@ -86,18 +95,23 @@ def generate_time_series(q, db, results):
         if date not in date_counts:
             date_counts[date] = date_total_count(date, db, q['year_interval'])
     
+    print >> sys.stderr, absolute_count
     return json.dumps(absolute_count), json.dumps(date_counts)
 
 
 def date_total_count(date, db, interval):
-    dates = [date]
-    if interval == '10':
-        dates.append(date + 9)
-    elif interval == "50":
-        dates.append(date + 49)
+    
+    if interval != '1':
+        dates = [date]
+        if interval == '10':
+            dates.append(date + 9)
+        elif interval == "50":
+            dates.append(date + 49)
+        else:
+            dates.append(date + 99)
+        query = 'select sum(word_count) from toms where date between "%d" and "%d"' % tuple(dates)
     else:
-        dates.append(date + 99)
-    query = 'select sum(word_count) from toms where date between "%d" and "%d"' % tuple(dates)
+        query = "select sum(word_count) from toms where date='%s'" % date
     
     c = db.dbh.cursor()
     c.execute(query)

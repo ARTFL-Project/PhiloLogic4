@@ -11,7 +11,6 @@ import cgi
 import json
 
 def get_total_results(environ,start_response):
-    print >> sys.stderr, "SCRIPT FIRED"
     status = '200 OK'
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response(status,headers)

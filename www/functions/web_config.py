@@ -5,11 +5,13 @@ import sys
 from json import dumps
 from search_utilities import search_examples
 
+valid_time_series_intervals = set([1, 10, 50, 100])
+
 class WebConfig(object):
     
     def __init__(self):
         self.config = {}
-        path = os.getcwd().replace('functions', "").replace('scripts', '').replace('reports', '') + "/data/web_config.cfg"
+        path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '') + "/data/web_config.cfg" 
         try:
             execfile(path, globals(), self.config)
         except SyntaxError:
@@ -23,22 +25,11 @@ class WebConfig(object):
                 self.config['search_examples'][i] = self.config['search_examples'][i].decode('utf-8', 'ignore')
                 
         self.options = set(['db_url', 'dbname', 'concordance_length', 'facets', 'metadata',
-                        'search_reports', 'metadata_aliases', 'search_examples'])
+                        'search_reports', 'metadata_aliases', 'search_examples', 'time_series_intervals'])
     
     def __getattr__(self, attr):
         if attr in self.options:
-            try:
-                config_option = self.config[attr]
-                if config_option == None:
-                    return self.load_defaults(attr)
-                else:
-                    return config_option
-            except KeyError:
-                #print >> sys.stderr, "### Web Configuration Warning ###"
-                #print >> sys.stderr, "The %s variable does not exist in your web_config.cfg file" % attr
-                #print >> sys.stderr, "If you wish to override the default value, please add it to your web_config.cfg file"
-                config_option = self.load_defaults(attr)
-                return config_option
+            return self.get_config(attr)
         else:
             print >> sys.stderr, "### Web Configuration Error ###"
             print >> sys.stderr, 'This variable is not supported in the current code base'
@@ -46,23 +37,28 @@ class WebConfig(object):
     
     def __getitem__(self, item):
         if item in self.options:
-            try:
-                config_option = self.config[item]
-                if config_option == None:
-                    return self.load_defaults(item)
-                else:
-                    return config_option
-            except KeyError:
-                #print >> sys.stderr, "### Web Configuration Warning ###"
-                #print >> sys.stderr, "The %s variable does not exist in your web_config file.cfg" % item
-                #print >> sys.stderr, "If you wish to override the default value, please add it to your web_config.cfg file"
-                config_option = self.load_defaults(item)
-                return config_option
+            return self.get_config(item)
         else:
             print >> sys.stderr, "### Web Configuration Error ###"
             print >> sys.stderr, 'This variable is not supported in the current code base'
             raise KeyError
-    
+        
+    def get_config(self, item):
+        try:
+            config_option = self.config[item]
+            if config_option == None:
+                return self.load_defaults(item)
+            else:
+                if item == "time_series_intervals":
+                    config_option = [i for i in config_option if i in valid_time_series_intervals]
+                return config_option
+        except KeyError:
+            #print >> sys.stderr, "### Web Configuration Warning ###"
+            #print >> sys.stderr, "The %s variable does not exist in your web_config file.cfg" % item
+            #print >> sys.stderr, "If you wish to override the default value, please add it to your web_config.cfg file"
+            config_option = self.load_defaults(item)
+            return config_option
+       
     def load_defaults(self, key):
         if key == "concordance_length":
             return 300
@@ -72,6 +68,8 @@ class WebConfig(object):
             return ['concordance', 'kwic', 'collocation', 'time_series']
         elif key == "metadata_aliases":
             return {}
+        elif key == "time_series_intervals":
+            return [10, 50, 100]
         else:
             return False
         
