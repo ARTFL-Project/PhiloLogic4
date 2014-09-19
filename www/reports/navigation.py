@@ -67,8 +67,9 @@ def navigate_doc(obj, db):
     c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % doc_id)
     start_rowid = c.fetchone()[0]
     c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % next_doc_id)
-    end_rowid = c.fetchone()[0]
-    if not end_rowid:
+    try:
+        end_rowid = c.fetchone()[0]
+    except TypeError:
         c.execute('select rowid from toms where rowid > %d' % start_rowid)
         end_rowid = [i[0] for i in c.fetchall()][-1] + 1 ## we add 1 to make sure the last row of the table is included
     try:
