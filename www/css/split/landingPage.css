@@ -1,0 +1,72 @@
+.panel-body {
+    padding: 0px;
+}
+ul {
+    margin-bottom: 0px;
+}
+.panel-heading {
+    text-align: center;
+}
+#landingGroup {
+    margin-top: 50px;
+    margin-bottom: 10px;
+}
+#landingGroup ul {
+    width: 100%;
+}
+#col-author > .panel, #col-title > .panel, #col-year > .panel {
+    border-bottom-width: 0px;
+}
+#author-range-selectors, #title-range-selectors, #year-range-selectors {
+    line-height: 200%;
+    border-bottom-width: 0px;
+    margin-left: 0px;
+}
+#author-range-selectors li:not(:last-of-type), #title-range-selectors li:not(:last-of-type), #year-range-selectors li:not(:last-of-type) {
+    border-bottom: solid 1px #eee;
+}
+#author-range-selectors li:hover, #title-range-selectors li:hover, #year-range-selectors li:hover {
+    background-color: #eee;
+}
+#author-range-selectors a, #title-range-selectors a, #year-range-selectors a {
+    display: block;
+    text-align: center;
+}
+#author-range-selectors a:hover, #title-range-selectors a:hover, #year-range-selectors a:hover {
+    text-decoration: none;
+    cursor: pointer
+}
+#landing-page-content {
+    display: none;
+}
+#landing-page-content h4 {
+    padding-left: 5px;
+}
+#landing-page-content li {
+    padding-left: 20px;
+}
+
+
+@media (max-width: 767px) {
+    #author-range-selectors li:nth-child(2n+2), #title-range-selectors li:nth-child(2n+2), #year-range-selectors li:nth-child(2n+2) {
+        border-left: solid 1px #eee;
+    }
+}
+@media (min-width: 768px) and (max-width: 991px) {
+    #year-range-selectors li:not(:nth-child(3n+3)), #author-range-selectors li:not(:nth-child(3n+3)), #title-range-selectors li:not(:nth-child(3n+3)) {
+        border-right: solid 1px #eee;
+    }
+}
+@media (min-width: 979px) and (max-width: 1199px) {
+    #author-range-selectors li:not(:nth-child(3n+3)), #title-range-selectors li:not(:nth-child(3n+3)) {
+        border-right: solid 1px #eee;
+    }
+    #year-range-selectors li:not(:nth-child(4n+4)) {
+        border-right: solid 1px #eee;
+    }
+}
+@media (min-width: 1200px) {
+    #year-range-selectors li:not(:nth-child(6n+6)), #author-range-selectors li:not(:nth-child(6n+6)), #title-range-selectors li:not(:nth-child(6n+6)) {
+        border-right: solid 1px #eee;
+    }
+}

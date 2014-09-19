@@ -2,3 +2,51 @@ Options +ExecCGI
 Options -Indexes
 AddHandler cgi-script py
 DirectoryIndex dispatcher.py
+
+<ifModule mod_headers.c>
+	Header set Connection keep-alive 
+</ifModule>
+
+# ------------------------------------------------------------------------------
+# | Compression                                                                |
+# ------------------------------------------------------------------------------
+
+<IfModule mod_deflate.c>
+
+    # Force compression for mangled headers.
+    # http://developer.yahoo.com/blogs/ydn/posts/2010/12/pushing-beyond-gzipping
+    <IfModule mod_setenvif.c>
+        <IfModule mod_headers.c>
+            SetEnvIfNoCase ^(Accept-EncodXng|X-cept-Encoding|X{15}|~{15}|-{15})$ ^((gzip|deflate)\s*,?\s*)+|[X~-]{4,13}$ HAVE_Accept-Encoding
+            RequestHeader append Accept-Encoding "gzip,deflate" env=HAVE_Accept-Encoding
+        </IfModule>
+    </IfModule>
+
+    # Compress all output labeled with one of the following MIME-types
+    # (for Apache versions below 2.3.7, you don't need to enable `mod_filter`
+    #  and can remove the `<IfModule mod_filter.c>` and `</IfModule>` lines
+    #  as `AddOutputFilterByType` is still in the core directives).
+#    <IfModule mod_filter.c>
+	# BEGIN Compress text files
+  		<filesMatch "\.(css|js)$">
+    			SetOutputFilter DEFLATE
+  		</filesMatch>
+# END Compress text files
+#    </IfModule>
+
+</IfModule>
+
+
+# ------------------------------------------------------------------------------
+# | ETags                                                                      |
+# ------------------------------------------------------------------------------
+
+# Remove `ETags` as resources are sent with far-future expires headers.
+# http://developer.yahoo.com/performance/rules.html#etags.
+
+# `FileETag None` doesn't work in all cases.
+<IfModule mod_headers.c>
+    Header unset ETag
+</IfModule>
+
+FileETag None

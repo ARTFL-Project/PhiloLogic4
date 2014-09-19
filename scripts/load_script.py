@@ -49,7 +49,7 @@ tables = ['toms', 'pages']
 
 # Define filters as a list of functions to call, either those in Loader or outside
 filters = [normalize_unicode_raw_words,make_word_counts,generate_words_sorted,make_object_ancestors(*navigable_objects),
-           make_sorted_toms(*navigable_objects),prev_next_obj,generate_pages, make_max_id]
+           make_sorted_toms(*navigable_objects),prev_next_obj(*navigable_objects),generate_pages, make_max_id]
 post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]
 
 # Define text objects to generate plain text files for various machine learning tasks

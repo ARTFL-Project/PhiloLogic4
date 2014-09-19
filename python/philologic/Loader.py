@@ -274,7 +274,7 @@ class Loader(object):
         # First we split the sort workload into chunks of 500 (default defined in the file_num keyword)
         for f in glob(self.workdir + '/*words.sorted.gz'):
             f = os.path.basename(f)
-            words_files.append(('<(zcat %s)' % f, self.workdir + '/' + f))
+            words_files.append(('<(gunzip -c %s)' % f, self.workdir + '/' + f))
             if len(words_files) ==  file_num:
                 lists_of_words_files.append(words_files)
                 words_files = []
@@ -301,7 +301,7 @@ class Loader(object):
             final_sorted_files = []
             for f in glob(self.workdir + '/*split.gz'):
                 f = os.path.basename(f)
-                final_sorted_files.append('<(zcat %s)' % f)
+                final_sorted_files.append('<(gunzip -c %s)' % f)
             final_sorted_files = ' '.join(final_sorted_files)
             final_wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + final_sorted_files
             command = '/bin/bash -c "%s | gzip -c -5 > %s/all_words_sorted.gz"' % (final_wordsargs, self.workdir)
@@ -348,7 +348,7 @@ class Loader(object):
         offset = 0
         
         # unix one-liner for a frequency table
-        os.system('/bin/bash -c "cut -f 2 <(zcat %s) | uniq -c | sort -rn -k 1,1> %s"' % ( self.workdir + "/all_words_sorted.gz", self.workdir + "/all_frequencies") )
+        os.system('/bin/bash -c "cut -f 2 <(gunzip -c %s) | uniq -c | sort -rn -k 1,1> %s"' % ( self.workdir + "/all_words_sorted.gz", self.workdir + "/all_frequencies") )
         
         # now scan over the frequency table to figure out how wide (in bits) the frequency fields are, and how large the block file will be.
         for line in open(self.workdir + "/all_frequencies"):    
@@ -384,7 +384,7 @@ class Loader(object):
         print >> dbs, "#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl)
         dbs.close()
         print "%s: analysis done" % time.ctime()
-        os.system('/bin/bash -c "zcat ' + self.workdir + '/all_words_sorted.gz | pack4 ' + self.workdir + 'dbspecs4.h"')
+        os.system('/bin/bash -c "gunzip -c ' + self.workdir + '/all_words_sorted.gz | pack4 ' + self.workdir + 'dbspecs4.h"')
         print "%s: all indices built. moving into place." % time.ctime()
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1") 
@@ -553,6 +553,8 @@ def setup_db_dir(db_destination, template_dir):
         os.system("chmod -R 777 %s/templates" % db_destination)
         os.system("mkdir -p %s/templates/compiled_templates" % db_destination)
         os.system("chmod -R 777 %s/templates/compiled_templates" % db_destination)
+	os.system("chmod -R 777 %s/css" % db_destination)
+	os.system("chmod -R 777 %s/js" % db_destination)
         os.system("mkdir -p %s/data/log" % db_destination)
         os.system("chmod -R 777 %s/data/log" % db_destination)
         os.system("touch %s/data/log/error.log" % db_destination)

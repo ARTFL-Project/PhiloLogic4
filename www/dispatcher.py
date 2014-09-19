@@ -2,8 +2,6 @@
 
 import sys
 import reports
-import traceback as tb
-from functions.log_config import *
 from functions import access_control
 from wsgiref.handlers import CGIHandler
 from cgi import FieldStorage
@@ -24,9 +22,7 @@ def philo_dispatcher(environ,start_response):
                 yield getattr(reports, report or "concordance")(environ,start_response)   
             else:
                 yield reports.landing_page(environ,start_response)
-            logging.info("%s\t%s" %  (os.environ["REMOTE_ADDR"], environ["QUERY_STRING"]))
         except Exception as e:
-            logging.error("Query string: %s" % environ["QUERY_STRING"], exc_info=True)
             yield getattr(reports, "error")(environ,start_response)
     else:
         yield getattr(reports, 'access')(environ, start_response)
