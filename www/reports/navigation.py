@@ -70,7 +70,7 @@ def navigate_doc(obj, db):
     end_rowid = c.fetchone()[0]
     if not end_rowid:
         c.execute('select rowid from toms where rowid > %d' % start_rowid)
-        end_rowid = [i[0] for i in c.fetchall()][:1] + 1 ## we add 1 to make sure the last row of the table is included
+        end_rowid = [i[0] for i in c.fetchall()][-1] + 1 ## we add 1 to make sure the last row of the table is included
     try:
         c.execute("select philo_id, philo_name, philo_type, head from toms where rowid between ? and ? and philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
     except sqlite3.OperationalError:
