@@ -9,11 +9,13 @@
                     Author
                 </div>
                 <div class="panel-body">
-                    <ul id="author-range-selectors" data-type="author">
-                        <li><a data-target="author-group-1" data-range="A-F">A-F</a></li>
-                        <li><a data-target="author-group-2" data-range="G-L">G-L</a></li>
-                        <li><a data-target="author-group-3" data-range="M-R">M-R</a></li>
-                        <li><a data-target="author-group-4" data-range="S-Z">S-Z</a></li>
+                    <ul id="author-range-selectors" class="row" data-type="author">
+                        <li class="col-xs-6 col-sm-4 col-lg-2"><a data-target="author-group-1" data-range="A-D">A-D</a></li>
+                        <li class="col-xs-6 col-sm-4 col-lg-2"><a data-target="author-group-2" data-range="E-I">E-I</a></li>
+                        <li class="col-xs-6 col-sm-4 col-lg-2"><a data-target="author-group-3" data-range="J-M">J-M</a></li>
+                        <li class="col-xs-6 col-sm-4 col-lg-2"><a data-target="author-group-4" data-range="N-R">N-R</a></li>
+                        <li class="col-xs-6 col-sm-4 col-lg-2"><a data-target="author-group-5" data-range="S-V">S-V</a></li>
+                        <li class="col-xs-6 col-sm-4 col-lg-2"><a data-target="author-group-6" data-range="W-Z">W-Z</a></li>
                     </ul>
                 </div>
             </div>
@@ -24,11 +26,13 @@
                     Title
                 </div>
                 <div class="panel-body">
-                    <ul id="title-range-selectors" data-type="title">
-                        <li><a data-target="title-group-1" data-range="A-F">A-F</a></li>
-                        <li><a data-target="title-group-2" data-range="G-L">G-L</a></li>
-                        <li><a data-target="title-group-3" data-range="M-R">M-R</a></li>
-                        <li><a data-target="title-group-4" data-range="S-Z">S-Z</a></li>
+                    <ul id="title-range-selectors" class="row" data-type="title">
+                        <li class="col-xs-6 col-sm-4 col-lg-2"><a data-target="title-group-1" data-range="A-D">A-D</a></li>
+                        <li class="col-xs-6 col-sm-4 col-lg-2"><a data-target="title-group-2" data-range="E-I">E-I</a></li>
+                        <li class="col-xs-6 col-sm-4 col-lg-2"><a data-target="title-group-3" data-range="J-M">J-M</a></li>
+                        <li class="col-xs-6 col-sm-4 col-lg-2"><a data-target="title-group-4" data-range="N-R">N-R</a></li>
+                        <li class="col-xs-6 col-sm-4 col-lg-2"><a data-target="title-group-5" data-range="S-V">S-V</a></li>
+                        <li class="col-xs-6 col-sm-4 col-lg-2"><a data-target="title-group-6" data-range="W-Z">W-Z</a></li>
                     </ul>
                 </div>
             </div>
@@ -59,12 +63,16 @@
             <div id="author-group-2" style="padding: 10px; display: none;"></div>
             <div id="author-group-3" style="padding: 10px; display: none;"></div>
             <div id="author-group-4" style="padding: 10px; display: none;"></div>
+            <div id="author-group-5" style="padding: 10px; display: none;"></div>
+            <div id="author-group-6" style="padding: 10px; display: none;"></div>
         </div>
         <div id="title-range-display">
             <div id="title-group-1" style="padding: 10px; display: none;"></div>
             <div id="title-group-2" style="padding: 10px; display: none;"></div>
             <div id="title-group-3" style="padding: 10px; display: none;"></div>
             <div id="title-group-4" style="padding: 10px; display: none;"></div>
+            <div id="title-group-5" style="padding: 10px; display: none;"></div>
+            <div id="title-group-6" style="padding: 10px; display: none;"></div>
         </div>
         <div id="year-range-display">
             <div id="year-group-1" style="padding: 10px; display: none;"></div>
