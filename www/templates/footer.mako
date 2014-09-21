@@ -58,6 +58,37 @@
         </div>
         <!--End of modal dialog-->
         
+        <!-- Modal -->
+        <div class="modal fade" id="export-dialog" tabindex="-1" role="dialog" aria-labelledby="exportLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Export Results</h4>
+                    </div>
+                    <div class="modal-body">
+                       <h5>Choose the format in which to export your search results:</h5>
+                       <div>
+                            <button type="button" class="btn btn-primary">
+                                JSON
+                            </button>
+                            <button type="button" class="btn btn-primary">
+                                CSV
+                            </button>
+                            <button type="button" class="btn btn-primary">
+                                TAB
+                            </button>
+                       </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--End of modal dialog-->
+        
         <!--Load all required JavaScript-->
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
         <script src="${config.db_url}/js/bootstrap/bootstrap.min.js" type="text/javascript"></script>
