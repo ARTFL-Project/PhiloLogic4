@@ -44,7 +44,7 @@
     </div>
     <div class="row">
         <div id="results_container" class="col-xs-12" style="overflow: hidden;">
-            <div id="kwic_concordance" style="display: table-cell;">
+            <div id="kwic_concordance" class="panel panel-default">
                 % for i in fetch_kwic(results, path, q, f.link.byte_query, db, start-1, end):
                     <div class="kwic_line">
                         % if len(str(end)) > len(str(current_pos)):

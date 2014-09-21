@@ -1,18 +1,17 @@
 #kwic_concordance {
     font-family: 'Droid Sans Mono', sans-serif;
-    font-size: 13px;
+    font-size: 12px;
     border-bottom: solid 1px #CCCCCC;
-    padding-top:7px;
-    padding-bottom:8px;
-    margin-right: 20px;
+    padding: 10px;
 }
 .kwic_line {
-    padding-top: 1px;
-    padding-bottom: 1px;
+    line-height: 180%;
 	white-space: nowrap;
+	overflow: hidden;
 }
 .kwic_biblio {
     font-weight:400 !important;
+	z-index: 10;
 }
 .short_biblio {
     width: 200px;
@@ -21,6 +20,9 @@
     text-overflow: ellipsis;
     display: inline-block;
     vertical-align: bottom;
+}
+.full_biblio {
+	z-index: 10;
 }
 #philologic_concordance, #colloc_concordance {
     list-style-type: none;
@@ -38,6 +40,65 @@
     text-align: justify;
 	padding: 7px 4px 5px 4px;
 }
+
+.kwic-before {
+	text-align: right;
+	overflow: hidden;
+	display: inline-block;
+	position: absolute;
+}
+.inner-before {
+	float: right;
+}
+.kwic-after {
+	text-align: left;
+	display: inline-block;
+}
+.kwic-text {
+	display: inline-block;
+	overflow: hidden;
+	vertical-align: bottom;
+}
+
+@media (min-width: 1200px) {
+	.kwic-highlight {
+		margin-left: 430px;
+	}
+	.kwic-before {
+		width: 430px;
+	}
+}
+@media (min-width:992px) and (max-width: 1199px) {
+	.kwic-highlight {
+		margin-left: 330px;
+	}
+	.kwic-before {
+		width: 330px;
+	}
+}
+@media (min-width:768px) and (max-width: 991px) {
+	.kwic-highlight {
+		margin-left: 220px;
+	}
+	.kwic-before {
+		width: 220px;
+	}
+	.kwic_line {
+		font-size: 12px;
+	}
+}
+@media (max-width:767px) {
+	.kwic-highlight {
+		margin-left: 200px;
+	}
+	.kwic-before {
+		width: 200px;
+	}
+	.kwic_line {
+		font-size: 12px;
+	}
+}
+
 
 /*Citations*/
 .hit_n {
