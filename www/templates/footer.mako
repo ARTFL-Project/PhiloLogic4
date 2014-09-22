@@ -58,7 +58,7 @@
         </div>
         <!--End of modal dialog-->
         
-        <!-- Modal -->
+        <!-- Export results modal -->
         <div class="modal fade" id="export-dialog" tabindex="-1" role="dialog" aria-labelledby="exportLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -68,21 +68,26 @@
                     </div>
                     <div class="modal-body">
                        <h5>Choose the format in which to export your search results:</h5>
-                       <div>
-                            <button type="button" class="btn btn-primary">
+                       <div id="export-buttons">
+                            <button type="button" class="btn btn-primary" data-format="json">
                                 JSON
                             </button>
-                            <button type="button" class="btn btn-primary">
+                            <button type="button" class="btn btn-primary" data-format="csv">
                                 CSV
                             </button>
-                            <button type="button" class="btn btn-primary">
+                            <button type="button" class="btn btn-primary" data-format="tab">
                                 TAB
                             </button>
                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
+                       <div id="export-results-file" style="margin-top: 10px;display: none;">
+                            Click on the link below to download the results of your query:
+                            <div id="retrieve-message">
+                                Generating results...
+                            </div>
+                            <div id="export-download-link" style="margin-top: 10px;margin-bottom: 10px; display: none;">
+                                <a download>Download results file</a>
+                            </div>
+                       </div>
                     </div>
                 </div>
             </div>
@@ -94,7 +99,8 @@
         <script src="${config.db_url}/js/bootstrap/bootstrap.min.js" type="text/javascript"></script>
         <script type="text/javascript" src="http://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
         <script type="text/javascript" src="${config.db_url}/js/plugins/jquery.history.js"></script>
-        <script type="text/javascript" src="${config.db_url}/js/plugins/jquery.velocity.min.js"></script>
+        <script type="text/javascript" src="${config.db_url}/js/plugins/velocity.min.js"></script>
+        <script type="text/javascript" src="${config.db_url}/js/plugins/velocity.ui.min.js"></script>
         % if not db.locals['debug']:
             <script src="${config.db_url}/js/${report}.js" type="text/javascript"></script>
         % else:

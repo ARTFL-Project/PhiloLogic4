@@ -5,7 +5,7 @@ import reports
 from functions import access_control
 from wsgiref.handlers import CGIHandler
 from cgi import FieldStorage
-from functions import clean_hitlists
+from functions import clean_hitlists, clean_export_results
 
 def philo_dispatcher(environ,start_response):
     report = FieldStorage().getvalue('report')
@@ -30,3 +30,4 @@ def philo_dispatcher(environ,start_response):
 if __name__ == "__main__":
     CGIHandler().run(philo_dispatcher)
     clean_hitlists()
+    clean_export_results()

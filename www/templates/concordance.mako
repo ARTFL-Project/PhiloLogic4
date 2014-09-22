@@ -74,10 +74,10 @@
             </div>
             <%include file="show_frequency.mako"/>
         </div>
-        <div class="more">
-            <%include file="results_paging.mako" args="start=start,results_per_page=results_per_page,q=q,results=results"/> 
-            <div style='clear:both;'></div>
-        </div>
+    </div>
+    <div class="more">
+        <%include file="results_paging.mako" args="start=start,results_per_page=results_per_page,q=q,results=results"/> 
+        <div style='clear:both;'></div>
     </div>
 </div>
 <%include file="footer.mako"/>

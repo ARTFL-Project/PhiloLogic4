@@ -16,3 +16,9 @@ def clean_hitlists():
     else:
         return False
     
+def clean_export_results():
+    path = os.path.abspath(os.path.dirname(__file__)).replace('functions', 'data/exports/')
+    for filename in [path + i for i in os.listdir(path)]:
+        file_modified = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
+        if datetime.datetime.now() - file_modified > datetime.timedelta(minutes=30):
+            os.remove(filename)
