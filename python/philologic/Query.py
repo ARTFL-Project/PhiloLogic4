@@ -117,7 +117,7 @@ def expand_query(split, freq_file, dest_fh):
                 print >> sys.stderr, repr(norm_tok_uni_chars)
 #                norm_tok_uni_chars = [u"^"] + norm_tok_uni_chars + [u"\b"]
                 norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
-                grep_command = ['egrep', '-wi', '^%s' % norm_tok, '%s' % freq_file]
+                grep_command = ['egrep', '-i', '^%s[[:blank:]]' % norm_tok, '%s' % freq_file]
                 print >> sys.stderr, repr(norm_tok)
                 print >> sys.stderr, " ".join(grep_command)
                 grep_proc = subprocess.Popen(grep_command,stdout=filters.stdin)
