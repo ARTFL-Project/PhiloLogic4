@@ -10,10 +10,6 @@
 }
 .graph_bar {
     height: 0px;
-    -moz-transition: height 300ms ease-out;
-    -webkit-transition: height 300ms ease-out;
-    -ms-transition: height 300ms ease-out;
-    transition: height 300ms ease-out;
     position:absolute;
     bottom:0;
     overflow: visible !important; /* make sure years don't temporarily disappear when switching between absolute and relative frequencies */
@@ -44,6 +40,9 @@
     -o-transform: rotate(-55deg);
     transform: rotate(-55deg);
 }
+
+
+
 #first_division, #middle_division, #top_division {
     position: absolute;
     z-index: 50;

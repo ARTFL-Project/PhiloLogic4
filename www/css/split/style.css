@@ -147,7 +147,6 @@ li {
 .more {
     font-size: 130%;
     text-align: center;
-	display: none;
 }
 .more .previous {
     float:left;

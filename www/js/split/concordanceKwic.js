@@ -8,7 +8,7 @@ $(document).ready(function() {
     if ($('#kwic_concordance').length) {
         var config = {    
                 over: showBiblio, 
-                timeout: 100,  
+                timeout: 50,  
                 out: hideBiblio   
             };
         $(".kwic_biblio").hoverIntent(config);
