@@ -1,12 +1,12 @@
 <%include file="header.mako"/>
 <%include file="search_form.mako"/>
-<div id='philologic_response' style="margin-top:0px;">
+<div class="container-fluid" id='philologic_response'>
     <div>
         <a href="${config.db_url}/">Return to search form</a>
         <p>
-            <span id="return_to_colloc">
+            <a id="return_to_colloc">
                 Return to previous results page
-            </span>
+            </a>
         </p>
     </div>
     <div id='initial_report'>
@@ -22,32 +22,37 @@
         </div>
     </div>
     <% occurences = 0 %>
-    <div id="results_container" class="results_container">
-        <ol id='colloc_concordance'>
-            % for i in results[start - 1:end]:
-                <li class='philologic_occurrence'>
-                    <%
-                    n += 1
-                    occurences += i.collocate_num
-                    %>
-                    <div class="citation cite_gradient" style="overflow:hidden;">
-                        <span class='hit_n'>${n}.</span>
-                        <span class="cite" style="display: inline-block;overflow:hidden;white-space: nowrap;text-overflow:ellipsis;-o-text-overflow:ellipsis;">
-                            ${f.concordance_citation(db,config, i)}
-                        </span>
-                        <span class="more_context_and_close">
-                            <span class="more_context">More</span>
-                        </span>
-                    </div>
-                    % if i.collocate_num > 1:
-                        <div style="padding-left:5px;"><b>At least ${i.collocate_num} occurences of collocate in hit</b></div>
-                    % endif
-                    <div class='philologic_context'>
-                        <div class="default_length">${colloc_concordance(i, path, q, config['concordance_length'])}</div>
-                    </div>
-                </li>
-            % endfor
-        </ol>
+    <div class="row">
+        <div id="results_container" class="col-xs-12">
+            <ol id='philologic_concordance' class="panel panel-default">
+                % for i in results[start - 1:end]:
+                    <li class="philologic_occurrence panel panel-default">
+                        <%
+                        n += 1
+                        occurences += i.collocate_num
+                        %>
+                        <div class="citation-container row">
+                            <div class="col-xs-12 col-sm-10 col-md-11">
+                               <span class="cite" data-id="${' '.join(str(s) for s in i.philo_id)}">
+                                   ${n}.&nbsp ${f.concordance_citation(db, config, i)}
+                               </span>
+                            </div>
+                            <div class="hidden-xs col-sm-2 col-md-1">
+                               <button class="btn btn-primary more_context pull-right" disabled="disabled" data-context="short">
+                                   More
+                               </button>
+                            </div>
+                        </div>
+                        % if i.collocate_num > 1:
+                            <div style="padding-left:5px;"><b>At least ${i.collocate_num} occurences of collocate in hit</b></div>
+                        % endif
+                        <div class='philologic_context'>
+                            <div class="default_length">${colloc_concordance(i, path, q, config['concordance_length'])}</div>
+                        </div>
+                    </li>
+                % endfor
+            </ol>
+        </div>
      </div>
      <div class="more">
         <%include file="results_paging.mako" args="start=start,results_per_page=results_per_page,q=q,results=results"/> 

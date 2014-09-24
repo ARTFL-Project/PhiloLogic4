@@ -54,8 +54,6 @@ $(document).ready(function() {
         backForwardButtonReload(db_url);
     }
     
-    page_image_link();
-    
     var text = 'Click to see a full-sized version of this image';
     $('.plate_img').attr('title', text).tooltip({ position: { my: "left center", at: "right center" } });
     
@@ -211,62 +209,5 @@ function newTextObjectCallback(data, philo_id, my_path) {
         History.pushState(null, '', new_url);
         checkEndBeginningOfDoc();
         $('body').velocity('scroll', {duration: 200, offset: 0, easing: 'easeOut'});
-    });
-}
-
-// Encyclopedie functions
-function page_image_link() {
-    $('#page_image_link, .plate_img_link').click(function(e) {
-        e.preventDefault();
-        var href = $(this).attr('href');
-        var image = $("<img />").attr('src', href).load(function() {
-            var div = '<div class="image_container" style="display: none;"></div>'
-            $('.page_display').prepend(div);
-            var close_div = '<div id="close_page_image" class="ui-icon ui-icon-circle-close close_page_image"></div>'
-            $('.image_container').append(close_div)
-            $("body").append("<div id='overlay' style='display:none;'></div>");
-            var header_height = $('#header').height();
-            var footer_height = $('#footer').height();
-            var overlay_height = $(document).height() - header_height - footer_height;
-            $("#overlay")
-            .height(overlay_height)
-            .css({
-               'opacity' : 0.3,
-               'position': 'absolute',
-               'top': 0,
-               'left': 0,
-               'background-color': 'white',
-               'width': '100%',
-               'margin-top': header_height,
-               'z-index': 90
-             });
-            $("html, body").animate({ scrollTop: 140 }, "slow");
-            $('.image_container').append(image);
-            $('.image_container, #overlay').fadeIn('fast');
-            var image_height = $('.image_container').offset().top + $('.image_container').height();
-            image_height = image_height + parseInt($('.image_container').css('border-top-width')) + parseInt($('.image_container').css('border-bottom-width'));
-            var original_footer_offset = $('#footer').offset().top;
-            if (image_height > $('#footer').offset().top) {
-                $('#footer').offset({top: image_height});
-            }
-            $("#close_page_image, #overlay").click(function() {
-                $('.image_container, #overlay').fadeOut('fast', function() {
-                    $('#overlay').remove();
-                    $('.image_container').remove();
-                    if ($('#footer').offset().top > original_footer_offset) {
-                        $("html, body").animate({ scrollTop: 0 }, function() {
-                            $('#footer').animate({top: original_footer_offset});
-                        });
-                    }
-                });
-            });
-        });
-    });
-}
-
-function plate_hover() {
-    $('.plate_img_link').hover(function() {
-        var text = 'Click to see a full-sized version of this image';
-        $(this).tooltip({content: text});
     });
 }
