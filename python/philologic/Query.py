@@ -127,7 +127,7 @@ def expand_query(split, freq_file, dest_fh):
             # what to do about NOT?
         filters.stdin.close()    
         filters.wait()
-    dest_fh.close()
+#    dest_fh.close()
     return
 
 def format_parsed_query(parsed_split,db):
