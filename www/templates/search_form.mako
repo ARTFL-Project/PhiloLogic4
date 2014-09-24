@@ -37,7 +37,7 @@
                         </div>
                         <div class="col-xs-12 col-sm-10 col-md-6">
                             <div class="input-group">
-                                <span class="input-group-btn">
+                                <span class="input-group-btn hidden-xs">
                                     <button class="btn btn-default" type="button" id="tip-btn" data-toggle="modal" data-target="#syntax">
                                         <span id="tip">?</span><span id="tip-text">Tips</span>
                                     </button>

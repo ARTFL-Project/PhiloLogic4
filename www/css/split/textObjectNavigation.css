@@ -48,7 +48,7 @@
     display: inline-block;
     overflow: scroll;
     padding: 10px;
-    line-height: 180%;
+    line-height: 150%;
     text-align: justify;
     width: 100%;
 }
@@ -89,10 +89,11 @@
 .bullet-point-div3 {
     border: solid 1px;
 }
-.toc-div2, .toc-div3 {
+.toc-div1, .toc-div2, .toc-div3 {
     text-indent: -.9em;  /*Account for the bullet point*/
+    margin-bottom: 5px;
 }
-.toc-div2 {
+.toc-div1 {
     padding-left: .9em;
 }
 .toc-div2 {

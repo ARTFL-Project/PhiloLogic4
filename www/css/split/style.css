@@ -213,21 +213,9 @@ s {
     border-radius:50%;
     margin-right: 5px;
 }
-
-#return_to_colloc {
-    color: #800000;
-    text-decoration: none;
-    font-weight: 700 !important;
-    font-size: 140%;
-}
-#return_to_colloc:hover {
-    text-decoration: underline;
-    cursor: pointer;
-}
 #time_series_report {
     margin-left: -50px;
 }
-
 
 #search_arguments {
     line-height: 180%;

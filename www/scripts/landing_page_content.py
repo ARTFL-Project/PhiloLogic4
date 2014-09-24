@@ -43,7 +43,7 @@ def generate_author_list(c, letter_range):
     c.execute('select distinct author, count(*) from toms where philo_type="doc" group by author order by author')
     content = []
     for author, count in c.fetchall():
-        if author == None:
+        if not author:
             author = "Anonymous"
         if author[0].lower() not in letter_range:
             continue
