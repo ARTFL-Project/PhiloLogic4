@@ -9,7 +9,7 @@ import re
 import unicodedata
 from QuerySyntax import parse_query, group_terms
 
-def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,limit=3000,filename=""):
+def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,limit=3000,filename="", query_debug=False):
     sys.stdout.flush()
     tstart = datetime.now()
 
@@ -38,23 +38,30 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
             os._exit(0)
         else:
             #now we're detached from the parent, and can do our work.
-#            print >> sys.stderr, "WORKER DETACHED at ", datetime.now() - tstart
+            print >> sys.stderr, "WORKER DETACHED at ", datetime.now() - tstart
             args = ["search4", db.path,"--limit",str(limit)]
             if corpus_file and corpus_size:
                 args.extend(("--corpusfile", corpus_file , "--corpussize" , str(corpus_size)))
             if method and method_arg:
                 args.extend((method,str(method_arg)))
+
             worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err)
-#            print >> sys.stderr, "SUBPROC RUNNING at ", datetime.now() - tstart
-#            worker.communicate(format_query(terms,db))
-# ouch! I was running format_query twice!
-#            worker.communicate(expandedterms) # I/O is taking a long time too!            
-#            print >> sys.stderr, "STARTING QUERY EXPANSION at ", datetime.now() - tstart
-            expand_query(split,freq_file,worker.stdin)
+            print >> sys.stderr, "WORKER STARTED"
+            if query_debug == True:
+                print >> sys.stderr, "DEBUGGING"
+                query_log_fh = filename + ".terms"
+                print >> sys.stderr, "LOGGING to " + filename + ".terms"
+                logger = subprocess.Popen(["tee",query_log_fh],stdin=subprocess.PIPE,stdout = worker.stdin)
+                print >> sys.stderr, "EXPANDING"
+                expand_query(split,freq_file,logger.stdin)
+                logger.stdin.close()
+            else:
+                expand_query(split,freq_file,worker.stdin)
+
             worker.stdin.close()
-#            print >> sys.stderr, "SUBPROC INPUT CLOSED at ", datetime.now() - tstart
+
             returncode = worker.wait()
-#            print >> sys.stderr, "SUBPROC RETURNED %d" % returncode
+
             if returncode == -11:
                 print >> sys.stderr, "SEGFAULT"
                 seg_flag = open(filename + ".error","w")
@@ -87,6 +94,7 @@ def split_terms(grouped):
 
 def expand_query(split, freq_file, dest_fh):
     first = True
+    print >> sys.stderr, repr(split)
     for group in split:
         if first == True:
             first = False
@@ -101,10 +109,16 @@ def expand_query(split, freq_file, dest_fh):
 
         for kind,token in group: # or, splits, and ranges should have been taken care of by now.
             if kind == "TERM" or kind == "RANGE":
-                norm_tok = token.decode("utf-8").lower()
-                norm_tok = [i for i in unicodedata.normalize("NFKD",norm_tok) if not unicodedata.combining(i)]
-                norm_tok = "".join(norm_tok).encode("utf-8")                
-                grep_command = ['egrep', '-wi', "^%s" % norm_tok, '%s' % freq_file]
+                print >> sys.stderr, repr(token)
+                norm_tok_uni = token.decode("utf-8").lower()
+                print >> sys.stderr, repr(norm_tok_uni)
+                norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
+                print >> sys.stderr, repr(norm_tok_uni_chars)
+#                norm_tok_uni_chars = [u"^"] + norm_tok_uni_chars + [u"\b"]
+                norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
+                grep_command = ['egrep', '-i', '^%s[[:blank:]]' % norm_tok, '%s' % freq_file]
+                print >> sys.stderr, repr(norm_tok)
+                print >> sys.stderr, " ".join(grep_command)
                 grep_proc = subprocess.Popen(grep_command,stdout=filters.stdin)
                 grep_proc.wait()
             elif kind == "QUOTE":
@@ -112,8 +126,8 @@ def expand_query(split, freq_file, dest_fh):
             # what to do about NOT?
         filters.stdin.close()    
         filters.wait()
-    dest_fh.close()
-    return
+#    dest_fh.close()
+    return grep_proc
 
 def format_parsed_query(parsed_split,db):
     command = ""
