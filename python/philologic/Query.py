@@ -110,26 +110,42 @@ def expand_query(split, freq_file, dest_fh):
 
         for kind,token in group: # or, splits, and ranges should have been taken care of by now.
             if kind == "TERM" or kind == "RANGE":
-                print >> sys.stderr, repr(token)
-                norm_tok_uni = token.decode("utf-8").lower()
-                print >> sys.stderr, repr(norm_tok_uni)
-                norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
-                print >> sys.stderr, repr(norm_tok_uni_chars)
-#                norm_tok_uni_chars = [u"^"] + norm_tok_uni_chars + [u"\b"]
-                norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
-                grep_command = ['egrep', '-i', '^%s[[:blank:]]' % norm_tok, '%s' % freq_file]
-                print >> sys.stderr, repr(norm_tok)
-                print >> sys.stderr, " ".join(grep_command)
-                grep_proc = subprocess.Popen(grep_command,stdout=filters.stdin)
-                grep_proc.wait()
+#                print >> sys.stderr, repr(token)
+#                norm_tok_uni = token.decode("utf-8").lower()
+#                print >> sys.stderr, repr(norm_tok_uni)
+#                norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
+#                print >> sys.stderr, repr(norm_tok_uni_chars)
+#                #norm_tok_uni_chars = [u"^"] + norm_tok_uni_chars + [u"\b"]
+#                norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
+#                grep_command = ['egrep', '-i', '^%s[[:blank:]]' % norm_tok, '%s' % freq_file]
+#                print >> sys.stderr, repr(norm_tok)
+#                print >> sys.stderr, " ".join(grep_command)
+#                grep_proc = subprocess.Popen(grep_command,stdout=filters.stdin)
+#                grep_proc.wait()
+                grep_word(token,freq_file,filters.stdin)
             elif kind == "QUOTE":
                 filters.stdin.write(token[1:-1] + "\n") 
             # what to do about NOT?
         filters.stdin.close()    
         filters.wait()
 #    dest_fh.close()
-    return grep_proc
+    return filters
 
+def grep_word(token,freq_file,dest_fh):
+    print >> sys.stderr, "IN_GREP_WORD", repr(token)
+    norm_tok_uni = token.decode("utf-8").lower()
+    print >> sys.stderr, repr(norm_tok_uni)
+    norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
+    print >> sys.stderr, repr(norm_tok_uni_chars)
+#                norm_tok_uni_chars = [u"^"] + norm_tok_uni_chars + [u"\b"]
+    norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
+    grep_command = ['egrep', '-i', '^%s[[:blank:]]' % norm_tok, '%s' % freq_file]
+    print >> sys.stderr, "GREP_COMMAND", "".join(grep_command)
+    print >> sys.stderr, repr(norm_tok)
+    grep_proc = subprocess.Popen(grep_command,stdout=dest_fh)
+    grep_proc.wait()    
+    return grep_proc
+    
 def format_parsed_query(parsed_split,db):
     command = ""
     clauses = [[]]
