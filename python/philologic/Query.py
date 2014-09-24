@@ -9,7 +9,7 @@ import re
 import unicodedata
 from QuerySyntax import parse_query, group_terms
 
-def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,limit=3000,filename=""):
+def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,limit=3000,filename="", query_debug=False):
     sys.stdout.flush()
     tstart = datetime.now()
 
@@ -47,7 +47,6 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
 
             worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err)
             print >> sys.stderr, "WORKER STARTED"
-            query_debug = True
             if query_debug == True:
                 print >> sys.stderr, "DEBUGGING"
                 query_log_fh = filename + ".terms"
