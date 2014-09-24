@@ -94,6 +94,7 @@ def split_terms(grouped):
 
 def expand_query(split, freq_file, dest_fh):
     first = True
+    grep_proc = None
     print >> sys.stderr, repr(split)
     for group in split:
         if first == True:
