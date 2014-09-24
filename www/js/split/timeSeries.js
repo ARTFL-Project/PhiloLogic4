@@ -337,7 +337,7 @@ function drawFromData(data, interval, frequency_type) {
         var count = $(this).data('count');
         var height = count * multiplier;
         $(this).attr('data-height', height)
-        $(this).eq(0).css('height', height + 'px');
+        $(this).eq(0).velocity({'height': height + 'px'}, {duration: 300, easing: "easeOut"});
     });
     $('.graph_bar').tooltip({ position: { my: "left top+10", at: "left bottom", collision: "flipfit" } }, { track: true });
     clickOnChart(interval);

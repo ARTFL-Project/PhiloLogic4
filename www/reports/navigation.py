@@ -88,7 +88,6 @@ def navigate_doc(obj, db):
             except:
                 head = philo_type
             text_hierarchy.append((philo_id, philo_type, head))
-    print >> sys.stderr, "NUM", start_rowid, end_rowid, len(text_hierarchy)
     return text_hierarchy
     
 def get_neighboring_pages(db, doc_id, doc_page):

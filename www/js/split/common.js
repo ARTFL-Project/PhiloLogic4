@@ -142,9 +142,7 @@ $(document).ready(function() {
         $("#arg_proxy, #arg_phrase").val('');
     });
     
-    
     metadataRemove();
-    
     
     // Catch Enter keypress when focused on fixed search bar input
     $("#q2").keyup(function(e) {
@@ -210,6 +208,22 @@ $(document).ready(function() {
             $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
         });
     }
+    
+    // Export results handler
+    $('#export-buttons button').click(function() {
+        $('#export-download-link').hide();
+        $('#retrieve-message').show();
+        var script = db_url + "/scripts/export_results.py?" + q_string + "&output_format=" + $(this).data('format');
+        $('#export-results-file').show();
+        $('#retrieve-message').append('<img src="' + db_url + '/js/gif/spinner-round.gif"/>');
+        $.get(script, function(href) {
+            $('#export-download-link a').attr('href', href);
+            $('#retrieve-message').fadeOut(function() {
+                $('#retrieve-message img').remove();
+                $('#export-download-link').velocity('fadeIn');
+            });
+        })
+    });
     
     // Keep footer at bottom and make sure content doesn't overlap footer
     //setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
@@ -360,7 +374,7 @@ function showMoreOptions(display) {
     if (display == "all") {
         var report = $('#report label.active input').attr('id') || global_report;
         showHide(report);
-        $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
+        $("#search_elements").velocity("transition.slideDownIn",{duration: 250, 'easing': 'easeIn'});
         
     }
     if (global_report != "landing_page") {

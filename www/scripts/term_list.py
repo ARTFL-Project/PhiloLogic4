@@ -10,8 +10,8 @@ import re
 import unicodedata
 import urlparse
 from wsgiref.handlers import CGIHandler
-from philologic.QuerySyntax import parse_query
-from philologic.Query import word_pattern_search
+from philologic.QuerySyntax import parse_query, group_terms
+from philologic.Query import word_pattern_search, split_terms, grep_word
 from functions.wsgi_handler import parse_cgi
 
 
@@ -25,50 +25,56 @@ def exact_word_pattern_search(term, path):
     matches = [m.split()[0].strip().decode('utf-8', 'ignore').encode('utf-8') for m in match]
     return matches
 
-def highlighter(words, token_len):
-    highlighted_matches = []
-    for word in words:
-        highlighted_section = word.decode('utf-8')[:token_len]
-        end_word = word.decode('utf-8')[token_len:]
-        h_word = u'<span class="highlight">' + highlighted_section + '</span>' + end_word
-        h_word = h_word.encode('utf-8')
-        highlighted_matches.append(h_word)
-    return highlighted_matches
+def highlighter(word, token_len):
+    highlighted_section = word.decode('utf-8')[:token_len]
+    end_word = word.decode('utf-8')[token_len:]
+    highlighted_word = u'<span class="highlight">' + highlighted_section + '</span>' + end_word
+    highlighted_word = highlighted_word.encode('utf-8')
+    return highlighted_word
 
 def format_query(q, db):
     parsed = parse_query(q)
-    parsed_split = []
-    for label,token in parsed:
-        l,t = label,token
-        if l == "QUOTE":
-            if t[-1] != '"':
-                t += '"'
-            subtokens = t[1:-1].split(" ")
-            parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
-        else:
-            parsed_split += [(l,t)]
+    group = group_terms(parsed)
+    all_groups = split_terms(group)
+    
+    # We just autocomplete on last term
+    last_group = all_groups[0][-1]
+    
+    ## Leave all words before the last untouched
+    if len(all_groups[0]) > 1:
+        prefix = []
+        for g in all_groups[0][:-1]:
+            prefix.append(g[1])
+        prefix = " ".join(prefix) + " "
+    else:
+        prefix = ""
+    
+    token = last_group[1]
+    kind = last_group[0]
+
+    if kind == "OR":
+        return []
+    if kind == "QUOTE":
+        token = token.replace('"', '')
+    frequency_file = db.locals["db_path"]+"/frequencies/normalized_word_frequencies"
+    
+    expanded_token = token + '.*'
+    grep_proc = grep_word(expanded_token, frequency_file, subprocess.PIPE)
+    
+    matches = []
+    len_token = len(token.decode('utf-8'))
+    for line in grep_proc.stdout:
+        word = line.split('\t')[1]
+        highlighted_word = highlighter(word, len_token)
+        matches.append(highlighted_word)
+
     output_string = []
-    label, token = parsed_split[-1]
-    prefix = " ".join('"'+t[1]+'"' if t[0] == "QUOTE_S" else t[1] for t in parsed_split[:-1])
-    if prefix:
-        prefix = prefix + " "
-    expanded = []
-    if label == "QUOTE_S" or label == "TERM":
-        norm_tok = token.decode("utf-8").lower()
-        norm_tok = [i for i in unicodedata.normalize("NFKD",norm_tok) if not unicodedata.combining(i)]
-        norm_tok = "".join(norm_tok).encode("utf-8")
-        matches = word_pattern_search(norm_tok,db.locals["db_path"]+"/frequencies/normalized_word_frequencies")
-        substr_token = token.decode("utf-8").lower().encode("utf-8")
-        exact_matches = exact_word_pattern_search(substr_token + '.*',db.locals["db_path"]+"/frequencies/word_frequencies")
-        for m in exact_matches:
-            if m not in matches:
-                matches.append(m)
-        matches = highlighter(matches, len(norm_tok))
-        for m in matches:
-            if label == "QUOTE_S":
-                output_string.append(prefix + '"%s"' % m)
-            else:
-                output_string.append(prefix + m)
+    for m in matches:
+        if kind == "QUOTE":
+            output_string.append(prefix + '"%s"' % m)
+        else:
+            output_string.append(prefix +  m)
+    
     return output_string
 
 def autocomplete_term(q, db):
