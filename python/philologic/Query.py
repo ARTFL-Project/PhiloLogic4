@@ -127,7 +127,7 @@ def expand_query(split, freq_file, dest_fh):
         filters.stdin.close()    
         filters.wait()
 #    dest_fh.close()
-    return
+    return grep_proc
 
 def format_parsed_query(parsed_split,db):
     command = ""
