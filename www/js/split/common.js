@@ -273,7 +273,6 @@ function autoCompleteWord(db_url) {
         "dataType": "json",
         focus: function( event, ui ) {
             var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-            //$("#" + field).val(q); This is too sensitive, so disabled
             return false;
         },
         select: function( event, ui ) {
@@ -285,7 +284,7 @@ function autoCompleteWord(db_url) {
         var term = item.label.replace(/^[^<]*/g, '');
         return $("<li></li>")
             .data("item.autocomplete", item)
-            .append("<a>" + term + "</a>")
+            .append(term)
             .appendTo(ul);
     };
     $("#q2").autocomplete({
@@ -294,7 +293,6 @@ function autoCompleteWord(db_url) {
         "dataType": "json",
         focus: function( event, ui ) {
             var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-            //$("#" + field).val(q); This is too sensitive, so disabled
             return false;
         },
         select: function( event, ui ) {
@@ -306,7 +304,7 @@ function autoCompleteWord(db_url) {
         var term = item.label.replace(/^[^<]*/g, '');
         return $("<li></li>")
             .data("item.autocomplete", item)
-            .append("<a>" + term + "</a>")
+            .append(term)
             .appendTo(ul);
     };
 }
@@ -336,7 +334,7 @@ function autoCompleteMetadata(metadata, field, db_url) {
         var term = item.label.replace(/.*(?=CUTHERE)CUTHERE /, '');
         return $("<li></li>")
             .data("item.autocomplete", item)
-            .append("<a>" + term + "</a>")
+            .append(term)
             .appendTo(ul);
      };
 }
@@ -398,6 +396,13 @@ function hideSearchForm() {
 ///////////////////////////////////////////////////
 ////// Functions shared by various reports ////////
 ///////////////////////////////////////////////////
+
+
+// Update progress bar in Time Series, Frequencies, and Collocations
+function updateProgressBar(percent) {
+    var truncated_percent = parseInt(percent.toString().split('.')[0]);
+    $('.progress-bar').velocity({'width': truncated_percent + '%'}, { queue: false, complete:function(){$('.progress-bar').text(percent.toString().split('.')[0] + '%');}});
+}
 
 // Show more context in concordance and concordance from collocation searches
 function fetchMoreContext() {

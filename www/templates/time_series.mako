@@ -21,8 +21,9 @@
                             </span>
                         </div>
                     </div>
-                    <div id="progress_bar" style="margin-top:-5px;margin-bottom: 10px" data-total='${total}'>
-                        <div class="progress-label"></div>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" data-total="${total}" style="width: 0%;">
+                        </div>
                     </div>
                     <div id="time_series_buttons" class="btn-group" data-toggle="buttons">
                         <label class="btn btn-primary active" id="absolute_time" data-value='${frequencies}' data-interval="${q['year_interval']}" checked="checked">

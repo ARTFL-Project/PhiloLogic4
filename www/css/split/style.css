@@ -73,47 +73,6 @@ li {
     z-index: 0;
 }
 
-/*jQueryUI styling*/
-.ui-button,  .ui-button-text, .ui-button, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button, .ui-widget, ul.ui-autocomplete.ui-menu {  
-    font-size: inherit !important;
-    font-family: inherit !important;
-}
-.ui-tooltip {
-    font-size: 12px !important;
-    font-family: inherit !important;
-}
-.ui-progressbar {
-    height: 1em;
-    position: relative;
-}
-.progress-label {
-    position: absolute;
-    left: 50%;
-    top: -4px;
-    font-weight: bold;
-    text-shadow: 1px 1px 0 #fff;
-}
-.ui-progressbar-value {
-    font-size: 70% !important;
-    text-align: center;
-}
-.ui-autocomplete {
-    max-height: 280px;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-.ui-corner-all, .ui-corner-bottom, .ui-corner-top, .ui-corner-right, .ui-corner-left, .ui-corner-tr {*/
-    border-radius: 0px !important;
-    border-bottom-left-radius: 0px !important;
-    border-bottom-right-radius: 0px !important;
-    border-top-left-radius: 0px !important;
-    border-top-right-radius: 0px !important;
-}
-.ui-menu-item {
-    font-size: .9em !important;
-    padding: .6em .5em .5em .9em !important;
-}
-
 /* Collocation classes */
 #philologic_collocation {
 	padding-left: 15px;
@@ -287,4 +246,29 @@ a.sidebar-option:hover {
     padding: 3px;
 }
 
-
+/*Autocomplete styling*/
+.ui-autocomplete {
+	position: absolute;
+	z-index: 200;
+	background: #fff;
+	border: solid #eee 1px;
+	overflow: hidden;
+	font-family: inherit !important;
+	font-size: inherit !important;
+	font-weight: 300;
+	overflow-y: scroll;
+	max-height: 300px;
+	box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.1);
+}
+.ui-menu-item {
+	padding: 7px 10px;
+}
+.ui-menu-item:hover {
+	cursor: pointer;
+}
+.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
+	background: #eee;
+}
+.ui-menu-item .highlight {
+	color: #649DC5;
+}

@@ -14,7 +14,6 @@ $(document).ready(function() {
         var alias = $(this).data('display');
         $('#selected-sidebar-option').html(webConfig.metadata_aliases[alias]);
         showSidebar();
-        console.log(q_string, db_url, facet)
         sidebarReports(q_string, db_url, facet);
     });
     $('#hide-sidebar-button').click(function() {
@@ -37,16 +36,12 @@ function sidebarReports(q_string, db_url, value) {
     } else {
         var script_call = db_url + "/scripts/collocation_fetcher.py?" + q_string + "&full_report=False";
     }
-    $('#progress_bar').hide();
+    $('.progress').hide();
     if (typeof sessionStorage[script_call] == "undefined") {
         // Initialize progress bar for sidebar
-        $('#progress_bar').progressbar({max: total_results});
-        $('#progress_bar').progressbar({value: 100});
         var percent = 100 / total_results * 100;
-        $('.progress-label').text(percent.toString().split('.')[0] + '%');
-        $('.progress-label').text('0%');
-        $('#progress_bar').progressbar({value: 0.1});
-        $("#progress_bar").show();
+        $(".progress").show();
+        updateProgressBar(percent);
         $('#selected-sidebar-option').data('interrupt', false)
         var full_results;
         populate_sidebar(script_call, value, total_results, 0, full_results);
@@ -145,12 +140,9 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
                 var new_full_results = merge[1];
                 update_sidebar(sorted_list, field);
                 populate_sidebar(script_call, field, total_results, interval_start, interval_end, new_full_results);
-                var total = $('#progress_bar').progressbar("option", "max");
-                var percent = interval_end / total * 100;
-                if (interval_end < total) {
-                    var progress_width = $('#progress_bar').width() * percent / 100;
-                    $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'fast', 'easeOutQuint', {queue: false});
-                    $('.progress-label').text(percent.toString().split('.')[0] + '%');
+                if (interval_end < total_results) {
+                    var percent = interval_end / total_results * 100;
+                    updateProgressBar(percent);
                 }
             } else {
                 // This won't affect the full collocation report which can't be interrupted
@@ -159,10 +151,8 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
             }
         });
     } else {
-        var total = $('#progress_bar').progressbar("option", "max");
-        $('#progress_bar').progressbar({value: total});
-        $('.progress-label').text('Complete!');
-        $("#progress_bar").delay(500).slideUp();
+        updateProgressBar(100)
+        $(".progress").delay(500).velocity('slideUp');
         $('#frequency_table').slimScroll({height: $('#results_container').height() - 14});
         if (typeof(localStorage) == 'undefined' ) {
             alert('Your browser does not support HTML5 localStorage. Try upgrading.');

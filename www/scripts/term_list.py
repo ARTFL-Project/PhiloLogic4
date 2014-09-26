@@ -37,20 +37,18 @@ def format_query(q, db):
     group = group_terms(parsed)
     all_groups = split_terms(group)
     
-    # We just autocomplete on last term
-    last_group = all_groups[0][-1]
-    
-    ## Leave all words before the last untouched
-    if len(all_groups[0]) > 1:
-        prefix = []
-        for g in all_groups[0][:-1]:
-            prefix.append(g[1])
-        prefix = " ".join(prefix) + " "
-    else:
-        prefix = ""
-    
+    # We extract every word tuple
+    word_groups = []
+    for g in all_groups:
+        for inner_g in g:
+            word_groups.append(inner_g)
+    last_group = word_groups.pop()  ## we take the last tuple for autocomplete
     token = last_group[1]
     kind = last_group[0]
+    if word_groups:
+        prefix = ' '.join([i[1] for i in word_groups]) + " "
+    else:
+        prefix = ''
 
     if kind == "OR":
         return []
@@ -81,7 +79,8 @@ def autocomplete_term(q, db):
     ## Workaround for when jquery send a list of words: happens when using the back button
     if isinstance(q, list):
         q = q[-1]
-    all_words = format_query(q, db)[:100] 
+    all_words = format_query(q, db)[:100]
+    print >> sys.stderr, "AUTOCOMP", repr(all_words)
     return json.dumps(all_words)
 
 def term_list(environ,start_response):
