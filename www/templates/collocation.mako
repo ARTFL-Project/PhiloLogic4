@@ -18,10 +18,11 @@
                     Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
                 </div>
             </div>
-            <div id="progress_bar" style="position:absolute;margin-top:-5px">
-                <div class="progress-label"></div>
+            <div class="progress" style="margin-left: 15px; margin-right: 15px">
+                <div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                </div>
             </div>
-            <div style="padding-left: 15px;padding-top: 15px;">
+            <div style="padding-left: 15px;">
                 The 100 most common words are being filtered from this report.
             </div>
         </div>

@@ -30,13 +30,9 @@ $(document).ready(function() {
         var full_abs = merge_abs[1]
         var interval = $("#absolute_time").data('interval');
         drawFromData(sorted_abs, interval, 'absolute_time');
-        var total = parseInt($('#progress_bar').data('total'));
-        $('#progress_bar').progressbar({max: total});
-        $('#progress_bar').progressbar({value: 5000});
+        var total = parseInt($('.progress-bar').data('total'));
         var percent = 5000 / total * 100;
-        $('.progress-label').text(percent.toString().split('.')[0] + '%');
-        $('#progress_bar').width($('#description').width());
-        $('#progressive_bar').show();
+        updateProgressBar(percent)
         var date_counts = eval($('#relative_time').data('datecount'));
         
         progressiveLoad(db_url, total, interval, 0, 5000, full_abs, date_counts, date_list);   
@@ -114,12 +110,9 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
             }
             
             progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_new_full_results, full_date_counts, date_list);
-            var total = $('#progress_bar').progressbar("option", "max");
-            var percent = interval_end / total * 100;
-            if (interval_end < total) {
-                var progress_width = $('#progress_bar').width() * percent / 100;
-                $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'slow', 'easeOutQuart', {queue: false});
-                $('.progress-label').text(percent.toString().split('.')[0] + '%');
+            if (interval_end < total_results) {
+                var percent = interval_end / total_results * 100;
+                updateProgressBar(percent)
             }
         });
     } else {
@@ -135,10 +128,8 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         // Create click event handler to switch between frequency types
         frequencySwitcher();
         
-        var total = $('#progress_bar').progressbar("option", "max");
-        $('#progress_bar').progressbar({value: total});
-        $('.progress-label').text('Complete!');
-        $("#progress_bar").delay(500).slideUp();
+        updateProgressBar(100)
+        $(".progress").delay(500).velocity("slideUp");
     }
 }
 
