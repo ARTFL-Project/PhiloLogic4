@@ -20,28 +20,21 @@ $(document).ready(function() {
         offset: {
         top: function() {
             return (this.top = $('#nav-buttons').offset().top)
-            },
-        bottom: function() {
-            return (this.bottom = $('#footer').outerHeight(true))
-          }
+            }
         }
     });
     
     $('#nav-buttons').on('affix.bs.affix', function() {
         $(this).addClass('fixed');
         adjustTocHeight();
-        $("#toc-container").css({'position': 'fixed'}); // Force position fixed because of bottom event hack
+        $("#toc-container").css({'position': 'fixed', "top": "32px"}); // Force position fixed because of bottom event hack
         $('#back-to-top').velocity('fadeIn', {duration: 200});
     });
     $('#nav-buttons').on('affix-top.bs.affix', function() {
         $(this).removeClass('fixed');
         adjustTocHeight();
         $('#back-to-top').velocity('fadeOut', {duration: 200});
-        $("#toc-container").css({'position': 'static'}); // Force position static because of bottom event hack
-    });
-    $('#toc-container').on('affixed-bottom.bs.affix', function() {
-        adjustTocHeight(50);
-        $(this).css({'position': 'fixed'}); // Force position fixed in order to override the position relative set on this event
+        $("#toc-container").css({'position': 'static', "top": "auto"}); // Force position static because of bottom event hack
     });
     
     $('#back-to-top').click(function() {
@@ -99,20 +92,21 @@ function retrieveTableOfContents(db_url) {
     $.get(script, function(data) {
         $('#toc-content').html(data);
         // Add a negative left margin to hide on the left side
-        var tocWidth = $('#toc-wrapper').outerWidth() + 30; // account for container margin
-        $('#toc-container').css('margin-left', '-' + tocWidth + 'px').css('display', 'inline-block');
+        //var tocWidth = $('#toc-wrapper').outerWidth() + 30; // account for container margin
+        //$('#toc-container').css('margin-left', '-' + tocWidth + 'px').css('display', 'inline-block');
         adjustTocHeight(100); // adjust height before showing
         TocLinkHandler(db_url);
     });
 }
 
 function hideTOC() {
-    if ($(document).height() == $(window).height()) {
-        $('#toc-container').css('position', 'static');
-    }
+    $('#toc-container').velocity("transition.slideLeftBigOut", {"duration": 300});
     $("#toc-container").data("status", "closed");
-    var tocWidth = $('#toc-container').outerWidth() + 30 + 40; // account for container margin and content padding
-    $('#toc-container').velocity({'margin-left': '-' + tocWidth + 'px'}, {"duration": 300});
+    setTimeout(function() {
+        if ($(document).height() == $(window).height()) {
+            $('#toc-container').css('position', 'static');
+        }
+    });
     $('#nav-buttons').removeClass('col-md-offset-4');
 }
 function showTOC() {
@@ -120,13 +114,13 @@ function showTOC() {
         $('#toc-container').css('position', 'static');
     }
     $("#toc-container").data("status", "open");
-    adjustTocHeight();
     $('#toc-wrapper').css('opacity', 1);
     $('#nav-buttons').addClass('col-md-offset-4');
-    $('#toc-container').velocity({'margin-left': '-30px'}, {"duration": 300});
+    $('#toc-container').velocity("transition.slideLeftBigIn", {"duration": 300});
     $('#toc-wrapper').addClass('show');
     var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
     setTimeout(function() {
+        adjustTocHeight();
         if ($('#toc-content').find($(scrollto_id)).length) {
             $('#toc-content').scrollTo($(scrollto_id), 500);
             $('#toc-content').find($(scrollto_id)).addClass('current-obj');
@@ -136,9 +130,9 @@ function showTOC() {
 function adjustTocHeight(num) {
     // Make sure the TOC is no higher than viewport
     if ($(document).height() == $(window).height()) {
-        var toc_height = $('#footer').offset().top - $('#nav-buttons').position().top - $('#nav-buttons').height() - $('#toc-titlebar').height() - 10;
+        var toc_height = $('#footer').offset().top - $('#nav-buttons').position().top - $('#nav-buttons').height() - $('#toc-titlebar').height() - 40;
     } else {
-        var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').position().top - $('#toc-titlebar').height() - 20;
+        var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').position().top - $('#toc-titlebar').height() - 50;
     }
     if (typeof num !="undefined") {
         toc_height = toc_height - num;
@@ -204,10 +198,15 @@ function newTextObjectCallback(data, philo_id, my_path) {
             $('#toc-content').scrollTo($(scrollto_id), 500);
             $('#toc-content').find($(scrollto_id)).addClass('current-obj');
         }
-        page_image_link();
         var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
         History.pushState(null, '', new_url);
         checkEndBeginningOfDoc();
-        $('body').velocity('scroll', {duration: 200, offset: 0, easing: 'easeOut'});
+        if ($('body').scrollTop() != 0) {
+            $('body').velocity('scroll', {duration: 200, offset: 0, easing: 'easeOut', complete: function() {$('#toc-container').css('position', 'static');}});
+        }
+        adjustTocHeight();
+        setTimeout(function() {
+            $('#toc-container').css('position', 'static')
+        }, 250)
     });
 }
