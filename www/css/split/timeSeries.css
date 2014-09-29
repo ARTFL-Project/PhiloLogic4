@@ -1,7 +1,7 @@
 #test_time_series {
     margin-left: 20px;
-    margin-top: 30px;
-    margin-bottom: 30px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     border-left: solid 1px;
     border-bottom: solid 1px;
     position: relative;
@@ -53,9 +53,6 @@
 }
 #middle_division {
     bottom: 66%;
-}
-#top_division {
-    bottom: 98.7%;
 }
 #top_number, #middle_number, #first_number {
     margin-top: -16px;

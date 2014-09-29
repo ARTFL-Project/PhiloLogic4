@@ -7,7 +7,7 @@ $(document).ready(function() {
     if (sessionStorage[window.location.href] == null) {
         
         // Calculate width and height of chart
-        var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 200;
+        var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
         $('#test_time_series').css('height', height);
         var body_width = parseInt($('body').width());
         $('#test_time_series, #first_division, #middle_division, #top_division').width(body_width-90 + 'px');
@@ -48,12 +48,12 @@ $(document).ready(function() {
             var chart_width = body_width - 90 + diff;
             $('#test_time_series, #first_division, #middle_division, #top_division').width(chart_width + 'px');
             $('.graph_bar').remove();
-            var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 200;
+            var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
             $('#test_time_series').css('height', height);
             $('#test_time_series').fadeOut('fast', function() {
                 $(this).show();
                 var frequency = $('#time_series_buttons label.active').attr('id');
-                data = eval($('#' + frequency).data('value'));
+                var data = eval($('#' + frequency).data('value'));
                 drawFromData(data, interval);
             });
         }, 500, $('#test_time_series').attr('id'));
@@ -129,7 +129,9 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         frequencySwitcher();
         
         updateProgressBar(100)
-        $(".progress").delay(500).velocity("slideUp");
+        var progress_height = $(".progress").height();
+        $(".progress").delay(500).velocity("slideUp", {complete: function() {$('#test_time_series').velocity({height: '+=' + progress_height})}});
+        $('.graph_bar').tooltip({html: true});
     }
 }
 
@@ -262,7 +264,7 @@ function drawFromData(data, interval, frequency_type) {
             if (i > 0) {
                 margin += width + 1;
             }
-            var graph_bar = "<span class='graph_bar' title='" + count + " occurrences in years '" + year_to_display + "' style='margin-left:" + margin + "px' data-count='" + Math.round(count, false) + "' data-year='" + year + "'></span>";
+            var graph_bar = "<span class='graph_bar' data-toggle='tooltip' title='" + count + " occurrences in years '" + year_to_display + "' style='margin-left:" + margin + "px' data-count='" + Math.round(count, false) + "' data-year='" + year + "'></span>";
             $('#test_time_series').append(graph_bar);
             $('.graph_bar').eq(i).width(width + 'px');
             $('.graph_bar').eq(i).data('href', data[i][1]['url']);
@@ -273,9 +275,9 @@ function drawFromData(data, interval, frequency_type) {
         } else {
             $('.graph_bar').eq(i).data('count', count);
             if (frequency_type == "absolute_time") {
-                $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences in years ' + year_to_display);
+                $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences<br>between ' + year_to_display);
             } else {
-                $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences per 1,000,000 words in years ' + year_to_display);
+                $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences per 1,000,000 words<br>between ' + year_to_display);
             }
             
         }
@@ -303,6 +305,23 @@ function drawFromData(data, interval, frequency_type) {
         })
     }
     
+    var chart_height = $('#test_time_series').height();
+    var multiplier = (chart_height - 10) / max_count; 
+    var max_height = 0;
+    
+    $('.graph_bar').each(function() {
+        var count = $(this).data('count');
+        var height = count * multiplier;
+        if (height > max_height) {
+            max_height = height;
+        }
+        $(this).attr('data-height', height)
+        $(this).eq(0).velocity({'height': height + 'px'}, {duration: 300, easing: "easeOut"});
+    });
+    
+    var top_line = (chart_height - 10) / chart_height * 100;
+    $("#top_division").css('bottom', top_line + '%');
+    
     // Draw three lines along the X axis to help visualize frequencies
     if (frequency_type == "relative_time") {
         $('#side_text').html('Occurrences per 1,000,000 words'); // TODO: move to translation file
@@ -321,16 +340,6 @@ function drawFromData(data, interval, frequency_type) {
         $('#middle_number').html(middle_number + ' occurrences');
         $('#first_number').html(bottom_number + ' occurrences');
     }
-    
-    var multiplier = ($('#test_time_series').height() - 10) / max_count; 
-    
-    $('.graph_bar').each(function() {
-        var count = $(this).data('count');
-        var height = count * multiplier;
-        $(this).attr('data-height', height)
-        $(this).eq(0).velocity({'height': height + 'px'}, {duration: 300, easing: "easeOut"});
-    });
-    $('.graph_bar').tooltip({ position: { my: "left top+10", at: "left bottom", collision: "flipfit" } }, { track: true });
     clickOnChart(interval);
 }
 

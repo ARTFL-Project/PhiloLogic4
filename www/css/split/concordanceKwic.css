@@ -23,6 +23,11 @@
 .full_biblio {
 	z-index: 10;
 }
+.full_biblio.show {
+	position: absolute;
+    box-shadow: 5px 5px 15px #C0C0C0;
+	display: inline !important;
+}
 #philologic_concordance, #colloc_concordance {
     list-style-type: none;
     overflow: hidden;
@@ -135,6 +140,11 @@
 }
 
 /*All the sidebar classes*/
+#sidebar {
+	padding-left: 0px;
+	padding-right: 0px;
+	margin-left: -15px;
+}
 #sidebar_display #freq_sidebar_status {
 	margin: 0em 0em 0.5em 0em;
 }
@@ -152,6 +162,12 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+#frequency_field {
+	width: 100%;
+}
+#frequency_field .dropdown-header {
+	padding: 3px 10px;
 }
 /* Concordance styling for theater */
 speaker {

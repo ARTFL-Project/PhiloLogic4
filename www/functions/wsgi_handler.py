@@ -7,6 +7,7 @@ import re
 import sys
 import os
 from philologic.DB import DB
+from philologic.Query import word_pattern_search
 from query_parser import query_parser
 
 

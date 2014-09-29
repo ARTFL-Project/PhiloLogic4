@@ -25,7 +25,7 @@ class WebConfig(object):
                 self.config['search_examples'][i] = self.config['search_examples'][i].decode('utf-8', 'ignore')
                 
         self.options = set(['db_url', 'dbname', 'concordance_length', 'facets', 'metadata',
-                        'search_reports', 'metadata_aliases', 'search_examples', 'time_series_intervals'])
+                        'search_reports', 'metadata_aliases', 'search_examples', 'time_series_intervals', "theme"])
     
     def __getattr__(self, attr):
         if attr in self.options:
@@ -70,6 +70,8 @@ class WebConfig(object):
             return {}
         elif key == "time_series_intervals":
             return [10, 50, 100]
+        elif key == "theme":
+            return "default_theme.css"
         else:
             return False
         
