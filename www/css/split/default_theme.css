@@ -31,6 +31,10 @@ body {
     background: #374655;
 	border-color: transparent;
 }
+.btn-primary[disabled] {
+	background-color: #8e979f;
+	border-color: transparent;
+}
 
 /* Links */
 a {
@@ -46,12 +50,6 @@ a:hover {
     color: #fff;
     background: rgb(217,83,79);
     border: solid 1px rgb(212,63,58);
-}
-/*TOC styling*/
-.toc-div1 > a:hover, .toc-div2 > a:hover, .toc-div3 > a:hover {
-    text-decoration: none;
-    background: rgb(100,157,197);
-    color: #fff !important;
 }
 
 /*Concordance Kwic styling*/
@@ -91,7 +89,7 @@ a:hover {
 }
 a.current-obj {
     background: rgba(256, 256, 256, .9);
-    color: rgb(39, 107, 155) !important;
+    color: #697683 !important;
 }
 .bullet-point-div1 {
     background: #fff;
@@ -101,6 +99,11 @@ a.current-obj {
 }
 
 /*TOC report styling*/
+.toc-div1 > a:hover, .toc-div2 > a:hover, .toc-div3 > a:hover {
+    text-decoration: none;
+    background: #8e979f;
+    color: #fff !important;
+}
 #toc-report .bullet-point-div1 {
     border: solid 1px #000;
     background: #000;

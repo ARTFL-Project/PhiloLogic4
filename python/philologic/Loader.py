@@ -484,6 +484,11 @@ class Loader(object):
         print >> web_config, "# If None is the value, PhiloLogic will use [10, 50, 100] as defaults"
         print >> web_config, "# The only valid intervals are 1, 10, 50 and 100. Invalid intervals will be ignored."
         print >> web_config, "time_series_intervals = None"
+        print >> web_config, "\n# The theme variable defines the default CSS theme to be used in the WebApp."
+        print >> web_config, "# The default theme called default_theme.css can be edited directly"
+        print >> web_config, "# or you can define a new CSS file below. This file must be located"
+        print >> web_config, "# in the css/split/ directory for the WebApp to find it."
+        print >> web_config, 'theme = "default_theme.css"' 
         print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")
 
                 
@@ -555,15 +560,7 @@ def setup_db_dir(db_destination, template_dir):
         os.system("chmod -R 777 %s/templates/compiled_templates" % db_destination)
 	os.system("chmod -R 777 %s/css" % db_destination)
 	os.system("chmod -R 777 %s/js" % db_destination)
-        os.system("mkdir -p %s/data/log" % db_destination)
-        os.system("chmod -R 777 %s/data/log" % db_destination)
-        os.system("touch %s/data/log/error.log" % db_destination)
-        os.system("chmod 777 %s/data/log/error.log" % db_destination)
-        os.system("touch %s/data/log/info.log" % db_destination)
-        os.system("chmod 777 %s/data/log/info.log" % db_destination)
-        os.system("touch %s/data/log/usage.log" % db_destination)
-        os.system("chmod 777 %s/data/log/usage.log" % db_destination)
-
+        os.system("mkdir %s/data/exports", % db_destination) 
                 
 # a quick utility function
 #def load(path,files,filters=default_filters,xpaths=None,metadata_xpaths=None,workers=4):
