@@ -28,7 +28,7 @@ def concordance(environ,start_response):
             full_metadata = {}
             for metadata in config.metadata:
                 full_metadata[metadata] = i[metadata]
-            result = {"citation": f.cite.make_abs_doc_cite_mobile(db,i), "shrtcit": f.cite.make_abs_doc_shrtcit_mobile(db,i), "text": text, "hit_count": len(hits), "philo_id": i.philo_id, "start":start}
+            result = {"citation": f.cite.make_abs_doc_cite_mobile(db,i), "shrtcit": f.cite.make_abs_doc_shrtcit_mobile(db,i), "text": text, "hit_count": len(hits), "philo_id": i.philo_id, "start":start, "offsets": i.bytes}
             formatted_results.append(result)
         return json.dumps(formatted_results)
     if q['q'] == '':

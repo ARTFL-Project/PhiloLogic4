@@ -23,8 +23,22 @@ def get_frequency(environ,start_response):
         hits = db.get_all(db.locals['default_object_level'])
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-    field, results = r.generate_frequency(hits, q, db)
-    yield json.dumps(results,indent=2)
+    if q["format"] == "json":
+        while not len(hits):
+            time.sleep(0.5) ## this should be enough time to write all results to disk in most instances.... better fix later
+        q["interval_start"] = 0
+        q["interval_end"] = len(hits)
+        bib_values = dict([(i, j) for i, j in q['metadata'].iteritems() if j])
+        field, results = r.generate_frequency(hits, q, db)
+        new_results = []
+        for label, result in sorted(results.iteritems(), key=lambda (x, y): y["count"], reverse=True):
+            formatted_result = {"search_term": q['q'], "frequency_field": frequency_field, "results": label, "count": result["count"], "url": "dispatcher.py/" + result["url"].replace('./', ''),
+                                "bib_values": bib_values}
+            new_results.append(formatted_result)
+        yield json.dumps(new_results)
+    else:
+        field, results = r.generate_frequency(hits, q, db)
+        yield json.dumps(results,indent=2)
 
 if __name__ == "__main__":
     CGIHandler().run(get_frequency)

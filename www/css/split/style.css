@@ -210,6 +210,16 @@ l[type="split"]::before {
 lb[type="hyphenInWord"] {
     display: inline;
 }
+gap desc {
+	display: none;
+}
+gap::after {
+	content: "*";
+}
+hi {
+	font-style: italic;
+	font-variant: small-caps;
+}
 w::before {
     margin:0;padding:0;float:left;
 }
