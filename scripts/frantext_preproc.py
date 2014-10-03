@@ -34,9 +34,7 @@ import string
 ##				 ##
 ################################### 
 
-metadata_xpaths = {}
-
-metadata_xpaths = {"author":
+artfl_metadata_xpaths = {"author":
                 [
                  ".//sourceDesc/bibl/author[@type='marc100']",
                  ".//sourceDesc/bibl/author[@type='artfl']",
@@ -211,8 +209,8 @@ from elementtree import ElementTree as etree
 #import xml.etree.ElementTree as etree
 
 def get_header(fn):
-        fh = open(fn)
-	header = ""
+    fh = open(fn)
+    header = ""
         while True:
             line = fh.readline()
             scan = re.search("<teiheader>|<temphead>",line,re.IGNORECASE)
@@ -228,7 +226,12 @@ def get_header(fn):
             else:
                 header = header + line
         tree = etree.fromstring(header)
-	return(tree)
+	return tree
+
+def get_whole_file(fn):
+    fh = open(fn)
+    tree = etree.fromstring(fh.read())
+    return tree
 
 def make_load_metadata(filenames,prefix=""):
     all_data = []
@@ -236,7 +239,7 @@ def make_load_metadata(filenames,prefix=""):
         tree = get_header(prefix+fn)
 	data = {"filename":fn}
 #	print i,fn,tree
-	for field,paths in metadata_xpaths.items():
+	for field,paths in artfl_metadata_xpaths.items():
 	   for path in paths:
 		el = tree.find(path)
 		if el is not None and el.text is not None:
