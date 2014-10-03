@@ -605,10 +605,11 @@ def setup_db_dir(db_destination, template_dir):
         os.system("chmod -R 777 %s/templates" % db_destination)
         os.system("mkdir -p %s/templates/compiled_templates" % db_destination)
         os.system("chmod -R 777 %s/templates/compiled_templates" % db_destination)
-	os.system("chmod -R 777 %s/css" % db_destination)
-	os.system("chmod -R 777 %s/js" % db_destination)
-        os.system("mkdir %s/data/exports", % db_destination)
-                
+        os.system("chmod -R 777 %s/css" % db_destination)
+        os.system("chmod -R 777 %s/js" % db_destination)
+        os.system("mkdir %s/data/exports" % db_destination)
+        os.system("chmod -R 777 %s/data/exports" % db_destination)
+        
 # a quick utility function
 #def load(path,files,filters=default_filters,xpaths=None,metadata_xpaths=None,workers=4):
 #    l = Loader(path)    
