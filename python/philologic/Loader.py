@@ -16,6 +16,7 @@ import philologic.Parser as Parser
 import philologic.LoadFilters as LoadFilters
 import philologic.PostFilters as PostFilters
 from philologic.PostFilters import make_sql_table
+from lxml import etree
 
 from philologic.utils import OutputHandler
 
@@ -115,7 +116,7 @@ class Loader(object):
     def list_files(self):
         return os.listdir(self.textdir)
 
-    def pre_parse_header(fn):
+    def pre_parse_header(self, fn):
         fh = open(fn)
         header = ""
         while True:
@@ -135,32 +136,52 @@ class Loader(object):
         tree = etree.fromstring(header)
         return tree
 
-    def pre_parse_whole_file(fn):
+    def pre_parse_whole_file(self, fn):
         fh = open(fn)
         tree = etree.fromstring(fh.read())
         return tree
         
-    def sort_by_metadata(self, whole_file=False, reverse=False, *fields):
-        files = [self.textdir + f for f in self.list_files()]
+    def sort_by_metadata(self, *fields, **options):
         load_metadata = []
-        for fn in files:
-            data = {}
+        if "reverse" in options:
+            reverse = options["reverse"]
+        else: reverse = False
+        if "whole_file" in options:
+            whole_file = options["whole_file"]
+        else: whole_file = False
+
+        for f in self.list_files():
+            data = {"filename":f}
+            fn = self.textdir + f
             if whole_file == True:
-                tree = pre_parse_whole_file(fn)
+                tree = self.pre_parse_whole_file(fn)
             else:
-                tree = pre_parse_header(fn)
+                tree = self.pre_parse_header(fn)
             
             for type, xpath, field in self.parser_defaults["metadata_xpaths"]:
                 if type == "doc":
                     if field not in data:
-                        el = tree.find(path)
-                        if el is not None and el.text is not None:
-                            data[field] = el.text.encode("utf-8")
+                        attr_pattern_match = re.search(r"@([^\/\[\]]+)$",xpath)
+                        if attr_pattern_match:
+                            xp_prefix = xpath[:attr_pattern_match.start(0)]
+                            attr_name = attr_pattern_match.group(1)
+                            elements = tree.findall(xp_prefix)
+                            for el in elements:
+                                if el is not none and el.get(attr_name,""):
+                                    data[field] = el.get(attr_name,"").encode("utf-8")
+                                    break
+                        else:
+                            el = tree.find(xpath)
+                            if el is not None and el.text is not None:
+                                data[field] = el.text.encode("utf-8")
             load_metadata.append(data)
-        
-        make_sort_key = lambda d: (d[f] for f in fields)
-        sorted_load_metadata = load_metadata.sort(reverse=reverse,key=make_sort_key)
-        return sorted_load_metadata
+
+        def make_sort_key(d):
+            key = [d.get(f,"") for f in fields]
+            return key
+        print "Load files ordered by %s" % ', '.join(fields)
+        load_metadata.sort(key=make_sort_key, reverse=reverse)
+        return load_metadata
         
     def parse_files(self,max_workers,data_dicts = None):
         print "\n### Parsing files ###"
@@ -607,7 +628,7 @@ def setup_db_dir(db_destination, template_dir):
         os.system("chmod -R 777 %s/templates/compiled_templates" % db_destination)
         os.system("chmod -R 777 %s/css" % db_destination)
         os.system("chmod -R 777 %s/js" % db_destination)
-        os.system("mkdir %s/data/exports" % db_destination)
+        os.system("mkdir -p %s/data/exports" % db_destination)
         os.system("chmod -R 777 %s/data/exports" % db_destination)
         
 # a quick utility function

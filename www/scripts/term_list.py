@@ -11,7 +11,7 @@ import unicodedata
 import urlparse
 from wsgiref.handlers import CGIHandler
 from philologic.QuerySyntax import parse_query, group_terms
-from philologic.Query import word_pattern_search, split_terms, grep_word
+from philologic.Query import split_terms, grep_word
 from functions.wsgi_handler import parse_cgi
 
 
