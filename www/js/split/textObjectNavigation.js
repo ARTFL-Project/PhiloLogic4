@@ -81,6 +81,11 @@ function checkEndBeginningOfDoc() {
     }
 }
 
+// Check to see if the footer is no longer at the bottomw of the page
+function checkFooterPosition() {
+    
+}
+
 function retrieveTableOfContents(db_url) {
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var my_path = pathname.replace(/\/\d+.*$/, '/');
@@ -91,9 +96,6 @@ function retrieveTableOfContents(db_url) {
     $('#toc-container').hide();
     $.get(script, function(data) {
         $('#toc-content').html(data);
-        // Add a negative left margin to hide on the left side
-        //var tocWidth = $('#toc-wrapper').outerWidth() + 30; // account for container margin
-        //$('#toc-container').css('margin-left', '-' + tocWidth + 'px').css('display', 'inline-block');
         adjustTocHeight(100); // adjust height before showing
         TocLinkHandler(db_url);
     });
