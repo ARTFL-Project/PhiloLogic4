@@ -114,53 +114,6 @@ class Loader(object):
     
     def list_files(self):
         return os.listdir(self.textdir)
-
-    def pre_parse_header(fn):
-        fh = open(fn)
-        header = ""
-        while True:
-            line = fh.readline()
-            scan = re.search("<teiheader>|<temphead>",line,re.IGNORECASE)
-            if scan:
-                header = line[scan.start():]
-                break
-        while True:        
-            line = fh.readline()
-            scan = re.search("</teiheader>|<\/?temphead>", line, re.IGNORECASE)
-            if scan:
-                header = header + line[:scan.end()]
-                break
-            else:
-                header = header + line
-        tree = etree.fromstring(header)
-        return tree
-
-    def pre_parse_whole_file(fn):
-        fh = open(fn)
-        tree = etree.fromstring(fh.read())
-        return tree
-        
-    def sort_by_metadata(self, whole_file=False, reverse=False, *fields):
-        files = [self.textdir + f for f in self.list_files()]
-        load_metadata = []
-        for fn in files:
-            data = {}
-            if whole_file == True:
-                tree = pre_parse_whole_file(fn)
-            else:
-                tree = pre_parse_header(fn)
-            
-            for type, xpath, field in self.parser_defaults["metadata_xpaths"]:
-                if type == "doc":
-                    if field not in data:
-                        el = tree.find(path)
-                        if el is not None and el.text is not None:
-                            data[field] = el.text.encode("utf-8")
-            load_metadata.append(data)
-        
-        make_sort_key = lambda d: (d[f] for f in fields)
-        sorted_load_metadata = load_metadata.sort(reverse=reverse,key=make_sort_key)
-        return sorted_load_metadata
         
     def parse_files(self,max_workers,data_dicts = None):
         print "\n### Parsing files ###"
@@ -600,8 +553,8 @@ def setup_db_dir(db_destination, template_dir):
         os.system("chmod -R 777 %s/templates" % db_destination)
         os.system("mkdir -p %s/templates/compiled_templates" % db_destination)
         os.system("chmod -R 777 %s/templates/compiled_templates" % db_destination)
-        os.system("chmod -R 777 %s/css" % db_destination)
-        os.system("chmod -R 777 %s/js" % db_destination)
+	os.system("chmod -R 777 %s/css" % db_destination)
+	os.system("chmod -R 777 %s/js" % db_destination)
         os.system("mkdir -p %s/data/log" % db_destination)
         os.system("chmod -R 777 %s/data/log" % db_destination)
         os.system("touch %s/data/log/error.log" % db_destination)
