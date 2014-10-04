@@ -5,7 +5,9 @@ $(document).ready(function() {
         var colloc_hits = parseInt($('#colloc_hits').html());
         var percent = 3000 / colloc_hits * 100;
         updateProgressBar(percent);
-        update_colloc(db_url, all_colloc, left_colloc, right_colloc, hit_len, 0, 3000);
+        var script = $('#philologic_collocation').data('script');
+        var q_string = window.location.search.substr(1);
+        update_colloc(db_url, all_colloc, left_colloc, right_colloc, hit_len, 0, 3000, script, q_string);
     } else {
         var collocation = JSON.parse(sessionStorage[window.location.href]);
         $('#philologic_collocation').html(collocation);
@@ -52,9 +54,7 @@ function update_table(sorted_lists, q_string, db_url) {
     }
 }
 
-function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end) {
-    var q_string = window.location.search.substr(1);
-    var script = db_url + "/scripts/collocation_fetcher.py?" + q_string
+function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end, script, q_string) {
     if (colloc_start == 0) {
         colloc_start = 3000;
         colloc_end = 13000;
@@ -81,7 +81,7 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
                 var percent = colloc_end / results_len * 100;
                 updateProgressBar(percent);
             }
-            update_colloc(db_url, all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
+            update_colloc(db_url, all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end, script, q_string);
         });
     }
     else {

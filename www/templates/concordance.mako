@@ -17,28 +17,21 @@
                     Searching database for <b>${q['q'].decode('utf-8', 'ignore')}</b><br>
                     Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
                 </div>
-                % if end != 0:
-                    % if end < results_per_page or end < len(results):
-                        Hits <span id="start">${start}</span> - <span id="end">${end}</span> of <span id="total_results">${len(results) or results_per_page}</span><span id="incomplete">${r_status}</span>
+                <div id="search-hits" data-script="${config.db_url + '/scripts/get_total_results.py?' + q['q_string']}">
+                    % if end != 0:
+                        % if end < results_per_page or end < len(results):
+                            Hits <span id="start">${start}</span> - <span id="end">${end}</span> of <span id="total_results">${len(results) or results_per_page}</span><span id="incomplete">${r_status}</span>
+                        % else:
+                            Hits <span id="start">${start}</span> - <span id="end">${len(results) or end}</span> of <span id="total_results">${len(results) or results_per_page}</span><span id="incomplete">${r_status}</span>         
+                        % endif
                     % else:
-                        Hits <span id="start">${start}</span> - <span id="end">${len(results) or end}</span> of <span id="total_results">${len(results) or results_per_page}</span><span id="incomplete">${r_status}</span>         
+                        No results for your query.
                     % endif
-                % else:
-                    No results for your query.
-                % endif
+                </div>
             </div>
             <div class="row hidden-xs" id="act-on-report">
                 <div class="col-sm-9 col-md-8 col-lg-6">
-                    <div id="report_switch" class="btn-group" data-toggle="buttons">
-                        <label class="btn btn-primary active">
-                            <input type="radio" name="report_switch" id="concordance_switch" value="?${q['q_string'].replace('report=kwic', 'report=concordance')}" checked>
-                            View occurences with context
-                        </label>
-                        <label class="btn btn-primary">
-                            <input type="radio" name="report_switch" id="kwic_switch" value="?${q['q_string'].replace('report=concordance', 'report=kwic')}">
-                            View occurences line by line (KWIC)
-                        </label>
-                    </div>
+                    <%include file="concordance_kwic_switcher.mako"/>
                 </div>
                 <div class="col-sm-3 col-md-4 col-lg-4 col-lg-offset-2" id="right-act-on-report">
                     <%include file="sidebar_menu.mako"/>
@@ -47,7 +40,7 @@
         </div>
         <div class="row">
             <div id="results_container" class="col-xs-12">
-                <ol id='philologic_concordance'>
+                <ol id='philologic_concordance' data-more-context="${config.db_url + '/scripts/get_more_context.py?' + q['q_string']}">
                     % for i in results[start - 1:end]:
                         <li class='philologic_occurrence panel panel-default'>
                             <%

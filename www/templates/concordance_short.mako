@@ -1,5 +1,5 @@
 <% start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"]) %>
-<ol id='philologic_concordance'>
+<ol id='philologic_concordance' data-more-context="${config.db_url + '/scripts/get_more_context.py?' + q['q_string']}">
   % for i in results[start - 1:end]:
       <li class='philologic_occurrence panel panel-default'>
           <%

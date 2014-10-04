@@ -26,7 +26,7 @@ $(document).ready(function() {
     $('#author-range-selectors a, #title-range-selectors a, #year-range-selectors a').click(function() {
         var range = $(this).data('range');
         var type = $(this).parent().parent().data('type');
-        var script = "scripts/landing_page_content.py?landing_page_content_type=" + type + "&range=" + range;
+        var script = $('#landingGroup').data('script') + type + "&range=" + range;
         var target = $(this).data('target');
         console.log(target)
         var contentArea = $("#" + target);

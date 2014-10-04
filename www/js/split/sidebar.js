@@ -13,11 +13,12 @@ $(document).ready(function() {
         var header = $(this).parent().prevAll('.dropdown-header').eq(0).text();
         var facet = $(this).data('value');
         var alias = $(this).data('display');
+        var script = $(this).data('script');
         $('#menu-header').html(header);
         var header_value = webConfig.metadata_aliases[alias] || alias;
         $('#selected-sidebar-option').html(header_value);
         showSidebar();
-        sidebarReports(q_string, db_url, facet);
+        sidebarReports(q_string, db_url, facet, script);
     });
     $('#hide-sidebar-button').click(function() {
         hideSidebar();
@@ -26,7 +27,7 @@ $(document).ready(function() {
 });
 
 
-function sidebarReports(q_string, db_url, value) {
+function sidebarReports(q_string, db_url, value, script_call) {
     // store the selected field to check whether to kill the ajax calls in populate_sidebar
     $('#selected-sidebar-option').data('selected', value);
     
@@ -34,11 +35,6 @@ function sidebarReports(q_string, db_url, value) {
     var total_results = parseInt($('#total_results').text());
     
     $('#frequency_table').empty().show();
-    if (value != 'collocation_report') {
-        var script_call = db_url + "/scripts/get_frequency.py?" + q_string + "&frequency_field=" + value;
-    } else {
-        var script_call = db_url + "/scripts/collocation_fetcher.py?" + q_string + "&full_report=False";
-    }
     $('.progress').hide();
     if (typeof sessionStorage[script_call] == "undefined") {
         // Initialize progress bar for sidebar
@@ -57,6 +53,7 @@ function sidebarReports(q_string, db_url, value) {
         if (freq_height > container_height) {
             container_height = freq_height;
         }
+        $("#frequency_container").show();
         $('#frequency_table').slimScroll({height: container_height});
     }
 }

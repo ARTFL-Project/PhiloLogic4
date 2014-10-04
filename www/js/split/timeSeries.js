@@ -35,7 +35,8 @@ $(document).ready(function() {
         updateProgressBar(percent)
         var date_counts = eval($('#relative_time').data('datecount'));
         
-        progressiveLoad(db_url, total, interval, 0, 5000, full_abs, date_counts, date_list);   
+        var script = $('#time_series_report').data('script');
+        progressiveLoad(db_url, total, interval, 0, 5000, full_abs, date_counts, date_list, script);   
     } else {
         var time_series = JSON.parse(sessionStorage[window.location.href]);
         $('#philologic_response').html(time_series);
@@ -85,9 +86,8 @@ function frequencySwitcher() {
     });
 }
 
-function progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_full_results, full_date_counts, date_list) {
+function progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_full_results, full_date_counts, date_list, script) {
     var q_string = window.location.search.substr(1);
-    var script = db_url + "/scripts/time_series_fetcher.py?" + q_string
     var initial_end = interval_end;
     if (interval_start === 0) {
         interval_start = 3000;
@@ -109,7 +109,7 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
                 full_date_counts[date] = data[1][date]
             }
             
-            progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_new_full_results, full_date_counts, date_list);
+            progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_new_full_results, full_date_counts, date_list, script);
             if (interval_end < total_results) {
                 var percent = interval_end / total_results * 100;
                 updateProgressBar(percent)

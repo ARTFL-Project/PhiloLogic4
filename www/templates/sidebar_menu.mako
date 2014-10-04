@@ -12,13 +12,15 @@
                 alias = config["metadata_aliases"][facet]
             else:
                 alias = facet
+            script = "%s/scripts/get_frequency.py?%s&frequency_field=%s" % (config.db_url, q['q_string'], facet)
             %>
-            <li><a class="sidebar-option" id="side_opt_${facet}" data-value='${facet}' data-display='${facet}'>${alias}</a></li>
+            <li><a class="sidebar-option" id="side_opt_${facet}" data-value='${facet}' data-display='${facet}' data-script="${script}">${alias}</a></li>
         % endfor
         % if report != 'bibliography':
             <li class="divider"></li>
             <li role="presentation" class="dropdown-header">Display collocates on</li>
-            <li><a class="sidebar-option" id="side_opt_collocate" data-value='collocation_report' data-display='on both sides'>Both sides</a></li>
+            <% script = "%s/scripts/collocation_fetcher.py?%s&full_report=False" % (config.db_url, q['q_string']) %>
+            <li><a class="sidebar-option" id="side_opt_collocate" data-value='collocation_report' data-display='on both sides' data-script="${script}">Both sides</a></li>
             <!--<li class="disabled"><a class="sidebar-option" id="side_opt_collocate_left" data-value='collocation_report_left' data-display='on the left side'>On the left side</a></li>-->
             <!--<li class="disabled"><a class="sidebar-option" id="side_opt_collocate_right" data-value='collocation_report_right' data-display='on the right side'>On the right side</a></li>-->
         % endif
