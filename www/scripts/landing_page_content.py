@@ -59,7 +59,7 @@ def generate_title_list(c, letter_range):
         if title[0].lower() not in letter_range:
             continue
         try:
-            author = i.author or "Anonymous"
+            author = i["author"] or "Anonymous"
         except:
             author = ""
         link = "dispatcher.py/" + i['philo_id'].split()[0]

@@ -6,7 +6,9 @@ xpaths =  [("doc","."),("div",".//div"), ("div",".//div1"),("div",".//div2"),("d
 
 metadata_xpaths = [
                 
-                ## DOC LEVEL XPATHS
+                ######################
+                ## DOC LEVEL XPATHS ##
+                ######################
                 
                 ## Author
                 ("doc", ".//sourceDesc/bibl/author[@type='marc100']", "author"),
@@ -31,15 +33,16 @@ metadata_xpaths = [
                 ("doc", ".//sourceDesc/bibl/author/date", "author_dates"),
                 ("doc", ".//titlestmt/author/date", "author_dates"),
                 
-                # Date
+                ## Date
                 ("doc", ".//profileDesc/creation/date", "date"),
                 ("doc", ".//fileDesc/sourceDesc/bibl/imprint/date", "date"),
                 ("doc", ".//sourceDesc/biblFull/publicationStmt/date", "date"),
                 ("doc", ".//sourceDesc/bibl/imprint/date", "date"),
                 ("doc", ".//sourceDesc/biblFull/publicationStmt/date", "date"),
                 ("doc", ".//profileDesc/dummy/creation/date", "date"),
+                ("doc", "./text/front/docDate/.@value", "date"),  ## this is for the French theater
                 
-                # Publisher
+                ## Publisher
                 ("doc", ".//sourceDesc/bibl/imprint[@type='marc534']", "publisher"),
                 ("doc", ".//sourceDesc/bibl/imprint[@type='artfl']", "publisher"),
                 ("doc", ".//sourceDesc/bibl/imprint/publisher", "publisher"),
@@ -48,6 +51,7 @@ metadata_xpaths = [
                 ("doc", ".//sourceDesc/bibl/publicationstmt/publisher", "publisher"),
                 ("doc", ".//sourceDesc/bibl/publisher", "publisher"),
                 ("doc", ".//publicationstmt/publisher", "publisher"),
+                ("doc", ".//publicationStmp", "publisher"),
                 
                 ## pub_place
                 ("doc", ".//sourceDesc/bibl/imprint/pubPlace", "pub_place"),
@@ -62,6 +66,7 @@ metadata_xpaths = [
                 ("doc", ".//sourceDesc/biblFull/publicationStmt/date", "pub_date"),
                 ("doc", ".//sourceDesc/bibFulll/imprint/date", "pub_date"),
                 ("doc", ".//sourceDesc/bibl/date", "pub_date"),
+                ("doc", ".//text/front/docImprint/acheveImprime", "pub_date"),
                 
                 ## extent
                 ("doc", ".//sourceDesc/bibl/extent", "extent"),
@@ -78,6 +83,7 @@ metadata_xpaths = [
                 
                 ## text_genre
                 ("doc", ".//profileDesc/textClass/keywords[@scheme='genre']/term", "text_genre"),
+                ("doc", ".//SourceDesc/genre", "text_genre"),
                 
                 ## keywords
                 ("doc", ".//profileDesc/textClass/keywords/list/item", "keywords"),
@@ -97,19 +103,35 @@ metadata_xpaths = [
                 
                 ## period
                 ("doc", ".//profileDesc/textClass/keywords[@scheme='period']/list/item", "period"),
+                ("doc", ".//SourceDesc/period", "period"),
                 
-                #text_form
+                ## text_form
                 ("doc", ".//profileDesc/textClass/keywords[@scheme='form']/term", "text_form"),
                 
-                ## DIV LEVEL XPATHS
+                ## structure
+                ("doc", ".//SourceDesc/structure", "structure"),
+                
+                
+                ######################
+                ## DIV LEVEL XPATHS ##
+                ######################
+                
                 ("div","./head","head"),
                 ("div",".@n","n"),
                 ("div",".@id","id"),
                 
-                ## PARAGRAPH LEVEL XPATHS
+                
+                ############################
+                ## PARAGRAPH LEVEL XPATHS ##
+                ############################
+                
                 ("para", ".@who", "who"),
                 
-                ## PAGE LEVEL XPATHS
+                
+                #######################
+                ## PAGE LEVEL XPATHS ##
+                #######################
+                
                 ("page",".@n","n"),
                 ("page",".@fac","img")
                 ]
