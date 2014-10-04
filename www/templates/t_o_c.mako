@@ -11,7 +11,7 @@
             <button id="show-header" class="btn btn-primary">Show Header</button>
             <div id="tei-header" style="white-space: pre; font-family: 'Droid Sans Mono', sans-serif; font-size: 80%; display: none;"></div>
         % endif
-        <div id="toc-report">
+        <div id="toc-report" data-script="${config.db_url + '/scripts/get_table_of_contents.py?philo_id='}">
             <div id="toc-content"></div>
         </div>
     </div>

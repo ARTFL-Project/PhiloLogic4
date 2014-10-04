@@ -213,7 +213,7 @@ $(document).ready(function() {
     $('#export-buttons button').click(function() {
         $('#export-download-link').hide();
         $('#retrieve-message').show();
-        var script = db_url + "/scripts/export_results.py?" + q_string + "&output_format=" + $(this).data('format');
+        var script = $('#export-buttons').data('script') + $(this).data('format');
         $('#export-results-file').show();
         $('#retrieve-message').append('<img src="' + db_url + '/js/gif/spinner-round.gif"/>');
         $.get(script, function(href) {
@@ -268,7 +268,7 @@ function metadataRemove() {
 
 function autoCompleteWord(db_url) {
     $("#q").autocomplete({
-        source: db_url + "/scripts/term_list.py",
+        source: $('#q').data('script'),
         minLength: 2,
         "dataType": "json",
         focus: function( event, ui ) {
@@ -288,7 +288,7 @@ function autoCompleteWord(db_url) {
             .appendTo(ul);
     };
     $("#q2").autocomplete({
-        source: db_url + "/scripts/term_list.py",
+        source: $('#q').data('script'),
         minLength: 2,
         "dataType": "json",
         focus: function( event, ui ) {
@@ -311,7 +311,7 @@ function autoCompleteWord(db_url) {
 
 function autoCompleteMetadata(metadata, field, db_url) {
     $("#" + field).autocomplete({
-        source: db_url + "/scripts/metadata_list.py?field=" + field,
+        source: $("#metadata_fields").data('script') + field,
         minLength: 2,
         timeout: 1000,
         dataType: "json",
@@ -406,9 +406,7 @@ function updateProgressBar(percent) {
 
 // Show more context in concordance and concordance from collocation searches
 function fetchMoreContext() {
-    var db_url = webConfig['db_url'];
-    var q_string = window.location.search.substr(1);
-    var script = db_url + '/scripts/get_more_context.py?' + q_string;
+    var script = $('#philologic_concordance').data('moreContext');
     $.getJSON(script, function(data) {
         for (var i=0; i < data.length; i++) {
             var more = '<div class="more_length" style="display:none;"' + data[i] + '</div>';

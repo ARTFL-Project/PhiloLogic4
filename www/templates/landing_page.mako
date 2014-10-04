@@ -2,7 +2,7 @@
 <%include file="header.mako"/>	  	
 <%include file="search_form.mako"/>
 <div class="container-fluid" id='philologic_response'>
-    <div class="row" id="landingGroup">
+    <div class="row" id="landingGroup" data-script="${config.db_url + '/scripts/landing_page_content.py?landing_page_content_type='}">
         <div class="col-xs-6" id="col-author">
             <div class="panel panel-default">
                 <div class="panel-heading">

@@ -27,7 +27,7 @@
             </div>
         </div>
         <div class="results_container">
-            <div id='philologic_collocation' class="row">
+            <div id='philologic_collocation' class="row" data-script="${config.db_url + '/scripts/collocation_fetcher.py?' + q['q_string']}">
                 <div class="col-xs-12 col-sm-3 col-sm-push-9 col-md-4 col-md-push-8">
                     <div id="word_cloud" class="word_cloud">
                         <div id="collocate_counts" class="collocation_counts">
