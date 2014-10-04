@@ -372,7 +372,7 @@ function showMoreOptions(display) {
     if (display == "all") {
         var report = $('#report label.active input').attr('id') || global_report;
         showHide(report);
-        $("#search_elements").velocity("transition.slideDownIn",{duration: 250, 'easing': 'easeIn'});
+        $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
         
     }
     if (global_report != "landing_page") {

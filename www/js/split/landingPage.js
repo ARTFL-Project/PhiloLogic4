@@ -63,15 +63,6 @@ $(document).ready(function() {
                 }
                 html += '</ul>';
                 contentArea.html(html).promise().done(function() {
-                    //$('#landing-page-content').prepend('<h4>');
-                    //for (var i=0; i < available_links.length; i++) {
-                    //    var content_link = '<a href="#' + available_links[i] + '">' + available_links[i].toUpperCase() + '</a>';
-                    //    if (i != (available_links.length - 1)) {
-                    //        content_link += " - ";
-                    //    }
-                    //    $('#landing-page-content > h4:first-of-type').append(content_link);    
-                    //}
-                    //$('#landing-page-content > h4:first-of-type').css('margin', '15px');
                     contentArea.show();
                     $('#landing-page-content').show();
                 });

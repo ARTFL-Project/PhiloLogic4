@@ -38,8 +38,9 @@
     }
 }
 #toc-container {
-    top: 32px !important;
+    /*top: 32px !important;*/
     max-width: 350px;
+    margin-left: -31px;
 }
 #toc-container a {
     color: #fff;
