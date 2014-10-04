@@ -167,7 +167,7 @@ class Loader(object):
                             attr_name = attr_pattern_match.group(1)
                             elements = tree.findall(xp_prefix)
                             for el in elements:
-                                if el is not none and el.get(attr_name,""):
+                                if el is not None and el.get(attr_name,""):
                                     data[field] = el.get(attr_name,"").encode("utf-8")
                                     break
                         else:
