@@ -210,6 +210,16 @@ l[type="split"]::before {
 lb[type="hyphenInWord"] {
     display: inline;
 }
+gap desc {
+	display: none;
+}
+gap::after {
+	content: "*";
+}
+hi {
+	font-style: italic;
+	font-variant: small-caps;
+}
 w::before {
     margin:0;padding:0;float:left;
 }
@@ -271,4 +281,23 @@ a.sidebar-option:hover {
 }
 .ui-menu-item .highlight {
 	color: #649DC5;
+}
+
+note {
+	display: none;
+	position: absolute;
+	padding: 5px;
+	border: 1px solid #000;
+	z-index: 50;
+	background: #eee;
+	width: 100%;
+	left: 0;
+}
+.note {
+	vertical-align: super;
+	font-size: .7em;
+	color: cadetblue;
+}
+.note:hover {
+	cursor: pointer;
 }

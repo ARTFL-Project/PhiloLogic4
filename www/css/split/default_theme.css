@@ -1,6 +1,10 @@
-/*THEME*/
+body {
+	color: rgb(61, 61, 61);
+}
+
+/* Navbar colors */
 .navbar-inverse, .panel-default > .panel-heading {
-    background: #276B9B !important;
+    background: #374655 !important;
 }
 .navbar-brand:hover, .navbar-inverse .navbar-nav>li>a:hover, .panel-default > .panel-heading {
     color: #fff !important;
@@ -8,41 +12,44 @@
 .navbar {
     box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
 }
-.btn-primary {
-    background: #4180ab;
-    transition: background-color 200ms;
-}
-.btn-primary:hover {
-    background: #649DC5;
-}
-.btn-primary.active {
-    background: #276B9B;
-}
-.biblio-criteria {
-    background: #d9534f;
-    border: solid 1px #d43f3a;
-}
 .navbar-brand, .navbar-inverse a {
-    color: #ECEDEE !important;
+    color: rgb(236,237,238) !important;
 }
+
+/* Button colors */
+.btn-primary {
+    background: rgb(78, 93, 108);
+    transition: background-color 200ms;
+	border-color: transparent;
+}
+.btn-primary:hover, .btn-primary:focus {
+    background: #697683;
+	border-color: transparent;
+	outline: 0;
+}
+.btn-primary.active, .open>.dropdown-toggle.btn-primary {
+    background: #374655;
+	border-color: transparent;
+}
+.btn-primary[disabled] {
+	background-color: #8e979f;
+	border-color: transparent;
+}
+
+/* Links */
 a {
-    color: #276B9B;
+    color: #697683;
+	font-weight: 400;
 }
 a:hover {
-    color: #4180ab !important;
+    color: rgb(78, 93, 108) !important;
 }
 
 /*Metadata criteria in results*/
 .biblio-criteria {
     color: #fff;
-    background: #d9534f;
-    border: solid 1px #d43f3a;
-}
-/*TOC styling*/
-.toc-div1 > a:hover, .toc-div2 > a:hover, .toc-div3 > a:hover {
-    text-decoration: none;
-    background: #649DC5;
-    color: #fff !important;
+    background: rgb(217,83,79);
+    border: solid 1px rgb(212,63,58);
 }
 
 /*Concordance Kwic styling*/
@@ -66,11 +73,6 @@ a:hover {
     box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
     background: #fff;
 }
-#initial-form {
-	/*background: rgb(39, 107, 155);*/
-	/*color: #fff;*/
-	/*padding-bottom: 15px;*/
-}
 #search_elements {
     border-top-color: #eee;
 }
@@ -78,16 +80,16 @@ a:hover {
     background-color: #eee;
 }
 #fixed-search, #nav-buttons.fixed {
-    background: rgba(39, 107, 155, .7);
+    background: rgba(78, 93, 108, .7);
 }
 
 /*Text object navigation*/
 #toc-container {
-    background: rgba(39, 107, 155, .9);
+    background: rgba(78, 93, 108, .9);
 }
 a.current-obj {
     background: rgba(256, 256, 256, .9);
-    color: rgb(39, 107, 155) !important;
+    color: #697683 !important;
 }
 .bullet-point-div1 {
     background: #fff;
@@ -97,6 +99,11 @@ a.current-obj {
 }
 
 /*TOC report styling*/
+.toc-div1 > a:hover, .toc-div2 > a:hover, .toc-div3 > a:hover {
+    text-decoration: none;
+    background: #8e979f;
+    color: #fff !important;
+}
 #toc-report .bullet-point-div1 {
     border: solid 1px #000;
     background: #000;
@@ -112,10 +119,19 @@ a.current-obj {
 
 /*Time series*/
 .graph_bar {
-    background-color: #ffdb9e; /* fallback color if gradients are not supported */
-    background-image: -webkit-linear-gradient(top, #ffdb9e, #fff2db); /* For Chrome and Safari */
-    background-image:    -moz-linear-gradient(top, #ffdb9e, #fff2db); /* For old Fx (3.6 to 15) */
-    background-image:     -ms-linear-gradient(top, #ffdb9e, #fff2db); /* For pre-releases of IE 10*/
-    background-image:      -o-linear-gradient(top, #ffdb9e, #fff2db); /* For old Opera (11.1 to 12.0) */ 
-    background-image:         linear-gradient(to bottom, #ffdb9e, #fff2db); /* Standard syntax; must be last */
+    background-color: rgb(255,219,158); /* fallback color if gradients are not supported */
+    background-image: -webkit-linear-gradient(top, rgb(255,219,158), rgb(255,242,219)); /* For Chrome and Safari */
+    background-image:    -moz-linear-gradient(top, rgb(255,219,158), rgb(255,242,219)); /* For old Fx (3.6 to 15) */
+    background-image:     -ms-linear-gradient(top, rgb(255,219,158), rgb(255,242,219)); /* For pre-releases of IE 10*/
+    background-image:      -o-linear-gradient(top, rgb(255,219,158), rgb(255,242,219)); /* For old Opera (11.1 to 12.0) */ 
+    background-image:         linear-gradient(to bottom, rgb(255,219,158), rgb(255,242,219)); /* Standard syntax; must be last */
+}
+
+.progress-bar {
+	background-color: rgb(78, 93, 108);
+}
+
+.full_biblio.show {
+	background: rgba(78, 93, 108, .9);
+	color: #fff;
 }

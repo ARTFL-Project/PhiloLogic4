@@ -22,11 +22,12 @@ def navigation(environ,start_response):
     config = f.WebConfig()
     prev = ' '.join(obj.prev.split()[:7])
     next = ' '.join(obj.next.split()[:7])
+    current = obj.philo_id[:7]
     if q['format'] == "json":
         if check_philo_virtual(db, path_components):
             obj = db[path_components[:-1]]
         obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
-        return json.dumps({'text': obj_text, 'prev': prev, 'next': next, 'shrtcit':  f.cite.make_abs_doc_shrtcit_mobile(db,obj)})
+        return json.dumps({'current': current, 'text': obj_text, 'prev': prev, 'next': next, 'shrtcit':  f.cite.make_abs_doc_shrtcit_mobile(db,obj), 'citation': f.cite.make_abs_doc_cite_mobile(db,obj)})
     if obj.philo_type == 'doc':
         concatenate_files(path, "t_o_c", debug=db.locals["debug"])
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,

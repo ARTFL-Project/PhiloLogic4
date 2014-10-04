@@ -52,26 +52,34 @@ def generate_author_list(c, letter_range):
     return content
 
 def generate_title_list(c, letter_range):
-    c.execute('select title, author, philo_id from toms where philo_type="doc" order by title')
+    c.execute('select * from toms where philo_type="doc" order by title')
     content = []
-    for title, author, philo_id in c.fetchall():
+    for i in c.fetchall():
+        title = i['title']
         if title[0].lower() not in letter_range:
             continue
-        author = author or "Anonymous"
-        link = "dispatcher.py/" + philo_id.split()[0]
+        try:
+            author = i.author or "Anonymous"
+        except:
+            author = ""
+        link = "dispatcher.py/" + i['philo_id'].split()[0]
         content.append({"title": title, "author": author, "link": link})
     return content
 
 def generate_year_list(c, q_range):
     low_range = int(q_range[0])
     high_range = int(q_range[1])
-    query = 'select title, author, date, philo_id from toms where philo_type="doc" and date >= "%d" and date <= "%d" order by date' % (low_range, high_range)
+    query = 'select * from toms where philo_type="doc" and date >= "%d" and date <= "%d" order by date' % (low_range, high_range)
     c.execute(query)
     content = []
-    for title, author, date, philo_id in c.fetchall():
-        author = author or "Anonymous"
-        link = "dispatcher.py/" + philo_id.split()[0]
-        content.append({"title": title, "author": author, "year": date, "link": link})
+    for i in c.fetchall():
+        author = i['author'] or "Anonymous"
+        link = "dispatcher.py/" + i['philo_id'].split()[0]
+        try:
+            date = i['date']
+        except:
+            date = ""
+        content.append({"title": i['title'], "author": author, "year": date, "link": link})
     return content
 
 
