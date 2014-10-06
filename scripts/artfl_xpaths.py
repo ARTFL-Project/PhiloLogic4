@@ -46,11 +46,11 @@ metadata_xpaths = [
                 ("doc", ".//sourceDesc/bibl/imprint[@type='marc534']", "publisher"),
                 ("doc", ".//sourceDesc/bibl/imprint[@type='artfl']", "publisher"),
                 ("doc", ".//sourceDesc/bibl/imprint/publisher", "publisher"),
-                ("doc", ".//sourceDesc/biblstruct/monogr/imprint/publisher/name", "publisher"),
-                ("doc", ".//sourceDesc/biblfull/publicationstmt/publisher", "publisher"),
-                ("doc", ".//sourceDesc/bibl/publicationstmt/publisher", "publisher"),
+                ("doc", ".//sourceDesc/biblStruct/monogr/imprint/publisher/name", "publisher"),
+                ("doc", ".//sourceDesc/biblFull/publicationStmt/publisher", "publisher"),
+                ("doc", ".//sourceDesc/bibl/publicationStmt/publisher", "publisher"),
                 ("doc", ".//sourceDesc/bibl/publisher", "publisher"),
-                ("doc", ".//publicationstmt/publisher", "publisher"),
+                ("doc", ".//publicationStmt/publisher", "publisher"),
                 ("doc", ".//publicationStmp", "publisher"),
                 
                 ## pub_place
@@ -64,7 +64,7 @@ metadata_xpaths = [
                 ("doc", ".//sourceDesc/bibl/imprint/date", "pub_date"),
                 ("doc", ".//sourceDesc/biblStruct/monog/imprint/date", "pub_date"),
                 ("doc", ".//sourceDesc/biblFull/publicationStmt/date", "pub_date"),
-                ("doc", ".//sourceDesc/bibFulll/imprint/date", "pub_date"),
+                ("doc", ".//sourceDesc/bibFull/imprint/date", "pub_date"),
                 ("doc", ".//sourceDesc/bibl/date", "pub_date"),
                 ("doc", ".//text/front/docImprint/acheveImprime", "pub_date"),
                 
@@ -89,7 +89,7 @@ metadata_xpaths = [
                 ("doc", ".//profileDesc/textClass/keywords/list/item", "keywords"),
                 
                 ## language
-                ("doc", ".//profileDesc/langusage/language", "language"),
+                ("doc", ".//profileDesc/language/language", "language"),
                 
                 ## notes
                 ("doc", ".//fileDesc/notesStmt/note", "notes"),
