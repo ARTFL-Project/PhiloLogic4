@@ -7,6 +7,8 @@ from philologic.PostFilters import metadata_frequencies, normalized_metadata_fre
 
 
 def change_metadata(metadata_field):
+    """ This is an example of a modification you could make to your metadata field
+    Modify at will"""
     updated_metadata = re.sub('.*(\d{4}).*', '\\1', metadata_field)
     return updated_metadata
 
