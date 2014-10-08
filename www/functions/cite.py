@@ -111,7 +111,10 @@ def kwic_citation(db, i, short_citation_length):
 
 def make_abs_doc_cite_mobile(db, i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
-    record = u"%s, <i><a data-id='%s' class='biblio_cite'>%s</a></i>" % (i.doc.author, ' '.join([str(j) for j in i.philo_id]),i.doc.title)
+    author = i.doc.author or ''
+    if author:
+        author = "%s, " % author
+    record = u"%s<i><a data-id='%s' class='biblio_cite'>%s</a></i>" % (i.doc.author, ' '.join([str(j) for j in i.philo_id]),i.doc.title)
     date = i.doc.date
     if date:
         record += " [%s]" % date
@@ -119,10 +122,14 @@ def make_abs_doc_cite_mobile(db, i):
 
 def make_abs_doc_shrtcit_mobile(db, i):
     """ Returns a representation of a PhiloLogic object suitable for a (short) bibliographic report. """
-    cmc_author = i.doc.author.split(",", 1)[0]
+    author = i.doc.author or ''
+    if author:
+        cmc_author = author.split(",", 1)[0] + ", "
+    else:
+        cmc_author = author
     section_names = [i.div1.head,i.div2.head,i.div3.head]
     head = section_names[2] or section_names[1] or section_names[0]
-    record = cmc_author + ", " + i.doc.title + ": " + head
+    record = cmc_author + i.doc.title + ": " + head
     return record
     
 def make_abs_doc_cite_biblio_mobile(db, i):

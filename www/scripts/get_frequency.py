@@ -9,6 +9,7 @@ from wsgiref.handlers import CGIHandler
 import reports as r
 import cgi
 import json
+import sqlite3
 
 def get_frequency(environ,start_response):
     status = '200 OK'
@@ -46,11 +47,13 @@ def get_frequency(environ,start_response):
         
 def get_author(title, db):
     c = db.dbh.cursor()
+    content = ''
     try:
         c.execute('select author from toms where title=?', (title,))
-        return c.fetchone()[0]
+        content = c.fetchone()[0]
     except sqlite3.OperationalError:
-        return False
+        content = False
+    return content
     
 
 if __name__ == "__main__":
