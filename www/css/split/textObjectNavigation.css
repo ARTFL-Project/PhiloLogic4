@@ -220,3 +220,64 @@ pb::before {
         z-index: 60;
     }
 }
+
+/*Dictionary formatting*/
+body {
+  counter-reset: section; /* Set the section counter to 0 */
+}
+prononciation::before {
+    content: "(";
+}
+prononciation::after {
+    content: ")\A";
+}
+nature {
+    font-style: italic;
+}
+indent, variante {
+    display: block;
+}
+variante {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-indent: -1.3em;
+    padding-left: 1.3em;
+}
+variante::before {
+    counter-increment: section;
+    content: counter(section) ")\00a0";
+    font-weight: 700;
+}
+:not(rubrique) + indent {
+    padding-top: 10px;
+}
+indent {
+    padding-left: 1.3em;
+}
+cit {
+    padding-left: 2.3em;
+    display: block;
+    text-indent: -1.3em;
+}
+indent > cit {
+    padding-left: 1em;
+}
+cit::before {
+    content: '\2012\00a0\00ab\00a0';
+}
+cit::after {
+    content: '\00a0\00bb\00a0(' attr(aut) '\00a0' attr(ref) ')';
+    font-variant: small-caps;
+}
+rubrique {
+    display: block;
+    margin-top: 20px;
+}
+rubrique::before {
+    content: attr(nom);
+    font-variant: small-caps;
+    font-weight: 700;
+}
+corps + rubrique {
+    margin-top: 10px;
+}

@@ -11,10 +11,14 @@ class WebConfig(object):
     
     def __init__(self):
         self.config = {}
-        path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '') + "/data/web_config.cfg" 
+        path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '') + "/data/web_config.cfg"
+        self.options = set(['db_url', 'dbname', 'concordance_length', 'facets', 'metadata',
+                        'search_reports', 'metadata_aliases', 'search_examples', 'time_series_intervals',
+                        "theme", "dictionary"])
         try:
             execfile(path, globals(), self.config)
-        except SyntaxError:
+        except NameError:
+            ##TODO: redirect to an error page indicating a syntax error
             raise SyntaxError
         if self.config['search_examples'] == None:
             self.config['search_examples'] = {}
@@ -23,9 +27,6 @@ class WebConfig(object):
                 self.config['search_examples'][i] = search_examples(i)
             else:
                 self.config['search_examples'][i] = self.config['search_examples'][i].decode('utf-8', 'ignore')
-                
-        self.options = set(['db_url', 'dbname', 'concordance_length', 'facets', 'metadata',
-                        'search_reports', 'metadata_aliases', 'search_examples', 'time_series_intervals', "theme"])
     
     def __getattr__(self, attr):
         if attr in self.options:

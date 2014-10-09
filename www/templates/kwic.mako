@@ -1,5 +1,9 @@
 <%include file="header.mako"/>
-<%include file="search_form.mako"/>
+% if not config.dictionary:
+    <%include file="search_form.mako"/>
+% else:
+    <%include file="dictionary_search_form.mako"/>
+% endif
 <div class="container-fluid">    
     <div id='philologic_response' class="panel panel-default">
         <div id='initial_report'>

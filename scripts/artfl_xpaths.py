@@ -2,7 +2,10 @@
 ## If you add any new XPATHS, be careful to remove any trailing slash
 ## at the end of your XPATH otherwise LXML won't find it.
 
-xpaths =  [("doc","."),("div",".//div"), ("div",".//div1"),("div",".//div2"),("div",".//div3"),("para",".//sp"),("page",".//pb")]
+xpaths =  [("doc","."),
+           ("div",".//div"), ("div",".//div1"),("div",".//div2"),("div",".//div3"),
+           ("para", ".//p"), ("para",".//sp"), ("para", ".//lg"), ("para", ".//epigraph"), ("para", ".//argument"), ("para", ".//postscript"),
+           ("page",".//pb")]
 
 metadata_xpaths = [
                 

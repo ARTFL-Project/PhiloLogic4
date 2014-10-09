@@ -247,7 +247,7 @@ br {
 a.sidebar-option:hover {
     cursor: pointer;
 }
-.btn, .panel, .panel-heading {
+.btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child {
     border-radius: 0px !important;
 }
 

@@ -1,5 +1,9 @@
 <%include file="header.mako"/>
-<%include file="search_form.mako"/>
+% if not config.dictionary:
+    <%include file="search_form.mako"/>
+% else:
+    <%include file="dictionary_search_form.mako"/>
+% endif
 <div id='philologic_response' class="container-fluid">
     <div class="row" id="toc-report-title">
         <div class="col-xs-offset-2 col-xs-8">

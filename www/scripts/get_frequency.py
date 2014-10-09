@@ -10,6 +10,7 @@ import reports as r
 import cgi
 import json
 import sqlite3
+import time
 
 def get_frequency(environ,start_response):
     status = '200 OK'
@@ -36,7 +37,7 @@ def get_frequency(environ,start_response):
             if frequency_field == "title":
                 author = get_author(label, db)
                 if author:
-                    label = label + " (%s)" % author
+                    label = label + " (%s)" % author.decode('utf-8', 'ignore')
             formatted_result = {"search_term": q['q'], "frequency_field": frequency_field, "results": label, "count": result["count"], "url": "dispatcher.py/" + result["url"].replace('./', ''),
                                 "bib_values": bib_values}
             new_results.append(formatted_result)

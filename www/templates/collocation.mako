@@ -1,5 +1,9 @@
 <%include file="header.mako"/>
-<%include file="search_form.mako"/>
+% if not config.dictionary:
+    <%include file="search_form.mako"/>
+% else:
+    <%include file="dictionary_search_form.mako"/>
+% endif
 <script>
     var all_colloc = ${dumps(all_colloc)};
     var left_colloc = ${dumps(left_colloc)};

@@ -26,7 +26,7 @@
 #more_options:hover {
     cursor: pointer;
 }
-#search_terms_container {
+#search_terms_container, #search_head_container {
     padding-top: 15px;
 	padding-bottom: 15px;
 }
