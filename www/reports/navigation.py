@@ -74,9 +74,9 @@ def navigate_doc(obj, db):
         c.execute('select rowid from toms where rowid > %d' % start_rowid)
         end_rowid = [i[0] for i in c.fetchall()][-1] + 1 ## we add 1 to make sure the last row of the table is included
     try:
-        c.execute("select philo_id, philo_name, philo_type, head from toms where rowid between ? and ? and philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
+        c.execute("select * from toms where rowid between ? and ? and philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
     except sqlite3.OperationalError:
-        c.execute("select philo_id, philo_name, philo_type from toms where rowid between ? and ? and  philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
+        c.execute("select * from toms where rowid between ? and ? and  philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
     text_hierarchy = []
     for i in c.fetchall():
         if i['philo_name'] == '__philo_virtual' and i["philo_type"] != "div1":
@@ -84,10 +84,16 @@ def navigate_doc(obj, db):
         else:
             philo_id = i['philo_id']
             philo_type = i['philo_type']
-            try:
-                head = i['head'].decode('utf-8', 'ignore')
-            except:
-                head = philo_type
+            if i['philo_name'] == "front":
+                head = "Front Matter"
+            else:
+                try:
+                    head = i['head'].decode('utf-8', 'ignore')
+                except:
+                    try:
+                        head = i['type'].decode('utf-8', 'ignore')
+                    except:
+                        head = philo_type
             text_hierarchy.append((philo_id, philo_type, head))
     return text_hierarchy
     

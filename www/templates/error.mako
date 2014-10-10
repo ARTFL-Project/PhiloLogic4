@@ -1,5 +1,9 @@
 <%include file="header.mako"/>
-<%include file="search_form.mako"/>
+% if not config.dictionary:
+    <%include file="search_form.mako"/>
+% else:
+    <%include file="dictionary_search_form.mako"/>
+% endif
 <script>
 $(document).ready(function() {
     $("#form_body").hide();

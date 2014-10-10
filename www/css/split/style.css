@@ -247,7 +247,7 @@ br {
 a.sidebar-option:hover {
     cursor: pointer;
 }
-.btn, .panel, .panel-heading {
+.btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child {
     border-radius: 0px !important;
 }
 
@@ -281,23 +281,4 @@ a.sidebar-option:hover {
 }
 .ui-menu-item .highlight {
 	color: #649DC5;
-}
-
-note {
-	display: none;
-	position: absolute;
-	padding: 5px;
-	border: 1px solid #000;
-	z-index: 50;
-	background: #eee;
-	width: 100%;
-	left: 0;
-}
-.note {
-	vertical-align: super;
-	font-size: .7em;
-	color: cadetblue;
-}
-.note:hover {
-	cursor: pointer;
 }

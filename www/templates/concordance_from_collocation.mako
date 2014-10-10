@@ -1,5 +1,9 @@
 <%include file="header.mako"/>
-<%include file="search_form.mako"/>
+% if not config.dictionary:
+    <%include file="search_form.mako"/>
+% else:
+    <%include file="dictionary_search_form.mako"/>
+% endif
 <div class="container-fluid" id='philologic_response'>
     <div>
         <a href="${config.db_url}/">Return to search form</a>

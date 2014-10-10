@@ -28,6 +28,7 @@ report_files = {"css": {"landing_page": ["split/style.css", "split/searchForm.cs
                 }
 
 def concatenate_files(path, report, debug=False):
+    path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '')
     for file_type in ["css", "js"]:
         concat_file = path + "/" + file_type + "/" + report + "." + file_type
         if debug == True:

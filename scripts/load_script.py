@@ -52,18 +52,13 @@ filters = [normalize_unicode_raw_words,make_word_counts,generate_words_sorted,ma
            make_sorted_toms(*navigable_objects),prev_next_obj(*navigable_objects),generate_pages, make_max_id]
 post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]
 
-# Define text objects to generate plain text files for various machine learning tasks
+## Define text objects to generate plain text files for various machine learning tasks
+## For instance, this could be ['doc', 'div1']
 plain_text_obj = []
 if plain_text_obj:
     filters.extend([store_in_plain_text(*plaint_text_obj)])
 
-## Define which search reports to enable
-## This can still be configured in your database db_locals.py file after the load
-search_reports = ['concordance', 'kwic', 'collocation', 'time_series']
-
-
 extra_locals = {"db_url": url_root + dbname}
-extra_locals['search_reports'] = search_reports
 extra_locals['default_object_level'] = default_object_level
 
 ###########################
@@ -86,12 +81,16 @@ metadata_xpaths = [ # metadata per type.  '.' is in this case the base element f
 ]
 
 pseudo_empty_tags = ["milestone"]
+
+## A list of tags to ignore
 suppress_tags = ["teiHeader",".//head"]
+
 word_regex = r"([\w]+)"
 punct_regex = r"([\.?!])"
 
 token_regex = word_regex + "|" + punct_regex 
 
+## Saved in db.locals.py for tokenizing at runtime
 extra_locals["word_regex"] = word_regex
 extra_locals["punct_regex"] = punct_regex
 
