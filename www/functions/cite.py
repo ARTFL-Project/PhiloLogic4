@@ -140,15 +140,15 @@ def make_abs_doc_cite_biblio_mobile(db, i):
     #if date:
     #    record += " [<b>%s</b>] " % date
     more_metadata = []
+    pub_place = i.doc.pub_place
+    if pub_place:
+        more_metadata.append(pub_place)
     collection = i.doc.collection
     if collection:
         more_metadata.append(collection)
     publisher = i.doc.publisher
     if publisher:
         more_metadata.append(publisher)
-    pub_place = i.doc.pub_place
-    if pub_place:
-        more_metadata.append(pub_place)
     date = i.doc.date
     if date:
         try:
@@ -157,7 +157,7 @@ def make_abs_doc_cite_biblio_mobile(db, i):
         except:
             pass
     if more_metadata:
-        record += '(%s)' % ', '.join(more_metadata)
+        record += '(%s)' % ' '.join(more_metadata)
     genre = i.doc.text_genre
     if genre:
         record += ' [genre: %s]' % genre

@@ -81,12 +81,16 @@ metadata_xpaths = [ # metadata per type.  '.' is in this case the base element f
 ]
 
 pseudo_empty_tags = ["milestone"]
+
+## A list of tags to ignore
 suppress_tags = ["teiHeader",".//head"]
+
 word_regex = r"([\w]+)"
 punct_regex = r"([\.?!])"
 
 token_regex = word_regex + "|" + punct_regex 
 
+## Saved in db.locals.py for tokenizing at runtime
 extra_locals["word_regex"] = word_regex
 extra_locals["punct_regex"] = punct_regex
 

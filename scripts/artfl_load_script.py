@@ -73,12 +73,18 @@ xpaths =  artfl_xpaths.xpaths
 metadata_xpaths = artfl_xpaths.metadata_xpaths
 
 pseudo_empty_tags = ["milestone"]
+
+## A list of tags to ignore
 suppress_tags = ["teiHeader",".//head"]
+
+word_regex = r"([\w]+)"
+punct_regex = r"([\.?!])"
 word_regex = r"([\w]+)"
 punct_regex = r"([\.?!])"
 
 token_regex = word_regex + "|" + punct_regex 
 
+## Saved in db.locals.py for tokenizing at runtime
 extra_locals["word_regex"] = word_regex
 extra_locals["punct_regex"] = punct_regex
 

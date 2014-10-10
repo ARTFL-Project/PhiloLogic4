@@ -47,8 +47,14 @@ $(document).ready(function() {
         backForwardButtonReload(db_url);
     }
     
-    var text = 'Click to see a full-sized version of this image';
-    $('.plate_img').attr('title', text).tooltip({ position: { my: "left center", at: "right center" } });
+    // Note handling
+    $('note').each(function() {
+        $(this).before('<a class="note" tabindex="0" data-toggle="popover" data-container="body" data-trigger="focus">note</a>');
+    }).promise().done(function() {
+        $('.note').popover({animate: true, trigger: 'hover focus', html: true, content: function() {
+            return $(this).next('note').html();
+        }});
+    });
     
     // Only enable back/forward buttons if necessary 
     checkEndBeginningOfDoc();
@@ -143,8 +149,21 @@ function adjustTocHeight(num) {
 }
 
 function scrollToHighlight() {
-    var word_offset = $('.highlight').offset().top - 40;
-    $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: word_offset});
+    var word_offset = $('.highlight').eq(0).offset().top;
+    if (word_offset == 0) {
+        var note = $('.highlight').parents('note');
+        note.show(); // The highlight is in a hidden note
+        word_offset = $('.highlight').offset().top;
+        $('.highlight').parents('note').hide();
+    }
+    if ($('.highlight').eq(0).parents('note').length) {
+        $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: word_offset - 60, complete: function() {
+            $('.highlight').parents('note').prev('.note').popover('show');}}
+        );
+    } else {
+        $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: word_offset - 40});
+    }
+    
 }
 
 /// Go to next or previous object in text display
