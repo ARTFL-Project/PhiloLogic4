@@ -38,8 +38,9 @@
     }
 }
 #toc-container {
-    top: 32px !important;
+    /*top: 32px !important;*/
     max-width: 350px;
+    margin-left: -31px;
 }
 #toc-container a {
     color: #fff;
@@ -188,6 +189,18 @@ pb::before {
     white-space:pre;
 }
 
+lg {
+    display: block;
+}
+lg::after {
+    content: "\A";
+    white-space: pre;
+}
+lg:first-of-type::before {
+    content: "\A";
+    white-space: pre;
+}
+
 #image_container {
     position: absolute;
     border: solid 18px #eee;
@@ -218,4 +231,78 @@ pb::before {
     #toc-wrapper {
         z-index: 60;
     }
+}
+
+/*Dictionary formatting*/
+body {
+  counter-reset: section; /* Set the section counter to 0 */
+}
+prononciation::before {
+    content: "(";
+}
+prononciation::after {
+    content: ")\A";
+}
+nature {
+    font-style: italic;
+}
+indent, variante {
+    display: block;
+}
+variante {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-indent: -1.3em;
+    padding-left: 1.3em;
+}
+variante::before {
+    counter-increment: section;
+    content: counter(section) ")\00a0";
+    font-weight: 700;
+}
+:not(rubrique) + indent {
+    padding-top: 10px;
+}
+indent {
+    padding-left: 1.3em;
+}
+cit {
+    padding-left: 2.3em;
+    display: block;
+    text-indent: -1.3em;
+}
+indent > cit {
+    padding-left: 1em;
+}
+cit::before {
+    content: '\2012\00a0\00ab\00a0';
+}
+cit::after {
+    content: '\00a0\00bb\00a0(' attr(aut) '\00a0' attr(ref) ')';
+    font-variant: small-caps;
+}
+rubrique {
+    display: block;
+    margin-top: 20px;
+}
+rubrique::before {
+    content: attr(nom);
+    font-variant: small-caps;
+    font-weight: 700;
+}
+corps + rubrique {
+    margin-top: 10px;
+}
+
+/*Note handling*/
+note {
+	display: none;
+}
+.note {
+	vertical-align: super;
+	font-size: .7em;
+}
+.note:hover {
+	cursor: pointer;
+    text-decoration: none;
 }

@@ -57,24 +57,25 @@ def biblio_citation(db, config, i):
         record = u"%s, <i><a href='%s'>%s</a></i>" % (i.doc.author, doc_href,i.doc.title)
     else:
         record = u"<i><a href='%s'>%s</a></i>" % (doc_href,i.doc.title)
-    date = i.doc.date
-    if date:
-        try:
-            record += " [<b>%s</b>] " % date
-        except:
-            pass
     more_metadata = []
-    collection = i.doc.collection
-    if collection:
-        more_metadata.append(collection)
-    publisher = i.doc.publisher
-    if publisher:
-        more_metadata.append(publisher)
     pub_place = i.doc.pub_place
     if pub_place:
         more_metadata.append(pub_place)
+    publisher = i.doc.publisher
+    if publisher:
+        more_metadata.append(publisher)
+    collection = i.doc.collection
+    if collection:
+        more_metadata.append(collection)
+    date = i.doc.date
+    if date:
+        try:
+            date = str(date)
+            more_metadata.append(date)
+        except:
+            pass
     if more_metadata:
-        record += '(%s)' % ', '.join(more_metadata)
+        record += '(%s)' % ' '.join(more_metadata)
     genre = i.doc.text_genre
     if genre:
         record += ' [genre: %s]' % genre
@@ -111,7 +112,10 @@ def kwic_citation(db, i, short_citation_length):
 
 def make_abs_doc_cite_mobile(db, i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
-    record = u"%s, <i><a data-id='%s' class='biblio_cite'>%s</a></i>" % (i.doc.author, ' '.join([str(j) for j in i.philo_id]),i.doc.title)
+    author = i.doc.author or ''
+    if author:
+        author = "%s, " % author
+    record = u"%s<i><a data-id='%s' class='biblio_cite'>%s</a></i>" % (i.doc.author, ' '.join([str(j) for j in i.philo_id]),i.doc.title)
     date = i.doc.date
     if date:
         record += " [%s]" % date
@@ -119,30 +123,41 @@ def make_abs_doc_cite_mobile(db, i):
 
 def make_abs_doc_shrtcit_mobile(db, i):
     """ Returns a representation of a PhiloLogic object suitable for a (short) bibliographic report. """
-    cmc_author = i.doc.author.split(",", 1)[0]
+    author = i.doc.author or ''
+    if author:
+        cmc_author = author.split(",", 1)[0] + ", "
+    else:
+        cmc_author = author
     section_names = [i.div1.head,i.div2.head,i.div3.head]
     head = section_names[2] or section_names[1] or section_names[0]
-    record = cmc_author + ", " + i.doc.title + ": " + head
+    record = cmc_author + i.doc.title + ": " + head
     return record
     
 def make_abs_doc_cite_biblio_mobile(db, i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
     record = u"%s|<i><span class='biblio_cite'>%s</span></i>" % (i.doc.author,i.doc.title)
-    date = i.doc.date
-    if date:
-        record += " [<b>%s</b>] " % date
+    #date = i.doc.date
+    #if date:
+    #    record += " [<b>%s</b>] " % date
     more_metadata = []
+    pub_place = i.doc.pub_place
+    if pub_place:
+        more_metadata.append(pub_place)
     collection = i.doc.collection
     if collection:
         more_metadata.append(collection)
     publisher = i.doc.publisher
     if publisher:
         more_metadata.append(publisher)
-    pub_place = i.doc.pub_place
-    if pub_place:
-        more_metadata.append(pub_place)
+    date = i.doc.date
+    if date:
+        try:
+            date = str(date)
+            more_metadata.append(date)
+        except:
+            pass
     if more_metadata:
-        record += '(%s)' % ', '.join(more_metadata)
+        record += '(%s)' % ' '.join(more_metadata)
     genre = i.doc.text_genre
     if genre:
         record += ' [genre: %s]' % genre

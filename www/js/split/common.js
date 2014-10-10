@@ -142,9 +142,7 @@ $(document).ready(function() {
         $("#arg_proxy, #arg_phrase").val('');
     });
     
-    
     metadataRemove();
-    
     
     // Catch Enter keypress when focused on fixed search bar input
     $("#q2").keyup(function(e) {
@@ -211,6 +209,22 @@ $(document).ready(function() {
         });
     }
     
+    // Export results handler
+    $('#export-buttons button').click(function() {
+        $('#export-download-link').hide();
+        $('#retrieve-message').show();
+        var script = $('#export-buttons').data('script') + $(this).data('format');
+        $('#export-results-file').show();
+        $('#retrieve-message').append('<img src="' + db_url + '/js/gif/spinner-round.gif"/>');
+        $.get(script, function(href) {
+            $('#export-download-link a').attr('href', href);
+            $('#retrieve-message').fadeOut(function() {
+                $('#retrieve-message img').remove();
+                $('#export-download-link').velocity('fadeIn');
+            });
+        })
+    });
+    
     // Keep footer at bottom and make sure content doesn't overlap footer
     //setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
     $(window).resize(function() {
@@ -254,12 +268,11 @@ function metadataRemove() {
 
 function autoCompleteWord(db_url) {
     $("#q").autocomplete({
-        source: db_url + "/scripts/term_list.py",
+        source: $('#q').data('script'),
         minLength: 2,
         "dataType": "json",
         focus: function( event, ui ) {
             var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-            //$("#" + field).val(q); This is too sensitive, so disabled
             return false;
         },
         select: function( event, ui ) {
@@ -271,16 +284,15 @@ function autoCompleteWord(db_url) {
         var term = item.label.replace(/^[^<]*/g, '');
         return $("<li></li>")
             .data("item.autocomplete", item)
-            .append("<a>" + term + "</a>")
+            .append(term)
             .appendTo(ul);
     };
     $("#q2").autocomplete({
-        source: db_url + "/scripts/term_list.py",
+        source: $('#q').data('script'),
         minLength: 2,
         "dataType": "json",
         focus: function( event, ui ) {
             var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-            //$("#" + field).val(q); This is too sensitive, so disabled
             return false;
         },
         select: function( event, ui ) {
@@ -292,14 +304,14 @@ function autoCompleteWord(db_url) {
         var term = item.label.replace(/^[^<]*/g, '');
         return $("<li></li>")
             .data("item.autocomplete", item)
-            .append("<a>" + term + "</a>")
+            .append(term)
             .appendTo(ul);
     };
 }
 
 function autoCompleteMetadata(metadata, field, db_url) {
     $("#" + field).autocomplete({
-        source: db_url + "/scripts/metadata_list.py?field=" + field,
+        source: $("#metadata_fields").data('script') + field,
         minLength: 2,
         timeout: 1000,
         dataType: "json",
@@ -322,7 +334,7 @@ function autoCompleteMetadata(metadata, field, db_url) {
         var term = item.label.replace(/.*(?=CUTHERE)CUTHERE /, '');
         return $("<li></li>")
             .data("item.autocomplete", item)
-            .append("<a>" + term + "</a>")
+            .append(term)
             .appendTo(ul);
      };
 }
@@ -385,11 +397,16 @@ function hideSearchForm() {
 ////// Functions shared by various reports ////////
 ///////////////////////////////////////////////////
 
+
+// Update progress bar in Time Series, Frequencies, and Collocations
+function updateProgressBar(percent) {
+    var truncated_percent = parseInt(percent.toString().split('.')[0]);
+    $('.progress-bar').velocity({'width': truncated_percent + '%'}, { queue: false, complete:function(){$('.progress-bar').text(percent.toString().split('.')[0] + '%');}});
+}
+
 // Show more context in concordance and concordance from collocation searches
 function fetchMoreContext() {
-    var db_url = webConfig['db_url'];
-    var q_string = window.location.search.substr(1);
-    var script = db_url + '/scripts/get_more_context.py?' + q_string;
+    var script = $('#philologic_concordance').data('moreContext');
     $.getJSON(script, function(data) {
         for (var i=0; i < data.length; i++) {
             var more = '<div class="more_length" style="display:none;"' + data[i] + '</div>';

@@ -22,11 +22,12 @@ def navigation(environ,start_response):
     config = f.WebConfig()
     prev = ' '.join(obj.prev.split()[:7])
     next = ' '.join(obj.next.split()[:7])
+    current = obj.philo_id[:7]
     if q['format'] == "json":
         if check_philo_virtual(db, path_components):
             obj = db[path_components[:-1]]
         obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
-        return json.dumps({'text': obj_text, 'prev': prev, 'next': next, 'shrtcit':  f.cite.make_abs_doc_shrtcit_mobile(db,obj)})
+        return json.dumps({'current': current, 'text': obj_text, 'prev': prev, 'next': next, 'shrtcit':  f.cite.make_abs_doc_shrtcit_mobile(db,obj), 'citation': f.cite.make_abs_doc_cite_mobile(db,obj)})
     if obj.philo_type == 'doc':
         concatenate_files(path, "t_o_c", debug=db.locals["debug"])
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
@@ -73,9 +74,9 @@ def navigate_doc(obj, db):
         c.execute('select rowid from toms where rowid > %d' % start_rowid)
         end_rowid = [i[0] for i in c.fetchall()][-1] + 1 ## we add 1 to make sure the last row of the table is included
     try:
-        c.execute("select philo_id, philo_name, philo_type, head from toms where rowid between ? and ? and philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
+        c.execute("select * from toms where rowid between ? and ? and philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
     except sqlite3.OperationalError:
-        c.execute("select philo_id, philo_name, philo_type from toms where rowid between ? and ? and  philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
+        c.execute("select * from toms where rowid between ? and ? and  philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
     text_hierarchy = []
     for i in c.fetchall():
         if i['philo_name'] == '__philo_virtual' and i["philo_type"] != "div1":
@@ -83,12 +84,17 @@ def navigate_doc(obj, db):
         else:
             philo_id = i['philo_id']
             philo_type = i['philo_type']
-            try:
-                head = i['head'].decode('utf-8', 'ignore')
-            except:
-                head = philo_type
+            if i['philo_name'] == "front":
+                head = "Front Matter"
+            else:
+                try:
+                    head = i['head'].decode('utf-8', 'ignore')
+                except:
+                    try:
+                        head = i['type'].decode('utf-8', 'ignore')
+                    except:
+                        head = philo_type
             text_hierarchy.append((philo_id, philo_type, head))
-    print >> sys.stderr, "NUM", start_rowid, end_rowid, len(text_hierarchy)
     return text_hierarchy
     
 def get_neighboring_pages(db, doc_id, doc_page):

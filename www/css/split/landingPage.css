@@ -70,3 +70,8 @@ ul {
         border-right: solid 1px #eee;
     }
 }
+
+#dico-landing-alpha td:hover, #dico-landing-volume li:hover {
+    cursor: pointer;
+    background: #eee;
+}

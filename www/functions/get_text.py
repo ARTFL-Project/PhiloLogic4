@@ -14,10 +14,6 @@ def get_text(hit, byte_start, length, path):
 
 def get_page_text(db, obj, page_num, path, bytes):
     page = obj.get_page()
-    print >> sys.stderr, "OBJ_ID", obj.philo_id,
-    print >> sys.stderr, "TYPE", obj.type
-    print >> sys.stderr, 'PAGE', obj.page
-    print >> sys.stderr, 'PHILO_ID', page['philo_id']
     length = int(page['end_byte']) - int(page['start_byte'])
     file_path = path + '/data/TEXT/' + obj.filename
     file = open(file_path)        
@@ -46,10 +42,10 @@ def get_text_obj(obj, path, query_args=False):
     width = obj.byte_end - byte_start
     raw_text = file.read(width)
 
-
     if query_args:
         bytes = sorted([int(byte) - byte_start for byte in query_args.split('+')])
     else:
         bytes = []
+        
     formatted = format(raw_text,bytes).decode("utf-8","ignore")
     return formatted

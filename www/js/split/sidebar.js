@@ -10,12 +10,15 @@ $(document).ready(function() {
     $.getScript(webConfig['db_url'] + '/js/plugins/jquery.slimscroll.min.js');
     
     $('.sidebar-option').click(function() {
+        var header = $(this).parent().prevAll('.dropdown-header').eq(0).text();
         var facet = $(this).data('value');
         var alias = $(this).data('display');
-        $('#selected-sidebar-option').html(webConfig.metadata_aliases[alias]);
+        var script = $(this).data('script');
+        $('#menu-header').html(header);
+        var header_value = webConfig.metadata_aliases[alias] || alias;
+        $('#selected-sidebar-option').html(header_value);
         showSidebar();
-        console.log(q_string, db_url, facet)
-        sidebarReports(q_string, db_url, facet);
+        sidebarReports(q_string, db_url, facet, script);
     });
     $('#hide-sidebar-button').click(function() {
         hideSidebar();
@@ -24,7 +27,7 @@ $(document).ready(function() {
 });
 
 
-function sidebarReports(q_string, db_url, value) {
+function sidebarReports(q_string, db_url, value, script_call) {
     // store the selected field to check whether to kill the ajax calls in populate_sidebar
     $('#selected-sidebar-option').data('selected', value);
     
@@ -32,21 +35,12 @@ function sidebarReports(q_string, db_url, value) {
     var total_results = parseInt($('#total_results').text());
     
     $('#frequency_table').empty().show();
-    if (value != 'collocation_report') {
-        var script_call = db_url + "/scripts/get_frequency.py?" + q_string + "&frequency_field=" + value;
-    } else {
-        var script_call = db_url + "/scripts/collocation_fetcher.py?" + q_string + "&full_report=False";
-    }
-    $('#progress_bar').hide();
+    $('.progress').hide();
     if (typeof sessionStorage[script_call] == "undefined") {
         // Initialize progress bar for sidebar
-        $('#progress_bar').progressbar({max: total_results});
-        $('#progress_bar').progressbar({value: 100});
         var percent = 100 / total_results * 100;
-        $('.progress-label').text(percent.toString().split('.')[0] + '%');
-        $('.progress-label').text('0%');
-        $('#progress_bar').progressbar({value: 0.1});
-        $("#progress_bar").show();
+        $(".progress").show();
+        updateProgressBar(percent);
         $('#selected-sidebar-option').data('interrupt', false)
         var full_results;
         populate_sidebar(script_call, value, total_results, 0, full_results);
@@ -59,6 +53,7 @@ function sidebarReports(q_string, db_url, value) {
         if (freq_height > container_height) {
             container_height = freq_height;
         }
+        $("#frequency_container").show();
         $('#frequency_table').slimScroll({height: container_height});
     }
 }
@@ -102,7 +97,7 @@ function mergeCollocResults(full_results, new_data) {
     if (typeof full_results === 'undefined') {
         full_results = new_data;
     } else {
-        for (key in new_data) {
+        for (var key in new_data) {
             if (key in full_results) {
                 full_results[key] += new_data[key];
             }
@@ -112,8 +107,8 @@ function mergeCollocResults(full_results, new_data) {
         }
     }
     var sorted_list = [];
-    for (key in full_results) {
-        sorted_list.push([key, full_results[key]]);
+    for (var k in full_results) {
+        sorted_list.push([k, full_results[k]]);
     }
     sorted_list.sort(function(a,b) {return b[1] - a[1]});
     
@@ -145,12 +140,9 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
                 var new_full_results = merge[1];
                 update_sidebar(sorted_list, field);
                 populate_sidebar(script_call, field, total_results, interval_start, interval_end, new_full_results);
-                var total = $('#progress_bar').progressbar("option", "max");
-                var percent = interval_end / total * 100;
-                if (interval_end < total) {
-                    var progress_width = $('#progress_bar').width() * percent / 100;
-                    $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'fast', 'easeOutQuint', {queue: false});
-                    $('.progress-label').text(percent.toString().split('.')[0] + '%');
+                if (interval_end < total_results) {
+                    var percent = interval_end / total_results * 100;
+                    updateProgressBar(percent);
                 }
             } else {
                 // This won't affect the full collocation report which can't be interrupted
@@ -159,10 +151,8 @@ function populate_sidebar(script_call, field, total_results, interval_start, int
             }
         });
     } else {
-        var total = $('#progress_bar').progressbar("option", "max");
-        $('#progress_bar').progressbar({value: total});
-        $('.progress-label').text('Complete!');
-        $("#progress_bar").delay(500).slideUp();
+        updateProgressBar(100)
+        $(".progress").delay(500).velocity('slideUp', {complete: function() {$('.progress-bar').width(0).text("0%");}});
         $('#frequency_table').slimScroll({height: $('#results_container').height() - 14});
         if (typeof(localStorage) == 'undefined' ) {
             alert('Your browser does not support HTML5 localStorage. Try upgrading.');
@@ -181,7 +171,7 @@ function update_sidebar(sorted_list, field) {
     var newlist = "";
     if (field == "collocation_report") {
         newlist += "<p id='freq_sidebar_status'>Collocates within 5 words left or right</p>";
-        q_string = window.location.search.substr(1);
+        var q_string = window.location.search.substr(1);
     }
     var limit = false;
     if (sorted_list.length > 1000) {

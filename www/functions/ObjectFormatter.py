@@ -54,6 +54,10 @@ def format(text,bytes=[]):
                 el.tag = "b"
                 el.attrib["class"] = "headword"
                 el.append(etree.Element("br"))
+            elif el.tag == "list":
+                el.tag = "ul"
+            elif el.tag == "item":
+                el.tag = "li"
             elif el.tag == "ab" or el.tag == "ln":
                 el.tag = "l"
             elif el.tag == "pb" and "fac" in el.attrib and "n" in el.attrib:

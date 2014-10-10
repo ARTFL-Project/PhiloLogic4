@@ -58,12 +58,50 @@
         </div>
         <!--End of modal dialog-->
         
+        <!-- Export results modal -->
+        <div class="modal fade" id="export-dialog" tabindex="-1" role="dialog" aria-labelledby="exportLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Export Results</h4>
+                    </div>
+                    <div class="modal-body">
+                       <h5>Choose the format in which to export your search results:</h5>
+                       <% script = config.db_url + "/scripts/export_results.py?" + (q['q_string'] or '') + "&output_format=" %>
+                       <div id="export-buttons" data-script="${script}">
+                            <button type="button" class="btn btn-primary" data-format="json">
+                                JSON
+                            </button>
+                            <button type="button" class="btn btn-primary" data-format="csv">
+                                CSV
+                            </button>
+                            <button type="button" class="btn btn-primary" data-format="tab">
+                                TAB
+                            </button>
+                       </div>
+                       <div id="export-results-file" style="margin-top: 10px;display: none;">
+                            Click on the link below to download the results of your query:
+                            <div id="retrieve-message">
+                                Generating results...
+                            </div>
+                            <div id="export-download-link" style="margin-top: 10px;margin-bottom: 10px; display: none;">
+                                <a download>Download results file</a>
+                            </div>
+                       </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--End of modal dialog-->
+        
         <!--Load all required JavaScript-->
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
         <script src="${config.db_url}/js/bootstrap/bootstrap.min.js" type="text/javascript"></script>
-        <script type="text/javascript" src="http://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
         <script type="text/javascript" src="${config.db_url}/js/plugins/jquery.history.js"></script>
-        <script type="text/javascript" src="${config.db_url}/js/plugins/jquery.velocity.min.js"></script>
+        <script type="text/javascript" src="${config.db_url}/js/plugins/velocity.min.js"></script>
+        <script type="text/javascript" src="${config.db_url}/js/plugins/velocity.ui.min.js"></script>
+        <script type="text/javascript" src="${config.db_url}/js/plugins/jquery-ui.min.js"></script>
         % if not db.locals['debug']:
             <script src="${config.db_url}/js/${report}.js" type="text/javascript"></script>
         % else:

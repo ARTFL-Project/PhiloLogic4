@@ -2,8 +2,38 @@
 <div id='search_overlay'></div>
 <div class="container" style="overflow: hidden;">
     <form id="search" action="${config.db_url + "/dispatcher.py/"}" role="form">
-    <div id="form_body">
+        <div id="form_body">
             <div id="initial-form">
+                <div id="search_head_container">
+                    <div id="metadata_fields" class="row" style="text-align: center;" data-script="${config.db_url + '/scripts/metadata_list.py?field='}">
+                        <div class="col-xs-12 col-sm-2 text-row">
+                            Search ${config.metadata_aliases['head']}
+                        </div>
+                        <div class="col-xs-12 col-sm-10 col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-btn hidden-xs">
+                                    <button class="btn btn-default" type="button" id="tip-btn" data-toggle="modal" data-target="#syntax">
+                                        <span id="tip">?</span><span id="tip-text">Tips</span>
+                                    </button>
+                                </span>
+                                <input type='text' name='head' id="head" class="form-control">
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn btn-primary" id="button-search">
+                                        <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
+                                    </button>
+                                </span> 
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
+                            <button type="reset" id="reset_form" class="btn btn-danger">Clear</button>
+                            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" style="display: none">Show search options</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="search_elements">
+                <h5>Refine your search with the following options and fields:
+                </h5>
                 <div id="report" class="btn-group btn-group-justified" data-toggle="buttons">
                     % if "concordance" in config.search_reports:
                         <label class="btn btn-primary active">
@@ -30,40 +60,20 @@
                         </label>
                     % endif
                 </div>
-                <div id="search_terms_container">
-                    <div id="search_terms" class="row">
-                        <div class="col-xs-12 col-sm-2 text-row">
-                            Search Terms:
+                <div id="search-in-head" style="margin-top: 15px">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-2 col-md-2 text-row">
+                            Full-text search
                         </div>
-                        <div class="col-xs-12 col-sm-10 col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-btn hidden-xs">
-                                    <button class="btn btn-default" type="button" id="tip-btn" data-toggle="modal" data-target="#syntax">
-                                        <span id="tip">?</span><span id="tip-text">Tips</span>
-                                    </button>
-                                </span>
-                                <input type='text' name='q' id='q' class="form-control" data-script="${config.db_url + '/scripts/term_list.py'}">
-                                <span class="input-group-btn">
-                                    <button type="submit" class="btn btn-primary" id="button-search">
-                                        <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
-                                    </button>
-                                </span> 
-                            </div>
-                        </div>
-                        <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
-                            <button type="reset" id="reset_form" class="btn btn-danger">Clear</button>
-                            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" style="display: none">Show search options</button>
+                        <div class="col-xs-12 col-sm-4 col-md-4">
+                            <input type='text' name='q' id='q' class="form-control" data-script="${config.db_url + '/scripts/term_list.py'}">
                         </div>
                     </div>
                 </div>
-            </div>
-            <div id="search_elements">
-                <h5>Refine your search with the following options and fields:
-                </h5>             
                 <!--This row defines the search method options-->
-                <div class="row hidden-xs" id='method'>
+                <div class="row hidden-xs" id='method' style="margin-top: 15px">
                     <div class="col-xs-12 col-sm-2" style="margin-top: 40px;">
-                        Search Terms
+                        Full-text search
                     </div>
                     <div class="col-xs-12 col-sm-3 col-lg-2" id="method-buttons">
                         <div class="btn-group-vertical" data-toggle="buttons">
@@ -88,25 +98,27 @@
                         <span style="padding-left: 10px">words in the same sentence</span>
                     </div>
                 </div>
-                <div id="metadata_fields" data-script="${config.db_url + '/scripts/metadata_list.py?field='}">
+                <div id="more_metadata_fields">
                     % for facet in config.metadata:
-                        <%
-                        if facet in config.metadata_aliases:
-                            alias = config.metadata_aliases[facet]
-                        else:
-                            alias = facet
-                        %>
-                        <div class="row">
-                            <div class="col-xs-12 col-sm-2 col-md-2 text-row">
-                                ${alias}:
+                        % if facet != "head":
+                            <%
+                            if facet in config.metadata_aliases:
+                                alias = config.metadata_aliases[facet]
+                            else:
+                                alias = facet
+                            %>
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-2 col-md-2 text-row">
+                                    ${alias}:
+                                </div>
+                                <div class="col-xs-12 col-sm-4 col-md-4">
+                                    <input type='text' name='${facet}' id="${facet}" class="form-control">
+                                </div>
+                                <div class="col-xs-12 col-sm-4 col-md-6 text-row">
+                                    (e.g., ${config.search_examples[facet]})
+                                </div>
                             </div>
-                            <div class="col-xs-12 col-sm-4 col-md-4">
-                                <input type='text' name='${facet}' id="${facet}" class="form-control">
-                            </div>
-                            <div class="col-xs-12 col-sm-4 col-md-6 text-row">
-                                (e.g., ${config.search_examples[facet]})
-                            </div>
-                        </div>
+                        % endif
                     % endfor
                 </div>
                 <div id="collocation_num" class="row">

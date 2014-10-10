@@ -7,7 +7,7 @@ $(document).ready(function() {
     if (sessionStorage[window.location.href] == null) {
         
         // Calculate width and height of chart
-        var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 200;
+        var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
         $('#test_time_series').css('height', height);
         var body_width = parseInt($('body').width());
         $('#test_time_series, #first_division, #middle_division, #top_division').width(body_width-90 + 'px');
@@ -30,16 +30,13 @@ $(document).ready(function() {
         var full_abs = merge_abs[1]
         var interval = $("#absolute_time").data('interval');
         drawFromData(sorted_abs, interval, 'absolute_time');
-        var total = parseInt($('#progress_bar').data('total'));
-        $('#progress_bar').progressbar({max: total});
-        $('#progress_bar').progressbar({value: 5000});
+        var total = parseInt($('.progress-bar').data('total'));
         var percent = 5000 / total * 100;
-        $('.progress-label').text(percent.toString().split('.')[0] + '%');
-        $('#progress_bar').width($('#description').width());
-        $('#progressive_bar').show();
+        updateProgressBar(percent)
         var date_counts = eval($('#relative_time').data('datecount'));
         
-        progressiveLoad(db_url, total, interval, 0, 5000, full_abs, date_counts, date_list);   
+        var script = $('#time_series_report').data('script');
+        progressiveLoad(db_url, total, interval, 0, 5000, full_abs, date_counts, date_list, script);   
     } else {
         var time_series = JSON.parse(sessionStorage[window.location.href]);
         $('#philologic_response').html(time_series);
@@ -52,12 +49,12 @@ $(document).ready(function() {
             var chart_width = body_width - 90 + diff;
             $('#test_time_series, #first_division, #middle_division, #top_division').width(chart_width + 'px');
             $('.graph_bar').remove();
-            var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 200;
+            var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
             $('#test_time_series').css('height', height);
             $('#test_time_series').fadeOut('fast', function() {
                 $(this).show();
                 var frequency = $('#time_series_buttons label.active').attr('id');
-                data = eval($('#' + frequency).data('value'));
+                var data = eval($('#' + frequency).data('value'));
                 drawFromData(data, interval);
             });
         }, 500, $('#test_time_series').attr('id'));
@@ -89,9 +86,8 @@ function frequencySwitcher() {
     });
 }
 
-function progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_full_results, full_date_counts, date_list) {
+function progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_full_results, full_date_counts, date_list, script) {
     var q_string = window.location.search.substr(1);
-    var script = db_url + "/scripts/time_series_fetcher.py?" + q_string
     var initial_end = interval_end;
     if (interval_start === 0) {
         interval_start = 3000;
@@ -113,13 +109,10 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
                 full_date_counts[date] = data[1][date]
             }
             
-            progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_new_full_results, full_date_counts, date_list);
-            var total = $('#progress_bar').progressbar("option", "max");
-            var percent = interval_end / total * 100;
-            if (interval_end < total) {
-                var progress_width = $('#progress_bar').width() * percent / 100;
-                $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'slow', 'easeOutQuart', {queue: false});
-                $('.progress-label').text(percent.toString().split('.')[0] + '%');
+            progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_new_full_results, full_date_counts, date_list, script);
+            if (interval_end < total_results) {
+                var percent = interval_end / total_results * 100;
+                updateProgressBar(percent)
             }
         });
     } else {
@@ -135,10 +128,10 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         // Create click event handler to switch between frequency types
         frequencySwitcher();
         
-        var total = $('#progress_bar').progressbar("option", "max");
-        $('#progress_bar').progressbar({value: total});
-        $('.progress-label').text('Complete!');
-        $("#progress_bar").delay(500).slideUp();
+        updateProgressBar(100)
+        var progress_height = $(".progress").height();
+        $(".progress").delay(500).velocity("slideUp", {complete: function() {$('#test_time_series').velocity({height: '+=' + progress_height})}});
+        $('.graph_bar').tooltip({html: true});
     }
 }
 
@@ -271,7 +264,7 @@ function drawFromData(data, interval, frequency_type) {
             if (i > 0) {
                 margin += width + 1;
             }
-            var graph_bar = "<span class='graph_bar' title='" + count + " occurrences in years '" + year_to_display + "' style='margin-left:" + margin + "px' data-count='" + Math.round(count, false) + "' data-year='" + year + "'></span>";
+            var graph_bar = "<span class='graph_bar' data-toggle='tooltip' title='" + count + " occurrences in years '" + year_to_display + "' style='margin-left:" + margin + "px' data-count='" + Math.round(count, false) + "' data-year='" + year + "'></span>";
             $('#test_time_series').append(graph_bar);
             $('.graph_bar').eq(i).width(width + 'px');
             $('.graph_bar').eq(i).data('href', data[i][1]['url']);
@@ -282,9 +275,9 @@ function drawFromData(data, interval, frequency_type) {
         } else {
             $('.graph_bar').eq(i).data('count', count);
             if (frequency_type == "absolute_time") {
-                $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences in years ' + year_to_display);
+                $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences<br>between ' + year_to_display);
             } else {
-                $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences per 1,000,000 words in years ' + year_to_display);
+                $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences per 1,000,000 words<br>between ' + year_to_display);
             }
             
         }
@@ -312,6 +305,23 @@ function drawFromData(data, interval, frequency_type) {
         })
     }
     
+    var chart_height = $('#test_time_series').height();
+    var multiplier = (chart_height - 10) / max_count; 
+    var max_height = 0;
+    
+    $('.graph_bar').each(function() {
+        var count = $(this).data('count');
+        var height = count * multiplier;
+        if (height > max_height) {
+            max_height = height;
+        }
+        $(this).attr('data-height', height)
+        $(this).eq(0).velocity({'height': height + 'px'}, {duration: 300, easing: "easeOut"});
+    });
+    
+    var top_line = (chart_height - 10) / chart_height * 100;
+    $("#top_division").css('bottom', top_line + '%');
+    
     // Draw three lines along the X axis to help visualize frequencies
     if (frequency_type == "relative_time") {
         $('#side_text').html('Occurrences per 1,000,000 words'); // TODO: move to translation file
@@ -330,16 +340,6 @@ function drawFromData(data, interval, frequency_type) {
         $('#middle_number').html(middle_number + ' occurrences');
         $('#first_number').html(bottom_number + ' occurrences');
     }
-    
-    var multiplier = ($('#test_time_series').height() - 10) / max_count; 
-    
-    $('.graph_bar').each(function() {
-        var count = $(this).data('count');
-        var height = count * multiplier;
-        $(this).attr('data-height', height)
-        $(this).eq(0).css('height', height + 'px');
-    });
-    $('.graph_bar').tooltip({ position: { my: "left top+10", at: "left bottom", collision: "flipfit" } }, { track: true });
     clickOnChart(interval);
 }
 

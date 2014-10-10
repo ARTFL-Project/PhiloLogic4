@@ -8,7 +8,7 @@ $(document).ready(function() {
     if ($('#kwic_concordance').length) {
         var config = {    
                 over: showBiblio, 
-                timeout: 100,  
+                timeout: 50,  
                 out: hideBiblio   
             };
         $(".kwic_biblio").hoverIntent(config);
@@ -17,7 +17,7 @@ $(document).ready(function() {
     $(window).load(function() {
          // Get the total results when available
         if ($('#incomplete').text() != '.') {
-            $.getJSON(db_url + '/scripts/get_total_results.py?' + q_string, function(data) {
+            $.getJSON($("#search-hits").data('script'), function(data) {
                 $('#total_results, #incomplete').fadeOut('fast', function() {
                     if (parseInt($('#end').text()) > data) {
                         $('#end').text(data);
@@ -36,69 +36,38 @@ $(document).ready(function() {
     
 });
 
-// Fetch results bibliography from results
-function fetchresultsBibliography(pathname) {
-    var philo_ids = [];
-    $('.cite').each(function() {
-        var id = $(this).data('id').split(' ').slice(0,7).toString();
-        philo_ids.push(id);
-    });
-    var script = pathname + '/scripts/get_results_bibliography.py?';
-    var key = "&id=";
-    for (var i = 0; i < philo_ids.length; i++) {
-        script += key + philo_ids[i];
-    }
-    $.getJSON(script, function(data) {
-        var ol = '<ol>';
-        for (var i = 0; i < data.length; i++) {
-            var li = "<li><span class='dot'></span>" + data[i][0] + "</li>";
-            ol += li;
-        }
-        ol += "</ol>";
-        $('#results-bibliography').append(ol);
-        //$("#show-results-bibliography").click(function() {
-        //    var list = $('#results-bibliography').find('ol');
-        //    if (list.css('display') == "none") {
-        //        list.velocity('slideDown');
-        //    } else {
-        //        list.velocity('slideUp');
-        //    }
-        //});
-    });
-}
-
 /// Switch betwwen concordance and KWIC reports
 function concordance_kwic_switch(db_url) {
-    $("#report_switch").on("change", function() {
-        $('.highlight_options').remove();
-        var switchto = $('input[name=report_switch]:checked').val();
+    $("#report_switch button").on('click touchstart', function(e) {
+        e.stopPropagation();
+        var script = $(this).data('script');
+        var switchto = $(this).data('report');
         var width = $(window).width() / 3;
-        $("#waiting").css("margin-left", width).show();
-        $("#waiting").css("margin-top", 200).show();
-        $.get(db_url + "/reports/concordance_switcher.py" + switchto, function(data) {
-            $("#results_container").hide().empty().html(data).fadeIn('fast');
-            $("#waiting").hide();
-            if (switchto.match(/kwic/)) {
+        $("#waiting").css({"margin-left": width, "margin-top": 200, "opacity": 1}).show();
+        $.get(script, function(html_results) {
+            $("#report_switch button").toggleClass('active');
+            $("#waiting").velocity('fadeOut', {duration: 200});
+            $("#results_container").hide().html(html_results).velocity('fadeIn', {duration: 200});
+            if (switchto == "kwic") {
                 var config = {    
-                over: showBiblio, 
-                timeout: 100,  
-                out: hideBiblio   
-            };
-            $(".kwic_biblio").hoverIntent(config);
-                $('#concordance').removeAttr("checked");
-                $('#kwic').prop("checked", true)
+                    over: showBiblio, 
+                    timeout: 100,  
+                    out: hideBiblio   
+                };
+                $(".kwic_biblio").hoverIntent(config);
+                $('#concordance').removeAttr("checked").parent().removeClass('active');
+                $('#kwic').prop("checked", true).parent().addClass('active');
                 var new_url = History.getState().url.replace(/report=concordance/, 'report=kwic');
                 History.pushState(null, '', new_url);
-            }
-            else {
-                $('#kwic').removeAttr("checked");
-                $('#concordance').prop("checked", true);
+            } else {
+                $('#kwic').removeAttr("checked").parent().removeClass('active');
+                $('#concordance').prop("checked", true).parent().addClass('active');
                 var new_url = History.getState().url.replace(/report=kwic/, 'report=concordance');
                 History.pushState(null, '', new_url);
             }
             fetchMoreContext();
-            $('.more').find('a').each(function() {
-                if (switchto.match(/kwic/)) {
+            $('.more a').each(function() {
+                if (switchto == "kwic") {
                     var new_href = $(this).attr('href').replace('concordance', 'kwic');
                 }
                 else {
@@ -117,12 +86,7 @@ function back_forward_button_concordance_reload() {
         if (report.match(/kwic|concordance/) === null) {
             report = "concordance";
         }
-        if ($('#concordance_switch').prop('checked')) {
-            var report_displayed = "concordance";
-        } else {
-            var report_displayed = 'kwic'
-        }
-        if (report != report_displayed) {
+        if (report != $("#report_switch .active").data('report')) {
             window.location = window.location.href;
         }
     });
@@ -130,14 +94,10 @@ function back_forward_button_concordance_reload() {
 
 // These functions are for the kwic bibliography which is shortened by default
 function showBiblio() {
-    console.log($(this))
-    $(this).children(".full_biblio").css('position', 'absolute').css('text-decoration', 'underline')
-    $(this).children(".full_biblio").css('background', 'LightGray')
-    $(this).children(".full_biblio").css('box-shadow', '5px 5px 15px #C0C0C0')
-    $(this).children(".full_biblio").css('display', 'inline')
+    $(this).children(".full_biblio").addClass('show');
 }
 
 function hideBiblio() {
-    $(this).children(".full_biblio").fadeOut(200)
+    $(this).children(".full_biblio").velocity('fadeOut', {duration: 200, complete:function() {$(this).removeClass('show')}});
 }
 

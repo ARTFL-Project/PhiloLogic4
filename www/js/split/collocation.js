@@ -3,14 +3,11 @@ $(document).ready(function() {
         collocation_cloud(mergeCollocResults(all_colloc)[1]);
         var db_url = webConfig['db_url'];
         var colloc_hits = parseInt($('#colloc_hits').html());
-        $('#progress_bar').css('width', $('#collocation_table').width() - 5);
-        $('#progress_bar').progressbar({max: colloc_hits});
-        $('#progress_bar').progressbar({value: 0.1});
         var percent = 3000 / colloc_hits * 100;
-        var progress_width = $('#progress_bar').width() * percent / 100;
-        $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'slow');
-        $('.progress-label').text(percent.toString().split('.')[0] + '%');
-        update_colloc(db_url, all_colloc, left_colloc, right_colloc, hit_len, 0, 3000);
+        updateProgressBar(percent);
+        var script = $('#philologic_collocation').data('script');
+        var q_string = window.location.search.substr(1);
+        update_colloc(db_url, all_colloc, left_colloc, right_colloc, hit_len, 0, 3000, script, q_string);
     } else {
         var collocation = JSON.parse(sessionStorage[window.location.href]);
         $('#philologic_collocation').html(collocation);
@@ -57,9 +54,7 @@ function update_table(sorted_lists, q_string, db_url) {
     }
 }
 
-function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end) {
-    var q_string = window.location.search.substr(1);
-    var script = db_url + "/scripts/collocation_fetcher.py?" + q_string
+function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end, script, q_string) {
     if (colloc_start == 0) {
         colloc_start = 3000;
         colloc_end = 13000;
@@ -81,22 +76,17 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
                 right_new_colloc = right_list[1];
             sorted_lists = {'all': all_sorted, 'left': left_sorted, 'right': right_sorted};
             update_table(sorted_lists, q_string, db_url);
-            update_colloc(db_url, all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end);
             collocation_cloud(all_new_colloc, colloc_end, results_len);
-            var total = $('#progress_bar').progressbar("option", "max");
-            var percent = colloc_end / total * 100;
-            if (colloc_end < total) {
-                var progress_width = $('#progress_bar').width() * percent / 100;
-                $('#progress_bar .ui-progressbar-value').animate({width: progress_width}, 'slow', 'easeOutQuart', {queue: false});
-                $('.progress-label').text(percent.toString().split('.')[0] + '%');
+            if (colloc_end < results_len) {
+                var percent = colloc_end / results_len * 100;
+                updateProgressBar(percent);
             }
+            update_colloc(db_url, all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end, script, q_string);
         });
     }
     else {
-        var total = $('#progress_bar').progressbar("option", "max");
-        $('#progress_bar').progressbar({value: total});
-        $('.progress-label').text('Complete!');
-        $("#progress_bar").delay(500).fadeOut('slow');
+        updateProgressBar(100);
+        $(".progress").delay(500).velocity('slideUp');
         
         // Activate links on collocations
         $('span[id^=all_word], span[id^=left_word], span[id^=right_word]').addClass('colloc_link');
@@ -246,7 +236,7 @@ function collocation_cloud(full_results, colloc_end, results_len) {
         $("#collocate_counts").append(full_link);
     }
     $("#collocate_counts span").tagcloud();
-    $("#collocate_counts").fadeIn();
+    $("#collocate_counts").velocity('fadeIn');
     if (colloc_end >= results_len) {
         clickOnColloc('.cloud_term');
     }

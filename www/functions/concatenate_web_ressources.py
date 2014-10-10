@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 
 import os.path
+from web_config import WebConfig
 
-report_files = {"css": {"landing_page": ["split/style.css", "split/searchForm.css", "split/landingPage.css", "split/theme.css"],
-                        "concordance": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/theme.css"],
-                        "kwic": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/theme.css"],
-                        "concordance_from_collocation": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/theme.css"],
-                        "bibliography": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/theme.css"],
-                        "collocation": ["split/style.css", "split/searchForm.css", "split/theme.css"],
-                        "time_series": ["split/style.css", "split/searchForm.css", "split/timeSeries.css", "split/theme.css"],
-                        "navigation": ["split/style.css", "split/searchForm.css", "split/textObjectNavigation.css", "split/theme.css"],
-                        "t_o_c": ["split/style.css", "split/searchForm.css", "split/textObjectNavigation.css", "split/theme.css"]},
+theme = WebConfig().theme
+report_files = {"css": {"landing_page": ["split/style.css", "split/searchForm.css", "split/landingPage.css", "split/%s" % theme],
+                        "concordance": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
+                        "kwic": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
+                        "concordance_from_collocation": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
+                        "bibliography": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
+                        "collocation": ["split/style.css", "split/searchForm.css", "split/%s" % theme],
+                        "time_series": ["split/style.css", "split/searchForm.css", "split/timeSeries.css", "split/%s" % theme],
+                        "navigation": ["split/style.css", "split/searchForm.css", "split/textObjectNavigation.css", "split/%s" % theme],
+                        "t_o_c": ["split/style.css", "split/searchForm.css", "split/textObjectNavigation.css", "split/%s" % theme]},
                 "js": {"landing_page": ["split/common.js"],
                         "concordance": ["split/common.js", "plugins/jquery.slimscroll.min.js", "split/sidebar.js", "plugins/jquery.hoverIntent.minified.js", "split/concordanceKwic.js"],
                         "kwic": ["split/common.js", "plugins/jquery.slimscroll.min.js", "split/sidebar.js", "plugins/jquery.hoverIntent.minified.js", "split/concordanceKwic.js"],
@@ -26,6 +28,7 @@ report_files = {"css": {"landing_page": ["split/style.css", "split/searchForm.cs
                 }
 
 def concatenate_files(path, report, debug=False):
+    path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '')
     for file_type in ["css", "js"]:
         concat_file = path + "/" + file_type + "/" + report + "." + file_type
         if debug == True:

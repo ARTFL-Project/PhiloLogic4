@@ -7,7 +7,7 @@ $(document).ready(function() {
     var my_path = pathname.replace(/\/\d+.*$/, '/');
     var doc_id = pathname.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
     var philo_id = doc_id + ' 0 0 0 0 0 0'
-    var script = my_path + '/scripts/get_table_of_contents.py?philo_id=' + philo_id;
+    var script = $('#toc-report').data('script') + philo_id;
     $.get(script, function(data) {
         $("#toc-content").html(data);
         $("#toc_wrapper").fadeIn();

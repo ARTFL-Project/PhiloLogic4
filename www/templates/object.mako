@@ -1,5 +1,9 @@
 <%include file="header.mako"/>
-<%include file="search_form.mako"/>
+% if not config.dictionary:
+    <%include file="search_form.mako"/>
+% else:
+    <%include file="dictionary_search_form.mako"/>
+% endif
 <div class="container-fluid" id='philologic_response'>
     <div id='object-title'>
         <span class='philologic_cite'>${f.biblio_citation(db,config, obj)}</span>
@@ -20,8 +24,8 @@
             </div>
         </div>
     </div>
-    <div class="row" id="all-content">
-        <div id="toc-wrapper" class="col-xs-4">
+    <div class="row" id="all-content" data-script="${config.db_url + '/scripts/go_to_obj.py?philo_id='}">
+        <div id="toc-wrapper" class="col-xs-4" data-script="${config.db_url + '/scripts/get_table_of_contents.py?philo_id='}">
             <div class="panel panel-default" id="toc-container" data-status="closed">
                 <div id="toc-titlebar">
                     <button type="button" class="btn btn-primary btn-xs pull-right" id="hide-toc">

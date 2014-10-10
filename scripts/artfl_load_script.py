@@ -8,13 +8,16 @@ from philologic.PostFilters import *
 from philologic.Parser import Parser
 from philologic.Loader import Loader, handle_command_line, setup_db_dir
 
+try:
+    import artfl_xpaths
+except ImportError:
+    print "You need to copy the artfl_xpaths.py script from PhiloLogic4/scripts/ in the same directory as this script"
 
 ## Flush buffer output
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 
 ## Parse command line
 dbname, files, workers, console_output, log, debug = handle_command_line(sys.argv)
-
 
 
 ##########################
@@ -28,14 +31,14 @@ database_root = None
 # Please follow the instructions in INSTALLING before use.
 
 # Set the URL path to the same root directory for your philologic install.
-url_root = None 
+url_root = None
 # http://localhost/philologic/ is appropriate if you don't have a DNS hostname.
 
 if database_root is None or url_root is None:
     print >> sys.stderr, "Please configure the loader script before use.  See INSTALLING in your PhiloLogic distribution."
     exit()
 
-template_dir = database_root + "_system_dir/_install_dir/"
+template_dir = "~/PhiloLogic4/www/"
 # The load process will fail if you haven't set up the template_dir at the correct location.
 
 # Define default object level
@@ -65,20 +68,9 @@ extra_locals['default_object_level'] = default_object_level
 ## Set-up database load ###
 ###########################
 
-xpaths =  [("doc","."),("div",".//div1"),("div",".//div2"),("div",".//div3"),("para",".//sp"),("page",".//pb")]         
+xpaths =  artfl_xpaths.xpaths        
 
-metadata_xpaths = [ # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
-    # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
-    ("doc","./teiHeader//titleStmt/title","title"),
-    ("doc","./teiHeader//titleStmt/author","author"),
-    ("doc", "./text/front//docDate/@value", "date"),
-    ("div","./head","head"),
-    ("div",".@n","n"),
-    ("div",".@id","id"),
-    ("para", ".@who", "who"),
-    ("page",".@n","n"),
-    ("page",".@fac","img")
-]
+metadata_xpaths = artfl_xpaths.metadata_xpaths
 
 pseudo_empty_tags = ["milestone"]
 
@@ -87,12 +79,20 @@ suppress_tags = ["teiHeader",".//head"]
 
 word_regex = r"([\w]+)"
 punct_regex = r"([\.?!])"
+word_regex = r"([\w]+)"
+punct_regex = r"([\.?!])"
 
 token_regex = word_regex + "|" + punct_regex 
 
 ## Saved in db.locals.py for tokenizing at runtime
 extra_locals["word_regex"] = word_regex
 extra_locals["punct_regex"] = punct_regex
+
+## Define the order in which files are sorted
+## This will affect the order in which results are displayed
+## Supply a list of metadata strings, e.g.:
+## ["date", "author", "title"]
+sort_order = ["date", "author", "title", "filename"]
 
 ################################
 ## Don't edit unless you know ##
@@ -127,11 +127,10 @@ l = Loader(data_destination,
 
 l.add_files(files)
 filenames = l.list_files()
-## The following line creates a list of the files to parse and sorts the files by filename
-## Should you need to supply a custom sort order from the command line you need to supply the files variable,
-## defined at the top of this script, instead of filenames, like so: 
-## load_metadata = [{"filename":f} for f in files] 
-load_metadata = [{"filename":f} for f in sorted(filenames)]
+if sort_order == None:
+    load_metadata = [{"filename":f} for f in sorted(filenames)]
+else:
+    load_metadata = l.sort_by_metadata(*sort_order)
 l.parse_files(workers,load_metadata)
 l.merge_objects()
 l.analyze()

@@ -18,11 +18,7 @@
     <link rel="shortcut icon" href="${config.db_url}/favicon.ico" type="image/x-icon">
     <link rel="icon" href="${config.db_url}/favicon.ico" type="image/x-icon">
     <!-- Bootstrap core CSS -->
-    <link href="${config.db_url}/css/bootstrap/bootstrap.min.css" rel="stylesheet">
-     
-    <!-- jQueryUI CSS -->
-    <link type="text/css" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css" rel="stylesheet" />
-    
+    <link href="${config.db_url}/css/bootstrap/bootstrap.min.css" rel="stylesheet">  
     <!-- PhiloLogic4 CSS -->
     % if not db.locals['debug']:
         <link rel="stylesheet" href="${config.db_url}/css/${report}.css" type="text/css" media="screen, projection">

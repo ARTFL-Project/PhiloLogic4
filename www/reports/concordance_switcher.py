@@ -31,5 +31,8 @@ if __name__ == "__main__":
                                 config=config, path=path, results_per_page=q['results_per_page']).encode('utf-8', 'ignore')
     else:
         mytemplate = Template(filename=path + "templates/kwic_short.mako")
+        print >> sys.stderr, mytemplate.render(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
+                                config=config, path=path, results_per_page=q['results_per_page']).encode('utf-8', 'ignore')
         print mytemplate.render(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
                                 config=config, path=path, results_per_page=q['results_per_page']).encode('utf-8', 'ignore')
+        

@@ -20,28 +20,21 @@ $(document).ready(function() {
         offset: {
         top: function() {
             return (this.top = $('#nav-buttons').offset().top)
-            },
-        bottom: function() {
-            return (this.bottom = $('#footer').outerHeight(true))
-          }
+            }
         }
     });
     
     $('#nav-buttons').on('affix.bs.affix', function() {
         $(this).addClass('fixed');
         adjustTocHeight();
-        $("#toc-container").css({'position': 'fixed'}); // Force position fixed because of bottom event hack
+        $("#toc-container").css({'position': 'fixed', "top": "32px"}); // Force position fixed because of bottom event hack
         $('#back-to-top').velocity('fadeIn', {duration: 200});
     });
     $('#nav-buttons').on('affix-top.bs.affix', function() {
         $(this).removeClass('fixed');
         adjustTocHeight();
         $('#back-to-top').velocity('fadeOut', {duration: 200});
-        $("#toc-container").css({'position': 'static'}); // Force position static because of bottom event hack
-    });
-    $('#toc-container').on('affixed-bottom.bs.affix', function() {
-        adjustTocHeight(50);
-        $(this).css({'position': 'fixed'}); // Force position fixed in order to override the position relative set on this event
+        $("#toc-container").css({'position': 'static', "top": "auto"}); // Force position static because of bottom event hack
     });
     
     $('#back-to-top').click(function() {
@@ -54,8 +47,14 @@ $(document).ready(function() {
         backForwardButtonReload(db_url);
     }
     
-    var text = 'Click to see a full-sized version of this image';
-    $('.plate_img').attr('title', text).tooltip({ position: { my: "left center", at: "right center" } });
+    // Note handling
+    $('note').each(function() {
+        $(this).before('<a class="note" tabindex="0" data-toggle="popover" data-container="body" data-trigger="focus">note</a>');
+    }).promise().done(function() {
+        $('.note').popover({animate: true, trigger: 'hover focus', html: true, content: function() {
+            return $(this).next('note').html();
+        }});
+    });
     
     // Only enable back/forward buttons if necessary 
     checkEndBeginningOfDoc();
@@ -88,31 +87,34 @@ function checkEndBeginningOfDoc() {
     }
 }
 
+// Check to see if the footer is no longer at the bottomw of the page
+function checkFooterPosition() {
+    
+}
+
 function retrieveTableOfContents(db_url) {
     var pathname = window.location.pathname.replace('dispatcher.py/', '');
     var my_path = pathname.replace(/\/\d+.*$/, '/');
     var doc_id = pathname.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
     var philo_id = doc_id + ' 0 0 0 0 0 0'
-    var script = my_path + '/scripts/get_table_of_contents.py?philo_id=' + philo_id;
+    var script = $('#toc-wrapper').data('script') + philo_id;
     $("#show-toc").removeAttr("disabled");
     $('#toc-container').hide();
     $.get(script, function(data) {
         $('#toc-content').html(data);
-        // Add a negative left margin to hide on the left side
-        var tocWidth = $('#toc-wrapper').outerWidth() + 30; // account for container margin
-        $('#toc-container').css('margin-left', '-' + tocWidth + 'px').css('display', 'inline-block');
         adjustTocHeight(100); // adjust height before showing
         TocLinkHandler(db_url);
     });
 }
 
 function hideTOC() {
-    if ($(document).height() == $(window).height()) {
-        $('#toc-container').css('position', 'static');
-    }
+    $('#toc-container').velocity("transition.slideLeftBigOut", {"duration": 300});
     $("#toc-container").data("status", "closed");
-    var tocWidth = $('#toc-container').outerWidth() + 30 + 40; // account for container margin and content padding
-    $('#toc-container').velocity({'margin-left': '-' + tocWidth + 'px'}, {"duration": 300});
+    setTimeout(function() {
+        if ($(document).height() == $(window).height()) {
+            $('#toc-container').css('position', 'static');
+        }
+    });
     $('#nav-buttons').removeClass('col-md-offset-4');
 }
 function showTOC() {
@@ -120,13 +122,13 @@ function showTOC() {
         $('#toc-container').css('position', 'static');
     }
     $("#toc-container").data("status", "open");
-    adjustTocHeight();
     $('#toc-wrapper').css('opacity', 1);
     $('#nav-buttons').addClass('col-md-offset-4');
-    $('#toc-container').velocity({'margin-left': '-30px'}, {"duration": 300});
+    $('#toc-container').velocity("transition.slideLeftBigIn", {"duration": 300});
     $('#toc-wrapper').addClass('show');
     var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
     setTimeout(function() {
+        adjustTocHeight();
         if ($('#toc-content').find($(scrollto_id)).length) {
             $('#toc-content').scrollTo($(scrollto_id), 500);
             $('#toc-content').find($(scrollto_id)).addClass('current-obj');
@@ -136,9 +138,9 @@ function showTOC() {
 function adjustTocHeight(num) {
     // Make sure the TOC is no higher than viewport
     if ($(document).height() == $(window).height()) {
-        var toc_height = $('#footer').offset().top - $('#nav-buttons').position().top - $('#nav-buttons').height() - $('#toc-titlebar').height() - 10;
+        var toc_height = $('#footer').offset().top - $('#nav-buttons').position().top - $('#nav-buttons').height() - $('#toc-titlebar').height() - 40;
     } else {
-        var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').position().top - $('#toc-titlebar').height() - 20;
+        var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').position().top - $('#toc-titlebar').height() - 50;
     }
     if (typeof num !="undefined") {
         toc_height = toc_height - num;
@@ -147,8 +149,21 @@ function adjustTocHeight(num) {
 }
 
 function scrollToHighlight() {
-    var word_offset = $('.highlight').offset().top - 40;
-    $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: word_offset});
+    var word_offset = $('.highlight').eq(0).offset().top;
+    if (word_offset == 0) {
+        var note = $('.highlight').parents('note');
+        note.show(); // The highlight is in a hidden note
+        word_offset = $('.highlight').offset().top;
+        $('.highlight').parents('note').hide();
+    }
+    if ($('.highlight').eq(0).parents('note').length) {
+        $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: word_offset - 60, complete: function() {
+            $('.highlight').parents('note').prev('.note').popover('show');}}
+        );
+    } else {
+        $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: word_offset - 40});
+    }
+    
 }
 
 /// Go to next or previous object in text display
@@ -156,7 +171,7 @@ function retrieveObj(db_url){
     $("#prev-obj, #next-obj").on('click', function() {
         var my_path = db_url.replace(/\/\d+.*$/, '/');
         var philo_id = $(this).data('philoId');
-        var script = my_path + '/scripts/go_to_obj.py?philo_id=' + philo_id;
+        var script = $('#all-content').data('script') + philo_id;
         var width = $(window).width() / 2 - 100;
         $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 150).show();
         $.getJSON(script, function(data) {
@@ -180,7 +195,7 @@ function TocLinkHandler(db_url) {
         e.preventDefault();
         var my_path = db_url.replace(/\/\d+.*$/, '/');
         var philo_id = $(this).attr('id').replace(/_/g, ' ');
-        var script = my_path + '/scripts/go_to_obj.py?philo_id=' + philo_id;
+        var script = $('#all-content').data('script') + philo_id;
         var width = $(window).width() / 2 - 100;
         $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 150).show();
         $.getJSON(script, function(data) {
@@ -204,10 +219,15 @@ function newTextObjectCallback(data, philo_id, my_path) {
             $('#toc-content').scrollTo($(scrollto_id), 500);
             $('#toc-content').find($(scrollto_id)).addClass('current-obj');
         }
-        page_image_link();
         var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
         History.pushState(null, '', new_url);
         checkEndBeginningOfDoc();
-        $('body').velocity('scroll', {duration: 200, offset: 0, easing: 'easeOut'});
+        if ($('body').scrollTop() != 0) {
+            $('body').velocity('scroll', {duration: 200, offset: 0, easing: 'easeOut', complete: function() {$('#toc-container').css('position', 'static');}});
+        }
+        adjustTocHeight();
+        setTimeout(function() {
+            $('#toc-container').css('position', 'static')
+        }, 250)
     });
 }
