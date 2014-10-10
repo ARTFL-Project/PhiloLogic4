@@ -309,9 +309,9 @@ class Loader(object):
                     for f in filters:
                         f(self, text)
                     
+                    os.system('gzip -c -5 %s > %s' % (text['raw'], text['raw'] + '.gz'))
                     if self.clean:
-                        command = 'rm %s' % text['raw']
-                        os.system(command)                    
+                        os.system('rm %s' % text['raw'])
                     
                     os.system('gzip -c -5 %s > %s' % (text['words'], text['words'] + '.gz'))
                     os.system('rm %s' % text['words'])

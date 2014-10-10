@@ -3,7 +3,7 @@
 ## at the end of your XPATH otherwise LXML won't find it.
 
 xpaths =  [("doc","."),
-           ("div",".//div"), ("div",".//div1"),("div",".//div2"),("div",".//div3"),
+           ("div",".//div"), ("div",".//div1"), ("div", ".//front"), ("div",".//div2"),("div",".//div3"),
            ("para", ".//p"), ("para",".//sp"), ("para", ".//lg"), ("para", ".//epigraph"), ("para", ".//argument"), ("para", ".//postscript"),
            ("page",".//pb")]
 
@@ -120,6 +120,7 @@ metadata_xpaths = [
                 ######################
                 
                 ("div","./head","head"),
+                ("div", ".@type", "type"),
                 ("div",".@n","n"),
                 ("div",".@id","id"),
                 
