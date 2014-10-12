@@ -295,7 +295,19 @@ corps + rubrique {
 }
 
 /*Note handling*/
-note {
+.popover {
+	max-width: 350px;
+	overflow: scroll;
+}
+.popover-content {
+	text-align: justify;
+}
+.popover-content .xml-p:not(:first-of-type) {
+    display: block;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+.note-content {
 	display: none;
 }
 .note {
@@ -306,3 +318,7 @@ note {
 	cursor: pointer;
     text-decoration: none;
 }
+/*.p-inline::after {*/
+/*	content :"\A";*/
+/*	white-space: pre;*/
+/*}*/

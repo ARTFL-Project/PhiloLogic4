@@ -4,7 +4,7 @@
 
 xpaths =  [("doc","."),
            ("div",".//div"), ("div",".//div1"), ("div", ".//front"), ("div",".//div2"),("div",".//div3"),
-           ("para", ".//p"), ("para",".//sp"), ("para", ".//lg"), ("para", ".//epigraph"), ("para", ".//argument"), ("para", ".//postscript"),
+           ("para", ".//text//p"), ("para", ".//body//p"), ("para",".//sp"), ("para", ".//lg"), ("para", ".//epigraph"), ("para", ".//argument"), ("para", ".//postscript"),
            ("page",".//pb")]
 
 metadata_xpaths = [
