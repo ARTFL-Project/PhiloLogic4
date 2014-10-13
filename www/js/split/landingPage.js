@@ -29,11 +29,12 @@ $(document).ready(function() {
             var range = $(this).data('range');
             var type = $(this).parent().parent().data('type');
             var script = $('#landingGroup').data('script') + type + "&range=" + range;
-            var target = $(this).data('target');
-            console.log(target)
-            var contentArea = $("#" + target);
+            var contentId = type + '-' + range;
+            var contentDiv = '<div id="' + contentId + '"></div>';
             var available_links = [];
-            if (contentArea.is(':empty')) {
+            if ($('#' + contentId).length == 0) {
+                $('#' + type + "-range-display").append(contentDiv);
+                var contentArea = $('#' + contentId);
                 $.getJSON(script, function(data) {
                     $('div[id$="-range-display"] div').hide();
                     var html = '';
@@ -57,9 +58,9 @@ $(document).ready(function() {
                         }
                         var content = '<li style="padding-top: 10px;padding-bottom: 10px;border-bottom: 1px solid #eee">'
                         if (type == "author") {
-                            content += '<a href="' + data[i].link + '">' + data[i].author + ' (' + data[i].count + ")</a></li>";
+                            content += data[i].cite + "</li>";
                         } else if (type == "title" || type == "year") {
-                            content += '<a href="' + data[i].link + '"><i>' + data[i].title + '</i></a> (' + data[i].author + ")</li>";
+                            content += data[i].cite + "</li>";
                         }
                         html += content;
                     }
@@ -70,6 +71,7 @@ $(document).ready(function() {
                     });
                 });
             } else {
+                var contentArea = $('#' + contentId);
                 $('div[id$="-range-display"] div').hide();
                 contentArea.show();
                 $('#landing-page-content').show();

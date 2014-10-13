@@ -45,6 +45,9 @@ ul {
 #landing-page-content li {
     padding-left: 20px;
 }
+#author-range-display div, #title-range-display div, #year-range-display div {
+    padding: 10px;
+}
 
 
 @media (max-width: 767px) {

@@ -29,29 +29,34 @@ def landing_page_content(environ,start_response):
     if content_type != "year":
         letter_range = set([chr(i) for i in range(ord(q_range[0]),ord(q_range[1])+1)])
     db, path_components, q = parse_cgi(environ)
+    config = f.WebConfig()
     c = db.dbh.cursor()
     content = ''
     if content_type == "author":
-        content = generate_author_list(c, letter_range)
+        content = generate_author_list(c, letter_range, db, config)
     elif content_type == "title":
-        content = generate_title_list(c, letter_range)
+        content = generate_title_list(c, letter_range, db, config)
     elif content_type == "year":
-        content = generate_year_list(c, q_range)
+        content = generate_year_list(c, q_range, db, config)
     yield json.dumps(content)
     
-def generate_author_list(c, letter_range):
+def generate_author_list(c, letter_range, db, config):
     c.execute('select distinct author, count(*) from toms where philo_type="doc" group by author order by author')
     content = []
     for author, count in c.fetchall():
         if not author:
-            author = "Anonymous"
+            author = "Unknown"
         if author[0].lower() not in letter_range:
             continue
-        link = f.link.make_query_link('', author='"' + author + '"')
-        content.append({"author": author, "count": count, "link": link})
+        if author != "Unknown":
+            link = f.link.make_query_link('', author='"' + author + '"')
+        else:
+            link = f.link.make_query_link('', author='NULL')
+        cite = '<a href="%s">%s</a> (%d)' % (link, author, count)
+        content.append({"author": author, "cite": cite})
     return content
 
-def generate_title_list(c, letter_range):
+def generate_title_list(c, letter_range, db, config):
     c.execute('select * from toms where philo_type="doc" order by title')
     content = []
     for i in c.fetchall():
@@ -63,10 +68,11 @@ def generate_title_list(c, letter_range):
         except:
             author = ""
         link = "dispatcher.py/" + i['philo_id'].split()[0]
-        content.append({"title": title, "author": author, "link": link})
+        cite = '<a href="%s">%s</a> (%s)' % (link, title, author)
+        content.append({"title": title, "cite": cite})
     return content
 
-def generate_year_list(c, q_range):
+def generate_year_list(c, q_range, db, config):
     low_range = int(q_range[0])
     high_range = int(q_range[1])
     query = 'select * from toms where philo_type="doc" and date >= "%d" and date <= "%d" order by date' % (low_range, high_range)
@@ -79,7 +85,8 @@ def generate_year_list(c, q_range):
             date = i['date']
         except:
             date = ""
-        content.append({"title": i['title'], "author": author, "year": date, "link": link})
+        cite = '<a href="%s">%s</a> (%s)' % (link, i["title"], author)
+        content.append({"cite": cite, "year": date})
     return content
 
 

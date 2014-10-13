@@ -14,7 +14,7 @@ class WebConfig(object):
         path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '') + "/data/web_config.cfg"
         self.options = set(['db_url', 'dbname', 'concordance_length', 'facets', 'metadata',
                         'search_reports', 'metadata_aliases', 'search_examples', 'time_series_intervals',
-                        "theme", "dictionary"])
+                        "theme", "dictionary", "landing_page_browsing"])
         try:
             execfile(path, globals(), self.config)
         except NameError:
@@ -52,6 +52,9 @@ class WebConfig(object):
             else:
                 if item == "time_series_intervals":
                     config_option = [i for i in config_option if i in valid_time_series_intervals]
+                elif item == "landing_page_browsing":
+                    if "start" not in config_option["date"] or "end" not in config_option["date"] or "interval" not in config_option["date"]:
+                        config_option["date"] = {}
                 return config_option
         except KeyError:
             #print >> sys.stderr, "### Web Configuration Warning ###"
@@ -73,6 +76,8 @@ class WebConfig(object):
             return [10, 50, 100]
         elif key == "theme":
             return "default_theme.css"
+        elif key == "landing_page_browsing":
+            return {"author": True, "title": True, "date": {}}
         else:
             return False
         
