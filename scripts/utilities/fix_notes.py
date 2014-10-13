@@ -2,7 +2,10 @@
 
 from lxml import etree
 import sys
-import re
+
+"""This script is intended to move the content of inline notes to the end of the document
+inside a <div type="notes">. The inline note tags will then contain ref attributes
+corresponding to the ids of the note contents at the end of the file"""
 
 for file in sys.argv[1:]:
     fd = open(file)
