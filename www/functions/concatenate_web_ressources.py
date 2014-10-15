@@ -13,7 +13,7 @@ report_files = {"css": {"landing_page": ["split/style.css", "split/searchForm.cs
                         "time_series": ["split/style.css", "split/searchForm.css", "split/timeSeries.css", "split/%s" % theme],
                         "navigation": ["split/style.css", "split/searchForm.css", "split/textObjectNavigation.css", "split/%s" % theme],
                         "t_o_c": ["split/style.css", "split/searchForm.css", "split/textObjectNavigation.css", "split/%s" % theme]},
-                "js": {"landing_page": ["split/common.js"],
+                "js": {"landing_page": ["split/common.js", "split/landingPage.js"],
                         "concordance": ["split/common.js", "plugins/jquery.slimscroll.min.js", "split/sidebar.js", "plugins/jquery.hoverIntent.minified.js", "split/concordanceKwic.js"],
                         "kwic": ["split/common.js", "plugins/jquery.slimscroll.min.js", "split/sidebar.js", "plugins/jquery.hoverIntent.minified.js", "split/concordanceKwic.js"],
                         "time_series": ["split/common.js", "split/timeSeries.js"],

@@ -65,11 +65,7 @@
                 </div>
             % endif
         </div>
-        <div id="landing-page-content" class="panel panel-default">
-            <div id="author-range-display"></div>
-            <div id="title-range-display"></div>
-            <div id="year-range-display"></div>
-        </div>
+        <div id="landing-page-content" ></div>
     % else:
         <div class="row">
             <div id="dico-landing-volume" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;" data-script="${config.db_url + '/scripts/get_bibliography.py?object_level=doc'}">
@@ -135,4 +131,3 @@
     % endif
 </div>
 <%include file="footer.mako"/>
-<script src="js/split/landingPage.js"></script>
