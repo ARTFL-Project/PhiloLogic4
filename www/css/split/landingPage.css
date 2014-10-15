@@ -37,18 +37,26 @@ ul {
     cursor: pointer
 }
 #landing-page-content {
+    margin-left: 15px;
+    margin-right: 15px;
     display: none;
 }
-#landing-page-content h4 {
-    padding-left: 5px;
+#landing-page-content ul {
+    border: 1px solid #eee;
+    display: none;
 }
 #landing-page-content li {
-    padding-left: 20px;
+    padding: 10px 20px;
 }
-#author-range-display div, #title-range-display div, #year-range-display div {
-    padding: 10px;
+#landing-page-content li:not(:last-child) {
+    border-bottom: 1px solid #eee;
 }
-
+#landing-page-content div h4 {
+    padding-top: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 0px;
+    padding-left: 10px;
+}
 
 @media (max-width: 767px) {
     #author-range-selectors li:nth-child(2n+2), #title-range-selectors li:nth-child(2n+2), #year-range-selectors li:nth-child(2n+2) {

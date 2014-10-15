@@ -26,17 +26,18 @@ $(document).ready(function() {
         
         //Ajax calls to pull content data
         $('#author-range-selectors a, #title-range-selectors a, #year-range-selectors a').click(function() {
+            console.log('hey')
             var range = $(this).data('range');
             var type = $(this).parent().parent().data('type');
             var script = $('#landingGroup').data('script') + type + "&range=" + range;
             var contentId = type + '-' + range;
             var contentDiv = '<div id="' + contentId + '"></div>';
             var available_links = [];
+            var visibleDiv = $('#landing-page-content').find('div:visible').velocity('transition.whirlOut', {duration: 200});
             if ($('#' + contentId).length == 0) {
-                $('#' + type + "-range-display").append(contentDiv);
+                $('#landing-page-content').append(contentDiv);
                 var contentArea = $('#' + contentId);
                 $.getJSON(script, function(data) {
-                    $('div[id$="-range-display"] div').hide();
                     var html = '';
                     var title;
                     for (var i=0; i < data.length; i++) {
@@ -46,35 +47,41 @@ $(document).ready(function() {
                             prefix = data[i].year;
                         }
                         if (i == 0) {
-                            html += '<h4 id="' + prefix + '" style="border-bottom: 1px solid #eee">' + prefix.toUpperCase() + '</h4>';
-                            html += '<ul style="margin-bottom: 20px;">';
+                            html += '<ul class="row" style="margin-bottom: 20px;">';
+                            html += '<h4 id="' + prefix + '">' + prefix.toUpperCase() + '</h4>';
                             title = prefix;
                             available_links.push(title);
                         }
                         if (prefix != title) {
-                            html += '</ul><h4 id="' + prefix + '" style="border-bottom: 1px solid #eee">' + prefix.toUpperCase() + '</h4><ul style="margin-bottom: 20px;">';
+                            html += '</ul><ul class="row" style="margin-bottom: 20px;"><h4 id="' + prefix + '">' + prefix.toUpperCase() + '</h4>';
                             title = prefix;
                             available_links.push(title);
                         }
-                        var content = '<li style="padding-top: 10px;padding-bottom: 10px;border-bottom: 1px solid #eee">'
                         if (type == "author") {
+                            var content = '<li class="col-xs-12 col-sm-6">';
                             content += data[i].cite + "</li>";
                         } else if (type == "title" || type == "year") {
+                            var content = '<li class="col-xs-12">'
                             content += data[i].cite + "</li>";
                         }
                         html += content;
                     }
                     html += '</ul>';
                     contentArea.html(html).promise().done(function() {
+                        var contentElements = contentArea.find('ul');
                         contentArea.show();
                         $('#landing-page-content').show();
+                        contentElements.velocity('transition.whirlIn', {duration: 400, stagger: 20, complete: function() {
+                            contentArea.velocity({opacity: 1})}}); // in case opacity doesn't get set
                     });
                 });
             } else {
                 var contentArea = $('#' + contentId);
-                $('div[id$="-range-display"] div').hide();
+                var contentElements = contentArea.find('ul');
                 contentArea.show();
                 $('#landing-page-content').show();
+                contentElements.velocity('transition.whirlIn', {duration: 400, stagger: 20, complete: function() {
+                            contentArea.velocity({opacity: 1})}}); // in case opacity doesn't get set
             }
         });
     } else {
