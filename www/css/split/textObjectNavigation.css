@@ -118,15 +118,15 @@
 }
 
 /* Styling for theater */
-castitem::after {
+.xml-castitem::after {
     content:"\A";
     white-space:pre;
 }
-castlist>castitem:first-of-type::before {
+.xml-castlist>.xml-castitem:first-of-type::before {
     content:"\A";
     white-space:pre;
 }
-castgroup::before {
+.xml-castgroup::before {
     content:"\A";
     white-space:pre;
 }
@@ -138,37 +138,37 @@ b.headword::before {
     content:"\A";
     white-space:pre;
 }
-lb {
+.xml-lb {
     display: block;
 }
-sp lb:first-of-type {
+.xml-sp .xml-lb:first-of-type {
     content: "";
     white-space: normal;
 }
-lb[type="hyphenInWord"] {
+.xml-lb[type="hyphenInWord"] {
     display: inline;
 }
-sp {
+.xml-sp {
     display: block;
 }
-sp::before {
+.xml-sp::before {
     content:"\A";
     white-space:pre;
 }
-stage+sp:nth-of-type(n+2)::before {
+.xml-stage+.xml-sp:nth-of-type(n+2)::before {
     content: "";
 }
-fw, join {
+.xml-fw, .xml-join {
     display: none;
 }
-speaker+stage::before {
+.xml-speaker+.xml-stage::before {
     content: "";
     white-space: normal;
 }
-stage {
+.xml-stage {
     font-style: italic;
 }
-stage::after {
+.xml-stage::after {
     content:"\A";
     white-space:pre;
 }
@@ -176,27 +176,27 @@ div1 div2::before {
     content:"\A";
     white-space:pre;
 }
-speaker {
+.xml-speaker {
     font-weight: 700;
 }
-pb {
+.xml-pb {
     display: block;
     text-align: center;
     margin: 10px;
 }
-pb::before {
+.xml-pb::before {
     content:"-" attr(n) "-";
     white-space:pre;
 }
 
-lg {
+.xml-lg {
     display: block;
 }
-lg::after {
+.xml-lg::after {
     content: "\A";
     white-space: pre;
 }
-lg:first-of-type::before {
+.xml-lg:first-of-type::before {
     content: "\A";
     white-space: pre;
 }
@@ -237,60 +237,60 @@ lg:first-of-type::before {
 body {
   counter-reset: section; /* Set the section counter to 0 */
 }
-prononciation::before {
+.xml-prononciation::before {
     content: "(";
 }
-prononciation::after {
+.xml-prononciation::after {
     content: ")\A";
 }
-nature {
+.xml-nature {
     font-style: italic;
 }
-indent, variante {
+.xml-indent, .xml-variante {
     display: block;
 }
-variante {
+.xml-variante {
     padding-top: 10px;
     padding-bottom: 10px;
     text-indent: -1.3em;
     padding-left: 1.3em;
 }
-variante::before {
+.xml-variante::before {
     counter-increment: section;
     content: counter(section) ")\00a0";
     font-weight: 700;
 }
-:not(rubrique) + indent {
+:not(.xml-rubrique) + .xml-indent {
     padding-top: 10px;
 }
-indent {
+.xml-indent {
     padding-left: 1.3em;
 }
-cit {
+.xml-cit {
     padding-left: 2.3em;
     display: block;
     text-indent: -1.3em;
 }
-indent > cit {
+.xml-indent > .xml-cit {
     padding-left: 1em;
 }
-cit::before {
+.xml-cit::before {
     content: '\2012\00a0\00ab\00a0';
 }
-cit::after {
+.xml-cit::after {
     content: '\00a0\00bb\00a0(' attr(aut) '\00a0' attr(ref) ')';
     font-variant: small-caps;
 }
-rubrique {
+.xml-rubrique {
     display: block;
     margin-top: 20px;
 }
-rubrique::before {
+.xml-rubrique::before {
     content: attr(nom);
     font-variant: small-caps;
     font-weight: 700;
 }
-corps + rubrique {
+.xml-corps + .xml-rubrique {
     margin-top: 10px;
 }
 
@@ -318,7 +318,3 @@ corps + rubrique {
 	cursor: pointer;
     text-decoration: none;
 }
-/*.p-inline::after {*/
-/*	content :"\A";*/
-/*	white-space: pre;*/
-/*}*/

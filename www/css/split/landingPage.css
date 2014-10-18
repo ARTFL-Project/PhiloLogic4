@@ -23,7 +23,7 @@ ul {
     margin-top: -1px;
     border-top: 1px;
 }
-#author-range-selectors td:hover, #title-range-selectors td:hover, #year-range-selectors td:hover {
+#author-range-selectors td:hover, #title-range-selectors td:hover, #year-range-selectors td:hover, #dico-landing-alpha td:hover, #dico-landing-volume li:hover {
     cursor: pointer;
     background: #eee;
 }
@@ -47,33 +47,4 @@ ul {
     border-bottom: 1px solid #eee;
     margin-bottom: 0px;
     padding-left: 10px;
-}
-
-/*@media (max-width: 767px) {
-    #author-range-selectors li:nth-child(2n+2), #title-range-selectors li:nth-child(2n+2), #year-range-selectors li:nth-child(2n+2) {
-        border-left: solid 1px #eee;
-    }
-}
-@media (min-width: 768px) and (max-width: 991px) {
-    #year-range-selectors li:not(:nth-child(3n+3)), #author-range-selectors li:not(:nth-child(3n+3)), #title-range-selectors li:not(:nth-child(3n+3)) {
-        border-right: solid 1px #eee;
-    }
-}
-@media (min-width: 979px) and (max-width: 1199px) {
-    #author-range-selectors li:not(:nth-child(3n+3)), #title-range-selectors li:not(:nth-child(3n+3)) {
-        border-right: solid 1px #eee;
-    }
-    #year-range-selectors li:not(:nth-child(4n+4)) {
-        border-right: solid 1px #eee;
-    }
-}
-@media (min-width: 1200px) {
-    #year-range-selectors li:not(:nth-child(6n+6)), #author-range-selectors li:not(:nth-child(6n+6)), #title-range-selectors li:not(:nth-child(6n+6)) {
-        border-right: solid 1px #eee;
-    }
-}*/
-
-#dico-landing-alpha td:hover, #dico-landing-volume li:hover {
-    cursor: pointer;
-    background: #eee;
 }
