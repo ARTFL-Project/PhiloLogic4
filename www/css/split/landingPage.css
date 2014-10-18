@@ -15,26 +15,17 @@ ul {
     width: 100%;
 }
 #col-author > .panel, #col-title > .panel, #col-year > .panel {
-    border-bottom-width: 0px;
+    border: 0px;
 }
 #author-range-selectors, #title-range-selectors, #year-range-selectors {
     line-height: 200%;
-    border-bottom-width: 0px;
-    margin-left: 0px;
+    margin-bottom: 0px;
+    margin-top: -1px;
+    border-top: 1px;
 }
-#author-range-selectors li:not(:last-of-type), #title-range-selectors li:not(:last-of-type), #year-range-selectors li:not(:last-of-type) {
-    border-bottom: solid 1px #eee;
-}
-#author-range-selectors li:hover, #title-range-selectors li:hover, #year-range-selectors li:hover {
-    background-color: #eee;
-}
-#author-range-selectors a, #title-range-selectors a, #year-range-selectors a {
-    display: block;
-    text-align: center;
-}
-#author-range-selectors a:hover, #title-range-selectors a:hover, #year-range-selectors a:hover {
-    text-decoration: none;
-    cursor: pointer
+#author-range-selectors td:hover, #title-range-selectors td:hover, #year-range-selectors td:hover {
+    cursor: pointer;
+    background: #eee;
 }
 #landing-page-content {
     margin-left: 15px;
@@ -58,7 +49,7 @@ ul {
     padding-left: 10px;
 }
 
-@media (max-width: 767px) {
+/*@media (max-width: 767px) {
     #author-range-selectors li:nth-child(2n+2), #title-range-selectors li:nth-child(2n+2), #year-range-selectors li:nth-child(2n+2) {
         border-left: solid 1px #eee;
     }
@@ -80,7 +71,7 @@ ul {
     #year-range-selectors li:not(:nth-child(6n+6)), #author-range-selectors li:not(:nth-child(6n+6)), #title-range-selectors li:not(:nth-child(6n+6)) {
         border-right: solid 1px #eee;
     }
-}
+}*/
 
 #dico-landing-alpha td:hover, #dico-landing-volume li:hover {
     cursor: pointer;

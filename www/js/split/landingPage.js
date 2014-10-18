@@ -25,15 +25,14 @@ $(document).ready(function() {
         });
         
         //Ajax calls to pull content data
-        $('#author-range-selectors a, #title-range-selectors a, #year-range-selectors a').click(function() {
-            console.log('hey')
+        $('#author-range-selectors td, #title-range-selectors td, #year-range-selectors td').click(function() {
             var range = $(this).data('range');
-            var type = $(this).parent().parent().data('type');
+            var type = $(this).parents('table').data('type');
             var script = $('#landingGroup').data('script') + type + "&range=" + range;
             var contentId = type + '-' + range;
             var contentDiv = '<div id="' + contentId + '"></div>';
             var available_links = [];
-            var visibleDiv = $('#landing-page-content').find('div:visible').velocity('transition.whirlOut', {duration: 200});
+            var visibleDiv = $('#landing-page-content').find('div:visible').velocity('transition.slideRightOut', {duration: 200});
             if ($('#' + contentId).length == 0) {
                 $('#landing-page-content').append(contentDiv);
                 var contentArea = $('#' + contentId);
@@ -71,7 +70,7 @@ $(document).ready(function() {
                         var contentElements = contentArea.find('ul');
                         contentArea.show();
                         $('#landing-page-content').show();
-                        contentElements.velocity('transition.whirlIn', {duration: 400, stagger: 20, complete: function() {
+                        contentElements.velocity('transition.slideLeftIn', {duration: 400, stagger: 20, complete: function() {
                             contentArea.velocity({opacity: 1})}}); // in case opacity doesn't get set
                     });
                 });
@@ -80,7 +79,7 @@ $(document).ready(function() {
                 var contentElements = contentArea.find('ul');
                 contentArea.show();
                 $('#landing-page-content').show();
-                contentElements.velocity('transition.whirlIn', {duration: 400, stagger: 20, complete: function() {
+                contentElements.velocity('transition.slideLeftIn', {duration: 400, stagger: 20, complete: function() {
                             contentArea.velocity({opacity: 1})}}); // in case opacity doesn't get set
             }
         });
