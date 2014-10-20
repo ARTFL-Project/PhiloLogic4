@@ -17,6 +17,23 @@ entities_match = re.compile("&#?\w+;")
 def get_text(obj,words):
     pass
 
+def get_all_text(element):
+    text = ""
+    text += element.text
+    for child in element:
+        text += get_all_text(child)
+        text += child.tail
+    return text
+    
+def xml_to_html_class(element):
+    if element.tag != "philoHighlight":
+        old_tag = element.tag[:]
+        element.tag = "span"
+        element.attrib['class'] = "xml-%s" % old_tag
+    for child in element:
+        child = xml_to_html_class(child)
+    return element
+
 def adjust_bytes(bytes, length):
     """Readjust byte offsets for concordance"""
     ### Called from every report that fetches text and needs highlighting
@@ -56,6 +73,11 @@ def format(text,bytes=[]):
                 el.append(etree.Element("br"))
             elif el.tag == "list":
                 el.tag = "ul"
+            elif el.tag == "note":
+                el.tag = 'span'
+                el.attrib['class'] = "note-content"
+                for child in el:
+                    child = xml_to_html_class(child)
             elif el.tag == "item":
                 el.tag = "li"
             elif el.tag == "ab" or el.tag == "ln":

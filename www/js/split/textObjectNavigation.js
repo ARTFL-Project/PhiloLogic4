@@ -48,11 +48,11 @@ $(document).ready(function() {
     }
     
     // Note handling
-    $('note').each(function() {
-        $(this).before('<a class="note" tabindex="0" data-toggle="popover" data-container="body" data-trigger="focus">note</a>');
+    $('.note-content').each(function() {
+        $(this).before('<a class="note" tabindex="0" data-toggle="popover" data-container="body" data-placement="right" data-trigger="focus">note</a>');
     }).promise().done(function() {
-        $('.note').popover({animate: true, trigger: 'hover focus', html: true, content: function() {
-            return $(this).next('note').html();
+        $('.note').popover({animate: true, trigger: 'focus', html: true, content: function() {
+            return $(this).next('.note-content').html();
         }});
     });
     
@@ -151,14 +151,14 @@ function adjustTocHeight(num) {
 function scrollToHighlight() {
     var word_offset = $('.highlight').eq(0).offset().top;
     if (word_offset == 0) {
-        var note = $('.highlight').parents('note');
+        var note = $('.highlight').parents('.note-content');
         note.show(); // The highlight is in a hidden note
         word_offset = $('.highlight').offset().top;
-        $('.highlight').parents('note').hide();
+        $('.highlight').parents('.note-content').hide();
     }
-    if ($('.highlight').eq(0).parents('note').length) {
+    if ($('.highlight').eq(0).parents('.note-content').length) {
         $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: word_offset - 60, complete: function() {
-            $('.highlight').parents('note').prev('.note').popover('show');}}
+            $('.highlight').parents('.note-content').prev('.note').trigger('focus');}}
         );
     } else {
         $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: word_offset - 40});
