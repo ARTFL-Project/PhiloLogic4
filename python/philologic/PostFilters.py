@@ -8,7 +8,7 @@ from collections import defaultdict
 
 
 
-def make_sql_table(table, file_in, db_file="toms.db", gzip=False, indices=[], depth=7):
+def make_sql_table(table, file_in, db_file="toms.db", gz=False, indices=[], depth=7):
     def inner_make_sql_table(loader_obj):
         print "Loading the %s SQLite table..." % table,
         db_destination = os.path.join(loader_obj.destination, db_file)
@@ -21,7 +21,7 @@ def make_sql_table(table, file_in, db_file="toms.db", gzip=False, indices=[], de
         c.execute(query)
         
         sequence = 0
-        if gzip:
+        if gz:
             file_in_handle = gzip.open(file_in, "rb")
         else:
             file_in_handle = open(file_in)
