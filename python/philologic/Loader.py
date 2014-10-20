@@ -565,7 +565,16 @@ class Loader(object):
         print >> web_config, "# The default theme called default_theme.css can be edited directly"
         print >> web_config, "# or you can define a new CSS file below. This file must be located"
         print >> web_config, "# in the css/split/ directory for the WebApp to find it."
-        print >> web_config, 'theme = "default_theme.css"' 
+        print >> web_config, 'theme = "default_theme.css"'
+        print >> web_config, "\n# The dictionary variable enables a different search interface"
+        print >> web_config,  "# with the headword as its starting point. It is turned off by default"
+        print >> web_config,  "dictionary = False"
+        print >> web_config, "\n# The landing_page_browsing variable defines which browsing functions are"
+        print >> web_config, "# exposed in the landing page. The only options are author, title and date."
+        print >> web_config, '# Example: {"author": True, "title": True, "date": {"start": 1700, "end": 1800, "interval": 10}}'
+        print >> web_config, "# Note that the date needs to define three variables: a start date, an end date in order to"
+        print >> web_config, "# construct proper intervals. If one of those variables is not defined, date_browsing will be hidden"
+        print >> web_config, "landing_page_browsing = {'author': True, 'title': True, date: {}}"
         print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")
 
                 
