@@ -200,6 +200,12 @@ div1 div2::before {
     content: "\A";
     white-space: pre;
 }
+.xml-castList {
+    display: block;
+}
+.xml-castItem {
+    display: block;
+}
 
 #image_container {
     position: absolute;

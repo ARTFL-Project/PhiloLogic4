@@ -562,8 +562,8 @@ class Loader(object):
         print >> web_config, "# For author and title, you have to define a list of ranges, such as 'author': ['A-L', 'M-Z'],"
         print >> web_config, "# and for date you need to define three variables: start_date, end_date, interval"
         print >> web_config, '# e.g. "date": {"start": 1600, "end": 1800, "interval": 25}'
-        print >> web_config, 'Note that no default is provided for "date", which is therefore hidden since undefined'
-        print >> web_config, """"landing_page_browsing = {"author": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
+        print >> web_config, '# Note that no default is provided for "date", which is therefore hidden since undefined'
+        print >> web_config, """landing_page_browsing = {"author": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
         print >> web_config, """                          "title": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
         print >> web_config, """                          "date": {}}"""
         print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")

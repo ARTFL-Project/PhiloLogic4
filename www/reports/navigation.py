@@ -87,14 +87,10 @@ def navigate_doc(obj, db):
             if i['philo_name'] == "front":
                 display_name = "Front Matter"
             else:
-                try:
-                    display_name = i['head'].decode('utf-8', 'ignore')
-                except:
-                    try:
-                        display_name = i['type'].decode('utf-8', 'ignore')
-                    except:
-                        display_name = philo_type
+                display_name = i['head'] or i['philo_name']
+            display_name = display_name.decode('utf-8', 'ignore')
             text_hierarchy.append((philo_id, philo_type, display_name))
+        print >> sys.stderr, 'DISPLAY NAME', repr(i['philo_name']), repr(display_name)
     return text_hierarchy
     
 def get_neighboring_pages(db, doc_id, doc_page):

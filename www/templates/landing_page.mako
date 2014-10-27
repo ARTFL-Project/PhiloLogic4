@@ -9,7 +9,7 @@
     % if not config.dictionary:
         <div class="row" id="landingGroup" data-script="${config.db_url + '/scripts/landing_page_content.py?landing_page_content_type='}">
             % if config.landing_page_browsing["author"]:
-                <div class="col-xs-6" id="col-author">
+                <div class="col-xs-12 col-sm-6" id="col-author">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Author
@@ -27,7 +27,7 @@
                 </div>
             % endif
             % if config.landing_page_browsing["title"]:
-                <div class="col-xs-6" id="col-title">
+                <div class="col-xs-12 col-sm-6" id="col-title">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Title
@@ -57,9 +57,18 @@
                                     start = config.landing_page_browsing['date']['start']
                                     end = config.landing_page_browsing['date']['end']
                                     interval = config.landing_page_browsing['date']['interval']
+                                    cell_num = 0
                                     %>
                                     % for start_date in xrange(start, end, interval):
-                                        <% end_date = start_date + interval - 1 %>
+                                        % if cell_num == 4:
+                                            <% cell_num = 0 %>
+                                            </tr>
+                                            <tr>
+                                        % endif   
+                                        <%
+                                        end_date = start_date + interval - 1
+                                        cell_num += 1
+                                        %>
                                         <td data-range="${start_date}-${end_date}">${start_date}-${end_date}</td>
                                     % endfor
                                 </tr>
