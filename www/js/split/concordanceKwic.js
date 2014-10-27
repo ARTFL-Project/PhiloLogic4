@@ -42,11 +42,13 @@ function concordance_kwic_switch(db_url) {
         e.stopPropagation();
         var script = $(this).data('script');
         var switchto = $(this).data('report');
-        var width = $(window).width() / 3;
-        $("#waiting").css({"margin-left": width, "margin-top": 200, "opacity": 1}).show();
+        var width = $(window).width() / 2 - 100;
+        $("#waiting").css({"margin-left": width, "margin-top": 320, "opacity": 1}).show();
+        $('#waiting').velocity({rotateZ: 3600}, {duration: 10000, easing: "linear"});
         $.get(script, function(html_results) {
             $("#report_switch button").toggleClass('active');
-            $("#waiting").velocity('fadeOut', {duration: 200});
+            $("#waiting").velocity("stop").velocity('fadeOut', {duration: 200, queue:false, complete:function() {
+                $(this).velocity("reverse", {duration:100})}});
             $("#results_container").hide().html(html_results).velocity('fadeIn', {duration: 200});
             if (switchto == "kwic") {
                 var config = {    

@@ -135,3 +135,7 @@ a.current-obj {
 	background: rgba(78, 93, 108, .9);
 	color: #fff;
 }
+
+.ui-menu-item .highlight {
+	color: #649DC5;
+}

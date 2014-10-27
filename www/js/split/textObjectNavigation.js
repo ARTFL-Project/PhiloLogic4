@@ -48,13 +48,7 @@ $(document).ready(function() {
     }
     
     // Note handling
-    $('.note-content').each(function() {
-        $(this).before('<a class="note" tabindex="0" data-toggle="popover" data-container="body" data-placement="right" data-trigger="focus">note</a>');
-    }).promise().done(function() {
-        $('.note').popover({animate: true, trigger: 'focus', html: true, content: function() {
-            return $(this).next('.note-content').html();
-        }});
-    });
+    createNoteLink();
     
     // Only enable back/forward buttons if necessary 
     checkEndBeginningOfDoc();
@@ -73,6 +67,16 @@ $(document).ready(function() {
 ////////////////////////////////////////////////////////////////////////////////
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+function createNoteLink() {
+    $('.note-content').each(function() {
+        $(this).before('<a class="note" tabindex="0" data-toggle="popover" data-container="body" data-placement="right" data-trigger="focus">note</a>');
+    }).promise().done(function() {
+        $('.note').popover({animate: true, trigger: 'focus', html: true, content: function() {
+            return $(this).next('.note-content').html();
+        }});
+    });
+}
 
 function checkEndBeginningOfDoc() {
     if ($('#next-obj').data('philoId') == "") {
@@ -173,7 +177,8 @@ function retrieveObj(db_url){
         var philo_id = $(this).data('philoId');
         var script = $('#all-content').data('script') + philo_id;
         var width = $(window).width() / 2 - 100;
-        $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 150).show();
+        $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 250).css({"display": "block", "opacity": 1});
+        $('#waiting').velocity({rotateZ: 7200}, {duration: 20000, easing: "linear"});
         $.getJSON(script, function(data) {
             newTextObjectCallback(data, philo_id, my_path);
         });
@@ -197,7 +202,8 @@ function TocLinkHandler(db_url) {
         var philo_id = $(this).attr('id').replace(/_/g, ' ');
         var script = $('#all-content').data('script') + philo_id;
         var width = $(window).width() / 2 - 100;
-        $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 150).show();
+        $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 250).css({"display": "block", "opacity": 1});
+        $('#waiting').velocity({rotateZ: 7200}, {duration: 20000, easing: "linear"});
         $.getJSON(script, function(data) {
             newTextObjectCallback(data, philo_id, my_path);
         });
@@ -206,7 +212,8 @@ function TocLinkHandler(db_url) {
 
 // Callback function after a new text object has been retrieved
 function newTextObjectCallback(data, philo_id, my_path) {
-    $("#waiting").fadeOut('fast');
+    $("#waiting").velocity('fadeOut', {duration: 100, queue:false, complete:function() {
+        $(this).velocity("reverse", {duration:100})}});
     var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
     $('#toc-content').find($(scrollto_id)).removeClass('current-obj');
     $('#text-obj-content').fadeOut('fast', function() {
@@ -226,6 +233,7 @@ function newTextObjectCallback(data, philo_id, my_path) {
             $('body').velocity('scroll', {duration: 200, offset: 0, easing: 'easeOut', complete: function() {$('#toc-container').css('position', 'static');}});
         }
         adjustTocHeight();
+        createNoteLink();
         setTimeout(function() {
             $('#toc-container').css('position', 'static')
         }, 250)

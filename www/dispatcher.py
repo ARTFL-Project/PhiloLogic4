@@ -2,6 +2,7 @@
 
 import sys
 import reports
+import traceback
 from functions import access_control
 from wsgiref.handlers import CGIHandler
 from cgi import FieldStorage
@@ -23,6 +24,7 @@ def philo_dispatcher(environ,start_response):
             else:
                 yield reports.landing_page(environ,start_response)
         except Exception as e:
+            traceback.print_exc(file=sys.stdout)
             yield getattr(reports, "error")(environ,start_response)
     else:
         yield getattr(reports, 'access')(environ, start_response)

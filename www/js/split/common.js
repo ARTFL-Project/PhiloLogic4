@@ -163,12 +163,15 @@ $(document).ready(function() {
         $('.ui-autocomplete').remove();
         var width = $(window).width() / 2 - 100;
         hideSearchForm();
-        $("#waiting").css("margin-left", width).css('margin-top', 100).show();
+        $("#waiting").css("margin-left", width).css('margin-top', 130).velocity('fadeIn', {duration: 100});
+        $('#waiting').velocity({rotateZ: 3600}, {duration: 10000, easing: "linear"});
+        $('#waiting-inner').velocity({rotateZ: -7200}, {duration: 10000, easing: "linear"});
+        
         var new_q_string = $(this).serialize();
         // Set a timeout in case the browser hangs: redirect to no hits after 10 seconds
         setTimeout(function() {
             e.preventDefault();
-            $("#waiting").fadeOut();
+            $("#waiting").velocity('fadeOut');
             var selected_report = $('#report').find('input:checked').attr('id');
             window.location = "?" + new_q_string.replace(/report=[^&]*/, 'report=error') + "&error_report=" + selected_report;
         }, 10000);
