@@ -170,18 +170,18 @@
 	padding: 3px 10px;
 }
 /* Concordance styling for theater */
-speaker {
+.xml-speaker {
     font-weight: 700;
 }
-sp {
+.xml-sp {
     display: block;
 }
-l, ab {
+.xml-l, .xml-ab {
     display: block;
 }
-sp+l, sp+ab {
+.xml-sp+.xml-l, .xml-sp+.xml-ab {
     display: inline;
 }
-stage {
+.xml-stage {
     font-style: italic;
 }

@@ -15,12 +15,13 @@
                             Author
                         </div>
                         <div class="panel-body">
-                            <ul id="author-range-selectors" class="row" data-type="author">
-                                <% author_range = ['A-D', 'E-I', 'J-M', 'N-R', 'S-V', 'W-Z'] %>
-                                % for range in author_range:
-                                    <li class="col-xs-6 col-sm-4 col-lg-2"><a data-range="${range}">${range}</a></li>
-                                % endfor
-                            </ul>
+                            <table id="author-range-selectors" class="table table-bordered" data-type="author">
+                                <tr>
+                                    % for range in config.landing_page_browsing["author"]:
+                                        <td data-range="${range}">${range}</td>
+                                    % endfor
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -32,12 +33,13 @@
                             Title
                         </div>
                         <div class="panel-body">
-                            <ul id="title-range-selectors" class="row" data-type="title">
-                                <% title_range = ['A-D', 'E-I', 'J-M', 'N-R', 'S-V', 'W-Z'] %>
-                                % for range in title_range:
-                                    <li class="col-xs-6 col-sm-4 col-lg-2"><a data-range="${range}">${range}</a></li>
-                                % endfor
-                            </ul>
+                            <table id="title-range-selectors" class="table table-bordered"" data-type="title">
+                                <tr>
+                                    % for range in config.landing_page_browsing["title"]:
+                                        <td data-range="${range}">${range}</td>
+                                    % endfor
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -49,17 +51,19 @@
                             Year
                         </div>
                         <div class="panel-body">
-                            <ul id="year-range-selectors" class="row" data-type="year">
-                                <%
-                                start = config.landing_page_browsing['date']['start']
-                                end = config.landing_page_browsing['date']['end']
-                                interval = config.landing_page_browsing['date']['interval']
-                                %>
-                                % for start_date in xrange(start, end, interval):
-                                    <% end_date = start_date + interval - 1 %>
-                                    <li class="col-xs-6 col-sm-4 col-md-3 col-lg-2"><a data-range="${start_date}-${end_date}">${start_date}-${end_date}</a></li>
-                                % endfor
-                            </ul>
+                            <table id="year-range-selectors" class="table table-bordered" data-type="year">
+                                <tr>
+                                    <%
+                                    start = config.landing_page_browsing['date']['start']
+                                    end = config.landing_page_browsing['date']['end']
+                                    interval = config.landing_page_browsing['date']['interval']
+                                    %>
+                                    % for start_date in xrange(start, end, interval):
+                                        <% end_date = start_date + interval - 1 %>
+                                        <td data-range="${start_date}-${end_date}">${start_date}-${end_date}</td>
+                                    % endfor
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>

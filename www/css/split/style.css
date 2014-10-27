@@ -195,32 +195,32 @@ s {
     cursor: pointer;
 }
 /*Text formatting*/
-l {
+.xml-l {
     display: block;
 }
-l::before {
+.xml-l::before {
     content:attr(n) "\0020\0020\0020";
     font-family: 'Droid Sans Mono', sans-serif;
     color: #bababa;
     font-size: .7em;
 }
-l[type="split"]::before {
+.xml-l[type="split"]::before {
     content: "";
 }
-lb[type="hyphenInWord"] {
+.xml-lb[type="hyphenInWord"] {
     display: inline;
 }
-gap desc {
+.xml-gap .xml-desc {
 	display: none;
 }
-gap::after {
+.xml-gap::after {
 	content: "*";
 }
-hi {
+.xml-hi {
 	font-style: italic;
 	font-variant: small-caps;
 }
-w::before {
+.xml-w::before {
     margin:0;padding:0;float:left;
 }
 br {
