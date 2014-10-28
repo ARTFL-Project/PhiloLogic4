@@ -85,13 +85,14 @@ $(document).ready(function() {
         });
     } else {
         var script = $('#dico-landing-volume').data('script');
-        var list = $(this).find('ul');
+        var list = $('#dico-landing-volume ul');
         $.getJSON(script, function(data) {
             for (var i=0; i < data.length; i++) {
                 console.log(data[i].philo_id)
-                var li = '<li class="list-group-item"><a href="dispatcher.py/' + data[i].philo_id[0] + '">' + data[i].title + '</a></li>';
+                var li = '<li class="list-group-item" style="display: none;"><a href="dispatcher.py/' + data[i].philo_id[0] + '">' + data[i].title + '</a></li>';
                 list.append(li);
             }
+            list.find('li').velocity('transition.fadeIn', {duration: 400, stagger: 20});
         });
         $('#dico-landing-alpha td').on('click touchstart', function() {
             var script = $('#dico-landing-alpha').data('script') + '^' + $(this).text() + '.*';
