@@ -53,6 +53,9 @@ $(document).ready(function() {
     // Only enable back/forward buttons if necessary 
     checkEndBeginningOfDoc();
     
+    // Specifically for the Encyclopédie
+    addPreviousPage();
+    
     $(window).load(function() {
         if ($('.highlight').length) {
             scrollToHighlight();
@@ -67,6 +70,27 @@ $(document).ready(function() {
 ////////////////////////////////////////////////////////////////////////////////
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+
+// TODO: make this function more generic
+function addPreviousPage() {
+    var first_link_split = $('.page-image-link').eq(0).attr('href');
+    if (first_link_split) {
+        first_link_split = first_link_split.split('/');
+        var url = first_link_split.slice(0,-1).join('/') + '/';
+        var img = first_link_split.reverse()[0];
+        img = img.replace('.jpeg', '').split('-');
+        var new_page_num = (parseInt(img[1]) - 1).toString();
+        if (isNaN(new_page_num) == false) {
+            var volume = img[0].split('_')[1];
+            img = img[0] + '-' + new_page_num;
+            var new_link = url + img + '.jpeg';
+            var element = '<a href="' + new_link + '" class="page-image-link" data-gallery>[page ' + volume + ":" + new_page_num + ']</a>';
+            $('b.headword').eq(0).before(element);
+        }
+    }
+}
+
 
 function createNoteLink() {
     $('.note-content').each(function() {
@@ -102,10 +126,11 @@ function retrieveTableOfContents(db_url) {
     var doc_id = pathname.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
     var philo_id = doc_id + ' 0 0 0 0 0 0'
     var script = $('#toc-wrapper').data('script') + philo_id;
-    $("#show-toc").removeAttr("disabled");
     $('#toc-container').hide();
     $.get(script, function(data) {
-        $('#toc-content').html(data);
+        $('#toc-content').html(data).promise().done(function() {
+            $("#show-toc").removeAttr("disabled");
+        });
         adjustTocHeight(100); // adjust height before showing
         TocLinkHandler(db_url);
     });
@@ -236,6 +261,7 @@ function newTextObjectCallback(data, philo_id, my_path) {
         createNoteLink();
         setTimeout(function() {
             $('#toc-container').css('position', 'static')
-        }, 250)
+        }, 250);
+        addPreviousPage();
     });
 }

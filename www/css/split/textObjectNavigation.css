@@ -117,6 +117,12 @@
     line-height: 140% !important;
 }
 
+@media (max-width: 992px) {
+    #toc-wrapper {
+        z-index: 60;
+    }
+}
+
 /* Styling for theater */
 .xml-castitem::after {
     content:"\A";
@@ -133,10 +139,8 @@
 b.headword {
     font-weight: 700 !important;
     font-size: 130%;
-}
-b.headword::before {
-    content:"\A";
-    white-space:pre;
+    display: block;
+    margin-top: 20px;
 }
 .xml-lb {
     display: block;
@@ -205,38 +209,6 @@ div1 div2::before {
 }
 .xml-castItem {
     display: block;
-}
-
-#image_container {
-    position: absolute;
-    border: solid 18px #eee;
-    z-index: 101;
-    left: 25%;
-    box-shadow: 0px 0px 15px #888888;
-    margin-top: -10px;
-}
-.page_image_link {
-    text-decoration: none;
-    font-weight: 700 !important;
-}
-.page_image_link:hover {
-    text-decoration: underline;
-    cursor: pointer;
-}
-.close_page_image {
-    position: absolute;
-    margin-top: -16px;
-    z-index: 200;
-    left: 100%;
-}
-.close_page_image:hover {
-    cursor: pointer;
-}
-
-@media (max-width: 992px) {
-    #toc-wrapper {
-        z-index: 60;
-    }
 }
 
 /*Dictionary formatting*/

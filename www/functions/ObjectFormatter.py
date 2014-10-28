@@ -39,7 +39,10 @@ def get_all_text(element):
 
 def xml_to_html_class(element):
     old_tag = element.tag[:]
-    element.tag = "span"
+    if element.tag == "div1" or element.tag == "div2" or element.tag == "div3":
+        element.tag = "div"
+    else:
+        element.tag = "span"
     element.attrib['class'] = "xml-%s" % old_tag
     return element
     
@@ -103,7 +106,8 @@ def format(text,bytes=[]):
                 el.append(etree.Element("a"))
                 el[-1].attrib["href"] = 'http://artflx.uchicago.edu/images/encyclopedie/' + el.attrib["fac"]
                 el[-1].text = "[page " + el.attrib["n"] + "]"
-                el[-1].attrib['class'] = "page_image_link"
+                el[-1].attrib['class'] = "page-image-link"
+                el[-1].attrib['data-gallery'] = ''
             elif el.tag == "figure":
                 if el[0].tag == "graphic":
                     img_url = el[0].attrib["url"].replace(":","_")
@@ -114,7 +118,8 @@ def format(text,bytes=[]):
                     el[0].tag = "img"
                     el[0].attrib["src"] = url_prefix + img_url + ".sm.jpeg"
                     el[0].attrib["class"] = "plate_img"
-                    el.attrib["class"] = "plate_img_link"
+                    el.attrib["class"] = "plate-image-link"
+                    el.attrib['data-gallery'] = ''
                     del el[0].attrib["url"]
                     el.append(etree.Element("br"))
             elif el.tag == "philoHighlight":        

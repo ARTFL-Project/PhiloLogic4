@@ -31,8 +31,6 @@ def render_template(*args, **data):
         try:
             return template.render(*args, **data).encode("UTF-8", "ignore")
         except:
-            from functions.log_config import logging
-            logging.error("Query string: %s" % os.environ["QUERY_STRING"], exc_info=True)
             return error_handling(data['db'], data['dbname'], data['q'])
     else:
         try:
