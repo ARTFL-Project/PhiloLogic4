@@ -56,7 +56,7 @@ post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencie
 ## For instance, this could be ['doc', 'div1']
 plain_text_obj = []
 if plain_text_obj:
-    filters.extend([store_in_plain_text(*plaint_text_obj)])
+    filters.extend([store_in_plain_text(*plain_text_obj)])
 
 extra_locals = {"db_url": url_root + dbname}
 extra_locals['default_object_level'] = default_object_level
