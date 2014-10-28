@@ -32,7 +32,8 @@ $(document).ready(function() {
             var contentId = type + '-' + range;
             var contentDiv = '<div id="' + contentId + '"></div>';
             var available_links = [];
-            var visibleDiv = $('#landing-page-content').find('div:visible').velocity('transition.slideRightOut', {duration: 200});
+            var visibleDiv = $('#landing-page-content').find('div:visible').velocity('transition.slideRightOut', {duration: 200, complete:function() {
+                $(this).css('opacity', 1)}});
             if ($('#' + contentId).length == 0) {
                 $('#landing-page-content').append(contentDiv);
                 var contentArea = $('#' + contentId);
@@ -70,8 +71,7 @@ $(document).ready(function() {
                         var contentElements = contentArea.find('ul');
                         contentArea.show();
                         $('#landing-page-content').show();
-                        contentElements.velocity('transition.slideLeftIn', {duration: 400, stagger: 20, complete: function() {
-                            contentArea.velocity({opacity: 1})}}); // in case opacity doesn't get set
+                        contentElements.velocity('transition.slideLeftIn', {duration: 400, stagger: 20});
                     });
                 });
             } else {
@@ -79,8 +79,7 @@ $(document).ready(function() {
                 var contentElements = contentArea.find('ul');
                 contentArea.show();
                 $('#landing-page-content').show();
-                contentElements.velocity('transition.slideLeftIn', {duration: 400, stagger: 20, complete: function() {
-                            contentArea.velocity({opacity: 1})}}); // in case opacity doesn't get set
+                contentElements.velocity('transition.slideLeftIn', {duration: 400, stagger: 20});
             }
         });
     } else {
