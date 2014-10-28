@@ -36,6 +36,7 @@ def generate_frequency(results, q, db):
         depth = field.split('.')[0]
         field = field.split('.')[-1]
     counts = defaultdict(int)
+    
     for n in results[q['interval_start']:q['interval_end']]:
         ## This is to minimize the number of SQL queries
         if field in db.locals['metadata_types'] and not depth:
@@ -79,17 +80,20 @@ def generate_frequency(results, q, db):
     table = {}
     for k,v in counts.iteritems():
         # for each item in the table, we modify the query params to generate a link url.
+        
+        metadata = dict(q['metadata']) ## Make a distinct copy for each key since we may modify it below
+        
         if k == "NULL":
             q["metadata"][field] = k # NULL is a magic boolean keyword, not a string value.
         if isinstance(k, tuple):
             key, title = k
-            q['metadata']['title'] = '"%s"' % title.encode('utf-8', 'ignore')
-            q["metadata"][field] = '"%s"' % key.encode('utf-8', 'ignore') # we want to do exact queries on defined values.
+            metadata['title'] = '"%s"' % title.encode('utf-8', 'ignore')
+            metadata[field] = '"%s"' % key.encode('utf-8', 'ignore') # we want to do exact queries on defined values.
         else:
-            q["metadata"][field] = '"%s"' % k.encode('utf-8', 'ignore') # we want to do exact queries on defined values.
+            metadata[field] = '"%s"' % k.encode('utf-8', 'ignore') # we want to do exact queries on defined values.
+        
         # Now build the url from q.
-        url = f.link.make_query_link(q["q"],q["method"],q["arg"],q["report"],**q["metadata"])     
-
+        url = f.link.make_query_link(q["q"],q["method"],q["arg"],q["report"],**metadata)
         # Contruct the label for the item.
         # This is the place to modify the displayed label of frequency table item.
         if isinstance(k, tuple):
