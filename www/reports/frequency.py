@@ -35,6 +35,15 @@ def generate_frequency(results, q, db):
     if field.split('.')[0] in object_types and field.split('.')[-1] in db.locals['metadata_fields']:
         depth = field.split('.')[0]
         field = field.split('.')[-1]
+    
+    ## If the selected field is defined as a field to which the title name must be appended
+    ## then set the add_title flag to true.
+    config = f.WebConfig()  
+    if field in config['metadata_facet_per_doc']:
+        add_title = True
+    else:
+        add_title = False
+        
     counts = defaultdict(int)
     
     for n in results[q['interval_start']:q['interval_end']]:
@@ -53,8 +62,9 @@ def generate_frequency(results, q, db):
             key = n[field]
         if not key:
             key = "NULL" # NULL is a magic value for queries, don't change it recklessly.
-        if depth != "doc" and key != "NULL":
-            key = (key, n.doc.title)
+        if add_title:
+            if key != "NULL":
+                key = (key, n.doc.title)
         counts[key] += 1
     
     if q['rate'] == 'relative':
@@ -81,26 +91,24 @@ def generate_frequency(results, q, db):
     for k,v in counts.iteritems():
         # for each item in the table, we modify the query params to generate a link url.
         
-        metadata = dict(q['metadata']) ## Make a distinct copy for each key since we may modify it below
+        metadata = dict(q['metadata']) ## Make a distinct copy for each key in case we may modify it below
         
         if k == "NULL":
-            q["metadata"][field] = k # NULL is a magic boolean keyword, not a string value.
-        if isinstance(k, tuple):
-            key, title = k
-            metadata['title'] = '"%s"' % title.encode('utf-8', 'ignore')
-            metadata[field] = '"%s"' % key.encode('utf-8', 'ignore') # we want to do exact queries on defined values.
+            metadata[field] = k # NULL is a magic boolean keyword, not a string value.
+            label = k #for example, replace NULL with '[None]', 'N.A.', 'Untitled', etc.
         else:
-            metadata[field] = '"%s"' % k.encode('utf-8', 'ignore') # we want to do exact queries on defined values.
+            if isinstance(k, tuple): ## if the add_title flag is set to True
+                key, title = k
+                metadata['title'] = '"%s"' % title.encode('utf-8', 'ignore')
+                metadata[field] = '"%s"' % key.encode('utf-8', 'ignore') # we want to run exact queries on defined values.
+                label = '%s (%s)' % k
+            else:
+                label = k
+                metadata[field] = '"%s"' % k.encode('utf-8', 'ignore') # we want to run exact queries on defined values.
         
         # Now build the url from q.
         url = f.link.make_query_link(q["q"],q["method"],q["arg"],q["report"],**metadata)
-        # Contruct the label for the item.
-        # This is the place to modify the displayed label of frequency table item.
-        if isinstance(k, tuple):
-            label = '%s (%s)' % k
-        else:
-            label = k #for example, replace NULL with '[None]', 'N.A.', 'Untitled', etc.
-            
+    
         table[label] = {'count': v, 'url': url}
 
     return field, table
