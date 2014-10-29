@@ -12,11 +12,10 @@ $(document).ready(function() {
     $('.sidebar-option').click(function() {
         var header = $(this).parent().prevAll('.dropdown-header').eq(0).text();
         var facet = $(this).data('value');
-        var alias = $(this).data('display');
         var script = $(this).data('script');
         $('#menu-header').html(header);
-        var header_value = webConfig.metadata_aliases[alias] || alias;
-        $('#selected-sidebar-option').html(header_value);
+        //var header_value = webConfig.metadata_aliases[alias] || alias;
+        $('#selected-sidebar-option').html(facet);
         showSidebar();
         sidebarReports(q_string, db_url, facet, script);
     });
