@@ -537,6 +537,10 @@ class Loader(object):
         print >> web_config, "metadata_aliases = None"
         print >> web_config, "\n# The facets variable sets which metadata field can be used as a facet"
         print >> web_config, "facets = %s" % self.metadata_fields
+        print >> web_config, "\n# The metadata_facet_per_doc variable defines which metadata should be considered"
+        print >> web_config, '''# unique at the doc level in facets. ['head', "who"] means that any "head" or "who" will'''
+        print >> web_config,  "# have the title of the doc appended to their value."
+        print >> web_config, "metadata_facet_per_doc = ['head', 'who']"
         print >> web_config, "\n# The concordance_length variable sets the length in bytes of each concordance result"
         print >> web_config, "concordance_length = 300"
         print >> web_config, "\n# The search_examples variable defines which examples should be provided"
