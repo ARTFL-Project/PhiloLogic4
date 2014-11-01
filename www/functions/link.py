@@ -69,6 +69,16 @@ def byte_query(hit_bytes):
     """This is used for navigating concordance results and highlighting hits"""
     return '?' + '&'.join(['byte=%d' % int(byte) for byte in hit_bytes])
 
+def generate_page_links(start, results_per_page, q, results):
+    current_page, my_pages, page_num = pager(start, results_per_page, q, results)
+    if results.done and page_num != my_pages[-1][0]:
+        last_page = find_page_number(len(results), results_per_page)
+        last_page_link = page_linker(last_page, results_per_page, q)
+    else:
+        last_page_link = None
+    pages = {"current_page": current_page, "my_pages": my_pages, "page_num": page_num, "last_page_link": last_page_link}
+    return pages
+
 def page_interval(num, results, start, end):
     if start <= 0:
         start = 1

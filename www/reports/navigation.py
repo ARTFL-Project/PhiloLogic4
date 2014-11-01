@@ -29,7 +29,10 @@ def navigation(environ,start_response):
         return json.dumps({'current': current, 'text': obj_text, 'prev': prev, 'next': next, 'shrtcit':  f.cite.make_abs_doc_shrtcit_mobile(db,obj), 'citation': f.cite.make_abs_doc_cite_mobile(db,obj)})
     if obj.philo_type == 'doc':
         resource = f.webResources("t_o_c", debug=db.locals["debug"])
-        return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
+        toc = navigate_doc(obj, db)
+        citation = f.biblio_citation(db,config, obj)
+        toc_object = {"content": toc, "citation": citation}
+        return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,toc=toc_object,
                        db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c",
                        css=resource.css, js=resource.js)
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
@@ -60,6 +63,7 @@ def check_philo_virtual(db, path_components):
 
 def navigate_doc(obj, db):
     """This function fetches all philo_ids for div elements within a doc"""
+    config = f.WebConfig()
     conn = db.dbh 
     c = conn.cursor()
     doc_id =  int(obj.philo_id[0])
@@ -86,10 +90,20 @@ def navigate_doc(obj, db):
             if i['philo_name'] == "front":
                 display_name = "Front Matter"
             else:
-                display_name = i['head'] or i['philo_name']
+                display_name = i['head']
+                if display_name:
+                    display_name = display_name.strip()
+                if not display_name:
+                    try:
+                        display_name = i['type']
+                    except:
+                        pass
+                    if not display_name:
+                        display_name = i['philo_name'] or i['philo_type']
             display_name = display_name.decode('utf-8', 'ignore')
-            text_hierarchy.append((philo_id, philo_type, display_name))
-        print >> sys.stderr, 'DISPLAY NAME', repr(i['philo_name']), repr(display_name)
+            display_name = display_name[0].upper() + display_name[1:]
+            link = f.link.make_absolute_object_link(config, philo_id.split()[:7])
+            text_hierarchy.append((philo_id, philo_type, display_name, link))
     return text_hierarchy
     
 def get_neighboring_pages(db, doc_id, doc_page):

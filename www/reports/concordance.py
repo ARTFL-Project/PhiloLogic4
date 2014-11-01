@@ -31,7 +31,7 @@ def concordance(environ,start_response):
 def render_concordance(concordance_object, hits, q, db, dbname, path, config):
     resource = f.webResources("concordance", debug=db.locals["debug"])
     biblio_criteria = f.biblio_criteria(concordance_object['query'], config)
-    pages = generate_page_links(concordance_object['description']['start'], q['results_per_page'], q, hits)
+    pages = f.link.generate_page_links(concordance_object['description']['start'], q['results_per_page'], q, hits)
     return render_template(concordance=concordance_object, q=concordance_object["query"], db=db,dbname=dbname,path=path,
                            biblio_criteria=biblio_criteria,config=config, template_name="concordance.mako", report="concordance",
                            pages=pages, css=resource.css, js=resource.js)
@@ -63,13 +63,3 @@ def fetch_concordance(hit, path, context_size):
     conc_text = convert_entities(conc_text)
     conc_text = strip_start_punctuation.sub("", conc_text)
     return conc_text
-
-def generate_page_links(start, results_per_page, q, results):
-    current_page, my_pages, page_num = f.link.pager(start, results_per_page, q, results)
-    if results.done and page_num != my_pages[-1][0]:
-        last_page = f.link.find_page_number(len(results), results_per_page)
-        last_page_link = f.link.page_linker(last_page, results_per_page, q)
-    else:
-        last_page_link = None
-    pages = {"current_page": current_page, "my_pages": my_pages, "page_num": page_num, "last_page_link": last_page_link}
-    return pages

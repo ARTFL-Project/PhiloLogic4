@@ -15,7 +15,7 @@ obj_level = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4}
 
 def get_table_of_contents(environ, start_response):
     status = '200 OK'
-    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response(status,headers)
     environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/get_table_of_contents.py', '')
     db, path_components, q = parse_cgi(environ)
