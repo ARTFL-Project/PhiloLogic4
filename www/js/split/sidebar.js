@@ -12,11 +12,10 @@ $(document).ready(function() {
     $('.sidebar-option').click(function() {
         var header = $(this).parent().prevAll('.dropdown-header').eq(0).text();
         var facet = $(this).data('value');
-        var alias = $(this).data('display');
         var script = $(this).data('script');
         $('#menu-header').html(header);
-        var header_value = webConfig.metadata_aliases[alias] || alias;
-        $('#selected-sidebar-option').html(header_value);
+        //var header_value = webConfig.metadata_aliases[alias] || alias;
+        $('#selected-sidebar-option').html(facet);
         showSidebar();
         sidebarReports(q_string, db_url, facet, script);
     });
@@ -188,11 +187,7 @@ function update_sidebar(sorted_list, field) {
             var count = sorted_list[item][1]['count'];
         }
         var full_link;
-        if (result == "NULL") {
-            full_link = '<a id="freq_sidebar_text" href="' + link + '"><span class="dot"></span>N/A</a>'; // Set to N/A for display only
-        } else {
-            full_link = '<a id="freq_sidebar_text" href="' + link + '"><span class="dot"></span>' + result + '</a>';
-        }
+        full_link = '<a id="freq_sidebar_text" href="' + link + '"><span class="dot"></span>' + result + '</a>';
         newlist += '<li>';
         newlist += full_link + '<span style="float:right;display:inline-block;padding-right: 5px;">' + count + '</span></li>';
     }

@@ -21,7 +21,7 @@ def make_query_link(query,method=None,methodarg=None,report=None,start=None,end=
             q_params.append(('arg_phrase', methodarg))
         else:
             q_params.append(("arg",methodarg))
-    metadata = dict([(k, v.replace('"NULL"', 'NULL')) for k, v in metadata.items()]) ## Make sure the NULL value does not have quotes
+    metadata = dict([(k, v) for k, v in metadata.items()])
     q_params.extend(metadata.items()[:])
     if report:
         q_params.append(("report",report))

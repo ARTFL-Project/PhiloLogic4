@@ -28,82 +28,74 @@ def frequency(environ,start_response):
 def generate_frequency(results, q, db):
     """reads through a hitlist. looks up q["field"] in each hit, and builds up a list of 
        unique values and their frequencies."""
-    field = q["field"]
-    depth = ''
-    ## Testing for a possible object depth attribute such as div1.head or para.who and
-    ## apply the corresponding depth for the SQL query
-    if field.split('.')[0] in object_types and field.split('.')[-1] in db.locals['metadata_fields']:
-        depth = field.split('.')[0]
-        field = field.split('.')[-1]
-    counts = defaultdict(int)
+    field = eval(q['field']).items()[0][1]
     
-    for n in results[q['interval_start']:q['interval_end']]:
-        ## This is to minimize the number of SQL queries
+    if isinstance(field, str):
+        field = [field]
+    
+    field_object = []
+    for i in field:
+        ## Testing for a possible object depth attribute such as div1.head or para.who and
+        ## apply the corresponding depth for the SQL query
+        depth = ''
+        if i.split('.')[0] in object_types and i.split('.')[-1] in db.locals['metadata_fields']:
+            depth = i.split('.')[0]
+            i = i.split('.')[-1]
+        field_object.append((i, depth))
+     
+    counts = defaultdict(int)
+    for hit in results[q['interval_start']:q['interval_end']]:
+        key = generate_key(hit, field_object, db)
+        counts[key] += 1
+
+    table = {}
+    for key,count in counts.iteritems():
+        # for each item in the table, we modify the query params to generate a link url.
+        key = eval(key)      
+        metadata = dict(q['metadata']) ## Make a distinct copy for each key in case we may modify it below
+        
+        ## Build a label starting with the first value as the main value
+        label = key[0]['value']
+        metadata[key[0]['field']] = key[0]['value'].encode('utf-8', 'ignore')
+        append_to_label= []
+        for k in key[1:]:
+            if k['value'] == "NULL":
+                metadata[k['field']] = "NULL" # replace NULL with '[None]', 'N.A.', 'Untitled', etc.
+            else:
+                metadata[k['field']] = k['value'].encode('utf-8', 'ignore') # we want to run exact queries on defined values.
+                append_to_label.append(k['value'])
+        ## Add parentheses to other value, as they are secondary
+        if append_to_label:
+            label = label + ' (' + ', '.join(append_to_label) + ')'
+        
+        # Now build the url from q.
+        url = f.link.make_query_link(q["q"],q["method"],q["arg"],q["report"],**metadata)
+    
+        table[label] = {'count': count, 'url': url}
+
+    return field, table
+
+def generate_key(hit, field_object, db):
+    key = []
+    for field, depth in field_object:
+        k = {"field": field}
         if field in db.locals['metadata_types'] and not depth:
             depth = db.locals['metadata_types'][field]
         if depth:
             if depth == "div":
                 for d in ["div3", "div2", "div1"]:
-                    key = n[d][field]
-                    if key:
+                    k['value'] = hit[d][field]
+                    if k['value']:
                         break
             else:
-                key = n[depth][field]
+                k['value'] = hit[depth][field]
         else:
-            key = n[field]
-        if not key:
-            key = "NULL" # NULL is a magic value for queries, don't change it recklessly.
-        if depth != "doc" and key != "NULL":
-            key = (key, n.doc.title)
-        counts[key] += 1
-    
-    if q['rate'] == 'relative':
-        for key, count in counts.iteritems():
-            if isinstance(key, tuple):
-                k = key[0]
-                counts[key] = relative_frequency(field, k, count, db, doc=key[1])
-            else:
-                counts[key] = relative_frequency(field, key, count, db)
-    elif q['rate'] == 'tf_idf':
-        c = db.dbh.cursor()
-        c.execute('select count(distinct philo_id) from toms where philo_type="doc"')
-        total_docs = int(c.fetchone()[0])
-        idf = 1 + log10(total_docs / len(counts))
-        print >> sys.stderr, "TFIDF", total_docs, idf
-        for key, count in counts.iteritems():
-            if isinstance(key, tuple):
-                k = key[0]
-                counts[key] = tf_idf(field, k, count, db, idf, doc=key[1])
-            else:
-                counts[key] = tf_idf(field, key, count, db, idf)
-
-    table = {}
-    for k,v in counts.iteritems():
-        # for each item in the table, we modify the query params to generate a link url.
-        
-        metadata = dict(q['metadata']) ## Make a distinct copy for each key since we may modify it below
-        
-        if k == "NULL":
-            q["metadata"][field] = k # NULL is a magic boolean keyword, not a string value.
-        if isinstance(k, tuple):
-            key, title = k
-            metadata['title'] = '"%s"' % title.encode('utf-8', 'ignore')
-            metadata[field] = '"%s"' % key.encode('utf-8', 'ignore') # we want to do exact queries on defined values.
-        else:
-            metadata[field] = '"%s"' % k.encode('utf-8', 'ignore') # we want to do exact queries on defined values.
-        
-        # Now build the url from q.
-        url = f.link.make_query_link(q["q"],q["method"],q["arg"],q["report"],**metadata)
-        # Contruct the label for the item.
-        # This is the place to modify the displayed label of frequency table item.
-        if isinstance(k, tuple):
-            label = '%s (%s)' % k
-        else:
-            label = k #for example, replace NULL with '[None]', 'N.A.', 'Untitled', etc.
-            
-        table[label] = {'count': v, 'url': url}
-
-    return field, table
+            k['value'] = hit[field]
+        if not k['value']:
+            k['value'] = "NULL" # NULL is a magic value for queries, don't change it recklessly.
+        key.append(k)
+    key = repr(key)
+    return key
     
 def relative_frequency(field, label, count, db, doc=False):
     c = db.dbh.cursor()
