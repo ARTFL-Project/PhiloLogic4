@@ -24,7 +24,7 @@ def philo_dispatcher(environ,start_response):
             else:
                 yield reports.landing_page(environ,start_response)
         except Exception as e:
-            traceback.print_exc(file=sys.stdout)
+            traceback.print_exc()
             yield getattr(reports, "error")(environ,start_response)
     else:
         yield getattr(reports, 'access')(environ, start_response)
