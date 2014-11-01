@@ -97,17 +97,7 @@
         
         <!--Load all required JavaScript-->
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
-        <script src="${config.db_url}/js/bootstrap/bootstrap.min.js" type="text/javascript"></script>
-        <script type="text/javascript" src="${config.db_url}/js/plugins/jquery.history.js"></script>
-        <script type="text/javascript" src="${config.db_url}/js/plugins/velocity.min.js"></script>
-        <script type="text/javascript" src="${config.db_url}/js/plugins/velocity.ui.min.js"></script>
-        <script type="text/javascript" src="${config.db_url}/js/plugins/jquery-ui.min.js"></script>
-        % if not db.locals['debug']:
-            <script src="${config.db_url}/js/${report}.js" type="text/javascript"></script>
-        % else:
-            % for script in ressources['js'][report]:
-                <script src="${config.db_url}/js/${script}" type="text/javascript"></script>
-            % endfor
-        % endif
+        <!--PhiloLogic4 Javascript-->
+        ${js}
     </body>
 </html>

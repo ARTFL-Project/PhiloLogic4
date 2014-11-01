@@ -14,7 +14,7 @@ class WebConfig(object):
         path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '') + "/data/web_config.cfg"
         self.options = set(['db_url', 'dbname', 'concordance_length', 'facets', 'metadata',
                         'search_reports', 'metadata_aliases', 'search_examples', 'time_series_intervals',
-                        "theme", "dictionary", "landing_page_browsing", "metadata_facet_per_doc"])
+                        "theme", "dictionary", "landing_page_browsing"])
         try:
             execfile(path, globals(), self.config)
         except NameError:
@@ -80,8 +80,6 @@ class WebConfig(object):
             return {"author": ["A-D", "E-I", "J-M", "N-R", "S-V", "W-Z"],
                     "title": ["A-D", "E-I", "J-M", "N-R", "S-V", "W-Z"],
                     "date": {}}
-        elif key == "metadata_facet_per_doc":
-            return []
         else:
             return False
         
