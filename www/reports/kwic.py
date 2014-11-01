@@ -7,6 +7,7 @@ import os
 import re
 from functions.wsgi_handler import wsgi_response
 from bibliography import fetch_bibliography as bibliography
+from concordance import generate_page_links
 from render_template import render_template
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 import json
@@ -16,32 +17,33 @@ def kwic(environ,start_response):
     db, dbname, path_components, q = wsgi_response(environ,start_response)
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
-    if q['format'] == "json":
-        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
-        kwic_results = fetch_kwic(hits, path, q, f.link.byte_query, db, start-1, end, length=250)
-        formatted_results = [{"citation": i[0],
-                              "text": i[1], "philo_id": i[2], "start":start, "hit_count": len(hits)} for i in kwic_results]
-        return json.dumps(formatted_results)
     if q['q'] == '':
         return bibliography(f,path, db, dbname,q,environ)
     else:
-        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        return render_kwic(hits, db, dbname, q, path, config)
+        kwic_object, hits = generate_kwic_results(db, q, config, path)
+        if q['format'] == "json":
+            # Remove db_path from query object since we don't want to expose that info to the client
+            del concordance_object['query']['dbpath']
+            return json.dumps(kwic_object)
+        return render_kwic(kwic_object, hits, db, dbname, q, path, config)
         
-def render_kwic(hits, db, dbname, q, path, config):
+def render_kwic(kwic_object, hits, db, dbname, q, path, config):
     biblio_criteria = f.biblio_criteria(q, config)
     resource = f.webResources("kwic", debug=db.locals["debug"])
-    return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
-                                path=path, results_per_page=q['results_per_page'], biblio_criteria=biblio_criteria,
-                                config=config, template_name='kwic.mako', report="kwic", css=resource.css, js=resource.js)
+    pages = generate_page_links(kwic_object['description']['start'], q['results_per_page'], q, hits)
+    return render_template(kwic=kwic_object,db=db,dbname=dbname,q=q, path=path, biblio_criteria=biblio_criteria,
+                           pages=pages, config=config, template_name='kwic.mako', report="kwic", css=resource.css, js=resource.js)
 
-def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
+def generate_kwic_results(db, q, config, path, length=5000):
+    hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+    start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
+    kwic_object = {"description": {"start": start, "end": end, "n": n, "results_per_page": q['results_per_page']},
+                    "query": q}
     kwic_results = []
-    
     default_short_citation_len = 30
     short_citation_len = 0
-    for hit in results[start:end]:
+  
+    for hit in hits[start:end]:
         full_citation, short_citation, href = f.kwic_citation(db, hit, default_short_citation_len)
         
         ## Find longest short_citation
@@ -73,12 +75,14 @@ def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
         short_biblio = '<span class="short_biblio">%s</span>' % short_biblio
         full_biblio = '<span class="full_biblio" style="display:none;">%s</span>' % biblio
         kwic_biblio = full_biblio + short_biblio
-        if q['format'] == "json":
-            kwic_results[pos] = (kwic_biblio, text, hit.philo_id)
-        else:
-            kwic_biblio_link = '<a href="%s" class="kwic_biblio">' % href + kwic_biblio + '</a>: '
-            kwic_results[pos] = kwic_biblio_link + '%s' % text
-    return kwic_results
+        kwic_biblio_link = '<a href="%s" class="kwic_biblio">' % href + kwic_biblio + '</a>: '
+        kwic_results[pos] = {"philo_id": hit.philo_id, "context": kwic_biblio_link + '%s' % text, "bytes": hit.bytes}
+
+    kwic_object['results'] = kwic_results
+    kwic_object['results_len'] = len(hits)
+    kwic_object["query_done"] = hits.done
+    
+    return kwic_object, hits
 
 
 def KWIC_formatter(output, hit_num, chars=40):

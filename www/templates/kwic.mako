@@ -12,22 +12,22 @@
                     Export results
                 </button>
                 <%
-                 start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
+                 description = kwic['description']
                  r_status = "."
-                 if not results.done:
+                 if not kwic['query_done']:
                     r_status += " Still working..."
-                 current_pos = start
+                 current_pos = description['start']
                 %>
                 <div id="search_arguments">
                     Searching database for <b>${q['q'].decode('utf-8', 'ignore')}</b></br>
                     Bibliographic criteria: ${biblio_criteria or "None"}
                 </div>
                 <div id="search-hits" data-script="${config.db_url + '/scripts/get_total_results.py?' + q['q_string']}">
-                    % if end != 0:
-                        % if end < results_per_page or end < len(results):
-                            Hits <span id="start">${start}</span> - <span id="end">${end}</span> of <span id="total_results">${len(results) or results_per_page}</span><span id="incomplete">${r_status}</span>
+                    % if description['end'] != 0:
+                        % if description['end'] < description['results_per_page'] or description['end'] < kwic['results_len']:
+                            Hits <span id="start">${description['start']}</span> - <span id="end">${description['end']}</span> of <span id="total_results">${kwic['results_len'] or description['results_per_page']}</span><span id="incomplete">${r_status}</span>
                         % else:
-                            Hits <span id="start">${start}</span> - <span id="end">${len(results) or end}</span> of <span id="total_results">${len(results) or results_per_page}</span><span id="incomplete">${r_status}</span>         
+                            Hits <span id="start">${description['start']}</span> - <span id="end">${kwic['results_len'] or description['end']}</span> of <span id="total_results">${kwic['results_len'] or description['results_per_page']}</span><span id="incomplete">${r_status}</span>         
                         % endif
                     % else:
                         No results for your query.
@@ -46,15 +46,15 @@
         <div class="row">
             <div id="results_container" class="col-xs-12" style="overflow: hidden;">
                 <div id="kwic_concordance">
-                    % for i in fetch_kwic(results, path, q, f.link.byte_query, db, start-1, end):
+                    % for i in kwic['results']:
                         <div class="kwic_line">
-                            % if len(str(end)) > len(str(current_pos)):
-                                <% spaces = '&nbsp' * (len(str(end)) - len(str(current_pos))) %>
+                            % if len(str(description['end'])) > len(str(current_pos)):
+                                <% spaces = '&nbsp' * (len(str(description['end'])) - len(str(current_pos))) %>
                                 <span>${current_pos}.${spaces}</span>
                             % else:
                                 <span>${current_pos}.</span>    
                             % endif
-                            ${i}
+                            ${i['context']}
                             <% current_pos += 1 %>
                         </div>
                     % endfor
@@ -67,7 +67,7 @@
         </div>-->
     </div>
     <div class="more">
-        <%include file="results_paging.mako" args="start=start,results_per_page=results_per_page,q=q,results=results"/> 
+        <%include file="results_paging.mako"/> 
         <div style='clear:both;'></div>
     </div>
 </div>
