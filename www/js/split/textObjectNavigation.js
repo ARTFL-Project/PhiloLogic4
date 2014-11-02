@@ -127,8 +127,24 @@ function retrieveTableOfContents(db_url) {
     var philo_id = doc_id + ' 0 0 0 0 0 0'
     var script = $('#toc-wrapper').data('script') + philo_id;
     $('#toc-container').hide();
-    $.get(script, function(data) {
-        $('#toc-content').html(data).promise().done(function() {
+    $.getJSON(script, function(data_object) {
+        var html = '';
+        var data = data_object.results
+        for (var i=0; i < data.length; i++) {
+            var philo_id = data[i][0].replace(' ', '_');
+            var philo_type = data[i][1];
+            var head = data[i][2];
+            var href = data[i][3];
+            var link = '<a href="'+ href + '" id="' + philo_id + '">' + head + '</a>';
+            if (philo_type == "div2") {
+                html += '<div class="toc-div2"><span class="bullet-point-div2"></span>' + link + '</div>';
+            } else if (philo_type == "div3") {
+                html += '<div class="toc-div3"><span class="bullet-point-div3"></span>' + link + '</div>';
+            } else {
+                html += '<div class="toc-div1"><span class="bullet-point-div1"></span>' + link + '</div>';
+            }
+        }
+        $('#toc-content').html(html).promise().done(function() {
             $("#show-toc").removeAttr("disabled");
         });
         adjustTocHeight(100); // adjust height before showing

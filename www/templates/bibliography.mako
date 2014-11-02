@@ -12,15 +12,15 @@
                         Export results
                 </button>
                 <%
-                start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
+                description = bibliography['description']
                 r_status = "."
-                if not results.done:
-                   r_status += " Still working.  Refresh for a more accurate count of the results."
+                #if not bibliography['query_done']:
+                #    r_status += " Still working..."
                 %>
                 <div id="search_arguments">
                         Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}<br>
                 </div>
-                Hits <span class="start">${start}</span> - <span class="end">${end}</span> of <span id="total_results">${len(results)}</span>${r_status}
+                Hits <span class="start">${description['start']}</span> - <span class="end">${description['end']}</span> of <span id="total_results">${bibliography['results_len']}</span>${r_status}
             </div>
             <div class="row" id="act-on-report">
                 <div class="col-xs-12">
@@ -31,28 +31,24 @@
         <div class="row">
             <div id='results_container' class="col-xs-12">
                 <ol class="bibliographic-results">
-                    % for i in results[start-1:end]:
+                    <% n = description['n'] %>
+                    % for i in bibliography['results']:
                         <li class='biblio-occurrence panel panel-default'>
                             <%
                             n += 1
                             %>
                             <span style="padding-left: 5px;">${n}.</span>
-                            ##<input type="checkbox" name="philo_id" value="${i.philo_id}">
-                            % if i.type == 'doc':
-                                <span class='philologic_cite'>${f.biblio_citation(db, config, i)}</span>
-                            % else:
-                                <span class='philologic_cite'>${f.concordance_citation(db, config, i)}</span>
-                            % endif
+                            <span class='philologic_cite'>${i['citation']}</span>
                         </li>
                     % endfor
                 </ol>
             </div>
             <%include file="show_frequency.mako"/>
        </div>
-       <div class="more">
-            <%include file="results_paging.mako" args="start=start,results_per_page=results_per_page,q=q,results=results"/> 
-            <div style='clear:both;'></div>
-        </div>
+    </div>
+    <div class="more">
+        <%include file="results_paging.mako"/> 
+        <div style='clear:both;'></div>
     </div>
 </div>
 <%include file="footer.mako"/>

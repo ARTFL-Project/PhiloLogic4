@@ -7,6 +7,7 @@ from functions.wsgi_handler import wsgi_response
 from render_template import render_template
 from collections import defaultdict
 from math import log10
+from ast import literal_eval as eval
 import json
 
 object_types = set(["doc", "div1", "div2", "div3", "para", "sent", "word"])
