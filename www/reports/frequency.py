@@ -6,8 +6,6 @@ import functions as f
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
 from collections import defaultdict
-from math import log10
-from ast import literal_eval as eval
 import json
 
 object_types = set(["doc", "div1", "div2", "div3", "para", "sent", "word"])
@@ -29,7 +27,13 @@ def frequency(environ,start_response):
 def generate_frequency(results, q, db):
     """reads through a hitlist. looks up q["field"] in each hit, and builds up a list of 
        unique values and their frequencies."""
-    field = eval(q['field']).items()[0][1]
+    config = f.WebConfig()
+    field = ''
+    for facet in config.facets:
+        key, value = facet.items()[0]
+        if key == q['field']:
+            field = value
+            break
     
     if isinstance(field, str):
         field = [field]
@@ -51,20 +55,20 @@ def generate_frequency(results, q, db):
 
     table = {}
     for key,count in counts.iteritems():
-        # for each item in the table, we modify the query params to generate a link url.
-        key = eval(key)      
+        # for each item in the table, we modify the query params to generate a link url.      
         metadata = dict(q['metadata']) ## Make a distinct copy for each key in case we may modify it below
         
         ## Build a label starting with the first value as the main value
-        label = key[0]['value']
-        metadata[key[0]['field']] = key[0]['value'].encode('utf-8', 'ignore')
+        first_metatada_key, first_metadata_value = key[0]
+        label = first_metadata_value
+        metadata[first_metatada_key] = first_metadata_value.encode('utf-8', 'ignore')
         append_to_label= []
-        for k in key[1:]:
-            if k['value'] == "NULL":
-                metadata[k['field']] = "NULL" # replace NULL with '[None]', 'N.A.', 'Untitled', etc.
+        for metadata_key, metadata_value in key[1:]:
+            if metadata_value == "NULL":
+                metadata[metadata_key] = "NULL" # replace NULL with '[None]', 'N.A.', 'Untitled', etc.
             else:
-                metadata[k['field']] = k['value'].encode('utf-8', 'ignore') # we want to run exact queries on defined values.
-                append_to_label.append(k['value'])
+                metadata[metadata_key] = metadata_value.encode('utf-8', 'ignore') # we want to run exact queries on defined values.
+                append_to_label.append(metadata_value)
         ## Add parentheses to other value, as they are secondary
         if append_to_label:
             label = label + ' (' + ', '.join(append_to_label) + ')'
@@ -79,48 +83,22 @@ def generate_frequency(results, q, db):
 def generate_key(hit, field_object, db):
     key = []
     for field, depth in field_object:
-        k = {"field": field}
+        value = ''
         if field in db.locals['metadata_types'] and not depth:
             depth = db.locals['metadata_types'][field]
         if depth:
             if depth == "div":
                 for d in ["div3", "div2", "div1"]:
-                    k['value'] = hit[d][field]
-                    if k['value']:
+                    value = hit[d][field]
+                    if value:
                         break
             else:
-                k['value'] = hit[depth][field]
+                value = hit[depth][field]
         else:
-            k['value'] = hit[field]
-        if not k['value']:
-            k['value'] = "NULL" # NULL is a magic value for queries, don't change it recklessly.
+            value = hit[field]
+        if not value:
+            value = "NULL" # NULL is a magic value for queries, don't change it recklessly.
+        k = (field, value)
         key.append(k)
-    key = repr(key)
+    key = tuple(key)
     return key
-    
-def relative_frequency(field, label, count, db, doc=False):
-    c = db.dbh.cursor()
-    if label == 'NULL':
-        label = ''
-    if doc:
-        query = 'select sum(word_count) from toms where %=? and title=?' % field
-        c.execute(query, (label, doc))
-    else:
-        query = 'select sum(word_count) from toms where %s=?' % field
-        c.execute(query, (label,))
-    result = count / c.fetchone()[0] * 10000
-    return "%.2f" % round(result, 3)
-
-def tf_idf(field, label, count, db, idf, doc=False):
-    c = db.dbh.cursor()
-    if label == 'NULL':
-        label = ''
-    if doc:
-        query = 'select sum(word_count) from toms where %s=? and title=?' % field
-        c.execute(query, (label, doc))
-    else:
-        query = 'select sum(word_count) from toms where %s=?' % field
-        c.execute(query, (label,))
-    result = count / c.fetchone()[0] * idf *10000
-    return "%.2f" % round(result, 3)
-

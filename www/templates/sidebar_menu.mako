@@ -9,7 +9,7 @@
         % for facet in config["facets"]:
             <%
             facet_name = facet.keys()[0]
-            script = "%s/scripts/get_frequency.py?%s&frequency_field=%s" % (config.db_url, q['q_string'], repr(facet))
+            script = "%s/scripts/get_frequency.py?%s&frequency_field=%s" % (config.db_url, q['q_string'], facet_name)
             %>
             <li><a class="sidebar-option" id="side_opt_${facet_name}" data-value='${facet_name}' data-script="${script}">${facet_name}</a></li>
         % endfor

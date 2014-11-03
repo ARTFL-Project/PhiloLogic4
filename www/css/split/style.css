@@ -198,6 +198,9 @@ s {
 .xml-l {
     display: block;
 }
+span.note {
+	display: inline;
+}
 .xml-l::before {
     content:attr(n) "\0020\0020\0020";
     font-family: 'Droid Sans Mono', sans-serif;

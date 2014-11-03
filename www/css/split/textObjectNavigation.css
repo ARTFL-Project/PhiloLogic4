@@ -182,6 +182,7 @@ div1 div2::before {
 }
 .xml-speaker {
     font-weight: 700;
+	display: block;
 }
 .xml-pb {
     display: block;
@@ -289,7 +290,7 @@ body {
 	display: none;
 }
 .note {
-	vertical-align: super;
+	vertical-align: .3em;
 	font-size: .7em;
 }
 .note:hover {

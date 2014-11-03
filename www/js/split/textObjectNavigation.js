@@ -64,6 +64,10 @@ $(document).ready(function() {
         retrieveObj(db_url);
     });
     
+    // Make sure notes stay inline when after a span.xml-l
+    $('.xml-l + .note').prev('.xml-l').css('display', 'inline');
+    $('.note-content + .xml-l').prepend('<br>');
+    
 });
 
 
