@@ -48,16 +48,13 @@ $(document).ready(function() {
     }
     
     // Note handling
-    $('.note-content').each(function() {
-        $(this).before('<a class="note" tabindex="0" data-toggle="popover" data-container="body" data-placement="right" data-trigger="focus">note</a>');
-    }).promise().done(function() {
-        $('.note').popover({animate: true, trigger: 'focus', html: true, content: function() {
-            return $(this).next('.note-content').html();
-        }});
-    });
+    createNoteLink();
     
     // Only enable back/forward buttons if necessary 
     checkEndBeginningOfDoc();
+    
+    // Specifically for the Encyclopédie
+    addPreviousPage();
     
     $(window).load(function() {
         if ($('.highlight').length) {
@@ -73,6 +70,37 @@ $(document).ready(function() {
 ////////////////////////////////////////////////////////////////////////////////
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+
+// TODO: make this function more generic
+function addPreviousPage() {
+    var first_link_split = $('.page-image-link').eq(0).attr('href');
+    if (first_link_split) {
+        first_link_split = first_link_split.split('/');
+        var url = first_link_split.slice(0,-1).join('/') + '/';
+        var img = first_link_split.reverse()[0];
+        img = img.replace('.jpeg', '').split('-');
+        var new_page_num = (parseInt(img[1]) - 1).toString();
+        if (isNaN(new_page_num) == false) {
+            var volume = img[0].split('_')[1];
+            img = img[0] + '-' + new_page_num;
+            var new_link = url + img + '.jpeg';
+            var element = '<a href="' + new_link + '" class="page-image-link" data-gallery>[page ' + volume + ":" + new_page_num + ']</a>';
+            $('b.headword').eq(0).before(element);
+        }
+    }
+}
+
+
+function createNoteLink() {
+    $('.note-content').each(function() {
+        $(this).before('<a class="note" tabindex="0" data-toggle="popover" data-container="body" data-placement="right" data-trigger="focus">note</a>');
+    }).promise().done(function() {
+        $('.note').popover({animate: true, trigger: 'focus', html: true, content: function() {
+            return $(this).next('.note-content').html();
+        }});
+    });
+}
 
 function checkEndBeginningOfDoc() {
     if ($('#next-obj').data('philoId') == "") {
@@ -98,10 +126,11 @@ function retrieveTableOfContents(db_url) {
     var doc_id = pathname.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
     var philo_id = doc_id + ' 0 0 0 0 0 0'
     var script = $('#toc-wrapper').data('script') + philo_id;
-    $("#show-toc").removeAttr("disabled");
     $('#toc-container').hide();
     $.get(script, function(data) {
-        $('#toc-content').html(data);
+        $('#toc-content').html(data).promise().done(function() {
+            $("#show-toc").removeAttr("disabled");
+        });
         adjustTocHeight(100); // adjust height before showing
         TocLinkHandler(db_url);
     });
@@ -173,7 +202,8 @@ function retrieveObj(db_url){
         var philo_id = $(this).data('philoId');
         var script = $('#all-content').data('script') + philo_id;
         var width = $(window).width() / 2 - 100;
-        $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 150).show();
+        $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 250).css({"display": "block", "opacity": 1});
+        $('#waiting').velocity({rotateZ: 7200}, {duration: 20000, easing: "linear"});
         $.getJSON(script, function(data) {
             newTextObjectCallback(data, philo_id, my_path);
         });
@@ -197,7 +227,8 @@ function TocLinkHandler(db_url) {
         var philo_id = $(this).attr('id').replace(/_/g, ' ');
         var script = $('#all-content').data('script') + philo_id;
         var width = $(window).width() / 2 - 100;
-        $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 150).show();
+        $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 250).css({"display": "block", "opacity": 1});
+        $('#waiting').velocity({rotateZ: 7200}, {duration: 20000, easing: "linear"});
         $.getJSON(script, function(data) {
             newTextObjectCallback(data, philo_id, my_path);
         });
@@ -206,7 +237,8 @@ function TocLinkHandler(db_url) {
 
 // Callback function after a new text object has been retrieved
 function newTextObjectCallback(data, philo_id, my_path) {
-    $("#waiting").fadeOut('fast');
+    $("#waiting").velocity('fadeOut', {duration: 100, queue:false, complete:function() {
+        $(this).velocity("reverse", {duration:100})}});
     var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
     $('#toc-content').find($(scrollto_id)).removeClass('current-obj');
     $('#text-obj-content').fadeOut('fast', function() {
@@ -226,8 +258,10 @@ function newTextObjectCallback(data, philo_id, my_path) {
             $('body').velocity('scroll', {duration: 200, offset: 0, easing: 'easeOut', complete: function() {$('#toc-container').css('position', 'static');}});
         }
         adjustTocHeight();
+        createNoteLink();
         setTimeout(function() {
             $('#toc-container').css('position', 'static')
-        }, 250)
+        }, 250);
+        addPreviousPage();
     });
 }

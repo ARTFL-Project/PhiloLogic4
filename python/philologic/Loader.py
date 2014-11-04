@@ -536,8 +536,8 @@ class Loader(object):
         print >> web_config, "\n# The db_url variable is the root URL for your database on the web"
         print >> web_config, "db_url = '%s'" % extra_locals['db_url']
         print >> web_config, "\n# The search_reports variable sets which search report is viewable in the search form"
-        print >> web_config, "# If the value is None, PhiloLogic4 will use this default: ['concordance', 'kwic', 'collocation', 'time_series']"
-        print >> web_config, "search_reports = None"
+        print >> web_config, "# Available reports are concordance, kwic, collocation, and time_series"
+        print >> web_config, "search_reports = ['concordance', 'kwic', 'collocation', 'time_series']"
         print >> web_config, "\n# The metadata variable sets which metadata field is viewable in the search form"
         print >> web_config, "metadata = %s" % self.metadata_fields
         print >> web_config, "\n# The metadata_aliases variable allows to display a metadata variable under a different name in the HTML"
@@ -545,11 +545,9 @@ class Loader(object):
         print >> web_config, "# metadata_aliases = {'who': 'Speaker', 'create_date', 'Date'}"
         print >> web_config, "metadata_aliases = None"
         print >> web_config, "\n# The facets variable sets which metadata field can be used as a facet"
-        print >> web_config, "# If the value is None, PhiloLogic4 will use the value of metadata"
-        print >> web_config, "facets = None"
+        print >> web_config, "facets = %s" % self.metadata_fields
         print >> web_config, "\n# The concordance_length variable sets the length in bytes of each concordance result"
-        print >> web_config, "# If the value is None, PhiloLogic4 will use a default of 300"
-        print >> web_config, "concordance_length = None"
+        print >> web_config, "concordance_length = 300"
         print >> web_config, "\n# The search_examples variable defines which examples should be provided"
         print >> web_config, "# for each searchable field in the search form."
         print >> web_config, "# If None is the value, or there are any missing examples, defaults will be generated"
@@ -558,9 +556,8 @@ class Loader(object):
         print >> web_config, '# search_examples = {"author": "Jean-Jacques Rousseau", "title": "Du contrat social"}'
         print >> web_config, "search_examples = None"
         print >> web_config, "\n# The time_series_intervals variable defines the year intervals in the time series report"
-        print >> web_config, "# If None is the value, PhiloLogic will use [10, 50, 100] as defaults"
         print >> web_config, "# The only valid intervals are 1, 10, 50 and 100. Invalid intervals will be ignored."
-        print >> web_config, "time_series_intervals = None"
+        print >> web_config, "time_series_intervals = [10, 50, 100]"
         print >> web_config, "\n# The theme variable defines the default CSS theme to be used in the WebApp."
         print >> web_config, "# The default theme called default_theme.css can be edited directly"
         print >> web_config, "# or you can define a new CSS file below. This file must be located"
@@ -571,10 +568,13 @@ class Loader(object):
         print >> web_config,  "dictionary = False"
         print >> web_config, "\n# The landing_page_browsing variable defines which browsing functions are"
         print >> web_config, "# exposed in the landing page. The only options are author, title and date."
-        print >> web_config, '# Example: {"author": True, "title": True, "date": {"start": 1700, "end": 1800, "interval": 10}}'
-        print >> web_config, "# Note that the date needs to define three variables: a start date, an end date in order to"
-        print >> web_config, "# construct proper intervals. If one of those variables is not defined, date_browsing will be hidden"
-        print >> web_config, "landing_page_browsing = {'author': True, 'title': True, date: {}}"
+        print >> web_config, "# For author and title, you have to define a list of ranges, such as 'author': ['A-L', 'M-Z'],"
+        print >> web_config, "# and for date you need to define three variables: start_date, end_date, interval"
+        print >> web_config, '# e.g. "date": {"start": 1600, "end": 1800, "interval": 25}'
+        print >> web_config, '# Note that no default is provided for "date", which is therefore hidden since undefined'
+        print >> web_config, """landing_page_browsing = {"author": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
+        print >> web_config, """                          "title": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
+        print >> web_config, """                          "date": {}}"""
         print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")
 
                 

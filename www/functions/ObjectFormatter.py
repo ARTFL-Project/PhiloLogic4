@@ -14,6 +14,18 @@ term_match = re.compile(r"\w+", re.U)
 
 entities_match = re.compile("&#?\w+;")
 
+# Source: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/HTML5_element_list
+valid_html_tags = set(['html', 'head', 'title', 'base', 'link', 'meta', 'style', 'script', 'noscript', 'template',
+                   'body', 'section', 'nav', 'article', 'aside', 'h1', ',h2', ',h3', ',h4', ',h5', ',h6', 'header',
+                   'footer', 'address', 'main', 'p', 'hr', 'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd',
+                   'figure', 'figcaption', 'div', 'a', 'em', 'strong', 'small', 's', 'cite', 'q', 'dfn', 'abbr',
+                   'data', 'time', 'code', 'var', 'samp', 'kbd', 'sub', 'sup', 'i', 'b', 'u', 'mark', 'ruby',
+                   'rt', 'rp', 'bdi', 'bdo', 'span', 'br', 'wbr', 'ins', 'del', 'img', 'iframe', 'embed', 'object',
+                   'param', 'video', 'audio', 'source', 'track', 'canvas', 'map', 'area', 'svg', 'math', 'table',
+                   'caption', 'colgroup', 'col', 'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'form', 'fieldset',
+                   'legend', 'label', 'input', 'button', 'select', 'datalist', 'optgroup', 'option', 'textarea',
+                   'keygen', 'output', 'progress', 'meter', 'details', 'summary', 'menuitem', 'menu'])
+
 def get_text(obj,words):
     pass
 
@@ -24,14 +36,21 @@ def get_all_text(element):
         text += get_all_text(child)
         text += child.tail
     return text
-    
+
 def xml_to_html_class(element):
-    if element.tag != "philoHighlight":
-        old_tag = element.tag[:]
+    old_tag = element.tag[:]
+    if element.tag == "div1" or element.tag == "div2" or element.tag == "div3":
+        element.tag = "div"
+    else:
         element.tag = "span"
-        element.attrib['class'] = "xml-%s" % old_tag
+    element.attrib['class'] = "xml-%s" % old_tag
+    return element
+    
+def note_content(element):
+    if element.tag != "philoHighlight":
+        element = xml_to_html_class(element)
     for child in element:
-        child = xml_to_html_class(child)
+        child = note_content(child)
     return element
 
 def adjust_bytes(bytes, length):
@@ -77,7 +96,7 @@ def format(text,bytes=[]):
                 el.tag = 'span'
                 el.attrib['class'] = "note-content"
                 for child in el:
-                    child = xml_to_html_class(child)
+                    child = note_content(child)
             elif el.tag == "item":
                 el.tag = "li"
             elif el.tag == "ab" or el.tag == "ln":
@@ -87,7 +106,8 @@ def format(text,bytes=[]):
                 el.append(etree.Element("a"))
                 el[-1].attrib["href"] = 'http://artflx.uchicago.edu/images/encyclopedie/' + el.attrib["fac"]
                 el[-1].text = "[page " + el.attrib["n"] + "]"
-                el[-1].attrib['class'] = "page_image_link"
+                el[-1].attrib['class'] = "page-image-link"
+                el[-1].attrib['data-gallery'] = ''
             elif el.tag == "figure":
                 if el[0].tag == "graphic":
                     img_url = el[0].attrib["url"].replace(":","_")
@@ -98,7 +118,8 @@ def format(text,bytes=[]):
                     el[0].tag = "img"
                     el[0].attrib["src"] = url_prefix + img_url + ".sm.jpeg"
                     el[0].attrib["class"] = "plate_img"
-                    el.attrib["class"] = "plate_img_link"
+                    el.attrib["class"] = "plate-image-link"
+                    el.attrib['data-gallery'] = ''
                     del el[0].attrib["url"]
                     el.append(etree.Element("br"))
             elif el.tag == "philoHighlight":        
@@ -107,6 +128,8 @@ def format(text,bytes=[]):
                 el.tail = el.tail[word_match.end():]
                 el.tag = "span"
                 el.attrib["class"] = "highlight"
+            if el.tag not in valid_html_tags:
+                el = xml_to_html_class(el)
         except:
             pass
     output = etree.tostring(xml)
@@ -160,6 +183,8 @@ def format_concordance(text,bytes=[]):
                 el.tail = el.tail[word_match.end():]
             el.tag = "span"
             el.attrib["class"] = "highlight"
+        if el.tag not in valid_html_tags:
+            el = xml_to_html_class(el)
     output = etree.tostring(xml)
     output = re.sub(r'\A<div class="philologic-fragment">', '', output)
     output = re.sub(r'</div>\Z', '', output)

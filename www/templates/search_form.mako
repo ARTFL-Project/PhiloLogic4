@@ -209,7 +209,7 @@
             </div>
         </div>
     </form>
-    <div id="waiting" style="display:none;z-index:99;position:absolute;">
-        <img src="${config.db_url}/js/gif/ajax-loader.gif" alt="Loading..."/>
+    <div id="waiting">
+        <!--<img src="${config.db_url}/js/gif/ajax-loader.gif" alt="Loading..."/>-->
     </div>
 </div>

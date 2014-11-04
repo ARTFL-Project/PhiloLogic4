@@ -130,7 +130,7 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         
         updateProgressBar(100)
         var progress_height = $(".progress").height();
-        $(".progress").delay(500).velocity("slideUp", {complete: function() {$('#test_time_series').velocity({height: '+=' + progress_height})}});
+        $(".progress").delay(500).velocity("slideUp", {complete: function() {$('#test_time_series, .graph_bar').velocity({height: '+=' + progress_height})}});
         $('.graph_bar').tooltip({html: true});
     }
 }

@@ -46,4 +46,12 @@
         </div>
     </div>
 </div>
+<div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-full-screen="true" data-continuous="false">
+    <div class="slides"></div>
+    <h3 class="title"></h3>
+    <a class="prev">&lt;</a>
+    <a class="next">&gt;</a>
+    <a class="close">&#10005;</a>
+    <ol class="indicator"></ol>
+</div>
 <%include file="footer.mako"/>

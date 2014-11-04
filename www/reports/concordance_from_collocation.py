@@ -118,8 +118,8 @@ def fetch_colloc_concordance(results, path, q, db, config, word_filter=True, fil
 def colloc_concordance(hit, path, q, context_size):
     conc_text = fetch_concordance(hit, path, context_size)
     collocate = q['collocate'].decode('utf-8', 'ignore')
-    collocate_match = re.compile(r'(.*\W)(%s)(\W.*)' % collocate, flags=re.U|re.I)
-    conc_text = collocate_match.sub(r'\1<span class="collocate">\2</span>\3', conc_text)
+    collocate_match = re.compile(r'(?<!<span class="highlight">)(%s)' % collocate, flags=re.U|re.I)
+    conc_text = collocate_match.sub(r'<span class="collocate">\1</span>', conc_text)
     return conc_text  
     
 class collocation_hitlist(object):

@@ -77,7 +77,9 @@ class WebConfig(object):
         elif key == "theme":
             return "default_theme.css"
         elif key == "landing_page_browsing":
-            return {"author": True, "title": True, "date": {}}
+            return {"author": ["A-D", "E-I", "J-M", "N-R", "S-V", "W-Z"],
+                    "title": ["A-D", "E-I", "J-M", "N-R", "S-V", "W-Z"],
+                    "date": {}}
         else:
             return False
         
