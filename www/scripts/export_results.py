@@ -14,12 +14,6 @@ import csv
 import uuid
 
 
-"""Notes on data format
-The object format will be the following:
-[{}, {}]
-"""
-
-
 def export_results(environ,start_response):
     status = '200 OK'
     headers = [('Content-type', 'text/plain; charset=UTF-8'),("Access-Control-Allow-Origin","*")]

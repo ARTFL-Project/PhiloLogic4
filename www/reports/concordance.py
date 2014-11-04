@@ -45,7 +45,10 @@ def concordance_results(db, q, config, path):
     for hit in hits[start - 1:end]:
         citation = f.concordance_citation(db, config, hit)
         context = fetch_concordance(hit, path, config.concordance_length)
-        result_obj = {"philo_id": hit.philo_id, "citation": citation, "context": context, "bytes": hit.bytes}
+        metadata_fields = {}
+        for metadata in q['metadata']:
+            metadata_fields[metadata] = hit[metadata]
+        result_obj = {"philo_id": hit.philo_id, "citation": citation, "context": context, "metadata_fields": metadata_fields, "bytes": hit.bytes}
         results.append(result_obj)
     concordance_object["results"] = results
     concordance_object['results_len'] = len(hits)

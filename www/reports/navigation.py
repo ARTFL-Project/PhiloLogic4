@@ -29,16 +29,13 @@ def navigation(environ,start_response):
         return json.dumps({'current': current, 'text': obj_text, 'prev': prev, 'next': next, 'shrtcit':  f.cite.make_abs_doc_shrtcit_mobile(db,obj), 'citation': f.cite.make_abs_doc_cite_mobile(db,obj)})
     if obj.philo_type == 'doc':
         resource = f.webResources("t_o_c", debug=db.locals["debug"])
-        toc = navigate_doc(obj, db)
+        toc_object = generate_toc_object(obj, db)
         citation = f.biblio_citation(db,config, obj)
-        toc_object = {"content": toc, "citation": citation}
-        return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,toc=toc_object,
-                       db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c",
-                       css=resource.css, js=resource.js)
+        return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,toc=toc_object, citation=citation,
+                               db=db, q=q,config=config,template_name='t_o_c.mako', report="t_o_c", css=resource.css, js=resource.js)
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
     resource = f.webResources("navigation", debug=db.locals["debug"])
-    return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,obj_text=obj_text,prev=prev,next=next,config=config,
+    return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,db=db,q=q,obj_text=obj_text,prev=prev,next=next,config=config,
                        template_name='object.mako', report="navigation", css=resource.css, js=resource.js)
 
 def check_philo_virtual(db, path_components):
@@ -61,7 +58,7 @@ def check_philo_virtual(db, path_components):
     except TypeError:
         return False
 
-def navigate_doc(obj, db):
+def generate_toc_object(obj, db):
     """This function fetches all philo_ids for div elements within a doc"""
     config = f.WebConfig()
     conn = db.dbh 
@@ -103,47 +100,11 @@ def navigate_doc(obj, db):
             display_name = display_name.decode('utf-8', 'ignore')
             display_name = display_name[0].upper() + display_name[1:]
             link = f.link.make_absolute_object_link(config, philo_id.split()[:7])
-            text_hierarchy.append((philo_id, philo_type, display_name, link))
-    return text_hierarchy
-    
-def get_neighboring_pages(db, doc_id, doc_page):
-    conn = db.dbh
-    c = conn.cursor()
-    c.execute('select philo_seq from pages where n=? and philo_id like ?', (doc_page, doc_id))
-    philo_seq = c.fetchone()[0]
-    prev_seq = philo_seq - 1
-    c.execute('select n from pages where philo_seq=? and philo_id like ?', (prev_seq, doc_id))
-    try:
-        prev_page = c.fetchone()[0]
-    except TypeError:  ## There is no previous page in that doc
-        prev_page = None
-    next_seq = philo_seq + 1
-    c.execute('select n from pages where philo_seq=? and philo_id like ?', (next_seq, doc_id))
-    try:
-        next_page = c.fetchone()[0]
-    except TypeError:  ## There is no previous page in that doc
-        next_page = None
-    return prev_page, next_page
-
-def has_pages(obj, db):
-    conn = db.dbh
-    c = conn.cursor()
-    ## this query will be slow until we create a doc id field
-    c.execute('select n from pages where philo_id like ?', (str(obj.philo_id[0]) + ' %', ))
-    if c.fetchall(): ## This document has pages
-        return True
-    else:
-        return False
-    
-def get_page_num(obj, db):
-    philo_id = ' '.join([str(i) for i in obj.philo_id])
-    conn = db.dbh
-    c = conn.cursor()
-    c.execute('select page from toms where philo_id = ?', (philo_id,))
-    try:
-        return str(c.fetchone()[0] + 1)
-    except TypeError:
-        try:
-            return c.fetchone()[0]
-        except:
-            return None
+            toc_element = {"philo_id": philo_id, "philo_type": philo_type, "display_name": display_name, "link": link}
+            text_hierarchy.append(toc_element)
+    metadata_fields = {}
+    for metadata in db.locals['metadata_fields']:
+        if db.locals['metadata_types'][metadata] == "doc":
+            metadata_fields[metadata] = obj[metadata]
+    toc_object = {"toc": text_hierarchy, "metadata_fields": metadata_fields}
+    return toc_object
