@@ -133,12 +133,12 @@ function retrieveTableOfContents(db_url) {
     $('#toc-container').hide();
     $.getJSON(script, function(data_object) {
         var html = '';
-        var data = data_object.results
+        var data = data_object.toc;
         for (var i=0; i < data.length; i++) {
-            var philo_id = data[i][0].replace(' ', '_');
-            var philo_type = data[i][1];
-            var head = data[i][2];
-            var href = data[i][3];
+            var philo_id = data[i].philo_id.replace(' ', '_');
+            var philo_type = data[i].philo_type;
+            var head = data[i].display_name;
+            var href = data[i].link;
             var link = '<a href="'+ href + '" id="' + philo_id + '">' + head + '</a>';
             if (philo_type == "div2") {
                 html += '<div class="toc-div2"><span class="bullet-point-div2"></span>' + link + '</div>';

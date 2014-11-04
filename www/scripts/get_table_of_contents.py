@@ -23,12 +23,8 @@ def get_table_of_contents(environ, start_response):
     path = db.locals['db_path']
     path = path[:path.rfind("/data")]
     obj = ObjectWrapper(q['philo_id'].split(), db)
-    results = r.navigate_doc(obj, db)
-    metadata_fields = {}
-    for metadata in db.locals['metadata_fields']:
-        if db.locals['metadata_types'][metadata] == "doc":
-            metadata_fields[metadata] = obj[metadata]
-    yield json.dumps({"results": results, "metadata": metadata_fields})
+    toc_object = r.generate_toc_object(obj, db)
+    yield json.dumps(toc_object)
     
 if __name__ == "__main__":
     CGIHandler().run(get_table_of_contents)

@@ -7,7 +7,7 @@
 <div id='philologic_response' class="container-fluid">
     <div class="row" id="toc-report-title">
         <div class="col-xs-offset-2 col-xs-8">
-            <span class='philologic_cite'>${toc['citation']}</span>
+            <span class='philologic_cite'>${citation}</span>
         </div>
     </div>
     <div class="panel panel-default">
@@ -17,16 +17,16 @@
         % endif
         <div id="toc-report">
             <div id="toc-content">
-                % for philo_id, philo_type, head, link in toc['content']:
+                % for toc_object in toc['toc']:
                     <%
-                    link = '<a href="%s" id="%s">%s</a>' % (link, philo_id.replace(' ', '_'), head)
+                    link = '<a href="%s" id="%s">%s</a>' % (toc_object['link'], toc_object['philo_id'].replace(' ', '_'), toc_object['display_name'])
                     %>
-                    % if philo_type == "div2":
+                    % if toc_object['philo_type'] == "div2":
                         <div class="toc-div2">
                             <span class="bullet-point-div2"></span>
                             ${link}
                         </div>
-                    % elif philo_type == "div3":
+                    % elif toc_object['philo_type'] == "div3":
                         <div class="toc-div3"><span class="bullet-point-div3"></span>
                             ${link}
                         </div>

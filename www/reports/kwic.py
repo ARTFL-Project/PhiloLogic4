@@ -60,14 +60,20 @@ def generate_kwic_results(db, q, config, path, length=5000):
         conc_text = f.get_text(hit, byte_start, length, path)
         conc_text = format_strip(conc_text, bytes)
         conc_text = KWIC_formatter(conc_text, len(hit.bytes))
-        kwic_results.append((full_citation, short_citation, href, conc_text, hit))
+        
+        # Get all metadata
+        metadata_fields = {}
+        for metadata in q['metadata']:
+            metadata_fields[metadata] = hit[metadata]
+            
+        kwic_results.append((full_citation, short_citation, href, conc_text, hit, metadata_fields))
     
     if short_citation_len < default_short_citation_len:
         default_short_citation_len = short_citation_len
     
     ## Populate Kwic_results with bibliography    
     for pos, result in enumerate(kwic_results):
-        biblio, short_biblio, href, text, hit = result
+        biblio, short_biblio, href, text, hit, metadata_fields = result
         if len(short_biblio) < default_short_citation_len:
             diff = default_short_citation_len - len(short_biblio)
             short_biblio += '&nbsp;' * diff
@@ -75,7 +81,7 @@ def generate_kwic_results(db, q, config, path, length=5000):
         full_biblio = '<span class="full_biblio" style="display:none;">%s</span>' % biblio
         kwic_biblio = full_biblio + short_biblio
         kwic_biblio_link = '<a href="%s" class="kwic_biblio">' % href + kwic_biblio + '</a>: '
-        kwic_results[pos] = {"philo_id": hit.philo_id, "context": kwic_biblio_link + '%s' % text, "bytes": hit.bytes}
+        kwic_results[pos] = {"philo_id": hit.philo_id, "context": kwic_biblio_link + '%s' % text, "metadata_fields": metadata_fields, "bytes": hit.bytes}
 
     kwic_object['results'] = kwic_results
     kwic_object['results_len'] = len(hits)
