@@ -8,47 +8,6 @@ import os
 from philologic.DB import DB
 from link import *
 
-def concordance_citation(db, config, i):
-    """ Returns a representation of a PhiloLogic object and all its ancestors
-        suitable for a precise concordance citation. """
-    doc_href = make_absolute_object_link(config,i.philo_id[:1],i.bytes)
-    section_href = make_absolute_object_link(config,i.philo_id[:2], i.bytes)
-    sub_section_href = make_absolute_object_link(config,i.philo_id[:3], i.bytes)
-    section_names = [i.div1.head,i.div2.head,i.div3.head]
-    section_name = section_names[0] or "Section"
-    try:
-        sub_section_name = section_names[1] or ""
-    except IndexError:
-        sub_section_name = ""
-    title = '<a href="%s">%s</a>' % (doc_href, i.doc.title.strip())
-    author = i.doc.author
-    if author:
-        citation = "%s <i>%s</i>" % (author.strip(),title)
-    else:
-        citation = "<i>%s</i>" % title
-    date = i.doc.date
-    if date:
-        try:
-            citation += " [%s]" % str(date)
-        except:
-            pass
-    if section_name:
-        citation += u"<a href='%s'>%s</a>" % (section_href,section_name.strip())
-    if sub_section_name:
-        citation += u"<a href='%s'>%s</a>" % (sub_section_href,sub_section_name.strip())
-    speaker_name = i.para.who
-    if speaker_name:
-        speaker_href = make_absolute_object_link(config, i.philo_id[:5], i.bytes)
-        citation += "<a href='%s'>%s</a>" % (speaker_href, speaker_name)
-    
-    page_obj = i.get_page()
-    if page_obj:
-        if page_obj['n']:
-            page_n = page_obj['n'].decode('utf-8', 'ignore')
-            citation += u" [page %s] " % page_n    
-    citation = u'<span class="philologic_cite">' + citation + "</span>"
-    return citation
-
 def biblio_citation(db, config, i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
     doc_href = make_absolute_object_link(config,i.philo_id[:1], i.bytes)
