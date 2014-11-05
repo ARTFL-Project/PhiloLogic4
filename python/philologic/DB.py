@@ -57,6 +57,12 @@ class DB:
         c.execute("SELECT * FROM toms WHERE philo_id=? LIMIT 1;",(hit_s,))
         return c.fetchone()
         
+    def get_word(self,item):
+        word_s = hit_to_string(item,self.width)
+        c = self.dbh.cursor()
+        c.execute("SELECT * FROM toms WHERE philo_id=? LIMIT 1;",(hit_s,))
+        return c.fetchone()
+        
     def get_page(self,item):
         #print >> sys.stderr, "PAGE_ITEM", item
         page_id_s = " ".join(str(s) for s in item)
