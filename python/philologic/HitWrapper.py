@@ -15,7 +15,6 @@ class HitWrapper(object):
         self.hit = hit
         #print >> sys.stderr, self.hit
         self.philo_id = hit
-        self.encoding = encoding
         if obj_type:
             self.type = obj_type
         else:
@@ -88,7 +87,7 @@ class HitWrapper(object):
             page_i = self["page"]
         if page_i:
             page_id = [self.hit[0],0,0,0,0,0,0,0,page_i]
-            return self.db.get_page(page_id)
+            return PageWrapper(page_id)
         else:
             return None
            
@@ -107,9 +106,7 @@ class ObjectWrapper(object):
             except ValueError:
                 length = len(hit)
             self.type = [k for k in obj_dict if obj_dict[k] == length][0]
-        self.bytes = bytes
-        self.encoding = encoding
-        
+        self.bytes = bytes        
 
     def __getitem__(self, key):
         if key in obj_dict:
@@ -150,6 +147,40 @@ class ObjectWrapper(object):
             page_i = self["page"]
         if page_i:
             page_id = [self.hit[0],0,0,0,0,0,0,0,page_i]
-            return self.db.get_page(page_id)
+            return PageWrapper(page_id)
         else:
             return None
+            
+class PageWrapper(object):
+    def__init__(self,id,db):
+        self.db = db
+        self.hit = id
+        self.philo_id = id
+        self_type = "page"
+        self.row = None
+        self.bytes = []
+        
+    def __getitem__(self,key):
+        if self.row == None:
+            self.row = self.db.get_page(self.philo_id)
+        return __safe__lookup(row,key,self.db.encoding)
+
+    def __getattr__(self,name):
+        if self.row == None:
+            self.row = self.db.get_page(self.philo_id)
+        return __safe__lookup(row,name,self.db.encoding)
+
+
+
+def __safe__lookup(row,field,encoding="utf-8"):
+    metadata = ""
+    try: 
+        metadata = row[field]
+    except:
+        pass
+    metadata_string = ""
+    try: 
+        metadata_string = metadata.decode(encoding,"ignore")
+    except AttributeError:
+        metadata_string = str(metadata).decode(encoding,"ignore")
+    return metadata_string
