@@ -8,67 +8,6 @@ import os
 from philologic.DB import DB
 from link import *
 
-def biblio_citation(db, config, i):
-    """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
-    doc_href = make_absolute_object_link(config,i.philo_id[:1], i.bytes)
-    author = i.doc.author
-    if author:
-        record = u"%s, <i><a href='%s'>%s</a></i>" % (i.doc.author, doc_href,i.doc.title)
-    else:
-        record = u"<i><a href='%s'>%s</a></i>" % (doc_href,i.doc.title)
-    more_metadata = []
-    pub_place = i.doc.pub_place
-    if pub_place:
-        more_metadata.append(pub_place)
-    publisher = i.doc.publisher
-    if publisher:
-        more_metadata.append(publisher)
-    collection = i.doc.collection
-    if collection:
-        more_metadata.append(collection)
-    date = i.doc.date
-    if date:
-        try:
-            date = str(date)
-            more_metadata.append(date)
-        except:
-            pass
-    if more_metadata:
-        record += '(%s)' % ' '.join(more_metadata)
-    genre = i.doc.text_genre
-    if genre:
-        record += ' [genre: %s]' % genre
-    #if db.locals['debug'] == True:
-    #    record += " %s" % i.doc.filename
-    return record
-
-def kwic_citation(db, i, short_citation_length):
-    full_citation = ""
-    short_citation = []
-    author = i.doc.author or ''
-    if author:
-        full_citation += author + ", "
-    short_citation.append(author)
-    title = i.doc.title
-    full_citation += title
-    short_citation.append(title)
-        
-    if len(', '.join([s for s in short_citation if s])) > short_citation_length:
-        short_author, short_title = tuple(short_citation)
-        if len(short_author) > 10:
-            short_author = short_author[:10] + "&#8230;"
-            short_citation[0] = short_author
-        title_len = short_citation_length - len(short_author)
-        if len(short_title) > title_len:
-            short_citation[1] = short_title[:title_len]
-    short_citation = ', '.join([s for s in short_citation if s])
-    
-    ## Generate link to a div1 object
-    get_query = byte_query(i.bytes)
-    href = "./" + '/'.join([str(j) for j in i.div1.philo_id]) + get_query
-    
-    return full_citation, short_citation, href
-
 def make_abs_doc_cite_mobile(db, i):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
     author = i.doc.author or ''
