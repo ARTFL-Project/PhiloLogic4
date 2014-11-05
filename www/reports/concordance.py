@@ -39,16 +39,18 @@ def render_concordance(concordance_object, hits, q, db, dbname, path, config):
 def concordance_results(db, q, config, path):
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
     start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
-    concordance_object = {"description": {"start": start, "end": end, "n": n, "results_per_page": q['results_per_page']},
+    concordance_object = {"description": {"start": start, "end": end, "results_per_page": q['results_per_page']},
                           "query": q}
     results = []
     for hit in hits[start - 1:end]:
-        citation = f.concordance_citation(db, config, hit)
-        context = fetch_concordance(hit, path, config.concordance_length)
+        citation_hrefs = f.citation_links(db, config, hit)
         metadata_fields = {}
         for metadata in q['metadata']:
             metadata_fields[metadata] = hit[metadata]
-        result_obj = {"philo_id": hit.philo_id, "citation": citation, "context": context, "metadata_fields": metadata_fields, "bytes": hit.bytes}
+        citation = concordance_citation(hit, citation_hrefs, metadata_fields)
+        context = fetch_concordance(hit, path, config.concordance_length)
+        result_obj = {"philo_id": hit.philo_id, "citation": citation, "citation_links": citation_hrefs, "context": context,
+                      "metadata_fields": metadata_fields, "bytes": hit.bytes}
         results.append(result_obj)
     concordance_object["results"] = results
     concordance_object['results_len'] = len(hits)
@@ -66,3 +68,49 @@ def fetch_concordance(hit, path, context_size):
     conc_text = convert_entities(conc_text)
     conc_text = strip_start_punctuation.sub("", conc_text)
     return conc_text
+
+def concordance_citation(hit, citation_hrefs, metadata_fields):
+    """ Returns a representation of a PhiloLogic object and all its ancestors
+        suitable for a precise concordance citation. """
+    
+    ## Doc level metadata
+    title = '<a href="%s">%s</a>' % (citation_hrefs['doc'], hit.doc.title.strip())
+    author = hit.doc.author
+    if author:
+        citation = "%s <i>%s</i>" % (author.strip(),title)
+    else:
+        citation = "<i>%s</i>" % title
+    date = hit.doc.date
+    if date:
+        try:
+            citation += " [%s]" % str(date)
+        except:
+            pass
+    
+    ## Div level metadata
+    div1_name = hit.div1.head
+    if not div1_name:
+        if hit.div1.philo_name == "__philo_virtual":
+            div1_name = "Section"
+        else:
+            div1_name = hit.div1.philo_name
+    div2_name = hit.div2.head
+    div3_name = hit.div3.head
+    if div1_name:
+        citation += u"<a href='%s'>%s</a>" % (citation_hrefs['div1'],div1_name.strip())
+    if div2_name:
+        citation += u"<a href='%s'>%s</a>" % (citation_hrefs['div2'],div2_name.strip())
+    if div3_name:
+        citation += u"<a href='%s'>%s</a>" % (citation_hrefs['div3'],div3_name.strip())
+        
+    ## Paragraph level metadata
+    if "para" in citation_hrefs:
+        citation += "<a href='%s'>%s</a>" % (citation_hrefs['para'], hit.para.who)
+    
+    #page_obj = i.get_page()
+    #if page_obj:
+    #    if page_obj['n']:
+    #        page_n = page_obj['n'].decode('utf-8', 'ignore')
+    #        citation += u" [page %s] " % page_n    
+    citation = u'<span class="philologic_cite">' + citation + "</span>"
+    return citation
