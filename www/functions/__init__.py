@@ -1,7 +1,6 @@
 import link
 from link import citation_links
 import IRHitWrapper
-from cite import biblio_citation, kwic_citation
 from get_text import get_text, get_page_text, get_text_obj
 from clean_cache import clean_hitlists, clean_export_results
 from web_config import WebConfig
