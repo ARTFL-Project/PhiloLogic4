@@ -8,9 +8,9 @@ import re
 import sys
 import functions as f
 from functions.wsgi_handler import wsgi_response
-from functions import concatenate_files
 from render_template import render_template
 from philologic import HitWrapper
+from bibliography import biblio_citation
 import json
 
 philo_types = set(['div1', 'div2', 'div3'])
@@ -23,21 +23,20 @@ def navigation(environ,start_response):
     prev = ' '.join(obj.prev.split()[:7])
     next = ' '.join(obj.next.split()[:7])
     current = obj.philo_id[:7]
-    if q['format'] == "json":
-        if check_philo_virtual(db, path_components):
-            obj = db[path_components[:-1]]
-        obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
-        return json.dumps({'current': current, 'text': obj_text, 'prev': prev, 'next': next, 'shrtcit':  f.cite.make_abs_doc_shrtcit_mobile(db,obj), 'citation': f.cite.make_abs_doc_cite_mobile(db,obj)})
+    citation_hrefs = f.citation_links(db, config, obj)
+    metadata_fields = {}
+    for metadata in db.locals['metadata_fields']:
+        metadata_fields[metadata] = obj[metadata]
+    citation = biblio_citation(citation_hrefs, metadata_fields)
     if obj.philo_type == 'doc':
-        concatenate_files(path, "t_o_c", debug=db.locals["debug"])
-        return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,config=config,template_name='t_o_c.mako', report="t_o_c",
-                       ressources=f.concatenate.report_files)
+        resource = f.webResources("t_o_c", debug=db.locals["debug"])
+        toc_object = generate_toc_object(obj, db)
+        return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,toc=toc_object, citation=citation,
+                               db=db, q=q,config=config,template_name='t_o_c.mako', report="t_o_c", css=resource.css, js=resource.js)
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
-    concatenate_files(path, "navigation", debug=db.locals["debug"])
-    return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,navigate_doc=navigate_doc,
-                       db=db,q=q,obj_text=obj_text,prev=prev,next=next,config=config,
-                       template_name='object.mako', report="navigation", ressources=f.concatenate.report_files)
+    resource = f.webResources("navigation", debug=db.locals["debug"])
+    return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,db=db,q=q,obj_text=obj_text,prev=prev,next=next,config=config,
+                           citation=citation, template_name='object.mako', report="navigation", css=resource.css, js=resource.js)
 
 def check_philo_virtual(db, path_components):
     object_type = ''
@@ -59,8 +58,9 @@ def check_philo_virtual(db, path_components):
     except TypeError:
         return False
 
-def navigate_doc(obj, db):
+def generate_toc_object(obj, db):
     """This function fetches all philo_ids for div elements within a doc"""
+    config = f.WebConfig()
     conn = db.dbh 
     c = conn.cursor()
     doc_id =  int(obj.philo_id[0])
@@ -87,50 +87,24 @@ def navigate_doc(obj, db):
             if i['philo_name'] == "front":
                 display_name = "Front Matter"
             else:
-                display_name = i['head'] or i['philo_name']
+                display_name = i['head']
+                if display_name:
+                    display_name = display_name.strip()
+                if not display_name:
+                    try:
+                        display_name = i['type']
+                    except:
+                        pass
+                    if not display_name:
+                        display_name = i['philo_name'] or i['philo_type']
             display_name = display_name.decode('utf-8', 'ignore')
-            text_hierarchy.append((philo_id, philo_type, display_name))
-        print >> sys.stderr, 'DISPLAY NAME', repr(i['philo_name']), repr(display_name)
-    return text_hierarchy
-    
-def get_neighboring_pages(db, doc_id, doc_page):
-    conn = db.dbh
-    c = conn.cursor()
-    c.execute('select philo_seq from pages where n=? and philo_id like ?', (doc_page, doc_id))
-    philo_seq = c.fetchone()[0]
-    prev_seq = philo_seq - 1
-    c.execute('select n from pages where philo_seq=? and philo_id like ?', (prev_seq, doc_id))
-    try:
-        prev_page = c.fetchone()[0]
-    except TypeError:  ## There is no previous page in that doc
-        prev_page = None
-    next_seq = philo_seq + 1
-    c.execute('select n from pages where philo_seq=? and philo_id like ?', (next_seq, doc_id))
-    try:
-        next_page = c.fetchone()[0]
-    except TypeError:  ## There is no previous page in that doc
-        next_page = None
-    return prev_page, next_page
-
-def has_pages(obj, db):
-    conn = db.dbh
-    c = conn.cursor()
-    ## this query will be slow until we create a doc id field
-    c.execute('select n from pages where philo_id like ?', (str(obj.philo_id[0]) + ' %', ))
-    if c.fetchall(): ## This document has pages
-        return True
-    else:
-        return False
-    
-def get_page_num(obj, db):
-    philo_id = ' '.join([str(i) for i in obj.philo_id])
-    conn = db.dbh
-    c = conn.cursor()
-    c.execute('select page from toms where philo_id = ?', (philo_id,))
-    try:
-        return str(c.fetchone()[0] + 1)
-    except TypeError:
-        try:
-            return c.fetchone()[0]
-        except:
-            return None
+            display_name = display_name[0].upper() + display_name[1:]
+            link = f.link.make_absolute_object_link(config, philo_id.split()[:7])
+            toc_element = {"philo_id": philo_id, "philo_type": philo_type, "display_name": display_name, "link": link}
+            text_hierarchy.append(toc_element)
+    metadata_fields = {}
+    for metadata in db.locals['metadata_fields']:
+        if db.locals['metadata_types'][metadata] == "doc":
+            metadata_fields[metadata] = obj[metadata]
+    toc_object = {"toc": text_hierarchy, "metadata_fields": metadata_fields}
+    return toc_object

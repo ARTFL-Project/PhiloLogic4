@@ -12,9 +12,9 @@
                         Export results
                 </button>
                 <%
-                 start, end, n = f.link.page_interval(results_per_page, results, q["start"], q["end"])
+                 description = concordance['description']
                  r_status = "."
-                 if not results.done:
+                 if not concordance['query_done']:
                     r_status += " Still working..."
                 %>
                 <div id="search_arguments">
@@ -23,10 +23,10 @@
                 </div>
                 <div id="search-hits" data-script="${config.db_url + '/scripts/get_total_results.py?' + q['q_string']}">
                     % if end != 0:
-                        % if end < results_per_page or end < len(results):
-                            Hits <span id="start">${start}</span> - <span id="end">${end}</span> of <span id="total_results">${len(results) or results_per_page}</span><span id="incomplete">${r_status}</span>
+                        % if description['end'] < description['results_per_page'] or description['end'] < concordance['results_len']:
+                            Hits <span id="start">${description['start']}</span> - <span id="end">${description['end']}</span> of <span id="total_results">${concordance['results_len'] or description['results_per_page']}</span><span id="incomplete">${r_status}</span>
                         % else:
-                            Hits <span id="start">${start}</span> - <span id="end">${len(results) or end}</span> of <span id="total_results">${len(results) or results_per_page}</span><span id="incomplete">${r_status}</span>         
+                            Hits <span id="start">${description['start']}</span> - <span id="end">${concordance['results_len'] or description['end']}</span> of <span id="total_results">${concordance['results_len'] or description['results_per_page']}</span><span id="incomplete">${r_status}</span>         
                         % endif
                     % else:
                         No results for your query.
@@ -45,15 +45,15 @@
         <div class="row">
             <div id="results_container" class="col-xs-12">
                 <ol id='philologic_concordance' data-more-context="${config.db_url + '/scripts/get_more_context.py?' + q['q_string']}">
-                    % for i in results[start - 1:end]:
+                    % for pos, i in enumerate(concordance['results']):
                         <li class='philologic_occurrence panel panel-default'>
                             <%
-                             n += 1
+                             n = description['start'] + pos
                             %>
                             <div class="citation-container row">
                                 <div class="col-xs-12 col-sm-10 col-md-11">
-                                   <span class="cite" data-id="${' '.join(str(s) for s in i.philo_id)}">
-                                       ${n}.&nbsp ${f.concordance_citation(db, config, i)}
+                                   <span class="cite" data-id="${' '.join(str(s) for s in i['philo_id'])}">
+                                       ${n}.&nbsp ${i['citation']}
                                    </span>
                                 </div>
                                 <div class="hidden-xs col-sm-2 col-md-1">
@@ -63,7 +63,7 @@
                                 </div>
                             </div>
                            <div class='philologic_context'>
-                               <div class="default_length">${fetch_concordance(i, path, config.concordance_length)}</div>
+                               <div class="default_length">${i['context']}</div>
                            </div>
                         </li>
                     % endfor
@@ -73,7 +73,7 @@
         </div>
     </div>
     <div class="more">
-        <%include file="results_paging.mako" args="start=start,results_per_page=results_per_page,q=q,results=results"/> 
+        <%include file="results_paging.mako"/>
         <div style='clear:both;'></div>
     </div>
 </div>

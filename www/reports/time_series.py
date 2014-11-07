@@ -4,9 +4,8 @@ import os
 import sys
 sys.path.append('..')
 import functions as f
+import reports as r
 from functions.wsgi_handler import wsgi_response
-from functions import concatenate_files
-from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from collections import defaultdict
 from copy import deepcopy
@@ -21,7 +20,7 @@ def time_series(environ,start_response):
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
     if q['q'] == '':
-        return bibliography(f,path, db, dbname,q,environ)
+        return r.fetch_bibliography(f,path, db, dbname,q,environ)
     else:
         q = handle_dates(q, db)
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
@@ -46,12 +45,12 @@ def handle_dates(q, db):
     
 
 def render_time_series(hits, db, dbname, q, path, config):
-    concatenate_files(path, "time_series", debug=db.locals["debug"])
+    resource = f.webResources("time_series", debug=db.locals["debug"])
     biblio_criteria = f.biblio_criteria(q, config, time_series=True)
     frequencies, date_counts = generate_time_series(q, db, hits)
     return render_template(frequencies=frequencies,db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
                            biblio_criteria=biblio_criteria, date_counts=date_counts,
-                           config=config, total=len(hits),report="time_series", ressources=f.concatenate.report_files)
+                           config=config, total=len(hits),report="time_series", css=resource.css, js=resource.js)
 
 def generate_time_series(q, db, results):    
     """reads through a hitlist."""    
