@@ -45,7 +45,7 @@ def concordance_results(db, q, config, path):
     for hit in hits[start - 1:end]:
         citation_hrefs = f.citation_links(db, config, hit)
         metadata_fields = {}
-        for metadata in q['metadata']:
+        for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
         citation = concordance_citation(hit, citation_hrefs, metadata_fields)
         context = fetch_concordance(hit, path, config.concordance_length)

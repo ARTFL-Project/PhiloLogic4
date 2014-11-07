@@ -6,7 +6,7 @@
 % endif
 <div class="container-fluid" id='philologic_response'>
     <div id='object-title'>
-        <span class='philologic_cite'>${f.biblio_citation(db,config, obj)}</span>
+        <span class='philologic_cite'>${citation}</span>
     </div>
     <div class="row" id="nav-buttons">
         <button type="button" class="btn btn-primary btn-sm" id="back-to-top">

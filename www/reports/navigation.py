@@ -10,6 +10,7 @@ import functions as f
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
 from philologic import HitWrapper
+from bibliography import biblio_citation
 import json
 
 philo_types = set(['div1', 'div2', 'div3'])
@@ -22,21 +23,20 @@ def navigation(environ,start_response):
     prev = ' '.join(obj.prev.split()[:7])
     next = ' '.join(obj.next.split()[:7])
     current = obj.philo_id[:7]
-    if q['format'] == "json":
-        if check_philo_virtual(db, path_components):
-            obj = db[path_components[:-1]]
-        obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
-        return json.dumps({'current': current, 'text': obj_text, 'prev': prev, 'next': next, 'shrtcit':  f.cite.make_abs_doc_shrtcit_mobile(db,obj), 'citation': f.cite.make_abs_doc_cite_mobile(db,obj)})
+    citation_hrefs = f.citation_links(db, config, obj)
+    metadata_fields = {}
+    for metadata in db.locals['metadata_fields']:
+        metadata_fields[metadata] = obj[metadata]
+    citation = biblio_citation(citation_hrefs, metadata_fields)
     if obj.philo_type == 'doc':
         resource = f.webResources("t_o_c", debug=db.locals["debug"])
         toc_object = generate_toc_object(obj, db)
-        citation = f.biblio_citation(db,config, obj)
         return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,toc=toc_object, citation=citation,
                                db=db, q=q,config=config,template_name='t_o_c.mako', report="t_o_c", css=resource.css, js=resource.js)
     obj_text = f.get_text_obj(obj, path, query_args=q['byte'])
     resource = f.webResources("navigation", debug=db.locals["debug"])
     return render_template(obj=obj,philo_id=obj.philo_id[0],dbname=dbname,f=f,db=db,q=q,obj_text=obj_text,prev=prev,next=next,config=config,
-                       template_name='object.mako', report="navigation", css=resource.css, js=resource.js)
+                           citation=citation, template_name='object.mako', report="navigation", css=resource.css, js=resource.js)
 
 def check_philo_virtual(db, path_components):
     object_type = ''

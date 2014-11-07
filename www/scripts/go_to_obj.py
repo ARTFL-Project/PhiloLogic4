@@ -5,8 +5,6 @@ import sys
 sys.path.append('..')
 from functions.wsgi_handler import parse_cgi
 from wsgiref.handlers import CGIHandler
-from reports import get_neighboring_pages, render_template
-from mako.template import Template
 from philologic.HitWrapper import ObjectWrapper
 import functions as f
 import json
