@@ -157,7 +157,8 @@ class Loader(object):
                 tree = self.pre_parse_whole_file(fn)
             else:
                 tree = self.pre_parse_header(fn)
-            
+
+            trimmed_metadata_xpaths = []
             for type, xpath, field in self.parser_defaults["metadata_xpaths"]:
                 if type == "doc":
                     if field not in data:
@@ -174,6 +175,9 @@ class Loader(object):
                             el = tree.find(xpath)
                             if el is not None and el.text is not None:
                                 data[field] = el.text.encode("utf-8")
+                else:
+                    trimmed_metadata_xpaths.append( (type,xpath,field) )
+            data["options"] = {"metadata_xpaths":trimmed_metadata_xpaths}
             load_metadata.append(data)
 
         def make_sort_key(d):
@@ -403,7 +407,7 @@ class Loader(object):
             words_status = os.system(command)
         else:
             # if not skip the last step and rename the file to all_words_sorted.gz
-            os.system('mv %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
+            words_status = os.system('mv %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
         if words_status != 0:
             print "Word sorting failed\nInterrupting database load..."
             sys.exit()
