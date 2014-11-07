@@ -47,7 +47,7 @@ def generate_kwic_results(db, q, config, path, length=5000, link_to_hit="div1"):
     for hit in hits[start:end]:
         # Get all metadata
         metadata_fields = {}
-        for metadata in q['metadata']:
+        for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
         
         ## Get all links and citations

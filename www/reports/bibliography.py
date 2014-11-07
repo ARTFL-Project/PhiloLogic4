@@ -6,7 +6,7 @@ sys.path.append('..')
 import functions as f
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
-from concordance import *
+#from concordance import *
 import json
 
 
@@ -48,7 +48,6 @@ def bibligraphy_results(db, q, config):
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
-        print >> sys.stderr, "META", repr(metadata_fields)
         if hit.type == "doc":
             citation = biblio_citation(citation_hrefs, metadata_fields)
         else:
@@ -84,3 +83,49 @@ def biblio_citation(citation_hrefs, metadata_fields):
     if "genre" in metadata_fields and metadata_fields['genre']:
         record += ' [genre: %s]' % metadata_fields['genre']
     return record
+
+def concordance_citation(hit, citation_hrefs, metadata_fields):
+    """ Returns a representation of a PhiloLogic object and all its ancestors
+        suitable for a precise concordance citation. """
+    
+    ## Doc level metadata
+    title = '<a href="%s">%s</a>' % (citation_hrefs['doc'], hit.doc.title.strip())
+    author = hit.doc.author
+    if author:
+        citation = "%s <i>%s</i>" % (author.strip(),title)
+    else:
+        citation = "<i>%s</i>" % title
+    date = hit.doc.date
+    if date:
+        try:
+            citation += " [%s]" % str(date)
+        except:
+            pass
+    
+    ## Div level metadata
+    div1_name = hit.div1.head
+    if not div1_name:
+        if hit.div1.philo_name == "__philo_virtual":
+            div1_name = "Section"
+        else:
+            div1_name = hit.div1.philo_name
+    div2_name = hit.div2.head
+    div3_name = hit.div3.head
+    if div1_name:
+        citation += u"<a href='%s'>%s</a>" % (citation_hrefs['div1'],div1_name.strip())
+    if div2_name:
+        citation += u"<a href='%s'>%s</a>" % (citation_hrefs['div2'],div2_name.strip())
+    if div3_name:
+        citation += u"<a href='%s'>%s</a>" % (citation_hrefs['div3'],div3_name.strip())
+        
+    ## Paragraph level metadata
+    if "para" in citation_hrefs:
+        citation += "<a href='%s'>%s</a>" % (citation_hrefs['para'], hit.para.who)
+    
+    #page_obj = i.get_page()
+    #if page_obj:
+    #    if page_obj['n']:
+    #        page_n = page_obj['n'].decode('utf-8', 'ignore')
+    #        citation += u" [page %s] " % page_n    
+    citation = u'<span class="philologic_cite">' + citation + "</span>"
+    return citation
