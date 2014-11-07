@@ -29,7 +29,13 @@ def error_handling(db, dbname, q):
         report = q['report']
     hits = NoHits()
     if report == "concordance":
-        return r.render_concordance(hits, db, dbname, q, path, config)
+        concordance_object = {"description": {"start": 0, "end": 0, "results_per_page": q['results_per_page']},
+                              "query": q,
+                              "results": [],
+                              "results_len": 0,
+                              "query_done": True
+                               }
+        return r.render_concordance(concordance_object, hits, q, db, dbname, path, config)
     elif report == "kwic":
         return r.render_kwic(hits, db, dbname, q, path, config)
     elif report == "collocation":

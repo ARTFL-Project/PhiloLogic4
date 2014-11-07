@@ -3,10 +3,10 @@
 import sys
 sys.path.append('..')
 import functions as f
+import reports as r
 import os
 import re
 from functions.wsgi_handler import wsgi_response
-from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from functions.ObjectFormatter import format_concordance, convert_entities, adjust_bytes
 from functions.FragmentParser import parse
@@ -19,7 +19,7 @@ def concordance(environ,start_response):
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
     if q['q'] == '':
-        return bibliography(f,path, db, dbname,q,environ)
+        return r.fetch_bibliography(f,path, db, dbname,q,environ)
     else:
         concordance_object, hits = concordance_results(db, q, config, path)
         if q['format'] == "json":
@@ -96,6 +96,7 @@ def concordance_citation(hit, citation_hrefs, metadata_fields):
             div1_name = hit.div1.philo_name
     div2_name = hit.div2.head
     div3_name = hit.div3.head
+    
     if div1_name:
         citation += u"<a href='%s'>%s</a>" % (citation_hrefs['div1'],div1_name.strip())
     if div2_name:
@@ -107,10 +108,9 @@ def concordance_citation(hit, citation_hrefs, metadata_fields):
     if "para" in citation_hrefs:
         citation += "<a href='%s'>%s</a>" % (citation_hrefs['para'], hit.para.who)
     
-    #page_obj = i.get_page()
-    #if page_obj:
-    #    if page_obj['n']:
-    #        page_n = page_obj['n'].decode('utf-8', 'ignore')
-    #        citation += u" [page %s] " % page_n    
+    page_obj = hit.page
+    if page_obj['n']:
+        page_n = page_obj['n']
+        citation += u" [page %s] " % page_n    
     citation = u'<span class="philologic_cite">' + citation + "</span>"
     return citation

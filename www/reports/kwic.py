@@ -3,10 +3,10 @@
 import sys
 sys.path.append('..')
 import functions as f
+import reports as r
 import os
 import re
 from functions.wsgi_handler import wsgi_response
-from bibliography import fetch_bibliography as bibliography
 from concordance import concordance_citation
 from render_template import render_template
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
@@ -18,7 +18,7 @@ def kwic(environ,start_response):
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
     if q['q'] == '':
-        return bibliography(f,path, db, dbname,q,environ)
+        return r.fetch_bibliography(f,path, db, dbname,q,environ)
     else:
         kwic_object, hits = generate_kwic_results(db, q, config, path)
         if q['format'] == "json":
