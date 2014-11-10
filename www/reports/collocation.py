@@ -3,6 +3,7 @@
 import sys
 sys.path.append('..')
 import functions as f
+import reports as r
 import os
 import re
 import json
@@ -11,7 +12,6 @@ from functions.wsgi_handler import wsgi_response
 from render_template import render_template
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
-from bibliography import fetch_bibliography as bibliography
 from collections import defaultdict
 from operator import itemgetter
 
@@ -31,7 +31,7 @@ def collocation(environ,start_response):
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
     if q['q'] == '':
-        return bibliography(f,path, db, dbname,q,environ) ## the default should be an error message
+        return r.fetch_bibliography(f,path, db, dbname,q,environ) ## the default should be an error message
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
     return render_collocation(hits, db, dbname, q, path, config)
     

@@ -4,8 +4,8 @@ import os
 import sys
 sys.path.append('..')
 import functions as f
+import reports as r
 from functions.wsgi_handler import wsgi_response
-from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from collections import defaultdict
 from copy import deepcopy
@@ -20,7 +20,7 @@ def time_series(environ,start_response):
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
     if q['q'] == '':
-        return bibliography(f,path, db, dbname,q,environ)
+        return r.fetch_bibliography(f,path, db, dbname,q,environ)
     else:
         q = handle_dates(q, db)
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])

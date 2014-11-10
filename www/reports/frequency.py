@@ -37,20 +37,10 @@ def generate_frequency(results, q, db):
     
     if isinstance(field, str):
         field = [field]
-    
-    field_object = []
-    for i in field:
-        ## Testing for a possible object depth attribute such as div1.head or para.who and
-        ## apply the corresponding depth for the SQL query
-        depth = ''
-        if i.split('.')[0] in object_types and i.split('.')[-1] in db.locals['metadata_fields']:
-            depth = i.split('.')[0]
-            i = i.split('.')[-1]
-        field_object.append((i, depth))
      
     counts = defaultdict(int)
     for hit in results[q['interval_start']:q['interval_end']]:
-        key = generate_key(hit, field_object, db)
+        key = generate_key(hit, field, db)
         counts[key] += 1
 
     table = {}
@@ -80,11 +70,12 @@ def generate_frequency(results, q, db):
 
     return field, table
 
-def generate_key(hit, field_object, db):
+def generate_key(hit, field_list, db):
     key = []
-    for field, depth in field_object:
+    for field in field_list:
         value = ''
-        if field in db.locals['metadata_types'] and not depth:
+        depth = ''
+        if field in db.locals['metadata_types']:
             depth = db.locals['metadata_types'][field]
         if depth:
             if depth == "div":

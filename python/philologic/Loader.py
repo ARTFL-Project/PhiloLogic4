@@ -157,7 +157,8 @@ class Loader(object):
                 tree = self.pre_parse_whole_file(fn)
             else:
                 tree = self.pre_parse_header(fn)
-            
+
+            trimmed_metadata_xpaths = []
             for type, xpath, field in self.parser_defaults["metadata_xpaths"]:
                 if type == "doc":
                     if field not in data:
@@ -174,6 +175,9 @@ class Loader(object):
                             el = tree.find(xpath)
                             if el is not None and el.text is not None:
                                 data[field] = el.text.encode("utf-8")
+                else:
+                    trimmed_metadata_xpaths.append( (type,xpath,field) )
+            data["options"] = {"metadata_xpaths":trimmed_metadata_xpaths}
             load_metadata.append(data)
 
         def make_sort_key(d):
@@ -215,6 +219,8 @@ class Loader(object):
                                  "sortedtoms":self.workdir + os.path.basename(d["filename"]) + ".toms.sorted",
                                  "pages":self.workdir + os.path.basename(d["filename"]) + ".pages",
                                  "results":self.workdir + os.path.basename(d["filename"]) + ".results"} for n,d in enumerate(data_dicts)]
+
+        self.loaded_files = self.filequeue[:]
                 
         indexed_types = []
 
@@ -329,6 +335,31 @@ class Loader(object):
             #print vec
             self.omax = [max(x,y) for x,y in zip(vec,self.omax)]
         print "%s: done parsing" % time.ctime()
+
+    def merge_objects(self, file_num=500,make_word_table=False):
+        print "\n### Merge parser output ###"
+        print "%s: sorting words" % time.ctime()
+        words_status = self.merge_words(file_num=file_num)
+        print "%s: word sort returned %d" % (time.ctime(),words_status)
+
+        if (make_word_table == True):
+            print "\n### Loading word table ###" 
+            print "concatenating document-order words file"
+            for d in self.loaded_files:
+                os.system('gunzip -c %s | egrep "^word" >> all_words_ordered' % (d["raw"] + ".gz"))                
+            
+        tomsargs = "sort -m " + sort_by_id + " " + "*.toms.sorted"
+        print "%s: sorting objects" % time.ctime()                                 
+        toms_status = os.system(tomsargs + " > " + self.workdir + "all_toms_sorted")
+        print "%s: object sort returned %d" % (time.ctime(),toms_status)
+        if self.clean:
+            os.system('rm *.toms.sorted')
+        
+        pagesargs = "cat *.pages"
+        print "%s: joining pages" % time.ctime()
+        pages_status = os.system(pagesargs + " > " + self.workdir + "all_pages")
+        print "%s: word join returned %d" % (time.ctime(), pages_status)
+
     
     def merge_words(self, file_num):
         """This function runs a multi-stage merge sort on words
@@ -376,32 +407,14 @@ class Loader(object):
             words_status = os.system(command)
         else:
             # if not skip the last step and rename the file to all_words_sorted.gz
-            os.system('mv %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
+            words_status = os.system('mv %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
         if words_status != 0:
             print "Word sorting failed\nInterrupting database load..."
             sys.exit()
         if self.clean:
             os.system('rm %s' % self.workdir + '/*split.gz')
         return words_status
-    
-    def merge_objects(self, file_num=500):
-        print "\n### Merge parser output ###"
-        print "%s: sorting words" % time.ctime()
-        words_status = self.merge_words(file_num=file_num)
-        print "%s: word sort returned %d" % (time.ctime(),words_status)
-
-        tomsargs = "sort -m " + sort_by_id + " " + "*.toms.sorted"
-        print "%s: sorting objects" % time.ctime()                                 
-        toms_status = os.system(tomsargs + " > " + self.workdir + "all_toms_sorted")
-        print "%s: object sort returned %d" % (time.ctime(),toms_status)
-        if self.clean:
-            os.system('rm *.toms.sorted')
-        
-        pagesargs = "cat *.pages"
-        print "%s: joining pages" % time.ctime()
-        pages_status = os.system(pagesargs + " > " + self.workdir + "all_pages")
-        print "%s: word join returned %d" % (time.ctime(), pages_status)
-         
+             
     def analyze(self):
         print "\n### Create inverted index ###"
         print self.omax
@@ -462,10 +475,10 @@ class Loader(object):
     def setup_sql_load(self):
         for table in self.tables:
             if table == 'words':
-                file_in = self.destination + '/WORK/all_words_sorted.gz'
+                file_in = self.destination + '/WORK/all_words_ordered'
                 indices = [("philo_name", "%s_ancestor" % self.default_object_level), ('philo_id',)]
                 depth = 7
-                compressed = True
+                compressed = False
             elif table == 'pages':
                 file_in = self.destination + '/WORK/all_pages'                
                 indices = [("philo_id",)]
@@ -476,7 +489,7 @@ class Loader(object):
                 indices = [('philo_type',), ('philo_id',)] + self.metadata_fields
                 depth = 7
                 compressed = False
-            post_filter = make_sql_table(table, file_in, gzip=compressed, indices=indices, depth=depth)
+            post_filter = make_sql_table(table, file_in, gz=compressed, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)
             
     def post_processing(self, *extra_filters):
@@ -541,7 +554,7 @@ class Loader(object):
         print >> web_config, "# The dict key should describe what the facets will do, and the"
         print >> web_config, "# dict value, which can be a string or a list, should list the metadata"
         print >> web_config, "# to be used for the frequency counts"
-        print >> web_config, "facets = %s" % repr(dict([(i, i) for i in self.metadata_fields]))
+        print >> web_config, "facets = %s" % repr([{i: i} for i in self.metadata_fields])
         print >> web_config, "\n# The concordance_length variable sets the length in bytes of each concordance result"
         print >> web_config, "concordance_length = 300"
         print >> web_config, "\n# The search_examples variable defines which examples should be provided"
