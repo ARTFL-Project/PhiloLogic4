@@ -6,7 +6,7 @@ import functions as f
 import reports as r
 import os
 import re
-from functions.wsgi_handler import wsgi_response
+from functions.wsgi_handler import wsgi_response, parse_cgi
 from render_template import render_template
 from functions.ObjectFormatter import format_concordance, convert_entities, adjust_bytes
 from functions.FragmentParser import parse
@@ -15,7 +15,9 @@ import json
 strip_start_punctuation = re.compile("^[,?;.:!']")
 
 def concordance(environ,start_response):
-    db, dbname, path_components, q = wsgi_response(environ,start_response)
+    wsgi_response(environ, start_response)
+    db, path_components, q = parse_cgi(environ)
+    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
     if q['q'] == '':
@@ -27,7 +29,7 @@ def concordance(environ,start_response):
             del concordance_object['query']['dbpath']
             return json.dumps(concordance_object)
         return render_concordance(concordance_object, hits, q, db, dbname, path, config)
-        
+ 
 def render_concordance(concordance_object, hits, q, db, dbname, path, config):
     resource = f.webResources("concordance", debug=db.locals["debug"])
     biblio_criteria = f.biblio_criteria(concordance_object['query'], config)
@@ -74,16 +76,14 @@ def concordance_citation(hit, citation_hrefs, metadata_fields):
         suitable for a precise concordance citation. """
     
     ## Doc level metadata
-    title = '<a href="%s">%s</a>' % (citation_hrefs['doc'], hit.doc.title.strip())
-    author = hit.doc.author
-    if author:
-        citation = "%s <i>%s</i>" % (author.strip(),title)
+    title = '<a href="%s">%s</a>' % (citation_hrefs['doc'], metadata_fields['title'].strip())
+    if metadata_fields['author']:
+        citation = "%s <i>%s</i>" % (metadata_fields['author'].strip(),title)
     else:
         citation = "<i>%s</i>" % title
-    date = hit.doc.date
-    if date:
+    if metadata_fields['date']:
         try:
-            citation += " [%s]" % str(date)
+            citation += " [%s]" % str(metadata_fields['date'])
         except:
             pass
     
@@ -106,7 +106,7 @@ def concordance_citation(hit, citation_hrefs, metadata_fields):
         
     ## Paragraph level metadata
     if "para" in citation_hrefs:
-        citation += "<a href='%s'>%s</a>" % (citation_hrefs['para'], hit.para.who)
+        citation += "<a href='%s'>%s</a>" % (citation_hrefs['para'], metadata_fields['who'])
     
     page_obj = hit.page
     if page_obj['n']:

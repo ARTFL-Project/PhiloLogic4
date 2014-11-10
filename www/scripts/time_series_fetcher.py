@@ -18,8 +18,8 @@ def time_series_fetcher(environ,start_response):
     db, path_components, q = parse_cgi(environ)
     q = r.handle_dates(q, db)
     results = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-    absolute_frequency, date_counts = r.generate_time_series(q, db, results)
-    yield json.dumps([json.loads(absolute_frequency), json.loads(date_counts)])
+    time_series_object = r.generate_time_series(q, db, results)
+    yield json.dumps(time_series_object)
 
 if __name__ == "__main__":
     CGIHandler().run(time_series_fetcher)

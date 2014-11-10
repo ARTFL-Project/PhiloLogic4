@@ -12,13 +12,12 @@ from query_parser import query_parser
 
 def wsgi_response(environ,start_response):
     status = '200 OK'
-    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
+    if "format" in cgi and cgi['format'][0] == "json":
+        headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    else:
+        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response(status,headers)
-    environ["parsed_params"] = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
-    myname = environ["SCRIPT_FILENAME"]
-    dbname = os.path.basename(myname.replace("/dispatcher.py",""))
-    db, path_components, q = parse_cgi(environ)
-    return db, dbname, path_components, q
 
 def parse_cgi(environ):
     """ Parses CGI parameters from Apache, returns a tuple with a philologic database, remaining path components, and a query dict. """

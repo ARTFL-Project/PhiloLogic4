@@ -7,7 +7,7 @@ import sqlite3
 import re
 import sys
 import functions as f
-from functions.wsgi_handler import wsgi_response
+from functions.wsgi_handler import wsgi_response, parse_cgi
 from render_template import render_template
 from philologic import HitWrapper
 from bibliography import biblio_citation
@@ -16,7 +16,9 @@ import json
 philo_types = set(['div1', 'div2', 'div3'])
 
 def navigation(environ,start_response):
-    db, dbname, path_components, q = wsgi_response(environ,start_response)
+    wsgi_response(environ, start_response)
+    db, path_components, q = parse_cgi(environ)
+    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
     path = os.getcwd().replace('functions/', '')
     obj = db[path_components]
     config = f.WebConfig()
@@ -87,7 +89,10 @@ def generate_toc_object(obj, db):
             if i['philo_name'] == "front":
                 display_name = "Front Matter"
             else:
-                display_name = i['head']
+                try:
+                    display_name = i['head']
+                except IndexError:
+                    display_name = ''
                 if display_name:
                     display_name = display_name.strip()
                 if not display_name:

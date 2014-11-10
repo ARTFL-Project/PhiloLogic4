@@ -5,7 +5,7 @@ import sys
 sys.path.append('..')
 import functions as f
 import reports as r
-from functions.wsgi_handler import wsgi_response
+from functions.wsgi_handler import wsgi_response, parse_cgi
 from render_template import render_template
 from collections import defaultdict
 from copy import deepcopy
@@ -16,7 +16,9 @@ import re
 sub_date = re.compile('date=[^&]*')
 
 def time_series(environ,start_response):
-    db, dbname, path_components, q = wsgi_response(environ,start_response)
+    wsgi_response(environ, start_response)
+    db, path_components, q = parse_cgi(environ)
+    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
     if q['q'] == '':
@@ -47,13 +49,13 @@ def handle_dates(q, db):
 def render_time_series(hits, db, dbname, q, path, config):
     resource = f.webResources("time_series", debug=db.locals["debug"])
     biblio_criteria = f.biblio_criteria(q, config, time_series=True)
-    frequencies, date_counts = generate_time_series(q, db, hits)
-    return render_template(frequencies=frequencies,db=db,dbname=dbname,q=q,f=f, template_name='time_series.mako',
-                           biblio_criteria=biblio_criteria, date_counts=date_counts,
-                           config=config, total=len(hits),report="time_series", css=resource.css, js=resource.js)
+    time_series_object = generate_time_series(q, db, hits)
+    return render_template(time_series=time_series_object,db=db,dbname=dbname,q=q,template_name='time_series.mako',json=json,
+                           biblio_criteria=biblio_criteria, config=config,report="time_series", css=resource.css, js=resource.js)
 
 def generate_time_series(q, db, results):    
-    """reads through a hitlist."""    
+    """reads through a hitlist to generate a time_series_object"""
+    time_series_object = {'results_length': len(results), 'query': q, 'query_done': False}
     try:
         start = int(q['start_date'])
     except ValueError:
@@ -65,7 +67,6 @@ def generate_time_series(q, db, results):
     
     absolute_count = defaultdict(int)
     date_counts = {}
-    print >> sys.stderr, "INTERVAL", q["year_interval"]
     for i in results[q['interval_start']:q['interval_end']]:
         date = i.doc['date']
         try:
@@ -93,13 +94,13 @@ def generate_time_series(q, db, results):
         
         if date not in date_counts:
             date_counts[date] = date_total_count(date, db, q['year_interval'])
-    
-    print >> sys.stderr, absolute_count
-    return json.dumps(absolute_count), json.dumps(date_counts)
+    if q['interval_end'] >= len(results):
+        time_series_object['query_done'] = True
+    time_series_object['results'] = {'absolute_count': absolute_count, 'date_count': date_counts}
+    return time_series_object
 
 
 def date_total_count(date, db, interval):
-    
     if interval != '1':
         dates = [date]
         if interval == '10':

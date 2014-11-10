@@ -37,9 +37,9 @@ def get_text_obj(obj, path, query_args=False):
         c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id,))
         path += "/data/TEXT/" + c.fetchone()["filename"]
     file = open(path)
-    byte_start = obj.byte_start
+    byte_start = int(obj.byte_start)
     file.seek(byte_start)
-    width = obj.byte_end - byte_start
+    width = int(obj.byte_end) - byte_start
     raw_text = file.read(width)
 
     if query_args:
