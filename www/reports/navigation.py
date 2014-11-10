@@ -89,7 +89,10 @@ def generate_toc_object(obj, db):
             if i['philo_name'] == "front":
                 display_name = "Front Matter"
             else:
-                display_name = i['head']
+                try:
+                    display_name = i['head']
+                except IndexError:
+                    display_name = ''
                 if display_name:
                     display_name = display_name.strip()
                 if not display_name:
