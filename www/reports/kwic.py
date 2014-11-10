@@ -6,7 +6,7 @@ import functions as f
 import reports as r
 import os
 import re
-from functions.wsgi_handler import wsgi_response
+from functions.wsgi_handler import wsgi_response, parse_cgi
 from concordance import concordance_citation
 from render_template import render_template
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
@@ -14,7 +14,9 @@ import json
 
 
 def kwic(environ,start_response):
-    db, dbname, path_components, q = wsgi_response(environ,start_response)
+    wsgi_response(environ, start_response)
+    db, path_components, q = parse_cgi(environ)
+    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
     if q['q'] == '':
@@ -48,6 +50,8 @@ def generate_kwic_results(db, q, config, path, length=5000, link_to_hit="div1"):
         # Get all metadata
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
+            if metadata == "author":
+                print >> sys.stderr, "AUTHOR", repr(hit.doc[metadata])
             metadata_fields[metadata] = hit[metadata]
         
         ## Get all links and citations
@@ -96,6 +100,7 @@ def generate_kwic_results(db, q, config, path, length=5000, link_to_hit="div1"):
     return kwic_object, hits
 
 def kwic_citation(short_citation_length, metadata_fields, hit):
+    #print >> sys.stderr, "META", repr(metadata_fields['author'])
     full_citation = ""
     short_citation = []
     author = metadata_fields['author']

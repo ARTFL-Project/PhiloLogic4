@@ -7,7 +7,7 @@ from reports.concordance import fetch_concordance
 import os
 import re
 import unicodedata
-from functions.wsgi_handler import wsgi_response
+from functions.wsgi_handler import wsgi_response, parse_cgi
 from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from collocation import tokenize, filter
@@ -30,7 +30,9 @@ end_match = re.compile(r'<[^>]*?\Z')
 no_tag = re.compile(r'<[^>]+>')
 
 def concordance_from_collocation(environ,start_response):
-    db, dbname, path_components, q = wsgi_response(environ,start_response)
+    wsgi_response(environ, start_response)
+    db, path_components, q = parse_cgi(environ)
+    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
     if q['q'] == '':

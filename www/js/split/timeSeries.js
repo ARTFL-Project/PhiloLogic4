@@ -34,7 +34,6 @@ $(document).ready(function() {
         var percent = 5000 / total * 100;
         updateProgressBar(percent)
         var date_counts = eval($('#relative_time').data('datecount'));
-        
         var script = $('#time_series_report').data('script');
         progressiveLoad(db_url, total, interval, 0, 5000, full_abs, date_counts, date_list, script);   
     } else {
@@ -99,14 +98,14 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
     if (initial_end < total_results) {
         var script_call = script + "&interval_start=" + interval_start + "&interval_end=" + interval_end;
         $.getJSON(script_call, function(data) {
-            var abs_merge = merge_time_results(abs_full_results, data[0], date_list);
+            var abs_merge = merge_time_results(abs_full_results, data.results['absolute_count'], date_list);
             var abs_sorted_list = abs_merge[0];
             var abs_new_full_results = abs_merge[1];            
             drawFromData(abs_sorted_list, interval, "absolute_time");
             
             // Update date_counts
-            for (var date in data[1]) {
-                full_date_counts[date] = data[1][date]
+            for (var date in data.results['date_count']) {
+                full_date_counts[date] = data.results['date_count'][date]
             }
             
             progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_new_full_results, full_date_counts, date_list, script);
@@ -119,6 +118,7 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         // Store final sorted results
         var abs_results = sortResults(abs_full_results)
         $('#absolute_time').data('value', JSON.stringify(abs_results));
+        console.log(JSON.stringify(abs_results));
         
         // Generate relative frequencies from absolute frequencies and make button clickable again
         $("#relative_time").removeAttr("disabled");

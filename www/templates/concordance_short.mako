@@ -1,10 +1,9 @@
 <% description = concordance['description'] %>
 <ol id='philologic_concordance' data-more-context="${config.db_url + '/scripts/get_more_context.py?' + q['q_string']}">
-    <% n = description['n'] %>
-    % for i in concordance['results']:
+    % for pos, i in enumerate(concordance['results']):
         <li class='philologic_occurrence panel panel-default'>
             <%
-             n += 1
+             n = description['start'] + pos
             %>
             <div class="citation-container row">
                 <div class="col-xs-12 col-sm-10 col-md-11">
@@ -18,9 +17,9 @@
                    </button>
                 </div>
             </div>
-            <div class='philologic_context'>
+           <div class='philologic_context'>
                <div class="default_length">${i['context']}</div>
-            </div>
+           </div>
         </li>
     % endfor
 </ol>
