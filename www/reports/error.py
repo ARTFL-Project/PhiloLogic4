@@ -29,23 +29,23 @@ def error_handling(db, dbname, q):
         report = q['report']
     hits = NoHits()
     if report == "concordance":
-        return r.render_concordance(hits, db, dbname, q, path, config)
+        concordance_object = {"description": {"start": 0, "end": 0, "results_per_page": q['results_per_page']},
+                              "query": q,
+                              "results": [],
+                              "results_len": 0,
+                              "query_done": True
+                              }
+        return r.render_concordance(concordance_object, hits, q, db, dbname, path, config)
     elif report == "kwic":
-        return r.render_kwic(hits, db, dbname, q, path, config)
+        kwic_object = {"description": {"start": 0, "end": 0, "results_per_page": q['results_per_page']},
+                       "query": q,
+                       "results": [],
+                       "results_len": 0,
+                       "query_done": True
+                       }
+        return r.render_kwic(kwic_object, hits, q, db, dbname, path, config)
     elif report == "collocation":
         return r.render_collocation(hits, db, dbname, q, path, config)
     elif report == "time_series":
         q = r.handle_dates(q, db)
         return r.render_time_series(hits, db, dbname, q, path, config)
-    
-#def error(environ,start_response):
-#    config = f.WebConfig()
-#    try:
-#        db, dbname, path_components, q = wsgi_response(environ,start_response)
-#    except AssertionError:
-#        myname = environ["SCRIPT_FILENAME"]
-#        dbname = os.path.basename(myname.replace("/dispatcher.py",""))
-#        db, path_components, q = parse_cgi(environ)
-#    return render_template(db=db,dbname=dbname,form=True, q=q, config=config,
-#                           report="error", template_name='error.mako')
-

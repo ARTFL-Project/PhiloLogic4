@@ -1,20 +1,17 @@
 <div class="btn-group pull-right">
     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
         <span id="menu-header">Display frequency by</span>
-        <span id="selected-sidebar-option" data-selected="${config['facets'][0]}"></span>
+        <span id="selected-sidebar-option" data-selected="${config['facets'][0].keys()[0]}"></span>
         <span class="caret"></span>
     </button>
     <ul class="dropdown-menu" role="menu" id="frequency_field">
         <li role="presentation" class="dropdown-header">Display frequency by</li>
         % for facet in config["facets"]:
             <%
-            if facet in config["metadata_aliases"]:
-                alias = config["metadata_aliases"][facet]
-            else:
-                alias = facet
-            script = "%s/scripts/get_frequency.py?%s&frequency_field=%s" % (config.db_url, q['q_string'], facet)
+            facet_name = facet.keys()[0]
+            script = "%s/scripts/get_frequency.py?%s&frequency_field=%s" % (config.db_url, q['q_string'], facet_name)
             %>
-            <li><a class="sidebar-option" id="side_opt_${facet}" data-value='${facet}' data-display='${facet}' data-script="${script}">${alias}</a></li>
+            <li><a class="sidebar-option" id="side_opt_${facet_name}" data-value='${facet_name}' data-script="${script}">${facet_name}</a></li>
         % endfor
         % if report != 'bibliography':
             <li class="divider"></li>

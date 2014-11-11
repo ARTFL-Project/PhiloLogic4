@@ -12,13 +12,12 @@ from query_parser import query_parser
 
 def wsgi_response(environ,start_response):
     status = '200 OK'
-    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
+    if "format" in cgi and cgi['format'][0] == "json":
+        headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    else:
+        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response(status,headers)
-    environ["parsed_params"] = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
-    myname = environ["SCRIPT_FILENAME"]
-    dbname = os.path.basename(myname.replace("/dispatcher.py",""))
-    db, path_components, q = parse_cgi(environ)
-    return db, dbname, path_components, q
 
 def parse_cgi(environ):
     """ Parses CGI parameters from Apache, returns a tuple with a philologic database, remaining path components, and a query dict. """
@@ -38,7 +37,6 @@ def parse_cgi(environ):
         query['q'] = query['q'].replace(',', '')
         query['q'] = query['q'].replace('!', '')
         query['q'] = query['q'].replace('?', '')
-        query['q'] = query['q'].replace(':', '')
         #query['q'] = re.sub('\.([^*]*)', ' \\1', query['q'])
     query["method"] = cgi.get("method",[None])[0] or "proxy"
     query['arg'] = cgi.get("arg", [None])[0]
@@ -78,8 +76,7 @@ def parse_cgi(environ):
     ## This is for frequency searches: raw count or per n number of words
     query["rate"] = cgi.get("rate", [None])[0]
     
-    ## This is for ranked relevancy
-    query['obj_type'] = 'doc'
+    query['philo_type'] = cgi.get("philo_type", [''])[0]
     
     ## This is for theme rheme searches
     query['theme_rheme'] = cgi.get("theme_rheme", [''])[0]
@@ -123,6 +120,8 @@ def parse_cgi(environ):
                 query["metadata"][field] = cgi[field][0]
         if field not in cgi or not cgi[field][0]: ## in case of an empty query
             num_empty += 1
+            
+    query["metadata"]['philo_type'] = query['philo_type']
     
     if num_empty == len(metadata_fields):
         query["no_q"] = True

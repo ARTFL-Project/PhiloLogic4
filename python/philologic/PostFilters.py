@@ -90,10 +90,11 @@ def normalized_word_frequencies(loader_obj):
     output.close()
     
 def metadata_frequencies(loader_obj):
-    print 'Generating metadata frequencies...',
+    print 'Generating metadata frequencies...'
     frequencies = loader_obj.destination + '/frequencies'
     conn = sqlite3.connect(loader_obj.destination + '/toms.db')
     c = conn.cursor()
+    fields_not_found = []
     for field in loader_obj.metadata_fields:
         query = 'select %s, count(*) from toms group by %s order by count(%s) desc' % (field, field, field)
         try:
@@ -105,15 +106,17 @@ def metadata_frequencies(loader_obj):
                     clean_val = val.replace("\n"," ").replace("\t","")
                     print >> output, clean_val + '\t' + str(result[1])
             output.close()
+            print >> sys.stderr, 'Generated metadata frequencies for %s' % field
         except sqlite3.OperationalError:
-            print >> sys.stderr, "error writing " + field + "_frequencies"
+            fields_not_found.append(field)
+    if fields_not_found:
+        print >> sys.stderr, 'The following fields were not found in the input corpus %s' % ', '.join(fields_not_found)
     conn.close()
     
 def normalized_metadata_frequencies(loader_obj):
     print 'Generating normalized metadata frequencies...',
     frequencies = loader_obj.destination + '/frequencies'
     for field in loader_obj.metadata_fields:
-        print >> sys.stderr, "normalizing " + field
         try:
             output = open(frequencies + "/normalized_" + field + "_frequencies","w")        
             for line in open(frequencies + "/" + field + "_frequencies"):            
@@ -124,7 +127,7 @@ def normalized_metadata_frequencies(loader_obj):
                 print >> output, norm_word + "\t" + word
             output.close()
         except:
-            print >> sys.stderr, "error writing normalized_" + field + "_frequencies"
+            pass
 
 # Some post-merge cleanup for normalize_divs in LoadFilters--should always be paired and use same arguments.
 def normalize_divs_post(*columns):

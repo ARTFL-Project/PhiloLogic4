@@ -8,6 +8,21 @@ import sqlite3
 obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4,
             'para': 5, 'sent': 6, 'word': 7}
 
+def _safe_lookup(row,field,encoding="utf-8"):
+    metadata = ""
+    try: 
+        metadata = row[field]
+    except:
+        pass
+    if metadata is None:
+        return u""
+    metadata_string = ""
+    try: 
+        metadata_string = metadata.decode(encoding,"ignore")
+    except AttributeError:
+        metadata_string = str(metadata).decode(encoding,"ignore")
+    return metadata_string
+
 class HitWrapper(object):
 
     def __init__(self, hit, db, obj_type=False, encoding=None):
@@ -25,21 +40,20 @@ class HitWrapper(object):
             if length >= 7: length = 7
             self.type = [k for k in obj_dict if obj_dict[k] == length][0]
         self.row = None
-        bytes = []
-        words = []
+        self.bytes = []
         self.words = []
         if len(list(hit)) == 7:
             self.words.append(WordWrapper(hit,db,self.byte_start))
             page_i = self["page"]
         else:
             parent_id = hit[:6]
-            remaining = list(philo_id[7:])
+            remaining = list(self.philo_id[7:])
             while remaining:
                 self.words += [ parent_id + (remaining.pop(0),) ]
                 if remaining:
                     self.bytes.append(remaining.pop(0))
             self.words.sort(key=lambda x:x[-1]) # assumes words in same sent, as does search4
-            self.words = [WordWrapper(word,db,byte) for word,byte in zip(self.words,bytes)]
+            self.words = [WordWrapper(word,db,byte) for word,byte in zip(self.words,self.bytes)]
 
             page_i = self.hit[6]
         page_id = [self.hit[0],0,0,0,0,0,0,0,page_i]
@@ -51,7 +65,7 @@ class HitWrapper(object):
         else:
             if self.row == None:
                 self.row = self.db.get_id_lowlevel(self.philo_id)
-            return __safe__lookup(row,key,self.db.encoding)
+            return _safe_lookup(self.row,key,self.db.encoding)
         
     def __getattr__(self, name):
         if name in obj_dict:
@@ -59,7 +73,7 @@ class HitWrapper(object):
         else:
             if self.row == None:
                 self.row = self.db.get_id_lowlevel(self.philo_id)
-            return __safe__lookup(row,name,self.db.encoding)
+            return _safe_lookup(self.row,name,self.db.encoding)
         
     def get_page(self):
         if self.type == "word" and len(list(self.hit)) > 7:
@@ -100,7 +114,7 @@ class ObjectWrapper(object):
         else:
             if self.row == None:
                 self.row = self.db.get_id_lowlevel(self.philo_id)
-            return __safe__lookup(row,key,self.db.encoding)
+            return _safe_lookup(self.row,key,self.db.encoding)
         
     def __getattr__(self, name):
         if name in obj_dict:
@@ -108,7 +122,7 @@ class ObjectWrapper(object):
         else:
             if self.row == None:
                 self.row = self.db.get_id_lowlevel(self.philo_id)
-            return __safe__lookup(row,name,self.db.encoding)
+            return _safe_lookup(self.row,name,self.db.encoding)
 
     def get_page(self):
         if self.type == "word" and len(list(self.hit)) > 7:
@@ -132,12 +146,12 @@ class PageWrapper(object):
     def __getitem__(self,key):
         if self.row == None:
             self.row = self.db.get_page(self.philo_id)
-        return __safe__lookup(row,key,self.db.encoding)
+        return _safe_lookup(self.row,key,self.db.encoding)
 
     def __getattr__(self,name):
         if self.row == None:
             self.row = self.db.get_page(self.philo_id)
-        return __safe__lookup(row,name,self.db.encoding)
+        return _safe_lookup(self.row,name,self.db.encoding)
 
 class WordWrapper(object):
     def __init__(self,id,db,byte):
@@ -150,23 +164,11 @@ class WordWrapper(object):
     def __getitem__(self,key):
         if self.row == None:
             self.row = self.db.get_word(self.philo_id)
-        return __safe__lookup(row,key,self.db.encoding)
+        return _safe_lookup(self.row,key,self.db.encoding)
 
     def __getattr__(self,name):
         if self.row == None:
             self.row = self.db.get_word(self.philo_id)
-        return __safe__lookup(row,name,self.db.encoding)
+        return _safe_lookup(self.row,name,self.db.encoding)
 
 
-def __safe__lookup(row,field,encoding="utf-8"):
-    metadata = ""
-    try: 
-        metadata = row[field]
-    except:
-        pass
-    metadata_string = ""
-    try: 
-        metadata_string = metadata.decode(encoding,"ignore")
-    except AttributeError:
-        metadata_string = str(metadata).decode(encoding,"ignore")
-    return metadata_string

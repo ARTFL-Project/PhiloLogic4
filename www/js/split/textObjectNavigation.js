@@ -53,9 +53,6 @@ $(document).ready(function() {
     // Only enable back/forward buttons if necessary 
     checkEndBeginningOfDoc();
     
-    // Specifically for the Encyclopédie
-    addPreviousPage();
-    
     $(window).load(function() {
         if ($('.highlight').length) {
             scrollToHighlight();
@@ -64,32 +61,16 @@ $(document).ready(function() {
         retrieveObj(db_url);
     });
     
+    // Make sure notes stay inline when after a span.xml-l
+    $('.xml-l + .note').prev('.xml-l').css('display', 'inline');
+    $('.note-content + .xml-l').prepend('<br>');
+    
 });
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-
-// TODO: make this function more generic
-function addPreviousPage() {
-    var first_link_split = $('.page-image-link').eq(0).attr('href');
-    if (first_link_split) {
-        first_link_split = first_link_split.split('/');
-        var url = first_link_split.slice(0,-1).join('/') + '/';
-        var img = first_link_split.reverse()[0];
-        img = img.replace('.jpeg', '').split('-');
-        var new_page_num = (parseInt(img[1]) - 1).toString();
-        if (isNaN(new_page_num) == false) {
-            var volume = img[0].split('_')[1];
-            img = img[0] + '-' + new_page_num;
-            var new_link = url + img + '.jpeg';
-            var element = '<a href="' + new_link + '" class="page-image-link" data-gallery>[page ' + volume + ":" + new_page_num + ']</a>';
-            $('b.headword').eq(0).before(element);
-        }
-    }
-}
 
 
 function createNoteLink() {
@@ -127,8 +108,24 @@ function retrieveTableOfContents(db_url) {
     var philo_id = doc_id + ' 0 0 0 0 0 0'
     var script = $('#toc-wrapper').data('script') + philo_id;
     $('#toc-container').hide();
-    $.get(script, function(data) {
-        $('#toc-content').html(data).promise().done(function() {
+    $.getJSON(script, function(data_object) {
+        var html = '';
+        var data = data_object.toc;
+        for (var i=0; i < data.length; i++) {
+            var philo_id = data[i].philo_id.split(' ').join('_');
+            var philo_type = data[i].philo_type;
+            var head = data[i].display_name;
+            var href = data[i].link;
+            var link = '<a href="'+ href + '" id="' + philo_id + '">' + head + '</a>';
+            if (philo_type == "div2") {
+                html += '<div class="toc-div2"><span class="bullet-point-div2"></span>' + link + '</div>';
+            } else if (philo_type == "div3") {
+                html += '<div class="toc-div3"><span class="bullet-point-div3"></span>' + link + '</div>';
+            } else {
+                html += '<div class="toc-div1"><span class="bullet-point-div1"></span>' + link + '</div>';
+            }
+        }
+        $('#toc-content').html(html).promise().done(function() {
             $("#show-toc").removeAttr("disabled");
         });
         adjustTocHeight(100); // adjust height before showing
@@ -146,6 +143,7 @@ function hideTOC() {
     });
     $('#nav-buttons').removeClass('col-md-offset-4');
 }
+
 function showTOC() {
     if ($(document).height() == $(window).height()) {
         $('#toc-container').css('position', 'static');
@@ -155,7 +153,7 @@ function showTOC() {
     $('#nav-buttons').addClass('col-md-offset-4');
     $('#toc-container').velocity("transition.slideLeftBigIn", {"duration": 300});
     $('#toc-wrapper').addClass('show');
-    var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
+    var scrollto_id = '#' + $("#text-obj-content").data('philoId').split(' ').join('_');
     setTimeout(function() {
         adjustTocHeight();
         if ($('#toc-content').find($(scrollto_id)).length) {
@@ -164,6 +162,7 @@ function showTOC() {
         }  
     }, 300);
 }
+
 function adjustTocHeight(num) {
     // Make sure the TOC is no higher than viewport
     if ($(document).height() == $(window).height()) {
@@ -239,19 +238,19 @@ function TocLinkHandler(db_url) {
 function newTextObjectCallback(data, philo_id, my_path) {
     $("#waiting").velocity('fadeOut', {duration: 100, queue:false, complete:function() {
         $(this).velocity("reverse", {duration:100})}});
-    var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
+    var scrollto_id = '#' + $("#text-obj-content").data('philoId').split(' ').join('_');
     $('#toc-content').find($(scrollto_id)).removeClass('current-obj');
     $('#text-obj-content').fadeOut('fast', function() {
         $(this).replaceHtml(data['text']).fadeIn('fast');
         $('#text-obj-content').data("philoId", philo_id);
         $('#prev-obj').data('philoId', data['prev']);
         $('#next-obj').data('philoId', data["next"]);
-        var scrollto_id = '#' + $("#text-obj-content").data('philoId').replace(/ /g, '_');
+        var scrollto_id = '#' + $("#text-obj-content").data('philoId').split(' ').join('_');
         if ($('#toc-content').find($(scrollto_id)).length) {
             $('#toc-content').scrollTo($(scrollto_id), 500);
             $('#toc-content').find($(scrollto_id)).addClass('current-obj');
         }
-        var new_url = my_path + '/dispatcher.py/' + philo_id.replace(/ /g, '/');
+        var new_url = my_path + '/dispatcher.py/' + philo_id.split(' ').join('/');
         History.pushState(null, '', new_url);
         checkEndBeginningOfDoc();
         if ($('body').scrollTop() != 0) {

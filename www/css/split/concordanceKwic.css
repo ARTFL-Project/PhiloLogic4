@@ -152,8 +152,7 @@
     display: none;
 }
 #frequency_table {
-    padding: 5px;
-    line-height: 230%;
+    line-height: 300%;
     margin-top: 0px;
 }
 #freq_sidebar_text {
@@ -162,6 +161,8 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+	vertical-align: bottom;
+	padding-left: 5px;
 }
 #frequency_field {
 	width: 100%;
@@ -169,6 +170,13 @@
 #frequency_field .dropdown-header {
 	padding: 3px 10px;
 }
+#frequency_table li:nth-child(2n-1) {
+	background-color: #FAFAFA;
+}
+#frequency_container .progress {
+	margin-bottom: 0px;
+}
+
 /* Concordance styling for theater */
 .xml-speaker {
     font-weight: 700;

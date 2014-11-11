@@ -3,47 +3,60 @@
 import sys
 sys.path.append('..')
 import functions as f
+import reports as r
 import os
 import re
-from functions.wsgi_handler import wsgi_response
-from bibliography import fetch_bibliography as bibliography
+from functions.wsgi_handler import wsgi_response, parse_cgi
+from concordance import concordance_citation
 from render_template import render_template
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
-from functions import concatenate_files
 import json
 
 
 def kwic(environ,start_response):
-    db, dbname, path_components, q = wsgi_response(environ,start_response)
+    wsgi_response(environ, start_response)
+    db, path_components, q = parse_cgi(environ)
+    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
-    if q['format'] == "json":
-        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
-        kwic_results = fetch_kwic(hits, path, q, f.link.byte_query, db, start-1, end, length=250)
-        formatted_results = [{"citation": i[0],
-                              "text": i[1], "philo_id": i[2], "start":start, "hit_count": len(hits)} for i in kwic_results]
-        return json.dumps(formatted_results)
     if q['q'] == '':
-        return bibliography(f,path, db, dbname,q,environ)
+        return r.fetch_bibliography(f,path, db, dbname,q,environ)
     else:
-        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        return render_kwic(hits, db, dbname, q, path, config)
+        kwic_object, hits = generate_kwic_results(db, q, config, path)
+        if q['format'] == "json":
+            # Remove db_path from query object since we don't want to expose that info to the client
+            del concordance_object['query']['dbpath']
+            return json.dumps(kwic_object)
+        return render_kwic(kwic_object, hits, db, dbname, q, path, config)
         
-def render_kwic(hits, db, dbname, q, path, config):
+def render_kwic(kwic_object, hits, db, dbname, q, path, config):
     biblio_criteria = f.biblio_criteria(q, config)
-    concatenate_files(path, "kwic", debug=db.locals["debug"])
-    return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_kwic=fetch_kwic,f=f,
-                                path=path, results_per_page=q['results_per_page'], biblio_criteria=biblio_criteria,
-                                config=config, template_name='kwic.mako', report="kwic", ressources=f.concatenate.report_files)
+    resource = f.webResources("kwic", debug=db.locals["debug"])
+    pages = f.link.generate_page_links(kwic_object['description']['start'], q['results_per_page'], q, hits)
+    return render_template(kwic=kwic_object,db=db,dbname=dbname,q=q, path=path, biblio_criteria=biblio_criteria,
+                           pages=pages, config=config, template_name='kwic.mako', report="kwic", css=resource.css, js=resource.js)
 
-def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
+def generate_kwic_results(db, q, config, path, length=5000, link_to_hit="div1"):
+    """ The link_to_hit keyword defines the text object to which the metadata link leads to"""
+    hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+    start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
+    kwic_object = {"description": {"start": start, "end": end, "n": n, "results_per_page": q['results_per_page']},
+                    "query": q}
     kwic_results = []
-    
     default_short_citation_len = 30
     short_citation_len = 0
-    for hit in results[start:end]:
-        full_citation, short_citation, href = f.kwic_citation(db, hit, default_short_citation_len)
+  
+    for hit in hits[start:end]:
+        # Get all metadata
+        metadata_fields = {}
+        for metadata in db.locals['metadata_fields']:
+            if metadata == "author":
+                print >> sys.stderr, "AUTHOR", repr(hit.doc[metadata])
+            metadata_fields[metadata] = hit[metadata]
+        
+        ## Get all links and citations
+        citation_hrefs = f.citation_links(db, config, hit)
+        full_citation, short_citation = kwic_citation(short_citation_len, metadata_fields, hit[link_to_hit])
         
         ## Find longest short_citation
         if short_citation_len == 0:
@@ -60,27 +73,57 @@ def fetch_kwic(results, path, q, byte_query, db, start, end, length=5000):
         conc_text = f.get_text(hit, byte_start, length, path)
         conc_text = format_strip(conc_text, bytes)
         conc_text = KWIC_formatter(conc_text, len(hit.bytes))
-        kwic_results.append((full_citation, short_citation, href, conc_text, hit))
+            
+        kwic_results.append((full_citation, short_citation, citation_hrefs, conc_text, hit, metadata_fields))
     
     if short_citation_len < default_short_citation_len:
         default_short_citation_len = short_citation_len
     
     ## Populate Kwic_results with bibliography    
     for pos, result in enumerate(kwic_results):
-        biblio, short_biblio, href, text, hit = result
+        biblio, short_biblio, hrefs, text, hit, metadata_fields = result
+        href = hrefs[link_to_hit]
         if len(short_biblio) < default_short_citation_len:
             diff = default_short_citation_len - len(short_biblio)
             short_biblio += '&nbsp;' * diff
         short_biblio = '<span class="short_biblio">%s</span>' % short_biblio
         full_biblio = '<span class="full_biblio" style="display:none;">%s</span>' % biblio
         kwic_biblio = full_biblio + short_biblio
-        if q['format'] == "json":
-            kwic_results[pos] = (kwic_biblio, text, hit.philo_id)
-        else:
-            kwic_biblio_link = '<a href="%s" class="kwic_biblio">' % href + kwic_biblio + '</a>: '
-            kwic_results[pos] = kwic_biblio_link + '%s' % text
-    return kwic_results
+        kwic_biblio_link = '<a href="%s" class="kwic_biblio">' % href + kwic_biblio + '</a>: '
+        kwic_results[pos] = {"philo_id": hit.philo_id, "context": kwic_biblio_link + '%s' % text, "metadata_fields": metadata_fields,
+                             "citation_links": hrefs, "citation": kwic_biblio_link, "bytes": hit.bytes}
 
+    kwic_object['results'] = kwic_results
+    kwic_object['results_len'] = len(hits)
+    kwic_object["query_done"] = hits.done
+    
+    return kwic_object, hits
+
+def kwic_citation(short_citation_length, metadata_fields, hit):
+    #print >> sys.stderr, "META", repr(metadata_fields['author'])
+    full_citation = ""
+    short_citation = []
+    author = metadata_fields['author']
+    if author:
+        full_citation += author + ", "
+    short_citation.append(author)
+    title = metadata_fields['title']
+    full_citation += title
+    short_citation.append(title)
+        
+    if len(', '.join([s for s in short_citation if s])) > short_citation_length:
+        short_author, short_title = tuple(short_citation)
+        if len(short_author) > 10:
+            short_author = short_author[:10] + "&#8230;"
+            short_citation[0] = short_author
+        title_len = short_citation_length - len(short_author)
+        if len(short_title) > title_len:
+            short_citation[1] = short_title[:title_len]
+    short_citation = ', '.join([s for s in short_citation if s])
+    
+    full_citation += ', %s' % hit.head
+    
+    return full_citation, short_citation
 
 def KWIC_formatter(output, hit_num, chars=40):
     output = output.replace('\n', ' ')

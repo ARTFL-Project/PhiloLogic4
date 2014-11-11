@@ -157,7 +157,8 @@ class Loader(object):
                 tree = self.pre_parse_whole_file(fn)
             else:
                 tree = self.pre_parse_header(fn)
-            
+
+            trimmed_metadata_xpaths = []
             for type, xpath, field in self.parser_defaults["metadata_xpaths"]:
                 if type == "doc":
                     if field not in data:
@@ -174,6 +175,9 @@ class Loader(object):
                             el = tree.find(xpath)
                             if el is not None and el.text is not None:
                                 data[field] = el.text.encode("utf-8")
+                else:
+                    trimmed_metadata_xpaths.append( (type,xpath,field) )
+            data["options"] = {"metadata_xpaths":trimmed_metadata_xpaths}
             load_metadata.append(data)
 
         def make_sort_key(d):
@@ -403,7 +407,7 @@ class Loader(object):
             words_status = os.system(command)
         else:
             # if not skip the last step and rename the file to all_words_sorted.gz
-            os.system('mv %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
+            words_status = os.system('mv %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
         if words_status != 0:
             print "Word sorting failed\nInterrupting database load..."
             sys.exit()
@@ -545,7 +549,12 @@ class Loader(object):
         print >> web_config, "# metadata_aliases = {'who': 'Speaker', 'create_date', 'Date'}"
         print >> web_config, "metadata_aliases = None"
         print >> web_config, "\n# The facets variable sets which metadata field can be used as a facet"
-        print >> web_config, "facets = %s" % self.metadata_fields
+        print >> web_config, "# The object format is a list of objects like the following:"
+        print >> web_config, "# [{'Author': 'author'}, {'Title': ['title', 'author']}"
+        print >> web_config, "# The dict key should describe what the facets will do, and the"
+        print >> web_config, "# dict value, which can be a string or a list, should list the metadata"
+        print >> web_config, "# to be used for the frequency counts"
+        print >> web_config, "facets = %s" % repr([{i: i} for i in self.metadata_fields])
         print >> web_config, "\n# The concordance_length variable sets the length in bytes of each concordance result"
         print >> web_config, "concordance_length = 300"
         print >> web_config, "\n# The search_examples variable defines which examples should be provided"

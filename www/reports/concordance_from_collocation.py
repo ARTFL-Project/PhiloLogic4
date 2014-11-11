@@ -7,13 +7,12 @@ from reports.concordance import fetch_concordance
 import os
 import re
 import unicodedata
-from functions.wsgi_handler import wsgi_response
+from functions.wsgi_handler import wsgi_response, parse_cgi
 from bibliography import fetch_bibliography as bibliography
 from render_template import render_template
 from collocation import tokenize, filter
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
-from functions import concatenate_files
 
 
 end_highlight_match = re.compile(r'.*<span class="highlight">[^<]*?(</span>)')
@@ -31,7 +30,9 @@ end_match = re.compile(r'<[^>]*?\Z')
 no_tag = re.compile(r'<[^>]+>')
 
 def concordance_from_collocation(environ,start_response):
-    db, dbname, path_components, q = wsgi_response(environ,start_response)
+    wsgi_response(environ, start_response)
+    db, path_components, q = parse_cgi(environ)
+    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
     if q['q'] == '':
@@ -46,11 +47,11 @@ def concordance_from_collocation(environ,start_response):
                     k = config.metadata_aliases[k]
                 biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b></span>' % (k.title(), v.decode('utf-8', 'ignore'), ))
         biblio_criteria = ' '.join(biblio_criteria)
-        concatenate_files(path, "concordance_from_collocation", debug=db.locals["debug"])
+        resource = f.webResources("concordance_from_collocation", debug=db.locals["debug"])
         return render_template(results=colloc_results,db=db,dbname=dbname,q=q,colloc_concordance=colloc_concordance,
                                f=f,path=path, results_per_page=q['results_per_page'], config=config,report="concordance_from_collocation",
                                biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako",
-                               ressources=f.concatenate.report_files)
+                               css= resource.css, js=resource.js)
         
 def fetch_colloc_concordance(results, path, q, db, config, word_filter=True, filter_num=100, stopwords=True):
     length = config['concordance_length']

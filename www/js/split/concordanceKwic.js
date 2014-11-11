@@ -31,7 +31,9 @@ $(document).ready(function() {
     
     // Fetch more context for concordances after page load
     $(window).load(function() {
-        fetchMoreContext();
+        if (global_report == "concordance") {
+            fetchMoreContext();
+        }
     });
     
 });

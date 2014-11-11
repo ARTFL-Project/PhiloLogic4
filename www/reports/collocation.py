@@ -3,16 +3,15 @@
 import sys
 sys.path.append('..')
 import functions as f
+import reports as r
 import os
 import re
 import json
 import unicodedata
-from functions.wsgi_handler import wsgi_response
+from functions.wsgi_handler import wsgi_response, parse_cgi
 from render_template import render_template
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
-from bibliography import fetch_bibliography as bibliography
-from functions import concatenate_files
 from collections import defaultdict
 from operator import itemgetter
 
@@ -28,24 +27,26 @@ end_match = re.compile(r'<[^>]*?\Z')
 
 
 def collocation(environ,start_response):
-    db, dbname, path_components, q = wsgi_response(environ,start_response)
+    wsgi_response(environ, start_response)
+    db, path_components, q = parse_cgi(environ)
+    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
     if q['q'] == '':
-        return bibliography(f,path, db, dbname,q,environ) ## the default should be an error message
+        return r.fetch_bibliography(f,path, db, dbname,q,environ) ## the default should be an error message
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
     return render_collocation(hits, db, dbname, q, path, config)
     
 def render_collocation(hits, db, dbname, q, path, config):
     biblio_criteria = f.biblio_criteria(q, config)
-    concatenate_files(path, "collocation", debug=db.locals["debug"])
+    resource = f.webResources("collocation", debug=db.locals["debug"])
     all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q, db)
     hit_len = len(hits)
     return render_template(all_colloc=all_colloc, left_colloc=left_colloc, right_colloc=right_colloc,
                            db=db,dbname=dbname,q=q,f=f,path=path, results_per_page=q['results_per_page'],
                            hit_len=hit_len, order=sort_to_display,dumps=json.dumps,biblio_criteria=biblio_criteria,
                            config=config, template_name='collocation.mako', report="collocation",
-                           ressources=f.concatenate.report_files)
+                           css=resource.css, js=resource.js)
 
 def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True, stopwords=True):
     config = f.WebConfig()
