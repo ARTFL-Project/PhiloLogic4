@@ -103,7 +103,7 @@ class ObjectWrapper(object):
             except ValueError:
                 length = len(hit)
             self.type = [k for k in obj_dict if obj_dict[k] == length][0]
-        self.bytes = bytes        
+        self.bytes = []
         self.row = None
         self.words = []
         page_i = self["page"]
@@ -125,7 +125,7 @@ class PageWrapper(object):
     def __init__(self,id,db):
         self.db = db
         self.philo_id = id
-        self_type = "page"
+        self.type = "page"
         self.row = None
         self.bytes = []
         
