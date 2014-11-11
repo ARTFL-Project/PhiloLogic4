@@ -64,7 +64,7 @@ class HitWrapper(object):
             if t == "word":
                 self.ancestors["word"] = self.words[0]
             else:
-                self.ancestors[t] = ObjectWrapper(self.hit,self.db,key)
+                self.ancestors[t] = ObjectWrapper(self.hit,self.db,t)
 
     def __getitem__(self, key):
         if key in obj_dict:
