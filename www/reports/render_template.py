@@ -2,6 +2,7 @@
 
 import os
 import sys
+import traceback
 from json import dumps
 from mako.lookup import TemplateLookup
 from mako import exceptions
@@ -36,4 +37,5 @@ def render_template(*args, **data):
         try:
             return template.render(*args, **data).encode("UTF-8", "ignore")
         except:
+            traceback.print_exc()
             return exceptions.html_error_template().render()

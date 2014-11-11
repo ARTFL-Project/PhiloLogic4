@@ -31,7 +31,7 @@ def get_more_context(environ,start_response):
     html_list = []
     for i in hit_range:
         try:
-            html_list.append(r.fetch_concordance(hits[i], environ["SCRIPT_FILENAME"], context_size))
+            html_list.append(r.fetch_concordance(db, hits[i], environ["SCRIPT_FILENAME"], context_size))
         except IndexError:
             break
     yield json.dumps(html_list)
