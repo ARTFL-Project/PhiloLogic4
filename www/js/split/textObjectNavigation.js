@@ -261,6 +261,5 @@ function newTextObjectCallback(data, philo_id, my_path) {
         setTimeout(function() {
             $('#toc-container').css('position', 'static')
         }, 250);
-        addPreviousPage();
     });
 }

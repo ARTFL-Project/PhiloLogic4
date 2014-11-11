@@ -23,7 +23,7 @@ def get_table_of_contents(environ, start_response):
     path = db.locals['db_path']
     path = path[:path.rfind("/data")]
     obj = ObjectWrapper(q['philo_id'].split(), db)
-    toc_object = r.generate_toc_object(obj, db)
+    toc_object = r.generate_toc_object(obj, db, q, config)
     yield json.dumps(toc_object)
     
 if __name__ == "__main__":

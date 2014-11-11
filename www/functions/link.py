@@ -57,6 +57,9 @@ def make_object_link(philo_id, hit_bytes):
 def make_absolute_object_link(config, id, bytes = []):
     """ Takes a valid PhiloLogic object, and returns an absolute URL representation of such. """
     href = config.db_url + '/dispatcher.py/' + "/".join(str(x) for x in id)
+    print >> sys.stderr, "TEST", bytes
+    #if isinstance(bytes, type):
+    #    bytes = []
     if bytes:
         href += byte_query(bytes)
     return href

@@ -7,6 +7,7 @@ from functions.wsgi_handler import parse_cgi
 from wsgiref.handlers import CGIHandler
 from philologic.HitWrapper import ObjectWrapper
 import functions as f
+from reports.navigation import generate_text_object
 import json
 
 def go_to_obj(environ,start_response):
@@ -20,8 +21,9 @@ def go_to_obj(environ,start_response):
     philo_obj = ObjectWrapper(q['philo_id'].split(), db)
     prev_obj = ' '.join(philo_obj.prev.split()[:7])
     next_obj = ' '.join(philo_obj.next.split()[:7])
-    text = f.get_text_obj(philo_obj, path)
-    yield json.dumps({'text': text, "prev": prev_obj, "next": next_obj})
+    config = f.WebConfig()
+    text_object = generate_text_object(philo_obj, db, q, next_obj, prev_obj, config, path)
+    yield json.dumps(text_object)
 
 if __name__ == "__main__":
     CGIHandler().run(go_to_obj)

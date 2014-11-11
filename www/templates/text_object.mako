@@ -1,3 +1,4 @@
+## -*- coding: utf-8 -*-
 <%include file="header.mako"/>
 % if not config.dictionary:
     <%include file="search_form.mako"/>
@@ -6,7 +7,7 @@
 % endif
 <div class="container-fluid" id='philologic_response'>
     <div id='object-title'>
-        <span class='philologic_cite'>${citation}</span>
+        <span class='philologic_cite'>${text_object['citation']}</span>
     </div>
     <div class="row" id="nav-buttons">
         <button type="button" class="btn btn-primary btn-sm" id="back-to-top">
@@ -14,11 +15,11 @@
         </button>
         <div class="col-xs-12" style="text-align: center;">
             <div class="btn-group-sm" style="display: inline-block;">
-                <button type="button" class="btn btn-primary" id="prev-obj" data-philo-id="${prev}">
+                <button type="button" class="btn btn-primary" id="prev-obj" data-philo-id="${text_object['prev']}">
                     &lt;
                 </button>
                 <button type="button" class="btn btn-primary" id="show-toc" style="padding-left: 30px; padding-right: 30px" disabled="disabled">Table of contents</button>
-                <button type="button" class="btn btn-primary" id="next-obj" data-philo-id="${next}">
+                <button type="button" class="btn btn-primary" id="next-obj" data-philo-id="${text_object['next']}">
                     &gt;
                 </button>
             </div>
@@ -39,7 +40,9 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div id="book-page">
-                        <div id="text-obj-content" class="panel panel-default" data-philo-id="${' '.join([str(j) for j in obj.philo_id])}" data-prev="${prev}" data-next="${next}">${obj_text}</div>
+                        <div id="text-obj-content" class="panel panel-default" data-philo-id="${' '.join([str(j) for j in obj.philo_id])}" data-prev="${text_object['prev']}" data-next="${text_object['next']}">
+                            ${text_object['text']}
+                        </div>
                     </div>
                 </div>
             </div>

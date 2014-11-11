@@ -1,3 +1,4 @@
+## -*- coding: utf-8 -*-
 <%include file="header.mako"/>
 % if not config.dictionary:
     <%include file="search_form.mako"/>
@@ -7,7 +8,7 @@
 <div id='philologic_response' class="container-fluid">
     <div class="row" id="toc-report-title">
         <div class="col-xs-offset-2 col-xs-8">
-            <span class='philologic_cite'>${citation}</span>
+            <span class='philologic_cite'>${toc['citation']}</span>
         </div>
     </div>
     <div class="panel panel-default">

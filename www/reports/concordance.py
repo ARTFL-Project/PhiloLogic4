@@ -8,11 +8,16 @@ import os
 import re
 from functions.wsgi_handler import wsgi_response, parse_cgi
 from render_template import render_template
-from functions.ObjectFormatter import format_concordance, convert_entities, adjust_bytes
+from functions.ObjectFormatter import convert_entities, adjust_bytes, valid_html_tags, xml_to_html_class
 from functions.FragmentParser import parse
+from lxml import etree
 import json
 
 strip_start_punctuation = re.compile("^[,?;.:!']")
+begin_match = re.compile(r'^[^<]*?>')
+start_cutoff_match = re.compile(r'^[^ <]+')
+end_match = re.compile(r'<[^>]*?\Z')
+space_match = re.compile(r" ?([-'])+ ")
 
 def concordance(environ,start_response):
     wsgi_response(environ, start_response)
@@ -50,7 +55,7 @@ def concordance_results(db, q, config, path):
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
         citation = concordance_citation(hit, citation_hrefs, metadata_fields)
-        context = fetch_concordance(hit, path, config.concordance_length)
+        context = fetch_concordance(db, hit, path, config.concordance_length)
         result_obj = {"philo_id": hit.philo_id, "citation": citation, "citation_links": citation_hrefs, "context": context,
                       "metadata_fields": metadata_fields, "bytes": hit.bytes}
         results.append(result_obj)
@@ -58,18 +63,6 @@ def concordance_results(db, q, config, path):
     concordance_object['results_len'] = len(hits)
     concordance_object["query_done"] = hits.done
     return concordance_object, hits
-
-
-def fetch_concordance(hit, path, context_size):
-    ## Determine length of text needed
-    byte_distance = hit.bytes[-1] - hit.bytes[0]
-    length = context_size + byte_distance + context_size
-    bytes, byte_start = adjust_bytes(hit.bytes, length)
-    conc_text = f.get_text(hit, byte_start, length, path)
-    conc_text = format_concordance(conc_text, bytes)
-    conc_text = convert_entities(conc_text)
-    conc_text = strip_start_punctuation.sub("", conc_text)
-    return conc_text
 
 def concordance_citation(hit, citation_hrefs, metadata_fields):
     """ Returns a representation of a PhiloLogic object and all its ancestors
@@ -114,3 +107,68 @@ def concordance_citation(hit, citation_hrefs, metadata_fields):
         citation += u" [page %s] " % page_n    
     citation = u'<span class="philologic_cite">' + citation + "</span>"
     return citation
+
+def fetch_concordance(db, hit, path, context_size):
+    ## Determine length of text needed
+    byte_distance = hit.bytes[-1] - hit.bytes[0]
+    length = context_size + byte_distance + context_size
+    bytes, byte_start = adjust_bytes(hit.bytes, length)
+    conc_text = f.get_text(hit, byte_start, length, path)
+    conc_text = format_concordance(conc_text, db.locals['word_regex'], bytes)
+    conc_text = convert_entities(conc_text)
+    conc_text = strip_start_punctuation.sub("", conc_text)
+    return conc_text
+
+def format_concordance(text, word_regex, bytes=[]):
+    removed_from_start = 0
+    begin = begin_match.search(text)
+    if begin:
+        removed_from_start = len(begin.group(0))
+        text = text[begin.end(0):]
+    start_cutoff = start_cutoff_match.search(text)
+    if start_cutoff:
+        removed_from_start += len(start_cutoff.group(0))
+        text = text[start_cutoff.end(0):]
+    removed_from_end = 0
+    end = end_match.search(text)
+    if end:
+        removed_from_end = len(end.group(0))
+        text = text[:end.start(0)]
+    if bytes:
+        bytes = [b - removed_from_start for b in bytes]
+        new_text = ""
+        last_offset = 0
+        for b in bytes:
+            if b > 0 and b < len(text):
+                new_text += text[last_offset:b] + "<philoHighlight/>"
+                last_offset = b
+        text = new_text + text[last_offset:]
+    xml = f.FragmentParser.parse(text)
+    length = 0
+    allowed_tags = set(['philoHighlight', 'l', 'ab', 'ln', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx', 'br'])
+    text = u''
+    for el in xml.iter():
+        if el.tag not in allowed_tags:
+            el.tag = 'span'
+        elif el.tag == "ab" or el.tag == "ln":
+            el.tag = "l"
+        if "id" in el.attrib:  ## kill ids in order to avoid the risk of having duplicate ids in the HTML
+            del el.attrib["id"]
+        if el.tag == "sc" or el.tag == "scx":
+            el.tag = "span"
+            el.attrib["class"] = "small-caps"
+        if el.tag == "philoHighlight":        
+            word_match = re.match(word_regex, el.tail, re.U)
+            if word_match:
+                el.text = el.tail[:word_match.end()]
+                el.tail = el.tail[word_match.end():]
+            el.tag = "span"
+            el.attrib["class"] = "highlight"
+        if el.tag not in valid_html_tags:
+            el = xml_to_html_class(el)
+    output = etree.tostring(xml)
+    output = re.sub(r'\A<div class="philologic-fragment">', '', output)
+    output = re.sub(r'</div>\Z', '', output)
+    ## remove spaces around hyphens and apostrophes
+    output = space_match.sub('\\1', output)
+    return output
