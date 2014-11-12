@@ -57,9 +57,6 @@ def make_object_link(philo_id, hit_bytes):
 def make_absolute_object_link(config, id, bytes = []):
     """ Takes a valid PhiloLogic object, and returns an absolute URL representation of such. """
     href = config.db_url + '/dispatcher.py/' + "/".join(str(x) for x in id)
-    print >> sys.stderr, "TEST", bytes
-    #if isinstance(bytes, type):
-    #    bytes = []
     if bytes:
         href += byte_query(bytes)
     return href
@@ -71,21 +68,6 @@ def make_absolute_query_link(db,**params):
 def byte_query(hit_bytes):
     """This is used for navigating concordance results and highlighting hits"""
     return '?' + '&'.join(['byte=%d' % int(byte) for byte in hit_bytes])
-
-def citation_links(db, config, i):
-    """ Returns a representation of a PhiloLogic object and all its ancestors
-        suitable for a precise concordance citation. """
-    doc_href = make_absolute_object_link(config,i.philo_id[:1],i.bytes)
-    div1_href = make_absolute_object_link(config,i.philo_id[:2], i.bytes)
-    div2_href = make_absolute_object_link(config,i.philo_id[:3], i.bytes)
-    div3_href = make_absolute_object_link(config,i.philo_id[:4], i.bytes)
-    
-    links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href}
-    
-    speaker_name = i.para.who
-    if speaker_name:
-        links['para'] = make_absolute_object_link(config, i.philo_id[:5], i.bytes)
-    return links
 
 def generate_page_links(start, results_per_page, q, results):
     current_page, my_pages, page_num = pager(start, results_per_page, q, results)

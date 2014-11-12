@@ -72,7 +72,7 @@ def adjust_bytes(bytes, length):
 
 
 def format_strip(text,bytes=[], chars=40, concordance_report=False):
-    """Remove formatting to for HTML rendering
+    """Remove formatting for HTML rendering
     Called from: -kwic.py
                  -frequency.py"""
     removed_from_start = 0
@@ -99,10 +99,7 @@ def format_strip(text,bytes=[], chars=40, concordance_report=False):
                 last_offset = b
         text = new_text + text[last_offset:]
     xml = FragmentParser.parse(text)
-    if concordance_report:
-        output = clean_tags_for_concordance(xml)
-    else:
-        output = clean_tags(xml)
+    output = clean_tags(xml)
     ## remove spaces around hyphens and apostrophes
     output = space_match.sub('\\1', output)
     return output

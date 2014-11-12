@@ -7,6 +7,7 @@ import functions as f
 import reports as r
 from functions.wsgi_handler import wsgi_response
 from render_template import render_template
+from concordance import citation_links
 import json
 
 
@@ -44,7 +45,7 @@ def bibligraphy_results(db, q, config):
                           "query": q}
     results = []
     for hit in hits[start - 1:end]:
-        citation_hrefs = f.citation_links(db, config, hit)
+        citation_hrefs = citation_links(db, config, hit)
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]

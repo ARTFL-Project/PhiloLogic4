@@ -15,14 +15,14 @@
                  description = concordance['description']
                  r_status = "."
                  if not concordance['query_done']:
-                    r_status += " Still working..."
+                    r_status += " Still working..."                 
                 %>
                 <div id="search_arguments">
                     Searching database for <b>${q['q'].decode('utf-8', 'ignore')}</b><br>
                     Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
                 </div>
                 <div id="search-hits" data-script="${config.db_url + '/scripts/get_total_results.py?' + q['q_string']}">
-                    % if end != 0:
+                    % if concordance['results_len'] != 0:
                         % if description['end'] < description['results_per_page'] or description['end'] < concordance['results_len']:
                             Hits <span id="start">${description['start']}</span> - <span id="end">${description['end']}</span> of <span id="total_results">${concordance['results_len'] or description['results_per_page']}</span><span id="incomplete">${r_status}</span>
                         % else:
