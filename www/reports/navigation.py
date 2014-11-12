@@ -61,12 +61,14 @@ def generate_toc_object(obj, db, q, config):
     except sqlite3.OperationalError:
         c.execute("select * from toms where rowid between ? and ? and  philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
     text_hierarchy = []
-    for i in c.fetchall():
+    for o in c.fetchall():
+        i = HitWrapper.ObjectWrapper(i["philo_id"],db,row=i)
         if i['philo_name'] == '__philo_virtual' and i["philo_type"] != "div1":
             continue
         else:
             philo_id = i['philo_id']
             philo_type = i['philo_type']
+            display_name = ""
             if i['philo_name'] == "front":
                 display_name = "Front Matter"
             else:
@@ -77,7 +79,7 @@ def generate_toc_object(obj, db, q, config):
                     if i["type"] and i["n"]:
                         display_name = i['type'] + " " + i["n"]                       
                     else:
-                        display_name = i['type'] or i['philo_name'] or i['philo_type']
+                        display_name = i["head"] or i['type'] or i['philo_name'] or i['philo_type']
             display_name = display_name.decode('utf-8', 'ignore')
             display_name = display_name[0].upper() + display_name[1:]
             link = f.make_absolute_object_link(config, philo_id.split()[:7])
