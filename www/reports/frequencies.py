@@ -8,7 +8,7 @@ import re
 from functions.wsgi_handler import wsgi_response
 from bibliography import bibliography
 from render_template import render_template
-from functions.ObjectFormatter import format_concordance, format_strip, convert_entities, adjust_bytes
+from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 from functions.FragmentParser import parse
 import philologic.MetadataQuery as MQ
 

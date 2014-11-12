@@ -28,7 +28,7 @@ def error_handling(db, dbname, q):
     else:
         report = q['report']
     hits = NoHits()
-    if report == "concordance":
+    if report == "concordance" or report == "bibligraphy":
         concordance_object = {"description": {"start": 0, "end": 0, "results_per_page": q['results_per_page']},
                               "query": q,
                               "results": [],

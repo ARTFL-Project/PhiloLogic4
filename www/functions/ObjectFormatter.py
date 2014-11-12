@@ -70,133 +70,10 @@ def adjust_bytes(bytes, length):
             new_bytes.append(word_byte - byte_start)
     return new_bytes, byte_start
 
-def format(text,bytes=[]):
-    parser = etree.XMLParser(recover=True)
-    if bytes:
-        new_text = ""
-        last_offset = 0
-        for b in bytes:
-            new_text += text[last_offset:b] + "<philoHighlight/>"
-            last_offset = b
-        text = new_text + text[last_offset:]
-    text = "<div>" + text + "</div>"
-    xml = FragmentParser.parse(text)
-    for el in xml.iter():        
-        try:
-            if el.tag == "sc" or el.tag == "scx":
-                el.tag = "span"
-                el.attrib["class"] = "small-caps"
-            elif el.tag == "head":
-                el.tag = "b"
-                el.attrib["class"] = "headword"
-                el.append(etree.Element("br"))
-            elif el.tag == "list":
-                el.tag = "ul"
-            elif el.tag == "note":
-                el.tag = 'span'
-                el.attrib['class'] = "note-content"
-                for child in el:
-                    child = note_content(child)
-            elif el.tag == "item":
-                el.tag = "li"
-            elif el.tag == "ab" or el.tag == "ln":
-                el.tag = "l"
-            elif el.tag == "pb" and "fac" in el.attrib and "n" in el.attrib:
-                el.tag = "p"
-                el.append(etree.Element("a"))
-                el[-1].attrib["href"] = 'http://artflx.uchicago.edu/images/encyclopedie/' + el.attrib["fac"]
-                el[-1].text = "[page " + el.attrib["n"] + "]"
-                el[-1].attrib['class'] = "page-image-link"
-                el[-1].attrib['data-gallery'] = ''
-            elif el.tag == "figure":
-                if el[0].tag == "graphic":
-                    img_url = el[0].attrib["url"].replace(":","_")
-                    volume = re.match("\d+",img_url).group()
-                    url_prefix = "http://artflx.uchicago.edu/images/encyclopedie/V" + volume + "/plate_"
-                    el.tag = "a"
-                    el.attrib["href"] = url_prefix + img_url + ".jpeg"
-                    el[0].tag = "img"
-                    el[0].attrib["src"] = url_prefix + img_url + ".sm.jpeg"
-                    el[0].attrib["class"] = "plate_img"
-                    el.attrib["class"] = "plate-image-link"
-                    el.attrib['data-gallery'] = ''
-                    del el[0].attrib["url"]
-                    el.append(etree.Element("br"))
-            elif el.tag == "philoHighlight":        
-                word_match = re.match(r"\w+", el.tail, re.U)
-                el.text = el.tail[:word_match.end()]
-                el.tail = el.tail[word_match.end():]
-                el.tag = "span"
-                el.attrib["class"] = "highlight"
-            if el.tag not in valid_html_tags:
-                el = xml_to_html_class(el)
-        except:
-            pass
-    output = etree.tostring(xml)
-    ## remove spaces around hyphens and apostrophes
-    output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
-    return convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
-
-
-def format_concordance(text,bytes=[]):
-    removed_from_start = 0
-    begin = begin_match.search(text)
-    if begin:
-        removed_from_start = len(begin.group(0))
-        text = text[begin.end(0):]
-    start_cutoff = start_cutoff_match.search(text)
-    if start_cutoff:
-        removed_from_start += len(start_cutoff.group(0))
-        text = text[start_cutoff.end(0):]
-    removed_from_end = 0
-    end = end_match.search(text)
-    if end:
-        removed_from_end = len(end.group(0))
-        text = text[:end.start(0)]
-    if bytes:
-        bytes = [b - removed_from_start for b in bytes]
-        new_text = ""
-        last_offset = 0
-        for b in bytes:
-            if b > 0 and b < len(text):
-                new_text += text[last_offset:b] + "<philoHighlight/>"
-                last_offset = b
-        text = new_text + text[last_offset:]
-    xml = FragmentParser.parse(text)
-    length = 0
-    allowed_tags = set(['philoHighlight', 'l', 'ab', 'ln', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx', 'br'])
-    text = u''
-    for el in xml.iter():
-        if el.tag not in allowed_tags:
-            el.tag = 'span'
-        elif el.tag == "ab" or el.tag == "ln":
-            el.tag = "l"
-        if "id" in el.attrib:  ## kill ids in order to avoid the risk of having duplicate ids in the HTML
-            del el.attrib["id"]
-        if el.tag == "sc" or el.tag == "scx":
-            el.tag = "span"
-            el.attrib["class"] = "small-caps"
-        if el.tag == "philoHighlight":        
-            word_match = re.match(r"\w+", el.tail, re.U)
-            if word_match:
-                el.text = el.tail[:word_match.end()]
-                el.tail = el.tail[word_match.end():]
-            el.tag = "span"
-            el.attrib["class"] = "highlight"
-        if el.tag not in valid_html_tags:
-            el = xml_to_html_class(el)
-    output = etree.tostring(xml)
-    output = re.sub(r'\A<div class="philologic-fragment">', '', output)
-    output = re.sub(r'</div>\Z', '', output)
-    ## remove spaces around hyphens and apostrophes
-    output = space_match.sub('\\1', output)
-    return output
-
 
 def format_strip(text,bytes=[], chars=40, concordance_report=False):
-    """Remove formatting to for HTML rendering
+    """Remove formatting for HTML rendering
     Called from: -kwic.py
-                 -relevance.py
                  -frequency.py"""
     removed_from_start = 0
     begin = begin_match.search(text)
@@ -222,10 +99,7 @@ def format_strip(text,bytes=[], chars=40, concordance_report=False):
                 last_offset = b
         text = new_text + text[last_offset:]
     xml = FragmentParser.parse(text)
-    if concordance_report:
-        output = clean_tags_for_concordance(xml)
-    else:
-        output = clean_tags(xml)
+    output = clean_tags(xml)
     ## remove spaces around hyphens and apostrophes
     output = space_match.sub('\\1', output)
     return output
