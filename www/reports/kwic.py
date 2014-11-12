@@ -7,7 +7,7 @@ import reports as r
 import os
 import re
 from functions.wsgi_handler import wsgi_response, parse_cgi
-from concordance import concordance_citation
+from concordance import concordance_citation, citation_links
 from render_template import render_template
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 import json
@@ -45,17 +45,15 @@ def generate_kwic_results(db, q, config, path, length=5000, link_to_hit="div1"):
     kwic_results = []
     default_short_citation_len = 30
     short_citation_len = 0
-  
-    for hit in hits[start:end]:
+    
+    for hit in hits[start - 1:end]:
         # Get all metadata
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
-            if metadata == "author":
-                print >> sys.stderr, "AUTHOR", repr(hit.doc[metadata])
             metadata_fields[metadata] = hit[metadata]
         
         ## Get all links and citations
-        citation_hrefs = f.citation_links(db, config, hit)
+        citation_hrefs = citation_links(db, config, hit)
         full_citation, short_citation = kwic_citation(short_citation_len, metadata_fields, hit[link_to_hit])
         
         ## Find longest short_citation
@@ -100,7 +98,6 @@ def generate_kwic_results(db, q, config, path, length=5000, link_to_hit="div1"):
     return kwic_object, hits
 
 def kwic_citation(short_citation_length, metadata_fields, hit):
-    #print >> sys.stderr, "META", repr(metadata_fields['author'])
     full_citation = ""
     short_citation = []
     author = metadata_fields['author']

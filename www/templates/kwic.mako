@@ -23,7 +23,7 @@
                     Bibliographic criteria: ${biblio_criteria or "None"}
                 </div>
                 <div id="search-hits" data-script="${config.db_url + '/scripts/get_total_results.py?' + q['q_string']}">
-                    % if description['end'] != 0:
+                    % if kwic['results_len'] != 0:
                         % if description['end'] < description['results_per_page'] or description['end'] < kwic['results_len']:
                             Hits <span id="start">${description['start']}</span> - <span id="end">${description['end']}</span> of <span id="total_results">${kwic['results_len'] or description['results_per_page']}</span><span id="incomplete">${r_status}</span>
                         % else:

@@ -50,7 +50,7 @@ def concordance_results(db, q, config, path):
                           "query": q}
     results = []
     for hit in hits[start - 1:end]:
-        citation_hrefs = f.citation_links(db, config, hit)
+        citation_hrefs = citation_links(db, config, hit)
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
@@ -63,6 +63,21 @@ def concordance_results(db, q, config, path):
     concordance_object['results_len'] = len(hits)
     concordance_object["query_done"] = hits.done
     return concordance_object, hits
+
+def citation_links(db, config, i):
+    """ Returns a representation of a PhiloLogic object and all its ancestors
+        suitable for a precise concordance citation. """
+    doc_href = f.make_absolute_object_link(config,i.philo_id[:1],i.bytes)
+    div1_href = f.make_absolute_object_link(config,i.philo_id[:2], i.bytes)
+    div2_href = f.make_absolute_object_link(config,i.philo_id[:3], i.bytes)
+    div3_href = f.make_absolute_object_link(config,i.philo_id[:4], i.bytes)
+    
+    links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href}
+    
+    speaker_name = i.para.who
+    if speaker_name:
+        links['para'] = f.make_absolute_object_link(config, i.philo_id[:5], i.bytes)
+    return links
 
 def concordance_citation(hit, citation_hrefs, metadata_fields):
     """ Returns a representation of a PhiloLogic object and all its ancestors
@@ -99,7 +114,10 @@ def concordance_citation(hit, citation_hrefs, metadata_fields):
         
     ## Paragraph level metadata
     if "para" in citation_hrefs:
-        citation += "<a href='%s'>%s</a>" % (citation_hrefs['para'], metadata_fields['who'])
+        try:
+            citation += "<a href='%s'>%s</a>" % (citation_hrefs['para'], metadata_fields['who'])
+        except KeyError: ## no who keyword
+            pass
     
     page_obj = hit.page
     if page_obj['n']:

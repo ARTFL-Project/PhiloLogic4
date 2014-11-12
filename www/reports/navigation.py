@@ -24,13 +24,10 @@ def navigation(environ,start_response):
     path = os.getcwd().replace('functions/', '')
     obj = db[path_components]
     config = f.WebConfig()
-    prev = ' '.join(obj.prev.split()[:7])
-    next = ' '.join(obj.next.split()[:7])
-    current = obj.philo_id[:7]
     if obj.philo_type == 'doc':
         return render_toc(obj, db, q, config, dbname)
     else:
-        return render_text_object(obj, db, q, next, prev, config, dbname, path)
+        return render_text_object(obj, db, q, config, dbname, path)
     
 def render_toc(obj, db, q, config, dbname):
     resource = f.webResources("t_o_c", debug=db.locals["debug"])
@@ -38,48 +35,11 @@ def render_toc(obj, db, q, config, dbname):
     return render_template(toc=toc_object,dbname=dbname, db=db, q=q, config=config,template_name='t_o_c.mako',
                            report="t_o_c", css=resource.css, js=resource.js)
 
-def render_text_object(obj, db, q, next, prev, config, dbname, path):
-    text_object = generate_text_object(obj, db, q, next, prev, config, path)
+def render_text_object(obj, db, q, config, dbname, path):
+    text_object = generate_text_object(obj, db, q, config, path)
     resource = f.webResources("navigation", debug=db.locals["debug"])
     return render_template(text_object=text_object,dbname=dbname,db=db, obj=obj,q=q, config=config, template_name='text_object.mako',
                            report="navigation", css=resource.css, js=resource.js)
-    
-def generate_text_object(obj, db, q, next, prev, config, path):
-    text_object = {"prev": prev, "next": next, "query": q, "philo_id": obj.philo_id[0]}
-    metadata_fields = {}
-    for metadata in db.locals['metadata_fields']:
-        metadata_fields[metadata] = obj[metadata]
-    text_object['metadata_fields'] = metadata_fields
-    citation_hrefs = f.citation_links(db, config, obj)
-    citation = biblio_citation(citation_hrefs, metadata_fields)
-    text_object['citation'] = citation
-    text = get_text_obj(obj, path, query_args=q['byte'])
-    text_object['text'] = text
-    return text_object
-
-def get_text_obj(obj, path, query_args=False):
-    filename = obj.doc.filename
-    if filename and os.path.exists(path + "/data/TEXT/" + filename):
-        path += "/data/TEXT/" + filename
-    else:
-        ## workaround for when no filename is returned with the full philo_id of the object
-        philo_id = obj.philo_id[0] + ' 0 0 0 0 0 0'
-        c = obj.db.dbh.cursor()
-        c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id,))
-        path += "/data/TEXT/" + c.fetchone()["filename"]
-    file = open(path)
-    byte_start = int(obj.byte_start)
-    file.seek(byte_start)
-    width = int(obj.byte_end) - byte_start
-    raw_text = file.read(width)
-
-    if query_args:
-        bytes = sorted([int(byte) - byte_start for byte in query_args.split('+')])
-    else:
-        bytes = []
-        
-    formatted = format_text_object(raw_text,bytes).decode("utf-8","ignore")
-    return formatted
 
 def generate_toc_object(obj, db, q, config):
     """This function fetches all philo_ids for div elements within a doc"""
@@ -125,15 +85,15 @@ def generate_toc_object(obj, db, q, config):
                         display_name = i['philo_name'] or i['philo_type']
             display_name = display_name.decode('utf-8', 'ignore')
             display_name = display_name[0].upper() + display_name[1:]
-            link = f.link.make_absolute_object_link(config, philo_id.split()[:7])
+            link = f.make_absolute_object_link(config, philo_id.split()[:7])
             toc_element = {"philo_id": philo_id, "philo_type": philo_type, "display_name": display_name, "link": link}
             text_hierarchy.append(toc_element)
     metadata_fields = {}
     for metadata in db.locals['metadata_fields']:
         if db.locals['metadata_types'][metadata] == "doc":
             metadata_fields[metadata] = obj[metadata]
-    citation_hrefs = f.citation_links(db, config, obj)
-    citation = biblio_citation(citation_hrefs, metadata_fields)
+    doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
+    citation = biblio_citation(doc_link, metadata_fields)
     toc_object = {"query": q, "philo_id": obj.philo_id[0], "toc": text_hierarchy, "metadata_fields": metadata_fields,
                   "citation": citation}
     return toc_object
@@ -206,6 +166,7 @@ def format_text_object(text,bytes=[]):
     return convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
 
 def check_philo_virtual(db, path_components):
+    """Keep around for reference"""
     object_type = ''
     if len(path_components) == 2:
         object_type = "div1"
@@ -224,3 +185,43 @@ def check_philo_virtual(db, path_components):
             return False
     except TypeError:
         return False
+
+def generate_text_object(obj, db, q, config, path):
+    text_object = {"query": q, "philo_id": obj.philo_id[0]}
+    text_object['prev'] = ' '.join(obj.prev.split()[:7])
+    text_object['next'] = ' '.join(obj.next.split()[:7])
+    metadata_fields = {}
+    for metadata in db.locals['metadata_fields']:
+        if db.locals['metadata_types'][metadata] == "doc":
+            metadata_fields[metadata] = obj[metadata]
+    text_object['metadata_fields'] = metadata_fields
+    doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
+    citation = biblio_citation(doc_link, metadata_fields)
+    text_object['citation'] = citation
+    text = get_text_obj(obj, path, query_args=q['byte'])
+    text_object['text'] = text
+    return text_object
+
+def get_text_obj(obj, path, query_args=False):
+    filename = obj.doc.filename
+    if filename and os.path.exists(path + "/data/TEXT/" + filename):
+        path += "/data/TEXT/" + filename
+    else:
+        ## workaround for when no filename is returned with the full philo_id of the object
+        philo_id = obj.philo_id[0] + ' 0 0 0 0 0 0'
+        c = obj.db.dbh.cursor()
+        c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id,))
+        path += "/data/TEXT/" + c.fetchone()["filename"]
+    file = open(path)
+    byte_start = int(obj.byte_start)
+    file.seek(byte_start)
+    width = int(obj.byte_end) - byte_start
+    raw_text = file.read(width)
+
+    if query_args:
+        bytes = sorted([int(byte) - byte_start for byte in query_args.split('+')])
+    else:
+        bytes = []
+        
+    formatted = format_text_object(raw_text,bytes).decode("utf-8","ignore")
+    return formatted

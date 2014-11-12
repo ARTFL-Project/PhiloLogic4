@@ -1,5 +1,5 @@
 import link
-from link import citation_links
+from link import make_absolute_object_link
 import IRHitWrapper
 from get_text import get_text
 from clean_cache import clean_hitlists, clean_export_results

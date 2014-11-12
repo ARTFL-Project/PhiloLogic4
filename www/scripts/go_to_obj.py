@@ -19,10 +19,8 @@ def go_to_obj(environ,start_response):
     path = db.locals['db_path']
     path = path[:path.rfind("/data")]
     philo_obj = ObjectWrapper(q['philo_id'].split(), db)
-    prev_obj = ' '.join(philo_obj.prev.split()[:7])
-    next_obj = ' '.join(philo_obj.next.split()[:7])
     config = f.WebConfig()
-    text_object = generate_text_object(philo_obj, db, q, next_obj, prev_obj, config, path)
+    text_object = generate_text_object(philo_obj, db, q, config, path)
     yield json.dumps(text_object)
 
 if __name__ == "__main__":
