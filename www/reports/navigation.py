@@ -66,27 +66,9 @@ def nav_query(obj,db):
 
 def generate_toc_object(obj, db, q, config):
     """This function fetches all philo_ids for div elements within a doc"""
-    config = f.WebConfig()
-    conn = db.dbh 
-    c = conn.cursor()
-    doc_id =  int(obj.philo_id[0])
-    next_doc_id = doc_id + 1
-    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % doc_id)
-    start_rowid = c.fetchone()[0]
-    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % next_doc_id)
-    try:
-        end_rowid = c.fetchone()[0]
-    except TypeError:
-        c.execute('select rowid from toms where rowid > %d' % start_rowid)
-        end_rowid = [i[0] for i in c.fetchall()][-1] + 1 ## we add 1 to make sure the last row of the table is included
-    try:
-        c.execute("select * from toms where rowid between ? and ? and philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
-    except sqlite3.OperationalError:
-        c.execute("select * from toms where rowid between ? and ? and  philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
+    toms_object = nav_query(obj, db)
     text_hierarchy = []
-    for o in c.fetchall():
-        id = [int(n) for n in o["philo_id"].split(" ")]
-        i = HitWrapper.ObjectWrapper(id,db,row=o)
+    for i in toms_object:
         if i['philo_name'] == '__philo_virtual' and i["philo_type"] != "div1":
             continue
         else:
