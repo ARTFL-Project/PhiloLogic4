@@ -148,6 +148,8 @@ class WordWrapper(object):
     def __getitem__(self,key):
         if self.row == None:
             self.row = self.db.get_word(self.philo_id)
+            if self.row == None:
+                print >> sys.stderr, "WORD LOOKUP ERROR for ", repr(self.philo_id)
         return _safe_lookup(self.row,key,self.db.encoding)
 
     def __getattr__(self,name):
