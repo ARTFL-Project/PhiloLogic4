@@ -2,13 +2,8 @@ import sys
 import re
 from BeautifulSoup import BeautifulStoneSoup as bss
 from philologic import TagCensus
+
 #REQUIRES BeautifulSoup3.  BS4 breaks on Python recursion errors when it gets badly damaged texts.
-
-#Annoyingly, BeautifulSoup requires you to declare ALL self-closing tags yourself; it will badly mangle your text if you miss one, so get this right.
-self_closing = []
-
-#BeautifulSoup lowercases all element names; to get things closer to standard TEI, I've included a list here which I use to restore them after parsing
-fix_case = {}
 
 total = None
 
@@ -24,6 +19,12 @@ for filename in sys.argv[1:]:
         total += census
     else:
         total = census
+
+    #Annoyingly, BeautifulSoup requires you to declare ALL self-closing tags yourself; it will badly mangle your text if you miss one, so get this right.
+    self_closing = []
+    
+    #BeautifulSoup lowercases all element names; to get things closer to standard TEI, I've included a list here which I use to restore them after parsing
+    fix_case = {}
 
     for tag in census.tags.keys():    
         fix_case[tag.lower()] = tag

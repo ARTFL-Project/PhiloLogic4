@@ -90,7 +90,7 @@ class HitWrapper(object):
                    
 class ObjectWrapper(object):
     
-    def __init__(self, hit, db, obj_type=False, encoding=None):
+    def __init__(self, hit, db, obj_type=False, row=None):
         self.db = db
         self.hit = hit
         if obj_type:
@@ -104,7 +104,7 @@ class ObjectWrapper(object):
                 length = len(hit)
             self.type = [k for k in obj_dict if obj_dict[k] == length][0]
         self.bytes = []
-        self.row = None
+        self.row = row
         self.words = []
         page_i = self["page"]
         page_id = [self.hit[0],0,0,0,0,0,0,0,page_i]
