@@ -104,7 +104,6 @@ def generate_toc_object(obj, db, q, config):
                         display_name = i['type'] + " " + i["n"]                       
                     else:
                         display_name = i["head"] or i['type'] or i['philo_name'] or i['philo_type']
-            display_name = display_name.decode('utf-8', 'ignore')
             display_name = display_name[0].upper() + display_name[1:]
             link = f.make_absolute_object_link(config, philo_id.split()[:7])
             toc_element = {"philo_id": philo_id, "philo_type": philo_type, "display_name": display_name, "link": link}

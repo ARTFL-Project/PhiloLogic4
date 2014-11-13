@@ -5,14 +5,16 @@ import sys
 sys.path.append('..')
 import functions as f
 import reports as r
-from functions.wsgi_handler import wsgi_response
+from functions.wsgi_handler import wsgi_response, parse_cgi
 from render_template import render_template
 from concordance import citation_links
 import json
 
 
 def bibliography(environ, start_response):
-    db, dbname, path_components, q = wsgi_response(environ,start_response)
+    wsgi_response(environ, start_response)
+    db, path_components, q = parse_cgi(environ)
+    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
     path = os.getcwd().replace('functions/', '')
     if q['format'] == "json":
         wrapper = []
