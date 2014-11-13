@@ -62,7 +62,8 @@ def generate_toc_object(obj, db, q, config):
         c.execute("select * from toms where rowid between ? and ? and  philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
     text_hierarchy = []
     for o in c.fetchall():
-        i = HitWrapper.ObjectWrapper(i["philo_id"],db,row=i)
+        id = [int(n) for n in o["philo_id"].split(" ")]
+        i = HitWrapper.ObjectWrapper(id,db,row=o)
         if i['philo_name'] == '__philo_virtual' and i["philo_type"] != "div1":
             continue
         else:
