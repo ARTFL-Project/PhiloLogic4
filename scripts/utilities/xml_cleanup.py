@@ -10,12 +10,84 @@ from optparse import OptionParser
 #REQUIRES BeautifulSoup3.  BS4 breaks on Python recursion errors when it gets badly damaged texts.
 
 
+
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
 all_chars = (unichr(i) for i in xrange(0x110000))
 control_chars = ''.join(map(unichr, range(0,32) + range(127,160)))
 control_char_re = re.compile('[%s]' % re.escape(control_chars))
 
+
+##############################################
+
+## Taken from Walt's RemoveHtml3.py script
+# maps the SGML entity name to the Unicode codepoint
+name2codepoint = {
+}
+
+# maps the Unicode codepoint to the HTML entity name
+codepoint2name = {}
+
+# maps the HTML entity name to the character
+# (or a character reference if the character is outside the Latin-1 range)
+entitydefs = {}
+
+for (name, codepoint) in name2codepoint.iteritems():
+	codepoint2name[codepoint] = name
+	if codepoint <= 0xff:
+		entitydefs[name] = chr(codepoint)
+	else:
+		entitydefs[name] = '&#%d;' % codepoint
+
+"""End of Other character entity references."""
+
+d = htmlentitydefs.name2codepoint.copy()
+dother = name2codepoint.copy()
+
+ents_to_ignore = ["quot","amp","lt","gt","apos"]
+
+def convert_remaining_entities(s, quiet):
+    """Take an input string s, find all things that look like SGML character
+    entities, and replace them with the Unicode equivalent.
+
+    Function is from:
+http://stackoverflow.com/questions/1197981/convert-html-entities-to-ascii-in-python/1582036#1582036
+
+    """
+    s = s.decode('utf-8', 'ignore')
+    
+    matches = re.findall("&#\d+;", s)
+    if len(matches) > 0:
+        hits = set(matches)
+        for hit in hits:
+            name = hit[2:-1]
+            try:
+                entnum = int(name)
+                s = s.replace(hit, unichr(entnum))
+                if not quiet:
+                    print >> sys.stderr, "converted %s entity to %s" % (name, unichr(entnum).encode('utf-8'))
+            except ValueError:
+                pass
+    matches = re.findall("&\w+;", s)
+    hits = set(matches)
+    for hit in hits:
+        name = hit[1:-1]
+        if name in d and name not in ents_to_ignore:
+            s = s.replace(hit, unichr(d[name]))
+            if not quiet:
+                print >> sys.stderr, "converted %s entity to %s" % (name, unichr(d[name]))
+        elif name in dother and name not in ents_to_ignore:
+            s = s.replace(hit, unichr(dother[name]))
+            if not quiet:
+                print >> sys.stderr, "converted %s entity to %s" % (name, unichr(dother[name]))
+        elif name not in d and name not in dother:
+            s = s.replace(hit, hit.replace('&', "&amp;"))
+            if not quiet:
+                print >> sys.stderr, "converted invalid entity %s to %s" % (name, hit.replace('&', "&amp;").encode('utf-8'))
+
+    return (s.encode('utf-8'))
+
+#############################################
 
 def parse_command_line(argv):
     usage = "usage: %prog [options] filename"
@@ -54,14 +126,17 @@ if __name__ == '__main__':
     
     for filename in files:
         print >> sys.stderr, "Cleaning %s" % filename
-        text = open(filename).read().decode('latin-1')
+        text = open(filename).read().decode('utf-8', 'ignore')
         text = remove_control_chars(text)
     
         census = TagCensus()
         census.parse(text)
         
         if not quiet:
-            print >> sys.stderr, census
+            try:
+                print >> sys.stderr, census
+            except UnicodeEncodeError:
+                print >> sys.stderr, unicode(census).encode('utf-8')
     
         #if total:
         #    total += census
@@ -81,10 +156,13 @@ if __name__ == '__main__':
     #    print >> sys.stderr, self_closing
     #    print >> sys.stderr, repr(fix_case)
         
-        soup = bss(text,selfClosingTags=self_closing, convertEntities=bss.HTML_ENTITIES)
+        soup = bss(text,selfClosingTags=self_closing)
         for tag in soup.findAll():
             if tag.name in fix_case:
                 tag.name = fix_case[tag.name]
+                
+        file_contents = soup.prettify()
+        file_contents = convert_remaining_entities(file_contents, quiet)
 
         if output_dir:
             filename = output_dir + '/' + os.path.basename(filename) + suffix
@@ -92,7 +170,7 @@ if __name__ == '__main__':
             filename = filename + suffix
 
         outfile = open(filename, 'w')
-        print >> outfile, soup.prettify()
+        print >> outfile, file_contents
         outfile.close()
     
     #print >> sys.stderr, total
