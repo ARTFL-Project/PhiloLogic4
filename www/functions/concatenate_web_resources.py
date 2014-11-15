@@ -6,29 +6,30 @@ from web_config import WebConfig
 config = WebConfig()
 theme = config.theme
 
-css_files = {"landing_page": ["split/style.css", "split/searchForm.css", "split/landingPage.css", "split/%s" % theme],
-            "concordance": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
-            "kwic": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
-            "concordance_from_collocation": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
-            "bibliography": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
-            "collocation": ["split/style.css", "split/searchForm.css", "split/%s" % theme],
-            "time_series": ["split/style.css", "split/searchForm.css", "split/timeSeries.css", "split/%s" % theme],
-            "navigation": ["image_gallery/blueimp-gallery.min.css", "split/style.css", "split/searchForm.css", "split/textObjectNavigation.css", "split/%s" % theme],
-            "t_o_c": ["split/style.css", "split/searchForm.css", "split/textObjectNavigation.css", "split/%s" % theme]}
+default_css = ["split/style.css", "split/searchForm.css", "split/%s" % theme]
+css_files = {"landing_page.mako": ["split/style.css", "split/searchForm.css", "split/landingPage.css", "split/%s" % theme],
+            "concordance.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
+            "kwic.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
+            "concordance_from_collocation.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
+            "bibliography.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
+            "collocation.mako": ["split/style.css", "split/searchForm.css", "split/%s" % theme],
+            "time_series.mako": ["split/style.css", "split/searchForm.css", "split/timeSeries.css", "split/%s" % theme],
+            "text_object.mako": ["image_gallery/blueimp-gallery.min.css", "split/style.css", "split/searchForm.css", "split/textObjectNavigation.css", "split/%s" % theme],
+            "t_o_c.mako": ["split/style.css", "split/searchForm.css", "split/textObjectNavigation.css", "split/%s" % theme]}
 
 default_js = ['bootstrap/bootstrap.min.js', "plugins/jquery.history.js", "plugins/velocity.min.js", "plugins/velocity.ui.min.js", "plugins/jquery-ui.min.js"]
-js_files = {"landing_page": default_js + ["split/common.js", "split/landingPage.js"],
-            "concordance": default_js + ["split/common.js", "plugins/jquery.slimscroll.min.js", "split/sidebar.js", "plugins/jquery.hoverIntent.minified.js", "split/concordanceKwic.js"],
-            "kwic": default_js + ["split/common.js", "plugins/jquery.slimscroll.min.js", "split/sidebar.js", "plugins/jquery.hoverIntent.minified.js", "split/concordanceKwic.js"],
-            "time_series": default_js +["split/common.js", "split/timeSeries.js"],
-            "collocation": default_js + ["split/common.js", "plugins/jquery.tagcloud.js", "split/collocation.js"],
-            "ranked_relevance": default_js + ["split/common.js", "split/rankedRelevance.js"],
-            "bibliography": default_js + ["split/common.js", "plugins/jquery.slimscroll.min.js", "split/sidebar.js", "split/bibliography.js"],
-            "navigation": default_js + ["plugins/jquery.blueimp-gallery.min.js", "split/common.js", "plugins/jquery.scrollTo.min.js", "split/textObjectNavigation.js"],
-            "concordance_from_collocation": default_js + ["split/common.js", "split/concordanceFromCollocation.js"],
-            "t_o_c": default_js + ["split/common.js", "split/toc.js"],
-            "error": default_js,
-            "access": default_js}
+js_files = {"landing_page.mako": default_js + ["split/common.js", "split/landingPage.js"],
+            "concordance.mako": default_js + ["split/common.js", "plugins/jquery.slimscroll.min.js", "split/sidebar.js", "plugins/jquery.hoverIntent.minified.js", "split/concordanceKwic.js"],
+            "kwic.mako": default_js + ["split/common.js", "plugins/jquery.slimscroll.min.js", "split/sidebar.js", "plugins/jquery.hoverIntent.minified.js", "split/concordanceKwic.js"],
+            "time_series.mako": default_js +["split/common.js", "split/timeSeries.js"],
+            "collocation.mako": default_js + ["split/common.js", "plugins/jquery.tagcloud.js", "split/collocation.js"],
+            "ranked_relevance.mako": default_js + ["split/common.js", "split/rankedRelevance.js"],
+            "bibliography.mako": default_js + ["split/common.js", "plugins/jquery.slimscroll.min.js", "split/sidebar.js", "split/bibliography.js"],
+            "text_object.mako": default_js + ["plugins/jquery.blueimp-gallery.min.js", "split/common.js", "plugins/jquery.scrollTo.min.js", "split/textObjectNavigation.js"],
+            "concordance_from_collocation.mako": default_js + ["split/common.js", "split/concordanceFromCollocation.js"],
+            "t_o_c.mako": default_js + ["split/common.js", "split/toc.js"],
+            "error.mako": default_js,
+            "access_denied.mako": default_js}
 
 
 class cssFiles(object):
@@ -40,7 +41,7 @@ class cssFiles(object):
         try:
             return self.css[item]
         except KeyError:
-            return self.css["concordance"]
+            return default_css
 
 
 class jsFiles(object):
@@ -52,7 +53,7 @@ class jsFiles(object):
         try:
             return self.js[item]
         except KeyError:
-            return self.js["concordance"]
+            return default_js + ['split/common.js']
 
    
 class webResources(object):

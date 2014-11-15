@@ -9,7 +9,6 @@ import re
 import json
 import unicodedata
 from functions.wsgi_handler import wsgi_response, parse_cgi
-from render_template import render_template
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
 from collections import defaultdict
@@ -39,44 +38,17 @@ def collocation(environ,start_response):
     
 def render_collocation(hits, db, dbname, q, path, config):
     biblio_criteria = f.biblio_criteria(q, config)
-    resource = f.webResources("collocation", debug=db.locals["debug"])
-    all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q, db)
-    hit_len = len(hits)
-    return render_template(all_colloc=all_colloc, left_colloc=left_colloc, right_colloc=right_colloc,
-                           db=db,dbname=dbname,q=q,f=f,path=path, results_per_page=q['results_per_page'],
-                           hit_len=hit_len, order=sort_to_display,dumps=json.dumps,biblio_criteria=biblio_criteria,
-                           config=config, template_name='collocation.mako', report="collocation",
-                           css=resource.css, js=resource.js)
+    collocation_object = fetch_collocation(hits, path, q, db, config)
+    return f.render_template(collocation=collocation_object, db=db,dbname=dbname,q=q,biblio_criteria=biblio_criteria,
+                             config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
-def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True, stopwords=True):
-    config = f.WebConfig()
+def fetch_collocation(hits, path, q, db, config, word_filter=True, filter_num=100, full_report=True, stopwords=True):
+    collocation_object = {"query": q, "results_length": len(hits)}
+    
     length = config['concordance_length']
     within_x_words = q['word_num']    
     
-    ## set up filtering with stopwords or 100 most frequent terms ##
-    filter_list = set([q['q']])
-    if word_filter:
-        if stopwords:
-            filter_list_path = path + '/data/stopwords.txt'
-            if os.path.isfile(filter_list_path):
-                filter_words_file = open(filter_list_path)
-                filter_num = float("inf")
-            else:
-                filter_list_path = path + '/data/frequencies/word_frequencies'
-                filter_words_file = open(filter_list_path)
-        else:
-            filter_list_path = path + '/data/frequencies/word_frequencies'
-            filter_words_file = open(filter_list_path)
-        line_count = 0 
-        for line in filter_words_file:
-            line_count += 1
-            try:
-                word = line.split()[0]
-            except IndexError:
-                continue
-            filter_list.add(word.decode('utf-8', 'ignore'))
-            if line_count > filter_num:
-                break
+    filter_list = build_filter_list(word_filter, stopwords, filter_num, q, path)
     
     ## start going though hits ##
     left_collocates = defaultdict(int)
@@ -84,7 +56,7 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
     all_collocates = defaultdict(int)
     
     count = 0
-    for hit in results[q['interval_start']:q['interval_end']]:
+    for hit in hits[q['interval_start']:q['interval_end']]:
         bytes, byte_start = adjust_bytes(hit.bytes, length)
         conc_text = f.get_text(hit, byte_start, length, path)
         
@@ -109,11 +81,38 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
             right_collocates[r_word] += 1
             all_collocates[r_word] += 1  
     
-    if full_report:
-        return all_collocates, left_collocates, right_collocates
-    else:
-        return all_collocates
+    collocation_object['all_collocates'] = sorted(all_collocates.items(), key=itemgetter(1), reverse=True)
+    collocation_object['left_collocates'] = sorted(left_collocates.items(), key=itemgetter(1), reverse=True)
+    collocation_object['right_collocates'] = sorted(right_collocates.items(), key=itemgetter(1), reverse=True)
+    
+    return collocation_object
 
+def build_filter_list(word_filter, stopwords, filter_num, q, path):
+    ## set up filtering with stopwords or 100 most frequent terms ##
+    filter_list = set([q['q']])
+    if word_filter:
+        if stopwords:
+            filter_list_path = path + '/data/stopwords.txt'
+            if os.path.isfile(filter_list_path):
+                filter_words_file = open(filter_list_path)
+                filter_num = float("inf")
+            else:
+                filter_list_path = path + '/data/frequencies/word_frequencies'
+                filter_words_file = open(filter_list_path)
+        else:
+            filter_list_path = path + '/data/frequencies/word_frequencies'
+            filter_words_file = open(filter_list_path)
+        line_count = 0 
+        for line in filter_words_file:
+            line_count += 1
+            try:
+                word = line.split()[0]
+            except IndexError:
+                continue
+            filter_list.add(word.decode('utf-8', 'ignore'))
+            if line_count > filter_num:
+                break
+    return filter_list
 
 def tokenize(text, filter_list, within_x_words, direction, db):
     text = text.lower()

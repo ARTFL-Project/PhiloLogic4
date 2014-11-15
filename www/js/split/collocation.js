@@ -7,6 +7,7 @@ $(document).ready(function() {
         updateProgressBar(percent);
         var script = $('#philologic_collocation').data('script');
         var q_string = window.location.search.substr(1);
+        var hit_len = $('#philologic_collocation').data('resultsLength');
         update_colloc(db_url, all_colloc, left_colloc, right_colloc, hit_len, 0, 3000, script, q_string);
     } else {
         var collocation = JSON.parse(sessionStorage[window.location.href]);

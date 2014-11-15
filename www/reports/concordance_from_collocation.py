@@ -3,14 +3,13 @@
 import sys
 sys.path.append('..')
 import functions as f
-from reports.concordance import fetch_concordance
 import os
 import re
 import unicodedata
 from functions.wsgi_handler import wsgi_response, parse_cgi
 from bibliography import fetch_bibliography as bibliography
-from render_template import render_template
 from collocation import tokenize, filter
+from concordance import citation_links, concordance_citation, fetch_concordance
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
 
@@ -39,7 +38,7 @@ def concordance_from_collocation(environ,start_response):
         return bibliography(f,path, db, dbname,q,environ)
     else:
         hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        colloc_results = fetch_colloc_concordance(hits, path, q, db, config)
+        concordance_object, pages = fetch_colloc_concordance(hits, path, q, db, config)
         biblio_criteria = []
         for k,v in q["metadata"].iteritems():
             if v:
@@ -47,13 +46,12 @@ def concordance_from_collocation(environ,start_response):
                     k = config.metadata_aliases[k]
                 biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b></span>' % (k.title(), v.decode('utf-8', 'ignore'), ))
         biblio_criteria = ' '.join(biblio_criteria)
-        resource = f.webResources("concordance_from_collocation", debug=db.locals["debug"])
-        return render_template(results=colloc_results,db=db,dbname=dbname,q=q,colloc_concordance=colloc_concordance,
-                               f=f,path=path, results_per_page=q['results_per_page'], config=config,report="concordance_from_collocation",
-                               biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako",
-                               css= resource.css, js=resource.js)
+        return f.render_template(concordance=concordance_object,pages=pages, db=db,dbname=dbname,q=q,config=config,report="concordance_from_collocation",
+                                 biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako")
         
-def fetch_colloc_concordance(results, path, q, db, config, word_filter=True, filter_num=100, stopwords=True):
+def fetch_colloc_concordance(hits, path, q, db, config, word_filter=True, filter_num=100, stopwords=True):
+    concordance_object = {'results_per_page': q['results_per_page'], "query": q}
+    
     length = config['concordance_length']
     within_x_words = q['word_num']
     direction = q['direction']
@@ -82,8 +80,9 @@ def fetch_colloc_concordance(results, path, q, db, config, word_filter=True, fil
             if line_count > filter_num:
                 break
     
-    new_hitlist = []
-    for hit in results:
+    results = []
+    colloc_hitlist = []
+    for hit in hits:
         ## get my chunk of text ##
         bytes, byte_start = adjust_bytes(hit.bytes, length)
         conc_text = f.get_text(hit, byte_start, length, path)
@@ -107,17 +106,36 @@ def fetch_colloc_concordance(results, path, q, db, config, word_filter=True, fil
             words.extend(tokenize(conc_right, filter_list, within_x_words, 'right', db))
         if collocate in set(words):
             count = words.count(collocate)
-            hit.collocate_num = count
-            new_hitlist.append(hit)
+            hit.colloc_num = count
+            colloc_hitlist.append(hit)
+            citation_hrefs = citation_links(db, config, hit)
+            metadata_fields = {}
+            for metadata in db.locals['metadata_fields']:
+                metadata_fields[metadata] = hit[metadata]
+            citation = concordance_citation(hit, citation_hrefs)
+            context = colloc_concordance(db, hit, path, q, config.concordance_length)
+            result_obj = {"philo_id": hit.philo_id, "citation": citation, "citation_links": citation_hrefs, "context": context,
+                          "metadata_fields": metadata_fields, "bytes": hit.bytes, "collocate_count": count}
+            results.append(result_obj)
 
-        if len(new_hitlist) > (q["start"] + q["results_per_page"]):
+        if len(results) > (q["start"] + q["results_per_page"]):
             break
     
-    h = collocation_hitlist(new_hitlist, collocate_num)
-    return h
+    concordance_object['results'] = results
+    concordance_object["query_done"] = hits.done
+    concordance_object['results_length'] = len(hits)
+    
+    start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
+    concordance_object["description"] = {"start": start, "end": end, "results_per_page": q['results_per_page']}
+    
+    ## Create new hitlist so we can get paging
+    colloc_hitlist = collocation_hitlist(colloc_hitlist, collocate_num)
+    pages = f.link.generate_page_links(concordance_object['description']['start'], q['results_per_page'], q, colloc_hitlist)
+    
+    return concordance_object, pages
 
-def colloc_concordance(hit, path, q, context_size):
-    conc_text = fetch_concordance(hit, path, context_size)
+def colloc_concordance(db, hit, path, q, context_size):
+    conc_text = fetch_concordance(db, hit, path, context_size)
     collocate = q['collocate'].decode('utf-8', 'ignore')
     collocate_match = re.compile(r'(?<!<span class="highlight">)(%s)' % collocate, flags=re.U|re.I)
     conc_text = collocate_match.sub(r'<span class="collocate">\1</span>', conc_text)
