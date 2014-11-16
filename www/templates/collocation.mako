@@ -5,9 +5,10 @@
     <%include file="dictionary_search_form.mako"/>
 % endif
 <script>
-    var all_colloc = ${dumps(dict(collocation['all_collocates']))};
-    var left_colloc = ${dumps(dict(collocation['left_collocates']))};
-    var right_colloc = ${dumps(dict(collocation['right_collocates']))}
+    var all_collocates = ${dumps(dict(collocation['all_collocates']))};
+    var left_collocates = ${dumps(dict(collocation['left_collocates']))};
+    var right_collocates = ${dumps(dict(collocation['right_collocates']))}
+    var hit_len = ${collocation['results_length']};
 </script>
 <div class="container-fluid">    
     <div id='philologic_response' class="panel panel-default">
@@ -46,30 +47,11 @@
                              <th>within ${q['word_num']} words to right</th>
                             </tr>
                             <tr>
-                                <td>
-                                    % for all_pos, all in enumerate(collocation['all_collocates'][:100]):
-                                        <% all_pos += 1 %>
-                                        <span id="all_num${all_pos}" class="colloc-row">
-                                            <span id="all_word_${all_pos}" data-word="${all[0]}" data-direction="all" data-count="${all[1]}">${all[0]}</span>
-                                            <span id="all_count_${all_pos}">(${all[1]})</span>
-                                        </span>
-                                    % endfor
+                                <td id="all-collocate-column">
                                 </td>
-                                <td>
-                                    % for left_pos, left in enumerate(collocation['left_collocates'][:100]):
-                                        <span id="left_num${left_pos}" class="colloc-row">
-                                            <span id="left_word_${left_pos}" data-word="${left[0]}" data-direction="left" data-count="${left[1]}">${left[0]}</span>
-                                            <span id="left_count_${left_pos}">(${left[1]})</span>
-                                        </span>
-                                    % endfor
+                                <td id="left-collocate-column">
                                 </td>
-                                <td>
-                                    % for right_pos, right in enumerate(collocation['right_collocates'][:100]):
-                                        <span id="right_num${right_pos}" class="colloc-row">
-                                            <span id="right_word_${right_pos}" data-word="${right[0]}" data-direction="right" data-count="${right[1]}">${right[0]}</span>
-                                            <span id="right_count_${right_pos}">(${right[1]})</span>
-                                        </span>
-                                    % endfor
+                                <td id="right-collocate-column">
                                 </td>
                             </tr>
                         </table>

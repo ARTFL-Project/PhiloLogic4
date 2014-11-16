@@ -306,3 +306,8 @@ a.sidebar-option:hover {
 	border-width: 6px 6px 6px 6px;
 	border-radius: 50%;
 }
+
+/*Hide progress bar by default*/
+.progress {
+	display: none;
+}
