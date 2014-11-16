@@ -8,7 +8,7 @@ import re
 import unicodedata
 from functions.wsgi_handler import wsgi_response, parse_cgi
 from bibliography import fetch_bibliography as bibliography
-from collocation import tokenize, filter
+from collocation import tokenize, filter, build_filter_list, split_concordance
 from concordance import citation_links, concordance_citation, fetch_concordance
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
@@ -58,44 +58,13 @@ def fetch_colloc_concordance(hits, path, q, db, config, word_filter=True, filter
     collocate = unicodedata.normalize('NFC', q['collocate'].decode('utf-8', 'ignore'))
     collocate_num = q['collocate_num']
     
-   ## set up filtering with stopwords or 100 most frequent terms ##
-    filter_list = set([q['q']])
-    if word_filter:
-        if stopwords:
-            filter_list_path = path + '/data/stopwords.txt'
-            if os.path.isfile(filter_list_path):
-                filter_words_file = open(filter_list_path)
-                filter_num = float("inf")
-            else:
-                filter_list_path = path + '/data/frequencies/word_frequencies'
-                filter_words_file = open(filter_list_path)
-        else:
-            filter_list_path = path + '/data/frequencies/word_frequencies'
-            filter_words_file = open(filter_list_path)
-        line_count = 0 
-        for line in filter_words_file:
-            line_count += 1
-            word = line.split()[0]
-            filter_list.add(word.decode('utf-8', 'ignore'))
-            if line_count > filter_num:
-                break
+    filter_list = build_filter_list(word_filter, stopwords, filter_num, q, path)
     
     results = []
     colloc_hitlist = []
+    position = 0
     for hit in hits:
-        ## get my chunk of text ##
-        bytes, byte_start = adjust_bytes(hit.bytes, length)
-        conc_text = f.get_text(hit, byte_start, length, path)
-        
-        ## Isolate left and right concordances
-        conc_left = convert_entities(conc_text[:bytes[0]].decode('utf-8', 'ignore'))
-        conc_left = begin_match.sub('', conc_left)
-        conc_left = start_cutoff_match.sub('', conc_left)
-        conc_right = convert_entities(conc_text[bytes[-1]:].decode('utf-8', 'ignore'))
-        conc_right = end_match.sub('', conc_right)
-        conc_right = left_truncate.sub('', conc_right)
-        conc_left = strip_tags(conc_left)
-        conc_right = strip_tags(conc_right)
+        conc_left, conc_right = split_concordance(hit, length, path)
         
         if direction =='left':
             words = tokenize(conc_left, filter_list, within_x_words, direction, db)
@@ -105,6 +74,9 @@ def fetch_colloc_concordance(hits, path, q, db, config, word_filter=True, filter
             words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
             words.extend(tokenize(conc_right, filter_list, within_x_words, 'right', db))
         if collocate in set(words):
+            position += 1
+            if position < q["start"]: ## Make sure we start appending hits at the right position in the hitlist
+                continue
             count = words.count(collocate)
             hit.colloc_num = count
             colloc_hitlist.append(hit)
@@ -118,7 +90,7 @@ def fetch_colloc_concordance(hits, path, q, db, config, word_filter=True, filter
                           "metadata_fields": metadata_fields, "bytes": hit.bytes, "collocate_count": count}
             results.append(result_obj)
 
-        if len(results) > (q["start"] + q["results_per_page"]):
+        if len(results) == (q["results_per_page"]):
             break
     
     concordance_object['results'] = results
@@ -126,6 +98,8 @@ def fetch_colloc_concordance(hits, path, q, db, config, word_filter=True, filter
     concordance_object['results_length'] = len(hits)
     
     start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
+    if end > len(results) + start - 1:
+        end = len(results) + start - 1
     concordance_object["description"] = {"start": start, "end": end, "results_per_page": q['results_per_page']}
     
     ## Create new hitlist so we can get paging
@@ -137,8 +111,8 @@ def fetch_colloc_concordance(hits, path, q, db, config, word_filter=True, filter
 def colloc_concordance(db, hit, path, q, context_size):
     conc_text = fetch_concordance(db, hit, path, context_size)
     collocate = q['collocate'].decode('utf-8', 'ignore')
-    collocate_match = re.compile(r'(?<!<span class="highlight">)(%s)' % collocate, flags=re.U|re.I)
-    conc_text = collocate_match.sub(r'<span class="collocate">\1</span>', conc_text)
+    collocate_match = re.compile(r'(?<!<span class="highlight">)(%s)(.*?)' % collocate, flags=re.U|re.I)
+    conc_text = collocate_match.sub(r'<span class="collocate">\1\2</span>', conc_text)
     return conc_text  
     
 class collocation_hitlist(object):

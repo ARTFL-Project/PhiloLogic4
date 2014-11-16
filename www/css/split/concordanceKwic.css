@@ -138,6 +138,9 @@
 .collocate {
     font-weight:400;
 }
+#return_to_colloc:hover {
+	cursor: pointer;
+}
 
 /*All the sidebar classes*/
 #sidebar {

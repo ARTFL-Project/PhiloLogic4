@@ -47,12 +47,9 @@
                              <th>within ${q['word_num']} words to right</th>
                             </tr>
                             <tr>
-                                <td id="all-collocate-column">
-                                </td>
-                                <td id="left-collocate-column">
-                                </td>
-                                <td id="right-collocate-column">
-                                </td>
+                                <td id="all-collocate-column"></td>
+                                <td id="left-collocate-column"></td>
+                                <td id="right-collocate-column"></td>
                             </tr>
                         </table>
                     </div>
