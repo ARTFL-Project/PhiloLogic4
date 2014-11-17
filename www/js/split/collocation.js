@@ -2,19 +2,28 @@ $(document).ready(function() {
     var q_string = window.location.search.substr(1);
     var db_url = webConfig['db_url'];
     if (sessionStorage[window.location.href] == null) {
+        // Render initial results
         var data = []
         sortAndRenderCollocation(all_collocates, left_collocates, right_collocates, data, q_string, db_url, hit_len, hit_len);
-        var colloc_hits = parseInt($('#colloc_hits').html());
-        var percent = 3000 / colloc_hits * 100;
-        $(".progress").show()
-        updateProgressBar(percent);
-        var script = $('#philologic_collocation').data('script');
-        update_colloc(db_url, all_collocates, left_collocates, right_collocates, hit_len, 0, 3000, script, q_string);
+        $('#philologic_collocation').velocity('fadeIn', {duration: 200});
+        
+        // Fetch total results to make sure we always have the right number
+        var total_hits_script = $('#search_arguments').data('script');
+        $.getJSON(total_hits_script, function(data) {
+            var total_hits = data;
+            $('#colloc_hits').html(data);
+            var percent = 3000 / total_hits * 100;
+            $(".progress").show()
+            updateProgressBar(percent);
+            var script = $('#philologic_collocation').data('script');
+            update_colloc(db_url, all_collocates, left_collocates, right_collocates, total_hits, 0, 3000, script, q_string);
+        });
     } else {
         var collocation = JSON.parse(sessionStorage[window.location.href]);
         var data = []
         sortAndRenderCollocation(collocation['all_collocates'], collocation['left_collocates'], collocation['right_collocates'], data, q_string, db_url, hit_len, hit_len);
         activateLinks();
+        $('#philologic_collocation').velocity('fadeIn', {duration: 200});
     }
 });
 
@@ -103,7 +112,7 @@ function update_table(sorted_lists, q_string, db_url) {
         var pos = 0;
         var sorted_list = sorted_lists[column];
         $('#' + column + '-collocate-column').empty();
-        for (i in sorted_list.slice(0, 50)) {
+        for (i in sorted_list.slice(0, 100)) {
             pos += 1;
             var word = '<span id="' + column + '_word_' + pos + '" data-word="' + sorted_list[i][0] + '" data-direction="' + column + '" data-count="' + sorted_list[i][1] + '">' + sorted_list[i][0] + '</span>';
             var count_id = column + '_count_' + sorted_list[i][1];
