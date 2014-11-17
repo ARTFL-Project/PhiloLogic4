@@ -7,7 +7,6 @@ import os
 import re
 from functions.wsgi_handler import wsgi_response
 from bibliography import bibliography
-from render_template import render_template
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 from functions.FragmentParser import parse
 import philologic.MetadataQuery as MQ
@@ -75,7 +74,7 @@ def frequencies(environ,start_response):
     #return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
     #                       f=f, path=path, results_per_page=q['results_per_page'],
     #                       template_name="concordance.mako")
-    return render_template(results=res,db=db,dbname=dbname,q=q,f=f,template_name="frequencies.mako", report="frequencies")
+    return f.render_template(results=res,db=db,dbname=dbname,q=q,f=f,template_name="frequencies.mako", report="frequencies")
     
 def prominent_features(q):
     conn = db.dbh

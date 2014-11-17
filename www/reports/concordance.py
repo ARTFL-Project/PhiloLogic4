@@ -7,7 +7,6 @@ import reports as r
 import os
 import re
 from functions.wsgi_handler import wsgi_response, parse_cgi
-from render_template import render_template
 from functions.ObjectFormatter import convert_entities, adjust_bytes, valid_html_tags, xml_to_html_class
 from functions.FragmentParser import parse
 from lxml import etree
@@ -36,12 +35,11 @@ def concordance(environ,start_response):
         return render_concordance(concordance_object, hits, q, db, dbname, path, config)
  
 def render_concordance(concordance_object, hits, q, db, dbname, path, config):
-    resource = f.webResources("concordance", debug=db.locals["debug"])
     biblio_criteria = f.biblio_criteria(concordance_object['query'], config)
     pages = f.link.generate_page_links(concordance_object['description']['start'], q['results_per_page'], q, hits)
-    return render_template(concordance=concordance_object, q=concordance_object["query"], db=db,dbname=dbname,path=path,
+    return f.render_template(concordance=concordance_object, q=concordance_object["query"], db=db,dbname=dbname,
                            biblio_criteria=biblio_criteria,config=config, template_name="concordance.mako", report="concordance",
-                           pages=pages, css=resource.css, js=resource.js)
+                           pages=pages)
 
 def concordance_results(db, q, config, path):
     hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
@@ -54,7 +52,7 @@ def concordance_results(db, q, config, path):
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
-        citation = concordance_citation(hit, citation_hrefs, metadata_fields)
+        citation = concordance_citation(hit, citation_hrefs)
         context = fetch_concordance(db, hit, path, config.concordance_length)
         result_obj = {"philo_id": hit.philo_id, "citation": citation, "citation_links": citation_hrefs, "context": context,
                       "metadata_fields": metadata_fields, "bytes": hit.bytes}
@@ -79,16 +77,22 @@ def citation_links(db, config, i):
         links['para'] = f.make_absolute_object_link(config, i.philo_id[:5], i.bytes)
     return links
 
-def concordance_citation(hit, citation_hrefs, metadata_fields):
+def concordance_citation(hit, citation_hrefs):
     """ Returns a representation of a PhiloLogic object and all its ancestors
         suitable for a precise concordance citation. """
     
     ## Doc level metadata
-    title = '<a href="%s">%s</a>' % (citation_hrefs['doc'], metadata_fields['title'].strip())
-    if metadata_fields['author']:
-        citation = "%s <i>%s</i>" % (metadata_fields['author'].strip(),title)
+    title = '<a href="%s">%s</a>' % (citation_hrefs['doc'], hit.title.strip())
+    if hit.author:
+        citation = "%s <i>%s</i>" % (hit.author.strip(),title)
     else:
         citation = "<i>%s</i>" % title
+
+    if hit.date:
+        try:
+            citation += " [%s]" % str(hit.date)
+        except:
+            pass
     
     ## Div level metadata
     div1_name = hit.div1.head
@@ -96,7 +100,11 @@ def concordance_citation(hit, citation_hrefs, metadata_fields):
         if hit.div1.philo_name == "__philo_virtual":
             div1_name = "Section"
         else:
-            div1_name = hit.div1.philo_name
+            if hit.div1["type"] and hit.div1["n"]:
+                div1_name = hit.div1['type'] + " " + hit.div1["n"]                       
+            else:
+                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
+    div1_name = div1_name[0].upper() + div1_name[1:]
     div2_name = hit.div2.head
     div3_name = hit.div3.head
     
@@ -110,7 +118,7 @@ def concordance_citation(hit, citation_hrefs, metadata_fields):
     ## Paragraph level metadata
     if "para" in citation_hrefs:
         try:
-            citation += "<a href='%s'>%s</a>" % (citation_hrefs['para'], metadata_fields['who'])
+            citation += "<a href='%s'>%s</a>" % (citation_hrefs['para'], hit.who)
         except KeyError: ## no who keyword
             pass
     
