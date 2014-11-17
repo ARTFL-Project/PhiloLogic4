@@ -124,7 +124,7 @@ def concordance_citation(hit, citation_hrefs):
     page_obj = hit.page
     if page_obj['n']:
         page_n = page_obj['n']
-        citation += u" [page %s] " % page_n    
+        citation += u" [line %s] " % page_n    
     citation = u'<span class="philologic_cite">' + citation + "</span>"
     return citation
 
