@@ -4,7 +4,6 @@ import sys
 sys.path.append('..')
 import functions as f
 from functions.wsgi_handler import wsgi_response, parse_cgi
-from render_template import render_template
 from collections import defaultdict
 import json
 

@@ -23,10 +23,7 @@ def error_handling(db, dbname, q):
     hits = NoHits()
     path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
-    if q["error_report"]:
-        report = q["error_report"]
-    else:
-        report = q['report']
+    report = q['report']
     hits = NoHits()
     if report == "concordance" or report == "bibligraphy":
         concordance_object = {"description": {"start": 0, "end": 0, "results_per_page": q['results_per_page']},

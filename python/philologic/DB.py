@@ -60,7 +60,7 @@ class DB:
     def get_word(self,item):
         word_s = hit_to_string(item,self.width)
         c = self.dbh.cursor()
-        c.execute("SELECT * FROM toms WHERE philo_id=? LIMIT 1;",(word_s,))
+        c.execute("SELECT * FROM words WHERE philo_id=? LIMIT 1;",(word_s,))
         return c.fetchone()
         
     def get_page(self,item):

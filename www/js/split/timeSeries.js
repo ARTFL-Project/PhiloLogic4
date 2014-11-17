@@ -32,6 +32,7 @@ $(document).ready(function() {
         drawFromData(sorted_abs, interval, 'absolute_time');
         var total = parseInt($('.progress-bar').data('total'));
         var percent = 5000 / total * 100;
+        $('.progress').show();
         updateProgressBar(percent)
         var date_counts = eval($('#relative_time').data('datecount'));
         var script = $('#time_series_report').data('script');

@@ -138,15 +138,15 @@
 .collocate {
     font-weight:400;
 }
+#return_to_colloc:hover {
+	cursor: pointer;
+}
 
 /*All the sidebar classes*/
 #sidebar {
 	padding-left: 0px;
 	padding-right: 0px;
 	margin-left: -15px;
-}
-#sidebar_display #freq_sidebar_status {
-	margin: 0em 0em 0.5em 0em;
 }
 #frequency_container {
     display: none;
@@ -175,6 +175,13 @@
 }
 #frequency_container .progress {
 	margin-bottom: 0px;
+	display: none;
+}
+#freq_sidebar_status {
+	display: inline-block;
+	width: 100%;
+	padding: 0px 5px;
+	border-bottom: solid 1px #ddd;
 }
 
 /* Concordance styling for theater */

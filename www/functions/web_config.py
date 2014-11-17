@@ -3,6 +3,7 @@
 import os
 import sys
 from json import dumps
+from philologic.DB import DB
 from search_utilities import search_examples
 
 valid_time_series_intervals = set([1, 10, 50, 100])
@@ -11,15 +12,18 @@ class WebConfig(object):
     
     def __init__(self):
         self.config = {}
-        path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '') + "/data/web_config.cfg"
+        db_path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '')
+        db = DB(db_path + '/data',encoding='utf-8')
+        web_config_path = db_path + "/data/web_config.cfg"
         self.options = set(['db_url', 'dbname', 'concordance_length', 'facets', 'metadata',
                         'search_reports', 'metadata_aliases', 'search_examples', 'time_series_intervals',
-                        "theme", "dictionary", "landing_page_browsing"])
+                        "theme", "dictionary", "landing_page_browsing", "debug"])
         try:
-            execfile(path, globals(), self.config)
+            execfile(web_config_path, globals(), self.config)
         except NameError:
             ##TODO: redirect to an error page indicating a syntax error
             raise SyntaxError
+        self.config['debug'] = db.locals['debug']
         if self.config['search_examples'] == None:
             self.config['search_examples'] = {}
         for i in self.config['metadata']:
@@ -83,6 +87,6 @@ class WebConfig(object):
         else:
             return False
         
-    def JSONify(self):
+    def toJSON(self):
         config_obj = dict([(option, self[option]) for option in self.options])
         return dumps(config_obj)

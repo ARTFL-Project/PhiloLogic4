@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
 	N64 uniq_words = 0;
 	char word[512];
 	char page[512];
-	char line[512];
+	char line[2048];
 	int state;
 	Z32 hit[10];
 
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 
 	//scanning
 	while(1) {
-		if (fgets(line,511,stdin) == NULL) {
+		if (fgets(line,2048,stdin) == NULL) {
 			hitbuffer_finish(hb);
 			break;		
 		}
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 			totalhits += 1LLU;
 		}
 		else {
-			fprintf(stderr, "Couldn't understand hit.\n");
+		  fprintf(stderr, "Couldn't understand hit:\n%s",line);
 		}
 	}
 

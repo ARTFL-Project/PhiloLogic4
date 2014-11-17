@@ -101,6 +101,16 @@ li {
 .table td, .table th {
     text-align: center;
 }
+#collocation_table td {
+	padding: 0;
+}
+.colloc-row {
+	display: block;
+	line-height: 300%;
+}
+.colloc-row:nth-child(2n-1) {
+	background-color: #FAFAFA;
+}
 
 /*Pages links*/
 .more {
@@ -295,4 +305,9 @@ a.sidebar-option:hover {
 	border-style: solid;
 	border-width: 6px 6px 6px 6px;
 	border-radius: 50%;
+}
+
+/*Hide progress bar by default*/
+.progress {
+	display: none;
 }

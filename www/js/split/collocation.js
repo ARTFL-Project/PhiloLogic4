@@ -1,60 +1,34 @@
 $(document).ready(function() {
+    var q_string = window.location.search.substr(1);
+    var db_url = webConfig['db_url'];
+    var hit_len = collocation['hit_length'];
     if (sessionStorage[window.location.href] == null) {
-        collocation_cloud(mergeCollocResults(all_colloc)[1]);
-        var db_url = webConfig['db_url'];
-        var colloc_hits = parseInt($('#colloc_hits').html());
-        var percent = 3000 / colloc_hits * 100;
-        updateProgressBar(percent);
-        var script = $('#philologic_collocation').data('script');
-        var q_string = window.location.search.substr(1);
-        update_colloc(db_url, all_colloc, left_colloc, right_colloc, hit_len, 0, 3000, script, q_string);
+        // Render initial results
+        var data = []
+        sortAndRenderCollocation(collocation_object, data, q_string, db_url, hit_len, hit_len);
+        $('#philologic_collocation').velocity('fadeIn', {duration: 200});
+        
+        // Fetch total results to make sure we always have the right number
+        var total_hits_script = $('#search_arguments').data('script');
+        $.getJSON(total_hits_script, function(data) {
+            var total_hits = data;
+            $('#colloc_hits').html(data);
+            var percent = 3000 / total_hits * 100;
+            $(".progress").show()
+            updateProgressBar(percent);
+            var script = $('#philologic_collocation').data('script');
+            update_colloc(db_url, collocation_object, total_hits, 0, 3000, script, q_string);
+        });
     } else {
-        var collocation = JSON.parse(sessionStorage[window.location.href]);
-        $('#philologic_collocation').html(collocation);
-        var q_string = window.location.search.substr(1);
-        clickOnColloc('.colloc_link');
-        clickOnColloc('.cloud_term');
+        var saved_collocation_object = JSON.parse(sessionStorage[window.location.href]);
+        var data = []
+        sortAndRenderCollocation(saved_collocation_object, data, q_string, db_url, hit_len, hit_len);
+        activateLinks();
+        $('#philologic_collocation').velocity('fadeIn', {duration: 200});
     }
 });
 
-// Set of functions for updating collocation tables
-function mergeCollocResults(full_results, new_data) {
-    if (typeof full_results === 'undefined') {
-        full_results = new_data;
-    } else {
-        for (key in new_data) {
-            if (key in full_results) {
-                full_results[key] += new_data[key];
-            }
-            else {
-                full_results[key] = new_data[key];
-            }
-        }
-    }
-    var sorted_list = [];
-    for (key in full_results) {
-        sorted_list.push([key, full_results[key]]);
-    }
-    sorted_list.sort(function(a,b) {return b[1] - a[1]});
-    
-    return [sorted_list, full_results]
-}
-
-function update_table(sorted_lists, q_string, db_url) {
-    for (column in sorted_lists) {
-        var pos = 0;
-        var sorted_list = sorted_lists[column];
-        for (i in sorted_list.slice(0, 50)) {
-            pos += 1;
-            var word = '<span id="' + column + '_word_' + pos + '" data-word="' + sorted_list[i][0] + '" data-direction="' + column + '" data-count="' + sorted_list[i][1] + '">' + sorted_list[i][0] + '</span>';
-            var count_id = column + '_count_' + sorted_list[i][1];
-            data = word + '<span id="' + count_id + '">&nbsp(' + sorted_list[i][1] + ')</span>';
-            $('#' + column + '_num' + pos).hide().html(data).fadeIn();
-        }
-    }
-}
-
-function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end, script, q_string) {
+function update_colloc(db_url, total_results_object, results_len, colloc_start, colloc_end, script, q_string) {
     if (colloc_start == 0) {
         colloc_start = 3000;
         colloc_end = 13000;
@@ -65,49 +39,88 @@ function update_colloc(db_url, all_colloc, left_colloc, right_colloc, results_le
     var script_call = script + '&interval_start=' + colloc_start + '&interval_end=' + colloc_end
     if (colloc_start <= results_len) {
         $.getJSON(script_call, function(data) {
-            all_list = mergeCollocResults(all_colloc, data[0]);
-            var all_sorted = all_list[0];
-                all_new_colloc = all_list[1];
-            left_list = mergeCollocResults(left_colloc, data[1]);
-            var left_sorted = left_list[0];
-                left_new_colloc = left_list[1];
-            right_list = mergeCollocResults(right_colloc, data[2]);
-            var right_sorted = right_list[0];
-                right_new_colloc = right_list[1];
-            sorted_lists = {'all': all_sorted, 'left': left_sorted, 'right': right_sorted};
-            update_table(sorted_lists, q_string, db_url);
-            collocation_cloud(all_new_colloc, colloc_end, results_len);
+            var total_results = sortAndRenderCollocation(total_results_object, data, q_string, db_url, results_len, colloc_end);
             if (colloc_end < results_len) {
                 var percent = colloc_end / results_len * 100;
                 updateProgressBar(percent);
             }
-            update_colloc(db_url, all_new_colloc, left_colloc, right_colloc, results_len, colloc_start, colloc_end, script, q_string);
+            update_colloc(db_url, total_results, results_len, colloc_start, colloc_end, script, q_string);
         });
     }
     else {
         updateProgressBar(100);
         $(".progress").delay(500).velocity('slideUp');
-        
-        // Activate links on collocations
-        $('span[id^=all_word], span[id^=left_word], span[id^=right_word]').addClass('colloc_link');
-        clickOnColloc('.colloc_link');
-        clickOnColloc('.cloud_term');
-        
-        // Make sure all animations and CSS transformations are complete
-        setTimeout(saveCollocations, 3000);
+        activateLinks();
+        if (webConfig.debug == false) {
+            if (typeof(localStorage) == 'undefined' ) {
+                alert('Your browser does not support HTML5 localStorage. Try upgrading.');
+            } else {
+                try {
+                    sessionStorage[window.location.href] = JSON.stringify(total_results_object);
+                } catch(e) {
+                    sessionStorage.clear();
+                    console.log("sessionStorage was full, clearing it for space...");
+                    sessionStorage[window.location.href] = JSON.stringify(total_results_object);
+                }
+            }
+        }
     }
 }
 
-function saveCollocations(args) {
-    if (typeof(localStorage) == 'undefined' ) {
-        alert('Your browser does not support HTML5 localStorage. Try upgrading.');
-    } else {
-        try {
-            sessionStorage[window.location.href] = JSON.stringify($('#philologic_collocation').html());
-        } catch(e) {
-            sessionStorage.clear();
-            console.log("sessionStorage was full, clearing it for space...");
-            sessionStorage[window.location.href] = JSON.stringify($('#philologic_collocation').html());
+function sortAndRenderCollocation(total_results, data, q_string, db_url, results_len, colloc_end) {
+    if (data.length == 0) {
+        data = {"all_collocates": [], 'left_collocates': [], 'right_collocates': []}
+    }
+    var all = mergeCollocResults(total_results["all_collocates"], data["all_collocates"]);
+    var left = mergeCollocResults(total_results["left_collocates"], data['left_collocates']);
+    var right = mergeCollocResults(total_results["right_collocates"], data['right_collocates']);
+    sorted_lists = {'all': all.sorted, 'left': left.sorted, 'right': right.sorted};
+    update_table(sorted_lists, q_string, db_url);
+    collocation_cloud(all.unsorted, colloc_end, results_len);
+    return {"all": all.unsorted, "left": left.unsorted, "right": right.unsorted}
+}
+
+function mergeCollocResults(full_results, new_data) {
+    if (typeof full_results === 'undefined') {
+        full_results = {};
+    }
+    if (new_data) {
+        for (var i=0; i < new_data.length; i++) {
+            var key = new_data[i][0];
+            var value = new_data[i][1];
+            if (key in full_results) {
+                full_results[key] += value;
+            }
+            else {
+                full_results[key] = value;
+            }
+        }
+    }
+    var sorted_list = sortCollocResults(full_results);
+    return {"sorted": sorted_list, "unsorted": full_results};
+}
+
+function sortCollocResults(full_results) {
+    var sorted_list = [];
+    for (var k in full_results) {
+        sorted_list.push([k, full_results[k]]);
+    }
+    sorted_list.sort(function(a,b) {return b[1] - a[1]});
+    return sorted_list;
+}
+
+function update_table(sorted_lists, q_string, db_url) {
+    for (column in sorted_lists) {
+        var pos = 0;
+        var sorted_list = sorted_lists[column];
+        $('#' + column + '-collocate-column').empty();
+        for (i in sorted_list.slice(0, 100)) {
+            pos += 1;
+            var word = '<span id="' + column + '_word_' + pos + '" data-word="' + sorted_list[i][0] + '" data-direction="' + column + '" data-count="' + sorted_list[i][1] + '">' + sorted_list[i][0] + '</span>';
+            var count_id = column + '_count_' + sorted_list[i][1];
+            data = word + '<span id="' + count_id + '">&nbsp(' + sorted_list[i][1] + ')</span>';
+            var wrapper = '<span id="' + column + '_num' + pos + '" class="colloc-row">' + data + '</span>';
+            $('#' + column + '-collocate-column').append(wrapper);
         }
     }
 }
@@ -237,14 +250,13 @@ function collocation_cloud(full_results, colloc_end, results_len) {
     }
     $("#collocate_counts span").tagcloud();
     $("#collocate_counts").velocity('fadeIn');
-    if (colloc_end >= results_len) {
-        clickOnColloc('.cloud_term');
-    }
 }
 
-function clickOnColloc(element) {
+function activateLinks() {
+    // Activate links on collocations
+    $('span[id^=all_word], span[id^=left_word], span[id^=right_word]').addClass('colloc_link');
     var href = window.location.href
-    $(element).click(function(e) {
+    $('.colloc_link, .cloud_term').click(function(e) {
         e.preventDefault();
         var word = $(this).data('word');
         var direction = $(this).data('direction');
