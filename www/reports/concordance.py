@@ -89,11 +89,6 @@ def concordance_citation(hit, citation_hrefs, metadata_fields):
         citation = "%s <i>%s</i>" % (metadata_fields['author'].strip(),title)
     else:
         citation = "<i>%s</i>" % title
-    if metadata_fields['date']:
-        try:
-            citation += " [%s]" % str(metadata_fields['date'])
-        except:
-            pass
     
     ## Div level metadata
     div1_name = hit.div1.head
@@ -122,7 +117,7 @@ def concordance_citation(hit, citation_hrefs, metadata_fields):
     page_obj = hit.page
     if page_obj['n']:
         page_n = page_obj['n']
-        citation += u" [page %s] " % page_n    
+        citation += u" [line %s] " % page_n    
     citation = u'<span class="philologic_cite">' + citation + "</span>"
     return citation
 
