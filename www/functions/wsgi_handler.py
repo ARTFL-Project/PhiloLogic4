@@ -9,8 +9,8 @@ import os
 from philologic.DB import DB
 from query_parser import query_parser
 
-class wsgi_helper(object):
-    def __init__(self,environ,db):
+class WSGIHandler(object):
+    def __init__(self,db,environ):
         self.path_info = environ["PATH_INFO"]
         self.query_string = environ["QUERY_STRING"]
         self.script_filename = environ["SCRIPT_FILENAME"]
@@ -50,6 +50,11 @@ class wsgi_helper(object):
                 
         self.metadata['philo_type'] = self['philo_type']
         
+        if self.cgi["q"] == "":
+            self.no_q = True
+        else:
+            self.no_q = False
+        
         if num_empty == len(self.metadata_fields):
             self.no_metadata = True
         else:
@@ -67,14 +72,10 @@ class wsgi_helper(object):
         return self[key]
 
     def __getitem__(self,key):
-        if key == "metadata":
-            return self.metadata
-        elif key in self.cgi:
+        if key in self.cgi:
             return self.cgi[0]
         elif key in self.defaults:
             return self.defaults[key]
-        elif key == "no_q":
-            return self.no_metadata
         else:
             return ""                
 
