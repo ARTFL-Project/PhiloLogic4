@@ -8,7 +8,6 @@ import os
 import re
 from functions.wsgi_handler import wsgi_response, parse_cgi
 from concordance import concordance_citation, citation_links
-from render_template import render_template
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 import json
 
@@ -31,10 +30,9 @@ def kwic(environ,start_response):
         
 def render_kwic(kwic_object, hits, db, dbname, q, path, config):
     biblio_criteria = f.biblio_criteria(q, config)
-    resource = f.webResources("kwic", debug=db.locals["debug"])
     pages = f.link.generate_page_links(kwic_object['description']['start'], q['results_per_page'], q, hits)
-    return render_template(kwic=kwic_object,db=db,dbname=dbname,q=q, path=path, biblio_criteria=biblio_criteria,
-                           pages=pages, config=config, template_name='kwic.mako', report="kwic", css=resource.css, js=resource.js)
+    return f.render_template(kwic=kwic_object,db=db,dbname=dbname,q=q, path=path, biblio_criteria=biblio_criteria,
+                           pages=pages, config=config, template_name='kwic.mako', report="kwic")
 
 def generate_kwic_results(db, q, config, path, length=5000, link_to_hit="div1"):
     """ The link_to_hit keyword defines the text object to which the metadata link leads to"""

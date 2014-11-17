@@ -5,10 +5,8 @@
     <%include file="dictionary_search_form.mako"/>
 % endif
 <script>
-    var all_colloc = ${dumps(all_colloc)};
-    var left_colloc = ${dumps(left_colloc)};
-    var right_colloc = ${dumps(right_colloc)};
-    var hit_len = ${hit_len};
+    var collocation_object = {"all_collocates": ${dumps(dict(collocation['all_collocates']))}, "left_collocates": ${dumps(dict(collocation['left_collocates']))},
+                              "right_collocates": ${dumps(dict(collocation['right_collocates']))}, "hit_length": ${collocation['results_length']}};
 </script>
 <div class="container-fluid">    
     <div id='philologic_response' class="panel panel-default">
@@ -17,8 +15,8 @@
                 <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
                     Export results
                 </button>
-                <div id="search_arguments">
-                    Displaying the top 100 collocates for <span id="colloc_hits">${hit_len}</span> occurrences of <b>${q['q'].decode('utf-8', 'ignore')}</b><br>
+                <div id="search_arguments" data-script="${config.db_url + '/scripts/get_total_results.py?' + q['q_string']}">
+                    Displaying the top 100 collocates for <span id="colloc_hits">${collocation['results_length'] or "..."}</span> occurrences of <b>${collocation['query']['q'].decode('utf-8', 'ignore')}</b><br>
                     Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
                 </div>
             </div>
@@ -31,7 +29,7 @@
             </div>
         </div>
         <div class="results_container">
-            <div id='philologic_collocation' class="row" data-script="${config.db_url + '/scripts/collocation_fetcher.py?' + q['q_string']}">
+            <div id='philologic_collocation' class="row" data-script="${config.db_url + '/scripts/get_collocation.py?' + collocation['query']['q_string']}" data-hits-length="${collocation['results_length']}" style="display: none">
                 <div class="col-xs-12 col-sm-3 col-sm-push-9 col-md-4 col-md-push-8">
                     <div id="word_cloud" class="word_cloud">
                         <div id="collocate_counts" class="collocation_counts">
@@ -46,30 +44,11 @@
                              <th>within ${q['word_num']} words to left</th>
                              <th>within ${q['word_num']} words to right</th>
                             </tr>
-                            <% pos = 0 %>
-                            % for all, left, right in order(all_colloc, left_colloc, right_colloc):
-                                <% pos += 1 %>
-                                <tr>
-                                    <td>
-                                        <span id="all_num${pos}">
-                                            <span id="all_word_${pos}" data-word="${all[0]}" data-direction="all" data-count="${all[1]}">${all[0]}</span>
-                                            <span id="all_count_${pos}">(${all[1]})</span>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span id="left_num${pos}">
-                                            <span id="left_word_${pos}" data-word="${left[0]}" data-direction="left" data-count="${left[1]}">${left[0]}</span>
-                                            <span id="left_count_${pos}">(${left[1]})</span>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span id="right_num${pos}">
-                                            <span id="right_word_${pos}" data-word="${right[0]}" data-direction="right" data-count="${right[1]}">${right[0]}</span>
-                                            <span id="right_count_${pos}">(${right[1]})</span>
-                                        </span>
-                                    </td>
-                                </tr>
-                            % endfor
+                            <tr>
+                                <td id="all-collocate-column"></td>
+                                <td id="left-collocate-column"></td>
+                                <td id="right-collocate-column"></td>
+                            </tr>
                         </table>
                     </div>
                 </div>

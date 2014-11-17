@@ -5,14 +5,15 @@ import sys
 sys.path.append('..')
 import functions as f
 import reports as r
-from functions.wsgi_handler import wsgi_response
-from render_template import render_template
+from functions.wsgi_handler import wsgi_response, parse_cgi
 from concordance import citation_links
 import json
 
 
 def bibliography(environ, start_response):
-    db, dbname, path_components, q = wsgi_response(environ,start_response)
+    wsgi_response(environ, start_response)
+    db, path_components, q = parse_cgi(environ)
+    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
     path = os.getcwd().replace('functions/', '')
     if q['format'] == "json":
         wrapper = []
@@ -30,10 +31,9 @@ def fetch_bibliography(f,path, db, dbname, q, environ):
     config = f.WebConfig()
     bibliography_object, hits = bibligraphy_results(db, q, config)
     biblio_criteria = f.biblio_criteria(q, config)
-    resource = f.webResources("bibliography", debug=db.locals["debug"])
     pages = f.link.generate_page_links(bibliography_object['description']['start'], q['results_per_page'], q, hits)
-    return render_template(bibliography=bibliography_object,db=db,dbname=dbname,q=q, template_name='bibliography.mako',
-                           pages=pages, biblio_criteria=biblio_criteria,config=config, report="bibliography", css=resource.css, js=resource.js)
+    return f.render_template(bibliography=bibliography_object,db=db,dbname=dbname,q=q, template_name='bibliography.mako',
+                           pages=pages, biblio_criteria=biblio_criteria,config=config, report="bibliography")
     
 def bibligraphy_results(db, q, config):
     if q["no_q"]:

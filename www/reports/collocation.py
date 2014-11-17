@@ -9,7 +9,6 @@ import re
 import json
 import unicodedata
 from functions.wsgi_handler import wsgi_response, parse_cgi
-from render_template import render_template
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
 from collections import defaultdict
@@ -19,7 +18,6 @@ from operator import itemgetter
 left_truncate = re.compile (r"^\w+", re.U)
 right_truncate = re.compile("\w+$", re.U)
 word_identifier = re.compile("\w", re.U)
-token_regex = re.compile(r'[\W\d]+', re.U)
 
 begin_match = re.compile(r'^[^<]*?>')
 start_cutoff_match = re.compile(r'^[^ <]+')
@@ -39,20 +37,44 @@ def collocation(environ,start_response):
     
 def render_collocation(hits, db, dbname, q, path, config):
     biblio_criteria = f.biblio_criteria(q, config)
-    resource = f.webResources("collocation", debug=db.locals["debug"])
-    all_colloc, left_colloc, right_colloc = fetch_collocation(hits, path, q, db)
-    hit_len = len(hits)
-    return render_template(all_colloc=all_colloc, left_colloc=left_colloc, right_colloc=right_colloc,
-                           db=db,dbname=dbname,q=q,f=f,path=path, results_per_page=q['results_per_page'],
-                           hit_len=hit_len, order=sort_to_display,dumps=json.dumps,biblio_criteria=biblio_criteria,
-                           config=config, template_name='collocation.mako', report="collocation",
-                           css=resource.css, js=resource.js)
+    collocation_object = fetch_collocation(hits, path, q, db, config)
+    return f.render_template(collocation=collocation_object, db=db,dbname=dbname,q=q,biblio_criteria=biblio_criteria,
+                             config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
-def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, full_report=True, stopwords=True):
-    config = f.WebConfig()
+def fetch_collocation(hits, path, q, db, config, word_filter=True, filter_num=100, full_report=True, stopwords=True):
+    collocation_object = {"query": q, "results_length": len(hits)}
+    
     length = config['concordance_length']
     within_x_words = q['word_num']    
     
+    filter_list = build_filter_list(word_filter, stopwords, filter_num, q, path)
+    
+    ## start going though hits ##
+    left_collocates = defaultdict(int)
+    right_collocates = defaultdict(int)
+    all_collocates = defaultdict(int)
+    
+    count = 0
+    for hit in hits[q['interval_start']:q['interval_end']]:
+        conc_left, conc_right = split_concordance(hit, length, path)
+        left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
+        right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)
+        
+        for l_word in left_words:
+            left_collocates[l_word] += 1
+            all_collocates[l_word] += 1 
+
+        for r_word in right_words:
+            right_collocates[r_word] += 1
+            all_collocates[r_word] += 1  
+    
+    collocation_object['all_collocates'] = sorted(all_collocates.items(), key=itemgetter(1), reverse=True)
+    collocation_object['left_collocates'] = sorted(left_collocates.items(), key=itemgetter(1), reverse=True)
+    collocation_object['right_collocates'] = sorted(right_collocates.items(), key=itemgetter(1), reverse=True)
+    
+    return collocation_object
+
+def build_filter_list(word_filter, stopwords, filter_num, q, path):
     ## set up filtering with stopwords or 100 most frequent terms ##
     filter_list = set([q['q']])
     if word_filter:
@@ -77,52 +99,34 @@ def fetch_collocation(results, path, q, db, word_filter=True, filter_num=100, fu
             filter_list.add(word.decode('utf-8', 'ignore'))
             if line_count > filter_num:
                 break
-    
-    ## start going though hits ##
-    left_collocates = defaultdict(int)
-    right_collocates = defaultdict(int)
-    all_collocates = defaultdict(int)
-    
-    count = 0
-    for hit in results[q['interval_start']:q['interval_end']]:
-        bytes, byte_start = adjust_bytes(hit.bytes, length)
-        conc_text = f.get_text(hit, byte_start, length, path)
-        
-        ## Isolate left and right concordances
-        conc_left = convert_entities(conc_text[:bytes[0]].decode('utf-8', 'ignore'))
-        conc_left = begin_match.sub('', conc_left)
-        conc_left = start_cutoff_match.sub('', conc_left)
-        conc_right = convert_entities(conc_text[bytes[-1]:].decode('utf-8', 'ignore'))
-        conc_right = end_match.sub('', conc_right)
-        conc_right = left_truncate.sub('', conc_right)
-        conc_left = strip_tags(conc_left)
-        conc_right = strip_tags(conc_right)
-        
-        left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
-        right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)
-        
-        for l_word in left_words:
-            left_collocates[l_word] += 1
-            all_collocates[l_word] += 1 
+    return filter_list
 
-        for r_word in right_words:
-            right_collocates[r_word] += 1
-            all_collocates[r_word] += 1  
+def split_concordance(hit, length, path):
+    bytes, byte_start = adjust_bytes(hit.bytes, length)
+    conc_text = f.get_text(hit, byte_start, length, path)
     
-    if full_report:
-        return all_collocates, left_collocates, right_collocates
-    else:
-        return all_collocates
+    ## Isolate left and right concordances
+    conc_left = convert_entities(conc_text[:bytes[0]].decode('utf-8', 'ignore'))
+    conc_left = begin_match.sub('', conc_left)
+    conc_left = start_cutoff_match.sub('', conc_left)
+    conc_right = convert_entities(conc_text[bytes[-1]:].decode('utf-8', 'ignore'))
+    conc_right = end_match.sub('', conc_right)
+    conc_right = left_truncate.sub('', conc_right)
+    conc_left = strip_tags(conc_left)
+    conc_right = strip_tags(conc_right)
+    
+    return conc_left, conc_right
 
 
 def tokenize(text, filter_list, within_x_words, direction, db):
     text = text.lower()
+    token_regex = re.compile(db.locals['word_regex'] + '|' + db.locals['punct_regex'], re.U)
     
     if direction == 'left':
-        word_list = tokenize_text(text, db) 
+        word_list = tokenize_text(text, token_regex) 
         word_list.reverse() ## left side needs to be reversed
     else:
-        word_list = tokenize_text(text, db)
+        word_list = tokenize_text(text, token_regex)
       
     word_list = filter(word_list, filter_list, within_x_words)
 
@@ -135,21 +139,14 @@ def filter(word_list, filter_list, within_x_words):
     ## character set can be extended, of course ##
 
     words_to_pass = []
-
     for word in word_list[:within_x_words]:
         if word not in filter_list and word_identifier.search(word):
             words_to_pass.append(word)
     return words_to_pass
 
-def tokenize_text(text, db):
+def tokenize_text(text, token_regex):
     """Returns a list of individual tokens"""
     ## Still used in collocations
     text_tokens = token_regex.split(text)
-    text_tokens = [token for token in text_tokens if token] ## remove empty strings
+    text_tokens = [token for token in text_tokens if token and re.search('\w', token)] ## remove empty strings
     return text_tokens
-
-def sort_to_display(all_collocates, left_collocates, right_collocates):
-    left_colloc = sorted(left_collocates.items(), key=itemgetter(1), reverse=True)[:100]
-    right_colloc = sorted(right_collocates.items(), key=itemgetter(1), reverse=True)[:100]
-    all_colloc = sorted(all_collocates.items(), key=itemgetter(1), reverse=True)[:100]
-    return zip(all_colloc, left_colloc, right_colloc)

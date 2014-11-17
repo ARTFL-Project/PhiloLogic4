@@ -8,7 +8,7 @@
  
     <!--Load the web config and global_report variable to use in the JavaScript code-->
     <script>
-        var webConfig = ${config.JSONify()}; /* loading the web_config in javascript */
+        var webConfig = ${config.toJSON()}; /* loading the web_config in javascript */
         var global_report = "${report}";    
     </script>
     

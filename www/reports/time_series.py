@@ -6,7 +6,6 @@ sys.path.append('..')
 import functions as f
 import reports as r
 from functions.wsgi_handler import wsgi_response, parse_cgi
-from render_template import render_template
 from collections import defaultdict
 from copy import deepcopy
 from operator import itemgetter
@@ -47,11 +46,10 @@ def handle_dates(q, db):
     
 
 def render_time_series(hits, db, dbname, q, path, config):
-    resource = f.webResources("time_series", debug=db.locals["debug"])
     biblio_criteria = f.biblio_criteria(q, config, time_series=True)
     time_series_object = generate_time_series(q, db, hits)
-    return render_template(time_series=time_series_object,db=db,dbname=dbname,q=q,template_name='time_series.mako',json=json,
-                           biblio_criteria=biblio_criteria, config=config,report="time_series", css=resource.css, js=resource.js)
+    return f.render_template(time_series=time_series_object,db=db,dbname=dbname,q=q,template_name='time_series.mako',json=json,
+                           biblio_criteria=biblio_criteria, config=config,report="time_series")
 
 def generate_time_series(q, db, results):    
     """reads through a hitlist to generate a time_series_object"""

@@ -10,7 +10,6 @@ from lxml import etree
 from functions.wsgi_handler import wsgi_response, parse_cgi
 from functions.ObjectFormatter import convert_entities, valid_html_tags, xml_to_html_class
 from functions.FragmentParser import parse
-from render_template import render_template
 from philologic import HitWrapper
 from bibliography import biblio_citation
 import json
@@ -30,16 +29,12 @@ def navigation(environ,start_response):
         return render_text_object(obj, db, q, config, dbname, path)
     
 def render_toc(obj, db, q, config, dbname):
-    resource = f.webResources("t_o_c", debug=db.locals["debug"])
     toc_object = generate_toc_object(obj, db, q, config)
-    return render_template(toc=toc_object,dbname=dbname, db=db, q=q, config=config,template_name='t_o_c.mako',
-                           report="t_o_c", css=resource.css, js=resource.js)
+    return f.render_template(toc=toc_object,dbname=dbname, db=db, q=q, config=config,template_name='t_o_c.mako', report="t_o_c")
 
 def render_text_object(obj, db, q, config, dbname, path):
     text_object = generate_text_object(obj, db, q, config, path)
-    resource = f.webResources("navigation", debug=db.locals["debug"])
-    return render_template(text_object=text_object,dbname=dbname,db=db, obj=obj,q=q, config=config, template_name='text_object.mako',
-                           report="navigation", css=resource.css, js=resource.js)
+    return f.render_template(text_object=text_object,dbname=dbname,db=db, obj=obj,q=q, config=config, template_name='text_object.mako', report="navigation")
 
 def nav_query(obj,db):
     conn = db.dbh
@@ -66,27 +61,9 @@ def nav_query(obj,db):
 
 def generate_toc_object(obj, db, q, config):
     """This function fetches all philo_ids for div elements within a doc"""
-    config = f.WebConfig()
-    conn = db.dbh 
-    c = conn.cursor()
-    doc_id =  int(obj.philo_id[0])
-    next_doc_id = doc_id + 1
-    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % doc_id)
-    start_rowid = c.fetchone()[0]
-    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % next_doc_id)
-    try:
-        end_rowid = c.fetchone()[0]
-    except TypeError:
-        c.execute('select rowid from toms where rowid > %d' % start_rowid)
-        end_rowid = [i[0] for i in c.fetchall()][-1] + 1 ## we add 1 to make sure the last row of the table is included
-    try:
-        c.execute("select * from toms where rowid between ? and ? and philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
-    except sqlite3.OperationalError:
-        c.execute("select * from toms where rowid between ? and ? and  philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
+    toms_object = nav_query(obj, db)
     text_hierarchy = []
-    for o in c.fetchall():
-        id = [int(n) for n in o["philo_id"].split(" ")]
-        i = HitWrapper.ObjectWrapper(id,db,row=o)
+    for i in toms_object:
         if i['philo_name'] == '__philo_virtual' and i["philo_type"] != "div1":
             continue
         else:
@@ -104,7 +81,6 @@ def generate_toc_object(obj, db, q, config):
                         display_name = i['type'] + " " + i["n"]                       
                     else:
                         display_name = i["head"] or i['type'] or i['philo_name'] or i['philo_type']
-            display_name = display_name.decode('utf-8', 'ignore')
             display_name = display_name[0].upper() + display_name[1:]
             link = f.make_absolute_object_link(config, philo_id.split()[:7])
             toc_element = {"philo_id": philo_id, "philo_type": philo_type, "display_name": display_name, "link": link}
