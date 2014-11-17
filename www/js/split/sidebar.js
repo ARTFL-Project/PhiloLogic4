@@ -160,14 +160,16 @@ function populate_sidebar(script_call, facet, total_results, interval_start, int
         updateProgressBar(100)
         $(".progress").delay(500).velocity('slideUp', {complete: function() {$('.progress-bar').width(0).text("0%");}});
         $('#frequency_table').slimScroll({height: $('#results_container').height() - 14});
-        if (typeof(localStorage) == 'undefined' ) {
-            alert('Your browser does not support HTML5 localStorage. Try upgrading.');
-        } else {
-            try {
-                sessionStorage[script_call + facet] = JSON.stringify(full_results);
-            } catch(e) {
-                sessionStorage.clear();
-                sessionStorage[script_call + facet] = JSON.stringify(full_results);
+        if (webConfig.debug == false) {
+            if (typeof(localStorage) == 'undefined' ) {
+                alert('Your browser does not support HTML5 localStorage. Try upgrading.');
+            } else {
+                try {
+                    sessionStorage[script_call + facet] = JSON.stringify(full_results);
+                } catch(e) {
+                    sessionStorage.clear();
+                    sessionStorage[script_call + facet] = JSON.stringify(full_results);
+                }
             }
         }
     }

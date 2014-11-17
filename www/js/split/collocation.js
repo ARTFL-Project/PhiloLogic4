@@ -1,10 +1,11 @@
 $(document).ready(function() {
     var q_string = window.location.search.substr(1);
     var db_url = webConfig['db_url'];
+    var hit_len = collocation['hit_length'];
     if (sessionStorage[window.location.href] == null) {
         // Render initial results
         var data = []
-        sortAndRenderCollocation(all_collocates, left_collocates, right_collocates, data, q_string, db_url, hit_len, hit_len);
+        sortAndRenderCollocation(collocation_object, data, q_string, db_url, hit_len, hit_len);
         $('#philologic_collocation').velocity('fadeIn', {duration: 200});
         
         // Fetch total results to make sure we always have the right number
@@ -16,18 +17,18 @@ $(document).ready(function() {
             $(".progress").show()
             updateProgressBar(percent);
             var script = $('#philologic_collocation').data('script');
-            update_colloc(db_url, all_collocates, left_collocates, right_collocates, total_hits, 0, 3000, script, q_string);
+            update_colloc(db_url, collocation_object, total_hits, 0, 3000, script, q_string);
         });
     } else {
-        var collocation = JSON.parse(sessionStorage[window.location.href]);
+        var saved_collocation_object = JSON.parse(sessionStorage[window.location.href]);
         var data = []
-        sortAndRenderCollocation(collocation['all_collocates'], collocation['left_collocates'], collocation['right_collocates'], data, q_string, db_url, hit_len, hit_len);
+        sortAndRenderCollocation(saved_collocation_object, data, q_string, db_url, hit_len, hit_len);
         activateLinks();
         $('#philologic_collocation').velocity('fadeIn', {duration: 200});
     }
 });
 
-function update_colloc(db_url, total_all, total_left, total_right, results_len, colloc_start, colloc_end, script, q_string) {
+function update_colloc(db_url, total_results_object, results_len, colloc_start, colloc_end, script, q_string) {
     if (colloc_start == 0) {
         colloc_start = 3000;
         colloc_end = 13000;
@@ -38,40 +39,41 @@ function update_colloc(db_url, total_all, total_left, total_right, results_len, 
     var script_call = script + '&interval_start=' + colloc_start + '&interval_end=' + colloc_end
     if (colloc_start <= results_len) {
         $.getJSON(script_call, function(data) {
-            var total_results = sortAndRenderCollocation(total_all, total_left, total_right, data, q_string, db_url, results_len, colloc_end);
+            var total_results = sortAndRenderCollocation(total_results_object, data, q_string, db_url, results_len, colloc_end);
             if (colloc_end < results_len) {
                 var percent = colloc_end / results_len * 100;
                 updateProgressBar(percent);
             }
-            update_colloc(db_url, total_results.all, total_results.left, total_results.right, results_len, colloc_start, colloc_end, script, q_string);
+            update_colloc(db_url, total_results, results_len, colloc_start, colloc_end, script, q_string);
         });
     }
     else {
         updateProgressBar(100);
         $(".progress").delay(500).velocity('slideUp');
         activateLinks();
-
-        if (typeof(localStorage) == 'undefined' ) {
-            alert('Your browser does not support HTML5 localStorage. Try upgrading.');
-        } else {
-            try {
-                sessionStorage[window.location.href] = JSON.stringify({"all_collocates": total_all, "left_collocates": total_left, "right_collocates": total_right});
-            } catch(e) {
-                sessionStorage.clear();
-                console.log("sessionStorage was full, clearing it for space...");
-                sessionStorage[window.location.href] = JSON.stringify({"all_collocates": total_all, "left_collocates": total_left, "right_collocates": total_right});
+        if (webConfig.debug == false) {
+            if (typeof(localStorage) == 'undefined' ) {
+                alert('Your browser does not support HTML5 localStorage. Try upgrading.');
+            } else {
+                try {
+                    sessionStorage[window.location.href] = JSON.stringify(total_results_object);
+                } catch(e) {
+                    sessionStorage.clear();
+                    console.log("sessionStorage was full, clearing it for space...");
+                    sessionStorage[window.location.href] = JSON.stringify(total_results_object);
+                }
             }
         }
     }
 }
 
-function sortAndRenderCollocation(colloc_all, colloc_left, colloc_right, data, q_string, db_url, results_len, colloc_end) {
+function sortAndRenderCollocation(total_results, data, q_string, db_url, results_len, colloc_end) {
     if (data.length == 0) {
         data = {"all_collocates": [], 'left_collocates': [], 'right_collocates': []}
     }
-    var all = mergeCollocResults(colloc_all, data["all_collocates"]);
-    var left = mergeCollocResults(colloc_left, data['left_collocates']);
-    var right = mergeCollocResults(colloc_right, data['right_collocates']);
+    var all = mergeCollocResults(total_results["all_collocates"], data["all_collocates"]);
+    var left = mergeCollocResults(total_results["left_collocates"], data['left_collocates']);
+    var right = mergeCollocResults(total_results["right_collocates"], data['right_collocates']);
     sorted_lists = {'all': all.sorted, 'left': left.sorted, 'right': right.sorted};
     update_table(sorted_lists, q_string, db_url);
     collocation_cloud(all.unsorted, colloc_end, results_len);
