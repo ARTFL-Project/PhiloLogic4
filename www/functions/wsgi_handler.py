@@ -10,8 +10,11 @@ from philologic.DB import DB
 from query_parser import query_parser
 
 class wsgi_helper(object):
-    def __init__(self,environ):
-        self.cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
+    def __init__(self,environ,db):
+        self.path_info = environ["PATH_INFO"]
+        self.query_string = environ["QUERY_STRING"]
+        self.script_filename = environ["SCRIPT_FILENAME"]
+        self.cgi = urlparse.parse_qs(self.query_string,keep_blank_values=True)
         self.defaults = {
           "results_per_page":"25",
           "start":"0",
@@ -20,12 +23,58 @@ class wsgi_helper(object):
           "interval_start":"0",
           "interval_end":"3000",
         }
+        self.metadata_fields = db.locals["metadata_fields"]
+        self.metadata = {}
+        num_empty = 0
+        
+        # cgi parameter string hacks here.
+        self.cgi['q'] = self.cgi["q"].replace("'", " ") ## HACK ALERT: this is for French.
+        self.cgi['q'] = self.cgi["q"].replace(';', '')
+        self.cgi['q'] = self.cgi["q"].replace(',', '')
+        self.cgi['q'] = self.cgi["q"].replace('!', '')
+        self.cgi['q'] = self.cgi["q"].replace('?', '')                        
+        
+        for field in self.metadata_fields:
+            if field in self.cgi and self.cgi[field]:
+                ## Hack to remove hyphens in Frantext
+                if field != "date" and isinstance(self.cgi[field][0], str or unicode):
+                    if not self.cgi[field][0].startswith('"'):
+                        self.cgi[field][0] = self.cgi[field][0].replace('-', ' ')
+                ## these ifs are to fix the no results you get when you do a metadata query
+                if query["q"] != '':
+                    self.metadata[field] = self.cgi[field][0]                    
+                elif cgi[field][0] != '':
+                    self.metadata[field] = self.cgi[field][0]
+            if field not in self.cgi or not self.cgi[field][0]: ## in case of an empty query
+                num_empty += 1
+                
+        self.metadata['philo_type'] = self['philo_type']
+        
+        if num_empty == len(self.metadata_fields):
+            self.no_metadata = True
+        else:
+            self.no_metadata = False
+        
+        try:
+            self.path_components = [c for c in self.path_info.split("/") if c]
+            if path_components[0] == 'form':
+                query['report'] = 'form'
+        except:
+            self.path_components = []
+
+
     def __getattr__(self,key):
         return self[key]
 
     def __getitem__(self,key):
-        if key in self.cgi:
+        if key == "metadata":
+            return self.metadata
+        elif key in self.cgi:
             return self.cgi[0]
+        elif key in self.defaults:
+            return self.defaults[key]
+        elif key == "no_q":
+            return self.no_metadata
         else:
             return ""                
 
