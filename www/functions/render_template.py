@@ -27,17 +27,16 @@ template_lookup = TemplateLookup(template_path, module_directory='%s/compiled_te
                                  collection_size=50, module_writer=compiled_template_permissions)
 
 def render_template(*args, **data):
-    db = data["db"]
-    data['db_locals'] = dumps(db.locals)
-    resource = webResources(data['template_name'], debug=db.locals["debug"])
+    config = data['config']
+    resource = webResources(data['template_name'], debug=config.debug)
     data['css'] = resource.css
     data['js'] = resource.js
     template = template_lookup.get_template(data['template_name'])
-    if not db.locals['debug']:
+    if not config.debug:
         try:
             return template.render(*args, **data).encode("UTF-8", "ignore")
         except:
-            return r.error.error_handling(data['db'], data['dbname'], data['q'])
+            return r.error.error_handling(config, data['q'])
     else:
         try:
             return template.render(*args, **data).encode("UTF-8", "ignore")

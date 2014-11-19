@@ -3,7 +3,8 @@
 import os
 import sys
 sys.path.append('..')
-from functions.wsgi_handler import parse_cgi
+from philologic.DB import DB
+from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
 from philologic.HitWrapper import ObjectWrapper
 import reports as r
@@ -14,13 +15,12 @@ def get_table_of_contents(environ, start_response):
     status = '200 OK'
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response(status,headers)
-    environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/get_table_of_contents.py', '')
-    db, path_components, q = parse_cgi(environ)
     config = f.WebConfig()
-    path = db.locals['db_path']
-    path = path[:path.rfind("/data")]
-    obj = ObjectWrapper(q['philo_id'].split(), db)
-    toc_object = r.generate_toc_object(obj, db, q, config)
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(db, environ)
+    path = config.db_path
+    obj = ObjectWrapper(request['philo_id'].split(), db)
+    toc_object = r.generate_toc_object(obj, db, request, config)
     yield json.dumps(toc_object)
     
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ sys.path.append('..')
 import functions as f
 import os
 import re
-from functions.wsgi_handler import wsgi_response
+from functions.wsgi_handler import WSGIHandler
 from bibliography import bibliography
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 from functions.FragmentParser import parse
@@ -57,14 +57,14 @@ def make_frequency_query(db,metadata):
         yield row + "<br/>"
         
 def frequencies(environ,start_response):
-    db, dbname, path_components, q = wsgi_response(environ,start_response)
-    print >> sys.stderr, "Q",q
-    path = os.getcwd().replace('functions/', '')
+    config = f.WebConfig()
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(db, environ)
 #    results = prominent_features(q, db)
     res = ""
     count = 0;
     res = []
-    for result in make_frequency_query(db,q["metadata"]):
+    for result in make_frequency_query(db,request.metadata):
 #        print >> sys.stderr,result
         res.append(result)
         count += 1;
@@ -74,7 +74,7 @@ def frequencies(environ,start_response):
     #return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
     #                       f=f, path=path, results_per_page=q['results_per_page'],
     #                       template_name="concordance.mako")
-    return f.render_template(results=res,db=db,dbname=dbname,q=q,f=f,template_name="frequencies.mako", report="frequencies")
+    return f.render_template(results=res,db=db,dbname=config.db_name,q=q,f=f,template_name="frequencies.mako", report="frequencies")
     
 def prominent_features(q):
     conn = db.dbh

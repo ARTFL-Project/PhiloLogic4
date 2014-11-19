@@ -9,7 +9,8 @@ import sqlite3
 sys.path.append('..')
 import reports as r
 import functions as f
-from functions.wsgi_handler import parse_cgi
+from functions.wsgi_handler import WSGIHandler
+from philologic.DB import DB
 from philologic.HitWrapper import ObjectWrapper
 from wsgiref.handlers import CGIHandler
 from collections import defaultdict
@@ -22,14 +23,13 @@ def landing_page_content(environ,start_response):
     status = '200 OK'
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response(status,headers)
-    environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/landing_page_content.py', '')
-    cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
-    content_type = cgi.get('landing_page_content_type',[])[0]
-    q_range = cgi.get('range',[])[0].lower().split('-')
+    config = f.WebConfig()
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(db, environ)
+    content_type = request.landing_page_content_type
+    q_range = request.range.lower().split('-')
     if content_type != "year":
         letter_range = set([chr(i) for i in range(ord(q_range[0]),ord(q_range[1])+1)])
-    db, path_components, q = parse_cgi(environ)
-    config = f.WebConfig()
     c = db.dbh.cursor()
     content = ''
     if content_type == "author":

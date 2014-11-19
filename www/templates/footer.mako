@@ -68,7 +68,7 @@
                     </div>
                     <div class="modal-body">
                        <h5>Choose the format in which to export your search results:</h5>
-                       <% script = config.db_url + "/scripts/export_results.py?" + (q['q_string'] or '') + "&output_format=" %>
+                       <% script = config.db_url + "/scripts/export_results.py?" + (query_string or '') + "&output_format=" %>
                        <div id="export-buttons" data-script="${script}">
                             <button type="button" class="btn btn-primary" data-format="json">
                                 JSON

@@ -4,9 +4,11 @@ import os
 import sys
 import urlparse
 sys.path.append('..')
-from functions.wsgi_handler import parse_cgi
+from functions.wsgi_handler import WSGIHandler
+from philologic.DB import DB
 from wsgiref.handlers import CGIHandler
 import reports as r
+import functions as f
 import cgi
 import json
 import sqlite3
@@ -16,45 +18,15 @@ def get_frequency(environ,start_response):
     status = '200 OK'
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response(status,headers)
-    environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/get_frequency.py', '')
-    cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
-    frequency_field = cgi.get('frequency_field',[''])[0]
-    db, path_components, q = parse_cgi(environ)
-    q['field'] = frequency_field
-    if q['q'] == '' and q["no_q"]:
+    config = f.WebConfig()
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(db, environ)
+    if request.q == '' and request.no_q:
         hits = db.get_all(db.locals['default_object_level'])
     else:
-        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-    if q["format"] == "json":
-        while not len(hits):
-            time.sleep(0.5) ## this should be enough time to write all results to disk in most instances.... better fix later
-        q["interval_start"] = 0
-        q["interval_end"] = len(hits)
-        bib_values = dict([(i, j) for i, j in q['metadata'].iteritems() if j])
-        field, results = r.generate_frequency(hits, q, db)
-        new_results = []
-        for label, result in sorted(results.iteritems(), key=lambda (x, y): y["count"], reverse=True):
-            if frequency_field == "title":
-                author = get_author(label, db)
-                if author:
-                    label = label + " (%s)" % author.decode('utf-8', 'ignore')
-            formatted_result = {"search_term": q['q'], "frequency_field": frequency_field, "results": label, "count": result["count"], "url": "dispatcher.py/" + result["url"].replace('./', ''),
-                                "bib_values": bib_values}
-            new_results.append(formatted_result)
-        yield json.dumps(new_results)
-    else:
-        field, results = r.generate_frequency(hits, q, db)
-        yield json.dumps(results,indent=2)
-        
-def get_author(title, db):
-    c = db.dbh.cursor()
-    content = ''
-    try:
-        c.execute('select author from toms where title=?', (title,))
-        content = c.fetchone()[0]
-    except sqlite3.OperationalError:
-        content = False
-    return content
+        hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
+    field, results = r.generate_frequency(hits, request, db, config)
+    yield json.dumps(results)
     
 
 if __name__ == "__main__":

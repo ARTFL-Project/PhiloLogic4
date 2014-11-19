@@ -19,15 +19,15 @@
                  current_pos = description['start']
                 %>
                 <div id="search_arguments">
-                    Searching database for <b>${q['q'].decode('utf-8', 'ignore')}</b></br>
+                    Searching database for <b>${kwic['query']['q'].decode('utf-8', 'ignore')}</b></br>
                     Bibliographic criteria: ${biblio_criteria or "None"}
                 </div>
-                <div id="search-hits" data-script="${config.db_url + '/scripts/get_total_results.py?' + q['q_string']}">
-                    % if kwic['results_len'] != 0:
-                        % if description['end'] < description['results_per_page'] or description['end'] < kwic['results_len']:
-                            Hits <span id="start">${description['start']}</span> - <span id="end">${description['end']}</span> of <span id="total_results">${kwic['results_len'] or description['results_per_page']}</span><span id="incomplete">${r_status}</span>
+                <div id="search-hits" data-script="${config.db_url + '/scripts/get_total_results.py?' + query_string}">
+                    % if kwic['results_length'] != 0:
+                        % if description['end'] < description['results_per_page'] or description['end'] < kwic['results_length']:
+                            Hits <span id="start">${description['start']}</span> - <span id="end">${description['end']}</span> of <span id="total_results">${kwic['results_length'] or description['results_per_page']}</span><span id="incomplete">${r_status}</span>
                         % else:
-                            Hits <span id="start">${description['start']}</span> - <span id="end">${kwic['results_len'] or description['end']}</span> of <span id="total_results">${kwic['results_len'] or description['results_per_page']}</span><span id="incomplete">${r_status}</span>         
+                            Hits <span id="start">${description['start']}</span> - <span id="end">${kwic['results_length'] or description['end']}</span> of <span id="total_results">${kwic['results_length'] or description['results_per_page']}</span><span id="incomplete">${r_status}</span>         
                         % endif
                     % else:
                         No results for your query.

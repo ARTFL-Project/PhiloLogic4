@@ -6,7 +6,8 @@ import functions as f
 import os
 import re
 import unicodedata
-from functions.wsgi_handler import wsgi_response, parse_cgi
+from philologic.DB import DB
+from functions.wsgi_handler import WSGIHandler
 from bibliography import fetch_bibliography as bibliography
 from collocation import tokenize, filter, build_filter_list, split_concordance
 from concordance import citation_links, concordance_citation, fetch_concordance
@@ -29,42 +30,42 @@ end_match = re.compile(r'<[^>]*?\Z')
 no_tag = re.compile(r'<[^>]+>')
 
 def concordance_from_collocation(environ,start_response):
-    wsgi_response(environ, start_response)
-    db, path_components, q = parse_cgi(environ)
-    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
-    path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
-    if q['q'] == '':
-        return bibliography(f,path, db, dbname,q,environ)
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(db, environ)
+    if request.no_q:
+        return r.fetch_bibliography(db, request, config, start_response)
     else:
-        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        concordance_object, pages = fetch_colloc_concordance(hits, path, q, db, config)
+        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+        start_response('200 OK',headers)
+        hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
+        concordance_object, pages = fetch_colloc_concordance(hits, request, db, config)
         biblio_criteria = []
-        for k,v in q["metadata"].iteritems():
+        for k,v in request.metadata.iteritems():
             if v:
                 if k in config.metadata_aliases:
                     k = config.metadata_aliases[k]
                 biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b></span>' % (k.title(), v.decode('utf-8', 'ignore'), ))
         biblio_criteria = ' '.join(biblio_criteria)
-        return f.render_template(concordance=concordance_object,pages=pages, db=db,dbname=dbname,q=q,config=config,report="concordance_from_collocation",
+        return f.render_template(concordance=concordance_object,pages=pages,query_string=request.query_string,config=config,report="concordance_from_collocation",
                                  biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako")
         
-def fetch_colloc_concordance(hits, path, q, db, config, word_filter=True, filter_num=100, stopwords=True):
-    concordance_object = {'results_per_page': q['results_per_page'], "query": q}
+def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=100, stopwords=True):
+    concordance_object = {"query": dict([i for i in q])}
     
     length = config['concordance_length']
-    within_x_words = q['word_num']
+    within_x_words = int(q['word_num'])
     direction = q['direction']
     collocate = unicodedata.normalize('NFC', q['collocate'].decode('utf-8', 'ignore'))
-    collocate_num = q['collocate_num']
+    collocate_num = int(q['collocate_num'])
     
-    filter_list = build_filter_list(word_filter, stopwords, filter_num, q, path)
+    filter_list = build_filter_list(word_filter, stopwords, filter_num, q, config.db_path)
     
     results = []
     colloc_hitlist = []
     position = 0
     for hit in hits:
-        conc_left, conc_right = split_concordance(hit, length, path)
+        conc_left, conc_right = split_concordance(hit, length, config.db_path)
         
         if direction =='left':
             words = tokenize(conc_left, filter_list, within_x_words, direction, db)
@@ -75,7 +76,7 @@ def fetch_colloc_concordance(hits, path, q, db, config, word_filter=True, filter
             words.extend(tokenize(conc_right, filter_list, within_x_words, 'right', db))
         if collocate in set(words):
             position += 1
-            if position < q["start"]: ## Make sure we start appending hits at the right position in the hitlist
+            if position < q.start: ## Make sure we start appending hits at the right position in the hitlist
                 continue
             count = words.count(collocate)
             hit.colloc_num = count
@@ -85,26 +86,26 @@ def fetch_colloc_concordance(hits, path, q, db, config, word_filter=True, filter
             for metadata in db.locals['metadata_fields']:
                 metadata_fields[metadata] = hit[metadata]
             citation = concordance_citation(hit, citation_hrefs)
-            context = colloc_concordance(db, hit, path, q, config.concordance_length)
+            context = colloc_concordance(db, hit, config.db_path, q, config.concordance_length)
             result_obj = {"philo_id": hit.philo_id, "citation": citation, "citation_links": citation_hrefs, "context": context,
                           "metadata_fields": metadata_fields, "bytes": hit.bytes, "collocate_count": count}
             results.append(result_obj)
 
-        if len(results) == (q["results_per_page"]):
+        if len(results) == (q.results_per_page):
             break
     
     concordance_object['results'] = results
     concordance_object["query_done"] = hits.done
     concordance_object['results_length'] = len(hits)
     
-    start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
+    start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
     if end > len(results) + start - 1:
         end = len(results) + start - 1
-    concordance_object["description"] = {"start": start, "end": end, "results_per_page": q['results_per_page']}
+    concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page}
     
     ## Create new hitlist so we can get paging
     colloc_hitlist = collocation_hitlist(colloc_hitlist, collocate_num)
-    pages = f.link.generate_page_links(concordance_object['description']['start'], q['results_per_page'], q, colloc_hitlist)
+    pages = f.link.generate_page_links(concordance_object['description']['start'], q.results_per_page, q, colloc_hitlist)
     
     return concordance_object, pages
 

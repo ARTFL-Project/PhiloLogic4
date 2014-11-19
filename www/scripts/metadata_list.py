@@ -4,15 +4,16 @@ import os
 import cgi
 import sys
 sys.path.append('..')
+import functions as f
 import json
 import subprocess
 import re
 import unicodedata
-import urlparse
 from wsgiref.handlers import CGIHandler
 from philologic.QuerySyntax import parse_query
 from philologic.MetadataQuery import metadata_pattern_search
-from functions.wsgi_handler import parse_cgi
+from philologic.DB import DB
+from functions.wsgi_handler import WSGIHandler
 
 
 def exact_word_pattern_search(term, path):
@@ -89,11 +90,11 @@ def metadata_list(environ,start_response):
     status = '200 OK'
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response(status,headers)
-    environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/metadata_list.py', '')
-    db, path_components, q = parse_cgi(environ)
-    cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
-    metadata = cgi.get('term',[''])[0]
-    field = cgi.get('field',[''])[0]
+    config = f.WebConfig()
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(db, environ)
+    metadata = request.term
+    field = request.field
     yield autocomplete_metadata(metadata, field, db)
 
 if __name__ == "__main__":

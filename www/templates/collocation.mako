@@ -5,8 +5,8 @@
     <%include file="dictionary_search_form.mako"/>
 % endif
 <script>
-    var collocation_object = {"all_collocates": ${dumps(dict(collocation['all_collocates']))}, "left_collocates": ${dumps(dict(collocation['left_collocates']))},
-                              "right_collocates": ${dumps(dict(collocation['right_collocates']))}, "hit_length": ${collocation['results_length']}};
+    var collocation_object = {"all_collocates": ${dumps(collocation['all_collocates'])}, "left_collocates": ${dumps(collocation['left_collocates'])},
+                              "right_collocates": ${dumps(collocation['right_collocates'])}, "hit_length": ${collocation['results_length']}};
 </script>
 <div class="container-fluid">    
     <div id='philologic_response' class="panel panel-default">
@@ -15,7 +15,7 @@
                 <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
                     Export results
                 </button>
-                <div id="search_arguments" data-script="${config.db_url + '/scripts/get_total_results.py?' + q['q_string']}">
+                <div id="search_arguments" data-script="${config.db_url + '/scripts/get_total_results.py?' + query_string}">
                     Displaying the top 100 collocates for <span id="colloc_hits">${collocation['results_length'] or "..."}</span> occurrences of <b>${collocation['query']['q'].decode('utf-8', 'ignore')}</b><br>
                     Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
                 </div>
@@ -29,7 +29,7 @@
             </div>
         </div>
         <div class="results_container">
-            <div id='philologic_collocation' class="row" data-script="${config.db_url + '/scripts/get_collocation.py?' + collocation['query']['q_string']}" data-hits-length="${collocation['results_length']}" style="display: none">
+            <div id='philologic_collocation' class="row" data-script="${config.db_url + '/scripts/get_collocation.py?' + query_string}" data-hits-length="${collocation['results_length']}" style="display: none">
                 <div class="col-xs-12 col-sm-3 col-sm-push-9 col-md-4 col-md-push-8">
                     <div id="word_cloud" class="word_cloud">
                         <div id="collocate_counts" class="collocation_counts">
@@ -40,9 +40,9 @@
                     <div class="table-reponsive">
                         <table class="table table-bordered" id="collocation_table">
                             <tr>
-                             <th>within ${q['word_num']} words on either side</th>
-                             <th>within ${q['word_num']} words to left</th>
-                             <th>within ${q['word_num']} words to right</th>
+                             <th>within ${word_num} words on either side</th>
+                             <th>within ${word_num} words to left</th>
+                             <th>within ${word_num} words to right</th>
                             </tr>
                             <tr>
                                 <td id="all-collocate-column"></td>

@@ -5,7 +5,8 @@ import sys
 sys.path.append('..')
 import functions as f
 import reports as r
-from functions.wsgi_handler import wsgi_response, parse_cgi
+from functions.wsgi_handler import WSGIHandler
+from philologic.DB import DB
 from collections import defaultdict
 from copy import deepcopy
 from operator import itemgetter
@@ -15,17 +16,17 @@ import re
 sub_date = re.compile('date=[^&]*')
 
 def time_series(environ,start_response):
-    wsgi_response(environ, start_response)
-    db, path_components, q = parse_cgi(environ)
-    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
-    path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
-    if q['q'] == '':
-        return r.fetch_bibliography(f,path, db, dbname,q,environ)
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(db, environ)
+    if request.no_q:
+        return r.fetch_bibliography(db, request, config, start_response)
     else:
-        q = handle_dates(q, db)
-        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        return render_time_series(hits, db, dbname, q, path, config)
+        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+        start_response('200 OK',headers)
+        request = handle_dates(request, db)
+        hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
+        return render_time_series(hits, db, request, config)
         
 def handle_dates(q, db):
     c = db.dbh.cursor()
@@ -37,38 +38,41 @@ def handle_dates(q, db):
         except ValueError:
             pass
     if not q['start_date']:
-        q['start_date'] = str(min(dates))
-    q['metadata']['date'] = '%s' % q['start_date']
+        setattr(q, 'start_date', min(dates))
+    q.metadata['date'] = '%d' % q.start_date
     if not q['end_date']:
-        q['end_date'] = str(max(dates))
-    q['metadata']['date'] += '-%s' % q['end_date']
+        setattr(q, 'end_date', max(dates))
+    q.metadata['date'] += '-%d' % q.end_date
     return q
     
 
-def render_time_series(hits, db, dbname, q, path, config):
+def render_time_series(hits, db, q, config):
     biblio_criteria = f.biblio_criteria(q, config, time_series=True)
     time_series_object = generate_time_series(q, db, hits)
-    return f.render_template(time_series=time_series_object,db=db,dbname=dbname,q=q,template_name='time_series.mako',json=json,
-                           biblio_criteria=biblio_criteria, config=config,report="time_series")
+    return f.render_template(time_series=time_series_object,db=db,template_name='time_series.mako',json=json,
+                             query_string=q.query_string, biblio_criteria=biblio_criteria, config=config, report="time_series")
 
-def generate_time_series(q, db, results):    
+def generate_time_series(q, db, hits):    
     """reads through a hitlist to generate a time_series_object"""
-    time_series_object = {'results_length': len(results), 'query': q, 'query_done': False}
-    try:
-        start = int(q['start_date'])
-    except ValueError:
+    time_series_object = {'query': dict([i for i in q]), 'query_done': False}
+    if q.start_date:
+        start = q.start_date
+    else:
         start = float("-inf")
-    try:
-        end = int(q['end_date'])
-    except ValueError:
+    if q.end_date:
+        end = q.end_date
+    else:
         end = float("inf")
+    time_series_object['query']['start_date'] = start
+    time_series_object['query']['end_date'] = end
     
     absolute_count = defaultdict(int)
     date_counts = {}
-    for i in results[q['interval_start']:q['interval_end']]:
-        date = i.doc['date']
+    print >> sys.stderr, "START %d, END %d" % (q.interval_start, q.interval_end)
+    for i in hits[q.interval_start:q.interval_end]:
+        date = i.date
         try:
-            if date != None:
+            if date:
                 date = int(date)
                 if not date <= end :
                     continue
@@ -84,6 +88,7 @@ def generate_time_series(q, db, results):
                         date = int(str(date)[:-2] + '50')
                     
             else:
+                print >> sys.stderr, "No valid dates for %s: %s, %s" % (i.filename, i.author, i.title)
                 continue
         except ValueError: ## No valid date
             continue
@@ -92,8 +97,8 @@ def generate_time_series(q, db, results):
         
         if date not in date_counts:
             date_counts[date] = date_total_count(date, db, q['year_interval'])
-    if q['interval_end'] >= len(results):
-        time_series_object['query_done'] = True
+    time_series_object['results_length'] = len(hits)
+    time_series_object['query_done'] = hits.done
     time_series_object['results'] = {'absolute_count': absolute_count, 'date_count': date_counts}
     return time_series_object
 

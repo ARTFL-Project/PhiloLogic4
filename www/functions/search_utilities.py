@@ -9,8 +9,8 @@ def biblio_criteria(q, config, time_series=False):
     """Generates clickable bibligraphic criteria in search results"""
     biblio = []
     if time_series:
-        del q["metadata"]["date"]
-    for k,v in q["metadata"].iteritems():
+        del q.metadata["date"]
+    for k,v in q.metadata.iteritems():
         if v:
             close_icon = '<span class="glyphicon glyphicon-remove-circle remove_metadata" data-metadata="%s"></span>' % k
             if k in config.metadata_aliases:

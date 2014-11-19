@@ -3,6 +3,7 @@
 $(document).ready(function() {
     
     var db_url = webConfig['db_url'];
+    var date_list = generateDateList();
     
     if (sessionStorage[window.location.href] == null) {
         
@@ -10,17 +11,7 @@ $(document).ready(function() {
         var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
         $('#test_time_series').css('height', height);
         var body_width = parseInt($('body').width());
-        $('#test_time_series, #first_division, #middle_division, #top_division').width(body_width-90 + 'px');
-        
-        
-        // Generate range of all dates
-        var year_interval = parseInt($('#search_arguments').data('interval'));
-        var start_date = normalizeDate($('#search_arguments').data('start'), year_interval);
-        var end_date = parseInt($('#search_arguments').data('end'));
-        var date_list = []
-        for (var i = start_date; i <= end_date; i += year_interval) {
-            date_list.push(i);
-        }
+        $('#test_time_series, #first_division, #middle_division, #top_division').width(body_width-90 + 'px');        
         
         // Default data display
         var full_results;
@@ -30,17 +21,27 @@ $(document).ready(function() {
         var full_abs = merge_abs[1]
         var interval = $("#absolute_time").data('interval');
         drawFromData(sorted_abs, interval, 'absolute_time');
-        var total = parseInt($('.progress-bar').data('total'));
-        var percent = 5000 / total * 100;
-        $('.progress').show();
-        updateProgressBar(percent)
-        var date_counts = eval($('#relative_time').data('datecount'));
-        var script = $('#time_series_report').data('script');
-        progressiveLoad(db_url, total, interval, 0, 5000, full_abs, date_counts, date_list, script);   
+        // Fetch total results to make sure we always have the right number
+        var total_hits_script = $('#search_arguments').data('script');
+        $.getJSON(total_hits_script, function(data) {
+            var total = data;
+            $("#time-series-length").html(total);
+            var percent = 3000 / total * 100;
+            $('.progress').show();
+            updateProgressBar(percent);
+            var date_counts = eval($('#relative_time').data('datecount'));
+            var script = $('#time_series_report').data('script');
+            console.log(date_list)
+            progressiveLoad(db_url, total, interval, 0, 3000, full_abs, date_counts, date_list, script);
+        });
     } else {
         var time_series = JSON.parse(sessionStorage[window.location.href]);
-        $('#philologic_response').html(time_series);
-        frequencySwitcher();
+        var date_counts = time_series['date_counts'];
+        var abs_results = time_series['abs_results'];
+        var total = $("#time-series-length").html(total);
+        var script = $('#time_series_report').data('script');
+        $('#relative_counts').data('value', relativeCount(abs_results, date_counts))
+        progressiveLoad(db_url, total, interval, 0, 3000, abs_results, date_counts, date_list, script);
     }
     
     $(window).resize(function() {
@@ -61,29 +62,16 @@ $(document).ready(function() {
     });
 });
 
-function normalizeDate(year, interval) {
-    year = year.toString();
-    if (interval == 10) {
-        year = year.slice(0,-1) + '0';
-    } else if (interval == '100') {
-        year = year.slice(0,-2) + '00';
-    } else if (interval == '50') {
-        var decade = parseInt(year.slice(-2));
-        if (decade < 50) {
-            year = year.slice(0,-2) + '00';
-        } else {
-            year = year.slice(0,-2) + '50';
-        }
+function generateDateList() {
+    // Generate range of all dates
+    var year_interval = parseInt($('#search_arguments').data('interval'));
+    var start_date = normalizeDate($('#search_arguments').data('start'), year_interval);
+    var end_date = parseInt($('#search_arguments').data('end'));
+    var date_list = []
+    for (var i = start_date; i <= end_date; i += year_interval) {
+        date_list.push(i);
     }
-    return parseInt(year)
-}
-
-function frequencySwitcher() {
-    $('#absolute_time, #relative_time').click(function() {
-        var abs_data = eval($(this).data('value'));
-        var interval = $(this).data('interval');
-        drawFromData(abs_data, interval, $(this).attr('id'));
-    });
+    return date_list;
 }
 
 function progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_full_results, full_date_counts, date_list, script) {
@@ -119,7 +107,6 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         // Store final sorted results
         var abs_results = sortResults(abs_full_results)
         $('#absolute_time').data('value', JSON.stringify(abs_results));
-        console.log(JSON.stringify(abs_results));
         
         // Generate relative frequencies from absolute frequencies and make button clickable again
         $("#relative_time").removeAttr("disabled");
@@ -131,21 +118,49 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         
         updateProgressBar(100)
         var progress_height = $(".progress").height();
-        $(".progress").delay(500).velocity("slideUp", {complete: function() {$('#test_time_series, .graph_bar').velocity({height: '+=' + progress_height})}});
+        $(".progress").delay(500).velocity("slideUp");
         $('.graph_bar').tooltip({html: true});
+        //if (!(window.location.href in sessionStorage)) {
+        //    saveTimeSeries(abs_full_results, full_date_counts)
+        //}
     }
 }
 
-function saveTimeSeries() {
+function normalizeDate(year, interval) {
+    year = year.toString();
+    if (interval == 10) {
+        year = year.slice(0,-1) + '0';
+    } else if (interval == '100') {
+        year = year.slice(0,-2) + '00';
+    } else if (interval == '50') {
+        var decade = parseInt(year.slice(-2));
+        if (decade < 50) {
+            year = year.slice(0,-2) + '00';
+        } else {
+            year = year.slice(0,-2) + '50';
+        }
+    }
+    return parseInt(year)
+}
+
+function frequencySwitcher() {
+    $('#absolute_time, #relative_time').click(function() {
+        var abs_data = eval($(this).data('value'));
+        var interval = $(this).data('interval');
+        drawFromData(abs_data, interval, $(this).attr('id'));
+    });
+}
+
+function saveTimeSeries(full_abs_results, full_date_counts) {
     if (typeof(localStorage) == 'undefined' ) {
         alert('Your browser does not support HTML5 localStorage. Try upgrading.');
     } else {
         try {
-            sessionStorage[window.location.href] = JSON.stringify($('#philologic_response').html());
+            sessionStorage[window.location.href] = JSON.stringify({"abs_results": full_abs_results, "date_counts": full_date_counts});
         } catch(e) {
             if (e == QUOTA_EXCEEDED_ERR) {
                 sessionStorage.clear();
-                sessionStorage[window.location.href] = JSON.stringify($('#philologic_response').html());
+                sessionStorage[window.location.href] = JSON.stringify({"abs_results": full_abs_results, "date_counts": full_date_counts});
             }
         }
     }
