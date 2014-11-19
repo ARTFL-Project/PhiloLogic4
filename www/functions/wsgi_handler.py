@@ -23,6 +23,7 @@ class WSGIHandler(object):
           "interval_start":"0",
           "interval_end":"3000",
         }
+
         self.metadata_fields = db.locals["metadata_fields"]
         self.metadata = {}
         num_empty = 0
