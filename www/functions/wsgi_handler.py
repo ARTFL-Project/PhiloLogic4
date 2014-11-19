@@ -32,6 +32,10 @@ class WSGIHandler(object):
         self.results_per_page = int(self['results_per_page'])
         self.interval_start = int(self['interval_start'])
         self.interval_end = int(self['interval_end'])
+        if self.start_date:
+            self.start_date = int(self['start_date'])
+        if self.end_date:
+            self.end_date = int(self['end_date'])
         
         # cgi parameter string hacks here.
         if 'q' in self.cgi:

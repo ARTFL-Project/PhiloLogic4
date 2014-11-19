@@ -14,8 +14,14 @@
                         <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
                             Export results
                         </button>
-                        <div id="search_arguments" data-start="${query['start_date']}" data-end="${query['end_date']}", data-interval="${query['year_interval']}">
-                            ${time_series['results_length']} occurrences for <b>${query['q'].decode('utf_8')}</b><br>
+                        <div id="search_arguments" data-start="${query['start_date']}" data-end="${query['end_date']}", data-interval="${query['year_interval']}" data-script="${config.db_url + '/scripts/get_total_results.py?' + query_string}">
+                            <span id="time-series-length">
+                                % if time_series['query_done']:
+                                    ${time_series['results_length']}
+                                % else:
+                                    Still working...
+                                % endif
+                            </span> occurrences for <b>${query['q'].decode('utf_8')}</b><br>
                             Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}<br>
                             Use of the term(s) between
                             <span class="biblio-criteria"><b>${query['start_date']}</b>
