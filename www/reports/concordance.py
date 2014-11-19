@@ -7,7 +7,7 @@ import reports as r
 import os
 import re
 from philologic.DB import DB
-from functions.wsgi_handler import wsgi_response, WSGIHandler
+from functions.wsgi_handler import WSGIHandler
 from functions.ObjectFormatter import convert_entities, adjust_bytes, valid_html_tags, xml_to_html_class
 from functions.FragmentParser import parse
 from lxml import etree

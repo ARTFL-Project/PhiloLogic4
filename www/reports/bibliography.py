@@ -6,7 +6,7 @@ sys.path.append('..')
 import functions as f
 import reports as r
 from philologic.DB import DB
-from functions.wsgi_handler import wsgi_response, parse_cgi
+from functions.wsgi_handler import WSGIHandler
 from concordance import citation_links
 import json
 
