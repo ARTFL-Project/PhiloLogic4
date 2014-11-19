@@ -84,8 +84,24 @@ class DB:
         else:
             return HitList.HitList(all_file,0,self)
 
-    def query(self,qs="",method="",method_arg=0,limit=10000000,**metadata):
+    def query(self,qs="",method="",method_arg="",limit="",**metadata):
         """query the PhiloLogic database"""
+        method = method or "proxy"
+        if isinstance(method_arg,str):
+            try:
+                method_arg = int(method_arg)
+            except:
+                if method == "cooc" or method == "sentence":
+                    method_arg = 6
+                else:
+                    method_arg = 0
+
+        if isinstance(limit,str):
+            try:
+                limit = int(limit)
+            except:
+                limit = 10000000
+
         hash = hashlib.sha1()
         hash.update(self.path)
         has_metadata = False

@@ -1,13 +1,14 @@
+"use strict";
+
 $(document).ready(function() {
     var q_string = window.location.search.substr(1);
     var db_url = webConfig['db_url'];
     var hit_len = collocation['hit_length'];
     if (sessionStorage[window.location.href] == null) {
         // Render initial results
-        var data = []
-        sortAndRenderCollocation(collocation_object, data, q_string, db_url, hit_len, hit_len);
+        var new_data = undefined;
+        sortAndRenderCollocation(collocation_object, new_data, q_string, db_url, hit_len);
         $('#philologic_collocation').velocity('fadeIn', {duration: 200});
-        
         // Fetch total results to make sure we always have the right number
         var total_hits_script = $('#search_arguments').data('script');
         $.getJSON(total_hits_script, function(data) {
@@ -28,7 +29,7 @@ $(document).ready(function() {
     }
 });
 
-function update_colloc(db_url, total_results_object, results_len, colloc_start, colloc_end, script, q_string) {
+function update_colloc(db_url, total_results, results_len, colloc_start, colloc_end, script, q_string) {
     if (colloc_start == 0) {
         colloc_start = 3000;
         colloc_end = 13000;
@@ -36,15 +37,16 @@ function update_colloc(db_url, total_results_object, results_len, colloc_start, 
         colloc_start += 10000;
         colloc_end += 10000;
     }
-    var script_call = script + '&interval_start=' + colloc_start + '&interval_end=' + colloc_end
+    var script_call = script + '&interval_start=' + colloc_start + '&interval_end=' + colloc_end;
     if (colloc_start <= results_len) {
         $.getJSON(script_call, function(data) {
-            var total_results = sortAndRenderCollocation(total_results_object, data, q_string, db_url, results_len, colloc_end);
+            console.log("Total", total_results)
+            console.log('received data=', data)
+            sortAndRenderCollocation(total_results, data, q_string, db_url, results_len, colloc_start, colloc_end, script, update_colloc);
             if (colloc_end < results_len) {
                 var percent = colloc_end / results_len * 100;
                 updateProgressBar(percent);
             }
-            update_colloc(db_url, total_results, results_len, colloc_start, colloc_end, script, q_string);
         });
     }
     else {
@@ -67,27 +69,26 @@ function update_colloc(db_url, total_results_object, results_len, colloc_start, 
     }
 }
 
-function sortAndRenderCollocation(total_results, data, q_string, db_url, results_len, colloc_end) {
-    if (data.length == 0) {
-        data = {"all_collocates": [], 'left_collocates': [], 'right_collocates': []}
+function sortAndRenderCollocation(full_results, data, q_string, db_url, results_len, colloc_start, colloc_end, script, callback) {
+    if (typeof(data) === "undefined") {
+        data = {"all_collocates": {}, 'left_collocates': {}, 'right_collocates': {}}
     }
-    var all = mergeCollocResults(total_results["all_collocates"], data["all_collocates"]);
-    var left = mergeCollocResults(total_results["left_collocates"], data['left_collocates']);
-    var right = mergeCollocResults(total_results["right_collocates"], data['right_collocates']);
-    sorted_lists = {'all': all.sorted, 'left': left.sorted, 'right': right.sorted};
+    var all = mergeCollocResults(full_results["all_collocates"], data["all_collocates"]);
+    var left = mergeCollocResults(full_results["left_collocates"], data['left_collocates']);
+    var right = mergeCollocResults(full_results["right_collocates"], data['right_collocates']);
+    var sorted_lists = {'all': all.sorted, 'left': left.sorted, 'right': right.sorted};
     update_table(sorted_lists, q_string, db_url);
     collocation_cloud(all.unsorted, colloc_end, results_len);
-    return {"all": all.unsorted, "left": left.unsorted, "right": right.unsorted}
+    if (callback) {
+        var temp_full_results = {"all_collocates": all.unsorted, "left_collocates": left.unsorted, "right_collocates": right.unsorted};
+        update_colloc(db_url, temp_full_results, results_len, colloc_start, colloc_end, script, q_string);
+    }
 }
 
 function mergeCollocResults(full_results, new_data) {
-    if (typeof full_results === 'undefined') {
-        full_results = {};
-    }
     if (new_data) {
-        for (var i=0; i < new_data.length; i++) {
-            var key = new_data[i][0];
-            var value = new_data[i][1];
+        for (var key in new_data) {
+            var value = new_data[key];
             if (key in full_results) {
                 full_results[key] += value;
             }
@@ -110,15 +111,15 @@ function sortCollocResults(full_results) {
 }
 
 function update_table(sorted_lists, q_string, db_url) {
-    for (column in sorted_lists) {
+    for (var column in sorted_lists) {
         var pos = 0;
         var sorted_list = sorted_lists[column];
         $('#' + column + '-collocate-column').empty();
-        for (i in sorted_list.slice(0, 100)) {
+        for (var i in sorted_list.slice(0, 100)) {
             pos += 1;
             var word = '<span id="' + column + '_word_' + pos + '" data-word="' + sorted_list[i][0] + '" data-direction="' + column + '" data-count="' + sorted_list[i][1] + '">' + sorted_list[i][0] + '</span>';
             var count_id = column + '_count_' + sorted_list[i][1];
-            data = word + '<span id="' + count_id + '">&nbsp(' + sorted_list[i][1] + ')</span>';
+            var data = word + '<span id="' + count_id + '">&nbsp(' + sorted_list[i][1] + ')</span>';
             var wrapper = '<span id="' + column + '_num' + pos + '" class="colloc-row">' + data + '</span>';
             $('#' + column + '-collocate-column').append(wrapper);
         }
@@ -231,7 +232,7 @@ function collocation_cloud(full_results, colloc_end, results_len) {
       };
     $('#collocate_counts').hide().empty();
     var sorted_list = [];
-    for (key in full_results) {
+    for (var key in full_results) {
         sorted_list.push([key, full_results[key]]);
     }
     sorted_list.sort(function(a,b) {return b[1] - a[1]});
@@ -241,7 +242,7 @@ function collocation_cloud(full_results, colloc_end, results_len) {
         var y = removeDiacritics(b[0]);
         return x < y ? -1 : x > y ? 1 : 0;
     });
-    for (i in sorted_list) {
+    for (var i in sorted_list) {
         var word = sorted_list[i][0];
         var count = sorted_list[i][1];
         var searchlink = '<span class="cloud_term" rel="' + count + '" data-word="' + word + '" data-direction="all" data-count="' + count + '">';
@@ -255,7 +256,7 @@ function collocation_cloud(full_results, colloc_end, results_len) {
 function activateLinks() {
     // Activate links on collocations
     $('span[id^=all_word], span[id^=left_word], span[id^=right_word]').addClass('colloc_link');
-    var href = window.location.href
+    var href = window.location.href;
     $('.colloc_link, .cloud_term').click(function(e) {
         e.preventDefault();
         var word = $(this).data('word');

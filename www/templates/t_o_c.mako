@@ -12,7 +12,7 @@
         </div>
     </div>
     <div class="panel panel-default">
-        % if db.locals['debug'] == True:
+        % if config.debug == True:
             <button id="show-header" class="btn btn-primary">Show Header</button>
             <div id="tei-header" style="white-space: pre; font-family: 'Droid Sans Mono', sans-serif; font-size: 80%; display: none;"></div>
         % endif

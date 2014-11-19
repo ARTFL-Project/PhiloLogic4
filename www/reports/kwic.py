@@ -6,40 +6,41 @@ import functions as f
 import reports as r
 import os
 import re
-from functions.wsgi_handler import wsgi_response, parse_cgi
+from philologic.DB import DB
+from functions.wsgi_handler import WSGIHandler
 from concordance import concordance_citation, citation_links
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 import json
 
 
 def kwic(environ,start_response):
-    wsgi_response(environ, start_response)
-    db, path_components, q = parse_cgi(environ)
-    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
-    path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
-    if q['q'] == '':
-        return r.fetch_bibliography(f,path, db, dbname,q,environ)
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(db, environ)
+    if request.no_q:
+        return r.fetch_bibliography(db, request, config, start_response)
     else:
-        kwic_object, hits = generate_kwic_results(db, q, config, path)
-        if q['format'] == "json":
-            # Remove db_path from query object since we don't want to expose that info to the client
-            del concordance_object['query']['dbpath']
+        kwic_object, hits = generate_kwic_results(db, request, config)
+        if request['format'] == "json":
+            headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+            start_response('200 OK',headers)
             return json.dumps(kwic_object)
-        return render_kwic(kwic_object, hits, db, dbname, q, path, config)
+        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+        start_response('200 OK',headers)
+        return render_kwic(kwic_object, hits, config, request)
         
-def render_kwic(kwic_object, hits, db, dbname, q, path, config):
+def render_kwic(k, hits, config, q):
     biblio_criteria = f.biblio_criteria(q, config)
-    pages = f.link.generate_page_links(kwic_object['description']['start'], q['results_per_page'], q, hits)
-    return f.render_template(kwic=kwic_object,db=db,dbname=dbname,q=q, path=path, biblio_criteria=biblio_criteria,
-                           pages=pages, config=config, template_name='kwic.mako', report="kwic")
+    pages = f.link.generate_page_links(k['description']['start'], q.results_per_page, q, hits)
+    return f.render_template(kwic=k, query_string=q.query_string, biblio_criteria=biblio_criteria,
+                             pages=pages, config=config, template_name='kwic.mako', report="kwic")
 
-def generate_kwic_results(db, q, config, path, length=5000, link_to_hit="div1"):
+def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
     """ The link_to_hit keyword defines the text object to which the metadata link leads to"""
-    hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-    start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
-    kwic_object = {"description": {"start": start, "end": end, "n": n, "results_per_page": q['results_per_page']},
-                    "query": q}
+    hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
+    start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
+    kwic_object = {"description": {"start": start, "end": end, "n": n, "results_per_page": q.results_per_page},
+                    "query": dict([i for i in q])}
     kwic_results = []
     default_short_citation_len = 30
     short_citation_len = 0
@@ -66,7 +67,7 @@ def generate_kwic_results(db, q, config, path, length=5000, link_to_hit="div1"):
             
         ## Get concordance and align it
         bytes, byte_start = adjust_bytes(hit.bytes, length)
-        conc_text = f.get_text(hit, byte_start, length, path)
+        conc_text = f.get_text(hit, byte_start, length, config.db_path)
         conc_text = format_strip(conc_text, bytes)
         conc_text = KWIC_formatter(conc_text, len(hit.bytes))
             
@@ -90,7 +91,7 @@ def generate_kwic_results(db, q, config, path, length=5000, link_to_hit="div1"):
                              "citation_links": hrefs, "citation": kwic_biblio_link, "bytes": hit.bytes}
 
     kwic_object['results'] = kwic_results
-    kwic_object['results_len'] = len(hits)
+    kwic_object['results_length'] = len(hits)
     kwic_object["query_done"] = hits.done
     
     return kwic_object, hits

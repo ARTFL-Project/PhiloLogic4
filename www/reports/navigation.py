@@ -7,7 +7,8 @@ import sqlite3
 import re
 import functions as f
 from lxml import etree
-from functions.wsgi_handler import wsgi_response, parse_cgi
+from philologic.DB import DB
+from functions.wsgi_handler import WSGIHandler
 from functions.ObjectFormatter import convert_entities, valid_html_tags, xml_to_html_class
 from functions.FragmentParser import parse
 from philologic import HitWrapper
@@ -17,24 +18,24 @@ import json
 philo_types = set(['div1', 'div2', 'div3'])
 
 def navigation(environ,start_response):
-    wsgi_response(environ, start_response)
-    db, path_components, q = parse_cgi(environ)
-    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
-    path = os.getcwd().replace('functions/', '')
-    obj = db[path_components]
     config = f.WebConfig()
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(db, environ)
+    obj = db[request.path_components]
+    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response('200 OK',headers)
     if obj.philo_type == 'doc':
-        return render_toc(obj, db, q, config, dbname)
+        return render_toc(obj, db, request, config)
     else:
-        return render_text_object(obj, db, q, config, dbname, path)
+        return render_text_object(obj, db, request, config)
     
-def render_toc(obj, db, q, config, dbname):
+def render_toc(obj, db, q, config):
     toc_object = generate_toc_object(obj, db, q, config)
-    return f.render_template(toc=toc_object,dbname=dbname, db=db, q=q, config=config,template_name='t_o_c.mako', report="t_o_c")
+    return f.render_template(toc=toc_object,query_string=q.query_string, config=config,template_name='t_o_c.mako', report="t_o_c")
 
-def render_text_object(obj, db, q, config, dbname, path):
-    text_object = generate_text_object(obj, db, q, config, path)
-    return f.render_template(text_object=text_object,dbname=dbname,db=db, obj=obj,q=q, config=config, template_name='text_object.mako', report="navigation")
+def render_text_object(obj, db, q, config):
+    text_object = generate_text_object(obj, db, q, config)
+    return f.render_template(text_object=text_object, query_string=q.query_string, obj=obj, config=config, template_name='text_object.mako', report="navigation")
 
 def nav_query(obj,db):
     conn = db.dbh
@@ -91,7 +92,7 @@ def generate_toc_object(obj, db, q, config):
             metadata_fields[metadata] = obj[metadata]
     doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
     citation = biblio_citation(doc_link, metadata_fields)
-    toc_object = {"query": q, "philo_id": obj.philo_id[0], "toc": text_hierarchy, "metadata_fields": metadata_fields,
+    toc_object = {"query": dict([i for i in q]), "philo_id": obj.philo_id[0], "toc": text_hierarchy, "metadata_fields": metadata_fields,
                   "citation": citation}
     return toc_object
 
@@ -183,8 +184,8 @@ def check_philo_virtual(db, path_components):
     except TypeError:
         return False
 
-def generate_text_object(obj, db, q, config, path):
-    text_object = {"query": q, "philo_id": obj.philo_id[0]}
+def generate_text_object(obj, db, q, config):
+    text_object = {"query": dict([i for i in q]), "philo_id": obj.philo_id[0]}
     text_object['prev'] = ' '.join(obj.prev.split()[:7])
     text_object['next'] = ' '.join(obj.next.split()[:7])
     metadata_fields = {}
@@ -195,7 +196,7 @@ def generate_text_object(obj, db, q, config, path):
     doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
     citation = biblio_citation(doc_link, metadata_fields)
     text_object['citation'] = citation
-    text = get_text_obj(obj, path, query_args=q['byte'])
+    text = get_text_obj(obj, config.db_path, query_args=q['byte'])
     text_object['text'] = text
     return text_object
 

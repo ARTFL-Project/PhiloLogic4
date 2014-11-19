@@ -12,9 +12,10 @@ class WebConfig(object):
     
     def __init__(self):
         self.config = {}
-        db_path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '')
-        db = DB(db_path + '/data',encoding='utf-8')
-        web_config_path = db_path + "/data/web_config.cfg"
+        self.db_path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '')
+        self.db_name = os.path.basename(self.db_path)
+        db = DB(self.db_path + '/data',encoding='utf-8')
+        web_config_path = self.db_path + "/data/web_config.cfg"
         self.options = set(['db_url', 'dbname', 'concordance_length', 'facets', 'metadata',
                         'search_reports', 'metadata_aliases', 'search_examples', 'time_series_intervals',
                         "theme", "dictionary", "landing_page_browsing", "debug"])
@@ -23,7 +24,11 @@ class WebConfig(object):
         except NameError:
             ##TODO: redirect to an error page indicating a syntax error
             raise SyntaxError
+        
         self.config['debug'] = db.locals['debug']
+        self.config['db_path'] = self.db_path
+        self.config['db_name'] = self.db_name
+        
         if self.config['search_examples'] == None:
             self.config['search_examples'] = {}
         for i in self.config['metadata']:

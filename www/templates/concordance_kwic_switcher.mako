@@ -1,7 +1,7 @@
 <div id="report_switch" class="btn-group">
     <%
-    concordance_script = "%s/scripts/concordance_kwic_switcher.py?%s" % (config.db_url, q['q_string'].replace('report=kwic', 'report=concordance'))
-    kwic_script = "%s/scripts/concordance_kwic_switcher.py?%s" % (config.db_url, q['q_string'].replace('report=concordance', 'report=kwic'))
+    concordance_script = "%s/scripts/concordance_kwic_switcher.py?%s" % (config.db_url, query_string.replace('report=kwic', 'report=concordance'))
+    kwic_script = "%s/scripts/concordance_kwic_switcher.py?%s" % (config.db_url, query_string.replace('report=concordance', 'report=kwic'))
     %>
     % if report == "concordance":
         <button type="button" class="btn btn-primary active" id="concordance-switch" data-script="${concordance_script}" data-report="concordance">
