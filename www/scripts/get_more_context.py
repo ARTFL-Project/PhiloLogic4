@@ -3,8 +3,9 @@
 import os
 import sys
 import urlparse
+from philologic.DB import DB
 sys.path.append('..')
-from functions.wsgi_handler import parse_cgi
+from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
 import reports as r
 import functions as f
@@ -18,15 +19,16 @@ def get_more_context(environ,start_response):
     environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/get_more_context.py', '')
     cgi = urlparse.parse_qs(environ["QUERY_STRING"],keep_blank_values=True)
     hit_num = int(cgi.get('hit_num',[0])[0])
-    db, path_components, q = parse_cgi(environ)
+    db = DB(environ["SCRIPT_FILENAME"] + '/data/')
+    request = WSGIHandler(db, environ)
     config = f.WebConfig()
-    if q['start'] == 0:
+    if request.start == 0:
         start = 0
     else:
-        start = q['start'] - 1
-    end = (q['end'] or q['results_per_page']) + 1
+        start = request.start - 1
+    end = (request.end or request.results_per_page) + 1
     hit_range = range(start, end)
-    hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
+    hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
     context_size = config['concordance_length'] * 3
     html_list = []
     for i in hit_range:

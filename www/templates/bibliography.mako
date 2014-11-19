@@ -20,7 +20,7 @@
                 <div id="search_arguments">
                         Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}<br>
                 </div>
-                Hits <span class="start">${description['start']}</span> - <span class="end">${description['end']}</span> of <span id="total_results">${bibliography['results_len']}</span>${r_status}
+                Hits <span class="start">${description['start']}</span> - <span class="end">${description['end']}</span> of <span id="total_results">${bibliography['results_length']}</span>${r_status}
             </div>
             <div class="row" id="act-on-report">
                 <div class="col-xs-12">

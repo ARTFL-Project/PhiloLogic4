@@ -112,7 +112,7 @@ class ObjectWrapper(object):
 
     def __getitem__(self, key):
         if key in obj_dict:
-            return ObjectWrapper(self.hit, self.db, key,encoding=self.encoding)
+            return ObjectWrapper(self.hit, self.db, key)
         else:
             if self.row == None:
                 self.row = self.db.get_id_lowlevel(self.philo_id)

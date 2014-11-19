@@ -8,8 +8,7 @@ from urllib import quote_plus
 from philologic.DB import DB
 
 
-def make_query_link(query,method=None,methodarg=None,report=None,start=None,end=None,results_per_page=None,theme_rheme=None,
-                    collocate=[],**metadata): 
+def make_query_link(query,method=None,methodarg=None,report=None,start=None,end=None,results_per_page=None,collocate=[],**metadata): 
     """ Takes a dictionary of query parameters as produced by parse_cgi, and returns a relative URL representation of such. """
     q_params = [("q",query)]
     if method:
@@ -31,8 +30,6 @@ def make_query_link(query,method=None,methodarg=None,report=None,start=None,end=
         q_params.append(("end", str(end)))
     if results_per_page:
         q_params.append(("pagenum", str(results_per_page)))
-    if theme_rheme:
-        q_params.append(("theme_rheme", theme_rheme))
     if collocate:
         q_params.append(('collocate', collocate[0]))
         q_params.append(('direction', collocate[1]))
@@ -80,6 +77,9 @@ def generate_page_links(start, results_per_page, q, results):
     return pages
 
 def page_interval(num, results, start, end):
+    start = int(start)
+    end = int(end)
+    num = int(num)
     if start <= 0:
         start = 1
     if end <= 0:
@@ -91,15 +91,16 @@ def page_interval(num, results, start, end):
     return start, end, n
     
 def page_linker(page, results_per_page, q):
-    theme_rheme = q['theme_rheme']
-    collocate = [q['collocate'], q['direction'], q['word_num'], q['collocate_num']]
+    if "collocate" in q:
+        collocate = [q['collocate'], q['direction'], q['word_num'], q['collocate_num']]
+    else:
+        collocate = []
     if page == 1:
         page_start = 1
     else:
         page_start = results_per_page * (page - 1) + 1
     page_end = results_per_page * (page)
-    page_link = make_query_link(q["q"],q["method"],q["arg"],q['report'],page_start,page_end,results_per_page,
-                                    theme_rheme,collocate,**q["metadata"])    
+    page_link = make_query_link(q["q"],q["method"],q["arg"],q['report'],page_start,page_end,results_per_page,collocate,**q.metadata)    
     return page_link
 
 def find_page_number(results_len, results_per_page):

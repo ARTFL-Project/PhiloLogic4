@@ -3,30 +3,26 @@
 import os
 import sys
 sys.path.append('..')
-from functions.wsgi_handler import parse_cgi
+from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
+from philologic.DB import DB
 from philologic.HitWrapper import ObjectWrapper
-from mako.template import Template
 from lxml import etree
-import reports as r
 import functions as f
-import json
 import re
 
-obj_level = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4}
 header_name = 'teiHeader'  ## Not sure if this should be configurable
 
 def get_header(environ, start_response):
     status = '200 OK'
     headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response(status,headers)
-    environ["SCRIPT_FILENAME"] = environ["SCRIPT_FILENAME"].replace('scripts/get_header.py', '')
-    db, path_components, q = parse_cgi(environ)
-    path = db.locals['db_path']
-    path = path[:path.rfind("/data")]
-    obj = ObjectWrapper(q['philo_id'].split(), db)
+    config = f.WebConfig()
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(db, environ)
+    path = config.db_path
+    obj = ObjectWrapper(request['philo_id'].split(), db)
     filename = path + '/data/TEXT/' + obj.filename
-    print >> sys.stderr, "FILENAME", filename
     parser = etree.XMLParser(remove_blank_text=True, recover=True)
     xml_tree = etree.parse(filename, parser)
     header = xml_tree.find(header_name)

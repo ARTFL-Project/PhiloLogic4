@@ -6,11 +6,13 @@ import functions as f
 import reports as r
 import os
 import re
-from functions.wsgi_handler import wsgi_response, parse_cgi
+from philologic.DB import DB
+from functions.wsgi_handler import wsgi_response, WSGIHandler
 from functions.ObjectFormatter import convert_entities, adjust_bytes, valid_html_tags, xml_to_html_class
 from functions.FragmentParser import parse
 from lxml import etree
 import json
+from inspect import getmembers
 
 strip_start_punctuation = re.compile("^[,?;.:!']")
 begin_match = re.compile(r'^[^<]*?>')
@@ -19,33 +21,28 @@ end_match = re.compile(r'<[^>]*?\Z')
 space_match = re.compile(r" ?([-'])+ ")
 
 def concordance(environ,start_response):
-    wsgi_response(environ, start_response)
-    db, path_components, q = parse_cgi(environ)
-    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
-    path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
-    if q['q'] == '':
-        return r.fetch_bibliography(f,path, db, dbname,q,environ)
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(db, environ)
+    if request.no_q:
+        return r.fetch_bibliography(db, request, config, start_response)
     else:
-        concordance_object, hits = concordance_results(db, q, config, path)
-        if q['format'] == "json":
-            # Remove db_path from query object since we don't want to expose that info to the client
-            del concordance_object['query']['dbpath']
+        concordance_object, hits = concordance_results(db, request, config)
+        if request['format'] == "json":
+            headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+            start_response('200 OK',headers)
             return json.dumps(concordance_object)
-        return render_concordance(concordance_object, hits, q, db, dbname, path, config)
- 
-def render_concordance(concordance_object, hits, q, db, dbname, path, config):
-    biblio_criteria = f.biblio_criteria(concordance_object['query'], config)
-    pages = f.link.generate_page_links(concordance_object['description']['start'], q['results_per_page'], q, hits)
-    return f.render_template(concordance=concordance_object, q=concordance_object["query"], db=db,dbname=dbname,
-                           biblio_criteria=biblio_criteria,config=config, template_name="concordance.mako", report="concordance",
-                           pages=pages)
-
-def concordance_results(db, q, config, path):
-    hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-    start, end, n = f.link.page_interval(q['results_per_page'], hits, q["start"], q["end"])
-    concordance_object = {"description": {"start": start, "end": end, "results_per_page": q['results_per_page']},
-                          "query": q}
+        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+        start_response('200 OK',headers)
+        return render_concordance(concordance_object, hits, config, request)
+    
+def concordance_results(db, q, config):
+    hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
+    start, end, n = f.link.page_interval(q['results_per_page'], hits, q.start, q.end)
+    
+    concordance_object = {"description": {"start": start, "end": end, "results_per_page": q.results_per_page},
+                          "query": dict([i for i in q])}
+    
     results = []
     for hit in hits[start - 1:end]:
         citation_hrefs = citation_links(db, config, hit)
@@ -53,14 +50,20 @@ def concordance_results(db, q, config, path):
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
         citation = concordance_citation(hit, citation_hrefs)
-        context = fetch_concordance(db, hit, path, config.concordance_length)
+        context = fetch_concordance(db, hit, config.db_path, config.concordance_length)
         result_obj = {"philo_id": hit.philo_id, "citation": citation, "citation_links": citation_hrefs, "context": context,
                       "metadata_fields": metadata_fields, "bytes": hit.bytes}
         results.append(result_obj)
     concordance_object["results"] = results
-    concordance_object['results_len'] = len(hits)
+    concordance_object['results_length'] = len(hits)
     concordance_object["query_done"] = hits.done
     return concordance_object, hits
+ 
+def render_concordance(c, hits, config, q):
+    biblio_criteria = f.biblio_criteria(q, config)
+    pages = f.link.generate_page_links(c['description']['start'], q.results_per_page, q, hits)
+    return f.render_template(concordance=c, biblio_criteria=biblio_criteria, config=config, query_string=q.query_string,
+                             template_name="concordance.mako", report="concordance", pages=pages)
 
 def citation_links(db, config, i):
     """ Returns a representation of a PhiloLogic object and all its ancestors

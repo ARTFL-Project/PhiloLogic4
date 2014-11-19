@@ -89,7 +89,7 @@
                     <ul class="list-group" style="margin-left: -15px; margin-right: -15px"></ul>
                 </div>
             </div>
-            <div id="dico-landing-alpha" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;" data-script="${config.db_url + '/dispatcher.py?report=bibliography&head='}">
+            <div id="dico-landing-alpha" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;" data-script="${config.db_url + '/dispatcher.py?report=bibliography&format=json&head='}">
                 <div class="panel-heading">
                     Browse by letter
                 </div>

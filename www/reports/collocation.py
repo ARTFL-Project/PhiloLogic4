@@ -8,7 +8,8 @@ import os
 import re
 import json
 import unicodedata
-from functions.wsgi_handler import wsgi_response, parse_cgi
+from philologic.DB import DB
+from functions.wsgi_handler import WSGIHandler
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
 from collections import defaultdict
@@ -25,29 +26,29 @@ end_match = re.compile(r'<[^>]*?\Z')
 
 
 def collocation(environ,start_response):
-    wsgi_response(environ, start_response)
-    db, path_components, q = parse_cgi(environ)
-    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
-    path = os.getcwd().replace('functions/', '')
     config = f.WebConfig()
-    if q['q'] == '':
-        return r.fetch_bibliography(f,path, db, dbname,q,environ) ## the default should be an error message
-    hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-    return render_collocation(hits, db, dbname, q, path, config)
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(db, environ)
+    if request.no_q:
+        return r.fetch_bibliography(db, request, config, start_response)
+    hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
+    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response('200 OK',headers)
+    return render_collocation(hits, db, request, config)
     
-def render_collocation(hits, db, dbname, q, path, config):
+def render_collocation(hits, db, q, config):
+    collocation_object = fetch_collocation(hits, q, db, config)
     biblio_criteria = f.biblio_criteria(q, config)
-    collocation_object = fetch_collocation(hits, path, q, db, config)
-    return f.render_template(collocation=collocation_object, db=db,dbname=dbname,q=q,biblio_criteria=biblio_criteria,
-                             config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
+    return f.render_template(collocation=collocation_object, query_string=q.query_string, biblio_criteria=biblio_criteria,
+                             word_num=q.word_num, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
-def fetch_collocation(hits, path, q, db, config, word_filter=True, filter_num=100, full_report=True, stopwords=True):
-    collocation_object = {"query": q, "results_length": len(hits)}
+def fetch_collocation(hits, q, db, config, word_filter=True, filter_num=100, full_report=True, stopwords=True):
+    collocation_object = {"query": dict([i for i in q]), "results_length": len(hits)}
     
     length = config['concordance_length']
-    within_x_words = q['word_num']    
+    within_x_words = int(q['word_num'])
     
-    filter_list = build_filter_list(word_filter, stopwords, filter_num, q, path)
+    filter_list = build_filter_list(word_filter, stopwords, filter_num, q, config.db_path)
     
     ## start going though hits ##
     left_collocates = defaultdict(int)
@@ -55,8 +56,8 @@ def fetch_collocation(hits, path, q, db, config, word_filter=True, filter_num=10
     all_collocates = defaultdict(int)
     
     count = 0
-    for hit in hits[q['interval_start']:q['interval_end']]:
-        conc_left, conc_right = split_concordance(hit, length, path)
+    for hit in hits[q.interval_start:q.interval_end]:
+        conc_left, conc_right = split_concordance(hit, length, config.db_path)
         left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
         right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)
         
@@ -68,9 +69,9 @@ def fetch_collocation(hits, path, q, db, config, word_filter=True, filter_num=10
             right_collocates[r_word] += 1
             all_collocates[r_word] += 1  
     
-    collocation_object['all_collocates'] = sorted(all_collocates.items(), key=itemgetter(1), reverse=True)
-    collocation_object['left_collocates'] = sorted(left_collocates.items(), key=itemgetter(1), reverse=True)
-    collocation_object['right_collocates'] = sorted(right_collocates.items(), key=itemgetter(1), reverse=True)
+    collocation_object['all_collocates'] = all_collocates
+    collocation_object['left_collocates'] = left_collocates
+    collocation_object['right_collocates'] = right_collocates
     
     return collocation_object
 
