@@ -27,7 +27,10 @@ $(document).ready(function() {
         activateLinks();
         $('#philologic_collocation').velocity('fadeIn', {duration: 200});
     }
+
 });
+
+
 
 function update_colloc(db_url, total_results, results_len, colloc_start, colloc_end, script, q_string) {
     if (colloc_start == 0) {
@@ -90,15 +93,24 @@ function mergeCollocResults(full_results, new_data) {
         for (var key in new_data) {
             var value = new_data[key];
             if (key in full_results) {
-                full_results[key] += value;
+                full_results[key].count += value.count;
             }
             else {
-                full_results[key] = value;
+                full_results[key] = {'count': value.count, 'url': value.url};
             }
         }
     }
-    var sorted_list = sortCollocResults(full_results);
+    var sorted_list = sortResults(full_results);
     return {"sorted": sorted_list, "unsorted": full_results};
+}
+
+function sortResults(full_results) {
+    var sorted_list = [];
+    for (var key in full_results) {
+        sorted_list.push([key, full_results[key]]);
+    }
+    sorted_list.sort(function(a,b) {return b[1].count - a[1].count});
+    return sorted_list;
 }
 
 function sortCollocResults(full_results) {
@@ -117,9 +129,9 @@ function update_table(sorted_lists, q_string, db_url) {
         $('#' + column + '-collocate-column').empty();
         for (var i in sorted_list.slice(0, 100)) {
             pos += 1;
-            var word = '<span id="' + column + '_word_' + pos + '" data-word="' + sorted_list[i][0] + '" data-direction="' + column + '" data-count="' + sorted_list[i][1] + '">' + sorted_list[i][0] + '</span>';
-            var count_id = column + '_count_' + sorted_list[i][1];
-            var data = word + '<span id="' + count_id + '">&nbsp(' + sorted_list[i][1] + ')</span>';
+            var word = '<span id="' + column + '_word_' + pos + '" data-href="' + sorted_list[i][0].url + '">' + sorted_list[i][0] + '</span>';
+            var count_id = column + '_count_' + sorted_list[i][1].count;
+            var data = word + '<span id="' + count_id + '">&nbsp(' + sorted_list[i][1].count + ')</span>';
             var wrapper = '<span id="' + column + '_num' + pos + '" class="colloc-row">' + data + '</span>';
             $('#' + column + '-collocate-column').append(wrapper);
         }
@@ -244,7 +256,7 @@ function collocation_cloud(full_results, colloc_end, results_len) {
     });
     for (var i in sorted_list) {
         var word = sorted_list[i][0];
-        var count = sorted_list[i][1];
+        var count = sorted_list[i][1].count;
         var searchlink = '<span class="cloud_term" rel="' + count + '" data-word="' + word + '" data-direction="all" data-count="' + count + '">';
         var full_link = searchlink + word + ' </span>';
         $("#collocate_counts").append(full_link);
@@ -259,13 +271,6 @@ function activateLinks() {
     var href = window.location.href;
     $('.colloc_link, .cloud_term').click(function(e) {
         e.preventDefault();
-        var word = $(this).data('word');
-        var direction = $(this).data('direction');
-        var count = $(this).data('count');
-        href = href.replace(/report=[^&]+/, 'report=concordance_from_collocation');
-        href += '&collocate=' + encodeURIComponent(word);
-        href += '&direction=' + direction;
-        href += '&collocate_num=' + count;
-        window.location = href;
+        window.location = $(this).data('href');
     });
 }
