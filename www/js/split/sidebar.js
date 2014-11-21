@@ -72,10 +72,10 @@ function populate_sidebar(script_call, facet, total_results, interval_start, int
     if (interval_start === 0) {
         interval_end = 1000;
     } else if (interval_end === 1000) {
-        interval_end = 21000;
+        interval_end = 11000;
     } else {
-        interval_start += 20000;
-        interval_end += 20000;
+        interval_start += 10000;
+        interval_end += 10000;
     }
     if (interval_start < total_results) {
         var script_call_interval = script_call + "&interval_start=" + interval_start + "&interval_end=" + interval_end;
@@ -84,11 +84,7 @@ function populate_sidebar(script_call, facet, total_results, interval_start, int
         }
         $.getJSON(script_call_interval, function(data) {
             if ($('#selected-sidebar-option').data('interrupt') != true && $('#selected-sidebar-option').data('selected') == facet) {
-                if (facet.match(/collocates$/) == null) {
-                    var merge = mergeResults(full_results, data);
-                } else {
-                    var merge = mergeCollocResults(full_results, data[facet])
-                }
+                var merge = mergeResults(full_results, data);
                 var sorted_list = merge.sorted;
                 var new_full_results = merge.unsorted;
                 update_sidebar(sorted_list, facet);

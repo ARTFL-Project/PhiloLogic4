@@ -35,10 +35,10 @@ $(document).ready(function() {
 function update_colloc(db_url, total_results, results_len, colloc_start, colloc_end, script, q_string) {
     if (colloc_start == 0) {
         colloc_start = 3000;
-        colloc_end = 13000;
+        colloc_end = 8000;
     } else {
-        colloc_start += 10000;
-        colloc_end += 10000;
+        colloc_start += 5000;
+        colloc_end += 5000;
     }
     var script_call = script + '&interval_start=' + colloc_start + '&interval_end=' + colloc_end;
     if (colloc_start <= results_len) {
@@ -258,7 +258,6 @@ function collocation_cloud(full_results, colloc_end, results_len) {
         var word = sorted_list[i][0];
         var count = sorted_list[i][1].count;
         var href = sorted_list[i][1].url;
-        console.log(href)
         var searchlink = '<span class="cloud_term" rel="' + count + '" data-href="' + href + '&collocate_num=' + count + '">';
         var full_link = searchlink + word + ' </span>';
         $("#collocate_counts").append(full_link);
