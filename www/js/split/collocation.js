@@ -129,7 +129,7 @@ function update_table(sorted_lists, q_string, db_url) {
         $('#' + column + '-collocate-column').empty();
         for (var i in sorted_list.slice(0, 100)) {
             pos += 1;
-            var word = '<span id="' + column + '_word_' + pos + '" data-href="' + sorted_list[i][0].url + '">' + sorted_list[i][0] + '</span>';
+            var word = '<span id="' + column + '_word_' + pos + '" class="colloc_link" data-href="' + sorted_list[i][1].url + '&collocate_num=' + sorted_list[i][1].count + '">' + sorted_list[i][0] + '</span>';
             var count_id = column + '_count_' + sorted_list[i][1].count;
             var data = word + '<span id="' + count_id + '">&nbsp(' + sorted_list[i][1].count + ')</span>';
             var wrapper = '<span id="' + column + '_num' + pos + '" class="colloc-row">' + data + '</span>';
@@ -247,8 +247,8 @@ function collocation_cloud(full_results, colloc_end, results_len) {
     for (var key in full_results) {
         sorted_list.push([key, full_results[key]]);
     }
-    sorted_list.sort(function(a,b) {return b[1] - a[1]});
-    sorted_list = sorted_list.slice(0, 130);
+    sorted_list.sort(function(a,b) {return b[1].count - a[1].count});
+    sorted_list = sorted_list.slice(0, 100);
     sorted_list.sort(function(a,b) {
         var x = removeDiacritics(a[0]);
         var y = removeDiacritics(b[0]);
@@ -257,7 +257,9 @@ function collocation_cloud(full_results, colloc_end, results_len) {
     for (var i in sorted_list) {
         var word = sorted_list[i][0];
         var count = sorted_list[i][1].count;
-        var searchlink = '<span class="cloud_term" rel="' + count + '" data-word="' + word + '" data-direction="all" data-count="' + count + '">';
+        var href = sorted_list[i][1].url;
+        console.log(href)
+        var searchlink = '<span class="cloud_term" rel="' + count + '" data-href="' + href + '&collocate_num=' + count + '">';
         var full_link = searchlink + word + ' </span>';
         $("#collocate_counts").append(full_link);
     }
