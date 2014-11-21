@@ -109,26 +109,47 @@
                         </div>
                     % endfor
                 </div>
-                <div id="collocation_num" class="row">
-                    <div class="col-xs-6 col-sm-2 col-md-2 text-row">
-                        Within
+                <div id="collocation-options" class="row">
+                    <div class="col-xs-12">
+                        <div class="row">
+                            <div class="col-xs-6 col-sm-2 col-md-2 text-row">
+                                Within
+                            </div>
+                            <div class="col-xs-6 col-sm-1 col-md-1">
+                                <select name="word_num" id="word_num" class="form-control">
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option selected>5</option>
+                                    <option>6</option>
+                                    <option>7</option>
+                                    <option>8</option>
+                                    <option>9</option>
+                                    <option>10</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-12 col-sm-5 col-md-7 text-row">
+                                (1-10) words
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-xs-6 col-sm-1 col-md-1">
-                        <select name="word_num" id="word_num" class="form-control">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                            <option selected>5</option>
-                            <option>6</option>
-                            <option>7</option>
-                            <option>8</option>
-                            <option>9</option>
-                            <option>10</option>
-                        </select>
-                    </div>
-                    <div class="col-xs-12 col-sm-5 col-md-9 text-row">
-                        (1-10) words
+                    <div class="col-xs-12" style="margin-top: 10px;">
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-2 col-md-2 text-row">
+                                Collocate Filtering
+                            </div>
+                            <div class="col-xs-12 col-sm-10 col-md-10">
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label class="btn btn-primary active">
+                                        <input type="radio" name="colloc-filtering" id="filter-stopwords" value='filter-stopwords' checked="checked">Stopwords
+                                    </label>
+                                    <label class="btn btn-primary">
+                                        <input type="radio" name="colloc-filtering" id="filter-frequency" value='filter-frequency'>Most frequent terms
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div id="time_series_num" class="row">
@@ -210,6 +231,5 @@
         </div>
     </form>
     <div id="waiting">
-        <!--<img src="${config.db_url}/js/gif/ajax-loader.gif" alt="Loading..."/>-->
     </div>
 </div>

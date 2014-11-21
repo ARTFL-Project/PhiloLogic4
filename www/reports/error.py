@@ -16,13 +16,15 @@ def error(environ,start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
     headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-    start_response('200 OK',headers)
+    try:
+        start_response('200 OK',headers)
+    except AssertionError: ## headers already set
+        pass
     return error_handling(db, config, request)
     
-def error_handling(db, dbname, q):
+def error_handling(db, config, q):
     hits = NoHits()
     path = config.db_path
-    config = f.WebConfig()
     report = q['report']
     hits = NoHits()
     if report == "concordance" or report == "bibligraphy":
