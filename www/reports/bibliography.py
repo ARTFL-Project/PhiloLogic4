@@ -15,7 +15,7 @@ def bibliography(environ, start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    if q['format'] == "json":
+    if request.format == "json":
         headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
         start_response('200 OK',headers)
         wrapper = []
@@ -50,37 +50,33 @@ def bibligraphy_results(db, q, config):
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
         if hit.type == "doc":
-            citation = biblio_citation(citation_hrefs, metadata_fields)
+            citation = biblio_citation(hit, citation_hrefs)
         else:
-            citation = r.concordance_citation(hit, citation_hrefs, metadata_fields)
+            citation = r.concordance_citation(hit, citation_hrefs)
         results.append({'citation': citation, 'citation_links': citation_hrefs, 'philo_id': hit.philo_id, "metadata_fields": metadata_fields})
     bibliography_object["results"] = results
     bibliography_object['results_length'] = len(hits)
     bibliography_object['query_done'] = hit.done
     return bibliography_object, hits        
     
-def biblio_citation(citation_hrefs, metadata_fields):
+def biblio_citation(hit, citation_hrefs):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
-    if metadata_fields['author']:
-        record = u"%s, <i><a href='%s'>%s</a></i>" % (metadata_fields['author'], citation_hrefs['doc'], metadata_fields['title'])
+    if hit.author:
+        citation = u"%s, <i><a href='%s'>%s</a></i>" % (hit.author, citation_hrefs['doc'], hit.title)
     else:
-        record = u"<i><a href='%s'>%s</a></i>" % (citation_hrefs['doc'],metadata_fields['title'])
+        citation = u"<i><a href='%s'>%s</a></i>" % (citation_hrefs['doc'],hit.title)
     more_metadata = []
-    if "pub_place" in metadata_fields and metadata_fields['pub_place']:
-        more_metadata.append(metadata_fields['pub_place'])
-    if "publisher" in metadata_fields and metadata_fields['publisher']:
-        more_metadata.append(metadata_fields['publisher'])
-    if "collection" in metadata_fields and metadata_fields['collection']:
-        more_metadata.append(metadata_fields['collection'])
-    if "date" in metadata_fields and metadata_fields['date']:
-        date = metadata_fields['date']
-        try:
-            date = str(date)
-            more_metadata.append(date)
-        except:
-            pass
+    if hit.pub_place:
+        more_metadata.append(hit.pub_place)
+    if hit.publisher:
+        more_metadata.append(hit.publisher)
+    if hit.collection:
+        more_metadata.append(hit.collection)
+    if hit.date:
+        more_metadata.append(hit.date)
     if more_metadata:
-        record += '(%s)' % ' '.join(more_metadata)
-    if "genre" in metadata_fields and metadata_fields['genre']:
-        record += ' [genre: %s]' % metadata_fields['genre']
-    return record
+        citation += '(%s)' % ' '.join(more_metadata)
+    if hit.genre:
+        citation += ' [genre: %s]' % hit.genre
+        
+    return citation

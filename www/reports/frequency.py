@@ -55,20 +55,7 @@ def generate_frequency(results, q, db, config):
 def generate_key(hit, field_list, db):
     key = []
     for field in field_list:
-        value = ''
-        depth = ''
-        if field in db.locals['metadata_types']:
-            depth = db.locals['metadata_types'][field]
-        if depth:
-            if depth == "div":
-                for d in ["div3", "div2", "div1"]:
-                    value = hit[d][field]
-                    if value:
-                        break
-            else:
-                value = hit[depth][field]
-        else:
-            value = hit[field]
+        value = hit[field]
         if not value:
             value = "NULL" # NULL is a magic value for queries, don't change it recklessly.
         k = (field, value)

@@ -111,6 +111,13 @@ li {
 .colloc-row:nth-child(2n-1) {
 	background-color: #FAFAFA;
 }
+.inactive-link {
+	color: black;
+}
+.inactive-link:hover {
+	text-decoration: none;
+	cursor: text;
+}
 
 /*Pages links*/
 .more {
