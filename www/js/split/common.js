@@ -104,7 +104,6 @@ $(document).ready(function() {
                 $('select[name=' + key + ']').val(value);
             }
             else if (key == "q") {
-                console.log(value)
                 $('#q').val(value);
                 $('#q2').val(value);
             }
@@ -350,7 +349,6 @@ function showHide(value) {
         $('#metadata_fields').find('tr').has('#date').show();
     }
     if (value == 'kwic' || value == "concordance" || value == "bibliography") {
-        console.log(value)
         $("#results_per_page, #method, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
         $('#start_date, #end_date').val('');

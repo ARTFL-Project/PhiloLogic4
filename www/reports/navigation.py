@@ -91,7 +91,7 @@ def generate_toc_object(obj, db, q, config):
         if db.locals['metadata_types'][metadata] == "doc":
             metadata_fields[metadata] = obj[metadata]
     doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
-    citation = biblio_citation(doc_link, metadata_fields)
+    citation = biblio_citation(obj, doc_link)
     toc_object = {"query": dict([i for i in q]), "philo_id": obj.philo_id[0], "toc": text_hierarchy, "metadata_fields": metadata_fields,
                   "citation": citation}
     return toc_object
