@@ -59,7 +59,7 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
     collocate = unicodedata.normalize('NFC', q['collocate'].decode('utf-8', 'ignore'))
     collocate_num = int(q['collocate_num'])
     
-    filter_list = build_filter_list(word_filter, stopwords, filter_num, q, config.db_path)
+    filter_list = build_filter_list(q, config)
     
     results = []
     colloc_hitlist = []

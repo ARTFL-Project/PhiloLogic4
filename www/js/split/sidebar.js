@@ -84,7 +84,11 @@ function populate_sidebar(script_call, facet, total_results, interval_start, int
         }
         $.getJSON(script_call_interval, function(data) {
             if ($('#selected-sidebar-option').data('interrupt') != true && $('#selected-sidebar-option').data('selected') == facet) {
-                var merge = mergeResults(full_results, data);
+                if (facet.match(/collocates$/)) {
+                    var merge = mergeResults(full_results, data[facet]);
+                } else {
+                    var merge = mergeResults(full_results, data);
+                }
                 var sorted_list = merge.sorted;
                 var new_full_results = merge.unsorted;
                 update_sidebar(sorted_list, facet);

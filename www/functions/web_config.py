@@ -47,7 +47,7 @@ class WebConfig(object):
                 if "start" not in config_option["date"] or "end" not in config_option["date"] or "interval" not in config_option["date"]:
                     config_option["date"] = {}
         except KeyError:
-            config_option = {}
+            config_option = []
         return config_option
         
     def toJSON(self):

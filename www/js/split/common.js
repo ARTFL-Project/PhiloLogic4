@@ -211,6 +211,14 @@ $(document).ready(function() {
         });
     }
     
+    // Show/Hide value selection in filtering on most common words in collocations
+    $('#colloc-filter-frequency').on('click touchstart', function() {
+        $('#filter-frequency').velocity('fadeIn', {duration: 200});
+    });
+    $('#colloc-filter-stopwords, #colloc-no-filter').on('click touchstart', function() {
+        $('#filter-frequency').velocity('fadeOut', {duration: 200});
+    });
+    
     // Export results handler
     $('#export-buttons button').click(function() {
         $('#export-download-link').hide();
@@ -343,9 +351,9 @@ function autoCompleteMetadata(metadata, field, db_url) {
 
 // Display different search parameters based on the type of report used
 function showHide(value) {
-    $("#results_per_page, #collocation_num, #time_series_num, #date_range, #method, #metadata_fields").hide();
+    $("#results_per_page, #collocation-options, #time_series_num, #date_range, #method, #metadata_fields").hide();
     if (value == 'collocation') {
-        $("#collocation_num, #metadata_fields").show();
+        $("#collocation-options, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
     }
     if (value == 'kwic' || value == "concordance" || value == "bibliography") {

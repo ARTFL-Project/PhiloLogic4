@@ -25,7 +25,11 @@
                 </div>
             </div>
             <div style="padding-left: 15px;">
-                The 100 most common words are being filtered from this report.
+                % if collocation['query']['colloc_filter_choice'] == "stopwords":
+                    Common function words are being filtered from this report.
+                % elif collocation['query']['colloc_filter_choice'] == "frequency":
+                    The ${collocation['query']['filter_frequency']} most common words are being filtered from this report.
+                % endif
             </div>
         </div>
         <div class="results_container">
