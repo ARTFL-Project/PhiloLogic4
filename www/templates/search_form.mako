@@ -112,11 +112,11 @@
                 <div id="collocation-options" class="row">
                     <div class="col-xs-12">
                         <div class="row">
-                            <div class="col-xs-6 col-sm-2 col-md-2 text-row">
+                            <div class="col-xs-3 col-sm-2 col-md-2 text-row">
                                 Within
                             </div>
-                            <div class="col-xs-6 col-sm-1 col-md-1">
-                                <select name="word_num" id="word_num" class="form-control">
+                            <div class="col-xs-2 col-sm-1 col-md-1">
+                                <select name="word_num" id="word_num" class="form-control" style="width: auto;">
                                     <option>1</option>
                                     <option>2</option>
                                     <option>3</option>
@@ -129,17 +129,29 @@
                                     <option>10</option>
                                 </select>
                             </div>
-                            <div class="col-xs-12 col-sm-5 col-md-7 text-row">
+                            <div class="col-xs-7 col-sm-5 col-md-7 text-row">
                                 (1-10) words
                             </div>
                         </div>
                     </div>
                     <div class="col-xs-12" style="margin-top: 10px;">
                         <div class="row">
-                            <div class="col-xs-12 col-sm-2 col-md-2 text-row">
+                            <div class="col-xs-3 col-sm-2 col-md-2 text-row">
                                 Word Filtering
                             </div>
-                            <div class="col-xs-8 col-sm-2">
+                            <div class="col-xs-2 col-sm-1">
+                                <select name="filter_frequency" id="filter_frequency" class="form-control" style="width: auto;">
+                                    <option>25</option>
+                                    <option>50</option>
+                                    <option>75</option>
+                                    <option selected>100</option>
+                                    <option>125</option>
+                                    <option>150</option>
+                                    <option>175</option>
+                                    <option>200</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-6 col-sm-2">
                                 <div class="btn-group-vertical" role="group" data-toggle="buttons" id="colloc_filter_choice">
                                     <label class="btn btn-primary active" id="colloc-filter-frequency">
                                         <input type="radio" name="colloc_filter_choice" value="frequency" checked="checked">Most frequent terms
@@ -153,18 +165,6 @@
                                         <input type="radio" name="colloc_filter_choice" value="nofilter">No filtering
                                     </label>
                                 </div>
-                            </div>
-                            <div class="col-xs-4 col-sm-2">
-                                <select name="filter_frequency" id="filter_frequency" class="form-control" style="margin-left: 10px; width: auto;">
-                                    <option>25</option>
-                                    <option>50</option>
-                                    <option>75</option>
-                                    <option selected>100</option>
-                                    <option>125</option>
-                                    <option>150</option>
-                                    <option>175</option>
-                                    <option>200</option>
-                                </select>
                             </div>
                         </div>
                     </div>
