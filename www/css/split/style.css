@@ -318,3 +318,11 @@ a.sidebar-option:hover {
 .progress {
 	display: none;
 }
+
+/* Syntax modal styling */
+#syntax ul {
+	margin-left: 20px;
+}
+#syntax li {
+	list-style-type: disc;
+}

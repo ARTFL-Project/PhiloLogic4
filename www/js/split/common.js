@@ -99,6 +99,11 @@ $(document).ready(function() {
                 $('#year_interval label').removeClass('active');
                 $('#year_interval input[name=year_interval][value=' + value + ']').prop('checked', true);
                 $('#year_interval input[name=year_interval][value=' + value + ']').parent().addClass('active');
+            } else if (key == "colloc_filter_choice") {
+                $('#colloc_filter_choice').removeAttr('checked');
+                $('#colloc_filter_choice label').removeClass('active');
+                $('#colloc_filter_choice input[name=colloc_filter_choice][value=' + value + ']').prop('checked', true);
+                $('#colloc_filter_choice input[name=colloc_filter_choice][value=' + value + ']').parent().addClass('active');
             }
             else if (key == 'field') {
                 $('select[name=' + key + ']').val(value);
@@ -210,14 +215,6 @@ $(document).ready(function() {
             $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
         });
     }
-    
-    // Show/Hide value selection in filtering on most common words in collocations
-    $('#colloc-filter-frequency').on('click touchstart', function() {
-        $('#filter-frequency').velocity('fadeIn', {duration: 200});
-    });
-    $('#colloc-filter-stopwords, #colloc-no-filter').on('click touchstart', function() {
-        $('#filter-frequency').velocity('fadeOut', {duration: 200});
-    });
     
     // Export results handler
     $('#export-buttons button').click(function() {

@@ -137,32 +137,34 @@
                     <div class="col-xs-12" style="margin-top: 10px;">
                         <div class="row">
                             <div class="col-xs-12 col-sm-2 col-md-2 text-row">
-                                Collocate Filtering
+                                Word Filtering
                             </div>
-                            <div class="col-xs-12 col-sm-10 col-md-10">
-                                <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-primary active" id="colloc-no-filter">
-                                        <input type="radio" name="colloc_filter_choice" value="nofilter" checked="checked">No filtering
+                            <div class="col-xs-8 col-sm-2">
+                                <div class="btn-group-vertical" role="group" data-toggle="buttons" id="colloc_filter_choice">
+                                    <label class="btn btn-primary active" id="colloc-filter-frequency">
+                                        <input type="radio" name="colloc_filter_choice" value="frequency" checked="checked">Most frequent terms
                                     </label>
-                                    % if config.stopwords:
+                                     % if config.stopwords:
                                         <label class="btn btn-primary" id="colloc-filter-stopwords">
                                             <input type="radio" name="colloc_filter_choice" value="stopwords">Stopwords
                                         </label>
                                     % endif
-                                    <label class="btn btn-primary" id="colloc-filter-frequency">
-                                        <input type="radio" name="colloc_filter_choice" value="frequency">Most frequent terms
+                                    <label class="btn btn-primary" id="colloc-no-filter">
+                                        <input type="radio" name="colloc_filter_choice" value="nofilter">No filtering
                                     </label>
-                                    <select name="filter_frequency" id="filter-frequency" class="form-control" style="margin-left: 10px;width: auto;display: none;">
-                                        <option>25</option>
-                                        <option>50</option>
-                                        <option>75</option>
-                                        <option selected>100</option>
-                                        <option>125</option>
-                                        <option>150</option>
-                                        <option>175</option>
-                                        <option>200</option>
-                                    </select>
                                 </div>
+                            </div>
+                            <div class="col-xs-4 col-sm-2">
+                                <select name="filter_frequency" id="filter_frequency" class="form-control" style="margin-left: 10px; width: auto;">
+                                    <option>25</option>
+                                    <option>50</option>
+                                    <option>75</option>
+                                    <option selected>100</option>
+                                    <option>125</option>
+                                    <option>150</option>
+                                    <option>175</option>
+                                    <option>200</option>
+                                </select>
                             </div>
                         </div>
                     </div>
