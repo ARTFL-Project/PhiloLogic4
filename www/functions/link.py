@@ -58,9 +58,14 @@ def make_absolute_object_link(config, id, bytes = []):
         href += byte_query(bytes)
     return href
     
-def make_absolute_query_link(db,**params):
-    """ Takes a dictionary of query parameters as produced by parse_cgi, and returns an absolute URL representation of such. """
-    pass
+def make_absolute_query_link(config, params, script_name="dispatcher.py", **extra_params):
+    """ Takes a dictionary of query parameters as produced by WSGIHandler, and returns an absolute URL representation of such. """
+    params = dict([i for i in params])
+    for k, v in extra_params.iteritems():
+        params[k] = v
+    query_string = url_encode(params.items())
+    href = config.db_url + "/%s?%s" % (script_name, query_string)
+    return href
     
 def byte_query(hit_bytes):
     """This is used for navigating concordance results and highlighting hits"""

@@ -42,18 +42,25 @@ def render_collocation(hits, db, q, config):
     return f.render_template(collocation=collocation_object, query_string=q.query_string, biblio_criteria=biblio_criteria,
                              word_num=q.word_num, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
-def fetch_collocation(hits, q, db, config, word_filter=True, filter_num=100, full_report=True, stopwords=True):
+def fetch_collocation(hits, q, db, config):
     collocation_object = {"query": dict([i for i in q]), "results_length": len(hits)}
     
     length = config['concordance_length']
-    within_x_words = int(q['word_num'])
+    try:
+        within_x_words = int(q['word_num'])
+    except ValueError: ## Getting an empty string since the keyword is not specificed in the URL
+        within_x_words = 5
     
-    filter_list = build_filter_list(word_filter, stopwords, filter_num, q, config.db_path)
+    if q.colloc_filter_choice == "nofilter":
+        filter_list = []
+    else:
+        filter_list = build_filter_list(q, config)
+        
     
     ## start going though hits ##
-    left_collocates = defaultdict(int)
-    right_collocates = defaultdict(int)
-    all_collocates = defaultdict(int)
+    left_collocates = {}
+    right_collocates = {}
+    all_collocates = {}
     
     count = 0
     for hit in hits[q.interval_start:q.interval_end]:
@@ -61,13 +68,25 @@ def fetch_collocation(hits, q, db, config, word_filter=True, filter_num=100, ful
         left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
         right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)
         
-        for l_word in left_words:
-            left_collocates[l_word] += 1
-            all_collocates[l_word] += 1 
+        for left_word in left_words:
+            try:
+                left_collocates[left_word]['count'] += 1
+            except KeyError:
+                left_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="left", collocate=left_word.encode('utf-8'))}
+            try:
+                all_collocates[left_word]['count'] += 1
+            except KeyError:
+                all_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="all", collocate=left_word.encode('utf-8'))}
 
-        for r_word in right_words:
-            right_collocates[r_word] += 1
-            all_collocates[r_word] += 1  
+        for right_word in right_words:
+            try:
+                right_collocates[right_word]['count'] += 1
+            except KeyError:
+                right_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="right", collocate=right_word.encode('utf-8'))}
+            try:
+                all_collocates[right_word]['count'] += 1
+            except KeyError:
+                all_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="all", collocate=right_word.encode('utf-8'))}
     
     collocation_object['all_collocates'] = all_collocates
     collocation_object['left_collocates'] = left_collocates
@@ -75,31 +94,23 @@ def fetch_collocation(hits, q, db, config, word_filter=True, filter_num=100, ful
     
     return collocation_object
 
-def build_filter_list(word_filter, stopwords, filter_num, q, path):
-    ## set up filtering with stopwords or 100 most frequent terms ##
+def build_filter_list(q, config):
+    ## set up filtering with stopwords or most frequent terms ##
+    if config.stopwords and q.colloc_filter_choice == "stopwords":
+        filter_file = open(config.db_path + '/data/stopwords.txt')
+        filter_num = float("inf")
+    else:
+        filter_file = open(config.db_path + '/data/frequencies/word_frequencies')
+        filter_num = int(q.filter_frequency)
     filter_list = set([q['q']])
-    if word_filter:
-        if stopwords:
-            filter_list_path = path + '/data/stopwords.txt'
-            if os.path.isfile(filter_list_path):
-                filter_words_file = open(filter_list_path)
-                filter_num = float("inf")
-            else:
-                filter_list_path = path + '/data/frequencies/word_frequencies'
-                filter_words_file = open(filter_list_path)
-        else:
-            filter_list_path = path + '/data/frequencies/word_frequencies'
-            filter_words_file = open(filter_list_path)
-        line_count = 0 
-        for line in filter_words_file:
-            line_count += 1
-            try:
-                word = line.split()[0]
-            except IndexError:
-                continue
-            filter_list.add(word.decode('utf-8', 'ignore'))
-            if line_count > filter_num:
-                break
+    for line_count, line in enumerate(filter_file):
+        if line_count == filter_num:
+            break
+        try:
+            word = line.split()[0]
+        except IndexError:
+            continue
+        filter_list.add(word.decode('utf-8', 'ignore'))
     return filter_list
 
 def split_concordance(hit, length, path):
@@ -134,11 +145,6 @@ def tokenize(text, filter_list, within_x_words, direction, db):
     return word_list
 
 def filter(word_list, filter_list, within_x_words):
-
-    ## this code currently presumes filtering -- I append only non-filter words ##
-    ## also, I check to make sure there are actual characters in my word -- no empties, please ##
-    ## character set can be extended, of course ##
-
     words_to_pass = []
     for word in word_list[:within_x_words]:
         if word not in filter_list and word_identifier.search(word):
