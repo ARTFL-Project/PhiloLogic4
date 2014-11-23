@@ -47,7 +47,7 @@ def handle_dates(q, db):
     
 
 def render_time_series(hits, db, q, config):
-    biblio_criteria = f.biblio_criteria(q, config, time_series=True)
+    biblio_criteria = f.biblio_criteria(q, config)
     time_series_object = generate_time_series(q, db, hits)
     return f.render_template(time_series=time_series_object,db=db,template_name='time_series.mako',json=json,
                              query_string=q.query_string, biblio_criteria=biblio_criteria, config=config, report="time_series")

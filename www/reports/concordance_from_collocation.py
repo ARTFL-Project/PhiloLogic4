@@ -40,13 +40,7 @@ def concordance_from_collocation(environ,start_response):
         start_response('200 OK',headers)
         hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
         concordance_object, pages = fetch_colloc_concordance(hits, request, db, config)
-        biblio_criteria = []
-        for k,v in request.metadata.iteritems():
-            if v:
-                if k in config.metadata_aliases:
-                    k = config.metadata_aliases[k]
-                biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b></span>' % (k.title(), v.decode('utf-8', 'ignore'), ))
-        biblio_criteria = ' '.join(biblio_criteria)
+        biblio_criteria = f.biblio_criteria(request, config)
         return f.render_template(concordance=concordance_object,pages=pages,query_string=request.query_string,config=config,report="concordance_from_collocation",
                                  biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako")
         

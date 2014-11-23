@@ -79,10 +79,10 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
     var initial_end = interval_end;
     if (interval_start === 0) {
         interval_start = 3000;
-        interval_end = 23000;
+        interval_end = 13000;
     } else {
-        interval_start += 20000;
-        interval_end += 20000;
+        interval_start += 10000;
+        interval_end += 10000;
     }
     if (initial_end < total_results) {
         var script_call = script + "&interval_start=" + interval_start + "&interval_end=" + interval_end;
@@ -294,8 +294,7 @@ function drawFromData(data, interval, frequency_type) {
                 $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences<br>between ' + year_to_display);
             } else {
                 $('.graph_bar').eq(i).attr('title', Math.round(count, false) + ' occurrences per 1,000,000 words<br>between ' + year_to_display);
-            }
-            
+            }  
         }
         if (count > max_count) {
             max_count = count;
@@ -311,7 +310,7 @@ function drawFromData(data, interval, frequency_type) {
     } else {
         var count = 0;
         $('.graph_years').eq(0).show();
-        var num = truncate($('.graph_years').length / 10);
+        var num = parseInt($('.graph_years').length / 10);
         $('.graph_years').each(function() {
             count += 1;
             if (count == num) {
@@ -325,14 +324,15 @@ function drawFromData(data, interval, frequency_type) {
     var multiplier = (chart_height - 10) / max_count; 
     var max_height = 0;
     
+    var delay_anim = 0
     $('.graph_bar').each(function() {
         var count = $(this).data('count');
         var height = count * multiplier;
+        delay_anim += 10;
         if (height > max_height) {
             max_height = height;
         }
-        $(this).attr('data-height', height)
-        $(this).eq(0).velocity({'height': height + 'px'}, {duration: 300, easing: "easeOut"});
+        $(this).eq(0).velocity({'height': height + 'px'}, {delay: delay_anim, duration: 200, easing: "easeOutQuad"});
     });
     
     var top_line = (chart_height - 10) / chart_height * 100;
@@ -364,9 +364,4 @@ function adjustWidth(elem_num) {
     var separation_margin = 1 * elem_num;
     var bar_width = (container_width - separation_margin) / elem_num;
     return bar_width;
-}
-
-function truncate(num) {
-    var new_num = String(num).replace(/(\d+).*/, '$1');
-    return parseInt(new_num);  
 }
