@@ -42,7 +42,7 @@
                                         <span id="tip">?</span><span id="tip-text">Tips</span>
                                     </button>
                                 </span>
-                                <input type='text' name='q' id='q' class="form-control" data-script="${config.db_url + '/scripts/term_list.py'}">
+                                <input type='text' name='q' id='q' class="form-control" data-script="${config.db_url + '/scripts/autocomplete_term.py'}">
                                 <span class="input-group-btn">
                                     <button type="submit" class="btn btn-primary" id="button-search">
                                         <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
@@ -88,7 +88,7 @@
                         <span style="padding-left: 10px">words in the same sentence</span>
                     </div>
                 </div>
-                <div id="metadata_fields" data-script="${config.db_url + '/scripts/metadata_list.py?field='}">
+                <div id="metadata_fields" data-script="${config.db_url + '/scripts/autocomplete_metadata.py?field='}">
                     % for facet in config.metadata:
                         <%
                         if facet in config.metadata_aliases:

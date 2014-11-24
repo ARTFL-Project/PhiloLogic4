@@ -15,7 +15,7 @@
                 <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
                     Export results
                 </button>
-                <div id="search_arguments" data-script="${config.db_url + '/scripts/get_total_results.py?' + query_string}">
+                <div id="search_arguments" data-script="${ajax['total']}">
                     Displaying the top 100 collocates for <span id="colloc_hits">${collocation['results_length'] or "..."}</span> occurrences of <b>${collocation['query']['q'].decode('utf-8', 'ignore')}</b><br>
                     Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
                 </div>
@@ -43,7 +43,7 @@
             </div>
         </div>
         <div class="results_container">
-            <div id='philologic_collocation' class="row" data-script="${config.db_url + '/scripts/get_collocation.py?' + query_string}" data-hits-length="${collocation['results_length']}" style="display: none">
+            <div id='philologic_collocation' class="row" data-script="${ajax['colloc']}" data-hits-length="${collocation['results_length']}" style="display: none">
                 <div class="col-xs-12 col-sm-3 col-sm-push-9 col-md-4 col-md-push-8">
                     <div id="word_cloud" class="word_cloud">
                         <div id="collocate_counts" class="collocation_counts">

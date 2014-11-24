@@ -328,11 +328,11 @@ function drawFromData(data, interval, frequency_type) {
     $('.graph_bar').each(function() {
         var count = $(this).data('count');
         var height = count * multiplier;
-        delay_anim += 10;
+        delay_anim += 5;
         if (height > max_height) {
             max_height = height;
         }
-        $(this).eq(0).velocity({'height': height + 'px'}, {delay: delay_anim, duration: 200, easing: "easeOutQuad"});
+        $(this).eq(0).velocity({'height': height + 'px'}, {delay: delay_anim, duration: 250, easing: "easeOutQuad"});
     });
     
     var top_line = (chart_height - 10) / chart_height * 100;
