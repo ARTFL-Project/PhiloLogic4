@@ -26,9 +26,19 @@
             </div>
             <div style="padding-left: 15px;">
                 % if collocation['query']['colloc_filter_choice'] == "stopwords":
-                    Common function words are being filtered from this report.
+                    <span class="filter-list">Common function words</span> are being filtered from this report.
                 % elif collocation['query']['colloc_filter_choice'] == "frequency":
-                    The ${collocation['query']['filter_frequency']} most common words are being filtered from this report.
+                    <span class="filter-list">The ${collocation['query']['filter_frequency']} most common words</span> are being filtered from this report.
+                % endif
+                % if collocation['filter_list']:
+                    <div class="panel panel-default" id="filter-list">
+                        <button type="button" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-remove-circle"></span></button>
+                        <ol>
+                        % for word in collocation['filter_list']:
+                            <li>${word}</li>
+                        % endfor
+                        </ol>
+                    </div>
                 % endif
             </div>
         </div>

@@ -27,7 +27,14 @@ $(document).ready(function() {
         activateLinks();
         $('#philologic_collocation').velocity('fadeIn', {duration: 200});
     }
-
+    
+    $('.filter-list').on("click touchstart", function() {
+        $('#filter-list').velocity('fadeIn', {duration: 200});
+    });
+    $('#filter-list button').on("click touchstart", function() {
+        $('#filter-list').velocity('fadeOut', {duration: 200});
+    });
+    
 });
 
 

@@ -36,7 +36,7 @@ def render_bibliography(b, q, hits, config, start_response):
                              pages=pages, biblio_criteria=biblio_criteria,config=config, report="bibliography")
     
 def bibligraphy_results(db, q, config):
-    if q["q"] == "":
+    if q.no_metadata:
         hits = db.get_all(db.locals['default_object_level'])
     else:
         hits = db.query(**q.metadata)

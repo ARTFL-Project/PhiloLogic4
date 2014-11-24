@@ -38,9 +38,10 @@ def collocation(environ,start_response):
     
 def render_collocation(hits, db, q, config):
     collocation_object = fetch_collocation(hits, q, db, config)
+    filter_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_filter_list.py")
     biblio_criteria = f.biblio_criteria(q, config)
     return f.render_template(collocation=collocation_object, query_string=q.query_string, biblio_criteria=biblio_criteria,
-                             word_num=q.word_num, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
+                             word_num=q.word_num, filter_script=filter_script, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
 def fetch_collocation(hits, q, db, config):
     collocation_object = {"query": dict([i for i in q]), "results_length": len(hits)}
@@ -55,6 +56,7 @@ def fetch_collocation(hits, q, db, config):
         filter_list = []
     else:
         filter_list = build_filter_list(q, config)
+    collocation_object['filter_list'] = filter_list
         
     
     ## start going though hits ##
@@ -97,7 +99,7 @@ def fetch_collocation(hits, q, db, config):
 def build_filter_list(q, config):
     ## set up filtering with stopwords or most frequent terms ##
     if config.stopwords and q.colloc_filter_choice == "stopwords":
-        filter_file = open(config.db_path + '/data/stopwords.txt')
+        filter_file = open(config.stopwords)
         filter_num = float("inf")
     else:
         filter_file = open(config.db_path + '/data/frequencies/word_frequencies')
