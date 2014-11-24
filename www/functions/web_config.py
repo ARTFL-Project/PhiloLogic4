@@ -46,6 +46,10 @@ class WebConfig(object):
             elif not config_option and item == "landing_page_browsing":
                 if "start" not in config_option["date"] or "end" not in config_option["date"] or "interval" not in config_option["date"]:
                     config_option["date"] = {}
+            if item == "stopwords":
+                config_option = os.path.join(self.db_path, "data", config_option)
+                if not os.access(config_option, os.R_OK):
+                    config_option = ''
         except KeyError:
             config_option = []
         return config_option

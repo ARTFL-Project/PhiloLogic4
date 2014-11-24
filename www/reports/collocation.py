@@ -32,15 +32,23 @@ def collocation(environ,start_response):
     if request.no_q:
         return r.fetch_bibliography(db, request, config, start_response)
     hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
-    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-    start_response('200 OK',headers)
-    return render_collocation(hits, db, request, config)
+    collocation_object = fetch_collocation(hits, request, db, config)
+    if request.format == "json":
+        headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+        start_response('200 OK',headers)
+        return json.dumps(collocation_object)
+    else:
+        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+        start_response('200 OK',headers)
+        return render_collocation(collocation_object, request, config)
     
-def render_collocation(hits, db, q, config):
-    collocation_object = fetch_collocation(hits, q, db, config)
+def render_collocation(collocation_object, q, config):
+    colloc_script = f.link.make_absolute_query_link(config, q, format="json")
+    total_script = f.link.make_absolute_query_link(config, q, script_name="scripts/get_total_results.py")
+    ajax_scripts = {"colloc": colloc_script, "total": total_script}
     biblio_criteria = f.biblio_criteria(q, config)
     return f.render_template(collocation=collocation_object, query_string=q.query_string, biblio_criteria=biblio_criteria,
-                             word_num=q.word_num, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
+                             word_num=q.word_num, ajax=ajax_scripts, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
 def fetch_collocation(hits, q, db, config):
     collocation_object = {"query": dict([i for i in q]), "results_length": len(hits)}
@@ -55,6 +63,7 @@ def fetch_collocation(hits, q, db, config):
         filter_list = []
     else:
         filter_list = build_filter_list(q, config)
+    collocation_object['filter_list'] = list(filter_list)
         
     
     ## start going though hits ##
@@ -97,7 +106,7 @@ def fetch_collocation(hits, q, db, config):
 def build_filter_list(q, config):
     ## set up filtering with stopwords or most frequent terms ##
     if config.stopwords and q.colloc_filter_choice == "stopwords":
-        filter_file = open(config.db_path + '/data/stopwords.txt')
+        filter_file = open(config.stopwords)
         filter_num = float("inf")
     else:
         filter_file = open(config.db_path + '/data/frequencies/word_frequencies')

@@ -7,7 +7,7 @@
 % endif
 <div class="container-fluid" id='philologic_response'>
     % if not config.dictionary:
-        <div class="row" id="landingGroup" data-script="${config.db_url + '/scripts/landing_page_content.py?landing_page_content_type='}">
+        <div class="row" id="landingGroup" data-script="${config.db_url + '/scripts/get_landing_page_content.py?landing_page_content_type='}">
             % if config.landing_page_browsing["author"]:
                 <div class="col-xs-12 col-sm-6" id="col-author">
                     <div class="panel panel-default">

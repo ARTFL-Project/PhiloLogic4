@@ -1,13 +1,8 @@
 #!/usr/bin/env python
 
-import urllib
-from wsgiref.util import shift_path_info
 import urlparse
-import re
 import sys
-import os
 from philologic.DB import DB
-from query_parser import query_parser
 
 class WSGIHandler(object):
     def __init__(self,db,environ):

@@ -22,11 +22,16 @@ def time_series(environ,start_response):
     if request.no_q:
         return r.fetch_bibliography(db, request, config, start_response)
     else:
-        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-        start_response('200 OK',headers)
         request = handle_dates(request, db)
         hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
-        return render_time_series(hits, db, request, config)
+        time_series_object = generate_time_series(request, db, hits)
+        if request['format'] == "json":
+            headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+            start_response('200 OK',headers)
+            return json.dumps(time_series_object)
+        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+        start_response('200 OK',headers)
+        return render_time_series(time_series_object, request, config)
         
 def handle_dates(q, db):
     c = db.dbh.cursor()
@@ -46,11 +51,11 @@ def handle_dates(q, db):
     return q
     
 
-def render_time_series(hits, db, q, config):
-    biblio_criteria = f.biblio_criteria(q, config, time_series=True)
-    time_series_object = generate_time_series(q, db, hits)
-    return f.render_template(time_series=time_series_object,db=db,template_name='time_series.mako',json=json,
-                             query_string=q.query_string, biblio_criteria=biblio_criteria, config=config, report="time_series")
+def render_time_series(time_series_object, q, config):
+    biblio_criteria = f.biblio_criteria(q, config)
+    ajax_script = f.link.make_absolute_query_link(config, q, format="json")
+    return f.render_template(time_series=time_series_object,template_name='time_series.mako',json=json,
+                             query_string=q.query_string, ajax=ajax_script, biblio_criteria=biblio_criteria, config=config, report="time_series")
 
 def generate_time_series(q, db, hits):    
     """reads through a hitlist to generate a time_series_object"""

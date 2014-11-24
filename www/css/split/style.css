@@ -118,6 +118,24 @@ li {
 	text-decoration: none;
 	cursor: text;
 }
+.filter-list:hover {
+	cursor: pointer;
+}
+#filter-list {
+	display: none;
+	position: absolute;
+	z-index: 100;
+	padding: 20px;
+	-webkit-column-count: 4;
+	-moz-column-count: 4;
+	column-count: 4;
+	box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.1);
+}
+#filter-list button {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
 
 /*Pages links*/
 .more {
@@ -317,4 +335,12 @@ a.sidebar-option:hover {
 /*Hide progress bar by default*/
 .progress {
 	display: none;
+}
+
+/* Syntax modal styling */
+#syntax ul {
+	margin-left: 20px;
+}
+#syntax li {
+	list-style-type: disc;
 }

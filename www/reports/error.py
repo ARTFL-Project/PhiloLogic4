@@ -44,7 +44,7 @@ def error_handling(db, config, q):
                        }
         return r.render_kwic(kwic_object, hits, config, q)
     elif report == "collocation":
-        return r.render_collocation(hits, db, q, config)
+        return r.render_collocation(hits, q, config)
     elif report == "time_series":
         q = r.handle_dates(q, db)
         return r.render_time_series(hits, db, q, config)
