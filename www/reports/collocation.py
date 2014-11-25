@@ -32,17 +32,25 @@ def collocation(environ,start_response):
     if request.no_q:
         return r.fetch_bibliography(db, request, config, start_response)
     hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
-    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-    start_response('200 OK',headers)
-    return render_collocation(hits, db, request, config)
+    collocation_object = fetch_collocation(hits, request, db, config)
+    if request.format == "json":
+        headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+        start_response('200 OK',headers)
+        return json.dumps(collocation_object)
+    else:
+        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+        start_response('200 OK',headers)
+        return render_collocation(collocation_object, request, config)
     
-def render_collocation(hits, db, q, config):
-    collocation_object = fetch_collocation(hits, q, db, config)
+def render_collocation(collocation_object, q, config):
+    colloc_script = f.link.make_absolute_query_link(config, q, format="json")
+    total_script = f.link.make_absolute_query_link(config, q, script_name="scripts/get_total_results.py")
+    ajax_scripts = {"colloc": colloc_script, "total": total_script}
     biblio_criteria = f.biblio_criteria(q, config)
     return f.render_template(collocation=collocation_object, query_string=q.query_string, biblio_criteria=biblio_criteria,
-                             word_num=q.word_num, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
+                             word_num=q.word_num, ajax=ajax_scripts, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
-def fetch_collocation(hits, q, db, config, word_filter=True, filter_num=100, stopwords=True):
+def fetch_collocation(hits, q, db, config):
     collocation_object = {"query": dict([i for i in q]), "results_length": len(hits)}
     
     length = config['concordance_length']
@@ -51,7 +59,12 @@ def fetch_collocation(hits, q, db, config, word_filter=True, filter_num=100, sto
     except ValueError: ## Getting an empty string since the keyword is not specificed in the URL
         within_x_words = 5
     
-    filter_list = build_filter_list(word_filter, stopwords, filter_num, q, config.db_path)
+    if q.colloc_filter_choice == "nofilter":
+        filter_list = []
+    else:
+        filter_list = build_filter_list(q, config)
+    collocation_object['filter_list'] = list(filter_list)
+        
     
     ## start going though hits ##
     left_collocates = {}
@@ -68,21 +81,21 @@ def fetch_collocation(hits, q, db, config, word_filter=True, filter_num=100, sto
             try:
                 left_collocates[left_word]['count'] += 1
             except KeyError:
-                left_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="left")}
+                left_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="left", collocate=left_word.encode('utf-8'))}
             try:
                 all_collocates[left_word]['count'] += 1
             except KeyError:
-                all_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="all")}
+                all_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="all", collocate=left_word.encode('utf-8'))}
 
         for right_word in right_words:
             try:
                 right_collocates[right_word]['count'] += 1
             except KeyError:
-                right_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="right")}
+                right_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="right", collocate=right_word.encode('utf-8'))}
             try:
                 all_collocates[right_word]['count'] += 1
             except KeyError:
-                all_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="all")}
+                all_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="all", collocate=right_word.encode('utf-8'))}
     
     collocation_object['all_collocates'] = all_collocates
     collocation_object['left_collocates'] = left_collocates
@@ -90,31 +103,23 @@ def fetch_collocation(hits, q, db, config, word_filter=True, filter_num=100, sto
     
     return collocation_object
 
-def build_filter_list(word_filter, stopwords, filter_num, q, path):
-    ## set up filtering with stopwords or 100 most frequent terms ##
+def build_filter_list(q, config):
+    ## set up filtering with stopwords or most frequent terms ##
+    if config.stopwords and q.colloc_filter_choice == "stopwords":
+        filter_file = open(config.stopwords)
+        filter_num = float("inf")
+    else:
+        filter_file = open(config.db_path + '/data/frequencies/word_frequencies')
+        filter_num = int(q.filter_frequency)
     filter_list = set([q['q']])
-    if word_filter:
-        if stopwords:
-            filter_list_path = path + '/data/stopwords.txt'
-            if os.path.isfile(filter_list_path):
-                filter_words_file = open(filter_list_path)
-                filter_num = float("inf")
-            else:
-                filter_list_path = path + '/data/frequencies/word_frequencies'
-                filter_words_file = open(filter_list_path)
-        else:
-            filter_list_path = path + '/data/frequencies/word_frequencies'
-            filter_words_file = open(filter_list_path)
-        line_count = 0 
-        for line in filter_words_file:
-            line_count += 1
-            try:
-                word = line.split()[0]
-            except IndexError:
-                continue
-            filter_list.add(word.decode('utf-8', 'ignore'))
-            if line_count > filter_num:
-                break
+    for line_count, line in enumerate(filter_file):
+        if line_count == filter_num:
+            break
+        try:
+            word = line.split()[0]
+        except IndexError:
+            continue
+        filter_list.add(word.decode('utf-8', 'ignore'))
     return filter_list
 
 def split_concordance(hit, length, path):

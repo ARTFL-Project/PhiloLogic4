@@ -564,6 +564,10 @@ class Loader(object):
         print >> web_config, "# If you wish to change these default values, you should configure them here like so:"
         print >> web_config, '# search_examples = {"author": "Jean-Jacques Rousseau", "title": "Du contrat social"}'
         print >> web_config, "search_examples = {}"
+        print >> web_config, "\n# The stopwords variable defines a file containing a list of words (one word per line)"
+        print >> web_config, "# used for filtering out words in the collocation report. The file must be located in this directory"
+        print >> web_config, "# and designated by its filename"
+        print >> web_config, "stopwords = 'stopwords.text'"
         print >> web_config, "\n# The time_series_intervals variable defines the year intervals in the time series report"
         print >> web_config, "# The only valid intervals are 1, 10, 50 and 100. Invalid intervals will be ignored."
         print >> web_config, "time_series_intervals = [10, 50, 100]"

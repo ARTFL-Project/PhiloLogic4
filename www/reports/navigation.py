@@ -35,7 +35,11 @@ def render_toc(obj, db, q, config):
 
 def render_text_object(obj, db, q, config):
     text_object = generate_text_object(obj, db, q, config)
-    return f.render_template(text_object=text_object, query_string=q.query_string, obj=obj, config=config, template_name='text_object.mako', report="navigation")
+    get_text_object = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_text_object.py")
+    get_table_of_contents = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_table_of_contents.py")
+    ajax_scripts = {"get_text_object": get_text_object, "get_table_of_contents": get_table_of_contents}
+    return f.render_template(text_object=text_object, query_string=q.query_string, obj=obj, ajax=ajax_scripts, config=config,
+                             template_name='text_object.mako', report="navigation")
 
 def nav_query(obj,db):
     conn = db.dbh
@@ -194,7 +198,7 @@ def generate_text_object(obj, db, q, config):
             metadata_fields[metadata] = obj[metadata]
     text_object['metadata_fields'] = metadata_fields
     doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
-    citation = biblio_citation(doc_link, metadata_fields)
+    citation = biblio_citation(obj, doc_link)
     text_object['citation'] = citation
     text = get_text_obj(obj, config.db_path, query_args=q['byte'])
     text_object['text'] = text

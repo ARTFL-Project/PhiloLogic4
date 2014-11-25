@@ -9,13 +9,14 @@
         % for facet in config["facets"]:
             <%
             facet_name = facet.keys()[0]
-            script = "%s/scripts/get_frequency.py?%s&frequency_field=%s" % (config.db_url, query_string, facet_name)
+            script = ajax["frequency"] + '&frequency_field=' + facet_name
             %>
             <li><a class="sidebar-option" id="side_opt_${facet_name}" data-value='${facet_name}' data-script="${script}">${facet_name}</a></li>
         % endfor
         % if report != 'bibliography':
             <li class="divider"></li>
             <li role="presentation" class="dropdown-header">Display collocates on</li>
+
             <% script = "%s/scripts/get_collocation.py?%s" % (config.db_url, query_string) %>
             <li><a class="sidebar-option" id="side_opt_collocate" data-value='all_collocates' data-display='both sides' data-script="${script}">Both sides</a></li>
             <li><a class="sidebar-option" id="side_opt_collocate_left" data-value='left_collocates' data-display='left side' data-script="${script}">On the left side</a></li>
@@ -33,6 +34,7 @@
 	            <li><a class="sidebar-option" id="side_opt_token" data-value="word_frequency_report_${facet_value}" data-display="${facet_value}" data-script="${script}">${facet_name}</a></li>
                  % endfor
 			%endif 
+
         % endif
     </ul>
     <button type="button" id="hide-sidebar-button" class="btn btn-primary" style="display: none";>

@@ -106,7 +106,7 @@ function retrieveTableOfContents(db_url) {
     var my_path = pathname.replace(/\/\d+.*$/, '/');
     var doc_id = pathname.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
     var philo_id = doc_id + ' 0 0 0 0 0 0'
-    var script = $('#toc-wrapper').data('script') + philo_id;
+    var script = $('#toc-wrapper').data('script') + '&philo_id=' + philo_id;
     $('#toc-container').hide();
     $.getJSON(script, function(data_object) {
         var html = '';
@@ -199,7 +199,7 @@ function retrieveObj(db_url){
     $("#prev-obj, #next-obj").on('click', function() {
         var my_path = db_url.replace(/\/\d+.*$/, '/');
         var philo_id = $(this).data('philoId');
-        var script = $('#all-content').data('script') + philo_id;
+        var script = $('#all-content').data('script') + '&philo_id=' + philo_id;
         var width = $(window).width() / 2 - 100;
         $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 250).css({"display": "block", "opacity": 1});
         $('#waiting').velocity({rotateZ: 7200}, {duration: 20000, easing: "linear"});
@@ -224,7 +224,7 @@ function TocLinkHandler(db_url) {
         e.preventDefault();
         var my_path = db_url.replace(/\/\d+.*$/, '/');
         var philo_id = $(this).attr('id').replace(/_/g, ' ');
-        var script = $('#all-content').data('script') + philo_id;
+        var script = $('#all-content').data('script') + '&philo_id=' + philo_id;
         var width = $(window).width() / 2 - 100;
         $("#waiting").css("margin-left", width).css('margin-top', $(window).scrollTop() + 250).css({"display": "block", "opacity": 1});
         $('#waiting').velocity({rotateZ: 7200}, {duration: 20000, easing: "linear"});

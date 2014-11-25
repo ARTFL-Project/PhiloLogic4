@@ -99,6 +99,11 @@ $(document).ready(function() {
                 $('#year_interval label').removeClass('active');
                 $('#year_interval input[name=year_interval][value=' + value + ']').prop('checked', true);
                 $('#year_interval input[name=year_interval][value=' + value + ']').parent().addClass('active');
+            } else if (key == "colloc_filter_choice") {
+                $('#colloc_filter_choice').removeAttr('checked');
+                $('#colloc_filter_choice label').removeClass('active');
+                $('#colloc_filter_choice input[name=colloc_filter_choice][value=' + value + ']').prop('checked', true);
+                $('#colloc_filter_choice input[name=colloc_filter_choice][value=' + value + ']').parent().addClass('active');
             }
             else if (key == 'field') {
                 $('select[name=' + key + ']').val(value);
@@ -217,14 +222,15 @@ $(document).ready(function() {
         $('#retrieve-message').show();
         var script = $('#export-buttons').data('script') + $(this).data('format');
         $('#export-results-file').show();
-        $('#retrieve-message').append('<img src="' + db_url + '/js/gif/spinner-round.gif"/>');
-        $.get(script, function(href) {
-            $('#export-download-link a').attr('href', href);
-            $('#retrieve-message').fadeOut(function() {
-                $('#retrieve-message img').remove();
-                $('#export-download-link').velocity('fadeIn');
-            });
-        })
+        window.open(script, '_blank');
+        //$('#retrieve-message').append('<img src="' + db_url + '/js/gif/spinner-round.gif"/>');
+        //$.get(script, function(href) {
+        //    $('#export-download-link a').attr('href', href);
+        //    $('#retrieve-message').fadeOut(function() {
+        //        $('#retrieve-message img').remove();
+        //        $('#export-download-link').velocity('fadeIn');
+        //    });
+        //})
     });
     
     // Keep footer at bottom and make sure content doesn't overlap footer
@@ -343,9 +349,9 @@ function autoCompleteMetadata(metadata, field, db_url) {
 
 // Display different search parameters based on the type of report used
 function showHide(value) {
-    $("#results_per_page, #collocation_num, #time_series_num, #date_range, #method, #metadata_fields").hide();
+    $("#results_per_page, #collocation-options, #time_series_num, #date_range, #method, #metadata_fields").hide();
     if (value == 'collocation') {
-        $("#collocation_num, #metadata_fields").show();
+        $("#collocation-options, #metadata_fields").show();
         $('#metadata_fields').find('tr').has('#date').show();
     }
     if (value == 'kwic' || value == "concordance" || value == "bibliography") {

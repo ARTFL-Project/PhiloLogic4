@@ -62,8 +62,11 @@ def concordance_results(db, q, config):
 def render_concordance(c, hits, config, q):
     biblio_criteria = f.biblio_criteria(q, config)
     pages = f.link.generate_page_links(c['description']['start'], q.results_per_page, q, hits)
+    collocation_script = f.link.make_absolute_query_link(config, q, report="collocation", format="json")
+    frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
+    ajax_scripts = {'frequency': frequency_script, 'collocation': collocation_script}
     return f.render_template(concordance=c, biblio_criteria=biblio_criteria, config=config, query_string=q.query_string,
-                             template_name="concordance.mako", report="concordance", pages=pages)
+                             ajax=ajax_scripts, template_name="concordance.mako", report="concordance", pages=pages)
 
 def citation_links(db, config, i):
     """ Returns a representation of a PhiloLogic object and all its ancestors
