@@ -6,6 +6,7 @@ import htmlentitydefs
 from BeautifulSoup import BeautifulStoneSoup as bss
 from philologic import TagCensus
 from optparse import OptionParser
+from lxml import etree
 
 #REQUIRES BeautifulSoup3.  BS4 breaks on Python recursion errors when it gets badly damaged texts.
 
@@ -115,6 +116,15 @@ def parse_command_line(argv):
 def remove_control_chars(s):
     return control_char_re.sub('', s)
 
+#### CUSTOM TAG REPLACEMENTS ####
+"""This is where you define custom tag replacements for your file
+For instance, to replace <sp> by <p>, you would do {"sp": "p"}
+See http://www.tei-c.org/Vault/P4/migrate.html for some guidelines to convert old XML/TEI to TEI P5
+If you wish to make changes to attributes, you should edit the lxml iter loop directly"""
+
+xml_tag_mapping = {}
+
+#################################
 
 if __name__ == '__main__':
     files, suffix, output_dir, debug, quiet = parse_command_line(sys.argv)
@@ -153,8 +163,6 @@ if __name__ == '__main__':
             fix_case[tag.lower()] = tag
             if census[tag]["empty"] != 0:
                 self_closing.append(tag)
-    #    print >> sys.stderr, self_closing
-    #    print >> sys.stderr, repr(fix_case)
         
         soup = bss(text,selfClosingTags=self_closing)
         for tag in soup.findAll():
@@ -163,6 +171,18 @@ if __name__ == '__main__':
                 
         file_contents = soup.prettify()
         file_contents = convert_remaining_entities(file_contents, quiet)
+        
+        try:
+            tree = etree.fromstring(file_contents)
+            for el in tree.iter():
+                ## Tags are defined as el.tag, so to change tag, you do: el.tag = "some_other_tag"
+                ## Attributes are contained in el.attrib where each attribute is a key. To change the type attribute you do: el.attrib['type'] = "some_other_type"
+                if el.tag in xml_tag_mapping: ## Check if the tag should be replaced according to the xml mapping dict
+                    el.tag = xml_tag_mapping[el.tag]
+            file_contents = etree.tostring(tree)
+        except:
+            print >> sys.stderr, "The clean-up script did not manage to fix all your XML issues"
+            print >> sys.stderr, 'Try running "xmllint -noout" on the output file to get a more complete error report'
 
         if output_dir:
             filename = output_dir + '/' + os.path.basename(filename) + suffix
