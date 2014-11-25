@@ -1,32 +1,10 @@
 "use strict";
 
 $(document).ready(function() {
-    
-    
     if (webConfig.dictionary == false) { // default
-        //Handle click on button
-        $('#landingGroup button').on('touchstart click', function() {
-            var selected = $(this).attr('id');
-            $('#landingGroup button').removeClass('active');
-            $(this).addClass('active');
-            if (selected == "authorGroup") {
-                $("#landing-page-authors").show();
-                $("#landing-page-titles").hide()
-                $("#landing-page-years").hide();
-            } else if (selected == "titleGroup") {
-                $("#landing-page-titles").show();
-                $("#landing-page-authors").hide();
-                $("#landing-page-years").hide();
-            } else if (selected == "yearGroup") {
-                $("#landing-page-years").show();
-                $("#landing-page-authors").hide();
-                $("#landing-page-titles").hide();
-            }
-        });
-        
-        //Ajax calls to pull content data
         $('#author-range-selectors td, #title-range-selectors td, #year-range-selectors td').click(function() {
             var range = $(this).data('range');
+            console.log(range)
             var type = $(this).parents('table').data('type');
             var script = $('#landingGroup').data('script') + type + "&range=" + range;
             var contentId = type + '-' + range;

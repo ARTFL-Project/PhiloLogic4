@@ -14,19 +14,19 @@
             Back to top
         </button>
         <div class="col-xs-12" style="text-align: center;">
-            <div class="btn-group-sm" style="display: inline-block;">
+            <div class="btn-group-sm" role="group">
                 <button type="button" class="btn btn-primary" id="prev-obj" data-philo-id="${text_object['prev']}">
-                    &lt;
+                    <span class="glyphicon glyphicon-chevron-left"></span>
                 </button>
                 <button type="button" class="btn btn-primary" id="show-toc" style="padding-left: 30px; padding-right: 30px" disabled="disabled">Table of contents</button>
                 <button type="button" class="btn btn-primary" id="next-obj" data-philo-id="${text_object['next']}">
-                    &gt;
+                    <span class="glyphicon glyphicon-chevron-right"></span>
                 </button>
             </div>
         </div>
     </div>
-    <div class="row" id="all-content" data-script="${config.db_url + '/scripts/go_to_obj.py?philo_id='}">
-        <div id="toc-wrapper" class="col-xs-4" data-script="${config.db_url + '/scripts/get_table_of_contents.py?philo_id='}">
+    <div class="row" id="all-content" data-script="${ajax['get_text_object']}">
+        <div id="toc-wrapper" class="col-xs-4" data-script="${ajax['get_table_of_contents']}">
             <div class="panel panel-default" id="toc-container" data-status="closed">
                 <div id="toc-titlebar">
                     <button type="button" class="btn btn-primary btn-xs pull-right" id="hide-toc">

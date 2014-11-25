@@ -42,7 +42,7 @@
                                         <span id="tip">?</span><span id="tip-text">Tips</span>
                                     </button>
                                 </span>
-                                <input type='text' name='q' id='q' class="form-control" data-script="${config.db_url + '/scripts/term_list.py'}">
+                                <input type='text' name='q' id='q' class="form-control" data-script="${config.db_url + '/scripts/autocomplete_term.py'}">
                                 <span class="input-group-btn">
                                     <button type="submit" class="btn btn-primary" id="button-search">
                                         <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
@@ -88,7 +88,7 @@
                         <span style="padding-left: 10px">words in the same sentence</span>
                     </div>
                 </div>
-                <div id="metadata_fields" data-script="${config.db_url + '/scripts/metadata_list.py?field='}">
+                <div id="metadata_fields" data-script="${config.db_url + '/scripts/autocomplete_metadata.py?field='}">
                     % for facet in config.metadata:
                         <%
                         if facet in config.metadata_aliases:
@@ -112,11 +112,11 @@
                 <div id="collocation-options" class="row">
                     <div class="col-xs-12">
                         <div class="row">
-                            <div class="col-xs-6 col-sm-2 col-md-2 text-row">
+                            <div class="col-xs-3 col-sm-2 col-md-2 text-row">
                                 Within
                             </div>
-                            <div class="col-xs-6 col-sm-1 col-md-1">
-                                <select name="word_num" id="word_num" class="form-control">
+                            <div class="col-xs-2 col-sm-1 col-md-1">
+                                <select name="word_num" id="word_num" class="form-control" style="width: auto;">
                                     <option>1</option>
                                     <option>2</option>
                                     <option>3</option>
@@ -129,23 +129,40 @@
                                     <option>10</option>
                                 </select>
                             </div>
-                            <div class="col-xs-12 col-sm-5 col-md-7 text-row">
+                            <div class="col-xs-7 col-sm-5 col-md-7 text-row">
                                 (1-10) words
                             </div>
                         </div>
                     </div>
                     <div class="col-xs-12" style="margin-top: 10px;">
                         <div class="row">
-                            <div class="col-xs-12 col-sm-2 col-md-2 text-row">
-                                Collocate Filtering
+                            <div class="col-xs-3 col-sm-2 col-md-2 text-row">
+                                Word Filtering
                             </div>
-                            <div class="col-xs-12 col-sm-10 col-md-10">
-                                <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-primary active">
-                                        <input type="radio" name="colloc-filtering" id="filter-stopwords" value='filter-stopwords' checked="checked">Stopwords
+                            <div class="col-xs-2 col-sm-1">
+                                <select name="filter_frequency" id="filter_frequency" class="form-control" style="width: auto;">
+                                    <option>25</option>
+                                    <option>50</option>
+                                    <option>75</option>
+                                    <option selected>100</option>
+                                    <option>125</option>
+                                    <option>150</option>
+                                    <option>175</option>
+                                    <option>200</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-6 col-sm-2">
+                                <div class="btn-group-vertical" role="group" data-toggle="buttons" id="colloc_filter_choice">
+                                    <label class="btn btn-primary active" id="colloc-filter-frequency">
+                                        <input type="radio" name="colloc_filter_choice" value="frequency" checked="checked">Most frequent terms
                                     </label>
-                                    <label class="btn btn-primary">
-                                        <input type="radio" name="colloc-filtering" id="filter-frequency" value='filter-frequency'>Most frequent terms
+                                     % if config.stopwords:
+                                        <label class="btn btn-primary" id="colloc-filter-stopwords">
+                                            <input type="radio" name="colloc_filter_choice" value="stopwords">Stopwords
+                                        </label>
+                                    % endif
+                                    <label class="btn btn-primary" id="colloc-no-filter">
+                                        <input type="radio" name="colloc_filter_choice" value="nofilter">No filtering
                                     </label>
                                 </div>
                             </div>

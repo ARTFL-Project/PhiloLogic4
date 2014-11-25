@@ -104,12 +104,6 @@
     padding-left: 2.9em;
 }
 
-
-#prev-obj, #next-obj {
-    font-weight: 700;
-    font-size: 120%;
-    padding: 1px 10px 2px;
-}
 #text-obj-content {
     display: inline-block;
     text-align: justify;

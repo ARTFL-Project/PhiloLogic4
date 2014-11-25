@@ -52,7 +52,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="results_container">
-                    <div id='time_series_report' style='display:none;' data-script="${config.db_url + '/scripts/time_series_fetcher.py?' + query_string}" data-status="json.dumps(time_series['results_done']})">
+                    <div id='time_series_report' style='display:none;' data-script="${ajax}" data-status="json.dumps(time_series['results_done']})">
                         <div id="chart" style="width: 900px; height: 500px;"></div>
                     </div>
                     <div id="test_time_series">

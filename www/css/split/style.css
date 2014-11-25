@@ -23,6 +23,23 @@
     border: 0px;
     border-radius: 0px;
 }
+.navbar-header {
+	width: 100%;
+	text-align: center;
+}
+.navbar-header a {
+	font-variant: small-caps;
+	float: none;
+	font-size: 1.8em;
+}
+.navbar-right {
+	font-size: .85em;
+	font-variant: small-caps;
+	margin-right: -10px;
+}
+.navbar-right a {
+	padding-left: 5px;
+}
 html, body {
     height:100%;
 }
@@ -118,6 +135,24 @@ li {
 	text-decoration: none;
 	cursor: text;
 }
+.filter-list:hover {
+	cursor: pointer;
+}
+#filter-list {
+	display: none;
+	position: absolute;
+	z-index: 100;
+	padding: 20px;
+	-webkit-column-count: 4;
+	-moz-column-count: 4;
+	column-count: 4;
+	box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.1);
+}
+#filter-list button {
+	position: absolute;
+	right: 5px;
+	top: 0;
+}
 
 /*Pages links*/
 .more {
@@ -179,14 +214,6 @@ li {
     padding: 5px;
     margin-top: 8px;
     line-height: 200%;
-}
-
-/* hack for inserted page links at top of object */
-b p.inserted-page {
-  display:inline;
-}
-s {
-    text-decoration: none;
 }
 
 .dot {
@@ -317,4 +344,12 @@ a.sidebar-option:hover {
 /*Hide progress bar by default*/
 .progress {
 	display: none;
+}
+
+/* Syntax modal styling */
+#syntax ul {
+	margin-left: 20px;
+}
+#syntax li {
+	list-style-type: disc;
 }
