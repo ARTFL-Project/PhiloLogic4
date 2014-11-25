@@ -20,14 +20,14 @@ class WSGIHandler(object):
         }
         
         ## Temporary fix for search term arguments before new core merge
-        method = self.method or "proxy"
-        arg = self.arg
+        method = self["method"] or "proxy"
+        arg = self["arg"]
         if method == "proxy":
             if not arg:
-                arg = self.arg_proxy
+                arg = self["arg_proxy"]
         elif method == "phrase":
             if not arg:
-                arg = self.arg_phrase
+                arg = self["arg_phrase"]
         elif method == "sentence" or method == "cooc":
             arg = "6"
         if not arg:
