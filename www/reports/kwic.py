@@ -32,8 +32,11 @@ def kwic(environ,start_response):
 def render_kwic(k, hits, config, q):
     biblio_criteria = f.biblio_criteria(q, config)
     pages = f.link.generate_page_links(k['description']['start'], q.results_per_page, q, hits)
+    collocation_script = f.link.make_absolute_query_link(config, q, report="collocation", format="json")
+    frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
+    ajax_scripts = {'frequency': frequency_script, 'collocation': collocation_script}
     return f.render_template(kwic=k, query_string=q.query_string, biblio_criteria=biblio_criteria,
-                             pages=pages, config=config, template_name='kwic.mako', report="kwic")
+                             ajax=ajax_scripts, pages=pages, config=config, template_name='kwic.mako', report="kwic")
 
 def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
     """ The link_to_hit keyword defines the text object to which the metadata link leads to"""
