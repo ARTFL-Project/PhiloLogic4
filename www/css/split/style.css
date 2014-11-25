@@ -23,6 +23,23 @@
     border: 0px;
     border-radius: 0px;
 }
+.navbar-header {
+	width: 100%;
+	text-align: center;
+}
+.navbar-header a {
+	font-variant: small-caps;
+	float: none;
+	font-size: 1.8em;
+}
+.navbar-right {
+	font-size: .85em;
+	font-variant: small-caps;
+	margin-right: -10px;
+}
+.navbar-right a {
+	padding-left: 5px;
+}
 html, body {
     height:100%;
 }
@@ -133,7 +150,7 @@ li {
 }
 #filter-list button {
 	position: absolute;
-	right: 0;
+	right: 5px;
 	top: 0;
 }
 
@@ -197,14 +214,6 @@ li {
     padding: 5px;
     margin-top: 8px;
     line-height: 200%;
-}
-
-/* hack for inserted page links at top of object */
-b p.inserted-page {
-  display:inline;
-}
-s {
-    text-decoration: none;
 }
 
 .dot {

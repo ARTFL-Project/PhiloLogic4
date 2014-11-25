@@ -14,13 +14,13 @@
             Back to top
         </button>
         <div class="col-xs-12" style="text-align: center;">
-            <div class="btn-group-sm" style="display: inline-block;">
+            <div class="btn-group-sm" role="group">
                 <button type="button" class="btn btn-primary" id="prev-obj" data-philo-id="${text_object['prev']}">
-                    &lt;
+                    <span class="glyphicon glyphicon-chevron-left"></span>
                 </button>
                 <button type="button" class="btn btn-primary" id="show-toc" style="padding-left: 30px; padding-right: 30px" disabled="disabled">Table of contents</button>
                 <button type="button" class="btn btn-primary" id="next-obj" data-philo-id="${text_object['next']}">
-                    &gt;
+                    <span class="glyphicon glyphicon-chevron-right"></span>
                 </button>
             </div>
         </div>

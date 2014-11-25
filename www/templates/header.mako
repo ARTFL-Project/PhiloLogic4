@@ -34,12 +34,12 @@
             <div id="header">
                 <div class="navbar navbar-inverse navbar-static-top" role="navigation">
                     <div class="container-fluid">
-                        <div class="navbar-header">
-                            <a href="${config.db_url}/" class="navbar-brand" style="font-size: 160%" title="${config.dbname.decode('utf-8', 'ignore')}">${config.dbname.decode('utf-8', 'ignore')}</a>
-                        </div>
                         <div class="navbar-right">
                             <a href="http://artfl-project.uchicago.edu">The ARTFL Project</a>
                             <a href="http://www.uchicago.edu">University of Chicago</a>
+                        </div>
+                        <div class="navbar-header">
+                            <a href="${config.db_url}/" class="navbar-brand" title="${config.dbname.decode('utf-8', 'ignore')}">${config.dbname.decode('utf-8', 'ignore')}</a>
                         </div>
                     </div>
                 </div>
