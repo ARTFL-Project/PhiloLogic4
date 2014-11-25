@@ -222,14 +222,15 @@ $(document).ready(function() {
         $('#retrieve-message').show();
         var script = $('#export-buttons').data('script') + $(this).data('format');
         $('#export-results-file').show();
-        $('#retrieve-message').append('<img src="' + db_url + '/js/gif/spinner-round.gif"/>');
-        $.get(script, function(href) {
-            $('#export-download-link a').attr('href', href);
-            $('#retrieve-message').fadeOut(function() {
-                $('#retrieve-message img').remove();
-                $('#export-download-link').velocity('fadeIn');
-            });
-        })
+        window.open(script, '_blank');
+        //$('#retrieve-message').append('<img src="' + db_url + '/js/gif/spinner-round.gif"/>');
+        //$.get(script, function(href) {
+        //    $('#export-download-link a').attr('href', href);
+        //    $('#retrieve-message').fadeOut(function() {
+        //        $('#retrieve-message img').remove();
+        //        $('#export-download-link').velocity('fadeIn');
+        //    });
+        //})
     });
     
     // Keep footer at bottom and make sure content doesn't overlap footer

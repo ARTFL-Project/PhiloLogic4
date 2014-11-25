@@ -32,7 +32,7 @@
                 % endif
                 % if collocation['filter_list']:
                     <div class="panel panel-default" id="filter-list">
-                        <button type="button" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-remove-circle"></span></button>
+                        <button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                         <ol>
                         % for word in collocation['filter_list']:
                             <li>${word}</li>
