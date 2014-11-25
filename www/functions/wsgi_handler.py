@@ -14,10 +14,27 @@ class WSGIHandler(object):
           "results_per_page":"25",
           "start":"0",
           "end":"25",
-          "arg":"0",          
+          #"arg":"0",          
           "interval_start":"0",
           "interval_end":"3000",
         }
+        
+        ## Temporary fix for search term arguments before new core merge
+        method = self["method"] or "proxy"
+        arg = self["arg"]
+        if method == "proxy":
+            if not arg:
+                arg = self["arg_proxy"]
+        elif method == "phrase":
+            if not arg:
+                arg = self["arg_phrase"]
+        elif method == "sentence" or method == "cooc":
+            arg = "6"
+        if not arg:
+            arg = 0
+        self.arg = arg
+        self.cgi['arg'] = [arg]
+        
         self.metadata_fields = db.locals["metadata_fields"]
         self.metadata = {}
         num_empty = 0
