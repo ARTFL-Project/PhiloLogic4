@@ -93,6 +93,7 @@ def concordance_citation(hit, citation_hrefs):
         citation = "%s <i>%s</i>" % (hit.author.strip(),title)
     else:
         citation = "<i>%s</i>" % title
+
     if hit.date:
         try:
             citation += " [%s]" % str(hit.date)
