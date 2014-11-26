@@ -11,7 +11,6 @@ css_files = {"landing_page.mako": ["split/style.css", "split/searchForm.css", "s
             "concordance.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
             "kwic.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
             "concordance_from_collocation.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
-            "word_property_filter.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
             "bibliography.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
             "collocation.mako": ["split/style.css", "split/searchForm.css", "split/%s" % theme],
             "time_series.mako": ["split/style.css", "split/searchForm.css", "split/timeSeries.css", "split/%s" % theme],
@@ -28,7 +27,6 @@ js_files = {"landing_page.mako": default_js + ["split/common.js", "split/landing
             "bibliography.mako": default_js + ["split/common.js", "plugins/jquery.slimscroll.min.js", "split/sidebar.js", "split/bibliography.js"],
             "text_object.mako": default_js + ["plugins/jquery.blueimp-gallery.min.js", "split/common.js", "plugins/jquery.scrollTo.min.js", "split/textObjectNavigation.js"],
             "concordance_from_collocation.mako": default_js + ["split/common.js", "split/concordanceFromCollocation.js"],
-            "word_property_filter.mako": default_js + ["split/common.js", "split/concordanceFromCollocation.js"],
             "t_o_c.mako": default_js + ["split/common.js", "split/toc.js"],
             "error.mako": default_js,
             "access_denied.mako": default_js}

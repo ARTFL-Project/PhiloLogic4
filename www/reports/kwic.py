@@ -34,7 +34,9 @@ def render_kwic(k, hits, config, q):
     pages = f.link.generate_page_links(k['description']['start'], q.results_per_page, q, hits)
     collocation_script = f.link.make_absolute_query_link(config, q, report="collocation", format="json")
     frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
-    ajax_scripts = {'frequency': frequency_script, 'collocation': collocation_script}
+    kwic_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/concordance_kwic_switcher.py")
+    concordance_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/concordance_kwic_switcher.py", report="concordance")
+    ajax_scripts = {"concordance": concordance_script, 'kwic': kwic_script, 'frequency': frequency_script, 'collocation': collocation_script}
     return f.render_template(kwic=k, query_string=q.query_string, biblio_criteria=biblio_criteria,
                              ajax=ajax_scripts, pages=pages, config=config, template_name='kwic.mako', report="kwic")
 
