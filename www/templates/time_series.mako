@@ -32,7 +32,7 @@
                             </span>
                         </div>
                     </div>
-                    <div class="progress" style="margin-left: 15px; margin-right: 15px">
+                    <div class="progress" style="margin-left: 15px; margin-right: 15px; margin-top: -10px;">
                         <div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" data-total="${time_series['results_length']}" style="width: 0%;">
                         </div>
                     </div>

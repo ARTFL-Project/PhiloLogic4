@@ -19,9 +19,13 @@ def generate_frequency(results, q, db, config):
     
     if isinstance(field, str):
         field = [field]
+        
+    ## Override default value of q.end for first batch of results
+    if q.end == 25:
+        q.end = 5000
      
     counts = defaultdict(int)
-    for hit in results[q.interval_start:q.interval_end]:
+    for hit in results[q.start:q.end]:
         key = generate_key(hit, field, db)
         counts[key] += 1
 

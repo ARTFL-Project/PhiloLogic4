@@ -46,7 +46,7 @@
             <div id="results_container" class="col-xs-12">
                 <ol id='philologic_concordance' data-more-context="${config.db_url + '/scripts/get_more_context.py?' + query_string}">
                     % for pos, i in enumerate(concordance['results']):
-                        <li class='philologic_occurrence panel panel-default'>
+                        <li class="philologic_occurrence panel panel-default">
                             <%
                              n = description['start'] + pos
                             %>

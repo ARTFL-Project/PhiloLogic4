@@ -1,8 +1,9 @@
 #footer {
-	margin-top: 40px;
+	margin-top: 30px;
 }
 #footer-content {
 	text-align: center;
+	margin-top: -10px;
 }
 .navbar-header {
 	width: 100%;
@@ -207,6 +208,9 @@ li {
 }
 #time_series_report {
     margin-left: -50px;
+}
+#time_series_buttons {
+	margin-top: -10px;
 }
 
 #search_arguments {

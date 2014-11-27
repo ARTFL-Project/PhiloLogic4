@@ -74,8 +74,12 @@ def generate_time_series(q, db, hits):
     
     absolute_count = defaultdict(int)
     date_counts = {}
-    print >> sys.stderr, "START %d, END %d" % (q.interval_start, q.interval_end)
-    for i in hits[q.interval_start:q.interval_end]:
+    
+    ## Override default value of q.end for first batch of results
+    if q.end == 25:
+        q.end = 3000
+    
+    for i in hits[q.start:q.end]:
         date = i.date
         try:
             if date:

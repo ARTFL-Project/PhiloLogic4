@@ -47,7 +47,7 @@ function update_colloc(db_url, total_results, results_len, colloc_start, colloc_
         colloc_start += 5000;
         colloc_end += 5000;
     }
-    var script_call = script + '&interval_start=' + colloc_start + '&interval_end=' + colloc_end;
+    var script_call = script + '&start=' + colloc_start + '&end=' + colloc_end;
     if (colloc_start <= results_len) {
         $.getJSON(script_call, function(data) {
             console.log("Total", total_results)

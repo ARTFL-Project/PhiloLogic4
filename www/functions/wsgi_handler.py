@@ -15,8 +15,6 @@ class WSGIHandler(object):
           "start":"0",
           "end":"25",
           #"arg":"0",          
-          "interval_start":"0",
-          "interval_end":"3000",
         }
         
         ## Temporary fix for search term arguments before new core merge
@@ -42,8 +40,6 @@ class WSGIHandler(object):
         self.start = int(self['start'])
         self.end = int(self['end'])
         self.results_per_page = int(self['results_per_page'])
-        self.interval_start = int(self['interval_start'])
-        self.interval_end = int(self['interval_end'])
         if self.start_date:
             self.start_date = int(self['start_date'])
         if self.end_date:
