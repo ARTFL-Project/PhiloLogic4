@@ -233,23 +233,7 @@ $(document).ready(function() {
         //})
     });
     
-    // Keep footer at bottom and make sure content doesn't overlap footer
-    //setTimeout(searchFormOverlap, 400); // delay to give time for the full height of the search form to be generated
-    $(window).resize(function() {
-        searchFormOverlap(); 
-    });
-    
 });
-
-function searchFormOverlap() {
-    var form_offset = $('#form_body').offset().top + $('#form_body').height();
-    var footer_offset = $('#footer').offset().top;
-    if (form_offset > footer_offset) {
-        $('#footer').css('top', form_offset + 20);
-    } else {
-        $('#footer').css('top', 'auto');
-    }
-}
 
 // Remove metadata criteria on click
 function metadataRemove() {
@@ -272,7 +256,6 @@ function metadataRemove() {
         });
     }
 }
-
 
 function autoCompleteWord(db_url) {
     $("#q").autocomplete({

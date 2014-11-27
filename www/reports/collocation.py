@@ -12,8 +12,6 @@ from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
-from collections import defaultdict
-from operator import itemgetter
 
 ## Precompiled regexes for performance
 left_truncate = re.compile (r"^\w+", re.U)
@@ -30,6 +28,7 @@ def collocation(environ,start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
     if request.no_q:
+        setattr(request, "report", "bibliography")
         return r.fetch_bibliography(db, request, config, start_response)
     hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
     collocation_object = fetch_collocation(hits, request, db, config)

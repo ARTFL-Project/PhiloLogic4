@@ -25,6 +25,7 @@ def concordance(environ,start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
     if request.no_q:
+        setattr(request, "report", "bibliography")
         return r.fetch_bibliography(db, request, config, start_response)
     else:
         concordance_object, hits = concordance_results(db, request, config)

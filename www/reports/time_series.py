@@ -20,6 +20,7 @@ def time_series(environ,start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
     if request.no_q:
+        setattr(request, "report", "bibliography")
         return r.fetch_bibliography(db, request, config, start_response)
     else:
         request = handle_dates(request, db)
