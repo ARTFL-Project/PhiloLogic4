@@ -18,7 +18,7 @@ $(document).ready(function() {
     $('#show-search-form').click(function() {
         $('#search_elements').css('z-index', 150);
         if ($(this).data('display') == "none") {
-            showMoreOptions("all");
+            showMoreOptions();
             $(this).data('display', 'block');
             $('#show-search-form').html('Hide search options');
         } else {
@@ -28,29 +28,13 @@ $(document).ready(function() {
         }
     });
     
-    $('#show-search-form').show();
-    showHide($('input[name=report]:checked', '#search').val());
-    
     // Handler for clicks on report tabs
     $('#report label').click(function() {
         var report = $(this).find('input').attr('id');
         if ($("#search_elements").css('display') != 'none') {
             showHide(report);
-            if (report != "frequencies") {
-                $("#search_elements")
-                    .velocity("fadeIn",
-                               {duration: 250, 'easing': 'easeIn'}
-                               );
-            }
-            showMoreOptions();
         } else {
             $("#show-search-form").data('display', 'block');
-            $('#show-search-form').html('Hide search options');
-            showHide(report);
-            if (report != "frequencies") {
-                $("#search_elements")
-                .velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
-            }
             showMoreOptions();
         }
     });
@@ -206,7 +190,7 @@ $(document).ready(function() {
         $("#back-to-full-search").click(function() {
             $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
             setTimeout(function() {
-                showMoreOptions("all");
+                showMoreOptions();
                 $("#show-search-form").data('display', 'block');
                 $('#show-search-form').html('Hide search options');
             }, 800);            
@@ -357,29 +341,18 @@ function showHide(value) {
 }
 
 //  Function to show or hide search options
-function showMoreOptions(display) {
-    var height = $("#wrapper").height() - 50;
-    if (display == "all") {
-        var report = $('#report label.active input').attr('id') || global_report;
-        showHide(report);
-        $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
-        
-    }
-    if (global_report != "landing_page") {
-        setTimeout(function() {$("#search_overlay").css({'top': '50px', 'opacity': 0.2, 'height': height})}, 250);
-    }
-    setTimeout(searchFormOverlap, 250);
+function showMoreOptions() {
+    var report = $('#report label.active input').attr('id') || global_report;
+    showHide(report);
+    $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn', complete: function() {
+        $("#search_overlay").velocity({opacity: .2}, {display: 'block', duration: 250});
+    }});
 }
 
 function hideSearchForm() {
-    $("#search_elements").velocity('slideUp', {duration: 250, easing: 'easeOut'});
-    setTimeout(function() {
-        $("#search_overlay").css({'opacity': 0});
-    }, 300);
-    setTimeout(function() {
-        $("#search_overlay").css('height', '0px');
-    }, 500);
-    setTimeout(searchFormOverlap, 250);
+    $("#search_elements").velocity('slideUp', {duration: 250, easing: 'easeOut', complete: function() {
+        $("#search_overlay").velocity({opacity: 0}, {display: 'none', duration: 250});
+    }});
 }
 
 
@@ -425,15 +398,6 @@ function moreContext() {
             $(this).data('context', 'short');
         }
     });
-}
-
-// This is to create links for collocations
-function colloc_linker(word, q_string, direction, num) {
-    q_string = q_string.replace(/report=[^&]+/, 'report=concordance_from_collocation');
-    q_string += '&collocate=' + encodeURIComponent(word);
-    q_string += '&direction=' + direction;
-    q_string += '&collocate_num=' + num;
-    return q_string
 }
 
 // Delay function calls in repeated actions:
