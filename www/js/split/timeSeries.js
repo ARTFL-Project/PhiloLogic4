@@ -328,7 +328,7 @@ function drawFromData(data, interval, frequency_type) {
     $('.graph_bar').each(function() {
         var count = $(this).data('count');
         var height = count * multiplier;
-        delay_anim += 5;
+        delay_anim += 20;
         if (height > max_height) {
             max_height = height;
         }

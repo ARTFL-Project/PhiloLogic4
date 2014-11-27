@@ -52,7 +52,7 @@
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
                             <button type="reset" id="reset_form" class="btn btn-danger">Clear</button>
-                            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" style="display: none">Show search options</button>
+                            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none">Show search options</button>
                         </div>
                     </div>
                 </div>

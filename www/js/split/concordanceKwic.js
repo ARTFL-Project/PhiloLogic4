@@ -68,8 +68,8 @@ function concordance_kwic_switch(db_url) {
                 $('#concordance').prop("checked", true).parent().addClass('active');
                 var new_url = History.getState().url.replace(/report=kwic/, 'report=concordance');
                 History.pushState(null, '', new_url);
+                fetchMoreContext();
             }
-            fetchMoreContext();
             $('.more a').each(function() {
                 if (switchto == "kwic") {
                     var new_href = $(this).attr('href').replace('concordance', 'kwic');

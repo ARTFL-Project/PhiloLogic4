@@ -25,6 +25,7 @@ def concordance(environ,start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
     if request.no_q:
+        setattr(request, "report", "bibliography")
         return r.fetch_bibliography(db, request, config, start_response)
     else:
         concordance_object, hits = concordance_results(db, request, config)
@@ -64,7 +65,9 @@ def render_concordance(c, hits, config, q):
     pages = f.link.generate_page_links(c['description']['start'], q.results_per_page, q, hits)
     collocation_script = f.link.make_absolute_query_link(config, q, report="collocation", format="json")
     frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
-    ajax_scripts = {'frequency': frequency_script, 'collocation': collocation_script}
+    kwic_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/concordance_kwic_switcher.py", report="kwic")
+    concordance_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/concordance_kwic_switcher.py")
+    ajax_scripts = {"concordance": concordance_script, 'kwic': kwic_script, 'frequency': frequency_script, 'collocation': collocation_script}
     return f.render_template(concordance=c, biblio_criteria=biblio_criteria, config=config, query_string=q.query_string,
                              ajax=ajax_scripts, template_name="concordance.mako", report="concordance", pages=pages)
 
@@ -93,7 +96,6 @@ def concordance_citation(hit, citation_hrefs):
         citation = "%s <i>%s</i>" % (hit.author.strip(),title)
     else:
         citation = "<i>%s</i>" % title
-
     if hit.date:
         try:
             citation += " [%s]" % str(hit.date)
