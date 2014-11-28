@@ -101,7 +101,7 @@
 	left: 15px;
 	position: absolute;
     transition: opacity 200ms;
-	top: 0 !important;
+	top: 0;
 	pointer-events: none;
 }
 #fixed-search.fixed {

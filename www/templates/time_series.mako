@@ -14,7 +14,7 @@
                         <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
                             Export results
                         </button>
-                        <div id="search_arguments" data-start="${query['start_date']}" data-end="${query['end_date']}", data-interval="${query['year_interval']}" data-script="${config.db_url + '/scripts/get_total_results.py?' + query_string}">
+                        <div id="search_arguments" data-start="${query['start_date']}" data-end="${query['end_date']}", data-interval="${query['year_interval']}" data-script="${ajax['total_hits']}">
                             <span id="time-series-length">
                                 % if time_series['query_done']:
                                     ${time_series['results_length']}
@@ -52,7 +52,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="results_container">
-                    <div id='time_series_report' style='display:none;' data-script="${ajax}" data-status="json.dumps(time_series['results_done']})">
+                    <div id='time_series_report' style='display:none;' data-script="${ajax['time_series']}" data-status="json.dumps(time_series['results_done']})">
                         <div id="chart" style="width: 900px; height: 500px;"></div>
                     </div>
                     <div id="test_time_series">

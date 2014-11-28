@@ -25,6 +25,7 @@ $(document).ready(function() {
         var total_hits_script = $('#search_arguments').data('script');
         $.getJSON(total_hits_script, function(data) {
             var total = data;
+            console.log(data)
             $("#time-series-length").html(total);
             var percent = 3000 / total * 100;
             $('.progress').show();
