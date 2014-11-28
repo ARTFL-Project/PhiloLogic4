@@ -7,16 +7,16 @@ config = WebConfig()
 theme = config.theme
 
 default_css = ["split/style.css", "split/searchForm.css", "split/%s" % theme]
-css_files = {"landing_page.mako": ["split/style.css", "split/searchForm.css", "split/landingPage.css", "split/%s" % theme],
-            "concordance.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
-            "kwic.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
-            "concordance_from_collocation.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
-            "word_property_filter.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
-            "bibliography.mako": ["split/style.css", "split/searchForm.css", "split/concordanceKwic.css", "split/%s" % theme],
-            "collocation.mako": ["split/style.css", "split/searchForm.css", "split/%s" % theme],
-            "time_series.mako": ["split/style.css", "split/searchForm.css", "split/timeSeries.css", "split/%s" % theme],
-            "text_object.mako": ["image_gallery/blueimp-gallery.min.css", "split/style.css", "split/searchForm.css", "split/textObjectNavigation.css", "split/%s" % theme],
-            "t_o_c.mako": ["split/style.css", "split/searchForm.css", "split/textObjectNavigation.css", "split/%s" % theme]}
+css_files = {"landing_page.mako": default_css + ["split/landingPage.css", "split/%s" % theme],
+            "concordance.mako": default_css + ["split/concordanceKwic.css", "split/%s" % theme],
+            "kwic.mako": default_css + ["split/concordanceKwic.css", "split/%s" % theme],
+            "concordance_from_collocation.mako": default_css + ["split/concordanceKwic.css", "split/%s" % theme],
+            "word_property_filter.mako": default_css + ["split/concordanceKwic.css", "split/%s" % theme],
+            "bibliography.mako": default_css + ["split/concordanceKwic.css", "split/%s" % theme],
+            "collocation.mako": default_css + ["split/%s" % theme],
+            "time_series.mako": default_css + ["split/timeSeries.css", "split/%s" % theme],
+            "text_object.mako": ["image_gallery/blueimp-gallery.min.css"] + default_css +  ["split/textObjectNavigation.css", "split/%s" % theme],
+            "t_o_c.mako": default_css + ["split/textObjectNavigation.css", "split/%s" % theme]}
 
 default_js = ['bootstrap/bootstrap.min.js', "plugins/jquery.history.js", "plugins/velocity.min.js", "plugins/velocity.ui.min.js", "plugins/jquery-ui.min.js"]
 js_files = {"landing_page.mako": default_js + ["split/common.js", "split/landingPage.js"],
