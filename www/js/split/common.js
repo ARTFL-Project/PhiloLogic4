@@ -72,11 +72,11 @@ $(document).ready(function() {
                 $('#method-buttons label').removeClass('active');
                 $('#method-buttons input[name=method][value=' + value + ']').prop('checked', true);
                 $('#method-buttons input[name=method][value=' + value + ']').parent().addClass('active');
-            } else if (key =='pagenum') {
-                $('#page_num input').removeAttr('checked');
-                $('#page_num label').removeClass('active');
-                $('#page_num input[name=pagenum][value=' + value + ']').prop('checked', true);
-                $('#page_num input[name=pagenum][value=' + value + ']').parent().addClass('active');
+            } else if (key =='results_per_page') {
+                $('#results_per_page input').removeAttr('checked');
+                $('#results_per_page label').removeClass('active');
+                $('#results_per_page input[name=results_per_page][value=' + value + ']').prop('checked', true);
+                $('#results_per_page input[name=results_per_page][value=' + value + ']').parent().addClass('active');
             }
             else if (key == 'year_interval') {
                 $('#year_interval input').removeAttr('checked');

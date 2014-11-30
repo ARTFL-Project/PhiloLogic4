@@ -5,8 +5,7 @@
     <%include file="dictionary_search_form.mako"/>
 % endif
 <script>
-    var collocation_object = {"all_collocates": ${dumps(collocation['all_collocates'])}, "left_collocates": ${dumps(collocation['left_collocates'])},
-                              "right_collocates": ${dumps(collocation['right_collocates'])}, "hit_length": ${collocation['results_length']}};
+    var collocation_object = ${dumps(collocation)};
 </script>
 <div class="container-fluid">    
     <div id='philologic_response' class="panel panel-default">

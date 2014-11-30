@@ -13,7 +13,7 @@ class WSGIHandler(object):
         self.defaults = {
           "results_per_page":"25",
           "start":"0",
-          "end":"25",
+          "end":"0",
           #"arg":"0",          
         }
         

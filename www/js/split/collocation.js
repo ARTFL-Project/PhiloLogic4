@@ -3,7 +3,7 @@
 $(document).ready(function() {
     var q_string = window.location.search.substr(1);
     var db_url = webConfig['db_url'];
-    var hit_len = collocation['hit_length'];
+    var hit_len = collocation['results_length'];
     if (sessionStorage[window.location.href] == null) {
         // Render initial results
         var new_data = undefined;
@@ -50,8 +50,6 @@ function update_colloc(db_url, total_results, results_len, colloc_start, colloc_
     var script_call = script + '&start=' + colloc_start + '&end=' + colloc_end;
     if (colloc_start <= results_len) {
         $.getJSON(script_call, function(data) {
-            console.log("Total", total_results)
-            console.log('received data=', data)
             sortAndRenderCollocation(total_results, data, q_string, db_url, results_len, colloc_start, colloc_end, script, update_colloc);
             if (colloc_end < results_len) {
                 var percent = colloc_end / results_len * 100;
@@ -117,15 +115,6 @@ function sortResults(full_results) {
         sorted_list.push([key, full_results[key]]);
     }
     sorted_list.sort(function(a,b) {return b[1].count - a[1].count});
-    return sorted_list;
-}
-
-function sortCollocResults(full_results) {
-    var sorted_list = [];
-    for (var k in full_results) {
-        sorted_list.push([k, full_results[k]]);
-    }
-    sorted_list.sort(function(a,b) {return b[1] - a[1]});
     return sorted_list;
 }
 

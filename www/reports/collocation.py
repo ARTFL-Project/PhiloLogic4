@@ -46,6 +46,7 @@ def render_collocation(collocation_object, q, config):
     total_script = f.link.make_absolute_query_link(config, q, script_name="scripts/get_total_results.py")
     ajax_scripts = {"colloc": colloc_script, "total": total_script}
     biblio_criteria = f.biblio_criteria(q, config)
+    print >> sys.stderr, "COLLOC", repr(collocation_object['all_collocates'])
     return f.render_template(collocation=collocation_object, query_string=q.query_string, biblio_criteria=biblio_criteria,
                              word_num=q.word_num, ajax=ajax_scripts, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
@@ -71,7 +72,7 @@ def fetch_collocation(hits, q, db, config):
     all_collocates = {}
     
     ## Override default value of q.end for first batch of results
-    if q.end == 25:
+    if q.end == 0:
         q.end = 3000
     
     count = 0
