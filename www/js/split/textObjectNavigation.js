@@ -26,15 +26,15 @@ $(document).ready(function() {
     
     $('#nav-buttons').on('affix.bs.affix', function() {
         $(this).addClass('fixed');
+        $("#toc-container").addClass('fixed');
         adjustTocHeight();
-        $("#toc-container").css({'position': 'fixed', "top": "32px"}); // Force position fixed because of bottom event hack
-        $('#back-to-top').velocity('fadeIn', {duration: 200});
+        $('#back-to-top').velocity("stop").velocity('fadeIn', {duration: 200});
     });
     $('#nav-buttons').on('affix-top.bs.affix', function() {
         $(this).removeClass('fixed');
+        $("#toc-container").removeClass('fixed').css('position', 'static');
         adjustTocHeight();
-        $('#back-to-top').velocity('fadeOut', {duration: 200});
-        $("#toc-container").css({'position': 'static', "top": "auto"}); // Force position static because of bottom event hack
+        $('#back-to-top').velocity("stop").velocity('fadeOut', {duration: 200});
     });
     
     $('#back-to-top').click(function() {
@@ -94,11 +94,6 @@ function checkEndBeginningOfDoc() {
     } else {
         $("#prev-obj").removeAttr('disabled');
     }
-}
-
-// Check to see if the footer is no longer at the bottomw of the page
-function checkFooterPosition() {
-    
 }
 
 function retrieveTableOfContents(db_url) {
@@ -166,14 +161,14 @@ function showTOC() {
 function adjustTocHeight(num) {
     // Make sure the TOC is no higher than viewport
     if ($(document).height() == $(window).height()) {
-        var toc_height = $('#footer').offset().top - $('#nav-buttons').position().top - $('#nav-buttons').height() - $('#toc-titlebar').height() - 40;
+        var toc_height = $(window).height() - $('#nav-buttons').position().top - $('#nav-buttons').height() - $('#toc-titlebar').height() - 55;
     } else {
-        var toc_height = $(window).height() - $("#footer").height() - $('#nav-buttons').position().top - $('#toc-titlebar').height() - 50;
+        var toc_height = $(window).height() - $('#nav-buttons').position().top - $('#toc-titlebar').height() - 55;
     }
     if (typeof num !="undefined") {
         toc_height = toc_height - num;
     }
-    $('#toc-content').velocity({'max-height': toc_height + 'px'});
+    $('#toc-content').velocity("stop").velocity({'max-height': toc_height + 'px'});
 }
 
 function scrollToHighlight() {

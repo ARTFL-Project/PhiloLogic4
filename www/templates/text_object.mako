@@ -18,7 +18,7 @@
                 <button type="button" class="btn btn-primary" id="prev-obj" data-philo-id="${text_object['prev']}">
                     <span class="glyphicon glyphicon-chevron-left"></span>
                 </button>
-                <button type="button" class="btn btn-primary" id="show-toc" style="padding-left: 30px; padding-right: 30px" disabled="disabled">Table of contents</button>
+                <button type="button" class="btn btn-primary" id="show-toc" disabled="disabled">Table of contents</button>
                 <button type="button" class="btn btn-primary" id="next-obj" data-philo-id="${text_object['next']}">
                     <span class="glyphicon glyphicon-chevron-right"></span>
                 </button>
