@@ -21,6 +21,10 @@
 #toc-wrapper.show {
     width: auto;
 }
+#show-toc {
+	padding-left: 30px;
+	padding-right: 30px
+}
 #toc-report-title {
     font-size: 1.2em;
     margin-top: 10px;
@@ -38,9 +42,12 @@
     }
 }
 #toc-container {
-    /*top: 32px !important;*/
     max-width: 350px;
     margin-left: -31px;
+}
+#toc-container.fixed {
+	position: fixed !important;
+	top: 30px;
 }
 #toc-container a {
     color: #fff;

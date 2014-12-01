@@ -17,31 +17,30 @@ $(document).ready(function() {
         var full_results;
         var abs_data = eval($("#absolute_time").data('value'));
         var merge_abs = merge_time_results(full_results, abs_data, date_list);
-        var sorted_abs = merge_abs[0]
-        var full_abs = merge_abs[1]
+        var sorted_abs = merge_abs.sorted
+        var full_abs = merge_abs.unsorted
         var interval = $("#absolute_time").data('interval');
         drawFromData(sorted_abs, interval, 'absolute_time');
         // Fetch total results to make sure we always have the right number
         var total_hits_script = $('#search_arguments').data('script');
         $.getJSON(total_hits_script, function(data) {
             var total = data;
+            console.log(data)
             $("#time-series-length").html(total);
             var percent = 3000 / total * 100;
             $('.progress').show();
             updateProgressBar(percent);
             var date_counts = eval($('#relative_time').data('datecount'));
             var script = $('#time_series_report').data('script');
-            console.log(date_list)
             progressiveLoad(db_url, total, interval, 0, 3000, full_abs, date_counts, date_list, script);
         });
     } else {
         var time_series = JSON.parse(sessionStorage[window.location.href]);
         var date_counts = time_series['date_counts'];
-        var abs_results = time_series['abs_results'];
+        var abs_results = sortResults(time_series['abs_results']);
         var total = $("#time-series-length").html(total);
-        var script = $('#time_series_report').data('script');
         $('#relative_counts').data('value', relativeCount(abs_results, date_counts))
-        progressiveLoad(db_url, total, interval, 0, 3000, abs_results, date_counts, date_list, script);
+        drawFromData(abs_sorted_list, interval, "absolute_time");
     }
     
     $(window).resize(function() {
@@ -74,6 +73,34 @@ function generateDateList() {
     return date_list;
 }
 
+// Taken from common.js. Differs in that it sorts by date and not count
+function merge_time_results(full_results, new_data, date_list) {
+    if (typeof full_results === 'undefined') {
+        full_results = new_data;
+    } else {
+        for (var key in new_data) {
+            if (key in full_results) {
+                full_results[key] += new_data[key];
+            }
+            else {
+                full_results[key] = new_data[key];
+            }
+        }
+    }
+    full_results = addMissingDates(full_results, date_list);
+    var sorted_list = sortResults(full_results);
+    return {"sorted": sorted_list, "unsorted": full_results}
+}
+
+function sortResults(full_results) {
+    var sorted_list = [];
+    for (var key in full_results) {
+        sorted_list.push([key, full_results[key]]);
+    }
+    sorted_list.sort(function(a,b) {return a[0] - b[0]});
+    return sorted_list
+}
+
 function progressiveLoad(db_url, total_results, interval, interval_start, interval_end, abs_full_results, full_date_counts, date_list, script) {
     var q_string = window.location.search.substr(1);
     var initial_end = interval_end;
@@ -85,11 +112,11 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         interval_end += 10000;
     }
     if (initial_end < total_results) {
-        var script_call = script + "&interval_start=" + interval_start + "&interval_end=" + interval_end;
+        var script_call = script + "&start=" + interval_start + "&end=" + interval_end;
         $.getJSON(script_call, function(data) {
             var abs_merge = merge_time_results(abs_full_results, data.results['absolute_count'], date_list);
-            var abs_sorted_list = abs_merge[0];
-            var abs_new_full_results = abs_merge[1];            
+            var abs_sorted_list = abs_merge.sorted;
+            var abs_new_full_results = abs_merge.unsorted;            
             drawFromData(abs_sorted_list, interval, "absolute_time");
             
             // Update date_counts
@@ -120,9 +147,9 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         var progress_height = $(".progress").height();
         $(".progress").delay(500).velocity("slideUp");
         $('.graph_bar').tooltip({html: true});
-        //if (!(window.location.href in sessionStorage)) {
-        //    saveTimeSeries(abs_full_results, full_date_counts)
-        //}
+        if (webConfig.debug == false) {
+            saveTimeSeries(abs_full_results, full_date_counts)
+        }
     }
 }
 
@@ -182,34 +209,6 @@ function addMissingDates(full_results, date_list) {
         }
     }
     return full_results
-}
-
-// Taken from common.js. Differs in that it sorts by date and not count
-function merge_time_results(full_results, new_data, date_list) {
-    if (typeof full_results === 'undefined') {
-        full_results = new_data;
-    } else {
-        for (var key in new_data) {
-            if (key in full_results) {
-                full_results[key] += new_data[key];
-            }
-            else {
-                full_results[key] = new_data[key];
-            }
-        }
-    }
-    full_results = addMissingDates(full_results, date_list);
-    var sorted_list = sortResults(full_results);
-    return [sorted_list, full_results]
-}
-
-function sortResults(full_results) {
-    var sorted_list = [];
-    for (var key in full_results) {
-        sorted_list.push([key, full_results[key]]);
-    }
-    sorted_list.sort(function(a,b) {return a[0] - b[0]});
-    return sorted_list
 }
 
 function yearToTimeSpan(year, interval) {
@@ -317,7 +316,7 @@ function drawFromData(data, interval, frequency_type) {
                 $(this).show();
                 count = 0;
             }
-        })
+        });
     }
     
     var chart_height = $('#test_time_series').height();

@@ -101,7 +101,7 @@
 	left: 15px;
 	position: absolute;
     transition: opacity 200ms;
-	top: 0 !important;
+	top: 0;
 	pointer-events: none;
 }
 #fixed-search.fixed {
@@ -136,7 +136,7 @@
 		right: 40px;
 	}
 	#philologic_response {
-		margin-top: 130px;
+		margin-top: 170px;
 	}
 }
 @media (max-width: 768px) {
@@ -147,7 +147,7 @@
 		padding-right: 20px;
 	}
 	#philologic_response {
-		margin-top: 160px;
+		margin-top: 190px;
 	}
 	#form_body {
 		left: 15px;

@@ -46,6 +46,7 @@ def render_collocation(collocation_object, q, config):
     total_script = f.link.make_absolute_query_link(config, q, script_name="scripts/get_total_results.py")
     ajax_scripts = {"colloc": colloc_script, "total": total_script}
     biblio_criteria = f.biblio_criteria(q, config)
+    print >> sys.stderr, "COLLOC", repr(collocation_object['all_collocates'])
     return f.render_template(collocation=collocation_object, query_string=q.query_string, biblio_criteria=biblio_criteria,
                              word_num=q.word_num, ajax=ajax_scripts, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
@@ -70,8 +71,12 @@ def fetch_collocation(hits, q, db, config):
     right_collocates = {}
     all_collocates = {}
     
+    ## Override default value of q.end for first batch of results
+    if q.end == 0:
+        q.end = 3000
+    
     count = 0
-    for hit in hits[q.interval_start:q.interval_end]:
+    for hit in hits[q.start:q.end]:
         conc_left, conc_right = split_concordance(hit, length, config.db_path)
         left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
         right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)
@@ -109,7 +114,10 @@ def build_filter_list(q, config):
         filter_num = float("inf")
     else:
         filter_file = open(config.db_path + '/data/frequencies/word_frequencies')
-        filter_num = int(q.filter_frequency)
+        if q.filter_frequency:
+            filter_num = int(q.filter_frequency)
+        else:
+            filter_num = 100 ## default value in case it's not defined
     filter_list = set([q['q']])
     for line_count, line in enumerate(filter_file):
         if line_count == filter_num:

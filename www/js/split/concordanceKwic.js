@@ -5,12 +5,12 @@ $(document).ready(function() {
     var q_string = window.location.search.substr(1);
     concordance_kwic_switch(db_url);
     back_forward_button_concordance_reload();
-    if ($('#kwic_concordance').length) {
-        var config = {    
-                over: showBiblio, 
-                timeout: 50,  
-                out: hideBiblio   
-            };
+    
+    if (global_report == "kwic") {
+        var config = {over: showBiblio, 
+                      timeout: 50,  
+                      out: hideBiblio   
+                     };
         $(".kwic_biblio").hoverIntent(config);
     }
     
@@ -27,10 +27,6 @@ $(document).ready(function() {
                 }).fadeIn('fast');
             });
         }
-    });
-    
-    // Fetch more context for concordances after page load
-    $(window).load(function() {
         if (global_report == "concordance") {
             fetchMoreContext();
         }
