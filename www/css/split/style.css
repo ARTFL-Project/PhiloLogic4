@@ -60,6 +60,9 @@ li {
 .small-caps {
     font-variant:small-caps;
 }
+s {
+    text-decoration: none;
+}
 #philologic_response {
     margin-top: 120px;
 }

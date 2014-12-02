@@ -329,6 +329,7 @@ function showMoreOptions() {
 
 // Display different search parameters based on the type of report used
 function displayReportOptions(value) {
+    var show_options = []
     $("#results_per_page, #collocation-options, #time_series_num, #date_range, #method, #metadata_fields").hide();
     if (value == 'collocation') {
         $("#collocation-options, #metadata_fields").show();
