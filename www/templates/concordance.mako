@@ -34,10 +34,10 @@
                 </div>
             </div>
             <div class="row hidden-xs" id="act-on-report">
-                <div class="col-sm-9 col-md-8 col-lg-6">
+                <div class="col-sm-7 col-lg-6">
                     <%include file="concordance_kwic_switcher.mako"/>
                 </div>
-                <div class="col-sm-3 col-md-4 col-lg-4 col-lg-offset-2" id="right-act-on-report">
+                <div class="col-sm-5 col-lg-4 col-lg-offset-2" id="right-act-on-report">
                     <%include file="sidebar_menu.mako"/>
                 </div>
             </div>
@@ -46,7 +46,7 @@
             <div id="results_container" class="col-xs-12">
                 <ol id='philologic_concordance' data-more-context="${config.db_url + '/scripts/get_more_context.py?' + query_string}">
                     % for pos, i in enumerate(concordance['results']):
-                        <li class='philologic_occurrence panel panel-default'>
+                        <li class="philologic_occurrence panel panel-default">
                             <%
                              n = description['start'] + pos
                             %>

@@ -17,22 +17,22 @@
             <li class="divider"></li>
             <li role="presentation" class="dropdown-header">Display collocates on</li>
 
-            <% script = "%s/scripts/get_collocation.py?%s" % (config.db_url, query_string) %>
-            <li><a class="sidebar-option" id="side_opt_collocate" data-value='all_collocates' data-display='both sides' data-script="${script}">Both sides</a></li>
-            <li><a class="sidebar-option" id="side_opt_collocate_left" data-value='left_collocates' data-display='left side' data-script="${script}">On the left side</a></li>
-            <li><a class="sidebar-option" id="side_opt_collocate_right" data-value='right_collocates' data-display='right side' data-script="${script}">On the right side</a></li>
+			<li><a class="sidebar-option" id="side_opt_collocate" data-value='all_collocates' data-display='both sides' data-script="${ajax['collocation']}">Both sides</a></li>
+            <li><a class="sidebar-option" id="side_opt_collocate_left" data-value='left_collocates' data-display='left side' data-script="${ajax['collocation']}">On the left side</a></li>
+            <li><a class="sidebar-option" id="side_opt_collocate_right" data-value='right_collocates' data-display='right side' data-script="${ajax['collocation']}">On the right side</a></li>
 			% if config["word_facets"]:
-			
-            <li class="divider"></li>
-            <li role="presentation" class="dropdown-header">Count results by</li>
-                 % for facet in config["word_facets"]:
+				<li class="divider"></li>
+				<li role="presentation" class="dropdown-header">Count results by</li>
+                % for facet in config["word_facets"]:
+
                  	<%
                  	  facet_name = facet.keys()[0]
                  	  facet_value = facet[facet_name]
                  	  script = "%s/scripts/get_word_frequency.py?%s&field=%s" % (config.db_url, query_string,facet_value)
                  	%>
 	            <li><a class="sidebar-option" id="side_opt_token" data-value="word_frequency_report_${facet_value}" data-display="${facet_value}" data-script="${script}">${facet_name}</a></li>
-                 % endfor
+
+                % endfor
 			%endif 
 
         % endif

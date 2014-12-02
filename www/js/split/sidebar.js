@@ -70,17 +70,17 @@ function hideSidebar() {
 
 function populate_sidebar(script_call, facet, total_results, interval_start, interval_end, full_results) {
     if (interval_start === 0) {
-        interval_end = 1000;
-    } else if (interval_end === 1000) {
-        interval_end = 11000;
+        interval_end = 3000;
+    } else if (interval_end === 3000) {
+        interval_end = 13000;
     } else {
         interval_start += 10000;
         interval_end += 10000;
     }
     if (interval_start < total_results) {
-        var script_call_interval = script_call + "&interval_start=" + interval_start + "&interval_end=" + interval_end;
+        var script_call_interval = script_call + "&start=" + interval_start + "&end=" + interval_end;
         if (interval_start === 0) {
-            interval_start = 1000;
+            interval_start = 3000;
         }
         $.getJSON(script_call_interval, function(data) {
             if ($('#selected-sidebar-option').data('interrupt') != true && $('#selected-sidebar-option').data('selected') == facet) {
@@ -145,34 +145,6 @@ function sortResults(full_results) {
         sorted_list.push([key, full_results[key]]);
     }
     sorted_list.sort(function(a,b) {return b[1].count - a[1].count});
-    return sorted_list;
-}
-
-function mergeCollocResults(full_results, new_data) {
-    if (typeof full_results === 'undefined') {
-        full_results = new_data;
-    }
-    if (new_data) {
-        for (var key in new_data) {
-            var value = new_data[key];
-            if (key in full_results) {
-                full_results[key] += value;
-            }
-            else {
-                full_results[key] = value;
-            }
-        }
-    }
-    var sorted_list = sortResults(full_results);
-    return {"sorted": sorted_list, "unsorted": full_results};
-}
-
-function sortCollocResults(full_results) {
-    var sorted_list = [];
-    for (var k in full_results) {
-        sorted_list.push([k, full_results[k]]);
-    }
-    sorted_list.sort(function(a,b) {return b[1] - a[1]});
     return sorted_list;
 }
 

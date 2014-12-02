@@ -61,15 +61,15 @@
     margin-right: 25px;
 }
 #search_overlay {
-    opacity : 0;
+	display: none;
     position: absolute;
-    top: 0;
+    top: 50px;
     left: 0;
+	opacity: 0;
     background-color: #000;
     width: 100%;
-    height: 0px;
+    height: 100%;
     z-index: 90;
-	transition: opacity 250ms;
 }
 #metadata_fields {
 	margin-top: 10px;
@@ -136,7 +136,7 @@
 		right: 40px;
 	}
 	#philologic_response {
-		margin-top: 130px;
+		margin-top: 170px;
 	}
 }
 @media (max-width: 768px) {
@@ -147,7 +147,7 @@
 		padding-right: 20px;
 	}
 	#philologic_response {
-		margin-top: 160px;
+		margin-top: 190px;
 	}
 	#form_body {
 		left: 15px;

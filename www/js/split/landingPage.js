@@ -4,14 +4,19 @@ $(document).ready(function() {
     if (webConfig.dictionary == false) { // default
         $('#author-range-selectors td, #title-range-selectors td, #year-range-selectors td').click(function() {
             var range = $(this).data('range');
-            console.log(range)
             var type = $(this).parents('table').data('type');
             var script = $('#landingGroup').data('script') + type + "&range=" + range;
             var contentId = type + '-' + range;
             var contentDiv = '<div id="' + contentId + '"></div>';
             var available_links = [];
-            var visibleDiv = $('#landing-page-content').find('div:visible').velocity('transition.slideRightOut', {duration: 200, complete:function() {
-                $(this).css('opacity', 1)}});
+            $('#landing-page-content').find('div:visible')
+                                      .velocity('transition.slideRightOut',
+                                                {duration: 200,
+                                                 begin: function() { $("#footer").hide(); },
+                                                 complete:function() { $(this).css('opacity', 1); }
+                                                }
+                                       );
+                
             if ($('#' + contentId).length == 0) {
                 $('#landing-page-content').append(contentDiv);
                 var contentArea = $('#' + contentId);
@@ -49,7 +54,7 @@ $(document).ready(function() {
                         var contentElements = contentArea.find('ul');
                         contentArea.show();
                         $('#landing-page-content').show();
-                        contentElements.velocity('transition.slideLeftIn', {duration: 400, stagger: 20});
+                        contentElements.velocity('transition.slideLeftIn', {duration: 400, stagger: 20, complete:function() { $("#footer").velocity('fadeIn'); }});
                     });
                 });
             } else {
@@ -57,7 +62,7 @@ $(document).ready(function() {
                 var contentElements = contentArea.find('ul');
                 contentArea.show();
                 $('#landing-page-content').show();
-                contentElements.velocity('transition.slideLeftIn', {duration: 400, stagger: 20});
+                contentElements.velocity('transition.slideLeftIn', {duration: 400, stagger: 20, complete:function() { $("#footer").velocity('fadeIn'); }});
             }
         });
     } else {
@@ -65,7 +70,6 @@ $(document).ready(function() {
         var list = $('#dico-landing-volume ul');
         $.getJSON(script, function(data) {
             for (var i=0; i < data.length; i++) {
-                console.log(data[i].philo_id)
                 var li = '<li class="list-group-item" style="display: none;"><a href="dispatcher.py/' + data[i].philo_id[0] + '">' + data[i].title + '</a></li>';
                 list.append(li);
             }
