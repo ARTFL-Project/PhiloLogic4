@@ -52,7 +52,7 @@
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
                             <button type="reset" id="reset_form" class="btn btn-danger">Clear</button>
-                            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" style="display: none">Show search options</button>
+                            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none">Show search options</button>
                         </div>
                     </div>
                 </div>
@@ -206,17 +206,17 @@
                         Results per page:
                     </div>
                     <div class="col-xs-12 col-sm-10 col-md-10">
-                        <div class="btn-group" id='page_num' data-toggle="buttons">
+                        <div class="btn-group" id='results_per_page' data-toggle="buttons">
                             <label class="btn btn-primary active">
-                                <input type="radio" name="pagenum" id="pagenum1" value='25' checked="checked">
+                                <input type="radio" name="results_per_page" id="pagenum1" value='25' checked="checked">
                                 25
                             </label>
                             <label class="btn btn-primary">
-                                <input type="radio" name="pagenum" id="pagenum2" value='50'>
+                                <input type="radio" name="results_per_page" id="pagenum2" value='50'>
                                 50
                             </label>
                             <label class="btn btn-primary">
-                                <input type="radio" name="pagenum" id="pagenum3" value='100'>
+                                <input type="radio" name="results_per_page" id="pagenum3" value='100'>
                                 100
                             </label>
                         </div>

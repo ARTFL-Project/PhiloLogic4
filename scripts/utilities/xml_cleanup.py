@@ -164,11 +164,13 @@ if __name__ == '__main__':
             if census[tag]["empty"] != 0:
                 self_closing.append(tag)
         
+        ## Add any custom regex here
+        
         soup = bss(text,selfClosingTags=self_closing)
         for tag in soup.findAll():
             if tag.name in fix_case:
                 tag.name = fix_case[tag.name]
-                
+        
         file_contents = soup.prettify()
         file_contents = convert_remaining_entities(file_contents, quiet)
         
@@ -179,7 +181,7 @@ if __name__ == '__main__':
                 ## Attributes are contained in el.attrib where each attribute is a key. To change the type attribute you do: el.attrib['type'] = "some_other_type"
                 if el.tag in xml_tag_mapping: ## Check if the tag should be replaced according to the xml mapping dict
                     el.tag = xml_tag_mapping[el.tag]
-            file_contents = etree.tostring(tree)
+            file_contents = etree.tostring(tree, encoding='utf-8')
         except:
             print >> sys.stderr, "The clean-up script did not manage to fix all your XML issues"
             print >> sys.stderr, 'Try running "xmllint -noout" on the output file to get a more complete error report'

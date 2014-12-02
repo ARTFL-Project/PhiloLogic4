@@ -20,6 +20,7 @@ def time_series(environ,start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
     if request.no_q:
+        setattr(request, "report", "bibliography")
         return r.fetch_bibliography(db, request, config, start_response)
     else:
         request = handle_dates(request, db)
@@ -53,9 +54,11 @@ def handle_dates(q, db):
 
 def render_time_series(time_series_object, q, config):
     biblio_criteria = f.biblio_criteria(q, config)
-    ajax_script = f.link.make_absolute_query_link(config, q, format="json")
+    time_series_script = f.link.make_absolute_query_link(config, q, format="json")
+    total_hits_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_total_results.py", date='%d-%d' % (q.start_date, q.end_date))
+    ajax_scripts = {"time_series": time_series_script, "total_hits": total_hits_script}
     return f.render_template(time_series=time_series_object,template_name='time_series.mako',json=json,
-                             query_string=q.query_string, ajax=ajax_script, biblio_criteria=biblio_criteria, config=config, report="time_series")
+                             query_string=q.query_string, ajax=ajax_scripts, biblio_criteria=biblio_criteria, config=config, report="time_series")
 
 def generate_time_series(q, db, hits):    
     """reads through a hitlist to generate a time_series_object"""
@@ -73,8 +76,12 @@ def generate_time_series(q, db, hits):
     
     absolute_count = defaultdict(int)
     date_counts = {}
-    print >> sys.stderr, "START %d, END %d" % (q.interval_start, q.interval_end)
-    for i in hits[q.interval_start:q.interval_end]:
+    
+    ## Override default value of q.end for first batch of results
+    if q.end == 25:
+        q.end = 3000
+        
+    for i in hits[q.start:q.end]:
         date = i.date
         try:
             if date:
