@@ -506,27 +506,41 @@ class Loader(object):
                 print 'done.'
 
     def finish(self, **extra_locals):
+        """Write important runtime information to the database directory"""
         print "\n### Finishing up ###"
         os.mkdir(self.destination + "/src/")
         os.mkdir(self.destination + "/hitlists/")
         os.chmod(self.destination + "/hitlists/", 0777)
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
         
-        ## Write local variables used by libphilo
+        self.write_db_config(**extra_locals)
+        self.write_web_config(**extra_locals)
+
+    def write_db_config(self, **extra_locals):
+        """ Write local variables used by libphilo"""
         db_locals = open(self.destination + "/db.locals.py","w")
         print >> db_locals, "# -*- coding: utf-8 -*-"
-        print >> db_locals, "metadata_fields = %s" % self.metadata_fields
-        print >> db_locals, "metadata_hierarchy = %s" % self.metadata_hierarchy
-        print >> db_locals, "metadata_types = %s" % self.metadata_types
-        print >> db_locals, "normalized_fields = %s" % self.normalized_fields
-        print >> db_locals, "db_path = '%s'" % self.destination
-        print >> db_locals, "debug = %s" % self.debug
+        print >> db_locals, "#########################################################"
+        print >> db_locals, "#### Database configuration options for PhiloLogic4 #####"
+        print >> db_locals, "#########################################################"
+        print >> db_locals, "### All variables must be in valid Python syntax ########"
+        print >> db_locals, "#########################################################"
+        print >> db_locals, "### Edit with extra care: an invalid          ###########"
+        print >> db_locals, "### configuration could break your database.  ###########"
+        print >> db_locals, "#########################################################\n"
+        print >> db_locals, "\nmetadata_fields = %s" % self.metadata_fields
+        print >> db_locals, "\nmetadata_hierarchy = %s" % self.metadata_hierarchy
+        print >> db_locals, "\nmetadata_types = %s" % self.metadata_types
+        print >> db_locals, "\nnormalized_fields = %s" % self.normalized_fields
+        print >> db_locals, "\ndb_path = '%s'" % self.destination
+        print >> db_locals, "\ndebug = %s" % self.debug
         for k,v in extra_locals.items():
             if k != "db_url" or k != "search_reports":  ## This should be changed in the load_script
                 print >> db_locals, "%s = %s" % (k,repr(v))
         print "wrote database info to %s." % (self.destination + "/db.locals.py")
-        
-        ## Write configuration variables for the Web application
+    
+    def write_web_config(self, **extra_locals):
+        """ Write configuration variables for the Web application"""
         web_config = open(self.destination + "/web_config.cfg", "w")
         print >> web_config, "# -*- coding: utf-8 -*-"
         print >> web_config, "####################################################"
@@ -555,6 +569,9 @@ class Loader(object):
         print >> web_config, "# dict value, which can be a string or a list, should list the metadata"
         print >> web_config, "# to be used for the frequency counts"
         print >> web_config, "facets = %s" % repr([{i: i} for i in self.metadata_fields])
+        print >> web_config, "\n# The word_facets variable functions much like the facets variable, but describes metadata"
+        print >> web_config, "# attached to word or phrases results and stored in the (optional) words table. Experimental."
+        print >> web_config, "words_facets = []"
         print >> web_config, "\n# The concordance_length variable sets the length in bytes of each concordance result"
         print >> web_config, "concordance_length = 300"
         print >> web_config, "\n# The search_examples variable defines which examples should be provided"
@@ -590,7 +607,6 @@ class Loader(object):
         print >> web_config, """                          "date": {}}"""
         print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")
 
-                
 
 def handle_command_line(argv):
     usage = "usage: %prog [options] database_name files"
