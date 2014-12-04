@@ -525,15 +525,15 @@ class Loader(object):
         print >> db_locals, "#########################################################"
         print >> db_locals, "### All variables must be in valid Python syntax ########"
         print >> db_locals, "#########################################################"
-        print >> db_locals, "### Edit with extra care, since any invalid  ############"
-        print >> db_locals, "### configuration can break your database.   ############"
+        print >> db_locals, "### Edit with extra care: an invalid          ###########"
+        print >> db_locals, "### configuration could break your database.  ###########"
         print >> db_locals, "#########################################################\n"
-        print >> db_locals, "metadata_fields = %s" % self.metadata_fields
-        print >> db_locals, "metadata_hierarchy = %s" % self.metadata_hierarchy
-        print >> db_locals, "metadata_types = %s" % self.metadata_types
-        print >> db_locals, "normalized_fields = %s" % self.normalized_fields
-        print >> db_locals, "db_path = '%s'" % self.destination
-        print >> db_locals, "debug = %s" % self.debug
+        print >> db_locals, "\nmetadata_fields = %s" % self.metadata_fields
+        print >> db_locals, "\nmetadata_hierarchy = %s" % self.metadata_hierarchy
+        print >> db_locals, "\nmetadata_types = %s" % self.metadata_types
+        print >> db_locals, "\nnormalized_fields = %s" % self.normalized_fields
+        print >> db_locals, "\ndb_path = '%s'" % self.destination
+        print >> db_locals, "\ndebug = %s" % self.debug
         for k,v in extra_locals.items():
             if k != "db_url" or k != "search_reports":  ## This should be changed in the load_script
                 print >> db_locals, "%s = %s" % (k,repr(v))
