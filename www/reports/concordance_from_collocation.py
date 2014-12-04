@@ -48,7 +48,10 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
     concordance_object = {"query": dict([i for i in q])}
     
     length = config['concordance_length']
-    within_x_words = int(q['word_num'])
+    try:
+        within_x_words = int(q['word_num'])
+    except ValueError: ## Getting an empty string since the keyword is not specificed in the URL
+        within_x_words = 5
     direction = q['direction']
     collocate = unicodedata.normalize('NFC', q['collocate'].decode('utf-8', 'ignore'))
     collocate_num = int(q['collocate_num'])
