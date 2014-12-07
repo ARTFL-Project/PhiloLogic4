@@ -91,6 +91,16 @@
 #tip-btn:hover #tip {
 	display: none;
 }
+#search_terms .row {
+	text-align: left;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+/*Dico layout changes*/
+#dico-form #search_elements {
+	border-top-width: 0px;
+}
 
 /*Fixed search bar*/
 #fixed-search {

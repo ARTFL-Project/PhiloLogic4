@@ -53,10 +53,10 @@ $(document).ready(function() {
     
     // Set-up autocomplete for words and metadata
     autoCompleteWord(db_url);
-    for (i in webConfig["metadata"]) {
-        var  metadata = $("#" + webConfig["metadata"][i]).val();
-        var field = webConfig["metadata"][i];
-        autoCompleteMetadata(metadata, field, db_url)
+    for (var i=0; i < webConfig.metadata.length; i++) {
+        var  metadata = $("#" + webConfig.metadata[i]).val();
+        var field = webConfig.metadata[i];
+        autoCompleteMetadata(metadata, field, db_url);
     }
     
     //  This will prefill the search form with the current query
@@ -322,6 +322,9 @@ function autoCompleteMetadata(metadata, field, db_url) {
 
 //  Function to show or hide search options
 function showMoreOptions() {
+    if (webConfig.dictionary) {
+        $("#report").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
+    }
     $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn', complete: function() {
         $("#search_overlay").velocity({opacity: .2}, {display: 'block', duration: 250});
     }});
@@ -355,6 +358,9 @@ function displayReportOptions(value) {
 }
 
 function hideSearchForm() {
+    if (webConfig.dictionary) {
+        $("#report").velocity("slideUp",{duration: 250, 'easing': 'easeIn'});
+    }
     $("#search_elements").velocity('slideUp', {duration: 250, easing: 'easeOut', complete: function() {
         $("#search_overlay").velocity({opacity: 0}, {display: 'none', duration: 250});
     }});
