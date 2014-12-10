@@ -16,7 +16,7 @@ class WSGIHandler(object):
           "end":"0",
           #"arg":"0",          
         }
-        
+
         ## Temporary fix for search term arguments before new core merge
         method = self["method"] or "proxy"
         arg = self["arg"]

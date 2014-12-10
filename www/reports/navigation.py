@@ -54,7 +54,7 @@ def nav_query(obj,db):
     try:
         end_rowid = c.fetchone()[0]
     except TypeError: # if this is the last doc, just get the last rowid in the table.
-        c.execute('select max(rowid) from toms;' % start_rowid)
+        c.execute('select max(rowid) from toms;')
         end_rowid = c.fetchone()[0]
 
     # use start_rowid and end_rowid to fetch every div in the document.
