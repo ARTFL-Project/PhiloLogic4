@@ -46,6 +46,7 @@ def render_collocation(collocation_object, q, config):
     total_script = f.link.make_absolute_query_link(config, q, script_name="scripts/get_total_results.py")
     ajax_scripts = {"colloc": colloc_script, "total": total_script}
     biblio_criteria = f.biblio_criteria(q, config)
+    print >> sys.stderr, "COLLOC", repr(collocation_object['all_collocates'])
     return f.render_template(collocation=collocation_object, query_string=q.query_string, biblio_criteria=biblio_criteria,
                              word_num=q.word_num, ajax=ajax_scripts, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
@@ -117,7 +118,7 @@ def build_filter_list(q, config):
             filter_num = int(q.filter_frequency)
         else:
             filter_num = 100 ## default value in case it's not defined
-    filter_list = set([q['q'].decode('utf-8', 'ignore')])
+    filter_list = set([q['q'].decode("utf-8"])
     for line_count, line in enumerate(filter_file):
         if line_count == filter_num:
             break
@@ -147,16 +148,18 @@ def split_concordance(hit, length, path):
 
 def tokenize(text, filter_list, within_x_words, direction, db):
     text = text.lower()
-    token_regex = re.compile(db.locals['word_regex'] + '|' + db.locals['punct_regex'], re.U)
-    
+    token_regex_pattern = db.locals["word_regex"] + u'|' + db.locals["punct_regex"]
+    token_regex = re.compile(token_regex_pattern, re.U)
+    print >> sys.stderr, "TEXT", repr(text)
+    print >> sys.stderr, "NEW PATTERN", repr(token_regex_pattern)
     if direction == 'left':
         word_list = tokenize_text(text, token_regex) 
         word_list.reverse() ## left side needs to be reversed
     else:
         word_list = tokenize_text(text, token_regex)
+#    word_list = text.split(" ")
       
     word_list = filter(word_list, filter_list, within_x_words)
-
     return word_list
 
 def filter(word_list, filter_list, within_x_words):
@@ -170,5 +173,5 @@ def tokenize_text(text, token_regex):
     """Returns a list of individual tokens"""
     ## Still used in collocations
     text_tokens = token_regex.split(text)
-    text_tokens = [token for token in text_tokens if token and re.search('\w', token)] ## remove empty strings
+    text_tokens = [token for token in text_tokens if token and token not in (""," ","\n","\t")] ## remove empty strings
     return text_tokens
