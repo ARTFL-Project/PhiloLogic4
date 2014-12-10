@@ -31,7 +31,8 @@ def render_bibliography(b, q, hits, config, start_response):
     headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
     biblio_criteria = f.biblio_criteria(q, config)
-    pages = f.link.generate_page_links(b['description']['start'], q.results_per_page, q, hits)
+#    pages = f.link.generate_page_links(b['description']['start'], q.results_per_page, q, hits)
+    pages = f.link.page_links(config,q,len(hits))
     frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
     ajax_scripts = {'frequency': frequency_script, 'collocation': ''}
     return f.render_template(bibliography=b, query_string=q.query_string, template_name='bibliography.mako',

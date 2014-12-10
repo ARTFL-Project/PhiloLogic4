@@ -20,7 +20,7 @@
                  description = concordance['description']
                 %>
                 <div id="search_arguments">
-                    Displaying ${concordance['query']['collocate_num']} occurences of collocate <b>${concordance['query']['collocate'].decode('utf-8', 'ignore')}</b> in the vicinity of <b>${concordance['query']['q'].decode('utf-8', 'ignore')}</b><br>
+                    Displaying occurences of collocate <b>${concordance['query']['collocate'].decode('utf-8', 'ignore')}</b> in the vicinity of <b>${concordance['query']['q'].decode('utf-8', 'ignore')}</b><br>
                     Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}
                 </div> 
                 Hits <span class="start">${description['start']}</span> - <span class="end">${description['end']}</span>

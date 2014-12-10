@@ -118,7 +118,7 @@ def build_filter_list(q, config):
             filter_num = int(q.filter_frequency)
         else:
             filter_num = 100 ## default value in case it's not defined
-    filter_list = set([q['q'].decode("utf-8"])
+    filter_list = set([q['q'].decode("utf-8")])
     for line_count, line in enumerate(filter_file):
         if line_count == filter_num:
             break

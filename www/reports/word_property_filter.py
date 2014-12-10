@@ -100,7 +100,9 @@ def filter_words_by_property(hits, path, q, db, config, word_filter=True, filter
     # Do these need to be captured in wsgi_handler?
     word_property = q["word_property"]
     word_property_value = q["word_property_value"]
-           
+    word_property_total = q["word_property_total"]
+    more_pages = False
+    
     new_hitlist = []
     results = []
     for hit in hits:
@@ -116,26 +118,39 @@ def filter_words_by_property(hits, path, q, db, config, word_filter=True, filter
             citation = concordance_citation(hit, citation_hrefs)
             context = fetch_concordance(db, hit, config.db_path, config.concordance_length)
             result_obj = {"philo_id": hit.philo_id, "citation": citation, "citation_links": citation_hrefs, "context": context,
-                          "metadata_fields": metadata_fields, "bytes": hit.bytes, "collocate_count": 1}
+                          "metadata_fields": metadata_fields, "bytes": hit.bytes, "collocate_count": 1}            
             results.append(result_obj)
 
         print >> sys.stderr, "FILTER_COUNT", len(new_hitlist), "vs", (q.start + q.results_per_page)
-        if len(new_hitlist) > (q.start + q.results_per_page):
+        if len(new_hitlist) == (q.start + q.results_per_page - 1 ):
+            more_pages = True
             break
     
-    
-    concordance_object['results'] = results
+    concordance_object['results'] = results[(q.start - 1):]
     concordance_object["query_done"] = hits.done
     concordance_object['results_length'] = len(hits)
-    
+        
     start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
-    if end > len(results) + start - 1:
-        end = len(results) + start - 1
+    start = q.start
+    end = start + q.results_per_page + 1
+    if more_pages and end > len(results):
+        end = len(results)
+    if not more_pages:
+        end = len(results)
+        word_property_total = end
+    else:
+        word_property_total = end + 1
+    
     concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page}
     
     ## Create new hitlist so we can get paging
-    h = word_property_hitlist(new_hitlist)
-    pages = f.link.generate_page_links(q.start, q.results_per_page, q, h)
+    h = word_property_hitlist(new_hitlist[q.start:q.start+q.results_per_page])
+#    pages = f.link.generate_page_links(q.start, q.results_per_page, q, h)
+    pages = f.link.page_links(config,q,int(word_property_total))
+    last_page,last_page_link = pages["page_links"][-1]
+    if last_page == "Last" and more_pages:
+        pages["page_links"][-1] = ("More",last_page_link)
+   
     print >> sys.stderr, "PAGES", repr(pages)
     return concordance_object, pages
 
