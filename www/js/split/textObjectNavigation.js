@@ -161,9 +161,9 @@ function showTOC() {
 function adjustTocHeight(num) {
     // Make sure the TOC is no higher than viewport
     if ($(document).height() == $(window).height()) {
-        var toc_height = $(window).height() - $('#nav-buttons').position().top - $('#nav-buttons').height() - $('#toc-titlebar').height() - 55;
+        var toc_height = $(window).height() - $('#nav-buttons').position().top - $('#nav-buttons').height() - $('#toc-titlebar').height() - 59;
     } else {
-        var toc_height = $(window).height() - $('#nav-buttons').position().top - $('#toc-titlebar').height() - 55;
+        var toc_height = $(window).height() - $('#nav-buttons').position().top - $('#toc-titlebar').height() - 59;
     }
     if (typeof num !="undefined") {
         toc_height = toc_height - num;

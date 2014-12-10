@@ -1,18 +1,13 @@
 #!/usr/bin/env python
 
-import os
 import sys
-import urlparse
 sys.path.append('..')
 from functions.wsgi_handler import WSGIHandler
 from philologic.DB import DB
 from wsgiref.handlers import CGIHandler
 import reports as r
 import functions as f
-import cgi
 import json
-import sqlite3
-import time
 
 def get_frequency(environ,start_response):
     status = '200 OK'

@@ -78,7 +78,7 @@ def generate_time_series(q, db, hits):
     date_counts = {}
     
     ## Override default value of q.end for first batch of results
-    if q.end == 25:
+    if q.end == 0:
         q.end = 3000
         
     for i in hits[q.start:q.end]:

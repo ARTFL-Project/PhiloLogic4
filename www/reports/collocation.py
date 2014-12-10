@@ -46,7 +46,6 @@ def render_collocation(collocation_object, q, config):
     total_script = f.link.make_absolute_query_link(config, q, script_name="scripts/get_total_results.py")
     ajax_scripts = {"colloc": colloc_script, "total": total_script}
     biblio_criteria = f.biblio_criteria(q, config)
-    print >> sys.stderr, "COLLOC", repr(collocation_object['all_collocates'])
     return f.render_template(collocation=collocation_object, query_string=q.query_string, biblio_criteria=biblio_criteria,
                              word_num=q.word_num, ajax=ajax_scripts, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
@@ -118,7 +117,7 @@ def build_filter_list(q, config):
             filter_num = int(q.filter_frequency)
         else:
             filter_num = 100 ## default value in case it's not defined
-    filter_list = set([q['q']])
+    filter_list = set([q['q'].decode('utf-8', 'ignore')])
     for line_count, line in enumerate(filter_file):
         if line_count == filter_num:
             break

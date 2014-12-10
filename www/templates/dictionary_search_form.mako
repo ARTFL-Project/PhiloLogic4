@@ -1,79 +1,86 @@
 ## -*- coding: utf-8 -*-
 <div id='search_overlay'></div>
-<div class="container" style="overflow: hidden;">
+<div id="dico-form" class="container" style="overflow: hidden;">
     <form id="search" action="${config.db_url + "/dispatcher.py/"}" role="form">
-        <div id="form_body">
+    <div id="form_body">
             <div id="initial-form">
-                <div id="search_head_container">
-                    <div id="metadata_fields" class="row" style="text-align: center;" data-script="${config.db_url + '/scripts/metadata_list.py?field='}">
-                        <div class="col-xs-12 col-sm-2 text-row">
-                            Search ${config.metadata_aliases['head']}
-                        </div>
-                        <div class="col-xs-12 col-sm-10 col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-btn hidden-xs">
-                                    <button class="btn btn-default" type="button" id="tip-btn" data-toggle="modal" data-target="#syntax">
-                                        <span id="tip">?</span><span id="tip-text">Tips</span>
-                                    </button>
-                                </span>
-                                <input type='text' name='head' id="head" class="form-control">
-                                <span class="input-group-btn">
-                                    <button type="submit" class="btn btn-primary" id="button-search">
-                                        <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
-                                    </button>
-                                </span> 
+                <div id="search_terms_container">
+                    <div id="search_terms">
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-2 text-row">
+                                Search articles:
+                            </div>
+                            <div class="col-xs-12 col-sm-10 col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-btn hidden-xs">
+                                        <button class="btn btn-default" type="button" id="tip-btn" data-toggle="modal" data-target="#syntax">
+                                            <span id="tip">?</span><span id="tip-text">Tips</span>
+                                        </button>
+                                    </span>
+                                    <input type='text' name='head' id='head' class="form-control" data-script="${config.db_url + '/scripts/autocomplete_metadata.py'}">
+                                    <span class="input-group-btn">
+                                        <button type="submit" class="btn btn-primary" id="button-search">
+                                            <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
+                                        </button>
+                                    </span> 
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
+                                <button type="reset" id="reset_form" class="btn btn-danger">Clear</button>
+                                <button type="button" id="show-search-form" class="btn btn-primary" data-display="none">Show search options</button>
                             </div>
                         </div>
-                        <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
-                            <button type="reset" id="reset_form" class="btn btn-danger">Clear</button>
-                            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" style="display: none">Show search options</button>
+                        <div class="row" style="margin-top: 15px";>
+                            <div class="col-xs-12 col-sm-2 text-row">
+                                Search in articles:
+                            </div>
+                            <div class="col-xs-12 col-sm-10 col-md-6">
+                                <div class="input-group">
+                                    <input type='text' name='q' id='q' class="form-control" data-script="${config.db_url + '/scripts/autocomplete_term.py'}">
+                                    <span class="input-group-btn">
+                                        <button type="submit" class="btn btn-primary" id="button-search">
+                                            <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div id="report" class="btn-group btn-group-justified" data-toggle="buttons" style="display: none;">
+                % if "concordance" in config.search_reports:
+                    <label class="btn btn-default active">
+                        <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
+                        Concordance
+                    </label>
+                % endif
+                % if "kwic" in config.search_reports:
+                    <label class="btn btn-default hidden-xs">
+                        <input type="radio" name="report" id="kwic" value='kwic'>
+                        KWIC
+                    </label>
+                % endif
+                % if "collocation" in config.search_reports:
+                    <label class="btn btn-default">
+                        <input type="radio" name="report" id="collocation" value='collocation'>
+                        Collocation
+                    </label>
+                % endif
+                % if "time_series" in config.search_reports:
+                    <label class="btn btn-default hidden-xs">
+                        <input type="radio" name="report" id="time_series" value='time_series'>
+                        Time Series
+                    </label>
+                % endif
+            </div>
             <div id="search_elements">
                 <h5>Refine your search with the following options and fields:
-                </h5>
-                <div id="report" class="btn-group btn-group-justified" data-toggle="buttons">
-                    % if "concordance" in config.search_reports:
-                        <label class="btn btn-primary active">
-                            <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
-                            Concordance
-                        </label>
-                    % endif
-                    % if "kwic" in config.search_reports:
-                        <label class="btn btn-primary hidden-xs">
-                            <input type="radio" name="report" id="kwic" value='kwic'>
-                            KWIC
-                        </label>
-                    % endif
-                    % if "collocation" in config.search_reports:
-                        <label class="btn btn-primary">
-                            <input type="radio" name="report" id="collocation" value='collocation'>
-                            Collocation
-                        </label>
-                    % endif
-                    % if "time_series" in config.search_reports:
-                        <label class="btn btn-primary hidden-xs">
-                            <input type="radio" name="report" id="time_series" value='time_series'>
-                            Time Series
-                        </label>
-                    % endif
-                </div>
-                <div id="search-in-head" style="margin-top: 15px">
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-2 col-md-2 text-row">
-                            Full-text search
-                        </div>
-                        <div class="col-xs-12 col-sm-4 col-md-4">
-                            <input type='text' name='q' id='q' class="form-control" data-script="${config.db_url + '/scripts/term_list.py'}">
-                        </div>
-                    </div>
-                </div>
+                </h5>             
                 <!--This row defines the search method options-->
-                <div class="row hidden-xs" id='method' style="margin-top: 15px">
+                <div class="row hidden-xs" id='method'>
                     <div class="col-xs-12 col-sm-2" style="margin-top: 40px;">
-                        Full-text search
+                        Search Terms
                     </div>
                     <div class="col-xs-12 col-sm-3 col-lg-2" id="method-buttons">
                         <div class="btn-group-vertical" data-toggle="buttons">
@@ -98,7 +105,7 @@
                         <span style="padding-left: 10px">words in the same sentence</span>
                     </div>
                 </div>
-                <div id="more_metadata_fields">
+                <div id="metadata_fields" data-script="${config.db_url + '/scripts/autocomplete_metadata.py?field='}">
                     % for facet in config.metadata:
                         % if facet != "head":
                             <%
@@ -121,26 +128,64 @@
                         % endif
                     % endfor
                 </div>
-                <div id="collocation_num" class="row">
-                    <div class="col-xs-6 col-sm-2 col-md-2 text-row">
-                        Within
+                <div id="collocation-options" class="row">
+                    <div class="col-xs-12">
+                        <div class="row">
+                            <div class="col-xs-3 col-sm-2 col-md-2 text-row">
+                                Within
+                            </div>
+                            <div class="col-xs-2 col-sm-1 col-md-1">
+                                <select name="word_num" id="word_num" class="form-control" style="width: auto;">
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option selected>5</option>
+                                    <option>6</option>
+                                    <option>7</option>
+                                    <option>8</option>
+                                    <option>9</option>
+                                    <option>10</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-7 col-sm-5 col-md-7 text-row">
+                                (1-10) words
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-xs-6 col-sm-1 col-md-1">
-                        <select name="word_num" id="word_num" class="form-control">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                            <option selected>5</option>
-                            <option>6</option>
-                            <option>7</option>
-                            <option>8</option>
-                            <option>9</option>
-                            <option>10</option>
-                        </select>
-                    </div>
-                    <div class="col-xs-12 col-sm-5 col-md-9 text-row">
-                        (1-10) words
+                    <div class="col-xs-12" style="margin-top: 10px;">
+                        <div class="row">
+                            <div class="col-xs-3 col-sm-2 col-md-2 text-row">
+                                Word Filtering
+                            </div>
+                            <div class="col-xs-2 col-sm-1">
+                                <select name="filter_frequency" id="filter_frequency" class="form-control" style="width: auto;">
+                                    <option>25</option>
+                                    <option>50</option>
+                                    <option>75</option>
+                                    <option selected>100</option>
+                                    <option>125</option>
+                                    <option>150</option>
+                                    <option>175</option>
+                                    <option>200</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-6 col-sm-2">
+                                <div class="btn-group-vertical" role="group" data-toggle="buttons" id="colloc_filter_choice">
+                                    <label class="btn btn-primary active" id="colloc-filter-frequency">
+                                        <input type="radio" name="colloc_filter_choice" value="frequency" checked="checked">Most frequent terms
+                                    </label>
+                                     % if config.stopwords:
+                                        <label class="btn btn-primary" id="colloc-filter-stopwords">
+                                            <input type="radio" name="colloc_filter_choice" value="stopwords">Stopwords
+                                        </label>
+                                    % endif
+                                    <label class="btn btn-primary" id="colloc-no-filter">
+                                        <input type="radio" name="colloc_filter_choice" value="nofilter">No filtering
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div id="time_series_num" class="row">
@@ -180,17 +225,17 @@
                         Results per page:
                     </div>
                     <div class="col-xs-12 col-sm-10 col-md-10">
-                        <div class="btn-group" id='page_num' data-toggle="buttons">
+                        <div class="btn-group" id='results_per_page' data-toggle="buttons">
                             <label class="btn btn-primary active">
-                                <input type="radio" name="pagenum" id="pagenum1" value='25' checked="checked">
+                                <input type="radio" name="results_per_page" id="pagenum1" value='25' checked="checked">
                                 25
                             </label>
                             <label class="btn btn-primary">
-                                <input type="radio" name="pagenum" id="pagenum2" value='50'>
+                                <input type="radio" name="results_per_page" id="pagenum2" value='50'>
                                 50
                             </label>
                             <label class="btn btn-primary">
-                                <input type="radio" name="pagenum" id="pagenum3" value='100'>
+                                <input type="radio" name="results_per_page" id="pagenum3" value='100'>
                                 100
                             </label>
                         </div>
@@ -221,7 +266,6 @@
             </div>
         </div>
     </form>
-    <div id="waiting" style="display:none;z-index:99;position:absolute;">
-        <img src="${config.db_url}/js/gif/ajax-loader.gif" alt="Loading..."/>
+    <div id="waiting">
     </div>
 </div>

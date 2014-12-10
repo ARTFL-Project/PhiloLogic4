@@ -60,6 +60,9 @@ li {
 .small-caps {
     font-variant:small-caps;
 }
+s {
+    text-decoration: none;
+}
 #philologic_response {
     margin-top: 120px;
 }
@@ -315,6 +318,9 @@ a.sidebar-option:hover {
 }
 .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
 	background: #eee;
+}
+.ui-helper-hidden-accessible {
+	display:none;
 }
 
 
