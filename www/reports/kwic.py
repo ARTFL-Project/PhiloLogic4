@@ -41,7 +41,7 @@ def render_kwic(k, hits, config, q):
     return f.render_template(kwic=k, query_string=q.query_string, biblio_criteria=biblio_criteria,
                              ajax=ajax_scripts, pages=pages, config=config, template_name='kwic.mako', report="kwic")
 
-def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
+def generate_kwic_results(db, q, config, length=5000, object_link="div1"):
     """ The link_to_hit keyword defines the text object to which the metadata link leads to"""
     hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
     start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
@@ -59,7 +59,7 @@ def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
         
         ## Get all links and citations
         citation_hrefs = citation_links(db, config, hit)
-        full_citation, short_citation = kwic_citation(short_citation_len, metadata_fields, hit[link_to_hit])
+        full_citation, short_citation = kwic_citation(default_short_citation_len, hit, object_link)
         
         ## Find longest short_citation
         if short_citation_len == 0:
@@ -85,7 +85,7 @@ def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
     ## Populate Kwic_results with bibliography    
     for pos, result in enumerate(kwic_results):
         biblio, short_biblio, hrefs, text, hit, metadata_fields = result
-        href = hrefs[link_to_hit]
+        href = hrefs[object_link]
         if len(short_biblio) < default_short_citation_len:
             diff = default_short_citation_len - len(short_biblio)
             short_biblio += '&nbsp;' * diff
@@ -102,14 +102,14 @@ def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
     
     return kwic_object, hits
 
-def kwic_citation(short_citation_length, metadata_fields, hit):
+def kwic_citation(short_citation_length, hit, object_link):
     full_citation = ""
     short_citation = []
-    author = metadata_fields['author']
+    author = hit.author.strip()
     if author:
         full_citation += author + ", "
     short_citation.append(author)
-    title = metadata_fields['title']
+    title = hit.title.strip()
     full_citation += title
     short_citation.append(title)
         
@@ -123,7 +123,7 @@ def kwic_citation(short_citation_length, metadata_fields, hit):
             short_citation[1] = short_title[:title_len]
     short_citation = ', '.join([s for s in short_citation if s])
     
-    full_citation += ', %s' % hit.head
+    full_citation += ', %s' % hit[object_link].head
     
     return full_citation, short_citation
 
