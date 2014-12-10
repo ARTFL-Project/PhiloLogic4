@@ -3,6 +3,7 @@ import re
 import os
 import unicodedata
 import htmlentitydefs
+import traceback
 from BeautifulSoup import BeautifulStoneSoup as bss
 from philologic import TagCensus
 from optparse import OptionParser
@@ -175,14 +176,16 @@ if __name__ == '__main__':
         file_contents = convert_remaining_entities(file_contents, quiet)
         
         try:
-            tree = etree.fromstring(file_contents)
+            parser = etree.XMLParser(huge_tree=True)
+            tree = etree.fromstring(file_contents, parser=parser)
             for el in tree.iter():
                 ## Tags are defined as el.tag, so to change tag, you do: el.tag = "some_other_tag"
                 ## Attributes are contained in el.attrib where each attribute is a key. To change the type attribute you do: el.attrib['type'] = "some_other_type"
                 if el.tag in xml_tag_mapping: ## Check if the tag should be replaced according to the xml mapping dict
                     el.tag = xml_tag_mapping[el.tag]
             file_contents = etree.tostring(tree, encoding='utf-8')
-        except:
+        except Exception as e:
+            traceback.print_exc()
             print >> sys.stderr, "The clean-up script did not manage to fix all your XML issues"
             print >> sys.stderr, 'Try running "xmllint -noout" on the output file to get a more complete error report'
 
