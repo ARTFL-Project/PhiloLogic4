@@ -48,19 +48,17 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
     concordance_object = {"query": dict([i for i in q])}
     
     length = config['concordance_length']
-    try:
-        within_x_words = int(q['word_num'])
-    except ValueError: ## Getting an empty string since the keyword is not specificed in the URL
-        within_x_words = 5
+    within_x_words = int(q['word_num'])
     direction = q['direction']
     collocate = unicodedata.normalize('NFC', q['collocate'].decode('utf-8', 'ignore'))
-    collocate_num = int(q['collocate_num'])
+    collocate_num = q['collocate_num']
     
     filter_list = build_filter_list(q, config)
     
     results = []
     colloc_hitlist = []
     position = 0
+    more_pages = False
     for hit in hits:
         conc_left, conc_right = split_concordance(hit, length, config.db_path)
         
@@ -89,27 +87,49 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
             results.append(result_obj)
 
         if len(results) == (q.results_per_page):
+            more_pages = True
             break
     
     concordance_object['results'] = results
     concordance_object["query_done"] = hits.done
     concordance_object['results_length'] = len(hits)
     
-    start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
-    if end > len(results) + start - 1:
-        end = len(results) + start - 1
+#    start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
+#    if end > len(results) + start - 1:
+#        end = len(results) + start - 1
+    
+    start = q.start
+    end = start + q.results_per_page + 1
+    if more_pages and end > len(results):
+        end = len(results)
+    if not more_pages:
+        end = len(results) + 1
+        collocate_num = end
+    else:
+        collocate_num = end + 1
+    start, end, n = f.link.page_interval(q.results_per_page, hits, start, end)
+
     concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page}
+
+    
     
     ## Create new hitlist so we can get paging
     colloc_hitlist = collocation_hitlist(colloc_hitlist, collocate_num)
-    pages = f.link.generate_page_links(concordance_object['description']['start'], q.results_per_page, q, colloc_hitlist)
-    
+#    pages = f.link.generate_page_links(concordance_object['description']['start'], q.results_per_page, q, colloc_hitlist)
+    pages = f.link.page_links(config,q,collocate_num)   
+
+    last_page,last_page_link = pages["page_links"][-1]
+    if last_page == "Last" and more_pages:
+        pages["page_links"][-1] = ("More",last_page_link)
+   
+
+
     return concordance_object, pages
 
 def colloc_concordance(db, hit, path, q, context_size):
     conc_text = fetch_concordance(db, hit, path, context_size)
     collocate = q['collocate'].decode('utf-8', 'ignore')
-    collocate_match = re.compile(r'(?<!<span class="highlight">)(%s)(.*?)' % collocate, flags=re.U|re.I)
+    collocate_match = re.compile(r'(?<!<span class="highlight">)\b(%s)\b(.*?)' % collocate, flags=re.U|re.I)
     conc_text = collocate_match.sub(r'<span class="collocate">\1\2</span>', conc_text)
     return conc_text  
     
