@@ -67,28 +67,25 @@
                     <h4 class="modal-title" id="myModalLabel">Export Results</h4>
                 </div>
                 <div class="modal-body">
-                   <h5>Choose the format in which to export your search results:</h5>
-                   <% script = config.db_url + "/scripts/export_results.py?" + (query_string or '') + "&output_format=" %>
-                   <div id="export-buttons" data-script="${script}">
-                        <button type="button" class="btn btn-primary" data-format="json">
-                            JSON
-                        </button>
-                        <button type="button" class="btn btn-primary" data-format="csv">
-                            CSV
-                        </button>
-                        <button type="button" class="btn btn-primary" data-format="tab">
-                            TAB
-                        </button>
-                   </div>
-                   <div id="export-results-file" style="margin-top: 10px;display: none;">
-                        Click on the link below to download the results of your query:
-                        <div id="retrieve-message">
-                            Generating results...
+                    % if report not in ("collocation", "time_series"):
+                        <h5>Choose the format in which to export your search results:</h5>
+                        <div id="export-buttons">
+                            <button type="button" class="btn btn-primary" data-format="json">
+                                JSON
+                            </button>
+                            <button type="button" class="btn btn-primary" data-format="csv" disabled>
+                                CSV
+                            </button>
+                            <button type="button" class="btn btn-primary" data-format="tab" disabled>
+                                TAB
+                            </button>
+                            <div>
+                                Note: only JSON is currently supported.
+                            </div>
                         </div>
-                        <div id="export-download-link" style="margin-top: 10px;margin-bottom: 10px; display: none;">
-                            <a download>Download results file</a>
-                        </div>
-                   </div>
+                    % else:
+                        <h5>We currently don't support exporting results from a ${report} report.</h5>
+                    % endif
                 </div>
             </div>
         </div>

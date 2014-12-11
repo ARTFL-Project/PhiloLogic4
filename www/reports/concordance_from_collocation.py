@@ -51,7 +51,7 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
     within_x_words = int(q['word_num'])
     direction = q['direction']
     collocate = unicodedata.normalize('NFC', q['collocate'].decode('utf-8', 'ignore'))
-    collocate_num = q['collocate_num']
+    collocate_num = int(q['collocate_num'])
     
     filter_list = build_filter_list(q, config)
     
@@ -94,20 +94,20 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
     concordance_object["query_done"] = hits.done
     concordance_object['results_length'] = len(hits)
     
-#    start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
-#    if end > len(results) + start - 1:
-#        end = len(results) + start - 1
+    start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
+    if end > len(results) + start - 1:
+        end = len(results) + start - 1
     
-    start = q.start
-    end = start + q.results_per_page + 1
-    if more_pages and end > len(results):
-        end = len(results)
-    if not more_pages:
-        end = len(results) + 1
-        collocate_num = end
-    else:
-        collocate_num = end + 1
-    start, end, n = f.link.page_interval(q.results_per_page, hits, start, end)
+    #start = q.start
+    #end = start + q.results_per_page + 1
+    #if more_pages and end > len(results):
+    #    end = len(results)
+    #if not more_pages:
+    #    end = len(results) + 1
+    #    collocate_num = end
+    #else:
+    #    collocate_num = end + 1
+    #start, end, n = f.link.page_interval(q.results_per_page, hits, start, end)
 
     concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page}
 
