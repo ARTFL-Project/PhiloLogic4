@@ -48,10 +48,11 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
     concordance_object = {"query": dict([i for i in q])}
     
     length = config['concordance_length']
+
     within_x_words = int(q['word_num'])
     direction = q['direction']
     collocate = unicodedata.normalize('NFC', q['collocate'].decode('utf-8', 'ignore'))
-    collocate_num = int(q['collocate_num'])
+    collocate_num = q['collocate_num']
     
     filter_list = build_filter_list(q, config)
     
@@ -59,6 +60,12 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
     colloc_hitlist = []
     position = 0
     more_pages = False
+
+    if q.start == 0:
+        start = 1
+    else:
+        start = q.start
+
     for hit in hits:
         conc_left, conc_right = split_concordance(hit, length, config.db_path)
         
@@ -94,20 +101,20 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
     concordance_object["query_done"] = hits.done
     concordance_object['results_length'] = len(hits)
     
-    start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
-    if end > len(results) + start - 1:
-        end = len(results) + start - 1
-    
-    #start = q.start
-    #end = start + q.results_per_page + 1
-    #if more_pages and end > len(results):
-    #    end = len(results)
-    #if not more_pages:
-    #    end = len(results) + 1
-    #    collocate_num = end
-    #else:
-    #    collocate_num = end + 1
-    #start, end, n = f.link.page_interval(q.results_per_page, hits, start, end)
+#    start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
+#    if end > len(results) + start - 1:
+#        end = len(results) + start - 1
+    end = start + len(results) - 1    
+#    if q.start == 0:
+#        end = start + len(results) - 1
+#    else:
+#        end = q.start + len(results) - 1
+
+    if len(results) < q.results_per_page:
+        collocate_num = end
+    else:
+        collocate_num = end + 1
+#    start, end, n = f.link.page_interval(q.results_per_page, hits, start, end)
 
     concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page}
 
