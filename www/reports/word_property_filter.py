@@ -101,16 +101,26 @@ def filter_words_by_property(hits, path, q, db, config, word_filter=True, filter
     word_property = q["word_property"]
     word_property_value = q["word_property_value"]
     word_property_total = q["word_property_total"]
-    more_pages = False
     
     new_hitlist = []
     results = []
+    position = 0
+    more_pages = False
+    
+    if q.start == 0:
+        start = 1
+    else:
+        start = q.start
+
     for hit in hits:
         ## get my chunk of text ##
         hit_val = get_word_attrib(hit,word_property,db)
-        if hit_val == word_property_value:
-            new_hitlist.append(hit)
 
+        if hit_val == word_property_value:
+            position += 1
+            if position < start:
+                continue
+            new_hitlist.append(hit)
             citation_hrefs = citation_links(db, config, hit)
             metadata_fields = {}
             for metadata in db.locals['metadata_fields']:
@@ -121,30 +131,34 @@ def filter_words_by_property(hits, path, q, db, config, word_filter=True, filter
                           "metadata_fields": metadata_fields, "bytes": hit.bytes, "collocate_count": 1}            
             results.append(result_obj)
 
-        print >> sys.stderr, "FILTER_COUNT", len(new_hitlist), "vs", (q.start + q.results_per_page)
-        if len(new_hitlist) == (q.start + q.results_per_page - 1 ):
+        if len(new_hitlist) == (q.results_per_page):
             more_pages = True
             break
     
-    concordance_object['results'] = results[(q.start - 1):]
+    concordance_object['results'] = results
     concordance_object["query_done"] = hits.done
     concordance_object['results_length'] = len(hits)
-        
-    start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
-    start = q.start
-    end = start + q.results_per_page + 1
-    if more_pages and end > len(results):
-        end = len(results)
-    if not more_pages:
-        end = len(results)
+
+    end = start + len(results) - 1  
+#    if q.start == 0:
+#        end = start + len(results) - 1
+#    else:
+#        end = q.start + len(results) - 1
+    
+    if len(results) < q.results_per_page:
         word_property_total = end
     else:
         word_property_total = end + 1
+    print >> sys.stderr, "RENDERING FILTERED HITLIST:: START:",start,"END:",end,"LENGTH",len(new_hitlist)
+
+#    start, end, n = f.link.page_interval(q.results_per_page, hits, start,end)
+
     
-    concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page}
+    concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page}    
     
     ## Create new hitlist so we can get paging
-    h = word_property_hitlist(new_hitlist[q.start:q.start+q.results_per_page])
+    h = word_property_hitlist(new_hitlist[start:])
+
 #    pages = f.link.generate_page_links(q.start, q.results_per_page, q, h)
     pages = f.link.page_links(config,q,int(word_property_total))
     last_page,last_page_link = pages["page_links"][-1]
