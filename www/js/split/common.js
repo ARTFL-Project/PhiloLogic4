@@ -208,19 +208,8 @@ $(document).ready(function() {
     
     // Export results handler
     $('#export-buttons button').click(function() {
-        $('#export-download-link').hide();
-        $('#retrieve-message').show();
-        var script = $('#export-buttons').data('script') + $(this).data('format');
-        $('#export-results-file').show();
-        window.open(script, '_blank');
-        //$('#retrieve-message').append('<img src="' + db_url + '/js/gif/spinner-round.gif"/>');
-        //$.get(script, function(href) {
-        //    $('#export-download-link a').attr('href', href);
-        //    $('#retrieve-message').fadeOut(function() {
-        //        $('#retrieve-message img').remove();
-        //        $('#export-download-link').velocity('fadeIn');
-        //    });
-        //})
+        var href = window.location.href + "&format=" + $(this).data('format');
+        window.open(href, '_blank');
     });
     
 });

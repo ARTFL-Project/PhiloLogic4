@@ -49,6 +49,11 @@ def generate_frequency(results, q, db, config):
         if append_to_label:
             label = label + ' (' + ', '.join(append_to_label) + ')'
         
+        ## HACK: we need to find a better way of getting exact matches on metadata
+        for m in metadata:
+            if metadata[m] and m != "date":
+                metadata[m] = '"%s"' % metadata[m]
+        
         # Now build the url from q.
         url = f.link.make_query_link(q["q"],q["method"],q["arg"],q["report"],**metadata)
     

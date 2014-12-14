@@ -32,7 +32,8 @@ def kwic(environ,start_response):
         
 def render_kwic(k, hits, config, q):
     biblio_criteria = f.biblio_criteria(q, config)
-    pages = f.link.generate_page_links(k['description']['start'], q.results_per_page, q, hits)
+    #pages = f.link.generate_page_links(k['description']['start'], q.results_per_page, q, hits)
+    pages = f.link.page_links(config,q,len(hits))
     collocation_script = f.link.make_absolute_query_link(config, q, report="collocation", format="json")
     frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
     kwic_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/concordance_kwic_switcher.py")

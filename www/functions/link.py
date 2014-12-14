@@ -71,16 +71,6 @@ def byte_query(hit_bytes):
     """This is used for navigating concordance results and highlighting hits"""
     return '?' + '&'.join(['byte=%d' % int(byte) for byte in hit_bytes])
 
-def generate_page_links(start, results_per_page, q, results):
-    current_page, my_pages, page_num = pager(start, results_per_page, q, results)
-    if results.done and page_num != my_pages[-1][0]:
-        last_page = find_page_number(len(results), results_per_page)
-        last_page_link = page_linker(last_page, results_per_page, q)
-    else:
-        last_page_link = None
-    pages = {"current_page": current_page, "my_pages": my_pages, "page_num": page_num, "last_page_link": last_page_link}
-    return pages
-
 def page_interval(num, results, start, end):
     start = int(start)
     end = int(end)
@@ -94,26 +84,71 @@ def page_interval(num, results, start, end):
         end = results_len
     n = start - 1
     return start, end, n
-    
-def page_linker(page, results_per_page, q):
-    if "collocate" in q:
-        collocate = [q['collocate'], q['direction'], q['word_num'], q['collocate_num']]
-    else:
-        collocate = []
-    if page == 1:
-        page_start = 1
-    else:
-        page_start = results_per_page * (page - 1) + 1
-    page_end = results_per_page * (page)
-    page_link = make_query_link(q["q"],q["method"],q["arg"],q['report'],page_start,page_end,results_per_page,collocate,**q.metadata)    
-    return page_link
 
-def find_page_number(results_len, results_per_page):
-    page_num = results_len / results_per_page
+def page_links(config,params,results_len,script_name="dispatcher.py"):
+    # pull basic parameters out of the query
+    start = params.start
+    results_per_page = params.results_per_page
+
+    # first find out what page we are on currently.    
+    current_page = start / results_per_page + 1 or 1
+
+    # then how many total pages the query has    
+    total_pages = results_len / results_per_page
     remainder = results_len % results_per_page
     if remainder:
-        page_num += 1
-    return page_num
+        total_pages += 1
+    total_pages = total_pages or 1    
+    
+    # construct the list of page numbers we will output.
+    pages = []
+    # up to four previous pages
+    prev = current_page - 4
+    while prev < current_page:
+        if prev > 0:
+            pages.append(prev)
+        prev += 1
+    # the current page
+    pages.append(current_page)
+    # up to five following pages
+    next = current_page + 5
+    while next > current_page:
+        if next < total_pages:
+            pages.append(next)
+        next -= 1
+    # first and last if not already there
+    if (pages[0] != 1):
+        pages = [1] + pages
+    if (pages[-1] != total_pages):
+        pages = pages + [total_pages]
+    pages.sort()
+    
+    #now we construct the actual links from the page numbers
+    page_links = []
+    for page in pages:
+        page_start = results_per_page * (page - 1) + 1
+        page_end = page_start + results_per_page - 1
+        if page_end > results_len:
+            page_end = results_len
+        link = make_absolute_query_link(config,params,script_name=script_name,start=str(page_start),end=str(page_end))
+        if page == 1 and 2 not in pages:
+            page = "First"
+        if page == total_pages:
+            page = "Last"
+            if page == current_page:
+                current_page = "Last"
+        page_links.append( (page,link) )
+    return {"current_page": current_page, "page_links":page_links}
+    
+def generate_page_links(start, results_per_page, q, results):
+    current_page, my_pages, page_num = pager(start, results_per_page, q, results)
+    if results.done and page_num != my_pages[-1][0]:
+        last_page = find_page_number(len(results), results_per_page)
+        last_page_link = page_linker(last_page, results_per_page, q)
+    else:
+        last_page_link = None
+    pages = {"current_page": current_page, "my_pages": my_pages, "page_num": page_num, "last_page_link": last_page_link}
+    return pages
 
 def pager(start, results_per_page, q, results):
     results_len = len(results)
@@ -148,3 +183,22 @@ def pager(start, results_per_page, q, results):
             
     return current_page, page_links, page_num
         
+def find_page_number(results_len, results_per_page):
+    page_num = results_len / results_per_page
+    remainder = results_len % results_per_page
+    if remainder:
+        page_num += 1
+    return page_num
+
+def page_linker(page, results_per_page, q):
+    if "collocate" in q:
+        collocate = [q['collocate'], q['direction'], q['word_num'], q['collocate_num']]
+    else:
+        collocate = []
+    if page == 1:
+        page_start = 1
+    else:
+        page_start = results_per_page * (page - 1) + 1
+    page_end = results_per_page * (page)
+    page_link = make_query_link(q["q"],q["method"],q["arg"],q['report'],page_start,page_end,results_per_page,collocate,**q.metadata)    
+    return page_link

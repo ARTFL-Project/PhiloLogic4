@@ -62,7 +62,7 @@ def concordance_results(db, q, config):
  
 def render_concordance(c, hits, config, q):
     biblio_criteria = f.biblio_criteria(q, config)
-    pages = f.link.generate_page_links(c['description']['start'], q.results_per_page, q, hits)
+    pages = f.link.page_links(config,q,len(hits))
     collocation_script = f.link.make_absolute_query_link(config, q, report="collocation", format="json")
     frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
     kwic_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/concordance_kwic_switcher.py", report="kwic")
@@ -133,7 +133,7 @@ def concordance_citation(hit, citation_hrefs):
     page_obj = hit.page
     if page_obj['n']:
         page_n = page_obj['n']
-        citation += u" [line %s] " % page_n    
+        citation += u" [page %s] " % page_n    
     citation = u'<span class="philologic_cite">' + citation + "</span>"
     return citation
 
