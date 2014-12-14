@@ -86,6 +86,8 @@ def generate_toc_object(obj, db, q, config):
                         display_name = i['type'] + " " + i["n"]                       
                     else:
                         display_name = i["head"] or i['type'] or i['philo_name'] or i['philo_type']
+                        if display_name == "__philo_virtual":
+                            display_name = i['philo_type']
             display_name = display_name[0].upper() + display_name[1:]
             link = f.make_absolute_object_link(config, philo_id.split()[:7])
             toc_element = {"philo_id": philo_id, "philo_type": philo_type, "display_name": display_name, "link": link}
@@ -100,6 +102,46 @@ def generate_toc_object(obj, db, q, config):
                   "citation": citation}
     return toc_object
 
+def generate_text_object(obj, db, q, config):
+    text_object = {"query": dict([i for i in q]), "philo_id": obj.philo_id[0]}
+    text_object['prev'] = ' '.join(obj.prev.split()[:7])
+    text_object['next'] = ' '.join(obj.next.split()[:7])
+    metadata_fields = {}
+    for metadata in db.locals['metadata_fields']:
+        if db.locals['metadata_types'][metadata] == "doc":
+            metadata_fields[metadata] = obj[metadata]
+    text_object['metadata_fields'] = metadata_fields
+    doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
+    citation = biblio_citation(obj, doc_link)
+    text_object['citation'] = citation
+    text = get_text_obj(obj, config.db_path, query_args=q.byte)
+    text_object['text'] = text
+    return text_object
+
+def get_text_obj(obj, path, query_args=False):
+    filename = obj.doc.filename
+    if filename and os.path.exists(path + "/data/TEXT/" + filename):
+        path += "/data/TEXT/" + filename
+    else:
+        ## workaround for when no filename is returned with the full philo_id of the object
+        philo_id = obj.philo_id[0] + ' 0 0 0 0 0 0'
+        c = obj.db.dbh.cursor()
+        c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id,))
+        path += "/data/TEXT/" + c.fetchone()["filename"]
+    file = open(path)
+    byte_start = int(obj.byte_start)
+    file.seek(byte_start)
+    width = int(obj.byte_end) - byte_start
+    raw_text = file.read(width)
+
+    if query_args:
+        bytes = sorted([int(byte) - byte_start for byte in query_args])
+    else:
+        bytes = []
+        
+    formatted = format_text_object(raw_text,bytes).decode("utf-8","ignore")
+    return formatted
+
 def format_text_object(text,bytes=[]):
     parser = etree.XMLParser(recover=True)
     if bytes:
@@ -107,6 +149,7 @@ def format_text_object(text,bytes=[]):
         last_offset = 0
         for b in bytes:
             new_text += text[last_offset:b] + "<philoHighlight/>"
+            print >> sys.stderr, "HIGH", b
             last_offset = b
         text = new_text + text[last_offset:]
     text = "<div>" + text + "</div>"
@@ -187,43 +230,3 @@ def check_philo_virtual(db, path_components):
             return False
     except TypeError:
         return False
-
-def generate_text_object(obj, db, q, config):
-    text_object = {"query": dict([i for i in q]), "philo_id": obj.philo_id[0]}
-    text_object['prev'] = ' '.join(obj.prev.split()[:7])
-    text_object['next'] = ' '.join(obj.next.split()[:7])
-    metadata_fields = {}
-    for metadata in db.locals['metadata_fields']:
-        if db.locals['metadata_types'][metadata] == "doc":
-            metadata_fields[metadata] = obj[metadata]
-    text_object['metadata_fields'] = metadata_fields
-    doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
-    citation = biblio_citation(obj, doc_link)
-    text_object['citation'] = citation
-    text = get_text_obj(obj, config.db_path, query_args=q['byte'])
-    text_object['text'] = text
-    return text_object
-
-def get_text_obj(obj, path, query_args=False):
-    filename = obj.doc.filename
-    if filename and os.path.exists(path + "/data/TEXT/" + filename):
-        path += "/data/TEXT/" + filename
-    else:
-        ## workaround for when no filename is returned with the full philo_id of the object
-        philo_id = obj.philo_id[0] + ' 0 0 0 0 0 0'
-        c = obj.db.dbh.cursor()
-        c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id,))
-        path += "/data/TEXT/" + c.fetchone()["filename"]
-    file = open(path)
-    byte_start = int(obj.byte_start)
-    file.seek(byte_start)
-    width = int(obj.byte_end) - byte_start
-    raw_text = file.read(width)
-
-    if query_args:
-        bytes = sorted([int(byte) - byte_start for byte in query_args.split('+')])
-    else:
-        bytes = []
-        
-    formatted = format_text_object(raw_text,bytes).decode("utf-8","ignore")
-    return formatted
