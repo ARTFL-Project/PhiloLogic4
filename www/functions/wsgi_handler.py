@@ -16,6 +16,11 @@ class WSGIHandler(object):
           "end":"0",
           #"arg":"0",          
         }
+        
+        # Make byte a direct attribute of the class since it is a special case and
+        # can contain more than one element
+        if "byte" in self.cgi:
+            self.byte = self.cgi['byte']
 
         ## Temporary fix for search term arguments before new core merge
         method = self["method"] or "proxy"
