@@ -43,6 +43,7 @@ metadata_xpaths = [
                 ("doc", ".//sourceDesc/bibl/imprint/date", "date"),
                 ("doc", ".//sourceDesc/biblFull/publicationStmt/date", "date"),
                 ("doc", ".//profileDesc/dummy/creation/date", "date"),
+                ("doc", ".//fileDesc/sourceDesc/bibl/creation/date", "date"),
                 ("doc", "./text/front/docDate/.@value", "date"),  ## this is for the French theater
                 
                 ## Publisher
