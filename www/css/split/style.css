@@ -233,16 +233,17 @@ s {
 }
 /*Text formatting*/
 .xml-l {
-    display: block;
+    /*display: block;*/
 }
 span.note {
 	display: inline;
 }
 .xml-l::before {
-    content:attr(n) "\0020\0020\0020";
+    content:"\A" attr(n) "\0020\0020\0020";
     font-family: 'Droid Sans Mono', sans-serif;
     color: #bababa;
     font-size: .7em;
+	white-space: pre;
 }
 .xml-l[type="split"]::before {
     content: "";
