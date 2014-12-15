@@ -114,11 +114,12 @@ def generate_text_object(obj, db, q, config):
     doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
     citation = biblio_citation(obj, doc_link)
     text_object['citation'] = citation
-    text = get_text_obj(obj, config.db_path, query_args=q.byte)
+    text = get_text_obj(obj, config, q)
     text_object['text'] = text
     return text_object
 
-def get_text_obj(obj, path, query_args=False):
+def get_text_obj(obj, config, q):
+    path = config.db_path
     filename = obj.doc.filename
     if filename and os.path.exists(path + "/data/TEXT/" + filename):
         path += "/data/TEXT/" + filename
@@ -134,22 +135,21 @@ def get_text_obj(obj, path, query_args=False):
     width = int(obj.byte_end) - byte_start
     raw_text = file.read(width)
 
-    if query_args:
-        bytes = sorted([int(byte) - byte_start for byte in query_args])
+    if q.byte:
+        bytes = sorted([int(byte) - byte_start for byte in q.byte])
     else:
         bytes = []
         
-    formatted = format_text_object(raw_text,bytes).decode("utf-8","ignore")
+    formatted = format_text_object(raw_text, config, q, bytes).decode("utf-8","ignore")
     return formatted
 
-def format_text_object(text,bytes=[]):
+def format_text_object(text, config, q, bytes=[]):
     parser = etree.XMLParser(recover=True)
     if bytes:
         new_text = ""
         last_offset = 0
         for b in bytes:
             new_text += text[last_offset:b] + "<philoHighlight/>"
-            print >> sys.stderr, "HIGH", b
             last_offset = b
         text = new_text + text[last_offset:]
     text = "<div>" + text + "</div>"
@@ -165,11 +165,36 @@ def format_text_object(text,bytes=[]):
                 el.append(etree.Element("br"))
             elif el.tag == "list":
                 el.tag = "ul"
-            elif el.tag == "note":
+            elif el.tag == "ptr":
+                target = el.attrib["target"]
+                link = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_notes.py", target=target)
+                el.attrib["data-ref"] = link
+                del el.attrib["target"]
+                el.attrib['class'] = "note-ref"
+                el.attrib['tabindex'] = "0"
+                el.attrib['data-toggle'] = "popover"
+                el.attrib['data-container'] = "body"
+                el.attrib["data-placement"] = "right"
+                el.attrib["data-trigger"] = "focus"
+                el.attrib["data-html"] = "true"
+                el.attrib["data-animation"] = "true"
+                el.text = "note"
+                el.tag = "span"
+            elif el.tag == "note" and el.getparent().attrib["type"] != "notes":
                 el.tag = 'span'
                 el.attrib['class'] = "note-content"
                 for child in el:
                     child = note_content(child)
+                # insert an anchor before this element by scanning through the parent
+                parent = el.getparent()
+                for i,child in enumerate(parent):
+                    if child == el:
+                        attribs = {"class":"note", "tabindex": "0", "data-toggle": "popover", "data-container": "body",
+                                   "data-placement": "right", "data-trigger": "focus"}
+                        parent.insert(i,etree.Element("a",attrib=attribs))
+                        new_anchor = parent[i]
+                        new_anchor.text = "note"
+
             elif el.tag == "item":
                 el.tag = "li"
             elif el.tag == "ab" or el.tag == "ln":
