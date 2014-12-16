@@ -71,6 +71,8 @@ def generate_toc_object(obj, db, q, config):
     for i in toms_object:
         if i['philo_name'] == '__philo_virtual' and i["philo_type"] != "div1":
             continue
+        elif i['type'] == "notes" or i['philo_name'] == "note": ## Hide notes from table of contents
+            continue
         else:
             philo_id = i['philo_id']
             philo_type = i['philo_type']
