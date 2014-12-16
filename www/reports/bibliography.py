@@ -70,15 +70,15 @@ def biblio_citation(hit, citation_hrefs):
         citation = u"<i><a href='%s'>%s</a></i>" % (citation_hrefs['doc'],hit.title)
     more_metadata = []
     if hit.pub_place:
-        more_metadata.append(hit.pub_place)
+        more_metadata.append(hit.pub_place.strip())
     if hit.publisher:
-        more_metadata.append(hit.publisher)
+        more_metadata.append(hit.publisher.strip())
     if hit.collection:
-        more_metadata.append(hit.collection)
+        more_metadata.append(hit.collection.strip())
     if hit.date:
-        more_metadata.append(hit.date)
+        more_metadata.append(hit.date.strip())
     if more_metadata:
-        citation += '(%s)' % ' '.join(more_metadata)
+        citation += ' (%s)' % ' '.join([i for i in more_metadata if i])
     if hit.genre:
         citation += ' [genre: %s]' % hit.genre
         
