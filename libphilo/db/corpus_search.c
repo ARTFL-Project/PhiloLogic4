@@ -46,7 +46,9 @@ enum stage_kind {
 
 typedef struct search_stage {
   enum stage_kind kind;
-  int (*check)(dbh *,uint32_t *,uint32_t *);
+  int (*check)(dbh *,uint32_t *,uint32_t *, int);
+  int arg;
+  int init;
   union {
     word_heap heap;
     corpus corp;
@@ -95,7 +97,7 @@ word_rec * fetch_word(dbh *db, char *word) {
   
   rec.current_block = 0; // is this redundant with header_position?
   rec.header_position = 0; 
-  rec.block_position = 0; // position 0 means the header is the next hit, and the block hasn't been fetched yet.
+  rec.block_position = 0; // position 0 means the header is the next hit, and the block hasn't been -ed yet.
   rec.current_hit = calloc(1,db->dbspec->fields * sizeof(uint32_t));
   rec.next_header = calloc(1,db->dbspec->fields * sizeof(uint32_t));
   *ret = rec;
@@ -129,71 +131,74 @@ uint32_t *word_next_hit(dbh *db, word_rec *rec) {
     //fprintf(stderr,"type %d; in block %d of %d", rec->type, rec->current_block, rec->block_count);
     if (rec->current_block < rec->block_count) { // if we aren't past the last block
       if (rec->block_position == 0) { // if we need to start a new block...
-	//fprintf(stderr,", reading header for block %d of %d\n",rec->current_block, rec->block_count);
+//      fprintf(stderr,", reading header for block %d of %d\n",rec->current_block, rec->block_count);
 
-	// read the header.
-	read_hit(db,rec->header,rec->current_hit); 
-	rec->header_position += 1;
-	rec->block_position += 1; // note that we haven't actually read from a block, or loaded it
-
-	// free the old block vector
-	if (rec->block != NULL) {
-	  bitsvectorOld(rec->block);
-	  rec->block = NULL;
-	}
-
-	// peek at the next header hit, if we're not on the last block
-	if (rec->header_position < rec->block_count) {
-	  //fprintf(stderr,", looking ahead at next block");
-	  peek = *rec->header; // save the state of the header vector
-	  read_hit(db,rec->header,rec->next_header); // read the next block's header
-	  *rec->header = peek; // rewind
-	} else { // if we're on the last block
-	  rec->next_header = NULL;
-	}
-	//fprintf(stderr,"\n");
-	return rec->current_hit;
+        // read the header.
+        read_hit(db,rec->header,rec->current_hit); 
+        rec->header_position += 1;
+        rec->block_position += 1; // note that we haven't actually read from a block, or loaded it
+    
+        // free the old block vector
+        if (rec->block != NULL) {
+          fprintf(stderr,"freeing rec->block on %s\n", rec->word);
+          bitsvectorOld(rec->block);
+          rec->block = NULL;
+        }
+    
+        // peek at the next header hit, if we're not on the last block
+        if (rec->header_position < rec->block_count) {
+          //fprintf(stderr,", looking ahead at next block");
+          peek = *rec->header; // save the state of the header vector
+          read_hit(db,rec->header,rec->next_header); // read the next block's header
+          *rec->header = peek; // rewind
+        } else { // if we're on the last block
+          rec->next_header = NULL;
+        }
+        //fprintf(stderr,"\n");
+        return rec->current_hit;
       }
       else { // if we've read the header of the current block..
-	
-	// we may still need to load it from disk.
-	if (rec->block_position == 1) {
-	  //fprintf(stderr,"loading block from disk\n");
-	  buffer = malloc(sizeof(char) * db->dbspec->block_size);
-	  res = fseeko(db->block_file,rec->start_offset + (db->dbspec->block_size * (rec->current_block))  ,0);
-	  res = fread(buffer,sizeof(char),db->dbspec->block_size, db->block_file);
-	  rec->block = bitsvectorNew(buffer); // buffer will be freed when bitsvectorOld is called.
-	} 
-	// we should check to see if we're still in a block--don't know why this doesn't segfault.
-	if ( bitsvectorTell(rec->block) + db->dbspec->bitwidth > db->dbspec->block_size << 3) {
-	  //fprintf(stderr,"end of block, advancing to next block\n");
-	  rec->current_block += 1;
-	  rec->block_position = 0;
-	  return word_next_hit(db,rec);
-	}
-	//	fprintf(stderr,",reading block hit %d at bit %d of %d",rec->block_position,bitsvectorTell(rec->block),db->dbspec->block_size << 3);
-	// once it's loaded, read it into a temp buffer.
-	read_hit(db,rec->block,rec->current_hit);
-	// a hit consisting of all binary 1's is actually an end-of-block flag
-	for (i = 0; i < db->dbspec->fields; i++) {
-	  if (rec->current_hit[i] != (( 1 << db->dbspec->bitlengths[i] ) - 1 )) {
-	    //fprintf(stderr,":valid");
-	    // the hit is good, return it.
-	    rec->block_position += 1;
-	    //fprintf(stderr,"; advancing to block hit %d\n",rec->block_position);
-	    return rec->current_hit;
-	  }
-	}
-	//fprintf(stderr,":invalid, advancing to next block\n");
-	// the hit is fake, we need to go to the next block.
-	rec->current_block += 1;
-	rec->block_position = 0;
-	// call ourselves recursively, we can check there if we've gone off the last block.
-	return word_next_hit(db,rec);
+        // we may still need to load it from disk.
+        if (rec->block_position == 1) {
+          fprintf(stderr,"%s: loading block from disk\n", rec->word);
+          buffer = malloc(sizeof(char) * db->dbspec->block_size);
+          res = fseeko(db->block_file,rec->start_offset + (db->dbspec->block_size * (rec->current_block))  ,0);
+          res = fread(buffer,sizeof(char),db->dbspec->block_size, db->block_file);
+          rec->block = bitsvectorNew(buffer); // buffer will be freed when bitsvectorOld is called.
+        } 
+        fprintf(stderr, "%s: at bit %d in block\n", rec->word, bitsvectorTell(rec->block) );
+
+        // we should check to see if we're still in a block--don't know why this doesn't segfault.
+        if ( bitsvectorTell(rec->block) + db->dbspec->bitwidth > db->dbspec->block_size << 3) {
+          //fprintf(stderr,"end of block, advancing to next block\n");
+          rec->current_block += 1;
+          rec->block_position = 0;
+          return word_next_hit(db,rec);
+        }
+        fprintf(stderr,"%s: reading block %d hit %d at bit %d of %d\n",rec->word,rec->current_block,rec->block_position,bitsvectorTell(rec->block),db->dbspec->block_size << 3);
+        // once it's loaded, read it into a temp buffer.
+        read_hit(db,rec->block,rec->current_hit);
+        // a hit consisting of all binary 1's is actually an end-of-block flag
+        for (i = 0; i < db->dbspec->fields; i++) {
+          if (rec->current_hit[i] != (( 1 << db->dbspec->bitlengths[i] ) - 1 )) {
+            //fprintf(stderr,":valid");
+            // the hit is good, return it.
+            rec->block_position += 1;
+            fprintf(stderr, "%s: at bit %d after reading hit\n", rec->word, bitsvectorTell(rec->block));
+            //fprintf(stderr,"; advancing to block hit %d\n",rec->block_position);
+            return rec->current_hit;
+          }
+        }
+        //fprintf(stderr,":invalid, advancing to next block\n");
+        // the hit is fake, we need to go to the next block.
+        rec->current_block += 1;
+        rec->block_position = 0;
+        // call ourselves recursively, we can check there if we've gone off the last block.
+        return word_next_hit(db,rec);
       }
     }
     else { // if we're off the end of the block list      
-      //fprintf(stderr,"no more blocks.  returning NULL\n");
+      fprintf(stderr,"%s: no more blocks.  returning NULL\n", rec->word);
       return NULL;
     }
   }
@@ -203,11 +208,11 @@ word_rec new_word_rec(dbh *db, char *word) {
   word_rec rec;
 
   rec.header_hits = hit_lookup(db,
-			       word,
-			       &rec.type,
-			       (uint32_t *)&rec.freq, /*fix this*/
-			       &rec.block_count,
-			       &rec.start_offset);
+                   word,
+                   &rec.type,
+                   (uint32_t *)&rec.freq, /*fix this*/
+                   &rec.block_count,
+                   &rec.start_offset);
   rec.word = malloc(strlen(word) + 1);
   strcpy(rec.word,word);
   
@@ -227,7 +232,7 @@ void dump_hits(FILE *f,dbh *db, uint32_t *hits, int count) {
   }
 }
 
-int byte_cmp(dbh *db, uint32_t *L, uint32_t *R) {
+int byte_cmp(dbh *db, uint32_t *L, uint32_t *R, int arg) {
   if (L[0] != R[0]) {
     return L[0] < R[0] ? -1 : 1;
   } else if (L[7] != R[7]) {
@@ -236,9 +241,55 @@ int byte_cmp(dbh *db, uint32_t *L, uint32_t *R) {
     return 0;
   }
 }
-int hit_cmp(dbh *db, uint32_t *L, uint32_t *R) {
+
+int hit_cmp(dbh *db, uint32_t *L, uint32_t *R, int arg) {
   int i;
   for (i = 0; i < 7; i++) { //ugly...db has 9 fields, only 7 are good for sorting
+    if (L[i] != R[i] ) {
+      return L[i] < R[i] ? -1 : 1;
+    }
+  }
+  return 0;
+}
+
+int proximity_cmp(dbh *db, uint32_t *L, uint32_t *R, int arg) {
+  int i;
+  uint32_t dist;
+  for (i = 0; i < 6; i++) { //ugly...db has 9 fields, only 7 are good for sorting
+    if (L[i] != R[i] ) {
+      return L[i] < R[i] ? -1 : 1;
+    }
+  }
+  dist = R[6] - L[6];
+  if (arg >= dist > 0) {
+    return 0;
+  }
+  else {
+    return L[6] < R[6] ? -1 : 1;
+  }
+}
+
+int phrase_cmp(dbh *db, uint32_t *L, uint32_t *R, int arg) {
+  int i;
+  uint32_t dist;
+  for (i = 0; i < 6; i++) { //ugly...db has 9 fields, only 7 are good for sorting
+    if (L[i] != R[i] ) {
+      return L[i] < R[i] ? -1 : 1;
+    }
+  }
+  dist = R[6] - L[6];
+  if (arg == dist) {
+    return 0; // this could be tricky when SKIPPING is implemented 
+  }
+  else {
+    return dist > arg ? -1 : 1; // is this right?
+  }
+}
+
+int sent_cmp(dbh *db, uint32_t *L, uint32_t *R, int arg) {
+  int i;
+  uint32_t dist;
+  for (i = 0; i < 6; i++) { //ugly...db has 9 fields, only 7 are good for sorting
     if (L[i] != R[i] ) {
       return L[i] < R[i] ? -1 : 1;
     }
@@ -249,8 +300,7 @@ int hit_cmp(dbh *db, uint32_t *L, uint32_t *R) {
 int rec_cmp(dbh *db, word_rec L, word_rec R) {
   //fprintf(stderr, "comparing %s <> %s\n", L.word, R.word);
   //return hit_cmp(db,L.current_hit,R.current_hit);
-  return byte_cmp(db,L.current_hit,R.current_hit);
-
+  return byte_cmp(db,L.current_hit,R.current_hit,0);
 }
 
 word_heap new_heap(dbh * db) {
@@ -321,11 +371,11 @@ int down_heap(word_heap *heap, int i) {
        (heap->cmp(db, records[i], records[rchild(i)]) > 0) ) {  
       if (heap->cmp(db, records[lchild(i)], records[rchild(i)]) < 0) {
       // swap i with it's lesser child
-	//fprintf(stderr,"swapping left; ");
-	child = lchild(i);
+    //fprintf(stderr,"swapping left; ");
+    child = lchild(i);
       } else {
-	//fprintf(stderr,"swapping right; ");
-	child = rchild(i);
+    //fprintf(stderr,"swapping right; ");
+    child = rchild(i);
       }
     }
   }
@@ -344,7 +394,7 @@ void add_record(word_heap *heap, word_rec *rec) {
   /* first make space if needed */
   if (heap->rec_count <= heap->rec_alloced) {
     /* should check for success here; running out of memory is a concern */
-    // heap->records = realloc(heap->records,sizeof(word_rec)*(heap->rec_count+1) );
+    heap->records = realloc(heap->records,sizeof(word_rec)*(heap->rec_count+1) );
     /* should also consider expanding by a larger factor, in case of thousands of records */
     heap->rec_alloced = heap->rec_count + 1;
   }
@@ -382,16 +432,22 @@ word_rec * add_word(word_heap *heap, char *word) {
   word_rec *rec = NULL;
   rec = fetch_word(heap->db,word);
   if (rec == NULL) {
+    fprintf(stderr, "%s not found.\n", word);
     return NULL;
   }
-  add_record(heap,rec);
-  free(rec);
+  else {
+    fprintf(stderr, "%s has %lld occurrences.\n", word, rec->freq);
+    add_record(heap,rec);
+    free(rec);
+  }
 }
 
 uint32_t * heap_advance(word_heap *heap) {
   word_rec *r;
   uint32_t *hit;
   if (heap->rec_count == 0) {
+    fprintf(stderr, "stage done\n");
+    heap->current_hit = NULL;
     return NULL;
   } else {
     r = &heap->records[0];
@@ -399,9 +455,10 @@ uint32_t * heap_advance(word_heap *heap) {
     heap->current_word = r->word;
     hit = word_next_hit(heap->db,r);
     if (hit == NULL) {
+      fprintf(stderr, "done with word %s, popping\n", heap->current_word);
       // if we are done with the word, pop it off
       pop_record(heap);
-      // need to free it and its block.
+      fprintf(stderr, "heap has %d records remaining\n", heap->rec_count);
     } else {
       // otherwise, we've modified the 0 records and may need to move it.
       down_heap(heap,0); 
@@ -422,7 +479,7 @@ uint32_t * corpus_advance(corpus *corpus) {
 
 uint32_t * stage_advance(search_stage * stage) {
   if (stage->kind == CORPUS) {
-  	return corpus_advance (&stage->data.corp);
+    return corpus_advance (&stage->data.corp);
   } else if (stage->kind == HEAP) {
     return heap_advance (&stage->data.heap);
   }
@@ -436,25 +493,63 @@ uint32_t * stage_current_hit(search_stage * stage) {
   }
 }
 
-uint32_t * init_stage_heap(search_stage * stage, word_heap * heap) {
+uint32_t * init_stage_heap(search_stage * stage, word_heap * heap,void * search_method,int search_method_arg) {
   stage->kind = HEAP;
   stage->data.heap = *heap; //worrisome
-  stage->check = hit_cmp; // wrong method
-  return stage_advance(stage);
+  stage->check = search_method; // wrong method
+  stage->arg = search_method_arg;
+  stage->init = 0;
+//  return stage_advance(stage);
+  return NULL;
 }
 
 uint32_t * init_stage_corp(search_stage * stage, corpus *corpus) {
   stage->kind = CORPUS;
   stage->data.corp = *corpus; //worrisome
   stage->check = hit_cmp;  // ok?
+  stage->init = 0;
   return stage_advance(stage);
 }
 
 int dump_search_result_ascii(search_stage * stages, int size) {
+  int i;
+  int j;
+  uint32_t * hit;
+  int first_word = 1;
+  for (i = 0; i < size; i++) {      
+    hit = stage_current_hit(&stages[i]);
+    if (stages[i].kind == HEAP) {
+      if (first_word == 1) {
+        first_word = 0;
+        fprintf(stdout, "%d %d %d %d %d %d %d %d %d", hit[0],hit[1],hit[2],hit[3],hit[4],hit[5],hit[6],hit[7],hit[8]);
+      }
+      else {
+        fprintf(stdout, " :: %d %d %d %d %d %d %d %d %d", hit[0],hit[1],hit[2],hit[3],hit[4],hit[5],hit[6],hit[7],hit[8]);
+      }            
+    }
+  }
+  fprintf(stdout, "\n");
   return 0;
 }
 
 int dump_search_result_binary(search_stage *stages, int size) {
+  int i;
+  uint32_t * hit;
+  int first = 1;
+  for (i = 0; i < size; i++) {
+    hit = stage_current_hit(&stages[0]);
+    if (stages[i].kind == HEAP) {
+      if (first == 1) {
+        // hit prefix up to sentence--same for all hits.
+        fwrite(hit,sizeof(uint32_t),6,stdout);
+        // hit page number of first word
+        fwrite(&hit[8],sizeof(uint32_t),1,stdout);
+        first = 0;
+      }
+      // word and byte for each word
+      fwrite(&hit[6],sizeof(uint32_t),2,stdout);
+    }  
+  }
   return 0;
 }
 
@@ -462,11 +557,13 @@ uint32_t * search_advance(search_stage *stages,int size) {
   int c = size - 1;        // our position in the stages array; start at the end
   int check_res;           // the result of the previous stage's search predicate function
   uint32_t * advance_res;  // the result of advancing the current or previous stage--not actually used directly.
-
+  int i;
   search_stage * curr = &stages[c];
   search_stage * prev;     // not assigned until we know it is safe.
-
+//  fprintf(stderr, "advancing stage %d : ", c);
   advance_res = stage_advance(curr); // advance the last stage. must do this at least once. 
+  curr->init = 1;
+  // could set init on curr here, or elsewhere. 
   if (size == 1) {                    // if this is a one-stage search, we're done.
     return stage_current_hit(curr);   // if current hit is NULL this returns NULL, so don't need to check explicitly.
   }
@@ -478,25 +575,49 @@ uint32_t * search_advance(search_stage *stages,int size) {
     curr = &stages[c];
     prev = &stages[c - 1]; // we know that this is safe, because we always check that c > 1 before decrementing.
 
-    // curr is always the stage that was just advanced.  So we can check to see if it has run out of hits.
-    if (stage_current_hit(curr) == NULL) {
-      return NULL;  
+    if (prev->init == 0) {
+        advance_res = stage_advance(prev);
+        prev->init = 1;
+        if (c > 1) {
+          c -= 1;
+        }
     }
 
+//    fprintf("stage %d at block %d bit %d; \n", c, curr->data.heap.records[0].block_count,bitsvectorTell(curr->data.heap.records[0].block));
+
+    // curr is always the stage that was just advanced.  So we can check to see if it has run out of hits.
+    if (stage_current_hit(curr) == NULL) {
+      return NULL;
+    } else if (stage_current_hit(prev) == NULL) {
+      return NULL;
+    }
+    
+    // if we have not initialized yet, we have an issue
+    for (i = 0; i < size; i++) {
+      fprintf(stderr, "stage %d block bit %d;\n",i,bitsvectorTell(stages[i].data.heap.records[0].block));
+    }
     // otherwise, we need to check the curr hit against it's prev.
-    check_res = prev->check(NULL, stage_current_hit(prev),stage_current_hit(curr));
+    check_res = prev->check(NULL, stage_current_hit(prev),stage_current_hit(curr),prev->arg);
+    fprintf(stderr,"checking ");
+    dump_search_result_ascii(stages, size);
     if (check_res < 0) {         // if curr is ahead of prev, advance prev
+      fprintf(stderr, "advancing L\n");
       advance_res = stage_advance(prev);
       if (c > 1) {               // since we've advanced prev, if it is not the innermost hit, we have to check it against it's own prev stage in the next loop cycle
         c -= 1;
-      }                          // if we are at the innermost stage, do nothing, just keep advancing with curr = 1, prev - 0
+      } 
+
     } else if (check_res == 0) { // if curr and prev are within the window defined by prev's search check function...
-      if (c == size - 1) {       // if we're on the outermost hit, it's good to output
-	return stage_current_hit(curr);
-      } else {                   // if we are on an inner hit, we can move our c counter outward.
-	c += 1;
+      if (c == size - 1) {       // if we're on the outermost hit, it's good to output    
+        fprintf(stderr,"match\n");
+        return stage_current_hit(curr);
+      } else {                   // if we are on an inner hit, we can move our c counter outward.        
+        fprintf(stderr,"partial match\n");
+        c += 1;
       }
+
     } else if (check_res > 0) {  // if prev is ahead of curr, advance curr
+      fprintf(stderr, "advancing R\n");
       advance_res = stage_advance(curr);
     }
   }
@@ -525,7 +646,9 @@ int main(int argc, char **argv) {
   dbh *db;
   char * corpus_fn;
   char * search_method_name;
-  char * search_method_arg;
+  char * search_method_arg_str;
+  int (*search_method)(dbh *,uint32_t *,uint32_t *, int);
+  int search_method_arg;
   char * output_arg;
   int (*dump_search_result)(search_stage *,int);
   char word[256];
@@ -538,12 +661,16 @@ int main(int argc, char **argv) {
   search_stage stages[20];
   int stage_c = 0;
   corpus corp;
+  uint32_t * search_res;
   
+  search_method = &phrase_cmp;
+  search_method_arg = 1;
   dump_search_result = &dump_search_result_ascii;
 
   while ((optc = getopt(argc, argv, "c:m:a:o:")) != -1) {
     switch (optc) {
     case 'c': // corpus file
+      fprintf(stderr, "corpus '%s'\n", optarg);
       corpus_fn = optarg;
       corp.fn = corpus_fn;
       corp.fh = fopen(corp.fn,"r");
@@ -552,14 +679,20 @@ int main(int argc, char **argv) {
       stage_c = 1;
       break;
     case 'm': // search method
+      fprintf(stderr, "method '%s'\n", optarg);
       search_method_name = optarg;      
-      break;
+      if (strcmp(search_method_name, "phrase") == 0) search_method = phrase_cmp;
+      else if (strcmp(search_method_name, "proxy") == 0) search_method = proximity_cmp;
+      else if (strcmp(search_method_name, "sent") == 0) search_method = sent_cmp;
     case 'a': // search method argument
-      search_method_arg = optarg;
+      fprintf(stderr, "arg is '%s'\n", optarg);
+      search_method_arg_str = optarg;
+      sscanf(optarg,"%d",  &search_method_arg);
       break;
     case 'o': // output mode
+      fprintf(stderr, "output '%s'\n", optarg);
       output_arg = optarg;
-      if (strcmp(output_arg, "ascii") == 0) dump_search_result = &dump_search_result_ascii;
+      if (strcmp(output_arg, "binary") == 0) dump_search_result = &dump_search_result_binary;
     case ':': // missing option argument
       break;
     case '?': // unrecognized
@@ -568,34 +701,42 @@ int main(int argc, char **argv) {
       break;
     }
   }
+
   // optind should now point at the non-option arg, which is the db folder path
   db = init_dbh_folder(argv[optind]);
   heap = new_heap(db);
   while(fgets(buffer,256,stdin)) {
 
     if (strcmp("\n",buffer) == 0) {
-      init_stage_heap(&stages[stage_c],&heap);
-      
-      if (stage_advance(&stages[stage_c]) == NULL) { // an empty stage can immediately exit.
-		exit(0);
-      } else {
-		stage_c += 1;
-		if (stage_c == 20) { // if we've exceeded the max stage limit, unlikely.
-	  	  exit(1);
-		}
-		heap = new_heap(db);
+      init_stage_heap(&stages[stage_c],&heap,search_method,search_method_arg);
+      stage_c += 1;
+      if (stage_c == 20) { // if we've exceeded the max stage limit, unlikely.
+        exit(1);
       }
+      heap = new_heap(db);
     } else {
       sscanf(buffer,"%s256",word);
-      rec = add_word(&heap,word);    
       fprintf(stderr, "looking up %s : \n",word);
+      rec = add_word(&heap,word);    
     }
   }
-  // clean up last stage
-  init_stage_heap(&stages[stage_c],&heap);
-  while (stage_advance(&stages[stage_c]) != NULL) {
-    // print the current hit;
-    dump_search_result(stages,stage_c);
+
+// clean up last stage
+
+  fprintf(stderr, "done scanning input\n");
+  init_stage_heap(&stages[stage_c],&heap,search_method,search_method_arg);
+  fprintf(stderr, "output for %d stages\n", stage_c + 1);
+  while (stage_current_hit(&stages[stage_c]) != NULL) {
+    // if this is not the intial stage, print the current hit;
+    if (stages[stage_c].init == 1) {
+      dump_search_result(stages,stage_c + 1);
+    }
+    search_res = search_advance(stages,stage_c + 1);
+    if (search_res == NULL) {
+      fprintf(stderr,"search_advance returned NULL, done\n");
+      break;
+    }
   }
+
   return 0;
 }
