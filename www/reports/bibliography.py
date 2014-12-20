@@ -24,21 +24,20 @@ def bibliography(environ, start_response):
         return fetch_bibliography(db, request, config, start_response)
 
 def fetch_bibliography(db, request, config, start_response):
-    bibliography_object, hits = bibligraphy_results(db, request, config)
+    bibliography_object, hits = bibliography_results(db, request, config)
     return render_bibliography(bibliography_object, request, hits, config, start_response)
     
 def render_bibliography(b, q, hits, config, start_response):
     headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
     biblio_criteria = f.biblio_criteria(q, config)
-#    pages = f.link.generate_page_links(b['description']['start'], q.results_per_page, q, hits)
     pages = f.link.page_links(config,q,len(hits))
     frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
     ajax_scripts = {'frequency': frequency_script, 'collocation': ''}
     return f.render_template(bibliography=b, query_string=q.query_string, template_name='bibliography.mako',
                              ajax=ajax_scripts, pages=pages, biblio_criteria=biblio_criteria,config=config, report="bibliography")
     
-def bibligraphy_results(db, q, config):
+def bibliography_results(db, q, config):
     if q.no_metadata:
         hits = db.get_all(db.locals['default_object_level'])
     else:

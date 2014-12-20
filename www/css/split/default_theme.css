@@ -30,6 +30,7 @@ body {
 .btn-primary.active, .open>.dropdown-toggle.btn-primary, #collocation_table th {
     background: #374655;
 	border-color: transparent;
+	color: #fff;
 }
 .btn-primary[disabled] {
 	background-color: #8e979f;
