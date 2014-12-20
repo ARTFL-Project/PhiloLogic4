@@ -16,7 +16,7 @@ from functions.FragmentParser import strip_tags
 ## Precompiled regexes for performance
 left_truncate = re.compile (r"^\w+", re.U)
 right_truncate = re.compile("\w+$", re.U)
-word_identifier = re.compile("\w", re.U)
+word_identifier = re.compile(r"\w", re.U)
 
 begin_match = re.compile(r'^[^<]*?>')
 start_cutoff_match = re.compile(r'^[^ <]+')
@@ -46,7 +46,6 @@ def render_collocation(collocation_object, q, config):
     total_script = f.link.make_absolute_query_link(config, q, script_name="scripts/get_total_results.py")
     ajax_scripts = {"colloc": colloc_script, "total": total_script}
     biblio_criteria = f.biblio_criteria(q, config)
-    print >> sys.stderr, "COLLOC", repr(collocation_object['all_collocates'])
     return f.render_template(collocation=collocation_object, query_string=q.query_string, biblio_criteria=biblio_criteria,
                              word_num=q.word_num, ajax=ajax_scripts, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
@@ -156,14 +155,11 @@ def tokenize(text, filter_list, within_x_words, direction, db):
     text = text.lower()
     token_regex_pattern = db.locals["word_regex"] + u'|' + db.locals["punct_regex"]
     token_regex = re.compile(token_regex_pattern, re.U)
-    print >> sys.stderr, "TEXT", repr(text)
-    print >> sys.stderr, "NEW PATTERN", repr(token_regex_pattern)
     if direction == 'left':
         word_list = tokenize_text(text, token_regex) 
         word_list.reverse() ## left side needs to be reversed
     else:
         word_list = tokenize_text(text, token_regex)
-#    word_list = text.split(" ")
       
     word_list = filter(word_list, filter_list, within_x_words)
     return word_list

@@ -67,7 +67,7 @@
                     <h4 class="modal-title" id="myModalLabel">Export Results</h4>
                 </div>
                 <div class="modal-body">
-                    % if report not in ("collocation", "time_series"):
+                    % if report != "collocation":
                         <h5>Choose the format in which to export your search results:</h5>
                         <div id="export-buttons">
                             <button type="button" class="btn btn-primary" data-format="json">
@@ -83,8 +83,10 @@
                                 Note: only JSON is currently supported.
                             </div>
                         </div>
+                        <div id="export-download-link" style="display:none">
+                        </div>
                     % else:
-                        <h5>We currently don't support exporting results from a ${report} report.</h5>
+                        <h5>We currently don't support exporting results from a collocation report.</h5>
                     % endif
                 </div>
             </div>
