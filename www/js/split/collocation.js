@@ -4,7 +4,7 @@ $(document).ready(function() {
     var q_string = window.location.search.substr(1);
     var db_url = webConfig['db_url'];
     var hit_len = collocation['results_length'];
-    if (sessionStorage[window.location.href] == null) {
+    if (sessionStorage[window.location.href] == null || webConfig.debug == true) {
         // Render initial results
         var new_data = undefined;
         sortAndRenderCollocation(collocation_object, new_data, q_string, db_url, hit_len);
@@ -61,16 +61,20 @@ function update_colloc(db_url, total_results, results_len, colloc_start, colloc_
         updateProgressBar(100);
         $(".progress").delay(500).velocity('slideUp');
         activateLinks();
-        if (webConfig.debug == false) {
-            if (typeof(localStorage) == 'undefined' ) {
-                alert('Your browser does not support HTML5 localStorage. Try upgrading.');
-            } else {
+        // Save results to local storage
+        if (typeof(localStorage) == 'undefined' ) {
+            alert('Your browser does not support HTML5 localStorage. Try upgrading.');
+        } else {
+            try {
+                sessionStorage[window.location.href] = JSON.stringify(total_results);
+            } catch(e) {
+                sessionStorage.clear();
+                console.log("Clearing sessionStorage for space...");
                 try {
-                    sessionStorage[window.location.href] = JSON.stringify(total_results_object);
+                    sessionStorage[window.location.href] = JSON.stringify(total_results);
                 } catch(e) {
                     sessionStorage.clear();
-                    console.log("sessionStorage was full, clearing it for space...");
-                    sessionStorage[window.location.href] = JSON.stringify(total_results_object);
+                    console.log("Quota exceeded error: the JSON object is too big...")
                 }
             }
         }

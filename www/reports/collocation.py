@@ -74,6 +74,12 @@ def fetch_collocation(hits, q, db, config):
     ## Override default value of q.end for first batch of results
     if q.end == 0:
         q.end = 3000
+        
+    ## Remove all empty keywords in request object
+    new_q = []
+    for i in q:
+        if i[1]:
+            new_q.append(i)
     
     count = 0
     for hit in hits[q.start:q.end]:
@@ -85,21 +91,21 @@ def fetch_collocation(hits, q, db, config):
             try:
                 left_collocates[left_word]['count'] += 1
             except KeyError:
-                left_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="left", collocate=left_word.encode('utf-8'))}
+                left_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="left", collocate=left_word.encode('utf-8'))}
             try:
                 all_collocates[left_word]['count'] += 1
             except KeyError:
-                all_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="all", collocate=left_word.encode('utf-8'))}
+                all_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="all", collocate=left_word.encode('utf-8'))}
 
         for right_word in right_words:
             try:
                 right_collocates[right_word]['count'] += 1
             except KeyError:
-                right_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="right", collocate=right_word.encode('utf-8'))}
+                right_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="right", collocate=right_word.encode('utf-8'))}
             try:
                 all_collocates[right_word]['count'] += 1
             except KeyError:
-                all_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="all", collocate=right_word.encode('utf-8'))}
+                all_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="all", collocate=right_word.encode('utf-8'))}
     
     collocation_object['all_collocates'] = all_collocates
     collocation_object['left_collocates'] = left_collocates
