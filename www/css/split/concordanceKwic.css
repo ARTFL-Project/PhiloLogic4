@@ -191,9 +191,6 @@
 .xml-sp {
     display: block;
 }
-.xml-l, .xml-ab {
-    display: block;
-}
 .xml-sp+.xml-l, .xml-sp+.xml-ab {
     display: inline;
 }

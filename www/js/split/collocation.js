@@ -4,7 +4,7 @@ $(document).ready(function() {
     var q_string = window.location.search.substr(1);
     var db_url = webConfig['db_url'];
     var hit_len = collocation['results_length'];
-    if (sessionStorage[window.location.href] == null) {
+    if (sessionStorage[window.location.href] == null || webConfig.debug == true) {
         // Render initial results
         var new_data = undefined;
         sortAndRenderCollocation(collocation_object, new_data, q_string, db_url, hit_len);
@@ -21,9 +21,9 @@ $(document).ready(function() {
             update_colloc(db_url, collocation_object, total_hits, 0, 3000, script, q_string);
         });
     } else {
-        var saved_collocation_object = JSON.parse(sessionStorage[window.location.href]);
-        var data = []
-        sortAndRenderCollocation(saved_collocation_object, data, q_string, db_url, hit_len, hit_len);
+        var storedObject = JSON.parse(sessionStorage[window.location.href]);
+        update_table(storedObject.sorted_lists, q_string, db_url);
+        collocation_cloud(storedObject.unsorted, hit_len, hit_len);
         activateLinks();
         $('#philologic_collocation').velocity('fadeIn', {duration: 200});
     }
@@ -37,47 +37,7 @@ $(document).ready(function() {
     
 });
 
-
-
-function update_colloc(db_url, total_results, results_len, colloc_start, colloc_end, script, q_string) {
-    if (colloc_start == 0) {
-        colloc_start = 3000;
-        colloc_end = 8000;
-    } else {
-        colloc_start += 5000;
-        colloc_end += 5000;
-    }
-    var script_call = script + '&start=' + colloc_start + '&end=' + colloc_end;
-    if (colloc_start <= results_len) {
-        $.getJSON(script_call, function(data) {
-            sortAndRenderCollocation(total_results, data, q_string, db_url, results_len, colloc_start, colloc_end, script, update_colloc);
-            if (colloc_end < results_len) {
-                var percent = colloc_end / results_len * 100;
-                updateProgressBar(percent);
-            }
-        });
-    }
-    else {
-        updateProgressBar(100);
-        $(".progress").delay(500).velocity('slideUp');
-        activateLinks();
-        if (webConfig.debug == false) {
-            if (typeof(localStorage) == 'undefined' ) {
-                alert('Your browser does not support HTML5 localStorage. Try upgrading.');
-            } else {
-                try {
-                    sessionStorage[window.location.href] = JSON.stringify(total_results_object);
-                } catch(e) {
-                    sessionStorage.clear();
-                    console.log("sessionStorage was full, clearing it for space...");
-                    sessionStorage[window.location.href] = JSON.stringify(total_results_object);
-                }
-            }
-        }
-    }
-}
-
-function sortAndRenderCollocation(full_results, data, q_string, db_url, results_len, colloc_start, colloc_end, script, callback) {
+function sortAndRenderCollocation(full_results, data, q_string, db_url, results_len, colloc_start, colloc_end, script) {
     if (typeof(data) === "undefined") {
         data = {"all_collocates": {}, 'left_collocates': {}, 'right_collocates': {}}
     }
@@ -87,9 +47,31 @@ function sortAndRenderCollocation(full_results, data, q_string, db_url, results_
     var sorted_lists = {'all': all.sorted, 'left': left.sorted, 'right': right.sorted};
     update_table(sorted_lists, q_string, db_url);
     collocation_cloud(all.unsorted, colloc_end, results_len);
-    if (callback) {
+    if (typeof(colloc_start) === "undefined" || colloc_end < results_len) {
         var temp_full_results = {"all_collocates": all.unsorted, "left_collocates": left.unsorted, "right_collocates": right.unsorted};
         update_colloc(db_url, temp_full_results, results_len, colloc_start, colloc_end, script, q_string);
+    } else {
+        updateProgressBar(100);
+        $(".progress").delay(500).velocity('slideUp');
+        activateLinks();
+        // Save results to local storage
+        var savedObject = {"sorted_lists": sorted_lists, "unsorted": all.unsorted}
+        if (typeof(localStorage) == 'undefined' ) {
+            alert('Your browser does not support HTML5 localStorage. Try upgrading.');
+        } else {
+            try {
+                sessionStorage[window.location.href] = JSON.stringify(savedObject);
+            } catch(e) {
+                sessionStorage.clear();
+                console.log("Clearing sessionStorage for space...");
+                try {
+                    sessionStorage[window.location.href] = JSON.stringify(savedObject);
+                } catch(e) {
+                    sessionStorage.clear();
+                    console.log("Quota exceeded error: the JSON object is too big...")
+                }
+            }
+        }
     }
 }
 
@@ -116,6 +98,26 @@ function sortResults(full_results) {
     }
     sorted_list.sort(function(a,b) {return b[1].count - a[1].count});
     return sorted_list;
+}
+
+function update_colloc(db_url, total_results, results_len, colloc_start, colloc_end, script, q_string) {
+    if (colloc_start == 0) {
+        colloc_start = 3000;
+        colloc_end = 8000;
+    } else {
+        colloc_start += 5000;
+        colloc_end += 5000;
+    }
+    var script_call = script + '&start=' + colloc_start + '&end=' + colloc_end;
+    if (colloc_start <= results_len) {
+        $.getJSON(script_call, function(data) {
+            sortAndRenderCollocation(total_results, data, q_string, db_url, results_len, colloc_start, colloc_end, script);
+            if (colloc_end <= results_len) {
+                var percent = colloc_end / results_len * 100;
+                updateProgressBar(percent);
+            }
+        });
+    }
 }
 
 function update_table(sorted_lists, q_string, db_url) {

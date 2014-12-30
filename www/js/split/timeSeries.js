@@ -2,10 +2,13 @@
 
 $(document).ready(function() {
     
+    $('#export-results').attr('disabled', 'disabled');
+    
+    
     var db_url = webConfig['db_url'];
     var date_list = generateDateList();
     
-    if (sessionStorage[window.location.href] == null) {
+    if (sessionStorage[window.location.href] == null || webConfig.debug == true) {
         
         // Calculate width and height of chart
         var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
@@ -147,9 +150,8 @@ function progressiveLoad(db_url, total_results, interval, interval_start, interv
         var progress_height = $(".progress").height();
         $(".progress").delay(500).velocity("slideUp");
         $('.graph_bar').tooltip({html: true});
-        if (webConfig.debug == false) {
-            saveTimeSeries(abs_full_results, full_date_counts)
-        }
+        saveTimeSeries(abs_full_results, full_date_counts)
+        $('#export-results').removeAttr('disabled');
     }
 }
 
