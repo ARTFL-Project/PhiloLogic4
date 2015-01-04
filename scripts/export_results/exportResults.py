@@ -4,6 +4,7 @@ import requests
 import sys
 from optparse import OptionParser, BadOptionError, AmbiguousOptionError
 from json import dump
+from time import sleep
 
 
 class PhiloLogicRequest(object):
@@ -12,7 +13,7 @@ class PhiloLogicRequest(object):
     in JSON or tab delimited
     """
     
-    def __init__(self, db_url=None, report=None, export_format="json", **args):
+    def __init__(self, db_url, report, export_format="json", **args):
         self.db_url = db_url
         self.report = report
         self.export_format = export_format.lower()
@@ -23,36 +24,47 @@ class PhiloLogicRequest(object):
         if "method" not in self.query_params:
             self.query_params["method"] = "proxy"
         if "results_per_page" not in self.query_params:
-            self.query_params["results_per_page"] = 5000
+            self.query_params["results_per_page"] = 500
         if "q" not in self.query_params:
             self.query_params["q"] = ''
         self.total_hits()
-        print >> sys.stderr, "Total hits:", self.total
+        print >> sys.stderr, "\nTotal hits: %d" % self.total
         
         ## Count number of queries needed to retrieve the full result set
         if report == "concordance" or report == "kwic":
             self.interval = self.query_params["results_per_page"]
         else:
-            self.interval = 5000
+            self.interval = 1000
         self.steps = self.total / self.interval
         remainder = self.total % self.interval
         if remainder:
             self.steps += 1
-        print >> sys.stderr, "%d queries in batches of %d hits will be performed to retrieve the full result set" % (self.steps, self.interval)
+        print >> sys.stderr, "%d queries in batches of %d hits will be performed to retrieve the full result set:" % (self.steps, self.interval)
             
     def total_hits(self):
-        r = requests.get(self.db_url + "/scripts/get_total_results.py", params=self.query_params)
         try:
-            self.total = int(r.json())
+            r = requests.get(self.db_url + "/scripts/get_total_results.py", params=self.query_params, timeout=5)
+        except requests.exceptions.ReadTimeout:
+            print >> sys.stderr, "\nGiving a couple seconds to compute hits..."
+            sleep(5)
+            r = requests.get(self.db_url + "/scripts/get_total_results.py", params=self.query_params, timeout=30)
         except ValueError:
             print >> sys.stderr, "Invalid URL:"
             print >> sys.stderr, r.url
             exit()
+        if self.report == "time_series":
+            r = self.query(start=0, end=1000)
+            self.total = r.json()['results_length']
+        else:
+            self.total = int(r.json())
     
-    def query(self, params=None):
+    def query(self, timeout=60, params=None, **args):
         if params == None:
             params = self.query_params
-        response = requests.get(self.db_url + "/dispatcher.py", params=params)
+        if args:
+            for k, v in args.iteritems():
+                params[k] = v
+        response = requests.get(self.db_url + "/dispatcher.py", params=params, timeout=timeout)
         return response
     
     def build_result_set(self):
@@ -69,10 +81,13 @@ class PhiloLogicRequest(object):
         for i in range(self.steps):
             start = i * self.interval
             end = start + self.interval - 1
+            if end > self.total:
+                end = self.total - 1
             params["start"] = start
             params["end"] = end
+            print >> sys.stderr, "Retrieving results %d-%d..." % (start + 1, end + 1),
             response = self.query(params=params)
-            print >> sys.stderr, "Done retrieving %s..." % response.url
+            print >> sys.stderr, "done."
             for k, v in response.json().iteritems():
                 if k == "results":
                     self.results["results"] += v
@@ -89,10 +104,13 @@ class PhiloLogicRequest(object):
         for i in range(self.steps):
             start = i * self.interval
             end = start + self.interval - 1
+            if end > self.total:
+                end = self.total - 1
             params["start"] = start
             params["end"] = end
+            print >> sys.stderr, "Retrieving results %d-%d..." % (start + 1, end + 1),
             response = self.query(params=params)
-            print >> sys.stderr, "Done retrieving %s..." % response.url
+            print >> sys.stderr, "done."
             results_object = response.json()
             if not self.results:
                 self.results = results_object
@@ -126,10 +144,13 @@ class PhiloLogicRequest(object):
         for i in range(self.steps):
             start = i * self.interval
             end = start + self.interval - 1
+            if end > self.total:
+                end = self.total - 1
             params["start"] = start
             params["end"] = end
+            print >> sys.stderr, "Retrieving results %d-%d..." % (start + 1, end + 1),
             response = self.query(params=params)
-            print >> sys.stderr, "Done retrieving %s..." % response.url
+            print >> sys.stderr, "done."
             results_object = response.json()
             if not self.results:
                 self.results = results_object
@@ -149,10 +170,13 @@ class PhiloLogicRequest(object):
         if self.export_format == "json":
             filename = "%s_results.json" % self.report
             output_file = open(filename, 'w')
+            print >> sys.stderr, "\nSaving %s to disk..." % filename,
             dump(self.results, output_file, indent=2)
         elif self.export_format == "tab":
             print >> sys.stderr, "TAB export not implemented yet, try JSON output"
             exit()
+        print >> sys.stderr, "done."
+
 
 class PassThroughOptionParser(OptionParser):
     """
@@ -173,7 +197,7 @@ class PassThroughOptionParser(OptionParser):
 
 def parse_command_line(arguments):
     parser = PassThroughOptionParser()
-    parser.add_option("-r", "--report", action="store", default="concordance", type="string", dest="report", help="select PhiloLogic search report")
+    parser.add_option("-r", "--report", action="store", default="", type="string", dest="report", help="select PhiloLogic search report")
     parser.add_option("-d", "--db-url", action="store", default="", type="string", dest="db_url", help="select database URL for search")
     parser.add_option("-e", "--export-format", action="store", default="", type="string", dest="export_format", help="select output format. Options are JSON or TAB.")
     
@@ -187,17 +211,27 @@ def parse_command_line(arguments):
         val = args.pop(0)
         arg_dict[key] = val.decode('utf-8')
         
+    if not options.db_url:
+        print >> sys.stderr, "\nNo database URL provided, exiting..."
+        exit()
+        
+    if not options.report:
+        print >> sys.stderr, "\nNo search report selected, defaulting to concordance..."
+        report = "concordance"
+    else:
+        report = options.report
+        
     if not options.export_format:
-        print >> sys.stderr, "No export format select, exporting to JSON..."
+        print >> sys.stderr, "\nNo export format selected, exporting to JSON..."
         export_format = "json"
     else:
         export_format = options.export_format
     
-    return options.db_url, options.report, export_format, arg_dict 
+    return options.db_url, report, export_format, arg_dict 
 
 
 if __name__ == '__main__':
     db_url, report, export_format, query_args = parse_command_line(sys.argv[1:])
-    philo_request = PhiloLogicRequest(report=report, db_url=db_url, export_format=export_format, **query_args)
+    philo_request = PhiloLogicRequest(db_url, report, export_format=export_format, **query_args)
     philo_request.build_result_set()
     philo_request.save_file()
