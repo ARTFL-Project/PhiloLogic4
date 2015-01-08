@@ -123,7 +123,12 @@ For instance, to replace <sp> by <p>, you would do {"sp": "p"}
 See http://www.tei-c.org/Vault/P4/migrate.html for some guidelines to convert old XML/TEI to TEI P5
 If you wish to make changes to attributes, you should edit the lxml iter loop directly"""
 
-xml_tag_mapping = {}
+xml_tag_mapping = {
+    ## TEI P4 => TEI P5 conversions
+    'TEI.2': "TEI",
+    'xref': "ref",
+    "xptr": "ptr",
+}
 
 #################################
 
@@ -149,10 +154,10 @@ if __name__ == '__main__':
             except UnicodeEncodeError:
                 print >> sys.stderr, unicode(census).encode('utf-8')
     
-        #if total:
-        #    total += census
-        #else:
-        #    total = census
+        if total:
+            total += census
+        else:
+            total = census
     
         #Annoyingly, BeautifulSoup requires you to declare ALL self-closing tags yourself; it will badly mangle your text if you miss one, so get this right.
         self_closing = []
@@ -198,5 +203,8 @@ if __name__ == '__main__':
         print >> outfile, file_contents
         outfile.close()
     
-    #print >> sys.stderr, total
+    try:
+        print >> sys.stderr, total
+    except UnicodeEncodeError:
+        print unicode(total).encode('utf-8')
     

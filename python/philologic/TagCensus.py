@@ -46,10 +46,10 @@ class TagCensus:
         for tag in other.tags.keys():
             if tag not in self.tags:
                 self[tag] = {"start":0,"end":0,"empty":0,"malformed":0}
-            self[tag]["start"] += census.tags[tag]["start"]
-            self[tag]["end"] += census.tags[tag]["end"]
-            self[tag]["empty"] += census.tags[tag]["empty"]
-            self[tag]["malformed"] += census.tags[tag]["malformed"]        
+            self[tag]["start"] += other.tags[tag]["start"]
+            self[tag]["end"] += other.tags[tag]["end"]
+            self[tag]["empty"] += other.tags[tag]["empty"]
+            self[tag]["malformed"] += other.tags[tag]["malformed"]        
         return self
         
     def __str__(self):
