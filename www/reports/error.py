@@ -29,7 +29,7 @@ def error_handling(db, config, q):
     report = q['report']
     hits = NoHits()
     error_message = "Your query made PhiloLogic4 crash with the following traceback: %s" % traceback.print_exc()
-    if report == "concordance" or report == "bibliography":
+    if report == "concordance" or report == "bibliography" or report == "error":
         concordance_object = {"warning": error_message,
                               "description": {"start": 0, "end": 0, "results_per_page": q.results_per_page},
                               "query": dict([i for i in q]),
