@@ -217,7 +217,8 @@ $(document).ready(function() {
             var script = window.location.href + "&format=" + $(this).data('format');
             $.getJSON(script, function(data) {
                 data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-                $('<a href="data:' + data + '" download="' + global_report + '.json">Download JSON file</a>').appendTo('#export-download-link');
+                $('#export-download-link a').attr('href', 'data:' + data).attr('download', global_report + '.json');
+                //$('<a href="data:' + data + '" download="' + global_report + '.json">Download JSON file</a>').appendTo('#export-download-link');
                 $("#export-download-link").velocity('slideDown');
             });
         }
