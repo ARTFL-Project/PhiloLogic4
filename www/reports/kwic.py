@@ -50,23 +50,23 @@ def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
                     "query": dict([i for i in q])}
     kwic_results = []
     default_short_citation_len = 30
-    short_citation_len = 0
+    shortest_citation_len = 0
     
     for hit in hits[start - 1:end]:
         # Get all metadata
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
-            metadata_fields[metadata] = hit[metadata]
+            metadata_fields[metadata] = hit[metadata].strip()
         
         ## Get all links and citations
         citation_hrefs = citation_links(db, config, hit)
-        full_citation, short_citation = kwic_citation(short_citation_len, metadata_fields, hit[link_to_hit])
+        current_citation_length = len(metadata_fields['author']) + 2 + len(metadata_fields['title'])
         
-        ## Find longest short_citation
-        if short_citation_len == 0:
-            short_citation_len = len(short_citation)
-        elif len(short_citation) > short_citation_len:
-            short_citation_len = len(short_citation)
+        ## Find smallest citation
+        if shortest_citation_len == 0:
+            shortest_citation_len = current_citation_length
+        elif shortest_citation_len > current_citation_length:
+            shortest_citation_len = current_citation_length
             
         ## Determine length of text needed
         byte_distance = hit.bytes[-1] - hit.bytes[0]
@@ -78,14 +78,15 @@ def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
         conc_text = format_strip(conc_text, bytes)
         conc_text = KWIC_formatter(conc_text, len(hit.bytes))
             
-        kwic_results.append((full_citation, short_citation, citation_hrefs, conc_text, hit, metadata_fields))
+        kwic_results.append((citation_hrefs, conc_text, hit, metadata_fields))
     
-    if short_citation_len < default_short_citation_len:
-        default_short_citation_len = short_citation_len
+    if default_short_citation_len > shortest_citation_len:
+        shortest_citation_len = default_short_citation_len
     
     ## Populate Kwic_results with bibliography    
     for pos, result in enumerate(kwic_results):
-        biblio, short_biblio, hrefs, text, hit, metadata_fields = result
+        hrefs, text, hit, metadata_fields = result
+        biblio, short_biblio = kwic_citation(shortest_citation_len, metadata_fields, hit[link_to_hit])
         href = hrefs[link_to_hit]
         if len(short_biblio) < default_short_citation_len:
             diff = default_short_citation_len - len(short_biblio)
@@ -113,9 +114,11 @@ def kwic_citation(short_citation_length, metadata_fields, hit):
     title = metadata_fields['title']
     full_citation += title
     short_citation.append(title)
+    full_citation += ', %s' % hit.head
+    short_citation.append(hit.head)
         
     if len(', '.join([s for s in short_citation if s])) > short_citation_length:
-        short_author, short_title = tuple(short_citation)
+        short_author, short_title, head = tuple(short_citation)
         if len(short_author) > 10:
             short_author = short_author[:10] + "&#8230;"
             short_citation[0] = short_author
@@ -123,8 +126,6 @@ def kwic_citation(short_citation_length, metadata_fields, hit):
         if len(short_title) > title_len:
             short_citation[1] = short_title[:title_len]
     short_citation = ', '.join([s for s in short_citation if s])
-    
-    full_citation += ', %s' % hit.head
     
     return full_citation, short_citation
 
