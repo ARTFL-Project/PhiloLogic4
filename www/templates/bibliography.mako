@@ -21,6 +21,11 @@
                         Bibliographic criteria: ${biblio_criteria or "<b>None</b>"}<br>
                 </div>
                 Hits <span class="start">${description['start']}</span> - <span class="end">${description['end']}</span> of <span id="total_results">${bibliography['results_length']}</span>${r_status}
+                % if config['debug']:
+                    % if "error" in bibliography:
+                        <div class="bg-danger" style="margin-top: 20px; width: 50%;">${bibliography['error']}</div>
+                    % endif
+                % endif
             </div>
             <div class="row" id="act-on-report">
                 <div class="col-xs-12">
