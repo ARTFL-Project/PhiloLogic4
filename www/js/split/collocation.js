@@ -4,7 +4,7 @@ $(document).ready(function() {
     var q_string = window.location.search.substr(1);
     var db_url = webConfig['db_url'];
     var hit_len = collocation['results_length'];
-    if (sessionStorage[window.location.href] == null || webConfig.debug == true) {
+    if (sessionStorage[window.location.href] == null || webConfig.debug == false) {
         // Render initial results
         var new_data = undefined;
         sortAndRenderCollocation(collocation_object, new_data, q_string, db_url, hit_len);
@@ -15,15 +15,19 @@ $(document).ready(function() {
             var total_hits = data;
             $('#colloc_hits').html(data);
             var percent = 3000 / total_hits * 100;
-            $(".progress").show()
-            updateProgressBar(percent);
-            var script = $('#philologic_collocation').data('script');
-            update_colloc(db_url, collocation_object, total_hits, 0, 3000, script, q_string);
+            if (percent >= 100) {
+                activateLinks();
+            } else {
+                $(".progress").show();
+                updateProgressBar(percent);
+                var script = $('#philologic_collocation').data('script');
+                update_colloc(db_url, collocation_object, total_hits, 0, 3000, script, q_string);
+            }
         });
     } else {
-        var storedObject = JSON.parse(sessionStorage[window.location.href]);
-        update_table(storedObject.sorted_lists, q_string, db_url);
-        collocation_cloud(storedObject.unsorted, hit_len, hit_len);
+        var sorted_lists = JSON.parse(sessionStorage[window.location.href]);
+        update_table(sorted_lists, q_string, db_url);
+        collocation_cloud(sorted_lists.all, hit_len, hit_len);
         activateLinks();
         $('#philologic_collocation').velocity('fadeIn', {duration: 200});
     }
@@ -46,7 +50,7 @@ function sortAndRenderCollocation(full_results, data, q_string, db_url, results_
     var right = mergeCollocResults(full_results["right_collocates"], data['right_collocates']);
     var sorted_lists = {'all': all.sorted, 'left': left.sorted, 'right': right.sorted};
     update_table(sorted_lists, q_string, db_url);
-    collocation_cloud(all.unsorted, colloc_end, results_len);
+    collocation_cloud(all.sorted, colloc_end, results_len);
     if (typeof(colloc_start) === "undefined" || colloc_end < results_len) {
         var temp_full_results = {"all_collocates": all.unsorted, "left_collocates": left.unsorted, "right_collocates": right.unsorted};
         update_colloc(db_url, temp_full_results, results_len, colloc_start, colloc_end, script, q_string);
@@ -54,24 +58,7 @@ function sortAndRenderCollocation(full_results, data, q_string, db_url, results_
         updateProgressBar(100);
         $(".progress").delay(500).velocity('slideUp');
         activateLinks();
-        // Save results to local storage
-        var savedObject = {"sorted_lists": sorted_lists, "unsorted": all.unsorted}
-        if (typeof(localStorage) == 'undefined' ) {
-            alert('Your browser does not support HTML5 localStorage. Try upgrading.');
-        } else {
-            try {
-                sessionStorage[window.location.href] = JSON.stringify(savedObject);
-            } catch(e) {
-                sessionStorage.clear();
-                console.log("Clearing sessionStorage for space...");
-                try {
-                    sessionStorage[window.location.href] = JSON.stringify(savedObject);
-                } catch(e) {
-                    sessionStorage.clear();
-                    console.log("Quota exceeded error: the JSON object is too big...")
-                }
-            }
-        }
+        saveToLocalStorage(sorted_lists);
     }
 }
 
@@ -235,17 +222,12 @@ function removeDiacritics (str) {
     return str;
 }
 
-function collocation_cloud(full_results, colloc_end, results_len) {
+function collocation_cloud(sorted_list, colloc_end, results_len) {
     $.fn.tagcloud.defaults = {
         size: {start: 1.0, end: 3.5, unit: 'em'},
         color: {start: '#C4DFF3', end: '#286895'}
       };
     $('#collocate_counts').hide().empty();
-    var sorted_list = [];
-    for (var key in full_results) {
-        sorted_list.push([key, full_results[key]]);
-    }
-    sorted_list.sort(function(a,b) {return b[1].count - a[1].count});
     sorted_list = sorted_list.slice(0, 100);
     sorted_list.sort(function(a,b) {
         var x = removeDiacritics(a[0]);
@@ -272,4 +254,27 @@ function activateLinks() {
         e.preventDefault();
         window.location = $(this).data('href');
     });
+}
+
+function saveToLocalStorage(sortedLists) {
+    if (typeof(localStorage) == 'undefined' ) {
+        alert('Your browser does not support HTML5 localStorage. Try upgrading.');
+    } else {
+        var shortSortedLists = {};
+        shortSortedLists.all = sortedLists.all.slice(0, 100);
+        shortSortedLists.left = sortedLists.left.slice(0, 100);
+        shortSortedLists.right = sortedLists.right.slice(0, 100);      
+        try {
+            sessionStorage[window.location.href] = JSON.stringify(shortSortedLists);
+        } catch(e) {
+            sessionStorage.clear();
+            console.log("Clearing sessionStorage for space...");
+            try {
+                sessionStorage[window.location.href] = JSON.stringify(shortSortedLists);
+            } catch(e) {
+                sessionStorage.clear();
+                console.log("Quota exceeded error: the JSON object is too big...")
+            }
+        }
+    }
 }
