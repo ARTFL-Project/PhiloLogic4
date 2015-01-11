@@ -40,6 +40,11 @@
                     </div>
                 % endif
             </div>
+            % if config['debug']:
+                % if "error" in collocation:
+                    <div class="bg-danger" style="margin-top: 20px; width: 50%;">${collocation['error']}</div>
+                % endif
+            % endif
         </div>
         <div class="results_container">
             <div id='philologic_collocation' class="row" data-script="${ajax['colloc']}" data-hits-length="${collocation['results_length']}" style="display: none">
