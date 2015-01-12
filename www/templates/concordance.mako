@@ -32,6 +32,11 @@
                         No results for your query.
                     % endif
                 </div>
+                % if config['debug']:
+                    % if "error" in concordance:
+                        <div class="bg-danger" style="margin-top: 20px; width: 50%;">${concordance['error']}</div>
+                    % endif
+                % endif
             </div>
             <div class="row hidden-xs" id="act-on-report">
                 <div class="col-sm-7 col-lg-6">
