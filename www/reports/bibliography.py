@@ -58,7 +58,7 @@ def bibliography_results(db, q, config):
         results.append({'citation': citation, 'citation_links': citation_hrefs, 'philo_id': hit.philo_id, "metadata_fields": metadata_fields})
     bibliography_object["results"] = results
     bibliography_object['results_length'] = len(hits)
-    bibliography_object['query_done'] = hit.done
+    bibliography_object['query_done'] = hits.done
     return bibliography_object, hits        
     
 def biblio_citation(hit, citation_hrefs):
