@@ -407,7 +407,7 @@ class Loader(object):
             words_status = os.system(command)
         else:
             # if not skip the last step and rename the file to all_words_sorted.gz
-            words_status = os.system('mv %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
+            words_status = os.system('cp %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
         if words_status != 0:
             print "Word sorting failed\nInterrupting database load..."
             sys.exit()
