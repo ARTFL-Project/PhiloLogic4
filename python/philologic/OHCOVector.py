@@ -47,7 +47,10 @@ class CompoundRecord(object):
         print_id.append(self.attrib.get("byte_start",0))
         print_id.append(self.attrib.get("page",0))
         self.attrib["parent"] = " ".join(str(x) for x in parent_id)
-        return "%s\t%s\t%s\t%s" % (self.type,self.name," ".join(str(i) for i in print_id),self.attrib)
+        clean_attrib = {}
+        for k,v in self.attrib.items():
+            clean_attrib[k] = " ".join(v.split())
+        return "%s\t%s\t%s\t%s" % (self.type,self.name," ".join(str(i) for i in print_id),clean_attrib)
 
     def __getitem__(self,n):
         return self.attrib[n]
@@ -230,7 +233,11 @@ class Record(object):
         self.attrib = {}
 
     def __str__(self):
-        return "%s\t%s\t%s\t%s" % (self.type,self.name," ".join(str(i) for i in self.id),self.attrib)
+        clean_attrib = {}
+        for k,v in self.attrib.items():
+            clean_attrib[k] = " ".join(v.split())
+
+        return "%s\t%s\t%s\t%s" % (self.type,self.name," ".join(str(i) for i in self.id),clean_attrib)
         
     def __repr__(self):
         return "Record('%s','%s',%s)" % (self.type,self.name,self.id)
