@@ -315,10 +315,10 @@ class Loader(object):
                     for f in filters:
                         f(self, text)
                     
-                    os.system('gzip -c -5 %s > %s' % (text['raw'], text['raw'] + '.gz'))
                     if self.clean:
-                        os.system('rm %s' % text['raw'])
-                    
+                        os.system('gzip -c -5 %s > %s' % (text['raw'], text['raw'] + '.gz'))
+
+                    os.system('rm %s' % text['raw'])                    
                     os.system('gzip -c -5 %s > %s' % (text['words'], text['words'] + '.gz'))
                     os.system('rm %s' % text['words'])
                     
@@ -359,6 +359,8 @@ class Loader(object):
         print "%s: joining pages" % time.ctime()
         pages_status = os.system(pagesargs + " > " + self.workdir + "all_pages")
         print "%s: word join returned %d" % (time.ctime(), pages_status)
+        if self.clean:
+            os.system("rm *.pages")
 
     
     def merge_words(self, file_num):
