@@ -83,13 +83,16 @@ def split_terms(grouped):
             kind,token = group[0]
             if kind == "QUOTE" and token.find(" ") > 1: #we can split quotes on spaces if there is no OR
                 for split_tok in token[1:-1].split(" "):
-                    split.append( ("QUOTE",'"'+split_tok+'"' ) )
-                continue
+                    split.append( ( ("QUOTE",'"'+split_tok+'"' ), ) )
             elif kind == "RANGE":
+                split_group = []
                 for split_tok in token.split("-"):
-                    split_group.append( ("TERM",split_tok) )
-                continue
-        split.append(group)
+                    split_group.append( ( ("TERM",split_tok), ) )
+                split.append(split_group)
+            else:
+                split.append(group)
+        else:
+            split.append(group)
     return split
 
 def expand_query(split, freq_file, dest_fh):
