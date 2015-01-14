@@ -28,6 +28,7 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
     hl = open(filename, "w")
     err = open("/dev/null", "w")
     freq_file = db.locals["db_path"]+"/frequencies/normalized_word_frequencies"
+    print >> sys.stderr, "FORKING"
     pid = os.fork()
     if pid == 0:
         os.umask(0)
@@ -95,12 +96,13 @@ def split_terms(grouped):
                 split.append(group)
         else:
             split.append(group)
+    print >> sys.stderr, repr(split)
     return split
 
 def expand_query(split, freq_file, dest_fh):
     first = True
     grep_proc = None
-    print >> sys.stderr, repr(split)
+    print >> sys.stderr, "EXPANDING", repr(split)
     for group in split:
         if first == True:
             first = False
