@@ -391,8 +391,8 @@ class Loader(object):
             if self.clean:
                 os.system("rm %s" % file_list)
             delete_status = os.system('rm %s' % output)
-        if self.clean:
-            os.system('rm *.words.sorted.gz')
+#        if self.clean:
+#            os.system('rm *.words.sorted.gz')
 
         # We check if there was more than one batch sorted
         if len(lists_of_words_files) > 1:
@@ -412,6 +412,7 @@ class Loader(object):
             print "Word sorting failed\nInterrupting database load..."
             sys.exit()
         if self.clean:
+            print "Cleaning"
             os.system('rm %s' % self.workdir + '/*split.gz')
         return words_status
              
