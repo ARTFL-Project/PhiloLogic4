@@ -389,11 +389,11 @@ class Loader(object):
             command = '/bin/bash -c "%s | gzip -c -5 > %s.gz"' % (wordsargs, output)
             print command
             words_status = os.system(command)
-            print "FILE_LIST", file_list
-#            if self.clean:
-#                os.system("rm %s" % file_list)
-            print 'rm %s' % output
-            delete_status = os.system('rm %s' % output)
+#            print "FILE_LIST", file_list
+            if self.clean:
+                os.system("rm %s" % file_list)
+#            print 'rm %s' % output
+#            delete_status = os.system('rm %s' % output)
 #        if self.clean:
 #            print "cleaning wordlists"            
 #            os.system('rm *.words.sorted.gz')
