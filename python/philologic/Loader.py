@@ -387,7 +387,7 @@ class Loader(object):
             output = self.workdir + "words.sorted.%d.split" % pos
             wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + command_list
             command = '/bin/bash -c "%s | gzip -c -5 > %s.gz"' % (wordsargs, output)
-            print command
+#            print command
             words_status = os.system(command)
 #            print "FILE_LIST", file_list
             if self.clean:
@@ -416,7 +416,7 @@ class Loader(object):
             print "Word sorting failed\nInterrupting database load..."
             sys.exit()
         if self.clean:
-            print "Cleaning"
+#            print "Cleaning"
             os.system('rm %s' % self.workdir + '/*split.gz')
         return words_status
              
