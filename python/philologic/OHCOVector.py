@@ -49,7 +49,7 @@ class CompoundRecord(object):
         self.attrib["parent"] = " ".join(str(x) for x in parent_id)
         clean_attrib = {}
         for k,v in self.attrib.items():
-            clean_attrib[k] = re.sub("[\n\t]"," ",v)
+            clean_attrib[k] = " ".join(v.split())
         return "%s\t%s\t%s\t%s" % (self.type,self.name," ".join(str(i) for i in print_id),clean_attrib)
 
     def __getitem__(self,n):
@@ -235,7 +235,7 @@ class Record(object):
     def __str__(self):
         clean_attrib = {}
         for k,v in self.attrib.items():
-            clean_attrib[k] = re.sub("[\n\t]"," ",v)
+            clean_attrib[k] = " ".join(v.split())
 
         return "%s\t%s\t%s\t%s" % (self.type,self.name," ".join(str(i) for i in self.id),clean_attrib)
         
