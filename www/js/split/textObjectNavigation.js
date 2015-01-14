@@ -61,10 +61,6 @@ $(document).ready(function() {
         retrieveObj(db_url);
     });
     
-    // Make sure notes stay inline when after a span.xml-l
-    $('.xml-l + .note').prev('.xml-l').css('display', 'inline');
-    $('.note-content + .xml-l').prepend('<br>');
-    
 });
 
 
@@ -74,14 +70,35 @@ $(document).ready(function() {
 
 
 function createNoteLink() {
-    $('.note-content').each(function() {
-        $(this).before('<a class="note" tabindex="0" data-toggle="popover" data-container="body" data-placement="right" data-trigger="focus">note</a>');
-    }).promise().done(function() {
-        $('.note').popover({animate: true, trigger: 'focus', html: true, content: function() {
-            return $(this).next('.note-content').html();
-        }});
+    $('.note-ref, .note').click(function() {
+        if ($(this).hasClass == ".note") {
+            $(this).popover({animate: true, trigger: 'focus', html: true, content: function() {
+                return $(this).next('.note-content').html();
+            }});
+        } else {
+            var link = $(this).data('ref');
+            var element = $(this);
+            //element.popover({trigger: 'manual'});
+            $.getJSON(link, function(data) {
+                element.popover({trigger: 'manual', content: function() {
+                    return data.text;
+                }});
+                if (data.text != '') {
+                    element.popover("show");
+                } else {
+                    alert('PhiloLogic was unable to retrieve a note at the given link')
+                }
+                $('body').on('click', function (e) {
+                    //did not click a popover toggle, or icon in popover toggle, or popover
+                    if ($(e.target).data('toggle') !== 'popover') { 
+                        element.popover('hide');
+                    }
+                });
+            });
+        }
     });
 }
+
 
 function checkEndBeginningOfDoc() {
     if ($('#next-obj').data('philoId') == "") {

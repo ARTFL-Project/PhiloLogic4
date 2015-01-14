@@ -208,8 +208,20 @@ $(document).ready(function() {
     
     // Export results handler
     $('#export-buttons button').click(function() {
-        var href = window.location.href + "&format=" + $(this).data('format');
-        window.open(href, '_blank');
+        if (global_report == 'time_series') {
+            var data = sessionStorage[window.location.href];
+            var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+            $('<a href="data:' + data + '" download="time_series.json">Download JSON file</a>').appendTo('#export-download-link');
+            $("#export-download-link").velocity('slideDown');
+        } else {
+            var script = window.location.href + "&format=" + $(this).data('format');
+            $.getJSON(script, function(data) {
+                data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+                $('#export-download-link a').attr('href', 'data:' + data).attr('download', global_report + '.json');
+                //$('<a href="data:' + data + '" download="' + global_report + '.json">Download JSON file</a>').appendTo('#export-download-link');
+                $("#export-download-link").velocity('slideDown');
+            });
+        }
     });
     
 });
@@ -315,7 +327,7 @@ function showMoreOptions() {
         $("#report").velocity("slideDown",{duration: 250, 'easing': 'easeIn'});
     }
     $("#search_elements").velocity("slideDown",{duration: 250, 'easing': 'easeIn', complete: function() {
-        $("#search_overlay").velocity({opacity: .2}, {display: 'block', duration: 250});
+        $("#search_overlay").velocity({opacity: .2, height: $(document).height() - 50}, {display: 'block', duration: 250});
     }});
 }
 

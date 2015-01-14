@@ -9,7 +9,11 @@
     % if not config.dictionary:
         <div class="row" id="landingGroup" data-script="${config.db_url + '/scripts/get_landing_page_content.py?landing_page_content_type='}">
             % if config.landing_page_browsing["author"]:
-                <div class="col-xs-12 col-sm-6" id="col-author">
+                <% offset = '' %>
+                % if not config.landing_page_browsing["title"]:
+                    <% offset = "col-sm-offset-3" %>
+                % endif
+                <div class="${offset} col-xs-12 col-sm-6" id="col-author">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Author
@@ -27,7 +31,11 @@
                 </div>
             % endif
             % if config.landing_page_browsing["title"]:
-                <div class="col-xs-12 col-sm-6" id="col-title">
+                <% offset = '' %>
+                % if not config.landing_page_browsing["author"]:
+                    <% offset = "col-sm-offset-3" %>
+                % endif 
+                <div class="${offset} col-xs-12 col-sm-6" id="col-title">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Title

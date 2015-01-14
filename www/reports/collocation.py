@@ -16,7 +16,7 @@ from functions.FragmentParser import strip_tags
 ## Precompiled regexes for performance
 left_truncate = re.compile (r"^\w+", re.U)
 right_truncate = re.compile("\w+$", re.U)
-word_identifier = re.compile("\w", re.U)
+word_identifier = re.compile(r"\w", re.U)
 
 begin_match = re.compile(r'^[^<]*?>')
 start_cutoff_match = re.compile(r'^[^ <]+')
@@ -46,7 +46,6 @@ def render_collocation(collocation_object, q, config):
     total_script = f.link.make_absolute_query_link(config, q, script_name="scripts/get_total_results.py")
     ajax_scripts = {"colloc": colloc_script, "total": total_script}
     biblio_criteria = f.biblio_criteria(q, config)
-    print >> sys.stderr, "COLLOC", repr(collocation_object['all_collocates'])
     return f.render_template(collocation=collocation_object, query_string=q.query_string, biblio_criteria=biblio_criteria,
                              word_num=q.word_num, ajax=ajax_scripts, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
 
@@ -74,6 +73,12 @@ def fetch_collocation(hits, q, db, config):
     ## Override default value of q.end for first batch of results
     if q.end == 0:
         q.end = 3000
+        
+    ## Remove all empty keywords in request object
+    new_q = []
+    for i in q:
+        if i[1]:
+            new_q.append(i)
     
     count = 0
     for hit in hits[q.start:q.end]:
@@ -85,21 +90,21 @@ def fetch_collocation(hits, q, db, config):
             try:
                 left_collocates[left_word]['count'] += 1
             except KeyError:
-                left_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="left", collocate=left_word.encode('utf-8'))}
+                left_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="left", collocate=left_word.encode('utf-8'))}
             try:
                 all_collocates[left_word]['count'] += 1
             except KeyError:
-                all_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="all", collocate=left_word.encode('utf-8'))}
+                all_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="all", collocate=left_word.encode('utf-8'))}
 
         for right_word in right_words:
             try:
                 right_collocates[right_word]['count'] += 1
             except KeyError:
-                right_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="right", collocate=right_word.encode('utf-8'))}
+                right_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="right", collocate=right_word.encode('utf-8'))}
             try:
                 all_collocates[right_word]['count'] += 1
             except KeyError:
-                all_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", direction="all", collocate=right_word.encode('utf-8'))}
+                all_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="all", collocate=right_word.encode('utf-8'))}
     
     collocation_object['all_collocates'] = all_collocates
     collocation_object['left_collocates'] = left_collocates
@@ -150,14 +155,11 @@ def tokenize(text, filter_list, within_x_words, direction, db):
     text = text.lower()
     token_regex_pattern = db.locals["word_regex"] + u'|' + db.locals["punct_regex"]
     token_regex = re.compile(token_regex_pattern, re.U)
-    print >> sys.stderr, "TEXT", repr(text)
-    print >> sys.stderr, "NEW PATTERN", repr(token_regex_pattern)
     if direction == 'left':
         word_list = tokenize_text(text, token_regex) 
         word_list.reverse() ## left side needs to be reversed
     else:
         word_list = tokenize_text(text, token_regex)
-#    word_list = text.split(" ")
       
     word_list = filter(word_list, filter_list, within_x_words)
     return word_list

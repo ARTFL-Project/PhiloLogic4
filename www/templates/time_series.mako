@@ -31,6 +31,11 @@
                                 <span class="glyphicon glyphicon-remove-circle remove_metadata" id="remove_metadata_date_end"></span>
                             </span>
                         </div>
+                        % if config['debug']:
+                            % if "error" in time_series:
+                                <div class="bg-danger" style="margin-top: 20px; width: 50%;">${time_series['error']}</div>
+                            % endif
+                        % endif
                     </div>
                     <div class="progress" style="margin-left: 15px; margin-right: 15px; margin-top: -10px;">
                         <div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" data-total="${time_series['results_length']}" style="width: 0%;">

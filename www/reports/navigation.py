@@ -71,6 +71,8 @@ def generate_toc_object(obj, db, q, config):
     for i in toms_object:
         if i['philo_name'] == '__philo_virtual' and i["philo_type"] != "div1":
             continue
+        elif i['type'] == "notes" or i['philo_name'] == "note": ## Hide notes from table of contents
+            continue
         else:
             philo_id = i['philo_id']
             philo_type = i['philo_type']
@@ -86,6 +88,8 @@ def generate_toc_object(obj, db, q, config):
                         display_name = i['type'] + " " + i["n"]                       
                     else:
                         display_name = i["head"] or i['type'] or i['philo_name'] or i['philo_type']
+                        if display_name == "__philo_virtual":
+                            display_name = i['philo_type']
             display_name = display_name[0].upper() + display_name[1:]
             link = f.make_absolute_object_link(config, philo_id.split()[:7])
             toc_element = {"philo_id": philo_id, "philo_type": philo_type, "display_name": display_name, "link": link}
@@ -100,7 +104,48 @@ def generate_toc_object(obj, db, q, config):
                   "citation": citation}
     return toc_object
 
-def format_text_object(text,bytes=[]):
+def generate_text_object(obj, db, q, config):
+    text_object = {"query": dict([i for i in q]), "philo_id": obj.philo_id[0]}
+    text_object['prev'] = ' '.join(obj.prev.split()[:7])
+    text_object['next'] = ' '.join(obj.next.split()[:7])
+    metadata_fields = {}
+    for metadata in db.locals['metadata_fields']:
+        if db.locals['metadata_types'][metadata] == "doc":
+            metadata_fields[metadata] = obj[metadata]
+    text_object['metadata_fields'] = metadata_fields
+    doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
+    citation = biblio_citation(obj, doc_link)
+    text_object['citation'] = citation
+    text = get_text_obj(obj, config, q)
+    text_object['text'] = text
+    return text_object
+
+def get_text_obj(obj, config, q):
+    path = config.db_path
+    filename = obj.doc.filename
+    if filename and os.path.exists(path + "/data/TEXT/" + filename):
+        path += "/data/TEXT/" + filename
+    else:
+        ## workaround for when no filename is returned with the full philo_id of the object
+        philo_id = obj.philo_id[0] + ' 0 0 0 0 0 0'
+        c = obj.db.dbh.cursor()
+        c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id,))
+        path += "/data/TEXT/" + c.fetchone()["filename"]
+    file = open(path)
+    byte_start = int(obj.byte_start)
+    file.seek(byte_start)
+    width = int(obj.byte_end) - byte_start
+    raw_text = file.read(width)
+
+    if q.byte:
+        bytes = sorted([int(byte) - byte_start for byte in q.byte])
+    else:
+        bytes = []
+        
+    formatted = format_text_object(raw_text, config, q, bytes).decode("utf-8","ignore")
+    return formatted
+
+def format_text_object(text, config, q, bytes=[]):
     parser = etree.XMLParser(recover=True)
     if bytes:
         new_text = ""
@@ -122,11 +167,36 @@ def format_text_object(text,bytes=[]):
                 el.append(etree.Element("br"))
             elif el.tag == "list":
                 el.tag = "ul"
-            elif el.tag == "note":
+            elif el.tag == "ptr":
+                target = el.attrib["target"]
+                link = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_notes.py", target=target)
+                el.attrib["data-ref"] = link
+                del el.attrib["target"]
+                el.attrib['class'] = "note-ref"
+                el.attrib['tabindex'] = "0"
+                el.attrib['data-toggle'] = "popover"
+                el.attrib['data-container'] = "body"
+                el.attrib["data-placement"] = "right"
+                el.attrib["data-trigger"] = "focus"
+                el.attrib["data-html"] = "true"
+                el.attrib["data-animation"] = "true"
+                el.text = "note"
+                el.tag = "span"
+            elif el.tag == "note" and el.getparent().attrib["type"] != "notes":
                 el.tag = 'span'
                 el.attrib['class'] = "note-content"
                 for child in el:
                     child = note_content(child)
+                # insert an anchor before this element by scanning through the parent
+                parent = el.getparent()
+                for i,child in enumerate(parent):
+                    if child == el:
+                        attribs = {"class":"note", "tabindex": "0", "data-toggle": "popover", "data-container": "body",
+                                   "data-placement": "right", "data-trigger": "focus"}
+                        parent.insert(i,etree.Element("a",attrib=attribs))
+                        new_anchor = parent[i]
+                        new_anchor.text = "note"
+
             elif el.tag == "item":
                 el.tag = "li"
             elif el.tag == "ab" or el.tag == "ln":
@@ -187,43 +257,3 @@ def check_philo_virtual(db, path_components):
             return False
     except TypeError:
         return False
-
-def generate_text_object(obj, db, q, config):
-    text_object = {"query": dict([i for i in q]), "philo_id": obj.philo_id[0]}
-    text_object['prev'] = ' '.join(obj.prev.split()[:7])
-    text_object['next'] = ' '.join(obj.next.split()[:7])
-    metadata_fields = {}
-    for metadata in db.locals['metadata_fields']:
-        if db.locals['metadata_types'][metadata] == "doc":
-            metadata_fields[metadata] = obj[metadata]
-    text_object['metadata_fields'] = metadata_fields
-    doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
-    citation = biblio_citation(obj, doc_link)
-    text_object['citation'] = citation
-    text = get_text_obj(obj, config.db_path, query_args=q['byte'])
-    text_object['text'] = text
-    return text_object
-
-def get_text_obj(obj, path, query_args=False):
-    filename = obj.doc.filename
-    if filename and os.path.exists(path + "/data/TEXT/" + filename):
-        path += "/data/TEXT/" + filename
-    else:
-        ## workaround for when no filename is returned with the full philo_id of the object
-        philo_id = obj.philo_id[0] + ' 0 0 0 0 0 0'
-        c = obj.db.dbh.cursor()
-        c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id,))
-        path += "/data/TEXT/" + c.fetchone()["filename"]
-    file = open(path)
-    byte_start = int(obj.byte_start)
-    file.seek(byte_start)
-    width = int(obj.byte_end) - byte_start
-    raw_text = file.read(width)
-
-    if query_args:
-        bytes = sorted([int(byte) - byte_start for byte in query_args.split('+')])
-    else:
-        bytes = []
-        
-    formatted = format_text_object(raw_text,bytes).decode("utf-8","ignore")
-    return formatted

@@ -33,6 +33,11 @@
                         No results for your query.
                     % endif
                 </div>
+                % if config['debug']:
+                    % if "error" in kwic:
+                        <div class="bg-danger" style="margin-top: 20px; width: 50%;">${kwic['error']}</div>
+                    % endif
+                % endif
             </div>
         </div>
         <div class="row hidden-xs" id="act-on-report">

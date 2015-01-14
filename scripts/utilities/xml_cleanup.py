@@ -67,7 +67,7 @@ http://stackoverflow.com/questions/1197981/convert-html-entities-to-ascii-in-pyt
                 entnum = int(name)
                 s = s.replace(hit, unichr(entnum))
                 if not quiet:
-                    print >> sys.stderr, "converted %s entity to %s" % (name, unichr(entnum).encode('utf-8'))
+                    print >> sys.stderr, "converted %s entity to '%s'" % (name, unichr(entnum).encode('utf-8'))
             except ValueError:
                 pass
     matches = re.findall("&\w+;", s)
@@ -77,15 +77,15 @@ http://stackoverflow.com/questions/1197981/convert-html-entities-to-ascii-in-pyt
         if name in d and name not in ents_to_ignore:
             s = s.replace(hit, unichr(d[name]))
             if not quiet:
-                print >> sys.stderr, "converted %s entity to %s" % (name, unichr(d[name]))
+                print >> sys.stderr, "converted %s entity to '%s'" % (name, unichr(d[name]))
         elif name in dother and name not in ents_to_ignore:
             s = s.replace(hit, unichr(dother[name]))
             if not quiet:
-                print >> sys.stderr, "converted %s entity to %s" % (name, unichr(dother[name]))
+                print >> sys.stderr, "converted %s entity to '%s'" % (name, unichr(dother[name]))
         elif name not in d and name not in dother:
             s = s.replace(hit, hit.replace('&', "&amp;"))
             if not quiet:
-                print >> sys.stderr, "converted invalid entity %s to %s" % (name, hit.replace('&', "&amp;").encode('utf-8'))
+                print >> sys.stderr, "converted invalid entity %s to '%s'" % (name, hit.replace('&', "&amp;").encode('utf-8'))
 
     return (s.encode('utf-8'))
 
@@ -123,7 +123,12 @@ For instance, to replace <sp> by <p>, you would do {"sp": "p"}
 See http://www.tei-c.org/Vault/P4/migrate.html for some guidelines to convert old XML/TEI to TEI P5
 If you wish to make changes to attributes, you should edit the lxml iter loop directly"""
 
-xml_tag_mapping = {}
+xml_tag_mapping = {
+    ## TEI P4 => TEI P5 conversions
+    'TEI.2': "TEI",
+    'xref': "ref",
+    "xptr": "ptr",
+}
 
 #################################
 
@@ -138,6 +143,7 @@ if __name__ == '__main__':
     for filename in files:
         print >> sys.stderr, "Cleaning %s" % filename
         text = open(filename).read().decode('utf-8', 'ignore')
+        text = text.replace('\n', ' ')
         text = remove_control_chars(text)
     
         census = TagCensus()
@@ -149,10 +155,10 @@ if __name__ == '__main__':
             except UnicodeEncodeError:
                 print >> sys.stderr, unicode(census).encode('utf-8')
     
-        #if total:
-        #    total += census
-        #else:
-        #    total = census
+        if total:
+            total += census
+        else:
+            total = census
     
         #Annoyingly, BeautifulSoup requires you to declare ALL self-closing tags yourself; it will badly mangle your text if you miss one, so get this right.
         self_closing = []
@@ -172,18 +178,18 @@ if __name__ == '__main__':
             if tag.name in fix_case:
                 tag.name = fix_case[tag.name]
         
-        file_contents = soup.prettify()
+        file_contents = str(soup)
         file_contents = convert_remaining_entities(file_contents, quiet)
         
         try:
-            parser = etree.XMLParser(huge_tree=True)
+            parser = etree.XMLParser(huge_tree=True, remove_blank_text=True, strip_cdata=False)
             tree = etree.fromstring(file_contents, parser=parser)
             for el in tree.iter():
                 ## Tags are defined as el.tag, so to change tag, you do: el.tag = "some_other_tag"
                 ## Attributes are contained in el.attrib where each attribute is a key. To change the type attribute you do: el.attrib['type'] = "some_other_type"
                 if el.tag in xml_tag_mapping: ## Check if the tag should be replaced according to the xml mapping dict
                     el.tag = xml_tag_mapping[el.tag]
-            file_contents = etree.tostring(tree, encoding='utf-8')
+            file_contents = etree.tostring(tree, pretty_print=True, encoding='utf-8')
         except Exception as e:
             traceback.print_exc()
             print >> sys.stderr, "The clean-up script did not manage to fix all your XML issues"
@@ -198,5 +204,8 @@ if __name__ == '__main__':
         print >> outfile, file_contents
         outfile.close()
     
-    #print >> sys.stderr, total
+    try:
+        print >> sys.stderr, total
+    except UnicodeEncodeError:
+        print unicode(total).encode('utf-8')
     
