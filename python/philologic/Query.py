@@ -77,6 +77,7 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
         return HitList.HitList(filename,words_per_hit,db)
 
 def split_terms(grouped):
+    print >> sys.stderr, repr(grouped)
     split = []
     for group in grouped:
         if len(group) == 1:
@@ -85,10 +86,11 @@ def split_terms(grouped):
                 for split_tok in token[1:-1].split(" "):
                     split.append( ( ("QUOTE",'"'+split_tok+'"' ), ) )
             elif kind == "RANGE":
-                split_group = []
-                for split_tok in token.split("-"):
-                    split_group.append( ( ("TERM",split_tok), ) )
-                split.append(split_group)
+                split.append( ( ("TERM",token), ) )
+#                split_group = []
+#                for split_tok in token.split("-"):
+#                    split_group.append( ( ("TERM",split_tok), ) )
+#                split.append(split_group)
             else:
                 split.append(group)
         else:
