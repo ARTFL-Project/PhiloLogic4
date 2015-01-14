@@ -16,7 +16,11 @@ from lxml import etree
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
 all_chars = (unichr(i) for i in xrange(0x110000))
-control_chars = ''.join(map(unichr, range(0,32) + range(127,160)))
+control_chars_range =  range(0,32) + range(127,160)
+control_chars_range.remove(9)
+control_chars_range.remove(10)
+control_chars_range.remove(13) ## Keeping newlines, carriage returns and tabs
+control_chars = ''.join(map(unichr, control_chars_range))
 control_char_re = re.compile('[%s]' % re.escape(control_chars))
 
 
@@ -143,7 +147,6 @@ if __name__ == '__main__':
     for filename in files:
         print >> sys.stderr, "Cleaning %s" % filename
         text = open(filename).read().decode('utf-8', 'ignore')
-        text = text.replace('\n', ' ')
         text = remove_control_chars(text)
     
         census = TagCensus()
