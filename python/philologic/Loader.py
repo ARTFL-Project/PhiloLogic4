@@ -315,10 +315,10 @@ class Loader(object):
                     for f in filters:
                         f(self, text)
                     
-                    os.system('gzip -c -5 %s > %s' % (text['raw'], text['raw'] + '.gz'))
                     if self.clean:
-                        os.system('rm %s' % text['raw'])
-                    
+                        os.system('gzip -c -5 %s > %s' % (text['raw'], text['raw'] + '.gz'))
+
+                    os.system('rm %s' % text['raw'])                    
                     os.system('gzip -c -5 %s > %s' % (text['words'], text['words'] + '.gz'))
                     os.system('rm %s' % text['words'])
                     
@@ -359,6 +359,8 @@ class Loader(object):
         print "%s: joining pages" % time.ctime()
         pages_status = os.system(pagesargs + " > " + self.workdir + "all_pages")
         print "%s: word join returned %d" % (time.ctime(), pages_status)
+        if self.clean:
+            os.system("rm *.pages")
 
     
     def merge_words(self, file_num):
@@ -387,12 +389,16 @@ class Loader(object):
             output = self.workdir + "words.sorted.%d.split" % pos
             wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + command_list
             command = '/bin/bash -c "%s | gzip -c -5 > %s.gz"' % (wordsargs, output)
+#            print command
             words_status = os.system(command)
+#            print "FILE_LIST", file_list
             if self.clean:
                 os.system("rm %s" % file_list)
-            delete_status = os.system('rm %s' % output)
-        if self.clean:
-            os.system('rm *.words.sorted.gz')
+#            print 'rm %s' % output
+#            delete_status = os.system('rm %s' % output)
+#        if self.clean:
+#            print "cleaning wordlists"            
+#            os.system('rm *.words.sorted.gz')
 
         # We check if there was more than one batch sorted
         if len(lists_of_words_files) > 1:
@@ -407,11 +413,12 @@ class Loader(object):
             words_status = os.system(command)
         else:
             # if not skip the last step and rename the file to all_words_sorted.gz
-            words_status = os.system('mv %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
+            words_status = os.system('cp %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
         if words_status != 0:
             print "Word sorting failed\nInterrupting database load..."
             sys.exit()
         if self.clean:
+#            print "Cleaning"
             os.system('rm %s' % self.workdir + '/*split.gz')
         return words_status
              

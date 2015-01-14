@@ -28,6 +28,7 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
     hl = open(filename, "w")
     err = open("/dev/null", "w")
     freq_file = db.locals["db_path"]+"/frequencies/normalized_word_frequencies"
+    print >> sys.stderr, "FORKING"
     pid = os.fork()
     if pid == 0:
         os.umask(0)
@@ -77,25 +78,31 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
         return HitList.HitList(filename,words_per_hit,db)
 
 def split_terms(grouped):
+    print >> sys.stderr, repr(grouped)
     split = []
     for group in grouped:
         if len(group) == 1:
             kind,token = group[0]
             if kind == "QUOTE" and token.find(" ") > 1: #we can split quotes on spaces if there is no OR
                 for split_tok in token[1:-1].split(" "):
-                    split.append( ("QUOTE",'"'+split_tok+'"' ) )
-                continue
+                    split.append( ( ("QUOTE",'"'+split_tok+'"' ), ) )
             elif kind == "RANGE":
-                for split_tok in token.split("-"):
-                    split_group.append( ("TERM",split_tok) )
-                continue
-        split.append(group)
+                split.append( ( ("TERM",token), ) )
+#                split_group = []
+#                for split_tok in token.split("-"):
+#                    split_group.append( ( ("TERM",split_tok), ) )
+#                split.append(split_group)
+            else:
+                split.append(group)
+        else:
+            split.append(group)
+    print >> sys.stderr, repr(split)
     return split
 
 def expand_query(split, freq_file, dest_fh):
     first = True
     grep_proc = None
-    print >> sys.stderr, repr(split)
+    print >> sys.stderr, "EXPANDING", repr(split)
     for group in split:
         if first == True:
             first = False

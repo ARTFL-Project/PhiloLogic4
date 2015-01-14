@@ -46,6 +46,8 @@ def format_query(q, field, db):
                 t += '"'
             subtokens = t[1:-1].split("|")
             parsed_split += [("QUOTE_S",sub_t) for sub_t in subtokens if sub_t]
+        elif l == "RANGE":
+            parsed_split += [("TERM", t)]
         else:
             parsed_split += [(l,t)]
     output_string = []
