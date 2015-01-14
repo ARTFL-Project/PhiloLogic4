@@ -77,6 +77,7 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
         return HitList.HitList(filename,words_per_hit,db)
 
 def split_terms(grouped):
+    print >> sys.stderr, repr(grouped)
     split = []
     for group in grouped:
         if len(group) == 1:
