@@ -388,11 +388,11 @@ class Loader(object):
             wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + command_list
             command = '/bin/bash -c "%s | gzip -c -5 > %s.gz"' % (wordsargs, output)
             words_status = os.system(command)
-            if self.clean:
-                os.system("rm %s" % file_list)
+#            if self.clean:
+#                os.system("rm %s" % file_list)
             delete_status = os.system('rm %s' % output)
-#        if self.clean:
-#            os.system('rm *.words.sorted.gz')
+        if self.clean:
+            os.system('rm *.words.sorted.gz')
 
         # We check if there was more than one batch sorted
         if len(lists_of_words_files) > 1:
