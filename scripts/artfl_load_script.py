@@ -136,3 +136,5 @@ l.analyze()
 l.setup_sql_load()
 l.post_processing()
 l.finish(**extra_locals)
+
+print >> sys.stderr, "Application viewable at", db_url
