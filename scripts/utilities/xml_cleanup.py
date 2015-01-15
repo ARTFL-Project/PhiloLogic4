@@ -8,6 +8,7 @@ from BeautifulSoup import BeautifulStoneSoup as bss
 from philologic import TagCensus
 from optparse import OptionParser
 from lxml import etree
+from collections import defaultdict
 
 #REQUIRES BeautifulSoup3.  BS4 breaks on Python recursion errors when it gets badly damaged texts.
 
@@ -52,6 +53,8 @@ dother = name2codepoint.copy()
 
 ents_to_ignore = ["quot","amp","lt","gt","apos"]
 
+invalid_entities = defaultdict(int)
+
 def convert_remaining_entities(s, quiet):
     """Take an input string s, find all things that look like SGML character
     entities, and replace them with the Unicode equivalent.
@@ -61,6 +64,7 @@ http://stackoverflow.com/questions/1197981/convert-html-entities-to-ascii-in-pyt
 
     """
     s = s.decode('utf-8', 'ignore')
+    
     
     matches = re.findall("&#\d+;", s)
     if len(matches) > 0:
@@ -88,8 +92,8 @@ http://stackoverflow.com/questions/1197981/convert-html-entities-to-ascii-in-pyt
                 print >> sys.stderr, "converted %s entity to '%s'" % (name, unichr(dother[name]))
         elif name not in d and name not in dother:
             s = s.replace(hit, hit.replace('&', "&amp;"))
-            if not quiet:
-                print >> sys.stderr, "converted invalid entity %s to '%s'" % (name, hit.replace('&', "&amp;").encode('utf-8'))
+            print >> sys.stderr, "converted invalid entity %s to '%s'" % (name, hit.replace('&', "&amp;").encode('utf-8'))
+            invalid_entities[name] += 1
 
     return (s.encode('utf-8'))
 
@@ -100,7 +104,7 @@ def parse_command_line(argv):
     parser = OptionParser(usage=usage)
     parser.add_option("-q", "--quiet", action="store_true", default=False, dest="quiet", help="suppress all output from the tag census")
     parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to print byte locations of each start/end tag")
-    parser.add_option("-s", "--suffix", action="store", default="xml", type="string", dest="suffix", help="define which file extension to use for the cleaned-up file")
+    parser.add_option("-s", "--suffix", action="store", default="fixed", type="string", dest="suffix", help="define which file extension to use for the cleaned-up file")
     parser.add_option("-o", "--output-dir", action="store", default="", type="string", dest="output_dir", help="define an output directory. The default is the source directory")
     
     ## Parse command-line arguments
@@ -113,7 +117,10 @@ def parse_command_line(argv):
         
     debug = options.debug
     quiet = options.quiet
-    suffix = '.' + options.suffix
+    if options.suffix:
+        suffix = '.' + options.suffix
+    else:
+        suffix = ".fixed"
     output_dir = options.output_dir
     
     return files, suffix, output_dir, debug, quiet
@@ -197,12 +204,12 @@ if __name__ == '__main__':
             traceback.print_exc()
             print >> sys.stderr, "The clean-up script did not manage to fix all your XML issues"
             print >> sys.stderr, 'Try running "xmllint -noout" on the output file to get a more complete error report'
-
+        
         if output_dir:
             filename = output_dir + '/' + os.path.basename(filename) + suffix
         else:
             filename = filename + suffix
-
+        
         outfile = open(filename, 'w')
         print >> outfile, file_contents
         outfile.close()
@@ -211,4 +218,10 @@ if __name__ == '__main__':
         print >> sys.stderr, total
     except UnicodeEncodeError:
         print unicode(total).encode('utf-8')
+        
+    if invalid_entities:
+        print >> sys.stderr, "##### Undeclared entities present in files.######"
+        print >> sys.stderr, "To resolve, add definitions in this script"
+        for k,v in invalid_entities.iteritems():
+            print "\t\t".join([k,str(v)])
     
