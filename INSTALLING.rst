@@ -1,3 +1,8 @@
+PhiloLogic4
+===========
+
+PhiloLogic is an XML database/search engine/web app that is desigined for the particular difficulties of TEI XML.  For a more theoretical description, you can refer to `our research publications <http://http://jtei.revues.org/817>/ or `our blog <http://artfl.blogspot.com>`.
+
 Installation
 ============
 
@@ -198,7 +203,7 @@ directory with both web application and data files::
     ls -l /var/www/html/mydatabase
 
 
-Serving database with `Apache httpd`
+Serving databases with `Apache httpd`
 ------------------------------------
 
 By default, all the previous steps would transparently let `Apache httpd`_
