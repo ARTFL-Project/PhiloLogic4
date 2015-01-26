@@ -6,10 +6,11 @@ PhiloLogic is an XML database/search engine/web app that is desigined for the pa
 Installation
 ============
 
-As described in main ``README`` document, installing `PhiloLogic` follows
-each of its parts installations [1]_. For the sake of example, we will assume
-that you have a copy of `PhiloLogic4` content in your home,
-at ``~/PhiloLogic4`` path.
+Installing PhiloLogic consists of three steps:
+
+1) Install the C and Python libraries system-wide
+2) Set up a directory in your web server to deploy databases
+3) Configure a loader script 
 
 
 Downloading
@@ -29,18 +30,16 @@ branch::
     tar -xzf PhiloLogic4.tar.gz
     mv PhiloLogic4-master PhiloLogic4
 
+If you are going to be the only PhiloLogic user on your machine, you probably want to set up 
+a repository in your home directory.  If your setting it up for shared use, you should make sure
+the repository is accessible by whoever is going to load databases on your system.
 
 Installing library system-wide
 ------------------------------
 
 Installing ``libphilo`` system-wide requires administrator privileges.
-This library, written in `C`, depends on `gdbm`_, which *must* be installed [1]_.
-Installation processes in two classical steps:
-
-1. first compiling the library into binaries,
-2. then installing the fresh built material into system,
-
-with shell commands::
+This library, depends on `gdbm`_, which *must* be installed [1]_.
+Installation is standard for a Makefile-style distribution.
 
     cd ~/PhiloLogic4/libphilo
     make
@@ -60,7 +59,9 @@ Installing `Python` ``philologic`` library system-wide
 
 Once ``libphilo`` is installed, we need to install its `Python` bindings
 and library: ``philologic``. Once again, this step requires administrator
-privileges. Installation could be reached through its
+privileges. You probably want to install it's prerequistes, 'lxml'_ and 'mako'_, first.
+
+Installation could be reached through its
 ``~/PhiloLogic4/python/setup.py`` package setup::
 
     cd ~/PhiloLogic4/python
@@ -70,8 +71,6 @@ or via `pip`_ [2]_::
 
     cd ~/PhiloLogic4/python
     sudo pip install .
-
-Usage of this ``philologic`` library requires `lxml`_ (see below) [1]_.
 
 
 Installing web application for a new database
