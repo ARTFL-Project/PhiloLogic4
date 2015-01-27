@@ -39,35 +39,38 @@ your home directory at ~/PhiloLogic4/
 
 Prerequisites
 ------------
-Python
-GCC
-Make
-`gdbm`_
-libxml
-`LXML`_
-`Mako`_
+* Python
+* GCC
+* Make
+* `gdbm`_
+* `LXML`_
+* `Mako`_
+
+.. _gdbm: http://www.gnu.org.ua/software/gdbm/
+.. _LXML: http://lxml.de/
+.. _Mako: http://www.makotemplates.org/
 
 Installing the C library
 ------------------------------
 
 Installing PhiloLogic's libraries requires administrator privileges.
-This C library, depends on `gdbm`_, which *must* be installed first, to compile correctly.
+This C library depends on `gdbm`_, which *must* be installed first, to compile correctly.
 Installation is standard for a Makefile-style distribution.
 
     cd ~/PhiloLogic4/libphilo
     make
     sudo make install
 
-The binaries resulting of compilation process are
-``~/PhiloLogic4/libphilo/search4`` and ``~/PhiloLogic4/libphilo/db/pack4``.
-They are then copied into the execution directory, usually ``/bin``.
+In addition to the library, the Makefile also generates two binary executables,
+``search4`` and ``pack4``, which are then copied into the 
+binary execution directory, usually ``/bin``.
 
 .. note::
 
     See ``libphilo/README`` document for further details.
 
 
-Installing `Python` ``philologic`` library system-wide
+Installing the `Python` ``philologic`` module system-wide
 ------------------------------------------------------
 
 Once ``libphilo`` is installed, we need to install its `Python` bindings
