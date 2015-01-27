@@ -304,8 +304,10 @@ int phrase_cmp(dbh *db, uint32_t *L, uint32_t *R, int arg) {
 int sent_cmp(dbh *db, uint32_t *L, uint32_t *R, int arg) {
   int i;
   uint32_t dist;
+  
   for (i = 0; i < 6; i++) { //ugly...db has 9 fields, only 7 are good for sorting
     if (L[i] != R[i] ) {
+      fprintf(stderr,"mismatch at %d\n",i);
       return L[i] < R[i] ? -1 : 1;
     }
   }
@@ -586,16 +588,35 @@ uint32_t * search_advance(search_stage *stages,int size) {
   int check_res;           // the result of the previous stage's search predicate function
   uint32_t * advance_res;  // the result of advancing the current or previous stage--not actually used directly.
   int i;
+  int starting_stage = c;
   search_stage * curr = &stages[c]; // we should probably assign curr to the least stage, not the last
   search_stage * prev;     // not assigned until we know it is safe.
   // fprintf(stderr, "advancing stage %d : ", c);
-  advance_res = stage_advance(curr); // advance the last stage. must do this at least once. 
-  curr->init = 1;
+
+  // We have decided to switch to a unique-pairs matching algorithm, which means all words,
+  // but not corpus stages, should be advanced at the start of each search_advance call;
+
+  while (c >= 0) {
+    curr = &stages[c];
+    if (curr->kind == HEAP) {
+      advance_res = stage_advance(curr); // advance the last stage. must do this at least once. 
+      curr->init = 1;
+      if (c > 0) {
+	starting_stage = c;
+      }
+      c -= 1;
+    } else {
+      break;
+    }
+  }
+
+  c = starting_stage;
+
   // could set init on curr here, or elsewhere. 
   if (size == 1) {                    // if this is a one-stage search, we're done.
     return stage_current_hit(curr);   // if current hit is NULL this returns NULL, so don't need to check explicitly.
   }
-
+  
   // otherwise, search checks proceed from right to left, or outer to inner, or size - 1 to 1.
   // when we advance a stage, we have to check it against it's preceding/inner stage
 
