@@ -43,12 +43,8 @@ Prerequisites
 * GCC
 * Make
 * `gdbm`_
-* `LXML`_
+* `lxml`_
 * `Mako`_
-
-.. _gdbm: http://www.gnu.org.ua/software/gdbm/
-.. _LXML: http://lxml.de/
-.. _Mako: http://www.makotemplates.org/
 
 Installing the C library
 ------------------------------
@@ -92,8 +88,8 @@ or via the pip command::
 Setting up PhiloLogic Web Services
 ---------------------------------------------
 
-A new database, filled with one or more `TEI-XML` corpus file, will be served
-by a its own dedicated version of `PhiloLogic` web application.
+A new database, filled with one or more TEI-XML corpus file, will be served
+by a its own dedicated copy of PhiloLogic web application.
 By convention, this database and web app reside together in a directory
 accessible via an HTTP server configure to run Python CGI scripts.
 
@@ -104,30 +100,6 @@ the proper directory may vary, but ``/var/www/philologic/`` or ``/var/www/html/p
 
 Configuring your web server is outside of the scope of this document;
 if in doubt, ask your sysadmin, or ask Google.  
-
-
-.. note::
-
-    See ``www/README`` document for further details,
-    including needed dependencies.
-
-
-Dependencies
-^^^^^^^^^^^^
-
-`PhiloLogic4` web application obviously requires both ``libphilo`` and
-``philologic`` libraries to be installed (see above), but it also
-depends on `Mako`_ templating engine [1]_. If `Mako`_ is not provided by
-your operating system package, or provided version is too old,
-we advice to install a fresh one via `pip`_ [2]_::
-
-    sudo pip install Mako
-
-Running the ``loader.py`` depends itself on `lxml`_, and previous remark for
-`Mako` also applies here::
-
-    sudo pip install lxml
-
 
 Customize ``load_script.py``
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -203,9 +175,7 @@ So our command line for loading would be::
     python ~/mycorpus/load_script.py mydatabase ~/mycorpus/xml/*.xml
 
 The above command should have populated the ``/var/www/html/mydatabase``
-directory with both web application and data files::
-
-    ls -l /var/www/html/mydatabase
+directory with both web application and data files.
 
 Layout of a PhiloLogic Web Application Instance
 -----------------------------------------------
