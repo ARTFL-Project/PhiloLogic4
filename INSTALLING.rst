@@ -16,13 +16,13 @@ Installing PhiloLogic consists of three steps:
 Downloading
 -----------
 
-Getting a copy of `PhiloLogic4` could be achieved from different ways.
-One is by 'cloning' GitHub's repository via `git`_::
+Getting a copy of `PhiloLogic4` can be achieved two different ways.
+One is by cloning GitHub's repository via `git`_::
 
     cd $HOME
     git clone https://github.com/ARTFL-Project/PhiloLogic4
 
-An other would be to directly download an archive from GitHub's ``master``
+Another would be to directly download an archive from GitHub's ``master``
 branch::
 
     cd $HOME
@@ -32,13 +32,26 @@ branch::
 
 If you are going to be the only PhiloLogic user on your machine, you probably want to set up 
 a repository in your home directory.  If your setting it up for shared use, you should make sure
-the repository is accessible by whoever is going to load databases on your system.
+the repository is accessible by whoever is going to load databases on your system.  
 
-Installing library system-wide
+For the rest of this document, we will assume the PhiloLogic source code is installed in 
+your home directory at ~/PhiloLogic4/
+
+Prerequisites
+------------
+Python
+GCC
+Make
+`gdbm`_
+libxml
+`LXML`_
+`Mako`_
+
+Installing the C library
 ------------------------------
 
-Installing ``libphilo`` system-wide requires administrator privileges.
-This library, depends on `gdbm`_, which *must* be installed [1]_.
+Installing PhiloLogic's libraries requires administrator privileges.
+This C library, depends on `gdbm`_, which *must* be installed first, to compile correctly.
 Installation is standard for a Makefile-style distribution.
 
     cd ~/PhiloLogic4/libphilo
@@ -67,38 +80,28 @@ Installation could be reached through its
     cd ~/PhiloLogic4/python
     sudo python setup.py install
 
-or via `pip`_ [2]_::
+or via the pip command::
 
     cd ~/PhiloLogic4/python
     sudo pip install .
 
 
-Installing web application for a new database
+Setting up PhiloLogic Web Services
 ---------------------------------------------
 
 A new database, filled with one or more `TEI-XML` corpus file, will be served
 by a its own dedicated version of `PhiloLogic` web application.
-The structure of such a database, located for e.g. in a ``mydatabase``
-directory behind web directory served by `Apache httpd`_, which is usually
-``/var/www/`` or ``/var/www/html``, follows. For the sake of example, lets say
-that our new database will stand at ``/var/www/html/mydatabase``.
-This directory will contain *both* `PhiloLogic` web application,
-and stuff generated for its serving, in a ``data`` subdirectory.
-The filling of this ``/var/www/html/mydatabase`` will be done by
-a *customized* version of ``~/PhiloLogic4/scripts/loader.py`` script.
-At the end of generation, this directory will look like this tree::
+By convention, this database and web app reside together in a directory
+accessible via an HTTP server configure to run Python CGI scripts.
 
-    --- /var/www/html
-      \--- mydatabase
-        \--- css
-        \--- data
-        \--- functions
-        \--- js
-        \--- reports
-        \--- scripts
-        \--- templates
-        \--- .htaccess
-        \--- dispatcher.py
+In Mac OS X systems, you will probably want to create a directory at
+``/Library/WebServer/Documents/philologic`` to serve up PhiloLogic databases
+with the URL prefix: ``http://<your_server's_name>/philologic/``; for Linux systems, 
+the proper directory may vary, but ``/var/www/philologic/`` or ``/var/www/html/philologic/``
+
+Configuring your web server is outside of the scope of this document;
+if in doubt, ask your sysadmin, or ask Google.  
+
 
 .. note::
 
@@ -201,19 +204,24 @@ directory with both web application and data files::
 
     ls -l /var/www/html/mydatabase
 
+Layout of a PhiloLogic Web Application Instance
+-----------------------------------------------
 
-Serving databases with `Apache httpd`
-------------------------------------
+This database directory now contains *both* `PhiloLogic` web application, at the root,
+with the indexes and other data structures, in a ``data`` subdirectory.
+At the end of generation, this directory will look like this tree::
 
-By default, all the previous steps would transparently let `Apache httpd`_
-serve our database without any additional change.
-Check ``http://localhost/mydatabase/`` URL in a web browser to test it!
-
-.. note::
-
-    See ``apache.rst`` document for further details about setting up `Apache`
-    web server.
-
+    --- /var/www/html
+      \--- mydatabase
+        \--- css
+        \--- data
+        \--- functions
+        \--- js
+        \--- reports
+        \--- scripts
+        \--- templates
+        \--- .htaccess
+        \--- dispatcher.py
 
 ----
 
