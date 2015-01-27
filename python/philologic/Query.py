@@ -40,14 +40,19 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
         else:
             #now we're detached from the parent, and can do our work.
             print >> sys.stderr, "WORKER DETACHED at ", datetime.now() - tstart
-            args = ["search4", db.path,"--limit",str(limit)]
-            if corpus_file and corpus_size:
-                args.extend(("--corpusfile", corpus_file , "--corpussize" , str(corpus_size)))
+#            args = ["search4", db.path,"--limit",str(limit)]
+            args = ["corpus_search"]
+            if corpus_file:
+                args.extend(("-c", corpus_file));
+#            if corpus_file and corpus_size:
+#                args.extend(("--corpusfile", corpus_file , "--corpussize" , str(corpus_size)))
             if method and method_arg:
-                args.extend((method,str(method_arg)))
+                args.extend(("-m",method,"-a",str(method_arg)))
+            
+            args.extend(("-o","binary",db.path,));
 
             worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err)
-            print >> sys.stderr, "WORKER STARTED"
+            print >> sys.stderr, "WORKER STARTED:"," ".join(args);
             if query_debug == True:
                 print >> sys.stderr, "DEBUGGING"
                 query_log_fh = filename + ".terms"

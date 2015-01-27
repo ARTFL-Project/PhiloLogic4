@@ -262,6 +262,17 @@ int hit_cmp(dbh *db, uint32_t *L, uint32_t *R, int arg) {
   return 0;
 }
 
+int contains_cmp(dbh *db, uint32_t *L, uint32_t *R, int arg) {
+  int i;
+  for (i = 0; i < 7; i++) {
+    if (L[i] == 0) { return 0; }
+    if (L[i] != R[i] ) {
+      return L[i] < R[i] ? -1 : 1;
+    }
+  }
+  return 0;
+}
+
 int proximity_cmp(dbh *db, uint32_t *L, uint32_t *R, int arg) {
   int i;
   int dist;
@@ -499,10 +510,14 @@ uint32_t * heap_advance(word_heap *heap) {
 
 uint32_t * corpus_advance(corpus *corpus) {
   // requires that corpus has a readable fh and malloc'd current_hit.  Does not require current_hit to be init'd.
+  fprintf(stderr, "advancing corpus: ");
   size_t res = fread(corpus->current_hit,sizeof(uint32_t), 7, corpus->fh); // read 1 7-wide hit into current_hit
   if (res < 7) {
+    fprintf(stderr, "READ FAILED %d\n",res);
+    corpus->current_hit = NULL;
     return NULL;
   } else {
+    fprintf(stderr, "%d %d %d %d %d %d %d\n", corpus->current_hit[0],corpus->current_hit[1],corpus->current_hit[2],corpus->current_hit[3],corpus->current_hit[4],corpus->current_hit[5],corpus->current_hit[6]);
     return corpus->current_hit;
   }  
 }
@@ -523,7 +538,7 @@ uint32_t * stage_current_hit(search_stage * stage) {
   }
 }
 
-uint32_t * init_stage_heap(search_stage * stage, word_heap * heap,void * search_method,int search_method_arg) {
+uint32_t * init_stage_heap(search_stage * stage, word_heap * heap, void * search_method,int search_method_arg) {
   stage->kind = HEAP;
   stage->data.heap = *heap; //worrisome
   stage->check = search_method; // wrong method
@@ -536,9 +551,10 @@ uint32_t * init_stage_heap(search_stage * stage, word_heap * heap,void * search_
 uint32_t * init_stage_corp(search_stage * stage, corpus *corpus) {
   stage->kind = CORPUS;
   stage->data.corp = *corpus; //worrisome
-  stage->check = hit_cmp;  // ok?
+  stage->check = contains_cmp;  
   stage->init = 0;
-  return stage_advance(stage);
+  //  return stage_advance(stage);
+  return NULL;
 }
 
 int dump_search_result_ascii(FILE * fh,search_stage * stages, int size) {
@@ -556,6 +572,8 @@ int dump_search_result_ascii(FILE * fh,search_stage * stages, int size) {
       else {
         fprintf(fh, " :: %d %d %d %d %d %d %d %d %d", hit[0],hit[1],hit[2],hit[3],hit[4],hit[5],hit[6],hit[7],hit[8]);
       }            
+    } else {
+      fprintf(fh, "(%d %d %d %d %d %d %d) ", hit[0],hit[1],hit[2],hit[3],hit[4],hit[5],hit[6]);
     }
   }
   fprintf(fh, "\n");
@@ -567,7 +585,7 @@ int dump_search_result_binary(FILE * fh,search_stage *stages, int size) {
   uint32_t * hit;
   int first = 1;
   for (i = 0; i < size; i++) {
-    hit = stage_current_hit(&stages[0]);
+    hit = stage_current_hit(&stages[i]);
     if (stages[i].kind == HEAP) {
       if (first == 1) {
         // hit prefix up to sentence--same for all hits.
@@ -736,6 +754,7 @@ int main(int argc, char **argv) {
       corpus_fn = optarg;
       corp.fn = corpus_fn;
       corp.fh = fopen(corp.fn,"r");
+      corp.current_hit = malloc(7 * sizeof(uint32_t));
       // probably init corpus by hand here, since it can't come from anywhere else.
       init_stage_corp(&stages[0],&corp);
       stage_c = 1;
