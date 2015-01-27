@@ -1,17 +1,19 @@
 PhiloLogic4
 ===========
 
-PhiloLogic is an XML database/search engine/web app that is desigined for the particular difficulties of TEI XML.  For a more theoretical description, you can refer to `our research publications <http://http://jtei.revues.org/817>`_ or `our blog <http://artfl.blogspot.com>`_.
+PhiloLogic is an XML database/search engine/web app that is designed 
+for the particular difficulties of TEI XML.  For a more theoretical 
+description, you can refer to `our research publications <http://http://jtei.revues.org/817>`_ or `our blog <http://artfl.blogspot.com>`_.
 
 Installation
 ============
 
-Installing PhiloLogic consists of three steps:
+Installing PhiloLogic consists of four steps:
 
 1) Install the C and Python libraries system-wide
-2) Set up a directory in your web server to deploy databases
+2) Set up a directory in your web server to serve databases from
 3) Configure a loader script 
-
+4) Load your texts into a new database instance
 
 Downloading
 -----------
