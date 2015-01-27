@@ -11,7 +11,8 @@ from philologic.Loader import Loader, handle_command_line, setup_db_dir
 try:
     import artfl_xpaths
 except ImportError:
-    print "You need to copy the artfl_xpaths.py script from PhiloLogic4/scripts/ in the same directory as this script"
+    print "## Error ###\nYou need to copy the artfl_xpaths.py script from PhiloLogic4/scripts/ in the same directory as this script"
+    exit()
 
 ## Flush buffer output
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
@@ -79,8 +80,6 @@ suppress_tags = ["teiHeader",".//head"]
 
 word_regex = r"([\w]+)"
 punct_regex = r"([\.?!])"
-word_regex = r"([\w]+)"
-punct_regex = r"([\.?!])"
 
 token_regex = word_regex + "|" + punct_regex 
 
@@ -137,3 +136,5 @@ l.analyze()
 l.setup_sql_load()
 l.post_processing()
 l.finish(**extra_locals)
+
+print >> sys.stderr, "Application viewable at", db_url
