@@ -16,7 +16,7 @@ Installing PhiloLogic consists of three steps:
 Downloading
 -----------
 
-Getting a copy of `PhiloLogic4` can be achieved two different ways.
+Getting a copy of PhiloLogic4 can be achieved two different ways.
 One is by cloning GitHub's repository via `git`_::
 
     cd $HOME
@@ -32,7 +32,8 @@ branch::
 
 If you are going to be the only PhiloLogic user on your machine, you probably want to set up 
 a repository in your home directory.  If your setting it up for shared use, you should make sure
-the repository is accessible by whoever is going to load databases on your system.  
+the repository is accessible by whoever is going to load databases on your system.  However,
+shared use is not advisable if you will be commiting code to github.
 
 For the rest of this document, we will assume the PhiloLogic source code is installed in 
 your home directory at ~/PhiloLogic4/
@@ -61,11 +62,6 @@ In addition to the library, the Makefile also generates two binary executables,
 ``search4`` and ``pack4``, which are then copied into the 
 binary execution directory, usually ``/bin``.
 
-.. note::
-
-    See ``libphilo/README`` document for further details.
-
-
 Installing the `Python` ``philologic`` module system-wide
 ------------------------------------------------------
 
@@ -73,8 +69,7 @@ Once ``libphilo`` is installed, we need to install its `Python` bindings
 and library: ``philologic``. Once again, this step requires administrator
 privileges. You probably want to install it's prerequistes, 'lxml'_ and 'mako'_, first.
 
-Installation could be reached through its
-``~/PhiloLogic4/python/setup.py`` package setup::
+You can install the libraries either with Python's distutils:
 
     cd ~/PhiloLogic4/python
     sudo python setup.py install
@@ -88,7 +83,7 @@ or via the pip command::
 Setting up PhiloLogic Web Services
 ---------------------------------------------
 
-A new database, filled with one or more TEI-XML corpus file, will be served
+Each new PhiloLogic database you load, containing one or more TEI-XML files, will be served
 by a its own dedicated copy of PhiloLogic web application.
 By convention, this database and web app reside together in a directory
 accessible via an HTTP server configure to run Python CGI scripts.
@@ -99,50 +94,50 @@ with the URL prefix: ``http://<your_server's_name>/philologic/``; for Linux syst
 the proper directory may vary, but ``/var/www/philologic/`` or ``/var/www/html/philologic/``
 
 Configuring your web server is outside of the scope of this document;
-if in doubt, ask your sysadmin, or ask Google.  
+if in doubt, ask a friendly sysadmin..  
 
 Customize ``load_script.py``
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-So the ``load_script.py`` is the central piece of software generating database and
+Tthe ``load_script.py`` is the most important script for generating database and
 web application from web application *template* and `TEI-XML` corpus files,
-and you **must customize** it. Given a set of this `TEI-XML` files,
-located for e.g. at ``~/mycorpus/xml`` directory, we could put a copy
-of ``~/PhiloLogic4/scripts/load_script.py`` in ``~/mycorpus``::
+but before using it, you **must customize** it for your system, and possibly
+for your data. 
+
+Given a set of this `TEI-XML` files, located for e.g. at ``~/mycorpus/xml`` directory, 
+we could put a copy of ``~/PhiloLogic4/scripts/load_script.py`` in ``~/mycorpus``::
 
     cp ~/PhiloLogic4/scripts/load_script.py ~/mycorpus/
 
 It could be possible to also tweak the web application template to better
-fullfill your corpora specificities or needs, but for the sake of current
+fullfill your data specification or branding needs, but for this
 example, we assume you'll simply started with bare ``~/PhiloLogic4/www``'s one.
 
 The main *required* variables of ``load_script.py`` to be set are located
 around lines 25-44, and are ``database_root``, ``url_root``
-and ``template_dir``. Following previous example, we must set
+and ``template_dir``. Following the previous section, we must set
 ``database_root`` variable to ``'/var/www/html/mydatabase/'``
--- with an ending slash! --, and ``url_root`` set to e.g.
-``'http://localhost/mydatabase'``. Also, as we use ``~/PhiloLogic4/www``
-sources as bare web application template, we must tweaked ``template_dir``
-as follows::
+``url_root`` set to``'http://localhost/mydatabase/'``. 
+Finally, since we're using the basic web application template in `
+`~/PhiloLogic4/www``, we should point ``template_dir`` there.
 
-    # variables are set to None by default,
-    # and *must* be set to values according to *your* current installation,
-    # for example:
+So the three lines to edit are as follows::
+
     database_root = '/var/www/html/mydatabase/'
-    url_root = 'http://localhost/mydatabase'
-    template_dir = '~/PhiloLogic4/www'
+    url_root = 'http://localhost/mydatabase/'
+    template_dir = '~/PhiloLogic4/www/'
 
 
 Loading
 ^^^^^^^
 
-Once all files are in place and ``load_script.py`` script customized, it's time
-for `PhiloLogic` to generates all stuff it needs, by executing script
-on `TEI-XML` files::
+Once all files are in place and ``load_script.py`` script is customized, it's time
+for PhiloLogic to actually index your text files, by running the script
+on TEI-XML files::
 
     python ~/mycorpus/load_script.py [database name] [path to TEI-XML files]
 
-This script required the following arguments:
+This script takes the following required arguments:
 
 1.  the name of the database to create, which will be the subdirectory
     into ``/var/www/html`` directory, i.e. ``mydatabase``,
@@ -150,7 +145,7 @@ This script required the following arguments:
     i.e. ``~/mycorpus/xml/*.xml``.
 
 The full list of arguments ``load_script.py`` accepts is set in its body
-around 15-25 lines, and showable when running ``loader.py`` without
+around lines 15-25, and will be displayed  when running ``loader.py`` without
 a database name::
 
     python ~/mycorpus/load_script.py
@@ -197,15 +192,6 @@ At the end of generation, this directory will look like this tree::
         \--- dispatcher.py
 
 ----
-
-.. Footnotes:
-
-.. [1]
-    See ``requirement.rst`` document of a synthetical list of all dependencies.
-.. [2]
-    Installing a `Python` package via `pip`_ allows an easy deinstallation.
-    It's also an easy way to get the last version of a package,
-    or a specific one.
 
 .. Links:
 
