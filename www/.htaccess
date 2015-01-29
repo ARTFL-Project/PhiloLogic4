@@ -3,9 +3,9 @@ Options -Indexes
 AddHandler cgi-script py
 DirectoryIndex dispatcher.py
 
-<ifModule mod_headers.c>
-	Header set Connection keep-alive 
-</ifModule>
+#<ifModule mod_headers.c>
+#	Header set Connection keep-alive 
+#</ifModule>
 
 # ------------------------------------------------------------------------------
 # | Compression                                                                |
@@ -121,8 +121,8 @@ DirectoryIndex dispatcher.py
 # http://developer.yahoo.com/performance/rules.html#etags.
 
 # `FileETag None` doesn't work in all cases.
-<IfModule mod_headers.c>
-    Header unset ETag
-</IfModule>
+#<IfModule mod_headers.c>
+#    Header unset ETag
+#</IfModule>
 
-FileETag None
+#FileETag None

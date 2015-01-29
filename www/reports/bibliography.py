@@ -18,8 +18,8 @@ def bibliography(environ, start_response):
     if request.format == "json":
         headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
         start_response('200 OK',headers)
-        wrapper = []
-        return json.dumps(wrapper)
+        bibliography_object, hits = bibliography_results(db, request, config)
+        return json.dumps(bibliography_object)
     else:
         return fetch_bibliography(db, request, config, start_response)
 

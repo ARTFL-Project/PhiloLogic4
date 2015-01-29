@@ -1,0 +1,41 @@
+<div class="panel panel-default">
+    <div id="initial_report">
+        <div id="description" ng-if="typeof(results) != 'undefined'" class="velocity-opposites-transition-fadeIn">
+            <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
+                    Export results
+            </button>
+            <div id="search_arguments">
+                Searching database for <b>{{ queryParams.q }}</b><br>
+                <span ng-bind-html="'Bibliographic criteria: ' + biblioCriteria"></span>
+            </div>
+            <div id="search-hits">
+            </div>
+        </div>
+        <div class="row hidden-xs" id="act-on-report">
+        </div>
+    </div>
+    <div class="row">
+        <div id="results_container" class="col-xs-12">
+            <ol id="philologic_concordance">
+                <li class="philologic_occurrence panel panel-default velocity-opposites-transition-slideLeftIn" data-velocity-opts="{delay: 200, duration:250, stagger:100}" ng-repeat="result in results.results">
+                    <div class="citation-container row">
+                        <div class="col-xs-12 col-sm-10 col-md-11" ng-init="position = $index + 1 + results.start">
+                           <span class="cite" data-id="{{ result.philo_id.join(' ') }}" ng-bind-html="position + '.&nbsp' + result.citation"></span>
+                        </div>
+                        <div class="hidden-xs col-sm-2 col-md-1">
+                           <button class="btn btn-primary more_context pull-right" disabled="disabled" data-context="short">
+                               More
+                           </button>
+                        </div>
+                    </div>
+                   <div class='philologic_context'>
+                       <div class="default_length" ng-bind-html="result.context"></div>
+                   </div>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+<div class="more">
+    <div style='clear:both;'></div>
+</div>

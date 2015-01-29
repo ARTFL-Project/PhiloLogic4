@@ -29,6 +29,7 @@ def concordance(environ,start_response):
         return r.fetch_bibliography(db, request, config, start_response)
     else:
         concordance_object, hits = concordance_results(db, request, config)
+        print >> sys.stderr, "QUERY", repr(concordance_object['query'])
         if request['format'] == "json":
             headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
             start_response('200 OK',headers)

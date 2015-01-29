@@ -55,7 +55,7 @@ a:hover {
 
 /*Concordance Kwic styling*/
 .more_context, .citation-container {
-    border-color: #eee;
+    border-color: #eee !important;
 }
 .citation-overflow {
     background: -moz-linear-gradient(left, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 86%, rgba(255,255,255,1) 94%, rgba(255,255,255,1) 100%); /* FF3.6+ */
@@ -70,10 +70,6 @@ a:hover {
 }
 
 /*Search form*/
-#form_body {
-    box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
-    background: #fff;
-}
 #search_elements {
     border-top-color: #eee;
 }

@@ -1,34 +1,26 @@
 ## -*- coding: utf-8 -*-
-<div id='search_overlay'></div>
 <div class="container" style="overflow: hidden;">
-    <form id="search" action="${config.db_url + "/dispatcher.py/"}" role="form">
-    <div id="form_body">
+    <form id="search" action="dispatcher.py/" role="form">
+        <div id="form_body" ng-controller="searchForm">
+            <div id="search_overlay" ng-if="formOpen" class="overlay-fadeOut"></div>
             <div id="initial-form">
-                <div id="report" class="btn-group btn-group-justified" data-toggle="buttons">
-                    % if "concordance" in config.search_reports:
-                        <label class="btn btn-primary active">
-                            <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
-                            Concordance
-                        </label>
-                    % endif
-                    % if "kwic" in config.search_reports:
-                        <label class="btn btn-primary hidden-xs">
-                            <input type="radio" name="report" id="kwic" value='kwic'>
-                            KWIC
-                        </label>
-                    % endif
-                    % if "collocation" in config.search_reports:
-                        <label class="btn btn-primary">
-                            <input type="radio" name="report" id="collocation" value='collocation'>
-                            Collocation
-                        </label>
-                    % endif
-                    % if "time_series" in config.search_reports:
-                        <label class="btn btn-primary hidden-xs">
-                            <input type="radio" name="report" id="time_series" value='time_series'>
-                            Time Series
-                        </label>
-                    % endif
+                <div id="report" class="btn-group btn-group-justified" data-toggle="buttons" ng-click="reportClicked($event)">
+                    <label class="btn btn-primary active" ng-if="searchReports.indexOf('concordance') > -1">
+                        <input type="radio" name="report" id="concordance" value='concordance' checked="checked">
+                        Concordance
+                    </label>
+                    <label class="btn btn-primary hidden-xs" ng-if="searchReports.indexOf('kwic') > -1">
+                        <input type="radio" name="report" id="kwic" value='kwic'>
+                        KWIC
+                    </label>
+                    <label class="btn btn-primary" ng-if="searchReports.indexOf('collocation') > -1">
+                        <input type="radio" name="report" id="collocation" value='collocation'>
+                        Collocation
+                    </label>
+                    <label class="btn btn-primary hidden-xs" ng-if="searchReports.indexOf('time_series') > -1">
+                        <input type="radio" name="report" id="time_series" value='time_series'>
+                        Time Series
+                    </label>
                 </div>
                 <div id="search_terms_container">
                     <div id="search_terms" class="row">
@@ -42,7 +34,7 @@
                                         <span id="tip">?</span><span id="tip-text">Tips</span>
                                     </button>
                                 </span>
-                                <input type='text' name='q' id='q' class="form-control" data-script="${config.db_url + '/scripts/autocomplete_term.py'}">
+                                <input type='text' name='q' id='q' class="form-control" data-script="scripts/autocomplete_term.py">
                                 <span class="input-group-btn">
                                     <button type="submit" class="btn btn-primary" id="button-search">
                                         <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
@@ -50,18 +42,18 @@
                                 </span> 
                             </div>
                         </div>
-                        <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
+                        <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons" ng-controller="showSearchForm">
                             <button type="reset" id="reset_form" class="btn btn-danger">Clear</button>
-                            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none">Show search options</button>
+                            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" ng-click="toggle()">Show search options</button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div id="search_elements">
+            <div id="search-elements" ng-if="formOpen" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{ duration: 400 }">
                 <h5>Refine your search with the following options and fields:
-                </h5>             
+                </h5>
                 <!--This row defines the search method options-->
-                <div class="row hidden-xs" id='method'>
+                <div class="row hidden-xs" id='method' ng-if="report != 'collocation'">
                     <div class="col-xs-12 col-sm-2" style="margin-top: 40px;">
                         Search Terms
                     </div>
@@ -88,28 +80,20 @@
                         <span style="padding-left: 10px">words in the same sentence</span>
                     </div>
                 </div>
-                <div id="metadata_fields" data-script="${config.db_url + '/scripts/autocomplete_metadata.py?field='}">
-                    % for facet in config.metadata:
-                        <%
-                        if facet in config.metadata_aliases:
-                            alias = config.metadata_aliases[facet]
-                        else:
-                            alias = facet
-                        %>
-                        <div class="row">
-                            <div class="col-xs-12 col-sm-2 col-md-2 text-row">
-                                ${alias}:
-                            </div>
-                            <div class="col-xs-12 col-sm-4 col-md-4">
-                                <input type='text' name='${facet}' id="${facet}" class="form-control">
-                            </div>
-                            <div class="col-xs-12 col-sm-4 col-md-6 text-row">
-                                (e.g., ${config.search_examples[facet]})
-                            </div>
+                <div id="metadata_fields" data-script="scripts/autocomplete_metadata.py?field=" ng-controller="searchMetadata">
+                    <div class="row" ng-repeat="(metadata, displayValue) in metadataFields">
+                        <div class="col-xs-12 col-sm-2 col-md-2 text-row">
+                            {{ displayValue.value }}:
                         </div>
-                    % endfor
+                        <div class="col-xs-12 col-sm-4 col-md-4">
+                            <input type='text' name='{{ metadata }}' id="{{ metadata }}" class="form-control">
+                        </div>
+                        <div class="col-xs-12 col-sm-4 col-md-6 text-row">
+                            (e.g., {{ displayValue.example }})
+                        </div>
+                    </div>
                 </div>
-                <div id="collocation-options" class="row">
+                <div id="collocation-options" class="row" ng-if="report == 'collocation'">
                     <div class="col-xs-12">
                         <div class="row">
                             <div class="col-xs-3 col-sm-2 col-md-2 text-row">
@@ -152,15 +136,13 @@
                                 </select>
                             </div>
                             <div class="col-xs-6 col-sm-2">
-                                <div class="btn-group-vertical" role="group" data-toggle="buttons" id="colloc_filter_choice">
+                                <div class="btn-group-vertical" role="group" data-toggle="buttons" id="colloc_filter_choice" ng-controller="collocationFilter">
                                     <label class="btn btn-primary active" id="colloc-filter-frequency">
                                         <input type="radio" name="colloc_filter_choice" value="frequency" checked="checked">Most frequent terms
                                     </label>
-                                     % if config.stopwords:
-                                        <label class="btn btn-primary" id="colloc-filter-stopwords">
-                                            <input type="radio" name="colloc_filter_choice" value="stopwords">Stopwords
-                                        </label>
-                                    % endif
+                                    <label class="btn btn-primary" id="colloc-filter-stopwords" ng-if="stopwords">
+                                        <input type="radio" name="colloc_filter_choice" value="stopwords">Stopwords
+                                    </label>
                                     <label class="btn btn-primary" id="colloc-no-filter">
                                         <input type="radio" name="colloc_filter_choice" value="nofilter">No filtering
                                     </label>
@@ -169,7 +151,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="time_series_num" class="row">
+                <div id="time_series_num" class="row" ng-if="report == 'time_series'">
                     <div class="col-xs-12 col-sm-2 col-md-2 text-row">
                         Date range:
                     </div>
@@ -178,30 +160,24 @@
                         to <input type='text' name="end_date" id="end_date" style="width:35px;">
                     </div>
                 </div>
-                <div id="date_range" class="row">
+                <div id="date_range" class="row" ng-if="report == 'time_series'">
                     <div class="col-xs-12 col-sm-2 col-md-2 text-row">
                         Year interval:
                     </div>
-                    <div class="col-xs-12 col-sm-10 col-md-10">
-                        <% time_options = {1: "Year", 10: "Decade", 50: "Half Century", 100: "Century"} %>
+                    <div class="col-xs-12 col-sm-10 col-md-10" ng-controller="timeSeriesInterval">
                         <div id="year_interval" class="btn-group" data-toggle="buttons">
-                            % for pos, year in enumerate(config.time_series_intervals):
-                                % if pos == 0:
-                                    <label class="btn btn-primary active">
-                                        <input type="radio" name="year_interval" id="year0" value="${year}" checked>
-                                        ${time_options[year]}
-                                    </label>
-                                % else:
-                                    <label class="btn btn-primary">
-                                        <input type="radio" name="year_interval" id="year${pos}" value="${year}">
-                                        ${time_options[year]}
-                                    </label>
-                                % endif
-                            % endfor
+                            <label class="btn btn-primary active">
+                                <input type="radio" name="year_interval" id="year0" value="{{ intervals[0].date }}" checked>
+                                {{ intervals[0].alias }}
+                            </label>
+                            <label class="btn btn-primary" ng-repeat="display in intervals.slice(1)">
+                                <input type="radio" name="year_interval" id="year{{ $index }}" value="{{ display.date }}">
+                                {{ display.alias }}
+                            </label>
                         </div>
                     </div>
                 </div>
-                <div id="results_per_page" class="row">
+                <div id="results_per_page" class="row" ng-if="report != 'collocation' && report != 'time_series'">
                     <div class="col-xs-12 col-sm-2 col-md-2 text-row">
                         Results per page:
                     </div>

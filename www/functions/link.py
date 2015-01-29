@@ -130,7 +130,7 @@ def page_links(config,params,results_len,script_name="dispatcher.py"):
         page_end = page_start + results_per_page - 1
         if page_end > results_len:
             page_end = results_len
-        link = make_absolute_query_link(config,params,script_name=script_name,start=str(page_start),end=str(page_end))
+        link = make_absolute_query_link(config,params,script_name=script_name,start=str(page_start),end=str(page_end), format="json")
         if page == 1 and 2 not in pages:
             page = "First"
         if page == total_pages:

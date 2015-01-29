@@ -32,7 +32,46 @@ $(document).ready(function() {
         }
     });
     
+    $('#page-links a').on('click touchstart', function(e) {
+        e.preventDefault();
+        $('#current_results_page').removeClass('active').removeAttr('id');
+        $(this).attr('id', 'current_results_page').addClass('active');
+        var script = $(this).data('script');
+        $.getJSON(script, function(data) {
+            concordanceRenderer(data);
+            var new_url = script.replace('format=json', 'format=');
+            History.pushState(null, '', new_url);
+        });
+    });
+    
 });
+
+/// Concordance template
+function concordanceRenderer(data) {
+    var html = '<ol id="philologic_concordance">';
+    var results = data.results;
+    for (var i=0; i < results.length; i++) {
+        var result = results[i];
+        var n = data.description.start + i;
+        html += '<li class="philologic_occurrence panel panel-default">';
+        html += '<div class="citation-container row">';
+        html += '<div class="col-xs-12 col-sm-10 col-md-11">';
+        var philo_id = result.philo_id.join(' ');
+        html += '<span class="cite" data-id="' + philo_id + '">';
+        html += n + '.&nbsp ' + result.citation;
+        html += '</span></div>';
+        html += '<div class="hidden-xs col-sm-2 col-md-1">';
+        html += '<button class="btn btn-primary more_context pull-right" disabled="disabled" data-context="short">More</button>';
+        html += '</div></div>';
+        html += '<div class="philologic_context">';
+        html += '<div class="default_length">' + result.context + '</div>';
+        html += '</div></li>';
+    }
+    html += '</ol>';
+    $('#results_container').hide().empty();
+    $('#results_container').append(html).velocity('fadeIn');
+    
+}
 
 /// Switch betwwen concordance and KWIC reports
 function concordance_kwic_switch(db_url) {

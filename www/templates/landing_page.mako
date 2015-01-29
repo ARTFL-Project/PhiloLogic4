@@ -1,154 +1,244 @@
 ## -*- coding: utf-8 -*-
-<%include file="header.mako"/>
-% if not config.dictionary:
-    <%include file="search_form.mako"/>
-% else:
-    <%include file="dictionary_search_form.mako"/>
-% endif
-<div class="container-fluid" id='philologic_response'>
-    % if not config.dictionary:
-        <div class="row" id="landingGroup" data-script="${config.db_url + '/scripts/get_landing_page_content.py?landing_page_content_type='}">
-            % if config.landing_page_browsing["author"]:
-                <% offset = '' %>
-                % if not config.landing_page_browsing["title"]:
-                    <% offset = "col-sm-offset-3" %>
-                % endif
-                <div class="${offset} col-xs-12 col-sm-6" id="col-author">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Author
-                        </div>
-                        <div class="panel-body">
-                            <table id="author-range-selectors" class="table table-bordered" data-type="author">
-                                <tr>
-                                    % for range in config.landing_page_browsing["author"]:
-                                        <td data-range="${range}">${range}</td>
-                                    % endfor
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
+<!DOCTYPE html>
+<html ng-app="philoApp">
+<head>
+    <title>${config.dbname.decode('utf-8', 'ignore')}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+ 
+    <!--Load the web config and global_report variable to use in the JavaScript code-->
+    <script>
+        var philoConfig = ${config.toJSON()}; /* loading the web_config in javascript */
+        var philoReport = "landing_page";
+    </script>
+    
+    <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono|Averia+Serif+Libre:300,400,700,300italic,400italic,700italic&subset=latin,latin-ext,cyrillic-ext,greek-ext,greek,cyrillic' rel='stylesheet' type='text/css'>
+    
+    <!--Load all required CSS-->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">  
+    <!-- PhiloLogic4 CSS -->
+    ${css}
+    
+    ## Load in header to allow ng-cloak
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.9/angular.min.js"></script>
+    
+</head>
+<body onunload="" ng-cloak>
+    <div id="header">
+        <div class="navbar navbar-inverse navbar-static-top" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-left">
+                     
                 </div>
-            % endif
-            % if config.landing_page_browsing["title"]:
-                <% offset = '' %>
-                % if not config.landing_page_browsing["author"]:
-                    <% offset = "col-sm-offset-3" %>
-                % endif 
-                <div class="${offset} col-xs-12 col-sm-6" id="col-title">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Title
-                        </div>
-                        <div class="panel-body">
-                            <table id="title-range-selectors" class="table table-bordered"" data-type="title">
-                                <tr>
-                                    % for range in config.landing_page_browsing["title"]:
-                                        <td data-range="${range}">${range}</td>
-                                    % endfor
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
+                <div class="navbar-right">
+                    <a href="http://artfl-project.uchicago.edu">The ARTFL Project</a>
+                    <a href="http://www.uchicago.edu">University of Chicago</a>
+                    <a href="http://artfl-project.uchicago.edu/content/contact-us" title="Contact information for the ARTFL Project">Contact Us</a>
                 </div>
-            % endif
-            % if config.landing_page_browsing["date"]:
-                <div class="col-xs-12" id="col-year">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Year
-                        </div>
-                        <div class="panel-body">
-                            <table id="year-range-selectors" class="table table-bordered" data-type="year">
-                                <tr>
-                                    <%
-                                    start = config.landing_page_browsing['date']['start']
-                                    end = config.landing_page_browsing['date']['end']
-                                    interval = config.landing_page_browsing['date']['interval']
-                                    cell_num = 0
-                                    %>
-                                    % for start_date in xrange(start, end, interval):
-                                        % if cell_num == 4:
-                                            <% cell_num = 0 %>
-                                            </tr>
-                                            <tr>
-                                        % endif   
-                                        <%
-                                        end_date = start_date + interval - 1
-                                        cell_num += 1
-                                        %>
-                                        <td data-range="${start_date}-${end_date}">${start_date}-${end_date}</td>
-                                    % endfor
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            % endif
-        </div>
-        <div id="landing-page-content" ></div>
-    % else:
-        <div class="row">
-            <div id="dico-landing-volume" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;" data-script="${config.db_url + '/scripts/get_bibliography.py?object_level=doc'}">
-                <div class="panel-heading" style="margin-left: -15px; margin-right: -15px">
-                    Browse by volume
-                </div>
-                <div class="panel-body" >
-                    <ul class="list-group" style="margin-left: -15px; margin-right: -15px"></ul>
-                </div>
-            </div>
-            <div id="dico-landing-alpha" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;" data-script="${config.db_url + '/dispatcher.py?report=bibliography&head='}">
-                <div class="panel-heading">
-                    Browse by letter
-                </div>
-                <div class="panel-body">
-                    <table class="table table-bordered">
-                        <tr>
-                            <td>A</td>
-                            <td>B</td>
-                            <td>C</td>
-                            <td>D</td>
-                        </tr>
-                        <tr>
-                            <td>E</td>
-                            <td>F</td>
-                            <td>G</td>
-                            <td>H</td>
-                        </tr>
-                        <tr>
-                            <td>I</td>
-                            <td>J</td>
-                            <td>K</td>
-                            <td>L</td>
-                        </tr>
-                        <tr>
-                            <td>M</td>
-                            <td>N</td>
-                            <td>O</td>
-                            <td>P</td>
-                        </tr>
-                        <tr>
-                            <td>Q</td>
-                            <td>R</td>
-                            <td>S</td>
-                            <td>T</td>
-                        </tr>
-                        <tr>
-                            <td>U</td>
-                            <td>V</td>
-                            <td>W</td>
-                            <td>X</td>
-                        </tr>
-                        <tr>
-                            <td>Y</td>
-                            <td>Z</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    </table>
+                <div class="navbar-header">
+                    <a href="." class="navbar-brand" title="${config.dbname.decode('utf-8', 'ignore')}">${config.dbname.decode('utf-8', 'ignore')}</a>
                 </div>
             </div>
         </div>
-    % endif
-</div>
-<%include file="footer.mako"/>
+    </div>
+    <div class="container-fluid" id="main-body" ng-controller="philoMain">
+        <div class="container" style="overflow: hidden;" ng-include="'templates/search_form.html'"></div>
+        <div class="container-fluid" id='philologic_response'>
+            <div id="landing-page" ng-if="report === 'landing_page'" ng-controller="landingPage">
+                <div id="default-landing-page" ng-if="!dictionary">
+                    <div class="row" id="landingGroup" ng-controller="defaultCtrl">
+                        <div class="{{ authorOffset }} col-xs-12 col-sm-6" id="col-author" ng-if="authorRanges">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Author
+                                </div>
+                                <div class="panel-body">
+                                    <table id="author-range-selectors" class="table table-bordered" data-type="author">
+                                        <tr>
+                                            <td ng-repeat="range in authorRanges" ng-click="getContent('author', '{{ range }}')">{{ range }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="{{ titleOffset }} col-xs-12 col-sm-6" id="col-title" ng-if="titleRanges">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Title
+                                </div>
+                                <div class="panel-body">
+                                    <table id="title-range-selectors" class="table table-bordered"" data-type="title">
+                                        <tr>
+                                            <td ng-repeat="range in titleRanges" ng-click="getContent('title', '{{ range }}')">{{ range }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12" id="col-year" ng-if="dateRanges">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Date
+                                </div>
+                                <div class="panel-body">
+                                    <table id="year-range-selectors" class="table table-bordered" data-type="year">
+                                        <tr ng-repeat="ranges in dateRanges">
+                                            <td ng-repeat="range in ranges" data-range="{{ range.start }}-{{ range.end }}">{{ range.start }}-{{ range.end }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="landing-page-content"></div>
+                </div>
+                <div id="dictionary-landing-page" ng-if="dictionary" ng-controller="dicoCtrl">
+                    <div class="row">
+                        <div id="dico-landing-volume" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;">
+                            <div class="panel-heading" style="margin-left: -15px; margin-right: -15px">
+                                Browse by volume
+                            </div>
+                            <div class="panel-body" >
+                                <ul class="list-group" style="margin-left: -15px; margin-right: -15px" ng-if="volumeData != []">
+                                    <li class="list-group-item velocity-transition-fadeIn" ng-repeat="volume in volumeData" data-velocity-opts="{ stagger: 10 }">
+                                        <a href="dispatcher.py/{{ volume.philo_id }}">{{ volume.title }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="dico-landing-alpha" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;">
+                            <div class="panel-heading">
+                                Browse by letter
+                            </div>
+                            <div class="panel-body">
+                                <table class="table table-bordered">
+                                    <tr ng-repeat="row in dicoLetterRows">
+                                        <td ng-repeat="letter in row" ng-click="goToBibliographyReport(letter)">{{ letter }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- /main-body -->
+    <div class="container-fluid" id="footer">
+        <div class="row" >
+            <div class="col-xs-offset-4 col-xs-4 col-sm-offset-5 col-sm-2">
+                <hr>
+            </div>
+            <div class="col-xs-offset-3 col-xs-6" id="footer-content">
+                Powered by <br>
+                <a href="https://artfl-project.uchicago.edu/node/157" title="Philologic 4: Open Source ARTFL Search and Retrieval Engine">
+                    <img src="css/images/philo.png" height="40" width="110"/>
+                </a>4
+            </div>
+            <div class="col-xs-12">
+                <!--Add any other content for your footer here-->
+            </div>
+        </div>
+    </div>
+    
+    <!--Modal dialog-->
+    <div id="syntax" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="syntaxLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="syntaxLabel">Search Syntax</h4>
+                </div>
+                <div class="modal-body">
+                    <p>In PhiloLogic4, the search syntax and semantics are largely the same for both word/phrase searching and metadata queries, with a few exceptions. The basic rules are:
+                        <ul>
+                            <li> plain terms such as <tt>genre humain</tt> or <tt>esprit systematique</tt> are split on the space character and evaluated without regard to case or accent.</li>
+                            <li> quoted terms like <tt>"esprit de systeme"</tt> are precise matches against case and accent. In phrases they match individual tokens; in metadata fields they must
+                            match the entire string value, i.e., <tt>"Histoire de la philosophie"</tt> or <tt>"Geographie sacree"</tt>.</li>
+                            <li> "egrep-style" regular expressions (described below) are permitted in plain terms, but not quoted terms; thus, they cannot cross a token/word boundary, e.g., <tt>libert.</tt>
+                            or <tt>nous m[aeiou].*er</tt>
+                            <li> the vertical bar symbol <tt>|</tt> (on US keyboards, use the <tt>Shift + \</tt> keys) stands for a logical Boolean OR operator, and can concatenate plain, quoted, or regex
+                            terms (e.g., <tt>liberte de penser | parler</tt> or <tt>philosophie eclectique | academique</tt>).</li>
+                            <li> a space corresponds to a user-selected phrase operator in word search, controlled by the within/exactly/same-sentence option on the search form.  In metadata queries,
+                            it corresponds to the Boolean AND operator (e.g., <tt>diderot mallet</tt>).
+                            <li> the Boolean NOT operator is only permitted at the end of metadata fields; it accepts a single term or an OR expression: e.g., <tt>Geographie | Histoire NOT moderne</tt>.</li>
+                        </ul>
+                    </p>
+                    <p>Basic regexp syntax, adapted from
+                        <a href="http://www.gnu.org/software/findutils/manual/html_node/find_html/egrep-regular-expression-syntax.html#egrep-regular-expression-syntax">the egrep regular expression syntax</a>.
+                        <ul>
+                            <li>The character <tt>.</tt> matches any single character except newline. Bracket expressions can match sets or ranges of characters: [aeiou] or [a-z], but will only match a single character unless followed by one of the quantifiers below.</li>
+                            <li> <tt>*</tt> indicates that the regular expression should match zero or more occurrences of the previous character or bracketed group.</li>
+                            <li> <tt>+</tt> indicates that the regular expression should match one or more occurrences of the previous character or bracketed group.</li>
+                            <li> <tt>?</tt> indicates that the regular expression should match zero or one occurrence of the previous character or bracketed group.</li>
+                        </ul>
+                        <div>
+                            Thus, <tt>.*</tt> is an approximate "match anything" wildcard operator, rather than the more traditional (but less precise) <tt>*</tt> in many other search engines.
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End of modal dialog-->
+    
+    <!-- Export results modal -->
+    <div class="modal fade" id="export-dialog" tabindex="-1" role="dialog" aria-labelledby="exportLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Export Results</h4>
+                </div>
+                <div class="modal-body">
+                    % if report != "collocation":
+                        Export your results in JSON
+                        <h5>Choose the format in which to export your search results:</h5>
+                        <div id="export-buttons">
+                            <button type="button" class="btn btn-primary" data-format="json">
+                                JSON
+                            </button>
+                            <button type="button" class="btn btn-primary" data-format="csv" disabled>
+                                CSV
+                            </button>
+                            <button type="button" class="btn btn-primary" data-format="tab" disabled>
+                                TAB
+                            </button>
+                            <div>
+                                Note: only JSON is currently supported.
+                            </div>
+                        </div>
+                        <div id="export-download-link" style="display:none;margin-top: 20px;">
+                            <a><span class="glyphicon glyphicon-download"></span> Download JSON file</a>
+                        </div>
+                    % else:
+                        <h5>We currently don't support exporting results from a collocation report.</h5>
+                    % endif
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End of modal dialog-->
+    
+    <!--Load all required JavaScript-->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.9/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.9/angular-resource.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.9/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.9/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.9/angular-touch.min.js"></script>
+    <script src="js/bootstrap/bootstrap.min.js"></script>
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+    <script src="js/plugins/angular-velocity.min.js"></script>
+    <script>
+        var philoApp = angular.module('philoApp', ['ngTouch', 'angular-velocity']);
+    </script>
+    <script src="js/philoLogicMain.js"></script>
+    <script src="js/landingPage.js"></script>
+    <script src="js/searchForm.js"></script>
+    <!--PhiloLogic4 Javascript-->
+</body>
+</html>

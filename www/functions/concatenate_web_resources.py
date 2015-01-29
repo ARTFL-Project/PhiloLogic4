@@ -75,7 +75,7 @@ class webResources(object):
             status = concatenate_files(self.css_resources, self.report, "css")
             if status:
                 css_file = "%s.css" % self.report
-                css_resource = '''<link rel="stylesheet" href="%s/css/%s" type="text/css" media="screen, projection">''' % (config.db_url, css_file)
+                css_resource = '''<link rel="stylesheet" href="css/%s" type="text/css" media="screen, projection">''' % css_file
             else:
                 css_resource = self.get_all_css()
         return css_resource
@@ -83,7 +83,7 @@ class webResources(object):
     def get_all_css(self):
         resource_list = []
         for resource in self.css_resources[self.report]:
-            css_link = '''<link rel="stylesheet" href="%s/css/%s" type="text/css" media="screen, projection">''' % (config.db_url, resource)
+            css_link = '''<link rel="stylesheet" href="css/%s" type="text/css" media="screen, projection">''' % resource
             resource_list.append(css_link)
         css_resource = '\n'.join(resource_list)
         return css_resource

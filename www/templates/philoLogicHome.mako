@@ -1,4 +1,57 @@
 ## -*- coding: utf-8 -*-
+<!DOCTYPE html>
+<html ng-app="philoApp">
+<head>
+    <title>${config.dbname.decode('utf-8', 'ignore')}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+ 
+    <!--Load the web config and global_report variable to use in the JavaScript code-->
+    <script>
+        var philoConfig = ${config.toJSON()}; /* loading the web_config in javascript */
+        var philoReport = "landing_page";
+    </script>
+    
+    <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono|Averia+Serif+Libre:300,400,700,300italic,400italic,700italic&subset=latin,latin-ext,cyrillic-ext,greek-ext,greek,cyrillic' rel='stylesheet' type='text/css'>
+    
+    <!--Load all required CSS-->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">  
+    <!-- PhiloLogic4 CSS -->
+    ${css}
+    <link href="css/split/landingPage.css" rel="stylesheet">
+    <link href="css/split/concordanceKwic.css" rel="stylesheet">
+    
+    ## Load in header to allow ng-cloak
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular.min.js"></script>
+    
+</head>
+<body onunload="" ng-controller="philoMain" ng-cloak>
+    <div id="header">
+        <div class="navbar navbar-inverse navbar-static-top" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-left">
+                     
+                </div>
+                <div class="navbar-right">
+                    <a href="http://artfl-project.uchicago.edu">The ARTFL Project</a>
+                    <a href="http://www.uchicago.edu">University of Chicago</a>
+                    <a href="http://artfl-project.uchicago.edu/content/contact-us" title="Contact information for the ARTFL Project">Contact Us</a>
+                </div>
+                <div class="navbar-header">
+                    <a href="." class="navbar-brand" title="{{ philoConfig.dbname }}">{{ philoConfig.dbname }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" id="main-body">
+        <div class="container" style="overflow: hidden;" ng-include="'templates/search_form.html'" ng-controller="searchForm"></div>
+        <div class="container-fluid" id='philologic_response'>
+            <div id="landing-page" ng-if="report === 'landing_page'" ng-include="'templates/landing_page.html'" ng-controller="landingPage" ></div>
+            <div id="concordance" ng-if="report === 'concordance'" ng-include="'templates/concordance.html'" ng-controller="concordanceCtrl"></div>
+        </div>
     </div> <!-- /main-body -->
     <div class="container-fluid" id="footer">
         <div class="row" >
@@ -8,7 +61,7 @@
             <div class="col-xs-offset-3 col-xs-6" id="footer-content">
                 Powered by <br>
                 <a href="https://artfl-project.uchicago.edu/node/157" title="Philologic 4: Open Source ARTFL Search and Retrieval Engine">
-                    <img src="${config.db_url}/css/images/philo.png" height="40" width="110"/>
+                    <img src="css/images/philo.png" height="40" width="110"/>
                 </a>4
             </div>
             <div class="col-xs-12">
@@ -98,9 +151,23 @@
     
     <!--Load all required JavaScript-->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js" type="text/javascript"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.9/angular.min.js"></script>
-    
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular-resource.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular-touch.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular-sanitize.min.js"></script>
+    <script src="js/bootstrap/bootstrap.min.js"></script>
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+    <script src="js/plugins/angular-velocity.min.js"></script>
+    <script>
+        var philoApp = angular.module('philoApp', ['ngTouch', 'ngSanitize', 'angular-velocity']);
+    </script>
+    <script src="js/philoLogicMain.js"></script>
+    <script src="js/landingPage.js"></script>
+    <script src="js/searchForm.js"></script>
+    <script src="js/concordance.js"></script>
     <!--PhiloLogic4 Javascript-->
-    
 </body>
 </html>
