@@ -241,6 +241,15 @@ void dump_hits(FILE *f,dbh *db, uint32_t *hits, int count) {
   }
 }
 
+void dump_hit(FILE *f, uint32_t *hits, int count, int newline) {
+	int i;
+	for (i = 0; i < count; i++) {
+		if (i != 0) fprintf(f," ");
+		fprintf(f,"%d", hits[i]);
+	}
+	if (newline != 0) fprintf(f,"\n");
+}
+
 int byte_cmp(dbh *db, uint32_t *L, uint32_t *R, int arg) {
   //fprintf(stderr, "byte_cmp'ing %d %d : %d %d\n", L[0], L[7], R[0], R[7]);
   if (L[0] != R[0]) {
@@ -282,7 +291,7 @@ int proximity_cmp(dbh *db, uint32_t *L, uint32_t *R, int arg) {
     }
   }
   dist = R[6] - L[6];
-  if ((arg <= dist) && (dist > 0)) {
+  if ((arg >= dist) && (dist > 0)) {
     return 0; // this could be tricky when SKIPPING is implemented
   }
   else if (dist < arg) {
@@ -353,7 +362,15 @@ int rchild(int i) {
 }
 
 int parent(int i) {
-  return floor((double)i/2.0);
+  return floor((double)(i - 1)/2.0);
+}
+
+void dump_heap(word_heap *heap) {
+  int i;
+  for (i = 0; i < heap->rec_count; i++) {
+  	fprintf(stderr,"%s\t", heap->records[i].word);
+  	dump_hit(stderr, heap->records[i].current_hit,9,1);  
+  }
 }
 
 int up_heap(word_heap *heap, int i) {
@@ -364,10 +381,14 @@ int up_heap(word_heap *heap, int i) {
   word_rec *records = heap->records;
   // bounds check
   if (i == 0) { return 0; }
-  //  cmp_res = heap->cmp(db, heap->records[i], records[parent(i)]);
-  //  fprintf(stderr,"testing for up_heap(%d) returns %d\n",i, cmp_res);
+  cmp_res = heap->cmp(db, heap->records[i], records[parent(i)]);
+  fprintf(stderr,"testing for up_heap: [%d]:%s ",i, records[i].word);
+  dump_hit(stderr, records[i].current_hit,9,0);
+  fprintf(stderr," vs [%d]:%s", p,records[p].word);
+  dump_hit(stderr, records[p].current_hit,9,0);
+  fprintf(stderr," returns %d\n",cmp_res);
   if ( heap->cmp(db, heap->records[i], records[parent(i)]) < 0) {
-    // fprintf(stderr,"up-swapping %s with %s\n", records[i].word, records[p].word);
+    fprintf(stderr,"up-swapping %s @ %d with %s @ %d\n", records[i].word,i, records[p].word,p);
     rec = records[i];
     records[i] = records[parent(i)];
     records[parent(i)] = rec;
@@ -382,22 +403,24 @@ int down_heap(word_heap *heap, int i) {
   int child = 0;
   dbh *db = heap->db;
   word_rec *records = heap->records;
-  //fprintf(stderr,"down_heap %d with L %d, R %d ):",i,lchild(i), rchild(i) );
+  int lres, rres;
+  fprintf(stderr, "pre down_heap(%d):\n",i);
+//  fprintf(stderr,"down_heap %d with L %d, R %d ):",i,lchild(i), rchild(i) );
   // bounds check
   if (lchild(i) >= heap->rec_count) { 
-    //fprintf(stderr, "%d is leaf in heap size %d\n",i,heap->rec_count);
+    fprintf(stderr, "%d is leaf in heap size %d\n",i,heap->rec_count);
     return 0;
   } // if we have a leaf, return 0;
   // if this is a partially filled branch, only check left
   else if (rchild(i) >= heap->rec_count) { 
-    //fprintf(stderr, "%d is partial branch with leaf in heap size %d\n",i,lchild(i),heap->rec_count);
+    fprintf(stderr, "%d is partial branch with leaf in heap size %d\n",i,lchild(i),heap->rec_count);
     if ( heap->cmp(db, records[i], records[lchild(i)]) > 0) {
       child = lchild(i);
     }
   }
   // normal case: if i is greater than either of its children
   else {
-    //fprintf(stderr,"%d is normal branch with leaves %d,%d,in heap size %d\n",i,lchild(i),rchild(i),heap->rec_count);
+    fprintf(stderr,"%d is normal branch with leaves %d,%d,in heap size %d\n",i,lchild(i),rchild(i),heap->rec_count);
     if ( (heap->cmp(db, records[i], records[lchild(i)]) > 0) ||
        (heap->cmp(db, records[i], records[rchild(i)]) > 0) ) {  
       if (heap->cmp(db, records[lchild(i)], records[rchild(i)]) < 0) {
@@ -411,10 +434,11 @@ int down_heap(word_heap *heap, int i) {
     }
   }
   if (child > 0) { // if we found a child to swap with
-    //fprintf(stderr,"down-swapping %s with %s\n", records[i].word, records[child].word);
+    fprintf(stderr,"down-swapping %s @%d with %s @ %d\n", records[i].word,i, records[child].word,child);
     rec = records[i];
     records[i] = records[child];
-    records[child] = rec;
+    records[child] = rec;    
+    dump_heap(heap);
     down_heap(heap,child);
     return 1;
   }
@@ -423,6 +447,7 @@ int down_heap(word_heap *heap, int i) {
 
 void add_record(word_heap *heap, word_rec *rec) {
   /* first make space if needed */
+  int i;
   fprintf(stderr,"heap has %d records\n", heap->rec_count);
   if (heap->rec_count <= heap->rec_alloced) {
     /* should check for success here; running out of memory is a concern */
@@ -438,8 +463,13 @@ void add_record(word_heap *heap, word_rec *rec) {
   heap->total_freq += rec->freq;
   /* while the new record is less than its parent */
   /* exchange the new record with it's parent */ 
-  fprintf(stderr, "calling up_heap on new record %d\n", heap->rec_count - 1);
+  //fprintf(stderr, "calling up_heap on new record %d\n", heap->rec_count - 1);
   up_heap(heap,heap->rec_count - 1);
+  fprintf(stderr,"heap order:\n");
+  for (i = 0; i < heap->rec_count; i++) {
+  	fprintf(stderr,"%s\t", heap->records[i].word);
+  	dump_hit(stderr, heap->records[i].current_hit,9,1);  
+  }
 }
 
 word_rec pop_record(word_heap * heap) {
@@ -488,6 +518,7 @@ uint32_t * heap_advance(word_heap *heap) {
     // this is suspicious.
     memcpy(heap->current_hit, r->current_hit, heap->db->dbspec->fields * sizeof(uint32_t) );
     heap->current_word = r->word;
+    
     if (heap->current_word[0] == 0) {
       fprintf(stderr, "%s: zero in heap hit\n", heap->current_word);
     }
@@ -501,7 +532,7 @@ uint32_t * heap_advance(word_heap *heap) {
       // otherwise, we've modified the 0 records and may need to move it.
       down_heap(heap,0); 
       if (hit[0] == 0) {
-	fprintf(stderr, "zero at top of heap\n");
+		fprintf(stderr, "zero at top of heap\n");
       }
     }
     return heap->current_hit;
@@ -765,6 +796,7 @@ int main(int argc, char **argv) {
       if (strcmp(search_method_name, "phrase") == 0) search_method = phrase_cmp;
       else if (strcmp(search_method_name, "proxy") == 0) search_method = proximity_cmp;
       else if (strcmp(search_method_name, "sent") == 0) search_method = sent_cmp;
+      else if (strcmp(search_method_name, "cooc") == 0) search_method = sent_cmp;
     case 'a': // search method argument
       fprintf(stderr, "arg is '%s'\n", optarg);
       search_method_arg_str = optarg;
