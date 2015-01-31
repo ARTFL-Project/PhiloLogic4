@@ -5,7 +5,32 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', function(
     $location.path(philoReport)
 }]);
 
-philoApp.factory('biblioCriteria', function() {
+philoApp.factory('URL', function() {
+    return {
+        objectToString: function(formData, url) {
+            var obj = angular.copy(formData);
+            if (url) {
+                var report = obj.report;
+                delete obj.report;
+                delete obj.format;
+            }
+            var str = [];
+            for (var p in obj) {
+                var k = p, 
+                    v = obj[k];
+                str.push(angular.isObject(v) ? qs(v, k) : (k) + "=" + encodeURIComponent(v));
+            }
+            if (url) {
+                return report + '/' + str.join('&');
+            } else {
+                return str.join("&");
+            }
+        }
+    }
+});
+
+
+philoApp.factory('biblioCriteria', ['$rootScope','$http', '$location', 'URL', function($rootScope, $http, $location, URL) {
         return {
             build: function(queryParams) {
                 var queryArgs = angular.copy(queryParams);
@@ -26,15 +51,25 @@ philoApp.factory('biblioCriteria', function() {
                             k = philoConfig.metadataAliases[k];
                         }
                         var htmlContent = '<span class="biblio-criteria">' + k.charAt(0).toUpperCase() + k.slice(1) + ': <b>' + v + '</b> ' + close_icon + '</span>';
-                        biblio.push(htmlContent);
+                        biblio.push({key: k, value: v});
                     }
                 }
-                console.log(biblio)
-                if (biblio.length) {
-                    return biblio.join(' ');
-                } else {
-                    return "None";
+                return biblio
+            },
+            remove: function(metadata, queryParams) {
+                delete queryParams[metadata];
+                var request = {
+                    method: "GET",
+                    url: $rootScope.philoConfig.db_url + '/dispatcher.py?' + URL.objectToString(queryParams)
                 }
+                $http(request)
+                .success(function(data, status, headers, config) {
+                    $rootScope.results = data;
+                    $location.url(URL.objectToString(queryParams, true));
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("Error", status, headers)
+                });
             }
         }
-});
+}]);

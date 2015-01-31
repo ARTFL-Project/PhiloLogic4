@@ -6,9 +6,25 @@
             </button>
             <div id="search_arguments">
                 Searching database for <b>{{ queryParams.q }}</b><br>
-                <span ng-bind-html="'Bibliographic criteria: ' + biblioCriteria"></span>
+                Bibliographic criteria:
+                <span class="biblio-criteria" ng-repeat="metadata in biblio" style="margin: 1px">
+                    {{ metadata.key.charAt(0).toUpperCase() + metadata.key.slice(1) }} : <b>{{ metadata.value }}</b>
+                    <span class="glyphicon glyphicon-remove-circle" ng-click="removeMetadata(metadata.key, queryParams)"></span>
+                </span>
+                <b ng-if="biblio.length === 0">None</b>
             </div>
             <div id="search-hits">
+                <span ng-if="results.results_length !== 0">
+                    <span ng-if="results.description.end < results.description.results_per_page || results.description.end < results.results_length">
+                        Hits {{ results.description.start }} - {{ results.description.end }} of {{ results.results_length || results.description.results_per_page }}
+                    </span>
+                    <span ng-if="results.description.end > results.description.results_per_page || results.description.end > results.results_length">
+                        Hits {{ results.descrption.start }} - {{ results.results_length || results.description.end }} of {{ results.results_length || results.description.results_per_page }}
+                    </span>
+                </span>
+                <span ng-if="results.results_length === 0">
+                    No results for your query.
+                </span>
             </div>
         </div>
         <div class="row hidden-xs" id="act-on-report">
@@ -17,7 +33,7 @@
     <div class="row">
         <div id="results_container" class="col-xs-12">
             <ol id="philologic_concordance">
-                <li class="philologic_occurrence panel panel-default velocity-opposites-transition-slideLeftIn" data-velocity-opts="{delay: 200, duration:250, stagger:100}" ng-repeat="result in results.results">
+                <li class="philologic_occurrence panel panel-default velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger:50}" ng-repeat="result in results.results">
                     <div class="citation-container row">
                         <div class="col-xs-12 col-sm-10 col-md-11" ng-init="position = $index + 1 + results.start">
                            <span class="cite" data-id="{{ result.philo_id.join(' ') }}" ng-bind-html="position + '.&nbsp' + result.citation"></span>

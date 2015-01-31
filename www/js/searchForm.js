@@ -23,19 +23,22 @@ philoApp.controller('searchForm', ['$scope', function($scope) {
     }
 }]);
 
-philoApp.controller('request', ['$scope', '$rootScope', '$http', '$location', function($scope, $rootScope, $http, $location) {
+philoApp.controller('request', ['$scope', '$rootScope', '$http', '$location', 'URL', function($scope, $rootScope, $http, $location, URL) {
     $scope.submit = function() {
+        if (typeof($scope.formData.q) === "undefined") {
+            $scope.formData.report = "bibliography";
+        }
         var request = {
             method: "GET",
-            url: $scope.philoConfig.db_url + '/dispatcher.py?' + queryString($scope.formData)
+            url: $scope.philoConfig.db_url + '/dispatcher.py?' + URL.objectToString($scope.formData)
         }
-        $scope.$parent.formOpen = false;
+        $scope.changeFormOpen(false);
         $rootScope.queryParams = $scope.formData;
         $rootScope.report = $scope.formData.report;
         $http(request)
         .success(function(data, status, headers, config) {
             $rootScope.results = data;
-            $location.url(queryString($scope.formData, true));
+            $location.url(URL.objectToString($scope.formData, true));
         })
         .error(function(data, status, headers, config) {
             console.log("Error", status, headers)
@@ -47,8 +50,10 @@ philoApp.controller('showSearchForm', ['$scope', function($scope) {
     $scope.toggle = function() {
         if (!$("#search-elements").length) {
             $scope.changeFormOpen(true);
+            //$scope.$parent.formOpen = true;
         } else {
             $scope.changeFormOpen(false);
+            //$scope.$parent.formOpen = false;
         }  
    }
 }]);
@@ -120,22 +125,22 @@ philoApp.animation('.report-fade', function() {
 });
 
 
-var queryString = function(formData, url) {
-    var obj = angular.copy(formData);
-    if (url) {
-        var report = obj.report;
-        delete obj.report;
-        delete obj.format;
-    }
-    var str = [];
-    for (var p in obj) {
-        var k = p, 
-            v = obj[k];
-        str.push(angular.isObject(v) ? qs(v, k) : (k) + "=" + encodeURIComponent(v));
-    }
-    if (url) {
-        return report + '/' + str.join('&');
-    } else {
-        return str.join("&");
-    }
-}
+//var queryString = function(formData, url) {
+//    var obj = angular.copy(formData);
+//    if (url) {
+//        var report = obj.report;
+//        delete obj.report;
+//        delete obj.format;
+//    }
+//    var str = [];
+//    for (var p in obj) {
+//        var k = p, 
+//            v = obj[k];
+//        str.push(angular.isObject(v) ? qs(v, k) : (k) + "=" + encodeURIComponent(v));
+//    }
+//    if (url) {
+//        return report + '/' + str.join('&');
+//    } else {
+//        return str.join("&");
+//    }
+//}
