@@ -1,11 +1,11 @@
-<ol id="philologic_concordance">
+<ol id="philologic_concordance" ng-controller="concordanceCtrl">
     <li class="philologic_occurrence panel panel-default velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger:50}" ng-repeat="result in results.results">
-        <div class="citation-container row">
-            <div class="col-xs-12 col-sm-10 col-md-11" ng-init="position = $index + 1 + results.start">
+        <div class="citation-container row" ng-init="position = $index + results.description.start">
+            <div class="col-xs-12 col-sm-10 col-md-11">
                <span class="cite" data-id="{{ result.philo_id.join(' ') }}" ng-bind-html="position + '.&nbsp' + result.citation"></span>
             </div>
             <div class="hidden-xs col-sm-2 col-md-1">
-               <button class="btn btn-primary more_context pull-right" disabled="disabled" data-context="short">
+               <button class="btn btn-primary more_context pull-right" ng-click="moreContext(position - 1)">
                    More
                </button>
             </div>

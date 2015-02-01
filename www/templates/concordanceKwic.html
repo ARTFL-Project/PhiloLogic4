@@ -13,12 +13,12 @@
                 </span>
                 <b ng-if="biblio.length === 0">None</b>
             </div>
-            <div id="search-hits">
+            <div id="search-hits" ng-if="results.description">
                 <span ng-if="results.results_length !== 0">
-                    <span ng-if="results.description.end < results.description.results_per_page || results.description.end < results.results_length">
+                    <span ng-if="results.description.end < results.description.results_per_page || results.description.end < results.results_length" id="test1">
                         Hits {{ results.description.start }} - {{ results.description.end }} of {{ results.results_length || results.description.results_per_page }}
                     </span>
-                    <span ng-if="results.description.end > results.description.results_per_page || results.description.end > results.results_length">
+                    <span ng-if="results.description.end >= results.results_length" id="test2">
                         Hits {{ results.description.start }} - {{ results.results_length || results.description.end }} of {{ results.results_length || results.description.results_per_page }}
                     </span>
                 </span>
@@ -52,7 +52,7 @@
                     </span>
                 </div>
             </div>
-            <div class="col-sm-5 col-lg-4 col-lg-offset-2" id="right-act-on-report" ng-if="philoConfig.facets.length > 1"></div>
+            <div class="col-sm-5 col-lg-4 col-lg-offset-2" id="right-act-on-report" ng-if="philoConfig.facets.length > 1" ng-include="'templates/sidebarMenu.html'"></div>
         </div>
     </div>
     <div class="row">
@@ -60,6 +60,9 @@
         <div id="results_container" class="col-xs-12" ng-if="report === 'kwic'" ng-include="'templates/kwic.html'"></div>
     </div>
 </div>
-<div class="more">
+<div class="more" ng-controller="paging" ng-if="results.results.length > 0">
+    <div id='page_links' class="btn-group">
+        <a id="current_results_page" class="btn btn-default btn-lg {{ page.active }}" ng-repeat="page in pages" ng-click="goToPage(page.start, page.end)">{{ page.display }}</a>
+    </div>
     <div style='clear:both;'></div>
 </div>

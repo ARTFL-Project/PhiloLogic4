@@ -33,7 +33,9 @@ philoApp.controller('request', ['$scope', '$rootScope', '$http', '$location', 'U
         }
         $scope.changeFormOpen(false);
         $rootScope.queryParams = $scope.formData;
-        $rootScope.results = {};
+        if ("results" in $rootScope) {
+            $rootScope.results.results = [];
+        }
         $rootScope.report = $scope.formData.report;
         $http(request)
         .success(function(data, status, headers, config) {
