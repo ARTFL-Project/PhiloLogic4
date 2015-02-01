@@ -50,7 +50,7 @@
         <div class="container" style="overflow: hidden;" ng-include="'templates/search_form.html'" ng-controller="searchForm"></div>
         <div class="container-fluid" id='philologic_response'>
             <div id="landing-page" ng-if="report === 'landing_page'" ng-include="'templates/landing_page.html'" ng-controller="landingPage" ></div>
-            <div id="concordance" ng-if="report === 'concordance'" ng-include="'templates/concordance.html'" ng-controller="concordanceCtrl"></div>
+            <div id="concordance" ng-if="report === 'concordance' || report === 'kwic'" ng-include="'templates/concordanceKwic.html'" ng-controller="concordanceKwicCtrl"></div>
         </div>
     </div> <!-- /main-body -->
     <div class="container-fluid" id="footer">
@@ -167,7 +167,7 @@
     <script src="js/philoLogicMain.js"></script>
     <script src="js/landingPage.js"></script>
     <script src="js/searchForm.js"></script>
-    <script src="js/concordance.js"></script>
+    <script src="js/concordanceKwic.js"></script>
     <!--PhiloLogic4 Javascript-->
 </body>
 </html>

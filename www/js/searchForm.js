@@ -10,7 +10,6 @@ philoApp.controller('searchForm', ['$scope', function($scope) {
         $scope.formOpen = bool;
     }
     $scope.radioClick = function(key, value) {
-        console.log(key, value)
         $scope.formData[key] = value;
     }
     $scope.clearFormData = function() {
@@ -34,6 +33,7 @@ philoApp.controller('request', ['$scope', '$rootScope', '$http', '$location', 'U
         }
         $scope.changeFormOpen(false);
         $rootScope.queryParams = $scope.formData;
+        $rootScope.results = {};
         $rootScope.report = $scope.formData.report;
         $http(request)
         .success(function(data, status, headers, config) {
@@ -50,10 +50,8 @@ philoApp.controller('showSearchForm', ['$scope', function($scope) {
     $scope.toggle = function() {
         if (!$("#search-elements").length) {
             $scope.changeFormOpen(true);
-            //$scope.$parent.formOpen = true;
         } else {
             $scope.changeFormOpen(false);
-            //$scope.$parent.formOpen = false;
         }  
    }
 }]);

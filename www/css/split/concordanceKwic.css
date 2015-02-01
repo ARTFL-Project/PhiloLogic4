@@ -22,6 +22,8 @@
 }
 .full_biblio {
 	z-index: 10;
+	display: none;
+	opacity: 0;
 }
 .full_biblio.show {
 	position: absolute;
