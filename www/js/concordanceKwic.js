@@ -43,9 +43,37 @@ philoApp.controller('kwicCtrl', ['$scope', '$rootScope', function($scope, $rootS
     } 
 }]);
 
-philoApp.controller('concordanceCtrl', ['$scope', '$rootScope', function($scope, $rootScope) {
-    $scope.moreContext = function(resultNumber) {
-        console.log(resultNumber);
+philoApp.controller('concordanceCtrl', ['$scope', '$rootScope', '$http', '$location', 'URL', function($scope, $rootScope, $http, $location, URL) {
+    $scope.moreContext = function($event, resultNumber) {
+        element = $($event.currentTarget).parents('.philologic_occurrence').find('.philologic_context');
+        defaultElement = element.find('.default-length');
+        moreContextElement = element.find('.more-length');
+        if (defaultElement.css('display') == "none") {
+            moreContextElement.hide()
+            defaultElement.velocity('fadeIn', {duration: 300});
+        } else {
+            if (moreContextElement.is(':empty')) {
+                var queryParams = angular.copy($rootScope.queryParams);
+                queryParams.hit_num = resultNumber;
+                var request = {
+                    method: "GET",
+                    url: $rootScope.philoConfig.db_url + '/scripts/get_more_context.py?' + URL.objectToString(queryParams)
+                }
+                $http(request)
+                .success(function(data, status, headers, config) {
+                    defaultElement.hide();
+                    moreContextElement.html(data).promise().done(function() {
+                            $(this).velocity('fadeIn', {duration: 300});
+                        });
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("Error", status, headers)
+                });
+            } else {
+                defaultElement.hide();
+                moreContextElement.velocity('fadeIn', {duration: 300});
+            }
+        }
     } 
 }]);
 

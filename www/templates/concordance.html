@@ -5,13 +5,14 @@
                <span class="cite" data-id="{{ result.philo_id.join(' ') }}" ng-bind-html="position + '.&nbsp' + result.citation"></span>
             </div>
             <div class="hidden-xs col-sm-2 col-md-1">
-               <button class="btn btn-primary more_context pull-right" ng-click="moreContext(position - 1)">
+               <button class="btn btn-primary more_context pull-right" ng-click="moreContext($event, position - 1)">
                    More
                </button>
             </div>
         </div>
        <div class='philologic_context'>
-           <div class="default_length" ng-bind-html="result.context"></div>
+           <div class="default-length" ng-bind-html="result.context"></div>
+           <div class="more-length"></div>
        </div>
     </li>
 </ol>

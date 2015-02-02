@@ -123,24 +123,3 @@ philoApp.animation('.report-fade', function() {
         }
     };
 });
-
-
-//var queryString = function(formData, url) {
-//    var obj = angular.copy(formData);
-//    if (url) {
-//        var report = obj.report;
-//        delete obj.report;
-//        delete obj.format;
-//    }
-//    var str = [];
-//    for (var p in obj) {
-//        var k = p, 
-//            v = obj[k];
-//        str.push(angular.isObject(v) ? qs(v, k) : (k) + "=" + encodeURIComponent(v));
-//    }
-//    if (url) {
-//        return report + '/' + str.join('&');
-//    } else {
-//        return str.join("&");
-//    }
-//}
