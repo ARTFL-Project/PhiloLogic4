@@ -1,3 +1,6 @@
+#results_container, #sidebar {
+	transition: width .2s;
+}
 #kwic_concordance {
     font-family: 'Droid Sans Mono', sans-serif;
     font-size: 12px;
@@ -150,9 +153,6 @@
 	padding-right: 0px;
 	margin-left: -15px;
 }
-#frequency_container {
-    display: none;
-}
 #frequency_table {
     line-height: 300%;
     margin-top: 0px;
@@ -177,13 +177,17 @@
 }
 #frequency_container .progress {
 	margin-bottom: 0px;
-	display: none;
 }
 #freq_sidebar_status {
 	display: inline-block;
 	width: 100%;
 	padding: 0px 5px;
 	border-bottom: solid 1px #ddd;
+}
+.sidebar-count {
+	display:inline-block;
+	float:right;
+	padding-right: 5px;
 }
 
 /* Concordance styling for theater */

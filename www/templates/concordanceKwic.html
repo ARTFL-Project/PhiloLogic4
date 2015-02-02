@@ -52,12 +52,13 @@
                     </span>
                 </div>
             </div>
-            <div class="col-sm-5 col-lg-4 col-lg-offset-2" id="right-act-on-report" ng-if="philoConfig.facets.length > 1" ng-include="'templates/sidebarMenu.html'"></div>
+            <div class="col-sm-5 col-lg-4 col-lg-offset-2" id="right-act-on-report" ng-if="philoConfig.facets.length > 1" ng-include="'templates/sidebarMenu.html'" ng-controller="facets"></div>
         </div>
     </div>
     <div class="row">
-        <div id="results_container" class="col-xs-12" ng-if="report === 'concordance'" ng-include="'templates/concordance.html'"></div>
-        <div id="results_container" class="col-xs-12" ng-if="report === 'kwic'" ng-include="'templates/kwic.html'"></div>
+        <div id="results_container" class="col-xs-12 {{ resultsContainerWidth }}" ng-if="report === 'concordance'" ng-include="'templates/concordance.html'"></div>
+        <div id="results_container" class="col-xs-12 {{ resultsContainerWidth }}" ng-if="report === 'kwic'" ng-include="'templates/kwic.html'"></div>
+        <div class="{{ sidebarWidth }} hidden-xs" id="sidebar" ng-if="frequencyResults.length > 0" ng-include="'templates/frequencySidebar.html'"></div>
     </div>
 </div>
 <div class="more" ng-controller="paging" ng-if="results.results.length > 0">

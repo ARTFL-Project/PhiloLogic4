@@ -1,12 +1,12 @@
-<div class="btn-group pull-right" ng-controller="facets">
+<div class="btn-group pull-right">
     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
         <span id="menu-header">Display frequency by</span>
-        <span id="selected-sidebar-option"></span>
+        <span id="selected-sidebar-option">{{ selectedFacet.alias }}</span>
         <span class="caret"></span>
     </button>
     <ul class="dropdown-menu" role="menu" id="frequency_field">
         <li role="presentation" class="dropdown-header">Display frequency by</li>
-		<li ng-repeat="facet in facets" ng-click="selectFacet(facet.facet)">
+		<li ng-repeat="facet in facets" ng-click="selectFacet(facet)">
 			<a class="sidebar-option">{{ facet.alias }}</a>
 		</li>
 		<li class="divider" ng-if="report !== 'bibliography'"></li>
@@ -22,11 +22,16 @@
 		</li>
 		<li class="divider" ng-if="report !== 'bibliography' && wordsFacets.length > 0"></li>
 		<li role="presentation" class="dropdown-header" ng-if="report !== 'bibliography' && wordsFacets.length > 0">Count results by</li>
-		<li ng-repeat="facet in wordsFacets" ng-if="report !== 'bibliography' && wordsFacets.length > 0" ng-click="selectFacet(facet.facet)">
+		<li ng-repeat="facet in wordsFacets" ng-if="report !== 'bibliography' && wordsFacets.length > 0" ng-click="selectFacet(facet)">
 			<a class="sidebar-option">{{ facet.alias }}</a>
 		</li>
     </ul>
-    <button type="button" id="hide-sidebar-button" class="btn btn-primary" style="display: none";>
+    <button type="button" id="hide-sidebar-button" class="btn btn-primary" ng-if="frequencyResults.length > 0" ng-click="removeSidebar()">
         <span class="glyphicon glyphicon-remove-circle" style="vertical-align: text-top"></span>
     </button>
+</div>
+<div class="spinner" ng-if="spinner">
+  <div class="bounce1"></div>
+  <div class="bounce2"></div>
+  <div class="bounce3"></div>
 </div>

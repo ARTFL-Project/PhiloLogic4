@@ -1,4 +1,4 @@
-philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', 'biblioCriteria', function($scope, $rootScope, biblioCriteria) {
+philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', 'biblioCriteria', 'progressiveLoad', function($scope, $rootScope, biblioCriteria, progressiveLoad) {
     $scope.$watch(function() {
         return $rootScope.queryParams;
         }, function() {
@@ -6,7 +6,27 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', 'biblioCrite
     }, true);
     $scope.removeMetadata = biblioCriteria.remove;
     
+    $rootScope.frequencyResults = [];
+    $scope.resultsContainerWidth = "col-xs-12";
+    $scope.sidebarWidth = '';    
+    $scope.$watch(function() {
+        return $rootScope.frequencyResults;
+        }, function() {
+            if ($rootScope.frequencyResults.length > 0) {
+                $scope.resultsContainerWidth = "col-xs-8";
+                $scope.sidebarWidth = "col-xs-4";
+            } else {
+                $scope.resultsContainerWidth = "col-xs-12";
+                $scope.sidebarWidth = "";
+            }
+    }, true);
     
+    $rootScope.percentComplete = 0;
+    $scope.$watch(function() {
+        return $rootScope.percentComplete;
+        }, function() {
+            progressiveLoad.updateProgressBar($("#frequency_container .progress-bar"), $rootScope.percentComplete);
+    }, true);
 }]);
 
 philoApp.controller('concordanceKwicSwitcher', ['$scope', '$rootScope', '$http', '$location', 'URL', function($scope, $rootScope, $http, $location, URL) {
@@ -77,7 +97,7 @@ philoApp.controller('concordanceCtrl', ['$scope', '$rootScope', '$http', '$locat
     } 
 }]);
 
-philoApp.controller('facets', ['$scope', '$rootScope', function($scope, $rootScope) {
+philoApp.controller('facets', ['$scope', '$rootScope', '$http', 'URL', 'progressiveLoad', function($scope, $rootScope, $http, URL, progressiveLoad) {
     $scope.facets = [];
     for (var i=0; i < $rootScope.philoConfig.facets.length; i++) {
         var facet = Object.keys($rootScope.philoConfig.facets[i])[0];
@@ -90,8 +110,102 @@ philoApp.controller('facets', ['$scope', '$rootScope', function($scope, $rootSco
         var alias = $rootScope.philoConfig.words_facets[i][facet];
         $scope.wordsFacets.push({facet: facet, alias: alias});
     }
-    $scope.selectFacet = function(facet) {
-        console.log(facet);
+    
+    $scope.selectedFacet = {};
+    
+    $scope.spinner = false;
+    
+    var populateSidebar = function(facet, fullResults, totalResults, intervalStart, intervalEnd, queryParams) {
+        if (intervalStart < totalResults) {
+            queryParams.start = intervalStart;
+            queryParams.end = intervalEnd;
+            var request = {
+                method: "GET",
+                url: "scripts/get_frequency.py?" + URL.objectToString(queryParams)
+            }
+            $http(request)
+                .success(function(data, status, headers, config) {
+                    $scope.spinner = false;
+                   if ($('#selected-sidebar-option').data('interrupt') != true && $('#selected-sidebar-option').data('selected') == facet) {
+                        if (facet.match(/collocates$/)) {
+                            var merge = progressiveLoad.mergeResults(fullResults.unsorted, data[facet]);
+                        } else {
+                            var merge = progressiveLoad.mergeResults(fullResults.unsorted, data);
+                        }
+                        $rootScope.frequencyResults = merge.sorted;
+                        fullResults = merge;
+                        if (intervalEnd < totalResults) {
+                            $rootScope.percentComplete = intervalEnd / totalResults * 100;
+                        }
+                        if (intervalStart === 0) {
+                            intervalStart = 3000;
+                            intervalEnd = 13000;
+                        } else {
+                            intervalStart += 10000;
+                            intervalEnd += 10000;
+                        }
+                        populateSidebar(facet, fullResults, totalResults, intervalStart, intervalEnd, queryParams);
+                   } else {
+                        // This won't affect the full collocation report which can't be interrupted
+                        // when on the page
+                        $('#selected-sidebar-option').data('interrupt', false);
+                   }
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("Error", status, headers)
+                });
+        } else {
+            $rootScope.percentComplete = 100;
+            $("#frequency_container .progress").delay(500).velocity('slideUp', {complete: function() {
+                $("#frequency_container .progress-bar").width(0).text("0%");}});
+            //$('#frequency_table').slimScroll({height: $('#results_container').height() - 14});
+            if ($rootScope.philoConfig.debug === true) {
+                if (typeof(localStorage) == 'undefined' ) {
+                    alert('Your browser does not support HTML5 localStorage. Try upgrading.');
+                } else {
+                    var qParams = angular.copy($rootScope.queryParams);
+                    qParams.frequency_field = facet;
+                    var urlString = URL.objectToString(qParams);
+                    try {
+                        sessionStorage[urlString] = JSON.stringify(fullResults.sorted);
+                    } catch(e) {
+                        sessionStorage.clear();
+                        sessionStorage[urlString] = JSON.stringify(fullResults.sorted);
+                    }
+                    console.log('results saved to localStorage')
+                }
+            }
+        }
+    }
+    
+    $scope.selectFacet = function(facetObj) {
+        $scope.selectedFacet = facetObj;
+        var facet = facetObj.facet;
+        // store the selected field to check whether to kill the ajax calls in populate_sidebar
+        $('#selected-sidebar-option').data('selected', facet);
+        $('#selected-sidebar-option').data('interrupt', false);
+        
+        var queryParams = angular.copy($rootScope.queryParams);
+        queryParams.frequency_field = facet;
+        var urlString = URL.objectToString(queryParams);
+        if (urlString in sessionStorage) {
+            $rootScope.frequencyResults = JSON.parse(sessionStorage[urlString]);
+             $rootScope.percentComplete = 100;
+        } else {
+            var totalResults = $rootScope.results.results_length;
+            var percent = 100 / totalResults * 100;
+            $rootScope.percentComplete = 0;
+            
+            var fullResults = {};
+            var intervalStart = 0;
+            var intervalEnd = 3000;
+            $scope.spinner = true;
+            populateSidebar(facet, fullResults, totalResults, intervalStart, intervalEnd, queryParams);
+        }
+    }
+    $scope.removeSidebar = function() {
+        $rootScope.frequencyResults = [];
+        $('#selected-sidebar-option').data('interrupt', true);
     }
 }]);
 

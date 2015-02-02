@@ -165,6 +165,7 @@
         var philoApp = angular.module('philoApp', ['ngTouch', 'ngSanitize', 'angular-velocity']);
     </script>
     <script src="js/philoLogicMain.js"></script>
+    <script src="js/services.js"></script>
     <script src="js/landingPage.js"></script>
     <script src="js/searchForm.js"></script>
     <script src="js/concordanceKwic.js"></script>
