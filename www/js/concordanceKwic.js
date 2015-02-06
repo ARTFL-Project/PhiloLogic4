@@ -1,8 +1,34 @@
-philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', 'biblioCriteria', 'progressiveLoad', function($scope, $rootScope, biblioCriteria, progressiveLoad) {
+philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$location', 'biblioCriteria', 'progressiveLoad', 'URL',
+                                            function($scope, $rootScope, $http, $location, biblioCriteria, progressiveLoad, URL) {
+    $rootScope.formData = $location.search();
+    if (typeof($rootScope.formData.q) === "undefined") {
+        $rootScope.formData.report = "bibliography";
+        $location.path('/bibliography')
+    }
+    var request = {
+        method: "GET",
+        url: $scope.philoConfig.db_url + '/' + URL.query($rootScope.formData)
+    }
+    var oldResults = angular.copy($rootScope.results)
+    if ("results" in oldResults) {
+        delete $rootScope.results.results;
+        $rootScope.results = {description: oldResults.description, results_length: oldResults.results_length};
+    } else {
+        $rootScope.results = {};
+    }
+    $rootScope.report = $rootScope.formData.report;
+    $http(request)
+        .success(function(data, status, headers, config) {
+            $rootScope.results = data;
+        })
+        .error(function(data, status, headers, config) {
+            console.log("Error", status, headers)
+        });
+    
     $scope.$watch(function() {
-        return $rootScope.queryParams;
+        return $rootScope.formData;
         }, function() {
-      $rootScope.biblio = biblioCriteria.build($rootScope.queryParams);
+      $rootScope.biblio = biblioCriteria.build($rootScope.formData);
     }, true);
     $scope.removeMetadata = biblioCriteria.remove;
     
@@ -31,25 +57,11 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', 'biblioCrite
 
 philoApp.controller('concordanceKwicSwitcher', ['$scope', '$rootScope', '$http', '$location', 'URL', function($scope, $rootScope, $http, $location, URL) {
     $scope.switchTo = function(report) {
-        $rootScope.queryParams.report = report;
+        $rootScope.formData.report = report;
         $('#report label.active').removeClass('active');
         $('#' + report).parent().addClass('active');
-        var request = {
-            method: "GET",
-            url: $rootScope.philoConfig.db_url + '/dispatcher.py?' + URL.objectToString($rootScope.queryParams)
-        }
-        if ("results" in $rootScope) {
-            $rootScope.results.results = [];
-        }
         $rootScope.report = report;
-        $http(request)
-        .success(function(data, status, headers, config) {
-            $rootScope.results = data;
-            $location.url(URL.objectToString($rootScope.queryParams, true));
-        })
-        .error(function(data, status, headers, config) {
-            console.log("Error", status, headers)
-        });
+        $location.url(URL.objectToString($rootScope.formData, true));
     }
 }]);
 
@@ -73,7 +85,7 @@ philoApp.controller('concordanceCtrl', ['$scope', '$rootScope', '$http', '$locat
             defaultElement.velocity('fadeIn', {duration: 300});
         } else {
             if (moreContextElement.is(':empty')) {
-                var queryParams = angular.copy($rootScope.queryParams);
+                var queryParams = angular.copy($rootScope.formData);
                 queryParams.hit_num = resultNumber;
                 var request = {
                     method: "GET",
@@ -163,7 +175,7 @@ philoApp.controller('facets', ['$scope', '$rootScope', '$http', 'URL', 'progress
                 if (typeof(localStorage) == 'undefined' ) {
                     alert('Your browser does not support HTML5 localStorage. Try upgrading.');
                 } else {
-                    var qParams = angular.copy($rootScope.queryParams);
+                    var qParams = angular.copy($rootScope.formData);
                     qParams.frequency_field = facet;
                     var urlString = URL.objectToString(qParams);
                     try {
@@ -185,7 +197,7 @@ philoApp.controller('facets', ['$scope', '$rootScope', '$http', 'URL', 'progress
         $('#selected-sidebar-option').data('selected', facet);
         $('#selected-sidebar-option').data('interrupt', false);
         
-        var queryParams = angular.copy($rootScope.queryParams);
+        var queryParams = angular.copy($rootScope.formData);
         queryParams.frequency_field = facet;
         var urlString = URL.objectToString(queryParams);
         if (urlString in sessionStorage) {
@@ -212,7 +224,7 @@ philoApp.controller('facets', ['$scope', '$rootScope', '$http', 'URL', 'progress
 philoApp.controller('paging', ['$scope', '$rootScope', '$http', '$location', 'URL', function($scope, $rootScope, $http, $location, URL) {
     $scope.buildPages = function() {
         var start = $rootScope.results.description.start;
-        var resultsPerPage = parseInt($rootScope.queryParams.results_per_page);
+        var resultsPerPage = parseInt($rootScope.formData.results_per_page);
         var resultsLength = $rootScope.results.results_length;
     
         // first find out what page we are on currently.    
@@ -289,11 +301,11 @@ philoApp.controller('paging', ['$scope', '$rootScope', '$http', '$location', 'UR
     $scope.buildPages();
     
     $scope.goToPage = function(start, end) {
-        $rootScope.queryParams.start = start;
-        $rootScope.queryParams.end = end;
+        $rootScope.formData.start = start;
+        $rootScope.formData.end = end;
         var request = {
             method: "GET",
-            url: $rootScope.philoConfig.db_url + '/dispatcher.py?' + URL.objectToString($rootScope.queryParams)
+            url: $rootScope.philoConfig.db_url + '/' + URL.query($rootScope.formData)
         }
         $("body").velocity('scroll', {duration: 200, easing: 'easeOutCirc', offset: 0, complete: function() {
             $rootScope.results = {};
@@ -301,7 +313,7 @@ philoApp.controller('paging', ['$scope', '$rootScope', '$http', '$location', 'UR
         $http(request)
         .success(function(data, status, headers, config) {
             $rootScope.results = data;
-            $location.url(URL.objectToString($rootScope.queryParams, true));
+            $location.url(URL.objectToString($rootScope.formData, true));
         })
         .error(function(data, status, headers, config) {
             console.log("Error", status, headers)

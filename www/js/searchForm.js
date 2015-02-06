@@ -1,50 +1,31 @@
-philoApp.controller('searchForm', ['$scope', function($scope) {
-    $scope.formData = {
-        report: $scope.philoConfig.search_reports[0],
-        method: "proxy",
-        results_per_page: "25",
-        format: "json"
-        };
+philoApp.controller('searchForm', ['$scope', '$rootScope', function($scope, $rootScope) {
     $scope.formOpen = false;
     $scope.changeFormOpen = function(bool) {
         $scope.formOpen = bool;
     }
     $scope.radioClick = function(key, value) {
-        $scope.formData[key] = value;
+        $rootScope.formData[key] = value;
     }
     $scope.clearFormData = function() {
-        $scope.formData = {
-            report: $scope.philoConfig.search_reports[0],
+        $rootScope.formData = {
+            report: $rootScope.philoConfig.search_reports[0],
             method: "proxy",
-            results_per_page: "25",
-            format: "json"
+            results_per_page: "25"
         };
     }
 }]);
 
 philoApp.controller('request', ['$scope', '$rootScope', '$http', '$location', 'URL', function($scope, $rootScope, $http, $location, URL) {
     $scope.submit = function() {
-        if (typeof($scope.formData.q) === "undefined") {
+        if (typeof($rootScope.formData.q) === "undefined") {
             $scope.formData.report = "bibliography";
         }
-        var request = {
-            method: "GET",
-            url: $scope.philoConfig.db_url + '/dispatcher.py?' + URL.objectToString($scope.formData)
-        }
+        delete $rootScope.formData.start;
+        delete $rootScope.formData.end;
         $scope.changeFormOpen(false);
-        $rootScope.queryParams = $scope.formData;
-        if ("results" in $rootScope) {
-            $rootScope.results.results = [];
-        }
-        $rootScope.report = $scope.formData.report;
-        $http(request)
-        .success(function(data, status, headers, config) {
-            $rootScope.results = data;
-            $location.url(URL.objectToString($scope.formData, true));
-        })
-        .error(function(data, status, headers, config) {
-            console.log("Error", status, headers)
-        });
+        $rootScope.report = $rootScope.formData.report;
+        console.log(URL.objectToString($rootScope.formData, true))
+        $location.url(URL.objectToString($rootScope.formData, true));
     }
 }]);
 
@@ -59,7 +40,6 @@ philoApp.controller('showSearchForm', ['$scope', function($scope) {
 }]);
 
 philoApp.controller('searchMetadata', ['$scope', function($scope) {
-    $scope.formData = $scope.$parent.formData;
     $scope.reportSelected = $scope.$parent.reportSelected;
     $scope.metadataFields = {};
     for (var i=0; i < philoConfig.metadata.length; i++) {
@@ -74,8 +54,7 @@ philoApp.controller('searchMetadata', ['$scope', function($scope) {
     }
 }]);
 
-philoApp.controller('timeSeriesInterval', ['$scope', function($scope) {
-    $scope.formData = $scope.$parent.formData;
+philoApp.controller('timeSeriesInterval', ['$scope', '$rootScope', function($scope, $rootScope) {
     $scope.reportSelected = $scope.$parent.reportSelected;
     var options = {1: "Year", 10: "Decade", 50: "Half Century", 100: "Century"};
     $scope.intervals = [];
@@ -86,12 +65,12 @@ philoApp.controller('timeSeriesInterval', ['$scope', function($scope) {
         };
         $scope.intervals.push(interval);
     }
-    $scope.formData.year_interval = $scope.intervals[0].date;
+    $rootScope.formData.year_interval = $rootScope.intervals[0].date;
 }]);
 
-philoApp.controller('collocationFilter', ['$scope', function($scope) {
+philoApp.controller('collocationFilter', ['$scope', '$rootScope', function($scope, $rootScope) {
     $scope.stopwords = philoConfig.stopwords;
-    $scope.formData.colloc_filter_choice = "frequency";
+    $rootScope.formData.colloc_filter_choice = "frequency";
 }]);
 
 philoApp.animation('.overlay-fadeOut', function() {

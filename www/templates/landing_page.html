@@ -1,5 +1,5 @@
-<div id="default-landing-page" ng-if="!dictionary">
-    <div class="row" id="landingGroup" ng-controller="defaultCtrl">
+<div id="default-landing-page" ng-if="!dictionary" ng-controller="landingDefault">
+    <div class="row" id="landingGroup">
         <div class="{{ authorOffset }} col-xs-12 col-sm-6" id="col-author" ng-if="authorRanges">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -45,7 +45,7 @@
     </div>
     <div id="landing-page-content"></div>
 </div>
-<div id="dictionary-landing-page" ng-if="dictionary" ng-controller="dicoCtrl">
+<div id="dictionary-landing-page" ng-if="dictionary" ng-controller="landingDico">
     <div class="row">
         <div id="dico-landing-volume" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;">
             <div class="panel-heading" style="margin-left: -15px; margin-right: -15px">

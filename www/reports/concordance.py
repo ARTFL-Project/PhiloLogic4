@@ -6,6 +6,7 @@ import functions as f
 import reports as r
 import os
 import re
+from wsgiref.handlers import CGIHandler
 from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
 from functions.ObjectFormatter import convert_entities, adjust_bytes, valid_html_tags, xml_to_html_class
@@ -29,14 +30,9 @@ def concordance(environ,start_response):
         return r.fetch_bibliography(db, request, config, start_response)
     else:
         concordance_object, hits = concordance_results(db, request, config)
-        print >> sys.stderr, "QUERY", repr(concordance_object['query'])
-        if request['format'] == "json":
-            headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-            start_response('200 OK',headers)
-            return json.dumps(concordance_object)
-        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+        headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
         start_response('200 OK',headers)
-        return render_concordance(concordance_object, hits, config, request)
+        return json.dumps(concordance_object)
     
 def concordance_results(db, q, config):
     hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
@@ -202,3 +198,6 @@ def format_concordance(text, word_regex, bytes=[]):
     ## remove spaces around hyphens and apostrophes
     output = space_match.sub('\\1', output)
     return output
+
+if __name__ == "__main__":
+    CGIHandler().run(concordance)

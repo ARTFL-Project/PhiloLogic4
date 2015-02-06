@@ -5,6 +5,7 @@
     <title>${config.dbname.decode('utf-8', 'ignore')}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <base href="${config.db_url}/">
  
     <!--Load the web config and global_report variable to use in the JavaScript code-->
     <script>
@@ -26,6 +27,9 @@
     
     ## Load in header to allow ng-cloak
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.11/angular.min.js"></script>
+    <script>
+        var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'angular-velocity']);
+    </script>
     
 </head>
 <body onunload="" ng-controller="philoMain" ng-cloak>
@@ -41,7 +45,7 @@
                     <a href="http://artfl-project.uchicago.edu/content/contact-us" title="Contact information for the ARTFL Project">Contact Us</a>
                 </div>
                 <div class="navbar-header">
-                    <a href="." class="navbar-brand" title="{{ philoConfig.dbname }}">{{ philoConfig.dbname }}</a>
+                    <a href="./#/" class="navbar-brand" title="{{ philoConfig.dbname }}">{{ philoConfig.dbname }}</a>
                 </div>
             </div>
         </div>
@@ -49,8 +53,7 @@
     <div class="container-fluid" id="main-body">
         <div class="container" style="overflow: hidden;" ng-include="'templates/search_form.html'" ng-controller="searchForm"></div>
         <div class="container-fluid" id='philologic_response'>
-            <div id="landing-page" ng-if="report === 'landing_page'" ng-include="'templates/landing_page.html'" ng-controller="landingPage" ></div>
-            <div id="concordance" ng-if="report === 'concordance' || report === 'kwic'" ng-include="'templates/concordanceKwic.html'" ng-controller="concordanceKwicCtrl"></div>
+            <div ng-view></div>
         </div>
     </div> <!-- /main-body -->
     <div class="container-fluid" id="footer">
@@ -161,9 +164,6 @@
     <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
     <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
     <script src="js/plugins/angular-velocity.min.js"></script>
-    <script>
-        var philoApp = angular.module('philoApp', ['ngTouch', 'ngSanitize', 'angular-velocity']);
-    </script>
     <script src="js/philoLogicMain.js"></script>
     <script src="js/services.js"></script>
     <script src="js/landingPage.js"></script>

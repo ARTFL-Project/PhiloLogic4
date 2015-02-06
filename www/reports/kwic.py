@@ -8,6 +8,7 @@ import os
 import re
 from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
+from wsgiref.handlers import CGIHandler
 from concordance import concordance_citation, citation_links
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 import json
@@ -22,17 +23,12 @@ def kwic(environ,start_response):
         return r.fetch_bibliography(db, request, config, start_response)
     else:
         kwic_object, hits = generate_kwic_results(db, request, config)
-        if request['format'] == "json":
-            headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-            start_response('200 OK',headers)
-            return json.dumps(kwic_object)
-        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+        headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
         start_response('200 OK',headers)
-        return render_kwic(kwic_object, hits, config, request)
+        return json.dumps(kwic_object)
         
 def render_kwic(k, hits, config, q):
     biblio_criteria = f.biblio_criteria(q, config)
-    #pages = f.link.generate_page_links(k['description']['start'], q.results_per_page, q, hits)
     pages = f.link.page_links(config,q,len(hits))
     collocation_script = f.link.make_absolute_query_link(config, q, report="collocation", format="json")
     frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
@@ -97,6 +93,8 @@ def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
         kwic_biblio_link = '<a href="%s" class="kwic_biblio">' % href + kwic_biblio + '</a>: '
         kwic_results[pos] = {"philo_id": hit.philo_id, "context": kwic_biblio_link + '%s' % text, "metadata_fields": metadata_fields,
                              "citation_links": hrefs, "citation": kwic_biblio_link, "bytes": hit.bytes}
+        print >> sys.stderr, "CONTEXT", kwic_results[pos]['context'].encode('utf-8')
+    print >> sys.stderr, "CONTEXT"
 
     kwic_object['results'] = kwic_results
     kwic_object['results_length'] = len(hits)
@@ -138,3 +136,6 @@ def KWIC_formatter(output, hit_num, chars=40):
     end_hit = output.rindex('</span>') + 7
     end_output = '<span class="kwic-after">' + output[end_hit:] + '</span>'
     return '<span class="kwic-text">' + start_output + '&nbsp;<span class="kwic-highlight">' + output[start_hit:end_hit] + "</span>&nbsp;" + end_output + '</span>'
+
+if __name__ == "__main__":
+    CGIHandler().run(kwic)

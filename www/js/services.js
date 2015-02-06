@@ -4,22 +4,23 @@ philoApp.factory('URL', function() {
     return {
         objectToString: function(formData, url) {
             var obj = angular.copy(formData);
-            if (url) {
-                var report = obj.report;
-                delete obj.report;
-                delete obj.format;
-            }
             var str = [];
             for (var p in obj) {
                 var k = p, 
                     v = obj[k];
                 str.push(angular.isObject(v) ? qs(v, k) : (k) + "=" + encodeURIComponent(v));
             }
-            if (url) {
-                return report + '/' + str.join('&');
-            } else {
-                return str.join("&");
+            return "dispatcher.py?" + str.join("&");
+        },
+        query: function(formData, url) {
+            var obj = angular.copy(formData);
+            var str = [];
+            for (var p in obj) {
+                var k = p, 
+                    v = obj[k];
+                str.push(angular.isObject(v) ? qs(v, k) : (k) + "=" + encodeURIComponent(v));
             }
+            return "reports/" + obj.report + '.py?' + str.join("&");
         }
     }
 });
@@ -54,7 +55,7 @@ philoApp.factory('biblioCriteria', ['$rootScope','$http', '$location', 'URL', fu
                 delete queryParams[metadata];
                 var request = {
                     method: "GET",
-                    url: $rootScope.philoConfig.db_url + '/dispatcher.py?' + URL.objectToString(queryParams)
+                    url: $rootScope.philoConfig.db_url + '/' + URL.query(queryParams)
                 }
                 $http(request)
                 .success(function(data, status, headers, config) {

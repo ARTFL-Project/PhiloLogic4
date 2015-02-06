@@ -4,7 +4,7 @@ philoApp.controller('landingPage', ['$scope', function($scope) {
     $scope.dictionary = $scope.philoConfig.dictionary;
 }]);
 
-philoApp.controller('defaultCtrl', ['$scope', '$http', function($scope, $http) {
+philoApp.controller('landingDefault', ['$scope', '$http', function($scope, $http) {
     
     $scope.authorRanges = $scope.philoConfig.landing_page_browsing.author;
     $scope.titleRanges = $scope.philoConfig.landing_page_browsing.title;
@@ -119,9 +119,8 @@ philoApp.controller('defaultCtrl', ['$scope', '$http', function($scope, $http) {
         });   
     }
 }]);
-
-philoApp.controller('dicoCtrl', ['$scope', '$http', function($scope, $http) {
-    $scope.volumeData = []
+    
+philoApp.controller('landingDico', ['$scope', '$http', function($scope, $http) {
     var allVolumesQuery = "scripts/get_bibliography.py?object_level=doc&format=json"
     $http.get(allVolumesQuery)
         .success(function(data, status, headers, config) {
