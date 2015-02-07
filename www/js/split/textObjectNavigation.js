@@ -4,43 +4,6 @@ var window_height = $(window).height();
 
 $(document).ready(function() {
     
-    $("#show-toc").click(function() {
-        if ($("#toc-container").data("status") == "closed") {
-            showTOC();
-        } else {
-            hideTOC();
-        }
-    });
-    $("#hide-toc").click(function() {
-        hideTOC()
-    });
-    
-    // Previous and next button follow scroll
-    $('#nav-buttons, #toc-container').affix({
-        offset: {
-        top: function() {
-            return (this.top = $('#nav-buttons').offset().top)
-            }
-        }
-    });
-    
-    $('#nav-buttons').on('affix.bs.affix', function() {
-        $(this).addClass('fixed');
-        $("#toc-container").addClass('fixed');
-        adjustTocHeight();
-        $('#back-to-top').velocity("stop").velocity('fadeIn', {duration: 200});
-    });
-    $('#nav-buttons').on('affix-top.bs.affix', function() {
-        $(this).removeClass('fixed');
-        $("#toc-container").removeClass('fixed').css('position', 'static');
-        adjustTocHeight();
-        $('#back-to-top').velocity("stop").velocity('fadeOut', {duration: 200});
-    });
-    
-    $('#back-to-top').click(function() {
-        $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
-    })
-    
     // Handle page reload properly
     var db_url = webConfig['db_url'];
     if ($('#book-page').length) {
@@ -111,81 +74,6 @@ function checkEndBeginningOfDoc() {
     } else {
         $("#prev-obj").removeAttr('disabled');
     }
-}
-
-function retrieveTableOfContents(db_url) {
-    var pathname = window.location.pathname.replace('dispatcher.py/', '');
-    var my_path = pathname.replace(/\/\d+.*$/, '/');
-    var doc_id = pathname.replace(my_path, '').replace(/(\d+)\/*.*/, '$1');
-    var philo_id = doc_id + ' 0 0 0 0 0 0'
-    var script = $('#toc-wrapper').data('script') + '&philo_id=' + philo_id;
-    $('#toc-container').hide();
-    $.getJSON(script, function(data_object) {
-        var html = '';
-        var data = data_object.toc;
-        for (var i=0; i < data.length; i++) {
-            var philo_id = data[i].philo_id.split(' ').join('_');
-            var philo_type = data[i].philo_type;
-            var head = data[i].display_name;
-            var href = data[i].link;
-            var link = '<a href="'+ href + '" id="' + philo_id + '">' + head + '</a>';
-            if (philo_type == "div2") {
-                html += '<div class="toc-div2"><span class="bullet-point-div2"></span>' + link + '</div>';
-            } else if (philo_type == "div3") {
-                html += '<div class="toc-div3"><span class="bullet-point-div3"></span>' + link + '</div>';
-            } else {
-                html += '<div class="toc-div1"><span class="bullet-point-div1"></span>' + link + '</div>';
-            }
-        }
-        $('#toc-content').html(html).promise().done(function() {
-            $("#show-toc").removeAttr("disabled");
-        });
-        adjustTocHeight(100); // adjust height before showing
-        TocLinkHandler(db_url);
-    });
-}
-
-function hideTOC() {
-    $('#toc-container').velocity("transition.slideLeftBigOut", {"duration": 300});
-    $("#toc-container").data("status", "closed");
-    setTimeout(function() {
-        if ($(document).height() == $(window).height()) {
-            $('#toc-container').css('position', 'static');
-        }
-    });
-    $('#nav-buttons').removeClass('col-md-offset-4');
-}
-
-function showTOC() {
-    if ($(document).height() == $(window).height()) {
-        $('#toc-container').css('position', 'static');
-    }
-    $("#toc-container").data("status", "open");
-    $('#toc-wrapper').css('opacity', 1);
-    $('#nav-buttons').addClass('col-md-offset-4');
-    $('#toc-container').velocity("transition.slideLeftBigIn", {"duration": 300});
-    $('#toc-wrapper').addClass('show');
-    var scrollto_id = '#' + $("#text-obj-content").data('philoId').split(' ').join('_');
-    setTimeout(function() {
-        adjustTocHeight();
-        if ($('#toc-content').find($(scrollto_id)).length) {
-            $('#toc-content').scrollTo($(scrollto_id), 500);
-            $('#toc-content').find($(scrollto_id)).addClass('current-obj');
-        }  
-    }, 300);
-}
-
-function adjustTocHeight(num) {
-    // Make sure the TOC is no higher than viewport
-    if ($(document).height() == $(window).height()) {
-        var toc_height = $(window).height() - $('#nav-buttons').position().top - $('#nav-buttons').height() - $('#toc-titlebar').height() - 59;
-    } else {
-        var toc_height = $(window).height() - $('#nav-buttons').position().top - $('#toc-titlebar').height() - 59;
-    }
-    if (typeof num !="undefined") {
-        toc_height = toc_height - num;
-    }
-    $('#toc-content').velocity("stop").velocity({'max-height': toc_height + 'px'});
 }
 
 function scrollToHighlight() {

@@ -24,6 +24,7 @@
     ${css}
     <link href="css/split/landingPage.css" rel="stylesheet">
     <link href="css/split/concordanceKwic.css" rel="stylesheet">
+    <link href="css/split/textObjectNavigation.css" rel="stylesheet">
     
     ## Load in header to allow ng-cloak
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.11/angular.min.js"></script>
@@ -164,11 +165,13 @@
     <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
     <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
     <script src="js/plugins/angular-velocity.min.js"></script>
+    <script src="js/plugins/jquery.scrollTo.min.js"></script>
     <script src="js/philoLogicMain.js"></script>
     <script src="js/services.js"></script>
     <script src="js/landingPage.js"></script>
     <script src="js/searchForm.js"></script>
     <script src="js/concordanceKwic.js"></script>
+    <script src="js/textObjectNavigation.js"></script>
     <!--PhiloLogic4 Javascript-->
 </body>
 </html>

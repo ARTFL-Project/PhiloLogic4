@@ -93,8 +93,12 @@ def concordance_citation(hit, citation_hrefs):
     citation['title'] = {"href": citation_hrefs['doc'], "label": hit.title.strip()}
     if hit.author:
         citation['author'] = {"href": citation_hrefs['doc'], "label": hit.author.strip()}
+    else:
+        citation['author'] = False
     if hit.date:
         citation['date'] = {"href": citation_hrefs['doc'], "label": hit.date.strip()}
+    else:
+        citation['date'] = False
     
     ## Div level metadata
     div1_name = hit.div1.head

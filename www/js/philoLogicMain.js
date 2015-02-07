@@ -37,12 +37,11 @@ philoApp.config(['$routeProvider', '$locationProvider',
             if (pathInfo[pathInfo.length - 1] == "table-of-contents") {
                 console.log('toc')
             } else {
-                console.log('text')
+                console.log(queryArgs)
             }
-            console.log(queryArgs)
-            return 'templates/landing_page.html'
+            return 'templates/textObject.html';
         },
-        controller: 'landingPage'
+        controller: 'textObjectNavigation'
       }).
       otherwise({
         redirectTo: '/'

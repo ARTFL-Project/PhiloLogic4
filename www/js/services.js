@@ -20,7 +20,11 @@ philoApp.factory('URL', function() {
                     v = obj[k];
                 str.push(angular.isObject(v) ? qs(v, k) : (k) + "=" + encodeURIComponent(v));
             }
-            return "reports/" + obj.report + '.py?' + str.join("&");
+            if ("script" in obj) {
+                return "scripts/" + obj.script + '?' + str.join("&");
+            } else {
+                return "reports/" + obj.report + '.py?' + str.join("&");
+            }
         }
     }
 });

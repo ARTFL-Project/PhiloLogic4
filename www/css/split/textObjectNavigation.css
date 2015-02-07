@@ -1,3 +1,6 @@
+#philologic_response.text-object {
+	margin-top: 0px;
+}
 #page_number {
     text-align: center;
     margin-bottom: 10px;
@@ -41,6 +44,9 @@
     #toc-report-title, #object-title {
         margin-top: 30px;
     }
+}
+#object-title .citation-small-caps {
+	font-variant: small-caps;
 }
 #toc-container {
     max-width: 350px;

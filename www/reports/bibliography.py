@@ -63,10 +63,13 @@ def bibliography_results(db, q, config):
     
 def biblio_citation(hit, citation_hrefs):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
+    
+    citation = {}
+    citation['title'] = {'href': citation_hrefs['doc'], 'label': hit.title.strip()}
     if hit.author:
-        citation = u"%s, <i><a href='%s'>%s</a></i>" % (hit.author, citation_hrefs['doc'], hit.title)
+        citation['author'] = {'href': '', 'label': hit.author.strip()}
     else:
-        citation = u"<i><a href='%s'>%s</a></i>" % (citation_hrefs['doc'],hit.title)
+        citation['author'] = False
     more_metadata = []
     if hit.pub_place:
         more_metadata.append(hit.pub_place.strip())
@@ -77,8 +80,11 @@ def biblio_citation(hit, citation_hrefs):
     if hit.date:
         more_metadata.append(hit.date.strip())
     if more_metadata:
-        citation += ' (%s)' % ' '.join([i for i in more_metadata if i])
+        citation['more'] =  ' (%s)' % ' '.join([i for i in more_metadata if i])
+    else:
+        citation['more'] =  False
     if hit.genre:
-        citation += ' [genre: %s]' % hit.genre
-        
+        citation['genre'] = '[genre: %s]' % hit.genre
+    else:
+        citation['genre'] = False
     return citation
