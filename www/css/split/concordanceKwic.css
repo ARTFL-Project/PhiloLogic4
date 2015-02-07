@@ -137,6 +137,9 @@
     padding-left: 8px;
     border-left: double 3px darkgray;
 }
+.citation-small-caps {
+	font-variant: small-caps;
+}
 .citation-container {
 	border-bottom: 1px solid;
 }

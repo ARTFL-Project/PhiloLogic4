@@ -5,7 +5,7 @@ DirectoryIndex dispatcher.py
 
 #RewriteEngine on
 # Rewrite everything else to the root to allow html5 state links
-#RewriteRule ^(.*)/dispatcher.py(.*) /$2 [L]
+#RewriteRule ^(.*)/.* $1/ [R,L]
 
 #<ifModule mod_headers.c>
 #	Header set Connection keep-alive 

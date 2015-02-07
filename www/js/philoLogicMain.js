@@ -30,6 +30,20 @@ philoApp.config(['$routeProvider', '$locationProvider',
         },
         controller: 'concordanceKwicCtrl'
       }).
+      when('/dispatcher.py/:pathInfo*\/', {
+        templateUrl: function(queryArgs) {
+            var pathInfo = queryArgs.pathInfo.split('/');
+            console.log(pathInfo)
+            if (pathInfo[pathInfo.length - 1] == "table-of-contents") {
+                console.log('toc')
+            } else {
+                console.log('text')
+            }
+            console.log(queryArgs)
+            return 'templates/landing_page.html'
+        },
+        controller: 'landingPage'
+      }).
       otherwise({
         redirectTo: '/'
       });

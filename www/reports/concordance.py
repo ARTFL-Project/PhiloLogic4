@@ -87,17 +87,14 @@ def concordance_citation(hit, citation_hrefs):
     """ Returns a representation of a PhiloLogic object and all its ancestors
         suitable for a precise concordance citation. """
     
+    citation = {}
+    
     ## Doc level metadata
-    title = '<a href="%s">%s</a>' % (citation_hrefs['doc'], hit.title.strip())
+    citation['title'] = {"href": citation_hrefs['doc'], "label": hit.title.strip()}
     if hit.author:
-        citation = "%s <i>%s</i>" % (hit.author.strip(),title)
-    else:
-        citation = "<i>%s</i>" % title
+        citation['author'] = {"href": citation_hrefs['doc'], "label": hit.author.strip()}
     if hit.date:
-        try:
-            citation += " [%s]" % str(hit.date)
-        except:
-            pass
+        citation['date'] = {"href": citation_hrefs['doc'], "label": hit.date.strip()}
     
     ## Div level metadata
     div1_name = hit.div1.head
@@ -110,28 +107,41 @@ def concordance_citation(hit, citation_hrefs):
             else:
                 div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
     div1_name = div1_name[0].upper() + div1_name[1:]
-    div2_name = hit.div2.head
-    div3_name = hit.div3.head
+    
+    ## Remove leading/trailing spaces
+    div1_name = div1_name.strip()
+    div2_name = hit.div2.head.strip()
+    div3_name = hit.div3.head.strip()
     
     if div1_name:
-        citation += u"<a href='%s'>%s</a>" % (citation_hrefs['div1'],div1_name.strip())
+        div1_name = div1_name[0].upper() + div1_name[1:].lower()
+        citation['div1'] = {"href": citation_hrefs['div1'], "label": div1_name}
+    else:
+        citation['div1'] = False
     if div2_name:
-        citation += u"<a href='%s'>%s</a>" % (citation_hrefs['div2'],div2_name.strip())
+        div2_name = div2_name[0].upper() + div2_name[1:].lower()
+        citation['div2'] = {"href": citation_hrefs['div2'], "label": div2_name}
+    else:
+        citation['div2'] = False
     if div3_name:
-        citation += u"<a href='%s'>%s</a>" % (citation_hrefs['div3'],div3_name.strip())
+        div3_name = div3_name[0].upper() + div3_name[1:].lower()
+        citation['div3'] = {"href": citation_hrefs['div3'], "label": div3_name}
+    else:
+        citation['div3'] = False
         
     ## Paragraph level metadata
     if "para" in citation_hrefs:
         try:
-            citation += "<a href='%s'>%s</a>" % (citation_hrefs['para'], hit.who)
+            citation['para'] = {"href": citation_hrefs['para'], "label": hit.who.strip()}
         except KeyError: ## no who keyword
-            pass
+            citation['para'] = False
     
     page_obj = hit.page
     if page_obj['n']:
-        page_n = page_obj['n']
-        citation += u" [page %s] " % page_n    
-    citation = u'<span class="philologic_cite">' + citation + "</span>"
+        page_n = '[page %s]' % page_obj['n']
+        citation['page'] = {"href": "", "label": page_n}
+    else:
+        citation['page'] =  False
     return citation
 
 def fetch_concordance(db, hit, path, context_size):
