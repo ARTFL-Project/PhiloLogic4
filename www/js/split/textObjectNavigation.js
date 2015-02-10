@@ -11,36 +11,6 @@ $(document).ready(function() {
 //////////// FUNCTIONS /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-function checkEndBeginningOfDoc() {
-    if ($('#next-obj').data('philoId') == "") {
-        $('#next-obj').attr('disabled', 'disabled');
-    } else {
-        $('#next-obj').removeAttr('disabled');
-    }
-    if ($("#prev-obj").data('philoId') == "") {
-        $("#prev-obj").attr('disabled', 'disabled');
-    } else {
-        $("#prev-obj").removeAttr('disabled');
-    }
-}
-
-function scrollToHighlight() {
-    var word_offset = $('.highlight').eq(0).offset().top;
-    if (word_offset == 0) {
-        var note = $('.highlight').parents('.note-content');
-        note.show(); // The highlight is in a hidden note
-        word_offset = $('.highlight').offset().top;
-        $('.highlight').parents('.note-content').hide();
-    }
-    if ($('.highlight').eq(0).parents('.note-content').length) {
-        $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: word_offset - 60, complete: function() {
-            $('.highlight').parents('.note-content').prev('.note').trigger('focus');}}
-        );
-    } else {
-        $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: word_offset - 40});
-    }
-    
-}
 
 function TocLinkHandler(db_url) {
     $('#toc-content a').click(function(e) {

@@ -176,6 +176,7 @@
     <script src="js/searchForm.js"></script>
     <script src="js/concordanceKwic.js"></script>
     <script src="js/textObjectNavigation.js"></script>
+    <script src="js/tableOfContents.js"></script>
     <!--PhiloLogic4 Javascript-->
 </body>
 </html>

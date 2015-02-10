@@ -1,14 +1,9 @@
-<div class="spinner" ng-if="spinner">
-    <div class="bounce1"></div>
-    <div class="bounce2"></div>
-    <div class="bounce3"></div>
-</div>
-<div class="container-fluid text-object"  id="philologic_response">
+<div class="container-fluid text-object"  id="philologic_response" ng-controller="textObjectNavigation">
     <div id="object-title">
         <span class='philologic_cite'>
             <a href="{{ textObject.citation.title.href }}" class="citation-small-caps"><i>{{ textObject.citation.title.label }}</i></a>
-            <span ng-if="citation.author">, {{ textObject.citation.author.label }}</span>
-            <span ng-if="citation.more">{{ textObject.citation.more }}</span>
+            <span ng-if="textObject.citation.author">, {{ textObject.citation.author.label }}</span>
+            <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
         </span>
     </div>
     <div class="row" id="nav-buttons">
@@ -20,18 +15,23 @@
                 <button type="button" class="btn btn-primary" id="prev-obj" ng-click="goToTextObject(textObject.prev)">
                     <span class="glyphicon glyphicon-chevron-left"></span>
                 </button>
-                <button type="button" class="btn btn-primary" id="show-toc" disabled="disabled" ng-click="openTableOfContents()">Table of contents</button>
+                <button type="button" class="btn btn-primary" id="show-toc" disabled="disabled" ng-click="toggleTableOfContents()">Table of contents</button>
                 <button type="button" class="btn btn-primary" id="next-obj" ng-click="goToTextObject(textObject.next)">
                     <span class="glyphicon glyphicon-chevron-right"></span>
                 </button>
             </div>
         </div>
     </div>
+    <div class="spinner" ng-if="spinner">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+    </div>
     <div class="row" id="all-content">
         <div id="toc-wrapper" class="col-xs-4">
             <div class="panel panel-default toc-slide" id="toc-container" ng-show="tocOpen">
                 <div id="toc-titlebar">
-                    <button type="button" class="btn btn-primary btn-xs pull-right" id="hide-toc" ng-click="closeTableOfContents()">
+                    <button type="button" class="btn btn-primary btn-xs pull-right" id="hide-toc" ng-click="toggleTableOfContents()">
                         <span class="glyphicon glyphicon-remove"></span>
                     </button>
                 </div>
@@ -57,7 +57,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div id="book-page">
-                        <div id="text-obj-content" class="panel panel-default" ng-bind-html="textObject.text"></div>
+                        <div id="text-obj-content" class="panel panel-default" ng-bind-html="textObject.text | unsafe"></div>
                     </div>
                 </div>
             </div>

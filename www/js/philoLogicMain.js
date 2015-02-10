@@ -54,8 +54,7 @@ philoApp.config(['$routeProvider', '$locationProvider',
             } else {
                 return 'templates/textObject.html';
             }
-        },
-        controller: 'textObjectNavigation'
+        }
       }).
       otherwise({
         redirectTo: '/'

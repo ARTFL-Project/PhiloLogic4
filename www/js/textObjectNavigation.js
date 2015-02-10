@@ -24,8 +24,6 @@ philoApp.controller('textObjectNavigation', ['$scope', '$rootScope', '$http', '$
         .success(function(data, status, headers, config) {
             $scope.textObject = data;
             textObjectCitation.citation = data.citation;
-            console.log(textObjectCitation)
-            $scope.textObjectCitation = textObjectCitation;
             affixTopBar();
             if ($scope.byteOffset.length > 0 ) {
                 setTimeout(scrollToHighlight, 500);
@@ -134,27 +132,30 @@ philoApp.controller('textObjectNavigation', ['$scope', '$rootScope', '$http', '$
     } else {
         $scope.tocOpen = true;
     }
-    $scope.openTableOfContents = function() {
+    $scope.toggleTableOfContents = function() {
         if ($scope.tocOpen) {
-            $scope.closeTableOfContents();
+            closeTableOfContents();
         } else {
-            if ($(document).height() == $(window).height()) {
-                $('#toc-container').css('position', 'static');
-            }
-            $('#toc-wrapper').css('opacity', 1);
-            $('#nav-buttons').addClass('col-md-offset-4');
-            $('#toc-wrapper').addClass('show');
-            $scope.tocOpen = true;
-            setTimeout(function() {
-                adjustTocHeight();
-                // TODO: find why this doesn't work
-                var scrollToID = $('#' + $scope.tocObject.philo_id.join('-'));
-                scrollToID.velocity("scroll", {duration: 500, container: $("#toc-content") });
-                scrollToID.addClass('current-obj');
-            }, 300);
+            openTableOfContents();
         }
+    }    
+    var openTableOfContents = function() {
+        if ($(document).height() == $(window).height()) {
+            $('#toc-container').css('position', 'static');
+        }
+        $('#toc-wrapper').css('opacity', 1);
+        $('#nav-buttons').addClass('col-md-offset-4');
+        $('#toc-wrapper').addClass('show');
+        $scope.tocOpen = true;
+        setTimeout(function() {
+            adjustTocHeight();
+            // TODO: find why this doesn't work
+            var scrollToID = $('#' + $scope.tocObject.philo_id.join('-'));
+            scrollToID.velocity("scroll", {duration: 500, container: $("#toc-content") });
+            scrollToID.addClass('current-obj');
+        }, 300);
     }
-    $scope.closeTableOfContents = function() {
+    var closeTableOfContents = function() {
         $scope.tocOpen = false;
         setTimeout(function() {
             if ($(document).height() == $(window).height()) {
