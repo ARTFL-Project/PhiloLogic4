@@ -17,7 +17,7 @@ from bibliography import biblio_citation
 import json
 
 philo_types = set(['div1', 'div2', 'div3'])
-philo_slices = {"doc": 2, "div1": 3, "div2": 4, "div3": 5, "para": 6}
+philo_slices = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
 
 def table_of_contents(environ,start_response):
     config = f.WebConfig()
@@ -80,7 +80,8 @@ def generate_toc_object(obj, db, q, config):
                             display_name = i['philo_type']
             display_name = display_name[0].upper() + display_name[1:]
             link = f.make_absolute_object_link(config, philo_id.split()[:7])
-            toc_element = {"philo_id": philo_id[:philo_slices[philo_type]], "philo_type": philo_type, "display_name": display_name, "link": link}
+            philo_id = ' '.join(philo_id.split()[:philo_slices[philo_type]])
+            toc_element = {"philo_id": philo_id, "philo_type": philo_type, "display_name": display_name, "link": link}
             text_hierarchy.append(toc_element)
     metadata_fields = {}
     for metadata in db.locals['metadata_fields']:

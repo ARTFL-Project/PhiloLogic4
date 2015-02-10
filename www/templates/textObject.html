@@ -1,9 +1,14 @@
-<div class="container-fluid text-object" id='philologic_response'>
-    <div id='object-title'>
+<div class="spinner" ng-if="spinner">
+    <div class="bounce1"></div>
+    <div class="bounce2"></div>
+    <div class="bounce3"></div>
+</div>
+<div class="container-fluid text-object"  id="philologic_response">
+    <div id="object-title">
         <span class='philologic_cite'>
             <a href="{{ textObject.citation.title.href }}" class="citation-small-caps"><i>{{ textObject.citation.title.label }}</i></a>
-            <span ng-if="textObject.citation.author">, {{ textObject.citation.author.label }}</span>
-            <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
+            <span ng-if="citation.author">, {{ textObject.citation.author.label }}</span>
+            <span ng-if="citation.more">{{ textObject.citation.more }}</span>
         </span>
     </div>
     <div class="row" id="nav-buttons">
@@ -12,11 +17,11 @@
         </button>
         <div class="col-xs-12" style="text-align: center;">
             <div class="btn-group-sm" role="group">
-                <button type="button" class="btn btn-primary" id="prev-obj" ng-click="goToTextObect(textObject.prev)">
+                <button type="button" class="btn btn-primary" id="prev-obj" ng-click="goToTextObject(textObject.prev)">
                     <span class="glyphicon glyphicon-chevron-left"></span>
                 </button>
                 <button type="button" class="btn btn-primary" id="show-toc" disabled="disabled" ng-click="openTableOfContents()">Table of contents</button>
-                <button type="button" class="btn btn-primary" id="next-obj" ng-click="goToTextObect(textObject.next)">
+                <button type="button" class="btn btn-primary" id="next-obj" ng-click="goToTextObject(textObject.next)">
                     <span class="glyphicon glyphicon-chevron-right"></span>
                 </button>
             </div>
@@ -24,7 +29,7 @@
     </div>
     <div class="row" id="all-content">
         <div id="toc-wrapper" class="col-xs-4">
-            <div class="panel panel-default velocity-opposites-transition-slideLeftBigIn" data-velocity-opts="{duration:300}" id="toc-container" ng-if="tocOpen">
+            <div class="panel panel-default toc-slide" id="toc-container" ng-show="tocOpen">
                 <div id="toc-titlebar">
                     <button type="button" class="btn btn-primary btn-xs pull-right" id="hide-toc" ng-click="closeTableOfContents()">
                         <span class="glyphicon glyphicon-remove"></span>
@@ -32,23 +37,23 @@
                 </div>
                 <div id="toc-content">
                     <div ng-repeat="element in tocObject.toc">
-                        <div id="{{ element.philo_id.split(' ').join('-') }}" class="toc-div1" ng-if="element.philo_type === 'div1'">
+                        <div id="{{ element.philo_id.split(' ').join('-') }}" class="toc-div1" ng-if="element.philo_type === 'div1'" ng-click="goToTextObject(element.philo_id)">
                             <span class="bullet-point-div1"></span>
-                            <a href="{{ element.href }}">{{ element.display_name }}</a>
+                            <a href="">{{ element.display_name }}</a>
                         </div>
-                        <div id="{{ element.philo_id.split(' ').join('-') }}" class="toc-div2" ng-if="element.philo_type === 'div2'">
+                        <div id="{{ element.philo_id.split(' ').join('-') }}" class="toc-div2" ng-if="element.philo_type === 'div2'" ng-click="goToTextObject(element.philo_id)">
                             <span class="bullet-point-div2"></span>
-                            <a href="{{ element.href }}">{{ element.display_name }}</a>
+                            <a href="" >{{ element.display_name }}</a>
                         </div>
-                        <div id="{{ element.philo_id.split(' ').join('-') }}" class="toc-div3" ng-if="element.philo_type === 'div3'">
+                        <div id="{{ element.philo_id.split(' ').join('-') }}" class="toc-div3" ng-if="element.philo_type === 'div3'" ng-click="goToTextObject(element.philo_id)">
                             <span class="bullet-point-div3"></span>
-                            <a href="{{ element.href }}">{{ element.display_name }}</a>
+                            <a href="">{{ element.display_name }}</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-offset-2 col-md-8 col-lg-offset-3 col-lg-6" id="center-content">
+        <div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-offset-2 col-md-8 col-lg-offset-3 col-lg-6" id="center-content" ng-show="textObject">
             <div class="row">
                 <div class="col-xs-12">
                     <div id="book-page">
@@ -59,7 +64,7 @@
         </div>
     </div>
 </div>
-<div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-full-screen="true" data-continuous="false">
+<div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-full-screen="true" data-continuous="false" style="display: none">
     <div class="slides"></div>
     <h3 class="title"></h3>
     <a class="prev">&lt;</a>

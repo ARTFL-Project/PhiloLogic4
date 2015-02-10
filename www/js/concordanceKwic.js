@@ -1,5 +1,8 @@
 philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$location', 'biblioCriteria', 'progressiveLoad', 'URL',
                                             function($scope, $rootScope, $http, $location, biblioCriteria, progressiveLoad, URL) {
+                                                
+    $rootScope.textObjectCitation = {} // Clear citation in text Objects
+    
     $rootScope.formData = $location.search();
     if (typeof($rootScope.formData.q) === "undefined") {
         $rootScope.formData.report = "bibliography";

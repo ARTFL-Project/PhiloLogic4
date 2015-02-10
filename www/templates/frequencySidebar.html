@@ -5,9 +5,9 @@
             </div>
         </div>
         <ol id="frequency_table" class="velocity-opposites-transition-fadeIn" data-velocity-opts="{duration:400}" ng-if="frequencyResults.length > 0">
-            <li ng-repeat="result in frequencyResults">
-                <a id="freq_sidebar_text"> {{ result.label }}</a>
-                <span class="sidebar-count"> {{ result.count }}</span>
+            <li ng-repeat="result in frequencyResults" ng-click="facetClick(result)">
+                <a id="freq_sidebar_text"> {{ ::result.label }}</a>
+                <span class="sidebar-count"> {{ ::result.count }}</span>
             </li>
         </ol>
     </div>

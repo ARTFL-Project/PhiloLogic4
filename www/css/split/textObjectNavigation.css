@@ -1,5 +1,6 @@
 #philologic_response.text-object {
 	margin-top: 0px;
+	margin-left: -15px;
 }
 #page_number {
     text-align: center;
@@ -116,6 +117,9 @@
 }
 .toc-div3 {
     padding-left: 2.9em;
+}
+.toc-div1:hover, .toc-div2:hover, .toc-div3:hover {
+	cursor: pointer;
 }
 
 #text-obj-content {

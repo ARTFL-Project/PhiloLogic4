@@ -336,10 +336,10 @@ a.sidebar-option:hover {
 .spinner {
 	margin: 100px auto 0;
 	width: 70px;
-	/*text-align: center;*/
 	position: absolute;
 	z-index: 1000;
-	left: 50%;
+	left: 45%;
+	top: 80px;
 }
 .spinner > div {
   width: 18px;

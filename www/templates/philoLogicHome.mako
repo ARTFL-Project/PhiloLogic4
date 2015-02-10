@@ -46,17 +46,21 @@
                     <a href="http://artfl-project.uchicago.edu/content/contact-us" title="Contact information for the ARTFL Project">Contact Us</a>
                 </div>
                 <div class="navbar-header">
-                    <a href="./#/" class="navbar-brand" title="{{ philoConfig.dbname }}">{{ philoConfig.dbname }}</a>
+                    <a href="./#/" class="navbar-brand" title="{{ philoConfig.dbname }}">{{ ::philoConfig.dbname }}</a>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!--Main content-->
     <div class="container-fluid" id="main-body">
         <div class="container" style="overflow: hidden;" ng-include="'templates/search_form.html'" ng-controller="searchForm"></div>
         <div class="container-fluid" id='philologic_response'>
             <div ng-view></div>
         </div>
-    </div> <!-- /main-body -->
+    </div>
+    <!--End of main content-->
+    
     <div class="container-fluid" id="footer">
         <div class="row" >
             <div class="col-xs-offset-4 col-xs-4 col-sm-offset-5 col-sm-2">

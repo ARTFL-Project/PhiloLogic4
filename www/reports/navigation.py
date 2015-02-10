@@ -40,11 +40,11 @@ def generate_text_object(obj, db, q, config):
     doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
     citation = biblio_citation(obj, doc_link)
     text_object['citation'] = citation
-    text = get_text_obj(obj, config, q)
+    text = get_text_obj(obj, config, q, db.locals['word_regex'])
     text_object['text'] = text
     return text_object
 
-def get_text_obj(obj, config, q):
+def get_text_obj(obj, config, q, word_regex):
     path = config.db_path
     filename = obj.doc.filename
     if filename and os.path.exists(path + "/data/TEXT/" + filename):
@@ -61,15 +61,15 @@ def get_text_obj(obj, config, q):
     width = int(obj.byte_end) - byte_start
     raw_text = file.read(width)
 
-    if q.byte:
+    try:
         bytes = sorted([int(byte) - byte_start for byte in q.byte])
-    else:
+    except ValueError: ## q.byte contains an empty string
         bytes = []
         
-    formatted = format_text_object(raw_text, config, q, bytes).decode("utf-8","ignore")
+    formatted = format_text_object(raw_text, config, q, word_regex, bytes=bytes).decode("utf-8","ignore")
     return formatted
 
-def format_text_object(text, config, q, bytes=[]):
+def format_text_object(text, config, q, word_regex, bytes=[]):
     parser = etree.XMLParser(recover=True)
     if bytes:
         new_text = ""
@@ -147,9 +147,10 @@ def format_text_object(text, config, q, bytes=[]):
                     del el[0].attrib["url"]
                     el.append(etree.Element("br"))
             elif el.tag == "philoHighlight":        
-                word_match = re.match(r"\w+", el.tail, re.U)
-                el.text = el.tail[:word_match.end()]
-                el.tail = el.tail[word_match.end():]
+                word_match = re.match(word_regex, el.tail, re.U)
+                if word_match:
+                    el.text = el.tail[:word_match.end()]
+                    el.tail = el.tail[word_match.end():]
                 el.tag = "span"
                 el.attrib["class"] = "highlight"
             if el.tag not in valid_html_tags:

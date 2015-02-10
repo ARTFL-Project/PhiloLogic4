@@ -9,6 +9,22 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', function(
     $rootScope.results = {}
 }]);
 
+philoApp.value('formData', {
+        report: philoConfig.search_reports[0],
+        method: "proxy",
+        results_per_page: "25"
+});
+
+philoApp.value('concordanceResults', {});
+
+philoApp.value('kwicResults', {});
+
+philoApp.value('timeSeriesResults', {})
+
+philoApp.value('collocationResults', {})
+
+philoApp.value('textObjectCitation', {citation: {}})
+
 philoApp.config(['$routeProvider', '$locationProvider',
   function($routeProvider, $locationProvider) {
     $routeProvider.
@@ -33,13 +49,11 @@ philoApp.config(['$routeProvider', '$locationProvider',
       when('/dispatcher.py/:pathInfo*\/', {
         templateUrl: function(queryArgs) {
             var pathInfo = queryArgs.pathInfo.split('/');
-            console.log(pathInfo)
             if (pathInfo[pathInfo.length - 1] == "table-of-contents") {
-                console.log('toc')
+                return 'templates/tableOfContents.html';
             } else {
-                console.log(queryArgs)
+                return 'templates/textObject.html';
             }
-            return 'templates/textObject.html';
         },
         controller: 'textObjectNavigation'
       }).

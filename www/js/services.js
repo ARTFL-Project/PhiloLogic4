@@ -25,6 +25,10 @@ philoApp.factory('URL', function() {
             } else {
                 return "reports/" + obj.report + '.py?' + str.join("&");
             }
+        },
+        path: function(pathInfo) {
+            pathInfo = pathInfo.split(' ').join('/');
+            return "dispatcher.py/" + pathInfo;
         }
     }
 });
@@ -106,3 +110,5 @@ philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
         }
     }
 }]);
+
+philoApp.filter('unsafe', function($sce) { return $sce.trustAsHtml; });
