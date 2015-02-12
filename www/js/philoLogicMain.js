@@ -37,14 +37,17 @@ philoApp.config(['$routeProvider', '$locationProvider',
       }).
       when('/dispatcher.py?:queryArgs', {
         templateUrl: function(queryArgs) {
-            if (queryArgs.report === "concordance" || queryArgs.report === "kwic") {
+            if (queryArgs.report === "concordance" || queryArgs.report === "kwic" || queryArgs.report === "bibliography") {
                 var template = 'templates/concordanceKwic.html';
+            } else if (queryArgs.report === "collocation") {
+                var template = 'templates/collocation.html';
+            } else if (queryArgs.report === "time_series") {
+                var template = 'templates/time_series.html';
             } else {
                 var template = 'templates/landing_page.html'; 
             }
             return template;
-        },
-        controller: 'concordanceKwicCtrl'
+        }
       }).
       when('/dispatcher.py/:pathInfo*\/', {
         templateUrl: function(queryArgs) {

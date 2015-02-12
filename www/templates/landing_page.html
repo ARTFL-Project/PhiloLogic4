@@ -1,6 +1,6 @@
 <div id="default-landing-page" ng-if="!dictionary" ng-controller="landingDefault">
     <div class="row" id="landingGroup">
-        <div class="{{ authorOffset }} col-xs-12 col-sm-6" id="col-author" ng-if="authorRanges">
+        <div class="{{ ::authorOffset }} col-xs-12 col-sm-6" id="col-author" ng-if="authorRanges">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     Author
@@ -8,13 +8,13 @@
                 <div class="panel-body">
                     <table id="author-range-selectors" class="table table-bordered" data-type="author">
                         <tr>
-                            <td ng-repeat="range in authorRanges" ng-click="getContent('author', '{{ range }}')">{{ range }}</td>
+                            <td ng-repeat="range in authorRanges" ng-click="getContent('author', '{{ ::range }}')">{{ ::range }}</td>
                         </tr>
                     </table>
                 </div>
             </div>
         </div>
-        <div class="{{ titleOffset }} col-xs-12 col-sm-6" id="col-title" ng-if="titleRanges">
+        <div class="{{ ::titleOffset }} col-xs-12 col-sm-6" id="col-title" ng-if="titleRanges">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     Title
@@ -22,7 +22,7 @@
                 <div class="panel-body">
                     <table id="title-range-selectors" class="table table-bordered"" data-type="title">
                         <tr>
-                            <td ng-repeat="range in titleRanges" ng-click="getContent('title', '{{ range }}')">{{ range }}</td>
+                            <td ng-repeat="range in titleRanges" ng-click="getContent('title', '{{ ::range }}')">{{ ::range }}</td>
                         </tr>
                     </table>
                 </div>
@@ -36,7 +36,7 @@
                 <div class="panel-body">
                     <table id="year-range-selectors" class="table table-bordered" data-type="year">
                         <tr ng-repeat="ranges in dateRanges">
-                            <td ng-repeat="range in ranges" data-range="{{ range.start }}-{{ range.end }}">{{ range.start }}-{{ range.end }}</td>
+                            <td ng-repeat="range in ranges" data-range="{{ ::range.start }}-{{ ::range.end }}">{{ ::range.start }}-{{ ::range.end }}</td>
                         </tr>
                     </table>
                 </div>
@@ -54,7 +54,7 @@
             <div class="panel-body" >
                 <ul class="list-group" style="margin-left: -15px; margin-right: -15px" ng-if="volumeData != []">
                     <li class="list-group-item velocity-transition-fadeIn" ng-repeat="volume in volumeData" data-velocity-opts="{ stagger: 10 }">
-                        <a href="dispatcher.py/{{ volume.philo_id }}">{{ volume.title }}</a>
+                        <a href="dispatcher.py/{{ ::volume.philo_id }}/table-of-contents">{{ ::volume.title }}</a>
                     </li>
                 </ul>
             </div>
@@ -66,7 +66,7 @@
             <div class="panel-body">
                 <table class="table table-bordered">
                     <tr ng-repeat="row in dicoLetterRows">
-                        <td ng-repeat="letter in row" ng-click="goToBibliographyReport(letter)">{{ letter }}</td>
+                        <td ng-repeat="letter in row" ng-click="goToBibliographyReport(letter)">{{ ::letter }}</td>
                     </tr>
                 </table>
             </div>

@@ -6,9 +6,14 @@ sys.path.append('..')
 import functions as f
 import reports as r
 from philologic.DB import DB
+from wsgiref.handlers import CGIHandler
 from functions.wsgi_handler import WSGIHandler
 from concordance import citation_links
-import json
+try:
+    import simplejson as json
+except ImportError:
+    print >> sys.stderr, "Please install simplejson for better performance"
+    import json
 
 
 def bibliography(environ, start_response):
@@ -63,7 +68,7 @@ def biblio_citation(hit, citation_hrefs):
     if hit.date:
         more_metadata.append(hit.date.strip())
     if more_metadata:
-        citation['more'] =  ' (%s)' % ' '.join([i for i in more_metadata if i])
+        citation['more'] =  '(%s)' % ' '.join([i for i in more_metadata if i])
     else:
         citation['more'] =  False
     if hit.genre:
@@ -71,3 +76,6 @@ def biblio_citation(hit, citation_hrefs):
     else:
         citation['genre'] = False
     return citation
+
+if __name__ == "__main__":
+    CGIHandler().run(bibliography)
