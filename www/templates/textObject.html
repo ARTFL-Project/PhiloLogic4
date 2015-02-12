@@ -1,10 +1,10 @@
 <div class="container-fluid text-object"  id="philologic_response" ng-controller="textObjectNavigation">
-    <div id="object-title">
-        <span class='philologic_cite'>
+    <div id="object-title" class='philologic_cite'>
+        <div>
             <a href="{{ textObject.citation.title.href }}" class="citation-small-caps"><i>{{ textObject.citation.title.label }}</i></a>
             <span ng-if="textObject.citation.author">, {{ textObject.citation.author.label }}</span>
-            <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
-        </span>
+        </div>
+        <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
     </div>
     <div class="row" id="nav-buttons">
         <button type="button" class="btn btn-primary btn-sm" id="back-to-top">

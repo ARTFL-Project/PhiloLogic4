@@ -14,4 +14,11 @@ def landing_page(environ,start_response):
     request = WSGIHandler(db, environ)
     headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
-    return f.render_template(query_string=request.query_string, template_name='philoLogicHome.mako', config=config, report="landing_page")
+    return build_html_page(config)
+
+def build_html_page(config):
+    html_page = open('%s/templates/philoLogicHome.html' % config.db_path).read()
+    html_page = html_page.replace('$DBNAME', config.dbname)
+    html_page = html_page.replace('$DBURL', config.db_url)
+    html_page = html_page.replace('$PHILOCONFIG', config.toJSON())
+    return html_page

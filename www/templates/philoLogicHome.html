@@ -1,15 +1,14 @@
-## -*- coding: utf-8 -*-
 <!DOCTYPE html>
 <html ng-app="philoApp">
 <head>
-    <title>${config.dbname.decode('utf-8', 'ignore')}</title>
+    <title>$DBNAME</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <base href="${config.db_url}/">
+    <base href="$DBURL/">
  
     <!--Load the web config and global_report variable to use in the JavaScript code-->
     <script>
-        var philoConfig = ${config.toJSON()}; /* loading the web_config in javascript */
+        var philoConfig = $PHILOCONFIG; /* loading the web_config in javascript */
         var philoReport = "landing_page";
     </script>
     
@@ -19,14 +18,16 @@
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- Bootstrap core CSS -->
-    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">  
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
     <!-- PhiloLogic4 CSS -->
-    ${css}
+    <link href="css/split/style.css" rel="stylesheet">
+    <link href="css/split/default_theme.css" rel="stylesheet">
+    <link href="css/split/searchForm.css" rel="stylesheet">
     <link href="css/split/landingPage.css" rel="stylesheet">
     <link href="css/split/concordanceKwic.css" rel="stylesheet">
     <link href="css/split/textObjectNavigation.css" rel="stylesheet">
     
-    ## Load in header to allow ng-cloak
+    <!--Load in header to allow ng-cloak-->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.11/angular.min.js"></script>
     <script>
         var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'angular-velocity']);
@@ -46,7 +47,7 @@
                     <a href="http://artfl-project.uchicago.edu/content/contact-us" title="Contact information for the ARTFL Project">Contact Us</a>
                 </div>
                 <div class="navbar-header">
-                    <a href="./#/" class="navbar-brand" title="{{ philoConfig.dbname }}">{{ ::philoConfig.dbname }}</a>
+                    <a href="./#/" class="navbar-brand" title="{{ ::philoConfig.dbname }}">{{ ::philoConfig.dbname }}</a>
                 </div>
             </div>
         </div>
@@ -165,7 +166,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.11/angular-animate.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.11/angular-touch.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.11/angular-sanitize.min.js"></script>
-    <script src="js/bootstrap/bootstrap.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
     <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
     <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
     <script src="js/plugins/angular-velocity.min.js"></script>

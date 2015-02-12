@@ -196,7 +196,6 @@ philoApp.controller('textObjectNavigation', ['$scope', '$rootScope', '$http', '$
     }
     
     $scope.goToTextObject = function(philoID) {
-        //console.log("before", $scope.citation)
         $location.url(URL.path(philoID));
     }
 }]);
