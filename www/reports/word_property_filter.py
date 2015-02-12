@@ -9,9 +9,7 @@ import re
 import unicodedata
 from philologic.DB import DB
 from concordance import citation_links, concordance_citation, fetch_concordance
-
 from functions.wsgi_handler import WSGIHandler
-from bibliography import fetch_bibliography as bibliography
 from collocation import tokenize, filter
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
@@ -56,41 +54,7 @@ def word_property_filter(environ,start_response):
     biblio_criteria = ' '.join(biblio_criteria)
 
 #    resource = f.webResources("word_property_filter", debug=db.locals["debug"])
-    return f.render_template(concordance=filter_results,pages=pages,query_string=request.query_string,config=config,report="word_property_filter",
-                             biblio_criteria=biblio_criteria, template_name="word_property_filter.mako")
-"""
-    return f.render_template(results=filter_results,db=db,dbname=dbname,q=q,colloc_concordance=colloc_concordance,
-                           f=f,path=path, results_per_page=q['results_per_page'], config=config,report="word_property_filter",
-                           biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako",
-                           css= resource.css, js=resource.js)
-"""
-"""
-    wsgi_response(environ, start_response)
-    db, path_components, q = parse_cgi(environ)
-    dbname = os.path.basename(environ["SCRIPT_FILENAME"].replace("/dispatcher.py",""))
-    path = os.getcwd().replace('functions/', '')
-    config = f.WebConfig()
-    if q['q'] == '':
-        return bibliography(f,path, db, dbname,q,environ)
-    else:
-        hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
-        print >> sys.stderr, "FILTERING"
-        filter_results = filter_words_by_property(hits, path, q, db, config)
-        print >> sys.stderr, "DONE"
-        biblio_criteria = []
-        for k,v in q["metadata"].iteritems():
-            if v:
-                if k in config.metadata_aliases:
-                    k = config.metadata_aliases[k]
-                biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b></span>' % (k.title(), v.decode('utf-8', 'ignore'), ))
-        biblio_criteria = ' '.join(biblio_criteria)
-
-        resource = f.webResources("word_property_filter", debug=db.locals["debug"])
-        return render_template(results=filter_results,db=db,dbname=dbname,q=q,colloc_concordance=colloc_concordance,
-                               f=f,path=path, results_per_page=q['results_per_page'], config=config,report="word_property_filter",
-                               biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako",
-                               css= resource.css, js=resource.js)
-"""
+    return ""
         
 def filter_words_by_property(hits, path, q, db, config, word_filter=True, filter_num=100, stopwords=True):
     concordance_object = {"query": dict([i for i in q])}

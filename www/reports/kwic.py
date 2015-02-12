@@ -22,25 +22,10 @@ def kwic(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    if request.no_q:
-        setattr(request, "report", "bibliography")
-        return r.fetch_bibliography(db, request, config, start_response)
-    else:
-        kwic_object, hits = generate_kwic_results(db, request, config)
-        headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-        start_response('200 OK',headers)
-        return json.dumps(kwic_object)
-        
-def render_kwic(k, hits, config, q):
-    biblio_criteria = f.biblio_criteria(q, config)
-    pages = f.link.page_links(config,q,len(hits))
-    collocation_script = f.link.make_absolute_query_link(config, q, report="collocation", format="json")
-    frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
-    kwic_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/concordance_kwic_switcher.py")
-    concordance_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/concordance_kwic_switcher.py", report="concordance")
-    ajax_scripts = {"concordance": concordance_script, 'kwic': kwic_script, 'frequency': frequency_script, 'collocation': collocation_script}
-    return f.render_template(kwic=k, query_string=q.query_string, biblio_criteria=biblio_criteria,
-                             ajax=ajax_scripts, pages=pages, config=config, template_name='kwic.mako', report="kwic")
+    kwic_object, hits = generate_kwic_results(db, request, config)
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response('200 OK',headers)
+    return json.dumps(kwic_object)
 
 def generate_kwic_results(db, q, config, link_to_hit="div1"):
     """ The link_to_hit keyword defines the text object to which the metadata link leads to"""

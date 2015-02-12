@@ -29,14 +29,10 @@ def concordance(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    if request.no_q:
-        setattr(request, "report", "bibliography")
-        return r.fetch_bibliography(db, request, config, start_response)
-    else:
-        concordance_object, hits = concordance_results(db, request, config)
-        headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-        start_response('200 OK',headers)
-        return json.dumps(concordance_object)
+    concordance_object, hits = concordance_results(db, request, config)
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response('200 OK',headers)
+    return json.dumps(concordance_object)
     
 def concordance_results(db, q, config):
     print >> sys.stderr, "TEST", repr(q["q"]), repr(q['method']), repr(q['arg']), repr(q.metadata)
@@ -61,17 +57,6 @@ def concordance_results(db, q, config):
     concordance_object['results_length'] = len(hits)
     concordance_object["query_done"] = hits.done
     return concordance_object, hits
- 
-def render_concordance(c, hits, config, q):
-    biblio_criteria = f.biblio_criteria(q, config)
-    pages = f.link.page_links(config,q,len(hits))
-    collocation_script = f.link.make_absolute_query_link(config, q, report="collocation", format="json")
-    frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
-    kwic_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/concordance_kwic_switcher.py", report="kwic")
-    concordance_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/concordance_kwic_switcher.py")
-    ajax_scripts = {"concordance": concordance_script, 'kwic': kwic_script, 'frequency': frequency_script, 'collocation': collocation_script}
-    return f.render_template(concordance=c, biblio_criteria=biblio_criteria, config=config, query_string=q.query_string,
-                             ajax=ajax_scripts, template_name="concordance.mako", report="concordance", pages=pages)
 
 def citation_links(db, config, i):
     """ Returns a representation of a PhiloLogic object and all its ancestors

@@ -8,7 +8,6 @@ import re
 import unicodedata
 from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
-from bibliography import fetch_bibliography as bibliography
 from collocation import tokenize, filter, build_filter_list, split_concordance
 from concordance import citation_links, concordance_citation, fetch_concordance
 from functions.ObjectFormatter import adjust_bytes, convert_entities
@@ -33,16 +32,12 @@ def concordance_from_collocation(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    if request.no_q:
-        return r.fetch_bibliography(db, request, config, start_response)
-    else:
-        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-        start_response('200 OK',headers)
-        hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
-        concordance_object, pages = fetch_colloc_concordance(hits, request, db, config)
-        biblio_criteria = f.biblio_criteria(request, config)
-        return f.render_template(concordance=concordance_object,pages=pages,query_string=request.query_string,config=config,report="concordance_from_collocation",
-                                 biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako")
+    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response('200 OK',headers)
+    hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
+    concordance_object, pages = fetch_colloc_concordance(hits, request, db, config)
+    biblio_criteria = f.biblio_criteria(request, config)
+    return ""
         
 def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=100, stopwords=True):
     concordance_object = {"query": dict([i for i in q])}
