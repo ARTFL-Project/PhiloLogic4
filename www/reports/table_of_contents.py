@@ -2,19 +2,17 @@
 
 import sys
 sys.path.append('..')
-import os
-import sqlite3
-import re
 import functions as f
-from lxml import etree
 from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
-from functions.ObjectFormatter import convert_entities, valid_html_tags, xml_to_html_class
-from functions.FragmentParser import parse
 from philologic import HitWrapper
 from bibliography import biblio_citation
-import json
+try:
+    import simplejson as json
+except ImportError:
+    print >> sys.stderr, "Import Error, please install simplejson for better performance"
+    import json
 
 philo_types = set(['div1', 'div2', 'div3'])
 philo_slices = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}

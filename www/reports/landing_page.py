@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 import sys
 sys.path.append('..')
 from functions.wsgi_handler import WSGIHandler

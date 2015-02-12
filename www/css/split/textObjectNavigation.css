@@ -30,10 +30,26 @@
 	padding-right: 30px
 }
 #toc-report-title {
-    font-size: 1.2em;
+    font-size: 1.4em;
+	line-height: 130%;
     margin-top: 10px;
     margin-bottom: 10px;
 	text-align: center;
+}
+#toc-title {
+	font-style: italic;
+	font-weight: 700;
+}
+#toc-title:hover {
+	text-decoration: none;
+}
+#tei-header {
+	display: none;
+	white-space: pre;
+	font-family: 'Droid Sans Mono', sans-serif;
+	font-size: 80%;
+	overflow-x: scroll;
+	padding: 10px;
 }
 #object-title {
     font-size: 140%;

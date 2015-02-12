@@ -67,7 +67,7 @@ def generate_title_list(c, letter_range, db, config):
             author = i["author"] or "Anonymous"
         except:
             author = ""
-        link = "dispatcher.py/" + i['philo_id'].split()[0]
+        link = "dispatcher.py/%s/table-of-contents" % i['philo_id'].split()[0]
         cite = '<a href="%s">%s</a> (%s)' % (link, title, author)
         content.append({"title": title, "cite": cite})
     return content
@@ -80,7 +80,7 @@ def generate_year_list(c, q_range, db, config):
     content = []
     for i in c.fetchall():
         author = i['author'] or "Anonymous"
-        link = "dispatcher.py/" + i['philo_id'].split()[0]
+        link = "dispatcher.py/%s/table-of-contents" % i['philo_id'].split()[0]
         try:
             date = i['date']
         except:

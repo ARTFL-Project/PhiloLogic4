@@ -15,10 +15,31 @@ philoApp.controller('tableOfContents', ['$scope', '$rootScope', '$http', '$locat
     $http(request)
         .success(function(data, status, headers, config) {
             $scope.tocObject = data;
-            console.log(JSON.stringify(data))
         })
         .error(function(data, status, headers, config) {
             console.log("Error", status, headers)
         });
+    
+    $scope.teiHeader = false;
+    $scope.showHeader = function() {
+        if (typeof($scope.teiHeader) === "string") {
+            $scope.teiHeader = false;
+        } else {
+            var request = {
+                method: "GET",
+                url: $rootScope.philoConfig.db_url + '/' + URL.query({
+                    script: "get_header.py",
+                    philo_id: $scope.philoID
+                })
+            }
+            $http(request)
+            .success(function(data, status, headers, config) {
+                $scope.teiHeader = data;
+            })
+            .error(function(data, status, headers, config) {
+                console.log("Error", status, headers)
+            });
+        }
+    }
 
 }]);
