@@ -11,7 +11,11 @@ from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
 from concordance import concordance_citation, citation_links
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
-import json
+try:
+    import simplejson as json
+except ImportError:
+    print >> sys.stderr, "Import Error, please install simplejson for better performance"
+    import json
 
 
 def kwic(environ,start_response):
@@ -38,7 +42,7 @@ def render_kwic(k, hits, config, q):
     return f.render_template(kwic=k, query_string=q.query_string, biblio_criteria=biblio_criteria,
                              ajax=ajax_scripts, pages=pages, config=config, template_name='kwic.mako', report="kwic")
 
-def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
+def generate_kwic_results(db, q, config, link_to_hit="div1"):
     """ The link_to_hit keyword defines the text object to which the metadata link leads to"""
     hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
     start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
@@ -47,6 +51,8 @@ def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
     kwic_results = []
     default_short_citation_len = 30
     shortest_citation_len = 0
+    
+    length = config.concordance_length
     
     for hit in hits[start - 1:end]:
         # Get all metadata
@@ -93,8 +99,6 @@ def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
         kwic_biblio_link = '<a href="%s" class="kwic_biblio">' % href + kwic_biblio + '</a>: '
         kwic_results[pos] = {"philo_id": hit.philo_id, "context": kwic_biblio_link + '%s' % text, "metadata_fields": metadata_fields,
                              "citation_links": hrefs, "citation": kwic_biblio_link, "bytes": hit.bytes}
-        print >> sys.stderr, "CONTEXT", kwic_results[pos]['context'].encode('utf-8')
-    print >> sys.stderr, "CONTEXT"
 
     kwic_object['results'] = kwic_results
     kwic_object['results_length'] = len(hits)

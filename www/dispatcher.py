@@ -11,6 +11,7 @@ import functions as f
 from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
 
+
 def philo_dispatcher(environ,start_response):
     report = FieldStorage().getvalue('report')
     access = access_control(environ, start_response)

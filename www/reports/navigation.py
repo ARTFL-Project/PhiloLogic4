@@ -14,7 +14,11 @@ from functions.ObjectFormatter import convert_entities, valid_html_tags, xml_to_
 from functions.FragmentParser import parse
 from philologic import HitWrapper
 from bibliography import biblio_citation
-import json
+try:
+    import simplejson as json
+except ImportError:
+    print >> sys.stderr, "Import Error, please install simplejson for better performance"
+    import json
 
 philo_types = set(['div1', 'div2', 'div3'])
 
@@ -37,7 +41,7 @@ def generate_text_object(obj, db, q, config):
         if db.locals['metadata_types'][metadata] == "doc":
             metadata_fields[metadata] = obj[metadata]
     text_object['metadata_fields'] = metadata_fields
-    doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
+    doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1]) + "/table-of-contents"}
     citation = biblio_citation(obj, doc_link)
     text_object['citation'] = citation
     text = get_text_obj(obj, config, q, db.locals['word_regex'])

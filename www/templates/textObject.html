@@ -37,17 +37,9 @@
                 </div>
                 <div id="toc-content">
                     <div ng-repeat="element in tocObject.toc">
-                        <div id="{{ element.philo_id.split(' ').join('-') }}" class="toc-div1" ng-if="element.philo_type === 'div1'" ng-click="goToTextObject(element.philo_id)">
-                            <span class="bullet-point-div1"></span>
-                            <a href="">{{ element.display_name }}</a>
-                        </div>
-                        <div id="{{ element.philo_id.split(' ').join('-') }}" class="toc-div2" ng-if="element.philo_type === 'div2'" ng-click="goToTextObject(element.philo_id)">
-                            <span class="bullet-point-div2"></span>
-                            <a href="" >{{ element.display_name }}</a>
-                        </div>
-                        <div id="{{ element.philo_id.split(' ').join('-') }}" class="toc-div3" ng-if="element.philo_type === 'div3'" ng-click="goToTextObject(element.philo_id)">
-                            <span class="bullet-point-div3"></span>
-                            <a href="">{{ element.display_name }}</a>
+                        <div id="{{ ::element.philo_id.split(' ').join('-') }}" class="toc-{{ ::element.philo_type }}" ng-click="goToTextObject(element.philo_id)">
+                            <span class="bullet-point-{{ ::element.philo_type }}"></span>
+                            <a href="">{{ ::element.label }}</a>
                         </div>
                     </div>
                 </div>

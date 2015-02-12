@@ -12,7 +12,11 @@ from functions.wsgi_handler import WSGIHandler
 from functions.ObjectFormatter import convert_entities, adjust_bytes, valid_html_tags, xml_to_html_class
 from functions.FragmentParser import parse
 from lxml import etree
-import json
+try:
+    import simplejson as json
+except ImportError:
+    print >> sys.stderr, "Please install simplejson for better performance"
+    import json
 from inspect import getmembers
 
 strip_start_punctuation = re.compile("^[,?;.:!']")
@@ -35,6 +39,7 @@ def concordance(environ,start_response):
         return json.dumps(concordance_object)
     
 def concordance_results(db, q, config):
+    print >> sys.stderr, "TEST", repr(q["q"]), repr(q['method']), repr(q['arg']), repr(q.metadata)
     hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
     start, end, n = f.link.page_interval(q['results_per_page'], hits, q.start, q.end)
     
