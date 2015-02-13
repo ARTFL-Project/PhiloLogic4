@@ -81,6 +81,9 @@ s {
 }
 
 /* Collocation classes */
+#collocation-container #philologic_response {
+	margin-top: 10px;
+}
 #philologic_collocation {
 	padding-left: 15px;
 }
@@ -232,9 +235,6 @@ s {
     cursor: pointer;
 }
 /*Text formatting*/
-.xml-l {
-    /*display: block;*/
-}
 span.note {
 	display: inline;
 }

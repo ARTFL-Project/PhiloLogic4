@@ -1,5 +1,36 @@
 "use strict"
 
+philoApp.factory('searchConfigBuild', ['$rootScope', function($rootScope) {
+    return {
+        timeSeriesIntervals: function() {
+            var options = {1: "Year", 10: "Decade", 50: "Half Century", 100: "Century"};
+            var intervals = [];
+            for (var i=0; i < $rootScope.philoConfig.time_series_intervals.length; i++) {
+                var interval = {
+                    date: $rootScope.philoConfig.time_series_intervals[i],
+                    alias: options[$rootScope.philoConfig.time_series_intervals[i]]
+                };
+                intervals.push(interval);
+            }
+            return intervals
+        },
+        metadata: function() {
+            var metadataFields = {};
+            for (var i=0; i < $rootScope.philoConfig.metadata.length; i++) {
+                var metadata = $rootScope.philoConfig.metadata[i];
+                metadataFields[metadata] = {}
+                if (metadata in $rootScope.philoConfig.metadata_aliases) {
+                    metadataFields[metadata].value = $rootScope.philoConfig.metadata_aliases[metadata];
+                } else {
+                    metadataFields[metadata].value = metadata;
+                }
+                metadataFields[metadata].example = $rootScope.philoConfig.search_examples[metadata];
+            }
+            return metadataFields
+        }
+    }
+}]);
+
 philoApp.factory('URL', function() {
     return {
         objectToString: function(formData, url) {
@@ -100,12 +131,32 @@ philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
             var sortedList = this.sortResults(fullResults);
             return {"sorted": sortedList, "unsorted": fullResults};
         },
+        mergeCollocationResults: function(fullResults, newData) {
+            for (var key in newData) {
+                var value = newData[key];
+                if (key in fullResults) {
+                    fullResults[key].count += value.count;
+                } else {
+                    fullResults[key] = {'count': value.count, 'url': value.url};
+                }
+            }
+            var sortedList = this.sortResults(fullResults);
+            return {"sorted": sortedList, "unsorted": fullResults};
+        },
         sortResults: function(fullResults) {
             var sortedList = [];
             for (var key in fullResults) {
                 sortedList.push({label:key, count: fullResults[key].count});
             }
             sortedList.sort(function(a,b) {return b.count - a.count});
+            return sortedList;
+        },
+        sortCollocationResults: function(fullResults) {
+            var sortedList = [];
+            for (var key in fullResults) {
+                sortedList.push([key, fullResults[key]]);
+            }
+            sortedList.sort(function(a,b) {return b[1].count - a[1].count});
             return sortedList;
         }
     }

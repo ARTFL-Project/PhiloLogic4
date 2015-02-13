@@ -9,6 +9,7 @@ import re
 import json
 import unicodedata
 from philologic.DB import DB
+from wsgiref.handlers import CGIHandler
 from functions.wsgi_handler import WSGIHandler
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
@@ -53,10 +54,6 @@ def fetch_collocation(hits, q, db, config):
     left_collocates = {}
     right_collocates = {}
     all_collocates = {}
-    
-    ## Override default value of q.end for first batch of results
-    if q.end == 0:
-        q.end = 3000
         
     ## Remove all empty keywords in request object
     new_q = []
@@ -65,7 +62,11 @@ def fetch_collocation(hits, q, db, config):
             new_q.append(i)
     
     count = 0
+    
+    print >> sys.stderr, "HIT LEN", len(hits)
+    
     for hit in hits[q.start:q.end]:
+        print >> sys.stderr, "BYTE", repr(hit.bytes)
         conc_left, conc_right = split_concordance(hit, length, config.db_path)
         left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
         right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)
@@ -161,3 +162,6 @@ def tokenize_text(text, token_regex):
     text_tokens = token_regex.split(text)
     text_tokens = [token for token in text_tokens if token and token not in (""," ","\n","\t")] ## remove empty strings
     return text_tokens
+
+if __name__ == "__main__":
+    CGIHandler().run(collocation)
