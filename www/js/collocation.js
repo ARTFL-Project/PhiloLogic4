@@ -23,16 +23,14 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
     }, true);
     $scope.removeMetadata = biblioCriteria.remove;
     
+    //$scope.resultsLength = false;
     $scope.done = false;
     
     var updateCollocation = function(fullResults, resultsLength, start, end) {
         $rootScope.formData.start = start;
         $rootScope.formData.end = end;
-        var request = {
-            method: "GET",
-            url: $scope.philoConfig.db_url + '/' + URL.query($rootScope.formData)
-        }
-        $http(request)
+        var request = $scope.philoConfig.db_url + '/' + URL.query($rootScope.formData);
+        $http.get(request)
         .success(function(data, status, headers, config) {
             sortAndRenderCollocation(fullResults, data, resultsLength, start, end)
             if (end <= resultsLength) {
@@ -49,9 +47,10 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
         if (typeof(fullResults) === "undefined") {
             fullResults = {"all_collocates": {}, 'left_collocates': {}, 'right_collocates': {}}
         }
-        var all = progressiveLoad.mergeCollocationResults(fullResults["all_collocates"], data["all_collocates"]);
-        var left = progressiveLoad.mergeCollocationResults(fullResults["left_collocates"], data['left_collocates']);
-        var right = progressiveLoad.mergeCollocationResults(fullResults["right_collocates"], data['right_collocates']);
+        var all = progressiveLoad.mergeResults(fullResults["all_collocates"], data["all_collocates"]);
+        var left = progressiveLoad.mergeResults(fullResults["left_collocates"], data['left_collocates']);
+        var right = progressiveLoad.mergeResults(fullResults["right_collocates"], data['right_collocates']);
+        console.log(JSON.stringify(typeof(left)))
         $scope.sortedLists = {
             'all': all.sorted.slice(0, 100),
             'left': left.sorted.slice(0, 100),
@@ -176,24 +175,26 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
     }
 
     var collocationCloud = function(sortedList) {
+        var cloudList = angular.copy(sortedList);
         $.fn.tagcloud.defaults = {
             size: {start: 1.0, end: 3.5, unit: 'em'},
             color: {start: '#C4DFF3', end: '#286895'}
           };
         $('#collocate_counts').hide().empty();
-        sortedList.sort(function(a,b) {
+        cloudList.sort(function(a,b) {
             var x = removeDiacritics(a.label);
             var y = removeDiacritics(b.label);
             return x < y ? -1 : x > y ? 1 : 0;
         });
-        for (var i in sortedList) {
-            var word = sortedList[i].label;
-            var count = sortedList[i].count;
-            var href = sortedList[i].url;
+        var html = ''
+        for (var i in cloudList) {
+            var word = cloudList[i].label;
+            var count = cloudList[i].count;
+            var href = cloudList[i].url;
             var searchLink = '<span class="cloud_term" rel="' + count + '" data-href="' + href + '&collocate_num=' + count + '">';
-            var fullLink = searchLink + word + ' </span>';
-            $("#collocate_counts").append(fullLink);
+            html += searchLink + word + ' </span>';
         }
+        $("#collocate_counts").html(html);
         $("#collocate_counts span").tagcloud();
         $("#collocate_counts").velocity('fadeIn');
     }
@@ -232,6 +233,7 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
         // Fetch total results to make sure we always have the right number
         var queryParams = angular.copy($rootScope.formData)
         queryParams.script = "get_total_results.py";
+        queryParams.report = "concordance"
         var request = {
             method: "GET",
             url: $scope.philoConfig.db_url + '/' + URL.query(queryParams)

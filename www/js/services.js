@@ -121,7 +121,7 @@ philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
             } else {
                 for (var key in newData) {
                     if (key in fullResults) {
-                        fullResults[key]['count'] += newData[key]['count'];
+                        fullResults[key].count += newData[key].count;
                     }
                     else {
                         fullResults[key] = newData[key];
@@ -131,32 +131,12 @@ philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
             var sortedList = this.sortResults(fullResults);
             return {"sorted": sortedList, "unsorted": fullResults};
         },
-        mergeCollocationResults: function(fullResults, newData) {
-            for (var key in newData) {
-                var value = newData[key];
-                if (key in fullResults) {
-                    fullResults[key].count += value.count;
-                } else {
-                    fullResults[key] = {'count': value.count, 'url': value.url};
-                }
-            }
-            var sortedList = this.sortResults(fullResults);
-            return {"sorted": sortedList, "unsorted": fullResults};
-        },
         sortResults: function(fullResults) {
             var sortedList = [];
             for (var key in fullResults) {
-                sortedList.push({label:key, count: fullResults[key].count});
+                sortedList.push({label:key, count: parseInt(fullResults[key].count), url: fullResults[key].url});
             }
             sortedList.sort(function(a,b) {return b.count - a.count});
-            return sortedList;
-        },
-        sortCollocationResults: function(fullResults) {
-            var sortedList = [];
-            for (var key in fullResults) {
-                sortedList.push([key, fullResults[key]]);
-            }
-            sortedList.sort(function(a,b) {return b[1].count - a[1].count});
             return sortedList;
         }
     }

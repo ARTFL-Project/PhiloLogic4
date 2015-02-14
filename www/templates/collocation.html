@@ -37,7 +37,7 @@
             </div>
         </div>
         <div class="results_container">
-            <div id='philologic_collocation' class="row" style="display: none">
+            <div id='philologic_collocation' class="row">
                 <div class="col-xs-12 col-sm-3 col-sm-push-9 col-md-4 col-md-push-8">
                     <div id="word_cloud" class="word_cloud">
                         <div id="collocate_counts" class="collocation_counts">
@@ -55,7 +55,7 @@
                             <tr>
                                 <td id="all-collocate-column">
                                     <span id="all-num-{{ ::$index}}" class="colloc-row" ng-repeat="result in sortedLists.all">
-                                        <span id="all-word-{{ ::$index }}" class="colloc_link" ng-click="something(result[1].url, result[1].count)">
+                                        <span id="all-word-{{ ::$index }}" class="colloc_link" ng-click="something(result.url)">
                                             {{ ::result.label }}
                                         </span>
                                         <span id="all-count-{{ ::$index }}">
@@ -65,7 +65,7 @@
                                 </td>
                                 <td id="left-collocate-column">
                                     <span id="left-num-{{ ::$index}}" class="colloc-row" ng-repeat="result in sortedLists.left">
-                                        <span id="left-word-{{ ::$index }}" class="colloc_link" ng-click="something(result[1].url, result[1].count)">
+                                        <span id="left-word-{{ ::$index }}" class="colloc_link" ng-click="something(result.url)">
                                             {{ ::result.label }}
                                         </span>
                                         <span id="left-count-{{ ::$index }}">
@@ -75,7 +75,7 @@
                                 </td>
                                 <td id="right-collocate-column">
                                     <span id="right-num-{{ ::$index}}" class="colloc-row" ng-repeat="result in sortedLists.right">
-                                        <span id="right-word-{{ ::$index }}" class="colloc_link" ng-click="something(result[1].url, result[1].count)">
+                                        <span id="right-word-{{ ::$index }}" class="colloc_link" ng-click="something(result.url)">
                                             {{ ::result.label }}
                                         </span>
                                         <span id="right-count-{{ ::$index }}">

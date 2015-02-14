@@ -10,6 +10,7 @@ from philologic.DB import DB
 import reports as r
 import functions as f
 import json
+import time
 
 def get_total_results(environ,start_response):
     status = '200 OK'
@@ -23,9 +24,9 @@ def get_total_results(environ,start_response):
     else:
         hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
     total_results = 0
-    while total_results == 0:
-        if hits.done:
-            break
+    if not hits.done:
+        while not hits.done:
+            time.sleep(0.05)
     total_results = len(hits)
         
     yield json.dumps(total_results)

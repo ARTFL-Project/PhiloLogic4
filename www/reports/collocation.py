@@ -63,10 +63,7 @@ def fetch_collocation(hits, q, db, config):
     
     count = 0
     
-    print >> sys.stderr, "HIT LEN", len(hits)
-    
     for hit in hits[q.start:q.end]:
-        print >> sys.stderr, "BYTE", repr(hit.bytes)
         conc_left, conc_right = split_concordance(hit, length, config.db_path)
         left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
         right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)

@@ -37,6 +37,7 @@ DirectoryIndex dispatcher.py
     #<IfModule mod_filter.c>
         AddOutputFilterByType DEFLATE "application/atom+xml" \
                                       "application/javascript" \
+                                      "application/json" \
                                       "application/ld+json" \
                                       "application/manifest+json" \
                                       "application/rdf+xml" \
