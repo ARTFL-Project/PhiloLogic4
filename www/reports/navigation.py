@@ -30,7 +30,7 @@ def navigation(environ,start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
     text_object = generate_text_object(obj, db, request, config)
-    return json.dumps(text_object)
+    yield json.dumps(text_object)
 
 def generate_text_object(obj, db, q, config):
     text_object = {"query": dict([i for i in q]), "philo_id": obj.philo_id[0]}

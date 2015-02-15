@@ -28,11 +28,11 @@ def collocation(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
-    collocation_object = fetch_collocation(hits, request, db, config)
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
-    return json.dumps(collocation_object)
+    hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
+    collocation_object = fetch_collocation(hits, request, db, config)
+    yield json.dumps(collocation_object)
 
 def fetch_collocation(hits, q, db, config):
     collocation_object = {"query": dict([i for i in q]), "results_length": len(hits)}

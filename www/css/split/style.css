@@ -127,7 +127,7 @@ s {
 	text-decoration: none;
 	cursor: text;
 }
-.filter-list:hover {
+#filter-list-trigger:hover {
 	cursor: pointer;
 }
 #filter-list {

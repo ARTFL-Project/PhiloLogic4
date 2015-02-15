@@ -26,7 +26,7 @@ def table_of_contents(environ,start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
     toc_object = json.dumps(generate_toc_object(obj, db, request, config))
-    return toc_object
+    yield toc_object
 
 def nav_query(obj,db):
     conn = db.dbh

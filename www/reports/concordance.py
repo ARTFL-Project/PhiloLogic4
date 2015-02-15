@@ -32,7 +32,7 @@ def concordance(environ,start_response):
     concordance_object, hits = concordance_results(db, request, config)
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
-    return json.dumps(concordance_object)
+    yield json.dumps(concordance_object)
     
 def concordance_results(db, q, config):
     print >> sys.stderr, "TEST", repr(q["q"]), repr(q['method']), repr(q['arg']), repr(q.metadata)

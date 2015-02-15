@@ -27,6 +27,8 @@ def get_total_results(environ,start_response):
     if not hits.done:
         while not hits.done:
             time.sleep(0.05)
+            if hits.done:
+                break
     total_results = len(hits)
         
     yield json.dumps(total_results)

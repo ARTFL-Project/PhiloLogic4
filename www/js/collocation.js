@@ -23,8 +23,8 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
     }, true);
     $scope.removeMetadata = biblioCriteria.remove;
     
-    //$scope.resultsLength = false;
     $scope.done = false;
+    $scope.filterList = false;
     
     var updateCollocation = function(fullResults, resultsLength, start, end) {
         $rootScope.formData.start = start;
@@ -32,10 +32,18 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
         var request = $scope.philoConfig.db_url + '/' + URL.query($rootScope.formData);
         $http.get(request)
         .success(function(data, status, headers, config) {
-            sortAndRenderCollocation(fullResults, data, resultsLength, start, end)
-            if (end <= resultsLength) {
-                var percent = end / resultsLength * 100;
-                progressiveLoad.updateProgressBar($('#collocation-container .progress-bar'), percent);
+            if (!resultsLength) {
+                // Fetch total results now since we know the hitlist will be fully on disk
+                var queryParams = angular.copy($rootScope.formData)
+                queryParams.script = "get_total_results.py";
+                queryParams.report = "concordance"
+                $http.get($scope.philoConfig.db_url + '/' + URL.query(queryParams))
+                .success(function(length, status, headers, config) {
+                    $scope.resultsLength = length;
+                    sortAndRenderCollocation(fullResults, data, length, start, end)
+                })
+            } else {
+                sortAndRenderCollocation(fullResults, data, resultsLength, start, end)
             }
         })
         .error(function(data, status, headers, config) {
@@ -44,6 +52,10 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
     }
     
     var sortAndRenderCollocation = function(fullResults, data, resultsLength, start, end) {
+        if (end <= resultsLength) {
+            var percent = end / resultsLength * 100;
+            progressiveLoad.updateProgressBar($('#collocation-container .progress-bar'), percent);
+        }
         if (typeof(fullResults) === "undefined") {
             fullResults = {"all_collocates": {}, 'left_collocates': {}, 'right_collocates': {}}
         }
@@ -68,6 +80,7 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
             updateCollocation(tempFullResults, resultsLength, start, end);
         } else {
             progressiveLoad.updateProgressBar($('#collocation-container .progress-bar'), 100);
+            $scope.filterList = data.filter_list;
             $scope.done = true;
             $(".progress").delay(500).velocity('slideUp');
             activateLinks();
@@ -214,12 +227,12 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
             alert('Your browser does not support HTML5 localStorage. Try upgrading.');
         } else {
             try {
-                sessionStorage[$location.url()] = JSON.stringify({results: sortedLists, resultsLength: $scope.resultsLength});
+                sessionStorage[$location.url()] = JSON.stringify({results: sortedLists, resultsLength: $scope.resultsLength, filterList: $scope.filterList});
             } catch(e) {
                 sessionStorage.clear();
                 console.log("Clearing sessionStorage for space...");
                 try {
-                    sessionStorage[$location.url()] = JSON.stringify({results: sortedLists, resultsLength: $scope.resultsLength});
+                    sessionStorage[$location.url()] = JSON.stringify({results: sortedLists, resultsLength: $scope.resultsLength, filterList: $scope.filterList});
                 } catch(e) {
                     sessionStorage.clear();
                     console.log("Quota exceeded error: the JSON object is too big...")
@@ -230,33 +243,28 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
     
     if (sessionStorage[$location.url()] == null || $rootScope.philoConfig.debug === false) {
         $('#philologic_collocation').velocity('fadeIn', {duration: 200});
-        // Fetch total results to make sure we always have the right number
-        var queryParams = angular.copy($rootScope.formData)
-        queryParams.script = "get_total_results.py";
-        queryParams.report = "concordance"
-        var request = {
-            method: "GET",
-            url: $scope.philoConfig.db_url + '/' + URL.query(queryParams)
-        }
-        $http(request)
-        .success(function(data, status, headers, config) {
-            $scope.resultsLength = data;
-            $(".progress").show();
-            var collocObject;
-            updateCollocation(collocObject, data, 0, 1000);
-        })
-        .error(function(data, status, headers, config) {
-            console.log("Error", status, headers)
-        });
+        $scope.resultsLength = false; // set to false for now
+        $(".progress").show();
+        var collocObject;
+        updateCollocation(collocObject, false, 0, 1000);
     } else {
         var savedObject = JSON.parse(sessionStorage[$location.url()]);
         $scope.sortedLists = savedObject.results;
         $scope.resultsLength = savedObject.resultsLength;
+        $scope.filterList = savedObject.filterList;
         collocationCloud($scope.sortedLists.all);
         activateLinks();
         progressiveLoad.updateProgressBar($('#collocation-container .progress-bar'), 100);
         $scope.done = true;
         $('#philologic_collocation').velocity('fadeIn', {duration: 200});
+    }
+    
+    $scope.toggleFilterList = function() {
+        if ($('#filter-list').css('display') === "block") {
+            $('#filter-list').velocity('fadeOut');
+        } else {
+            $('#filter-list').velocity('fadeIn');
+        }
     }
 
 }]);

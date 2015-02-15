@@ -1,4 +1,4 @@
-#test_time_series {
+#time-series {
     margin-left: 20px;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -8,16 +8,16 @@
     padding-left: 1px;
     padding-right: 1px;
 }
-.graph_bar {
+.graph-bar {
     height: 0px;
     position:absolute;
     bottom:0;
     overflow: visible !important; /* make sure years don't temporarily disappear when switching between absolute and relative frequencies */
 }
-.graph_bar:hover {
+.graph-bar:hover {
     cursor: pointer;
 }
-#side_text {
+#side-text {
     position: absolute;
     bottom: 50%;
     margin-left: -115px;
@@ -30,7 +30,7 @@
     -o-transform: rotate(-90deg);
     transform: rotate(-90deg);
 }
-.graph_years {
+.graph-years {
     position: absolute;
     bottom: -40px;
     font-size: 90%;
@@ -43,18 +43,18 @@
 
 
 
-#first_division, #middle_division, #top_division {
+#first-division, #middle-division, #top-division {
     position: absolute;
     z-index: 50;
     border-top: dashed 1px #B8B8B8;
 }
-#first_division {
+#first-division {
     bottom: 33%;
 }
-#middle_division {
+#middle-division {
     bottom: 66%;
 }
-#top_number, #middle_number, #first_number {
+#top-number, #middle-number, #first-number {
     margin-top: -16px;
     position: absolute;
     z-index: 100;

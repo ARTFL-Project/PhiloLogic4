@@ -26,7 +26,7 @@ philoApp.config(['$routeProvider', '$locationProvider',
             } else if (queryArgs.report === "collocation") {
                 var template = 'templates/collocation.html';
             } else if (queryArgs.report === "time_series") {
-                var template = 'templates/time_series.html';
+                var template = 'templates/timeSeries.html';
             } else {
                 var template = 'templates/landing_page.html'; 
             }

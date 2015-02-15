@@ -6,7 +6,7 @@
                     Export results
                 </button>
                 <div id="search_arguments">
-                    Displaying the top 100 collocates for {{ ::resultsLength }} occurrences of <b>{{ ::collocationParams.q }}</b><br>
+                    Displaying the top 100 collocates for {{ resultsLength || '...' }} occurrences of <b>{{ ::collocationParams.q }}</b><br>
                     Bibliographic criteria:
                     <span class="biblio-criteria" ng-repeat="metadata in biblio" style="margin: 1px">
                         {{ ::metadata.key.charAt(0).toUpperCase() + metadata.key.slice(1) }} : <b>{{ ::metadata.value }}</b>
@@ -20,20 +20,20 @@
             </div>
             <div style="padding-left: 15px;">
                 <span ng-if="collocationParams.collocFilterChoice === 'stopwords'">
-                    <span class="filter-list">Common function words</span> are being filtered from this report.
+                    <a id="filter-list-trigger" ng-click="toggleFilterList()">Common function words</a> are being filtered from this report.
                 </span>
                 <span ng-if="collocationParams.collocFilterChoice === 'frequency'"">
-                    <span class="filter-list">The {{ ::collocationParams.filterFrequency }} most common words</span> are being filtered from this report.
+                    <a id="filter-list-trigger" ng-click="toggleFilterList()">The {{ ::collocationParams.filterFrequency }} most common words</a> are being filtered from this report.
                 </span>
-                <div class="panel panel-default" id="filter-list" ng-if="collocationParams.filterList">
-                    <button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <div class="panel panel-default" id="filter-list" ng-if="filterList">
+                    <button type="button" class="close" ng-click="toggleFilterList()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     <ol>
-                        <li ng-repeat="word in collocation.filterList">{{ ::word }}</li>
+                        <li ng-repeat="word in filterList">{{ ::word }}</li>
                     </ol>
                 </div>
             </div>
             <div class="bg-danger" style="margin-top: 20px; width: 50%;" ng-if="config.debug">
-                {{ ::collocation.error }}
+                {{ ::error }}
             </div>
         </div>
         <div class="results_container">

@@ -4,7 +4,6 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
     
     $rootScope.formData = $location.search();
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
-        console.log("hi")
         $rootScope.formData.report = "bibliography";
         $location.url(URL.objectToString($rootScope.formData, true));
     }

@@ -1,4 +1,5 @@
-#!/usr/bin env python
+#!/usr/bin/env python
+
 from __future__ import division
 import os
 import sys
@@ -6,11 +7,16 @@ sys.path.append('..')
 import functions as f
 import reports as r
 from functions.wsgi_handler import WSGIHandler
+from wsgiref.handlers import CGIHandler
 from philologic.DB import DB
 from collections import defaultdict
 from copy import deepcopy
 from operator import itemgetter
-import json
+try:
+    import simplejson as json
+except ImportError:
+    print >> sys.stderr, "Please install simplejson for better performance"
+    import json
 import re
 
 sub_date = re.compile('date=[^&]*')
@@ -24,7 +30,7 @@ def time_series(environ,start_response):
     time_series_object = generate_time_series(request, db, hits)
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
-    return json.dumps(time_series_object)
+    yield json.dumps(time_series_object)
         
 def handle_dates(q, db):
     c = db.dbh.cursor()
@@ -88,7 +94,9 @@ def generate_time_series(q, db, hits):
         except ValueError: ## No valid date
             continue
         
-        absolute_count[date] += 1
+        if date not in absolute_count:
+            absolute_count[date] = {"count": 0, "url": ""}
+        absolute_count[date]['count'] += 1
         
         if date not in date_counts:
             date_counts[date] = date_total_count(date, db, q['year_interval'])
@@ -115,9 +123,5 @@ def date_total_count(date, db, interval):
     c.execute(query)
     return c.fetchone()[0]
     
-    
-    
-
-
-    
-    
+if __name__ == '__main__':
+    CGIHandler().run(time_series)

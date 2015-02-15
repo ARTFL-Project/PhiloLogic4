@@ -25,7 +25,7 @@ def kwic(environ,start_response):
     kwic_object, hits = generate_kwic_results(db, request, config)
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
-    return json.dumps(kwic_object)
+    yield json.dumps(kwic_object)
 
 def generate_kwic_results(db, q, config, link_to_hit="div1"):
     """ The link_to_hit keyword defines the text object to which the metadata link leads to"""
