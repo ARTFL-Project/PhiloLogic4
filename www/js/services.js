@@ -84,51 +84,6 @@ philoApp.factory('URL', function() {
     }
 });
 
-philoApp.factory('biblioCriteria', ['$rootScope','$http', '$location', 'URL', function($rootScope, $http, $location, URL) {
-        return {
-            build: function(queryParams) {
-                var queryArgs = angular.copy(queryParams);
-                var biblio = []
-                if (queryArgs.report === "time_series") {
-                    delete queryParams.date;
-                }
-                var config = $rootScope.philoConfig;
-                for (var i=0; i < config.metadata.length; i++) {
-                    var k = config.metadata[i];
-                    var v = queryArgs[k];
-                    var alias = k;
-                    if (v) {
-                        if (queryArgs.report !== "concordance_from_collocation") {
-                            var close_icon = '<span class="glyphicon glyphicon-remove-circle remove_metadata" data-metadata="' + k + '"></span>';
-                        } else {
-                            var close_icon = ""
-                        }
-                        if (k in config.metadata_aliases) {
-                            alias = config.metadata_aliases[k];
-                        }
-                        var htmlContent = '<span class="biblio-criteria">' + k.charAt(0).toUpperCase() + k.slice(1) + ': <b>' + v + '</b> ' + close_icon + '</span>';
-                        biblio.push({key: k, alias: alias, value: v});
-                    }
-                }
-                return biblio
-            },
-            remove: function(metadata, queryParams) {
-                delete queryParams[metadata];
-                console.log(metadata)
-                console.log(JSON.stringify(queryParams))
-                var request = $rootScope.philoConfig.db_url + '/' + URL.query(queryParams);
-                if (queryParams.report === "concordance" || queryParams.report === "kwic") {
-                    $http.get(request).success(function(data) {
-                        $rootScope.results = data;
-                        $location.url(URL.objectToString(queryParams, true));
-                    })
-                } else if (queryParams.report === "collocation") {
-                    $('#collocate_counts').empty();
-                }
-            }
-        }
-}]);
-
 philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
     return {
         mergeResults: function(fullResults, newData, sortKey) {
@@ -182,37 +137,6 @@ philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
 
 philoApp.factory('collocation', ['$rootScope', '$http', 'URL', 'defaultDiacriticsRemovalMap', 'progressiveLoad',  function($rootScope, $http, URL, defaultDiacriticsRemovalMap, progressiveLoad) {
     return {
-        collocationCloud: function(sortedList) {
-            var cloudList = angular.copy(sortedList);
-            $.fn.tagcloud.defaults = {
-                size: {start: 1.0, end: 3.5, unit: 'em'},
-                color: {start: '#C4DFF3', end: '#286895'}
-              };
-            $('#collocate_counts').hide().empty();
-            var removeDiacritics = function(str) {
-                var changes = defaultDiacriticsRemovalMap.map;
-                for(var i=0; i<changes.length; i++) {
-                    str = str.replace(changes[i].letters, changes[i].base);
-                }
-                return str;
-            }
-            cloudList.sort(function(a,b) {
-                var x = removeDiacritics(a.label);
-                var y = removeDiacritics(b.label);
-                return x < y ? -1 : x > y ? 1 : 0;
-            });
-            var html = ''
-            for (var i in cloudList) {
-                var word = cloudList[i].label;
-                var count = cloudList[i].count;
-                var href = cloudList[i].url;
-                var searchLink = '<span class="cloud_term" rel="' + count + '" data-href="' + href + '&collocate_num=' + count + '">';
-                html += searchLink + word + ' </span>';
-            }
-            $("#collocate_counts").html(html);
-            $("#collocate_counts span").tagcloud();
-            $("#collocate_counts").velocity('fadeIn');
-        },
         activateLinks: function() {
             // Activate links on collocations
             $('span[id^=all_word], span[id^=left_word], span[id^=right_word]').addClass('colloc_link');
@@ -262,7 +186,7 @@ philoApp.factory('collocation', ['$rootScope', '$http', 'URL', 'defaultDiacritic
                 'left': left.sorted.slice(0, 100),
                 'right': right.sorted.slice(0, 100)
                 };
-            this.collocationCloud($scope.sortedLists.all);
+            //this.collocationCloud($scope.sortedLists.all);
             if (typeof(start) === "undefined" || end < resultsLength) {
                 var tempFullResults = {"all_collocates": all.unsorted, "left_collocates": left.unsorted, "right_collocates": right.unsorted};
                 if (start === 0) {

@@ -1,5 +1,5 @@
-philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'biblioCriteria', 'progressiveLoad', 'URL',
-                                            function($scope, $rootScope, $http, $location, radio, biblioCriteria, progressiveLoad, URL) {
+philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'progressiveLoad', 'URL',
+                                            function($scope, $rootScope, $http, $location, radio, progressiveLoad, URL) {
                                                 
     $rootScope.formData = $location.search();
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
@@ -30,13 +30,6 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
             console.log("Error", status, headers)
         });
     
-    $scope.$watch(function() {
-        return $rootScope.formData;
-        }, function() {
-      $rootScope.biblio = biblioCriteria.build($rootScope.formData);
-    }, true);
-    $scope.removeMetadata = biblioCriteria.remove;
-    
     $rootScope.frequencyResults = [];
     $scope.resultsContainerWidth = "col-xs-12";
     $scope.sidebarWidth = '';    
@@ -51,6 +44,26 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
                 $scope.sidebarWidth = "";
             }
     }, true);
+    
+    $scope.goToPage = function(start, end) {
+        $rootScope.formData.start = start;
+        $rootScope.formData.end = end;
+        var request = {
+            method: "GET",
+            url: $rootScope.philoConfig.db_url + '/' + URL.query($rootScope.formData)
+        }
+        $("body").velocity('scroll', {duration: 200, easing: 'easeOutCirc', offset: 0, complete: function() {
+            $rootScope.results = {};
+        }});
+        $http(request)
+        .success(function(data, status, headers, config) {
+            $rootScope.results = data;
+            $location.url(URL.objectToString($rootScope.formData, true));
+        })
+        .error(function(data, status, headers, config) {
+            console.log("Error", status, headers)
+        });
+    }
 }]);
 
 philoApp.controller('concordanceKwicSwitcher', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL', function($scope, $rootScope, $http, $location, radio, URL) {
@@ -218,110 +231,4 @@ philoApp.controller('facets', ['$scope', '$rootScope', '$http', 'URL', 'progress
         $rootScope.frequencyResults = [];
         $('#selected-sidebar-option').data('interrupt', true);
     }
-}]);
-
-philoApp.controller('paging', ['$scope', '$rootScope', '$http', '$location', 'URL', function($scope, $rootScope, $http, $location, URL) {
-    $scope.buildPages = function() {
-        var start = $rootScope.results.description.start;
-        var resultsPerPage = parseInt($rootScope.formData.results_per_page);
-        var resultsLength = $rootScope.results.results_length;
-    
-        // first find out what page we are on currently.    
-        var currentPage = Math.floor(start / resultsPerPage) + 1 || 1;
-        
-        // then how many total pages the query has    
-        var totalPages = Math.floor(resultsLength / resultsPerPage);
-        var remainder = resultsLength % resultsPerPage;
-        if (remainder !== 0) {
-            totalPages += 1;
-        }
-        totalPages = totalPages || 1;
-        
-        // construct the list of page numbers we will output.
-        var pages = []
-        // up to four previous pages
-        var prev = currentPage - 4;
-        while (prev < currentPage) {
-            if (prev > 0) {
-                pages.push(prev);
-            }
-            prev += 1;
-        }
-        // the current page
-        pages.push(currentPage);
-        // up to five following pages
-        var next = currentPage + 5;
-        while (next > currentPage) {
-            if (next < totalPages) {
-                pages.push(next);
-            }
-            next -= 1;
-        }
-        // first and last if not already there
-        if (pages[0] !== 1) {
-            pages.unshift(1);
-        }
-        if (pages[-1] !== totalPages) {
-            pages.push(totalPages);
-        }
-        var uniquePages = [];
-        $.each(pages, function(i, el){
-            if($.inArray(el, uniquePages) === -1) uniquePages.push(el);
-        });
-        var pages = uniquePages.sort(function (a, b) { 
-            return a - b;
-        });
-        
-        // now we construct the actual links from the page numbers
-        $scope.pages = [];
-        for (var i=0; i < pages.length; i++) {
-            var page = pages[i];
-            var pageStart = page * resultsPerPage - resultsPerPage + 1;
-            var pageEnd = page * resultsPerPage;
-            if (page === currentPage) {
-                var active = "active";
-            } else {
-                var active = "";
-            }
-            var pageStart = resultsPerPage * (page - 1) + 1;
-            var pageEnd = pageStart + resultsPerPage - 1;
-            if (pageEnd > resultsLength) {
-                pageEnd = resultsLength;
-            }
-            if (page === 1 && !2 in pages) {
-                page = "First";
-            }
-            if (page === totalPages) {
-                page = "Last";
-            }
-            $scope.pages.push({display: page, start: pageStart, end: pageEnd, active: active});
-        }
-    }
-    $scope.buildPages();
-    
-    $scope.goToPage = function(start, end) {
-        $rootScope.formData.start = start;
-        $rootScope.formData.end = end;
-        var request = {
-            method: "GET",
-            url: $rootScope.philoConfig.db_url + '/' + URL.query($rootScope.formData)
-        }
-        $("body").velocity('scroll', {duration: 200, easing: 'easeOutCirc', offset: 0, complete: function() {
-            $rootScope.results = {};
-        }});
-        $http(request)
-        .success(function(data, status, headers, config) {
-            $rootScope.results = data;
-            $location.url(URL.objectToString($rootScope.formData, true));
-        })
-        .error(function(data, status, headers, config) {
-            console.log("Error", status, headers)
-        });
-    }
-    
-    $scope.$watch(function() {
-        return $rootScope.results;
-        }, function() {
-      $scope.buildPages();
-    }, true);
 }]);

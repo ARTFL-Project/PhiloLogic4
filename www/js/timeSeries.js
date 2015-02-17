@@ -1,7 +1,7 @@
 "use strict";
 
-philoApp.controller('timeSeriesCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'biblioCriteria', 'progressiveLoad', 'URL',
-                                            function($scope, $rootScope, $http, $location, radio, biblioCriteria, progressiveLoad, URL) {
+philoApp.controller('timeSeriesCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'progressiveLoad', 'URL',
+                                            function($scope, $rootScope, $http, $location, radio, progressiveLoad, URL) {
     $rootScope.formData = $location.search();
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
         $rootScope.formData.report = "bibliography";
@@ -9,13 +9,6 @@ philoApp.controller('timeSeriesCtrl', ['$scope', '$rootScope', '$http', '$locati
     }
     
     radio.setReport('time_series');
-    
-    $scope.$watch(function() {
-        return $rootScope.formData;
-        }, function() {
-      $scope.biblio = biblioCriteria.build($rootScope.formData);
-    }, true);
-    $scope.removeMetadata = biblioCriteria.remove;
     
     $scope.percent = 0;
     $scope.interval = parseInt($rootScope.formData.year_interval);

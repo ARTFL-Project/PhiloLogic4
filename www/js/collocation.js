@@ -1,7 +1,7 @@
 "use strict";
 
-philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'biblioCriteria', 'progressiveLoad', 'URL', 'collocation',
-                                            function($scope, $rootScope, $http, $location, radio, biblioCriteria, progressiveLoad, URL, collocation) {
+philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'progressiveLoad', 'URL', 'collocation',
+                                            function($scope, $rootScope, $http, $location, radio, progressiveLoad, URL, collocation) {
     $rootScope.formData = $location.search();
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
         $rootScope.formData.report = "bibliography";
@@ -18,16 +18,10 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
         collocFilterList: $rootScope.formData.filter_list
     }
     
-    $scope.$watch(function() {
-        return $rootScope.formData;
-        }, function() {
-      $rootScope.biblio = biblioCriteria.build($rootScope.formData);
-    }, true);
-    $scope.removeMetadata = biblioCriteria.remove;
-    
     $scope.done = false;
     $scope.filterList = false;
     $scope.percent = 0;
+    $scope.sortedLists = {};
     
     if (sessionStorage[$location.url()] == null || $rootScope.philoConfig.debug === false) {
         $('#philologic_collocation').velocity('fadeIn', {duration: 200});

@@ -7,11 +7,7 @@
                 </button>
                 <div id="search_arguments">
                     Displaying the top 100 collocates for {{ resultsLength || '...' }} occurrences of <b>{{ ::collocationParams.q }}</b><br>
-                    Bibliographic criteria:
-                    <span class="biblio-criteria" ng-repeat="metadata in biblio" style="margin: 1px">
-                        {{ ::metadata.alias }} : <b>{{ ::metadata.value }}</b>
-                        <span class="glyphicon glyphicon-remove-circle" ng-click="removeMetadata(metadata.key, formData)"></span>
-                    </span>
+                    <biblio-criteria></biblio-criteria>
                 </div>
             </div>
             <progress-bar progress="{{ percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{ duration: 400 }" ng-if="done === false"></progress-bar>
@@ -36,10 +32,7 @@
         <div class="results_container">
             <div id='philologic_collocation' class="row">
                 <div class="col-xs-12 col-sm-3 col-sm-push-9 col-md-4 col-md-push-8">
-                    <div id="word_cloud" class="word_cloud">
-                        <div id="collocate_counts" class="collocation_counts">
-                        </div>
-                    </div>
+                    <collocation-cloud></collocation-cloud>
                 </div>
                 <div class="col-xs-12 col-sm-9 col-sm-pull-3 col-md-8 col-md-pull-4">
                     <div class="table-reponsive">
