@@ -1,7 +1,7 @@
 "use strict";
 
-philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'progressiveLoad', 'URL', 'collocation',
-                                            function($scope, $rootScope, $http, $location, radio, progressiveLoad, URL, collocation) {
+philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL',
+                                            function($scope, $rootScope, $http, $location, radio, URL) {
     $rootScope.formData = $location.search();
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
         $rootScope.formData.report = "bibliography";
@@ -22,24 +22,7 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
     $scope.filterList = false;
     $scope.percent = 0;
     $scope.sortedLists = {};
-    
-    if (sessionStorage[$location.url()] == null || $rootScope.philoConfig.debug === false) {
-        $('#philologic_collocation').velocity('fadeIn', {duration: 200});
-        $scope.resultsLength = false; // set to false for now
-        $(".progress").show();
-        var collocObject;
-        collocation.updateCollocation($scope, collocObject, false, 0, 1000);
-    } else {
-        var savedObject = JSON.parse(sessionStorage[$location.url()]);
-        $scope.sortedLists = savedObject.results;
-        $scope.resultsLength = savedObject.resultsLength;
-        $scope.filterList = savedObject.filterList;
-        collocation.collocationCloud($scope.sortedLists.all);
-        collocation.activateLinks();
-        $scope.percent = 100;
-        $scope.done = true;
-        $('#philologic_collocation').velocity('fadeIn', {duration: 200});
-    }
+    $scope.resultsLength = false; // set to false for now
     
     $scope.toggleFilterList = function() {
         if ($('#filter-list').css('display') === "block") {
