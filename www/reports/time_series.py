@@ -52,6 +52,7 @@ def handle_dates(q, db):
 def generate_time_series(q, db, hits):    
     """reads through a hitlist to generate a time_series_object"""
     time_series_object = {'query': dict([i for i in q]), 'query_done': False}
+    time_series_object['query']['date'] = q.metadata['date']
     if q.start_date:
         start = q.start_date
     else:
@@ -69,7 +70,8 @@ def generate_time_series(q, db, hits):
     ## Override default value of q.end for first batch of results
     if q.end == 0:
         q.end = 3000
-        
+    
+    count = 0
     for i in hits[q.start:q.end]:
         date = i.date
         try:
@@ -94,12 +96,14 @@ def generate_time_series(q, db, hits):
         except ValueError: ## No valid date
             continue
         
+        count += 1
         if date not in absolute_count:
-            absolute_count[date] = {"count": 0, "url": ""}
+            absolute_count[date] = {"label": date, "count": 0, "url": ""}
         absolute_count[date]['count'] += 1
         
         if date not in date_counts:
             date_counts[date] = date_total_count(date, db, q['year_interval'])
+            
     time_series_object['results_length'] = len(hits)
     time_series_object['query_done'] = hits.done
     time_series_object['results'] = {'absolute_count': absolute_count, 'date_count': date_counts}

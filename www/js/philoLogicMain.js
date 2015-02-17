@@ -7,6 +7,15 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', function(
         results_per_page: "25"
         };
     $rootScope.results = {}
+    $rootScope.reportStatus = {};
+    for (var i=0; i < $rootScope.philoConfig.search_reports.length; i++) {
+        var report = $rootScope.philoConfig.search_reports[i];
+        if (i === 0) {
+            $rootScope.reportStatus[report] = 'active';
+        } else {
+            $rootScope.reportStatus[report] = '';
+        }
+    }
 }]);
 
 philoApp.config(['$routeProvider', '$locationProvider',

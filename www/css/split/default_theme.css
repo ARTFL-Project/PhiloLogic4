@@ -115,7 +115,7 @@ a.current-obj {
 }
 
 /*Time series*/
-.graph_bar {
+.graph-bar {
     background-color: rgb(255,219,158); /* fallback color if gradients are not supported */
     background-image: -webkit-linear-gradient(top, rgb(255,219,158), rgb(255,242,219)); /* For Chrome and Safari */
     background-image:    -moz-linear-gradient(top, rgb(255,219,158), rgb(255,242,219)); /* For old Fx (3.6 to 15) */

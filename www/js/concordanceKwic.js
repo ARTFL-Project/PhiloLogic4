@@ -1,12 +1,13 @@
-philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$location', 'biblioCriteria', 'progressiveLoad', 'URL',
-                                            function($scope, $rootScope, $http, $location, biblioCriteria, progressiveLoad, URL) {
+philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'biblioCriteria', 'progressiveLoad', 'URL',
+                                            function($scope, $rootScope, $http, $location, radio, biblioCriteria, progressiveLoad, URL) {
                                                 
-    
     $rootScope.formData = $location.search();
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
         $rootScope.formData.report = "bibliography";
         $location.url(URL.objectToString($rootScope.formData, true));
     }
+    
+    radio.setReport($rootScope.formData.report);
     
     $rootScope.textObjectCitation = {} // Clear citation in text Objects
     var request = {
@@ -50,20 +51,11 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
                 $scope.sidebarWidth = "";
             }
     }, true);
-    
-    $rootScope.percentComplete = 0;
-    $scope.$watch(function() {
-        return $rootScope.percentComplete;
-        }, function() {
-            progressiveLoad.updateProgressBar($("#frequency_container .progress-bar"), $rootScope.percentComplete);
-    }, true);
 }]);
 
-philoApp.controller('concordanceKwicSwitcher', ['$scope', '$rootScope', '$http', '$location', 'URL', function($scope, $rootScope, $http, $location, URL) {
+philoApp.controller('concordanceKwicSwitcher', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL', function($scope, $rootScope, $http, $location, radio, URL) {
     $scope.switchTo = function(report) {
-        $rootScope.formData.report = report;
-        $('#report label.active').removeClass('active');
-        $('#' + report).parent().addClass('active');
+        radio.setReport(report);
         $rootScope.report = report;
         $location.url(URL.objectToString($rootScope.formData, true));
     }
@@ -116,20 +108,24 @@ philoApp.controller('concordanceCtrl', ['$scope', '$rootScope', '$http', '$locat
 philoApp.controller('facets', ['$scope', '$rootScope', '$http', 'URL', 'progressiveLoad', function($scope, $rootScope, $http, URL, progressiveLoad) {
     $scope.facets = [];
     for (var i=0; i < $rootScope.philoConfig.facets.length; i++) {
-        var facet = Object.keys($rootScope.philoConfig.facets[i])[0];
-        var alias = $rootScope.philoConfig.facets[i][facet];
+        var alias = Object.keys($rootScope.philoConfig.facets[i])[0];
+        var facet = $rootScope.philoConfig.facets[i][alias];
+        if (typeof(facet) === "objet") {
+            facet = JSON.stringify(facet);
+        }
         $scope.facets.push({facet: facet, alias: alias});
     }
     $scope.wordsFacets = [];
     for (var i=0; i < $rootScope.philoConfig.words_facets.length; i++) {
-        var facet = Object.keys($rootScope.philoConfig.words_facets[i])[0];
-        var alias = $rootScope.philoConfig.words_facets[i][facet];
+        var alias = Object.keys($rootScope.philoConfig.words_facets[i])[0];
+        var facet = $rootScope.philoConfig.words_facets[i][alias];
         $scope.wordsFacets.push({facet: facet, alias: alias});
     }
     
     $scope.selectedFacet = {};
     
-    $scope.spinner = false;
+    $scope.loading = false;
+    $scope.percent = 0;
     
     var populateSidebar = function(facet, fullResults, totalResults, intervalStart, intervalEnd, queryParams) {
         if (intervalStart < totalResults) {
@@ -171,9 +167,7 @@ philoApp.controller('facets', ['$scope', '$rootScope', '$http', 'URL', 'progress
                     console.log("Error", status, headers)
                 });
         } else {
-            $rootScope.percentComplete = 100;
-            $("#frequency_container .progress").delay(500).velocity('slideUp', {complete: function() {
-                $("#frequency_container .progress-bar").width(0).text("0%");}});
+            $scope.percent = 100;
             //$('#frequency_table').slimScroll({height: $('#results_container').height() - 14});
             if ($rootScope.philoConfig.debug === true) {
                 if (typeof(localStorage) == 'undefined' ) {
@@ -197,6 +191,7 @@ philoApp.controller('facets', ['$scope', '$rootScope', '$http', 'URL', 'progress
     $scope.selectFacet = function(facetObj) {
         $scope.selectedFacet = facetObj;
         var facet = facetObj.facet;
+        console.log(facetObj)
         // store the selected field to check whether to kill the ajax calls in populate_sidebar
         $('#selected-sidebar-option').data('selected', facet);
         $('#selected-sidebar-option').data('interrupt', false);
@@ -215,7 +210,7 @@ philoApp.controller('facets', ['$scope', '$rootScope', '$http', 'URL', 'progress
             var fullResults = {};
             var intervalStart = 0;
             var intervalEnd = 3000;
-            $scope.spinner = true;
+            $scope.loading = true;
             populateSidebar(facet, fullResults, totalResults, intervalStart, intervalEnd, queryParams);
         }
     }

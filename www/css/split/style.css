@@ -295,6 +295,9 @@ a.sidebar-option:hover {
 .biblio-criteria {
     padding: 3px;
 }
+.biblio-criteria span:hover {
+	cursor: pointer;
+}
 
 /*Autocomplete styling*/
 .ui-autocomplete {
@@ -372,4 +375,13 @@ a.sidebar-option:hover {
     transform: scale(1.0);
     -webkit-transform: scale(1.0);
   }
+}
+
+/*Progress bar*/
+progress-bar {
+	display: block;
+}
+#collocation-container progress-bar {
+	margin-left: 15px;
+	margin-right: 15px;
 }

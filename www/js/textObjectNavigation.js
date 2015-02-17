@@ -3,7 +3,7 @@
 philoApp.controller('textObjectNavigation', ['$scope', '$rootScope', '$http', '$location', '$routeParams', 'URL', 'textObjectCitation',
                                             function($scope, $rootScope, $http, $location, $routeParams, URL, textObjectCitation) {
     
-    $scope.spinner = true; // Start a spinner while text is getting fetched
+    $scope.loading = true; // Start a spinner while text is getting fetched
     
     $scope.textObjectURL = $routeParams;
     $scope.philoID = $scope.textObjectURL.pathInfo.split('/').join(' ');
@@ -31,7 +31,7 @@ philoApp.controller('textObjectNavigation', ['$scope', '$rootScope', '$http', '$
             }
             getTableOfContents();
             checkEndBeginningOfDoc();
-            $scope.spinner = false;
+            $scope.loading = false;
         })
         .error(function(data, status, headers, config) {
             console.log("Error", status, headers)

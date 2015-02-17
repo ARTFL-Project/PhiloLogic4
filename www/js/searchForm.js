@@ -1,4 +1,4 @@
-philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location', 'URL', 'searchFormConfig', function($scope, $rootScope, $http, $location, URL, searchFormConfig) {
+philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL', 'searchFormConfig', function($scope, $rootScope, $http, $location, radio, URL, searchFormConfig) {
     $scope.formOpen = false;
     $scope.toggleForm = function() {
         if (!$("#search-elements").length) {
@@ -8,10 +8,12 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
         }  
     }
     
+    $scope.reports = $rootScope.philoConfig.search_reports;
+    $scope.reportStatus = $rootScope.reportStatus;
+    console.log(JSON.stringify($rootScope.reportStatus))
+    
     // Handle radio clicks to workaround clash between angular and bootstrap
-    $scope.radioClick = function(key, value) {
-        $rootScope.formData[key] = value;
-    }
+    $scope.radioClick = radio.click;
     
     $scope.clearFormData = function() {
         $rootScope.formData = {

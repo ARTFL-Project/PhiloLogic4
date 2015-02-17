@@ -3,11 +3,7 @@
         <div id="search_overlay" ng-if="formOpen" class="overlay-fadeOut"></div>
         <div id="initial-form">
             <div id="report" class="btn-group btn-group-justified" data-toggle="buttons">
-                <label class="btn btn-primary active" ng-click="radioClick('report', philoConfig.search_reports[0])">
-                    <input type="radio" name="report" value="{{ philoConfig.search_reports[0] }}" id="{{ philoConfig.search_reports[0] }}" checked>
-                    {{ philoConfig.search_reports[0].replace('_', ' ') }}
-                </label>
-                <label class="btn btn-primary hidden-xs" ng-repeat="report in philoConfig.search_reports.slice(1)" ng-click="radioClick('report', report)">
+                <label class="btn btn-primary {{ reportStatus[report] }}" ng-repeat="report in reports" ng-click="radioClick('report', report)">
                     <input type="radio" name="report" value="{{ ::report }}" id="{{ ::report }}">
                     {{ ::report.replace('_', ' ') }}
                 </label>
@@ -70,7 +66,7 @@
                     <span style="padding-left: 10px">words in the same sentence</span>
                 </div>
             </div>
-            <div id="metadata_fields" data-script="scripts/autocomplete_metadata.py?field=">
+            <div id="metadata_fields">
                 <div class="row" ng-repeat="(metadata, displayValue) in metadataFields">
                     <div class="col-xs-12 col-sm-2 col-md-2 text-row">
                         {{ ::displayValue.value }}:
