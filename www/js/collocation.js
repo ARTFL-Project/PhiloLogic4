@@ -2,7 +2,7 @@
 
 philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL',
                                             function($scope, $rootScope, $http, $location, radio, URL) {
-    $rootScope.formData = $location.search();
+    $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
         $rootScope.formData.report = "bibliography";
         $location.url(URL.objectToString($rootScope.formData, true));

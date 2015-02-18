@@ -150,7 +150,7 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL',
         }
         return biblio
     }
-    var removeMetadata = function(metadata, queryParams) {
+    var removeMetadata = function(metadata, queryParams, restart) {
         delete queryParams[metadata];
         var request = $rootScope.philoConfig.db_url + '/' + URL.query(queryParams);
         if (queryParams.report === "concordance" || queryParams.report === "kwic" || queryParams.report === "bibliography") {
@@ -159,7 +159,9 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL',
                 $location.url(URL.objectToString(queryParams, true));
             })
         } else if (queryParams.report === "collocation") {
-            $('#collocate_counts').empty();
+            $location.url(URL.objectToString(queryParams));
+            $rootScope.formData = queryParams;
+            restart = true;
         }
     }
     return {
@@ -169,9 +171,10 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL',
                 scope.$watch(function() {
                     return $location.search();
                     }, function() {
-                    scope.queryArgs = getSearchArgs($location.search());
-                    scope.queryArgs.report = $location.search().report;
-                }, true);
+                        console.log(JSON.stringify($location.search()))
+                        scope.queryArgs = getSearchArgs($location.search());
+                        scope.queryArgs.report = $location.search().report;
+                    }, true);
                 scope.formData = $rootScope.formData;
                 scope.removeMetadata = removeMetadata;
         } 
@@ -293,10 +296,15 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
         }
     }
     var getCollocations = function(scope) {
-        $('#philologic_collocation').velocity('fadeIn', {duration: 200});
-        $(".progress").show();
-        var collocObject;
-        updateCollocation(scope, collocObject, false, 0, 1000);
+        if (sessionStorage[$location.url()] == null || $rootScope.philoConfig.debug === false) {
+            $('#philologic_collocation').velocity('fadeIn', {duration: 200});
+            $(".progress").show();
+            var collocObject;
+            updateCollocation(scope, collocObject, false, 0, 1000);
+        } else {
+            retrieveFromStorage(scope);
+        }
+        
     }
     var retrieveFromStorage = function(scope) {
         var savedObject = JSON.parse(sessionStorage[$location.url()]);
@@ -312,11 +320,13 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
         restrict: 'E',
         templateUrl: 'templates/collocationTable.html',
         link: function(scope, element, attrs) {
-                if (sessionStorage[$location.url()] == null || $rootScope.philoConfig.debug === false) {
-                    getCollocations(scope);
-                } else {
-                    retrieveFromStorage(scope);
-                }
+                getCollocations(scope);
+                scope.restart = false; 
+                scope.$watch('restart', function() {
+                    if (scope.restart) {
+                        getCollocations(scope);
+                    }
+                });
             }
     }
 }]);

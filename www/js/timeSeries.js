@@ -2,7 +2,7 @@
 
 philoApp.controller('timeSeriesCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'progressiveLoad', 'URL',
                                             function($scope, $rootScope, $http, $location, radio, progressiveLoad, URL) {
-    $rootScope.formData = $location.search();
+    $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
         $rootScope.formData.report = "bibliography";
         $location.url(URL.objectToString($rootScope.formData, true));
