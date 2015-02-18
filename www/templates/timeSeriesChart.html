@@ -1,0 +1,14 @@
+<div id="top-division">
+    <div id="top-number">{{ topNumber }}</div>
+</div>
+<div id="middle-division">
+    <div id="middle-number">{{ topNumber }}</div>
+</div>
+<div id="bottom-division">
+    <div id="bottom-number">{{ topNumber }}</div>
+</div>
+<div id="side-text">{{ sideText }}</div>
+<span class="graph-bar" data-toggle="tooltip" title="{{ timeObject.occurrence }}" ng-repeat="timeObject in timeSeriesResults">
+    <span class="graph-years"></span>
+</span>
+

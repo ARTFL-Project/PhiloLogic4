@@ -7,17 +7,7 @@
                         <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
                             Export results
                         </button>
-                        <div id="search_arguments">
-                            Searching database for <b>{{ ::formData.q }}</b><br>
-                            <biblio-criteria></biblio-criteria>
-                            Use of the term(s) between
-                            <span class="biblio-criteria"><b>{{ ::startDate }}</b>
-                                <span class="glyphicon glyphicon-remove-circle remove_metadata" id="remove_metadata_date_start"></span>
-                            </span>&nbsp and
-                            <span class="biblio-criteria"><b>{{ ::endDate }}</b>
-                                <span class="glyphicon glyphicon-remove-circle remove_metadata" id="remove_metadata_date_end"></span>
-                            </span>
-                        </div>
+                        <search-arguments start-date="{{ ::startDate}}" end-date="{{ ::endDate }}"></search-arguments>
                        <div philo-debug></div>
                     </div>
                     <progress-bar progress="{{ percent }}" style="margin-left: 15px; margin-right: 15px; margin-top: -10px;"></progress-bar>

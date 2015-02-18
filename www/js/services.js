@@ -8,9 +8,14 @@ philoApp.factory('radio', ['$rootScope', function($rootScope) {
             $rootScope.formData[key] = value;
         },
         setReport: function(report) {
+            if (report === "bibliography") {
+                var reportToSelect = "concordance";
+            } else {
+                var reportToSelect = report;
+            }
             for (var key in $rootScope.reportStatus) {
-                if (key === report) {
-                   $rootScope.reportStatus[key] = 'active';
+                if (key === reportToSelect) {
+                    $rootScope.reportStatus[key] = 'active';
                 } else {
                     $rootScope.reportStatus[key] = '';
                 }

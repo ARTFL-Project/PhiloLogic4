@@ -35,8 +35,10 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
     $rootScope.formData.year_interval = $scope.timeSeriesIntervals[0].date;
 
     $scope.submit = function() {
-        if (typeof($rootScope.formData.q) === "undefined") {
-            $scope.formData.report = "bibliography";
+        if (typeof($rootScope.formData.q) === "undefined" || $rootScope.formData.q === '') {
+            $rootScope.formData.report = "bibliography";
+        } else if ($scope.formData.report === "bibliography" && typeof($rootScope.formData.q) !== "undefined") {
+            $rootScope.formData.report = $("#report label.active input").attr('id');
         }
         delete $rootScope.formData.start;
         delete $rootScope.formData.end;

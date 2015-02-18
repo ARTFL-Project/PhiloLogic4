@@ -1,10 +1,11 @@
 philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'progressiveLoad', 'URL',
                                             function($scope, $rootScope, $http, $location, radio, progressiveLoad, URL) {
                                                 
-    $rootScope.formData = $location.search();
+    $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
-        $rootScope.formData.report = "bibliography";
-        $location.url(URL.objectToString($rootScope.formData, true));
+        var queryParams = angular.copy($rootScope.formData);
+        queryParams.report = "bibliography";
+        $location.url(URL.objectToString(queryParams, true));
     }
     
     radio.setReport($rootScope.formData.report);

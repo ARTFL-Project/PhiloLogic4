@@ -5,10 +5,7 @@
                 <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
                         Export results
                 </button>
-                <div id="search_arguments">
-                    Searching database for <b>{{ ::formData.q }}</b><br>
-                    <biblio-criteria></biblio-criteria>
-                </div>
+                <search-arguments></search-arguments>
                 <div id="search-hits" ng-if="results.description">
                     <span ng-if="results.results_length !== 0 && results.description.end < results.description.results_per_page || results.description.end < results.results_length">
                         Hits {{ results.description.start }} - {{ results.description.end }} of {{ results.results_length || results.description.results_per_page }}

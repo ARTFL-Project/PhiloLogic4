@@ -119,7 +119,17 @@ philoApp.directive('pages', ['$rootScope', function($rootScope) {
     }
 }]);
 
-philoApp.directive('biblioCriteria', ['$rootScope','$http', '$location', 'URL', function($rootScope, $http, $location, URL) {
+philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL', function($rootScope, $http, $location, URL) {
+    var getSearchArgs = function(queryParams) {
+        var queryArgs = {};
+        if ('q' in queryParams) {
+            queryArgs.queryTerm = queryParams.q;
+        } else {
+            queryArgs.queryTerm = '';  
+        }
+        queryArgs.biblio = buildCriteria(queryParams);
+        return queryArgs;
+    }
     var buildCriteria = function(queryParams) {
         var queryArgs = angular.copy(queryParams);
         var biblio = []
@@ -143,7 +153,7 @@ philoApp.directive('biblioCriteria', ['$rootScope','$http', '$location', 'URL', 
     var removeMetadata = function(metadata, queryParams) {
         delete queryParams[metadata];
         var request = $rootScope.philoConfig.db_url + '/' + URL.query(queryParams);
-        if (queryParams.report === "concordance" || queryParams.report === "kwic") {
+        if (queryParams.report === "concordance" || queryParams.report === "kwic" || queryParams.report === "bibliography") {
             $http.get(request).success(function(data) {
                 $rootScope.results = data;
                 $location.url(URL.objectToString(queryParams, true));
@@ -154,16 +164,13 @@ philoApp.directive('biblioCriteria', ['$rootScope','$http', '$location', 'URL', 
     }
     return {
         restrict: 'E',
-        template: 'Bibliography criteria: <span class="biblio-criteria" ng-repeat="metadata in biblio" style="margin: 1px">{{ ::metadata.alias }} : <b>{{ ::metadata.value }}</b>' +
-                  '&nbsp;<span class="glyphicon glyphicon-remove-circle" ng-click="removeMetadata(metadata.key, formData)"></span></span><b ng-if="biblio.length === 0">None</b>',
-        scope: {
-        control: '='
-        },
+        templateUrl: 'templates/searchArguments.html',
         link: function(scope, element, attrs) {
                 scope.$watch(function() {
-                    return $rootScope.formData;
+                    return $location.search();
                     }, function() {
-                    scope.biblio = buildCriteria($rootScope.formData);
+                    scope.queryArgs = getSearchArgs($location.search());
+                    scope.queryArgs.report = $location.search().report;
                 }, true);
                 scope.formData = $rootScope.formData;
                 scope.removeMetadata = removeMetadata;

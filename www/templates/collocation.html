@@ -5,10 +5,7 @@
                 <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
                     Export results
                 </button>
-                <div id="search_arguments">
-                    Displaying the top 100 collocates for {{ resultsLength || '...' }} occurrences of <b>{{ ::collocationParams.q }}</b><br>
-                    <biblio-criteria></biblio-criteria>
-                </div>
+                <search-arguments></search-arguments>
             </div>
             <progress-bar progress="{{ percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{ duration: 400 }" ng-if="done === false"></progress-bar>
             <div style="padding-left: 15px;">
