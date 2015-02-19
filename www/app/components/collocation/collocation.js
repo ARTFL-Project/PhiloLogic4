@@ -8,8 +8,6 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
         $location.url(URL.objectToString($rootScope.formData, true));
     }
     
-    radio.setReport('collocation');
-    
     $scope.collocationParams = {
         q: $rootScope.formData.q,
         wordNum: $rootScope.formData.word_num,

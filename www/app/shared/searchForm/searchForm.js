@@ -8,10 +8,6 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
         }  
     }
     
-    $scope.reports = $rootScope.philoConfig.search_reports;
-    $scope.reportStatus = $rootScope.reportStatus;
-    console.log(JSON.stringify($rootScope.reportStatus))
-    
     // Handle radio clicks to workaround clash between angular and bootstrap
     $scope.radioClick = radio.click;
     

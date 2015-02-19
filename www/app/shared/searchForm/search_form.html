@@ -1,13 +1,8 @@
-<form id="search" role="form" ng-submit="submit()">
+<form id="search" role="form" ng-submit="submit()" style="display: none;">
     <div id="form_body">
         <div id="search_overlay" ng-if="formOpen" class="overlay-fadeOut"></div>
         <div id="initial-form">
-            <div id="report" class="btn-group btn-group-justified" data-toggle="buttons">
-                <label class="btn btn-primary {{ reportStatus[report] }}" ng-repeat="report in reports" ng-click="radioClick('report', report)">
-                    <input type="radio" name="report" value="{{ ::report }}" id="{{ ::report }}">
-                    {{ ::report.replace('_', ' ') }}
-                </label>
-            </div>
+            <search-reports></search-reports>
             <div id="search_terms_container">
                 <div id="search_terms" class="row">
                     <div class="col-xs-12 col-sm-2 text-row">

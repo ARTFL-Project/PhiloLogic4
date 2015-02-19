@@ -7,8 +7,10 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
         queryParams.report = "bibliography";
         $location.url(URL.objectToString(queryParams, true));
     }
-    
-    radio.setReport($rootScope.formData.report);
+    if ($rootScope.formData.report !== $('#reports label.active input').attr('id')) {
+        $('#report label').removeClass('active');
+        $('#' + $rootScope.formData.report).parent().addClass('active');
+    }
     
     $rootScope.textObjectCitation = {} // Clear citation in text Objects
     var request = {
@@ -49,28 +51,14 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
     $scope.goToPage = function(start, end) {
         $rootScope.formData.start = start;
         $rootScope.formData.end = end;
-        var request = {
-            method: "GET",
-            url: $rootScope.philoConfig.db_url + '/' + URL.query($rootScope.formData)
-        }
         $("body").velocity('scroll', {duration: 200, easing: 'easeOutCirc', offset: 0, complete: function() {
             $rootScope.results = {};
         }});
-        $http(request)
-        .success(function(data, status, headers, config) {
-            $rootScope.results = data;
-            $location.url(URL.objectToString($rootScope.formData, true));
-        })
-        .error(function(data, status, headers, config) {
-            console.log("Error", status, headers)
-        });
+        $location.url(URL.objectToString($rootScope.formData, true));
     }
-}]);
-
-philoApp.controller('concordanceKwicSwitcher', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL', function($scope, $rootScope, $http, $location, radio, URL) {
+    
     $scope.switchTo = function(report) {
-        radio.setReport(report);
-        $rootScope.report = report;
+        $rootScope.formData.report = report;
         $location.url(URL.objectToString($rootScope.formData, true));
     }
 }]);

@@ -8,8 +8,6 @@ philoApp.controller('timeSeriesCtrl', ['$scope', '$rootScope', '$http', '$locati
         $location.url(URL.objectToString($rootScope.formData, true));
     }
     
-    radio.setReport('time_series');
-    
     $scope.percent = 0;
     $scope.interval = parseInt($rootScope.formData.year_interval);
     
