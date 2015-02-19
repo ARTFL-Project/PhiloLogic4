@@ -9,21 +9,7 @@ philoApp.factory('searchFormConfig', ['$rootScope', 'searchConfigBuild', functio
     }
 }]);
 
-philoApp.value('formData', {
-        report: philoConfig.search_reports[0],
-        method: "proxy",
-        results_per_page: "25"
-});
-
-philoApp.value('concordanceResults', {});
-
-philoApp.value('kwicResults', {});
-
-philoApp.value('timeSeriesResults', {})
-
-philoApp.value('collocationResults', {})
-
-philoApp.value('textObjectCitation', {citation: {}})
+philoApp.value('textObjectCitation', {citation: {}});
 
 philoApp.constant('defaultDiacriticsRemovalMap', {
     map: [

@@ -24,20 +24,20 @@ philoApp.config(['$routeProvider', '$locationProvider',
       when('/', {
         templateUrl: function(array) {
             console.log(array);
-            return 'templates/landing_page.html'
+            return 'app/components/landingPage/landing_page.html'
         },
         controller: 'landingPage'
       }).
       when('/dispatcher.py?:queryArgs', {
         templateUrl: function(queryArgs) {
             if (queryArgs.report === "concordance" || queryArgs.report === "kwic" || queryArgs.report === "bibliography") {
-                var template = 'templates/concordanceKwic.html';
+                var template = 'app/components/concordanceKwic/concordanceKwic.html';
             } else if (queryArgs.report === "collocation") {
-                var template = 'templates/collocation.html';
+                var template = 'app/components/collocation/collocation.html';
             } else if (queryArgs.report === "time_series") {
-                var template = 'templates/timeSeries.html';
+                var template = 'app/components/timeSeries/timeSeries.html';
             } else {
-                var template = 'templates/landing_page.html'; 
+                var template = 'app/components/landingPage/landing_page.html'; 
             }
             return template;
         }
@@ -46,9 +46,9 @@ philoApp.config(['$routeProvider', '$locationProvider',
         templateUrl: function(queryArgs) {
             var pathInfo = queryArgs.pathInfo.split('/');
             if (pathInfo[pathInfo.length - 1] == "table-of-contents") {
-                return 'templates/tableOfContents.html';
+                return 'app/components/tableOfContents/tableOfContents.html';
             } else {
-                return 'templates/textObject.html';
+                return 'app/components/textObject/textObject.html';
             }
         }
       }).

@@ -2,7 +2,6 @@
     margin-top: 15px;
 }
 #time-series {
-    margin-left: 20px;
     margin-top: 10px;
     margin-bottom: 10px;
     border-left: solid 1px;
@@ -46,18 +45,19 @@
 
 
 
-#first-division, #middle-division, #top-division {
+#bottom-division, #middle-division, #top-division {
     position: absolute;
+    width: 100%;
     z-index: 50;
     border-top: dashed 1px #B8B8B8;
 }
-#first-division {
+#bottom-division {
     bottom: 33%;
 }
 #middle-division {
     bottom: 66%;
 }
-#top-number, #middle-number, #first-number {
+#top-number, #middle-number, #bottom-number {
     margin-top: -16px;
     position: absolute;
     z-index: 100;
