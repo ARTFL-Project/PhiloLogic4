@@ -15,7 +15,7 @@
                                     <span id="tip">?</span><span id="tip-text">Tips</span>
                                 </button>
                             </span>
-                            <input type='text' name='q' id='q' class="form-control" data-script="scripts/autocomplete_term.py" ng-model="formData.q">
+                            <input type='text' name='q' id='q' class="form-control" autocomplete-term ng-model="formData.q">
                             <span class="input-group-btn">
                                 <button type="submit" class="btn btn-primary" id="button-search">
                                     <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
@@ -67,7 +67,7 @@
                         {{ ::displayValue.value }}:
                     </div>
                     <div class="col-xs-12 col-sm-4 col-md-4">
-                        <input type='text' name='{{ metadata }}' id="{{ metadata }}" class="form-control" ng-model="formData[metadata]">
+                        <input type='text' name='{{ metadata }}' id="{{ metadata }}" class="form-control" autocomplete-metadata ng-model="formData[metadata]">
                     </div>
                     <div class="col-xs-12 col-sm-4 col-md-6 text-row">
                         (e.g., {{ ::displayValue.example }})
@@ -163,28 +163,7 @@
             </div>
         </div>
     </div>
-    <div id="fixed-search" class="row">
-        <div class="col-xs-4 col-sm-3">
-            <button type="button" id="top-of-page" class="btn btn-primary btn-sm">
-                Back to top
-            </button>
-        </div>
-        <div class="col-xs-8 col-sm-6">
-            <div class="input-group">
-                <input type='text' id='q2' class="form-control input-sm" ng-model="formData.q2">
-                <span class="input-group-btn">
-                    <button type="button" class="btn btn-primary btn-sm" id="button-search2">
-                        <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
-                    </button>
-                </span> 
-            </div>
-        </div>
-        <div class="hidden-xs col-sm-3">
-            <button type="button" id="back-to-full-search" class="btn btn-primary btn-sm pull-right">
-                Back to full search form
-            </button>
-        </div>
-    </div>
+    <fixed-search-bar></fixed-search-bar>
 </form>
 <div id="waiting">
 </div>

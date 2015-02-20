@@ -5,7 +5,8 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
             $scope.formOpen = true;
         } else {
             $scope.formOpen = false;
-        }  
+        }
+        console.log($scope.formOpen)
     }
     
     // Handle radio clicks to workaround clash between angular and bootstrap
@@ -29,7 +30,15 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
     $rootScope.formData.filter_frequency = $scope.wordFiltering[3];
     $scope.timeSeriesIntervals = searchFormConfig.timeSeriesIntervals;
     $rootScope.formData.year_interval = $scope.timeSeriesIntervals[0].date;
-
+    
+    // Button click from fixed search bar
+    $scope.backToFullSearch = function() {
+        $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0, complete: function() {
+            $scope.toggleForm();
+            $scope.$apply();
+        }});            
+    }
+    
     $scope.submit = function() {
         if (typeof($rootScope.formData.q) === "undefined" || $rootScope.formData.q === '') {
             $rootScope.formData.report = "bibliography";
