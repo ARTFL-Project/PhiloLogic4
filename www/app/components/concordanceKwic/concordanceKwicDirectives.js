@@ -187,15 +187,6 @@ philoApp.directive('facets', ['$rootScope', '$http', 'URL', 'progressiveLoad', f
                     retrieveFacet(scope, facetObj);
                 }
             });
-            scope.$watch('frequencyResults', function(frequencyResults) {
-                if (frequencyResults.length > 0) {
-                    scope.resultsContainerWidth = "col-xs-8";
-                    scope.sidebarWidth = "col-xs-4";
-                } else {
-                    scope.resultsContainerWidth = "col-xs-12";
-                    scope.sidebarWidth = "";
-                }
-            });
         }
     }
 }]);

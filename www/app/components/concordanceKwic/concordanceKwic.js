@@ -29,8 +29,17 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
         })
 
     $rootScope.frequencyResults = [];
-    $scope.resultsContainerWidth = "col-xs-12";
-    $scope.sidebarWidth = '';    
+    $scope.resultsContainerWidth = "";
+    $scope.sidebarWidth = '';
+    $scope.$watch('frequencyResults', function(frequencyResults) {
+        if (frequencyResults.length > 0) {
+            $scope.resultsContainerWidth = "col-xs-8";
+            $scope.sidebarWidth = "col-xs-4";
+        } else {
+            $scope.resultsContainerWidth = "";
+            $scope.sidebarWidth = "";
+        }
+    });
     
     $scope.goToPage = function(start, end) {
         $rootScope.formData.start = start;
@@ -46,7 +55,6 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
         $location.url(URL.objectToString($rootScope.formData, true));
     }
     
-    //$scope.selectedFacet = {};
     $scope.selectFacet = function(facetObj) {
         $scope.selectedFacet = facetObj;
     }
