@@ -11,13 +11,13 @@ philoApp.directive('progressBar', function() {
         template: '<div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div></div>',
         link: function(scope, element, attrs) {
             attrs.$observe('progress', function(percent){
-                var progressElement = $(element).find('.progress-bar');
+                var progressElement = element.find('.progress-bar');
                 progressElement.velocity({'width': percent.toString() + '%'}, {
                     queue: false,
                     complete: function() {
                         progressElement.text(percent.toString() + '%');
                         if (percent == 100) {
-                            progressElement.delay(500).velocity('slideUp');
+                            progressElement.parent().delay(500).velocity('slideUp');
                         }
                     }
                 }); 

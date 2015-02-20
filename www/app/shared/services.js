@@ -59,7 +59,9 @@ philoApp.factory('URL', function() {
             for (var p in obj) {
                 var k = p, 
                     v = obj[k];
-                str.push(angular.isObject(v) ? this.query(v, k) : (k) + "=" + encodeURIComponent(v));
+                if (k !== "script") {
+                    str.push(angular.isObject(v) ? this.query(v, k) : (k) + "=" + encodeURIComponent(v));
+                }
             }
             if ("script" in obj) {
                 return "scripts/" + obj.script + '?' + str.join("&");
