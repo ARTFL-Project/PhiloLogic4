@@ -7,6 +7,7 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
         $rootScope.formData.report = "bibliography";
         $location.url(URL.objectToString($rootScope.formData, true));
     }
+    $rootScope.report = $rootScope.formData.report;
     
     $scope.collocationParams = {
         q: $rootScope.formData.q,

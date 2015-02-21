@@ -194,7 +194,7 @@ philoApp.directive('facets', ['$rootScope', '$http', 'URL', 'progressiveLoad', f
 philoApp.directive('pages', ['$rootScope', function($rootScope) {
     var buildPages = function() {
         var start = $rootScope.results.description.start;
-        var resultsPerPage = parseInt($rootScope.formData.results_per_page);
+        var resultsPerPage = parseInt($rootScope.formData.results_per_page) || 25;
         var resultsLength = $rootScope.results.results_length;
     
         // first find out what page we are on currently.    

@@ -2,6 +2,8 @@
 
 philoApp.controller('tableOfContents', ['$scope', '$rootScope', '$http', '$location', '$routeParams', 'URL', 'textObjectCitation',
                                             function($scope, $rootScope, $http, $location, $routeParams, URL, textObjectCitation) {
+    
+    $rootScope.report = "table_of_contents";
     $scope.textObjectURL = $routeParams;
     var tempValue = $scope.textObjectURL.pathInfo.split('/');
     tempValue.pop();

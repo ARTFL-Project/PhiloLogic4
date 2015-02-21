@@ -1,7 +1,16 @@
 "use strict";
 
-philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'radio', 'progressiveLoad', 'URL',
-                    function($rootScope, $http, $location, radio, progressiveLoad, URL) {
+philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'progressiveLoad', 'URL', function($rootScope, $http, $location, progressiveLoad, URL) {
+    var getTimeSeries = function(scope) {
+        //$('#time-series').css('height', height); // Make sure the element doesn't get shrunk
+        scope.resultsLength = false; // set to false for now
+        $(".progress").show();
+        
+        var fullResults;
+        var absoluteFrequency;
+        var dateCounts;
+        updateTimeSeries(scope, fullResults, 0, 1000, absoluteFrequency, dateCounts);
+    }
     var updateTimeSeries = function(scope, fullResults, start, end) {
         $rootScope.formData.start = start;
         $rootScope.formData.end = end;
@@ -36,12 +45,14 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'radi
         }
         if (typeof(fullResults) === "undefined") {
             // Populate fullResults with all the dates possible in the range
-            scope.dateList = generateDateList(timeSeriesResults.query.start_date, timeSeriesResults.query.end_date);
+            scope.barChart = initializeBarChart(timeSeriesResults.query.start_date, timeSeriesResults.query.end_date);
+            
             fullResults = {};
-            for (var i = 0; i < scope.dateList.length; i++) {
-                fullResults[scope.dateList[i]] = {count: 0, 'url': ''};
+            for (var i = 0; i < scope.barChart.length; i++) {
+                fullResults[scope.barChart[i].date] = {count: 0, 'url': ''};
             }
         }
+        
         var allResults = progressiveLoad.mergeResults(fullResults, timeSeriesResults.results['absolute_count'], "label");
         fullResults = allResults.unsorted;
         drawFromData(scope, allResults.sorted, "absolute_time");
@@ -60,66 +71,28 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'radi
             //saveToLocalStorage(scope.sortedLists);
         }
     }
-    var drawFromData = function(scope, data, frequency_type) {
-        var barWidth = (parseInt($('#time-series').width()) - 1 * data.length) / data.length;
-        var maxCount = 0;
-        var margin = 0;
-        for (var i in data) {
+    var drawFromData = function(scope, data, frequencyType) {        
+        var maxCount = Math.max.apply(Math,data.map(function(object){return Math.round(object.count);}));
+        var chartHeight = $('#time-series').height();
+        var multiplier = (chartHeight - 10) / maxCount;        
+        for (var i=0; i < data.length; i++) {
             var count = Math.round(data[i].count);
             var year = data[i].label;
             var yearDisplay = yearToTimeSpan(year, scope.interval);
-            // Test if the chart has already been drawn
-            if ($('.graph-bar').length < (data.length)) {
-                if (i > 0) {
-                    margin += barWidth + 1;
-                }
-                var graphBar = "<span class='graph-bar' data-toggle='tooltip' title='" + count + " occurrences in years '" + yearDisplay + "' style='margin-left:" + margin + "px' data-count='" + Math.round(count, false) + "' data-year='" + year + "'></span>";
-                $('#time-series').append(graphBar);
-                $('.graph-bar').eq(i).width(barWidth + 'px');
-                $('.graph-bar').eq(i).data('href', data[i].url);
-                var year = '<span class="graph-years">' + year + '</span>';
-                $('.graph-bar').eq(i).append(year);
-                var yearWidth = (barWidth - 25) / 2;
-                $('.graph-bar').eq(i).find('.graph-years').css('margin-left', yearWidth + 'px');
+            var pixelHeight = count * multiplier;
+            $('.graph-bar').eq(i).data('height', pixelHeight);
+            
+            if (frequencyType === 'absolute_time') {
+                scope.barChart[i].title = Math.round(count, false) + ' occurrences between ' + yearDisplay;
             } else {
-                $('.graph-bar').eq(i).data('count', count);
-                if (frequency_type == "absolute_time") {
-                    $('.graph-bar').eq(i).attr('title', Math.round(count, false) + ' occurrences<br>between ' + yearDisplay);
-                } else {
-                    $('.graph-bar').eq(i).attr('title', Math.round(count, false) + ' occurrences per 1,000,000 words<br>between ' + yearDisplay);
-                }  
-            }
-            if (count > maxCount) {
-                maxCount = count;
+                scope.barChart[i].title = Math.round(count, false) + ' occurrences per 1,000,000 words between ' + yearDisplay;
             }
         }
-        
-        // Make sure the years don't overlap
-        if (barWidth > 12) {
-            $('.graph-years').show();
-            if (barWidth < 18) {
-                $('.graph-years').css('font-size', '70%');
-            }
-        } else {
-            var count = 0;
-            $('.graph-years').eq(0).show();
-            var num = parseInt($('.graph-years').length / 10);
-            $('.graph-years').each(function() {
-                count += 1;
-                if (count == num) {
-                    $(this).show();
-                    count = 0;
-                }
-            });
-        }
-        var chart_height = $('#time-series').height();
-        var multiplier = (chart_height - 10) / maxCount;
-        console.log(maxCount)
+            
         var max_height = 0;
         var animDelay = 0;
         $('.graph-bar').each(function() {
-            var count = $(this).data('count');
-            var height = count * multiplier;
+            var height = $(this).data('height');
             animDelay += 20;
             if (height > max_height) {
                 max_height = height;
@@ -128,12 +101,12 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'radi
         });
         
         // Draw three lines along the X axis to help visualize frequencies
-        var top_line = (chart_height - 10) / chart_height * 100;
+        var top_line = (chartHeight - 10) / chartHeight * 100;
         $("#top-division").css('bottom', top_line + '%');
         var topNumber = Math.round(maxCount);
         var middleNumber = Math.round(maxCount / 3 * 2);
         var bottomNumber = Math.round(maxCount / 3);
-        if (frequency_type == "relative_time") {
+        if (frequencyType == "relative_time") {
             scope.sideText = 'Occurrences per 1,000,000 words';
             scope.topNumber = topNumber + ' occurrences per 1,000,000 words';
             scope.middleNumber = middleNumber + ' occurrences per 1,000,000 words';
@@ -146,14 +119,31 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'radi
         }
         //clickOnChart(interval);
     }
-    // Generate range of all dates
-    var generateDateList = function(start, end) {
+    // Generate bars in chart by iterating over all date ranges
+    var initializeBarChart = function(start, end) {
         var yearInterval = parseInt($rootScope.formData.year_interval);
         var startDate = normalizeDate(start, yearInterval);
         var endDate = parseInt(end);
-        var dateList = []
+        var dateList = [];
+        var dataLength = Math.floor((endDate - startDate) / yearInterval) + 1;
+        var remainder = (endDate - startDate) % yearInterval;
+        if (remainder > 0) {
+            dataLength += 1;
+        }
+        var barWidth = (parseInt($('#time-series').width()) - dataLength) / dataLength; // Something is off here...
+        var margin = 0;
         for (var i = startDate; i <= endDate; i += yearInterval) {
-            dateList.push(i);
+            if (i !== startDate) {
+                margin += barWidth + 1;
+            }
+            var yearWidth = (barWidth - 25) / 2;
+            dateList.push({
+                date: i,
+                marginLeft: margin,
+                width: barWidth,
+                yearWidth: yearWidth,
+                title: ''
+            });
         }
         return dateList;
     }
@@ -217,21 +207,6 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'radi
         }
         return year
     }
-    var getTimeSeries = function(scope) {
-        // Calculate width and height of chart
-        var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
-        $('#time-series').css('height', height);
-        var bodyWidth = parseInt($('body').width());
-        $('#time-series, #first-division, #middle-division, #top-division').width(bodyWidth-90 + 'px');        
-        
-        scope.resultsLength = false; // set to false for now
-        $(".progress").show();
-        
-        var fullResults;
-        var absoluteFrequency;
-        var dateCounts;
-        updateTimeSeries(scope, fullResults, 0, 1000, absoluteFrequency, dateCounts);
-    }
     var retrieveFromStorage = function(scope) {
         var time_series = JSON.parse(sessionStorage[window.location.href]);
         var date_counts = time_series['date_counts'];
@@ -244,6 +219,8 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'radi
         restrict: 'E',
         templateUrl: 'app/components/timeSeries/timeSeriesChart.html',
         link: function(scope, element, attrs) {
+                scope.height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
+                scope.bodyWidth = parseInt($('body').width()) - 90; 
                 if (sessionStorage[$location.url()] == null || $rootScope.philoConfig.debug === false) {
                     getTimeSeries(scope);
                 } else {

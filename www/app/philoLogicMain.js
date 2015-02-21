@@ -16,7 +16,6 @@ philoApp.config(['$routeProvider', '$locationProvider',
     $routeProvider.
       when('/', {
         templateUrl: function(array) {
-            console.log(array);
             return 'app/components/landingPage/landing_page.html'
         },
         controller: 'landingPage'

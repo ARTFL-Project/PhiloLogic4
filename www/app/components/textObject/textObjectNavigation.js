@@ -3,8 +3,8 @@
 philoApp.controller('textObjectNavigation', ['$scope', '$rootScope', '$http', '$location', '$routeParams', 'URL', 'textObjectCitation',
                                             function($scope, $rootScope, $http, $location, $routeParams, URL, textObjectCitation) {
     
+    $rootScope.report = "textObject";
     $scope.loading = true; // Start a spinner while text is getting fetched
-    
     $scope.textObjectURL = $routeParams;
     $scope.philoID = $scope.textObjectURL.pathInfo.split('/').join(' ');
     if ("byte" in $scope.textObjectURL) {

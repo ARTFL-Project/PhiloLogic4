@@ -1,7 +1,8 @@
 "use strict";
 
-philoApp.controller('landingPage', ['$scope', function($scope) {
+philoApp.controller('landingPage', ['$rootScope', '$scope', function($rootScope, $scope) {
     $scope.dictionary = $scope.philoConfig.dictionary;
+    $rootScope.report = "landing_page";
 }]);
 
 philoApp.controller('landingDefault', ['$scope', '$http', function($scope, $http) {

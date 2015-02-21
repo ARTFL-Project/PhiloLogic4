@@ -51,7 +51,6 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL',
                 scope.$watch(function() {
                     return $location.search();
                     }, function() {
-                        console.log(JSON.stringify($location.search()))
                         scope.queryArgs = getSearchArgs($location.search());
                         scope.queryArgs.report = $location.search().report;
                     }, true);

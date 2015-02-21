@@ -6,7 +6,6 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
         } else {
             $scope.formOpen = false;
         }
-        console.log($scope.formOpen)
     }
     
     // Handle radio clicks to workaround clash between angular and bootstrap
@@ -40,6 +39,7 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
     }
     
     $scope.submit = function() {
+        $('.ui-autocomplete').hide();
         if (typeof($rootScope.formData.q) === "undefined" || $rootScope.formData.q === '') {
             $rootScope.formData.report = "bibliography";
         } else if ($scope.formData.report === "bibliography" && typeof($rootScope.formData.q) !== "undefined") {

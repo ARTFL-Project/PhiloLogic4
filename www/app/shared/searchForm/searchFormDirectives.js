@@ -41,7 +41,7 @@ philoApp.directive('searchReports', ['$rootScope', function($rootScope) {
     }
 }]);
 
-philoApp.directive('fixedSearchBar', function() {
+philoApp.directive('fixedSearchBar', ['$rootScope', function($rootScope) {
     var affixSearchBar = function(scope) {
         $('#fixed-search').affix({
             offset: {
@@ -71,10 +71,13 @@ philoApp.directive('fixedSearchBar', function() {
         restrict: 'E',
         templateUrl: 'app/shared/searchForm/fixedSearchBar.html',
         link: function(scope, element, attrs) {
-                affixSearchBar(scope);
+                var report = $rootScope.report;
+                if (report === "concordance" || report === "kwic" || report === "bibliography") {
+                    affixSearchBar(scope);
                 }
+            }
     }
-});
+}]);
 
 philoApp.directive('autocompleteTerm', ['$rootScope', function($rootScope) {
     var autocomplete = function(element) {
@@ -110,7 +113,6 @@ philoApp.directive('autocompleteTerm', ['$rootScope', function($rootScope) {
 
 philoApp.directive('autocompleteMetadata', ['$rootScope', function($rootScope) {
     var autocomplete = function(element, field) {
-        //var field = element.attr('id');
         element.autocomplete({
         source: 'scripts/autocomplete_metadata.py?field=' + field,
         minLength: 2,
@@ -142,7 +144,6 @@ philoApp.directive('autocompleteMetadata', ['$rootScope', function($rootScope) {
     return {
         restrict: 'A',
         link: function(scope, element, attrs) {
-            console.log(attrs.id)
             autocomplete(element, attrs.id); 
         }
     }
