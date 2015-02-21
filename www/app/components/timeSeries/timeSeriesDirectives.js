@@ -2,10 +2,8 @@
 
 philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'progressiveLoad', 'URL', function($rootScope, $http, $location, progressiveLoad, URL) {
     var getTimeSeries = function(scope) {
-        //$('#time-series').css('height', height); // Make sure the element doesn't get shrunk
         scope.resultsLength = false; // set to false for now
         $(".progress").show();
-        
         var fullResults;
         var absoluteFrequency;
         var dateCounts;
@@ -46,13 +44,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         if (typeof(fullResults) === "undefined") {
             // Populate fullResults with all the dates possible in the range
             scope.barChart = initializeBarChart(timeSeriesResults.query.start_date, timeSeriesResults.query.end_date);
-            
-            fullResults = {};
-            for (var i = 0; i < scope.barChart.length; i++) {
-                fullResults[scope.barChart[i].date] = {count: 0, 'url': ''};
-            }
         }
-        
         var allResults = progressiveLoad.mergeResults(fullResults, timeSeriesResults.results['absolute_count'], "label");
         fullResults = allResults.unsorted;
         drawFromData(scope, allResults.sorted, "absolute_time");
@@ -71,17 +63,19 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             //saveToLocalStorage(scope.sortedLists);
         }
     }
-    var drawFromData = function(scope, data, frequencyType) {        
+    var drawFromData = function(scope, data, frequencyType) {
         var maxCount = Math.max.apply(Math,data.map(function(object){return Math.round(object.count);}));
         var chartHeight = $('#time-series').height();
-        var multiplier = (chartHeight - 10) / maxCount;        
+        var multiplier = (chartHeight - 10) / maxCount;
         for (var i=0; i < data.length; i++) {
             var count = Math.round(data[i].count);
             var year = data[i].label;
             var yearDisplay = yearToTimeSpan(year, scope.interval);
             var pixelHeight = count * multiplier;
             $('.graph-bar').eq(i).data('height', pixelHeight);
-            
+            if (scope.barChart[i].url === '' && data[i].url !== '') {
+                scope.barChart[i].url = data[i].url;
+            }
             if (frequencyType === 'absolute_time') {
                 scope.barChart[i].title = Math.round(count, false) + ' occurrences between ' + yearDisplay;
             } else {
@@ -117,7 +111,6 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             scope.middleNumber = middleNumber + ' occurrences';
             scope.bottomNumber = bottomNumber + ' occurrences';
         }
-        //clickOnChart(interval);
     }
     // Generate bars in chart by iterating over all date ranges
     var initializeBarChart = function(start, end) {
@@ -142,7 +135,8 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                 marginLeft: margin,
                 width: barWidth,
                 yearWidth: yearWidth,
-                title: ''
+                title: '',
+                url: ''
             });
         }
         return dateList;
