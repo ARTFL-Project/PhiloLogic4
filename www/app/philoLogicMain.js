@@ -48,6 +48,6 @@ philoApp.config(['$routeProvider', '$locationProvider',
         redirectTo: '/'
       });
     $locationProvider.html5Mode({
-        enabled: true,
+        enabled: true
       });
   }]);

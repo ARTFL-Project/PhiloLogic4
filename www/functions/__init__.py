@@ -6,3 +6,4 @@ from web_config import WebConfig
 from search_utilities import biblio_criteria, search_examples
 from access_control import access_control
 import FragmentParser
+import webApp

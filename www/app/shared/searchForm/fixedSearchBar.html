@@ -1,0 +1,22 @@
+<div id="fixed-search" class="row">
+    <div class="col-xs-4 col-sm-3">
+        <button type="button" id="top-of-page" class="btn btn-primary btn-sm">
+            Back to top
+        </button>
+    </div>
+    <div class="col-xs-8 col-sm-6">
+        <div class="input-group">
+            <input type='text' id='q2' class="form-control input-sm" autocomplete-term ng-model="formData.q">
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-primary btn-sm" id="button-search2">
+                    <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
+                </button>
+            </span> 
+        </div>
+    </div>
+    <div class="hidden-xs col-sm-3">
+        <button type="button" id="back-to-full-search" class="btn btn-primary btn-sm pull-right" ng-click="backToFullSearch()">
+            Back to full search form
+        </button>
+    </div>
+</div>
