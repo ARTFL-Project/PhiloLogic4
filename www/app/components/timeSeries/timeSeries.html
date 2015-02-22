@@ -11,15 +11,13 @@
                        <div philo-debug></div>
                     </div>
                     <progress-bar progress="{{ percent }}" style="margin-left: 15px; margin-right: 15px; margin-top: -10px;"></progress-bar>
-                    <div id="time_series_buttons" class="btn-group" data-toggle="buttons">
-                        <label class="btn btn-primary active" id="absolute_time" checked="checked">
-                            <input type="radio" name="freq_type" >
+                    <div id="time-series-buttons" class="btn-group" role="group" aria-label="...">
+                        <button type="button" class="btn btn-primary active" id="absolute_time" ng-click="toggleFrequency('absolute_time')">
                             Absolute Frequency
-                        </label>
-                        <label class="btn btn-primary" disabled="disabled" id="relative_time">
-                            <input type="radio" name="freq_type">
+                        </button>
+                        <button type="button" class="btn btn-primary" disabled="disabled" id="relative_time" ng-click="toggleFrequency('relative_time')">
                             Relative Frequency
-                        </label>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -27,7 +25,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="results_container">
-                    <time-series-chart></time-series-chart>
+                    <time-series-chart frequency-type="{{ frequencyType }}"></time-series-chart>
                 </div>
             </div>
         </div>

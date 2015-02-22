@@ -105,24 +105,26 @@ philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
                 sortedList.sort(function(a,b) {return b.count - a.count});
             }
             return sortedList;
-        },
-        saveToLocalStorage: function(results) {
-            if (typeof(localStorage) == 'undefined' ) {
-                alert('Your browser does not support HTML5 localStorage. Try upgrading.');
-            } else {
-                try {
-                    sessionStorage[$location.url()] = JSON.stringify(results);
-                } catch(e) {
-                    sessionStorage.clear();
-                    console.log("Clearing sessionStorage for space...");
-                    try {
-                        sessionStorage[$location.url()] = JSON.stringify(results);
-                    } catch(e) {
-                        sessionStorage.clear();
-                        console.log("Quota exceeded error: the JSON object is too big...")
-                    }
-                }
-            }
         }
     }
 }]);
+
+philoApp.factory('saveToLocalStorage', ['$location', function($location) {
+    var save = function(results) {
+        try {
+            sessionStorage[$location.url()] = JSON.stringify(results);
+            console.log('saved results to localStorage');
+        } catch(e) {
+            sessionStorage.clear();
+            console.log("Clearing sessionStorage for space...");
+            try {
+                sessionStorage[$location.url()] = JSON.stringify(results);
+                console.log('saved results to localStorage');
+            } catch(e) {
+                sessionStorage.clear();
+                console.log("Quota exceeded error: the JSON object is too big...")
+            }
+        }
+    }
+    return save;
+}])

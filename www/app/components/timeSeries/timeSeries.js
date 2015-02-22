@@ -11,4 +11,12 @@ philoApp.controller('timeSeriesCtrl', ['$scope', '$rootScope', '$location', 'rad
     $scope.percent = 0;
     $scope.interval = parseInt($rootScope.formData.year_interval);
     
+    $scope.frequencyType = 'absolute_time';
+    $scope.toggleFrequency = function(frequencyType) {
+        $('#time-series-buttons button').removeClass('active');
+        $('#' + frequencyType).addClass('active');
+        console.log(frequencyType)
+        $scope.frequencyType = frequencyType;
+    }
+    
 }]);
