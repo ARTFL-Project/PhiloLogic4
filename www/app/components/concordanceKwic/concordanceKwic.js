@@ -62,5 +62,6 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
     $scope.removeSidebar = function() {
         $scope.frequencyResults = [];
         $('#selected-sidebar-option').data('interrupt', true);
+        $scope.selectedFacet = '';
     }
 }]);

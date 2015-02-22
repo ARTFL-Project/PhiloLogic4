@@ -97,17 +97,15 @@ philoApp.directive('sidebarMenu', ['$rootScope', '$http', 'URL', function($rootS
     }
 }]);
 
-philoApp.directive('facets', ['$rootScope', '$http', 'URL', 'progressiveLoad', function($rootScope, $http, URL, progressiveLoad) {
+philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progressiveLoad', 'saveToLocalStorage', function($rootScope, $http, $location, URL, progressiveLoad, save) {
     var retrieveFacet = function(scope, facetObj) {
-        scope.loading = false;
-        scope.done = false;
-        var queryParams = angular.copy($rootScope.formData);
-        queryParams.frequency_field = facetObj.alias;
-        var urlString = URL.objectToString(queryParams);
-        if (urlString in sessionStorage) {
-            $rootScope.frequencyResults = JSON.parse(sessionStorage[urlString]);
-             $rootScope.percentComplete = 100;
+        var urlString = window.location.href + '&frequency_field=' + facetObj.alias;
+        if (typeof(sessionStorage[urlString]) !== "undefined" && $rootScope.philoConfig.debug === false) {
+            scope.frequencyResults = JSON.parse(sessionStorage[urlString]);
+            $rootScope.percentComplete = 100;
+            scope.percent = 100;
         } else {
+            scope.done = false;
             // store the selected field to check whether to kill the ajax calls in populate_sidebar
             $('#selected-sidebar-option').data('selected', facetObj.alias);
             $('#selected-sidebar-option').data('interrupt', false);
@@ -116,6 +114,8 @@ philoApp.directive('facets', ['$rootScope', '$http', 'URL', 'progressiveLoad', f
             var fullResults = {};
             scope.loading = true;
             scope.percent = 0;
+            var queryParams = angular.copy($rootScope.formData);
+            queryParams.frequency_field = facetObj.alias;
             populateSidebar(scope, facetObj.alias, fullResults, totalResults, 0, 3000, queryParams);
         }
     }
@@ -136,7 +136,6 @@ philoApp.directive('facets', ['$rootScope', '$http', 'URL', 'progressiveLoad', f
                         var merge = progressiveLoad.mergeResults(fullResults.unsorted, data);
                     }
                     scope.frequencyResults = merge.sorted;
-                    console.log(JSON.stringify(merge.sorted))
                     fullResults = merge;
                     if (end < totalResults) {
                         $rootScope.percentComplete = end / totalResults * 100;
@@ -158,23 +157,8 @@ philoApp.directive('facets', ['$rootScope', '$http', 'URL', 'progressiveLoad', f
             });
         } else {
             scope.percent = 100;
-            //$('#frequency_table').slimScroll({height: $('#results_container').height() - 14});
-            if ($rootScope.philoConfig.debug === true) {
-                if (typeof(localStorage) == 'undefined' ) {
-                    alert('Your browser does not support HTML5 localStorage. Try upgrading.');
-                } else {
-                    var qParams = angular.copy($rootScope.formData);
-                    qParams.frequency_field = facet;
-                    var urlString = URL.objectToString(qParams);
-                    try {
-                        sessionStorage[urlString] = JSON.stringify(fullResults.sorted);
-                    } catch(e) {
-                        sessionStorage.clear();
-                        sessionStorage[urlString] = JSON.stringify(fullResults.sorted);
-                    }
-                    console.log('results saved to localStorage')
-                }
-            }
+            var urlString = window.location.href + '&frequency_field=' + scope.selectedFacet.alias;
+            save(fullResults.sorted, urlString);
         }
     }
     return {

@@ -110,15 +110,18 @@ philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
 }]);
 
 philoApp.factory('saveToLocalStorage', ['$location', function($location) {
-    var save = function(results) {
+    var save = function(results, urlString) {
+        if (typeof(urlString) === 'undefined') {
+            urlString = $location.url();
+        }
         try {
-            sessionStorage[$location.url()] = JSON.stringify(results);
+            sessionStorage[urlString] = JSON.stringify(results);
             console.log('saved results to localStorage');
         } catch(e) {
             sessionStorage.clear();
             console.log("Clearing sessionStorage for space...");
             try {
-                sessionStorage[$location.url()] = JSON.stringify(results);
+                sessionStorage[urlString] = JSON.stringify(results);
                 console.log('saved results to localStorage');
             } catch(e) {
                 sessionStorage.clear();

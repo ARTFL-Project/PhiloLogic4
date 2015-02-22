@@ -47,7 +47,8 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
     }
 }]);
 
-philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL', 'progressiveLoad',  function($rootScope, $http, $location, URL, progressiveLoad) {
+philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL', 'progressiveLoad', 'saveToLocalStorage',
+                                        function($rootScope, $http, $location, URL, progressiveLoad, save) {
     var activateLinks= function() {
         // Activate links on collocations
         $('span[id^=all_word], span[id^=left_word], span[id^=right_word]').addClass('colloc_link');
@@ -62,24 +63,21 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
         $rootScope.formData.end = end;
         var request = scope.philoConfig.db_url + '/' + URL.query($rootScope.formData);
         var collocation = this;
-        $http.get(request)
-        .success(function(data, status, headers, config) {
+        $http.get(request).then(function(response) {
+            var data = response.data;
             if (!resultsLength) {
                 // Fetch total results now since we know the hitlist will be fully on disk
                 var queryParams = angular.copy($rootScope.formData)
                 queryParams.script = "get_total_results.py";
                 queryParams.report = "concordance"
                 $http.get($rootScope.philoConfig.db_url + '/' + URL.query(queryParams))
-                .success(function(length, status, headers, config) {
-                    scope.resultsLength = length;
-                    sortAndRenderCollocation(scope, fullResults, data, length, start, end)
+                .then(function(results) {
+                    scope.resultsLength = results.data;
+                    sortAndRenderCollocation(scope, fullResults, data, results.data, start, end)
                 })
             } else {
                 sortAndRenderCollocation(scope, fullResults, data, resultsLength, start, end)
             }
-        })
-        .error(function(data, status, headers, config) {
-            console.log("Error", status, headers)
         });
     }
     var sortAndRenderCollocation = function(scope, fullResults, data, resultsLength, start, end) {
@@ -111,11 +109,11 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
             scope.filterList = data.filter_list;
             scope.done = true;
             activateLinks();
-            progressiveLoad.saveToLocalStorage({results: scope.sortedLists, resultsLength: scope.resultsLength, filterList: scope.filterList});
+            save({results: scope.sortedLists, resultsLength: scope.resultsLength, filterList: scope.filterList});
         }
     }
     var getCollocations = function(scope) {
-        if (sessionStorage[$location.url()] == null || $rootScope.philoConfig.debug === false) {
+        if (typeof(sessionStorage[$location.url()]) === 'undefined' || $rootScope.philoConfig.debug === true) {
             $('#philologic_collocation').velocity('fadeIn', {duration: 200});
             $(".progress").show();
             var collocObject;
@@ -130,7 +128,6 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
         scope.sortedLists = savedObject.results;
         scope.resultsLength = savedObject.resultsLength;
         scope.filterList = savedObject.filterList;
-        collocation.activateLinks();
         scope.percent = 100;
         scope.done = true;
         $('#philologic_collocation').velocity('fadeIn', {duration: 200});
