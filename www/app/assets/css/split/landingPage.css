@@ -30,11 +30,10 @@ ul {
 #landing-page-content {
     margin-left: 15px;
     margin-right: 15px;
-    display: none;
 }
 #landing-page-content ul {
+    margin-bottom: 20px;
     border: 1px solid #eee;
-    display: none;
 }
 #landing-page-content li {
     padding: 10px 20px;
@@ -42,7 +41,7 @@ ul {
 #landing-page-content li:not(:last-child) {
     border-bottom: 1px solid #eee;
 }
-#landing-page-content div h4 {
+#landing-page-content h4 {
     padding-top: 10px;
     border-bottom: 1px solid #eee;
     margin-bottom: 0px;
