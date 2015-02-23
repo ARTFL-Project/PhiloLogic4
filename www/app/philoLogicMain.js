@@ -26,7 +26,7 @@ philoApp.config(['$routeProvider', '$locationProvider',
       when('/dispatcher.py?:queryArgs', {
         templateUrl: function(queryArgs) {
             var report = queryArgs.report;
-            if (report === "concordance" || report === "kwic" || report === "bibliography" || report === "concordance_from_collocation") {
+            if (report === "concordance" || report === "kwic" || report === "bibliography" || report === "concordance_from_collocation" ||Êreport === "word_property_filter") {
                 var template = 'app/components/concordanceKwic/concordanceKwic.html';
             } else if (report === "collocation") {
                 var template = 'app/components/collocation/collocation.html';
