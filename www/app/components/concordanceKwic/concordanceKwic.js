@@ -1,5 +1,4 @@
-philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'progressiveLoad', 'URL',
-                                            function($scope, $rootScope, $http, $location, radio, progressiveLoad, URL) {
+philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL', function($scope, $rootScope, $http, $location, radio, URL) {
                                                 
     $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
@@ -12,6 +11,8 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
         $('#' + $rootScope.formData.report).parent().addClass('active');
     }
     
+    console.log($scope.report)
+    
     $rootScope.textObjectCitation = {} // Clear citation in text Objects
     
     var oldResults = angular.copy($rootScope.results)
@@ -21,7 +22,7 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
     } else {
         $rootScope.results = {};
     }
-    $rootScope.report = $rootScope.formData.report;
+    
     var request = $scope.philoConfig.db_url + '/' + URL.query($rootScope.formData);
     $http.get(request)
         .then(function(results) {

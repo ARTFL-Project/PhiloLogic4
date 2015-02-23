@@ -7,7 +7,6 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
         $rootScope.formData.report = "bibliography";
         $location.url(URL.objectToString($rootScope.formData, true));
     }
-    $rootScope.report = $rootScope.formData.report;
     
     $scope.collocationParams = {
         q: $rootScope.formData.q,
@@ -29,6 +28,12 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
         } else {
             $('#filter-list').velocity('fadeIn');
         }
+    }
+    
+    $scope.concordanceFromCollocation = function(url) {
+        url = url.replace($rootScope.philoConfig.db_url, '');
+        console.log(url)
+        $location.url(url);
     }
 
 }]);

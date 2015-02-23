@@ -107,6 +107,12 @@ s {
     text-decoration: none !important;
     cursor: pointer;
 }
+.cloud_term a {
+	color: inherit !important;
+}
+.cloud_term a:hover {
+	color: inherit !important;
+}
 .table td, .table th {
     text-align: center;
 }

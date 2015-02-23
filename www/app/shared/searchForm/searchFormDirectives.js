@@ -71,10 +71,7 @@ philoApp.directive('fixedSearchBar', ['$rootScope', function($rootScope) {
         restrict: 'E',
         templateUrl: 'app/shared/searchForm/fixedSearchBar.html',
         link: function(scope, element, attrs) {
-                var report = $rootScope.report;
-                if (report === "concordance" || report === "kwic" || report === "bibliography") {
-                    affixSearchBar(scope);
-                }
+                affixSearchBar(scope);
             }
     }
 }]);

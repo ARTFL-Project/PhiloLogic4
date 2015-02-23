@@ -10,7 +10,7 @@
                     <span ng-if="results.results_length !== 0 && results.description.end < results.description.results_per_page || results.description.end < results.results_length">
                         Hits {{ results.description.start }} - {{ results.description.end }} of {{ results.results_length || results.description.results_per_page }}
                     </span>
-                    <span ng-if="results.results_length !== 0 && results.description.end >= results.results_length">
+                    <span ng-if="results.results_length !== 0 && results.description.end > results.results_length">
                         Hits {{ results.description.start }} - {{ results.results_length || results.description.end }} of {{ results.results_length || results.description.results_per_page }}
                     </span>
                     <span ng-if="results.results_length === 0">
@@ -18,7 +18,7 @@
                     </span>
                 </div>
             </div>
-            <div class="row hidden-xs" id="act-on-report">
+            <div class="row hidden-xs" id="act-on-report" ng-if="report !== 'concordance_from_collocation'">
                 <div class="col-sm-7 col-lg-6">
                     <div id="report_switch" class="btn-group">
                         <span ng-if="report === 'concordance'">
@@ -43,11 +43,11 @@
                         </span>
                     </div>
                 </div>
-                <sidebar-menu ng-if="philoConfig.facets.length > 1"></sidebar-menu>
+                <sidebar-menu ng-if="report !== 'concordance_from_collocation' && philoConfig.facets.length > 1"></sidebar-menu>
             </div>
         </div>
         <div class="row">
-            <concordance ng-if="report === 'concordance'"></concordance>
+            <concordance ng-if="report === 'concordance' || report === 'concordance_from_collocation'"></concordance>
             <kwic ng-if="report === 'kwic'"></kwic>
             <bibliography ng-if="report === 'bibliography'"></bibliography>
             <facets facet="{{ selectedFacet }}"></facets>

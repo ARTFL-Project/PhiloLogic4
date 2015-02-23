@@ -1,4 +1,5 @@
-philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL', 'searchFormConfig', function($scope, $rootScope, $http, $location, radio, URL, searchFormConfig) {
+philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL', 'searchFormConfig',
+                                   function($scope, $rootScope, $http, $location, radio, URL, searchFormConfig) {
     $scope.formOpen = false;
     $scope.toggleForm = function() {
         if (!$("#search-elements").length) {
@@ -38,6 +39,20 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
         }});            
     }
     
+    // Show or hide search bar
+    if ($rootScope.report === "concordance" || $rootScope.report === "kwic" || $rootScope.report === "bibliography" || $rootScope.report === "collocation") {
+        $scope.showSearchBar = true;
+    } else {
+        $scope.showSearchBar = false;
+    }
+    $rootScope.$watch('report', function(newReport) {
+        if (newReport === "concordance" || newReport === "kwic" || newReport === "bibliography" || newReport === 'collocation') {
+            $scope.showSearchBar = true;
+        } else {
+            $scope.showSearchBar = false;
+        }
+    });
+    
     $scope.submit = function() {
         $('.ui-autocomplete').hide();
         if (typeof($rootScope.formData.q) === "undefined" || $rootScope.formData.q === '') {
@@ -48,7 +63,6 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
         delete $rootScope.formData.start;
         delete $rootScope.formData.end;
         $scope.formOpen = false;
-        $rootScope.report = $rootScope.formData.report;
         console.log(URL.objectToString($rootScope.formData, true))
         $location.url(URL.objectToString($rootScope.formData, true));
     }

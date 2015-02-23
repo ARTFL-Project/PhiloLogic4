@@ -1,7 +1,7 @@
 "use strict";
 
 philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(defaultDiacriticsRemovalMap) {
-    var buildCloud = function(sortedList) {
+    var buildCloud = function(scope, sortedList) {
         var cloudList = angular.copy(sortedList);
         $.fn.tagcloud.defaults = {
             size: {start: 1.0, end: 3.5, unit: 'em'},
@@ -25,8 +25,8 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
             var word = cloudList[i].label;
             var count = cloudList[i].count;
             var href = cloudList[i].url;
-            var searchLink = '<span class="cloud_term" rel="' + count + '" data-href="' + href + '&collocate_num=' + count + '">';
-            html += searchLink + word + ' </span>';
+            var searchLink = '<span class="cloud_term" rel="' + count + '"><a href="' + href + '&collocate_num=' + count + '">';
+            html += searchLink + word + '</a> </span>';
         }
         $("#collocate_counts").html(html);
         $("#collocate_counts span").tagcloud();
@@ -39,7 +39,7 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
         link: function(scope, element, attrs) {
                 scope.$watch('sortedLists', function() {
                     if (!$.isEmptyObject(scope.sortedLists)) {
-                        scope.cloud = buildCloud(scope.sortedLists.all);
+                        scope.cloud = buildCloud(scope, scope.sortedLists.all);
                     }
                 });
         }
