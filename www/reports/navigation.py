@@ -83,7 +83,7 @@ def format_text_object(text, config, q, word_regex, bytes=[]):
             last_offset = b
         text = new_text + text[last_offset:]
     text = "<div>" + text + "</div>"
-    xml = parse(text)
+    xml = f.FragmentParser.parse(text)
     for el in xml.iter():        
         try:
             if el.tag == "sc" or el.tag == "scx":
