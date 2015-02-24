@@ -16,5 +16,4 @@ def access(environ, start_response):
     hostname = socket.gethostname()
     headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
-    return f.render_template(config=config,form=True, client_address=incoming_address, q=request,
-                           hostname=environ['HTTP_HOST'], report='access', template_name='access_denied.mako')
+    return ""

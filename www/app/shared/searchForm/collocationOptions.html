@@ -1,0 +1,40 @@
+<div id="collocation-options" class="row" ng-if="formData.report == 'collocation'">
+    <div class="col-xs-12">
+        <div class="row">
+            <div class="col-xs-3 col-sm-2 col-md-2 text-row">
+                Within
+            </div>
+            <div class="col-xs-2 col-sm-1 col-md-1">
+                <select name="word_num" class="form-control" style="width: auto;" ng-model="formData.word_num" ng-options="opt for opt in collocWordNum">
+                </select>
+            </div>
+            <div class="col-xs-7 col-sm-5 col-md-7 text-row">
+                (1-10) words
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12" style="margin-top: 10px;">
+        <div class="row">
+            <div class="col-xs-3 col-sm-2 col-md-2 text-row">
+                Word Filtering
+            </div>
+            <div class="col-xs-2 col-sm-1">
+                <select name="filter_frequency" class="form-control" style="width: auto;" ng-model="formData.filter_frequency" ng-options="opt for opt in wordFiltering">
+                </select>
+            </div>
+            <div class="col-xs-6 col-sm-2">
+                <div class="btn-group-vertical" role="group" data-toggle="buttons" id="colloc_filter_choice">
+                    <label class="btn btn-primary active" id="colloc-filter-frequency" ng-click="radioClick('colloc_filter_choice', 'frequency')">
+                        <input type="radio" name="colloc_filter_choice" value="frequency" checked="checked">Most frequent terms
+                    </label>
+                    <label class="btn btn-primary" id="colloc-filter-stopwords" ng-if="stopwords" ng-click="radioClick('colloc_filter_choice', 'stopwords')">
+                        <input type="radio" name="colloc_filter_choice" value="stopwords">Stopwords
+                    </label>
+                    <label class="btn btn-primary" id="colloc-no-filter" ng-click="radioClick('colloc_filter_choice', 'nofilter')">
+                        <input type="radio" name="colloc_filter_choice" value="nofilter">No filtering
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

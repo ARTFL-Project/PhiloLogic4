@@ -1,4 +1,5 @@
-#!/usr/bin env python
+#!/usr/bin/env python
+
 from __future__ import division
 import os
 import sys
@@ -6,11 +7,16 @@ sys.path.append('..')
 import functions as f
 import reports as r
 from functions.wsgi_handler import WSGIHandler
+from wsgiref.handlers import CGIHandler
 from philologic.DB import DB
 from collections import defaultdict
 from copy import deepcopy
 from operator import itemgetter
-import json
+try:
+    import simplejson as json
+except ImportError:
+    print >> sys.stderr, "Please install simplejson for better performance"
+    import json
 import re
 
 sub_date = re.compile('date=[^&]*')
@@ -19,20 +25,12 @@ def time_series(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    if request.no_q:
-        setattr(request, "report", "bibliography")
-        return r.fetch_bibliography(db, request, config, start_response)
-    else:
-        request = handle_dates(request, db)
-        hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
-        time_series_object = generate_time_series(request, db, hits)
-        if request['format'] == "json":
-            headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-            start_response('200 OK',headers)
-            return json.dumps(time_series_object)
-        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-        start_response('200 OK',headers)
-        return render_time_series(time_series_object, request, config)
+    request = handle_dates(request, db)
+    hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
+    time_series_object = generate_time_series(config, request, db, hits)
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response('200 OK',headers)
+    yield json.dumps(time_series_object)
         
 def handle_dates(q, db):
     c = db.dbh.cursor()
@@ -50,19 +48,11 @@ def handle_dates(q, db):
         setattr(q, 'end_date', max(dates))
     q.metadata['date'] += '-%d' % q.end_date
     return q
-    
 
-def render_time_series(time_series_object, q, config):
-    biblio_criteria = f.biblio_criteria(q, config)
-    time_series_script = f.link.make_absolute_query_link(config, q, format="json")
-    total_hits_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_total_results.py", date='%d-%d' % (q.start_date, q.end_date))
-    ajax_scripts = {"time_series": time_series_script, "total_hits": total_hits_script}
-    return f.render_template(time_series=time_series_object,template_name='time_series.mako',json=json,
-                             query_string=q.query_string, ajax=ajax_scripts, biblio_criteria=biblio_criteria, config=config, report="time_series")
-
-def generate_time_series(q, db, hits):    
+def generate_time_series(config, q, db, hits):    
     """reads through a hitlist to generate a time_series_object"""
     time_series_object = {'query': dict([i for i in q]), 'query_done': False}
+    time_series_object['query']['date'] = q.metadata['date']
     if q.start_date:
         start = q.start_date
     else:
@@ -80,7 +70,8 @@ def generate_time_series(q, db, hits):
     ## Override default value of q.end for first batch of results
     if q.end == 0:
         q.end = 3000
-        
+    
+    count = 0
     for i in hits[q.start:q.end]:
         date = i.date
         try:
@@ -105,10 +96,17 @@ def generate_time_series(q, db, hits):
         except ValueError: ## No valid date
             continue
         
-        absolute_count[date] += 1
+        count += 1
+        if date not in absolute_count:
+            end_date = date + int(q["year_interval"]) - 1
+            date_range = "%d-%d" % (date, end_date)
+            url = f.link.make_absolute_query_link(config, q, report="concordance", date=date_range, start="0", end="0")
+            absolute_count[date] = {"label": date, "count": 0, "url": url}
+        absolute_count[date]['count'] += 1
         
         if date not in date_counts:
             date_counts[date] = date_total_count(date, db, q['year_interval'])
+            
     time_series_object['results_length'] = len(hits)
     time_series_object['query_done'] = hits.done
     time_series_object['results'] = {'absolute_count': absolute_count, 'date_count': date_counts}
@@ -132,9 +130,5 @@ def date_total_count(date, db, interval):
     c.execute(query)
     return c.fetchone()[0]
     
-    
-    
-
-
-    
-    
+if __name__ == '__main__':
+    CGIHandler().run(time_series)

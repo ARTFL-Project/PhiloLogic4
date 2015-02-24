@@ -49,11 +49,10 @@ def generate_author_list(c, letter_range, db, config):
         if author[0].lower() not in letter_range:
             continue
         if author != "Unknown":
-            link = f.link.make_query_link('', author='"' + author + '"')
+            url = f.link.make_query_link('', author='"' + author + '"')
         else:
-            link = f.link.make_query_link('', author='NULL')
-        cite = '<a href="%s">%s</a> (%d)' % (link, author, count)
-        content.append({"author": author, "cite": cite})
+            url = f.link.make_query_link('', author='NULL')
+        content.append({"author": author, "url": url, "count": count})
     return content
 
 def generate_title_list(c, letter_range, db, config):
@@ -67,9 +66,8 @@ def generate_title_list(c, letter_range, db, config):
             author = i["author"] or "Anonymous"
         except:
             author = ""
-        link = "dispatcher.py/" + i['philo_id'].split()[0]
-        cite = '<a href="%s">%s</a> (%s)' % (link, title, author)
-        content.append({"title": title, "cite": cite})
+        url = "dispatcher.py/%s/table-of-contents" % i['philo_id'].split()[0]
+        content.append({"title": title, "url": url, "author": author})
     return content
 
 def generate_year_list(c, q_range, db, config):
@@ -80,13 +78,12 @@ def generate_year_list(c, q_range, db, config):
     content = []
     for i in c.fetchall():
         author = i['author'] or "Anonymous"
-        link = "dispatcher.py/" + i['philo_id'].split()[0]
+        url = "dispatcher.py/%s/table-of-contents" % i['philo_id'].split()[0]
         try:
             date = i['date']
         except:
             date = ""
-        cite = '<a href="%s">%s</a> (%s)' % (link, i["title"], author)
-        content.append({"cite": cite, "year": date})
+        content.append({"title": i['title'], "url": url, "date": date, "author": author})
     return content
 
 

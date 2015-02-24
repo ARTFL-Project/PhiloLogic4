@@ -8,11 +8,16 @@ import re
 import unicodedata
 from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
-from bibliography import fetch_bibliography as bibliography
+from wsgiref.handlers import CGIHandler
 from collocation import tokenize, filter, build_filter_list, split_concordance
 from concordance import citation_links, concordance_citation, fetch_concordance
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
+try:
+    import simplejson as json
+except ImportError:
+    print >> sys.stderr, "Please install simplejson for better performance"
+    import json
 
 
 end_highlight_match = re.compile(r'.*<span class="highlight">[^<]*?(</span>)')
@@ -33,16 +38,11 @@ def concordance_from_collocation(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    if request.no_q:
-        return r.fetch_bibliography(db, request, config, start_response)
-    else:
-        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-        start_response('200 OK',headers)
-        hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
-        concordance_object, pages = fetch_colloc_concordance(hits, request, db, config)
-        biblio_criteria = f.biblio_criteria(request, config)
-        return f.render_template(concordance=concordance_object,pages=pages,query_string=request.query_string,config=config,report="concordance_from_collocation",
-                                 biblio_criteria=biblio_criteria, template_name="concordance_from_collocation.mako")
+    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response('200 OK',headers)
+    hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
+    concordance_object, pages = fetch_colloc_concordance(hits, request, db, config)
+    return json.dumps(concordance_object)
         
 def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=100, stopwords=True):
     concordance_object = {"query": dict([i for i in q])}
@@ -99,22 +99,13 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
     
     concordance_object['results'] = results
     concordance_object["query_done"] = hits.done
-    concordance_object['results_length'] = len(hits)
-    
-#    start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
-#    if end > len(results) + start - 1:
-#        end = len(results) + start - 1
-    end = start + len(results) - 1    
-#    if q.start == 0:
-#        end = start + len(results) - 1
-#    else:
-#        end = q.start + len(results) - 1
+    concordance_object['results_length'] = len(results)
+    end = start + len(results) - 1
 
     if len(results) < q.results_per_page:
         collocate_num = end
     else:
         collocate_num = end + 1
-#    start, end, n = f.link.page_interval(q.results_per_page, hits, start, end)
 
     concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page}
 
@@ -155,4 +146,7 @@ class collocation_hitlist(object):
         
     def __len__(self):
         return int(self.num)
+    
+if __name__ == '__main__':
+    CGIHandler().run(concordance_from_collocation)
         

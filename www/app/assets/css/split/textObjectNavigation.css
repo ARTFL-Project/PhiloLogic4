@@ -1,0 +1,326 @@
+#philologic_response.text-object, #philologic_response.toc-object {
+	margin-top: 0px;
+	margin-left: -15px;
+}
+#page_number {
+    text-align: center;
+    margin-bottom: 10px;
+}
+#all-content {
+    margin-top: 50px; 
+}
+#book-page {
+    text-align: center;
+}
+#obj_text {
+    vertical-align:middle;
+}
+
+/*TOC styling*/
+#toc-wrapper {
+    position: absolute;
+    opacity: 0;
+    z-index: 60;
+}
+#toc-wrapper.show {
+    width: auto;
+}
+#show-toc {
+	padding-left: 30px;
+	padding-right: 30px
+}
+#toc-report-title {
+    font-size: 1.4em;
+	line-height: 130%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+	text-align: center;
+}
+#toc-title {
+	font-style: italic;
+	font-weight: 700;
+}
+#toc-title:hover {
+	text-decoration: none;
+}
+#tei-header {
+	display: none;
+	white-space: pre;
+	font-family: 'Droid Sans Mono', sans-serif;
+	font-size: 80%;
+	overflow-x: scroll;
+	padding: 10px;
+}
+#object-title {
+    font-size: 140%;
+    line-height: 120%;
+    margin: 20px 0px 20px 0px;
+    text-align: center;
+}
+@media (min-width: 768px) and (max-width: 992px) {
+    #toc-report-title, #object-title {
+        margin-top: 30px;
+    }
+}
+#object-title .citation-small-caps {
+	font-variant: small-caps;
+}
+#toc-container {
+    max-width: 350px;
+    margin-left: -31px;
+}
+#toc-container.fixed {
+	position: fixed !important;
+	top: 30px;
+}
+#toc-container a {
+    color: #fff;
+}
+#toc-content {
+    display: inline-block;
+    overflow: scroll;
+    padding: 10px;
+    line-height: 150%;
+    text-align: justify;
+    width: 100%;
+}
+#back-to-top {
+    position: absolute;
+    left: 15px;
+    z-index: 5;
+    display: none;
+}
+#nav-buttons {
+    margin-left: -30px;
+    margin-right: -30px;
+    position: absolute;
+    width: 100%;
+    z-index: 80;
+    transition: background 200ms;
+}
+#nav-buttons.fixed {
+    position: fixed;
+    top: 0;
+}
+.toc-div1 > a, .toc-div2 > a, .toc-div3 > a {
+    padding: 5px 5px 5px 0px;
+}
+.bullet-point-div1, .bullet-point-div2, .bullet-point-div3 {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius:50%;
+    margin-right: 5px;
+}
+.bullet-point-div1 {
+    border: solid 1px;
+}
+.bullet-point-div2 {
+    border: solid 2px;
+}
+.bullet-point-div3 {
+    border: solid 1px;
+}
+.toc-div1, .toc-div2, .toc-div3 {
+    text-indent: -.9em;  /*Account for the bullet point*/
+    margin-bottom: 5px;
+}
+.toc-div1 {
+    padding-left: .9em;
+}
+.toc-div2 {
+    padding-left: 1.9em;
+}
+.toc-div3 {
+    padding-left: 2.9em;
+}
+.toc-div1:hover, .toc-div2:hover, .toc-div3:hover {
+	cursor: pointer;
+}
+
+#text-obj-content {
+    display: inline-block;
+    text-align: justify;
+    padding: 20px;
+    line-height: 140% !important;
+}
+
+@media (max-width: 992px) {
+    #toc-wrapper {
+        z-index: 60;
+    }
+}
+
+/* Styling for theater */
+.xml-castitem::after {
+    content:"\A";
+    white-space:pre;
+}
+.xml-castlist>.xml-castitem:first-of-type::before {
+    content:"\A";
+    white-space:pre;
+}
+.xml-castgroup::before {
+    content:"\A";
+    white-space:pre;
+}
+b.headword {
+    font-weight: 700 !important;
+    font-size: 130%;
+    display: block;
+    margin-top: 20px;
+}
+.xml-lb {
+    display: block;
+}
+.xml-sp .xml-lb:first-of-type {
+    content: "";
+    white-space: normal;
+}
+.xml-lb[type="hyphenInWord"] {
+    display: inline;
+}
+.xml-sp {
+    display: block;
+}
+.xml-sp::before {
+    content:"\A";
+    white-space:pre;
+}
+.xml-stage+.xml-sp:nth-of-type(n+2)::before {
+    content: "";
+}
+.xml-fw, .xml-join {
+    display: none;
+}
+.xml-speaker+.xml-stage::before {
+    content: "";
+    white-space: normal;
+}
+.xml-stage {
+    font-style: italic;
+}
+.xml-stage::after {
+    content:"\A";
+    white-space:pre;
+}
+div1 div2::before {
+    content:"\A";
+    white-space:pre;
+}
+.xml-speaker {
+    font-weight: 700;
+}
+.xml-pb {
+    display: block;
+    text-align: center;
+    margin: 10px;
+}
+.xml-pb::before {
+    content:"-" attr(n) "-";
+    white-space:pre;
+}
+
+.xml-lg {
+    display: block;
+}
+.xml-lg::after {
+    content: "\A";
+    white-space: pre;
+}
+.xml-lg:first-of-type::before {
+    content: "\A";
+    white-space: pre;
+}
+.xml-castList {
+    display: block;
+}
+.xml-castItem {
+    display: block;
+}
+
+/*Dictionary formatting*/
+body {
+  counter-reset: section; /* Set the section counter to 0 */
+}
+.xml-prononciation::before {
+    content: "(";
+}
+.xml-prononciation::after {
+    content: ")\A";
+}
+.xml-nature {
+    font-style: italic;
+}
+.xml-indent, .xml-variante {
+    display: block;
+}
+.xml-variante {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-indent: -1.3em;
+    padding-left: 1.3em;
+}
+.xml-variante::before {
+    counter-increment: section;
+    content: counter(section) ")\00a0";
+    font-weight: 700;
+}
+:not(.xml-rubrique) + .xml-indent {
+    padding-top: 10px;
+}
+.xml-indent {
+    padding-left: 1.3em;
+}
+.xml-cit {
+    padding-left: 2.3em;
+    display: block;
+    text-indent: -1.3em;
+}
+.xml-indent > .xml-cit {
+    padding-left: 1em;
+}
+.xml-cit::before {
+    content: '\2012\00a0\00ab\00a0';
+}
+.xml-cit::after {
+    content: '\00a0\00bb\00a0(' attr(aut) '\00a0' attr(ref) ')';
+    font-variant: small-caps;
+}
+.xml-rubrique {
+    display: block;
+    margin-top: 20px;
+}
+.xml-rubrique::before {
+    content: attr(nom);
+    font-variant: small-caps;
+    font-weight: 700;
+}
+.xml-corps + .xml-rubrique {
+    margin-top: 10px;
+}
+
+/*Note handling*/
+.popover {
+	max-width: 350px;
+	overflow: scroll;
+}
+.popover-content {
+	text-align: justify;
+}
+.popover-content .xml-p:not(:first-of-type) {
+    display: block;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+.note-content {
+	display: none;
+}
+.note, .note-ref {
+	vertical-align: .3em;
+	font-size: .7em;
+}
+.note:hover, .note-ref:hover {
+	cursor: pointer;
+    text-decoration: none;
+}

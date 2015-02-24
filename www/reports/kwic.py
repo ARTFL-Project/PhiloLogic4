@@ -8,41 +8,26 @@ import os
 import re
 from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
+from wsgiref.handlers import CGIHandler
 from concordance import concordance_citation, citation_links
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
-import json
+try:
+    import simplejson as json
+except ImportError:
+    print >> sys.stderr, "Import Error, please install simplejson for better performance"
+    import json
 
 
 def kwic(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    if request.no_q:
-        setattr(request, "report", "bibliography")
-        return r.fetch_bibliography(db, request, config, start_response)
-    else:
-        kwic_object, hits = generate_kwic_results(db, request, config)
-        if request['format'] == "json":
-            headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-            start_response('200 OK',headers)
-            return json.dumps(kwic_object)
-        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-        start_response('200 OK',headers)
-        return render_kwic(kwic_object, hits, config, request)
-        
-def render_kwic(k, hits, config, q):
-    biblio_criteria = f.biblio_criteria(q, config)
-    #pages = f.link.generate_page_links(k['description']['start'], q.results_per_page, q, hits)
-    pages = f.link.page_links(config,q,len(hits))
-    collocation_script = f.link.make_absolute_query_link(config, q, report="collocation", format="json")
-    frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
-    kwic_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/concordance_kwic_switcher.py")
-    concordance_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/concordance_kwic_switcher.py", report="concordance")
-    ajax_scripts = {"concordance": concordance_script, 'kwic': kwic_script, 'frequency': frequency_script, 'collocation': collocation_script}
-    return f.render_template(kwic=k, query_string=q.query_string, biblio_criteria=biblio_criteria,
-                             ajax=ajax_scripts, pages=pages, config=config, template_name='kwic.mako', report="kwic")
+    kwic_object, hits = generate_kwic_results(db, request, config)
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response('200 OK',headers)
+    yield json.dumps(kwic_object)
 
-def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
+def generate_kwic_results(db, q, config, link_to_hit="div1"):
     """ The link_to_hit keyword defines the text object to which the metadata link leads to"""
     hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
     start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
@@ -51,6 +36,8 @@ def generate_kwic_results(db, q, config, length=5000, link_to_hit="div1"):
     kwic_results = []
     default_short_citation_len = 30
     shortest_citation_len = 0
+    
+    length = config.concordance_length
     
     for hit in hits[start - 1:end]:
         # Get all metadata
@@ -138,3 +125,6 @@ def KWIC_formatter(output, hit_num, chars=40):
     end_hit = output.rindex('</span>') + 7
     end_output = '<span class="kwic-after">' + output[end_hit:] + '</span>'
     return '<span class="kwic-text">' + start_output + '&nbsp;<span class="kwic-highlight">' + output[start_hit:end_hit] + "</span>&nbsp;" + end_output + '</span>'
+
+if __name__ == "__main__":
+    CGIHandler().run(kwic)

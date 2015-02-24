@@ -1,0 +1,62 @@
+<div class="container-fluid text-object"  id="philologic_response" ng-controller="textObjectNavigation">
+    <div id="object-title" class='philologic_cite'>
+        <div>
+            <a href="{{ textObject.citation.title.href }}" class="citation-small-caps"><i>{{ textObject.citation.title.label }}</i></a>
+            <span ng-if="textObject.citation.author">, {{ textObject.citation.author.label }}</span>
+        </div>
+        <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
+    </div>
+    <div class="row" id="nav-buttons">
+        <button type="button" class="btn btn-primary btn-sm" id="back-to-top">
+            Back to top
+        </button>
+        <div class="col-xs-12" style="text-align: center;">
+            <div class="btn-group-sm" role="group">
+                <button type="button" class="btn btn-primary" id="prev-obj" ng-click="goToTextObject(textObject.prev)">
+                    <span class="glyphicon glyphicon-chevron-left"></span>
+                </button>
+                <button type="button" class="btn btn-primary" id="show-toc" disabled="disabled" ng-click="toggleTableOfContents()">Table of contents</button>
+                <button type="button" class="btn btn-primary" id="next-obj" ng-click="goToTextObject(textObject.next)">
+                    <span class="glyphicon glyphicon-chevron-right"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <loading ng-if="loading"></loading>
+    <div class="row" id="all-content">
+        <div id="toc-wrapper" class="col-xs-4">
+            <div class="panel panel-default toc-slide" id="toc-container" ng-show="tocOpen">
+                <div id="toc-titlebar">
+                    <button type="button" class="btn btn-primary btn-xs pull-right" id="hide-toc" ng-click="toggleTableOfContents()">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </div>
+                <div id="toc-content">
+                    <div ng-repeat="element in tocObject.toc">
+                        <div id="{{ ::element.philo_id.split(' ').join('-') }}" class="toc-{{ ::element.philo_type }}" ng-click="goToTextObject(element.philo_id)">
+                            <span class="bullet-point-{{ ::element.philo_type }}"></span>
+                            <a href="">{{ ::element.label }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-offset-2 col-md-8 col-lg-offset-3 col-lg-6" id="center-content" ng-show="textObject">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="book-page">
+                        <div id="text-obj-content" class="panel panel-default" ng-bind-html="textObject.text | unsafe"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-full-screen="true" data-continuous="false" style="display: none">
+    <div class="slides"></div>
+    <h3 class="title"></h3>
+    <a class="prev">&lt;</a>
+    <a class="next">&gt;</a>
+    <a class="close">&#10005;</a>
+    <ol class="indicator"></ol>
+</div>

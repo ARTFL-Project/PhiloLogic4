@@ -1,0 +1,14 @@
+<div class="{{ sidebarWidth }} hidden-xs" id="sidebar" ng-if="frequencyResults.length > 0">
+    <loading ng-if="loading"></loading>
+    <div id="sidebar_display" class="panel panel-default">
+        <div id="frequency_container">
+            <progress-bar progress="{{ percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{duration:400}" ng-if="done === false"></progress-bar>
+            <ol id="frequency_table" class="velocity-opposites-transition-fadeIn" data-velocity-opts="{duration:400}" ng-if="frequencyResults.length > 0">
+                <li ng-repeat="result in frequencyResults" ng-click="facetClick(result)">
+                    <a id="freq_sidebar_text" href="{{ ::result.url }}"> {{ ::result.label }}</a>
+                    <span class="sidebar-count"> {{ ::result.count }}</span>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>

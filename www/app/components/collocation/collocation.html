@@ -1,0 +1,40 @@
+<div id="collocation-container" class="container-fluid" ng-controller="collocationCtrl">    
+    <div id="philologic_response" class="panel panel-default">
+        <div id="initial_report">
+            <div id="description">
+                <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
+                    Export results
+                </button>
+                <search-arguments></search-arguments>
+            </div>
+            <progress-bar progress="{{ percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{ duration: 400 }" ng-if="done === false"></progress-bar>
+            <div style="padding-left: 15px;">
+                <span ng-if="collocationParams.collocFilterChoice === 'stopwords'">
+                    <a id="filter-list-trigger" ng-click="toggleFilterList()">Common function words</a> are being filtered from this report.
+                </span>
+                <span ng-if="collocationParams.collocFilterChoice === 'frequency'"">
+                    <a id="filter-list-trigger" ng-click="toggleFilterList()">The {{ ::collocationParams.filterFrequency }} most common words</a> are being filtered from this report.
+                </span>
+                <div class="panel panel-default" id="filter-list" ng-if="filterList">
+                    <button type="button" class="close" ng-click="toggleFilterList()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <ol>
+                        <li ng-repeat="word in filterList">{{ ::word }}</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="bg-danger" style="margin-top: 20px; width: 50%;" ng-if="config.debug">
+                {{ ::error }}
+            </div>
+        </div>
+        <div class="results_container">
+            <div id='philologic_collocation' class="row">
+                <div class="col-xs-12 col-sm-3 col-sm-push-9 col-md-4 col-md-push-8">
+                    <collocation-cloud></collocation-cloud>
+                </div>
+                <div class="col-xs-12 col-sm-9 col-sm-pull-3 col-md-8 col-md-pull-4">
+                    <collocation-table></collocation-table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

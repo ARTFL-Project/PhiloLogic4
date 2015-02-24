@@ -1,0 +1,60 @@
+<div id="concordanceKwic-container" ng-controller="concordanceKwicCtrl">
+    <div class="panel panel-default">
+        <div id="initial_report">
+            <div id="description" ng-if="typeof(results) != 'undefined'" class="velocity-opposites-transition-fadeIn">
+                <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
+                        Export results
+                </button>
+                <search-arguments></search-arguments>
+                <div id="search-hits" ng-if="results.description">
+                    <span ng-if="results.results_length !== 0 && results.description.end < results.description.results_per_page || results.description.end < results.results_length">
+                        Hits {{ results.description.start }} - {{ results.description.end }} of {{ results.results_length || results.description.results_per_page }}
+                    </span>
+                    <span ng-if="results.results_length !== 0 && results.description.end > results.results_length">
+                        Hits {{ results.description.start }} - {{ results.results_length || results.description.end }} of {{ results.results_length || results.description.results_per_page }}
+                    </span>
+                    <span ng-if="results.results_length === 0">
+                        No results for your query.
+                    </span>
+                </div>
+            </div>
+            <div class="row hidden-xs" id="act-on-report" ng-if="report !== 'concordance_from_collocation' && report !=='word_property_filter'">
+                <div class="col-sm-7 col-lg-6">
+                    <div id="report_switch" class="btn-group">
+                        <span ng-if="report === 'concordance'">
+                            <button type="button" class="btn btn-primary active" id="concordance-switch" ng-click="switchTo('concordance')">
+                                <span class="hidden-xs hidden-sm">View occurrences with context</span>
+                                <span class="visible-xs visible-sm">Concordance</span>
+                            </button>
+                            <button type="button" class="btn btn-primary" id="kwic-switch" ng-click="switchTo('kwic')">
+                                <span class="hidden-xs hidden-sm">View occurrences line by line (KWIC)</span>
+                                <span class="visible-xs visible-sm">Keyword in context</span>
+                            </button>
+                        </span>
+                        <span ng-if="report === 'kwic'">
+                            <button type="button" class="btn btn-primary" id="concordance-switch" ng-click="switchTo('concordance')">
+                                <span class="hidden-xs hidden-sm">View occurrences with context</span>
+                                <span class="visible-xs visible-sm">Concordance</span>
+                            </button>
+                            <button type="button" class="btn btn-primary active" id="kwic-switch" ng-click="switchTo('kwic')">
+                                <span class="hidden-xs hidden-sm">View occurrences line by line (KWIC)</span>
+                                <span class="visible-xs visible-sm">Keyword in context</span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                <sidebar-menu ng-if="report !== 'concordance_from_collocation' && report !=='word_property_filter' && philoConfig.facets.length > 1"></sidebar-menu>
+            </div>
+        </div>
+        <div class="row">
+            <concordance ng-if="report === 'concordance' || report === 'concordance_from_collocation' || report === 'word_property_filter'"></concordance>
+            <kwic ng-if="report === 'kwic'"></kwic>
+            <bibliography ng-if="report === 'bibliography'"></bibliography>
+            <facets facet="{{ selectedFacet }}"></facets>
+        </div>
+    </div>
+    <div class="more" ng-if="results.results.length > 0">
+        <pages></pages>
+        <div style='clear:both;'></div>
+    </div>
+</div>

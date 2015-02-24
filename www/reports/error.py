@@ -38,7 +38,7 @@ def error_handling(db, config, q):
                               "results_length": 0,
                               "query_done": True,
                               }
-        return r.render_concordance(concordance_object, hits, config, q)
+        return ""#r.render_concordance(concordance_object, hits, config, q)
     elif report == "kwic":
         kwic_object = {"error": error_message,
                        "description": {"start": 0, "end": 0, "results_per_page": q.results_per_page},
@@ -47,7 +47,7 @@ def error_handling(db, config, q):
                        "results_length": 0,
                        "query_done": True,
                        }
-        return r.render_kwic(kwic_object, hits, config, q)
+        return ""#r.render_kwic(kwic_object, hits, config, q)
     elif report == "collocation":
         collocation_object = {"error": error_message,
                               "query": dict([i for i in q]),
@@ -57,7 +57,7 @@ def error_handling(db, config, q):
                               "left_collocates": {},
                               "right_collocates": {},
                               }
-        return r.render_collocation(collocation_object, q, config)
+        return ""#r.render_collocation(collocation_object, q, config)
     elif report == "time_series":
         try:
             q = r.handle_dates(q, db)
@@ -71,4 +71,4 @@ def error_handling(db, config, q):
                               "query_done": True,
                               "results": {"absolute_count": {}, "date_count": {}}
                              }
-        return r.render_time_series(time_series_object, q, config)
+        return ""#r.render_time_series(time_series_object, q, config)

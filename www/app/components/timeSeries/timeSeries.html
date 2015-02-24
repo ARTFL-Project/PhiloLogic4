@@ -1,0 +1,33 @@
+<div id="time-series-container" class="container-fluid" ng-controller="timeSeriesCtrl">
+    <div id="philologic_response">
+        <div id="initial_report" class="row">
+            <div class="col-xs-12">
+                <div class="panel panel-default">
+                    <div id="description">
+                        <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
+                            Export results
+                        </button>
+                        <search-arguments start-date="{{ ::startDate}}" end-date="{{ ::endDate }}"></search-arguments>
+                       <div philo-debug></div>
+                    </div>
+                    <progress-bar progress="{{ percent }}" style="margin-left: 15px; margin-right: 15px; margin-top: -10px;"></progress-bar>
+                    <div id="time-series-buttons" class="btn-group" role="group" aria-label="...">
+                        <button type="button" class="btn btn-primary active" id="absolute_time" ng-click="toggleFrequency('absolute_time')">
+                            Absolute Frequency
+                        </button>
+                        <button type="button" class="btn btn-primary" disabled="disabled" id="relative_time" ng-click="toggleFrequency('relative_time')">
+                            Relative Frequency
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="results_container">
+                    <time-series-chart frequency-type="{{ frequencyType }}"></time-series-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

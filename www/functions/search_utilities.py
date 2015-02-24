@@ -5,22 +5,6 @@ import sys
 import sqlite3
 from philologic.DB import DB
 
-def biblio_criteria(q, config):
-    """Generates clickable bibligraphic criteria in search results"""
-    biblio = []
-    if q.report == 'time_series':
-        del q.metadata["date"]
-    for k,v in q.metadata.iteritems():
-        if v:
-            if q.report != "concordance_from collocation":
-                close_icon = '<span class="glyphicon glyphicon-remove-circle remove_metadata" data-metadata="%s"></span>' % k
-            else:
-                close_icon = ""
-            if k in config.metadata_aliases:
-                k = config.metadata_aliases[k]
-            biblio.append('<span class="biblio-criteria">%s: <b>%s</b> %s</span>' % (k.title(), v.decode('utf-8', 'ignore'), close_icon))
-    return ' '.join(biblio)
-
 def search_examples(field):
     path = os.path.abspath(os.path.dirname(__file__)).replace('functions', "") + '/data/'
     db = DB(path,encoding='utf-8')
