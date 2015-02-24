@@ -10,37 +10,6 @@ philoApp.factory('radio', ['$rootScope', function($rootScope) {
     }
 }]);
 
-philoApp.factory('searchConfigBuild', ['$rootScope', function($rootScope) {
-    return {
-        timeSeriesIntervals: function() {
-            var options = {1: "Year", 10: "Decade", 50: "Half Century", 100: "Century"};
-            var intervals = [];
-            for (var i=0; i < $rootScope.philoConfig.time_series_intervals.length; i++) {
-                var interval = {
-                    date: $rootScope.philoConfig.time_series_intervals[i],
-                    alias: options[$rootScope.philoConfig.time_series_intervals[i]]
-                };
-                intervals.push(interval);
-            }
-            return intervals
-        },
-        metadata: function() {
-            var metadataFields = {};
-            for (var i=0; i < $rootScope.philoConfig.metadata.length; i++) {
-                var metadata = $rootScope.philoConfig.metadata[i];
-                metadataFields[metadata] = {}
-                if (metadata in $rootScope.philoConfig.metadata_aliases) {
-                    metadataFields[metadata].value = $rootScope.philoConfig.metadata_aliases[metadata];
-                } else {
-                    metadataFields[metadata].value = metadata;
-                }
-                metadataFields[metadata].example = $rootScope.philoConfig.search_examples[metadata];
-            }
-            return metadataFields
-        }
-    }
-}]);
-
 philoApp.factory('URL', function() {
     return {
         objectToString: function(formData, url) {

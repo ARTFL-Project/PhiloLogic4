@@ -4,8 +4,7 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', function(
     $rootScope.philoConfig = philoConfig;
     $rootScope.formData = {
         report: philoConfig.search_reports[0],
-        method: "proxy",
-        results_per_page: "25"
+        method: "proxy"
         };
     $rootScope.results = {};
     $rootScope.report = philoReport;

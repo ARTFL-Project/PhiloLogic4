@@ -20,7 +20,7 @@ def get_frequency(environ,start_response):
         hits = db.get_all(db.locals['default_object_level'])
     else:
         hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
-    field, results = r.generate_frequency(hits, request, db, config)
+    results = r.generate_frequency(hits, request, db, config)
     yield json.dumps(results)
     
 

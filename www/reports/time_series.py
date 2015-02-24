@@ -27,7 +27,7 @@ def time_series(environ,start_response):
     request = WSGIHandler(db, environ)
     request = handle_dates(request, db)
     hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
-    time_series_object = generate_time_series(request, db, hits)
+    time_series_object = generate_time_series(config, request, db, hits)
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
     yield json.dumps(time_series_object)
@@ -49,7 +49,7 @@ def handle_dates(q, db):
     q.metadata['date'] += '-%d' % q.end_date
     return q
 
-def generate_time_series(q, db, hits):    
+def generate_time_series(config, q, db, hits):    
     """reads through a hitlist to generate a time_series_object"""
     time_series_object = {'query': dict([i for i in q]), 'query_done': False}
     time_series_object['query']['date'] = q.metadata['date']
@@ -98,7 +98,10 @@ def generate_time_series(q, db, hits):
         
         count += 1
         if date not in absolute_count:
-            absolute_count[date] = {"label": date, "count": 0, "url": ""}
+            end_date = date + int(q["year_interval"]) - 1
+            date_range = "%d-%d" % (date, end_date)
+            url = f.link.make_absolute_query_link(config, q, report="concordance", date=date_range, start="0", end="0")
+            absolute_count[date] = {"label": date, "count": 0, "url": url}
         absolute_count[date]['count'] += 1
         
         if date not in date_counts:

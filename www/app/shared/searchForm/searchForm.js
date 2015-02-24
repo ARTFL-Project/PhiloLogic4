@@ -1,5 +1,4 @@
-philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL', 'searchFormConfig',
-                                   function($scope, $rootScope, $http, $location, radio, URL, searchFormConfig) {
+philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL', function($scope, $rootScope, $http, $location, radio, URL) {
     $scope.formOpen = false;
     $scope.toggleForm = function() {
         if (!$("#search-elements").length) {
@@ -19,17 +18,6 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
             results_per_page: "25"
         };
     }
-    
-    // Load searchFormConfig variables into scope
-    $scope.metadataFields = searchFormConfig.metadataFields;
-    $scope.collocWordNum = searchFormConfig.collocWordNum;
-    $rootScope.formData.word_num = $scope.collocWordNum[4];
-    $scope.stopwords = $rootScope.philoConfig.stopwords;
-    $rootScope.formData.colloc_filter_choice = "frequency";
-    $scope.wordFiltering = searchFormConfig.wordFiltering;
-    $rootScope.formData.filter_frequency = $scope.wordFiltering[3];
-    $scope.timeSeriesIntervals = searchFormConfig.timeSeriesIntervals;
-    $rootScope.formData.year_interval = $scope.timeSeriesIntervals[0].date;
     
     // Button click from fixed search bar
     $scope.backToFullSearch = function() {

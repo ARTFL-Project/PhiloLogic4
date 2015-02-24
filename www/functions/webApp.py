@@ -35,8 +35,10 @@ js_files = [
     "app/shared/config.js",
     "app/shared/searchArguments/searchArgumentsDirective.js",
     "app/shared/exportResults/exportResults.js",
+    "app/components/landingPage/landingPageDirectives.js",
     "app/components/landingPage/landingPage.js",
     "app/shared/searchForm/searchFormServices.js",
+    "app/shared/searchForm/searchFormFilters.js",
     "app/shared/searchForm/searchFormDirectives.js",
     "app/shared/searchForm/searchForm.js",
     "app/components/concordanceKwic/concordanceKwicDirectives.js",
@@ -51,7 +53,6 @@ js_files = [
 ]
 
 path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '')
-
 
 def angular(environ,start_response):
     config = f.WebConfig()

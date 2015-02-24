@@ -41,6 +41,76 @@ philoApp.directive('searchReports', ['$rootScope', function($rootScope) {
     }
 }]);
 
+philoApp.directive('metadataFields', ['$rootScope', function($rootScope) {
+    var buildMetadata = function() {
+        var metadataFields = [];
+        for (var i=0; i < $rootScope.philoConfig.metadata.length; i++) {
+            var metadata = $rootScope.philoConfig.metadata[i];
+            var metadataObject = {};
+            metadataObject.value = metadata;
+            if (metadata in $rootScope.philoConfig.metadata_aliases) {
+                metadataObject.label = $rootScope.philoConfig.metadata_aliases[metadata];
+            } else {
+                metadataObject.label = metadata;
+            }
+            metadataObject.example = $rootScope.philoConfig.search_examples[metadata];
+            metadataFields.push(metadataObject);
+        }
+        return metadataFields
+    }
+    return {
+        templateUrl: 'app/shared/searchForm/metadataFields.html',
+        link: function(scope, element, attrs) {
+            scope.metadataFields = buildMetadata();
+        }
+    }
+}]);
+
+philoApp.directive('collocationOptions', ['$rootScope', function($rootScope) {
+    return {
+        templateUrl: 'app/shared/searchForm/collocationOptions.html',
+        link: function(scope, element, attrs) {
+            scope.collocWordNum = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            $rootScope.formData.word_num = scope.collocWordNum[4];
+            scope.stopwords = $rootScope.philoConfig.stopwords;
+            $rootScope.formData.colloc_filter_choice = "frequency";
+            scope.wordFiltering = [25, 50, 75, 100, 125, 150, 175, 200];
+            $rootScope.formData.filter_frequency = scope.wordFiltering[3];
+        }
+    }
+}]);
+
+philoApp.directive('timeSeriesOptions', ['$rootScope', function($rootScope) {
+    var buildOptions = function() {
+        var options = {1: "Year", 10: "Decade", 50: "Half Century", 100: "Century"};
+        var intervals = [];
+        for (var i=0; i < $rootScope.philoConfig.time_series_intervals.length; i++) {
+            var interval = {
+                date: $rootScope.philoConfig.time_series_intervals[i],
+                alias: options[$rootScope.philoConfig.time_series_intervals[i]]
+            };
+            intervals.push(interval);
+        }
+        return intervals
+    }
+    return {
+        templateUrl: 'app/shared/searchForm/timeSeriesOptions.html',
+        link: function(scope, element, attrs) {
+            scope.timeSeriesIntervals = buildOptions();
+            $rootScope.formData.year_interval = scope.timeSeriesIntervals[0].date;
+        }
+    }
+}]);
+
+philoApp.directive('resultsPerPage', ['$rootScope', function($rootScope) {
+    return {
+        templateUrl: 'app/shared/searchForm/resultsPerPage.html',
+        link: function() {
+            $rootScope.results_per_page = "25";
+        }
+    }
+}]);
+
 philoApp.directive('fixedSearchBar', ['$rootScope', function($rootScope) {
     var affixSearchBar = function(scope) {
         $('#fixed-search').affix({

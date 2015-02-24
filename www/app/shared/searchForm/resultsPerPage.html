@@ -1,0 +1,21 @@
+<div id="results_per_page" class="row" ng-if="formData.report != 'collocation' && formData.report != 'time_series'">
+    <div class="col-xs-12 col-sm-2 col-md-2 text-row">
+        Results per page:
+    </div>
+    <div class="col-xs-12 col-sm-10 col-md-10">
+        <div class="btn-group" id='results_per_page' data-toggle="buttons">
+            <label class="btn btn-primary active" ng-click="radioClick('results_per_page', '25')">
+                <input type="radio" name="results_per_page" id="pagenum1" value='25' checked>
+                25
+            </label>
+            <label class="btn btn-primary" ng-click="radioClick('results_per_page', '50')">
+                <input type="radio" name="results_per_page" id="pagenum2" value='50'>
+                50
+            </label>
+            <label class="btn btn-primary" ng-click="radioClick('results_per_page', '100')">
+                <input type="radio" name="results_per_page" id="pagenum3" value='100'>
+                100
+            </label>
+        </div>
+    </div>
+</div>

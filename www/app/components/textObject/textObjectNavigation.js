@@ -151,8 +151,9 @@ philoApp.controller('textObjectNavigation', ['$scope', '$rootScope', '$http', '$
             adjustTocHeight();
             // TODO: find why this doesn't work
             var scrollToID = $('#' + $scope.tocObject.philo_id.join('-'));
-            scrollToID.velocity("scroll", {duration: 500, container: $("#toc-content") });
-            scrollToID.addClass('current-obj');
+            console.log(scrollToID)
+            scrollToID.velocity("scroll", {duration: 500, container: $("#toc-content"), offset: -50});
+            scrollToID.find('a').addClass('current-obj');
         }, 300);
     }
     var closeTableOfContents = function() {
