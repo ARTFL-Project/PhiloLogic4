@@ -7,7 +7,47 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         var fullResults;
         var absoluteFrequency;
         scope.dateCounts = {};
-        updateTimeSeries(scope, fullResults, 0, 1000);
+        $http.get('scripts/get_start_end_date.py').then(function(dates) { // We run this even we have the values since it's so fast
+            scope.startDate = $rootScope.formData.start_date || dates.data.start_date;
+            scope.endDate = $rootScope.formData.end_date || dates.data.end_date;
+            var barChartObject = initializeBarChart(scope.startDate, scope.endDate);
+            scope.barChart = barChartObject.dateList;
+            scope.chartIndex = barChartObject.chartIndex;
+            updateTimeSeries(scope, fullResults, 0, 1000);
+        });
+    }
+    // Generate bars in chart by iterating over all date ranges
+    var initializeBarChart = function(start, end) {
+        var yearInterval = parseInt($rootScope.formData.year_interval);
+        var startDate = normalizeDate(start, yearInterval);
+        var endDate = parseInt(end);
+        var dateList = [];
+        var dataLength = Math.floor((endDate - startDate) / yearInterval) + 1;
+        var remainder = (endDate - startDate) % yearInterval;
+        if (remainder > 0) {
+            dataLength += 1;
+        }
+        var barWidth = (parseInt($('#time-series').width()) - dataLength) / dataLength; // Something is off here...
+        var margin = 0;
+        var chartIndex = {};
+        var position = 0;
+        for (var i = startDate; i <= endDate; i += yearInterval) {
+            if (i !== startDate) {
+                margin += barWidth + 1;
+            }
+            var yearWidth = (barWidth - 25) / 2;
+            dateList.push({
+                date: i,
+                marginLeft: margin,
+                width: barWidth,
+                yearWidth: yearWidth,
+                title: '',
+                url: ''
+            });
+            chartIndex[i.toString()] = position;
+            position ++;
+        }
+        return {dateList: dateList, chartIndex: chartIndex};
     }
     var updateTimeSeries = function(scope, fullResults, start, end) {
         $rootScope.formData.start = start;
@@ -15,9 +55,6 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         var request = scope.philoConfig.db_url + '/' + URL.query($rootScope.formData);
         $http.get(request).then(function(results) {
             var timeSeriesResults = results.data;
-            // Now that we have initial results, we can determine start and end date if not specified
-            scope.startDate = timeSeriesResults.query.date.split('-')[0];
-            scope.endDate = timeSeriesResults.query.date.split('-')[1];
             for (var date in timeSeriesResults.results.date_count) { // Update date counts
                 scope.dateCounts[date] = timeSeriesResults.results.date_count[date];
             }
@@ -39,10 +76,6 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
     var sortAndRenderTimeSeries = function(scope, fullResults, timeSeriesResults, start, end) {
         if (end <= scope.resultsLength) {
             scope.percent = Math.floor(end / scope.resultsLength * 100);
-        }
-        if (typeof(fullResults) === "undefined") {
-            // Populate fullResults with all the dates possible in the range
-            scope.barChart = initializeBarChart(timeSeriesResults.query.start_date, timeSeriesResults.query.end_date);
         }
         var allResults = progressiveLoad.mergeResults(fullResults, timeSeriesResults.results['absolute_count'], "label");
         fullResults = allResults.unsorted;
@@ -78,22 +111,30 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         var chartHeight = $('#time-series').height();
         var multiplier = (chartHeight - 10) / maxCount;
         for (var i=0; i < data.length; i++) {
+            var chartIndex = scope.chartIndex[data[i].label];
             var count = Math.round(data[i].count);
             var pixelHeight = count * multiplier;
-            $('.graph-bar').eq(i).data('height', pixelHeight);
-            if (scope.barChart[i].url === '' && data[i].url !== '') {
-                scope.barChart[i].url = data[i].url;
+            $('.graph-bar').eq(chartIndex).data('height', pixelHeight);
+            if (scope.barChart[chartIndex].url === '' && data[i].url !== '') {
+                scope.barChart[chartIndex].url = data[i].url;
             }
             var year = data[i].label;
             var yearDisplay = yearToTimeSpan(year, scope.interval);
             if (frequencyType === 'absolute_time') {
-                scope.barChart[i].title = Math.round(count, false) + ' occurrences between ' + yearDisplay;
+                scope.barChart[chartIndex].title = Math.round(count, false) + ' occurrences between ' + yearDisplay;
             } else {
-                scope.barChart[i].title = Math.round(count, false) + ' occurrences per 1,000,000 words between ' + yearDisplay;
+                scope.barChart[chartIndex].title = Math.round(count, false) + ' occurrences per 1,000,000 words between ' + yearDisplay;
             }
         }
         
-        animateBarChart(scope);
+        var animDelay = 0;
+        $('.graph-bar').each(function() {
+            var height = $(this).data('height');
+            if (typeof(height) !== "undefined") {
+                animDelay += 15;
+                $(this).eq(0).velocity({'height': height + 'px'}, {delay: animDelay, duration: 250, easing: "easeOutQuad"});
+            }
+        });
         
         // Draw three lines along the X axis to help visualize frequencies
         var top_line = (chartHeight - 10) / chartHeight * 100;
@@ -112,44 +153,6 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             scope.middleNumber = middleNumber + ' occurrences';
             scope.bottomNumber = bottomNumber + ' occurrences';
         }
-    }
-    
-    var animateBarChart = function(scope) {
-        var animDelay = 0;
-        $('.graph-bar').each(function() {
-            var height = $(this).data('height');
-            animDelay += 20;
-            $(this).eq(0).velocity({'height': height + 'px'}, {delay: animDelay, duration: 250, easing: "easeOutQuad"});
-        });
-    }
-    // Generate bars in chart by iterating over all date ranges
-    var initializeBarChart = function(start, end) {
-        var yearInterval = parseInt($rootScope.formData.year_interval);
-        var startDate = normalizeDate(start, yearInterval);
-        var endDate = parseInt(end);
-        var dateList = [];
-        var dataLength = Math.floor((endDate - startDate) / yearInterval) + 1;
-        var remainder = (endDate - startDate) % yearInterval;
-        if (remainder > 0) {
-            dataLength += 1;
-        }
-        var barWidth = (parseInt($('#time-series').width()) - dataLength) / dataLength; // Something is off here...
-        var margin = 0;
-        for (var i = startDate; i <= endDate; i += yearInterval) {
-            if (i !== startDate) {
-                margin += barWidth + 1;
-            }
-            var yearWidth = (barWidth - 25) / 2;
-            dateList.push({
-                date: i,
-                marginLeft: margin,
-                width: barWidth,
-                yearWidth: yearWidth,
-                title: '',
-                url: ''
-            });
-        }
-        return dateList;
     }
     var normalizeDate = function(year, interval) {
         year = year.toString();
