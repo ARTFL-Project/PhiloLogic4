@@ -190,12 +190,12 @@ At the end of generation, this directory will look like this tree::
                 \--- shared
                 \--- index.html
                 \--- PhiloLogicMain.js
-        \--- data
-        \--- functions
-        \--- reports
-        \--- scripts
-        \--- .htaccess
-        \--- dispatcher.py
+            \--- data
+            \--- functions
+            \--- reports
+            \--- scripts
+            \--- .htaccess
+            \--- dispatcher.py
 
 ----
 
