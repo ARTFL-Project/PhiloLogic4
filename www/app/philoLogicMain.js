@@ -43,7 +43,7 @@ philoApp.config(['$routeProvider', '$locationProvider',
             if (pathInfo[pathInfo.length - 1] == "table-of-contents") {
                 return 'app/components/tableOfContents/tableOfContents.html';
             } else {
-                return 'app/components/textObject/textObject.html';
+                return 'app/components/textNavigation/textNavigation.html';
             }
         }
       }).

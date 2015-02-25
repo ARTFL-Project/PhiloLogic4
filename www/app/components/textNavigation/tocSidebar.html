@@ -1,0 +1,17 @@
+<div id="toc-wrapper" class="col-xs-4">
+    <div class="panel panel-default toc-slide" id="toc-container" ng-show="tocOpen">
+        <div id="toc-titlebar">
+            <button type="button" class="btn btn-primary btn-xs pull-right" id="hide-toc" ng-click="toggleTableOfContents()">
+                <span class="glyphicon glyphicon-remove"></span>
+            </button>
+        </div>
+        <div id="toc-content">
+            <div ng-repeat="element in tocObject.toc">
+                <div id="{{ ::element.philo_id.split(' ').join('-') }}" class="toc-{{ ::element.philo_type }}" ng-click="goToTextObject(element.philo_id)">
+                    <span class="bullet-point-{{ ::element.philo_type }}"></span>
+                    <a href="">{{ ::element.label }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
