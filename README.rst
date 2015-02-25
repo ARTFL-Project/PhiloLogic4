@@ -47,7 +47,6 @@ Prerequisites
 * Make
 * `gdbm`_
 * `lxml`_
-* `Mako`_
 
 Installing the C library
 ------------------------------
@@ -69,7 +68,7 @@ Installing the `Python` ``philologic`` module system-wide
 
 Once ``libphilo`` is installed, we need to install its `Python` bindings
 and library: ``philologic``. Once again, this step requires administrator
-privileges. You probably want to install it's prerequistes, 'lxml'_ and 'mako'_, first.
+privileges. You probably want to install it's prerequiste, 'lxml'_, first.
 
 You can install the libraries either with Python's distutils:
 
@@ -183,13 +182,11 @@ At the end of generation, this directory will look like this tree::
 
     --- /var/www/html
       \--- mydatabase
-        \--- css
+        \--- app
         \--- data
         \--- functions
-        \--- js
         \--- reports
         \--- scripts
-        \--- templates
         \--- .htaccess
         \--- dispatcher.py
 
@@ -201,5 +198,4 @@ At the end of generation, this directory will look like this tree::
 .. _gdbm: http://www.gnu.org.ua/software/gdbm/
 .. _pip: http://www.pip-installer.org/
 .. _Apache httpd: http://httpd.apache.org/
-.. _Mako: http://makotemplates.org/
 .. _lxml: http://lxml.de/
