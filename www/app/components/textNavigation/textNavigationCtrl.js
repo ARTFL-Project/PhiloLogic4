@@ -9,34 +9,6 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
     $scope.loading = true; // Start a spinner while text is getting fetched
     $scope.tocDone = false // Only fetch TOC once navBar has been drawn
     
-    
-    var affixTopBar = function() {
-        // Previous and next button follow scroll
-        $('#nav-buttons, #toc-container').affix({
-            offset: {
-            top: function() {
-                return (this.top = $('#nav-buttons').offset().top)
-                }
-            }
-        });
-        $('#nav-buttons').on('affix.bs.affix', function() {
-            $(this).addClass('fixed');
-            $("#toc-container").addClass('fixed');
-            adjustTocHeight();
-            $('#back-to-top').velocity("stop").velocity('fadeIn', {duration: 200});
-        });
-        $('#nav-buttons').on('affix-top.bs.affix', function() {
-            $(this).removeClass('fixed');
-            $("#toc-container").removeClass('fixed').css('position', 'static');
-            adjustTocHeight();
-            $('#back-to-top').velocity("stop").velocity('fadeOut', {duration: 200});
-        });
-        
-        $('#back-to-top').click(function() {
-            $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
-        })
-    }
-    
     $scope.toggleTableOfContents = function() {
         if ($scope.tocOpen) {
             closeTableOfContents();
@@ -45,15 +17,15 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
         }
     }    
     var openTableOfContents = function() {
-        if ($(document).height() == $(window).height()) {
-            $('#toc-container').css('position', 'static');
-        }
+        //if ($(document).height() == $(window).height()) {
+        //    $('#toc-container').css('position', 'static');
+        //}
         $('#toc-wrapper').css('opacity', 1);
-        $('#nav-buttons').addClass('col-md-offset-4');
+        $('#nav-buttons').addClass('col-md-offset-4'); // could cause the margin issue
         $('#toc-wrapper').addClass('show');
+        $scope.adjustTocHeight();
         $scope.tocOpen = true;
         setTimeout(function() {
-            $scope.adjustTocHeight();
             // TODO: find why this doesn't work
             var scrollToID = $('#' + $scope.tocObject.philo_id.join('-'));
             scrollToID.velocity("scroll", {duration: 500, container: $("#toc-content"), offset: -50});
@@ -79,7 +51,11 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
         if (typeof num !="undefined") {
             toc_height = toc_height - num;
         }
-        $('#toc-content').velocity("stop").velocity({'max-height': toc_height + 'px'});
+        $('#toc-content').velocity({'max-height': toc_height + 'px'});
+    }
+    
+    $scope.backToTop = function() {
+        $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
     }
     
     $scope.goToTextObject = function(philoID) {

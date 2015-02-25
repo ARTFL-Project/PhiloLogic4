@@ -51,7 +51,6 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
         delete $rootScope.formData.start;
         delete $rootScope.formData.end;
         $scope.formOpen = false;
-        console.log(URL.objectToString($rootScope.formData, true))
         $location.url(URL.objectToString($rootScope.formData, true));
     }
 }]);

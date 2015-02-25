@@ -23,7 +23,6 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textObjectCit
     }
     var scrollToHighlight = function() {
         var word_offset = $('.highlight').eq(0).offset().top;
-        console.log(word_offset)
         if (word_offset == 0) {
             var note = $('.highlight').parents('.note-content');
             note.show(); // The highlight is in a hidden note
@@ -75,13 +74,27 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textObjectCit
     }    
 }]);
 
-philoApp.directive('tocSidebar', ['$routeParams', '$http', 'URL', 'textObjectCitation', function($routeParams, $http, URL, textObjectCitation) {
+philoApp.directive('tocSidebar', ['$routeParams', '$http', '$timeout', 'URL', 'textObjectCitation', function($routeParams, $http, $timeout, URL, textObjectCitation) {
     var getTableOfContents = function(scope) {
         var philoID = $routeParams.pathInfo.split('/').join(' ');
         var request = scope.philoConfig.db_url + '/' + URL.query({philo_id: philoID, script: 'get_table_of_contents.py'});
         $http.get(request).then(function(response) {
             scope.tocObject = response.data;
             scope.tocDone = true;
+            $timeout(function() {
+                $('#toc-container').affix({ offset: { top: function() {
+                    return (this.top = $('#toc-container').offset().top + 30)
+                    }
+                }});
+                $('#toc-container').on('affix.bs.affix', function() {
+                    $("#toc-container").addClass('fixed');
+                    scope.adjustTocHeight();
+                });
+                $('#toc-container').on('affix-top.bs.affix', function() {
+                    $("#toc-container").removeClass('fixed').css('position', 'static');
+                    scope.adjustTocHeight();
+                });
+            });
         });
     }
     return {
@@ -92,7 +105,7 @@ philoApp.directive('tocSidebar', ['$routeParams', '$http', 'URL', 'textObjectCit
     }
 }]);
 
-philoApp.directive('navigationBar', ['$routeParams', '$http', 'URL', 'textObjectCitation', function($routeParams, $http, URL, textObjectCitation) {
+philoApp.directive('navigationBar', ['$routeParams', '$http', '$timeout', 'URL', 'textObjectCitation', function($routeParams, $http, $timeout, URL, textObjectCitation) {
     var setUpNavBar = function(scope) {
         if (scope.textObject.next === "") {
             $('#next-obj').attr('disabled', 'disabled');
@@ -104,13 +117,30 @@ philoApp.directive('navigationBar', ['$routeParams', '$http', 'URL', 'textObject
         } else {
             $("#prev-obj").removeAttr('disabled');
         }
-    }
-    
+    }    
     return {
         templateUrl: 'app/components/textNavigation/navigationBar.html',
         link: function(scope, element, attrs) {
             setUpNavBar(scope);
             scope.navBar = true; // it's now drawn and shouldn't be removed
+            applyAffix()
+            function applyAffix() {
+                $timeout(function() {
+                    $('#nav-buttons').affix({ offset: { top: function() {
+                        return (this.top = $('#nav-buttons').offset().top)
+                        }
+                    }});
+                    $('#nav-buttons').on('affix.bs.affix', function() {
+                        $(this).addClass('fixed');
+                        $('#back-to-top').velocity("stop").velocity('fadeIn', {duration: 200});
+                    });
+                    $('#nav-buttons').on('affix-top.bs.affix', function() {
+                        $(this).removeClass('fixed');
+                        $('#back-to-top').velocity("stop").velocity('fadeOut', {duration: 200});
+                    });
+                });
+            }
+            
             attrs.$observe('tocDone', function(tocDone) {
                 if (tocDone) {
                     $("#show-toc").removeAttr("disabled");

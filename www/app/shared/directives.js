@@ -25,3 +25,24 @@ philoApp.directive('progressBar', function() {
         }
     }
 });
+
+philoApp.directive('affix', ['$rootScope', '$timeout', function($rootScope, $timeout) {
+    return {
+        link: function($scope, $element, $attrs) {
+
+            function applyAffix() {
+                $timeout(function() {                   
+                    $element.affix({ offset: { top: $attrs.affix } });
+                });
+            }
+
+            $rootScope.$on('$locationChangeStart', function() {
+                $element.removeData('bs.affix').removeClass('affix affix-top affix-bottom');
+                applyAffix();
+            });
+
+            applyAffix();
+
+        }
+    };
+}]);
