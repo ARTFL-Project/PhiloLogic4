@@ -6,7 +6,6 @@
         </div>
         <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
     </div>
-    {{ navBar }}
     <navigation-bar toc-done="{{ tocDone }}" ng-if="navBar === true || loading === false"></navigation-bar>
     <loading ng-if="loading"></loading>
     <div class="row" id="all-content">

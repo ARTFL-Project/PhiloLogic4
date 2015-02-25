@@ -10,7 +10,7 @@ philoApp.factory('radio', ['$rootScope', function($rootScope) {
     }
 }]);
 
-philoApp.factory('URL', function() {
+philoApp.factory('URL', ['$rootScope', function($rootScope) {
     return {
         objectToString: function(formData, url) {
             var obj = angular.copy(formData);
@@ -18,7 +18,14 @@ philoApp.factory('URL', function() {
             for (var p in obj) {
                 var k = p, 
                     v = obj[k];
-                str.push(angular.isObject(v) ? this.objectToString(v, k) : (k) + "=" + encodeURIComponent(v));
+                if (typeof(v) === 'object') {
+                    for (var i=0; i < v.length; i++) {
+                        str.push(angular.isObject(v[i]) ? this.query(v[i], k) : (k) + "=" + encodeURIComponent(v[i]));
+                    }
+                } else {
+                    str.push(angular.isObject(v) ? this.query(v, k) : (k) + "=" + encodeURIComponent(v));
+                }
+                //str.push(angular.isObject(v) ? this.objectToString(v, k) : (k) + "=" + encodeURIComponent(v));
             }
             return "dispatcher.py?" + str.join("&");
         },
@@ -28,8 +35,14 @@ philoApp.factory('URL', function() {
             for (var p in obj) {
                 var k = p, 
                     v = obj[k];
-                if (k !== "script") {
-                    str.push(angular.isObject(v) ? this.query(v, k) : (k) + "=" + encodeURIComponent(v));
+                if (k !== "script" && k!== "report") {
+                    if (typeof(v) === 'object') {
+                        for (var i=0; i < v.length; i++) {
+                            str.push(angular.isObject(v[i]) ? this.query(v[i], k) : (k) + "=" + encodeURIComponent(v[i]));
+                        }
+                    } else {
+                        str.push(angular.isObject(v) ? this.query(v, k) : (k) + "=" + encodeURIComponent(v));
+                    }
                 }
             }
             if ("script" in obj) {
@@ -43,7 +56,7 @@ philoApp.factory('URL', function() {
             return "dispatcher.py/" + pathInfo;
         }
     }
-});
+}]);
 
 philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
     return {

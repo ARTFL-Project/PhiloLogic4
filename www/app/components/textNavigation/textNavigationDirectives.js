@@ -23,6 +23,7 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textObjectCit
     }
     var scrollToHighlight = function() {
         var word_offset = $('.highlight').eq(0).offset().top;
+        console.log(word_offset)
         if (word_offset == 0) {
             var note = $('.highlight').parents('.note-content');
             note.show(); // The highlight is in a hidden note
