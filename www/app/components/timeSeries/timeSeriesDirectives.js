@@ -85,9 +85,9 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             if (start === 0) {
                 start = 1000;
             } else {
-                start += 5000;
+                start += 10000;
             }
-            end += 5000;
+            end += 10000;
             updateTimeSeries(scope, fullResults, start, end);
         } else {
             scope.percent = 100;
@@ -249,6 +249,12 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                         } else {
                             drawFromData(scope, scope.absoluteCounts, frequencyType);
                         }
+                    }
+                });
+                scope.restart = false; 
+                scope.$watch('restart', function() {
+                    if (scope.restart) {
+                        getTimeSeries(scope);
                     }
                 });
             }

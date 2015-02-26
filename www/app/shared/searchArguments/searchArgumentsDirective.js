@@ -38,7 +38,7 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL',
             $http.get(request).success(function(data) {
                 $location.url(URL.objectToString(queryParams, true));
             })
-        } else if (queryParams.report === "collocation") {
+        } else if (queryParams.report === "collocation" || queryParams.report === "time_series") {
             $location.url(URL.objectToString(queryParams));
             $rootScope.formData = queryParams;
             restart = true;

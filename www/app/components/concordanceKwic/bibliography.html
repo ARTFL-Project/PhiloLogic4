@@ -5,7 +5,7 @@
             <span class="philologic_cite">
                 <a href="{{result.citation.title.href}}" class="citation-small-caps"><i>{{ ::result.citation.title.label }}</i></a>
                 <span ng-if="result.citation.author" class="citation-small-caps">, {{ ::result.citation.author.label }}</span>
-                <span ng-if="result.citation.date">[{{ ::result.citation.date.label }}]</span>
+                <span ng-if="result.citation.date"><b>[{{ ::result.citation.date.label }}]</b></span>
                 <span ng-if="result.citation.more">{{ ::result.citation.more }}</span>
             </span>
         </li>
