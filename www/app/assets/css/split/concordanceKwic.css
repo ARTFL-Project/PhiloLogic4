@@ -32,6 +32,7 @@
 	position: absolute;
     box-shadow: 5px 5px 15px #C0C0C0;
 	display: inline !important;
+	opacity: 1;
 }
 #philologic_concordance, #colloc_concordance {
     list-style-type: none;
@@ -67,6 +68,9 @@
 	display: inline-block;
 	overflow: hidden;
 	vertical-align: bottom;
+}
+#kwic-switch {
+	margin-left: -3px;
 }
 
 @media (min-width: 1200px) {

@@ -27,6 +27,14 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
             $rootScope.results = results.data;
         })
 
+    $scope.showFullBiblio = function(event) {
+        target = $(event.currentTarget).find('.full_biblio');
+        target.addClass('show');
+    }
+    $scope.hideFullBiblio= function(event) {
+        target = $(event.currentTarget).find('.full_biblio');
+        target.removeClass('show');
+    }
     $rootScope.frequencyResults = [];
     $scope.resultsContainerWidth = "";
     $scope.sidebarWidth = '';

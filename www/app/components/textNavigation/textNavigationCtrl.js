@@ -1,12 +1,13 @@
 "use strict";
 
-philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$location', '$routeParams', 'URL', 'textObjectCitation',
-                                            function($scope, $rootScope, $http, $location, $routeParams, URL, textObjectCitation) {
+philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', 'location', '$routeParams', 'URL', 'textObjectCitation',
+                                            function($scope, $rootScope, $http, location, $routeParams, URL, textObjectCitation) {
     
     $rootScope.report = "textObject";
     $scope.textObject = {};
     $scope.navBar = false; // Don't draw navBar until text has been fetched
     $scope.loading = true; // Start a spinner while text is getting fetched
+    console.log($scope.tocDone)
     $scope.tocDone = false // Only fetch TOC once navBar has been drawn
     
     $scope.toggleTableOfContents = function() {
@@ -59,7 +60,8 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
     }
     
     $scope.goToTextObject = function(philoID) {
-        $location.url(URL.path(philoID));
+        location.skipReload().path(URL.path(philoID)).replace();
+        //$location.url();
     }
 }]);
 
