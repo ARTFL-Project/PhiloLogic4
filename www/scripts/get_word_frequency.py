@@ -15,32 +15,7 @@ import json
 import sqlite3
 import time
 
-"""    
-def get_word_attrib(n,field,db):
-    print >> sys.stderr, "HIT", repr(n.philo_id)
-    words = n.words
-    print >> sys.stderr, "WORDS", repr(words)
-    key = field
-    if key == "token":
-        key = "philo_name"
-    if key == "morph":
-        key = "pos"
-    print >> sys.stderr, "looking up %s" % key
-    val = ""
-    for word in words:
-        word_obj = word
-        if val:
-            val += "_"
-        if word_obj[key]:
-            val += word_obj[key]
-        else:
-            val += "NULL"
-        print >> sys.stderr, "ROW", repr(word_obj.row)
-    if isinstance(val,unicode):
-        return val.encode("utf-8")
 
-    return val
-"""
 def generate_word_frequency(hits,q,db,config):
     """reads through a hitlist. looks up q["field"] in each hit, and builds up a list of 
        unique values and their frequencies."""
