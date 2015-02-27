@@ -62,6 +62,7 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
         $location.url(URL.objectToString($rootScope.formData, true));
     }
     
+    $scope.selectedFacet = '';
     $scope.selectFacet = function(facetObj) {
         $scope.selectedFacet = facetObj;
     }

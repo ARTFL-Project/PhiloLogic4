@@ -74,16 +74,24 @@ philoApp.directive('sidebarMenu', ['$rootScope', '$http', 'URL', function($rootS
             if (typeof(facet) === "objet") {
                 facet = JSON.stringify(facet);
             }
-            facets.push({facet: facet, alias: alias});
+            facets.push({facet: facet, alias: alias, type: 'facet'});
         }
         return facets;
+    }
+    var populateCollocationFacets = function() {
+        var collocationFacets = [
+            {facet: "left_collocates", alias: "the left side", type: "collocationFacet"},
+            {facet: "all_collocates",  alias: "both sides", type: "collocationFacet"},
+            {facet: "right_collocates", alias: "the right side", type: "collocationFacet"}
+        ];
+        return collocationFacets;
     }
     var populateWordFacets = function() {
         var wordsFacets = [];
         for (var i=0; i < $rootScope.philoConfig.words_facets.length; i++) {
             var alias = Object.keys($rootScope.philoConfig.words_facets[i])[0];
             var facet = $rootScope.philoConfig.words_facets[i][alias];
-            wordsFacets.push({facet: facet, alias: alias});
+            wordsFacets.push({facet: facet, alias: alias, type: 'wordFacet'});
         }
         return wordsFacets;
     }
@@ -92,6 +100,7 @@ philoApp.directive('sidebarMenu', ['$rootScope', '$http', 'URL', function($rootS
         templateUrl: 'app/components/concordanceKwic/sidebarMenu.html',
         link: function(scope) {
             scope.facets = populateFacets();
+            scope.collocationFacets = populateCollocationFacets();
             scope.wordsFacets = populateWordFacets();
         }
     }
@@ -115,23 +124,31 @@ philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progre
             scope.loading = true;
             scope.percent = 0;
             var queryParams = angular.copy($rootScope.formData);
-            queryParams.frequency_field = facetObj.alias;
-            populateSidebar(scope, facetObj.alias, fullResults, totalResults, 0, 3000, queryParams);
+            if (facetObj.type === "facet") {
+                queryParams.script = "get_frequency.py";
+                queryParams.frequency_field = facetObj.alias;
+            } else if (facetObj.type === "collocationFacet") {
+                queryParams.report = "collocation";
+            } else {
+                queryParams.field = facetObj.facet;
+                queryParams.script = "get_word_frequency.py";
+            }
+            populateSidebar(scope, facetObj, fullResults, totalResults, 0, 3000, queryParams);
         }
     }
     var populateSidebar = function(scope, facet, fullResults, totalResults, start, end, queryParams) {
         if (start < totalResults) {
             queryParams.start = start;
             queryParams.end = end;
-            queryParams.script = "get_frequency.py"
             var request = URL.query(queryParams);
             $http.get(request)
             .then(function(results) {
                 var data = results.data;
                 scope.loading = false;
-                if ($('#selected-sidebar-option').data('interrupt') != true && $('#selected-sidebar-option').data('selected') == facet) {
-                    if (facet.match(/collocates$/)) {
-                        var merge = progressiveLoad.mergeResults(fullResults.unsorted, data[facet]);
+                scope.sidebarHeight = $('#philologic_concordance').height() - 20;
+                if ($('#selected-sidebar-option').data('interrupt') != true && $('#selected-sidebar-option').data('selected') == facet.alias) {
+                    if (facet.type === "collocationFacet") {
+                        var merge = progressiveLoad.mergeResults(fullResults.unsorted, data[facet.facet]);
                     } else {
                         var merge = progressiveLoad.mergeResults(fullResults.unsorted, data);
                     }

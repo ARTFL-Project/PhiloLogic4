@@ -160,6 +160,9 @@
 	padding-right: 0px;
 	margin-left: -15px;
 }
+#sidebar_display {
+	overflow-y: scroll;
+}
 #frequency_table {
     line-height: 300%;
     margin-top: 0px;
