@@ -58,6 +58,10 @@ def biblio_citation(hit, citation_hrefs):
         citation['author'] = {'href': '', 'label': hit.author.strip()}
     else:
         citation['author'] = False
+    if hit.date:
+        citation['date'] = {'href': '', 'label': hit.date.strip()}
+    else:
+        citation["date"] = False
     more_metadata = []
     if hit.pub_place:
         more_metadata.append(hit.pub_place.strip())
@@ -65,8 +69,6 @@ def biblio_citation(hit, citation_hrefs):
         more_metadata.append(hit.publisher.strip())
     if hit.collection:
         more_metadata.append(hit.collection.strip())
-    if hit.date:
-        more_metadata.append(hit.date.strip())
     if more_metadata:
         citation['more'] =  '(%s)' % ' '.join([i for i in more_metadata if i])
     else:

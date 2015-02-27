@@ -64,7 +64,8 @@ def get_text_obj(obj, config, q, word_regex):
     file.seek(byte_start)
     width = int(obj.byte_end) - byte_start
     raw_text = file.read(width)
-
+    
+    print >> sys.stderr, "BYTE", repr(q.byte)
     try:
         bytes = sorted([int(byte) - byte_start for byte in q.byte])
     except ValueError: ## q.byte contains an empty string
@@ -74,7 +75,6 @@ def get_text_obj(obj, config, q, word_regex):
     return formatted
 
 def format_text_object(text, config, q, word_regex, bytes=[]):
-    parser = etree.XMLParser(recover=True)
     if bytes:
         new_text = ""
         last_offset = 0
@@ -82,6 +82,7 @@ def format_text_object(text, config, q, word_regex, bytes=[]):
             new_text += text[last_offset:b] + "<philoHighlight/>"
             last_offset = b
         text = new_text + text[last_offset:]
+        print >> sys.stderr, "TEXT", text
     text = "<div>" + text + "</div>"
     xml = f.FragmentParser.parse(text)
     for el in xml.iter():        

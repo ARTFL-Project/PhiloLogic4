@@ -74,17 +74,14 @@ def generate_kwic_results(db, q, config, link_to_hit="div1"):
     for pos, result in enumerate(kwic_results):
         hrefs, text, hit, metadata_fields = result
         biblio, short_biblio = kwic_citation(shortest_citation_len, metadata_fields, hit[link_to_hit])
-        href = hrefs[link_to_hit]
+        citation = {}
         if len(short_biblio) < default_short_citation_len:
             diff = default_short_citation_len - len(short_biblio)
             short_biblio += '&nbsp;' * diff
-        short_biblio = '<span class="short_biblio">%s</span>' % short_biblio
-        full_biblio = '<span class="full_biblio" style="display:none;">%s</span>' % biblio
-        kwic_biblio = full_biblio + short_biblio
-        kwic_biblio_link = '<a href="%s" class="kwic_biblio">' % href + kwic_biblio + '</a>: '
-        kwic_results[pos] = {"philo_id": hit.philo_id, "context": kwic_biblio_link + '%s' % text, "metadata_fields": metadata_fields,
-                             "citation_links": hrefs, "citation": kwic_biblio_link, "bytes": hit.bytes}
-
+        citation['short_biblio'] = short_biblio
+        citation['full_biblio'] = biblio
+        kwic_results[pos] = {"philo_id": hit.philo_id, "context": text, "metadata_fields": metadata_fields,
+                             "citation_links": hrefs, "citation": citation, "bytes": hit.bytes}
     kwic_object['results'] = kwic_results
     kwic_object['results_length'] = len(hits)
     kwic_object["query_done"] = hits.done

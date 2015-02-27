@@ -30,7 +30,7 @@ philoApp.config(['$routeProvider', '$locationProvider',
         },
         controller: 'landingPage'
       }).
-      when('/dispatcher.py?:queryArgs', {
+      when('/query?:queryArgs', {
         templateUrl: function(queryArgs) {
             var report = queryArgs.report;
             if (report === "concordance" || report === "kwic" || report === "bibliography" || report === "concordance_from_collocation" || report === "word_property_filter") {
@@ -45,7 +45,7 @@ philoApp.config(['$routeProvider', '$locationProvider',
             return template;
         }
       }).
-      when('/dispatcher.py/:pathInfo*\/', {
+      when('/navigate/:pathInfo*\/', {
         templateUrl: function(queryArgs) {
             var pathInfo = queryArgs.pathInfo.split('/');
             if (pathInfo[pathInfo.length - 1] == "table-of-contents") {

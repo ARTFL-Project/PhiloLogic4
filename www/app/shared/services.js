@@ -27,7 +27,7 @@ philoApp.factory('URL', ['$rootScope', function($rootScope) {
                 }
                 //str.push(angular.isObject(v) ? this.objectToString(v, k) : (k) + "=" + encodeURIComponent(v));
             }
-            return "dispatcher.py?" + str.join("&");
+            return "query?" + str.join("&");
         },
         query: function(formData, url) {
             var obj = angular.copy(formData);
@@ -53,7 +53,7 @@ philoApp.factory('URL', ['$rootScope', function($rootScope) {
         },
         path: function(pathInfo) {
             pathInfo = pathInfo.split(' ').join('/');
-            return "dispatcher.py/" + pathInfo;
+            return "navigate/" + pathInfo;
         }
     }
 }]);
