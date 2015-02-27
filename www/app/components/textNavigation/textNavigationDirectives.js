@@ -1,6 +1,6 @@
 "use strict";
 
-philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textObjectCitation', function($routeParams, $http, URL, textObjectCitation) {
+philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textNavigationValues', function($routeParams, $http, URL, textNavigationValues) {
     var getTextObject = function(scope) {
         scope.textObjectURL = $routeParams;
         scope.philoID = scope.textObjectURL.pathInfo.split('/').join(' ');
@@ -9,11 +9,12 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textObjectCit
         } else {
             scope.byteOffset = ''
         }
-        scope.textObject = {citation: textObjectCitation.citation}; // Make sure we don't change citation if it has been already filled
+        scope.textObject = {citation: textNavigationValues.citation}; // Make sure we don't change citation if it has been already filled
         var request = scope.philoConfig.db_url + '/' + URL.query({report: "navigation", philo_id: scope.philoID, byte: scope.byteOffset});
         $http.get(request).then(function(response) {
             scope.textObject = response.data;
-            textObjectCitation.citation = response.data.citation;
+            textNavigationValues.citation = response.data.citation;
+            textNavigationValues.navBar = true;
             if (scope.byteOffset.length > 0 ) {
                 setTimeout(scrollToHighlight, 500);
                 setTimeout(createNoteLink, 500)
@@ -74,38 +75,49 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textObjectCit
     }    
 }]);
 
-philoApp.directive('tocSidebar', ['$routeParams', '$http', '$timeout', 'URL', 'textObjectCitation', function($routeParams, $http, $timeout, URL, textObjectCitation) {
+philoApp.directive('tocSidebar', ['$routeParams', '$http', '$timeout', 'URL', 'textNavigationValues', function($routeParams, $http, $timeout, URL, textNavigationValues) {
     var getTableOfContents = function(scope) {
         var philoID = $routeParams.pathInfo.split('/').join(' ');
         var request = scope.philoConfig.db_url + '/' + URL.query({philo_id: philoID, script: 'get_table_of_contents.py'});
         $http.get(request).then(function(response) {
             scope.tocObject = response.data;
+            textNavigationValues.tocObject = response.data;
             scope.tocDone = true;
-            $timeout(function() {
-                $('#toc-container').affix({ offset: { top: function() {
-                    return (this.top = $('#toc-container').offset().top + 30)
-                    }
-                }});
-                $('#toc-container').on('affix.bs.affix', function() {
-                    $("#toc-container").addClass('fixed');
-                    scope.adjustTocHeight();
-                });
-                $('#toc-container').on('affix-top.bs.affix', function() {
-                    $("#toc-container").removeClass('fixed').css('position', 'static');
-                    scope.adjustTocHeight();
-                });
+            affixTOC(scope);
+        });
+    }
+    var affixTOC = function(scope) {
+        $timeout(function() {
+            $('#toc-container').affix({ offset: { top: function() {
+                return (this.top = $('#toc-container').offset().top + 30)
+                }
+            }});
+            $('#toc-container').on('affix.bs.affix', function() {
+                $("#toc-container").addClass('fixed');
+                scope.adjustTocHeight();
+            });
+            $('#toc-container').on('affix-top.bs.affix', function() {
+                $("#toc-container").removeClass('fixed').css('position', 'static');
+                scope.adjustTocHeight();
             });
         });
     }
     return {
         templateUrl: 'app/components/textNavigation/tocSidebar.html',
         link: function(scope, element, attrs) {
-            getTableOfContents(scope);
+            if (!textNavigationValues.tocObject) {
+                getTableOfContents(scope);
+            } else {
+                scope.tocObject = textNavigationValues.tocObject;
+                affixTOC(scope);
+                scope.tocDone = true;
+            }
+           
         }
     }
 }]);
 
-philoApp.directive('navigationBar', ['$routeParams', '$http', '$timeout', 'URL', 'textObjectCitation', function($routeParams, $http, $timeout, URL, textObjectCitation) {
+philoApp.directive('navigationBar', ['$routeParams', '$http', '$timeout', 'URL', function($routeParams, $http, $timeout, URL) {
     var setUpNavBar = function(scope) {
         if (scope.textObject.next === "") {
             $('#next-obj').attr('disabled', 'disabled');

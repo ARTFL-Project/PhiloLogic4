@@ -1,6 +1,6 @@
 var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'angular-velocity']);
 
-philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', function($rootScope, $scope, $location) {
+philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'textNavigationValues', function($rootScope, $scope, $location, textNavigationValues) {
     $rootScope.philoConfig = philoConfig;
     $rootScope.formData = {
         report: philoConfig.search_reports[0],
@@ -11,6 +11,14 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', function(
     $scope.$on('$locationChangeStart', function() {
         $rootScope.report = $location.search().report;
     });
+    //$rootScope.$watch('report', function(report) { // Doesn't recognize textNavigation
+    //    if (report !== 'textNavigation') {
+    //        console.log(report)
+    //        textNavigationValues.citation = {};
+    //        textNavigationValues.tocObject = false;
+    //        textNavigationValues.navBar = false;
+    //    }
+    //});
 }]);
 
 philoApp.config(['$routeProvider', '$locationProvider',

@@ -11,8 +11,6 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
         $('#' + $rootScope.formData.report).parent().addClass('active');
     }
     
-    $rootScope.textObjectCitation = {} // Clear citation in text Objects
-    
     var oldResults = angular.copy($rootScope.results)
     if ("results" in oldResults) {
         delete $rootScope.results.results;

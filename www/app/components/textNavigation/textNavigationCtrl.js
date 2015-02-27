@@ -1,13 +1,13 @@
 "use strict";
 
-philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', 'location', '$routeParams', 'URL', 'textObjectCitation',
-                                            function($scope, $rootScope, $http, location, $routeParams, URL, textObjectCitation) {
+philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$location', '$routeParams', 'URL', 'textNavigationValues',
+                                            function($scope, $rootScope, $http, $location, $routeParams, URL, textNavigationValues) {
     
-    $rootScope.report = "textObject";
+    $rootScope.report = "textNavigation";
     $scope.textObject = {};
-    $scope.navBar = false; // Don't draw navBar until text has been fetched
+    $scope.navBar = textNavigationValues.navBar; // Don't draw navBar until text has been fetched
+    $scope.tocObject = textNavigationValues.tocObject;
     $scope.loading = true; // Start a spinner while text is getting fetched
-    console.log($scope.tocDone)
     $scope.tocDone = false // Only fetch TOC once navBar has been drawn
     
     $scope.toggleTableOfContents = function() {
@@ -18,9 +18,6 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', 'locatio
         }
     }    
     var openTableOfContents = function() {
-        //if ($(document).height() == $(window).height()) {
-        //    $('#toc-container').css('position', 'static');
-        //}
         $('#toc-wrapper').css('opacity', 1);
         $('#nav-buttons').addClass('col-md-offset-4'); // could cause the margin issue
         $('#toc-wrapper').addClass('show');
@@ -60,8 +57,7 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', 'locatio
     }
     
     $scope.goToTextObject = function(philoID) {
-        location.skipReload().path(URL.path(philoID)).replace();
-        //$location.url();
+        $location.url(URL.path(philoID));
     }
 }]);
 
