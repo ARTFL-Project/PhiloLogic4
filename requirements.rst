@@ -1,4 +1,4 @@
-Requirement
+Requirements
 ===========
 
 `PhiloLogic4` runs only on `Unix` and derivated operating systems,
