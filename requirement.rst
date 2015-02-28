@@ -3,8 +3,7 @@ Requirement
 
 `PhiloLogic4` runs only on `Unix` and derivated operating systems,
 which includes most `Linux` distributions and `Mac OS X`.
-It currently needs additional softwares do be available
-on your system:
+Here are the dependencies:
 
 +-----------------------+-----------------------+-------------------------+
 | 3rd party             | versions              | `PhiloLogic4` component |
