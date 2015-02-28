@@ -17,12 +17,6 @@ Here are the dependencies:
 | `Apache httpd`_       |                       | web application         |
 +-----------------------+-----------------------+-------------------------+
 
-.. note::
-
-    Also, *installation* of both dependancies and component could require
-    other softwares, and we list some of them in ``INSTALLING.rst`` document.
-
-
 .. Links:
 
 .. _gdbm: http://www.gnu.org.ua/software/gdbm/
