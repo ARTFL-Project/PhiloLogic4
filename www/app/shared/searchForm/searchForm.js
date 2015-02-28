@@ -45,11 +45,11 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
         $('.ui-autocomplete').hide();
         if (typeof($rootScope.formData.q) === "undefined" || $rootScope.formData.q === '') {
             $rootScope.formData.report = "bibliography";
-        } else if ($scope.formData.report === "bibliography" && typeof($rootScope.formData.q) !== "undefined") {
-            if ($("#report label.active input").length === 0) {
+        } else if ($rootScope.formData.report === "bibliography" && typeof($rootScope.formData.q) !== "undefined") {
+            if ($("#report label.active").length === 0) {
                 $rootScope.formData.report = "concordance";
             } else {
-                $rootScope.formData.report = $("#report label.active input").attr('id');
+                $rootScope.formData.report = $("#report label.active").attr('id');
             }
         } else if ($rootScope.formData.report === "undefined") {
             $rootScope.formData.report = "concordance";

@@ -2,12 +2,12 @@ var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', '
 
 philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'textNavigationValues', function($rootScope, $scope, $location, textNavigationValues) {
     $rootScope.philoConfig = philoConfig;
+    $rootScope.report = $location.search().report || philoReport;
     $rootScope.formData = {
-        report: philoConfig.search_reports[0],
+        report: $rootScope.report,
         method: "proxy"
         };
     $rootScope.results = {};
-    $rootScope.report = philoReport;
     $scope.$on('$locationChangeStart', function() {
         var paths = $location.path().split('/');
         if (paths[1] == "query") {

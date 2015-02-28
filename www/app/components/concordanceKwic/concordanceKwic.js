@@ -6,10 +6,6 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
         queryParams.report = "bibliography";
         $location.url(URL.objectToString(queryParams, true));
     }
-    if ($rootScope.formData.report !== $('#reports label.active input').attr('id')) {
-        $('#report label').removeClass('active');
-        $('#' + $rootScope.formData.report).parent().addClass('active');
-    }
     
     var oldResults = angular.copy($rootScope.results)
     if ("results" in oldResults) {
@@ -57,6 +53,8 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
     
     $scope.switchTo = function(report) {
         $rootScope.formData.report = report;
+        $('#report label').removeClass('active');
+        $('#' + report).addClass('active');
         $location.url(URL.objectToString($rootScope.formData, true));
     }
     

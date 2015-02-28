@@ -9,6 +9,12 @@
 	width: 100%;
 	text-align: center;
 }
+@media (max-width: 768px) {
+	.navbar-header {
+		font-size: 80%;
+		margin-top: 5px;
+	}
+}
 .navbar-header a {
 	font-variant: small-caps;
 	float: none;

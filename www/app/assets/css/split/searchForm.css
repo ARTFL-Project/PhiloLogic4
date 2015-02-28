@@ -163,6 +163,9 @@
 	#philologic_response {
 		margin-top: 170px;
 	}
+	#search-elements {
+		margin-top: 148px;
+	}
 }
 @media (max-width: 768px) {
 	#right-act-on-report .btn-group {
@@ -170,6 +173,7 @@
 	}
 	#search-elements {
 		padding-right: 20px;
+		margin-top: 160px;
 	}
 	#philologic_response {
 		margin-top: 190px;
@@ -177,5 +181,8 @@
 	#initial-form, #search-elements {
 		left: 15px;
 		right: 15px;
+	}
+	#kwic, #time_series {
+		display: none;
 	}
 }

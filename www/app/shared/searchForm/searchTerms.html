@@ -1,0 +1,26 @@
+<div id="search_terms_container">
+    <div id="search_terms" class="row">
+        <div class="col-xs-12 col-sm-2 text-row">
+            Search Terms:
+        </div>
+        <div class="col-xs-12 col-sm-10 col-md-6">
+            <div class="input-group">
+                <span class="input-group-btn hidden-xs">
+                    <button class="btn btn-default" type="button" id="tip-btn" data-toggle="modal" data-target="#syntax">
+                        <span id="tip">?</span><span id="tip-text">Tips</span>
+                    </button>
+                </span>
+                <input type='text' name='q' id='q' class="form-control" autocomplete-term ng-model="formData.q">
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-primary" id="button-search">
+                        <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
+                    </button>
+                </span> 
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-12 col-md-4" id="search-buttons">
+            <button type="reset" id="reset_form" class="btn btn-danger" ng-click="clearFormData()">Clear</button>
+            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" ng-click="toggleForm()">Show search options</button>
+        </div>
+    </div>
+</div>

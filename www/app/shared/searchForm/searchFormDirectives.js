@@ -1,4 +1,14 @@
-philoApp.directive('searchReports', ['$rootScope', function($rootScope) {
+philoApp.directive('searchForm', ['$rootScope', function($rootScope) {
+    return {
+        templateUrl: 'app/shared/searchForm/searchForm.html',
+        scope: false,
+        link: function(scope, element, attrs) {
+            
+        }
+    }
+}]);
+
+philoApp.directive('searchReports', ['$rootScope', '$location', function($rootScope, $location) {
     var reportSetUp = function(reportSelected) {
         reportSelected = angular.copy(reportSelected);
         if (reportSelected === "bibliography" || reportSelected === "landing_page") {
@@ -23,23 +33,37 @@ philoApp.directive('searchReports', ['$rootScope', function($rootScope) {
     return {
         restrict: 'E',
         templateUrl: 'app/shared/searchForm/searchReports.html',
+        scope: {report: '=formData'},
         link: function(scope, element, attrs) {
-            scope.reports = reportSetUp($rootScope.formData.report); // First report is active
-            setTimeout(function() { // Make sure the reports are loaded properly before being displayed
-                $('#search').show();
-            }, 250);
+            console.log(scope.formData)
             scope.reportChange = reportChange;
-            scope.report = $rootScope.formData.report;
             scope.$watch('report', function(report) {
                 var reportToSelect = angular.copy(report);
                 if (reportToSelect === "bibliography") {
                     reportToSelect = "concordance"
+                } else if (reportToSelect === "textNavigation" || reportToSelect === "table-of-contents") {
+                    reportToSelect = "concordance";
+                } else if (typeof(reportToSelect) == "undefined") {
+                    reportToSelect = $location.search().report || "concordance";
                 }
                 scope.reports = reportChange(reportToSelect);
             });
         }
     }
 }]);
+
+philoApp.directive('searchTerms', function() {
+    return {
+        templateUrl: 'app/shared/searchForm/searchTerms.html'
+    }
+});
+
+philoApp.directive('searchMethods', function() {
+    return {
+        templateUrl: 'app/shared/searchForm/searchMethods.html',
+        scope: false
+    }
+});
 
 philoApp.directive('metadataFields', ['$rootScope', function($rootScope) {
     var buildMetadata = function() {
