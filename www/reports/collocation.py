@@ -35,7 +35,7 @@ def collocation(environ,start_response):
     yield json.dumps(collocation_object)
 
 def fetch_collocation(hits, q, db, config):
-    collocation_object = {"query": dict([i for i in q]), "results_length": len(hits)}
+    collocation_object = {"query": dict([i for i in q])}
     
     length = config['concordance_length']
     try:
@@ -63,34 +63,41 @@ def fetch_collocation(hits, q, db, config):
     
     count = 0
     
-    for hit in hits[q.start:q.end]:
-        conc_left, conc_right = split_concordance(hit, length, config.db_path)
-        left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
-        right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)
-        
-        for left_word in left_words:
-            try:
-                left_collocates[left_word]['count'] += 1
-            except KeyError:
-                left_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="left", collocate=left_word.encode('utf-8'))}
-            try:
-                all_collocates[left_word]['count'] += 1
-            except KeyError:
-                all_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="all", collocate=left_word.encode('utf-8'))}
-
-        for right_word in right_words:
-            try:
-                right_collocates[right_word]['count'] += 1
-            except KeyError:
-                right_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="right", collocate=right_word.encode('utf-8'))}
-            try:
-                all_collocates[right_word]['count'] += 1
-            except KeyError:
-                all_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="all", collocate=right_word.encode('utf-8'))}
+    more_results = True
+    try:
+        for hit in hits[q.start:q.end]:
+            conc_left, conc_right = split_concordance(hit, length, config.db_path)
+            left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
+            right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)
+            
+            for left_word in left_words:
+                try:
+                    left_collocates[left_word]['count'] += 1
+                except KeyError:
+                    left_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="left", collocate=left_word.encode('utf-8'))}
+                try:
+                    all_collocates[left_word]['count'] += 1
+                except KeyError:
+                    all_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="all", collocate=left_word.encode('utf-8'))}
     
-    collocation_object['all_collocates'] = all_collocates
-    collocation_object['left_collocates'] = left_collocates
-    collocation_object['right_collocates'] = right_collocates
+            for right_word in right_words:
+                try:
+                    right_collocates[right_word]['count'] += 1
+                except KeyError:
+                    right_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="right", collocate=right_word.encode('utf-8'))}
+                try:
+                    all_collocates[right_word]['count'] += 1
+                except KeyError:
+                    all_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="all", collocate=right_word.encode('utf-8'))}
+        
+        collocation_object['all_collocates'] = all_collocates
+        collocation_object['left_collocates'] = left_collocates
+        collocation_object['right_collocates'] = right_collocates
+    except IndexError: ## We've gone beyond the hitlist
+        more_results = False
+    
+    collocation_object["results_length"] = len(hits)
+    collocation_object['more_results'] = more_results
     
     return collocation_object
 

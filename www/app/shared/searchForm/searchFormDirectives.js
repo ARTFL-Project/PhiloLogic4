@@ -1,10 +1,7 @@
 philoApp.directive('searchForm', ['$rootScope', function($rootScope) {
     return {
         templateUrl: 'app/shared/searchForm/searchForm.html',
-        scope: false,
-        link: function(scope, element, attrs) {
-            
-        }
+        scope: false
     }
 }]);
 
@@ -35,7 +32,6 @@ philoApp.directive('searchReports', ['$rootScope', '$location', function($rootSc
         templateUrl: 'app/shared/searchForm/searchReports.html',
         scope: {report: '=formData'},
         link: function(scope, element, attrs) {
-            console.log(scope.formData)
             scope.reportChange = reportChange;
             scope.$watch('report', function(report) {
                 var reportToSelect = angular.copy(report);
