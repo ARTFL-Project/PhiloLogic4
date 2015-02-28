@@ -3,7 +3,6 @@
 philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$location', '$routeParams', 'URL', 'textNavigationValues',
                                             function($scope, $rootScope, $http, $location, $routeParams, URL, textNavigationValues) {
     
-    $rootScope.report = "textNavigation";
     $scope.textObject = {};
     $scope.navBar = textNavigationValues.navBar; // Don't draw navBar until text has been fetched
     $scope.tocObject = textNavigationValues.tocObject;

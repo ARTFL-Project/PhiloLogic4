@@ -25,7 +25,6 @@ philoApp.factory('URL', ['$rootScope', function($rootScope) {
                 } else {
                     str.push(angular.isObject(v) ? this.query(v, k) : (k) + "=" + encodeURIComponent(v));
                 }
-                //str.push(angular.isObject(v) ? this.objectToString(v, k) : (k) + "=" + encodeURIComponent(v));
             }
             return "query?" + str.join("&");
         },

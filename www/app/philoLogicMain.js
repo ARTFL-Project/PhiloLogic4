@@ -9,16 +9,20 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'textNavi
     $rootScope.results = {};
     $rootScope.report = philoReport;
     $scope.$on('$locationChangeStart', function() {
-        $rootScope.report = $location.search().report;
+        var paths = $location.path().split('/');
+        if (paths[1] == "query") {
+            $rootScope.report = $location.search().report;
+        } else if (paths[2] === "table-of-contents") {
+            $rootScope.report = "table-of-contents";
+        } else {
+            $rootScope.report = 'textNavigation';
+        }
+        if ($rootScope.report !== 'textNavigation') {
+            textNavigationValues.citation = {};
+            textNavigationValues.tocObject = false;
+            textNavigationValues.navBar = false;
+        }
     });
-    //$rootScope.$watch('report', function(report) { // Doesn't recognize textNavigation
-    //    if (report !== 'textNavigation') {
-    //        console.log(report)
-    //        textNavigationValues.citation = {};
-    //        textNavigationValues.tocObject = false;
-    //        textNavigationValues.navBar = false;
-    //    }
-    //});
 }]);
 
 philoApp.config(['$routeProvider', '$locationProvider',

@@ -25,7 +25,7 @@ philoApp.directive('searchReports', ['$rootScope', function($rootScope) {
         templateUrl: 'app/shared/searchForm/searchReports.html',
         link: function(scope, element, attrs) {
             scope.reports = reportSetUp($rootScope.formData.report); // First report is active
-            setTimeout(function() { // Workaround to make sure the reports are loaded properly before being displayed
+            setTimeout(function() { // Make sure the reports are loaded properly before being displayed
                 $('#search').show();
             }, 250);
             scope.reportChange = reportChange;
@@ -106,7 +106,7 @@ philoApp.directive('resultsPerPage', ['$rootScope', function($rootScope) {
     return {
         templateUrl: 'app/shared/searchForm/resultsPerPage.html',
         link: function() {
-            $rootScope.results_per_page = "25";
+            $rootScope.formData.results_per_page = "25";
         }
     }
 }]);
@@ -185,32 +185,32 @@ philoApp.directive('autocompleteTerm', ['$rootScope', function($rootScope) {
 philoApp.directive('autocompleteMetadata', ['$rootScope', function($rootScope) {
     var autocomplete = function(element, field) {
         element.autocomplete({
-        source: 'scripts/autocomplete_metadata.py?field=' + field,
-        minLength: 2,
-        timeout: 1000,
-        dataType: "json",
-        focus: function( event, ui ) {
-            var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-            q = q.replace(/ CUTHERE /, ' ');
-            return false;
-        },
-        select: function( event, ui ) {
-            var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-            q = q.split('|');
-            q[q.length - 1] = q[q.length - 1].replace(/.*CUTHERE /, '');
-            q[q.length-1] = '\"' + q[q.length-1].replace(/^\s*/g, '') + '\"'; 
-            q = q.join('|').replace(/""/g, '"');
-            element.val(q);
-            $rootScope.formData[field] = q
-            return false;
-        }
+            source: 'scripts/autocomplete_metadata.py?field=' + field,
+            minLength: 2,
+            timeout: 1000,
+            dataType: "json",
+            focus: function( event, ui ) {
+                var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+                q = q.replace(/ CUTHERE /, ' ');
+                return false;
+            },
+            select: function( event, ui ) {
+                var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
+                q = q.split('|');
+                q[q.length - 1] = q[q.length - 1].replace(/.*CUTHERE /, '');
+                q[q.length-1] = '\"' + q[q.length-1].replace(/^\s*/g, '') + '\"'; 
+                q = q.join('|').replace(/""/g, '"');
+                element.val(q);
+                $rootScope.formData[field] = q
+                return false;
+            }
         }).data("ui-autocomplete")._renderItem = function (ul, item) {
             var term = item.label.replace(/.*(?=CUTHERE)CUTHERE /, '');
             return $("<li></li>")
                 .data("item.autocomplete", item)
                 .append(term)
                 .appendTo(ul);
-         };
+        };
     }
     return {
         restrict: 'A',

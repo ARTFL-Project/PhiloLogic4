@@ -46,8 +46,15 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
         if (typeof($rootScope.formData.q) === "undefined" || $rootScope.formData.q === '') {
             $rootScope.formData.report = "bibliography";
         } else if ($scope.formData.report === "bibliography" && typeof($rootScope.formData.q) !== "undefined") {
-            $rootScope.formData.report = $("#report label.active input").attr('id');
+            if ($("#report label.active input").length === 0) {
+                $rootScope.formData.report = "concordance";
+            } else {
+                $rootScope.formData.report = $("#report label.active input").attr('id');
+            }
+        } else if ($rootScope.formData.report === "undefined") {
+            $rootScope.formData.report = "concordance";
         }
+        
         delete $rootScope.formData.start;
         delete $rootScope.formData.end;
         $scope.formOpen = false;
