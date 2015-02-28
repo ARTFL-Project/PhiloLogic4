@@ -86,6 +86,7 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
         }
         if (typeof(fullResults) === "undefined") {
             fullResults = {"all_collocates": {}, 'left_collocates': {}, 'right_collocates': {}}
+            scope.filterList = data.filter_list;
         }
         var all = progressiveLoad.mergeResults(fullResults["all_collocates"], data["all_collocates"]);
         var left = progressiveLoad.mergeResults(fullResults["left_collocates"], data['left_collocates']);
@@ -106,7 +107,6 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
             updateCollocation(scope, tempFullResults, resultsLength, start, end);
         } else {
             scope.percent = 100;
-            scope.filterList = data.filter_list;
             scope.done = true;
             activateLinks();
             save({results: scope.sortedLists, resultsLength: scope.resultsLength, filterList: scope.filterList});
@@ -146,3 +146,18 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
             }
     }
 }]);
+
+philoApp.directive('collocationParameters', function() {
+    return {
+        templateUrl: 'app/components/collocation/collocationParameters.html',
+        link: function(scope) {
+            scope.collocationParams = {
+                q: scope.formData.q,
+                wordNum: scope.formData.word_num,
+                collocFilterChoice: scope.formData.colloc_filter_choice,
+                collocFilterFrequency: scope.formData.filter_frequency,
+                collocFilterList: scope.formData.filter_list
+            }
+        }
+    }
+});

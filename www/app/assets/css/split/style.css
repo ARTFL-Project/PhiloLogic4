@@ -137,7 +137,6 @@ s {
 	cursor: pointer;
 }
 #filter-list {
-	display: none;
 	position: absolute;
 	z-index: 100;
 	padding: 20px;

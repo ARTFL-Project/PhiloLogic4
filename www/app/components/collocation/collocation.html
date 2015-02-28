@@ -8,20 +8,7 @@
                 <search-arguments></search-arguments>
             </div>
             <progress-bar progress="{{ percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{ duration: 400 }" ng-if="done === false"></progress-bar>
-            <div style="padding-left: 15px;">
-                <span ng-if="collocationParams.collocFilterChoice === 'stopwords'">
-                    <a id="filter-list-trigger" ng-click="toggleFilterList()">Common function words</a> are being filtered from this report.
-                </span>
-                <span ng-if="collocationParams.collocFilterChoice === 'frequency'"">
-                    <a id="filter-list-trigger" ng-click="toggleFilterList()">The {{ ::collocationParams.filterFrequency }} most common words</a> are being filtered from this report.
-                </span>
-                <div class="panel panel-default" id="filter-list" ng-if="filterList">
-                    <button type="button" class="close" ng-click="toggleFilterList()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    <ol>
-                        <li ng-repeat="word in filterList">{{ ::word }}</li>
-                    </ol>
-                </div>
-            </div>
+            <collocation-parameters></collocation-parameters>
             <div class="bg-danger" style="margin-top: 20px; width: 50%;" ng-if="config.debug">
                 {{ ::error }}
             </div>
