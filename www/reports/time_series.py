@@ -72,41 +72,46 @@ def generate_time_series(config, q, db, hits):
         q.end = 3000
     
     count = 0
-    for i in hits[q.start:q.end]:
-        date = i.date
-        try:
-            if date:
-                date = int(date)
-                if not date <= end :
-                    continue
-                if q["year_interval"] == "10":
-                    date = int(str(date)[:-1] + '0')
-                elif q['year_interval'] == "100":
-                    date = int(str(date)[:-2] + '00')
-                elif q['year_interval'] == '50':
-                    decade = int(str(date)[-2:])
-                    if decade < 50:
+    more_results = True
+    try:
+        for i in hits[q.start:q.end]:
+            date = i.date
+            try:
+                if date:
+                    date = int(date)
+                    if not date <= end :
+                        continue
+                    if q["year_interval"] == "10":
+                        date = int(str(date)[:-1] + '0')
+                    elif q['year_interval'] == "100":
                         date = int(str(date)[:-2] + '00')
-                    else:
-                        date = int(str(date)[:-2] + '50')
-                    
-            else:
-                print >> sys.stderr, "No valid dates for %s: %s, %s" % (i.filename, i.author, i.title)
+                    elif q['year_interval'] == '50':
+                        decade = int(str(date)[-2:])
+                        if decade < 50:
+                            date = int(str(date)[:-2] + '00')
+                        else:
+                            date = int(str(date)[:-2] + '50')
+                        
+                else:
+                    print >> sys.stderr, "No valid dates for %s: %s, %s" % (i.filename, i.author, i.title)
+                    continue
+            except ValueError: ## No valid date
                 continue
-        except ValueError: ## No valid date
-            continue
-        
-        count += 1
-        if date not in absolute_count:
-            end_date = date + int(q["year_interval"]) - 1
-            date_range = "%d-%d" % (date, end_date)
-            url = f.link.make_absolute_query_link(config, q, report="concordance", date=date_range, start="0", end="0")
-            absolute_count[date] = {"label": date, "count": 0, "url": url}
-        absolute_count[date]['count'] += 1
-        
-        if date not in date_counts:
-            date_counts[date] = date_total_count(date, db, q['year_interval'])
             
+            count += 1
+            if date not in absolute_count:
+                end_date = date + int(q["year_interval"]) - 1
+                date_range = "%d-%d" % (date, end_date)
+                url = f.link.make_absolute_query_link(config, q, report="concordance", date=date_range, start="0", end="0")
+                absolute_count[date] = {"label": date, "count": 0, "url": url}
+            absolute_count[date]['count'] += 1
+            
+            if date not in date_counts:
+                date_counts[date] = date_total_count(date, db, q['year_interval'])
+    except IndexError:
+        more_results = False
+    
+    time_series_object['more_results'] = more_results
     time_series_object['results_length'] = len(hits)
     time_series_object['query_done'] = hits.done
     time_series_object['results'] = {'absolute_count': absolute_count, 'date_count': date_counts}
