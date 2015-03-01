@@ -55,22 +55,9 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         var request = scope.philoConfig.db_url + '/' + URL.query($rootScope.formData);
         $http.get(request).then(function(results) {
             var timeSeriesResults = results.data;
-            for (var date in timeSeriesResults.results.date_count) { // Update date counts
-                scope.dateCounts[date] = timeSeriesResults.results.date_count[date];
-            }
-            if (!scope.resultsLength) {
-                // Fetch total results now since we know the hitlist will be fully on disk
-                var queryParams = angular.copy($rootScope.formData)
-                queryParams.script = "get_total_results.py";
-                queryParams.date = timeSeriesResults.query.date;
-                $http.get(scope.philoConfig.db_url + '/' + URL.query(queryParams))
-                .success(function(length, status, headers, config) {
-                    scope.resultsLength = length;
-                    sortAndRenderTimeSeries(scope, fullResults, timeSeriesResults, start, end)
-                })
-            } else {
-                sortAndRenderTimeSeries(scope, fullResults, timeSeriesResults, start, end)
-            }
+            scope.resultsLength = timeSeriesResults.results_length;
+            scope.moreResults = timeSeriesResults.more_results;
+            sortAndRenderTimeSeries(scope, fullResults, timeSeriesResults, start, end)
         });
     }
     var sortAndRenderTimeSeries = function(scope, fullResults, timeSeriesResults, start, end) {
@@ -81,7 +68,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         fullResults = allResults.unsorted;
         scope.absoluteCounts = allResults.sorted;
         drawFromData(scope, allResults.sorted, "absolute_time");
-        if (end < scope.resultsLength) {
+        if (scope.moreResults) {
             if (start === 0) {
                 start = 1000;
             } else {
@@ -103,7 +90,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                 startDate: scope.startDate,
                 endDate: scope.endDate
             }
-            //save(objectToSave); This is quite working correctly.
+            //save(objectToSave); This isn't quite working correctly.
         }
     }
     var drawFromData = function(scope, data, frequencyType) {
