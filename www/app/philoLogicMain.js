@@ -7,7 +7,7 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'textNavi
         report: $rootScope.report,
         method: "proxy"
         };
-    $rootScope.results = {};
+    //$rootScope.results = {};
     $scope.$on('$locationChangeStart', function() {
         var paths = $location.path().split('/');
         if (paths[1] == "query") {

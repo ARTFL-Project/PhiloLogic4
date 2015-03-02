@@ -10,6 +10,16 @@ philoApp.factory('radio', ['$rootScope', function($rootScope) {
     }
 }]);
 
+philoApp.factory('request', ['$http', 'URL', function($http, URL) {
+    return {
+        query: function(queryParams) {
+            var request = URL.query(queryParams);
+            return $http.get(request);
+        }
+        
+    }
+}]);
+
 philoApp.factory('URL', ['$rootScope', function($rootScope) {
     return {
         objectToString: function(formData, url) {
@@ -45,7 +55,7 @@ philoApp.factory('URL', ['$rootScope', function($rootScope) {
                 }
             }
             if ("script" in obj) {
-                return "scripts/" + obj.script + '?' + str.join("&");
+                return "scripts/" + obj.script + '?' + str.join("&") + '&report=' + obj.report;
             } else {
                 return "reports/" + obj.report + '.py?' + str.join("&");
             }
@@ -63,14 +73,16 @@ philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
             if (typeof fullResults === 'undefined') {
                 fullResults = newData;
             } else {
-                for (var key in newData) {
-                    if (key in fullResults) {
-                        fullResults[key].count += newData[key].count;
+                angular.forEach(newData, function(value, key) {
+                    if (typeof value.count !== 'undefined') {
+                       if (key in fullResults) {
+                        fullResults[key].count += value.count;
+                        }
+                        else {
+                            fullResults[key] = value;
+                        }
                     }
-                    else {
-                        fullResults[key] = newData[key];
-                    }
-                }
+                });
             }
             var sortedList = this.sortResults(fullResults, sortKey);
             return {"sorted": sortedList, "unsorted": fullResults};

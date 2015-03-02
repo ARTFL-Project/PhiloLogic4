@@ -1,4 +1,4 @@
-philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL', function($scope, $rootScope, $http, $location, radio, URL) {
+philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$location', 'request', 'URL', function($scope, $rootScope, $location, request, URL) {
                                                 
     $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
@@ -7,29 +7,21 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$http', '$l
         $location.url(URL.objectToString(queryParams, true));
     }
     
-    var oldResults = angular.copy($rootScope.results)
-    if ("results" in oldResults) {
-        delete $rootScope.results.results;
-        $rootScope.results = {description: oldResults.description, results_length: oldResults.results_length};
-    } else {
-        $rootScope.results = {};
-    }
-    
-    var request = $scope.philoConfig.db_url + '/' + URL.query($rootScope.formData);
-    $http.get(request)
-        .then(function(results) {
-            $rootScope.results = results.data;
-        })
+    var promise = request.query($rootScope.formData);
+    promise.then(function(results) {
+        $scope.results = results.data;
+        $scope.description = $scope.results.description;
+    })
 
     $scope.showFullBiblio = function(event) {
         target = $(event.currentTarget).find('.full_biblio');
         target.addClass('show');
     }
-    $scope.hideFullBiblio= function(event) {
+    $scope.hideFullBiblio = function(event) {
         target = $(event.currentTarget).find('.full_biblio');
         target.removeClass('show');
     }
-    $rootScope.frequencyResults = [];
+    $rootScope.frequencyResults = []; // TODO: move this out of rootScope
     $scope.resultsContainerWidth = "";
     $scope.sidebarWidth = '';
     $scope.$watch('frequencyResults', function(frequencyResults) {

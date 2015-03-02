@@ -6,17 +6,7 @@
                         Export results
                 </button>
                 <search-arguments></search-arguments>
-                <div id="search-hits" ng-if="results.description">
-                    <span ng-if="results.results_length !== 0 && results.description.end < results.description.results_per_page || results.description.end < results.results_length">
-                        Hits {{ results.description.start }} - {{ results.description.end }} of {{ results.results_length || results.description.results_per_page }}
-                    </span>
-                    <span ng-if="results.results_length !== 0 && results.description.end > results.results_length">
-                        Hits {{ results.description.start }} - {{ results.results_length || results.description.end }} of {{ results.results_length || results.description.results_per_page }}
-                    </span>
-                    <span ng-if="results.results_length === 0">
-                        No results for your query.
-                    </span>
-                </div>
+                <results-description description="{{ description }}"></results-description>
             </div>
             <div class="row hidden-xs" id="act-on-report" ng-if="report !== 'concordance_from_collocation' && report !=='word_property_filter'">
                 <div class="col-sm-7 col-lg-6">

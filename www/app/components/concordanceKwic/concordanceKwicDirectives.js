@@ -42,10 +42,10 @@ philoApp.directive('concordance', ['$rootScope', '$http', 'URL', function($rootS
 }]);
 
 philoApp.directive('kwic', ['$rootScope', function($rootScope) {
-    var initializePos = function(start, index) {
+    var initializePos = function(start, index, endPos) {
         var currentPos = start + index;
         var currentPosLength = currentPos.toString().length;
-        var endPosLength = $rootScope.results.description.end.toString().length;
+        var endPosLength = endPos.toString().length;
         var spaces = endPosLength - currentPosLength + 1;
         return currentPos + '.' + Array(spaces).join('&nbsp');
     } 
@@ -63,6 +63,40 @@ philoApp.directive('bibliography', ['$rootScope', function($rootScope) {
         restrict: 'E',
         templateUrl: 'app/components/concordanceKwic/bibliography.html'
     }
+}]);
+
+philoApp.directive('resultsDescription', ['descriptionValues', function(descriptionValues) {
+    return {
+        templateUrl: 'app/components/concordanceKwic/resultsDescription.html',
+        link: function(scope, element, attrs) {
+            scope.start = descriptionValues.start;
+            scope.end = descriptionValues.end;
+            scope.resultsPerPage = descriptionValues.resultsPerPage;
+            scope.resultsLength = descriptionValues.resultsLength;
+            attrs.$observe('description', function(newDescription) {
+                if (newDescription.length > 0) {
+                    newDescription = JSON.parse(newDescription);
+                    if (scope.resultsLength !== scope.results.results_length) {
+                        scope.resultsLength = scope.results.results_length;
+                        descriptionValues.resultsLength = scope.resultsLength;
+                    }
+                    if (newDescription.start !== scope.start) {
+                        scope.start = newDescription.start;
+                        descriptionValues.start = scope.start;
+                    }
+                    if (newDescription.end !== scope.end) {
+                        scope.end = newDescription.end;
+                        descriptionValues.end = scope.end
+                    }
+                    if (newDescription.results_per_page !== scope.resultsPerPage) {
+                        scope.resultsPerPage = newDescription.results_per_page;
+                        descriptionValues.resultsPerPage = scope.resultsPerPage;
+                    }
+                }
+            });
+        }
+    }
+    
 }]);
 
 philoApp.directive('sidebarMenu', ['$rootScope', '$http', 'URL', function($rootScope, $http, URL) {
@@ -118,44 +152,45 @@ philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progre
             // store the selected field to check whether to kill the ajax calls in populate_sidebar
             $('#selected-sidebar-option').data('selected', facetObj.alias);
             $('#selected-sidebar-option').data('interrupt', false);
-            var totalResults = $rootScope.results.results_length;
             $rootScope.percentComplete = 0;
             var fullResults = {};
             scope.loading = true;
+            scope.moreResults = true;
             scope.percent = 0;
             var queryParams = angular.copy($rootScope.formData);
             if (facetObj.type === "facet") {
                 queryParams.script = "get_frequency.py";
-                queryParams.frequency_field = facetObj.alias;
+                queryParams.frequency_field = JSON.stringify(facetObj.facet);
             } else if (facetObj.type === "collocationFacet") {
                 queryParams.report = "collocation";
             } else {
                 queryParams.field = facetObj.facet;
                 queryParams.script = "get_word_frequency.py";
             }
-            populateSidebar(scope, facetObj, fullResults, totalResults, 0, 3000, queryParams);
+            populateSidebar(scope, facetObj, fullResults, 0, 3000, queryParams);
         }
     }
-    var populateSidebar = function(scope, facet, fullResults, totalResults, start, end, queryParams) {
-        if (start < totalResults) {
-            queryParams.start = start;
-            queryParams.end = end;
-            var request = URL.query(queryParams);
-            $http.get(request)
-            .then(function(results) {
-                var data = results.data;
+    var populateSidebar = function(scope, facet, fullResults, start, end, queryParams) {
+        queryParams.start = start;
+        queryParams.end = end;
+        var request = URL.query(queryParams);
+        $http.get(request)
+        .then(function(response) {
+            if (response.data.more_results) {
+                var results = response.data.results;
+                scope.resultsLength = response.data.results_length;
                 scope.loading = false;
                 scope.sidebarHeight = $('#philologic_concordance').height() - 20;
                 if ($('#selected-sidebar-option').data('interrupt') != true && $('#selected-sidebar-option').data('selected') == facet.alias) {
                     if (facet.type === "collocationFacet") {
-                        var merge = progressiveLoad.mergeResults(fullResults.unsorted, data[facet.facet]);
+                        var merge = progressiveLoad.mergeResults(fullResults.unsorted, response.data[facet.facet]);
                     } else {
-                        var merge = progressiveLoad.mergeResults(fullResults.unsorted, data);
+                        var merge = progressiveLoad.mergeResults(fullResults.unsorted, results);
                     }
                     scope.frequencyResults = merge.sorted;
                     fullResults = merge;
-                    if (end < totalResults) {
-                        $rootScope.percentComplete = end / totalResults * 100;
+                    if (end < scope.resultsLength) {
+                        $rootScope.percentComplete = end / scope.resultsLength * 100;
                         scope.percent = Math.floor($rootScope.percentComplete);
                     }
                     if (start === 0) {
@@ -165,18 +200,17 @@ philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progre
                         start += 10000;
                         end += 10000;
                     }
-                    populateSidebar(scope, facet, fullResults, totalResults, start, end, queryParams);
-                    } else {
-                        // This won't affect the full collocation report which can't be interrupted
-                        // when on the page
-                        $('#selected-sidebar-option').data('interrupt', false);
-                    }
-            });
-        } else {
-            scope.percent = 100;
-            var urlString = window.location.href + '&frequency_field=' + scope.selectedFacet.alias;
-            save(fullResults.sorted, urlString);
-        }
+                    populateSidebar(scope, facet, fullResults, start, end, queryParams);
+                } else {
+                    // This won't affect the full collocation report which can't be interrupted when on the page
+                    $('#selected-sidebar-option').data('interrupt', false);
+                }
+            }  else {
+                scope.percent = 100;
+                var urlString = window.location.href + '&frequency_field=' + scope.selectedFacet.alias;
+                save(fullResults.sorted, urlString);
+            }
+        });
     }
     return {
         restrict: 'E',
@@ -193,10 +227,10 @@ philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progre
 }]);
 
 philoApp.directive('pages', ['$rootScope', function($rootScope) {
-    var buildPages = function() {
-        var start = $rootScope.results.description.start;
+    var buildPages = function(scope) {
+        var start = scope.results.description.start;
         var resultsPerPage = parseInt($rootScope.formData.results_per_page) || 25;
-        var resultsLength = $rootScope.results.results_length;
+        var resultsLength = scope.results.results_length;
     
         // first find out what page we are on currently.    
         var currentPage = Math.floor(start / resultsPerPage) + 1 || 1;
@@ -277,9 +311,9 @@ philoApp.directive('pages', ['$rootScope', function($rootScope) {
                   '</div>',
         link: function(scope, element, attrs) {
                 scope.$watch(function() {
-                    return $rootScope.results;
+                    return scope.results;
                     }, function() {
-                    scope.pages = buildPages();
+                    scope.pages = buildPages(scope);
                 }, true);
         }
     }
