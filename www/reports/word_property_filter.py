@@ -103,20 +103,12 @@ def filter_words_by_property(hits, path, q, db, config, word_filter=True, filter
     concordance_object["query_done"] = hits.done
     concordance_object['results_length'] = len(hits)
 
-    end = start + len(results) - 1  
-#    if q.start == 0:
-#        end = start + len(results) - 1
-#    else:
-#        end = q.start + len(results) - 1
-    
+    end = start + len(results) - 1 
     if len(results) < q.results_per_page:
         word_property_total = end
     else:
         word_property_total = end + 1
     print >> sys.stderr, "RENDERING FILTERED HITLIST:: START:",start,"END:",end,"LENGTH",len(new_hitlist)
-
-#    start, end, n = f.link.page_interval(q.results_per_page, hits, start,end)
-
     
     concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page}    
     

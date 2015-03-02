@@ -162,6 +162,13 @@ philoApp.directive('fixedSearchBar', ['$rootScope', '$timeout', function($rootSc
             scope.backToTop = function() {
                 $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
             }
+            // Button click from fixed search bar
+            scope.backToFullSearch = function() {
+                $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0, complete: function() {
+                    scope.toggleForm();
+                    scope.$apply();
+                }});            
+            }
             $timeout(function() {
                 affixSearchBar(scope);
             });
@@ -191,7 +198,7 @@ philoApp.directive('autocompleteTerm', ['$rootScope', function($rootScope) {
                 .data("item.autocomplete", item)
                 .append(term)
                 .appendTo(ul);
-        };
+        }
     }
     return {
         restrict: 'A',

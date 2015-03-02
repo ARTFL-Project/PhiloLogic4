@@ -19,14 +19,6 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
         };
     }
     
-    // Button click from fixed search bar
-    $scope.backToFullSearch = function() {
-        $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0, complete: function() {
-            $scope.toggleForm();
-            $scope.$apply();
-        }});            
-    }
-    
     // Show or hide search bar
     if ($rootScope.report === "concordance" || $rootScope.report === "kwic" || $rootScope.report === "bibliography" || $rootScope.report === "collocation") {
         $scope.showSearchBar = true;
@@ -43,22 +35,20 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
     
     $scope.submit = function() {
         $('.ui-autocomplete').hide();
+        var extraParams = {start: '0', end: '0'};
         if (typeof($rootScope.formData.q) === "undefined" || $rootScope.formData.q === '') {
-            $rootScope.formData.report = "bibliography";
+            extraParams.report = "bibliography";
         } else if ($rootScope.formData.report === "bibliography" && typeof($rootScope.formData.q) !== "undefined") {
             if ($("#report label.active").length === 0) {
-                $rootScope.formData.report = "concordance";
+                extraParams.report = "concordance";
             } else {
-                $rootScope.formData.report = $("#report label.active").attr('id');
+                extraParams.report = $("#report label.active").attr('id');
             }
         } else if ($rootScope.formData.report === "undefined") {
-            $rootScope.formData.report = "concordance";
+            extraParams.report = "concordance";
         }
-        
-        delete $rootScope.formData.start;
-        delete $rootScope.formData.end;
         $scope.formOpen = false;
-        $location.url(URL.objectToString($rootScope.formData, true));
+        $location.url(URL.objectToUrlString($rootScope.formData, extraParams));
     }
 }]);
 

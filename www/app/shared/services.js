@@ -22,12 +22,20 @@ philoApp.factory('request', ['$http', 'URL', function($http, URL) {
 
 philoApp.factory('URL', ['$rootScope', function($rootScope) {
     return {
-        objectToString: function(formData, url) {
-            var obj = angular.copy(formData);
+        mergeParams: function(queryParams, extraParams) {
+            var localParams = angular.copy(queryParams);
+            if (typeof extraParams !== 'undefined') {
+                angular.forEach(extraParams, function(value, param) {
+                    localParams[param] = value;
+                });
+            }
+            return localParams;            
+        },
+        objectToString: function(localParams) {
             var str = [];
-            for (var p in obj) {
+            for (var p in localParams) {
                 var k = p, 
-                    v = obj[k];
+                    v = localParams[k];
                 if (typeof(v) === 'object') {
                     for (var i=0; i < v.length; i++) {
                         str.push(angular.isObject(v[i]) ? this.query(v[i], k) : (k) + "=" + encodeURIComponent(v[i]));
@@ -36,28 +44,20 @@ philoApp.factory('URL', ['$rootScope', function($rootScope) {
                     str.push(angular.isObject(v) ? this.query(v, k) : (k) + "=" + encodeURIComponent(v));
                 }
             }
-            return "query?" + str.join("&");
+            return str.join('&')
         },
-        query: function(formData, url) {
-            var obj = angular.copy(formData);
-            var str = [];
-            for (var p in obj) {
-                var k = p, 
-                    v = obj[k];
-                if (k !== "script" && k!== "report") {
-                    if (typeof(v) === 'object') {
-                        for (var i=0; i < v.length; i++) {
-                            str.push(angular.isObject(v[i]) ? this.query(v[i], k) : (k) + "=" + encodeURIComponent(v[i]));
-                        }
-                    } else {
-                        str.push(angular.isObject(v) ? this.query(v, k) : (k) + "=" + encodeURIComponent(v));
-                    }
-                }
-            }
-            if ("script" in obj) {
-                return "scripts/" + obj.script + '?' + str.join("&") + '&report=' + obj.report;
+        objectToUrlString: function(queryParams, extraParams) {
+            var localParams = this.mergeParams(queryParams, extraParams)
+            var urlString = this.objectToString(localParams)
+            return "query?" + urlString;
+        },
+        query: function(queryParams, extraParams) {
+            var localParams = this.mergeParams(queryParams, extraParams)
+            var urlString = this.objectToString(localParams)
+            if ("script" in localParams) {
+                return "scripts/" + localParams.script + '?' + urlString + '&report=' + localParams.report;
             } else {
-                return "reports/" + obj.report + '.py?' + str.join("&");
+                return "reports/" + localParams.report + '.py?' + urlString;
             }
         },
         path: function(pathInfo) {

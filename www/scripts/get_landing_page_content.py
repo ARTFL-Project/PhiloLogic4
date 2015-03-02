@@ -33,14 +33,14 @@ def landing_page_content(environ,start_response):
     c = db.dbh.cursor()
     content = ''
     if content_type == "author":
-        content = generate_author_list(c, letter_range, db, config)
+        content = generate_author_list(c, letter_range, db, config, request)
     elif content_type == "title":
-        content = generate_title_list(c, letter_range, db, config)
+        content = generate_title_list(c, letter_range, db, config, request)
     elif content_type == "year":
-        content = generate_year_list(c, q_range, db, config)
+        content = generate_year_list(c, q_range, db, config, request)
     yield json.dumps(content)
     
-def generate_author_list(c, letter_range, db, config):
+def generate_author_list(c, letter_range, db, config, request):
     c.execute('select distinct author, count(*) from toms where philo_type="doc" group by author order by author')
     content = []
     for author, count in c.fetchall():
@@ -49,13 +49,13 @@ def generate_author_list(c, letter_range, db, config):
         if author[0].lower() not in letter_range:
             continue
         if author != "Unknown":
-            url = f.link.make_query_link('', author='"' + author + '"')
+            url = 'query?report=bibliography&author="%s"' % author
         else:
-            url = f.link.make_query_link('', author='NULL')
+            url = 'query?report=bibliography&author=NULL'
         content.append({"author": author, "url": url, "count": count})
     return content
 
-def generate_title_list(c, letter_range, db, config):
+def generate_title_list(c, letter_range, db, config, request):
     c.execute('select * from toms where philo_type="doc" order by title')
     content = []
     for i in c.fetchall():
@@ -66,11 +66,11 @@ def generate_title_list(c, letter_range, db, config):
             author = i["author"] or "Anonymous"
         except:
             author = ""
-        url = "dispatcher.py/%s/table-of-contents" % i['philo_id'].split()[0]
+        url = "navigate/%s/table-of-contents" % i['philo_id'].split()[0]
         content.append({"title": title, "url": url, "author": author})
     return content
 
-def generate_year_list(c, q_range, db, config):
+def generate_year_list(c, q_range, db, config, request):
     low_range = int(q_range[0])
     high_range = int(q_range[1])
     query = 'select * from toms where philo_type="doc" and date >= "%d" and date <= "%d" order by date' % (low_range, high_range)
@@ -78,7 +78,7 @@ def generate_year_list(c, q_range, db, config):
     content = []
     for i in c.fetchall():
         author = i['author'] or "Anonymous"
-        url = "dispatcher.py/%s/table-of-contents" % i['philo_id'].split()[0]
+        url = "navigate/%s/table-of-contents" % i['philo_id'].split()[0]
         try:
             date = i['date']
         except:

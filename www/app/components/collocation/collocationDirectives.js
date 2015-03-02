@@ -60,9 +60,7 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
         }  
     }
     var updateCollocation = function(scope, fullResults, start, end) {
-        $rootScope.formData.start = start;
-        $rootScope.formData.end = end;
-        var request = scope.philoConfig.db_url + '/' + URL.query($rootScope.formData);
+        var request = URL.query($rootScope.formData, {start: start, end: end});
         var collocation = this;
         $http.get(request).then(function(response) {
             var data = response.data;

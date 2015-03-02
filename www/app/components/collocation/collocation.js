@@ -4,8 +4,7 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
                                             function($scope, $rootScope, $http, $location, radio, URL) {
     $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
-        $rootScope.formData.report = "bibliography";
-        $location.url(URL.objectToString($rootScope.formData, true));
+        $location.url(URL.objectToUrlString($rootScope.formData, {report: "bibliography"}));
     }
     
     $scope.done = false;
@@ -25,7 +24,6 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
     
     $scope.concordanceFromCollocation = function(url) {
         url = url.replace($rootScope.philoConfig.db_url, '');
-        console.log(url)
         $location.url(url);
     }
 

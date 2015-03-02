@@ -10,21 +10,13 @@ philoApp.directive('concordance', ['$rootScope', '$http', 'URL', function($rootS
             defaultElement.velocity('fadeIn', {duration: 300});
         } else {
             if (moreContextElement.is(':empty')) {
-                var queryParams = angular.copy($rootScope.formData);
-                queryParams.hit_num = resultNumber;
-                var request = {
-                    method: "GET",
-                    url: $rootScope.philoConfig.db_url + '/scripts/get_more_context.py?' + URL.objectToString(queryParams)
-                }
-                $http(request)
-                .success(function(data, status, headers, config) {
+                var request = URL.query($rootScope.formData, {script: 'get_more_context.py', hit_num: resultNumber})
+                $http.get(request)
+                .then(function(response) {
                     defaultElement.hide();
-                    moreContextElement.html(data).promise().done(function() {
+                    moreContextElement.html(response.data).promise().done(function() {
                             $(this).velocity('fadeIn', {duration: 300});
                         });
-                })
-                .error(function(data, status, headers, config) {
-                    console.log("Error", status, headers)
                 });
             } else {
                 defaultElement.hide();
@@ -142,7 +134,7 @@ philoApp.directive('sidebarMenu', ['$rootScope', '$http', 'URL', function($rootS
 
 philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progressiveLoad', 'saveToLocalStorage', function($rootScope, $http, $location, URL, progressiveLoad, save) {
     var retrieveFacet = function(scope, facetObj) {
-        var urlString = window.location.href + '&frequency_field=' + facetObj.alias;
+        var urlString = URL.objectToUrlString($rootScope.formData, {frequency_field: facetObj.alias});
         if (typeof(sessionStorage[urlString]) !== "undefined" && $rootScope.philoConfig.debug === false) {
             scope.frequencyResults = JSON.parse(sessionStorage[urlString]);
             $rootScope.percentComplete = 100;
@@ -171,9 +163,7 @@ philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progre
         }
     }
     var populateSidebar = function(scope, facet, fullResults, start, end, queryParams) {
-        queryParams.start = start;
-        queryParams.end = end;
-        var request = URL.query(queryParams);
+        var request = URL.query(queryParams, {start: start, end: end});
         $http.get(request)
         .then(function(response) {
             if (response.data.more_results) {

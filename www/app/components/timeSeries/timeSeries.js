@@ -3,12 +3,11 @@
 philoApp.controller('timeSeriesCtrl', ['$scope', '$rootScope', '$location', 'radio', 'URL', function($scope, $rootScope, $location, radio, URL) {
     $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
-        $rootScope.formData.report = "bibliography";
-        $location.url(URL.objectToString($rootScope.formData, true));
+        $location.url(URL.objectToUrlString($rootScope.formData, {report: "bibliography"}));
     }
     if (typeof($rootScope.formData.year_interval) === "undefined") {
-        $rootScope.formData.year_interval = $rootScope.philoConfig.time_series_intervals[0];
-        $location.url(URL.objectToString($rootScope.formData));
+        var urlString = URL.objectToUrlString($rootScope.formData, {year_interval: $rootScope.philoConfig.time_series_intervals[0]});
+        $location.url(urlString);
     }
     
     $scope.percent = 0;
@@ -18,7 +17,6 @@ philoApp.controller('timeSeriesCtrl', ['$scope', '$rootScope', '$location', 'rad
     $scope.toggleFrequency = function(frequencyType) {
         $('#time-series-buttons button').removeClass('active');
         $('#' + frequencyType).addClass('active');
-        console.log(frequencyType)
         $scope.frequencyType = frequencyType;
     }
     

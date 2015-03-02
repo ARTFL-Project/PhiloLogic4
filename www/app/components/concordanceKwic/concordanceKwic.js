@@ -2,9 +2,8 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$location',
                                                 
     $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
-        var queryParams = angular.copy($rootScope.formData);
-        queryParams.report = "bibliography";
-        $location.url(URL.objectToString(queryParams, true));
+        var urlString = URL.objectToUrlString($rootScope.formData, {report: "bibliography"});
+        $location.url(urlString);
     }
     
     var promise = request.query($rootScope.formData);
@@ -40,14 +39,13 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$location',
         $("body").velocity('scroll', {duration: 200, easing: 'easeOutCirc', offset: 0, complete: function() {
             $rootScope.results = {};
         }});
-        $location.url(URL.objectToString($rootScope.formData, true));
+        $location.url(URL.objectToUrlString($rootScope.formData));
     }
     
     $scope.switchTo = function(report) {
-        $rootScope.formData.report = report;
         $('#report label').removeClass('active');
         $('#' + report).addClass('active');
-        $location.url(URL.objectToString($rootScope.formData, true));
+        $location.url(URL.objectToUrlString($rootScope.formData, {report: report}));
     }
     
     $scope.selectedFacet = '';

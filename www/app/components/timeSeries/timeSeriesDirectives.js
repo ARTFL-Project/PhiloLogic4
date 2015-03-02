@@ -50,9 +50,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         return {dateList: dateList, chartIndex: chartIndex};
     }
     var updateTimeSeries = function(scope, fullResults, start, end) {
-        $rootScope.formData.start = start;
-        $rootScope.formData.end = end;
-        var request = scope.philoConfig.db_url + '/' + URL.query($rootScope.formData);
+        var request = URL.query($rootScope.formData, {start: start, end: end});
         $http.get(request).then(function(results) {
             var timeSeriesResults = results.data;
             scope.resultsLength = timeSeriesResults.results_length;
