@@ -133,40 +133,39 @@ philoApp.directive('resultsPerPage', ['$rootScope', function($rootScope) {
 
 philoApp.directive('fixedSearchBar', ['$rootScope', '$timeout', function($rootScope, $timeout) {
     var affixSearchBar = function(scope) {
-        if ($('#description').length) {
-            $('#fixed-search').affix({
-                offset: {
-                top: function() {
-                    return (this.top = $('#description').offset().top)
-                    },
-                bottom: function() {
-                    return (this.bottom = $('#footer').outerHeight(true))
-                  }
-                }
+        var initialForm = $('#initial-form');
+        $('#fixed-search').affix({
+            offset: {
+            top: function() {
+                return (this.top = initialForm.offset().top + initialForm.height())
+                },
+            bottom: function() {
+                return (this.bottom = $('#footer').outerHeight(true))
+              }
+            }
+        });
+        $('#fixed-search').on('affix.bs.affix', function() {
+            $(this).addClass('fixed');
+            $(this).css({'opacity': 1, "pointer-events": "auto"});
+        });
+        $('#fixed-search').on('affixed-top.bs.affix', function() {
+            $(this).css({'opacity': 0, "pointer-events": "none"});
+            setTimeout(function() {
+               $(this).removeClass('fixed'); 
             });
-            $('#fixed-search').on('affix.bs.affix', function() {
-                $(this).addClass('fixed');
-                $(this).css({'opacity': 1, "pointer-events": "auto"});
-            });
-            $('#fixed-search').on('affixed-top.bs.affix', function() {
-                $(this).css({'opacity': 0, "pointer-events": "none"});
-                setTimeout(function() {
-                   $(this).removeClass('fixed'); 
-                });
-            });
-            $("#top-of-page").click(function() {
-                $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
-            });
-        }
+        });
     }
     return {
         restrict: 'E',
         templateUrl: 'app/shared/searchForm/fixedSearchBar.html',
         link: function(scope, element, attrs) {
-                $timeout(function() {
-                    affixSearchBar(scope);
-                }); 
+            scope.backToTop = function() {
+                $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
             }
+            $timeout(function() {
+                affixSearchBar(scope);
+            });
+        }
     }
 }]);
 

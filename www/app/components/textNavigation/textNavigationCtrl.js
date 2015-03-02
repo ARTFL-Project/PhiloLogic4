@@ -6,8 +6,16 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
     $scope.textObject = {};
     $scope.navBar = textNavigationValues.navBar; // Don't draw navBar until text has been fetched
     $scope.tocObject = textNavigationValues.tocObject;
+    $scope.tocOpen = textNavigationValues.tocOpen;
     $scope.loading = true; // Start a spinner while text is getting fetched
     $scope.tocDone = false // Only fetch TOC once navBar has been drawn
+    
+    if ($scope.tocOpen) {
+        setTimeout(function() {
+            // TODO: find why this doesn't work
+            $('.current-obj').velocity("scroll", {duration: 500, container: $("#toc-content"), offset: -50});
+        });
+    }
     
     $scope.toggleTableOfContents = function() {
         if ($scope.tocOpen) {
@@ -23,9 +31,7 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
         $scope.adjustTocHeight();
         $scope.tocOpen = true;
         $timeout(function() {
-            // TODO: find why this doesn't work
-            var scrollToID = $('#' + $scope.tocObject.philo_id.join('-'));
-            scrollToID.velocity("scroll", {duration: 500, container: $("#toc-content"), offset: -50});
+            $('.current-obj').velocity("scroll", {duration: 500, container: $("#toc-content"), offset: -50});
         }, 300);
     }
     var closeTableOfContents = function() {
@@ -55,6 +61,7 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
     }
     
     $scope.goToTextObject = function(philoID) {
+        textNavigationValues.tocOpen = $scope.tocOpen;
         philoID = philoID.split('-').join(' ');
         $location.url(URL.path(philoID));
     }

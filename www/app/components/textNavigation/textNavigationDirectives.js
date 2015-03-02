@@ -47,7 +47,6 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textNavigatio
             } else {
                 var link = $(this).data('ref');
                 var element = $(this);
-                //element.popover({trigger: 'manual'});
                 $.getJSON(link, function(data) {
                     element.popover({trigger: 'manual', content: function() {
                         return data.text;
@@ -112,6 +111,9 @@ philoApp.directive('tocSidebar', ['$routeParams', '$http', '$timeout', 'URL', 't
                 affixTOC(scope);
                 scope.tocDone = true;
             }
+            element.on('$destroy', function() {
+                $('#toc-container').removeData('affix').removeClass('affix affix-top affix-bottom');
+            });
            
         }
     }
@@ -152,7 +154,6 @@ philoApp.directive('navigationBar', ['$routeParams', '$http', '$timeout', 'URL',
                     });
                 });
             }
-            
             attrs.$observe('tocDone', function(tocDone) {
                 if (tocDone) {
                     $("#show-toc").removeAttr("disabled");

@@ -1,13 +1,13 @@
 var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'angular-velocity']);
 
-philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'textNavigationValues', function($rootScope, $scope, $location, textNavigationValues) {
+philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', '$route', '$window', 'textNavigationValues', function($rootScope, $scope, $location, $route, $window, textNavigationValues) {
     $rootScope.philoConfig = philoConfig;
     $rootScope.report = $location.search().report || philoReport;
     $rootScope.formData = {
         report: $rootScope.report,
         method: "proxy"
         };
-    //$rootScope.results = {};
+    
     $scope.$on('$locationChangeStart', function() {
         var paths = $location.path().split('/');
         if (paths[1] == "query") {
@@ -20,6 +20,7 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'textNavi
         if ($rootScope.report !== 'textNavigation') {
             textNavigationValues.citation = {};
             textNavigationValues.tocObject = false;
+            textNavigationValues.tocOpen = false;
             textNavigationValues.navBar = false;
         }
     });
