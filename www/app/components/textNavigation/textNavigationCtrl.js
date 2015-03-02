@@ -1,7 +1,7 @@
 "use strict";
 
-philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$location', '$routeParams', 'URL', 'textNavigationValues',
-                                            function($scope, $rootScope, $http, $location, $routeParams, URL, textNavigationValues) {
+philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$location', '$routeParams', '$timeout', 'URL', 'textNavigationValues',
+                                            function($scope, $rootScope, $http, $location, $routeParams, $timeout, URL, textNavigationValues) {
     
     $scope.textObject = {};
     $scope.navBar = textNavigationValues.navBar; // Don't draw navBar until text has been fetched
@@ -22,11 +22,10 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
         $('#toc-wrapper').addClass('show');
         $scope.adjustTocHeight();
         $scope.tocOpen = true;
-        setTimeout(function() {
+        $timeout(function() {
             // TODO: find why this doesn't work
             var scrollToID = $('#' + $scope.tocObject.philo_id.join('-'));
             scrollToID.velocity("scroll", {duration: 500, container: $("#toc-content"), offset: -50});
-            scrollToID.find('a').addClass('current-obj');
         }, 300);
     }
     var closeTableOfContents = function() {
@@ -56,6 +55,7 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
     }
     
     $scope.goToTextObject = function(philoID) {
+        philoID = philoID.split('-').join(' ');
         $location.url(URL.path(philoID));
     }
 }]);

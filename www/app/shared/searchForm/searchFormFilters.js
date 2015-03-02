@@ -13,4 +13,4 @@ philoApp.filter('metadataFieldsFilter', ['$rootScope', function($rootScope) {
         }
         return filtered;
     }
-}])
+}]);

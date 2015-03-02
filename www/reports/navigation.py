@@ -33,7 +33,10 @@ def navigation(environ,start_response):
     yield json.dumps(text_object)
 
 def generate_text_object(obj, db, q, config):
-    text_object = {"query": dict([i for i in q]), "philo_id": obj.philo_id[0]}
+    philo_id = list(obj.philo_id)
+    while philo_id[-1] == 0:
+        philo_id.pop()
+    text_object = {"query": dict([i for i in q]), "philo_id": ' '.join([str(i) for i in philo_id])}
     text_object['prev'] = ' '.join(obj.prev.split()[:7])
     text_object['next'] = ' '.join(obj.next.split()[:7])
     metadata_fields = {}
@@ -64,8 +67,6 @@ def get_text_obj(obj, config, q, word_regex):
     file.seek(byte_start)
     width = int(obj.byte_end) - byte_start
     raw_text = file.read(width)
-    
-    print >> sys.stderr, "BYTE", repr(q.byte)
     try:
         bytes = sorted([int(byte) - byte_start for byte in q.byte])
     except ValueError: ## q.byte contains an empty string
@@ -82,7 +83,6 @@ def format_text_object(text, config, q, word_regex, bytes=[]):
             new_text += text[last_offset:b] + "<philoHighlight/>"
             last_offset = b
         text = new_text + text[last_offset:]
-        print >> sys.stderr, "TEXT", text
     text = "<div>" + text + "</div>"
     xml = f.FragmentParser.parse(text)
     for el in xml.iter():        

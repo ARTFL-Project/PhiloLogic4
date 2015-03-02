@@ -6,10 +6,10 @@
             </button>
         </div>
         <div id="toc-content">
-            <div ng-repeat="element in tocObject.toc">
-                <div id="{{ ::element.philo_id.split(' ').join('-') }}" class="toc-{{ ::element.philo_type }}" ng-click="goToTextObject(element.philo_id)">
+            <div ng-repeat="element in tocObject.toc | currentObj:this">
+                <div id="{{ ::element.philo_id }}" class="toc-{{ ::element.philo_type }}" ng-click="goToTextObject(element.philo_id)">
                     <span class="bullet-point-{{ ::element.philo_type }}"></span>
-                    <a href="">{{ ::element.label }}</a>
+                    <a class="{{ element.currentObj }}" href="">{{ ::element.label }}</a>
                 </div>
             </div>
         </div>
