@@ -31,7 +31,7 @@ def generate_kwic_results(db, q, config, link_to_hit="div1"):
     """ The link_to_hit keyword defines the text object to which the metadata link leads to"""
     hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
     start, end, n = f.link.page_interval(q.results_per_page, hits, q.start, q.end)
-    kwic_object = {"description": {"start": start, "end": end, "n": n, "results_per_page": q.results_per_page},
+    kwic_object = {"description": {"start": start, "end": end, "results_per_page": q.results_per_page},
                     "query": dict([i for i in q])}
     kwic_results = []
     default_short_citation_len = 30

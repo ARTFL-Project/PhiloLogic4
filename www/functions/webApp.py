@@ -41,6 +41,7 @@ js_files = [
     "app/shared/searchForm/searchFormFilters.js",
     "app/shared/searchForm/searchFormDirectives.js",
     "app/shared/searchForm/searchForm.js",
+    "app/components/concordanceKwic/concordanceKwicValues.js",
     "app/components/concordanceKwic/concordanceKwicDirectives.js",
     "app/components/concordanceKwic/concordanceKwic.js",
     "app/components/textNavigation/textNavigationValues.js",
