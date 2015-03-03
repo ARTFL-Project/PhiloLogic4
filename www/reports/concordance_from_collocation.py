@@ -48,8 +48,11 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
     concordance_object = {"query": dict([i for i in q])}
     
     length = config['concordance_length']
-
-    within_x_words = int(q['word_num'])
+    
+    try:
+        within_x_words = int(q['word_num'])
+    except ValueError: ## Getting an empty string since the keyword is not specificed in the URL
+        within_x_words = 5
     direction = q['direction']
     collocate = unicodedata.normalize('NFC', q['collocate'].decode('utf-8', 'ignore'))
     collocate_num = q['collocate_num']
@@ -97,30 +100,15 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
             more_pages = True
             break
     
-    concordance_object['results'] = results
-    concordance_object["query_done"] = hits.done
-    concordance_object['results_length'] = len(results)
     end = start + len(results) - 1
-
     if len(results) < q.results_per_page:
         collocate_num = end
     else:
         collocate_num = end + 1
-
-    concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page}
-
-    
-    
-    ## Create new hitlist so we can get paging
-    colloc_hitlist = collocation_hitlist(colloc_hitlist, collocate_num)
-#    pages = f.link.generate_page_links(concordance_object['description']['start'], q.results_per_page, q, colloc_hitlist)
-    pages = f.link.page_links(config,q,collocate_num)   
-
-    last_page,last_page_link = pages["page_links"][-1]
-    if last_page == "Last" and more_pages:
-        pages["page_links"][-1] = ("More",last_page_link)
-   
-
+    concordance_object['results_length'] = collocate_num
+    concordance_object['results'] = results
+    concordance_object["query_done"] = hits.done
+    concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page, "more_pages": more_pages}  
 
     return concordance_object, pages
 

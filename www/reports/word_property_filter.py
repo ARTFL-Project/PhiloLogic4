@@ -30,32 +30,16 @@ end_match = re.compile(r'<[^>]*?\Z')
 no_tag = re.compile(r'<[^>]+>')
 
 def word_property_filter(environ,start_response):
-    print >> sys.stderr, "BEGIN WORD_PROP_FILTER"
-#    db, dbname, path_components, q = wsgi_response(environ,start_response)
-
-    status = '200 OK'
-    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-    start_response(status,headers)
     config = f.WebConfig()
-    
-    db = DB(config.db_path + '/data/')    
+    db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response('200 OK',headers)
+    
     hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
-
-    filter_results,pages = filter_words_by_property(hits, config.db_path, request, db, config)
-    print >> sys.stderr, "DONE"
-
-    biblio_criteria = []
-    for k,v in request.metadata.iteritems():
-        if v:
-            if k in config.metadata_aliases:
-                k = config.metadata_aliases[k]
-            biblio_criteria.append('<span class="biblio_criteria">%s: <b>%s</b></span>' % (k.title(), v.decode('utf-8', 'ignore'), ))
-    biblio_criteria = ' '.join(biblio_criteria)
-
-#    resource = f.webResources("word_property_filter", debug=db.locals["debug"])
-    return ""
-        
+    filter_results = filter_words_by_property(hits, config.db_path, request, db, config)
+    yield json.dumps(filter_results)
+  
 def filter_words_by_property(hits, path, q, db, config, word_filter=True, filter_num=100, stopwords=True):
     concordance_object = {"query": dict([i for i in q])}
 
@@ -99,30 +83,16 @@ def filter_words_by_property(hits, path, q, db, config, word_filter=True, filter
             more_pages = True
             break
     
-    concordance_object['results'] = results
-    concordance_object["query_done"] = hits.done
-    concordance_object['results_length'] = len(hits)
-
     end = start + len(results) - 1 
     if len(results) < q.results_per_page:
         word_property_total = end
     else:
         word_property_total = end + 1
-    print >> sys.stderr, "RENDERING FILTERED HITLIST:: START:",start,"END:",end,"LENGTH",len(new_hitlist)
-    
-    concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page}    
-    
-    ## Create new hitlist so we can get paging
-    h = word_property_hitlist(new_hitlist[start:])
-
-#    pages = f.link.generate_page_links(q.start, q.results_per_page, q, h)
-    pages = f.link.page_links(config,q,int(word_property_total))
-    last_page,last_page_link = pages["page_links"][-1]
-    if last_page == "Last" and more_pages:
-        pages["page_links"][-1] = ("More",last_page_link)
-   
-    print >> sys.stderr, "PAGES", repr(pages)
-    return concordance_object, pages
+    concordance_object['results'] = results
+    concordance_object["query_done"] = hits.done        
+    concordance_object['results_length'] = word_property_total
+    concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page, "more_pages": more_pages}    
+    return concordance_object
 
 def get_word_ids(hit):
     philo_id = hit.philo_id[:]

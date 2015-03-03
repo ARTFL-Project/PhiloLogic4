@@ -217,7 +217,7 @@ philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progre
 }]);
 
 philoApp.directive('pages', ['$rootScope', function($rootScope) {
-    var buildPages = function(scope) {
+    var buildPages = function(scope, morePages) {
         var start = scope.results.description.start;
         var resultsPerPage = parseInt($rootScope.formData.results_per_page) || 25;
         var resultsLength = scope.results.results_length;
@@ -288,7 +288,11 @@ philoApp.directive('pages', ['$rootScope', function($rootScope) {
                 page = "First";
             }
             if (page === totalPages) {
-                page = "Last";
+                if (morePages !== 'undefined' && morePages) { // Account for concordance from collocation case
+                    page = "More";
+                } else {
+                    page = "Last";
+                }
             }
             pageObject.push({display: page, start: pageStart, end: pageEnd, active: active});
         }
@@ -303,7 +307,7 @@ philoApp.directive('pages', ['$rootScope', function($rootScope) {
                 scope.$watch(function() {
                     return scope.results;
                     }, function() {
-                    scope.pages = buildPages(scope);
+                    scope.pages = buildPages(scope, scope.results.description.more_pages);
                 }, true);
         }
     }

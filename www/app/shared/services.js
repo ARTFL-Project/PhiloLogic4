@@ -75,10 +75,10 @@ philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
             } else {
                 angular.forEach(newData, function(value, key) {
                     if (typeof value.count !== 'undefined') {
-                       if (key in fullResults) {
-                        fullResults[key].count += value.count;
-                        }
-                        else {
+                        if (key in fullResults) {
+                            fullResults[key].count += value.count;
+                            fullResults[key].url = value.url; // Update URL for collocations
+                        } else {
                             fullResults[key] = value;
                         }
                     }
