@@ -15,8 +15,8 @@
             <div id="toc-content">
                 <div ng-repeat="element in tocObject.toc">
                     <div class="toc-{{ ::element.philo_type }}">
+                        <span class="bullet-point-{{ ::element.philo_type }}"></span>
                         <a href="{{ ::element.href }}">
-                            <span class="bullet-point-{{ ::element.philo_type }}"></span>
                             {{ :: element.label }}
                         </a>
                     </div>

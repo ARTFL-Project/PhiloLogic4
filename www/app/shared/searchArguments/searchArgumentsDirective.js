@@ -33,13 +33,13 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL',
     }
     var removeMetadata = function(metadata, queryParams, restart) {
         delete queryParams[metadata];
-        var request = $rootScope.philoConfig.db_url + '/' + URL.query(queryParams);
+        var request = URL.query(queryParams);
         if (queryParams.report === "concordance" || queryParams.report === "kwic" || queryParams.report === "bibliography") {
             $http.get(request).success(function(data) {
-                $location.url(URL.objectToString(queryParams, true));
+                $location.url(URL.objectToUrlString(queryParams));
             })
         } else if (queryParams.report === "collocation" || queryParams.report === "time_series") {
-            $location.url(URL.objectToString(queryParams));
+            $location.url(URL.objectToUrlString(queryParams));
             $rootScope.formData = queryParams;
             restart = true;
         }

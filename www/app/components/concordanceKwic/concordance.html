@@ -6,8 +6,8 @@
                    <span class="cite" data-id="{{ ::result.philo_id.join(' ') }}">
                         {{ ::position }}.
                         <span class="philologic_cite">
-                            <a href="{{result.citation.title.href}}" class="citation-small-caps"><i>{{ ::result.citation.title.label }}</i></a>
                             <span ng-if="result.citation.author" class="citation-small-caps">, {{ ::result.citation.author.label }}</span>
+                            <a href="{{result.citation.title.href}}" class="citation-small-caps"><i>{{ ::result.citation.title.label }}</i></a>
                             <span ng-if="result.citation.date"> [{{ ::result.citation.date.label }}]</span>
                             <a href="{{result.citation.div1.href}}" ng-if="result.citation.div1">{{ ::result.citation.div1.label }}</a>
                             <a href="{{result.citation.div2.href}}" ng-if="result.citation.div2">{{ ::result.citation.div2.label }}</a>
