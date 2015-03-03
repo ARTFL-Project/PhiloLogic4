@@ -9,30 +9,7 @@
                 <results-description description="{{ description }}"></results-description>
             </div>
             <div class="row hidden-xs" id="act-on-report" ng-if="report !== 'concordance_from_collocation' && report !=='word_property_filter'">
-                <div class="col-sm-7 col-lg-6">
-                    <div id="report_switch" class="btn-group">
-                        <span ng-if="report === 'concordance'">
-                            <button type="button" class="btn btn-primary active" id="concordance-switch" ng-click="switchTo('concordance')">
-                                <span class="hidden-xs hidden-sm">View occurrences with context</span>
-                                <span class="visible-xs visible-sm">Concordance</span>
-                            </button>
-                            <button type="button" class="btn btn-primary" id="kwic-switch" ng-click="switchTo('kwic')">
-                                <span class="hidden-xs hidden-sm">View occurrences line by line (KWIC)</span>
-                                <span class="visible-xs visible-sm">Keyword in context</span>
-                            </button>
-                        </span>
-                        <span ng-if="report === 'kwic'">
-                            <button type="button" class="btn btn-primary" id="concordance-switch" ng-click="switchTo('concordance')">
-                                <span class="hidden-xs hidden-sm">View occurrences with context</span>
-                                <span class="visible-xs visible-sm">Concordance</span>
-                            </button>
-                            <button type="button" class="btn btn-primary active" id="kwic-switch" ng-click="switchTo('kwic')">
-                                <span class="hidden-xs hidden-sm">View occurrences line by line (KWIC)</span>
-                                <span class="visible-xs visible-sm">Keyword in context</span>
-                            </button>
-                        </span>
-                    </div>
-                </div>
+                <concordance-kwic-switch report="{{ report }}"></concordance-kwic-switch>
                 <sidebar-menu ng-if="report !== 'concordance_from_collocation' && report !=='word_property_filter' && philoConfig.facets.length > 1"></sidebar-menu>
             </div>
         </div>

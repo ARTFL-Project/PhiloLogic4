@@ -1,0 +1,8 @@
+<div class="col-sm-7 col-lg-6">
+    <div id="report_switch" class="btn-group">
+        <button type="button" class="btn btn-primary {{ report.active }}" ng-repeat="report in reportSwitch" ng-click="switchTo(report.name)">
+            <span class="hidden-xs hidden-sm">{{ ::report.labelBig }}</span>
+            <span class="visible-xs visible-sm">{{ ::report.labelSmall }}</span>
+        </button>
+    </div>
+</div>

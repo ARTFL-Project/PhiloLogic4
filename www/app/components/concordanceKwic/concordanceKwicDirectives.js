@@ -25,7 +25,6 @@ philoApp.directive('concordance', ['$rootScope', '$http', 'URL', function($rootS
         }
     } 
     return {
-        restrict: 'E',
         templateUrl: 'app/components/concordanceKwic/concordance.html',
         link: function(scope) {
             scope.moreContext = moreContext;
@@ -37,12 +36,12 @@ philoApp.directive('kwic', ['$rootScope', function($rootScope) {
     var initializePos = function(start, index, endPos) {
         var currentPos = start + index;
         var currentPosLength = currentPos.toString().length;
+        endPos += start;
         var endPosLength = endPos.toString().length;
         var spaces = endPosLength - currentPosLength + 1;
         return currentPos + '.' + Array(spaces).join('&nbsp');
     } 
     return {
-        restrict: 'E',
         templateUrl: 'app/components/concordanceKwic/kwic.html',
         link: function(scope) {
             scope.initializePos = initializePos;
@@ -52,7 +51,6 @@ philoApp.directive('kwic', ['$rootScope', function($rootScope) {
 
 philoApp.directive('bibliography', ['$rootScope', function($rootScope) {
     return {
-        restrict: 'E',
         templateUrl: 'app/components/concordanceKwic/bibliography.html'
     }
 }]);
@@ -90,6 +88,38 @@ philoApp.directive('resultsDescription', ['descriptionValues', function(descript
     }
     
 }]);
+
+philoApp.directive('concordanceKwicSwitch', function() {
+    var buildReportSwitch = function(report) {
+        var concordance = {
+            labelBig: "View occurrences with context",
+            labelSmall: "Concordance",
+            name: "concordance",
+            }
+        var kwic = {
+            labelBig: "View occurrences line by line (KWIC)",
+            labelSmall: "Keyword in context",
+            name: "kwic",
+        }
+        if (report === 'kwic') {
+            kwic.active = "active";
+            concordance.active = "";
+        } else {
+            kwic.active = "";
+            concordance.active = "active";
+        }
+        return [concordance, kwic];
+    }
+    return {
+        templateUrl: 'app/components/concordanceKwic/concordanceKwicSwitch.html',
+        link: function(scope, element, attrs) {
+            scope.reportSwitch = buildReportSwitch(attrs.report);
+            attrs.$observe('report', function(report) {
+                scope.reportSwitch = buildReportSwitch(report);
+            })
+        }
+    } 
+});
 
 philoApp.directive('sidebarMenu', ['$rootScope', '$http', 'URL', function($rootScope, $http, URL) {
     var populateFacets = function() {
