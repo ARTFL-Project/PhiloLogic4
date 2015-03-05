@@ -27,7 +27,6 @@ left_truncate = re.compile (r"^\w+", re.U)
 right_truncate = re.compile("\w+$", re.U)
 word_identifier = re.compile("\w", re.U)
 highlight_match = re.compile(r'<span class="highlight">[^<]*?</span>')
-#token_regex = re.compile(r'[\W\d]+', re.U)
 
 begin_match = re.compile(r'^[^<]*?>')
 start_cutoff_match = re.compile(r'^[^ <]+')
@@ -41,7 +40,7 @@ def concordance_from_collocation(environ,start_response):
     headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
     hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
-    concordance_object, pages = fetch_colloc_concordance(hits, request, db, config)
+    concordance_object = fetch_colloc_concordance(hits, request, db, config)
     return json.dumps(concordance_object)
         
 def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=100, stopwords=True):
@@ -110,7 +109,7 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
     concordance_object["query_done"] = hits.done
     concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page, "more_pages": more_pages}  
 
-    return concordance_object, pages
+    return concordance_object
 
 def colloc_concordance(db, hit, path, q, context_size):
     conc_text = fetch_concordance(db, hit, path, context_size)

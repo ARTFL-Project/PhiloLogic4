@@ -13,7 +13,7 @@ philoApp.factory('radio', ['$rootScope', function($rootScope) {
 philoApp.factory('request', ['$http', 'URL', function($http, URL) {
     return {
         query: function(queryParams) {
-            var request = URL.query(queryParams);
+            var request = URL.report(queryParams);
             return $http.get(request);
         }
         
@@ -51,14 +51,15 @@ philoApp.factory('URL', ['$rootScope', function($rootScope) {
             var urlString = this.objectToString(localParams)
             return "query?" + urlString;
         },
-        query: function(queryParams, extraParams) {
+        report: function(queryParams, extraParams) {
             var localParams = this.mergeParams(queryParams, extraParams)
             var urlString = this.objectToString(localParams)
-            if ("script" in localParams) {
-                return "scripts/" + localParams.script + '?' + urlString + '&report=' + localParams.report;
-            } else {
-                return "reports/" + localParams.report + '.py?' + urlString;
-            }
+            return "reports/" + localParams.report + '.py?' + urlString;
+        },
+        script: function(queryParams, extraParams) {
+            var localParams = this.mergeParams(queryParams, extraParams)
+            var urlString = this.objectToString(localParams)
+            return "scripts/" + localParams.script + '?' + urlString + '&report=' + localParams.report;
         },
         path: function(pathInfo) {
             pathInfo = pathInfo.split(' ').join('/');
@@ -84,6 +85,8 @@ philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
                     }
                 });
             }
+            delete fullResults.more_results; /// Workaround for weird object inheritance issue
+            delete fullResults.results;
             var sortedList = this.sortResults(fullResults, sortKey);
             return {"sorted": sortedList, "unsorted": fullResults};
         },

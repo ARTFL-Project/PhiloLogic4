@@ -10,7 +10,7 @@ philoApp.directive('concordance', ['$rootScope', '$http', 'URL', function($rootS
             defaultElement.velocity('fadeIn', {duration: 300});
         } else {
             if (moreContextElement.is(':empty')) {
-                var request = URL.query($rootScope.formData, {script: 'get_more_context.py', hit_num: resultNumber})
+                var request = URL.script($rootScope.formData, {script: 'get_more_context.py', hit_num: resultNumber})
                 $http.get(request)
                 .then(function(response) {
                     defaultElement.hide();
@@ -121,7 +121,7 @@ philoApp.directive('concordanceKwicSwitch', function() {
     } 
 });
 
-philoApp.directive('sidebarMenu', ['$rootScope', '$http', 'URL', function($rootScope, $http, URL) {
+philoApp.directive('sidebarMenu', ['$rootScope', '$http', function($rootScope, $http) {
     var populateFacets = function() {
         var facets = [];
         for (var i=0; i < $rootScope.philoConfig.facets.length; i++) {
@@ -193,7 +193,11 @@ philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progre
         }
     }
     var populateSidebar = function(scope, facet, fullResults, start, end, queryParams) {
-        var request = URL.query(queryParams, {start: start, end: end});
+		if (facet.type !== "collocationFacet") {
+			var request = URL.script(queryParams, {start: start, end: end});
+		} else {
+			var request = URL.report(queryParams, {start: start, end: end});
+		}
         $http.get(request)
         .then(function(response) {
             if (response.data.more_results) {

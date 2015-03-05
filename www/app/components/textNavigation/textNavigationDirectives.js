@@ -10,7 +10,7 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textNavigatio
             scope.byteOffset = ''
         }
         scope.textObject = {citation: textNavigationValues.citation}; // Make sure we don't change citation if it has been already filled
-        var request = URL.query({report: "navigation", philo_id: scope.philoID, byte: scope.byteOffset});
+        var request = URL.report({report: "navigation", philo_id: scope.philoID, byte: scope.byteOffset});
         $http.get(request).then(function(response) {
             scope.textObject = response.data;
             textNavigationValues.citation = response.data.citation;
@@ -77,7 +77,7 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textNavigatio
 philoApp.directive('tocSidebar', ['$routeParams', '$http', '$timeout', 'URL', 'textNavigationValues', function($routeParams, $http, $timeout, URL, textNavigationValues) {
     var getTableOfContents = function(scope) {
         var philoID = $routeParams.pathInfo.split('/').join(' ');
-        var request = URL.query({philo_id: philoID, script: 'get_table_of_contents.py'});
+        var request = URL.script({philo_id: philoID, script: 'get_table_of_contents.py'});
         $http.get(request).then(function(response) {
             scope.tocObject = response.data;
             textNavigationValues.tocObject = response.data;

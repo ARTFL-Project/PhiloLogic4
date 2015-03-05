@@ -33,7 +33,7 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL',
     }
     var removeMetadata = function(metadata, queryParams, restart) {
         delete queryParams[metadata];
-        var request = URL.query(queryParams);
+        var request = URL.report(queryParams);
         if (queryParams.report === "concordance" || queryParams.report === "kwic" || queryParams.report === "bibliography") {
             $http.get(request).success(function(data) {
                 $location.url(URL.objectToUrlString(queryParams));

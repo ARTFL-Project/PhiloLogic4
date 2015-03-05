@@ -7,7 +7,7 @@ philoApp.controller('tableOfContents', ['$scope', '$rootScope', '$http', '$locat
     var tempValue = $scope.textObjectURL.pathInfo.split('/');
     tempValue.pop();
     $scope.philoID = tempValue.join(' ');
-    var request = URL.query({report: "table_of_contents", philo_id: $scope.philoID});
+    var request = URL.report({report: "table_of_contents", philo_id: $scope.philoID});
     $http.get(request).then(function(response) {
         $scope.tocObject = response.data;
     });
@@ -17,7 +17,7 @@ philoApp.controller('tableOfContents', ['$scope', '$rootScope', '$http', '$locat
         if (typeof($scope.teiHeader) === "string") {
             $scope.teiHeader = false;
         } else {
-            var request = URL.query({script: "get_header.py", philo_id: $scope.philoID});
+            var request = URL.script({script: "get_header.py", philo_id: $scope.philoID});
             $http.get(request)
             .then(function(response) {
                 $scope.teiHeader = response.data;

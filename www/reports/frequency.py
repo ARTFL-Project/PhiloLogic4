@@ -57,7 +57,7 @@ def generate_frequency(results, q, db, config):
                         metadata[m] = '"%s"' % metadata[m]
             
             # Now build the url from q.
-            url = f.link.make_absolute_query_link(config, q, frequency_field="", start="0", end="0", report=q.report, **metadata)
+            url = f.link.make_absolute_query_link(config, q, frequency_field="", start="0", end="0", report=q.report, script='', **metadata)
         
             table[label] = {'count': count, 'url': url}
         

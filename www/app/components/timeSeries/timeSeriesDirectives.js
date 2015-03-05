@@ -50,11 +50,14 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         return {dateList: dateList, chartIndex: chartIndex};
     }
     var updateTimeSeries = function(scope, fullResults, start, end) {
-        var request = URL.query($rootScope.formData, {start: start, end: end});
+        var request = URL.report($rootScope.formData, {start: start, end: end});
         $http.get(request).then(function(results) {
             var timeSeriesResults = results.data;
             scope.resultsLength = timeSeriesResults.results_length;
             scope.moreResults = timeSeriesResults.more_results;
+            for (var date in timeSeriesResults.results.date_count) { // Update date counts
+                scope.dateCounts[date] = timeSeriesResults.results.date_count[date];
+            }
             sortAndRenderTimeSeries(scope, fullResults, timeSeriesResults, start, end)
         });
     }
