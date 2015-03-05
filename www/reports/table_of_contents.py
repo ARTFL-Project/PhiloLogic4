@@ -7,6 +7,7 @@ from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
 from philologic import HitWrapper
+from concordance import citation_links
 from bibliography import biblio_citation
 try:
     import simplejson as json
@@ -89,8 +90,8 @@ def generate_toc_object(obj, db, q, config):
     for metadata in db.locals['metadata_fields']:
         if db.locals['metadata_types'][metadata] == "doc":
             metadata_fields[metadata] = obj[metadata]
-    doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1])}
-    citation = biblio_citation(obj, doc_link)
+    citation_hrefs = citation_links(db, config, obj)
+    citation = biblio_citation(obj, citation_hrefs)
     toc_object = {"query": dict([i for i in q]), "philo_id": obj.philo_id, "toc": text_hierarchy, "metadata_fields": metadata_fields,
                   "citation": citation}
     return toc_object

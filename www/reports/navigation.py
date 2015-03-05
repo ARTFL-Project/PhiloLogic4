@@ -13,6 +13,7 @@ from wsgiref.handlers import CGIHandler
 from functions.ObjectFormatter import convert_entities, valid_html_tags, xml_to_html_class
 from functions.FragmentParser import parse
 from philologic import HitWrapper
+from concordance import citation_links
 from bibliography import biblio_citation
 try:
     import simplejson as json
@@ -48,8 +49,8 @@ def generate_text_object(obj, db, q, config):
         if db.locals['metadata_types'][metadata] == "doc":
             metadata_fields[metadata] = obj[metadata]
     text_object['metadata_fields'] = metadata_fields
-    doc_link = {'doc': f.make_absolute_object_link(config,obj.philo_id[:1]) + "/table-of-contents"}
-    citation = biblio_citation(obj, doc_link)
+    citation_hrefs = citation_links(db, config, obj)
+    citation = biblio_citation(obj, citation_hrefs)
     text_object['citation'] = citation
     text = get_text_obj(obj, config, q, db.locals['word_regex'])
     text_object['text'] = text

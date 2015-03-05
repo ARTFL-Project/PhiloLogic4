@@ -62,6 +62,40 @@ def biblio_citation(hit, citation_hrefs):
         citation['date'] = {'href': '', 'label': hit.date.strip()}
     else:
         citation["date"] = False
+        
+    ## Div level metadata // Copied from concordance citations
+    div1_name = hit.div1.head
+    if not div1_name:
+        if hit.div1.philo_name == "__philo_virtual":
+            div1_name = "Section"
+        else:
+            if hit.div1["type"] and hit.div1["n"]:
+                div1_name = hit.div1['type'] + " " + hit.div1["n"]                       
+            else:
+                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
+    div1_name = div1_name[0].upper() + div1_name[1:]
+    
+    ## Remove leading/trailing spaces
+    div1_name = div1_name.strip()
+    div2_name = hit.div2.head.strip()
+    div3_name = hit.div3.head.strip()
+    
+    if div1_name:
+        div1_name = div1_name[0].upper() + div1_name[1:].lower()
+        citation['div1'] = {"href": citation_hrefs['div1'], "label": div1_name}
+    else:
+        citation['div1'] = False
+    if div2_name:
+        div2_name = div2_name[0].upper() + div2_name[1:].lower()
+        citation['div2'] = {"href": citation_hrefs['div2'], "label": div2_name}
+    else:
+        citation['div2'] = False
+    if div3_name:
+        div3_name = div3_name[0].upper() + div3_name[1:].lower()
+        citation['div3'] = {"href": citation_hrefs['div3'], "label": div3_name}
+    else:
+        citation['div3'] = False
+    
     more_metadata = []
     if hit.pub_place:
         more_metadata.append(hit.pub_place.strip())
