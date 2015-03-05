@@ -26,7 +26,11 @@ def navigation(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    obj = db[request.philo_id]
+    try:
+        obj = db[request.philo_id]
+    except ValueError:
+        philo_id = ' '.join(request.path_components)
+        obj = db[philo_id]
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
     text_object = generate_text_object(obj, db, request, config)

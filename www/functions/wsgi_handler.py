@@ -5,7 +5,7 @@ import sys
 from philologic.DB import DB
 
 class WSGIHandler(object):
-    def __init__(self,db,environ):
+    def __init__(self,db,environ):        
         self.path_info = environ.get("PATH_INFO", '')
         self.query_string = environ["QUERY_STRING"]
         self.script_filename = environ["SCRIPT_FILENAME"]
@@ -16,6 +16,18 @@ class WSGIHandler(object):
           "end":"0",
           #"arg":"0",          
         }
+
+        ## Check the header for JSON content_type or look for a format=json keyword
+        if 'CONTENT_TYPE' in environ:
+            self.content_type = environ['CONTENT_TYPE']
+        else:
+            self.content_type = 'text/HTML'
+        ## If format is set, it overrides the content_type
+        if "format" in self.cgi:
+            if self.cgi['format'][0] == "json":
+                self.content_type = "application/json"
+            else:
+                self.content_type = self.cgi['format'][0] or ''
         
         # Make byte a direct attribute of the class since it is a special case and
         # can contain more than one element
@@ -87,10 +99,9 @@ class WSGIHandler(object):
         
         try:
             self.path_components = [c for c in self.path_info.split("/") if c]
-            if self.path_components[0] == 'form':
-                query['report'] = 'form'
         except:
             self.path_components = []
+            
 
     def __getattr__(self,key):
         return self[key]

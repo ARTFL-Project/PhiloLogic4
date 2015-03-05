@@ -61,11 +61,10 @@ def concordance_results(db, q, config):
 def citation_links(db, config, i):
     """ Returns a representation of a PhiloLogic object and all its ancestors
         suitable for a precise concordance citation. """
-    doc_href = f.make_absolute_object_link(config,i.philo_id[:1],i.bytes) + "/table-of-contents"
+    doc_href = f.make_absolute_object_link(config,i.philo_id[:1],i.bytes)
     div1_href = f.make_absolute_object_link(config,i.philo_id[:2], i.bytes)
     div2_href = f.make_absolute_object_link(config,i.philo_id[:3], i.bytes)
     div3_href = f.make_absolute_object_link(config,i.philo_id[:4], i.bytes)
-    print >> sys.stderr, "LINK", div1_href
     
     links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href}
     

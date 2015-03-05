@@ -10,5 +10,6 @@ from time_series import time_series, generate_time_series, handle_dates
 from bibliography import bibliography, biblio_citation
 from frequencies import frequencies
 from word_property_filter import word_property_filter
+from table_of_contents import table_of_contents
 from error import error
 from access import access

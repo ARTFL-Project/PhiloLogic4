@@ -21,8 +21,11 @@ def table_of_contents(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    print >> sys.stderr, "PHILOID", repr(request.philo_id)
-    obj = db[request.philo_id]
+    try:
+        obj = db[request.philo_id]
+    except ValueError:
+        philo_id = ' '.join(request.path_components[:-1])
+        obj = db[philo_id]
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
     toc_object = json.dumps(generate_toc_object(obj, db, request, config))

@@ -53,7 +53,7 @@ def biblio_citation(hit, citation_hrefs):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
     
     citation = {}
-    citation['title'] = {'href': citation_hrefs['doc'], 'label': hit.title.strip()}
+    citation['title'] = {'href': citation_hrefs['doc'] + '/table-of-contents', 'label': hit.title.strip()}
     if hit.author:
         citation['author'] = {'href': '', 'label': hit.author.strip()}
     else:
