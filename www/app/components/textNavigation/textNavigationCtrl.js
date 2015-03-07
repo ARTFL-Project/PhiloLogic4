@@ -51,9 +51,13 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
     }
     
     $scope.goToTextObject = function(philoID) {
-        $scope.tocOpen = false;
-        philoID = philoID.split('-').join('/');
-        $location.url(URL.path(philoID));
+        $("#toc-wrapper").velocity({opacity: 0}, {duration: 250});
+        $("#toc-wrapper").velocity('slideUp', {duration: 300, queue: false, complete: function() {
+                philoID = philoID.split('-').join('/');
+                console.log(philoID)
+                $location.url(URL.path(philoID)).replace();
+                $scope.$apply()
+            }});
     }
 }]);
 
