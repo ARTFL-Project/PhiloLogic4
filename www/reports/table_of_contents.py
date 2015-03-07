@@ -82,7 +82,7 @@ def generate_toc_object(obj, db, q, config):
                         if display_name == "__philo_virtual":
                             display_name = i['philo_type']
             display_name = display_name[0].upper() + display_name[1:]
-            link = f.make_absolute_object_link(config, philo_id.split()[:7])
+            link = f.make_absolute_object_link(config, philo_id.split()[:philo_slices[philo_type]])
             philo_id = ' '.join(philo_id.split()[:philo_slices[philo_type]])
             toc_element = {"philo_id": philo_id, "philo_type": philo_type, "label": display_name, "href": link}
             text_hierarchy.append(toc_element)

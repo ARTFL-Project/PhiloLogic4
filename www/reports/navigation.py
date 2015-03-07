@@ -22,6 +22,7 @@ except ImportError:
     import json
 
 philo_types = set(['div1', 'div2', 'div3'])
+philo_slices = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
 
 def navigation(environ,start_response):
     config = f.WebConfig()
@@ -42,7 +43,7 @@ def generate_text_object(obj, db, q, config):
     while philo_id[-1] == 0:
         philo_id.pop()
     text_object = {"query": dict([i for i in q]), "philo_id": ' '.join([str(i) for i in philo_id])}
-    text_object['prev'] = ' '.join(obj.prev.split()[:7])
+    text_object['prev'] = ' '.join(obj.prev.split()[:7][:philo_slices[obj.philo_type]])
     text_object['next'] = ' '.join(obj.next.split()[:7])
     metadata_fields = {}
     for metadata in db.locals['metadata_fields']:

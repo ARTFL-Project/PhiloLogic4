@@ -1,6 +1,6 @@
 <div id="search-hits">
     <span ng-if="resultsLength !== 0 && end <= resultsPerPage || end <= resultsLength">
-        Hits {{ start }} - {{ end }} of {{ resultsLength || resultsPerPage }}
+        Hits {{ start }} - {{ end }} of {{ resultsLength }}
     </span>
     <span ng-if="resultsLength !== 0 && end > resultsLength">
         Hits {{ start }} - {{ resultsLength || end }} of {{ resultsLength || resultsPerPage }}

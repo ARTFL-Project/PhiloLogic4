@@ -2,7 +2,7 @@
 
 philoApp.value('textNavigationValues', {
     citation: {},
-    tocObject:false,
+    tocElements:false,
     tocOpen: false,
     navBar: false
 });

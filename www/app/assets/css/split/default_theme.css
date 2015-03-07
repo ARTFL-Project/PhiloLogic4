@@ -84,7 +84,7 @@ a:hover {
 #toc-container {
     background: rgba(78, 93, 108, .9);
 }
-a.current-obj, , #toc-container a:hover {
+a.current-obj, #toc-container a:hover {
     background: rgba(256, 256, 256, .9);
     color: #697683 !important;
 }

@@ -1,5 +1,5 @@
 <div class="container-fluid text-object"  id="philologic_response" ng-controller="textNavigation">
-    <div id="object-title" class='philologic_cite'>
+    <div id="object-title">
         <div>
             <a href="{{ textObject.citation.title.href }}" class="citation-small-caps"><i>{{ textObject.citation.title.label }}</i></a>
             <span ng-if="textObject.citation.author">, {{ textObject.citation.author.label }}</span>
@@ -9,8 +9,8 @@
     <navigation-bar toc-done="{{ tocDone }}" ng-if="navBar === true || loading === false"></navigation-bar>
     <loading ng-if="loading"></loading>
     <div class="row" id="all-content">
-        <toc-sidebar></toc-sidebar>
-        <text-object></text-object>
+        <toc-sidebar philo-id="{{ philo_id }}"></toc-sidebar>
+        <text-object scroll-to-highlight="{{ highlight }}"></text-object>
     </div>
 </div>
 <div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-full-screen="true" data-continuous="false" style="display: none">

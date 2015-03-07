@@ -4,16 +4,18 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
                                             function($scope, $rootScope, $http, $location, $routeParams, $timeout, URL, textNavigationValues) {
     
     $scope.textObject = {};
+    $scope.loading = true;
     $scope.navBar = textNavigationValues.navBar; // Don't draw navBar until text has been fetched
-    $scope.tocObject = textNavigationValues.tocObject;
+    $scope.tocElements = textNavigationValues.tocElements;
     $scope.tocOpen = textNavigationValues.tocOpen;
-    $scope.loading = true; // Start a spinner while text is getting fetched
     $scope.tocDone = false // Only fetch TOC once navBar has been drawn
+    
+    $scope.philoId = $routeParams.pathInfo.replace('/', ' ');
     
     if ($scope.tocOpen) {
         setTimeout(function() {
             // TODO: find why this doesn't work
-            $('.current-obj').velocity("scroll", {duration: 500, container: $("#toc-content"), offset: -50});
+            $('.current-obj').velocity("scroll", {duration: 0, container: $("#toc-content"), offset: -50});
         });
     }
     
@@ -53,7 +55,7 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
         if (typeof num !="undefined") {
             toc_height = toc_height - num;
         }
-        $('#toc-content').velocity({'max-height': toc_height + 'px'});
+        $('#toc-content').css({'max-height': toc_height + 'px'});
     }
     
     $scope.backToTop = function() {
@@ -62,7 +64,7 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
     
     $scope.goToTextObject = function(philoID) {
         textNavigationValues.tocOpen = $scope.tocOpen;
-        philoID = philoID.split('-').join(' ');
+        philoID = philoID.split('-').join('/');
         $location.url(URL.path(philoID));
     }
 }]);

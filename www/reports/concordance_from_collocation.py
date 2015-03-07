@@ -67,8 +67,10 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
         start = 1
     else:
         start = q.start
-
+    
+    count = 0
     for hit in hits:
+        count += 1
         conc_left, conc_right = split_concordance(hit, length, config.db_path)
         
         if direction =='left':
@@ -94,7 +96,8 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
             result_obj = {"philo_id": hit.philo_id, "citation": citation, "citation_links": citation_hrefs, "context": context,
                           "metadata_fields": metadata_fields, "bytes": hit.bytes, "collocate_count": count}
             results.append(result_obj)
-
+        else:
+            print >> sys.stderr, "NOTTT", count
         if len(results) == (q.results_per_page):
             more_pages = True
             break
@@ -108,6 +111,7 @@ def fetch_colloc_concordance(hits, q, db, config, word_filter=True, filter_num=1
     concordance_object['results'] = results
     concordance_object["query_done"] = hits.done
     concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page, "more_pages": more_pages}  
+    print >> sys.stderr, "RESULTS", len(hits), concordance_object['results']
 
     return concordance_object
 

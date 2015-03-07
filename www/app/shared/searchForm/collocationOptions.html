@@ -24,13 +24,13 @@
             </div>
             <div class="col-xs-6 col-sm-2">
                 <div class="btn-group-vertical" role="group" data-toggle="buttons" id="colloc_filter_choice">
-                    <label class="btn btn-primary active" id="colloc-filter-frequency" ng-click="radioClick('colloc_filter_choice', 'frequency')">
+                    <label class="btn btn-primary" ng-class="{'active': formData.colloc_filter_choice === 'frequency'}" id="colloc-filter-frequency" ng-click="radioClick('colloc_filter_choice', 'frequency')">
                         <input type="radio" name="colloc_filter_choice" value="frequency" checked="checked">Most frequent terms
                     </label>
-                    <label class="btn btn-primary" id="colloc-filter-stopwords" ng-if="stopwords" ng-click="radioClick('colloc_filter_choice', 'stopwords')">
+                    <label class="btn btn-primary" ng-class="{'active': formData.colloc_filter_choice === 'stopwords'}" id="colloc-filter-stopwords" ng-if="stopwords" ng-click="radioClick('colloc_filter_choice', 'stopwords')">
                         <input type="radio" name="colloc_filter_choice" value="stopwords">Stopwords
                     </label>
-                    <label class="btn btn-primary" id="colloc-no-filter" ng-click="radioClick('colloc_filter_choice', 'nofilter')">
+                    <label class="btn btn-primary" ng-class="{'active': formData.colloc_filter_choice === 'nofilter'}" id="colloc-no-filter" ng-click="radioClick('colloc_filter_choice', 'nofilter')">
                         <input type="radio" name="colloc_filter_choice" value="nofilter">No filtering
                     </label>
                 </div>

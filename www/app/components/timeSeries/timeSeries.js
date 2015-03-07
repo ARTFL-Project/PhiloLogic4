@@ -20,4 +20,9 @@ philoApp.controller('timeSeriesCtrl', ['$scope', '$rootScope', '$location', 'rad
         $scope.frequencyType = frequencyType;
     }
     
+    $scope.hoverChart = function($event, title) {
+        var element = $($event.currentTarget);
+        element.popover('toggle')
+    }
+    
 }]);

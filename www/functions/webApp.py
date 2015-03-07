@@ -23,6 +23,7 @@ css_files = [
 
 ## External JavaScript assets
 js_plugins = [
+    "app/assets/js/plugins/ui-utils.min.js",
     "app/assets/js/plugins/angular-velocity.min.js",
     "app/assets/js/plugins/jquery.tagcloud.js"
 ]

@@ -9,7 +9,7 @@
         <div id="bottom-number">{{ bottomNumber }}</div>
     </div>
     <div id="side-text">{{ sideText }}</div>
-    <a class='graph-bar' href="{{ bar.url }}" data-toggle='tooltip' title="{{ bar.title }}" style="margin-left: {{ bar.marginLeft }}px; width: {{ bar.width }}px;" ng-repeat="bar in barChart | filterTimeSeries">
-        <span class="graph-years" style="margin-left: {{ bar.yearWidth }}px;">{{ bar.date }}</span>
+    <a class='graph-bar' href="{{ bar.url }}" data-toggle='popover' data-content="{{bar.title}}" style="margin-left: {{ bar.marginLeft }}px; width: {{ bar.width }}px;" ng-mouseover="hoverChart($event)" ng-mouseleave="hoverChart($event)" ng-repeat="bar in barChart | filterTimeSeries">
+        <span class="graph-years" style="margin-left: {{ bar.yearWidth }}px;">{{ ::bar.date }}</span>
     </a>
 </div>

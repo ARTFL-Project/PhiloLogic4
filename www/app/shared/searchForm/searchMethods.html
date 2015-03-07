@@ -1,18 +1,18 @@
 <div class="row hidden-xs" id='method' ng-if="formData.report != 'collocation'">
     <div class="col-xs-12 col-sm-2" style="margin-top: 40px;">
-        Search Terms
+        Search Terms {{ formData.method }}
     </div>
     <div class="col-xs-12 col-sm-3 col-lg-2" id="method-buttons">
         <div class="btn-group-vertical" data-toggle="buttons">
-            <label class="btn btn-primary active" ng-click="radioClick('method', 'proxy')">
+            <label class="btn btn-primary" ng-class="{'active': formData.method === 'proxy'}" ng-click="radioClick('method', 'proxy')">
                 <input type="radio" name="method" id="method1" value='proxy' checked>
                 Within
             </label>
-            <label class="btn btn-primary" ng-click="radioClick('method', 'phrase')">
+            <label class="btn btn-primary" ng-class="{'active': formData.method === 'phrase'}" ng-click="radioClick('method', 'phrase')">
                 <input type="radio" name="method" id="method2" value='phrase'>
                 Exactly
             </label>
-            <label class="btn btn-primary" ng-click="radioClick('method', 'cooc')">
+            <label class="btn btn-primary" ng-class="{'active': formData.method === 'cooc'}" ng-click="radioClick('method', 'cooc')">
                 <input type="radio" name="method" id="method3" value='cooc'>
                 In the same sentence
             </label>

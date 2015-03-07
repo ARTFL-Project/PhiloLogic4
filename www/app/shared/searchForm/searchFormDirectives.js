@@ -54,12 +54,11 @@ philoApp.directive('searchTerms', function() {
     }
 });
 
-philoApp.directive('searchMethods', function() {
+philoApp.directive('searchMethods', ['$rootScope', function($rootScope) {
     return {
         templateUrl: 'app/shared/searchForm/searchMethods.html',
-        scope: false
     }
-});
+}]);
 
 philoApp.directive('metadataFields', ['$rootScope', function($rootScope) {
     var buildMetadata = function() {
@@ -90,19 +89,25 @@ philoApp.directive('collocationOptions', ['$rootScope', function($rootScope) {
     return {
         templateUrl: 'app/shared/searchForm/collocationOptions.html',
         link: function(scope, element, attrs) {
-            scope.collocWordNum = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-            $rootScope.formData.word_num = scope.collocWordNum[4];
+            scope.collocWordNum = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+            if (!'word_num' in $rootScope.formData || typeof($rootScope.formData.word_num) === 'undefined') {
+                $rootScope.formData.word_num = scope.collocWordNum[4];
+            }
             scope.stopwords = $rootScope.philoConfig.stopwords;
-            $rootScope.formData.colloc_filter_choice = "frequency";
-            scope.wordFiltering = [25, 50, 75, 100, 125, 150, 175, 200];
-            $rootScope.formData.filter_frequency = scope.wordFiltering[3];
+            if (!'colloc_filter_choice' in $rootScope.formData || typeof($rootScope.formData.colloc_filter_choice) === 'undefined') {
+                $rootScope.formData.colloc_filter_choice = "frequency";
+            }
+            scope.wordFiltering = ['25', '50', '75', '100', '125', '150', '175', '200'];
+            if (!'filter_frequency' in $rootScope.formData || typeof($rootScope.formData.filter_frequency) === 'undefined') {
+                $rootScope.formData.filter_frequency = scope.wordFiltering[3];
+            }
         }
     }
 }]);
 
 philoApp.directive('timeSeriesOptions', ['$rootScope', function($rootScope) {
     var buildOptions = function() {
-        var options = {1: "Year", 10: "Decade", 50: "Half Century", 100: "Century"};
+        var options = {1: "Year", '10': "Decade", '50': "Half Century", '100': "Century"};
         var intervals = [];
         for (var i=0; i < $rootScope.philoConfig.time_series_intervals.length; i++) {
             var interval = {
@@ -117,7 +122,7 @@ philoApp.directive('timeSeriesOptions', ['$rootScope', function($rootScope) {
         templateUrl: 'app/shared/searchForm/timeSeriesOptions.html',
         link: function(scope, element, attrs) {
             scope.timeSeriesIntervals = buildOptions();
-            $rootScope.formData.year_interval = scope.timeSeriesIntervals[0].date;
+            //$rootScope.formData.year_interval = scope.timeSeriesIntervals[0].date;
         }
     }
 }]);
@@ -125,9 +130,6 @@ philoApp.directive('timeSeriesOptions', ['$rootScope', function($rootScope) {
 philoApp.directive('resultsPerPage', ['$rootScope', function($rootScope) {
     return {
         templateUrl: 'app/shared/searchForm/resultsPerPage.html',
-        link: function() {
-            $rootScope.formData.results_per_page = "25";
-        }
     }
 }]);
 

@@ -13,30 +13,17 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textNavigatio
         var request = URL.report({report: "navigation", philo_id: scope.philoID, byte: scope.byteOffset});
         $http.get(request).then(function(response) {
             scope.textObject = response.data;
+            textNavigationValues.textObject = response.data;
             textNavigationValues.citation = response.data.citation;
             textNavigationValues.navBar = true;
             if (scope.byteOffset.length > 0 ) {
-                setTimeout(scrollToHighlight, 500);
+                scope.highlight = true;
                 setTimeout(createNoteLink, 500)
+            } else {
+                scope.highlight = false;
             }
             scope.loading = false;
         });
-    }
-    var scrollToHighlight = function() {
-        var word_offset = $('.highlight').eq(0).offset().top;
-        if (word_offset == 0) {
-            var note = $('.highlight').parents('.note-content');
-            note.show(); // The highlight is in a hidden note
-            word_offset = $('.highlight').offset().top;
-            $('.highlight').parents('.note-content').hide();
-        }
-        if ($('.highlight').eq(0).parents('.note-content').length) {
-            $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: word_offset - 60, complete: function() {
-                $('.highlight').parents('.note-content').prev('.note').trigger('focus');}}
-            );
-        } else {
-            $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: word_offset - 100});
-        }
     }
     var createNoteLink = function() {
         $('.note-ref, .note').click(function() {
@@ -68,7 +55,7 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textNavigatio
     }
     return {
         templateUrl: 'app/components/textNavigation/textObject.html',
-        link: function(scope) {
+        link: function(scope,element, attrs) {
             getTextObject(scope);
         }
     }    
@@ -76,14 +63,42 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textNavigatio
 
 philoApp.directive('tocSidebar', ['$routeParams', '$http', '$timeout', 'URL', 'textNavigationValues', function($routeParams, $http, $timeout, URL, textNavigationValues) {
     var getTableOfContents = function(scope) {
-        var philoID = $routeParams.pathInfo.split('/').join(' ');
-        var request = URL.script({philo_id: philoID, script: 'get_table_of_contents.py'});
+        var philoId = $routeParams.pathInfo.split('/').join(' ');
+        var request = URL.script({philo_id: philoId, script: 'get_table_of_contents.py'});
         $http.get(request).then(function(response) {
-            scope.tocObject = response.data;
-            textNavigationValues.tocObject = response.data;
+            console.log('queried TOC')
+            var tocObject = response.data;
+            scope.tocElements = filterTocElements(tocObject.toc, philoId);
+            textNavigationValues.tocElements = scope.tocElements;
             scope.tocDone = true;
-            affixTOC(scope);
         });
+    }
+    var filterTocElements = function(tocElements, philoId) {
+        var filtered = [];
+        var limit = 200;
+        var match = false;
+        var count = 0;
+        for (var i=0; i < tocElements.length; i++) {
+            if (match) {
+                count += 1
+            }
+            var element = tocElements[i];
+            if (element.philo_id === philoId) {
+                element.currentObj = "current-obj";
+                match = i;
+            } else {
+                element.currentObj = "";
+            }
+            filtered.push(element)
+            if (count == limit) {
+                break
+            }
+        }
+        if ((match - limit) < 0) {
+            return filtered;
+        } else {
+            return filtered.slice(match - limit);
+        }
     }
     var affixTOC = function(scope) {
         $timeout(function() {
@@ -93,7 +108,6 @@ philoApp.directive('tocSidebar', ['$routeParams', '$http', '$timeout', 'URL', 't
             }});
             $('#toc-container').on('affix.bs.affix', function() {
                 $("#toc-container").addClass('fixed');
-                scope.adjustTocHeight();
             });
             $('#toc-container').on('affix-top.bs.affix', function() {
                 $("#toc-container").removeClass('fixed').css('position', 'static');
@@ -104,12 +118,15 @@ philoApp.directive('tocSidebar', ['$routeParams', '$http', '$timeout', 'URL', 't
     return {
         templateUrl: 'app/components/textNavigation/tocSidebar.html',
         link: function(scope, element, attrs) {
-            if (!textNavigationValues.tocObject) {
+            if (!scope.tocElements) {
                 getTableOfContents(scope);
             } else {
-                scope.tocObject = textNavigationValues.tocObject;
-                affixTOC(scope);
-                scope.tocDone = true;
+                var philoId = $routeParams.pathInfo.split('/').join(' ');
+                scope.tocElements = filterTocElements(scope.tocElements, philoId);
+                textNavigationValues = scope.tocElements;
+                $timeout(function() {
+                    scope.adjustTocHeight()
+                })
             }
             element.on('$destroy', function() {
                 $('#toc-container').removeData('affix').removeClass('affix affix-top affix-bottom');
@@ -137,28 +154,78 @@ philoApp.directive('navigationBar', ['$routeParams', '$http', '$timeout', 'URL',
         link: function(scope, element, attrs) {
             setUpNavBar(scope);
             scope.navBar = true; // it's now drawn and shouldn't be removed
-            applyAffix()
-            function applyAffix() {
-                $timeout(function() {
-                    $('#nav-buttons').affix({ offset: { top: function() {
-                        return (this.top = $('#nav-buttons').offset().top)
-                        }
-                    }});
-                    $('#nav-buttons').on('affix.bs.affix', function() {
-                        $(this).addClass('fixed');
-                        $('#back-to-top').velocity("stop").velocity('fadeIn', {duration: 200});
-                    });
-                    $('#nav-buttons').on('affix-top.bs.affix', function() {
-                        $(this).removeClass('fixed');
-                        $('#back-to-top').velocity("stop").velocity('fadeOut', {duration: 200});
-                    });
-                });
-            }
             attrs.$observe('tocDone', function(tocDone) {
                 if (tocDone) {
                     $("#show-toc").removeAttr("disabled");
                 }
             });
+        }
+    }
+}]);
+
+philoApp.directive('affix', function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            if (attrs.affix !== '') {
+                var offsetTop = element.offset().top - parseInt(attrs.affix);
+            } else {
+                var offsetTop = element.offset().top;
+            }
+            element.affix({ offset: { top: function() {
+                return (this.top = offsetTop)
+                }
+            }});
+            element.on('affix.bs.affix', function() {
+                $(this).addClass('fixed');
+                if (element.attr('id') === "toc-container") {
+                    scope.adjustTocHeight();
+                } else if (element.attr('id') === "nav-buttons") {
+                    $('#back-to-top').addClass('fixed');
+                }
+            });
+            element.on('affix-top.bs.affix', function() {
+                $(this).removeClass('fixed');
+                if (element.attr('id') === "toc-container") {
+                    scope.adjustTocHeight();
+                } else if (element.attr('id') === "nav-buttons") {
+                    $('#back-to-top').removeClass('fixed');
+                }
+            });
+        }
+    }
+});
+
+philoApp.directive('scrollToHighlight', ['$timeout', function($timeout) {
+    var scroll = function() {
+        $timeout(function() {
+            var wordOffset = $('.highlight').eq(0).offset().top;
+            if (wordOffset == 0) {
+                var note = $('.highlight').parents('.note-content');
+                note.show(); // The highlight is in a hidden note
+                wordOffset = $('.highlight').offset().top;
+                $('.highlight').parents('.note-content').hide();
+            }
+            if ($('.highlight').eq(0).parents('.note-content').length) {
+                $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: wordOffset - 60, complete: function() {
+                    $('.highlight').parents('.note-content').prev('.note').trigger('focus');}}
+                );
+            } else {
+                $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: wordOffset - 100});
+            }
+        })
+    }
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            if (attrs.scrollToHighlight) {
+                scroll();
+            }
+            attrs.$observe('scrollToHighlight', function(scrollBool) {
+                if (scrollBool) {
+                    scroll();
+                }
+            })
         }
     }
 }]);
