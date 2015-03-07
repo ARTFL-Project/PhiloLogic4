@@ -76,9 +76,9 @@
 }
 #toc-container {
 	display: inline-block !important;
+	margin-left: -25px;
 }
 #toc-container.fixed {
-	display: inline-block !important;
 	position: fixed !important;
 	top: 30px !important;
 }
