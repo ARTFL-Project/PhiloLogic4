@@ -1,6 +1,7 @@
 var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'angular-velocity']);
 
-philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', '$route', '$window', 'textNavigationValues', function($rootScope, $scope, $location, $route, $window, textNavigationValues) {
+philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'textNavigationValues',
+                                  function($rootScope, $scope, $location, textNavigationValues) {
     $rootScope.philoConfig = philoConfig;
     $rootScope.report = $location.search().report || philoReport;
     $rootScope.formData = {
@@ -9,17 +10,22 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', '$route',
         };
     
     $scope.$on('$locationChangeStart', function() {
-        var paths = $location.path().split('/');
-        if (paths[1] == "query") {
+        var paths = $location.path().split('/').filter(Boolean);
+        if (paths[0] == "query") {
             $rootScope.report = $location.search().report;
-        } else if (paths[2] === "table-of-contents") {
-            $rootScope.report = "table-of-contents";
+        } else if (paths[0] == "navigate") {
+            if (paths[paths.length-1] === "table-of-contents") {
+                $rootScope.report = "table-of-contents";
+            } else {
+                $rootScope.report = 'textNavigation';
+            }
         } else {
-            $rootScope.report = 'textNavigation';
-        }
+            $rootScope.report = "landing_page";
+        } 
         if ($rootScope.report !== 'textNavigation') {
+            console.log('clearing')
             textNavigationValues.citation = {};
-            textNavigationValues.tocObject = false;
+            textNavigationValues.tocElements = false;
             textNavigationValues.tocOpen = false;
             textNavigationValues.navBar = false;
         }

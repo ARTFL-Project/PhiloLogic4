@@ -1,16 +1,21 @@
-<div class="row" id="nav-buttons" affix>
-    <button type="button" id="back-to-top" class="btn btn-primary btn-sm" ng-click="backToTop()">
-        Back to top
-    </button>
-    <div class="col-xs-12" style="text-align: center;">
-        <div class="btn-group-sm" role="group">
-            <button type="button" class="btn btn-primary" id="prev-obj" ng-click="goToTextObject(textObject.prev)">
-                <span class="glyphicon glyphicon-chevron-left"></span>
-            </button>
-            <button type="button" class="btn btn-primary" id="show-toc" disabled="disabled" ng-click="toggleTableOfContents()">Table of contents</button>
-            <button type="button" class="btn btn-primary" id="next-obj" ng-click="goToTextObject(textObject.next)">
-                <span class="glyphicon glyphicon-chevron-right"></span>
-            </button>
+<div class="row">
+    <div id="nav-buttons" affix="-20">
+        <button type="button" id="back-to-top" class="btn btn-primary btn-sm" ng-click="backToTop()">
+            Back to top
+        </button>
+        <div class="col-xs-12" style="text-align: center;">
+            <div class="btn-group-sm" role="group">
+                <button type="button" class="btn btn-primary" id="prev-obj" ng-click="goToTextObject(textObject.prev)">
+                    <span class="glyphicon glyphicon-chevron-left"></span>
+                </button>
+                <button type="button" class="btn btn-primary" id="show-toc" disabled="disabled" ng-click="toggleTableOfContents()">Table of contents</button>
+                <button type="button" class="btn btn-primary" id="next-obj" ng-click="goToTextObject(textObject.next)">
+                    <span class="glyphicon glyphicon-chevron-right"></span>
+                </button>
+            </div>
         </div>
+    </div>
+    <div id="toc-wrapper" class="col-xs-12 col-sm-8 col-sm-offset-2" affix="10">
+        <toc-sidebar philo-id="{{ philo_id }}"></toc-sidebar>
     </div>
 </div>

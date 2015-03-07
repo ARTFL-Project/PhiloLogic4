@@ -20,6 +20,7 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
     }
     
     $scope.toggleTableOfContents = function() {
+        console.log('toggled', $scope.tocOpen)
         if ($scope.tocOpen) {
             closeTableOfContents();
         } else {
@@ -27,10 +28,8 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
         }
     }    
     var openTableOfContents = function() {
-        $('#toc-wrapper').css('opacity', 1);
-        $('#nav-buttons').addClass('col-md-offset-4'); // could cause the margin issue
-        $('#toc-wrapper').addClass('show');
-        $scope.adjustTocHeight();
+        $('#toc-wrapper').addClass('display');
+        //$scope.adjustTocHeight();
         $scope.tocOpen = true;
         $timeout(function() {
             $('.current-obj').velocity("scroll", {duration: 500, container: $("#toc-content"), offset: -50});
@@ -43,19 +42,8 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
                 $('#toc-container').css('position', 'static');
             }
         });
-        $('#nav-buttons').removeClass('col-md-offset-4');
     }
-    $scope.adjustTocHeight = function(num) {
-        // Make sure the TOC is no higher than viewport
-        if ($(document).height() == $(window).height()) {
-            var toc_height = $(window).height() - $('#nav-buttons').position().top - $('#nav-buttons').height() - $('#toc-titlebar').height() - 59;
-        } else {
-            var toc_height = $(window).height() - $('#nav-buttons').position().top - $('#toc-titlebar').height() - 59;
-        }
-        if (typeof num !="undefined") {
-            toc_height = toc_height - num;
-        }
-        $('#toc-content').css({'max-height': toc_height + 'px'});
+    $scope.adjustTocHeight = function() {
     }
     
     $scope.backToTop = function() {
@@ -63,7 +51,7 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
     }
     
     $scope.goToTextObject = function(philoID) {
-        textNavigationValues.tocOpen = $scope.tocOpen;
+        $scope.tocOpen = false;
         philoID = philoID.split('-').join('/');
         $location.url(URL.path(philoID));
     }
@@ -74,7 +62,8 @@ philoApp.animation('.toc-slide', function() {
     return {
         beforeAddClass : function(element, className, done) {
             if (className == 'ng-hide') {
-                $(element).velocity('transition.slideLeftBigOut', {duration: 300, complete: done});
+                $(element).velocity('slideUp', {duration: 300, complete: done});
+                $("#toc-wrapper").velocity({opacity: 0}, {duration: 300, queue: false});
             }
             else {
                 done();
@@ -82,7 +71,19 @@ philoApp.animation('.toc-slide', function() {
         },
         removeClass : function(element, className, done) {
             if (className == 'ng-hide') {
-                $(element).velocity('transition.slideLeftBigIn', {duration: 300, complete: done});
+                var windowHeight = $(window).height();
+                var bookPageHeight = $('#book-page').height() + 50;
+                if ((windowHeight -120) < bookPageHeight) {
+                    var height = windowHeight - 120;
+                } else {
+                    var height = windowHeight - $('#book-page').offset().top - 80;
+                }
+                console.log(height)
+                $('#toc-content').css({
+                    maxHeight: height + 'px'
+                    });
+                $(element).velocity('slideDown', {duration: 300, complete: done});
+                $("#toc-wrapper").velocity({opacity: 1}, {duration: 300, queue: false});
             }
             else {
                 done();

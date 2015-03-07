@@ -199,19 +199,21 @@ philoApp.directive('affix', function() {
 philoApp.directive('scrollToHighlight', ['$timeout', function($timeout) {
     var scroll = function() {
         $timeout(function() {
-            var wordOffset = $('.highlight').eq(0).offset().top;
-            if (wordOffset == 0) {
-                var note = $('.highlight').parents('.note-content');
-                note.show(); // The highlight is in a hidden note
-                wordOffset = $('.highlight').offset().top;
-                $('.highlight').parents('.note-content').hide();
-            }
-            if ($('.highlight').eq(0).parents('.note-content').length) {
-                $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: wordOffset - 60, complete: function() {
-                    $('.highlight').parents('.note-content').prev('.note').trigger('focus');}}
-                );
-            } else {
-                $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: wordOffset - 100});
+            if ($('.highlight').length) {
+                var wordOffset = $('.highlight').eq(0).offset().top;
+                if (wordOffset == 0) {
+                    var note = $('.highlight').parents('.note-content');
+                    note.show(); // The highlight is in a hidden note
+                    wordOffset = $('.highlight').offset().top;
+                    $('.highlight').parents('.note-content').hide();
+                }
+                if ($('.highlight').eq(0).parents('.note-content').length) {
+                    $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: wordOffset - 60, complete: function() {
+                        $('.highlight').parents('.note-content').prev('.note').trigger('focus');}}
+                    );
+                } else {
+                    $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: wordOffset - 100});
+                }
             }
         })
     }

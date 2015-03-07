@@ -44,7 +44,7 @@ def generate_text_object(obj, db, q, config):
         philo_id.pop()
     text_object = {"query": dict([i for i in q]), "philo_id": ' '.join([str(i) for i in philo_id])}
     text_object['prev'] = ' '.join(obj.prev.split()[:7][:philo_slices[obj.philo_type]])
-    text_object['next'] = ' '.join(obj.next.split()[:7])
+    text_object['next'] = ' '.join(obj.next.split()[:7][:philo_slices[obj.philo_type]])
     metadata_fields = {}
     for metadata in db.locals['metadata_fields']:
         if db.locals['metadata_types'][metadata] == "doc":
