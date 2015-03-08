@@ -25,7 +25,8 @@ css_files = [
 js_plugins = [
     "app/assets/js/plugins/ui-utils.min.js",
     "app/assets/js/plugins/angular-velocity.min.js",
-    "app/assets/js/plugins/jquery.tagcloud.js"
+    "app/assets/js/plugins/jquery.tagcloud.js",
+    "app/assets/js/plugins/blueimp-gallery.min.js"
 ]
 
 ## Full List of all AngularJS specific JavaScript

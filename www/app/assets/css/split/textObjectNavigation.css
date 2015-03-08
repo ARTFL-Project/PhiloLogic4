@@ -20,15 +20,13 @@
 #toc-wrapper {
     position: absolute;
 	margin-top: 30px;
-	/*width: auto;*/
 	text-align: center;
     opacity: 0;
     z-index: 60;
-	/*transition: opacity 300ms;*/
+	pointer-events: none;
 }
 #toc-wrapper.display {
-    /*width: auto !important;*/
-	/*opacity: 1;*/
+	pointer-events: auto;
 }
 #toc-wrapper.display.fixed {
 	position: fixed;
@@ -338,4 +336,11 @@ body {
 .note:hover, .note-ref:hover {
 	cursor: pointer;
     text-decoration: none;
+}
+
+/*Page images*/
+.page-image-link {
+	margin-top: 10px;
+	display: block;
+	text-align: center;
 }

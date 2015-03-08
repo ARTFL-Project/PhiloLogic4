@@ -36,6 +36,7 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
         }, 300);
     }
     var closeTableOfContents = function() {
+        $('#toc-wrapper').removeClass('display');
         $scope.tocOpen = false;
         setTimeout(function() {
             if ($(document).height() == $(window).height()) {

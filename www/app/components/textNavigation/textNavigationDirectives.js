@@ -215,7 +215,7 @@ philoApp.directive('scrollToHighlight', ['$timeout', function($timeout) {
                     $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: wordOffset - 100});
                 }
             }
-        })
+        });
     }
     return {
         restrict: 'A',
@@ -231,3 +231,37 @@ philoApp.directive('scrollToHighlight', ['$timeout', function($timeout) {
         }
     }
 }]);
+
+philoApp.directive('compileTemplate', ['$compile', '$parse', function($compile, $parse) {
+    // Credits to http://stackoverflow.com/questions/20297638/call-function-inside-sce-trustashtml-string-in-angular-js
+    return {
+        link: function(scope, element, attr){
+            var parsed = $parse(attr.ngBindHtml);
+            function getStringValue() { return (parsed(scope) || '').toString(); }
+
+            //Recompile if the template changes
+            scope.$watch(getStringValue, function() {
+                $compile(element, null, -9999)(scope);  //The -9999 makes it skip directives so that we do not recompile ourselves
+            });
+        }         
+    }
+}]);
+
+philoApp.directive('pageImageLink', function() {
+    var launchGallery = function(scope) {
+        var imageList = [];
+        $('#book-page').find('a.page-image-link').each(function() {
+            imageList.push($(this).attr('href'));
+        });
+        scope.gallery = blueimp.Gallery(imageList);
+    }
+    return {
+        restrict: 'C',
+        link: function(scope, element) {
+            element.click(function(e) {
+                e.preventDefault();
+                launchGallery(scope);
+            });
+        }
+    }
+});
