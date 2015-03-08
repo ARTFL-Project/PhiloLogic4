@@ -344,3 +344,23 @@ body {
 	display: block;
 	text-align: center;
 }
+#full-size-image {
+        padding: 15px;
+        right: 50px;
+        left: auto;
+        margin: -15px;
+        font-size: 25px;
+        text-decoration: none;
+        cursor: pointer;
+        position: absolute;
+        top: 18px;
+        color: #fff;
+        opacity: .8;
+}
+#blueimp-gallery a:hover {
+        color: #fff !important;
+        opacity: 1;
+}
+.blueimp-gallery>.prev, .blueimp-gallery>.next {
+        font-size: 40px;
+}

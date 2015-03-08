@@ -248,20 +248,30 @@ philoApp.directive('compileTemplate', ['$compile', '$parse', function($compile, 
 }]);
 
 philoApp.directive('pageImageLink', function() {
-    var launchGallery = function(scope) {
+    var launchGallery = function() {
         var imageList = [];
         $('#book-page').find('a.page-image-link').each(function() {
             imageList.push($(this).attr('href'));
         });
-        scope.gallery = blueimp.Gallery(imageList);
+        return imageList;
     }
     return {
         restrict: 'C',
         link: function(scope, element) {
             element.click(function(e) {
                 e.preventDefault();
-                launchGallery(scope);
-            });
+                scope.gallery = blueimp.Gallery(launchGallery(), {
+                    onopen: function() {
+                        this.index = element.index('a.page-image-link');
+                    }
+                });
+                $('#full-size-image').off();
+                $('#full-size-image').click(function() {
+                    var imageIndex = scope.gallery.getIndex();
+                    var img = $("#blueimp-gallery").find("[data-index='" + imageIndex + "'] img");
+                    window.open(img.attr('src'));
+                })
+            })
         }
     }
 });

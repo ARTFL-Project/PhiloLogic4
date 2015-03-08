@@ -60,6 +60,11 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
                 $scope.$apply()
             }});
     }
+    
+    $scope.fullSizeImage = function(e) {
+        //e.preventDefault();
+        console.log("hi")
+    };
 }]);
 
 
