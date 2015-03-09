@@ -6,8 +6,7 @@ philoApp.controller('concordanceKwicCtrl', ['$scope', '$rootScope', '$location',
         $location.url(urlString);
     }
     
-    var promise = request.query($rootScope.formData);
-    promise.then(function(results) {
+    request.report($rootScope.formData).then(function(results) {
         $scope.results = results.data;
         $scope.description = $scope.results.description;
     })

@@ -133,51 +133,6 @@ philoApp.directive('resultsPerPage', ['$rootScope', function($rootScope) {
     }
 }]);
 
-philoApp.directive('fixedSearchBar', ['$rootScope', '$timeout', function($rootScope, $timeout) {
-    var affixSearchBar = function(scope) {
-        var initialForm = $('#initial-form');
-        $('#fixed-search').affix({
-            offset: {
-            top: function() {
-                return (this.top = initialForm.offset().top + initialForm.height())
-                },
-            bottom: function() {
-                return (this.bottom = $('#footer').outerHeight(true))
-              }
-            }
-        });
-        $('#fixed-search').on('affix.bs.affix', function() {
-            $(this).addClass('fixed');
-            $(this).css({'opacity': 1, "pointer-events": "auto"});
-        });
-        $('#fixed-search').on('affixed-top.bs.affix', function() {
-            $(this).css({'opacity': 0, "pointer-events": "none"});
-            setTimeout(function() {
-               $(this).removeClass('fixed'); 
-            });
-        });
-    }
-    return {
-        restrict: 'E',
-        templateUrl: 'app/shared/searchForm/fixedSearchBar.html',
-        link: function(scope, element, attrs) {
-            scope.backToTop = function() {
-                $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
-            }
-            // Button click from fixed search bar
-            scope.backToFullSearch = function() {
-                $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0, complete: function() {
-                    scope.toggleForm();
-                    scope.$apply();
-                }});            
-            }
-            $timeout(function() {
-                affixSearchBar(scope);
-            });
-        }
-    }
-}]);
-
 philoApp.directive('autocompleteTerm', ['$rootScope', function($rootScope) {
     var autocomplete = function(element) {
         element.autocomplete({

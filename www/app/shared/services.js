@@ -12,9 +12,19 @@ philoApp.factory('radio', ['$rootScope', function($rootScope) {
 
 philoApp.factory('request', ['$http', 'URL', function($http, URL) {
     return {
-        query: function(queryParams) {
-            var request = URL.report(queryParams);
-            return $http.get(request);
+        report: function(queryParams, extraParams) {
+            var request = URL.report(queryParams, extraParams);
+            var promise = $http.get(request).success(function(data, status, headers, config) {
+                return data;
+            });
+            return promise;
+        },
+        script: function(queryParams, extraParams) {
+            var request = URL.script(queryParams, extraParams);
+            var promise = $http.get(request).success(function(data, status, headers, config) {
+                return data;
+            });
+            return promise;
         }
         
     }

@@ -1,6 +1,6 @@
 "use strict";
 
-philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textNavigationValues', function($routeParams, $http, URL, textNavigationValues) {
+philoApp.directive('textObject', ['$routeParams', 'request', 'textNavigationValues', function($routeParams, request, textNavigationValues) {
     var getTextObject = function(scope) {
         scope.textObjectURL = $routeParams;
         scope.philoID = scope.textObjectURL.pathInfo.split('/').join(' ');
@@ -10,8 +10,12 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textNavigatio
             scope.byteOffset = ''
         }
         scope.textObject = {citation: textNavigationValues.citation}; // Make sure we don't change citation if it has been already filled
-        var request = URL.report({report: "navigation", philo_id: scope.philoID, byte: scope.byteOffset});
-        $http.get(request).then(function(response) {
+        request.report({
+            report: "navigation",
+            philo_id: scope.philoID,
+            byte: scope.byteOffset
+        })
+        .then(function(response) {
             scope.textObject = response.data;
             textNavigationValues.textObject = response.data;
             textNavigationValues.citation = response.data.citation;
@@ -61,12 +65,14 @@ philoApp.directive('textObject', ['$routeParams', '$http', 'URL', 'textNavigatio
     }    
 }]);
 
-philoApp.directive('tocSidebar', ['$routeParams', '$http', '$timeout', 'URL', 'textNavigationValues', function($routeParams, $http, $timeout, URL, textNavigationValues) {
+philoApp.directive('tocSidebar', ['$routeParams', 'request', 'textNavigationValues', function($routeParams, request, textNavigationValues) {
     var getTableOfContents = function(scope) {
         var philoId = $routeParams.pathInfo.split('/').join(' ');
-        var request = URL.script({philo_id: philoId, script: 'get_table_of_contents.py'});
-        $http.get(request).then(function(response) {
-            console.log('queried TOC')
+        request.script({
+            philo_id: philoId,
+            script: 'get_table_of_contents.py'
+        })
+        .then(function(response) {
             var tocObject = response.data;
             scope.tocElements = filterTocElements(tocObject.toc, philoId);
             textNavigationValues.tocElements = scope.tocElements;
@@ -117,7 +123,7 @@ philoApp.directive('tocSidebar', ['$routeParams', '$http', '$timeout', 'URL', 't
     }
 }]);
 
-philoApp.directive('navigationBar', ['$routeParams', '$http', '$timeout', 'URL', function($routeParams, $http, $timeout, URL) {
+philoApp.directive('navigationBar', function() {
     var setUpNavBar = function(scope) {
         if (scope.textObject.next === "") {
             $('#next-obj').attr('disabled', 'disabled');
@@ -142,7 +148,7 @@ philoApp.directive('navigationBar', ['$routeParams', '$http', '$timeout', 'URL',
             });
         }
     }
-}]);
+});
 
 philoApp.directive('affix', function() {
     return {

@@ -1,6 +1,6 @@
 "use strict";
 
-philoApp.directive('concordance', ['$rootScope', '$http', 'URL', function($rootScope, $http, URL) {
+philoApp.directive('concordance', ['$rootScope', '$http', 'request', function($rootScope, $http, request) {
      var moreContext = function($event, resultNumber) {
         var element = $($event.currentTarget).parents('.philologic_occurrence').find('.philologic_context');
         var defaultElement = element.find('.default-length');
@@ -10,9 +10,8 @@ philoApp.directive('concordance', ['$rootScope', '$http', 'URL', function($rootS
             defaultElement.velocity('fadeIn', {duration: 300});
         } else {
             if (moreContextElement.is(':empty')) {
-                var request = URL.script($rootScope.formData, {script: 'get_more_context.py', hit_num: resultNumber})
-                $http.get(request)
-                .then(function(response) {
+                var extraParams = {script: 'get_more_context.py', hit_num: resultNumber};
+				request.script($rootScope.formData, extraParams).then(function(response) {
                     defaultElement.hide();
                     moreContextElement.html(response.data).promise().done(function() {
                             $(this).velocity('fadeIn', {duration: 300});
@@ -121,7 +120,7 @@ philoApp.directive('concordanceKwicSwitch', function() {
     } 
 });
 
-philoApp.directive('sidebarMenu', ['$rootScope', '$http', function($rootScope, $http) {
+philoApp.directive('sidebarMenu', ['$rootScope', function($rootScope) {
     var populateFacets = function() {
         var facets = [];
         for (var i=0; i < $rootScope.philoConfig.facets.length; i++) {
@@ -162,7 +161,7 @@ philoApp.directive('sidebarMenu', ['$rootScope', '$http', function($rootScope, $
     }
 }]);
 
-philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progressiveLoad', 'saveToLocalStorage', function($rootScope, $http, $location, URL, progressiveLoad, save) {
+philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progressiveLoad', 'saveToLocalStorage', 'request', function($rootScope, $http, $location, URL, progressiveLoad, save, request) {
     var retrieveFacet = function(scope, facetObj) {
         var urlString = URL.objectToUrlString($rootScope.formData, {frequency_field: facetObj.alias});
         if (typeof(sessionStorage[urlString]) !== "undefined" && $rootScope.philoConfig.debug === false) {
@@ -194,12 +193,11 @@ philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progre
     }
     var populateSidebar = function(scope, facet, fullResults, start, end, queryParams) {
 		if (facet.type !== "collocationFacet") {
-			var request = URL.script(queryParams, {start: start, end: end});
+			var promise = request.script(queryParams, {start: start, end: end});
 		} else {
-			var request = URL.report(queryParams, {start: start, end: end});
+			var promise = request.report(queryParams, {start: start, end: end});
 		}
-        $http.get(request)
-        .then(function(response) {
+        promise.then(function(response) {
             if (response.data.more_results) {
                 var results = response.data.results;
                 scope.resultsLength = response.data.results_length;

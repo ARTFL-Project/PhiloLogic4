@@ -1,13 +1,14 @@
 "use strict";
 
-philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'progressiveLoad', 'URL', 'saveToLocalStorage', function($rootScope, $http, $location, progressiveLoad, URL, save) {
+philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'progressiveLoad', 'URL', 'request', 'saveToLocalStorage',
+                                       function($rootScope, $http, $location, progressiveLoad, URL, request, save) {
     var getTimeSeries = function(scope) {
         scope.resultsLength = false; // set to false for now
         $(".progress").show();
         var fullResults;
         var absoluteFrequency;
         scope.dateCounts = {};
-        $http.get('scripts/get_start_end_date.py').then(function(dates) { // We run this even we have the values since it's so fast
+        request.script({script: 'get_start_end_date.py'}).then(function(dates) { // We run this even we have the values since it's so fast
             scope.startDate = $rootScope.formData.start_date || dates.data.start_date;
             scope.endDate = $rootScope.formData.end_date || dates.data.end_date;
             var barChartObject = initializeBarChart(scope.startDate, scope.endDate);
@@ -50,8 +51,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         return {dateList: dateList, chartIndex: chartIndex};
     }
     var updateTimeSeries = function(scope, fullResults, start, end) {
-        var request = URL.report($rootScope.formData, {start: start, end: end});
-        $http.get(request).then(function(results) {
+        request.report($rootScope.formData, {start: start, end: end}).then(function(results) {
             var timeSeriesResults = results.data;
             scope.resultsLength = timeSeriesResults.results_length;
             scope.moreResults = timeSeriesResults.more_results;

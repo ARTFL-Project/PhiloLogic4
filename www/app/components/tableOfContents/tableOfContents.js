@@ -1,25 +1,25 @@
 "use strict"
 
-philoApp.controller('tableOfContents', ['$scope', '$rootScope', '$http', '$location', '$routeParams', 'URL', function($scope, $rootScope, $http, $location, $routeParams, URL) {
+philoApp.controller('tableOfContents', ['$rootScope', '$http', '$location', '$routeParams', 'URL', "request", function($rootScope, $http, $location, $routeParams, URL, request) {
     
-    $scope.textObjectURL = $routeParams;
-    var tempValue = $scope.textObjectURL.pathInfo.split('/');
+    this.textObjectURL = $routeParams;
+    var tempValue = this.textObjectURL.pathInfo.split('/');
     tempValue.pop();
-    $scope.philoID = tempValue.join(' ');
-    var request = URL.report({report: "table_of_contents", philo_id: $scope.philoID});
-    $http.get(request).then(function(response) {
-        $scope.tocObject = response.data;
+    this.philoID = tempValue.join(' ');
+    var formData = {report: "table_of_contents", philo_id: this.philoID};
+    var self = this;
+    request.report(formData).then(function(promise) {
+        self.tocObject = promise.data;
     });
     
-    $scope.teiHeader = false;
-    $scope.showHeader = function() {
-        if (typeof($scope.teiHeader) === "string") {
-            $scope.teiHeader = false;
+    this.teiHeader = false;
+    this.showHeader = function() {
+        if (typeof(this.teiHeader) === "string") {
+            this.teiHeader = false;
         } else {
-            var request = URL.script({script: "get_header.py", philo_id: $scope.philoID});
-            $http.get(request)
-            .then(function(response) {
-                $scope.teiHeader = response.data;
+            var UrlString = {script: "get_header.py", philo_id: this.philoID};
+            request.script(UrlString).then(function(promise) {
+                self.teiHeader = promise.data;
             });
         }
     }

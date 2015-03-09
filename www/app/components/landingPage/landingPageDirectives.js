@@ -43,16 +43,17 @@ philoApp.directive('defaultLandingPage', ['$rootScope', function($rootScope) {
     }
 }]);
 
-philoApp.directive('dictionaryLandingPage', ['$rootScope', '$http', function($rootScope, $http) {
+philoApp.directive('dictionaryLandingPage', ['$rootScope', 'request', function($rootScope, request) {
     var setupPage = function(scope) {
-        var allVolumesQuery = "scripts/get_bibliography.py?object_level=doc&format=json";
-        scope.volumeData = [];
-        $http.get(allVolumesQuery)
-            .success(function(data, status, headers, config) {
-                for (var i=0; i < data.length; i++) {
-                    scope.volumeData.push(data[i]);
-                }
-            });
+        request.script({
+            script: 'get_bibliography.py',
+            object_level: 'doc'})
+        .then(function(response) {
+            scope.volumeData = [];
+            for (var i=0; i < response.data.length; i++) {
+                scope.volumeData.push(response.data[i]);
+            }
+        });
         
         var dicoLetterRange = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                                 "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
@@ -83,11 +84,15 @@ philoApp.directive('dictionaryLandingPage', ['$rootScope', '$http', function($ro
     }
 }]);
 
-philoApp.directive('landingPageContent', ['$rootScope', '$http', function($rootScope, $http) {
+philoApp.directive('landingPageContent', ['$rootScope', 'request', function($rootScope, request) {
     var getContent = function(scope) {
         var contentType = scope.contentType;
-        var query = 'scripts/get_landing_page_content.py?landing_page_content_type=' + scope.contentType + '&range=' + scope.range;
-        $http.get(query).then(function(response) {
+        request.script({
+            script: 'get_landing_page_content.py',
+            landing_page_content_type: scope.contentType,
+            range: scope.range
+        })
+        .then(function(response) {
             var content = response.data;
             var resultGroups = [];
             var results = [];

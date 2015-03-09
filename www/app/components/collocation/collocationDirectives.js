@@ -47,8 +47,8 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
     }
 }]);
 
-philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL', 'progressiveLoad', 'saveToLocalStorage',
-                                        function($rootScope, $http, $location, URL, progressiveLoad, save) {
+philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL', 'progressiveLoad', 'saveToLocalStorage', "request",
+                                        function($rootScope, $http, $location, URL, progressiveLoad, save, request) {
     var getCollocations = function(scope) {
         if (typeof(sessionStorage[$location.url()]) === 'undefined' || $rootScope.philoConfig.debug === true) {
             $('#philologic_collocation').velocity('fadeIn', {duration: 200});
@@ -60,9 +60,8 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
         }  
     }
     var updateCollocation = function(scope, fullResults, start, end) {
-        var request = URL.report($rootScope.formData, {start: start, end: end});
         var collocation = this;
-        $http.get(request).then(function(response) {
+        request.report($rootScope.formData, {start: start, end: end}).then(function(response) {
             var data = response.data;
             scope.resultsLength = data.results_length;
             scope.moreResults = data.more_results;
