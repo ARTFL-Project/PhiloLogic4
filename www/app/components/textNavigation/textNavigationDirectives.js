@@ -100,21 +100,6 @@ philoApp.directive('tocSidebar', ['$routeParams', '$http', '$timeout', 'URL', 't
             return filtered.slice(match - limit);
         }
     }
-    var affixTOC = function(scope) {
-        $timeout(function() {
-            $('#toc-container').affix({ offset: { top: function() {
-                return (this.top = $('#toc-container').offset().top - 30)
-                }
-            }});
-            $('#toc-container').on('affix.bs.affix', function() {
-                $("#toc-container").addClass('fixed');
-            });
-            $('#toc-container').on('affix-top.bs.affix', function() {
-                $("#toc-container").removeClass('fixed').css('position', 'static');
-                scope.adjustTocHeight();
-            });
-        });
-    }
     return {
         templateUrl: 'app/components/textNavigation/tocSidebar.html',
         link: function(scope, element, attrs) {
@@ -124,14 +109,10 @@ philoApp.directive('tocSidebar', ['$routeParams', '$http', '$timeout', 'URL', 't
                 var philoId = $routeParams.pathInfo.split('/').join(' ');
                 scope.tocElements = filterTocElements(scope.tocElements, philoId);
                 textNavigationValues = scope.tocElements;
-                $timeout(function() {
-                    scope.adjustTocHeight()
-                })
             }
             element.on('$destroy', function() {
-                $('#toc-container').removeData('affix').removeClass('affix affix-top affix-bottom');
+                $(window).off('.affix');
             });
-           
         }
     }
 }]);
@@ -178,19 +159,15 @@ philoApp.directive('affix', function() {
             }});
             element.on('affix.bs.affix', function() {
                 $(this).addClass('fixed');
-                if (element.attr('id') === "toc-container") {
-                    scope.adjustTocHeight();
-                } else if (element.attr('id') === "nav-buttons") {
-                    $('#back-to-top').addClass('fixed');
-                }
+                $('#back-to-top').addClass('fixed');
             });
             element.on('affix-top.bs.affix', function() {
                 $(this).removeClass('fixed');
-                if (element.attr('id') === "toc-container") {
-                    scope.adjustTocHeight();
-                } else if (element.attr('id') === "nav-buttons") {
-                    $('#back-to-top').removeClass('fixed');
-                }
+                $('#back-to-top').removeClass('fixed');
+            });
+            element.on('$destroy', function() {
+                $(window).off('.affix');
+                element.removeData('affix').removeClass('affix affix-top affix-bottom');
             });
         }
     }
@@ -263,15 +240,19 @@ philoApp.directive('pageImageLink', function() {
                 scope.gallery = blueimp.Gallery(launchGallery(), {
                     onopen: function() {
                         this.index = element.index('a.page-image-link');
-                    }
+                    },
+                    continuous: false
                 });
                 $('#full-size-image').off();
                 $('#full-size-image').click(function() {
                     var imageIndex = scope.gallery.getIndex();
                     var img = $("#blueimp-gallery").find("[data-index='" + imageIndex + "'] img");
                     window.open(img.attr('src'));
-                })
-            })
+                });
+            });
+            element.on('$destroy', function() {
+                $('#full-size-image').off();
+            });
         }
     }
 });

@@ -20,7 +20,6 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
     }
     
     $scope.toggleTableOfContents = function() {
-        console.log('toggled', $scope.tocOpen)
         if ($scope.tocOpen) {
             closeTableOfContents();
         } else {
@@ -44,8 +43,6 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
             }
         });
     }
-    $scope.adjustTocHeight = function() {
-    }
     
     $scope.backToTop = function() {
         $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: 0});
@@ -60,11 +57,6 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
                 $scope.$apply()
             }});
     }
-    
-    $scope.fullSizeImage = function(e) {
-        //e.preventDefault();
-        console.log("hi")
-    };
 }]);
 
 
@@ -73,7 +65,9 @@ philoApp.animation('.toc-slide', function() {
         beforeAddClass : function(element, className, done) {
             if (className == 'ng-hide') {
                 $(element).velocity('slideUp', {duration: 300, complete: done});
-                $("#toc-wrapper").velocity({opacity: 0}, {duration: 300, queue: false});
+                $(element).velocity({opacity: 0}, {duration: 300, queue: false, complete: function() {
+                    $('#toc-container').removeClass('display');
+                }});
             }
             else {
                 done();
@@ -88,12 +82,12 @@ philoApp.animation('.toc-slide', function() {
                 } else {
                     var height = windowHeight - $('#book-page').offset().top - 80;
                 }
-                console.log(height)
                 $('#toc-content').css({
                     maxHeight: height + 'px'
                     });
+                $('#toc-container').addClass('display');
                 $(element).velocity('slideDown', {duration: 300, complete: done});
-                $("#toc-wrapper").velocity({opacity: 1}, {duration: 300, queue: false});
+                $(element).velocity({opacity: 1}, {duration: 300, queue: false});
             }
             else {
                 done();

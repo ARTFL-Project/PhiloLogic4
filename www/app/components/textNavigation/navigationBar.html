@@ -1,5 +1,5 @@
 <div class="row">
-    <div id="nav-buttons" affix="-20">
+    <div id="nav-buttons" affix>
         <button type="button" id="back-to-top" class="btn btn-primary btn-sm" ng-click="backToTop()">
             Back to top
         </button>
@@ -14,8 +14,8 @@
                 </button>
             </div>
         </div>
-    </div>
-    <div id="toc-wrapper" class="col-xs-12 col-sm-8 col-sm-offset-2" affix="10">
-        <toc-sidebar philo-id="{{ philo_id }}"></toc-sidebar>
+        <div id="toc-wrapper" class="col-xs-12 col-sm-8 col-sm-offset-2 toc-slide" ng-show="tocOpen">
+            <toc-sidebar philo-id="{{ philo_id }}"></toc-sidebar>
+        </div>
     </div>
 </div>

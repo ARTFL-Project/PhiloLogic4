@@ -73,12 +73,11 @@
 	font-variant: small-caps;
 }
 #toc-container {
-	display: inline-block !important;
+	display: none;
 	margin-left: -25px;
 }
-#toc-container.fixed {
-	position: fixed !important;
-	top: 30px !important;
+#toc-container.display {
+	display: inline-block;
 }
 #toc-container a {
     color: #fff;
