@@ -76,7 +76,7 @@ a:hover {
 #more_options:hover {
     background-color: #eee;
 }
-#fixed-search, #nav-buttons.fixed {
+#fixed-search, #nav-buttons.ui-scrollfix {
     background: rgba(78, 93, 108, .7);
 }
 

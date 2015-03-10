@@ -22,15 +22,10 @@
 	margin-top: 30px;
 	text-align: center;
     opacity: 0;
-    z-index: 60;
 	pointer-events: none;
 }
 #toc-wrapper.display {
 	pointer-events: auto;
-}
-#toc-wrapper.display.fixed {
-	position: fixed;
-	top: 0px;
 }
 #show-toc {
 	padding-left: 30px;
@@ -90,18 +85,6 @@
     text-align: justify;
     width: 100%;
 }
-#back-to-top {
-	display: none;
-    position: absolute;
-    left: 15px;
-    z-index: 5;
-	opacity: 0;
-	transition: opacity 200ms;
-}
-#back-to-top.fixed {
-	display: inline;
-	opacity: 1;
-}
 #nav-buttons {
     margin-left: -15px;
     margin-right: -15px;
@@ -110,9 +93,21 @@
     z-index: 80;
     transition: background 200ms;
 }
-#nav-buttons.fixed {
-	position: fixed !important;
+#nav-buttons.ui-scrollfix {
+	position: fixed;
 	top: 0px;
+}
+#back-to-top {
+	display: none;
+    position: absolute;
+    left: 15px;
+    z-index: 5;
+	opacity: 0;
+	transition: opacity 200ms;
+}
+#nav-buttons.ui-scrollfix #back-to-top {
+	display: inline;
+	opacity: 1;
 }
 .toc-div1 > a, .toc-div2 > a, .toc-div3 > a {
     padding: 5px 5px 5px 0px;

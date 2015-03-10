@@ -116,9 +116,6 @@ philoApp.directive('tocSidebar', ['$routeParams', 'request', 'textNavigationValu
                 scope.tocElements = filterTocElements(scope.tocElements, philoId);
                 textNavigationValues = scope.tocElements;
             }
-            element.on('$destroy', function() {
-                $(window).off('.affix');
-            });
         }
     }
 }]);
@@ -145,35 +142,6 @@ philoApp.directive('navigationBar', function() {
                 if (tocDone) {
                     $("#show-toc").removeAttr("disabled");
                 }
-            });
-        }
-    }
-});
-
-philoApp.directive('affix', function() {
-    return {
-        restrict: 'A',
-        link: function(scope, element, attrs) {
-            if (attrs.affix !== '') {
-                var offsetTop = element.offset().top - parseInt(attrs.affix);
-            } else {
-                var offsetTop = element.offset().top;
-            }
-            element.affix({ offset: { top: function() {
-                return (this.top = offsetTop)
-                }
-            }});
-            element.on('affix.bs.affix', function() {
-                $(this).addClass('fixed');
-                $('#back-to-top').addClass('fixed');
-            });
-            element.on('affix-top.bs.affix', function() {
-                $(this).removeClass('fixed');
-                $('#back-to-top').removeClass('fixed');
-            });
-            element.on('$destroy', function() {
-                $(window).off('.affix');
-                element.removeData('affix').removeClass('affix affix-top affix-bottom');
             });
         }
     }

@@ -1,4 +1,4 @@
-var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'angular-velocity']);
+var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'angular-velocity', 'ui.utils']);
 
 philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'textNavigationValues',
                                   function($rootScope, $scope, $location, textNavigationValues) {
