@@ -29,34 +29,6 @@ philoApp.directive('textObject', ['$routeParams', 'request', 'textNavigationValu
             scope.loading = false;
         });
     }
-    var createNoteLink = function() {
-        $('.note-ref, .note').click(function() {
-            if ($(this).hasClass == ".note") {
-                $(this).popover({animate: true, trigger: 'focus', html: true, content: function() {
-                    return $(this).next('.note-content').html();
-                }});
-            } else {
-                var link = $(this).data('ref');
-                var element = $(this);
-                $.getJSON(link, function(data) {
-                    element.popover({trigger: 'manual', content: function() {
-                        return data.text;
-                    }});
-                    if (data.text != '') {
-                        element.popover("show");
-                    } else {
-                        alert('PhiloLogic was unable to retrieve a note at the given link')
-                    }
-                    $('body').on('click', function (e) {
-                        //did not click a popover toggle, or icon in popover toggle, or popover
-                        if ($(e.target).data('toggle') !== 'popover') { 
-                            element.popover('hide');
-                        }
-                    });
-                });
-            }
-        });
-    }
     return {
         templateUrl: 'app/components/textNavigation/textObject.html',
         link: function(scope,element, attrs) {
@@ -226,6 +198,52 @@ philoApp.directive('pageImageLink', function() {
             });
             element.on('$destroy', function() {
                 $('#full-size-image').off();
+            });
+        }
+    }
+});
+
+philoApp.directive('noteRef', ['$http', function($http) {
+    return {
+        restrict: 'C',
+        link: function(scope, element) {
+            element.on('click', function() {
+                $http.get(element.data('ref')).then(function(response) {
+                    var data = response.data;
+                    element.popover({trigger: 'manual', content: function() {
+                        return data.text;
+                    }});
+                    if (data.text != '') {
+                        element.popover("show");
+                    } else {
+                        alert('PhiloLogic was unable to retrieve a note at the given link')
+                    }
+                    $('body').on('click', function (e) {
+                        //did not click a popover toggle, or icon in popover toggle, or popover
+                        if ($(e.target).data('toggle') !== 'popover') { 
+                            element.popover('hide');
+                        }
+                    });
+                });
+            });
+            element.on('$destroy', function() {
+                element.popover('destroy');
+                element.off();
+                $('body').off('click');
+            })
+        }
+    }    
+}]);
+
+philoApp.directive('note', function() {
+    return {
+        restrict: 'C',
+        link: function(scope, element) {
+            element.popover({animate: true, trigger: 'focus', html: true, content: function() {
+                return element.next('.note-content').html();
+            }});
+            element.on('$destroy', function() {
+                element.popover('destroy');
             });
         }
     }

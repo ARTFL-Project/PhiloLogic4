@@ -28,7 +28,6 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
     }    
     var openTableOfContents = function() {
         $('#toc-wrapper').addClass('display');
-        //$scope.adjustTocHeight();
         $scope.tocOpen = true;
         $timeout(function() {
             $('.current-obj').velocity("scroll", {duration: 500, container: $("#toc-content"), offset: -50});
@@ -52,7 +51,6 @@ philoApp.controller('textNavigation', ['$scope', '$rootScope', '$http', '$locati
         $("#toc-wrapper").velocity({opacity: 0}, {duration: 250});
         $("#toc-wrapper").velocity('slideUp', {duration: 300, queue: false, complete: function() {
                 philoID = philoID.split('-').join('/');
-                console.log(philoID)
                 $location.url(URL.path(philoID)).replace();
                 $scope.$apply()
             }});

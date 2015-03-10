@@ -23,7 +23,6 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'textNavi
             $rootScope.report = "landing_page";
         } 
         if ($rootScope.report !== 'textNavigation') {
-            console.log('clearing')
             textNavigationValues.citation = {};
             textNavigationValues.tocElements = false;
             textNavigationValues.tocOpen = false;
