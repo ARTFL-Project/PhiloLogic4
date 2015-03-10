@@ -60,19 +60,19 @@ philoApp.directive('searchMethods', ['$rootScope', function($rootScope) {
     }
 }]);
 
-philoApp.directive('metadataFields', ['$rootScope', function($rootScope) {
-    var buildMetadata = function() {
+philoApp.directive('metadataFields', function() {
+    var buildMetadata = function(scope, fields) {
         var metadataFields = [];
-        for (var i=0; i < $rootScope.philoConfig.metadata.length; i++) {
-            var metadata = $rootScope.philoConfig.metadata[i];
+        for (var i=0; i < fields.length; i++) {
+            var metadata = fields[i];
             var metadataObject = {};
             metadataObject.value = metadata;
-            if (metadata in $rootScope.philoConfig.metadata_aliases) {
-                metadataObject.label = $rootScope.philoConfig.metadata_aliases[metadata];
+            if (metadata in scope.philoConfig.metadata_aliases) {
+                metadataObject.label = scope.philoConfig.metadata_aliases[metadata];
             } else {
                 metadataObject.label = metadata;
             }
-            metadataObject.example = $rootScope.philoConfig.search_examples[metadata];
+            metadataObject.example = scope.philoConfig.search_examples[metadata];
             metadataFields.push(metadataObject);
         }
         return metadataFields
@@ -80,10 +80,37 @@ philoApp.directive('metadataFields', ['$rootScope', function($rootScope) {
     return {
         templateUrl: 'app/shared/searchForm/metadataFields.html',
         link: function(scope, element, attrs) {
-            scope.metadataFields = buildMetadata();
+            if (!attrs.field && !attrs.exclude) {
+                scope.metadataFields = buildMetadata(scope, scope.philoConfig.metadata);
+                scope.head = false;
+                scope.exclude = false;
+                console.log(scope.metadataFields)
+            } else if (attrs.field === "head") {
+                var head = [];
+                for (var i=0; i < scope.philoConfig.metadata.length; i++) {
+                    console.log(scope.philoConfig.metadata[i])
+                    if (scope.philoConfig.metadata[i] === 'head') {
+                        head.push(scope.philoConfig.metadata[i]);
+                        break
+                    }
+                }
+                scope.head = true;
+                scope.exclude = false;
+                scope.metadataFields = buildMetadata(scope, head);
+            } else if (attrs.exclude === "head") {
+                var fields = [];
+                for (var i=0; i < scope.philoConfig.metadata.length; i++) {
+                    if (scope.philoConfig.metadata[i] !== 'head') {
+                        fields.push(scope.philoConfig.metadata[i]);
+                    }
+                }
+                scope.head = false;
+                scope.exclude = true;
+                scope.metadataFields = buildMetadata(scope, fields);
+            }
         }
     }
-}]);
+});
 
 philoApp.directive('collocationOptions', ['$rootScope', function($rootScope) {
     return {

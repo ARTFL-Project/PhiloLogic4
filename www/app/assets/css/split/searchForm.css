@@ -1,3 +1,6 @@
+.dico-margin {
+	margin-top: 200px !important;
+}
 #initial-form {
 	position: absolute;
 	left: 30px;
@@ -18,6 +21,9 @@
 	padding-bottom: 10px;
     overflow: hidden;
 	width: inherit;
+}
+#search-elements.dico {
+	margin-top: 168px;
 }
 #search-elements > h5 {
 	margin-top: 15px;
@@ -41,42 +47,21 @@
 #more_options:hover {
     cursor: pointer;
 }
-#search_terms_container, #search_head_container {
+#search_terms_container {
     padding-top: 15px;
 	padding-bottom: 15px;
 }
-#search_terms {
+#search_terms, #head-search-container {
     text-align: center;
 }
-#search_explain {
-    float: right;
-    margin-top: -5px;
-    margin-right: 10px;
+#head-search-container {
+	margin-top: -10px;
+	padding-bottom: 15px;
 }
-#search_explain .ui-button-text {
-    padding: 0.4em;
-    font-weight: 700;
-}
-#explain_concordance, #explain_relevance, #explain_collocation, #explain_time_series, #explain_kwic {
-    display: none;
-	font-weight: 300;
-}
-#syntax_title {
-    font-size: 90%;
-}
-#syntax_title:hover {
-    text-decoration: underline;
-}
-#bottom_search {
-    display: none;
-    position: absolute;
-    bottom: 0;
-    padding-bottom: 10px;
-    right: 0;
-    margin-right: 25px;
+.no-example {
+	display: none;
 }
 #search_overlay {
-	/*display: none;*/
     position: absolute;
     top: 50px;
     left: 0;
@@ -89,7 +74,7 @@
 #metadata_fields {
 	margin-top: 10px;
 }
-#metadata_fields .row, #time_series_num.row, #date_range.row, #results_per_page.row {
+#metadata_fields.row, #time_series_num.row, #date_range.row, #results_per_page.row {
 	padding-top: 10px;
 	padding-bottom: 10px;
 }
@@ -113,26 +98,8 @@
 }
 
 /*Dico layout changes*/
-#dico-form #search_elements {
+#search_elements {
 	border-top-width: 0px;
-}
-
-/*Fixed search bar*/
-#fixed-search {
-	padding-top: 1px;
-	padding-bottom: 1px;
-	width: 100%;
-    z-index: -10;
-	left: 15px;
-	position: absolute;
-    transition: opacity 200ms;
-	top: 0;
-	pointer-events: none;
-}
-#fixed-search.fixed {
-	z-index: 200;
-	position: fixed;
-	pointer-events: auto;
 }
 
 /*Responsiveness*/
@@ -152,10 +119,11 @@
 	#search-buttons {
 		padding-top: 15px;
 	}
-	#search_terms > div:nth-of-type(2) {
+	#search_terms > div:nth-of-type(2), #head-search-container #metadata_fields div:nth-of-type(2) {
 		padding-right: 20px;
 		padding-left: 20px;
 	}
+	#head-search-container #metadata-fields 
 	#initial-form, #search-elements {
 		left: 40px;
 		right: 40px;
@@ -166,6 +134,9 @@
 	#search-elements {
 		margin-top: 148px;
 	}
+	#search-elements.dico {
+		margin-top: 217px;
+	}
 }
 @media (max-width: 768px) {
 	#right-act-on-report .btn-group {
@@ -174,6 +145,9 @@
 	#search-elements {
 		padding-right: 20px;
 		margin-top: 160px;
+	}
+	#search-elements.dico {
+		margin-top: 248px;
 	}
 	#philologic_response {
 		margin-top: 190px;

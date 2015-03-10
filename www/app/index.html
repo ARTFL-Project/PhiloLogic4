@@ -45,7 +45,7 @@
     <!--Main content-->
     <div class="container-fluid" id="main-body">
         <search-form></search-form>
-        <div class="container-fluid" id="philologic_response">
+        <div id="philologic_response" class="container-fluid" ng-class="{'dico-margin': philoConfig.dictionary}">
             <div ng-view></div>
         </div>
     </div>

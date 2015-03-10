@@ -1,4 +1,5 @@
 philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL', function($scope, $rootScope, $http, $location, radio, URL) {
+    
     $scope.formOpen = false;
     $scope.toggleForm = function() {
         if (!$("#search-elements").length) {
