@@ -8,7 +8,7 @@
         <tr>
             <td id="all-collocate-column">
                 <span id="all-num-{{ ::$index}}" class="colloc-row" ng-repeat="result in sortedLists.all">
-                    <span id="all-word-{{ ::$index }}" class="colloc_link" ng-click="concordanceFromCollocation(result.label, result.count, 'all')">
+                    <span id="all-word-{{ ::$index }}" class="colloc_link" ng-click="collocation.concordanceFromCollocation(result.label, result.count, 'all')">
                         {{ ::result.label }}
                     </span>
                     <span id="all-count-{{ ::$index }}">
@@ -18,7 +18,7 @@
             </td>
             <td id="left-collocate-column">
                 <span id="left-num-{{ ::$index}}" class="colloc-row" ng-repeat="result in sortedLists.left">
-                    <span id="left-word-{{ ::$index }}" class="colloc_link" ng-click="concordanceFromCollocation(result.label, result.count, 'left')">
+                    <span id="left-word-{{ ::$index }}" class="colloc_link" ng-click="collocation.concordanceFromCollocation(result.label, result.count, 'left')">
                         {{ ::result.label }}
                     </span>
                     <span id="left-count-{{ ::$index }}">
@@ -28,7 +28,7 @@
             </td>
             <td id="right-collocate-column">
                 <span id="right-num-{{ ::$index}}" class="colloc-row" ng-repeat="result in sortedLists.right">
-                    <span id="right-word-{{ ::$index }}" class="colloc_link" ng-click="concordanceFromCollocation(result.label, result.count, 'right')">
+                    <span id="right-word-{{ ::$index }}" class="colloc_link" ng-click="collocation.concordanceFromCollocation(result.label, result.count, 'right')">
                         {{ ::result.label }}
                     </span>
                     <span id="right-count-{{ ::$index }}">

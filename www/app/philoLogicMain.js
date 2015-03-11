@@ -38,7 +38,8 @@ philoApp.config(['$routeProvider', '$locationProvider',
         templateUrl: function(array) {
             return 'app/components/landingPage/landing_page.html'
         },
-        controller: 'landingPage'
+        controller: 'landingPage',
+        controllerAs: 'lp'
       }).
       when('/query?:queryArgs', {
         templateUrl: function(queryArgs) {
@@ -70,5 +71,5 @@ philoApp.config(['$routeProvider', '$locationProvider',
       });
     $locationProvider.html5Mode({
         enabled: true
-      });
-  }]);
+    });
+}]);

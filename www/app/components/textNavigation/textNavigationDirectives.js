@@ -22,11 +22,10 @@ philoApp.directive('textObject', ['$routeParams', 'request', 'textNavigationValu
             textNavigationValues.navBar = true;
             if (scope.byteOffset.length > 0 ) {
                 scope.highlight = true;
-                setTimeout(createNoteLink, 500)
             } else {
                 scope.highlight = false;
             }
-            scope.loading = false;
+            scope.textNav.loading = false;
         });
     }
     return {
@@ -109,7 +108,7 @@ philoApp.directive('navigationBar', function() {
         templateUrl: 'app/components/textNavigation/navigationBar.html',
         link: function(scope, element, attrs) {
             setUpNavBar(scope);
-            scope.navBar = true; // it's now drawn and shouldn't be removed
+            scope.textNav.navBar = true;
             attrs.$observe('tocDone', function(tocDone) {
                 if (tocDone) {
                     $("#show-toc").removeAttr("disabled");

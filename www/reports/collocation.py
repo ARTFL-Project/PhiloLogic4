@@ -89,7 +89,7 @@ def fetch_collocation(hits, q, db, config):
                     all_collocates[right_word]['count'] += 1
                 except KeyError:
                     all_link = f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", start='0', end='0',
-                                                               direction="all", collocate=left_word.encode('utf-8'))
+                                                               direction="all", collocate=right_word.encode('utf-8'))
                     all_collocates[right_word] = {"count": 1, "url": all_link}
         
         collocation_object['all_collocates'] = all_collocates

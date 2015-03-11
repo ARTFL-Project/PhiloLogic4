@@ -84,7 +84,6 @@ philoApp.directive('metadataFields', function() {
                 scope.metadataFields = buildMetadata(scope, scope.philoConfig.metadata);
                 scope.head = false;
                 scope.exclude = false;
-                console.log(scope.metadataFields)
             } else if (attrs.field === "head") {
                 var head = [];
                 for (var i=0; i < scope.philoConfig.metadata.length; i++) {

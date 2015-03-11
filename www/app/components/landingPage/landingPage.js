@@ -1,18 +1,16 @@
 "use strict";
 
-philoApp.controller('landingPage', ['$rootScope', '$scope', '$location', function($rootScope, $scope, $location) {
-    $scope.dictionary = $scope.philoConfig.dictionary;
-    $rootScope.report = "landing_page";
+philoApp.controller('landingPage', ['$rootScope', '$location', function($rootScope, $location) {
     
-    $scope.query = "";
-    $scope.getContent = function(contentType, range) {
-        $scope.contentType = contentType;
-        $scope.range = range;
-        $scope.resultGroups = [];
-        $scope.query = contentType + range;
+    var vm = this;
+    vm.dictionary = $rootScope.philoConfig.dictionary;
+    $rootScope.report = "landing_page";
+
+    vm.getContent = function(contentType, range) {
+        vm.query = {contentType: contentType, range: range};
     }
     
-    $scope.goToBibliography = function(url) {
+    vm.goToBibliography = function(url) {
         $location.url(url);
     }
 }]);

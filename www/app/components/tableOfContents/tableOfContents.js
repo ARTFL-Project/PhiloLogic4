@@ -2,24 +2,24 @@
 
 philoApp.controller('tableOfContents', ['$rootScope', '$http', '$location', '$routeParams', 'URL', "request", function($rootScope, $http, $location, $routeParams, URL, request) {
     
-    this.textObjectURL = $routeParams;
-    var tempValue = this.textObjectURL.pathInfo.split('/');
+    var vm = this;
+    vm.textObjectURL = $routeParams;
+    var tempValue = vm.textObjectURL.pathInfo.split('/');
     tempValue.pop();
-    this.philoID = tempValue.join(' ');
-    var formData = {report: "table_of_contents", philo_id: this.philoID};
-    var self = this;
+    vm.philoID = tempValue.join(' ');
+    var formData = {report: "table_of_contents", philo_id: vm.philoID};
     request.report(formData).then(function(promise) {
-        self.tocObject = promise.data;
+        vm.tocObject = promise.data;
     });
     
-    this.teiHeader = false;
-    this.showHeader = function() {
-        if (typeof(this.teiHeader) === "string") {
-            this.teiHeader = false;
+    vm.teiHeader = false;
+    vm.showHeader = function() {
+        if (typeof(vm.teiHeader) === "string") {
+            vm.teiHeader = false;
         } else {
-            var UrlString = {script: "get_header.py", philo_id: this.philoID};
+            var UrlString = {script: "get_header.py", philo_id: vm.philoID};
             request.script(UrlString).then(function(promise) {
-                self.teiHeader = promise.data;
+                vm.teiHeader = promise.data;
             });
         }
     }

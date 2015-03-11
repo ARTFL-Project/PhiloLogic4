@@ -64,7 +64,7 @@ philoApp.directive('dictionaryLandingPage', ['$rootScope', 'request', function($
             position++;
             row.push({
                 letter: dicoLetterRange[i],
-                url: "dispatcher.py?report=bibliography&head=^" + dicoLetterRange[i] + '.*'
+                url: "query?report=bibliography&head=^" + dicoLetterRange[i] + '.*'
             });
             if (position === 4) {
                 scope.dicoLetterRows.push(row);
@@ -85,8 +85,11 @@ philoApp.directive('dictionaryLandingPage', ['$rootScope', 'request', function($
 }]);
 
 philoApp.directive('landingPageContent', ['$rootScope', 'request', function($rootScope, request) {
-    var getContent = function(scope) {
-        var contentType = scope.contentType;
+    var getContent = function(scope, query) {
+        scope.resultGroups = [];
+        query = scope.$eval(query);
+        scope.contentType = query.contentType;
+        scope.range = query.range;
         request.script({
             script: 'get_landing_page_content.py',
             landing_page_content_type: scope.contentType,
@@ -98,8 +101,8 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
             var results = [];
             var oldPrefix = "";
             for (var i=0; i < content.length; i++) {
-                if (contentType == "author" || contentType == "title") {
-                    var prefix = content[i][contentType].slice(0,1).toUpperCase();
+                if (scope.contentType == "author" || scope.contentType == "title") {
+                    var prefix = content[i][scope.contentType].slice(0,1).toUpperCase();
                 } else {
                     var prefix = content[i].date;
                 }
@@ -124,8 +127,8 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
                 }
             attrs.$observe('name', function(query) {
                 if (query !== '') {
-                    getContent(scope);
-                    scope.contentClass= contentTypeClass[scope.contentType];
+                    getContent(scope, query);
+                    scope.contentClass = contentTypeClass[scope.contentType];
                 }
             });
         }

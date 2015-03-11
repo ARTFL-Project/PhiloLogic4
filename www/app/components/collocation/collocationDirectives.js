@@ -70,7 +70,7 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
     }
     var sortAndRenderCollocation = function(scope, fullResults, data, start, end) {
         if (end <= scope.resultsLength) {
-            scope.percent = Math.floor(end / scope.resultsLength * 100);
+            scope.collocation.percent = Math.floor(end / scope.resultsLength * 100);
         }
         if (typeof(fullResults) === "undefined") {
             fullResults = {"all_collocates": {}, 'left_collocates': {}, 'right_collocates': {}}
@@ -94,7 +94,7 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
             end += 5000;
             updateCollocation(scope, tempFullResults, start, end);
         } else {
-            scope.percent = 100;
+            scope.collocation.percent = 100;
             scope.done = true;
             activateLinks();
             save({results: scope.sortedLists, resultsLength: scope.resultsLength, filterList: scope.filterList});

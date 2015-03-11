@@ -19,7 +19,7 @@
             <div class="panel-body">
                 <table class="table table-bordered">
                     <tr ng-repeat="row in dicoLetterRows">
-                        <td ng-repeat="letter in row" ng-click="goToBibliography(letter.url)">{{ ::letter.letter }}</td>
+                        <td ng-repeat="letter in row" ng-click="lp.goToBibliography(letter.url)">{{ ::letter.letter }}</td>
                     </tr>
                 </table>
             </div>

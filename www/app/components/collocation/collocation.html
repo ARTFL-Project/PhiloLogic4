@@ -1,4 +1,4 @@
-<div id="collocation-container" class="container-fluid" ng-controller="collocationCtrl">    
+<div id="collocation-container" class="container-fluid" ng-controller="collocationCtrl as collocation">    
     <div id="philologic_response" class="panel panel-default">
         <div id="initial_report">
             <div id="description">
@@ -7,7 +7,7 @@
                 </button>
                 <search-arguments></search-arguments>
             </div>
-            <progress-bar progress="{{ percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{ duration: 400 }" ng-if="done === false"></progress-bar>
+            <progress-bar progress="{{ collocation.percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{ duration: 400 }" ng-if="collocation.done === false"></progress-bar>
             <collocation-parameters></collocation-parameters>
             <div class="bg-danger" style="margin-top: 20px; width: 50%;" ng-if="config.debug">
                 {{ ::error }}

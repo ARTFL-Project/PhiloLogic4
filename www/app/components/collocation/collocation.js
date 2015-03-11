@@ -1,28 +1,30 @@
 "use strict";
 
-philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL',
-                                            function($scope, $rootScope, $http, $location, radio, URL) {
+philoApp.controller('collocationCtrl', ['$rootScope', '$http', '$location', 'URL',
+                                            function($rootScope, $http, $location, URL) {
+                                                
+    var vm = this;
     $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
         $location.url(URL.objectToUrlString($rootScope.formData, {report: "bibliography"}));
     }
     
-    $scope.done = false;
-    $scope.filterList = false;
-    $scope.percent = 0;
-    $scope.sortedLists = {};
-    $scope.resultsLength = false; // set to false for now
+    vm.done = false;
+    vm.filterList = false;
+    vm.percent = 0;
+    vm.sortedLists = {};
+    vm.resultsLength = false; // set to false for now
     
-    $scope.showFilter = false;
-    $scope.toggleFilterList = function() {
-        if (!$scope.showFilter) {
-            $scope.showFilter = true;
+    vm.showFilter = false;
+    vm.toggleFilterList = function() {
+        if (!vm.showFilter) {
+            vm.showFilter = true;
         } else {
-            $scope.showFilter = false;
+            vm.showFilter = false;
         }
     }
     
-    $scope.concordanceFromCollocation = function(word, count, direction) {
+    vm.concordanceFromCollocation = function(word, count, direction) {
         var url = URL.objectToUrlString($location.search(), {report: 'concordance_from_collocation', collocate: word, collocate_num: count, direction: direction});
         console.log(url)
         $location.url(url);

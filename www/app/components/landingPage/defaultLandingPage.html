@@ -8,7 +8,7 @@
                 <div class="panel-body">
                     <table id="author-range-selectors" class="table table-bordered" data-type="author">
                         <tr>
-                            <td ng-repeat="range in authorRanges" ng-click="getContent('author', '{{ ::range }}')">{{ ::range }}</td>
+                            <td ng-repeat="range in authorRanges" ng-click="lp.getContent('author', '{{ ::range }}')">{{ ::range }}</td>
                         </tr>
                     </table>
                 </div>
@@ -22,7 +22,7 @@
                 <div class="panel-body">
                     <table id="title-range-selectors" class="table table-bordered"" data-type="title">
                         <tr>
-                            <td ng-repeat="range in titleRanges" ng-click="getContent('title', '{{ ::range }}')">{{ ::range }}</td>
+                            <td ng-repeat="range in titleRanges" ng-click="lp.getContent('title', '{{ ::range }}')">{{ ::range }}</td>
                         </tr>
                     </table>
                 </div>
@@ -36,7 +36,7 @@
                 <div class="panel-body">
                     <table id="year-range-selectors" class="table table-bordered" data-type="year">
                         <tr ng-repeat="ranges in dateRanges">
-                            <td ng-repeat="range in ranges" ng-click="getContent('year', '{{ ::range.start }}-{{ ::range.end }}')">{{ ::range.start }}-{{ ::range.end }}</td>
+                            <td ng-repeat="range in ranges" ng-click="lp.getContent('year', '{{ ::range.start }}-{{ ::range.end }}')">{{ ::range.start }}-{{ ::range.end }}</td>
                         </tr>
                     </table>
                 </div>

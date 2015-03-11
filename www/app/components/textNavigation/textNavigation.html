@@ -1,4 +1,4 @@
-<div class="container-fluid text-object"  id="philologic_response" ng-controller="textNavigation">
+<div class="container-fluid text-object"  id="philologic_response" ng-controller="textNavigationCtrl as textNav">
     <div id="object-title">
         <div>
             <a href="{{ textObject.citation.title.href }}" class="citation-small-caps"><i>{{ textObject.citation.title.label }}</i></a>
@@ -6,8 +6,8 @@
         </div>
         <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
     </div>
-    <navigation-bar toc-done="{{ tocDone }}" ng-if="navBar === true || loading === false"></navigation-bar>
-    <loading ng-if="loading"></loading>
+    <navigation-bar toc-done="{{ textNav.tocDone }}" ng-if="textNav.navBar === true || textNav.loading === false"></navigation-bar>
+    <loading ng-if="textNav.loading"></loading>
     <div class="row" id="all-content">
         <text-object scroll-to-highlight="{{ highlight }}"></text-object>
     </div>
@@ -17,7 +17,7 @@
     <h3 class="title"></h3>
     <a class="prev">&lt;</a>
     <a class="next">&gt;</a>
-    <a id="full-size-image" class="glyphicon glyphicon-new-window" ng-click="fullSizeImage()"></a>
+    <a id="full-size-image" class="glyphicon glyphicon-new-window" ng-click="textNav.fullSizeImage()"></a>
     <a class="close">&#10005;</a>
     <ol class="indicator"></ol>
 </div>
