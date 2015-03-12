@@ -8,7 +8,6 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', '$cookies
     // Verify access
     var access = $cookies[$rootScope.philoConfig.db_url]
     if (typeof(access) === 'undefined' || access === "unauthorized") {
-        console.log(access)
         $location.path('/access-control')
     }
     
