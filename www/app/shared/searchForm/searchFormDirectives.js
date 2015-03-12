@@ -87,7 +87,6 @@ philoApp.directive('metadataFields', function() {
             } else if (attrs.field === "head") {
                 var head = [];
                 for (var i=0; i < scope.philoConfig.metadata.length; i++) {
-                    console.log(scope.philoConfig.metadata[i])
                     if (scope.philoConfig.metadata[i] === 'head') {
                         head.push(scope.philoConfig.metadata[i]);
                         break

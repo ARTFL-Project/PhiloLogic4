@@ -1,12 +1,12 @@
-<div id="concordanceKwic-container" ng-controller="concordanceKwicCtrl">
+<div id="concordanceKwic-container" ng-controller="concordanceKwicCtrl as concKwic">
     <div class="panel panel-default">
         <div id="initial_report">
-            <div id="description" ng-if="typeof(results) != 'undefined'" class="velocity-opposites-transition-fadeIn">
+            <div id="description" ng-if="typeof(concKwic.results) != 'undefined'" class="velocity-opposites-transition-fadeIn">
                 <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
                         Export results
                 </button>
                 <search-arguments></search-arguments>
-                <results-description description="{{ description }}"></results-description>
+                <results-description description="{{ concKwic.description }}"></results-description>
             </div>
             <div class="row hidden-xs" id="act-on-report" ng-if="report !== 'concordance_from_collocation' && report !=='word_property_filter'">
                 <concordance-kwic-switch report="{{ report }}" ng-if="report !== 'bibliography'"></concordance-kwic-switch>
@@ -17,10 +17,10 @@
             <concordance ng-if="report === 'concordance' || report === 'concordance_from_collocation' || report === 'word_property_filter'"></concordance>
             <kwic ng-if="report === 'kwic'"></kwic>
             <bibliography ng-if="report === 'bibliography'"></bibliography>
-            <facets facet="{{ selectedFacet }}"></facets>
+            <facets facet="{{ concKwic.selectedFacet }}"></facets>
         </div>
     </div>
-    <div class="more" ng-if="results.results.length > 0">
+    <div class="more" ng-if="concKwic.results.results.length > 0">
         <pages></pages>
         <div style='clear:both;'></div>
     </div>

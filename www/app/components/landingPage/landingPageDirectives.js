@@ -55,8 +55,7 @@ philoApp.directive('dictionaryLandingPage', ['$rootScope', 'request', function($
             }
         });
         
-        var dicoLetterRange = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-                                "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+        var dicoLetterRange = $rootScope.philoConfig.dico_letter_range;
         scope.dicoLetterRows = [];
         var row = [];
         var position = 0;

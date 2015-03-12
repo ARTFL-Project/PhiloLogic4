@@ -1,7 +1,7 @@
-<div id="results_container" class="col-xs-12 {{ resultsContainerWidth }}">
+<div id="results_container" ng-class="{'col-xs-12': concKwic.frequencyResults.length === 0, 'col-xs-8': concKwic.frequencyResults.length > 0}">
     <ol class="bibliographic-results">
-        <li class="biblio-occurrence panel panel-default velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger:20}" ng-repeat="result in results.results">
-            <span style="padding-left: 5px;" ng-init="position = $index + results.description.start">{{ ::position }}.</span>
+        <li class="biblio-occurrence panel panel-default velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger:20}" ng-repeat="result in concKwic.results.results">
+            <span style="padding-left: 5px;" ng-init="position = $index + concKwic.results.description.start">{{ ::position }}.</span>
             <span class="philologic_cite">
                 <a class="philologic-doc" href="{{result.citation.title.href}}" class="citation-small-caps"><i>{{ ::result.citation.title.label }}</i></a>
                 <span ng-if="result.citation.author" class="citation-small-caps">, {{ ::result.citation.author.label }}</span>

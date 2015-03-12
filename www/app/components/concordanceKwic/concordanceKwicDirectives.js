@@ -32,7 +32,9 @@ philoApp.directive('concordance', ['$rootScope', '$http', 'request', function($r
 }]);
 
 philoApp.directive('kwic', ['$rootScope', function($rootScope) {
-    var initializePos = function(start, index, endPos) {
+    var initializePos = function(results, index) {
+		var start = results.description.start;
+		var endPos = results.resultsLength;
         var currentPos = start + index;
         var currentPosLength = currentPos.toString().length;
         endPos += start;
@@ -44,6 +46,14 @@ philoApp.directive('kwic', ['$rootScope', function($rootScope) {
         templateUrl: 'app/components/concordanceKwic/kwic.html',
         link: function(scope) {
             scope.initializePos = initializePos;
+			scope.showFullBiblio = function(event) {
+				var target = $(event.currentTarget).find('.full_biblio');
+				target.addClass('show');
+			}
+			scope.hideFullBiblio = function(event) {
+				var target = $(event.currentTarget).find('.full_biblio');
+				target.removeClass('show');
+			}
         }
     }
 }]);
@@ -65,8 +75,8 @@ philoApp.directive('resultsDescription', ['descriptionValues', function(descript
             attrs.$observe('description', function(newDescription) {
                 if (newDescription.length > 0) {
                     newDescription = JSON.parse(newDescription);
-                    if (scope.resultsLength !== scope.results.results_length) {
-                        scope.resultsLength = scope.results.results_length;
+                    if (scope.resultsLength !== scope.concKwic.results.results_length) {
+                        scope.resultsLength = scope.concKwic.results.results_length;
                         descriptionValues.resultsLength = scope.resultsLength;
                     }
                     if (newDescription.start !== scope.start) {
@@ -161,19 +171,17 @@ philoApp.directive('sidebarMenu', ['$rootScope', function($rootScope) {
     }
 }]);
 
-philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progressiveLoad', 'saveToLocalStorage', 'request', function($rootScope, $http, $location, URL, progressiveLoad, save, request) {
+philoApp.directive('facets', ['$rootScope', 'URL', 'progressiveLoad', 'saveToLocalStorage', 'request', function($rootScope, URL, progressiveLoad, save, request) {
     var retrieveFacet = function(scope, facetObj) {
         var urlString = URL.objectToUrlString($rootScope.formData, {frequency_field: facetObj.alias});
         if (typeof(sessionStorage[urlString]) !== "undefined" && $rootScope.philoConfig.debug === false) {
-            scope.frequencyResults = JSON.parse(sessionStorage[urlString]);
-            $rootScope.percentComplete = 100;
+            scope.concKwic.frequencyResults = JSON.parse(sessionStorage[urlString]);
             scope.percent = 100;
         } else {
-            scope.done = false;
             // store the selected field to check whether to kill the ajax calls in populate_sidebar
             $('#selected-sidebar-option').data('selected', facetObj.alias);
             $('#selected-sidebar-option').data('interrupt', false);
-            $rootScope.percentComplete = 0;
+			scope.done = false;
             var fullResults = {};
             scope.loading = true;
             scope.moreResults = true;
@@ -209,7 +217,7 @@ philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progre
                     } else {
                         var merge = progressiveLoad.mergeResults(fullResults.unsorted, results);
                     }
-                    scope.frequencyResults = merge.sorted;
+                    scope.concKwic.frequencyResults = merge.sorted;
                     fullResults = merge;
                     if (end < scope.resultsLength) {
                         $rootScope.percentComplete = end / scope.resultsLength * 100;
@@ -229,7 +237,7 @@ philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progre
                 }
             }  else {
                 scope.percent = 100;
-                var urlString = window.location.href + '&frequency_field=' + scope.selectedFacet.alias;
+                var urlString = window.location.href + '&frequency_field=' + scope.concKwic.selectedFacet.alias;
                 save(fullResults.sorted, urlString);
             }
         });
@@ -240,7 +248,7 @@ philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progre
         link: function(scope, element, attrs) {
             attrs.$observe('facet', function(facetObj) {
                 if (facetObj !== '') {
-                    facetObj = JSON.parse(facetObj);
+                    facetObj = scope.$eval(facetObj);
                     retrieveFacet(scope, facetObj);
                 }
             });
@@ -250,9 +258,9 @@ philoApp.directive('facets', ['$rootScope', '$http', '$location', 'URL', 'progre
 
 philoApp.directive('pages', ['$rootScope', function($rootScope) {
     var buildPages = function(scope, morePages) {
-        var start = scope.results.description.start;
+        var start = scope.concKwic.results.description.start;
         var resultsPerPage = parseInt($rootScope.formData.results_per_page) || 25;
-        var resultsLength = scope.results.results_length;
+        var resultsLength = scope.concKwic.results.results_length;
     
         // first find out what page we are on currently.    
         var currentPage = Math.floor(start / resultsPerPage) + 1 || 1;
@@ -332,14 +340,14 @@ philoApp.directive('pages', ['$rootScope', function($rootScope) {
     }
     return {
         restrict: 'E',
-        template: '<div id="page_links" class="btn-group">' +
-                  '<a id="current_results_page" class="btn btn-default btn-lg {{ page.active }}" ng-repeat="page in pages" ng-click="goToPage(page.start, page.end)">{{ page.display }}</a>' +
-                  '</div>',
+        template: ['<div id="page_links" class="btn-group">',
+						'<a id="current_results_page" class="btn btn-default btn-lg {{ page.active }}" ng-repeat="page in pages" ng-click="concKwic.goToPage(page.start, page.end)">{{ page.display }}</a>',
+				   '</div>'].join(''),
         link: function(scope, element, attrs) {
                 scope.$watch(function() {
                     return scope.results;
                     }, function() {
-                    scope.pages = buildPages(scope, scope.results.description.more_pages);
+                    scope.pages = buildPages(scope, scope.concKwic.results.description.more_pages);
                 }, true);
         }
     }
