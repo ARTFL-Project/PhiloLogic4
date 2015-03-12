@@ -397,3 +397,19 @@ progress-bar {
 	margin-left: 15px;
 	margin-right: 15px;
 }
+
+/*Access control*/
+#error-message {
+	margin: 15px;
+}
+#error-message .bg-danger {
+	padding: 15px;
+	font-size: 1.3em;
+}
+#password-form, #info-panel {
+	margin: 15px;
+	padding: 15px;
+}
+#password-access .row {
+	margin-top: 15px;
+}

@@ -55,7 +55,8 @@ js_files = [
     "app/components/collocation/collocation.js",
     "app/components/timeSeries/timeSeriesFilters.js",
     "app/components/timeSeries/timeSeriesDirectives.js",
-    "app/components/timeSeries/timeSeries.js"
+    "app/components/timeSeries/timeSeries.js",
+    "app/components/accessControl/accessControlCtrl.js"
 ]
 
 path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '')

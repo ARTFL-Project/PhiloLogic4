@@ -34,41 +34,44 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'textNavi
 philoApp.config(['$routeProvider', '$locationProvider',
   function($routeProvider, $locationProvider) {
     $routeProvider.
-      when('/', {
-        templateUrl: function(array) {
-            return 'app/components/landingPage/landing_page.html'
-        },
-        controller: 'landingPage',
-        controllerAs: 'lp'
-      }).
-      when('/query?:queryArgs', {
-        templateUrl: function(queryArgs) {
-            var report = queryArgs.report;
-            if (report === "concordance" || report === "kwic" || report === "bibliography" || report === "concordance_from_collocation" || report === "word_property_filter") {
-                var template = 'app/components/concordanceKwic/concordanceKwic.html';
-            } else if (report === "collocation") {
-                var template = 'app/components/collocation/collocation.html';
-            } else if (report === "time_series") {
-                var template = 'app/components/timeSeries/timeSeries.html';
-            } else {
-                var template = 'app/components/landingPage/landing_page.html'; 
+        when('/', {
+            templateUrl: function(array) {
+                return 'app/components/landingPage/landing_page.html';
+            },
+            controller: 'landingPage',
+            controllerAs: 'lp'
+        }).
+        when('/query?:queryArgs', {
+            templateUrl: function(queryArgs) {
+                var report = queryArgs.report;
+                if (report === "concordance" || report === "kwic" || report === "bibliography" || report === "concordance_from_collocation" || report === "word_property_filter") {
+                    var template = 'app/components/concordanceKwic/concordanceKwic.html';
+                } else if (report === "collocation") {
+                    var template = 'app/components/collocation/collocation.html';
+                } else if (report === "time_series") {
+                    var template = 'app/components/timeSeries/timeSeries.html';
+                } else {
+                    var template = 'app/components/landingPage/landing_page.html'; 
+                }
+                return template;
             }
-            return template;
-        }
-      }).
-      when('/navigate/:pathInfo*\/', {
-        templateUrl: function(queryArgs) {
-            var pathInfo = queryArgs.pathInfo.split('/');
-            if (pathInfo[pathInfo.length - 1] == "table-of-contents") {
-                return 'app/components/tableOfContents/tableOfContents.html';
-            } else {
-                return 'app/components/textNavigation/textNavigation.html';
+        }).
+        when('/navigate/:pathInfo*\/', {
+            templateUrl: function(queryArgs) {
+                var pathInfo = queryArgs.pathInfo.split('/');
+                if (pathInfo[pathInfo.length - 1] == "table-of-contents") {
+                    return 'app/components/tableOfContents/tableOfContents.html';
+                } else {
+                    return 'app/components/textNavigation/textNavigation.html';
+                }
             }
-        }
-      }).
-      otherwise({
-        redirectTo: '/'
-      });
+        }).
+        when('/access_control', {
+            templateUrl: 'app/components/accessControl/accessControl.html'
+        }).
+        otherwise({
+          redirectTo: '/'
+        });
     $locationProvider.html5Mode({
         enabled: true
     });
