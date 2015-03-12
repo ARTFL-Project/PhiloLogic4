@@ -18,10 +18,9 @@ def access_request(environ, start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    access, user_exists = check_login(config, request)
+    access = check_login(config, request)
+    ip_address = environ["REMOTE_ADDR"]
     if access:
-        write_access = open("/tmp/philo4_access", "a")
-        print >> write_access, environ["REMOTE_ADDR"]
         yield json.dumps('authorized')
     else:
         yield json.dumps('unauthorized')
@@ -29,7 +28,6 @@ def access_request(environ, start_response):
 def check_login(config, request):
     password_file = open(config.db_path + "/data/logins.txt")
     access = False
-    user_exists = False
     for line in password_file:
         user, passwd = tuple(line.strip().split())
         if user == request.username:
@@ -40,7 +38,7 @@ def check_login(config, request):
             else:
                 access = False
                 break
-    return access, user_exists
+    return access
 
 if __name__ == "__main__":
 	CGIHandler().run(access_request)

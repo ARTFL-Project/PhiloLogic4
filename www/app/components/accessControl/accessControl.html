@@ -52,7 +52,7 @@
                 <a href="http://artfl-project.uchicago.edu/node/14">Subscription Information</a> to see how your institution can   
                 gain access to ARTFL resources.
             </p>
-            <p>Requesting Computer Address: <tt>{{ client_address }}</tt></p>
+            <p ng-if="access.clientIp">Requesting Computer Address: <tt>{{ access.clientIp }}</tt></p>
         </div>
     </div>
 </div>

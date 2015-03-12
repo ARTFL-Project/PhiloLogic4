@@ -1,9 +1,14 @@
-philoApp.controller('accessControlCtrl', ['$window', '$cookies', '$rootScope', 'request', function($window, $cookies, $rootScope, request) {
+philoApp.controller('accessControlCtrl', ['$window', '$http', '$cookies', '$rootScope', 'request', function($window, $http, $cookies, $rootScope, request) {
 	var vm = this;
 	
 	vm.hostname = window.location.hostname;
 	vm.accessInput = {};
 	vm.accessDenied = false;
+	
+	vm.clientIp = false; // don't show anything before retrieval
+	$http.get('http://api.ipify.org?format=json').then(function(response) {
+		vm.clientIp = response.data.ip;
+	});
 	
 	vm.submit = function() {
 		var username = encodeURIComponent(vm.accessInput.username);
