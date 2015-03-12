@@ -1,8 +1,17 @@
-var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'angular-velocity', 'ui.utils']);
+var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'ngCookies', 'angular-velocity', 'ui.utils']);
 
-philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'textNavigationValues',
-                                  function($rootScope, $scope, $location, textNavigationValues) {
+philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', '$cookies', 'textNavigationValues',
+                                  function($rootScope, $scope, $location, $cookies, textNavigationValues) {
+    
     $rootScope.philoConfig = philoConfig;
+    
+    // Verify access
+    var access = $cookies[$rootScope.philoConfig.db_url]
+    if (typeof(access) === 'undefined' || access === "unauthorized") {
+        console.log(access)
+        $location.path('/access-control')
+    }
+    
     $rootScope.report = $location.search().report || philoReport;
     $rootScope.formData = {
         report: $rootScope.report,
@@ -66,7 +75,7 @@ philoApp.config(['$routeProvider', '$locationProvider',
                 }
             }
         }).
-        when('/access_control', {
+        when('/access-control', {
             templateUrl: 'app/components/accessControl/accessControl.html'
         }).
         otherwise({
