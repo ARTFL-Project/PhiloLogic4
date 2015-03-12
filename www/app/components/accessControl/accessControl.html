@@ -7,28 +7,29 @@
             </div>
         </div>
         <div id="password-form" class="panel panel-default">
-            <form id="password-access">
-                <h5>If you have a username and password, please enter them here:</h5>
+            <form id="password-access" ng-submit="access.submit()">
+                <h5 ng-if="!access.accessDenied">If you have a username and password, please enter them here:</h5>
+                <h5 class="text-danger" ng-if="access.accessDenied">Your username or password don't match. Please try again.</h5>
                 <div class="row">
                     <div class="col-xs-12 col-sm-3 text-row">
                         Username:
                     </div>
                     <div class="col-xs-12 col-sm-4">
-                        <input type="text" class="form-control" name="username" id="username">
+                        <input type="text" class="form-control" name="username" ng-model="access.accessInput.username">
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-xs-12 col-sm-3 text-row">
-                        Username:
+                        Password:
                     </div>
                     <div class="col-xs-12 col-sm-4">
-                        <input type="text" class="form-control" name="password" id="password">
+                        <input type="text" class="form-control" name="password" ng-model="access.accessInput.password">
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-xs-12 col-sm-4 col-sm-offset-3">
-                        <button type="button" class="btn btn-primary">Submit</button>
-                        <button type="button" class="btn btn-danger">Reset</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="reset" class="btn btn-danger">Reset</button>
                     </div>
                 </div>
             </form>
