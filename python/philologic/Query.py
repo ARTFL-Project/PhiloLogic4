@@ -126,7 +126,7 @@ def expand_query(split, freq_file, dest_fh):
             elif kind == "QUOTE":
                 filters.stdin.write(token[1:-1] + "\n") 
             # what to do about NOT?
-        filters.stdin.close()    
+        filters.stdin.close()
         filters.wait()
 #    dest_fh.close()
     return filters
@@ -214,7 +214,8 @@ def invert_grep(token, in_fh, dest_fh):
 
 def invert_grep_exact(token, in_fh, dest_fh):
     #don't strip accent or case, exact match only.
-    grep_command = ["egrep", "-v", "[[:blank:]]%s$" % token]
+    grep_command = ["egrep", "-v", "[[:blank:]]%s$" % token[1:-1]]
+    print >> sys.stderr, grep_command
     grep_proc = subprocess.Popen(grep_command,stdin=in_fh,stdout=dest_fh)
     #can't wait because input isn't ready yet.
     return grep_proc
@@ -223,7 +224,9 @@ if __name__ == "__main__":
     freq_file = sys.argv[1]
     terms = sys.argv[2:]
     parsed = parse_query(" ".join(terms))
+    print >> sys.stderr, "PARSED:", parsed
     grouped = group_terms(parsed)
+    print >> sys.stderr, "GROUPED:", grouped
     split = split_terms(grouped)
     print >> sys.stderr, "parsed %d terms:" % len(split), split
     freq_file = "/Library/WebServer/Documents/philologic/plain_text_test/data/frequencies/normalized_word_frequencies"
