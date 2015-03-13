@@ -45,10 +45,8 @@ def group_terms(parsed):
                 grouped.append(current_clause)
                 current_clause = []
         elif kind == "NOT":
-            # NOT should immediately detach a new clause
-            grouped.append(current_clause)
-            current_clause = []
-
+            # NOT should be put in the same clause as it's predecessors
+            pass
         current_clause.append((kind,val))
         last_term = kind
     grouped.append(current_clause)
