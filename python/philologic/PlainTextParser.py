@@ -28,9 +28,13 @@ class PlainTextParser(object):
 		"""Top level function for reading a file and printing out the output."""
 		#print >> sys.stderr, "SingleParser parsing"
 		self.input = input
-		content = input.read().decode("utf-8")
+		content = input.read().decode("utf-8")		
 		buffer_pos = 0
 		byte_pos = 0
+
+		self.v.push("doc","text",0)
+		for k,v in self.known_metadata.items():
+			self.v["doc"][k] = v
 		for tok in re.finditer(self.token_regex,content,re.U):
 			if tok.group(1):
 				tok_type = "word"
@@ -55,11 +59,13 @@ class PlainTextParser(object):
 				self.v.pull("sent",byte_end)
 			buffer_pos = tok.end()
 			byte_pos = byte_end 
+		self.v.pull("doc",self.filesize)
 
 if __name__ == "__main__":
 	for docid, fn in enumerate(sys.argv[1:],1):
 		print >> sys.stderr, docid, fn
 		size = os.path.getsize(fn)
 		fh = open(fn)
-		parser = PlainTextParser(sys.stdout,docid,size,token_regex = r"(\w+)|([\.\?\!])")
+		parser = PlainTextParser(sys.stdout,docid,size,token_regex = r"(\w+)|([\.\?\!])",
+			known_metadata={"filename":fn})
 		parser.parse(fh)

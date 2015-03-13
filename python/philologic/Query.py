@@ -59,10 +59,10 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
                 print >> sys.stderr, "LOGGING to " + filename + ".terms"
                 logger = subprocess.Popen(["tee",query_log_fh],stdin=subprocess.PIPE,stdout = worker.stdin)
                 print >> sys.stderr, "EXPANDING"
-                expand_query(split,freq_file,logger.stdin)
+                expand_query_not(split,freq_file,logger.stdin)
                 logger.stdin.close()
             else:
-                expand_query(split,freq_file,worker.stdin)
+                expand_query_not(split,freq_file,worker.stdin)
 
             worker.stdin.close()
 
@@ -83,7 +83,7 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
         return HitList.HitList(filename,words_per_hit,db)
 
 def split_terms(grouped):
-    print >> sys.stderr, repr(grouped)
+    #print >> sys.stderr, repr(grouped)
     split = []
     for group in grouped:
         if len(group) == 1:
@@ -101,13 +101,13 @@ def split_terms(grouped):
                 split.append(group)
         else:
             split.append(group)
-    print >> sys.stderr, repr(split)
+    #print >> sys.stderr, repr(split)
     return split
 
 def expand_query(split, freq_file, dest_fh):
     first = True
     grep_proc = None
-    print >> sys.stderr, "EXPANDING", repr(split)
+    #print >> sys.stderr, "EXPANDING", repr(split)
     for group in split:
         if first == True:
             first = False
@@ -131,17 +131,100 @@ def expand_query(split, freq_file, dest_fh):
 #    dest_fh.close()
     return filters
 
+def expand_query_not(split, freq_file, dest_fh):
+    first = True
+    grep_proc = None
+    #print >> sys.stderr, "SPLIT", repr(split)
+    for group in split:
+        if first == True:
+            first = False
+        else: # bare newline starts a new group, except the first
+            dest_fh.write("\n")
+
+        #find all the NOT terms and separate them out by type
+        exclude= []
+        term_exclude = []
+        quote_exclude = []
+
+        #print >> sys.stderr, "GROUP", repr(group)
+        for i, g in enumerate(group):
+            #print >> sys.stderr, i,"G", repr(g)
+            kind, token = g
+            if kind == "NOT":
+                exclude = group[i+1:]
+                group = group[:i]
+
+                for kind, token in exclude:
+                    if kind == "TERM":
+                        term_exclude.append((kind,token))
+                    if kind == "QUOTE":
+                        quote_exclude.append((kind,token))
+                break
+
+        #print >> sys.stderr, "OUTPUT", repr(dest_fh)
+
+        # set up the basic filter to get the terms sorted and ready for the search engine
+        if len(group) > 1:
+            cut_proc = subprocess.Popen("cut -f 2", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)  
+        else:
+            cut_proc = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
+        filter_inputs = [cut_proc.stdin]
+        filter_procs = [cut_proc]
+
+        # We will chain all NOT operators backward from the main filter.
+        for kind, token in exclude:
+            if kind == "TERM":
+                proc = invert_grep(token,subprocess.PIPE,filter_inputs[0])
+            if kind == "QUOTE":
+                proc = invert_grep_exact(token,subprocess.PIPE,filter_inputs[0])    
+            filter_inputs = [proc.stdin] + filter_inputs  
+            filter_procs = [proc] + filter_procs
+
+        # then we append output from all the greps into the front of that filter chain.
+        for kind,token in group: # or, splits, and ranges should have been taken care of by now.
+            if kind == "TERM" or kind == "RANGE":
+                grep_proc = grep_word(token,freq_file,filter_inputs[0])
+                grep_proc.wait()
+            elif kind == "QUOTE":
+                filter_inputs[0].write(token[1:-1] + "\t" + token[1:-1] + "\n") 
+
+        # close all the pipes and wait for procs to finish.
+        for pipe,proc in zip(filter_inputs,filter_procs):
+            pipe.close()
+            proc.wait()
+
 def grep_word(token,freq_file,dest_fh):
-    print >> sys.stderr, "IN_GREP_WORD", repr(token)
+    #print >> sys.stderr, "GREP_WORD_TOKEN", repr(token)
     norm_tok_uni = token.decode("utf-8").lower()
-    print >> sys.stderr, repr(norm_tok_uni)
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
-    print >> sys.stderr, repr(norm_tok_uni_chars)
-#                norm_tok_uni_chars = [u"^"] + norm_tok_uni_chars + [u"\b"]
     norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
     grep_command = ['egrep', '-i', '^%s[[:blank:]]' % norm_tok, '%s' % freq_file]
-    print >> sys.stderr, "GREP_COMMAND", "".join(grep_command)
-    print >> sys.stderr, repr(norm_tok)
+    #print >> sys.stderr, "GREP_COMMAND", "".join(grep_command)
+    #print >> sys.stderr, repr(norm_tok)
     grep_proc = subprocess.Popen(grep_command,stdout=dest_fh)
-    grep_proc.wait()    
     return grep_proc
+
+def invert_grep(token, in_fh, dest_fh):
+    norm_tok_uni = token.decode("utf-8").lower()
+    norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
+    norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
+    grep_command = ['egrep', '-iv', '^%s[[:blank:]]' % norm_tok]
+    grep_proc = subprocess.Popen(grep_command,stdin=in_fh,stdout=dest_fh)
+    return grep_proc
+
+def invert_grep_exact(token, in_fh, dest_fh):
+    #don't strip accent or case, exact match only.
+    grep_command = ["egrep", "-v", "[[:blank:]]%s$" % token]
+    grep_proc = subprocess.Popen(grep_command,stdin=in_fh,stdout=dest_fh)
+    #can't wait because input isn't ready yet.
+    return grep_proc
+
+if __name__ == "__main__":
+    freq_file = sys.argv[1]
+    terms = sys.argv[2:]
+    parsed = parse_query(" ".join(terms))
+    grouped = group_terms(parsed)
+    split = split_terms(grouped)
+    print >> sys.stderr, "parsed %d terms:" % len(split), split
+    freq_file = "/Library/WebServer/Documents/philologic/plain_text_test/data/frequencies/normalized_word_frequencies"
+    expand_query_not(split,freq_file,sys.stdout)
