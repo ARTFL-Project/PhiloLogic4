@@ -1,6 +1,6 @@
 philoApp.controller('accessControlCtrl', ['$window', '$http', '$cookies', '$rootScope', 'request', function($window, $http, $cookies, $rootScope, request) {
-	var vm = this;
 	
+	var vm = this;
 	vm.hostname = window.location.hostname;
 	vm.accessInput = {};
 	vm.accessDenied = false;

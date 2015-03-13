@@ -52,33 +52,3 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
         $location.url(URL.objectToUrlString($rootScope.formData, extraParams));
     }
 }]);
-
-philoApp.animation('.overlay-fadeOut', function() {
-    return {
-        enter: function(element, done) {
-            $(element).velocity({
-                opacity: 0.3
-            }, {duration: 300, complete: done});
-        },
-        leave: function(element, done) {
-            $(element).velocity({
-                opacity: 0
-            }, {duration: 300, complete: done});
-        }
-    };
-});
-
-philoApp.animation('.report-fade', function() {
-    return {
-        enter: function(element, done) {
-            $(element).velocity({
-                opacity: 1
-            }, {duration: 200, complete: done});
-        },
-        leave: function(element, done) {
-            $(element).velocity({
-                opacity: 0
-            }, {duration: 200, complete: done});
-        }
-    };
-});

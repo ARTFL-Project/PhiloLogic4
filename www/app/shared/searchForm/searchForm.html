@@ -2,7 +2,6 @@
     <div ng-if="philoConfig.dictionary === false">
         <form id="search" role="form" ng-submit="submit()">
             <div id="form_body">
-                <div id="search_overlay" ng-if="formOpen" class="overlay-fadeOut"></div>
                 <div id="initial-form">
                     <search-reports></search-reports>
                     <search-terms></search-terms>
@@ -22,7 +21,6 @@
         <div class="container" style="overflow: hidden;" ng-controller="searchForm">
             <form id="search" role="form" ng-submit="submit()">
                 <div id="form_body">
-                    <div id="search_overlay" ng-if="formOpen" class="overlay-fadeOut"></div>
                     <div id="initial-form">
                         <search-reports></search-reports>
                         <search-terms></search-terms>
