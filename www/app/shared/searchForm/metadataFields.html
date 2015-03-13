@@ -1,0 +1,15 @@
+<div class="row" id="metadata_fields" ng-repeat="metadata in metadataFields | metadataFieldsFilter">
+    <div class="text-row" ng-class="{'col-xs-12 col-sm-2 col-md-2': head === false, 'col-xs-12 col-sm-2': head}">
+        {{ ::metadata.label }}:
+    </div>
+    <div ng-class="{'col-xs-12 col-sm-4 col-md-4': head === false, 'col-xs-12 col-sm-10 col-md-6': head}">
+        <input type='text' name='{{ ::metadata.value }}' id="{{ ::metadata.value }}" class="form-control" autocomplete-metadata ng-model="formData[metadata.value]">
+    </div>
+    <div class="text-row" ng-class="{'col-xs-12 col-sm-4 col-md-6': head === false, 'no-example': head}">
+        (e.g., {{ ::metadata.example }})
+    </div>
+    <div class="col-xs-12 col-sm-12 col-md-4" ng-if="philoConfig.dictionary && head" id="search-buttons">
+        <button type="reset" id="reset_form" class="btn btn-danger" ng-click="clearFormData()">Clear</button>
+        <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" ng-click="toggleForm()">Show search options</button>
+    </div>
+</div>

@@ -1,0 +1,214 @@
+#results_container, #sidebar {
+	transition: width .2s;
+}
+#kwic_concordance {
+    font-family: 'Droid Sans Mono', sans-serif;
+    font-size: 12px;
+    padding: 15px;
+}
+.kwic_line {
+    line-height: 180%;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.kwic_biblio {
+    font-weight:400 !important;
+	z-index: 10;
+}
+.short_biblio {
+    width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    vertical-align: bottom;
+}
+.full_biblio {
+	z-index: 10;
+	display: none;
+	opacity: 0;
+}
+.full_biblio.show {
+	position: absolute;
+    box-shadow: 5px 5px 15px #C0C0C0;
+	display: inline !important;
+	opacity: 1;
+}
+#philologic_concordance, #colloc_concordance {
+    list-style-type: none;
+    overflow: hidden;
+	padding-bottom: 10px;
+}
+.philologic_occurrence {
+    padding-bottom : 2px;
+    margin: 15px 1px 6px 1px;
+    background-color: white;
+    left: 0;
+    position: relative;
+}
+.philologic_context {
+    text-align: justify;
+	padding: .6em;
+}
+
+.kwic-before {
+	text-align: right;
+	overflow: hidden;
+	display: inline-block;
+	position: absolute;
+}
+.inner-before {
+	float: right;
+}
+.kwic-after {
+	text-align: left;
+	display: inline-block;
+}
+.kwic-text {
+	display: inline-block;
+	overflow: hidden;
+	vertical-align: bottom;
+}
+#kwic-switch {
+	margin-left: -3px;
+}
+
+@media (min-width: 1200px) {
+	.kwic-highlight {
+		margin-left: 430px;
+	}
+	.kwic-before {
+		width: 430px;
+	}
+}
+@media (min-width:992px) and (max-width: 1199px) {
+	.kwic-highlight {
+		margin-left: 330px;
+	}
+	.kwic-before {
+		width: 330px;
+	}
+}
+@media (min-width:768px) and (max-width: 991px) {
+	.kwic-highlight {
+		margin-left: 220px;
+	}
+	.kwic-before {
+		width: 220px;
+	}
+	.kwic_line {
+		font-size: 12px;
+	}
+}
+@media (max-width:767px) {
+	.kwic-highlight {
+		margin-left: 200px;
+	}
+	.kwic-before {
+		width: 200px;
+	}
+	.kwic_line {
+		font-size: 12px;
+	}
+}
+#act-on-report {
+	margin-left: 0px;
+	margin-right: 0px;
+}
+#sidebar_display {
+	margin-right: 15px;
+	margin-top: 15px;
+}
+
+
+/*Citations*/
+.hit_n {
+    vertical-align: 5px;    /*align numbers*/
+}
+.more_context {
+	border-width: 0px 0px 0px 1px;
+	transition: all 250ms;
+}
+.cite {
+	padding-left: .6em;
+	padding-top: 7px;
+	display: inline-block;
+}
+.philologic_cite a:not(.philologic-doc) {
+    font-weight: 400 !important;
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: double 3px darkgray;
+}
+.citation-small-caps {
+	font-variant: small-caps;
+}
+.citation-container {
+	border-bottom: 1px solid;
+}
+.collocate {
+    font-weight:400;
+}
+#return_to_colloc:hover {
+	cursor: pointer;
+}
+
+/*All the sidebar classes*/
+#sidebar {
+	padding-left: 0px;
+	padding-right: 0px;
+	margin-left: -15px;
+}
+#sidebar_display {
+	overflow-y: scroll;
+}
+#frequency_table {
+    line-height: 300%;
+    margin-top: 0px;
+}
+#freq_sidebar_text {
+    display: inline-block !important;
+    max-width: 80%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+	vertical-align: bottom;
+	padding-left: 5px;
+}
+#frequency_field {
+	width: 100%;
+}
+#frequency_field .dropdown-header {
+	padding: 3px 10px;
+}
+#frequency_table li:nth-child(2n-1) {
+	background-color: #FAFAFA;
+}
+#frequency_container .progress {
+	margin-bottom: 0px;
+}
+#freq_sidebar_status {
+	display: inline-block;
+	width: 100%;
+	padding: 0px 5px;
+	border-bottom: solid 1px #ddd;
+}
+.sidebar-count {
+	display:inline-block;
+	float:right;
+	padding-right: 5px;
+}
+
+/* Concordance styling for theater */
+.xml-speaker {
+    font-weight: 700;
+}
+.xml-sp {
+    display: block;
+}
+.xml-sp+.xml-l, .xml-sp+.xml-ab {
+    display: inline;
+}
+.xml-stage {
+    font-style: italic;
+}

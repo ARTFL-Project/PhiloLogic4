@@ -612,6 +612,10 @@ class Loader(object):
         print >> web_config, """landing_page_browsing = {"author": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
         print >> web_config, """                          "title": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
         print >> web_config, """                          "date": {}}"""
+        print >> web_config, "# The dico_letter_range variables defines a set of letters corresponding to the first"
+        print >> web_config, "# letter of a headword. This generates a set of buttons for browsing the database available"
+        print >> web_config, "# on the landing page. The default represents the entire roman alphabet"
+        print >> web_config, '''dico_letter_range = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]'''
         print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")
 
 
@@ -677,13 +681,8 @@ def setup_db_dir(db_destination, template_dir):
     if template_dir:
         os.system("cp -r %s* %s" % (template_dir,db_destination))
         os.system("cp %s.htaccess %s" % (template_dir,db_destination))
-        os.system("chmod -R 777 %s/templates" % db_destination)
-        os.system("mkdir -p %s/templates/compiled_templates" % db_destination)
-        os.system("chmod -R 777 %s/templates/compiled_templates" % db_destination)
-        os.system("chmod -R 777 %s/css" % db_destination)
-        os.system("chmod -R 777 %s/js" % db_destination)
-        os.system("mkdir -p %s/data/exports" % db_destination)
-        os.system("chmod -R 777 %s/data/exports" % db_destination)
+        os.system("chmod -R 777 %s/app/assets/css" % db_destination)
+        os.system("chmod -R 777 %s/app/assets/js" % db_destination)
 
 # a quick utility function
 #def load(path,files,filters=default_filters,xpaths=None,metadata_xpaths=None,workers=4):
@@ -695,23 +694,23 @@ def setup_db_dir(db_destination, template_dir):
 #    l.make_tables()
 #    l.finish()
         
-if __name__ == "__main__":
-    os.environ["LC_ALL"] = "C" # Exceedingly important to get uniform sort order.
-    os.environ["PYTHONIOENCODING"] = "utf-8"
-    
-    usage = "usage: philoload.py destination_path texts ..."
-    
-    try :
-        destination = sys.argv[1]
-    except IndexError:
-        print usage
-        exit()
-        
-    texts = sys.argv[2:]
-    if len(sys.argv[2:]) == 0:
-        print usage
-        exit()
-
-    load(destination,texts)
-    
-    print "done"
+#if __name__ == "__main__":
+#    os.environ["LC_ALL"] = "C" # Exceedingly important to get uniform sort order.
+#    os.environ["PYTHONIOENCODING"] = "utf-8"
+#    
+#    usage = "usage: philoload.py destination_path texts ..."
+#    
+#    try :
+#        destination = sys.argv[1]
+#    except IndexError:
+#        print usage
+#        exit()
+#        
+#    texts = sys.argv[2:]
+#    if len(sys.argv[2:]) == 0:
+#        print usage
+#        exit()
+#
+#    load(destination,texts)
+#    
+#    print "done"

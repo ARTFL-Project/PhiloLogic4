@@ -1,0 +1,31 @@
+<div id="results_container" ng-class="{'col-xs-12': concKwic.frequencyResults.length === 0, 'col-xs-8': concKwic.frequencyResults.length > 0}">
+    <ol id="philologic_concordance">
+        <li class="philologic_occurrence panel panel-default velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger:50}" ng-repeat="result in concKwic.results.results">
+            <div class="citation-container row" ng-init="position = $index + concKwic.results.description.start">
+                <div class="col-xs-12 col-sm-10 col-md-11">
+                   <span class="cite" data-id="{{ ::result.philo_id.join(' ') }}">
+                        {{ ::position }}.
+                        <span class="philologic_cite">
+                            <span ng-if="result.citation.author" class="citation-small-caps">, {{ ::result.citation.author.label }}</span>
+                            <a class="philologic-doc" href="{{result.citation.title.href}}" class="citation-small-caps"><i>{{ ::result.citation.title.label }}</i></a>
+                            <span ng-if="result.citation.date"> [{{ ::result.citation.date.label }}]</span>
+                            <a href="{{result.citation.div1.href}}" ng-if="result.citation.div1">{{ ::result.citation.div1.label }}</a>
+                            <a href="{{result.citation.div2.href}}" ng-if="result.citation.div2">{{ ::result.citation.div2.label }}</a>
+                            <a href="{{result.citation.div3.href}}" ng-if="result.citation.div3">{{ ::result.citation.div3.label }}</a>
+                            <a href="{{result.citation.para.href}}" ng-if="result.citation.para">{{ ::result.citation.para.label }}</a>
+                        </span>
+                   </span>
+                </div>
+                <div class="hidden-xs col-sm-2 col-md-1" ng-if="report !== 'concordance_from_collocation' && report !=='word_property_filter'">
+                   <button class="btn btn-primary more_context pull-right" ng-click="moreContext($event, position - 1)">
+                       More
+                   </button>
+                </div>
+            </div>
+           <div class='philologic_context'>
+               <div class="default-length" ng-bind-html="result.context | unsafe"></div>
+               <div class="more-length"></div>
+           </div>
+        </li>
+    </ol>
+</div>

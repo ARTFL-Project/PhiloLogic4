@@ -1,0 +1,27 @@
+<div id='philologic_response' class="container-fluid toc-object" ng-controller="tableOfContents as toc">
+    <div class="row" id="toc-report-title">
+        <div class="col-xs-offset-2 col-xs-8">
+            <div>
+                <a id="toc-title" class="citation-small-caps">{{ ::toc.tocObject.citation.title.label }}</a>
+                <span ng-if="tocObject.citation.author">, {{ ::toc.tocObject.citation.author.label }}</span>
+            </div>
+            <span ng-if="tocObject.citation.more">{{ ::toc.tocObject.citation.more }}</span>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <button id="show-header" class="btn btn-primary" ng-if="philoConfig.debug" ng-click="toc.showHeader()">Show Header</button>
+        <div id="tei-header" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{duration: 200}" ng-if="toc.teiHeader" ng-bind-html="toc.teiHeader | unsafe"></div>
+        <div id="toc-report">
+            <div id="toc-content">
+                <div ng-repeat="element in toc.tocObject.toc">
+                    <div class="toc-{{ ::element.philo_type }}">
+                        <span class="bullet-point-{{ ::element.philo_type }}"></span>
+                        <a href="{{ ::element.href }}">
+                            {{ :: element.label }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

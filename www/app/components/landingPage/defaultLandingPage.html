@@ -1,0 +1,46 @@
+<div id="default-landing-page">
+    <div class="row" id="landingGroup">
+        <div class="{{ ::authorOffset }} col-xs-12 col-sm-6" id="col-author" ng-if="authorRanges">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Author
+                </div>
+                <div class="panel-body">
+                    <table id="author-range-selectors" class="table table-bordered" data-type="author">
+                        <tr>
+                            <td ng-repeat="range in authorRanges" ng-click="lp.getContent('author', '{{ ::range }}')">{{ ::range }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="{{ ::titleOffset }} col-xs-12 col-sm-6" id="col-title" ng-if="titleRanges">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Title
+                </div>
+                <div class="panel-body">
+                    <table id="title-range-selectors" class="table table-bordered"" data-type="title">
+                        <tr>
+                            <td ng-repeat="range in titleRanges" ng-click="lp.getContent('title', '{{ ::range }}')">{{ ::range }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12" id="col-year" ng-if="dateRanges">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Date
+                </div>
+                <div class="panel-body">
+                    <table id="year-range-selectors" class="table table-bordered" data-type="year">
+                        <tr ng-repeat="ranges in dateRanges">
+                            <td ng-repeat="range in ranges" ng-click="lp.getContent('year', '{{ ::range.start }}-{{ ::range.end }}')">{{ ::range.start }}-{{ ::range.end }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

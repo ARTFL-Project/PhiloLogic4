@@ -1,0 +1,28 @@
+<div id="dictionary-landing-page">
+    <div class="row">
+        <div id="dico-landing-volume" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;">
+            <div class="panel-heading" style="margin-left: -15px; margin-right: -15px">
+                Browse by volume
+            </div>
+            <div class="panel-body" >
+                <ul class="list-group" style="margin-left: -15px; margin-right: -15px" ng-if="volumeData != []">
+                    <li class="list-group-item velocity-transition-fadeIn" ng-repeat="volume in volumeData" data-velocity-opts="{ stagger: 10 }">
+                        <a href="dispatcher.py/{{ ::volume.philo_id }}/table-of-contents">{{ ::volume.title }}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="dico-landing-alpha" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;">
+            <div class="panel-heading">
+                Browse by letter
+            </div>
+            <div class="panel-body">
+                <table class="table table-bordered">
+                    <tr ng-repeat="row in dicoLetterRows">
+                        <td ng-repeat="letter in row" ng-click="lp.goToBibliography(letter.url)">{{ ::letter.letter }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

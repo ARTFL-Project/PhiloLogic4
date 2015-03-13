@@ -74,7 +74,7 @@ def frequencies(environ,start_response):
     #return render_template(results=hits,db=db,dbname=dbname,q=q,fetch_concordance=fetch_concordance,
     #                       f=f, path=path, results_per_page=q['results_per_page'],
     #                       template_name="concordance.mako")
-    return f.render_template(results=res,db=db,dbname=config.db_name,q=q,f=f,template_name="frequencies.mako", report="frequencies")
+    return ""#f.render_template(results=res,db=db,dbname=config.db_name,q=q,f=f,template_name="frequencies.mako", report="frequencies")
     
 def prominent_features(q):
     conn = db.dbh

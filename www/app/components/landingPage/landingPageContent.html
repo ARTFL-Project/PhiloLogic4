@@ -1,0 +1,17 @@
+<div id="landing-page-content">
+    <ul class="row velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration: 400, stagger: 20}" ng-repeat="group in resultGroups">
+        <h4>{{ ::group.prefix }}</h4>
+        <li class="{{ contentClass }}" ng-repeat="result in group.results">
+            <span ng-if="contentType === 'author'">
+                <a href="{{ result.url }}">{{ ::result.author }}</a>&nbsp;({{ ::result.count }})
+            </span>
+            <span ng-if="contentType === 'title'">
+                <a href="{{ result.url }}" ><i>{{ ::result.title }}</i></a>&nbsp;({{ ::result.author }})
+            </span>
+            <span ng-if="contentType === 'year'">
+                hey
+                <a href="{{ result.url }}" ><i>{{ ::result.title }}</i></a>&nbsp;({{ ::result.author }})
+            </span>
+        </li>
+    </ul>
+</div>

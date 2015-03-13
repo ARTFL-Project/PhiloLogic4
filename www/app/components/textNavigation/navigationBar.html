@@ -1,0 +1,21 @@
+<div class="row">
+    <div id="nav-buttons" ui-scrollfix>
+        <button type="button" id="back-to-top" class="btn btn-primary btn-sm" ng-click="textNav.backToTop()">
+            Back to top
+        </button>
+        <div class="col-xs-12" style="text-align: center;">
+            <div class="btn-group-sm" role="group">
+                <button type="button" class="btn btn-primary" id="prev-obj" ng-click="textNav.goToTextObject(textObject.prev)">
+                    <span class="glyphicon glyphicon-chevron-left"></span>
+                </button>
+                <button type="button" class="btn btn-primary" id="show-toc" disabled="disabled" ng-click="textNav.toggleTableOfContents()">Table of contents</button>
+                <button type="button" class="btn btn-primary" id="next-obj" ng-click="textNav.goToTextObject(textObject.next)">
+                    <span class="glyphicon glyphicon-chevron-right"></span>
+                </button>
+            </div>
+        </div>
+        <div id="toc-wrapper" class="col-xs-12 col-sm-8 col-sm-offset-2 toc-slide" ng-show="textNav.tocOpen">
+            <toc-sidebar></toc-sidebar>
+        </div>
+    </div>
+</div>

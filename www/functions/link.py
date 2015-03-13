@@ -53,12 +53,12 @@ def make_object_link(philo_id, hit_bytes):
 
 def make_absolute_object_link(config, id, bytes = []):
     """ Takes a valid PhiloLogic object, and returns an absolute URL representation of such. """
-    href = config.db_url + '/dispatcher.py/' + "/".join(str(x) for x in id)
+    href = config.db_url + '/navigate/' + "/".join(str(x) for x in id)
     if bytes:
         href += byte_query(bytes)
     return href
     
-def make_absolute_query_link(config, params, script_name="dispatcher.py", **extra_params):
+def make_absolute_query_link(config, params, script_name="query", **extra_params):
     """ Takes a dictionary of query parameters as produced by WSGIHandler, and returns an absolute URL representation of such. """
     params = dict([i for i in params])
     for k, v in extra_params.iteritems():
@@ -130,7 +130,7 @@ def page_links(config,params,results_len,script_name="dispatcher.py"):
         page_end = page_start + results_per_page - 1
         if page_end > results_len:
             page_end = results_len
-        link = make_absolute_query_link(config,params,script_name=script_name,start=str(page_start),end=str(page_end))
+        link = make_absolute_query_link(config,params,script_name=script_name,start=str(page_start),end=str(page_end), format="json")
         if page == 1 and 2 not in pages:
             page = "First"
         if page == total_pages:

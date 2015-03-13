@@ -6,36 +6,24 @@ sys.path.append('..')
 import functions as f
 import reports as r
 from philologic.DB import DB
+from wsgiref.handlers import CGIHandler
 from functions.wsgi_handler import WSGIHandler
 from concordance import citation_links
-import json
+try:
+    import simplejson as json
+except ImportError:
+    print >> sys.stderr, "Please install simplejson for better performance"
+    import json
 
 
 def bibliography(environ, start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    if request.format == "json":
-        headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-        start_response('200 OK',headers)
-        wrapper = []
-        return json.dumps(wrapper)
-    else:
-        return fetch_bibliography(db, request, config, start_response)
-
-def fetch_bibliography(db, request, config, start_response):
-    bibliography_object, hits = bibliography_results(db, request, config)
-    return render_bibliography(bibliography_object, request, hits, config, start_response)
-    
-def render_bibliography(b, q, hits, config, start_response):
-    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
-    biblio_criteria = f.biblio_criteria(q, config)
-    pages = f.link.page_links(config,q,len(hits))
-    frequency_script = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_frequency.py", format="json")
-    ajax_scripts = {'frequency': frequency_script, 'collocation': ''}
-    return f.render_template(bibliography=b, query_string=q.query_string, template_name='bibliography.mako',
-                             ajax=ajax_scripts, pages=pages, biblio_criteria=biblio_criteria,config=config, report="bibliography")
+    bibliography_object, hits = bibliography_results(db, request, config)
+    yield json.dumps(bibliography_object)
     
 def bibliography_results(db, q, config):
     if q.no_metadata:
@@ -63,10 +51,51 @@ def bibliography_results(db, q, config):
     
 def biblio_citation(hit, citation_hrefs):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
+    
+    citation = {}
+    citation['title'] = {'href': citation_hrefs['doc'] + '/table-of-contents', 'label': hit.title.strip()}
     if hit.author:
-        citation = u"%s, <i><a href='%s'>%s</a></i>" % (hit.author, citation_hrefs['doc'], hit.title)
+        citation['author'] = {'href': '', 'label': hit.author.strip()}
     else:
-        citation = u"<i><a href='%s'>%s</a></i>" % (citation_hrefs['doc'],hit.title)
+        citation['author'] = False
+    if hit.date:
+        citation['date'] = {'href': '', 'label': hit.date.strip()}
+    else:
+        citation["date"] = False
+        
+    ## Div level metadata // Copied from concordance citations
+    div1_name = hit.div1.head
+    if not div1_name:
+        if hit.div1.philo_name == "__philo_virtual":
+            div1_name = "Section"
+        else:
+            if hit.div1["type"] and hit.div1["n"]:
+                div1_name = hit.div1['type'] + " " + hit.div1["n"]                       
+            else:
+                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
+    div1_name = div1_name[0].upper() + div1_name[1:]
+    
+    ## Remove leading/trailing spaces
+    div1_name = div1_name.strip()
+    div2_name = hit.div2.head.strip()
+    div3_name = hit.div3.head.strip()
+    
+    if div1_name:
+        div1_name = div1_name[0].upper() + div1_name[1:].lower()
+        citation['div1'] = {"href": citation_hrefs['div1'], "label": div1_name}
+    else:
+        citation['div1'] = False
+    if div2_name:
+        div2_name = div2_name[0].upper() + div2_name[1:].lower()
+        citation['div2'] = {"href": citation_hrefs['div2'], "label": div2_name}
+    else:
+        citation['div2'] = False
+    if div3_name:
+        div3_name = div3_name[0].upper() + div3_name[1:].lower()
+        citation['div3'] = {"href": citation_hrefs['div3'], "label": div3_name}
+    else:
+        citation['div3'] = False
+    
     more_metadata = []
     if hit.pub_place:
         more_metadata.append(hit.pub_place.strip())
@@ -74,11 +103,15 @@ def biblio_citation(hit, citation_hrefs):
         more_metadata.append(hit.publisher.strip())
     if hit.collection:
         more_metadata.append(hit.collection.strip())
-    if hit.date:
-        more_metadata.append(hit.date.strip())
     if more_metadata:
-        citation += ' (%s)' % ' '.join([i for i in more_metadata if i])
+        citation['more'] =  '(%s)' % ' '.join([i for i in more_metadata if i])
+    else:
+        citation['more'] =  False
     if hit.genre:
-        citation += ' [genre: %s]' % hit.genre
-        
+        citation['genre'] = '[genre: %s]' % hit.genre
+    else:
+        citation['genre'] = False
     return citation
+
+if __name__ == "__main__":
+    CGIHandler().run(bibliography)

@@ -9,6 +9,7 @@ import re
 import json
 import unicodedata
 from philologic.DB import DB
+from wsgiref.handlers import CGIHandler
 from functions.wsgi_handler import WSGIHandler
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
@@ -27,30 +28,14 @@ def collocation(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    if request.no_q:
-        setattr(request, "report", "bibliography")
-        return r.fetch_bibliography(db, request, config, start_response)
+    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
+    start_response('200 OK',headers)
     hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
     collocation_object = fetch_collocation(hits, request, db, config)
-    if request.format == "json":
-        headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-        start_response('200 OK',headers)
-        return json.dumps(collocation_object)
-    else:
-        headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-        start_response('200 OK',headers)
-        return render_collocation(collocation_object, request, config)
-    
-def render_collocation(collocation_object, q, config):
-    colloc_script = f.link.make_absolute_query_link(config, q, format="json")
-    total_script = f.link.make_absolute_query_link(config, q, script_name="scripts/get_total_results.py")
-    ajax_scripts = {"colloc": colloc_script, "total": total_script}
-    biblio_criteria = f.biblio_criteria(q, config)
-    return f.render_template(collocation=collocation_object, query_string=q.query_string, biblio_criteria=biblio_criteria,
-                             word_num=q.word_num, ajax=ajax_scripts, config=config, dumps=json.dumps, template_name='collocation.mako', report="collocation")
+    yield json.dumps(collocation_object)
 
 def fetch_collocation(hits, q, db, config):
-    collocation_object = {"query": dict([i for i in q]), "results_length": len(hits)}
+    collocation_object = {"query": dict([i for i in q])}
     
     length = config['concordance_length']
     try:
@@ -70,45 +55,51 @@ def fetch_collocation(hits, q, db, config):
     right_collocates = {}
     all_collocates = {}
     
-    ## Override default value of q.end for first batch of results
-    if q.end == 0:
-        q.end = 3000
-        
-    ## Remove all empty keywords in request object
-    new_q = []
-    for i in q:
-        if i[1]:
-            new_q.append(i)
-    
     count = 0
-    for hit in hits[q.start:q.end]:
-        conc_left, conc_right = split_concordance(hit, length, config.db_path)
-        left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
-        right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)
-        
-        for left_word in left_words:
-            try:
-                left_collocates[left_word]['count'] += 1
-            except KeyError:
-                left_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="left", collocate=left_word.encode('utf-8'))}
-            try:
-                all_collocates[left_word]['count'] += 1
-            except KeyError:
-                all_collocates[left_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="all", collocate=left_word.encode('utf-8'))}
-
-        for right_word in right_words:
-            try:
-                right_collocates[right_word]['count'] += 1
-            except KeyError:
-                right_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="right", collocate=right_word.encode('utf-8'))}
-            try:
-                all_collocates[right_word]['count'] += 1
-            except KeyError:
-                all_collocates[right_word] = {"count": 1, "url": f.link.make_absolute_query_link(config, new_q, report="concordance_from_collocation", direction="all", collocate=right_word.encode('utf-8'))}
     
-    collocation_object['all_collocates'] = all_collocates
-    collocation_object['left_collocates'] = left_collocates
-    collocation_object['right_collocates'] = right_collocates
+    more_results = True
+    try:
+        for hit in hits[q.start:q.end]:
+            conc_left, conc_right = split_concordance(hit, length, config.db_path)
+            left_words = tokenize(conc_left, filter_list, within_x_words, 'left', db)
+            right_words = tokenize(conc_right, filter_list, within_x_words, 'right', db)
+            
+            for left_word in left_words:
+                try:
+                    left_collocates[left_word]['count'] += 1
+                except KeyError:
+                    left_link = f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", start='0', end='0',
+                                                                direction="left", collocate=left_word.encode('utf-8'))
+                    left_collocates[left_word] = {"count": 1, "url": left_link}
+                try:
+                    all_collocates[left_word]['count'] += 1
+                except KeyError:
+                    all_link = f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", start='0', end='0',
+                                                               direction="all", collocate=left_word.encode('utf-8'))
+                    all_collocates[left_word] = {"count": 1, "url": all_link}
+    
+            for right_word in right_words:
+                try:
+                    right_collocates[right_word]['count'] += 1
+                except KeyError:
+                    right_link = f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", start='0', end='0',
+                                                                 direction="right", collocate=right_word.encode('utf-8'))
+                    right_collocates[right_word] = {"count": 1, "url": right_link}
+                try:
+                    all_collocates[right_word]['count'] += 1
+                except KeyError:
+                    all_link = f.link.make_absolute_query_link(config, q, report="concordance_from_collocation", start='0', end='0',
+                                                               direction="all", collocate=right_word.encode('utf-8'))
+                    all_collocates[right_word] = {"count": 1, "url": all_link}
+        
+        collocation_object['all_collocates'] = all_collocates
+        collocation_object['left_collocates'] = left_collocates
+        collocation_object['right_collocates'] = right_collocates
+    except IndexError: ## We've gone beyond the hitlist
+        more_results = False
+    
+    collocation_object["results_length"] = len(hits)
+    collocation_object['more_results'] = more_results
     
     return collocation_object
 
@@ -177,3 +168,6 @@ def tokenize_text(text, token_regex):
     text_tokens = token_regex.split(text)
     text_tokens = [token for token in text_tokens if token and token not in (""," ","\n","\t")] ## remove empty strings
     return text_tokens
+
+if __name__ == "__main__":
+    CGIHandler().run(collocation)

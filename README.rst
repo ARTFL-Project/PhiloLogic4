@@ -47,7 +47,6 @@ Prerequisites
 * Make
 * `gdbm`_
 * `lxml`_
-* `Mako`_
 
 Installing the C library
 ------------------------------
@@ -69,7 +68,7 @@ Installing the `Python` ``philologic`` module system-wide
 
 Once ``libphilo`` is installed, we need to install its `Python` bindings
 and library: ``philologic``. Once again, this step requires administrator
-privileges. You probably want to install it's prerequistes, 'lxml'_ and 'mako'_, first.
+privileges. You probably want to install its prerequiste, ``lxml`` , first.
 
 You can install the libraries either with Python's distutils:
 
@@ -82,20 +81,22 @@ or via the pip command::
     sudo pip install .
 
 
-Setting up PhiloLogic Web Services
+Setting up PhiloLogic Web Application
 ---------------------------------------------
 
 Each new PhiloLogic database you load, containing one or more TEI-XML files, will be served
 by a its own dedicated copy of PhiloLogic web application.
 By convention, this database and web app reside together in a directory
-accessible via an HTTP server configure to run Python CGI scripts.
+accessible via an HTTP server configured to run Python CGI scripts.
 
 In Mac OS X systems, you will probably want to create a directory at
 ``/Library/WebServer/Documents/philologic`` to serve up PhiloLogic databases
 with the URL prefix: ``http://<your_server's_name>/philologic/``; for Linux systems, 
 the proper directory may vary, but ``/var/www/philologic/`` or ``/var/www/html/philologic/``
 
-Configuring your web server is outside of the scope of this document;
+Configuring your web server is outside of the scope of this document; but the web install
+does come with a preconfigured .htaccess file that allows you to run the Web App.
+Therefore, you need to make sure your server is configured to allow htaccess files.
 if in doubt, ask a friendly sysadmin..  
 
 Customize ``load_script.py``
@@ -182,16 +183,19 @@ with the indexes and other data structures, in a ``data`` subdirectory.
 At the end of generation, this directory will look like this tree::
 
     --- /var/www/html
-      \--- mydatabase
-        \--- css
-        \--- data
-        \--- functions
-        \--- js
-        \--- reports
-        \--- scripts
-        \--- templates
-        \--- .htaccess
-        \--- dispatcher.py
+        \--- mydatabase
+            \--- app
+                \--- assets
+                \--- components
+                \--- shared
+                \--- index.html
+                \--- PhiloLogicMain.js
+            \--- data
+            \--- functions
+            \--- reports
+            \--- scripts
+            \--- .htaccess
+            \--- dispatcher.py
 
 ----
 
@@ -201,5 +205,4 @@ At the end of generation, this directory will look like this tree::
 .. _gdbm: http://www.gnu.org.ua/software/gdbm/
 .. _pip: http://www.pip-installer.org/
 .. _Apache httpd: http://httpd.apache.org/
-.. _Mako: http://makotemplates.org/
 .. _lxml: http://lxml.de/

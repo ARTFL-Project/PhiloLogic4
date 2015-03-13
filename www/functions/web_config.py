@@ -2,7 +2,11 @@
 
 import os
 import sys
-from json import dumps
+try:
+    import simplejson as json
+except ImportError:
+    print >> sys.stderr, "Please install simplejson for better performance"
+    import json
 from philologic.DB import DB
 from search_utilities import search_examples
 
@@ -56,4 +60,4 @@ class WebConfig(object):
         
     def toJSON(self):
         config_obj = dict([(option, self[option]) for option in self.config])
-        return dumps(config_obj)
+        return json.dumps(config_obj)

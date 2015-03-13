@@ -1,0 +1,5 @@
+<div id="landing-page-container">
+    <default-landing-page ng-if="lp.dictionary === false"></default-landing-page>
+    <dictionary-landing-page ng-if="lp.dictionary"></dictionary-landing-page>
+    <landing-page-content name="{{ lp.query }}"></landing-page-content>
+</div>
