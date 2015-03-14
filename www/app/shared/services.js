@@ -2,6 +2,19 @@
 
 philoApp.filter('unsafe', function($sce) { return $sce.trustAsHtml; });
 
+philoApp.factory('accessControl', ['$rootScope', '$cookies', '$location', function($rootScope, $cookies, $location) {
+    return {
+        check: function() {
+            var access = $cookies[$rootScope.philoConfig.db_url]
+            if (typeof(access) === 'undefined' || access === "unauthorized") {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+}])
+
 philoApp.factory('radio', ['$rootScope', function($rootScope) {
     return {
         click: function(key, value) {

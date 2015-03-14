@@ -11,10 +11,11 @@ from cgi import FieldStorage
 from wsgiref.handlers import CGIHandler
 import json
 
+
 def access_request(environ, start_response):
     status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-    start_response(status,headers)
+    headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin","*")]
+    start_response(status, headers)
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
@@ -24,6 +25,7 @@ def access_request(environ, start_response):
         yield json.dumps('authorized')
     else:
         yield json.dumps('unauthorized')
+
 
 def check_login(config, request):
     password_file = open(config.db_path + "/data/logins.txt")
@@ -41,5 +43,4 @@ def check_login(config, request):
     return access
 
 if __name__ == "__main__":
-	CGIHandler().run(access_request)
-	
+    CGIHandler().run(access_request)

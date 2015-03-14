@@ -1,4 +1,4 @@
-philoApp.controller('accessControlCtrl', ['$window', '$http', '$cookies', '$rootScope', 'request', function($window, $http, $cookies, $rootScope, request) {
+philoApp.controller('accessControlCtrl', ['$window', '$http', '$cookies', '$rootScope', '$route', 'request', function($window, $http, $cookies, $rootScope, $route, request) {
 	
 	var vm = this;
 	vm.hostname = window.location.hostname;
@@ -20,7 +20,10 @@ philoApp.controller('accessControlCtrl', ['$window', '$http', '$cookies', '$root
 		}).then(function(response) {
 			if (response.data === "authorized") {
 				$cookies[$rootScope.philoConfig.db_url] = "authorized";
-				$window.location.href = $rootScope.philoConfig.db_url;
+				$rootScope.authorized = true;
+				//$window.location.href = $window;
+				//$window.reload();
+				$route.reload();
 			} else {
 				vm.accessDenied = true;
 			}

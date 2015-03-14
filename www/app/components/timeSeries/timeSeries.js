@@ -1,8 +1,9 @@
 "use strict";
 
-philoApp.controller('timeSeriesCtrl', ['$rootScope', '$location', 'URL', function($rootScope, $location, URL) {
+philoApp.controller('timeSeriesCtrl', ['$rootScope', '$location', 'accessControl', 'URL', function($rootScope, $location, accessControl, URL) {
     
     var vm = this;
+    vm.authorized = $rootScope.authorized;
     $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
         $location.url(URL.objectToUrlString($rootScope.formData, {report: "bibliography"}));

@@ -1,6 +1,8 @@
-philoApp.controller('concordanceKwicCtrl', ['$rootScope', '$location', 'request', 'URL', function($rootScope, $location, request, URL) {
+philoApp.controller('concordanceKwicCtrl', ['$rootScope', '$location', 'accessControl', 'request', 'URL',
+                                            function($rootScope, $location, accessControl, request, URL) {
     
-    var vm = this;                                          
+    var vm = this;
+    vm.authorized = $rootScope.authorized;
     $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
         var urlString = URL.objectToUrlString($rootScope.formData, {report: "bibliography"});

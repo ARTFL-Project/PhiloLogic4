@@ -1,5 +1,5 @@
 <div id="collocation-container" class="container-fluid" ng-controller="collocationCtrl as collocation">    
-    <div id="philologic_response" class="panel panel-default">
+    <div id="philo-view" class="panel panel-default" ng-if="collocation.authorized">
         <div id="initial_report">
             <div id="description">
                 <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
@@ -24,4 +24,5 @@
             </div>
         </div>
     </div>
+    <access-control ng-if="!collocation.authorized"></access-control>
 </div>

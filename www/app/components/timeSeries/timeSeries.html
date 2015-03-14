@@ -1,5 +1,5 @@
 <div id="time-series-container" class="container-fluid" ng-controller="timeSeriesCtrl as timeSeries">
-    <div id="philologic_response">
+    <div id="philo-view" ng-if="timeSeries.authorized">
         <div id="initial_report" class="row">
             <div class="col-xs-12">
                 <div class="panel panel-default">
@@ -30,4 +30,5 @@
             </div>
         </div>
     </div>
+    <access-control ng-if="!timeSeries.authorized"></access-control>
 </div>

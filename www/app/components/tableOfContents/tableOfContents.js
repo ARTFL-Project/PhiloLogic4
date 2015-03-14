@@ -1,8 +1,10 @@
 "use strict"
 
-philoApp.controller('tableOfContents', ['$rootScope', '$http', '$location', '$routeParams', 'URL', "request", function($rootScope, $http, $location, $routeParams, URL, request) {
+philoApp.controller('tableOfContents', ['$rootScope', '$http', '$location', '$routeParams', 'accessControl', 'URL', "request",
+                                        function($rootScope, $http, $location, $routeParams, accessControl, URL, request) {
     
     var vm = this;
+    vm.authorized = accessControl.check();
     vm.textObjectURL = $routeParams;
     var tempValue = vm.textObjectURL.pathInfo.split('/');
     tempValue.pop();

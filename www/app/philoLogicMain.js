@@ -1,23 +1,23 @@
 var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'ngCookies', 'angular-velocity', 'ui.utils']);
 
-philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', '$cookies', 'textNavigationValues',
-                                  function($rootScope, $scope, $location, $cookies, textNavigationValues) {
+philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'accessControl', 'textNavigationValues',
+                                  function($rootScope, $scope, $location, accessControl, textNavigationValues) {
     
     $rootScope.philoConfig = philoConfig;
-    
-    // Verify access
-    var access = $cookies[$rootScope.philoConfig.db_url]
-    if (typeof(access) === 'undefined' || access === "unauthorized") {
-        $location.path('/access-control')
-    }
-    
     $rootScope.report = $location.search().report || philoReport;
     $rootScope.formData = {
         report: $rootScope.report,
         method: "proxy"
         };
+        
+    if (!accessControl.check()) {
+        $rootScope.authorized = false;
+    } else {
+        $rootScope.authorized = true;
+    }
     
-    $scope.$on('$locationChangeStart', function() {
+    $scope.$on('$locationChangeStart', function(e) {
+        
         var paths = $location.path().split('/').filter(Boolean);
         if (paths[0] == "query") {
             $rootScope.report = $location.search().report;

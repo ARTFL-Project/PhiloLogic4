@@ -1,8 +1,9 @@
 "use strict";
 
-philoApp.controller('landingPage', ['$rootScope', '$location', function($rootScope, $location) {
+philoApp.controller('landingPage', ['$rootScope', '$location', 'accessControl', function($rootScope, $location, accessControl) {
     
     var vm = this;
+    vm.authorized = accessControl.check();
     vm.dictionary = $rootScope.philoConfig.dictionary;
     $rootScope.report = "landing_page";
 
