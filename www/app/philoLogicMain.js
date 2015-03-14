@@ -4,17 +4,27 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'accessCo
                                   function($rootScope, $scope, $location, accessControl, textNavigationValues) {
     
     $rootScope.philoConfig = philoConfig;
+    
+    // Check for possible access restrictions
+    if (!$rootScope.philoConfig.access_control) {
+        $rootScope.authorized = true;
+        $rootScope.access = accessControl.setAccess(true);
+    } else {
+        var accessCookie = accessControl.cookieCheck(); 
+        if (!accessCookie.access) {
+            $rootScope.authorized = false;
+            $rootScope.access = accessControl.setAccess(false);
+        } else {
+            $rootScope.authorized = true;
+            $rootScope.access = accessCookie.reports;
+        }
+    }
+        
     $rootScope.report = $location.search().report || philoReport;
     $rootScope.formData = {
         report: $rootScope.report,
         method: "proxy"
         };
-        
-    if (!accessControl.check()) {
-        $rootScope.authorized = false;
-    } else {
-        $rootScope.authorized = true;
-    }
     
     $scope.$on('$locationChangeStart', function(e) {
         

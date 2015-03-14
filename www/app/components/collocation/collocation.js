@@ -4,7 +4,7 @@ philoApp.controller('collocationCtrl', ['$rootScope', '$http', '$location', 'acc
                                         function($rootScope, $http, $location, accessControl, URL) {
     
     var vm = this;
-    vm.authorized = accessControl.check();
+    vm.authorized = $rootScope.access.collocation;
     $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
         $location.url(URL.objectToUrlString($rootScope.formData, {report: "bibliography"}));

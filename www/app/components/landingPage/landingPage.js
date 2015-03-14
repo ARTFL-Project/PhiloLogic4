@@ -3,7 +3,7 @@
 philoApp.controller('landingPage', ['$rootScope', '$location', 'accessControl', function($rootScope, $location, accessControl) {
     
     var vm = this;
-    vm.authorized = accessControl.check();
+    vm.authorized = $rootScope.authorized;
     vm.dictionary = $rootScope.philoConfig.dictionary;
     $rootScope.report = "landing_page";
 

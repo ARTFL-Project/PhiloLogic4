@@ -3,7 +3,7 @@
 philoApp.controller('timeSeriesCtrl', ['$rootScope', '$location', 'accessControl', 'URL', function($rootScope, $location, accessControl, URL) {
     
     var vm = this;
-    vm.authorized = $rootScope.authorized;
+    vm.authorized = $rootScope.access.time_series;
     $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
         $location.url(URL.objectToUrlString($rootScope.formData, {report: "bibliography"}));

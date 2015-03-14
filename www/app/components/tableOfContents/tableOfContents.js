@@ -4,7 +4,7 @@ philoApp.controller('tableOfContents', ['$rootScope', '$http', '$location', '$ro
                                         function($rootScope, $http, $location, $routeParams, accessControl, URL, request) {
     
     var vm = this;
-    vm.authorized = accessControl.check();
+    vm.authorized = $rootScope.authorized; // cannot be blocked specifically if access to database
     vm.textObjectURL = $routeParams;
     var tempValue = vm.textObjectURL.pathInfo.split('/');
     tempValue.pop();

@@ -538,7 +538,7 @@ class Loader(object):
         print >> db_locals, "\ndebug = %s" % self.debug
         for k, v in extra_locals.items():
             if k != "db_url" or k != "search_reports":  # This should be changed in the load_script
-                print >> db_locals, "%s = %s" % (k,repr(v))
+                print >> db_locals, "%s = %s" % (k, repr(v))
         print "wrote database info to %s." % (self.destination + "/db.locals.py")
 
     def write_web_config(self, **extra_locals):
@@ -555,6 +555,10 @@ class Loader(object):
         print >> web_config, "dbname = '%s'" % dbname
         print >> web_config, "\n# The db_url variable is the root URL for your database on the web"
         print >> web_config, "db_url = '%s'" % extra_locals['db_url']
+        print >> web_config, "# Configure access control with True or False."
+        print >> web_config, "# Note that if you want access control, you have to provide a login.txt file inside your /data directory,"
+        print >> web_config, "# otherwise access will remain open."
+        print >> web_config, "access_control = False"
         print >> web_config, "\n# The search_reports variable sets which search report is viewable in the search form"
         print >> web_config, "# Available reports are concordance, kwic, collocation, and time_series"
         print >> web_config, "search_reports = ['concordance', 'kwic', 'collocation', 'time_series']"

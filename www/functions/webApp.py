@@ -62,13 +62,18 @@ js_files = [
 
 path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '')
 
-def angular(environ,start_response):
+
+def angular(environ, start_response):
     config = f.WebConfig()
+    if config.access_control:
+        access = f.check_access(environ, config)
+        config.config['access_control'] = access
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-    start_response('200 OK',headers)
+    headers = [('Content-type', 'text/html; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
+    start_response('200 OK', headers)
     return build_html_page(config)
+
 
 def build_html_page(config):
     html_page = open('%s/app/index.html' % config.db_path).read()
@@ -78,6 +83,7 @@ def build_html_page(config):
     html_page = html_page.replace('$CSS', load_CSS())
     html_page = html_page.replace('$JS', load_JS())
     return html_page
+
 
 def load_CSS():
     mainCSS = os.path.join(path, "app/assets/css/philoLogic.css")
@@ -89,7 +95,8 @@ def load_CSS():
         return '<link rel="stylesheet" href="app/assets/css/philoLogic.css">'
     else:
         return '\n'.join(css_links)
-    
+
+
 def load_JS():
     mainJS = os.path.join(path, "app/assets/js/plugins/philoLogicPlugins.js")
     if config.debug or not os.path.exists(mainJS):
@@ -105,7 +112,8 @@ def load_JS():
         return scripts
     else:
         return '\n'.join(js_plugins_links + js_links)
-    
+
+
 def concatenate_files(file_list, file_type):
     string = []
     links = []
