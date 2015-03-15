@@ -1,16 +1,15 @@
-<div id="landing-page-content">
-    <ul class="row velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration: 400, stagger: 20}" ng-repeat="group in resultGroups">
+<div id="landing-page-content" infinite-scroll="displayMoreItems()" infinite-scroll-distance="2">
+    <ul class="row" ng-repeat="group in resultGroups | limitTo: displayLimit">
         <h4>{{ ::group.prefix }}</h4>
-        <li class="{{ contentClass }}" ng-repeat="result in group.results">
+        <li class="{{ ::contentClass }}" ng-repeat="result in group.results">
             <span ng-if="contentType === 'author'">
-                <a href="{{ result.url }}">{{ ::result.author }}</a>&nbsp;({{ ::result.count }})
+                <a href="{{ ::result.url }}">{{ ::result.author }}</a>&nbsp;({{ ::result.count }})
             </span>
             <span ng-if="contentType === 'title'">
-                <a href="{{ result.url }}" ><i>{{ ::result.title }}</i></a>&nbsp;({{ ::result.author }})
+                <a href="{{ ::result.url }}" ><i>{{ ::result.title }}</i></a>&nbsp;({{ ::result.author }})
             </span>
             <span ng-if="contentType === 'year'">
-                hey
-                <a href="{{ result.url }}" ><i>{{ ::result.title }}</i></a>&nbsp;({{ ::result.author }})
+                <a href="{{ ::result.url }}" ><i>{{ ::result.title }}</i></a>&nbsp;({{ ::result.author }})
             </span>
         </li>
     </ul>

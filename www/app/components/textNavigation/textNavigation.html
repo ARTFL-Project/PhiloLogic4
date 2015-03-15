@@ -1,16 +1,19 @@
-<div class="container-fluid text-object"  id="philologic_response" ng-controller="textNavigationCtrl as textNav">
-    <div id="object-title">
-        <div>
-            <a href="{{ textObject.citation.title.href }}" class="citation-small-caps"><i>{{ textObject.citation.title.label }}</i></a>
-            <span ng-if="textObject.citation.author">, {{ textObject.citation.author.label }}</span>
+<div class="text-object" ng-controller="textNavigationCtrl as textNav">
+    <div id="philo-view" ng-if="textNav.authorized">
+        <div id="object-title">
+            <div>
+                <a href="{{ textObject.citation.title.href }}" class="citation-small-caps"><i>{{ textObject.citation.title.label }}</i></a>
+                <span ng-if="textObject.citation.author">, {{ textObject.citation.author.label }}</span>
+            </div>
+            <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
         </div>
-        <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
+        <navigation-bar toc-done="{{ textNav.tocDone }}" prev="{{ textObject.prev }}" next="{{ textObject.next }}" ng-if="textNav.navBar === true || textNav.loading === false"></navigation-bar>
+        <loading ng-if="textNav.loading"></loading>
+        <div class="row" id="all-content">
+            <text-object scroll-to-highlight="{{ highlight }}"></text-object>
+        </div>
     </div>
-    <navigation-bar toc-done="{{ textNav.tocDone }}" ng-if="textNav.navBar === true || textNav.loading === false"></navigation-bar>
-    <loading ng-if="textNav.loading"></loading>
-    <div class="row" id="all-content">
-        <text-object scroll-to-highlight="{{ highlight }}"></text-object>
-    </div>
+    <access-control ng-if="!textNav.authorized"></access-control>
 </div>
 <div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-full-screen="true" data-continuous="false" style="display: none">
     <div class="slides"></div>

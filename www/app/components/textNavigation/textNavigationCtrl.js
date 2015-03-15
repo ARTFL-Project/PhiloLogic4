@@ -1,9 +1,11 @@
 "use strict";
 
-philoApp.controller('textNavigationCtrl', ['$scope', '$rootScope', '$location', '$routeParams', '$timeout', 'URL', 'textNavigationValues',
-                                           function($scope, $rootScope, $location, $routeParams, $timeout, URL, textNavigationValues) {
+philoApp.controller('textNavigationCtrl', ['$scope', '$rootScope', '$location', '$routeParams', '$timeout', 'accessControl', 'URL', 'textNavigationValues',
+                                           function($scope, $rootScope, $location, $routeParams, $timeout, accessControl, URL, textNavigationValues) {
     
     var vm = this;
+    var access = accessControl.cookieCheck()
+    vm.authorized = $rootScope.access.navigation;
     vm.textObject = {};
     vm.loading = true;
     vm.navBar = textNavigationValues.navBar; // Don't draw navBar until text has been fetched

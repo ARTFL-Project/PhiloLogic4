@@ -4,5 +4,7 @@ philoApp.value('textNavigationValues', {
     citation: {},
     tocElements:false,
     tocOpen: false,
-    navBar: false
+    navBar: false,
+    prev: "",
+    next: ""
 });

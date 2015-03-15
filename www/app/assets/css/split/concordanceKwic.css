@@ -134,6 +134,10 @@
 	padding-top: 7px;
 	display: inline-block;
 }
+.philologic-doc {
+	font-variant: small-caps;
+	font-weight: 700;
+}
 .philologic_cite a:not(.philologic-doc) {
     font-weight: 400 !important;
     margin-left: 8px;

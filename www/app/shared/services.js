@@ -2,6 +2,42 @@
 
 philoApp.filter('unsafe', function($sce) { return $sce.trustAsHtml; });
 
+philoApp.factory('accessControl', ['$rootScope', '$cookies', '$location', function($rootScope, $cookies, $location) {
+    return {
+        cookieCheck: function() {
+            var cookie = $cookies[$rootScope.philoConfig.db_url];
+            if (typeof(cookie) === 'undefined') {
+                return {access: false};
+            } else {
+                return JSON.parse(cookie);
+            }
+        },
+        storeSettings: function(authorization) {
+            $rootScope.access = {};
+            var reports = ['concordance', 'kwic', 'collocation', 'time_series', 'navigation'];
+            for (var i=0; i < reports.length; i++) {
+                var report = reports[i];
+                if (authorization.reports.indexOf(report) >= 0) {
+                    $rootScope.access[report] = true;
+                } else {
+                    $rootScope.access[report] = false;
+                }
+            }
+            $cookies[$rootScope.philoConfig.db_url] = JSON.stringify({access: true, reports: $rootScope.access});
+            $rootScope.authorized = true;
+        },
+        setAccess: function(bool) {
+            return {
+                'concordance': bool,
+                'kwic': bool,
+                'collocation': bool,
+                'time_series': bool,
+                'navigation': bool
+            }
+        }
+    }
+}])
+
 philoApp.factory('radio', ['$rootScope', function($rootScope) {
     return {
         click: function(key, value) {

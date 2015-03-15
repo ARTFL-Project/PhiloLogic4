@@ -1,9 +1,10 @@
 "use strict";
 
-philoApp.controller('collocationCtrl', ['$rootScope', '$http', '$location', 'URL',
-                                            function($rootScope, $http, $location, URL) {
-                                                
+philoApp.controller('collocationCtrl', ['$rootScope', '$http', '$location', 'accessControl', 'URL',
+                                        function($rootScope, $http, $location, accessControl, URL) {
+    
     var vm = this;
+    vm.authorized = $rootScope.access.collocation;
     $rootScope.formData = angular.copy($location.search());
     if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
         $location.url(URL.objectToUrlString($rootScope.formData, {report: "bibliography"}));
