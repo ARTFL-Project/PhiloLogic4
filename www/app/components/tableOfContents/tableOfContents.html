@@ -10,8 +10,8 @@
             </div>
         </div>
         <div class="panel panel-default">
-            <button id="show-header" class="btn btn-primary" ng-if="philoConfig.debug" ng-click="toc.showHeader()">Show Header</button>
-            <div id="tei-header" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{duration: 200}" ng-if="toc.teiHeader" ng-bind-html="toc.teiHeader | unsafe"></div>
+            <button id="show-header" class="btn btn-primary" ng-if="philoConfig.debug" ng-click="toc.showHeader()">{{ toc.headerButton }}</button>
+            <div id="tei-header" class="panel panel-default tei-header velocity-opposites-transition-slideDownIn" data-velocity-opts="{duration: 200}" ng-if="toc.teiHeader" ng-bind-html="toc.teiHeader | unsafe"></div>
             <div id="toc-report">
                 <div id="toc-content">
                     <div ng-repeat="element in toc.tocObject.toc">

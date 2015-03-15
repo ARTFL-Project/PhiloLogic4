@@ -14,14 +14,17 @@ philoApp.controller('tableOfContents', ['$rootScope', '$http', '$location', '$ro
         vm.tocObject = promise.data;
     });
     
+    vm.headerButton = "Show Header";
     vm.teiHeader = false;
     vm.showHeader = function() {
         if (typeof(vm.teiHeader) === "string") {
             vm.teiHeader = false;
+            vm.headerButton = "Show Header";
         } else {
             var UrlString = {script: "get_header.py", philo_id: vm.philoID};
             request.script(UrlString).then(function(promise) {
                 vm.teiHeader = promise.data;
+                vm.headerButton = "Hide Header";
             });
         }
     }

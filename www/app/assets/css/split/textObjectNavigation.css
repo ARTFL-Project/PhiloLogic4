@@ -15,6 +15,11 @@
 #obj_text {
     vertical-align:middle;
 }
+#tei-header {
+	background-color: rgb(253, 253, 253);
+	margin: 10px;
+	padding: 10px;
+}
 
 /*TOC styling*/
 #toc-wrapper {

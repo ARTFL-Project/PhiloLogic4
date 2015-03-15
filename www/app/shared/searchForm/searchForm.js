@@ -1,11 +1,14 @@
 philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location', 'radio', 'URL', function($scope, $rootScope, $http, $location, radio, URL) {
     
     $scope.formOpen = false;
+    $scope.searchOptionsButton = "Show search options";
     $scope.toggleForm = function() {
         if (!$("#search-elements").length) {
             $scope.formOpen = true;
+            $scope.searchOptionsButton = "Hide search options";
         } else {
             $scope.formOpen = false;
+            $scope.searchOptionsButton = "Show search options";
         }
     }
     
