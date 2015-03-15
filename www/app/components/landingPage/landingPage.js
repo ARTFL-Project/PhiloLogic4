@@ -15,3 +15,14 @@ philoApp.controller('landingPage', ['$rootScope', '$location', 'accessControl', 
         $location.url(url);
     }
 }]);
+
+philoApp.animation('.repeated-item', function() {
+  return {
+    enter : function(element, done) {
+        element.velocity('transition.slideLeftIn', {duration: 400})
+    },
+    leave : function(element, done) {
+        element.velocity('transition.slideRightOut', {duration: 400})
+    }
+  }
+});

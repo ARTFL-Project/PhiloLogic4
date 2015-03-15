@@ -15,7 +15,7 @@ def check_access(environ, config):
         access = {}
         access_file = config.db_path + '/data/' + config['access_file']
         if not os.path.isfile(access_file):
-            return True  # We deny access if no file is provided
+            return True  # We keep access control on if no file is provided
         else:
             execfile(access_file, globals(), access)
             domain_list = set(access["domain_list"])
@@ -24,20 +24,15 @@ def check_access(environ, config):
             fq_domain_name = socket.getfqdn(incoming_address).split(',')[-1]
             edit_domain = re.split('\.', fq_domain_name)
 
-            ## this if is probably an unnecessary step, oh well... ##
             if re.match('edu', edit_domain[-1]):
                 match_domain = '.'.join([edit_domain[-2], edit_domain[-1]])
-                print >> sys.stderr, "MATCH DOMAIN:", match_domain
             else:
                 if len(edit_domain) == 2:
                     match_domain = '.'.join([edit_domain[-2], edit_domain[-1]])
-                    print >> sys.stderr, "MATCH DOMAIN:", match_domain
                 else:
                     match_domain = fq_domain_name
-                    print >> sys.stderr, "MATCH DOMAIN:", match_domain
 
             access_control = True
-            print >> sys.stderr, "HERE", incoming_address, access["domain_list"]
             if incoming_address not in blocked_ips:
                 if incoming_address in domain_list or match_domain in domain_list:
                     access_control = False  # We disable access control

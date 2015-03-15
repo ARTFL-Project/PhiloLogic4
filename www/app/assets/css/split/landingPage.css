@@ -47,3 +47,26 @@ ul {
     margin-bottom: 0px;
     padding-left: 10px;
 }
+#landing-page-content ul {
+    transition: 300ms all ease-out;    
+}
+#landing-page-content ul.ng-enter-stagger, #landing-page-content ul.ng-leave-stagger {
+    transition-delay: 200ms;
+    animation-delay: 200ms;
+}
+#landing-page-content ul.ng-enter {
+    transform: translateX(-50px);
+    opacity: 0;
+}
+#landing-page-content ul.ng-enter-active {
+    transform: translateX(0px);
+    opacity: 1;
+}
+#landing-page-content ul.ng-leave {
+    transform: translateX(0px);
+    opacity: 1;
+}
+#landing-page-content ul.ng-leave-active {
+    transform: translateX(50px);
+    opacity: 0;
+}

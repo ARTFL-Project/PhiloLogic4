@@ -7,7 +7,7 @@
             </div>
             <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
         </div>
-        <navigation-bar toc-done="{{ textNav.tocDone }}" ng-if="textNav.navBar === true || textNav.loading === false"></navigation-bar>
+        <navigation-bar toc-done="{{ textNav.tocDone }}" prev="{{ textObject.prev }}" next="{{ textObject.next }}" ng-if="textNav.navBar === true || textNav.loading === false"></navigation-bar>
         <loading ng-if="textNav.loading"></loading>
         <div class="row" id="all-content">
             <text-object scroll-to-highlight="{{ highlight }}"></text-object>

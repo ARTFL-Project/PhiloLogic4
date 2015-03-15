@@ -118,6 +118,7 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
     return {
         templateUrl: 'app/components/landingPage/landingPageContent.html',
         link: function(scope, element, attrs) {
+            scope.displayLimit = 1;
             scope.resultGroups = [];
             var contentTypeClass = {
                 author: "col-xs-12 col-sm-6",
@@ -130,6 +131,9 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
                     scope.contentClass = contentTypeClass[scope.contentType];
                 }
             });
+            scope.displayMoreItems = function() {
+                scope.displayLimit += 1;
+            }
         }
     }
 }]);

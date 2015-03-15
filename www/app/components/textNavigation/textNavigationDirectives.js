@@ -93,12 +93,12 @@ philoApp.directive('tocSidebar', ['$routeParams', 'request', 'textNavigationValu
 
 philoApp.directive('navigationBar', function() {
     var setUpNavBar = function(scope) {
-        if (scope.textObject.next === "") {
+        if (scope.textObject.next === "" || typeof(scope.textObject.next) === 'undefined') {
             $('#next-obj').attr('disabled', 'disabled');
         } else {
             $('#next-obj').removeAttr('disabled');
         }
-        if (scope.textObject.prev === "") {
+        if (scope.textObject.prev === "" || typeof(scope.textObject.prev) === 'undefined') {
             $("#prev-obj").attr('disabled', 'disabled');
         } else {
             $("#prev-obj").removeAttr('disabled');
@@ -107,12 +107,17 @@ philoApp.directive('navigationBar', function() {
     return {
         templateUrl: 'app/components/textNavigation/navigationBar.html',
         link: function(scope, element, attrs) {
-            setUpNavBar(scope);
             scope.textNav.navBar = true;
             attrs.$observe('tocDone', function(tocDone) {
                 if (tocDone) {
                     $("#show-toc").removeAttr("disabled");
                 }
+            });
+            attrs.$observe('prev', function(prev) {
+                setUpNavBar(scope);
+            });
+            attrs.$observe('next', function(prev) {
+                setUpNavBar(scope);
             });
         }
     }
@@ -130,7 +135,7 @@ philoApp.directive('scrollToHighlight', ['$timeout', function($timeout) {
                     $('.highlight').parents('.note-content').hide();
                 }
                 if ($('.highlight').eq(0).parents('.note-content').length) {
-                    $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: wordOffset - 60, complete: function() {
+                    $("body").velocity('scroll', {duration: 800, easing: 'easeOutCubic', offset: wordOffset - 60, complete: function() {
                         $('.highlight').parents('.note-content').prev('.note').trigger('focus');}}
                     );
                 } else {
