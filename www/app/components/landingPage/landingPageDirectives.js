@@ -85,7 +85,6 @@ philoApp.directive('dictionaryLandingPage', ['$rootScope', 'request', function($
 
 philoApp.directive('landingPageContent', ['$rootScope', 'request', function($rootScope, request) {
     var getContent = function(scope, query) {
-        scope.resultGroups = [];
         query = scope.$eval(query);
         scope.contentType = query.contentType;
         scope.range = query.range;
@@ -95,6 +94,7 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
             range: scope.range
         })
         .then(function(response) {
+            scope.resultGroups = [];
             var content = response.data;
             var resultGroups = [];
             var results = [];

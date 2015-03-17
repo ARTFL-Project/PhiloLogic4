@@ -50,12 +50,8 @@ ul {
 #landing-page-content ul {
     transition: 300ms all ease-out;    
 }
-#landing-page-content ul.ng-enter-stagger, #landing-page-content ul.ng-leave-stagger {
-    transition-delay: 200ms;
-    animation-delay: 200ms;
-}
 #landing-page-content ul.ng-enter {
-    transform: translateX(-50px);
+    transform: translateX(-30px);
     opacity: 0;
 }
 #landing-page-content ul.ng-enter-active {
@@ -67,6 +63,6 @@ ul {
     opacity: 1;
 }
 #landing-page-content ul.ng-leave-active {
-    transform: translateX(50px);
+    transform: translateX(30px);
     opacity: 0;
 }

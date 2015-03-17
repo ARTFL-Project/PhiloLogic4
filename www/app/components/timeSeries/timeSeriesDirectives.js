@@ -3,23 +3,24 @@
 philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'progressiveLoad', 'URL', 'request', 'saveToLocalStorage',
                                        function($rootScope, $http, $location, progressiveLoad, URL, request, save) {
     var getTimeSeries = function(scope) {
+        var formData = angular.copy(scope.formData);
         scope.resultsLength = false; // set to false for now
         $(".progress").show();
         var fullResults;
         var absoluteFrequency;
         scope.dateCounts = {};
         request.script({script: 'get_start_end_date.py'}).then(function(dates) { // We run this even we have the values since it's so fast
-            scope.startDate = $rootScope.formData.start_date || dates.data.start_date;
-            scope.endDate = $rootScope.formData.end_date || dates.data.end_date;
-            var barChartObject = initializeBarChart(scope.startDate, scope.endDate);
+            scope.startDate = formData.start_date || dates.data.start_date;
+            scope.endDate = formData.end_date || dates.data.end_date;
+            var barChartObject = initializeBarChart(scope.startDate, scope.endDate, formData.year_interval);
             scope.barChart = barChartObject.dateList;
             scope.chartIndex = barChartObject.chartIndex;
-            updateTimeSeries(scope, fullResults, 0, 1000);
+            updateTimeSeries(scope, formData, fullResults, 0, 1000);
         });
     }
     // Generate bars in chart by iterating over all date ranges
-    var initializeBarChart = function(start, end) {
-        var yearInterval = parseInt($rootScope.formData.year_interval);
+    var initializeBarChart = function(start, end, yearInterval) {
+        yearInterval = parseInt(yearInterval);
         var startDate = normalizeDate(start, yearInterval);
         var endDate = parseInt(end);
         var dateList = [];
@@ -50,18 +51,18 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         }
         return {dateList: dateList, chartIndex: chartIndex};
     }
-    var updateTimeSeries = function(scope, fullResults, start, end) {
-        request.report($rootScope.formData, {start: start, end: end}).then(function(results) {
+    var updateTimeSeries = function(scope, formData, fullResults, start, end) {
+        request.report(formData, {start: start, end: end}).then(function(results) {
             var timeSeriesResults = results.data;
             scope.resultsLength = timeSeriesResults.results_length;
             scope.moreResults = timeSeriesResults.more_results;
             for (var date in timeSeriesResults.results.date_count) { // Update date counts
                 scope.dateCounts[date] = timeSeriesResults.results.date_count[date];
             }
-            sortAndRenderTimeSeries(scope, fullResults, timeSeriesResults, start, end)
+            sortAndRenderTimeSeries(scope, formData, fullResults, timeSeriesResults, start, end)
         });
     }
-    var sortAndRenderTimeSeries = function(scope, fullResults, timeSeriesResults, start, end) {
+    var sortAndRenderTimeSeries = function(scope, formData, fullResults, timeSeriesResults, start, end) {
         if (end <= scope.resultsLength) {
             scope.percent = Math.floor(end / scope.resultsLength * 100);
         }
@@ -76,7 +77,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                 start += 10000;
             }
             end += 10000;
-            updateTimeSeries(scope, fullResults, start, end);
+            updateTimeSeries(scope, formData, fullResults, start, end);
         } else {
             scope.percent = 100;
             scope.done = true;
@@ -223,28 +224,28 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         restrict: 'E',
         templateUrl: 'app/components/timeSeries/timeSeriesChart.html',
         link: function(scope, element, attrs) {
-                scope.height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
-                scope.bodyWidth = parseInt($('body').width()) - 90; 
-                if (typeof(sessionStorage[$location.url()]) === 'undefined' || $rootScope.philoConfig.debug === true) {
-                    getTimeSeries(scope);
-                } else {
-                    retrieveFromStorage(scope);
-                }
-                attrs.$observe('frequencyType', function(frequencyType) {
-                    if (typeof(scope.absoluteCounts) !== 'undefined') {
-                        if (frequencyType === 'relative_time') {
-                            drawFromData(scope, scope.relativeCounts, frequencyType);
-                        } else {
-                            drawFromData(scope, scope.absoluteCounts, frequencyType);
-                        }
-                    }
-                });
-                scope.restart = false; 
-                scope.$watch('restart', function() {
-                    if (scope.restart) {
-                        getTimeSeries(scope);
-                    }
-                });
+            scope.height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
+            scope.bodyWidth = parseInt($('body').width()) - 90;
+            if (typeof(sessionStorage[$location.url()]) === 'undefined' || $rootScope.philoConfig.debug === true) {
+                getTimeSeries(scope);
+            } else {
+                retrieveFromStorage(scope);
             }
+            attrs.$observe('frequencyType', function(frequencyType) {
+                if (typeof(scope.absoluteCounts) !== 'undefined') {
+                    if (frequencyType === 'relative_time') {
+                        drawFromData(scope, scope.relativeCounts, frequencyType);
+                    } else {
+                        drawFromData(scope, scope.absoluteCounts, frequencyType);
+                    }
+                }
+            });
+            scope.restart = false; 
+            scope.$watch('restart', function() {
+                if (scope.restart) {
+                    getTimeSeries(scope);
+                }
+            });
+        }
     }
 }]);

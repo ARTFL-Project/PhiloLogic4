@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 
 philoApp.filter('unsafe', function($sce) { return $sce.trustAsHtml; });
 
@@ -28,11 +28,11 @@ philoApp.factory('accessControl', ['$rootScope', '$cookies', '$location', functi
         },
         setAccess: function(bool) {
             return {
-                'concordance': bool,
-                'kwic': bool,
-                'collocation': bool,
-                'time_series': bool,
-                'navigation': bool
+                concordance: bool,
+                kwic: bool,
+                collocation: bool,
+                time_series: bool,
+                navigation: bool
             }
         }
     }
@@ -61,12 +61,11 @@ philoApp.factory('request', ['$http', 'URL', function($http, URL) {
                 return data;
             });
             return promise;
-        }
-        
+        }   
     }
 }]);
 
-philoApp.factory('URL', ['$rootScope', function($rootScope) {
+philoApp.factory('URL', function() {
     return {
         mergeParams: function(queryParams, extraParams) {
             var localParams = angular.copy(queryParams);
@@ -112,9 +111,9 @@ philoApp.factory('URL', ['$rootScope', function($rootScope) {
             return "navigate/" + pathInfo;
         }
     }
-}]);
+});
 
-philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
+philoApp.factory('progressiveLoad', function() {
     return {
         mergeResults: function(fullResults, newData, sortKey) {
             if (typeof fullResults === 'undefined') {
@@ -149,7 +148,7 @@ philoApp.factory('progressiveLoad', ['$rootScope', function($rootScope) {
             return sortedList;
         }
     }
-}]);
+});
 
 philoApp.factory('saveToLocalStorage', ['$location', function($location) {
     var save = function(results, urlString) {
