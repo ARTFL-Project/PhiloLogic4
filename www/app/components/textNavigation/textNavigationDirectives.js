@@ -123,41 +123,32 @@ philoApp.directive('navigationBar', function() {
     }
 });
 
-philoApp.directive('scrollToHighlight', ['$timeout', function($timeout) {
-    var scroll = function() {
-        $timeout(function() {
-            if ($('.highlight').length) {
-                var wordOffset = $('.highlight').eq(0).offset().top;
-                if (wordOffset == 0) {
-                    var note = $('.highlight').parents('.note-content');
-                    note.show(); // The highlight is in a hidden note
-                    wordOffset = $('.highlight').offset().top;
-                    $('.highlight').parents('.note-content').hide();
-                }
-                if ($('.highlight').eq(0).parents('.note-content').length) {
-                    $("body").velocity('scroll', {duration: 800, easing: 'easeOutCubic', offset: wordOffset - 60, complete: function() {
-                        $('.highlight').parents('.note-content').prev('.note').trigger('focus');}}
-                    );
-                } else {
-                    $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: wordOffset - 100});
-                }
-            }
-        });
-    }
-    return {
-        restrict: 'A',
-        link: function(scope, element, attrs) {
-            if (attrs.scrollToHighlight) {
-                scroll();
-            }
-            attrs.$observe('scrollToHighlight', function(scrollBool) {
-                if (scrollBool) {
-                    scroll();
-                }
-            })
+philoApp.directive('highlight', function() {
+    var scroll = function(element) {
+        var wordOffset = element.eq(0).offset().top;
+        if (wordOffset == 0) {
+            var note = element.parents('.note-content');
+            note.show(); // The highlight is in a hidden note
+            wordOffset = element.offset().top;
+            element.parents('.note-content').hide();
+        }
+        if (element.eq(0).parents('.note-content').length) {
+            $("body").velocity('scroll', {duration: 800, easing: 'easeOutCubic', offset: wordOffset - 60, complete: function() {
+                element.parents('.note-content').prev('.note').trigger('focus');}}
+            );
+        } else {
+            $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: wordOffset - 100});
         }
     }
-}]);
+    return {
+        restrict: 'C',
+        link: function(scope, element) {
+            if (element.is($('#book-page .highlight').eq(0))) {
+                scroll(element);
+            }
+        }
+    }
+});
 
 philoApp.directive('compileTemplate', ['$compile', '$parse', function($compile, $parse) {
     // Credits to http://stackoverflow.com/questions/20297638/call-function-inside-sce-trustashtml-string-in-angular-js
