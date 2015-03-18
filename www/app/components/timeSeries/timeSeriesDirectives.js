@@ -48,7 +48,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                 dateStyle: {
                     width: yearWidth + 'px'
                 },
-                width: barWidth, // Keep this for the filter to decide wether to skip a year on display
+                width: barWidth, // Keep this for the filter to decide whether to skip a year on display
                 title: '',
                 url: ''
             });
@@ -221,6 +221,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
     return {
         restrict: 'E',
         templateUrl: 'app/components/timeSeries/timeSeriesChart.html',
+        replace: true,
         link: function(scope, element, attrs) {
             var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
             var width = parseInt($('body').width()) - 90;

@@ -37,6 +37,7 @@ philoApp.directive('defaultLandingPage', ['$rootScope', function($rootScope) {
     }
     return {
         templateUrl: 'app/components/landingPage/defaultLandingPage.html',
+        replace: true,
         link: function(scope) {
             setupPage(scope);
         }
@@ -77,6 +78,7 @@ philoApp.directive('dictionaryLandingPage', ['$rootScope', 'request', function($
     }
     return {
         templateUrl: 'app/components/landingPage/dictionaryLandingPage.html',
+        replace: true,
         link: function(scope) {
             setupPage(scope);
         }
@@ -117,6 +119,7 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
     }
     return {
         templateUrl: 'app/components/landingPage/landingPageContent.html',
+        replace: true,
         link: function(scope, element, attrs) {
             scope.displayLimit = 1;
             scope.resultGroups = [];

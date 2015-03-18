@@ -30,6 +30,7 @@ philoApp.directive('textObject', ['$routeParams', 'request', 'textNavigationValu
     }
     return {
         templateUrl: 'app/components/textNavigation/textObject.html',
+        replace: true,
         link: function(scope,element, attrs) {
             getTextObject(scope);
         }
@@ -79,6 +80,7 @@ philoApp.directive('tocSidebar', ['$routeParams', 'request', 'textNavigationValu
     }
     return {
         templateUrl: 'app/components/textNavigation/tocSidebar.html',
+        replace: true,
         link: function(scope, element, attrs) {
             if (!scope.tocElements) {
                 getTableOfContents(scope);
@@ -106,6 +108,7 @@ philoApp.directive('navigationBar', function() {
     }    
     return {
         templateUrl: 'app/components/textNavigation/navigationBar.html',
+        replace: true,
         link: function(scope, element, attrs) {
             scope.textNav.navBar = true;
             attrs.$observe('tocDone', function(tocDone) {
