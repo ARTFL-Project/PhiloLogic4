@@ -36,6 +36,7 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
         restrict: 'E',
         template: '<div id="word_cloud" class="word_cloud">' +
                   '<div id="collocate_counts" class="collocation_counts">{{ cloud }}</div></div>',
+        replace: true,
         link: function(scope, element, attrs) {
                 scope.$watch('sortedLists', function() {
                     if (!$.isEmptyObject(scope.sortedLists)) {
@@ -121,6 +122,7 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
     return {
         restrict: 'E',
         templateUrl: 'app/components/collocation/collocationTable.html',
+        replace: true,
         link: function(scope, element, attrs) {
                 getCollocations(scope);
                 scope.restart = false; 
@@ -136,6 +138,7 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
 philoApp.directive('collocationParameters', function() {
     return {
         templateUrl: 'app/components/collocation/collocationParameters.html',
+        replace: true,
         link: function(scope) {
             scope.collocationParams = {
                 q: scope.formData.q,

@@ -147,7 +147,9 @@ philoApp.directive('timeSeriesOptions', ['$rootScope', function($rootScope) {
         templateUrl: 'app/shared/searchForm/timeSeriesOptions.html',
         link: function(scope, element, attrs) {
             scope.timeSeriesIntervals = buildOptions();
-            //$rootScope.formData.year_interval = scope.timeSeriesIntervals[0].date;
+            if (typeof($rootScope.formData.year_interval) === 'undefined') {
+                $rootScope.formData.year_interval = scope.timeSeriesIntervals[0].date;
+            }
         }
     }
 }]);

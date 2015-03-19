@@ -12,6 +12,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         request.script({script: 'get_start_end_date.py'}).then(function(dates) { // We run this even we have the values since it's so fast
             scope.startDate = formData.start_date || dates.data.start_date;
             scope.endDate = formData.end_date || dates.data.end_date;
+            scope.interval = formData.year_interval;
             var barChartObject = initializeBarChart(scope.startDate, scope.endDate, formData.year_interval);
             scope.barChart = barChartObject.dateList;
             scope.chartIndex = barChartObject.chartIndex;
@@ -40,9 +41,14 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             var yearWidth = (barWidth - 25) / 2;
             dateList.push({
                 date: i,
-                marginLeft: margin,
-                width: barWidth,
-                yearWidth: yearWidth,
+                barStyle: {
+                    'margin-left': margin + 'px',
+                    width: barWidth + 'px'
+                },
+                dateStyle: {
+                    width: yearWidth + 'px'
+                },
+                width: barWidth, // Keep this for the filter to decide whether to skip a year on display
                 title: '',
                 url: ''
             });
@@ -108,22 +114,15 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                 scope.barChart[chartIndex].url = data[i].url;
             }
             var year = data[i].label;
-            var yearDisplay = yearToTimeSpan(year, scope.interval);
+            var yearDisplay = yearToTimeSpan(year, scope.interval, scope.endDate);
             if (frequencyType === 'absolute_time') {
                 scope.barChart[chartIndex].title = Math.round(count, false) + ' occurrences between ' + yearDisplay;
             } else {
                 scope.barChart[chartIndex].title = Math.round(count, false) + ' occurrences per 1,000,000 words between ' + yearDisplay;
             }
         }
-        
-        var animDelay = 0;
-        $('.graph-bar').each(function() {
-            var height = $(this).data('height');
-            if (typeof(height) !== "undefined") {
-                animDelay += 15;
-                $(this).eq(0).velocity({'height': height + 'px'}, {delay: animDelay, duration: 250, easing: "easeOutQuad"});
-            }
-        });
+
+        $('.graph-bar').velocity({'height': function() {return $(this).data('height')}}, {duration: 250, easing: "easeOutQuad", stagger: 15}); // stagger doesn't work
         
         // Draw three lines along the X axis to help visualize frequencies
         var top_line = (chartHeight - 10) / chartHeight * 100;
@@ -159,14 +158,13 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         }
         return parseInt(year)
     }    
-    var yearToTimeSpan = function(year, interval) {
-        var end_date = parseInt($('#search_arguments').data('end'));
+    var yearToTimeSpan = function(year, interval, endDate) {
         year = String(year);
         if (interval == '10') {
             year = year.slice(0,-1) + '0';
             var next = parseInt(year) + 9;
-            if (next > end_date) {
-                next = String(end_date)
+            if (next > endDate) {
+                next = String(endDate)
             } else {
                 next = String(next);   
             }
@@ -175,8 +173,8 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         else if (interval == '100') {
             year = year.slice(0,-2) + '00';
             var next = parseInt(year) + 99;
-            if (next > end_date) {
-                next = String(end_date)
+            if (next > endDate) {
+                next = String(endDate)
             } else {
                 next = String(next);   
             }
@@ -185,16 +183,16 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             var decade = parseInt(year.slice(-2));
             if (decade < 50) {
                 var next = parseInt(year.slice(0,-2) + '49');
-                if (next > end_date) {
-                    next = String(end_date)
+                if (next > endDate) {
+                    next = String(endDate)
                 } else {
                     next = String(next);   
                 }
                 year = year.slice(0,-2) + '00' + '-' + next;
             } else {
                 var next = year.slice(0,-2) + '99';
-                if (next > end_date) {
-                    next = String(end_date)
+                if (next > endDate) {
+                    next = String(endDate)
                 } else {
                     next = String(next);   
                 }
@@ -223,9 +221,15 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
     return {
         restrict: 'E',
         templateUrl: 'app/components/timeSeries/timeSeriesChart.html',
+        replace: true,
         link: function(scope, element, attrs) {
-            scope.height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
-            scope.bodyWidth = parseInt($('body').width()) - 90;
+            var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
+            var width = parseInt($('body').width()) - 90;
+            scope.chartSize = {
+                height: height + 'px',
+                width: width + 'px'
+                };
+            scope.divisionWidth = {width: width + 'px'};
             if (typeof(sessionStorage[$location.url()]) === 'undefined' || $rootScope.philoConfig.debug === true) {
                 getTimeSeries(scope);
             } else {

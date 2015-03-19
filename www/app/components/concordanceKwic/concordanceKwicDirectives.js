@@ -25,6 +25,7 @@ philoApp.directive('concordance', ['$rootScope', '$http', 'request', function($r
     } 
     return {
         templateUrl: 'app/components/concordanceKwic/concordance.html',
+		replace: true,
         link: function(scope) {
             scope.moreContext = moreContext;
         }
@@ -60,13 +61,15 @@ philoApp.directive('kwic', ['$rootScope', function($rootScope) {
 
 philoApp.directive('bibliography', ['$rootScope', function($rootScope) {
     return {
-        templateUrl: 'app/components/concordanceKwic/bibliography.html'
+        templateUrl: 'app/components/concordanceKwic/bibliography.html',
+		replace: true
     }
 }]);
 
 philoApp.directive('resultsDescription', ['descriptionValues', function(descriptionValues) {
     return {
         templateUrl: 'app/components/concordanceKwic/resultsDescription.html',
+		replace: true,
         link: function(scope, element, attrs) {
             scope.start = descriptionValues.start;
             scope.end = descriptionValues.end;
@@ -121,6 +124,7 @@ philoApp.directive('concordanceKwicSwitch', function() {
     }
     return {
         templateUrl: 'app/components/concordanceKwic/concordanceKwicSwitch.html',
+		replace: true,
         link: function(scope, element, attrs) {
             scope.reportSwitch = buildReportSwitch(attrs.report);
             attrs.$observe('report', function(report) {
@@ -163,6 +167,7 @@ philoApp.directive('sidebarMenu', ['$rootScope', function($rootScope) {
     return {
         restrict: 'E',
         templateUrl: 'app/components/concordanceKwic/sidebarMenu.html',
+		replace: true,
         link: function(scope) {
             scope.facets = populateFacets();
             scope.collocationFacets = populateCollocationFacets();
@@ -245,6 +250,7 @@ philoApp.directive('facets', ['$rootScope', 'URL', 'progressiveLoad', 'saveToLoc
     return {
         restrict: 'E',
         templateUrl: 'app/components/concordanceKwic/facets.html',
+		replace: true,
         link: function(scope, element, attrs) {
             attrs.$observe('facet', function(facetObj) {
                 if (facetObj !== '') {
@@ -343,6 +349,7 @@ philoApp.directive('pages', ['$rootScope', function($rootScope) {
         template: ['<div id="page_links" class="btn-group">',
 						'<a id="current_results_page" class="btn btn-default btn-lg {{ page.active }}" ng-repeat="page in pages" ng-click="concKwic.goToPage(page.start, page.end)">{{ page.display }}</a>',
 				   '</div>'].join(''),
+		replace: true,
         link: function(scope, element, attrs) {
                 scope.$watch(function() {
                     return scope.results;

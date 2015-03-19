@@ -14,7 +14,6 @@ philoApp.controller('timeSeriesCtrl', ['$rootScope', '$location', 'accessControl
     }
     
     vm.percent = 0;
-    vm.interval = parseInt($rootScope.formData.year_interval);
     
     vm.frequencyType = 'absolute_time';
     vm.toggleFrequency = function(frequencyType) {
@@ -25,7 +24,7 @@ philoApp.controller('timeSeriesCtrl', ['$rootScope', '$location', 'accessControl
     
     vm.hoverChart = function($event, title) {
         var element = $($event.currentTarget);
-        element.popover('toggle')
+        element.popover('toggle');
     }
     
 }]);

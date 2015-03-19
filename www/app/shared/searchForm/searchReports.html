@@ -1,6 +1,6 @@
 <div id="report" class="btn-group btn-group-justified" data-toggle="buttons">
-    <label class="btn btn-primary {{ report.status }}" id="{{ ::report.value }}" ng-repeat="report in reports" ng-click="reportChange(report.value)">
-        <input type="radio" name="{{ report.value }}" value="{{ ::report.value }}">
+    <label class="btn btn-primary {{ report.status }}" id="{{ ::report.value }}" ng-repeat="report in ::reports" ng-click="reportChange(report.value)">
+        <input type="radio" name="{{ ::report.value }}" value="{{ ::report.value }}">
         {{ ::report.label }}
     </label>
 </div>
