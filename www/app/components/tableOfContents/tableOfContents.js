@@ -28,5 +28,10 @@ philoApp.controller('tableOfContents', ['$rootScope', '$http', '$location', '$ro
             });
         }
     }
+    
+    vm.displayLimit = 50;
+    vm.getMoreItems = function() {
+        vm.displayLimit += 200;
+    }
 
 }]);
