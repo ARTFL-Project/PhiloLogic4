@@ -13,7 +13,7 @@
     </div>
     <div class="col-xs-12 col-sm-10 col-md-10">
         <div id="year_interval" class="btn-group" data-toggle="buttons">
-            <label class="btn btn-primary" ng-class="{'active': formData.year_interval == display.date}" ng-repeat="display in timeSeriesIntervals" ng-click="radioClick('year_interval', display.date)">
+            <label class="btn btn-primary" ng-class="{'active': formData.year_interval == display.date}" ng-repeat="display in ::timeSeriesIntervals" ng-click="radioClick('year_interval', display.date)">
                 <input type="radio" name="year_interval" id="year{{ $index }}" value="{{ ::display.date }}">
                 {{ ::display.alias }}
             </label>
