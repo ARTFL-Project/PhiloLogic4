@@ -299,7 +299,7 @@ br {
 a.sidebar-option:hover {
     cursor: pointer;
 }
-.btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child, .popover {
+.btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child, .popover, .progress {
     border-radius: 0px !important;
 }
 
@@ -348,17 +348,21 @@ a.sidebar-option:hover {
 
 /*Spinner CSS*/
 .spinner {
-	margin: 100px auto 0;
-	width: 70px;
+	display: none;
+	opacity: 0;
+	left: 0;
+	right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 20px;
+	width: 120px;
 	position: absolute;
 	z-index: 1000;
-	left: 45%;
-	top: 80px;
 }
 .spinner > div {
-  width: 18px;
-  height: 18px;
-  background-color: #333;
+  width: 38px;
+  height: 38px;
+  background-color: #000;
   border-radius: 100%;
   display: inline-block;
   -webkit-animation: bouncedelay .8s infinite ease-in-out;

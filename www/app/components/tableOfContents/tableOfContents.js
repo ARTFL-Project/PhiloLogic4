@@ -10,7 +10,9 @@ philoApp.controller('tableOfContents', ['$rootScope', '$http', '$location', '$ro
     tempValue.pop();
     vm.philoID = tempValue.join(' ');
     var formData = {report: "table_of_contents", philo_id: vm.philoID};
+    vm.loading = true
     request.report(formData).then(function(promise) {
+        vm.loading = false;
         vm.tocObject = promise.data;
     });
     

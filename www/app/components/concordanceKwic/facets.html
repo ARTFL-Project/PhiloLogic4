@@ -1,9 +1,8 @@
-<div ng-class="{'col-xs-4': concKwic.frequencyResults.length > 0}" id="sidebar" ng-if="concKwic.frequencyResults.length > 0">
-    <loading ng-if="loading"></loading>
-    <div id="sidebar_display" class="panel panel-default" style="height: {{ sidebarHeight }}px">
+<div ng-class="{'col-xs-4': concKwic.frequencyResults.length > 0}" id="sidebar" loading="loading">
+    <div id="sidebar_display" class="panel panel-default" ng-style="sidebarHeight" ng-if="concKwic.frequencyResults.length > 0">
         <div id="frequency_container">
-            <progress-bar progress="{{ percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{duration:400}" ng-if="done === false"></progress-bar>
-            <ol id="frequency_table" class="velocity-opposites-transition-fadeIn" data-velocity-opts="{duration:400}" ng-if="concKwic.frequencyResults.length > 0">
+            <progress-bar progress="{{ percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{duration:400}"></progress-bar>
+            <ol id="frequency_table" class="velocity-opposites-transition-fadeIn" data-velocity-opts="{duration:400}">
                 <li ng-repeat="result in concKwic.frequencyResults.slice(0, 500)" ng-click="concKwic.facetClick(result)">
                     <a id="freq_sidebar_text" href="{{ ::result.url }}"> {{ ::result.label }}</a>
                     <span class="sidebar-count"> {{ ::result.count }}</span>

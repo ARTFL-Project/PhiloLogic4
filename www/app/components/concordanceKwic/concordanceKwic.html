@@ -14,7 +14,7 @@
                     <sidebar-menu ng-if="philoConfig.facets.length > 1"></sidebar-menu>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" loading="concKwic.loading">
                 <concordance ng-if="report === 'concordance' || report === 'concordance_from_collocation' || report === 'word_property_filter'"></concordance>
                 <kwic ng-if="report === 'kwic'"></kwic>
                 <bibliography ng-if="report === 'bibliography'"></bibliography>

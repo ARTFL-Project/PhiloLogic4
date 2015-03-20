@@ -7,7 +7,8 @@
     margin-bottom: 10px;
 }
 #all-content {
-    margin-top: 30px; 
+    margin-top: 30px;
+	position: relative;
 }
 #book-page {
     text-align: center;
