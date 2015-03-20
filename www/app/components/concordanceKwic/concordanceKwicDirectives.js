@@ -214,7 +214,7 @@ philoApp.directive('facets', ['$rootScope', 'URL', 'progressiveLoad', 'saveToLoc
             if (response.data.more_results) {
                 var results = response.data.results;
                 scope.resultsLength = response.data.results_length;
-                scope.sidebarHeight = {height: $('#philologic_concordance').height() - 20 + 'px'};
+                scope.sidebarHeight = {height: $('#results_container').height() - 40 + 'px'};
                 if ($('#selected-sidebar-option').data('interrupt') != true && $('#selected-sidebar-option').data('selected') == facet.alias) {
                     if (facet.type === "collocationFacet") {
                         var merge = progressiveLoad.mergeResults(fullResults.unsorted, response.data[facet.facet]);
