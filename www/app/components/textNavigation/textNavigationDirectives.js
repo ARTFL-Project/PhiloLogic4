@@ -57,8 +57,8 @@ philoApp.directive('tocSidebar', ['$routeParams', 'request', 'textNavigationValu
         var match = false;
         var count = 0;
         for (var i=0; i < tocElements.length; i++) {
-            if (match) {
-                count += 1
+            if (match !== false) {
+                count++;
             }
             var element = tocElements[i];
             if (element.philo_id === philoId) {
@@ -68,7 +68,7 @@ philoApp.directive('tocSidebar', ['$routeParams', 'request', 'textNavigationValu
                 element.currentObj = "";
             }
             filtered.push(element)
-            if (count == limit) {
+            if (count === limit) {
                 break
             }
         }
