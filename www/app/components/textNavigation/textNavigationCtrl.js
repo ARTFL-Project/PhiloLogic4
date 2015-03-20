@@ -50,11 +50,16 @@ philoApp.controller('textNavigationCtrl', ['$scope', '$rootScope', '$location', 
     }
     
     vm.goToTextObject = function(philoID) {
-        $("#toc-wrapper").velocity('transition.slideUpOut', {duration: 300, queue: false, complete: function() {
-                philoID = philoID.split('-').join('/');
+        philoID = philoID.split('-').join('/');
+        if (vm.tocOpen) {
+            $("#toc-wrapper").velocity('transition.slideUpOut', {duration: 200, queue: false, complete: function() {
                 $location.url(URL.path(philoID)).replace();
                 $scope.$apply();
             }});
+        } else {
+            $location.url(URL.path(philoID)).replace();
+        }
+        
     }
 }]);
 

@@ -13,6 +13,7 @@ philoApp.controller('timeSeriesCtrl', ['$rootScope', '$location', 'accessControl
         $location.url(urlString);
     }
     
+    vm.loading = true;
     vm.percent = 0;
     
     vm.frequencyType = 'absolute_time';

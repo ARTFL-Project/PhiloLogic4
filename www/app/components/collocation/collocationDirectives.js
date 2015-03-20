@@ -85,6 +85,7 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
             'left': left.sorted.slice(0, 100),
             'right': right.sorted.slice(0, 100)
             };
+        scope.collocation.loading = false;
         if (scope.moreResults) {
             var tempFullResults = {"all_collocates": all.unsorted, "left_collocates": left.unsorted, "right_collocates": right.unsorted};
             if (start === 0) {
@@ -124,14 +125,15 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
         templateUrl: 'app/components/collocation/collocationTable.html',
         replace: true,
         link: function(scope, element, attrs) {
-                getCollocations(scope);
-                scope.restart = false; 
-                scope.$watch('restart', function() {
-                    if (scope.restart) {
-                        getCollocations(scope);
-                    }
-                });
-            }
+            getCollocations(scope);
+            scope.restart = false; 
+            scope.$watch('restart', function() {
+                if (scope.restart) {
+                    scope.collocation.loading = true;
+                    getCollocations(scope);
+                }
+            });
+        }
     }
 }]);
 

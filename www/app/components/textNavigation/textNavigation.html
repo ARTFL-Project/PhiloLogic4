@@ -8,9 +8,8 @@
             <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
         </div>
         <navigation-bar toc-done="{{ textNav.tocDone }}" prev="{{ textObject.prev }}" next="{{ textObject.next }}" ng-if="textNav.navBar === true || textNav.loading === false"></navigation-bar>
-        <loading ng-if="textNav.loading"></loading>
-        <div class="row" id="all-content">
-            <text-object scroll-to-highlight="{{ highlight }}"></text-object>
+        <div class="row" id="all-content" loading="textNav.loading">
+            <text-object></text-object>
         </div>
     </div>
     <access-control ng-if="!textNav.authorized"></access-control>

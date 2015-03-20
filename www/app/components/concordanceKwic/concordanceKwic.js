@@ -9,9 +9,11 @@ philoApp.controller('concordanceKwicCtrl', ['$rootScope', '$location', 'accessCo
         $location.url(urlString);
     }
     
+    vm.loading = true;
     request.report($rootScope.formData).then(function(results) {
         vm.results = results.data;
         vm.description = vm.results.description;
+        vm.loading = false;
     });
     
     vm.frequencyResults = [];

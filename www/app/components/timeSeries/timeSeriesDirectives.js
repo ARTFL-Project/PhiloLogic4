@@ -59,6 +59,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
     }
     var updateTimeSeries = function(scope, formData, fullResults, start, end) {
         request.report(formData, {start: start, end: end}).then(function(results) {
+            scope.timeSeries.loading = false;
             var timeSeriesResults = results.data;
             scope.resultsLength = timeSeriesResults.results_length;
             scope.moreResults = timeSeriesResults.more_results;
@@ -247,6 +248,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             scope.restart = false; 
             scope.$watch('restart', function() {
                 if (scope.restart) {
+                    scope.timeSeries.loading = false;
                     getTimeSeries(scope);
                 }
             });
