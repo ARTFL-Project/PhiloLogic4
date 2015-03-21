@@ -299,6 +299,9 @@ br {
 a.sidebar-option:hover {
     cursor: pointer;
 }
+a.btn:hover {
+	color: #fff !important;
+}
 .btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child, .popover, .progress {
     border-radius: 0px !important;
 }
@@ -355,13 +358,13 @@ a.sidebar-option:hover {
 	margin-left: auto;
 	margin-right: auto;
 	margin-top: 20px;
-	width: 120px;
+	width: 90px;
 	position: absolute;
 	z-index: 1000;
 }
 .spinner > div {
-  width: 38px;
-  height: 38px;
+  width: 30px;
+  height: 30px;
   background-color: #000;
   border-radius: 100%;
   display: inline-block;

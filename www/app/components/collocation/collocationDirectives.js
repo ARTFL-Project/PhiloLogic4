@@ -55,6 +55,7 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
             $('#philologic_collocation').velocity('fadeIn', {duration: 200});
             $(".progress").show();
             var collocObject;
+            scope.localFormData = angular.copy(scope.formData);
             updateCollocation(scope, collocObject, 0, 1000);
         } else {
             retrieveFromStorage(scope);
@@ -62,7 +63,7 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
     }
     var updateCollocation = function(scope, fullResults, start, end) {
         var collocation = this;
-        request.report($rootScope.formData, {start: start, end: end}).then(function(response) {
+        request.report(scope.localFormData, {start: start, end: end}).then(function(response) {
             var data = response.data;
             scope.resultsLength = data.results_length;
             scope.moreResults = data.more_results;
@@ -94,7 +95,9 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
                 start += 5000;
             }
             end += 5000;
-            updateCollocation(scope, tempFullResults, start, end);
+            if (scope.report === "collocation") { // make sure we haven't moved to a different report
+                updateCollocation(scope, tempFullResults, start, end);
+            }
         } else {
             scope.collocation.percent = 100;
             scope.done = true;
@@ -132,6 +135,9 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
                     scope.collocation.loading = true;
                     getCollocations(scope);
                 }
+            });
+            scope.$on('$destroy', function() {
+                $('.colloc_link, .cloud_term').off();
             });
         }
     }

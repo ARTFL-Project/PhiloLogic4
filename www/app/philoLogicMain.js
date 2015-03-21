@@ -27,7 +27,6 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'accessCo
         };
     
     $scope.$on('$locationChangeStart', function(e) {
-        
         var paths = $location.path().split('/').filter(Boolean);
         if (paths[0] == "query") {
             $rootScope.report = $location.search().report;

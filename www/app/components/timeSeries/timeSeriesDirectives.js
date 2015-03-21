@@ -84,7 +84,9 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                 start += 10000;
             }
             end += 10000;
-            updateTimeSeries(scope, formData, fullResults, start, end);
+            if (scope.report === 'time_series') { // make sure we haven't changed report
+                updateTimeSeries(scope, formData, fullResults, start, end);
+            }
         } else {
             scope.percent = 100;
             scope.done = true;

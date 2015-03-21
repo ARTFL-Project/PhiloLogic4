@@ -126,22 +126,24 @@ philoApp.directive('navigationBar', function() {
     }
 });
 
-philoApp.directive('highlight', function() {
+philoApp.directive('highlight', ['$timeout', function($timeout) {
     var scroll = function(element) {
-        var wordOffset = element.eq(0).offset().top;
-        if (wordOffset == 0) {
-            var note = element.parents('.note-content');
-            note.show(); // The highlight is in a hidden note
-            wordOffset = element.offset().top;
-            element.parents('.note-content').hide();
-        }
-        if (element.eq(0).parents('.note-content').length) {
-            $("body").velocity('scroll', {duration: 800, easing: 'easeOutCubic', offset: wordOffset - 60, complete: function() {
-                element.parents('.note-content').prev('.note').trigger('focus');}}
-            );
-        } else {
-            $("body").velocity('scroll', {duration: 800, easing: 'easeOutCirc', offset: wordOffset - 100});
-        }
+        $timeout(function() {
+            var wordOffset = element.eq(0).offset().top;
+            if (wordOffset == 0) {
+                var note = element.parents('.note-content');
+                note.show(); // The highlight is in a hidden note
+                wordOffset = element.offset().top;
+                element.parents('.note-content').hide();
+            }
+            if (element.eq(0).parents('.note-content').length) {
+                $("body").velocity('scroll', {duration: 800, easing: 'easeOutQuad', offset: wordOffset - 60, complete: function() {
+                    element.parents('.note-content').prev('.note').trigger('focus');}}
+                );
+            } else {
+                $("body").velocity('scroll', {duration: 800, easing: 'easeOutQuad', offset: wordOffset - 100});
+            }
+        }, 200);
     }
     return {
         restrict: 'C',
@@ -151,7 +153,7 @@ philoApp.directive('highlight', function() {
             }
         }
     }
-});
+}]);
 
 philoApp.directive('compileTemplate', ['$compile', '$parse', function($compile, $parse) {
     // Credits to http://stackoverflow.com/questions/20297638/call-function-inside-sce-trustashtml-string-in-angular-js
