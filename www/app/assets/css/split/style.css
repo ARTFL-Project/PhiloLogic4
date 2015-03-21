@@ -299,6 +299,9 @@ br {
 a.sidebar-option:hover {
     cursor: pointer;
 }
+a.btn:hover {
+	color: #fff !important;
+}
 .btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child, .popover, .progress {
     border-radius: 0px !important;
 }

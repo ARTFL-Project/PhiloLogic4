@@ -101,31 +101,30 @@ philoApp.directive('resultsDescription', ['descriptionValues', function(descript
     
 }]);
 
-philoApp.directive('concordanceKwicSwitch', function() {
-    var buildReportSwitch = function(report) {
+philoApp.directive('concordanceKwicSwitch', ['$location', 'URL', function($location, URL) {
+    var buildReportSwitch = function(scope) {
         var concordance = {
             labelBig: "View occurrences with context",
             labelSmall: "Concordance",
             name: "concordance",
+			href: URL.objectToUrlString(scope.formData, {report: 'concordance'})
             }
         var kwic = {
             labelBig: "View occurrences line by line (KWIC)",
             labelSmall: "Keyword in context",
             name: "kwic",
+			href: URL.objectToUrlString(scope.formData, {report: 'kwic'})
         }
         return [concordance, kwic];
     }
     return {
         templateUrl: 'app/components/concordanceKwic/concordanceKwicSwitch.html',
 		replace: true,
-        link: function(scope, element, attrs) {
-            scope.reportSwitch = buildReportSwitch(attrs.report);
-            attrs.$observe('report', function(report) {
-                scope.reportSwitch = buildReportSwitch(report);
-            })
+        link: function(scope) {
+            scope.reportSwitch = buildReportSwitch(scope);
         }
     } 
-});
+}]);
 
 philoApp.directive('sidebarMenu', ['$rootScope', function($rootScope) {
     var populateFacets = function() {

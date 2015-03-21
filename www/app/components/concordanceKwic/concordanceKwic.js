@@ -18,12 +18,6 @@ philoApp.controller('concordanceKwicCtrl', ['$rootScope', '$location', 'accessCo
     
     vm.frequencyResults = [];
     
-    vm.switchTo = function(report) {
-        //$('#report label').removeClass('active');
-        //$('#' + report).addClass('active');
-        $location.url(URL.objectToUrlString($rootScope.formData, {report: report}));
-    }
-    
     vm.selectedFacet = '';
     vm.selectFacet = function(facetObj) {
         vm.selectedFacet = facetObj;

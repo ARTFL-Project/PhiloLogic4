@@ -7,12 +7,15 @@ philoApp.directive('searchForm', ['$rootScope', function($rootScope) {
 
 philoApp.directive('searchReports', ['$rootScope', '$location', function($rootScope, $location) {
     var reportChange = function(report) {
+        if (report === 'landing_page') {
+            report = $rootScope.philoConfig.search_reports[0];
+        }
         $rootScope.formData.report = report;
         var reports = [];
         for (var i=0; i < $rootScope.philoConfig.search_reports.length; i++) {
             var value = $rootScope.philoConfig.search_reports[i];
             var label = value.replace('_', ' ');
-            reports.push({value: value, label: label, status: status});
+            reports.push({value: value, label: label});
         }
         return reports
     }
