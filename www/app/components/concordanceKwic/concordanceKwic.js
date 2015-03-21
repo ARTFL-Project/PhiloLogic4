@@ -18,18 +18,9 @@ philoApp.controller('concordanceKwicCtrl', ['$rootScope', '$location', 'accessCo
     
     vm.frequencyResults = [];
     
-    vm.goToPage = function(start, end) {
-        $rootScope.formData.start = start;
-        $rootScope.formData.end = end;
-        $("body").velocity('scroll', {duration: 200, easing: 'easeOutCirc', offset: 0, complete: function() {
-            $rootScope.results = {};
-        }});
-        $location.url(URL.objectToUrlString($rootScope.formData));
-    }
-    
     vm.switchTo = function(report) {
-        $('#report label').removeClass('active');
-        $('#' + report).addClass('active');
+        //$('#report label').removeClass('active');
+        //$('#' + report).addClass('active');
         $location.url(URL.objectToUrlString($rootScope.formData, {report: report}));
     }
     

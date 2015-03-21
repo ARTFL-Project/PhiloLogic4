@@ -6,37 +6,25 @@ philoApp.directive('searchForm', ['$rootScope', function($rootScope) {
 }]);
 
 philoApp.directive('searchReports', ['$rootScope', '$location', function($rootScope, $location) {
-    var reportSetUp = function(reportSelected) {
-        reportSelected = angular.copy(reportSelected);
-        if (reportSelected === "bibliography" || reportSelected === "landing_page") {
-            reportSelected = $rootScope.philoConfig.search_reports[0];
-        }
+    var reportChange = function(report) {
+        $rootScope.formData.report = report;
         var reports = [];
         for (var i=0; i < $rootScope.philoConfig.search_reports.length; i++) {
             var value = $rootScope.philoConfig.search_reports[i];
             var label = value.replace('_', ' ');
-            var status = '';
-            if (reportSelected === value) {
-                status = 'active';
-            }
             reports.push({value: value, label: label, status: status});
         }
         return reports
     }
-    var reportChange = function(report) {
-        $rootScope.formData.report = report;
-        return reportSetUp(report);
-    }
     return {
         restrict: 'E',
         templateUrl: 'app/shared/searchForm/searchReports.html',
-        scope: {report: '=formData'},
         link: function(scope, element, attrs) {
             scope.reportChange = reportChange;
             scope.$watch('report', function(report) {
                 var reportToSelect = angular.copy(report);
                 if (reportToSelect === "bibliography") {
-                    reportToSelect = "concordance"
+                    reportToSelect = "concordance";
                 } else if (reportToSelect === "textNavigation" || reportToSelect === "table-of-contents") {
                     reportToSelect = "concordance";
                 } else if (typeof(reportToSelect) == "undefined") {

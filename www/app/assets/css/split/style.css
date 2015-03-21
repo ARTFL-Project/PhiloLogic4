@@ -355,13 +355,13 @@ a.sidebar-option:hover {
 	margin-left: auto;
 	margin-right: auto;
 	margin-top: 20px;
-	width: 120px;
+	width: 90px;
 	position: absolute;
 	z-index: 1000;
 }
 .spinner > div {
-  width: 38px;
-  height: 38px;
+  width: 30px;
+  height: 30px;
   background-color: #000;
   border-radius: 100%;
   display: inline-block;

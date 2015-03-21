@@ -113,13 +113,6 @@ philoApp.directive('concordanceKwicSwitch', function() {
             labelSmall: "Keyword in context",
             name: "kwic",
         }
-        if (report === 'kwic') {
-            kwic.active = "active";
-            concordance.active = "";
-        } else {
-            kwic.active = "";
-            concordance.active = "active";
-        }
         return [concordance, kwic];
     }
     return {
@@ -262,10 +255,10 @@ philoApp.directive('facets', ['$rootScope', 'URL', 'progressiveLoad', 'saveToLoc
     }
 }]);
 
-philoApp.directive('pages', ['$rootScope', function($rootScope) {
+philoApp.directive('pages', ['URL', function(URL) {
     var buildPages = function(scope, morePages) {
         var start = scope.concKwic.results.description.start;
-        var resultsPerPage = parseInt($rootScope.formData.results_per_page) || 25;
+        var resultsPerPage = parseInt(scope.formData.results_per_page) || 25;
         var resultsLength = scope.concKwic.results.results_length;
     
         // first find out what page we are on currently.    
@@ -340,14 +333,15 @@ philoApp.directive('pages', ['$rootScope', function($rootScope) {
                     page = "Last";
                 }
             }
-            pageObject.push({display: page, start: pageStart, end: pageEnd, active: active});
+			var href = URL.objectToUrlString(scope.formData, {start: pageStart, end: pageEnd});
+            pageObject.push({display: page, href: href, active: active});
         }
         return pageObject;
     }
     return {
         restrict: 'E',
         template: ['<div id="page_links" class="btn-group">',
-						'<a id="current_results_page" class="btn btn-default btn-lg {{ page.active }}" ng-repeat="page in pages" ng-click="concKwic.goToPage(page.start, page.end)">{{ page.display }}</a>',
+						'<a href="{{ page.href }}" id="current_results_page" class="btn btn-default btn-lg {{ page.active }}" ng-repeat="page in pages">{{ page.display }}</a>',
 				   '</div>'].join(''),
 		replace: true,
         link: function(scope, element, attrs) {
