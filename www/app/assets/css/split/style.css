@@ -321,6 +321,9 @@ a.btn:hover {
 .btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child, .popover, .progress, .form-control {
     border-radius: 0px !important;
 }
+.modal-dialog {
+	width: 300px;
+}
 
 /*Metadata criteria in results*/
 .biblio-criteria {

@@ -62,6 +62,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             scope.timeSeries.loading = false;
             var timeSeriesResults = results.data;
             scope.resultsLength = timeSeriesResults.results_length;
+            scope.timeSeries.resultsLength = scope.resultsLength;
             scope.moreResults = timeSeriesResults.more_results;
             for (var date in timeSeriesResults.results.date_count) { // Update date counts
                 scope.dateCounts[date] = timeSeriesResults.results.date_count[date];
