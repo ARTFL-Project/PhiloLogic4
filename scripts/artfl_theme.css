@@ -1,0 +1,152 @@
+body {
+	color: rgb(61, 61, 61);
+}
+
+/* Navbar colors */
+.navbar-inverse, .panel-default > .panel-heading {
+    background:rgb(21, 67, 95) !important;
+}
+.navbar-brand:hover, .navbar-inverse .navbar-nav>li>a:hover, .panel-default > .panel-heading {
+    color: #fff !important;
+}
+.navbar {
+    box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
+}
+.navbar-brand, .navbar-inverse a {
+    color: rgb(236,237,238) !important;
+}
+
+/* Button colors */
+.btn-primary {
+    background: rgb(21, 95, 131);
+    transition: background-color 200ms;
+	border-color: transparent;
+}
+.btn-primary:hover, .btn-primary:focus {
+    background: rgba(21, 95, 131, .8);
+	border-color: transparent;
+	outline: 0;
+}
+.btn-primary.active, .open>.dropdown-toggle.btn-primary, #collocation_table th {
+    background: rgb(21, 67, 95);
+	border-color: transparent;
+	color: #fff;
+}
+.btn-primary[disabled] {
+	background-color: rgb(91, 150, 173);
+	border-color: transparent;
+}
+
+/* Links */
+a {
+    color: rgb(21, 95, 131);
+	font-weight: 400;
+	transition: all 200ms;
+}
+a:hover {
+    color: rgb(128,0,0) !important;
+	text-decoration: none;
+}
+
+/*Metadata criteria in results*/
+.biblio-criteria, .btn-danger {
+    color: #fff;
+    background: rgb(143,57,49);
+    border: solid 1px rgb(109,50,39);
+}
+
+/*Concordance Kwic styling*/
+.more_context, .citation-container {
+    border-color: #eee !important;
+}
+.citation-overflow {
+    background: -moz-linear-gradient(left, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 86%, rgba(255,255,255,1) 94%, rgba(255,255,255,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,0)), color-stop(86%,rgba(255,255,255,0)), color-stop(94%,rgba(255,255,255,1)), color-stop(100%,rgba(255,255,255,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* IE10+ */
+	background: linear-gradient(to right, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* W3C */
+}
+.collocate {
+    color:#1E90FF;
+}
+
+/*Search form*/
+#form_body {
+    box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
+    background: #fff;
+}
+#search_elements {
+    border-top-color: #eee;
+}
+#more_options:hover {
+    background-color: #eee;
+}
+#nav-buttons.ui-scrollfix {
+    background: rgba(21, 67, 95, .7);
+}
+
+/*Text object navigation*/
+#toc-container {
+    background: rgba(21, 67, 95, .9);
+}
+a.current-obj, #toc-container a:hover {
+    background: rgba(256, 256, 256, .9);
+    color: rgb(21, 67, 95) !important;
+}
+.bullet-point-div1 {
+    background: #fff;
+}
+.bullet-point-div1, .bullet-point-div2, .bullet-point-div3 {
+    border-color: #fff;
+}
+
+/*TOC report styling*/
+.toc-div1 > a:hover, .toc-div2 > a:hover, .toc-div3 > a:hover {
+    text-decoration: none;
+    background: rgb(21, 67, 95);
+    color: rgb(256, 256, 256) !important;
+}
+#toc-report .bullet-point-div1 {
+    border: solid 1px #000;
+    background: #000;
+}
+#toc-report .bullet-point-div2 {
+    border: solid 2px #000;
+    background: #fff;
+}
+#toc-report .bullet-point-div3 {
+    border: solid 1px #000;
+    background: #fff;
+}
+
+/*Time series*/
+.graph-bar {
+    background-color: rgb(91, 150, 173); /* fallback color if gradients are not supported */
+}
+
+.progress-bar {
+	background-color: rgb(21, 95, 131);
+}
+
+.full_biblio.show {
+	background: rgba(21, 95, 131, .9);
+	color: #fff;
+}
+
+.ui-menu-item .highlight {
+	color: rgb(174, 89, 80);
+}
+
+#waiting, #waiting-inner, #waiting-inner-inner {
+	border-color: rgba(174, 89, 80, .5) rgba(143, 57, 49, .7) rgba(174, 89, 80, .5) rgba(174, 89, 80, .5);
+}
+
+.filter-list {
+	color: rgb(109, 50, 39);
+	font-weight: 400;
+}
+
+.navbar-right a:hover {
+	color: #fff !important;
+}
