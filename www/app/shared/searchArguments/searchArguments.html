@@ -7,7 +7,7 @@
     </span>
     <b ng-if="queryArgs.biblio.length === 0">None</b>
     <div ng-if="queryArgs.report === 'time_series'">
-        Use of the term(s) between
+        {{ timeSeries.resultsLength || '...' }} occurrences of the term(s) between
         <span class="biblio-criteria"><b>{{ ::startDate }}</b>
             <span class="glyphicon glyphicon-remove-circle" ng-click="removeMetadata('start_date', formData, restart)"></span>
         </span>&nbsp and

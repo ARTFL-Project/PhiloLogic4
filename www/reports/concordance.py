@@ -29,7 +29,7 @@ def concordance(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    concordance_object, hits = concordance_results(db, request, config)
+    concordance_object = concordance_results(db, request, config)
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
     yield json.dumps(concordance_object)
@@ -56,7 +56,7 @@ def concordance_results(db, q, config):
     concordance_object["results"] = results
     concordance_object['results_length'] = len(hits)
     concordance_object["query_done"] = hits.done
-    return concordance_object, hits
+    return concordance_object
 
 def citation_links(db, config, i):
     """ Returns a representation of a PhiloLogic object and all its ancestors

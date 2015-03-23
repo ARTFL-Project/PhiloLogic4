@@ -47,13 +47,16 @@ body {
     line-height: 130%;
 }
 @media (max-width: 768px) {
+	.row {
+		margin: 0;
+	}
     #main-body, .btn {
         font-size: 12px !important;
     }
-    #results_container {
-        padding-left: 0;
-        padding-right: 0;
-    }
+	#main-body {
+		padding-left: 0px;
+		padding-right: 0px;
+	}
     .form-control {
         height: 31px;
     }
@@ -75,10 +78,11 @@ s {
 }
 @media (max-width: 768px) {
 	#philologic_response {
-		margin-left: -15px;
-		margin-right: -15px;
-		padding-left: 15px;
-		padding-right: 15px;
+		padding-left: 0px;
+		padding-right: 0px;
+	}
+	#philo-view > .panel-default {
+		border: none;
 	}
 }
 
@@ -179,6 +183,12 @@ s {
     font-size: 1.1em;
 	padding: 10px 15px;
     margin-bottom: 10px;
+}
+@media (max-width: 768px) {
+	#description {
+		padding: 5px 10px;
+		margin-bottom: 0px;
+	}
 }
 #search_arguments {
     margin-bottom: 10px;
@@ -292,6 +302,12 @@ br {
 	margin-right: 15px;
 	overflow: hidden;
 }
+@media (max-width: 768px) {
+	#philologic_concordance .panel, .biblio-occurrence {
+		margin-left: 0;
+		margin-right: 0;
+	}
+}
 .bibliographic-results li {
     margin-top: 20px;
     padding: 10px 0px 10px 0px;
@@ -302,8 +318,11 @@ a.sidebar-option:hover {
 a.btn:hover {
 	color: #fff !important;
 }
-.btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child, .popover, .progress {
+.btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child, .popover, .progress, .form-control {
     border-radius: 0px !important;
+}
+.modal-dialog {
+	width: 300px;
 }
 
 /*Metadata criteria in results*/

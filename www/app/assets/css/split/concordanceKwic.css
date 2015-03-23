@@ -39,6 +39,12 @@
     overflow: hidden;
 	padding-bottom: 10px;
 }
+@media (max-width: 768px) {
+	#philologic_concordance, #colloc_concordance {
+		margin-left: -5px;
+		margin-right: -5px;
+	}
+}
 .philologic_occurrence {
     padding-bottom : 2px;
     margin: 15px 1px 6px 1px;

@@ -7,19 +7,8 @@
             </div>
             <div class="modal-body">
                 <div ng-if="report !== 'collocation'">
-                    Export your results in JSON
-                    <h5>Choose the format in which to export your search results:</h5>
-                    <div id="export-buttons">
-                        <a class="btn btn-primary" ng-click="exportResults()">JSON</a>
-                        <a class="btn btn-primary" disabled>CSV</a>
-                        <a class="btn btn-primary" disabled>TAB</a>
-                        <div>
-                            Note: only JSON is currently supported.
-                        </div>
-                    </div>
-                    <div id="export-download-link" style="display:none;margin-top: 20px;">
-                        <a><span class="glyphicon glyphicon-download"></span> Download JSON file</a>
-                    </div>
+                    <a class="btn btn-primary pull-right" ng-click="exportResults()">Export</a>
+                    Results of the current page will be serialized to JSON and displayed in a new tab
                 </div>
                 <div ng-if="report === 'collocation'">
                     <h5>We currently don't support exporting results from a collocation report.</h5>

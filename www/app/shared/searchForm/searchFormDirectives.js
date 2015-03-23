@@ -1,6 +1,7 @@
 philoApp.directive('searchForm', ['$rootScope', function($rootScope) {
     return {
         templateUrl: 'app/shared/searchForm/searchForm.html',
+        replace: true,
         scope: false
     }
 }]);
@@ -22,6 +23,7 @@ philoApp.directive('searchReports', ['$rootScope', '$location', function($rootSc
     return {
         restrict: 'E',
         templateUrl: 'app/shared/searchForm/searchReports.html',
+        replace: true,
         link: function(scope, element, attrs) {
             scope.reportChange = reportChange;
             scope.$watch('report', function(report) {
@@ -41,13 +43,15 @@ philoApp.directive('searchReports', ['$rootScope', '$location', function($rootSc
 
 philoApp.directive('searchTerms', function() {
     return {
-        templateUrl: 'app/shared/searchForm/searchTerms.html'
+        templateUrl: 'app/shared/searchForm/searchTerms.html',
+        replace: true
     }
 });
 
 philoApp.directive('searchMethods', ['$rootScope', function($rootScope) {
     return {
         templateUrl: 'app/shared/searchForm/searchMethods.html',
+        replace: true
     }
 }]);
 
@@ -70,6 +74,7 @@ philoApp.directive('metadataFields', function() {
     }
     return {
         templateUrl: 'app/shared/searchForm/metadataFields.html',
+        replace: true,
         link: function(scope, element, attrs) {
             if (!attrs.field && !attrs.exclude) {
                 scope.metadataFields = buildMetadata(scope, scope.philoConfig.metadata);
@@ -104,6 +109,7 @@ philoApp.directive('metadataFields', function() {
 philoApp.directive('collocationOptions', ['$rootScope', function($rootScope) {
     return {
         templateUrl: 'app/shared/searchForm/collocationOptions.html',
+        replace: true,
         link: function(scope, element, attrs) {
             scope.collocWordNum = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
             if (!'word_num' in $rootScope.formData || typeof($rootScope.formData.word_num) === 'undefined') {
@@ -136,6 +142,7 @@ philoApp.directive('timeSeriesOptions', ['$rootScope', function($rootScope) {
     }
     return {
         templateUrl: 'app/shared/searchForm/timeSeriesOptions.html',
+        replace: true,
         link: function(scope, element, attrs) {
             scope.timeSeriesIntervals = buildOptions();
             if (typeof($rootScope.formData.year_interval) === 'undefined') {
@@ -148,6 +155,7 @@ philoApp.directive('timeSeriesOptions', ['$rootScope', function($rootScope) {
 philoApp.directive('resultsPerPage', ['$rootScope', function($rootScope) {
     return {
         templateUrl: 'app/shared/searchForm/resultsPerPage.html',
+        replace: true
     }
 }]);
 

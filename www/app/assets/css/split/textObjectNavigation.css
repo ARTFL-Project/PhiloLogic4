@@ -33,10 +33,6 @@
 #toc-wrapper.display {
 	pointer-events: auto;
 }
-#show-toc {
-	padding-left: 30px;
-	padding-right: 30px
-}
 #toc-report-title {
     font-size: 1.4em;
 	line-height: 130%;
@@ -102,6 +98,9 @@
 	position: fixed;
 	top: 0px;
 }
+#nav-buttons > div {
+	text-align: center;
+}
 #back-to-top {
 	display: none;
     position: absolute;
@@ -113,6 +112,14 @@
 #nav-buttons.ui-scrollfix #back-to-top {
 	display: inline;
 	opacity: 1;
+}
+@media (max-width: 768px) {
+	#nav-buttons {
+		margin-left: 0px;
+	}
+	#back-to-top {
+		left: 0;
+	}
 }
 .toc-div1 > a, .toc-div2 > a, .toc-div3 > a {
     padding: 5px 5px 5px 0px;
