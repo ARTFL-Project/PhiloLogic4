@@ -381,14 +381,14 @@ int up_heap(word_heap *heap, int i) {
   word_rec *records = heap->records;
   // bounds check
   if (i == 0) { return 0; }
-  cmp_res = heap->cmp(db, heap->records[i], records[parent(i)]);
-  fprintf(stderr,"testing for up_heap: [%d]:%s ",i, records[i].word);
-  dump_hit(stderr, records[i].current_hit,9,0);
-  fprintf(stderr," vs [%d]:%s", p,records[p].word);
-  dump_hit(stderr, records[p].current_hit,9,0);
-  fprintf(stderr," returns %d\n",cmp_res);
+//  cmp_res = heap->cmp(db, heap->records[i], records[parent(i)]);
+//  fprintf(stderr,"testing for up_heap: [%d]:%s ",i, records[i].word);
+//  dump_hit(stderr, records[i].current_hit,9,0);
+//  fprintf(stderr," vs [%d]:%s", p,records[p].word);
+//  dump_hit(stderr, records[p].current_hit,9,0);
+//  fprintf(stderr," returns %d\n",cmp_res);
   if ( heap->cmp(db, heap->records[i], records[parent(i)]) < 0) {
-    fprintf(stderr,"up-swapping %s @ %d with %s @ %d\n", records[i].word,i, records[p].word,p);
+//    fprintf(stderr,"up-swapping %s @ %d with %s @ %d\n", records[i].word,i, records[p].word,p);
     rec = records[i];
     records[i] = records[parent(i)];
     records[parent(i)] = rec;
@@ -404,23 +404,23 @@ int down_heap(word_heap *heap, int i) {
   dbh *db = heap->db;
   word_rec *records = heap->records;
   int lres, rres;
-  fprintf(stderr, "pre down_heap(%d):\n",i);
+//  fprintf(stderr, "pre down_heap(%d):\n",i);
 //  fprintf(stderr,"down_heap %d with L %d, R %d ):",i,lchild(i), rchild(i) );
   // bounds check
   if (lchild(i) >= heap->rec_count) { 
-    fprintf(stderr, "%d is leaf in heap size %d\n",i,heap->rec_count);
+//    fprintf(stderr, "%d is leaf in heap size %d\n",i,heap->rec_count);
     return 0;
   } // if we have a leaf, return 0;
   // if this is a partially filled branch, only check left
   else if (rchild(i) >= heap->rec_count) { 
-    fprintf(stderr, "%d is partial branch with leaf in heap size %d\n",i,lchild(i),heap->rec_count);
+//    fprintf(stderr, "%d is partial branch with leaf in heap size %d\n",i,lchild(i),heap->rec_count);
     if ( heap->cmp(db, records[i], records[lchild(i)]) > 0) {
       child = lchild(i);
     }
   }
   // normal case: if i is greater than either of its children
   else {
-    fprintf(stderr,"%d is normal branch with leaves %d,%d,in heap size %d\n",i,lchild(i),rchild(i),heap->rec_count);
+//    fprintf(stderr,"%d is normal branch with leaves %d,%d,in heap size %d\n",i,lchild(i),rchild(i),heap->rec_count);
     if ( (heap->cmp(db, records[i], records[lchild(i)]) > 0) ||
        (heap->cmp(db, records[i], records[rchild(i)]) > 0) ) {  
       if (heap->cmp(db, records[lchild(i)], records[rchild(i)]) < 0) {
@@ -434,11 +434,11 @@ int down_heap(word_heap *heap, int i) {
     }
   }
   if (child > 0) { // if we found a child to swap with
-    fprintf(stderr,"down-swapping %s @%d with %s @ %d\n", records[i].word,i, records[child].word,child);
+//    fprintf(stderr,"down-swapping %s @%d with %s @ %d\n", records[i].word,i, records[child].word,child);
     rec = records[i];
     records[i] = records[child];
     records[child] = rec;    
-    dump_heap(heap);
+//    dump_heap(heap);
     down_heap(heap,child);
     return 1;
   }
@@ -466,10 +466,7 @@ void add_record(word_heap *heap, word_rec *rec) {
   //fprintf(stderr, "calling up_heap on new record %d\n", heap->rec_count - 1);
   up_heap(heap,heap->rec_count - 1);
   fprintf(stderr,"heap order:\n");
-  for (i = 0; i < heap->rec_count; i++) {
-  	fprintf(stderr,"%s\t", heap->records[i].word);
-  	dump_hit(stderr, heap->records[i].current_hit,9,1);  
-  }
+  //dump_heap(heap);
 }
 
 word_rec pop_record(word_heap * heap) {
@@ -520,19 +517,19 @@ uint32_t * heap_advance(word_heap *heap) {
     heap->current_word = r->word;
     
     if (heap->current_word[0] == 0) {
-      fprintf(stderr, "%s: zero in heap hit\n", heap->current_word);
+//      fprintf(stderr, "%s: zero in heap hit\n", heap->current_word);
     }
     hit = word_next_hit(heap->db,r);
     if (hit == NULL) {
-      fprintf(stderr, "done with word %s, popping\n", heap->current_word);
+//      fprintf(stderr, "done with word %s, popping\n", heap->current_word);
       // if we are done with the word, pop it off
       pop_record(heap);
-      fprintf(stderr, "heap has %d records remaining\n", heap->rec_count);
+//      fprintf(stderr, "heap has %d records remaining\n", heap->rec_count);
     } else {
       // otherwise, we've modified the 0 records and may need to move it.
       down_heap(heap,0); 
       if (hit[0] == 0) {
-		fprintf(stderr, "zero at top of heap\n");
+//		fprintf(stderr, "zero at top of heap\n");
       }
     }
     return heap->current_hit;
@@ -541,14 +538,14 @@ uint32_t * heap_advance(word_heap *heap) {
 
 uint32_t * corpus_advance(corpus *corpus) {
   // requires that corpus has a readable fh and malloc'd current_hit.  Does not require current_hit to be init'd.
-  fprintf(stderr, "advancing corpus: ");
+//  fprintf(stderr, "advancing corpus: ");
   size_t res = fread(corpus->current_hit,sizeof(uint32_t), 7, corpus->fh); // read 1 7-wide hit into current_hit
   if (res < 7) {
     fprintf(stderr, "READ FAILED %d\n",res);
     corpus->current_hit = NULL;
     return NULL;
   } else {
-    fprintf(stderr, "%d %d %d %d %d %d %d\n", corpus->current_hit[0],corpus->current_hit[1],corpus->current_hit[2],corpus->current_hit[3],corpus->current_hit[4],corpus->current_hit[5],corpus->current_hit[6]);
+//    fprintf(stderr, "%d %d %d %d %d %d %d\n", corpus->current_hit[0],corpus->current_hit[1],corpus->current_hit[2],corpus->current_hit[3],corpus->current_hit[4],corpus->current_hit[5],corpus->current_hit[6]);
     return corpus->current_hit;
   }  
 }
@@ -700,11 +697,11 @@ uint32_t * search_advance(search_stage *stages,int size) {
 
     check_res = prev->check(NULL, stage_current_hit(prev),stage_current_hit(curr),prev->arg);
 
-    fprintf(stderr,"post checking(result: %d) ",check_res);
-    dump_search_result_ascii(stderr,stages, size);
+//    fprintf(stderr,"post checking(result: %d) ",check_res);
+    //dump_search_result_ascii(stderr,stages, size);
 
     if (check_res < 0) {         // if curr is ahead of prev, advance prev
-      fprintf(stderr, "advancing L\n");
+//      fprintf(stderr, "advancing L\n");
       if (stage_current_hit(prev) != NULL) {
 	//  fprintf(stderr,"pre L-advance: ");
         //dump_search_result_ascii(stderr,stages, size);
@@ -720,15 +717,15 @@ uint32_t * search_advance(search_stage *stages,int size) {
 
     } else if (check_res == 0) { // if curr and prev are within the window defined by prev's search check function...
       if (c == size - 1) {       // if we're on the outermost hit, it's good to output    
-        fprintf(stderr,"match\n");
+//        fprintf(stderr,"match\n");
         return stage_current_hit(curr);
       } else {                   // if we are on an inner hit, we can move our c counter outward.        
-        fprintf(stderr,"partial match\n");
+//        fprintf(stderr,"partial match\n");
         c += 1;
       }
 
     } else if (check_res > 0) {  // if prev is ahead of curr, advance curr
-      fprintf(stderr, "advancing R\n");
+//      fprintf(stderr, "advancing R\n");
       advance_res = stage_advance(curr);
     }
   }
