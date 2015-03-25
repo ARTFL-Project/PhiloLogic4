@@ -31,7 +31,7 @@ for file in sys.argv[1:]:
             new_note.tail = "\n"
             el.text = ""
             note_div.append(new_note)
-            el.attrib["ref"] = "#%s" % new_id
+            el.attrib["target"] = "#%s" % new_id
             note_count += 1
     root[-1].append(note_div)
     new_file = file + ".notes_fixed"
