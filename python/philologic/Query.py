@@ -223,9 +223,6 @@ def invert_grep_exact(token, in_fh, dest_fh):
     #can't wait because input isn't ready yet.
     return grep_proc
 
-class Fake_DB:
-    pass
-
 if __name__ == "__main__":
     path = sys.argv[1]
     terms = sys.argv[2:]
@@ -235,6 +232,9 @@ if __name__ == "__main__":
     print >> sys.stderr, "GROUPED:", grouped
     split = split_terms(grouped)
     print >> sys.stderr, "parsed %d terms:" % len(split), split
+
+    class Fake_DB: pass
+
     fake_db = Fake_DB()
     fake_db.locals = {"db_path":path + "/data/"}
     fake_db.path = path + "/data/"
