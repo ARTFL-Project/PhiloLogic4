@@ -466,7 +466,7 @@ void add_record(word_heap *heap, word_rec *rec) {
   //fprintf(stderr, "calling up_heap on new record %d\n", heap->rec_count - 1);
   up_heap(heap,heap->rec_count - 1);
   fprintf(stderr,"heap order:\n");
-  dump_heap(heap);
+  //dump_heap(heap);
 }
 
 word_rec pop_record(word_heap * heap) {
