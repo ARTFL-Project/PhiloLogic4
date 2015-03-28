@@ -199,8 +199,13 @@ s {
 	border-width: 0px 0px 1px 1px;
 }
 .highlight {
-    color: #EF4500;
-    font-weight: 400;
+	color: #EF4500;
+	font-weight: 400;
+	padding: 0px 2px;
+}
+#book-page .highlight {
+	background-color: #EF4500;
+	color: #fff;
 }
 .separation {
         width:40%;
@@ -321,7 +326,7 @@ a.btn:hover {
 .btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child, .popover, .progress, .form-control {
     border-radius: 0px !important;
 }
-.modal-dialog {
+#export-dialog .modal-dialog {
 	width: 300px;
 }
 

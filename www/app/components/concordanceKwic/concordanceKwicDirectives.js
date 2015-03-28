@@ -67,14 +67,29 @@ philoApp.directive('bibliography', ['$rootScope', function($rootScope) {
 }]);
 
 philoApp.directive('resultsDescription', ['descriptionValues', function(descriptionValues) {
+	var buildDescription = function(scope) {
+		if (scope.resultsLength && scope.end <= scope.resultsPerPage && scope.end <= scope.resultsLength) {
+			var description = 'Hits ' + scope.start + ' - ' + scope.end  + ' of ' + scope.resultsLength;
+		} else if (scope.resultsLength) {
+			if (scope.resultsPerPage > scope.resultsLength) {
+				var description = 'Hits ' + scope.start + ' - ' + scope.resultsLength + ' of ' + scope.resultsLength;
+			} else {
+				var description = 'Hits ' + scope.start + ' - ' + scope.end + ' of ' + scope.resultsLength;
+			}
+		} else {
+			var description = 'No results for your query.';
+		}
+		return description;
+	}
     return {
-        templateUrl: 'app/components/concordanceKwic/resultsDescription.html',
+        template: '<div id="search-hits">{{ hits }}</div>',
 		replace: true,
         link: function(scope, element, attrs) {
             scope.start = descriptionValues.start;
             scope.end = descriptionValues.end;
             scope.resultsPerPage = descriptionValues.resultsPerPage;
             scope.resultsLength = descriptionValues.resultsLength;
+			scope.hits = buildDescription(scope);
             attrs.$observe('description', function(newDescription) {
                 if (newDescription.length > 0) {
                     newDescription = JSON.parse(newDescription);
@@ -95,6 +110,7 @@ philoApp.directive('resultsDescription', ['descriptionValues', function(descript
                         descriptionValues.resultsPerPage = scope.resultsPerPage;
                     }
                 }
+				scope.hits = buildDescription(scope);
             });
         }
     }
