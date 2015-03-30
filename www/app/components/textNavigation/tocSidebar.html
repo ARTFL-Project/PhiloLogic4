@@ -1,0 +1,15 @@
+<div class="panel panel-default" id="toc-container">
+    <div id="toc-titlebar">
+        <button type="button" class="btn btn-primary btn-xs pull-right" id="hide-toc" ng-click="textNav.toggleTableOfContents()">
+            <span class="glyphicon glyphicon-remove"></span>
+        </button>
+    </div>
+    <div id="toc-content">
+        <div ng-repeat="element in ::tocElements track by element.philo_id">
+            <div id="{{ ::element.philo_id }}" class="toc-{{ ::element.philo_type }}" ng-click="textNav.goToTextObject(element.philo_id)">
+                <span class="bullet-point-{{ ::element.philo_type }}"></span>
+                <a class="{{ ::element.currentObj }}" href="">{{ ::element.label }}</a>
+            </div>
+        </div>
+    </div>
+</div>

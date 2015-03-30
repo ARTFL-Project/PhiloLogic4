@@ -1,0 +1,15 @@
+<div id="time-series" ng-style="chartSize">
+    <div id="top-division" ng-style="divisionWidth">
+        <div id="top-number">{{ topNumber }}</div>
+    </div>
+    <div id="middle-division" ng-style="divisionWidth">
+        <div id="middle-number">{{ middleNumber }}</div>
+    </div>
+    <div id="bottom-division" ng-style="divisionWidth">
+        <div id="bottom-number">{{ bottomNumber }}</div>
+    </div>
+    <div id="side-text">{{ sideText }}</div>
+    <a class='graph-bar' href="{{ bar.url }}" data-toggle='popover' data-content="{{bar.title}}" ng-style="bar.barStyle" ng-mouseover="timeSeries.hoverChart($event)" ng-mouseleave="timeSeries.hoverChart($event)" ng-repeat="bar in barChart | filterTimeSeries">
+        <span class="graph-years" ng-style="dateStyle">{{ ::bar.date }}</span>
+    </a>
+</div>

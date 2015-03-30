@@ -1,0 +1,34 @@
+<div id="time-series-container" ng-controller="timeSeriesCtrl as timeSeries">
+    <div id="philo-view" ng-if="timeSeries.authorized">
+        <div id="initial_report" class="row">
+            <div class="col-xs-12">
+                <div class="panel panel-default">
+                    <div id="description">
+                        <button type="button" id="export-results" class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#export-dialog">
+                            Export results
+                        </button>
+                        <search-arguments start-date="{{ ::startDate}}" end-date="{{ ::endDate }}"></search-arguments>
+                       <div philo-debug></div>
+                    </div>
+                    <progress-bar progress="{{ percent }}" style="margin-left: 15px; margin-right: 15px; margin-top: -10px;"></progress-bar>
+                    <div id="time-series-buttons" class="btn-group" role="group" aria-label="...">
+                        <button type="button" class="btn btn-primary active" id="absolute_time" ng-click="timeSeries.toggleFrequency('absolute_time')">
+                            Absolute Frequency
+                        </button>
+                        <button type="button" class="btn btn-primary" disabled="disabled" id="relative_time" ng-click="timeSeries.toggleFrequency('relative_time')">
+                            Relative Frequency
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" loading="timeSeries.loading">
+            <div class="col-xs-12">
+                <div class="results_container">
+                    <time-series-chart frequency-type="{{ timeSeries.frequencyType }}"></time-series-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+    <access-control ng-if="!timeSeries.authorized"></access-control>
+</div>

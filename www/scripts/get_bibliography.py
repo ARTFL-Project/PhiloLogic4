@@ -31,7 +31,10 @@ def get_bibliography(environ,start_response):
         hit_object = {}
         for field in db.locals['metadata_fields']:
             hit_object[field] = hit[field] or ''
-        hit_object['philo_id'] = hit.philo_id
+        if object_level == "doc":
+            hit_object['philo_id'] = hit.philo_id[0]
+        else:
+            hit_object['philo_id'] = '/'.join([str(i) for i in hit.philo_id])
         results.append(hit_object)
     
     yield json.dumps(results)

@@ -1,0 +1,30 @@
+<div class="toc-object" ng-controller="tableOfContents as toc">
+    <div id="philo-view" ng-if="toc.authorized">
+        <div class="row" id="toc-report-title">
+            <div class="col-xs-offset-2 col-xs-8">
+                <div>
+                    <a id="toc-title" class="citation-small-caps">{{ ::toc.tocObject.citation.title.label }}</a>
+                    <span ng-if="toc.tocObject.citation.author">, {{ ::toc.tocObject.citation.author.label }}</span>
+                </div>
+                <span ng-if="toc.tocObject.citation.more">{{ ::toc.tocObject.citation.more }}</span>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <button id="show-header" class="btn btn-primary" ng-if="philoConfig.debug" ng-click="toc.showHeader()">{{ toc.headerButton }}</button>
+            <div id="tei-header" class="panel panel-default tei-header velocity-opposites-transition-slideDownIn" data-velocity-opts="{duration: 200}" ng-if="toc.teiHeader" ng-bind-html="toc.teiHeader | unsafe"></div>
+            <div id="toc-report" loading="toc.loading">
+                <div id="toc-content" infinite-scroll="toc.getMoreItems()" infinite-scroll-distance="4">
+                    <div ng-repeat="element in toc.tocObject.toc | limitTo: toc.displayLimit">
+                        <div class="toc-{{ ::element.philo_type }}">
+                            <span class="bullet-point-{{ ::element.philo_type }}"></span>
+                            <a href="{{ ::element.href }}">
+                                {{ :: element.label }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <access-control ng-if="!toc.authorized"></access-control>
+</div>

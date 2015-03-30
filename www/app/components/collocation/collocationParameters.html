@@ -1,0 +1,17 @@
+<div style="padding-left: 15px;">
+    <span ng-if="collocationParams.collocFilterChoice === 'stopwords'">
+        <a id="filter-list-trigger" ng-click="collocation.toggleFilterList()">Common function words</a> are being filtered from this report.
+    </span>
+    <span ng-if="collocationParams.collocFilterChoice === 'frequency'"">
+        <a id="filter-list-trigger" ng-click="collocation.toggleFilterList()">The {{ ::collocationParams.filterFrequency }} most common words</a> are being filtered from this report.
+    </span>
+    <div id="filter-list" class="panel panel-default velocity-opposites-transition-fadeIn" data-velocity-opts="{duration: 200}" ng-if="collocation.showFilter">
+        <button type="button" class="close" ng-click="collocation.toggleFilterList()">
+            <span aria-hidden="true">&times;</span>
+            <span class="sr-only">Close</span>
+        </button>
+        <ol>
+            <li ng-repeat="word in filterList">{{ ::word }}</li>
+        </ol>
+    </div>
+</div>

@@ -1,0 +1,43 @@
+<div class="container" style="overflow: hidden;" ng-controller="searchForm">
+    <div ng-if="philoConfig.dictionary === false">
+        <form id="search" role="form" ng-submit="submit()">
+            <div id="form_body">
+                <div id="initial-form">
+                    <search-reports></search-reports>
+                    <search-terms></search-terms>
+                </div>
+                <div id="search-elements" ng-if="formOpen" class="velocity-opposites-transition-slideDownBigIn" data-velocity-opts="{ duration: 400 }">
+                    <h5>Refine your search with the following options and fields:</h5>
+                    <search-methods></search-methods>
+                    <metadata-fields></metadata-fields>
+                    <collocation-options></collocation-options>
+                    <time-series-options></time-series-options>
+                    <results-per-page></results-per-page>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div ng-if="philoConfig.dictionary">
+        <div class="container" style="overflow: hidden;" ng-controller="searchForm">
+            <form id="search" role="form" ng-submit="submit()">
+                <div id="form_body">
+                    <div id="initial-form">
+                        <search-reports></search-reports>
+                        <search-terms></search-terms>
+                        <div id="head-search-container">
+                            <metadata-fields field="head"></metadata-fields>
+                        </div>
+                    </div>
+                    <div id="search-elements" ng-if="formOpen" class="dico velocity-opposites-transition-slideDownBigIn" data-velocity-opts="{ duration: 400 }">
+                        <h5>Refine your search with the following options and fields:</h5>
+                        <search-methods></search-methods>
+                        <metadata-fields exclude="head"></metadata-fields>
+                        <collocation-options></collocation-options>
+                        <time-series-options></time-series-options>
+                        <results-per-page></results-per-page>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

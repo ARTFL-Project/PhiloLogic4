@@ -14,10 +14,10 @@ from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
 
 
-def term_list(environ,start_response):
+def term_list(environ, start_response):
     status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-    start_response(status,headers)
+    headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin","*")]
+    start_response(status, headers)
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
@@ -26,18 +26,18 @@ def term_list(environ,start_response):
         term = term[-1]
     all_words = format_query(term, db)[:100]
     yield json.dumps(all_words)
-    
+
 def format_query(q, db):
     parsed = parse_query(q)
     group = group_terms(parsed)
     all_groups = split_terms(group)
-    
+
     # We extract every word tuple
     word_groups = []
     for g in all_groups:
         for inner_g in g:
             word_groups.append(inner_g)
-    last_group = word_groups.pop()  ## we take the last tuple for autocomplete
+    last_group = word_groups.pop()  # we take the last tuple for autocomplete
     token = last_group[1]
     kind = last_group[0]
     if word_groups:
@@ -50,10 +50,10 @@ def format_query(q, db):
     if kind == "QUOTE":
         token = token.replace('"', '')
     frequency_file = db.locals["db_path"]+"/frequencies/normalized_word_frequencies"
-    
+
     expanded_token = token + '.*'
     grep_proc = grep_word(expanded_token, frequency_file, subprocess.PIPE)
-    
+
     matches = []
     len_token = len(token.decode('utf-8'))
     for line in grep_proc.stdout:
@@ -67,7 +67,7 @@ def format_query(q, db):
             output_string.append(prefix + '"%s"' % m)
         else:
             output_string.append(prefix +  m)
-    
+
     return output_string
 
 def highlighter(word, token_len):
@@ -79,4 +79,4 @@ def highlighter(word, token_len):
 
 if __name__ == "__main__":
     CGIHandler().run(term_list)
-    
+

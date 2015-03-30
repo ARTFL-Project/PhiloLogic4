@@ -3,6 +3,10 @@ Options -Indexes
 AddHandler cgi-script py
 DirectoryIndex dispatcher.py
 
+RewriteEngine on
+RewriteRule ^query(.*) dispatcher.py$1 [PT,QSA]
+RewriteRule ^navigate(.*) dispatcher.py$1 [PT,QSA]
+
 <ifModule mod_headers.c>
 	Header set Connection keep-alive 
 </ifModule>

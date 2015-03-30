@@ -1,0 +1,68 @@
+.panel-body {
+    padding: 0px;
+}
+ul {
+    margin-bottom: 0px;
+}
+.panel-heading {
+    text-align: center;
+}
+#landingGroup {
+    margin-top: 50px;
+    margin-bottom: 10px;
+}
+#landingGroup ul {
+    width: 100%;
+}
+#col-author > .panel, #col-title > .panel, #col-year > .panel {
+    border: 0px;
+}
+#author-range-selectors, #title-range-selectors, #year-range-selectors {
+    line-height: 200%;
+    margin-bottom: 0px;
+    margin-top: -1px;
+    border-top: 1px;
+}
+#author-range-selectors td:hover, #title-range-selectors td:hover, #year-range-selectors td:hover, #dico-landing-alpha td:hover, #dico-landing-volume li:hover {
+    cursor: pointer;
+    background: #eee;
+}
+#landing-page-content {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+#landing-page-content ul {
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+}
+#landing-page-content li {
+    padding: 10px 20px;
+}
+#landing-page-content li:not(:last-child) {
+    border-bottom: 1px solid #eee;
+}
+#landing-page-content h4 {
+    padding-top: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 0px;
+    padding-left: 10px;
+}
+#landing-page-content ul {
+    transition: 300ms all ease-out;    
+}
+#landing-page-content ul.ng-enter {
+    transform: translateX(-30px);
+    opacity: 0;
+}
+#landing-page-content ul.ng-enter-active {
+    transform: translateX(0px);
+    opacity: 1;
+}
+#landing-page-content ul.ng-leave {
+    transform: translateX(0px);
+    opacity: 1;
+}
+#landing-page-content ul.ng-leave-active {
+    transform: translateX(30px);
+    opacity: 0;
+}

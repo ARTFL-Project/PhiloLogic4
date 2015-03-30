@@ -16,21 +16,11 @@ def get_more_context(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    if request.start == 0:
-        start = 0
-    else:
-        start = request.start - 1
-    end = (request.end or request.results_per_page) + 1
-    hit_range = range(start, end)
+    hit_num = int(request.hit_num)
     hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
     context_size = config['concordance_length'] * 3
-    html_list = []
-    for i in hit_range:
-        try:
-            html_list.append(r.fetch_concordance(db, hits[i], config.db_path, context_size))
-        except IndexError:
-            break
-    yield json.dumps(html_list)
+    hit_context = r.fetch_concordance(db, hits[hit_num], config.db_path, context_size)
+    yield json.dumps(hit_context)
 
 if __name__ == "__main__":
     CGIHandler().run(get_more_context)

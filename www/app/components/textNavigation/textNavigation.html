@@ -1,0 +1,25 @@
+<div class="text-object" ng-controller="textNavigationCtrl as textNav">
+    <div id="philo-view" ng-if="textNav.authorized">
+        <div id="object-title">
+            <div>
+                <a href="{{ textObject.citation.title.href }}" class="citation-small-caps"><i>{{ textObject.citation.title.label }}</i></a>
+                <span ng-if="textObject.citation.author">, {{ textObject.citation.author.label }}</span>
+            </div>
+            <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
+        </div>
+        <navigation-bar toc-done="{{ textNav.tocDone }}" prev="{{ textObject.prev }}" next="{{ textObject.next }}" ng-if="textNav.navBar === true || textNav.loading === false"></navigation-bar>
+        <div class="row" id="all-content" loading="textNav.loading">
+            <text-object></text-object>
+        </div>
+    </div>
+    <access-control ng-if="!textNav.authorized"></access-control>
+</div>
+<div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-full-screen="true" data-continuous="false" style="display: none">
+    <div class="slides"></div>
+    <h3 class="title"></h3>
+    <a class="prev">&lt;</a>
+    <a class="next">&gt;</a>
+    <a id="full-size-image" class="glyphicon glyphicon-new-window" ng-click="textNav.fullSizeImage()"></a>
+    <a class="close">&#10005;</a>
+    <ol class="indicator"></ol>
+</div>
