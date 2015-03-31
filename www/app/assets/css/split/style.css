@@ -201,10 +201,9 @@ s {
 .highlight {
 	color: #EF4500;
 	font-weight: 400;
+	padding: 0px 2px;
 }
 #book-page .highlight {
-	margin: 0px 1px;
-	padding: 0px 1px;
 	background-color: #EF4500;
 	color: #fff;
 }
