@@ -88,31 +88,47 @@ def build_html_page(config):
 
 def load_CSS():
     mainCSS = os.path.join(path, "app/assets/css/philoLogic.css")
-    if config.debug or not os.path.exists(mainCSS):
-        css_string, css_links = concatenate_files(css_files, 'css')
-        output = open(os.path.join(path, 'app/assets/css/philoLogic.css'), 'w')
-        output.write(css_string)
+    if os.path.exists(mainCSS):
+        if config.debug:
+            css_links = concat_CSS()
+    else:
+        css_links = concat_CSS()
     if not config.debug:
         return '<link rel="stylesheet" href="app/assets/css/philoLogic.css">'
     else:
         return '\n'.join(css_links)
 
 
+def concat_CSS():
+    css_string, css_links = concatenate_files(css_files, 'css')
+    output = open(os.path.join(path, 'app/assets/css/philoLogic.css'), 'w')
+    output.write(css_string)
+    return css_links
+
+
 def load_JS():
-    mainJS = os.path.join(path, "app/assets/js/plugins/philoLogicPlugins.js")
-    if config.debug or not os.path.exists(mainJS):
-        js_plugins_string, js_plugins_links = concatenate_files(js_plugins, 'js')
-        plugin_output = open(os.path.join(path, 'app/assets/js/plugins/philoLogicPlugins.js'), 'w')
-        plugin_output.write(js_plugins_string)
-        js_string, js_links = concatenate_files(js_files, "js")
-        output = open(os.path.join(path, 'app/assets/js/philoLogic.js'), 'w')
-        output.write(js_string)
+    mainJS = os.path.join(path, "app/assets/js/philoLogic.js")
+    if os.path.exists(mainJS):
+        if config.debug:
+            js_links, js_plugins_links = concat_JS()
+    else:
+        js_links, js_plugins_links = concat_JS()
     if not config.debug:
         scripts = '<script src="app/assets/js/plugins/philoLogicPlugins.js"></script>'
         scripts += '<script src="app/assets/js/philoLogic.js"></script>'
         return scripts
     else:
         return '\n'.join(js_plugins_links + js_links)
+    
+
+def concat_JS():
+    js_plugins_string, js_plugins_links = concatenate_files(js_plugins, 'js')
+    plugin_output = open(os.path.join(path, 'app/assets/js/plugins/philoLogicPlugins.js'), 'w')
+    plugin_output.write(js_plugins_string)
+    js_string, js_links = concatenate_files(js_files, "js")
+    output = open(os.path.join(path, 'app/assets/js/philoLogic.js'), 'w')
+    output.write(js_string)
+    return js_links, js_plugins_links
 
 
 def concatenate_files(file_list, file_type):
@@ -127,6 +143,7 @@ def concatenate_files(file_list, file_type):
                 else:
                     links.append('<script src="%s"></script>' % file_path)
         except IOError:
+            print >> sys.stderr, 'OS error'
             pass
     string = '\n'.join(string)
     return string, links

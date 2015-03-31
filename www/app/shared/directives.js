@@ -39,3 +39,28 @@ philoApp.directive('progressBar', function() {
         }
     }
 });
+
+philoApp.directive('wordSelect', ['$rootScope', 'request', function($rootScope, request) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            element.mouseup(function() {
+                var text = window.getSelection().toString();
+                var position = attrs.wordSelect;
+                if (text.length > 0) {
+                    console.log(position, text)
+                    request.script($rootScope.formData, {
+                        // This is where you define additional parameters
+                        script: 'something.py',
+                        wordSelection: text
+                        }).then(function(results) { // resolving promise
+                            console.log(results.data)
+                        });
+                }
+            });
+            scope.$on('$destroy', function() {
+                element.off();
+            });
+        }
+    }
+}]);
