@@ -15,11 +15,11 @@ your home directory at ~/PhiloLogic4/
 
 ### Prerequisites ###
 
-* Python
+* Python 2.6 or 2.7
 * GCC
 * Make
-* `gdbm`_
-* `lxml`_
+* [gdbm](http://www.gnu.org.ua/software/gdbm/)
+* [lxml](http://lxml.de/)
 
 ### Installing the C library ###
 
