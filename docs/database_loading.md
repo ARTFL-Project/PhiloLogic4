@@ -2,10 +2,10 @@ Database Loading
 ================
 
 Loading PhiloLogic databases requires two separate steps:
-* Configuring the loading script
-* Executing the loading script with command-line arguments
+* [Configuring the loading script](#sysconfig)
+* [Executing the loading script with command-line arguments](#loading)
 
-## Configuring the loading script ##
+## <a name="sysconfig">Configuring the loading script ##
 
 A few important notes:
 * The load script is not installed system-wide--you generally want to keep it near your data, with any other scripts. 
@@ -190,7 +190,7 @@ Usually, these load functions should all be executed in the same order, but it i
 
 For this purpose, we've added a powerful new Loader function called `sort_by_metadata` which integrates the functions of a PhiloLogic3 style metadata guesser and sorter, while still being modular enough to replaced entirely when necessary.
 
-## Loading the database ##
+## <a name="loading">Running the load script ##
 
 Once all files are in place and ``load_script.py`` script is customized, it's time
 for PhiloLogic to actually index your text files, by running the script
