@@ -5,7 +5,7 @@ Loading PhiloLogic databases requires two separate steps:
 * Configuring the loading script
 * Executing the loading script with command-line arguments
 
-### Configuring the loading script ###
+## Configuring the loading script ##
 
 A few important notes:
 * The load script is not installed system-wide--you generally want to keep it near your data, with any other scripts. 
@@ -15,7 +15,7 @@ A few important notes:
 
 The most important pieces of information in any load script are the system setup variables at the top of the file.  These will give immediate errors if they aren't set up right.  
 
-##### System Configuration #####
+#### System Configuration ####
 
 <pre><code>
 ##########################
@@ -51,7 +51,7 @@ default_object_level = 'doc'
 
 At the moment, you can't "clone" the templates from an existing database, because they actual database content can be very large, but we'd very much like to implement that feature in the future to allow for easy reloads.
 
-##### Database Configuration #####
+#### Database Configuration ####
 
 Most of the rest of the file is configuration for the Loader class, which does all of the real work, but the config is kept here, in the script, so you don't have to maintain custom classes for every database. 
 
@@ -67,7 +67,7 @@ For now, it's just important to know what options can be specified in the load s
 
 `extra_locals` is a catch_all list of extra parameters to pass on to your database later, if you need to--think of it as a "swiss army knife" for passing data from the loader to the database at run-time.
 
-##### Configuring the XML Parser #####
+#### Configuring the XML Parser ####
 The next section of the load script is setup for the XML Parser:
 
 The basic layout is this:
