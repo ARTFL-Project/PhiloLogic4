@@ -10,4 +10,4 @@ Documentation
 =============
 * [**Installation**](docs/installation.md)
 * [**Database Loading**](docs/database_loading.md)
-* [**Configure Web Application**](docs/configure_web_app.md)
+* [**Configuring the Web Application**](docs/configure_web_app.md)
