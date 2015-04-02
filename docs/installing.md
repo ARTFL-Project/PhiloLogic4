@@ -1,12 +1,10 @@
 Installation
 ============
 
-Installing PhiloLogic consists of four steps:
+Installing PhiloLogic consists of two steps:
 
-1) Install the C and Python libraries system-wide
-2) Set up a directory in your web server to serve databases from
-3) Configure a loader script 
-4) Load your texts into a new database instance
+1. Install the C and Python libraries system-wide
+2. Set up a directory in your web server to serve databases from
 
 Downloading
 -----------
