@@ -9,8 +9,7 @@ Installing PhiloLogic consists of two steps:
 Downloading
 -----------
 
-You can find a copy of the latest version of PhiloLogic4 from here:
-https://github.com/ARTFL-Project/PhiloLogic4/releases/tag/v4.0-rc.1
+You can find a copy of the latest version of PhiloLogic4 from <a href="https://github.com/ARTFL-Project/PhiloLogic4/releases/tag/v4.0-rc.1">here</a>.
 
 For the rest of this document, we will assume the PhiloLogic source code is installed in 
 your home directory at ~/PhiloLogic4/
