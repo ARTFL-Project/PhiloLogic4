@@ -188,6 +188,4 @@ And that's it!
 
 Usually, these load functions should all be executed in the same order, but it is worth paying special attention to the `load_metadata variable` that is constructed right before `l.parse_files` is called.  This variable controls the entire parsing process, and is incredibly powerful.  Not only does it let you define any order in which to load your files, but you can also supply any document-level metadata you wish, and change the xpaths, load_filters, or parser class used per file, which can be very useful on complex or heterogeneous data sets.  However, this often requires either some source of stand-off metadata or pre-processing/parsing stage.  
 
-For this purpose, we've added a powerful new Loader function called `sort_by_metadata` which integrates the functions of a PhiloLogic3 style metadata guesser and sorter, while still being modular enough to replaced entirely when necessary.  We'll describe it in more detail in a later post, but for now, you can look at the new `artfl_load_script.py` to get a sense of how to construct a more robust, fault-tolerant loader using this new function.
-
-https://github.com/ARTFL-Project/PhiloLogic4/blob/master/scripts/artfl_load_script.py
+For this purpose, we've added a powerful new Loader function called `sort_by_metadata` which integrates the functions of a PhiloLogic3 style metadata guesser and sorter, while still being modular enough to replaced entirely when necessary.
