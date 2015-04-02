@@ -8,10 +8,10 @@ Loading PhiloLogic databases requires two separate steps:
 ### Configuring the loading script ###
 
 A few important notes:
-1. The load script is not installed system-wide--you generally want to keep it near your data, with any other scripts. 
-2. The load script has no global configuration file--all configuration is kept separate in each copy of the script that you create.
-3. The PhiloLogic4 Parser class is fully configurable from the load script--you can change any Xpaths you want, or even supply a replacement Parser class if you need to.
-4. The load script is designed to be short, and easy to understand and modify.
+* The load script is not installed system-wide--you generally want to keep it near your data, with any other scripts. 
+* The load script has no global configuration file--all configuration is kept separate in each copy of the script that you create.
+* The PhiloLogic4 Parser class is fully configurable from the load script--you can change any Xpaths you want, or even supply a replacement Parser class if you need to.
+* The load script is designed to be short, and easy to understand and modify.
 
 The most important pieces of information in any load script are the system setup variables at the top of the file.  These will give immediate errors if they aren't set up right.  
 
@@ -41,11 +41,11 @@ template_dir = database_root + "_system_dir/_install_dir/"
 default_object_level = 'doc'
 </code></pre>
 
-database_root is the filesystem path to the web-accessible directory where your PhiloLogic4 database will live, like /var/www/philologic/--so your webserver process will need read access to it, and you will need write access to create the database--and don't forget to keep the slash at the end of the directory, or you'll get errors.  
+`database_root` is the filesystem path to the web-accessible directory where your PhiloLogic4 database will live, like /var/www/philologic/--so your webserver process will need read access to it, and you will need write access to create the database--and don't forget to keep the slash at the end of the directory, or you'll get errors.  
 
-url_root is the HTTP URL that the database_root directory is accessible at: http://your.server.com/philologic/could be a reasonable mapping of the example above, but it will depend on your DNS setup, server configuration, and other hosting issues outside the scope of this document.
+`url_root` is the HTTP URL that the database_root directory is accessible at: http://your.server.com/philologic/could be a reasonable mapping of the example above, but it will depend on your DNS setup, server configuration, and other hosting issues outside the scope of this document.
 
-template_dir, which defaults to database_root + "/_system_dir/_install_dir/", is the directory containing all the scripts, reports, templates, and stylesheets that make up a PhiloLogic4 database application.  If you have customized behaviors or designs that you want reflected in all of the databases you build, you can keep those templates in a directory on their own where they won't get overwritten.  
+`template_dir`, which defaults to database_root + "/_system_dir/_install_dir/", is the directory containing all the scripts, reports, templates, and stylesheets that make up a PhiloLogic4 database application.  If you have customized behaviors or designs that you want reflected in all of the databases you build, you can keep those templates in a directory on their own where they won't get overwritten.  
 
 (At the moment, you can't "clone" the templates from an existing database, because they actual database content can be very large, but we'd very much like to implement that feature in the future to allow for easy reloads.)
 
@@ -53,11 +53,11 @@ Most of the rest of the file is configuration for the Loader class, which does a
 
 
 For now, it's just important to know what options can be specified in the load script:
-default_object_level defines the type of object returned for the purpose of most navigation reports--for most database, this will be "doc", but you might want to use "div1" for dictionary or encyclopedia databases.
-navigable_objects is a list of the object types stored in the database and available for searching, reporting, and navigation--("doc","div1","div2","div3") is the default, but you might want to append "para" if you are parsing interesting metadata on paragraphs, like in drama.  Pages are handled separately, and don't need to be included here.
-filters and post_filters are lists of loader functions--their behavior and design will be documented separately, but they are basically lists of modular loader functions to be executed in order, and so shouldn't be modified carelessly.
-plain_text_obj is a very useful option that generates a flat text file representations of all objects of a given type, like "doc" or "div1", usually for data mining with Mallet or some other tool.
-extra_locals is a catch_all list of extra parameters to pass on to your database later, if you need to--think of it as a "swiss army knife" for passing data from the loader to the database at run-time.
+`default_object_level` defines the type of object returned for the purpose of most navigation reports--for most database, this will be "doc", but you might want to use "div1" for dictionary or encyclopedia databases.
+`navigable_objects` is a list of the object types stored in the database and available for searching, reporting, and navigation--("doc","div1","div2","div3") is the default, but you might want to append "para" if you are parsing interesting metadata on paragraphs, like in drama.  Pages are handled separately, and don't need to be included here.
+`filters` and `post_filters` are lists of loader functions--their behavior and design will be documented separately, but they are basically lists of modular loader functions to be executed in order, and so shouldn't be modified carelessly.
+`plain_text_obj` is a very useful option that generates a flat text file representations of all objects of a given type, like "doc" or "div1", usually for data mining with Mallet or some other tool.
+`extra_locals` is a catch_all list of extra parameters to pass on to your database later, if you need to--think of it as a "swiss army knife" for passing data from the loader to the database at run-time.
 The next section of the load script is setup for the XML Parser:
 
 
