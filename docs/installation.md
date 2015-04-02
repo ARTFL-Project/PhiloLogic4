@@ -6,24 +6,22 @@ Installing PhiloLogic consists of two steps:
 1. Install the C and Python libraries system-wide
 2. Set up a directory in your web server to serve databases from
 
-Downloading
------------
+### Downloading ###
 
 You can find a copy of the latest version of PhiloLogic4 from <a href="https://github.com/ARTFL-Project/PhiloLogic4/releases/tag/v4.0-rc.1">here</a>.
 
 For the rest of this document, we will assume the PhiloLogic source code is installed in 
 your home directory at ~/PhiloLogic4/
 
-Prerequisites
-------------
+### Prerequisites ###
+
 * Python
 * GCC
 * Make
 * `gdbm`_
 * `lxml`_
 
-Installing the C library
-------------------------------
+### Installing the C library ###
 
 Installing PhiloLogic's libraries requires administrator privileges.
 This C library depends on `gdbm`_, which *must* be installed first, to compile correctly.
@@ -37,8 +35,7 @@ In addition to the library, the Makefile also generates two binary executables,
 ``corpus_search`` and ``pack4``, which are then copied into the 
 binary execution directory, usually ``/bin``.
 
-Installing the `Python` ``philologic`` module system-wide
-------------------------------------------------------
+### Installing the `Python` ``philologic`` module system-wide ###
 
 Once ``libphilo`` is installed, we need to install its `Python` bindings
 and library: ``philologic``. Once again, this step requires administrator
@@ -54,8 +51,7 @@ or via the pip command::
     cd ~/PhiloLogic4/python
     sudo pip install .
 
-Setting up PhiloLogic Web Application
----------------------------------------------
+### Setting up PhiloLogic Web Application ###
 
 Each new PhiloLogic database you load, containing one or more TEI-XML files, will be served
 by a its own dedicated copy of PhiloLogic web application.
