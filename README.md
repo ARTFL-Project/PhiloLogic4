@@ -35,10 +35,3 @@ At the end of generation, this directory will look like this tree::
 
 ----
 
-.. Links:
-
-.. _git: http://git-scm.com/
-.. _gdbm: http://www.gnu.org.ua/software/gdbm/
-.. _pip: http://www.pip-installer.org/
-.. _Apache httpd: http://httpd.apache.org/
-.. _lxml: http://lxml.de/
