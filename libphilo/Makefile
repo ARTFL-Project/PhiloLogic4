@@ -14,7 +14,7 @@ db/pack4: db/pack.c db/pack.h db/db.c db/db.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o db/pack4 db/pack.c db/db.c -lgdbm
 
 db/corpus_search: db/corpus_search.c db/db.o db/unpack.o db/bitsvector.o
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o db/corpus_search db/corpus_search.c db/db.o db/unpack.o db/bitsvector.o -lgdbm
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o db/corpus_search db/corpus_search.c db/db.o db/unpack.o db/bitsvector.o -lgdbm -lm
 
 search4: search4.c search.o retreive.o gmap.o word.o blockmap.o level.o out.o plugin/libindex.a db/db.o db/bitsvector.o db/unpack.o
 	$(PH_BUILDENV) $(CC) $(CFLAGS) $(CPPFLAGS) $(PH_CFLAGS) $(LDFLAGS) $(PH_LDSEARCHFLAGS) search4.c search.o retreive.o gmap.o word.o blockmap.o level.o out.o db/db.o db/bitsvector.o db/unpack.o plugin/libindex.a -lgdbm -o search4
