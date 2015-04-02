@@ -55,6 +55,31 @@ At the moment, you can't "clone" the templates from an existing database, becaus
 
 Most of the rest of the file is configuration for the Loader class, which does all of the real work, but the config is kept here, in the script, so you don't have to maintain custom classes for every database. 
 
+<pre><code>
+# Define default object level
+default_object_level = 'doc'
+
+# Define navigable objects
+navigable_objects = ('doc', 'div1', 'div2', 'div3')
+
+# Data tables to store.
+tables = ['toms', 'pages']
+
+# Define filters as a list of functions to call, either those in Loader or outside
+filters = [normalize_unicode_raw_words,make_word_counts,generate_words_sorted,make_object_ancestors(*navigable_objects),
+           make_sorted_toms(*navigable_objects),prev_next_obj(*navigable_objects),generate_pages, make_max_id]
+post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]
+
+## Define text objects to generate plain text files for various machine learning tasks
+## For instance, this could be ['doc', 'div1']
+plain_text_obj = []
+if plain_text_obj:
+    filters.extend([store_in_plain_text(*plaint_text_obj)])
+
+extra_locals = {"db_url": url_root + dbname}
+extra_locals['default_object_level'] = default_object_level
+</code></pre>
+
 For now, it's just important to know what options can be specified in the load script:
 
 `default_object_level` defines the type of object returned for the purpose of most navigation reports--for most database, this will be "doc", but you might want to use "div1" for dictionary or encyclopedia databases.
@@ -70,6 +95,40 @@ For now, it's just important to know what options can be specified in the load s
 #### Configuring the XML Parser ####
 The next section of the load script is setup for the XML Parser:
 
+<pre><code>
+## Set-up database load ###
+###########################
+
+xpaths =  [("doc","."),("div",".//div1"),("div",".//div2"),("div",".//div3"),("para",".//sp"),("page",".//pb")]         
+
+metadata_xpaths = [ # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
+    # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
+    ("doc","./teiHeader//titleStmt/title","title"),
+    ("doc","./teiHeader//titleStmt/author","author"),
+    ("doc", "./text/front//docDate/@value", "date"),
+    ("div","./head","head"),
+    ("div",".@n","n"),
+    ("div",".@id","id"),
+    ("para", ".@who", "who"),
+    ("page",".@n","n"),
+    ("page",".@fac","img")
+]
+
+pseudo_empty_tags = ["milestone"]
+
+## A list of tags to ignore
+suppress_tags = ["teiHeader",".//head"]
+
+word_regex = r"([\w]+)"
+punct_regex = r"([\.?!])"
+
+token_regex = word_regex + "|" + punct_regex 
+
+## Saved in db.locals.py for tokenizing at runtime
+extra_locals["word_regex"] = word_regex
+extra_locals["punct_regex"] = punct_regex
+</code></pre>
+
 The basic layout is this:
 
 `xpaths` is a list of 2-tuples that maps philologic object types to absolute XPaths--that is, XPaths evaluated where `.` refers to the TEI document root element.  You can define multiple XPaths for the same type of object, but you will get much better and more consistent results if you do not.
@@ -80,8 +139,11 @@ The basic layout is this:
 
 `suppress_tags` is a list of tags in which you do not want to perform tokenization at all--that is, no words in them will be searchable via full-text search.  It does not prohibit extracting metadata from the content of those tags.
 
-`word_regex` and `punct_regex` are regular expression fragments that drive our tokenizer.  Each needs to consist of exactly one capturing subgroup so that our tokenizer can use them correctly. They are both fully unicode-aware--usually, the default \w class is fine for words, but in some cases you may need to add apostrophes and such to the word pattern.  Likewise, the punctuation regex pattern fully supports multi-byte utf-8 punctuation.  In both cases you should enter characters as unicode code points, not utf-8 byte strings.
+`word_regex` and `punct_regex` are regular expression fragments that drive our tokenizer.  Each needs to consist of exactly one capturing subgroup so that our tokenizer can use them correctly. They are both fully unicode-aware--usually, the default `\w` class is fine for words, but in some cases you may need to add apostrophes and such to the word pattern.  
+Likewise, the punctuation regex pattern fully supports multi-byte utf-8 punctuation.  In both cases you should enter characters as unicode code points, not utf-8 byte strings.
+
 The next section consists of just a few scary incantations that shouldn't be modified:
+
 
 
 But the following 2 sections are where all the work gets done, and an important place to perform modifications.   First, we construct the Loader object, passing it all the configuration variables we have constructed so far:
