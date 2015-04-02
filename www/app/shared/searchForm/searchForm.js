@@ -52,6 +52,7 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
             extraParams.report = "concordance";
         }
         $scope.formOpen = false;
+        $scope.searchOptionsButton = "Show search options";
         $location.url(URL.objectToUrlString($rootScope.formData, extraParams));
     }
 }]);

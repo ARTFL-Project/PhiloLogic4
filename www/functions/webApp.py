@@ -143,7 +143,6 @@ def concatenate_files(file_list, file_type):
                 else:
                     links.append('<script src="%s"></script>' % file_path)
         except IOError:
-            print >> sys.stderr, 'OS error'
             pass
     string = '\n'.join(string)
     return string, links
