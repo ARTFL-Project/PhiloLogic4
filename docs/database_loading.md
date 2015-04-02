@@ -8,13 +8,38 @@ Loading PhiloLogic databases requires two separate steps:
 ### Configuring the loading script ###
 
 A few important notes:
-* The load script is not installed system-wide--you generally want to keep it near your data, with any other scripts. 
-* The load script has no global configuration file--all configuration is kept separate in each copy of the script that you create.
-* The PhiloLogic4 Parser class is fully configurable from the load script--you can change any Xpaths you want, or even supply a replacement Parser class if you need to.
-* The load script is designed to be short, and easy to understand and modify.
-* The most important pieces of information in any load script are the system setup variables at the top of the file.  These will give immediate errors if they aren't set up right.  
+1. The load script is not installed system-wide--you generally want to keep it near your data, with any other scripts. 
+2. The load script has no global configuration file--all configuration is kept separate in each copy of the script that you create.
+3. The PhiloLogic4 Parser class is fully configurable from the load script--you can change any Xpaths you want, or even supply a replacement Parser class if you need to.
+4. The load script is designed to be short, and easy to understand and modify.
 
+The most important pieces of information in any load script are the system setup variables at the top of the file.  These will give immediate errors if they aren't set up right.  
 
+<pre><code>
+##########################
+## System Configuration ##
+##########################
+
+# Set the filesytem path to the root web directory for your PhiloLogic install.
+database_root = None
+# /var/www/html/philologic/ is conventional for linux,
+# /Library/WebServer/Documents/philologic for Mac OS.
+# Please follow the instructions in INSTALLING before use.
+
+# Set the URL path to the same root directory for your philologic install.
+url_root = None 
+# http://localhost/philologic/ is appropriate if you don't have a DNS hostname.
+
+if database_root is None or url_root is None:
+    print >> sys.stderr, "Please configure the loader script before use.  See INSTALLING in your PhiloLogic distribution."
+    exit()
+
+template_dir = database_root + "_system_dir/_install_dir/"
+# The load process will fail if you haven't set up the template_dir at the correct location.
+
+# Define default object level
+default_object_level = 'doc'
+</code></pre>
 
 database_root is the filesystem path to the web-accessible directory where your PhiloLogic4 database will live, like /var/www/philologic/--so your webserver process will need read access to it, and you will need write access to create the database--and don't forget to keep the slash at the end of the directory, or you'll get errors.  
 
