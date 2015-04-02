@@ -13,7 +13,9 @@ A few important notes:
 * The PhiloLogic4 Parser class is fully configurable from the load script--you can change any Xpaths you want, or even supply a replacement Parser class if you need to.
 * The load script is designed to be short, and easy to understand and modify.
 
-The most important pieces of information in any load script are the system setup variables at the top of the file.  These will give immediate errors if they aren't set up right.  
+The most important pieces of information in any load script are the system setup variables at the top of the file.  These will give immediate errors if they aren't set up right. 
+
+You can find the load script in extras/load_script.py. 
 
 #### System Configuration ####
 
@@ -142,95 +144,50 @@ The basic layout is this:
 `word_regex` and `punct_regex` are regular expression fragments that drive our tokenizer.  Each needs to consist of exactly one capturing subgroup so that our tokenizer can use them correctly. They are both fully unicode-aware--usually, the default `\w` class is fine for words, but in some cases you may need to add apostrophes and such to the word pattern.  
 Likewise, the punctuation regex pattern fully supports multi-byte utf-8 punctuation.  In both cases you should enter characters as unicode code points, not utf-8 byte strings.
 
-The next section consists of just a few scary incantations that shouldn't be modified:
+#### Construct the Loader object ####
 
+The following 2 sections are where all the work gets done, and an important place to perform modifications.   First, we construct the Loader object, passing it all the configuration variables we have constructed so far:
 
+<pre><code>
+####################
+## Load the files ##
+####################
 
-But the following 2 sections are where all the work gets done, and an important place to perform modifications.   First, we construct the Loader object, passing it all the configuration variables we have constructed so far:
-
+l = Loader(data_destination,
+           load_filters=filters,
+           post_filters=post_filters,
+           tables=tables,
+           xpaths=xpaths,
+           metadata_xpaths=metadata_xpaths,
+           pseudo_empty_tags=pseudo_empty_tags,
+           suppress_tags=suppress_tags,
+           token_regex=token_regex,
+           default_object_level=default_object_level,
+           debug=debug)
+</code></pre>
 
 Then we operate the Loader object step-by-step:
 
+<pre><code>
+l.add_files(files)
+filenames = l.list_files()
+## The following line creates a list of the files to parse and sorts the files by filename
+## Should you need to supply a custom sort order from the command line you need to supply the files variable,
+## defined at the top of this script, instead of filenames, like so: 
+## load_metadata = [{"filename":f} for f in files] 
+load_metadata = [{"filename":f} for f in sorted(filenames)]
+l.parse_files(workers,load_metadata)
+l.merge_objects()
+l.analyze()
+l.setup_sql_load()
+l.post_processing()
+l.finish(**extra_locals)
+</code></pre>
 
 And that's it!  
 
-Usually, these load functions should all be executed in the same order, but it is worth paying special attention to the load_metadata variable that is constructed right before l.parse_files is called.  This variable controls the entire parsing process, and is incredibly powerful.  Not only does it let you define any order in which to load your files, but you can also supply any document-level metadata you wish, and change the xpaths, load_filters, or parser class used per file, which can be very useful on complex or heterogeneous data sets.  However, this often requires either some source of stand-off metadata or pre-processing/parsing stage.  
+Usually, these load functions should all be executed in the same order, but it is worth paying special attention to the `load_metadata variable` that is constructed right before `l.parse_files` is called.  This variable controls the entire parsing process, and is incredibly powerful.  Not only does it let you define any order in which to load your files, but you can also supply any document-level metadata you wish, and change the xpaths, load_filters, or parser class used per file, which can be very useful on complex or heterogeneous data sets.  However, this often requires either some source of stand-off metadata or pre-processing/parsing stage.  
 
-For this purpose, we've added a powerful new Loader function called sort_by_metadata which integrates the functions of a PhiloLogic3 style metadata guesser and sorter, while still being modular enough to replaced entirely when necessary.  We'll describe it in more detail in a later post, but for now, you can look at the new artfl_load_script to get a sense of how to construct a more robust, fault-tolerant loader using this new function.
+For this purpose, we've added a powerful new Loader function called `sort_by_metadata` which integrates the functions of a PhiloLogic3 style metadata guesser and sorter, while still being modular enough to replaced entirely when necessary.  We'll describe it in more detail in a later post, but for now, you can look at the new `artfl_load_script.py` to get a sense of how to construct a more robust, fault-tolerant loader using this new function.
 
 https://github.com/ARTFL-Project/PhiloLogic4/blob/master/scripts/artfl_load_script.py
-
-Up next: the architecture of the PhiloLogic Loader class itself.
-
-The ``load_script.py`` is the most important script for generating database and
-web application from web application *template* and `TEI-XML` corpus files,
-but before using it, you **must customize** it for your system, and possibly
-for your data. 
-
-Given a set of this `TEI-XML` files, located for e.g. at ``~/mycorpus/xml`` directory, 
-we could put a copy of ``~/PhiloLogic4/scripts/load_script.py`` in ``~/mycorpus``::
-
-    cp ~/PhiloLogic4/scripts/load_script.py ~/mycorpus/
-
-It could be possible to also tweak the web application template to better
-fullfill your data specification or branding needs, but for this
-example, we assume you'll simply started with bare ``~/PhiloLogic4/www``'s one.
-
-The main *required* variables of ``load_script.py`` to be set are located
-around lines 25-44, and are ``database_root``, ``url_root``
-and ``template_dir``. Following the previous section, we must set
-``database_root`` variable to ``'/var/www/html/mydatabase/'``
-``url_root`` set to``'http://localhost/mydatabase/'``. 
-Finally, since we're using the basic web application template in `
-`~/PhiloLogic4/www``, we should point ``template_dir`` there.
-
-So the three lines to edit are as follows::
-
-    database_root = '/var/www/html/mydatabase/'
-    url_root = 'http://localhost/mydatabase/'
-    template_dir = '~/PhiloLogic4/www/'
-
-
-Loading
-^^^^^^^
-
-Once all files are in place and ``load_script.py`` script is customized, it's time
-for PhiloLogic to actually index your text files, by running the script
-on TEI-XML files::
-
-    python ~/mycorpus/load_script.py [database name] [path to TEI-XML files]
-
-This script takes the following required arguments:
-
-1.  the name of the database to create, which will be the subdirectory
-    into ``/var/www/html`` directory, i.e. ``mydatabase``,
-2.  the paths to each of `TEI-XML` files from which fulfill database content,
-    i.e. ``~/mycorpus/xml/*.xml``.
-
-The full list of arguments ``load_script.py`` accepts is set in its body
-around lines 15-25, and will be displayed  when running ``loader.py`` without
-a database name::
-
-    python ~/mycorpus/load_script.py
-
-The script also accepts optional arguments, among others most common are
-``--workers`` and ``--debug``:
-
-``-w WORKERS`` / ``--workers=WORKERS``:
-    This option set the number of workers the ``loader.py`` will use.
-    It is mostly usefull for multi-cores hardware.
-
-``-d`` / ``--debug``
-    Set both ``load_script.py`` and web application in debug mode.
-
-.. note::
-
-    See ``LOADING.rst`` document for details about loading.
-
-So our command line for loading would be::
-
-    cd /var/www/html
-    python ~/mycorpus/load_script.py mydatabase ~/mycorpus/xml/*.xml
-
-The above command should have populated the ``/var/www/html/mydatabase``
-directory with both web application and data files.
