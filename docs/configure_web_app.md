@@ -1,4 +1,4 @@
-Configuring PhiloLogic's Web Application
+Configuring the Web Application
 ========================================
 
 #### Layout of a PhiloLogic Web Application Instance ####
