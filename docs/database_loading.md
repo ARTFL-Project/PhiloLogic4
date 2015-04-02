@@ -189,3 +189,46 @@ And that's it!
 Usually, these load functions should all be executed in the same order, but it is worth paying special attention to the `load_metadata variable` that is constructed right before `l.parse_files` is called.  This variable controls the entire parsing process, and is incredibly powerful.  Not only does it let you define any order in which to load your files, but you can also supply any document-level metadata you wish, and change the xpaths, load_filters, or parser class used per file, which can be very useful on complex or heterogeneous data sets.  However, this often requires either some source of stand-off metadata or pre-processing/parsing stage.  
 
 For this purpose, we've added a powerful new Loader function called `sort_by_metadata` which integrates the functions of a PhiloLogic3 style metadata guesser and sorter, while still being modular enough to replaced entirely when necessary.
+
+## Loading the database ##
+
+Once all files are in place and ``load_script.py`` script is customized, it's time
+for PhiloLogic to actually index your text files, by running the script
+on TEI-XML files::
+
+    python ~/mycorpus/load_script.py [database name] [path to TEI-XML files]
+
+This script takes the following required arguments:
+
+1.  the name of the database to create, which will be the subdirectory
+    into ``/var/www/html`` directory, i.e. ``mydatabase``,
+2.  the paths to each of `TEI-XML` files from which fulfill database content,
+    i.e. ``~/mycorpus/xml/*.xml``.
+
+The full list of arguments ``load_script.py`` accepts is set in its body
+around lines 15-25, and will be displayed  when running ``loader.py`` without
+a database name::
+
+    python ~/mycorpus/load_script.py
+
+The script also accepts optional arguments, among others most common are
+``--workers`` and ``--debug``:
+
+``-w WORKERS`` / ``--workers=WORKERS``:
+    This option set the number of workers the ``loader.py`` will use.
+    It is mostly usefull for multi-cores hardware.
+
+``-d`` / ``--debug``
+    Set both ``load_script.py`` and web application in debug mode.
+
+.. note::
+
+    See ``LOADING.rst`` document for details about loading.
+
+So our command line for loading would be::
+
+    cd /var/www/html
+    python ~/mycorpus/load_script.py mydatabase ~/mycorpus/xml/*.xml
+
+The above command should have populated the ``/var/www/html/mydatabase``
+directory with both web application and data files.
