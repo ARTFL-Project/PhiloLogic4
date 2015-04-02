@@ -205,13 +205,12 @@ This script takes the following required arguments:
 2.  the paths to each of `TEI-XML` files from which fulfill database content,
     i.e. ``~/mycorpus/xml/*.xml``.
 
-The full list of arguments ``load_script.py`` accepts is set in its body
-around lines 15-25, and will be displayed  when running ``loader.py`` without
+The full list of arguments ``load_script.py`` accepts will be displayed  when running ``loader.py`` without
 a database name::
 
     python ~/mycorpus/load_script.py
 
-The script also accepts optional arguments, among others most common are
+The script also accepts optional arguments, among others most common are::
 ``--workers`` and ``--debug``:
 
 ``-w WORKERS`` / ``--workers=WORKERS``:
@@ -220,10 +219,6 @@ The script also accepts optional arguments, among others most common are
 
 ``-d`` / ``--debug``
     Set both ``load_script.py`` and web application in debug mode.
-
-.. note::
-
-    See ``LOADING.rst`` document for details about loading.
 
 So our command line for loading would be::
 
