@@ -53,3 +53,21 @@ or via the pip command::
 
     cd ~/PhiloLogic4/python
     sudo pip install .
+
+Setting up PhiloLogic Web Application
+---------------------------------------------
+
+Each new PhiloLogic database you load, containing one or more TEI-XML files, will be served
+by a its own dedicated copy of PhiloLogic web application.
+By convention, this database and web app reside together in a directory
+accessible via an HTTP server configured to run Python CGI scripts.
+
+In Mac OS X systems, you will probably want to create a directory at
+``/Library/WebServer/Documents/philologic`` to serve up PhiloLogic databases
+with the URL prefix: ``http://<your_server's_name>/philologic/``; for Linux systems, 
+the proper directory may vary, but ``/var/www/philologic/`` or ``/var/www/html/philologic/``
+
+Configuring your web server is outside of the scope of this document; but the web install
+does come with a preconfigured .htaccess file that allows you to run the Web App.
+Therefore, you need to make sure your server is configured to allow htaccess files.
+if in doubt, ask a friendly sysadmin.. 
