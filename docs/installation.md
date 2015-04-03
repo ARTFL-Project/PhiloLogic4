@@ -8,6 +8,7 @@ Installing PhiloLogic consists of two steps:
 
 You can find more detailed installation instructions for specific OSes here:
 * [Mac OSX] (specific_installations/mac_installation.md)
+* [RedHat (and CentOS)](specific_installations/redhat_installation.md)
 
 ### Downloading ###
 
