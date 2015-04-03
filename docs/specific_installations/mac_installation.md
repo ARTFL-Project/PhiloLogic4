@@ -6,13 +6,17 @@ Note: these instructions were only tested on Mac OSX Yosemite.
 * Install Homebrew for easy installation of dependencies: see <a href="http://brew.sh/">here</a>
 
 * Install gdbm:
+
 `brew install gdbm`
 
 * Install pip:
+
 `sudo easy_install pip`
 
 * Install mako and LXML
+
 `sudo pip install mako`
+
 `sudo pip install lxml`
 
 - Download Philo4: click on download zip
