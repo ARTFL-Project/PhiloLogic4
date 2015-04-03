@@ -47,29 +47,29 @@ Note: these instructions were only tested on Mac OSX Yosemite.
 
 
 * Configure Apache Web Server
+ * Open Apache config file:
+  `sudo vim /etc/apache2/httpd.conf``
 
- `sudo vim /etc/apache2/httpd.conf``
+ * uncomment: `LoadModule cgi_module libexec/apache2/mod_cgi.so`
 
- uncomment: `LoadModule cgi_module libexec/apache2/mod_cgi.so`
-
- In `<Directory "/Library/WebServer/Documents”>`, change `AllowOverride None` to `ÀllowOverride All`
+ * In `<Directory "/Library/WebServer/Documents”>`, change `AllowOverride None` to `ÀllowOverride All`
 
 
 * Create a PhiloLogic4 directory in the webspace and give proper permissions
+ * Create database directory:
+  `sudo mkdir /Library/WebServer/Documents/philologic4/`
 
- `sudo mkdir /Library/WebServer/Documents/philologic4/`
+ * Run one of the two following commands according to your prefered configuration:
 
- Run one of the two following commands according to your prefered configuration:
+  `sudo chmod -R username /Library/WebServer/Documents/philologic4/`
 
- `sudo chmod -R username /Library/WebServer/Documents/philologic4/`
+  OR
 
- OR
+  `sudo chgrp -R group /Library/WebServer/Documents/philologic4/`
 
- `sudo chgrp -R group /Library/WebServer/Documents/philologic4/`
+ * Then run:
 
- Then run:
-
- `sudo chmod 775 /Library/WebServer/Documents/philologic4/`
+  `sudo chmod 775 /Library/WebServer/Documents/philologic4/`
 
 
 * Start Apache Server
