@@ -7,7 +7,7 @@ Installing PhiloLogic consists of two steps:
 2. Set up a directory in your web server to serve databases from
 
 You can find more detailed installation instructions for specific OSes here:
-* [Mac OSX] (specific_installations/mac_instructions.md)
+* [Mac OSX] (specific_installations/mac_installation.md)
 
 ### Downloading ###
 
