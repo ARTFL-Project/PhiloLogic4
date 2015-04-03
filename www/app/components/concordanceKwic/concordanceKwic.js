@@ -8,7 +8,7 @@ philoApp.controller('concordanceKwicCtrl', ['$rootScope', '$location', 'accessCo
         var urlString = URL.objectToUrlString($rootScope.formData, {report: "bibliography"});
         $location.url(urlString);
     }
-    
+        
     vm.loading = true;
     request.report($rootScope.formData).then(function(results) {
         vm.results = results.data;
