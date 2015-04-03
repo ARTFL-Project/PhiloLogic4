@@ -28,7 +28,8 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
     hl = open(filename, "w")
     err = open("/dev/null", "w")
     freq_file = db.locals["db_path"]+"/frequencies/normalized_word_frequencies"
-    print >> sys.stderr, "FORKING"
+    if (query_debug):
+        print >> sys.stderr, "FORKING"
     pid = os.fork()
     if pid == 0:
         os.umask(0)
@@ -39,7 +40,8 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
             os._exit(0)
         else:
             #now we're detached from the parent, and can do our work.
-            print >> sys.stderr, "WORKER DETACHED at ", datetime.now() - tstart
+            if query_debug:
+                print >> sys.stderr, "WORKER DETACHED at ", datetime.now() - tstart
 #            args = ["search4", db.path,"--limit",str(limit)]
             args = ["corpus_search"]
             if corpus_file:
@@ -52,7 +54,8 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
             args.extend(("-o","binary",db.path,));
 
             worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err)
-            print >> sys.stderr, "WORKER STARTED:"," ".join(args);
+            if query_debug:
+                print >> sys.stderr, "WORKER STARTED:"," ".join(args);
             if query_debug == True:
                 print >> sys.stderr, "DEBUGGING"
                 query_log_fh = filename + ".terms"
@@ -220,8 +223,11 @@ def invert_grep_exact(token, in_fh, dest_fh):
     #can't wait because input isn't ready yet.
     return grep_proc
 
+class Fake_DB:
+    pass
+
 if __name__ == "__main__":
-    freq_file = sys.argv[1]
+    path = sys.argv[1]
     terms = sys.argv[2:]
     parsed = parse_query(" ".join(terms))
     print >> sys.stderr, "PARSED:", parsed
@@ -229,5 +235,11 @@ if __name__ == "__main__":
     print >> sys.stderr, "GROUPED:", grouped
     split = split_terms(grouped)
     print >> sys.stderr, "parsed %d terms:" % len(split), split
-    freq_file = "/Library/WebServer/Documents/philologic/plain_text_test/data/frequencies/normalized_word_frequencies"
+    fake_db = Fake_DB()
+    fake_db.locals = {"db_path":path + "/data/"}
+    fake_db.path = path + "/data/"
+    fake_db.encoding = "utf-8"
+    freq_file = path + "/data/frequencies/normalized_word_frequencies"    
+#    freq_file = "/Library/WebServer/Documents/philologic/plain_text_test/data/frequencies/normalized_word_frequencies"
     expand_query_not(split,freq_file,sys.stdout)
+    hits = query(fake_db," ".join(terms),query_debug = True)
