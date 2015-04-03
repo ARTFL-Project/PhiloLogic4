@@ -2,20 +2,27 @@ Installing PhiloLogic on RedHat (and CentOS)
 ============================================
 
 * Install gdbm
+
   `sudo yum install gdbm gbdm-devel`
 
 * Install lxml
+
   `sudo yum install lxml`
   
 * [Download PhiloLogic](releases/)
 
 * Compile and install C Core
+
   `cd lib`
-  `make``
-  `sudo make install``
+  
+  `make`
+  
+  `sudo make install`
 
 * Install Python bindings
+
   `cd python`
+  
   `sudo python setup.py install`
 
 * Configure Apache
