@@ -7,41 +7,62 @@ Note: these instructions were only tested on Mac OSX Yosemite.
 
 * Install gdbm:
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`brew install gdbm`
+`brew install gdbm`
 
 * Install pip:
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`sudo easy_install pip`
+`sudo easy_install pip`
 
 * Install mako and LXML
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`sudo pip install mako`
+`sudo pip install mako`
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`sudo pip install lxml`
+`sudo pip install lxml`
 
-- Download Philo4: click on download zip
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In the future, go in releases. 
+* Download PhiloLogic from [here](releases/) and unpack the tarball:
 
-- Install search core:
-in lib/
-make
-sudo make install
+`tar -xf PhiloLogic4.xyz.tar.gz`
 
-- Install Python bindings:
-in python/
-sudo python setup.py install
+`cd PhiloLogic4/`
 
-- Configure Apache:
-sudo vim /etc/apache2/httpd.conf
-* uncomment: LoadModule cgi_module libexec/apache2/mod_cgi.so
-* In <Directory "/Library/WebServer/Documents”>, change AllowOverride None to All
+* Compile and install the search core:
 
-- Create philo4 directory and give proper permissions
-sudo mkdir /Library/WebServer/Documents/philologic4/
-sudo chmod -R username /Library/WebServer/Documents/philologic4/
+`cd lib``
+
+`make`
+
+`sudo make install`
+
+* Install Python bindings:
+
+`cd ..`
+
+`sudo python setup.py install`
+
+* Configure Apache Web Server:
+
+`sudo vim /etc/apache2/httpd.conf``
+
+uncomment: `LoadModule cgi_module libexec/apache2/mod_cgi.so`
+
+In `<Directory "/Library/WebServer/Documents”>`, change `AllowOverride None` to `ÀllowOverride All`
+
+* Create a PhiloLogic4 directory in the webspace and give proper permissions
+
+`sudo mkdir /Library/WebServer/Documents/philologic4/`
+
+Run one of the two following commands according to your prefered configuration:
+
+`sudo chmod -R username /Library/WebServer/Documents/philologic4/`
+
 OR
-sudo chgrp -R group /Library/WebServer/Documents/philologic4/
-sudo chmod 775 /Library/WebServer/Documents/philologic4/
 
-- Start apache
-sudo apachectl start
+`sudo chgrp -R group /Library/WebServer/Documents/philologic4/`
+
+Then run:
+
+`sudo chmod 775 /Library/WebServer/Documents/philologic4/`
+
+* Start Apache Server:
+
+`sudo apachectl start`
