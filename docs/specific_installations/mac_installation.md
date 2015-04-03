@@ -57,19 +57,19 @@ Note: these instructions were only tested on Mac OSX Yosemite.
 
 * Create a PhiloLogic4 directory in the webspace and give proper permissions
  * Create database directory:
-  `sudo mkdir /Library/WebServer/Documents/philologic4/`
+   `sudo mkdir /Library/WebServer/Documents/philologic4/`
 
  * Run one of the two following commands according to your prefered configuration:
 
-  `sudo chmod -R username /Library/WebServer/Documents/philologic4/`
+   `sudo chmod -R username /Library/WebServer/Documents/philologic4/`
 
-  OR
+    OR
 
-  `sudo chgrp -R group /Library/WebServer/Documents/philologic4/`
+    `sudo chgrp -R group /Library/WebServer/Documents/philologic4/`
 
  * Then run:
 
-  `sudo chmod 775 /Library/WebServer/Documents/philologic4/`
+   `sudo chmod 775 /Library/WebServer/Documents/philologic4/`
 
 
 * Start Apache Server
