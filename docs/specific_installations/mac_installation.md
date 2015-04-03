@@ -7,20 +7,20 @@ Note: these instructions were only tested on Mac OSX Yosemite.
 
 * Install gdbm:
 
-`brew install gdbm`
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`brew install gdbm`
 
 * Install pip:
 
-`sudo easy_install pip`
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`sudo easy_install pip`
 
 * Install mako and LXML
 
-`sudo pip install mako`
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`sudo pip install mako`
 
-`sudo pip install lxml`
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`sudo pip install lxml`
 
 - Download Philo4: click on download zip
-In the future, go in releases. 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In the future, go in releases. 
 
 - Install search core:
 in lib/
