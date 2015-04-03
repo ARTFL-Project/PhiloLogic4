@@ -6,6 +6,9 @@ Installing PhiloLogic consists of two steps:
 1. Install the C and Python libraries system-wide
 2. Set up a directory in your web server to serve databases from
 
+You can find more detailed installation instructions for specific OSes here:
+* [Mac OSX] (specific_installations/mac_instructions.md)
+
 ### Downloading ###
 
 You can find a copy of the latest version of PhiloLogic4 from <a href="https://github.com/ARTFL-Project/PhiloLogic4/releases/tag/v4.0-rc.1">here</a>.
