@@ -50,7 +50,13 @@ Note: these instructions were only tested on Mac OSX Yosemite.
  * Open Apache config file:
   `sudo vim /etc/apache2/httpd.conf``
 
- * uncomment: `LoadModule cgi_module libexec/apache2/mod_cgi.so`
+ * Change:
+ 
+   `# LoadModule cgi_module libexec/apache2/mod_cgi.so`
+
+    to:
+   
+    `LoadModule cgi_module libexec/apache2/mod_cgi.so`
 
  * In `<Directory "/Library/WebServer/Documents”>`, change `AllowOverride None` to `ÀllowOverride All`
 
