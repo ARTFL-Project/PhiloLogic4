@@ -36,7 +36,7 @@
                 <div class="panel-body">
                     <table id="year-range-selectors" class="table table-bordered" data-type="year">
                         <tr ng-repeat="ranges in dateRanges">
-                            <td ng-repeat="range in ::ranges" ng-click="lp.getContent('year', '{{ ::range.start }}-{{ ::range.end }}')">{{ ::range.start }}-{{ ::range.end }}</td>
+                            <td ng-repeat="range in ::ranges" ng-click="lp.getContent('date', '{{ ::range.start }}-{{ ::range.end }}')">{{ ::range.start }}-{{ ::range.end }}</td>
                         </tr>
                     </table>
                 </div>
