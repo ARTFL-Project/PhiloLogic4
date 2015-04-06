@@ -87,7 +87,6 @@ philoApp.directive('dictionaryLandingPage', ['$rootScope', 'request', function($
 
 philoApp.directive('landingPageContent', ['$rootScope', 'request', function($rootScope, request) {
     var getContent = function(scope, query) {
-        query = scope.$eval(query);
         scope.contentType = query.contentType;
         scope.range = query.range;
         request.script({
@@ -128,11 +127,19 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
                 title: "col-xs-12",
                 year: "col-xs-12"
                 }
+            if (scope.philoConfig.landing_page_browsing.default_display) {
+                var query = {
+                    contentType: scope.philoConfig.landing_page_browsing.default_display.type,
+                    range: scope.philoConfig.landing_page_browsing.default_display.range
+                }
+                getContent(scope, query);
+            }
             attrs.$observe('name', function(query) {
                 if (query !== '') {
                     if (scope.displayLimit > 4) {
                         scope.displayLimit = 4;
                     }
+                    query = scope.$eval(query);
                     getContent(scope, query);
                     scope.contentClass = contentTypeClass[scope.contentType];
                 }
