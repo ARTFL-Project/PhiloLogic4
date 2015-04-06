@@ -2,8 +2,16 @@
 
 philoApp.directive('defaultLandingPage', ['$rootScope', function($rootScope) {
     var setupPage = function(scope) {
-        scope.authorRanges = $rootScope.philoConfig.landing_page_browsing.author;
-        scope.titleRanges = $rootScope.philoConfig.landing_page_browsing.title;
+        if ($rootScope.philoConfig.landing_page_browsing.author.length > 0) {
+            scope.authorRanges = $rootScope.philoConfig.landing_page_browsing.author;
+        } else {
+            scope.authorRanges = false;
+        }
+        if ($rootScope.philoConfig.landing_page_browsing.title.length > 0) {
+            scope.titleRanges = $rootScope.philoConfig.landing_page_browsing.title;
+        } else {
+            scope.titleRanges = false;
+        }
         scope.authorOffset = "";
         scope.titleOffset = "";
         
@@ -89,6 +97,7 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
     var getContent = function(scope, query) {
         scope.contentType = query.contentType;
         scope.range = query.range;
+        scope.loadingContent = true;
         request.script({
             script: 'get_landing_page_content.py',
             landing_page_content_type: scope.contentType,
@@ -114,6 +123,7 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
                 oldPrefix = prefix;
             }
             scope.resultGroups.push({prefix: prefix, results: results});
+            scope.loadingContent = false;
         })
     }
     return {
@@ -140,6 +150,7 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
                         scope.displayLimit = 4;
                     }
                     query = scope.$eval(query);
+                    scope.loadingContent = true;
                     getContent(scope, query);
                     scope.contentClass = contentTypeClass[scope.contentType];
                 }
