@@ -2,12 +2,12 @@
 
 philoApp.directive('defaultLandingPage', ['$rootScope', function($rootScope) {
     var setupPage = function(scope) {
-        if ($rootScope.philoConfig.landing_page_browsing.author.length > 0) {
+        if (typeof($rootScope.philoConfig.landing_page_browsing.author) !== 'undefined' && $rootScope.philoConfig.landing_page_browsing.author.length > 0) {
             scope.authorRanges = $rootScope.philoConfig.landing_page_browsing.author;
         } else {
             scope.authorRanges = false;
         }
-        if ($rootScope.philoConfig.landing_page_browsing.title.length > 0) {
+        if (typeof($rootScope.philoConfig.landing_page_browsing.title) !== 'undefined' && $rootScope.philoConfig.landing_page_browsing.title.length > 0) {
             scope.titleRanges = $rootScope.philoConfig.landing_page_browsing.title;
         } else {
             scope.titleRanges = false;
