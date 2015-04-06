@@ -607,13 +607,13 @@ class Loader(object):
         print >> web_config, "# For author and title, you have to define a list of ranges, such as 'author': ['A-L', 'M-Z'],"
         print >> web_config, "# and for date you need to define three variables: start_date, end_date, interval"
         print >> web_config, '# e.g. "date": {"start": 1600, "end": 1800, "interval": 25}'
-        print >> web_config, '# default_value allows you to load content by default. It is a dictionary that contains a type'
-        print >> web_config, '# and a range, e.g. = "default_value": {"type": "title": "range": "A-D"}'
+        print >> web_config, '# default_display allows you to load content by default. It is a dictionary that contains a type'
+        print >> web_config, '# and a range, e.g. = "default_display": {"type": "title": "range": "A-D"}'
         print >> web_config, '# Note that no default is provided for "date" or default_value: they are therefore disabled'
         print >> web_config, """landing_page_browsing = {"author": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
         print >> web_config, """                         "title": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
         print >> web_config, """                         "date": {},"""
-        print >> web_config, """                         "default_value: {}}"""
+        print >> web_config, """                         "default_display: {}}"""
         print >> web_config, "# The dico_letter_range variables defines a set of letters corresponding to the first"
         print >> web_config, "# letter of a headword. This generates a set of buttons for browsing the database available"
         print >> web_config, "# on the landing page. The default represents the entire roman alphabet"
