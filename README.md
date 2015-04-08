@@ -10,3 +10,6 @@ description, you can refer to [our research publications](<http://http://jtei.re
 * [**Installation**](docs/installation.md)
 * [**Database Loading**](docs/database_loading.md)
 * [**Configuring the Web Application**](docs/configure_web_app.md)
+
+
+Note: The PhiloLogic4 Web App will only work on modern browsers: Chrome, Firefox, Safari, Opera, Internet Explorer 9 and up
