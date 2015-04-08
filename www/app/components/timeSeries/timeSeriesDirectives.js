@@ -240,7 +240,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                 width: width + 'px'
                 };
             scope.divisionWidth = {width: width + 'px'};
-            if (typeof(sessionStorage[$location.url()]) === 'undefined' || $rootScope.philoConfig.debug === true) {
+            if (typeof(sessionStorage[$location.url()]) === 'undefined' || $rootScope.philoConfig.production === false) {
                 getTimeSeries(scope);
             } else {
                 retrieveFromStorage(scope);

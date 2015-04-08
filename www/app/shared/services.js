@@ -152,6 +152,7 @@ philoApp.factory('progressiveLoad', function() {
 
 philoApp.factory('saveToLocalStorage', ['$location', function($location) {
     var save = function(results, urlString) {
+        console.log(urlString)
         if (typeof(urlString) === 'undefined') {
             urlString = $location.url();
         }

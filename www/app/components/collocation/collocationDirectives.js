@@ -29,19 +29,25 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
             html += searchLink + word + '</a> </span>';
         }
         $("#collocate_counts").html(html);
+        console.log($("#collocate_counts"))
         $("#collocate_counts span").tagcloud();
         $("#collocate_counts").velocity('fadeIn');
+        console.log($("#collocate_counts"))
     }
     return {
         restrict: 'E',
         template: '<div id="word_cloud" class="word_cloud">' +
-                  '<div id="collocate_counts" class="collocation_counts">{{ cloud }}</div></div>',
+                  '<div id="collocate_counts" class="collocation_counts"></div></div>',
         replace: true,
         link: function(scope, element, attrs) {
                 scope.$watch('sortedLists', function() {
                     if (!$.isEmptyObject(scope.sortedLists)) {
+                        console.log(scope.sortedLists.all)
                         scope.cloud = buildCloud(scope, scope.sortedLists.all);
                     }
+                });
+                scope.$on('$destroy', function() {
+                    $('.cloud_term').off();
                 });
         }
         
@@ -51,7 +57,7 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
 philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL', 'progressiveLoad', 'saveToLocalStorage', "request",
                                         function($rootScope, $http, $location, URL, progressiveLoad, save, request) {
     var getCollocations = function(scope) {
-        if (typeof(sessionStorage[$location.url()]) === 'undefined' || $rootScope.philoConfig.debug === true) {
+        if (typeof(sessionStorage[$location.url()]) === 'undefined' || $rootScope.philoConfig.production === false) {
             $('#philologic_collocation').velocity('fadeIn', {duration: 200});
             $(".progress").show();
             var collocObject;
@@ -102,7 +108,8 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
             scope.collocation.percent = 100;
             scope.done = true;
             activateLinks();
-            save({results: scope.sortedLists, resultsLength: scope.resultsLength, filterList: scope.filterList});
+            // Collocation cloud not showing when loading cached searches one after the other
+            //save({results: scope.sortedLists, resultsLength: scope.resultsLength, filterList: scope.filterList});
         }
     }
     var activateLinks = function() {
@@ -119,8 +126,9 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
         scope.sortedLists = savedObject.results;
         scope.resultsLength = savedObject.resultsLength;
         scope.filterList = savedObject.filterList;
-        scope.percent = 100;
+        scope.collocation.percent = 100;
         scope.done = true;
+        scope.collocation.loading = false;
         $('#philologic_collocation').velocity('fadeIn', {duration: 200});
     }
     return {
@@ -137,7 +145,7 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
                 }
             });
             scope.$on('$destroy', function() {
-                $('.colloc_link, .cloud_term').off();
+                $('.colloc_link').off();
             });
         }
     }
