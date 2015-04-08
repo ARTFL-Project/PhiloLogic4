@@ -39,7 +39,7 @@ In addition to the library, the Makefile also generates two binary executables,
 ``corpus_search`` and ``pack4``, which are then copied into the 
 binary execution directory, usually ``/bin``.
 
-### Installing the `Python` ``philologic`` module system-wide ###
+### Installing the Python philologic module system-wide ###
 
 Once ``libphilo`` is installed, we need to install its `Python` bindings
 and library: ``philologic``. Once again, this step requires administrator

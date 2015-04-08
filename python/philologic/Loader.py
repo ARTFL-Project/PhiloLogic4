@@ -613,7 +613,7 @@ class Loader(object):
         print >> web_config, """landing_page_browsing = {"author": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
         print >> web_config, """                         "title": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
         print >> web_config, """                         "date": {},"""
-        print >> web_config, """                         "default_display: {}}"""
+        print >> web_config, """                         "default_display": {}}"""
         print >> web_config, "# The dico_letter_range variables defines a set of letters corresponding to the first"
         print >> web_config, "# letter of a headword. This generates a set of buttons for browsing the database available"
         print >> web_config, "# on the landing page. The default represents the entire roman alphabet"
