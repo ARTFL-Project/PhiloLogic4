@@ -34,7 +34,7 @@ database/
 </code></pre>
 
 There are four distinct sections inside the application:
-* The `app/` directory: this contains the web client, and is organized according to functionality and shared components. You should need to modify the web client.
+* The `app/` directory: this contains the web client, and is organized according to functionality and shared components.
 * The `data/`directory contains all the indexes and SQLite tables needing for search and retrieval, as well as database and web configuration files.
 * The `reports/` directory, which contains the major search reports which fetch data from the database by interfacing with the core library, and then return a specialized results report as a JSON object. These reports include concordance, KWIC (Key Word In Context), collocation, and time series. 
 * The `functions/` directory, which contains all of the generic functions used by individual reports. These functions include parsing the query string, loading web configuration options, access control, etc. 

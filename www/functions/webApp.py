@@ -89,11 +89,11 @@ def build_html_page(config):
 def load_CSS():
     mainCSS = os.path.join(path, "app/assets/css/philoLogic.css")
     if os.path.exists(mainCSS):
-        if config.debug:
+        if not config.production:
             css_links = concat_CSS()
     else:
         css_links = concat_CSS()
-    if not config.debug:
+    if config.production:
         return '<link rel="stylesheet" href="app/assets/css/philoLogic.css">'
     else:
         return '\n'.join(css_links)
@@ -109,11 +109,11 @@ def concat_CSS():
 def load_JS():
     mainJS = os.path.join(path, "app/assets/js/philoLogic.js")
     if os.path.exists(mainJS):
-        if config.debug:
+        if not config.production:
             js_links, js_plugins_links = concat_JS()
     else:
         js_links, js_plugins_links = concat_JS()
-    if not config.debug:
+    if config.production:
         scripts = '<script src="app/assets/js/plugins/philoLogicPlugins.js"></script>'
         scripts += '<script src="app/assets/js/philoLogic.js"></script>'
         return scripts
@@ -137,7 +137,7 @@ def concatenate_files(file_list, file_type):
     for file_path in file_list:
         try:
             string.append(open(os.path.join(path, file_path)).read())
-            if config.debug:
+            if not config.production:
                 if file_type == "css":
                     links.append('<link rel="stylesheet" href="%s">' % file_path)
                 else:

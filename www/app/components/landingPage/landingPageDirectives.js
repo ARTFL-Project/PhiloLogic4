@@ -137,7 +137,7 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
                 title: "col-xs-12",
                 year: "col-xs-12"
                 }
-            if (scope.philoConfig.landing_page_browsing.default_display) {
+            if (!$.isEmptyObject(scope.philoConfig.landing_page_browsing.default_display)) {
                 var query = {
                     contentType: scope.philoConfig.landing_page_browsing.default_display.type,
                     range: scope.philoConfig.landing_page_browsing.default_display.range

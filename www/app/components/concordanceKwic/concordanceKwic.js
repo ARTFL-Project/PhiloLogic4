@@ -4,11 +4,12 @@ philoApp.controller('concordanceKwicCtrl', ['$rootScope', '$location', 'accessCo
     var vm = this;
     vm.authorized = $rootScope.access.concordance;
     $rootScope.formData = angular.copy($location.search());
-    if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
-        var urlString = URL.objectToUrlString($rootScope.formData, {report: "bibliography"});
-        $location.url(urlString);
+    if ($rootScope.report !== "bibliography") {
+        if ($rootScope.formData.q === "" || typeof($rootScope.formData.q) === 'undefined') {
+            var urlString = URL.objectToUrlString($rootScope.formData, {report: "bibliography"});
+            $location.url(urlString);
+        }        
     }
-        
     vm.loading = true;
     request.report($rootScope.formData).then(function(results) {
         vm.results = results.data;
