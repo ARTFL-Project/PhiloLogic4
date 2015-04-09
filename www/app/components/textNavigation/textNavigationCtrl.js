@@ -79,16 +79,8 @@ philoApp.animation('.toc-slide', function() {
         },
         removeClass : function(element, className, done) {
             if (className == 'ng-hide') {
-                var windowHeight = $(window).height();
-                var bookPageHeight = $('#book-page').height() + 50;
-                if ((windowHeight -120) < bookPageHeight) {
-                    var height = windowHeight - 120;
-                } else {
-                    var height = windowHeight - $('#book-page').offset().top - 80;
-                }
-                $('#toc-content').css({
-                    maxHeight: height + 'px'
-                    });
+                var height = $(window).height() - $('#book-page').offset().top - 80;
+                $('#toc-content').css('max-height', height + 'px');
                 $('#toc-container').addClass('display');
                 $(element).velocity('slideDown', {duration: 300, complete: done});
                 $(element).velocity({opacity: 1}, {duration: 300, queue: false});

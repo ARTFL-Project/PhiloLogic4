@@ -270,7 +270,7 @@ philoApp.directive('facets', ['$rootScope', '$location', 'URL', 'progressiveLoad
     }
 }]);
 
-philoApp.directive('pages', ['URL', function(URL) {
+philoApp.directive('pages', ['$location', 'URL', function($location, URL) {
     var buildPages = function(scope, morePages) {
         var start = scope.concKwic.results.description.start;
         var resultsPerPage = parseInt(scope.formData.results_per_page) || 25;
@@ -348,7 +348,7 @@ philoApp.directive('pages', ['URL', function(URL) {
                     page = "Last";
                 }
             }
-			var href = URL.objectToUrlString(scope.formData, {start: pageStart, end: pageEnd});
+			var href = URL.objectToUrlString($location.search(), {start: pageStart, end: pageEnd});
             pageObject.push({display: page, href: href, active: active});
         }
         return pageObject;
