@@ -23,11 +23,11 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
     origpid = os.getpid()
     if not filename:
         hfile = str(origpid) + ".hitlist"
-    dir = db.locals["db_path"] + "/hitlists/"
+    dir = db.path + "/hitlists/"
     filename = filename or (dir + hfile)
     hl = open(filename, "w")
     err = open("/dev/null", "w")
-    freq_file = db.locals["db_path"]+"/frequencies/normalized_word_frequencies"
+    freq_file = db.path+"/frequencies/normalized_word_frequencies"
     if (query_debug):
         print >> sys.stderr, "FORKING"
     pid = os.fork()
