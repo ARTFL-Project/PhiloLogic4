@@ -646,39 +646,29 @@ def handle_command_line(argv):
         parser.print_help()
         sys.exit()
 
-    ## Number of workers used for parsing: you can define your own value on the
-    ## command-line, stay with the default, or define your own value here
     workers = options.workers or 2
-
-
-    ## Define the type of output you want. By default, you get console output for your database
-    ## load. You can however set a quiet option on the command-line, or set console_output
-    ## to False here.
     console_output = True
     if options.quiet:
         console_output = False
-
-    ## Define a path for a log of your database load. This option can be defined on the command-line
-    ## or here. It's disabled by default.
     log = options.log or False
-
-    ## Set debugging if you want to keep all the parsing data, as well as debug the templates
     debug = options.debug or False
 
     return dbname,files, workers, console_output, log, debug
 
 
-def setup_db_dir(db_destination, template_dir):
+def setup_db_dir(db_destination, template_dir, safe=False):
     try:
         os.mkdir(db_destination)
     except OSError:
-        ## maybe test to see what db_destination is
-        print "The database folder could not be created at %s" % db_destination
-        print "Do you want to delete this database? Yes/No"
-        choice = raw_input().lower()
-        if choice.startswith('y'):
-            os.system('rm -rf %s' % db_destination)
-            os.mkdir(db_destination)
+        if not safe:
+            print "The database folder could not be created at %s" % db_destination
+            print "Do you want to delete this database? Yes/No"
+            choice = raw_input().lower()
+            if choice.startswith('y'):
+                os.system('rm -rf %s' % db_destination)
+                os.mkdir(db_destination)
+            else:
+                sys.exit()
         else:
             sys.exit()
 
