@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
- 
+import json
+
 db_locals_defaults = {
     'metadata_fields': {
         'value': [],
@@ -190,6 +191,8 @@ class Config(object):
   def __init__(self, filename, defaults):
     print >> sys.stderr, "INIT", type(self), type(filename), type(defaults)
     self.filename = filename
+    abspath = os.abspath(filename)
+    self.db_path = abspath[:abspath.index("/data/")]
     print >> sys.stderr, "FILENAME", type(self.filename)
     self.defaults = defaults
     print >> sys.stderr, "DEFAULTS", type(self.defaults)
@@ -205,10 +208,12 @@ class Config(object):
       execfile(self.filename,globals(),self.data)
 
   def __getitem__(self, item):
+      if "stopwords" in self.defaults and item == "stopwords":
+
       return self.data[item]
 
   def __getattr__(self,key):
-      return self.data[key]
+      return self[key]
  
   def __setitem__(self, item, value):
       self.data[item] = value
