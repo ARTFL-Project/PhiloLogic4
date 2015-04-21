@@ -208,8 +208,6 @@ class Config(object):
       execfile(self.filename,globals(),self.data)
 
   def __getitem__(self, item):
-      if "stopwords" in self.defaults and item == "stopwords":
-
       return self.data[item]
 
   def __getattr__(self,key):
