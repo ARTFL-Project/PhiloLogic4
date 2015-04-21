@@ -54,7 +54,7 @@ def query_lowlevel(db,param_dict):
     clauses = []
     # if column = _philo_id I can do a special query here
     for column,values in param_dict.items():
-        norm_path = db.locals["db_path"]+"/frequencies/normalized_" + column + "_frequencies"
+        norm_path = db.path+"/frequencies/normalized_" + column + "_frequencies"
         for v in values:
             parsed = parse_query(v)            
             print >> sys.stderr, "METADATA_TOKENS:", parsed

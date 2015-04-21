@@ -106,7 +106,7 @@ class Loader(object):
 
     def add_files(self,files):
         for f in files:
-            os.system("cp %s %s" % (f,self.textdir))
+            os.system("cp %s %s/%s" % (f,self.textdir, f.replace(" ","_").replace("'","_")) )
         os.system("chmod 775 %s*" % self.textdir)
 
     def status(self):

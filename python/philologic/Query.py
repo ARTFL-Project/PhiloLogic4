@@ -23,11 +23,11 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
     origpid = os.getpid()
     if not filename:
         hfile = str(origpid) + ".hitlist"
-    dir = db.locals["db_path"] + "/hitlists/"
+    dir = db.path + "/hitlists/"
     filename = filename or (dir + hfile)
     hl = open(filename, "w")
     err = open("/dev/null", "w")
-    freq_file = db.locals["db_path"]+"/frequencies/normalized_word_frequencies"
+    freq_file = db.path+"/frequencies/normalized_word_frequencies"
     if (query_debug):
         print >> sys.stderr, "FORKING"
     pid = os.fork()
@@ -223,9 +223,6 @@ def invert_grep_exact(token, in_fh, dest_fh):
     #can't wait because input isn't ready yet.
     return grep_proc
 
-class Fake_DB:
-    pass
-
 if __name__ == "__main__":
     path = sys.argv[1]
     terms = sys.argv[2:]
@@ -235,6 +232,9 @@ if __name__ == "__main__":
     print >> sys.stderr, "GROUPED:", grouped
     split = split_terms(grouped)
     print >> sys.stderr, "parsed %d terms:" % len(split), split
+
+    class Fake_DB: pass
+
     fake_db = Fake_DB()
     fake_db.locals = {"db_path":path + "/data/"}
     fake_db.path = path + "/data/"
