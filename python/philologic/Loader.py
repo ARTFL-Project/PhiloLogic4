@@ -17,6 +17,7 @@ import philologic.LoadFilters as LoadFilters
 import philologic.PostFilters as PostFilters
 from philologic.PostFilters import make_sql_table
 from lxml import etree
+from philologic.Config import *
 
 from philologic.utils import OutputHandler
 
@@ -543,83 +544,15 @@ class Loader(object):
 
     def write_web_config(self, **extra_locals):
         """ Write configuration variables for the Web application"""
-        web_config = open(self.destination + "/web_config.cfg", "w")
-        print >> web_config, "# -*- coding: utf-8 -*-"
-        print >> web_config, "####################################################"
-        print >> web_config, "#### Web configuration options for PhiloLogic4 #####"
-        print >> web_config, "####################################################"
-        print >> web_config, "### All variables must be in valid Python syntax ###"
-        print >> web_config, "####################################################\n"
-        dbname = os.path.basename(re.sub("/data/?$", "", self.destination))
-        print >> web_config, "\n# The dbname variable is the title name in the HTML header"
-        print >> web_config, "dbname = '%s'" % dbname
-        print >> web_config, "\n# The db_url variable is the root URL for your database on the web"
-        print >> web_config, "db_url = '%s'" % extra_locals['db_url']
-        print >> web_config, "# Configure access control with True or False."
-        print >> web_config, "# Note that if you want access control, you have to provide a login.txt file inside your /data directory,"
-        print >> web_config, "# otherwise access will remain open."
-        print >> web_config, "access_control = False"
-        print >> web_config, "\n# Do not set to False unless you want to make changes in the Web Client in the app/ directory"
-        print >> web_config, "production = True"
-        print >> web_config, "\n# The search_reports variable sets which search report is viewable in the search form"
-        print >> web_config, "# Available reports are concordance, kwic, collocation, and time_series"
-        print >> web_config, "search_reports = ['concordance', 'kwic', 'collocation', 'time_series']"
-        print >> web_config, "\n# The metadata variable sets which metadata field is viewable in the search form"
-        print >> web_config, "metadata = %s" % self.metadata_fields
-        print >> web_config, "\n# The metadata_aliases variable allows to display a metadata variable under a different name in the HTML"
-        print >> web_config, "# For example, you could rename the who metadata to Speaker, and the create_date variable to Date like so:"
-        print >> web_config, "# metadata_aliases = {'who': 'Speaker', 'create_date', 'Date'}"
-        print >> web_config, "metadata_aliases = {}"
-        print >> web_config, "\n# The facets variable sets which metadata field can be used as a facet"
-        print >> web_config, "# The object format is a list of objects like the following:"
-        print >> web_config, "# [{'Author': 'author'}, {'Title': ['title', 'author']}"
-        print >> web_config, "# The dict key should describe what the facets will do, and the"
-        print >> web_config, "# dict value, which can be a string or a list, should list the metadata"
-        print >> web_config, "# to be used for the frequency counts"
-        print >> web_config, "facets = %s" % repr([{i: i} for i in self.metadata_fields])
-        print >> web_config, "\n# The word_facets variable functions much like the facets variable, but describes metadata"
-        print >> web_config, "# attached to word or phrases results and stored in the (optional) words table. Experimental."
-        print >> web_config, "words_facets = []"
-        print >> web_config, "\n# The concordance_length variable sets the length in bytes of each concordance result"
-        print >> web_config, "concordance_length = 300"
-        print >> web_config, "\n# The search_examples variable defines which examples should be provided"
-        print >> web_config, "# for each searchable field in the search form."
-        print >> web_config, "# If None is the value, or there are any missing examples, defaults will be generated"
-        print >> web_config, "# at runtime by picking the first result for any given field."
-        print >> web_config, "# If you wish to change these default values, you should configure them here like so:"
-        print >> web_config, '# search_examples = {"author": "Jean-Jacques Rousseau", "title": "Du contrat social"}'
-        print >> web_config, "search_examples = {}"
-        print >> web_config, "\n# The stopwords variable defines a file containing a list of words (one word per line)"
-        print >> web_config, "# used for filtering out words in the collocation report. The file must be located in this directory"
-        print >> web_config, "# and designated by its filename"
-        print >> web_config, "stopwords = ''"
-        print >> web_config, "\n# The time_series_intervals variable defines the year intervals in the time series report"
-        print >> web_config, "# The only valid intervals are 1, 10, 50 and 100. Invalid intervals will be ignored."
-        print >> web_config, "time_series_intervals = [10, 50, 100]"
-        print >> web_config, "\n# The theme variable defines the default CSS theme to be used in the WebApp."
-        print >> web_config, "# The default theme called default_theme.css can be edited directly"
-        print >> web_config, "# or you can define a new CSS file below. This file must be located"
-        print >> web_config, "# in the css/split/ directory for the WebApp to find it."
-        print >> web_config, 'theme = "default_theme.css"'
-        print >> web_config, "\n# The dictionary variable enables a different search interface"
-        print >> web_config,  "# with the headword as its starting point. It is turned off by default"
-        print >> web_config,  "dictionary = False"
-        print >> web_config, "\n# The landing_page_browsing variable defines which browsing functions are"
-        print >> web_config, "# exposed in the landing page. The only options are author, title, date, and default_display."
-        print >> web_config, "# For author and title, you have to define a list of ranges, such as 'author': ['A-L', 'M-Z'],"
-        print >> web_config, "# and for date you need to define three variables: start_date, end_date, interval"
-        print >> web_config, '# e.g. "date": {"start": 1600, "end": 1800, "interval": 25}'
-        print >> web_config, '# default_display allows you to load content by default. It is a dictionary that contains a type'
-        print >> web_config, '# and a range, e.g. = "default_display": {"type": "title": "range": "A-D"}'
-        print >> web_config, '# Note that no default is provided for "date" or default_value: they are therefore disabled'
-        print >> web_config, """landing_page_browsing = {"author": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
-        print >> web_config, """                         "title": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
-        print >> web_config, """                         "date": {},"""
-        print >> web_config, """                         "default_display": {}}"""
-        print >> web_config, "# The dico_letter_range variables defines a set of letters corresponding to the first"
-        print >> web_config, "# letter of a headword. This generates a set of buttons for browsing the database available"
-        print >> web_config, "# on the landing page. The default represents the entire roman alphabet"
-        print >> web_config, '''dico_letter_range = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]'''
+        config_values = {'dbname': re.sub("/data/?$", "", self.destination),
+                         'db_url': extra_locals['db_url'],
+                         'metadata': self.metadata_fields,
+                         'facets': [{i: i} for i in self.metadata_fields]}
+        for key in config_values:
+            web_config_defaults[key]['value'] = config_values[key]
+        fh = open(self.destination + "/web_config.cfg")
+        web_config = Config('', web_config_defaults)
+        web_config.write(fh, header=web_config_header)
         print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")
 
 
