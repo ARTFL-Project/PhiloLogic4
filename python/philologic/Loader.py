@@ -544,10 +544,12 @@ class Loader(object):
                          'facets': [{i: i} for i in self.metadata_fields]}
         ## Fetch search examples:
         search_examples = {}
-        db = DB(self.destination)
-        c = db.dbh.cursor()
+        conn = sqlite3.connect(self.destination + '/toms.db')
+        conn.text_factory = str
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
         for field in self.metadata_fields:
-            object_type = db.locals['metadata_types'][field]
+            object_type = self.metadata_types[field]
             try:
                 if object_type != 'div':
                     c.execute('select %s from toms where philo_type="%s" and %s!="" limit 1' % (field, object_type, field))
