@@ -23,6 +23,8 @@ def _safe_lookup(row,field,encoding="utf-8"):
         metadata_string = str(metadata).decode(encoding,"ignore")
     return metadata_string
 
+shared_cache = {}
+
 class HitWrapper(object):
 
     def __init__(self, hit, db, obj_type=False, encoding=None):
@@ -114,8 +116,13 @@ class ObjectWrapper(object):
         if key in obj_dict:
             return ObjectWrapper(self.hit, self.db, key)
         else:
+            if self.type in shared_cache:
+                philo_id, row = shared_cache[self.type]
+                if philo_id == self.philo_id:
+                    self.row = row
             if self.row == None:
                 self.row = self.db.get_id_lowlevel(self.philo_id)
+                shared_cache[self.type] = (self.philo_id,self.row)
             return _safe_lookup(self.row,key,self.db.encoding)
         
     def __getattr__(self, name):
