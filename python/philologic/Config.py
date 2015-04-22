@@ -189,60 +189,61 @@ web_config_header = '''
  
  
 class Config(object):
-  def __init__(self, filename, defaults, header=''):
-    #print >> sys.stderr, "INIT", type(self), type(filename), type(defaults)
-    self.filename = filename
-    abspath = os.path.abspath(filename)
-    self.db_path = abspath[:abspath.index("/data/")]
-    #print >> sys.stderr, "FILENAME", type(self.filename)
-    self.defaults = defaults
-    #print >> sys.stderr, "DEFAULTS", type(self.defaults)
-    self.header = header
-    self.data = {}
-    #print >> sys.stderr, "SELF", repr(self)
-    self.sorted_defaults = sorted(self.defaults.items(),key=lambda x:x[1]['index'])
-    #print >> sys.stderr, "SORTED_DEFAULTS", repr(self.sorted_defaults)
-    for key,value in self.sorted_defaults:
-      self.data[key] = value['value']
+    
+    def __init__(self, filename, defaults, header=''):
+        #print >> sys.stderr, "INIT", type(self), type(filename), type(defaults)
+        self.filename = filename
+        abspath = os.path.abspath(filename)
+        self.db_path = abspath[:abspath.index("/data/")]
+        #print >> sys.stderr, "FILENAME", type(self.filename)
+        self.defaults = defaults
+        #print >> sys.stderr, "DEFAULTS", type(self.defaults)
+        self.header = header
+        self.data = {}
+        #print >> sys.stderr, "SELF", repr(self)
+        self.sorted_defaults = sorted(self.defaults.items(),key=lambda x:x[1]['index'])
+        #print >> sys.stderr, "SORTED_DEFAULTS", repr(self.sorted_defaults)
+        for key,value in self.sorted_defaults:
+            self.data[key] = value['value']
 
-    if self.filename and os.path.exists(self.filename):
-      fh = open(self.filename)
-      execfile(self.filename,globals(),self.data)
+        if self.filename and os.path.exists(self.filename):
+            fh = open(self.filename)
+            execfile(self.filename,globals(),self.data)
 
-  def __getitem__(self, item):
-      return self.data[item]
-
-  def __getattr__(self,key):
-      return self[key]
- 
-  def __setitem__(self, item, value):
-      self.data[item] = value
-
-  def __str__(self):
-    string = "\n".join([line.strip() for line in self.header.splitlines() if line.strip()]) + '\n\n'
-    written_keys = []
-    for key,value in self.sorted_defaults:
-      if value["comment"]:
-        string += "\n" + "\n".join(line.strip() for line in value["comment"].splitlines() if line.strip())
-      string += "\n%s = %s\n" % (key,repr(self.data[key]))
-      written_keys.append(key)
-    for key in self.data:
-      if key not in written_keys:
-        string += "\n%s = %s\n" % (key,repr(self.data[key]))
-        written_keys.append(key)
-    return string
-
-  def to_json(self):
-    out_obj = {}
-    written = []
-    for key,value in self.sorted_defaults:
-      out_obj[key] = self.data[key]
-      written.append(key)
-    for key in self.data:
-      if key not in written:
-        out_obj[key] = self.data[key]
-        written.append(key)
-    return json.dumps(out_obj)
+    def __getitem__(self, item):
+        return self.data[item]
+  
+    def __getattr__(self,key):
+        return self[key]
+   
+    def __setitem__(self, item, value):
+        self.data[item] = value
+  
+    def __str__(self):
+        string = "\n".join([line.strip() for line in self.header.splitlines() if line.strip()]) + '\n\n'
+        written_keys = []
+        for key,value in self.sorted_defaults:
+            if value["comment"]:
+                string += "\n" + "\n".join(line.strip() for line in value["comment"].splitlines() if line.strip())
+            string += "\n%s = %s\n" % (key,repr(self.data[key]))
+            written_keys.append(key)
+        for key in self.data:
+            if key not in written_keys:
+                string += "\n%s = %s\n" % (key,repr(self.data[key]))
+                written_keys.append(key)
+        return string
+  
+    def to_json(self):
+        out_obj = {}
+        written = []
+        for key,value in self.sorted_defaults:
+            out_obj[key] = self.data[key]
+            written.append(key)
+        for key in self.data:
+            if key not in written:
+                out_obj[key] = self.data[key]
+                written.append(key)
+        return json.dumps(out_obj)
 
 def MakeWebConfig(path, **extra_values):
     web_config = Config(path, web_config_defaults, header=web_config_header)
@@ -259,8 +260,8 @@ def MakeDBConfig(path, **extra_values):
     return db_config
 
 if __name__ == "__main__":
-  conf = Config(sys.argv[1],web_config_defaults)
-  print >> sys.stderr, conf
-
-
-
+    if sys.argv[1].endswith('cfg'):
+        conf = Config(sys.argv[1],web_config_defaults)
+    else:
+        conf = Config(sys.argv[1],db_locals_defaults)
+    print >> sys.stderr, conf
