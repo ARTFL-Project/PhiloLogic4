@@ -16,6 +16,7 @@ import philologic.Parser as Parser
 import philologic.LoadFilters as LoadFilters
 import philologic.PostFilters as PostFilters
 from philologic.PostFilters import make_sql_table
+from philologic.DB import DB
 from lxml import etree
 from philologic.Config import MakeWebConfig, MakeDBConfig
 
@@ -541,6 +542,25 @@ class Loader(object):
                          'search_reports': extra_locals['search_reports'],
                          'metadata': self.metadata_fields,
                          'facets': [{i: i} for i in self.metadata_fields]}
+        ## Fetch search examples:
+        search_examples = {}
+        db = DB(self.destination)
+        c = db.dbh.cursor()
+        for field in self.metadata_fields:
+            object_type = db.locals['metadata_types'][field]
+            try:
+                if object_type != 'div':
+                    c.execute('select %s from toms where philo_type="%s" and %s!="" limit 1' % (field, object_type, field))
+                else:
+                    c.execute('select %s from toms where philo_type="div1" or philo_type="div2" or philo_type="div3" and %s!="" limit 1' % (field, field))
+            except sqlite3.OperationalError:
+                continue
+            try:
+                search_examples[field] = c.fetchone()[0].decode('utf-8', 'ignore')
+            except (TypeError, AttributeError):
+                continue
+        config_values['search_examples'] = search_examples
+    
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)
         print >> open(filename, 'w'), web_config
