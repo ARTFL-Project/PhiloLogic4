@@ -136,7 +136,9 @@ philoApp.directive('timeSeriesOptions', ['$rootScope', function($rootScope) {
                 date: $rootScope.philoConfig.time_series_intervals[i],
                 alias: options[$rootScope.philoConfig.time_series_intervals[i]]
             };
-            intervals.push(interval);
+            if (interval.date == 1 || interval.date == 10 || interval.date == 50 || interval.date == 100) { // this will go when we can select whatever interval
+                intervals.push(interval);
+            }
         }
         return intervals
     }

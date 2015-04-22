@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import os
 import json
 
 db_locals_defaults = {
@@ -131,7 +132,7 @@ web_config_defaults = {
         'index': 10
     },
     'stopwords': {
-        'value': 'stopwords.txt',
+        'value': '',
         'comment': '''
                # The stopwords variable defines a file containing a list of words (one word per line) used for filtering out words
                # in the collocation report. The file must be located in this directory and designated by its filename. If the file is not found,
@@ -188,22 +189,23 @@ web_config_header = '''
  
  
 class Config(object):
-  def __init__(self, filename, defaults):
-    print >> sys.stderr, "INIT", type(self), type(filename), type(defaults)
+  def __init__(self, filename, defaults, header=''):
+    #print >> sys.stderr, "INIT", type(self), type(filename), type(defaults)
     self.filename = filename
-    abspath = os.abspath(filename)
+    abspath = os.path.abspath(filename)
     self.db_path = abspath[:abspath.index("/data/")]
-    print >> sys.stderr, "FILENAME", type(self.filename)
+    #print >> sys.stderr, "FILENAME", type(self.filename)
     self.defaults = defaults
-    print >> sys.stderr, "DEFAULTS", type(self.defaults)
+    #print >> sys.stderr, "DEFAULTS", type(self.defaults)
+    self.header = header
     self.data = {}
-    print >> sys.stderr, "SELF", repr(self)
+    #print >> sys.stderr, "SELF", repr(self)
     self.sorted_defaults = sorted(self.defaults.items(),key=lambda x:x[1]['index'])
-    print >> sys.stderr, "SORTED_DEFAULTS", repr(self.sorted_defaults)
+    #print >> sys.stderr, "SORTED_DEFAULTS", repr(self.sorted_defaults)
     for key,value in self.sorted_defaults:
       self.data[key] = value['value']
 
-    if (self.filename):
+    if self.filename and os.path.exists(self.filename):
       fh = open(self.filename)
       execfile(self.filename,globals(),self.data)
 
@@ -216,19 +218,19 @@ class Config(object):
   def __setitem__(self, item, value):
       self.data[item] = value
 
-  def write(self,fh,header=""):
+  def __str__(self):
+    string = "\n".join([line.strip() for line in self.header.splitlines() if line.strip()]) + '\n\n'
     written_keys = []
-    fh.write(header)
     for key,value in self.sorted_defaults:
-
       if value["comment"]:
-        fh.write("\n" + "\n".join(line.strip() for line in value["comment"].splitlines()))
-      fh.write("\n%s = %s\n" % (key,repr(self.data[key])) )
+        string += "\n" + "\n".join(line.strip() for line in value["comment"].splitlines() if line.strip())
+      string += "\n%s = %s\n" % (key,repr(self.data[key]))
       written_keys.append(key)
     for key in self.data:
       if key not in written_keys:
-        fh.write("\n%s = %s\n" % (key,repr(self.data[key])) )
+        string += "\n%s = %s\n" % (key,repr(self.data[key]))
         written_keys.append(key)
+    return string
 
   def to_json(self):
     out_obj = {}
@@ -237,17 +239,28 @@ class Config(object):
       out_obj[key] = self.data[key]
       written.append(key)
     for key in self.data:
-      if key not in written_keys:
+      if key not in written:
         out_obj[key] = self.data[key]
         written.append(key)
     return json.dumps(out_obj)
 
-def MakeWebConfig(path):
-        return Config(path,web_config_defaults)
+def MakeWebConfig(path, **extra_values):
+    web_config = Config(path, web_config_defaults, header=web_config_header)
+    if extra_values:
+        for key, value in extra_values.iteritems():
+            web_config[key] = value
+    return web_config
+
+def MakeDBConfig(path, **extra_values):
+    db_config = Config(path, db_locals_defaults, header=db_locals_header)
+    if extra_values:
+        for key, value in extra_values.iteritems():
+            db_config[key] = value
+    return db_config
 
 if __name__ == "__main__":
   conf = Config(sys.argv[1],web_config_defaults)
-  conf.write(sys.stderr)
+  print >> sys.stderr, conf
 
 
 

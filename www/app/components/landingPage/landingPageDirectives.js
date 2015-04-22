@@ -25,22 +25,25 @@ philoApp.directive('defaultLandingPage', ['$rootScope', function($rootScope) {
         var start = $rootScope.philoConfig.landing_page_browsing.date.start;
         var end = $rootScope.philoConfig.landing_page_browsing.date.end;
         var interval = $rootScope.philoConfig.landing_page_browsing.date.interval;
-        var row = [];
-        var position = 0;
-        for (var i=start; i < end; i += interval) {
-            position++;
-            row.push({start: i, end: i+interval});
-            if (position === 4) {
-                scope.dateRanges.push(row);
-                row = [];
-                position = 0;
-            }
-        }
-        if (row.length) {
-            scope.dateRanges.push(row);
-        }
-        if (!scope.dateRanges.length) {
+        if (typeof(start) === 'undefined' || typeof(end) === 'undefined' || typeof(interval) === 'undefined') {
             scope.dateRanges = false;
+        } else if (start.length === 0 || end.length === 0 || interval.length === 0) {
+            scope.dateRanges = false;
+        } else {
+            var row = [];
+            var position = 0;
+            for (var i=start; i < end; i += interval) {
+                position++;
+                row.push({start: i, end: i+interval});
+                if (position === 4) {
+                    scope.dateRanges.push(row);
+                    row = [];
+                    position = 0;
+                }
+            }
+            if (row.length) {
+                scope.dateRanges.push(row);
+            }
         }
     }
     return {

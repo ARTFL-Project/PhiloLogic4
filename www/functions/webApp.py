@@ -68,7 +68,7 @@ def angular(environ, start_response):
     config = f.WebConfig()
     if config.access_control:
         access = f.check_access(environ, config)
-        config.config['access_control'] = access
+        config['access_control'] = access
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
     headers = [('Content-type', 'text/html; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
@@ -80,7 +80,7 @@ def build_html_page(config):
     html_page = open('%s/app/index.html' % config.db_path).read()
     html_page = html_page.replace('$DBNAME', config.dbname)
     html_page = html_page.replace('$DBURL', config.db_url)
-    html_page = html_page.replace('$PHILOCONFIG', config.toJSON())
+    html_page = html_page.replace('$PHILOCONFIG', config.to_json())
     html_page = html_page.replace('$CSS', load_CSS())
     html_page = html_page.replace('$JS', load_JS())
     return html_page
