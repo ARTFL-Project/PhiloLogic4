@@ -16,9 +16,7 @@ Note: these instructions were only tested on Mac OSX Yosemite.
  `sudo easy_install pip`
 
 
-* Install mako and LXML
-
- `sudo pip install mako`
+* Install LXML
 
  `sudo pip install lxml`
 
