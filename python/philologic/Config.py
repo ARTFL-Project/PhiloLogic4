@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import os
 import json
 
 db_locals_defaults = {
@@ -131,7 +132,7 @@ web_config_defaults = {
         'index': 10
     },
     'stopwords': {
-        'value': 'stopwords.txt',
+        'value': '',
         'comment': '''
                # The stopwords variable defines a file containing a list of words (one word per line) used for filtering out words
                # in the collocation report. The file must be located in this directory and designated by its filename. If the file is not found,
@@ -191,7 +192,7 @@ class Config(object):
   def __init__(self, filename, defaults):
     print >> sys.stderr, "INIT", type(self), type(filename), type(defaults)
     self.filename = filename
-    abspath = os.abspath(filename)
+    abspath = os.path.abspath(filename)
     self.db_path = abspath[:abspath.index("/data/")]
     print >> sys.stderr, "FILENAME", type(self.filename)
     self.defaults = defaults
@@ -237,13 +238,13 @@ class Config(object):
       out_obj[key] = self.data[key]
       written.append(key)
     for key in self.data:
-      if key not in written_keys:
+      if key not in written:
         out_obj[key] = self.data[key]
         written.append(key)
     return json.dumps(out_obj)
 
 def MakeWebConfig(path):
-        return Config(path,web_config_defaults)
+        return Config(path, web_config_defaults)
 
 if __name__ == "__main__":
   conf = Config(sys.argv[1],web_config_defaults)
