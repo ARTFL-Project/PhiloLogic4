@@ -21,7 +21,7 @@ Note: these instructions were only tested on Mac OSX Yosemite.
  `sudo pip install lxml`
 
 
-* Download PhiloLogic from [here](../../../releases/) and unpack the tarball
+* Download PhiloLogic from [here](../../../../releases/) and unpack the tarball
 
  `tar -xf PhiloLogic4.xyz.tar.gz`
 
