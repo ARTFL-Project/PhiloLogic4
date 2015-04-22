@@ -12,7 +12,7 @@ You can find more detailed installation instructions for specific OSes here:
 
 ### Downloading ###
 
-You can find a copy of the latest version of PhiloLogic4 [here](releases/).
+You can find a copy of the latest version of PhiloLogic4 [here](../../releases/).
 
 For the rest of this document, we will assume the PhiloLogic source code is installed in 
 your home directory at ~/PhiloLogic4/
