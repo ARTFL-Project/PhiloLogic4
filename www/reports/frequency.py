@@ -25,11 +25,12 @@ def generate_frequency(results, q, db, config):
      
     counts = defaultdict(int)
     frequency_object = {}
+        
     try:
         for hit in results[q.start:q.end]:
             key = generate_key(hit, field, db)
             counts[key] += 1
-    
+                
         table = {'results': {}, 'more_results': True}
         for key,count in counts.iteritems():
             # for each item in the table, we modify the query params to generate a link url.      
@@ -50,11 +51,12 @@ def generate_frequency(results, q, db, config):
             if append_to_label:
                 label = label + ' (' + ', '.join(append_to_label) + ')'
             
-            ## HACK: we need to find a better way of getting exact matches on metadata
+            ## Quote metadata to force exact matches on metadata
             for m in metadata:
-                if metadata[m] and m != "date":
-                    if not metadata[m].startswith('"'):
-                        metadata[m] = '"%s"' % metadata[m]
+                if m not in q.metadata: # skip metadata already in original query: this could be a glob search
+                    if metadata[m] and m != "date":
+                        if not metadata[m].startswith('"'):
+                            metadata[m] = '"%s"' % metadata[m]
             
             # Now build the url from q.
             url = f.link.make_absolute_query_link(config, q, frequency_field="", start="0", end="0", report=q.report, script='', **metadata)

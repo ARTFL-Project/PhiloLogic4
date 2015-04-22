@@ -28,7 +28,7 @@ def landing_page_content(environ,start_response):
     request = WSGIHandler(db, environ)
     content_type = request.landing_page_content_type
     q_range = request.range.lower().split('-')
-    if content_type != "year":
+    if content_type != "date":
         letter_range = set([chr(i) for i in range(ord(q_range[0]),ord(q_range[1])+1)])
     c = db.dbh.cursor()
     content = ''
@@ -36,7 +36,7 @@ def landing_page_content(environ,start_response):
         content = generate_author_list(c, letter_range, db, config, request)
     elif content_type == "title":
         content = generate_title_list(c, letter_range, db, config, request)
-    elif content_type == "year":
+    elif content_type == "date":
         content = generate_year_list(c, q_range, db, config, request)
     yield json.dumps(content)
     

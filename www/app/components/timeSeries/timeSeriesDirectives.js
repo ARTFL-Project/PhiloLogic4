@@ -9,10 +9,16 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         var fullResults;
         var absoluteFrequency;
         scope.dateCounts = {};
-        request.script({script: 'get_start_end_date.py'}).then(function(dates) { // We run this even we have the values since it's so fast
+        request.script({script: 'get_start_end_date.py'}).then(function(dates) { // always run even if useless since so fast
             scope.startDate = formData.start_date || dates.data.start_date;
             scope.endDate = formData.end_date || dates.data.end_date;
             scope.interval = formData.year_interval;
+            
+            // Store the current query as a local and global variable in order to make sure they are equal later on...
+            $rootScope.globalQuery = URL.mergeParams(angular.copy(formData), {start_date: scope.startDate, end_date: scope.endDate});
+            scope.localQuery = angular.copy($rootScope.globalQuery);
+            
+            scope.barChart = [];
             var barChartObject = initializeBarChart(scope.startDate, scope.endDate, formData.year_interval);
             scope.barChart = barChartObject.dateList;
             scope.chartIndex = barChartObject.chartIndex;
@@ -77,32 +83,32 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         var allResults = progressiveLoad.mergeResults(fullResults, timeSeriesResults.results['absolute_count'], "label");
         fullResults = allResults.unsorted;
         scope.absoluteCounts = allResults.sorted;
-        drawFromData(scope, allResults.sorted, "absolute_time");
-        if (scope.moreResults) {
-            if (start === 0) {
-                start = 1000;
-            } else {
-                start += 10000;
-            }
-            end += 10000;
-            if (scope.report === 'time_series') { // make sure we haven't changed report
+        if (scope.report === 'time_series' && angular.equals($rootScope.globalQuery, scope.localQuery)) { // are we running a different query?
+            drawFromData(scope, allResults.sorted, "absolute_time");
+            if (scope.moreResults) {
+                if (start === 0) {
+                    start = 1000;
+                } else {
+                    start += 10000;
+                }
+                end += 10000;
                 updateTimeSeries(scope, formData, fullResults, start, end);
+            } else {
+                scope.percent = 100;
+                scope.done = true;
+                scope.relativeCounts = relativeCount(allResults.sorted, scope.dateCounts);
+                $('#relative_time').removeAttr('disabled');
+                $(".progress").delay(500).velocity('slideUp');
+                var objectToSave = {
+                    barChart: scope.barChart,
+                    absoluteCounts: scope.absoluteCounts,
+                    relativeCounts: scope.relativeCounts,
+                    resultsLength: scope.resultsLength,
+                    startDate: scope.startDate,
+                    endDate: scope.endDate
+                }
+                //save(objectToSave); This isn't quite working correctly.
             }
-        } else {
-            scope.percent = 100;
-            scope.done = true;
-            scope.relativeCounts = relativeCount(allResults.sorted, scope.dateCounts);
-            $('#relative_time').removeAttr('disabled');
-            $(".progress").delay(500).velocity('slideUp');
-            var objectToSave = {
-                barChart: scope.barChart,
-                absoluteCounts: scope.absoluteCounts,
-                relativeCounts: scope.relativeCounts,
-                resultsLength: scope.resultsLength,
-                startDate: scope.startDate,
-                endDate: scope.endDate
-            }
-            //save(objectToSave); This isn't quite working correctly.
         }
     }
     var drawFromData = function(scope, data, frequencyType) {
@@ -234,7 +240,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                 width: width + 'px'
                 };
             scope.divisionWidth = {width: width + 'px'};
-            if (typeof(sessionStorage[$location.url()]) === 'undefined' || $rootScope.philoConfig.debug === true) {
+            if (typeof(sessionStorage[$location.url()]) === 'undefined' || $rootScope.philoConfig.production === false) {
                 getTimeSeries(scope);
             } else {
                 retrieveFromStorage(scope);

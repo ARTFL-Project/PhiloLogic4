@@ -68,7 +68,7 @@ def angular(environ, start_response):
     config = f.WebConfig()
     if config.access_control:
         access = f.check_access(environ, config)
-        config.config['access_control'] = access
+        config['access_control'] = access
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
     headers = [('Content-type', 'text/html; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
@@ -80,7 +80,7 @@ def build_html_page(config):
     html_page = open('%s/app/index.html' % config.db_path).read()
     html_page = html_page.replace('$DBNAME', config.dbname)
     html_page = html_page.replace('$DBURL', config.db_url)
-    html_page = html_page.replace('$PHILOCONFIG', config.toJSON())
+    html_page = html_page.replace('$PHILOCONFIG', config.to_json())
     html_page = html_page.replace('$CSS', load_CSS())
     html_page = html_page.replace('$JS', load_JS())
     return html_page
@@ -88,31 +88,47 @@ def build_html_page(config):
 
 def load_CSS():
     mainCSS = os.path.join(path, "app/assets/css/philoLogic.css")
-    if config.debug or not os.path.exists(mainCSS):
-        css_string, css_links = concatenate_files(css_files, 'css')
-        output = open(os.path.join(path, 'app/assets/css/philoLogic.css'), 'w')
-        output.write(css_string)
-    if not config.debug:
+    if os.path.exists(mainCSS):
+        if not config.production:
+            css_links = concat_CSS()
+    else:
+        css_links = concat_CSS()
+    if config.production:
         return '<link rel="stylesheet" href="app/assets/css/philoLogic.css">'
     else:
         return '\n'.join(css_links)
 
 
+def concat_CSS():
+    css_string, css_links = concatenate_files(css_files, 'css')
+    output = open(os.path.join(path, 'app/assets/css/philoLogic.css'), 'w')
+    output.write(css_string)
+    return css_links
+
+
 def load_JS():
-    mainJS = os.path.join(path, "app/assets/js/plugins/philoLogicPlugins.js")
-    if config.debug or not os.path.exists(mainJS):
-        js_plugins_string, js_plugins_links = concatenate_files(js_plugins, 'js')
-        plugin_output = open(os.path.join(path, 'app/assets/js/plugins/philoLogicPlugins.js'), 'w')
-        plugin_output.write(js_plugins_string)
-        js_string, js_links = concatenate_files(js_files, "js")
-        output = open(os.path.join(path, 'app/assets/js/philoLogic.js'), 'w')
-        output.write(js_string)
-    if not config.debug:
+    mainJS = os.path.join(path, "app/assets/js/philoLogic.js")
+    if os.path.exists(mainJS):
+        if not config.production:
+            js_links, js_plugins_links = concat_JS()
+    else:
+        js_links, js_plugins_links = concat_JS()
+    if config.production:
         scripts = '<script src="app/assets/js/plugins/philoLogicPlugins.js"></script>'
         scripts += '<script src="app/assets/js/philoLogic.js"></script>'
         return scripts
     else:
         return '\n'.join(js_plugins_links + js_links)
+    
+
+def concat_JS():
+    js_plugins_string, js_plugins_links = concatenate_files(js_plugins, 'js')
+    plugin_output = open(os.path.join(path, 'app/assets/js/plugins/philoLogicPlugins.js'), 'w')
+    plugin_output.write(js_plugins_string)
+    js_string, js_links = concatenate_files(js_files, "js")
+    output = open(os.path.join(path, 'app/assets/js/philoLogic.js'), 'w')
+    output.write(js_string)
+    return js_links, js_plugins_links
 
 
 def concatenate_files(file_list, file_type):
@@ -121,7 +137,7 @@ def concatenate_files(file_list, file_type):
     for file_path in file_list:
         try:
             string.append(open(os.path.join(path, file_path)).read())
-            if config.debug:
+            if not config.production:
                 if file_type == "css":
                     links.append('<link rel="stylesheet" href="%s">' % file_path)
                 else:

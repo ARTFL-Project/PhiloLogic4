@@ -184,10 +184,10 @@ philoApp.directive('sidebarMenu', ['$rootScope', function($rootScope) {
     }
 }]);
 
-philoApp.directive('facets', ['$rootScope', 'URL', 'progressiveLoad', 'saveToLocalStorage', 'request', function($rootScope, URL, progressiveLoad, save, request) {
+philoApp.directive('facets', ['$rootScope', '$location', 'URL', 'progressiveLoad', 'saveToLocalStorage', 'request', function($rootScope, $location, URL, progressiveLoad, save, request) {
     var retrieveFacet = function(scope, facetObj) {
-        var urlString = URL.objectToUrlString($rootScope.formData, {frequency_field: facetObj.alias});
-        if (typeof(sessionStorage[urlString]) !== "undefined" && $rootScope.philoConfig.debug === false) {
+        var urlString = $location.url() + '&frequency_field=' + facetObj.alias;
+        if (typeof(sessionStorage[urlString]) !== "undefined" && $rootScope.philoConfig.production === true) {
             scope.concKwic.frequencyResults = JSON.parse(sessionStorage[urlString]);
             scope.percent = 100;
         } else {
@@ -250,7 +250,7 @@ philoApp.directive('facets', ['$rootScope', 'URL', 'progressiveLoad', 'saveToLoc
                 }
             }  else {
                 scope.percent = 100;
-                var urlString = window.location.href + '&frequency_field=' + scope.concKwic.selectedFacet.alias;
+                var urlString = $location.url() + '&frequency_field=' + scope.concKwic.selectedFacet.alias;
                 save(fullResults.sorted, urlString);
             }
         });
@@ -270,7 +270,7 @@ philoApp.directive('facets', ['$rootScope', 'URL', 'progressiveLoad', 'saveToLoc
     }
 }]);
 
-philoApp.directive('pages', ['URL', function(URL) {
+philoApp.directive('pages', ['$location', 'URL', function($location, URL) {
     var buildPages = function(scope, morePages) {
         var start = scope.concKwic.results.description.start;
         var resultsPerPage = parseInt(scope.formData.results_per_page) || 25;
@@ -348,7 +348,7 @@ philoApp.directive('pages', ['URL', function(URL) {
                     page = "Last";
                 }
             }
-			var href = URL.objectToUrlString(scope.formData, {start: pageStart, end: pageEnd});
+			var href = URL.objectToUrlString($location.search(), {start: pageStart, end: pageEnd});
             pageObject.push({display: page, href: href, active: active});
         }
         return pageObject;

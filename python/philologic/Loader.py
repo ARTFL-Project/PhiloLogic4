@@ -16,7 +16,9 @@ import philologic.Parser as Parser
 import philologic.LoadFilters as LoadFilters
 import philologic.PostFilters as PostFilters
 from philologic.PostFilters import make_sql_table
+from philologic.DB import DB
 from lxml import etree
+from philologic.Config import MakeWebConfig, MakeDBConfig
 
 from philologic.utils import OutputHandler
 
@@ -520,102 +522,51 @@ class Loader(object):
 
     def write_db_config(self, **extra_locals):
         """ Write local variables used by libphilo"""
-        db_locals = open(self.destination + "/db.locals.py","w")
-        print >> db_locals, "# -*- coding: utf-8 -*-"
-        print >> db_locals, "#########################################################"
-        print >> db_locals, "#### Database configuration options for PhiloLogic4 #####"
-        print >> db_locals, "#########################################################"
-        print >> db_locals, "### All variables must be in valid Python syntax ########"
-        print >> db_locals, "#########################################################"
-        print >> db_locals, "### Edit with extra care: an invalid          ###########"
-        print >> db_locals, "### configuration could break your database.  ###########"
-        print >> db_locals, "#########################################################\n"
-        print >> db_locals, "\nmetadata_fields = %s" % self.metadata_fields
-        print >> db_locals, "\nmetadata_hierarchy = %s" % self.metadata_hierarchy
-        print >> db_locals, "\nmetadata_types = %s" % self.metadata_types
-        print >> db_locals, "\nnormalized_fields = %s" % self.normalized_fields
-        print >> db_locals, "\ndb_path = '%s'" % self.destination
-        print >> db_locals, "\ndebug = %s" % self.debug
+        filename = self.destination + "/db.locals.py"
+        db_values = {'metadata_fields': self.metadata_fields,
+                     'metadata_hierarchy': self.metadata_hierarchy,
+                     'metadata_types': self.metadata_types,
+                     'normalized_fields': self.normalized_fields,
+                     'debug': self.debug}
         for k, v in extra_locals.items():
             if k != "db_url" or k != "search_reports":  # This should be changed in the load_script
-                print >> db_locals, "%s = %s" % (k, repr(v))
-        print "wrote database info to %s." % (self.destination + "/db.locals.py")
+                db_values[k] = v
+        db_config = MakeDBConfig(filename, **db_values)
+        print >> open(filename, 'w'), db_config
+        print "wrote database info to %s." % (filename)
 
     def write_web_config(self, **extra_locals):
         """ Write configuration variables for the Web application"""
-        web_config = open(self.destination + "/web_config.cfg", "w")
-        print >> web_config, "# -*- coding: utf-8 -*-"
-        print >> web_config, "####################################################"
-        print >> web_config, "#### Web configuration options for PhiloLogic4 #####"
-        print >> web_config, "####################################################"
-        print >> web_config, "### All variables must be in valid Python syntax ###"
-        print >> web_config, "####################################################\n"
-        dbname = os.path.basename(re.sub("/data/?$", "", self.destination))
-        print >> web_config, "\n# The dbname variable is the title name in the HTML header"
-        print >> web_config, "dbname = '%s'" % dbname
-        print >> web_config, "\n# The db_url variable is the root URL for your database on the web"
-        print >> web_config, "db_url = '%s'" % extra_locals['db_url']
-        print >> web_config, "# Configure access control with True or False."
-        print >> web_config, "# Note that if you want access control, you have to provide a login.txt file inside your /data directory,"
-        print >> web_config, "# otherwise access will remain open."
-        print >> web_config, "access_control = False"
-        print >> web_config, "\n# The search_reports variable sets which search report is viewable in the search form"
-        print >> web_config, "# Available reports are concordance, kwic, collocation, and time_series"
-        print >> web_config, "search_reports = ['concordance', 'kwic', 'collocation', 'time_series']"
-        print >> web_config, "\n# The metadata variable sets which metadata field is viewable in the search form"
-        print >> web_config, "metadata = %s" % self.metadata_fields
-        print >> web_config, "\n# The metadata_aliases variable allows to display a metadata variable under a different name in the HTML"
-        print >> web_config, "# For example, you could rename the who metadata to Speaker, and the create_date variable to Date like so:"
-        print >> web_config, "# metadata_aliases = {'who': 'Speaker', 'create_date', 'Date'}"
-        print >> web_config, "metadata_aliases = {}"
-        print >> web_config, "\n# The facets variable sets which metadata field can be used as a facet"
-        print >> web_config, "# The object format is a list of objects like the following:"
-        print >> web_config, "# [{'Author': 'author'}, {'Title': ['title', 'author']}"
-        print >> web_config, "# The dict key should describe what the facets will do, and the"
-        print >> web_config, "# dict value, which can be a string or a list, should list the metadata"
-        print >> web_config, "# to be used for the frequency counts"
-        print >> web_config, "facets = %s" % repr([{i: i} for i in self.metadata_fields])
-        print >> web_config, "\n# The word_facets variable functions much like the facets variable, but describes metadata"
-        print >> web_config, "# attached to word or phrases results and stored in the (optional) words table. Experimental."
-        print >> web_config, "words_facets = []"
-        print >> web_config, "\n# The concordance_length variable sets the length in bytes of each concordance result"
-        print >> web_config, "concordance_length = 300"
-        print >> web_config, "\n# The search_examples variable defines which examples should be provided"
-        print >> web_config, "# for each searchable field in the search form."
-        print >> web_config, "# If None is the value, or there are any missing examples, defaults will be generated"
-        print >> web_config, "# at runtime by picking the first result for any given field."
-        print >> web_config, "# If you wish to change these default values, you should configure them here like so:"
-        print >> web_config, '# search_examples = {"author": "Jean-Jacques Rousseau", "title": "Du contrat social"}'
-        print >> web_config, "search_examples = {}"
-        print >> web_config, "\n# The stopwords variable defines a file containing a list of words (one word per line)"
-        print >> web_config, "# used for filtering out words in the collocation report. The file must be located in this directory"
-        print >> web_config, "# and designated by its filename"
-        print >> web_config, "stopwords = 'stopwords.text'"
-        print >> web_config, "\n# The time_series_intervals variable defines the year intervals in the time series report"
-        print >> web_config, "# The only valid intervals are 1, 10, 50 and 100. Invalid intervals will be ignored."
-        print >> web_config, "time_series_intervals = [10, 50, 100]"
-        print >> web_config, "\n# The theme variable defines the default CSS theme to be used in the WebApp."
-        print >> web_config, "# The default theme called default_theme.css can be edited directly"
-        print >> web_config, "# or you can define a new CSS file below. This file must be located"
-        print >> web_config, "# in the css/split/ directory for the WebApp to find it."
-        print >> web_config, 'theme = "default_theme.css"'
-        print >> web_config, "\n# The dictionary variable enables a different search interface"
-        print >> web_config,  "# with the headword as its starting point. It is turned off by default"
-        print >> web_config,  "dictionary = False"
-        print >> web_config, "\n# The landing_page_browsing variable defines which browsing functions are"
-        print >> web_config, "# exposed in the landing page. The only options are author, title and date."
-        print >> web_config, "# For author and title, you have to define a list of ranges, such as 'author': ['A-L', 'M-Z'],"
-        print >> web_config, "# and for date you need to define three variables: start_date, end_date, interval"
-        print >> web_config, '# e.g. "date": {"start": 1600, "end": 1800, "interval": 25}'
-        print >> web_config, '# Note that no default is provided for "date", which is therefore hidden since undefined'
-        print >> web_config, """landing_page_browsing = {"author": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
-        print >> web_config, """                          "title": ["A-D", "E-I", "J-M", "N-R", "S-Z"],"""
-        print >> web_config, """                          "date": {}}"""
-        print >> web_config, "# The dico_letter_range variables defines a set of letters corresponding to the first"
-        print >> web_config, "# letter of a headword. This generates a set of buttons for browsing the database available"
-        print >> web_config, "# on the landing page. The default represents the entire roman alphabet"
-        print >> web_config, '''dico_letter_range = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]'''
-        print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")
+        config_values = {'dbname': os.path.basename(re.sub("/data/?$", "", self.destination)),
+                         'db_url': extra_locals['db_url'],
+                         'search_reports': extra_locals['search_reports'],
+                         'metadata': self.metadata_fields,
+                         'facets': [{i: i} for i in self.metadata_fields]}
+        ## Fetch search examples:
+        search_examples = {}
+        conn = sqlite3.connect(self.destination + '/toms.db')
+        conn.text_factory = str
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        for field in self.metadata_fields:
+            object_type = self.metadata_types[field]
+            try:
+                if object_type != 'div':
+                    c.execute('select %s from toms where philo_type="%s" and %s!="" limit 1' % (field, object_type, field))
+                else:
+                    c.execute('select %s from toms where philo_type="div1" or philo_type="div2" or philo_type="div3" and %s!="" limit 1' % (field, field))
+            except sqlite3.OperationalError:
+                continue
+            try:
+                search_examples[field] = c.fetchone()[0].decode('utf-8', 'ignore')
+            except (TypeError, AttributeError):
+                continue
+        config_values['search_examples'] = search_examples
+    
+        filename = self.destination + "/web_config.cfg"
+        web_config = MakeWebConfig(filename, **config_values)
+        print >> open(filename, 'w'), web_config
+        print "wrote Web application info to %s." % (filename)
 
 
 def handle_command_line(argv):
@@ -641,39 +592,29 @@ def handle_command_line(argv):
         parser.print_help()
         sys.exit()
 
-    ## Number of workers used for parsing: you can define your own value on the
-    ## command-line, stay with the default, or define your own value here
     workers = options.workers or 2
-
-
-    ## Define the type of output you want. By default, you get console output for your database
-    ## load. You can however set a quiet option on the command-line, or set console_output
-    ## to False here.
     console_output = True
     if options.quiet:
         console_output = False
-
-    ## Define a path for a log of your database load. This option can be defined on the command-line
-    ## or here. It's disabled by default.
     log = options.log or False
-
-    ## Set debugging if you want to keep all the parsing data, as well as debug the templates
     debug = options.debug or False
 
     return dbname,files, workers, console_output, log, debug
 
 
-def setup_db_dir(db_destination, template_dir):
+def setup_db_dir(db_destination, template_dir, safe=False):
     try:
         os.mkdir(db_destination)
     except OSError:
-        ## maybe test to see what db_destination is
-        print "The database folder could not be created at %s" % db_destination
-        print "Do you want to delete this database? Yes/No"
-        choice = raw_input().lower()
-        if choice.startswith('y'):
-            os.system('rm -rf %s' % db_destination)
-            os.mkdir(db_destination)
+        if not safe:
+            print "The database folder could not be created at %s" % db_destination
+            print "Do you want to delete this database? Yes/No"
+            choice = raw_input().lower()
+            if choice.startswith('y'):
+                os.system('rm -rf %s' % db_destination)
+                os.mkdir(db_destination)
+            else:
+                sys.exit()
         else:
             sys.exit()
 

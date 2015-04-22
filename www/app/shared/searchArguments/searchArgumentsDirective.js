@@ -18,21 +18,39 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL',
             delete queryParams.date;
         }
         var config = $rootScope.philoConfig;
-        for (var i=0; i < config.metadata.length; i++) {
-            var k = config.metadata[i];
-            var v = queryArgs[k];
-            var alias = k;
-            if (v) {
-                if (k in config.metadata_aliases) {
-                    alias = config.metadata_aliases[k];
+        var facets = [];
+        for (var i=0; i < config.facets.length; i++) {
+            var alias = Object.keys(config.facets[i])[0];
+            var facet = config.facets[i][alias];
+            if (typeof(facet) === 'string') {
+                facets.push(facet);
+            } else {
+                for (var i=0; i < facet.length; i++) {
+                    if (facets.indexOf(facet[i]) < 0) {
+                        facets.push(facet[i]);
+                    }
                 }
-                biblio.push({key: k, alias: alias, value: v});
+            }
+        }
+        for (var k in queryArgs) {
+            if (config.metadata.indexOf(k) >= 0 || facets.indexOf(k) >= 0) {
+                var v = queryArgs[k];
+                var alias = k;
+                if (v) {
+                    if (k in config.metadata_aliases) {
+                        alias = config.metadata_aliases[k];
+                    }
+                    biblio.push({key: k, alias: alias, value: v});
+                }
             }
         }
         return biblio
     }
     var removeMetadata = function(metadata, queryParams, restart) {
         delete queryParams[metadata];
+        if (!queryParams.q) {
+            queryParams.report = 'bibliography';
+        }
         var request = URL.report(queryParams);
         if (queryParams.report === "concordance" || queryParams.report === "kwic" || queryParams.report === "bibliography") {
             $http.get(request).success(function(data) {
