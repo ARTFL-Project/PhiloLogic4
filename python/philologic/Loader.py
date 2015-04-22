@@ -17,7 +17,7 @@ import philologic.LoadFilters as LoadFilters
 import philologic.PostFilters as PostFilters
 from philologic.PostFilters import make_sql_table
 from lxml import etree
-from philologic.Config import *
+from philologic.Config import MakeWebConfig, MakeDBConfig
 
 from philologic.utils import OutputHandler
 
@@ -521,39 +521,30 @@ class Loader(object):
 
     def write_db_config(self, **extra_locals):
         """ Write local variables used by libphilo"""
-        db_locals = open(self.destination + "/db.locals.py","w")
-        print >> db_locals, "# -*- coding: utf-8 -*-"
-        print >> db_locals, "#########################################################"
-        print >> db_locals, "#### Database configuration options for PhiloLogic4 #####"
-        print >> db_locals, "#########################################################"
-        print >> db_locals, "### All variables must be in valid Python syntax ########"
-        print >> db_locals, "#########################################################"
-        print >> db_locals, "### Edit with extra care: an invalid          ###########"
-        print >> db_locals, "### configuration could break your database.  ###########"
-        print >> db_locals, "#########################################################\n"
-        print >> db_locals, "\nmetadata_fields = %s" % self.metadata_fields
-        print >> db_locals, "\nmetadata_hierarchy = %s" % self.metadata_hierarchy
-        print >> db_locals, "\nmetadata_types = %s" % self.metadata_types
-        print >> db_locals, "\nnormalized_fields = %s" % self.normalized_fields
-        print >> db_locals, "\ndb_path = '%s'" % self.destination
-        print >> db_locals, "\ndebug = %s" % self.debug
+        filename = self.destination + "/db.locals.py"
+        db_values = {'metadata_fields': self.metadata_fields,
+                     'metadata_hierarchy': self.metadata_hierarchy,
+                     'metadata_types': self.metadata_types,
+                     'normalized_fields': self.normalized_fields,
+                     'debug': self.debug}
         for k, v in extra_locals.items():
             if k != "db_url" or k != "search_reports":  # This should be changed in the load_script
-                print >> db_locals, "\n%s = %s" % (k, repr(v))
-        print "wrote database info to %s." % (self.destination + "/db.locals.py")
+                db_values[k] = v
+        db_config = MakeDBConfig(filename, **db_values)
+        print >> open(filename, 'w'), db_config
+        print "wrote database info to %s." % (filename)
 
     def write_web_config(self, **extra_locals):
         """ Write configuration variables for the Web application"""
-        config_values = {'dbname': re.sub("/data/?$", "", self.destination),
+        config_values = {'dbname': os.path.basename(re.sub("/data/?$", "", self.destination)),
                          'db_url': extra_locals['db_url'],
+                         'search_reports': extra_locals['search_reports'],
                          'metadata': self.metadata_fields,
                          'facets': [{i: i} for i in self.metadata_fields]}
-        for key in config_values:
-            web_config_defaults[key]['value'] = config_values[key]
-        fh = open(self.destination + "/web_config.cfg")
-        web_config = Config('', web_config_defaults)
-        web_config.write(fh, header=web_config_header)
-        print "wrote Web application info to %s." % (self.destination + "/web_config.cfg")
+        filename = self.destination + "/web_config.cfg"
+        web_config = MakeWebConfig(filename, **config_values)
+        print >> open(filename, 'w'), web_config
+        print "wrote Web application info to %s." % (filename)
 
 
 def handle_command_line(argv):
