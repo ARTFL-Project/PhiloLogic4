@@ -39,3 +39,31 @@ philoApp.directive('progressBar', function() {
         }
     }
 });
+
+philoApp.directive('selectWord', ['$location', 'request', function($location, request) {
+    return {
+        restrict: 'A',
+        replace: true,
+        link: function(scope, element, attrs) {
+            if (scope.philoConfig.word_facets.length > 0) {
+                element.mouseup(function() {
+                    var text = window.getSelection().toString();
+                    if (text.length > 0) {
+                        var position = attrs.position;
+                        var query = $location.search();
+                        request.script(query, {
+                            script: 'lookup_word.py',
+                            selected: text,
+                            position: position
+                        }).then(function(response) {
+                            console.log(response.data);
+                        });
+                    }
+                });
+            }
+            element.on('$destroy', function() {
+                element.off();
+            });
+        }
+    }
+}]);
