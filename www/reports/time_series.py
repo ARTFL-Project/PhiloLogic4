@@ -18,6 +18,7 @@ except ImportError:
     print >> sys.stderr, "Please install simplejson for better performance"
     import json
 import re
+import timeit
 
 sub_date = re.compile('date=[^&]*')
 
@@ -52,6 +53,7 @@ def handle_dates(q, db):
 def generate_time_series(config, q, db):
     time_series_object = {'query': dict([i for i in q]), 'query_done': False}
     time_series_object['query']['date'] = q.metadata['date']
+    time_series_object['results_length'] = int(q.total_results) or 0
     if q.start_date:
         start = q.start_date
     else:
@@ -64,11 +66,12 @@ def generate_time_series(config, q, db):
     time_series_object['query']['end_date'] = end
     
     absolute_count = defaultdict(int)
+    date_ranges = generate_date_ranges(q)
     date_counts = {}
     total_hits = 0
-    
-    date_ranges = generate_date_ranges(q)
-    for start_date, date_range in date_ranges:
+    ranges_done = 0
+    start_time = timeit.default_timer()
+    for start_date, date_range in date_ranges[q.start:]:
         q.metadata['date'] = date_range
         hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
         ### Make sure hitlist is done:
@@ -78,14 +81,20 @@ def generate_time_series(config, q, db):
         absolute_count[start_date] = {"label": start_date, "count": len(hits), "url": url}
         date_counts[start_date] = date_total_count(start_date, db, q['year_interval'])
         total_hits += len(hits)
+        elapsed = timeit.default_timer() - start_time
+        if elapsed > 10: # avoid timeouts by splitting the query if more than 10 seconds has been spent in the loop
+            ranges_done += 1
+            break
+        ranges_done += 1    
     
-    time_series_object['results_length'] = total_hits
-    time_series_object['more_results'] = False
-    time_series_object['query_done'] = True
+    time_series_object['results_length'] += total_hits
+    if (ranges_done + q.start) == len(date_ranges):
+        time_series_object['more_results'] = False
+    else:
+        time_series_object['more_results'] =  True
+        time_series_object['ranges_done'] = ranges_done
     time_series_object['results'] = {'absolute_count': absolute_count, 'date_count': date_counts}
-    
-    print >> sys.stderr, repr(date_counts)
-    
+        
     return time_series_object
 
 def generate_date_ranges(q):

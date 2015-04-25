@@ -4,7 +4,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                                        function($rootScope, $http, $location, progressiveLoad, URL, request, save) {
     var getTimeSeries = function(scope) {
         var formData = angular.copy(scope.formData);
-        scope.resultsLength = false; // set to false for now
+        scope.resultsLength = 0;
         $(".progress").show();
         var fullResults;
         var absoluteFrequency;
@@ -22,7 +22,8 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             var barChartObject = initializeBarChart(scope.startDate, scope.endDate, formData.year_interval);
             scope.barChart = barChartObject.dateList;
             scope.chartIndex = barChartObject.chartIndex;
-            updateTimeSeries(scope, formData, fullResults, 0, 25000);
+            scope.start = 0; // Start at first date range
+            updateTimeSeries(scope, formData, fullResults);
         });
     }
     // Generate bars in chart by iterating over all date ranges
@@ -63,32 +64,32 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         }
         return {dateList: dateList, chartIndex: chartIndex};
     }
-    var updateTimeSeries = function(scope, formData, fullResults, start, end) {
-        request.report(formData, {start: start, end: end}).then(function(results) {
+    var updateTimeSeries = function(scope, formData, fullResults) {
+        request.report(formData, {start: scope.start, total_results: scope.resultsLength}).then(function(results) {
             scope.timeSeries.loading = false;
             var timeSeriesResults = results.data;
             scope.resultsLength = timeSeriesResults.results_length;
             scope.timeSeries.resultsLength = scope.resultsLength;
             scope.moreResults = timeSeriesResults.more_results;
+            scope.start += timeSeriesResults.ranges_done;
             for (var date in timeSeriesResults.results.date_count) { // Update date counts
                 scope.dateCounts[date] = timeSeriesResults.results.date_count[date];
             }
-            sortAndRenderTimeSeries(scope, formData, fullResults, timeSeriesResults, start, end)
+            sortAndRenderTimeSeries(scope, formData, fullResults, timeSeriesResults)
         });
     }
-    var sortAndRenderTimeSeries = function(scope, formData, fullResults, timeSeriesResults, start, end) {
-        if (end <= scope.resultsLength) {
-            scope.percent = Math.floor(end / scope.resultsLength * 100);
+    var sortAndRenderTimeSeries = function(scope, formData, fullResults, timeSeriesResults) {
+        if (scope.start <= scope.barChart.length) {
+            scope.percent = Math.floor(scope.start / scope.barChart.length * 100);
         }
         var allResults = progressiveLoad.mergeResults(fullResults, timeSeriesResults.results['absolute_count'], "label");
         fullResults = allResults.unsorted;
         scope.absoluteCounts = allResults.sorted;
         if (scope.report === 'time_series' && angular.equals($rootScope.globalQuery, scope.localQuery)) { // are we running a different query?
             drawFromData(scope, allResults.sorted, "absolute_time");
+            console.log(scope.moreResults)
             if (scope.moreResults) {
-                start += 25000;
-                end += 25000;
-                updateTimeSeries(scope, formData, fullResults, start, end);
+                updateTimeSeries(scope, formData, fullResults);
             } else {
                 scope.percent = 100;
                 scope.done = true;
