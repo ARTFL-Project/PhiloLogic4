@@ -22,7 +22,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             var barChartObject = initializeBarChart(scope.startDate, scope.endDate, formData.year_interval);
             scope.barChart = barChartObject.dateList;
             scope.chartIndex = barChartObject.chartIndex;
-            updateTimeSeries(scope, formData, fullResults, 0, 1000);
+            updateTimeSeries(scope, formData, fullResults, 0, 25000);
         });
     }
     // Generate bars in chart by iterating over all date ranges
@@ -86,12 +86,8 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         if (scope.report === 'time_series' && angular.equals($rootScope.globalQuery, scope.localQuery)) { // are we running a different query?
             drawFromData(scope, allResults.sorted, "absolute_time");
             if (scope.moreResults) {
-                if (start === 0) {
-                    start = 1000;
-                } else {
-                    start += 10000;
-                }
-                end += 10000;
+                start += 25000;
+                end += 25000;
                 updateTimeSeries(scope, formData, fullResults, start, end);
             } else {
                 scope.percent = 100;
@@ -216,6 +212,9 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         for (var i=0; i < absoluteCounts.length; i++) {
             var absoluteObject = angular.copy(absoluteCounts[i]);
             absoluteObject.count = absoluteObject.count / dateCounts[absoluteObject.label] * 1000000;
+            if (isNaN(absoluteObject.count)) {
+                absoluteObject.count = 1;
+            }
             relativeCounts.push(absoluteObject);
         }
         return relativeCounts

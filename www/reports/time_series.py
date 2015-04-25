@@ -26,8 +26,8 @@ def time_series(environ,start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
     request = handle_dates(request, db)
-    hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
-    time_series_object = generate_time_series(config, request, db, hits)
+    # hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
+    time_series_object = generate_time_series(config, request, db)
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
     yield json.dumps(time_series_object)
@@ -49,8 +49,7 @@ def handle_dates(q, db):
     q.metadata['date'] += '-%d' % q.end_date
     return q
 
-def generate_time_series(config, q, db, hits):    
-    """reads through a hitlist to generate a time_series_object"""
+def generate_time_series(config, q, db):
     time_series_object = {'query': dict([i for i in q]), 'query_done': False}
     time_series_object['query']['date'] = q.metadata['date']
     if q.start_date:
@@ -66,74 +65,50 @@ def generate_time_series(config, q, db, hits):
     
     absolute_count = defaultdict(int)
     date_counts = {}
+    total_hits = 0
     
-    ## Override default value of q.end for first batch of results
-    if q.end == 0:
-        q.end = 3000
+    date_ranges = generate_date_ranges(q)
+    for start_date, date_range in date_ranges:
+        q.metadata['date'] = date_range
+        hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
+        ### Make sure hitlist is done:
+        while not hits.done:
+            hits.update()
+        url = f.link.make_absolute_query_link(config, q, report="concordance", date=date_range, start="0", end="0")
+        absolute_count[start_date] = {"label": start_date, "count": len(hits), "url": url}
+        date_counts[start_date] = date_total_count(start_date, db, q['year_interval'])
+        total_hits += len(hits)
     
-    count = 0
-    more_results = True
-    try:
-        for i in hits[q.start:q.end]:
-            date = i.date
-            try:
-                if date:
-                    date = int(date)
-                    if not date <= end :
-                        continue
-                    if q["year_interval"] == "10":
-                        date = int(str(date)[:-1] + '0')
-                    elif q['year_interval'] == "100":
-                        date = int(str(date)[:-2] + '00')
-                    elif q['year_interval'] == '50':
-                        decade = int(str(date)[-2:])
-                        if decade < 50:
-                            date = int(str(date)[:-2] + '00')
-                        else:
-                            date = int(str(date)[:-2] + '50')
-                        
-                else:
-                    print >> sys.stderr, "No valid dates for %s: %s, %s" % (i.filename, i.author, i.title)
-                    continue
-            except ValueError: ## No valid date
-                continue
-            
-            count += 1
-            if date not in absolute_count:
-                end_date = date + int(q["year_interval"]) - 1
-                date_range = "%d-%d" % (date, end_date)
-                url = f.link.make_absolute_query_link(config, q, report="concordance", date=date_range, start="0", end="0")
-                absolute_count[date] = {"label": date, "count": 0, "url": url}
-            absolute_count[date]['count'] += 1
-            
-            if date not in date_counts:
-                date_counts[date] = date_total_count(date, db, q['year_interval'])
-    except IndexError:
-        more_results = False
-    
-    time_series_object['more_results'] = more_results
-    time_series_object['results_length'] = len(hits)
-    time_series_object['query_done'] = hits.done
+    time_series_object['results_length'] = total_hits
+    time_series_object['more_results'] = False
+    time_series_object['query_done'] = True
     time_series_object['results'] = {'absolute_count': absolute_count, 'date_count': date_counts}
+    
+    print >> sys.stderr, repr(date_counts)
+    
     return time_series_object
 
+def generate_date_ranges(q):
+    interval = int(q.year_interval)
+    date_ranges = []
+    for i in xrange(q.start_date, q.end_date, interval):
+        start = i
+        end = i + interval - 1
+        date_range = "%d-%d" % (start, end)
+        date_ranges.append((start,date_range))
+    return date_ranges
 
 def date_total_count(date, db, interval):
     if interval != '1':
         dates = [date]
-        if interval == '10':
-            dates.append(date + 9)
-        elif interval == "50":
-            dates.append(date + 49)
-        else:
-            dates.append(date + 99)
+        dates.append(date + (int(interval) - 1))
         query = 'select sum(word_count) from toms where date between "%d" and "%d"' % tuple(dates)
     else:
         query = "select sum(word_count) from toms where date='%s'" % date
-    
     c = db.dbh.cursor()
     c.execute(query)
-    return c.fetchone()[0]
+    count = c.fetchone()[0] or 0
+    return count
     
 if __name__ == '__main__':
     CGIHandler().run(time_series)
