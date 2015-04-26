@@ -27,7 +27,6 @@ def time_series(environ,start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
     request = handle_dates(request, db)
-    # hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
     time_series_object = generate_time_series(config, request, db)
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
@@ -44,15 +43,13 @@ def handle_dates(q, db):
             pass
     if not q['start_date']:
         setattr(q, 'start_date', min(dates))
-    q.metadata['date'] = '%d' % q.start_date
     if not q['end_date']:
         setattr(q, 'end_date', max(dates))
-    q.metadata['date'] += '-%d' % q.end_date
     return q
 
 def generate_time_series(config, q, db):
     time_series_object = {'query': dict([i for i in q]), 'query_done': False}
-    time_series_object['query']['date'] = q.metadata['date']
+    time_series_object['query']['date'] = '%d-%d' % (q.start_date, q.end_date)
     time_series_object['results_length'] = int(q.total_results) or 0
     if q.start_date:
         start = q.start_date
@@ -82,7 +79,7 @@ def generate_time_series(config, q, db):
         date_counts[start_date] = date_total_count(start_date, db, q['year_interval'])
         total_hits += len(hits)
         elapsed = timeit.default_timer() - start_time
-        if elapsed > 10: # avoid timeouts by splitting the query if more than 10 seconds has been spent in the loop
+        if elapsed > 5: # avoid timeouts by splitting the query if more than 5 seconds has been spent in the loop
             ranges_done += 1
             break
         ranges_done += 1    

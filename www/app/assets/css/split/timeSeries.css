@@ -34,8 +34,8 @@
 }
 .graph-years {
     position: absolute;
-    bottom: -43px;
-    font-size: 90%;
+    bottom: -30px;
+	left: -10px;
     -webkit-transform: rotate(-45deg);
     -moz-transform: rotate(-45deg);
     -ms-transform: rotate(-45deg);

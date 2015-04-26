@@ -29,15 +29,15 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
     // Generate bars in chart by iterating over all date ranges
     var initializeBarChart = function(start, end, yearInterval) {
         yearInterval = parseInt(yearInterval);
-        var startDate = normalizeDate(start, yearInterval);
+        var startDate = parseInt(start);
         var endDate = parseInt(end);
         var dateList = [];
-        var dataLength = Math.floor((endDate - startDate) / yearInterval) + 1;
+        var dataLength = Math.floor((endDate - startDate) / yearInterval);
         var remainder = (endDate - startDate) % yearInterval;
         if (remainder > 0) {
             dataLength += 1;
         }
-        var barWidth = (parseInt($('#time-series').width()) - dataLength) / dataLength; // Something is off here...
+        var barWidth = Math.floor(parseInt($('#time-series').width()) / dataLength - 1);
         var margin = 0;
         var chartIndex = {};
         var position = 0;
@@ -45,15 +45,11 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             if (i !== startDate) {
                 margin += barWidth + 1;
             }
-            var yearWidth = (barWidth - 25) / 2;
             dateList.push({
                 date: i,
                 barStyle: {
                     'margin-left': margin + 'px',
                     width: barWidth + 'px'
-                },
-                dateStyle: {
-                    width: yearWidth + 'px'
                 },
                 width: barWidth, // Keep this for the filter to decide whether to skip a year on display
                 title: '',
@@ -87,7 +83,6 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         scope.absoluteCounts = allResults.sorted;
         if (scope.report === 'time_series' && angular.equals($rootScope.globalQuery, scope.localQuery)) { // are we running a different query?
             drawFromData(scope, allResults.sorted, "absolute_time");
-            console.log(scope.moreResults)
             if (scope.moreResults) {
                 updateTimeSeries(scope, formData, fullResults);
             } else {
@@ -104,7 +99,6 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                     startDate: scope.startDate,
                     endDate: scope.endDate
                 }
-                //save(objectToSave); This isn't quite working correctly.
             }
         }
     }
@@ -121,7 +115,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                 scope.barChart[chartIndex].url = data[i].url;
             }
             var year = data[i].label;
-            var yearDisplay = yearToTimeSpan(year, scope.interval, scope.endDate);
+            var yearDisplay = year + '-' + (parseInt(year) + parseInt(scope.interval) - 1); //yearToTimeSpan(year, scope.interval, scope.endDate);
             if (frequencyType === 'absolute_time') {
                 scope.barChart[chartIndex].title = Math.round(count, false) + ' occurrences between ' + yearDisplay;
             } else {
@@ -149,65 +143,6 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             scope.bottomNumber = bottomNumber + ' occurrences';
         }
     }
-    var normalizeDate = function(year, interval) {
-        year = year.toString();
-        if (interval === 10) {
-            year = year.slice(0,-1) + '0';
-        } else if (interval === 100) {
-            year = year.slice(0,-2) + '00';
-        } else if (interval === 50) {
-            var decade = parseInt(year.slice(-2));
-            if (decade < 50) {
-                year = year.slice(0,-2) + '00';
-            } else {
-                year = year.slice(0,-2) + '50';
-            }
-        }
-        return parseInt(year)
-    }    
-    var yearToTimeSpan = function(year, interval, endDate) {
-        year = String(year);
-        if (interval == '10') {
-            year = year.slice(0,-1) + '0';
-            var next = parseInt(year) + 9;
-            if (next > endDate) {
-                next = String(endDate)
-            } else {
-                next = String(next);   
-            }
-            year = year + '-' + next;
-        }
-        else if (interval == '100') {
-            year = year.slice(0,-2) + '00';
-            var next = parseInt(year) + 99;
-            if (next > endDate) {
-                next = String(endDate)
-            } else {
-                next = String(next);   
-            }
-            year = year + '-' + next
-        } else if (interval == '50') {
-            var decade = parseInt(year.slice(-2));
-            if (decade < 50) {
-                var next = parseInt(year.slice(0,-2) + '49');
-                if (next > endDate) {
-                    next = String(endDate)
-                } else {
-                    next = String(next);   
-                }
-                year = year.slice(0,-2) + '00' + '-' + next;
-            } else {
-                var next = year.slice(0,-2) + '99';
-                if (next > endDate) {
-                    next = String(endDate)
-                } else {
-                    next = String(next);   
-                }
-                year = year.slice(0,-2) + '50' + '-' + next;
-            }
-        }
-        return year
-    }
     var relativeCount = function(absoluteCounts, dateCounts) {
         var relativeCounts = [];
         for (var i=0; i < absoluteCounts.length; i++) {
@@ -218,15 +153,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             }
             relativeCounts.push(absoluteObject);
         }
-        return relativeCounts
-    }
-    var retrieveFromStorage = function(scope) {
-        var results = JSON.parse(sessionStorage[$location.url()]);
-        for (var k in results) scope[k] = results[k];
-        scope.percent = 100;
-        setTimeout(function() {
-            drawFromData(scope, scope.absoluteCounts, "absolute_time");
-        }, 500)
+        return relativeCounts;
     }
     return {
         restrict: 'E',
@@ -234,17 +161,13 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         replace: true,
         link: function(scope, element, attrs) {
             var height = $(window).height() - $('#footer').height() - $('#initial_report').height() - $('#header').height() - 190;
-            var width = parseInt($('body').width()) - 90;
+            var width = parseInt($('body').width()) - 60;
             scope.chartSize = {
                 height: height + 'px',
                 width: width + 'px'
                 };
             scope.divisionWidth = {width: width + 'px'};
-            if (typeof(sessionStorage[$location.url()]) === 'undefined' || $rootScope.philoConfig.production === false) {
-                getTimeSeries(scope);
-            } else {
-                retrieveFromStorage(scope);
-            }
+            getTimeSeries(scope);
             attrs.$observe('frequencyType', function(frequencyType) {
                 if (typeof(scope.absoluteCounts) !== 'undefined') {
                     if (frequencyType === 'relative_time') {
