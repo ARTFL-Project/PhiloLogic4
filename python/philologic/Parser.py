@@ -91,6 +91,7 @@ class Parser(object):
                 if future_event[0] == "start":
 #                    if future_element in new_element.findall(xp_prefix):
                     if new_element.findall(xp_prefix) == [future_element]:
+                        #print >> sys.stderr, "testing ", repr(future_event), "for", attr_name
                         if future_element.get(attr_name,""):
                             destination[field] = future_element.get(attr_name)
                             return True
@@ -210,17 +211,27 @@ class Parser(object):
                     for m_obj_type,m_xpath,field in self.metadata_xpaths:      
                         if m_obj_type == obj_type:
                             self.handlers[new_element] += [self.make_extractor(new_element,m_obj_type,m_xpath,field)]
+#                            print >> sys.stderr, "adding handler for ", m_obj_type, m_xpath, field, "to", new_element
                     self.handlers[new_element] += [cleanup]
+#                    print >> sys.stderr, self.handlers[new_element]
                     # only emit one object per element.
                     break
 
             # check for metadata on the new element.
             for open_object in self.handlers.keys():
+#                print >> sys.stderr, open_object, self.handlers[open_object]
+                to_remove = []
                 for handler in self.handlers[open_object]:
+#                    print >> sys.stderr, "running ", handler
 #                    handler(event,new_element)
                     if handler(event,new_element):
                         # If a handler returns True in the end phase, delete it to prevent future evaluation.
-                        self.handlers[open_object].remove(handler)
+#                        print >> sys.stderr, "removing", handler
+                        to_remove.append(handler)
+#                        self.handlers[open_object].remove(handler)
+#                        print >> sys.stderr, self.handlers[open_object]
+                for handler in to_remove:
+                    self.handlers[open_object].remove(handler)
             # objects that don't correspond to real elements can't attach handlers, or clean themselves up.
             # Let OHCOVector handle them numerically instead.
             if (obj_type == self.parallel_type) or (new_element.tag in self.pseudo_empty_tags):
