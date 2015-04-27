@@ -1,26 +1,20 @@
 #!/usr/bin/env python
 
 from __future__ import division
-import os
 import sys
 sys.path.append('..')
 import functions as f
-import reports as r
 from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
 from philologic.DB import DB
 from collections import defaultdict
-from copy import deepcopy
-from operator import itemgetter
+import timeit
 try:
     import simplejson as json
 except ImportError:
     print >> sys.stderr, "Please install simplejson for better performance"
     import json
-import re
-import timeit
 
-sub_date = re.compile('date=[^&]*')
 
 def time_series(environ,start_response):
     config = f.WebConfig()
