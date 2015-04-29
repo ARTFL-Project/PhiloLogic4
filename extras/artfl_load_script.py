@@ -105,36 +105,38 @@ db_destination = database_root + dbname
 data_destination = db_destination + "/data"
 db_url = url_root + dbname
 
-setup_db_dir(db_destination, template_dir)
+if __name__ == "__main__":
+
+    setup_db_dir(db_destination, template_dir)
 
 
-####################
-## Load the files ##
-####################
+    ####################
+    ## Load the files ##
+    ####################
 
-l = Loader(data_destination,
-           load_filters=filters,
-           post_filters=post_filters,
-           tables=tables,
-           xpaths=xpaths,
-           metadata_xpaths=metadata_xpaths,
-           pseudo_empty_tags=pseudo_empty_tags,
-           suppress_tags=suppress_tags,
-           token_regex=token_regex,
-           default_object_level=default_object_level,
-           debug=debug)
+    l = Loader(data_destination,
+             load_filters=filters,
+             post_filters=post_filters,
+             tables=tables,
+             xpaths=xpaths,
+             metadata_xpaths=metadata_xpaths,
+             pseudo_empty_tags=pseudo_empty_tags,
+             suppress_tags=suppress_tags,
+             token_regex=token_regex,
+             default_object_level=default_object_level,
+             debug=debug)
 
-l.add_files(files)
-filenames = l.list_files()
-if sort_order == None:
-    load_metadata = [{"filename":f} for f in sorted(filenames)]
-else:
-    load_metadata = l.sort_by_metadata(*sort_order)
-l.parse_files(workers,load_metadata)
-l.merge_objects()
-l.analyze()
-l.setup_sql_load()
-l.post_processing()
-l.finish(**extra_locals)
+    l.add_files(files)
+    filenames = l.list_files()
+    if sort_order == None:
+      load_metadata = [{"filename":f} for f in sorted(filenames)]
+    else:
+      load_metadata = l.sort_by_metadata(*sort_order)
+    l.parse_files(workers,load_metadata)
+    l.merge_objects()
+    l.analyze()
+    l.setup_sql_load()
+    l.post_processing()
+    l.finish(**extra_locals)
 
-print >> sys.stderr, "Application viewable at", db_url
+    print >> sys.stderr, "Application viewable at", db_url

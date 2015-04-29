@@ -106,35 +106,37 @@ db_destination = database_root + dbname
 data_destination = db_destination + "/data"
 db_url = url_root + dbname
 
-setup_db_dir(db_destination, template_dir)
+if __name__ == "__main__":
+
+  setup_db_dir(db_destination, template_dir)
 
 
-####################
-## Load the files ##
-####################
+  ####################
+  ## Load the files ##
+  ####################
 
-l = Loader(data_destination,
-           load_filters=filters,
-           post_filters=post_filters,
-           tables=tables,
-           xpaths=xpaths,
-           metadata_xpaths=metadata_xpaths,
-           pseudo_empty_tags=pseudo_empty_tags,
-           suppress_tags=suppress_tags,
-           token_regex=token_regex,
-           default_object_level=default_object_level,
-           debug=debug)
+  l = Loader(data_destination,
+             load_filters=filters,
+             post_filters=post_filters,
+             tables=tables,
+             xpaths=xpaths,
+             metadata_xpaths=metadata_xpaths,
+             pseudo_empty_tags=pseudo_empty_tags,
+             suppress_tags=suppress_tags,
+             token_regex=token_regex,
+             default_object_level=default_object_level,
+             debug=debug)
 
-l.add_files(files)
-filenames = l.list_files()
-## The following line creates a list of the files to parse and sorts the files by filename
-## Should you need to supply a custom sort order from the command line you need to supply the files variable,
-## defined at the top of this script, instead of filenames, like so: 
-## load_metadata = [{"filename":f} for f in files] 
-load_metadata = [{"filename":f} for f in sorted(filenames)]
-l.parse_files(workers,load_metadata)
-l.merge_objects()
-l.analyze()
-l.setup_sql_load()
-l.post_processing()
-l.finish(**extra_locals)
+  l.add_files(files)
+  filenames = l.list_files()
+  ## The following line creates a list of the files to parse and sorts the files by filename
+  ## Should you need to supply a custom sort order from the command line you need to supply the files variable,
+  ## defined at the top of this script, instead of filenames, like so: 
+  ## load_metadata = [{"filename":f} for f in files] 
+  load_metadata = [{"filename":f} for f in sorted(filenames)]
+  l.parse_files(workers,load_metadata)
+  l.merge_objects()
+  l.analyze()
+  l.setup_sql_load()
+  l.post_processing()
+  l.finish(**extra_locals)
