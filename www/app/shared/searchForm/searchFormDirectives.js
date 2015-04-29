@@ -128,28 +128,11 @@ philoApp.directive('collocationOptions', ['$rootScope', function($rootScope) {
 }]);
 
 philoApp.directive('timeSeriesOptions', ['$rootScope', function($rootScope) {
-    var buildOptions = function() {
-        var options = {1: "Year", '10': "Decade", '50': "Half Century", '100': "Century"};
-        var intervals = [];
-        for (var i=0; i < $rootScope.philoConfig.time_series_intervals.length; i++) {
-            var interval = {
-                date: $rootScope.philoConfig.time_series_intervals[i],
-                alias: options[$rootScope.philoConfig.time_series_intervals[i]]
-            };
-            if (interval.date == 1 || interval.date == 10 || interval.date == 50 || interval.date == 100) { // this will go when we can select whatever interval
-                intervals.push(interval);
-            }
-        }
-        return intervals
-    }
     return {
         templateUrl: 'app/shared/searchForm/timeSeriesOptions.html',
         replace: true,
-        link: function(scope, element, attrs) {
-            scope.timeSeriesIntervals = buildOptions();
-            if (typeof($rootScope.formData.year_interval) === 'undefined') {
-                $rootScope.formData.year_interval = scope.timeSeriesIntervals[0].date;
-            }
+        link: function() {
+            $rootScope.formData.year_interval = 10;
         }
     }
 }]);
