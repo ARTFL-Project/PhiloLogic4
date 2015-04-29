@@ -9,9 +9,9 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         var fullResults;
         var absoluteFrequency;
         scope.dateCounts = {};
-        request.script({script: 'get_start_end_date.py'}).then(function(dates) { // always run even if useless since so fast
-            scope.startDate = formData.start_date || dates.data.start_date;
-            scope.endDate = formData.end_date || dates.data.end_date;
+        request.script(formData, {script: 'get_start_end_date.py'}).then(function(dates) { // if no dates supplied or if invalid dates
+            scope.startDate = dates.data.start_date;
+            scope.endDate = dates.data.end_date;
             scope.interval = formData.year_interval;
             
             // Store the current query as a local and global variable in order to make sure they are equal later on...
@@ -22,7 +22,6 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             var barChartObject = initializeBarChart(scope.startDate, scope.endDate, formData.year_interval);
             scope.barChart = barChartObject.dateList;
             scope.chartIndex = barChartObject.chartIndex;
-            scope.start = 0; // Start at first date range
             updateTimeSeries(scope, formData, fullResults);
         });
     }
@@ -61,13 +60,13 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         return {dateList: dateList, chartIndex: chartIndex};
     }
     var updateTimeSeries = function(scope, formData, fullResults) {
-        request.report(formData, {start: scope.start, total_results: scope.resultsLength}).then(function(results) {
+        request.report(formData, {start_date: scope.startDate, max_time: 5}).then(function(results) {
             scope.timeSeries.loading = false;
             var timeSeriesResults = results.data;
-            scope.resultsLength = timeSeriesResults.results_length;
+            scope.resultsLength += timeSeriesResults.results_length;
             scope.timeSeries.resultsLength = scope.resultsLength;
             scope.moreResults = timeSeriesResults.more_results;
-            scope.start += timeSeriesResults.ranges_done;
+            scope.startDate = timeSeriesResults.new_start_date;
             for (var date in timeSeriesResults.results.date_count) { // Update date counts
                 scope.dateCounts[date] = timeSeriesResults.results.date_count[date];
             }
@@ -75,8 +74,10 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
         });
     }
     var sortAndRenderTimeSeries = function(scope, formData, fullResults, timeSeriesResults) {
-        if (scope.start <= scope.barChart.length) {
-            scope.percent = Math.floor(scope.start / scope.barChart.length * 100);
+        //console.log(scope.barChart[scope.barChart.length])
+        if (scope.startDate <= scope.barChart[scope.barChart.length - 1].date) {
+            var index = scope.chartIndex[scope.startDate.toString()];
+            scope.percent = Math.floor(index / scope.barChart.length * 100);
         }
         var allResults = progressiveLoad.mergeResults(fullResults, timeSeriesResults.results['absolute_count'], "label");
         fullResults = allResults.unsorted;
