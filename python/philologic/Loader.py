@@ -529,7 +529,7 @@ class Loader(object):
                      'normalized_fields': self.normalized_fields,
                      'debug': self.debug}
         for k, v in extra_locals.items():
-            if k != "db_url" or k != "search_reports":  # This should be changed in the load_script
+            if k != "db_url":  # This should be changed in the load_script
                 db_values[k] = v
         db_config = MakeDBConfig(filename, **db_values)
         print >> open(filename, 'w'), db_config
@@ -539,7 +539,6 @@ class Loader(object):
         """ Write configuration variables for the Web application"""
         config_values = {'dbname': os.path.basename(re.sub("/data/?$", "", self.destination)),
                          'db_url': extra_locals['db_url'],
-                         'search_reports': extra_locals['search_reports'],
                          'metadata': self.metadata_fields,
                          'facets': [{i: i} for i in self.metadata_fields]}
         ## Fetch search examples:

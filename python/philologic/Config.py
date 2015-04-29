@@ -82,7 +82,7 @@ web_config_defaults = {
         'index': 3
     },
     'search_reports': {
-        'value': [],
+        'value': ['concordance', 'kwic', 'collocation', 'time_series'],
         'comment': '''
                # The search_reports variable sets which search report is viewable in the search form
                # Available reports are concordance, kwic, collocation, and time_series''',
