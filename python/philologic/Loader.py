@@ -619,8 +619,14 @@ def setup_db_dir(db_destination, template_dir, safe=False):
             sys.exit()
 
     if template_dir:
-        os.system("cp -r %s* %s" % (template_dir,db_destination))
-        os.system("cp %s.htaccess %s" % (template_dir,db_destination))
+        for f in os.listdir(template_dir):
+            if f != "data":
+                cp_command = "cp -r %s %s" % (template_dir+f,db_destination+"/"+f)
+                print cp_command
+                os.system(cp_command)
+
+        # os.system("cp -r %s* %s" % (template_dir,db_destination))
+        # os.system("cp %s.htaccess %s" % (template_dir,db_destination))
         os.system("chmod -R 777 %s/app/assets/css" % db_destination)
         os.system("chmod -R 777 %s/app/assets/js" % db_destination)
 
