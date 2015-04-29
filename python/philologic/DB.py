@@ -9,6 +9,7 @@ import sys
 import QuerySyntax
 from HitWrapper import HitWrapper
 from philologic import Query,shlax
+from Config import Config, db_locals_defaults, db_locals_header
 
 def hit_to_string(hit,width):
     if isinstance(hit,sqlite3.Row):
@@ -32,19 +33,20 @@ class DB:
         self.dbh.row_factory = sqlite3.Row
         self.width = width
         self.encoding="utf-8"
-        self.locals = {}
-        try:
-            execfile(dbpath + "/db.locals.py",globals(),self.locals)
-        except IOError:
-            pass
-        if "metadata_fields" not in self.locals:
-            self.locals["metadata_fields"] = ["author","title","date","who","head"]
-        if "metadata_hierarchy" not in self.locals:
-            self.locals["metadata_hierarchy"] = [ ["author","title","date"],["head"],["who"] ]
-        if "metadata_types" not in self.locals:
-            self.locals["metadata_types"] = {"author":"doc","title":"doc","date":"doc","head":"div","who":"para"}
-        if "normalized_fields" not in self.locals:
-            self.locals["normalized_fields"] = []
+#        self.locals = {}
+        self.locals = Config(dbpath + "/db.locals.py", db_locals_defaults, db_locals_header)
+        # try:
+        #     execfile(dbpath + "/db.locals.py",globals(),self.locals)
+        # except IOError:
+        #     pass
+        # if "metadata_fields" not in self.locals:
+        #     self.locals["metadata_fields"] = ["author","title","date","who","head"]
+        # if "metadata_hierarchy" not in self.locals:
+        #     self.locals["metadata_hierarchy"] = [ ["author","title","date"],["head"],["who"] ]
+        # if "metadata_types" not in self.locals:
+        #     self.locals["metadata_types"] = {"author":"doc","title":"doc","date":"doc","head":"div","who":"para"}
+        # if "normalized_fields" not in self.locals:
+        #     self.locals["normalized_fields"] = []
 
     def __getitem__(self,item):
         hit = self.get_id_lowlevel(item)
