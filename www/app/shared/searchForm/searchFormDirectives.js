@@ -132,7 +132,9 @@ philoApp.directive('timeSeriesOptions', ['$rootScope', function($rootScope) {
         templateUrl: 'app/shared/searchForm/timeSeriesOptions.html',
         replace: true,
         link: function() {
-            $rootScope.formData.year_interval = 10;
+            if (!$rootScope.formData.year_interval) {
+                $rootScope.formData.year_interval = 10;
+            }
         }
     }
 }]);

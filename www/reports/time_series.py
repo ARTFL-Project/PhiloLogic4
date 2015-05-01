@@ -38,9 +38,7 @@ def generate_time_series(config, q, db):
     for start_range, date_range in date_ranges:
         q.metadata['date'] = date_range
         hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
-        ### Make sure hitlist is done:
-        while not hits.done:
-            hits.update()
+        hits.finish()
         url = f.link.make_absolute_query_link(config, q, report="concordance", date=date_range, start="0", end="0")
         absolute_count[start_range] = {"label": start_range, "count": len(hits), "url": url}
         date_counts[start_range] = date_total_count(start_range, db, q['year_interval'])

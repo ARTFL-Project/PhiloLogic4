@@ -74,7 +74,7 @@ class HitList(object):
     def finish(self):
         self.update()
         while not self.done:
-            time.sleep(.05)
+            time.sleep(.02)
             self.update()
 
     def seek(self,n):
