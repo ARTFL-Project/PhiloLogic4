@@ -67,3 +67,24 @@ philoApp.directive('selectWord', ['$location', 'request', function($location, re
         }
     }
 }]);
+
+philoApp.directive('tooltip', function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            element.mouseenter(function() {
+                var text = attrs.tooltipTitle;
+                var tooltipContainer = $('<div class="tooltip right"><div class="tooltip-arrow"></div><div class="tooltip-inner">' + text + '</div></div>');
+                element.append(tooltipContainer);
+                var barWidth = element.width();
+                element.find('.tooltip').css('marginLeft', barWidth).velocity({'opacity': .9}, {duration: 200});
+            });
+            element.mouseleave(function() {
+                element.find('.tooltip').remove();
+            });
+            element.on('$destroy', function() {
+                element.off();
+            });
+        }
+    }
+});
