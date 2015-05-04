@@ -9,7 +9,7 @@
         <div id="bottom-number">{{ bottomNumber }}</div>
     </div>
     <div id="side-text">{{ sideText }}</div>
-    <a class='graph-bar' href="{{ bar.url }}" tooltip tooltip-title="{{bar.title}}" tooltip-side="right" ng-style="bar.barStyle" ng-repeat="bar in barChart | filterTimeSeries">
+    <a class='graph-bar' href="{{ bar.url }}" tooltip tooltip-title="{{bar.title}}" ng-style="bar.barStyle" ng-repeat="bar in barChart | filterTimeSeries">
         <span class="graph-years">{{ ::bar.date }}</span>
     </a>
 </div>
