@@ -74,15 +74,20 @@ philoApp.directive('tooltip', function() {
         link: function(scope, element, attrs) {
             element.mouseenter(function() {
                 var text = attrs.tooltipTitle;
+                if (!text.length && scope.formData.report === 'time_series') {
+                    var startDate = element.find('.graph-years').text();
+                    var endDate = parseInt(startDate) + parseInt(scope.formData.year_interval) - 1;
+                    text = '0 occurrences for ' + startDate.toString() + '-' + endDate.toString();
+                }
                 var barWidth = element.width();
-                var distanceFromEdge = $(document).width() - element.offset().left - 160; // Give 10px extra for padding;
+                var distanceFromEdge = $(document).width() - element.offset().left - element.width() - 180; // Give extra for padding;
                 if (distanceFromEdge > 0) {
                     var tooltipContainer = $('<div class="tooltip right" style="width: 150px; margin-left: ' + barWidth + 'px;"><div class="tooltip-arrow"></div><div class="tooltip-inner">' + text + '</div></div>');
                 } else {
                     var tooltipContainer = $('<div class="tooltip left" style="width: 150px; margin-left: -150px;"><div class="tooltip-arrow"></div><div class="tooltip-inner">' + text + '</div></div>');
                 }
                 element.append(tooltipContainer);
-                element.find('.tooltip').velocity({'opacity': .9}, {duration: 200});
+                element.find('.tooltip').velocity({'opacity': .9}, {duration: 200});              
             });
             element.mouseleave(function() {
                 element.find('.tooltip').remove();
