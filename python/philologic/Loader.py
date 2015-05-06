@@ -108,7 +108,9 @@ class Loader(object):
 
     def add_files(self,files):
         for f in files:
-            os.system("cp %s %s/%s" % (f,self.textdir, os.path.basename(f).replace(" ","_").replace("'","_")) )
+            command = "cp %s %s/%s" % (shellquote(f),self.textdir, os.path.basename(f).replace(" ","_").replace("'","_")) 
+            print >> sys.stderr, command
+            os.system(command)
         os.system("chmod 775 %s*" % self.textdir)
 
     def status(self):
@@ -567,6 +569,8 @@ class Loader(object):
         print >> open(filename, 'w'), web_config
         print "wrote Web application info to %s." % (filename)
 
+def shellquote(s):
+    return "'" + s.replace("'", "'\\''") + "'"
 
 def handle_command_line(argv):
     usage = "usage: %prog [options] database_name files"
