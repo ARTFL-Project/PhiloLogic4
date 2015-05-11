@@ -8,15 +8,12 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'accessCo
     // Check for possible access restrictions
     if (!$rootScope.philoConfig.access_control) {
         $rootScope.authorized = true;
-        $rootScope.access = accessControl.setAccess(true);
     } else {
         var accessCookie = accessControl.cookieCheck(); 
         if (!accessCookie.access) {
             $rootScope.authorized = false;
-            $rootScope.access = accessControl.setAccess(false);
         } else {
             $rootScope.authorized = true;
-            $rootScope.access = accessCookie.reports;
         }
     }
         

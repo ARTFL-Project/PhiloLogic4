@@ -13,17 +13,7 @@ philoApp.factory('accessControl', ['$rootScope', '$cookies', '$location', functi
             }
         },
         storeSettings: function(authorization) {
-            $rootScope.access = {};
-            var reports = ['concordance', 'kwic', 'collocation', 'time_series', 'navigation'];
-            for (var i=0; i < reports.length; i++) {
-                var report = reports[i];
-                if (authorization.reports.indexOf(report) >= 0) {
-                    $rootScope.access[report] = true;
-                } else {
-                    $rootScope.access[report] = false;
-                }
-            }
-            $cookies[$rootScope.philoConfig.db_url] = JSON.stringify({access: true, reports: $rootScope.access});
+            $cookies[$rootScope.philoConfig.db_url] = JSON.stringify({access: true});
             $rootScope.authorized = true;
         },
         setAccess: function(bool) {
