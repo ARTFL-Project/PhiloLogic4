@@ -2,6 +2,8 @@
 
 import urlparse
 import sys
+import Cookie
+import hashlib
 from philologic.DB import DB
 
 class WSGIHandler(object):
@@ -9,6 +11,14 @@ class WSGIHandler(object):
         self.path_info = environ.get("PATH_INFO", '')
         self.query_string = environ["QUERY_STRING"]
         self.script_filename = environ["SCRIPT_FILENAME"]
+        self.cookies = Cookie.SimpleCookie(environ["HTTP_COOKIE"])
+
+        h = hashlib.md5()
+        secret = ""
+        h.update(environ['REMOTE_ADDR'])
+        h.update(self.cookies["timestamp"])
+        h.update(secret)
+        print >> sys.stderr, "COOKIE: ", self.cookies["hash"], " vs ", h.hexdigest()       
         self.cgi = urlparse.parse_qs(self.query_string,keep_blank_values=True)
         self.defaults = {
           "results_per_page":"25",

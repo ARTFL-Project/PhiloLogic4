@@ -69,11 +69,12 @@ def angular(environ, start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
     headers = [('Content-type', 'text/html; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
+
     if config.access_control:
         access,token = f.check_access(environ, config)
         h, ts = token
         config['access_control'] = access
-        headers.append( ("Set-Cookie", "hash=%s&timestamp=%s" % (h,ts) ) )
+        headers.append( ("Set-Cookie", "hash=%s;timestamp=%s" % (h,ts) ) )
     start_response('200 OK', headers)
     return build_html_page(config)
 
