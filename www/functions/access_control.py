@@ -5,7 +5,7 @@ from philologic.DB import DB
 import sys
 import socket
 import re
-
+import hashlib
 
 def check_access(environ, config):
     incoming_address = environ['REMOTE_ADDR']
@@ -37,7 +37,16 @@ def check_access(environ, config):
                 if incoming_address in domain_list or match_domain in domain_list:
                     access_control = False  # We disable access control
                     save_access(environ["REMOTE_ADDR"], config.dbname)
-            return access_control
+            if access_control = True:
+                h = hashlib.md5()
+                h.update(incoming_address)
+                now = time.localtime()
+                h.update(now)
+                secret = ""
+                h.update(secret)
+                return access_control, (h, now)
+            else:
+                return access_control, ()
 
 
 def previous_access_cleared(incoming_address, dbname):
