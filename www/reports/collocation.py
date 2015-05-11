@@ -105,6 +105,7 @@ def fetch_collocation(hits, q, db, config):
 
 def build_filter_list(q, config):
     ## set up filtering with stopwords or most frequent terms ##
+    print >> sys.stderr, 'STOP', config.stopwords
     if config.stopwords and q.colloc_filter_choice == "stopwords":
         filter_file = open(config.stopwords)
         filter_num = float("inf")
