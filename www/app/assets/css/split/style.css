@@ -324,7 +324,7 @@ a.sidebar-option:hover {
 a.btn:hover {
 	color: #fff !important;
 }
-.btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child, .popover, .progress, .form-control {
+.btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child, .popover, .progress, .form-control, .tooltip-inner {
     border-radius: 0px !important;
 }
 #export-dialog .modal-dialog {

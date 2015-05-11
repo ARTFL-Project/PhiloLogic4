@@ -23,9 +23,4 @@ philoApp.controller('timeSeriesCtrl', ['$rootScope', '$location', 'accessControl
         vm.frequencyType = frequencyType;
     }
     
-    vm.hoverChart = function($event, title) {
-        var element = $($event.currentTarget);
-        element.popover('toggle');
-    }
-    
 }]);

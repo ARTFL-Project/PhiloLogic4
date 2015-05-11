@@ -5,7 +5,7 @@ from collocation import collocation, fetch_collocation
 from navigation import navigation
 from table_of_contents import generate_toc_object
 from concordance_from_collocation import concordance_from_collocation
-from time_series import time_series, generate_time_series, handle_dates
+from time_series import time_series, generate_time_series, get_start_end_date
 from bibliography import bibliography, biblio_citation
 from frequencies import frequencies
 from word_property_filter import word_property_filter

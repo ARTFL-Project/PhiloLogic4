@@ -23,7 +23,7 @@ def access_request(environ, start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    access, reports = check_login(config, request)
+    access = check_login(config, request)
     ip_address = environ["REMOTE_ADDR"]
     if access:
         yield json.dumps({'access': 'authorized', 'reports': reports})
@@ -37,7 +37,6 @@ def check_login(config, request):
     except IOError:
         return (True, default_reports)
     access = False
-    reports = []
     for line in password_file:
         fields = line.strip().split('\t')
         print >> sys.stderr, repr(fields)
@@ -47,16 +46,11 @@ def check_login(config, request):
             user_exists = True
             if passwd == request.password:
                 access = True
-                try:
-                    print >> sys.stderr, fields[2]
-                    reports += eval(fields[2])
-                except IndexError:
-                    reports = default_reports
                 break
             else:
                 access = False
                 break
-    return (access, reports)
+    return access
 
 if __name__ == "__main__":
     CGIHandler().run(access_request)

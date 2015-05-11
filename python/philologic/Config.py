@@ -134,29 +134,22 @@ web_config_defaults = {
     'stopwords': {
         'value': '',
         'comment': '''
-               # The stopwords variable defines a file containing a list of words (one word per line) used for filtering out words
-               # in the collocation report. The file must be located in this directory and designated by its filename. If the file is not found,
+               # The stopwords variable defines a file path containing a list of words (one word per line) used for filtering out words
+               # in the collocation report. The file must be located in the defined path. If the file is not found,
                # no option for using a stopword list will be displayed in collocation searches.''',
         'index': 11
-    },
-    'time_series_intervals': {
-        'value': [10, 50, 100],
-        'comment': '''
-               # The time_series_intervals variable defines the year intervals in the time series report
-               # The only valid intervals are 1, 10, 50 and 100. Invalid intervals will be ignored.''',
-        'index': 12
     },
     'theme': {
         'value': 'default_theme.css',
         'comment': '''
            # The theme variable defines the default CSS theme to be used in the WebApp. The default theme called default_theme.css
            # can be edited directly or you can define a new CSS file below. This file must be located in the app/assets/css/split/ directory for the Web App to find it.''',
-        'index': 13
+        'index': 12
     },
     'dictionary': {
         'value': False,
         'comment': '# The dictionary variable enables a different search interface with the headword as its starting point. It is turned off by default',
-        'index': 14
+        'index': 13
     },
     'landing_page_browsing': {
         'value': {"author": ["A-D", "E-I", "J-M", "N-R", "S-Z"], "title": ["A-D", "E-I", "J-M", "N-R", "S-Z"], "date": {}, "default_display": {}},
@@ -166,14 +159,14 @@ web_config_defaults = {
                # and for date you need to define three variables: start_date, end_date, interval: e.g. "date": {"start": 1600, "end": 1800, "interval": 25}
                # default_display allows you to load content by default. It is a dictionary that contains a type and a range, e.g. = "default_display": {"type": "title": "range": "A-D"}
                # Note that no default is provided for "date" or default_value: they are therefore disabled''',
-        'index': 15
+        'index': 14
     },
     'dico_letter_range': {
         'value': ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"],
         'comment': '''
                # The dico_letter_range variables defines a set of letters corresponding to the first letter of a headword. This generates a set of buttons
                # for browsing the database available on the landing page. The default represents the entire roman alphabet.''',
-        'index': 16
+        'index': 15
     }
 }
 
