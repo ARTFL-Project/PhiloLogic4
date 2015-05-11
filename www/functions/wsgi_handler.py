@@ -13,12 +13,15 @@ class WSGIHandler(object):
         self.script_filename = environ["SCRIPT_FILENAME"]
         self.cookies = Cookie.SimpleCookie(environ["HTTP_COOKIE"])
 
-        h = hashlib.md5()
-        secret = ""
-        h.update(environ['REMOTE_ADDR'])
-        h.update(self.cookies["timestamp"])
-        h.update(secret)
-        print >> sys.stderr, "COOKIE: ", self.cookies["hash"], " vs ", h.hexdigest()       
+        try:
+            h = hashlib.md5()
+            secret = ""
+            h.update(environ['REMOTE_ADDR'])
+            h.update(self.cookies["timestamp"])
+            h.update(secret)
+            print >> sys.stderr, "COOKIE: ", self.cookies["hash"], " vs ", h.hexdigest()       
+        except: 
+            pass
         self.cgi = urlparse.parse_qs(self.query_string,keep_blank_values=True)
         self.defaults = {
           "results_per_page":"25",
