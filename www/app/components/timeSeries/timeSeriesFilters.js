@@ -2,13 +2,26 @@ philoApp.filter('filterTimeSeries', function() {
     return function (items) {
         if (typeof(items) !== 'undefined') {
             var barWidth = items[0].width;
-            var filterEveryOther = false;
-            if (barWidth < 20) {
-               filterEveryOther = true;
+            var filter = false;
+            if (barWidth < 5) {
+                filter = true;
+                var filterValue = 9;
+            } else if (barWidth < 10) {
+                filter = true;
+                var filterValue = 4;
+            } else if (barWidth < 20) {
+               filter = true;
+               var filterValue = 1;
             }
-            if (filterEveryOther) {
-                for (var i = 1; i < items.length; i+=2) {
-                    items[i].date = '';
+            if (filter) {
+                var count = filterValue;
+                for (var i=0; i < items.length; i++) {
+                    if (count < filterValue) {
+                        items[i].date = '';
+                        count ++;
+                    } else {
+                        count = 0;
+                    }
                 }
             }
             return items;

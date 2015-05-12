@@ -19,8 +19,13 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
         $rootScope.formData = {
             report: $rootScope.philoConfig.search_reports[0],
             method: "proxy",
-            results_per_page: "25"
+            results_per_page: "25",
+            stopwords: $rootScope.philoConfig.stopwords,
+            wordFiltering: ['25', '50', '75', '100', '125', '150', '175', '200'],
+            collocWordNum: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+            year_interval: 10
         };
+        $scope.toggleForm();
     }
     
     // Show or hide search bar
