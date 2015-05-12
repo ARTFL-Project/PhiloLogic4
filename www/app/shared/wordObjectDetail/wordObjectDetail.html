@@ -1,0 +1,25 @@
+<div id="wordProperty" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="wordPropertyLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="wordObjectDetail">Word Properties for <b>{{wordProperties.token}}</b></h4>
+            </div>
+            <div class="modal-body">
+				<h5>Lookup in <a href="{{wordProperties.dictionary_lookup}}" target="_blank">{{wordProperties.dictionary_name}}</a></h5>
+                <ol style="margin: 0px -15px">
+					<li ng-repeat="(property, value) in wordProperties" style="padding: 0px 20px" ng-if="!property.startsWith('dictionary')">
+						<div class="row">
+							<div class="col-xs-6">
+								{{property}}
+							</div>
+							<div class="col-xs-6">
+								{{value}}
+							</div>
+						</div>
+					</li>
+				</ol>
+            </div>
+        </div>
+    </div>
+</div>
