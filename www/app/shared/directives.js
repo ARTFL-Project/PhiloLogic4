@@ -40,23 +40,27 @@ philoApp.directive('progressBar', function() {
     }
 });
 
-philoApp.directive('selectWord', ['$location', 'request', function($location, request) {
+philoApp.directive('selectWord', ['$location', 'request', '$rootScope', function($location, request, $rootScope) {
     return {
         restrict: 'A',
         replace: true,
         link: function(scope, element, attrs) {
-            if (scope.philoConfig.word_facets.length > 0) {
+            if (scope.philoConfig.words_facets.length > 0) {
                 element.mouseup(function() {
                     var text = window.getSelection().toString();
                     if (text.length > 0) {
-                        var position = attrs.position;
+                        var context = element.find('div:visible').text();
+                        var position = parseInt(attrs.position) - 1;
                         var query = $location.search();
                         request.script(query, {
                             script: 'lookup_word.py',
                             selected: text,
                             position: position
                         }).then(function(response) {
-                            console.log(response.data);
+                            if (!$.isEmptyObject(response.data)) {
+                                $rootScope.wordProperties = response.data;
+                                $('#wordProperty').modal('show');
+                            }
                         });
                     }
                 });

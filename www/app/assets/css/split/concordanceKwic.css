@@ -191,7 +191,7 @@
 #frequency_field .dropdown-header {
 	padding: 3px 10px;
 }
-#frequency_table li:nth-child(2n-1) {
+#frequency_table li:nth-child(2n-1),  #wordProperty li:nth-child(2n-1) {
 	background-color: #FAFAFA;
 }
 #frequency_container .progress {
