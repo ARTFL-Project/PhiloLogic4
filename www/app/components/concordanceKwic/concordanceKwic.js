@@ -1,8 +1,14 @@
 philoApp.controller('concordanceKwicCtrl', ['$rootScope', '$location', 'accessControl', 'request', 'URL',
                                             function($rootScope, $location, accessControl, request, URL) {
-    
     var vm = this;
-    vm.authorized = $rootScope.access.concordance;
+    if ($rootScope.authorized === true) {
+        vm.authorized = true;
+    } else {
+        $rootScope.accessRequest.then(function(response) {
+            $rootScope.authorized = response.data.access;
+            vm.authorized = $rootScope.authorized;
+        });
+    }
     $rootScope.formData = angular.copy($location.search());
     if ($rootScope.report !== "bibliography") {
         if ($rootScope.formData.q === "" || typeof($rootScope.formData.q) === 'undefined') {

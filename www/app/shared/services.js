@@ -5,24 +5,10 @@ philoApp.filter('unsafe', function($sce) { return $sce.trustAsHtml; });
 philoApp.factory('accessControl', ['$rootScope', '$cookies', '$location', function($rootScope, $cookies, $location) {
     return {
         cookieCheck: function() {
-            var cookie = $cookies[$rootScope.philoConfig.db_url];
-            if (typeof(cookie) === 'undefined') {
-                return {access: false};
+            if (typeof($cookies.hash) !== 'undefined') {
+                return true
             } else {
-                return JSON.parse(cookie);
-            }
-        },
-        storeSettings: function(authorization) {
-            $cookies[$rootScope.philoConfig.db_url] = JSON.stringify({access: true});
-            $rootScope.authorized = true;
-        },
-        setAccess: function(bool) {
-            return {
-                concordance: bool,
-                kwic: bool,
-                collocation: bool,
-                time_series: bool,
-                navigation: bool
+                return false
             }
         }
     }

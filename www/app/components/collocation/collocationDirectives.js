@@ -29,10 +29,8 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
             html += searchLink + word + '</a> </span>';
         }
         $("#collocate_counts").html(html);
-        console.log($("#collocate_counts"))
         $("#collocate_counts span").tagcloud();
         $("#collocate_counts").velocity('fadeIn');
-        console.log($("#collocate_counts"))
     }
     return {
         restrict: 'E',
@@ -42,7 +40,6 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
         link: function(scope, element, attrs) {
                 scope.$watch('sortedLists', function() {
                     if (!$.isEmptyObject(scope.sortedLists)) {
-                        console.log(scope.sortedLists.all)
                         scope.cloud = buildCloud(scope, scope.sortedLists.all);
                     }
                 });

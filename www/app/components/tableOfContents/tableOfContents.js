@@ -2,9 +2,15 @@
 
 philoApp.controller('tableOfContents', ['$rootScope', '$http', '$location', '$routeParams', 'accessControl', 'URL', "request",
                                         function($rootScope, $http, $location, $routeParams, accessControl, URL, request) {
-    
     var vm = this;
-    vm.authorized = $rootScope.authorized; // cannot be blocked specifically if access to database
+    if ($rootScope.authorized === true) {
+        vm.authorized = true;
+    } else {
+        $rootScope.accessRequest.then(function(response) {
+            $rootScope.authorized = response.data.access;
+            vm.authorized = $rootScope.authorized;
+        });
+    }
     vm.textObjectURL = $routeParams;
     var tempValue = vm.textObjectURL.pathInfo.split('/');
     tempValue.pop();
