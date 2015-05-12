@@ -71,11 +71,15 @@ def angular(environ, start_response):
     headers = [('Content-type', 'text/html; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
 
     if config.access_control:
-        access,token = f.check_access(environ, config)
-        h, ts = token
-        config['access_control'] = access
-        headers.append( ("Set-Cookie", "hash=%s" % h) )
-        headers.append( ("Set-Cookie", "timestamp=%s" % ts) )
+        if not request.authenticated:
+            token = f.check_access(environ, config, db)
+            if token:
+                print >> sys.stderr, "ISSUING TOKEN"
+                h, ts = token
+                headers.append( ("Set-Cookie", "hash=%s" % h) )
+                headers.append( ("Set-Cookie", "timestamp=%s" % ts) )
+            else:
+                print >> sys.stderr, "NOT AUTHENTICATED"
     start_response('200 OK', headers)
     return build_html_page(config)
 

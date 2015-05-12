@@ -1,20 +1,17 @@
 var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'ngCookies', 'angular-velocity', 'ui.utils', 'infinite-scroll']);
 
-philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'accessControl', 'textNavigationValues',
-                                  function($rootScope, $scope, $location, accessControl, textNavigationValues) {
+philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'accessControl', 'textNavigationValues', 'request',
+                                  function($rootScope, $scope, $location, accessControl, textNavigationValues, request) {
     
     $rootScope.philoConfig = philoConfig;
     
-    // Check for possible access restrictions
+    // Check access control
     if (!$rootScope.philoConfig.access_control) {
         $rootScope.authorized = true;
     } else {
-        var accessCookie = accessControl.cookieCheck(); 
-        if (!accessCookie.access) {
-            $rootScope.authorized = false;
-        } else {
-            $rootScope.authorized = true;
-        }
+        $rootScope.accessRequest = request.script({
+            script: 'access_request.py'
+        });
     }
         
     $rootScope.report = $location.search().report || philoReport;
