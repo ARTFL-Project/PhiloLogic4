@@ -219,6 +219,7 @@ philoApp.directive('facets', ['$rootScope', '$location', 'URL', 'progressiveLoad
 			var promise = request.report(queryParams, {start: start, end: end});
 		}
         promise.then(function(response) {
+			console.log(response.data.more_results)
             if (response.data.more_results) {
                 var results = response.data.results;
                 scope.resultsLength = response.data.results_length;

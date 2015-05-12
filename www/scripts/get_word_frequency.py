@@ -24,7 +24,7 @@ def generate_word_frequency(hits,q,db,config):
     counts = {}
     more_results = True
     try:
-        for n in hits[q.interval_start:q.interval_end]:
+        for n in hits[q.start:q.end]:
             key = get_word_attrib(n,field,db)
             if not key:
                 key = "NULL" # NULL is a magic value for queries, don't change it recklessly.

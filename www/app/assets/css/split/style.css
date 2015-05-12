@@ -31,6 +31,7 @@
 
 body {
     font-family: 'Averia Serif Libre', cursive;
+	/*font-family: 'Open Sans', sans-serif;*/
 }
 #header, #footer {
     z-index: 1000;
@@ -42,7 +43,8 @@ body {
 
 /* Fonts */
 #main-body{
-    font-weight:300;
+	font-weight: 300;
+    /*font-weight:400;*/
     font-size: 14px;
     line-height: 130%;
 }
@@ -324,7 +326,7 @@ a.sidebar-option:hover {
 a.btn:hover {
 	color: #fff !important;
 }
-.btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child, .popover, .progress, .form-control, .tooltip-inner {
+.btn, .panel, .panel-heading, .list-group-item:first-child, .list-group-item:last-child, .popover, .progress, .form-control, .tooltip-inner, .modal-content {
     border-radius: 0px !important;
 }
 #export-dialog .modal-dialog {

@@ -89,7 +89,7 @@ def filter_words_by_property(hits, path, q, db, config, word_filter=True, filter
     else:
         word_property_total = end + 1
     concordance_object['results'] = results
-    concordance_object["query_done"] = hits.done        
+    concordance_object["query_done"] = hits.done
     concordance_object['results_length'] = word_property_total
     concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page, "more_pages": more_pages}    
     return concordance_object
