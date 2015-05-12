@@ -19,16 +19,28 @@ default_reports = ['concordance', 'kwic', 'collocation', 'time_series', 'navigat
 def access_request(environ, start_response):
     status = '200 OK'
     headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
-    start_response(status, headers)
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    access, reports = check_login(config, request)
-    ip_address = environ["REMOTE_ADDR"]
-    if access:
-        yield json.dumps({'access': 'authorized', 'reports': reports})
+    if request.authenticated:
+        access = True
     else:
-        yield json.dumps({'access': 'unauthorized'})
+        if request.username and request.password:
+            access = check_login(config, request)
+            if access:
+                incoming_address = environ['REMOTE_ADDR']
+                token = f.make_token(incoming_address, db)
+                if token:
+                    h, ts = token
+                    headers.append( ("Set-Cookie", "hash=%s" % h) )
+                    headers.append( ("Set-Cookie", "timestamp=%s" % ts) )
+        else:
+            access = False
+    start_response(status, headers)
+    if access:
+        yield json.dumps({'access': True})
+    else:
+        yield json.dumps({'access': False})
 
 
 def check_login(config, request):
@@ -37,26 +49,18 @@ def check_login(config, request):
     except IOError:
         return (True, default_reports)
     access = False
-    reports = []
     for line in password_file:
         fields = line.strip().split('\t')
-        print >> sys.stderr, repr(fields)
         user = fields[0]
         passwd = fields[1]
         if user == request.username:
-            user_exists = True
             if passwd == request.password:
                 access = True
-                try:
-                    print >> sys.stderr, fields[2]
-                    reports += eval(fields[2])
-                except IndexError:
-                    reports = default_reports
                 break
             else:
                 access = False
                 break
-    return (access, reports)
+    return access
 
 if __name__ == "__main__":
     CGIHandler().run(access_request)

@@ -20,8 +20,8 @@ philoApp.controller('accessControlCtrl', ['$window', '$http', '$cookies', '$root
 			password: password
 		}).then(function(response) {
 			var authorization = response.data;
-			if (authorization.access === "authorized") {
-				accessControl.storeSettings(authorization);
+			if (authorization.access) {
+				$rootScope.authorized = true;
 				$route.reload();
 			} else {
 				vm.accessDenied = true;

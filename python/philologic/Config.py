@@ -134,8 +134,8 @@ web_config_defaults = {
     'stopwords': {
         'value': '',
         'comment': '''
-               # The stopwords variable defines a file (with the absolute path) containing a list of words (one word per line) used for filtering out words
-               # in the collocation report. If the file is not found,
+               # The stopwords variable defines a file path containing a list of words (one word per line) used for filtering out words
+               # in the collocation report. The file must be located in the defined path. If the file is not found,
                # no option for using a stopword list will be displayed in collocation searches.''',
         'index': 11
     },
