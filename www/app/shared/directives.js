@@ -67,6 +67,7 @@ philoApp.directive('selectWord', ['$location', 'request', '$rootScope', function
             }
             element.on('$destroy', function() {
                 element.off();
+                $rootScope.wordProperties = undefined;
             });
         }
     }

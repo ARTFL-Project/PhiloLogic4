@@ -7,6 +7,7 @@ import socket
 import re
 import hashlib
 import time
+from wsgi_handler import WSGIHandler
 
 def check_access(environ, config, db):
     incoming_address = environ['REMOTE_ADDR']
@@ -40,6 +41,43 @@ def check_access(environ, config, db):
             return make_token(incoming_address, db)
         else:
             return ()
+        
+def login_access(environ, config, db, headers):
+    request = WSGIHandler(db, environ)
+    if request.authenticated:
+        access = True
+    else:
+        if request.username and request.password:
+            access = check_login_info(config, request)
+            if access:
+                incoming_address = environ['REMOTE_ADDR']
+                token = make_token(incoming_address, db)
+                if token:
+                    h, ts = token
+                    headers.append( ("Set-Cookie", "hash=%s" % h) )
+                    headers.append( ("Set-Cookie", "timestamp=%s" % ts) )
+        else:
+            access = False
+    return access, headers
+
+def check_login_info(config, request):
+    try:
+        password_file = open(config.db_path + "/data/logins.txt")
+    except IOError:
+        return (True, default_reports)
+    access = False
+    for line in password_file:
+        fields = line.strip().split('\t')
+        user = fields[0]
+        passwd = fields[1]
+        if user == request.username:
+            if passwd == request.password:
+                access = True
+                break
+            else:
+                access = False
+                break
+    return access
 
 def make_token(incoming_address, db):
     h = hashlib.md5()
@@ -49,23 +87,3 @@ def make_token(incoming_address, db):
     secret = db.locals.secret
     h.update(secret)
     return (h.hexdigest(), now)
-
-# def previous_access_cleared(incoming_address, dbname):
-#     session_file = "/tmp/%s" % '_'.join(dbname.split())
-#     if os.path.isfile(session_file):
-#         tmp_file = open(session_file)
-#         previously_cleared = False
-#         for line in tmp_file:
-#             ip = line.strip()
-#             if ip == incoming_address:
-#                 previous_cleared = True
-#                 break
-#         return previous_cleared
-#     else:
-#         return False
-# 
-# 
-# def save_access(incoming_address, dbname):
-#     session_file = "/tmp/%s" % '_'.join(dbname.split())
-#     output = open(session_file, 'a')
-#     print >> output, incoming_address

@@ -213,9 +213,9 @@
 .xml-speaker {
     font-weight: 700;
 }
-.xml-sp {
-    display: block;
-}
+/*.xml-sp {*/
+/*    display: block;*/
+/*}*/
 .xml-sp+.xml-l, .xml-sp+.xml-ab {
     display: inline;
 }

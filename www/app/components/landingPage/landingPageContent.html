@@ -1,5 +1,5 @@
 <div id="landing-page-content" infinite-scroll="displayMoreItems()" infinite-scroll-distance="2">
-    <div loading="loadingContent">
+    <div loading="loadingContent" class="text-content-area">
         <ul class="row" ng-repeat="group in resultGroups | limitTo: displayLimit">
             <h4>{{ ::group.prefix }}</h4>
             <li class="{{ ::contentClass }}" ng-repeat="result in ::group.results">
