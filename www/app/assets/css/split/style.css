@@ -31,7 +31,12 @@
 
 body {
     font-family: 'Averia Serif Libre', cursive;
+}
+.text-content-area {
+	font-family: inherit;
+	font-weight: inherit;
 	/*font-family: 'Open Sans', sans-serif;*/
+	/*font-weight: 400;*/
 }
 #header, #footer {
     z-index: 1000;
@@ -268,11 +273,14 @@ span.note {
 	display: inline;
 }
 .xml-l::before {
-    content:"\A" attr(n) "\0020\0020\0020";
+    content:"\A\0020\0020\0020\0020\0020\0020\0020\0020";
     font-family: 'Droid Sans Mono', sans-serif;
-    color: #bababa;
-    font-size: .7em;
+	font-size: .7em;
 	white-space: pre;
+}
+.xml-l[n]::before {
+    content:"\A" attr(n) "\0020\0020\0020\0020\0020";
+    color: #bababa;
 }
 .xml-l[type="split"]::before {
     content: "";
