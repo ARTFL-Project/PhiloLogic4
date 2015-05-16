@@ -54,7 +54,7 @@ def generate_frequency(results, q, db, config):
             ## Quote metadata to force exact matches on metadata
             for m in metadata:
                 if m not in q.metadata: # skip metadata already in original query: this could be a glob search
-                    if metadata[m] and m != "date":
+                    if metadata[m] and m != "date" and metadata[m] != "NULL":
                         if not metadata[m].startswith('"'):
                             metadata[m] = '"%s"' % metadata[m]
             
