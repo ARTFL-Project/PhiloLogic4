@@ -110,7 +110,7 @@ web_config_defaults = {
                # should list the metadata to be used for the frequency counts''',
         'index': 7
     },
-    'word_facets': {
+    'words_facets': {
         'value': [],
         'comment': '''
                # The word_facets variable functions much like the facets variable, but describes metadata
