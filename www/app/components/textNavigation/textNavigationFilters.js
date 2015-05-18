@@ -22,6 +22,7 @@ philoApp.filter('currentObj', function() {
                     break
                 }
             }
+            console.log('called')
             if ((match - 5) < 9) {
                 return filtered
             } else {

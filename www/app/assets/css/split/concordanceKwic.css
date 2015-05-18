@@ -22,8 +22,6 @@
     text-overflow: ellipsis;
     display: inline-block;
     vertical-align: bottom;
-	margin-left: -5px;
-	padding-left: 5px;
 }
 .full_biblio {
 	z-index: 10;
@@ -34,8 +32,6 @@
 	position: absolute;
     box-shadow: 5px 5px 15px #C0C0C0;
 	display: inline !important;
-	padding: 0px 5px;
-	margin-left: -5px;
 	opacity: 1;
 }
 #philologic_concordance, #colloc_concordance {
