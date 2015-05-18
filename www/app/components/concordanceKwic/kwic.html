@@ -1,10 +1,10 @@
 <div id="results_container" ng-class="{'col-xs-12': concKwic.frequencyResults.length === 0, 'col-xs-8': concKwic.frequencyResults.length > 0}">
     <div id="kwic_concordance" ng-if="report === 'kwic'">
-        <div class="kwic_line velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger: 10}" ng-repeat="result in ::concKwic.results.results" ng-init="currentPos = initializePos(concKwic.results, $index)">
+        <div class="kwic_line velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger: 10}" ng-repeat="result in concKwic.results.results | kwicBiblioDisplay" ng-init="currentPos = initializePos(concKwic.results, $index)">
             <span ng-bind-html="currentPos | unsafe"></span>
             <a href="{{ ::result.citation_links.div1 }}" class="kwic_biblio" ng-mouseover="showFullBiblio($event)" ng-mouseleave="hideFullBiblio($event)">
-                <span class="full_biblio" style="display:none;">{{ result.citation.full_biblio }}</span>
-                <span class="short_biblio" ng-bind-html="result.citation.short_biblio | unsafe"></span>
+                <span class="full_biblio" style="display:none;">{{ result.fullBiblio }}</span>
+                <span class="short_biblio" ng-bind-html="result.shortBiblio | unsafe"></span>
             </a>
             <span ng-bind-html="result.context | unsafe"></span>
         </div>

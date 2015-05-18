@@ -35,7 +35,6 @@ def concordance(environ,start_response):
     yield json.dumps(concordance_object)
     
 def concordance_results(db, q, config):
-    print >> sys.stderr, "TEST", repr(q["q"]), repr(q['method']), repr(q['arg']), repr(q.metadata)
     hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
     start, end, n = f.link.page_interval(q['results_per_page'], hits, q.start, q.end)
     
