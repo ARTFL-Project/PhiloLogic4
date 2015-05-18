@@ -167,6 +167,12 @@ web_config_defaults = {
                # The dico_letter_range variables defines a set of letters corresponding to the first letter of a headword. This generates a set of buttons
                # for browsing the database available on the landing page. The default represents the entire roman alphabet.''',
         'index': 15
+    },
+    'kwic_bibliography_fields': {
+        'value': ['author', 'title'],
+        'comment': '''
+               # This variable defines which bibliography fields will be displayed in the KWIC view.
+               '''
     }
 }
 
