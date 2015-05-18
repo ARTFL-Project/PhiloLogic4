@@ -272,14 +272,18 @@ s {
 span.note {
 	display: inline;
 }
+.xml-l {
+	display: block;
+}
 .xml-l::before {
-    content:"\A\0020\0020\0020\0020\0020\0020\0020\0020";
     font-family: 'Droid Sans Mono', sans-serif;
 	font-size: .7em;
 	white-space: pre;
+	width: 35px;
+	display: inline-block;
 }
 .xml-l[n]::before {
-    content:"\A" attr(n) "\0020\0020\0020\0020\0020";
+    content: attr(n);
     color: #bababa;
 }
 .xml-l[type="split"]::before {
@@ -300,6 +304,10 @@ span.note {
 }
 .xml-w::before {
     margin:0;padding:0;float:left;
+}
+/*Remove spacing before punctuation*/
+.xml-w[pos=","], .xml-w[pos="."], .xml-w[pos=";"], .xml-w[pos="?"], .xml-w[pos="!"], .xml-w[pos=":"], .xml-w[pos="!"] {
+	margin-left: -.25em;
 }
 br {
     content: " ";
