@@ -108,7 +108,6 @@ class Loader(object):
     def add_files(self,files):
         for f in files:
             command = "cp %s %s/%s" % (shellquote(f),self.textdir, os.path.basename(f).replace(" ","_").replace("'","_")) 
-            print >> sys.stderr, command
             os.system(command)
         os.system("chmod 775 %s*" % self.textdir)
 
