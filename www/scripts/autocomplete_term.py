@@ -24,10 +24,10 @@ def term_list(environ, start_response):
     term = request.term
     if isinstance(term, list):
         term = term[-1]
-    all_words = format_query(term, db)[:100]
+    all_words = format_query(term, db, config)[:100]
     yield json.dumps(all_words)
 
-def format_query(q, db):
+def format_query(q, db, config):
     parsed = parse_query(q)
     group = group_terms(parsed)
     all_groups = split_terms(group)
@@ -49,7 +49,7 @@ def format_query(q, db):
         return []
     if kind == "QUOTE":
         token = token.replace('"', '')
-    frequency_file = db.locals["db_path"]+"/frequencies/normalized_word_frequencies"
+    frequency_file = config.db_path +"/data/frequencies/normalized_word_frequencies"
 
     expanded_token = token + '.*'
     grep_proc = grep_word(expanded_token, frequency_file, subprocess.PIPE)
