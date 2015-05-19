@@ -48,13 +48,23 @@ def lookup_word(cursor,token,n,start,end,filename):
 #        print >> sys.stderr, row['philo_name'], type(row['philo_name'])
         if row['philo_name'] == token_lower:
             if i == int(n):
-                return json.dumps( {"philo_id":row['philo_id'],
-                                   "token":row['philo_name'], 
-                                   "lemma":row['lemma'],
-                                   "pos":row['pos'],
-                                   "dictionary_name": "Logeion",
-                                   "dictionary_lookup": "http://logeion.uchicago.edu/index.html#" + row['lemma']
-                                    })
+                result_object = {'properties':
+                                    [{"property": "Form", "value": row['philo_name']},
+                                    {"property": "Lemma", "value": row['lemma']},
+                                    {"property": "Parse", "value": row['pos']},
+                                    {"property": "Definition", "value": ''},
+                                    {"property": "Provenance", "value": 'Parsed by HD'}],
+                                 'problem_report': '/',
+                                 'token': row['philo_name'],
+                                 'lemma': row['lemma'],
+                                 'philo_id': row['philo_id'],
+                                 'alt_lemma': [],                                    
+                                 "dictionary_name": 'Logeion',
+                                 "dictionary_lookup": "http://logeion.uchicago.edu/index.html#" + row['lemma'],
+                                 "alt_parses": [{'lemma': 'x', 'parse': ["a","b","c","d"], "dictionary_lookup": "http://logeion.uchicago.edu/index.html#" + 'x'},
+                                                {'lemma': 'y', 'parse': ["e","f","g"], "dictionary_lookup": "http://logeion.uchicago.edu/index.html#" + 'y'}]
+                                }
+                return json.dumps(result_object)
             else:
                 i += 1
     return json.dumps( {} )
