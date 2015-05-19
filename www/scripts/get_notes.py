@@ -20,8 +20,11 @@ def get_notes(environ,start_response):
     request = WSGIHandler(db, environ)
     path = config.db_path
     target = request.target.replace('#', '')
+    doc_id = request.philo_id.split()[0] + ' %'
     try:
-        philo_id = db.query(id=target)[0].philo_id
+        c = db.dbh.cursor()
+        c.execute('select philo_id from toms where id=? and philo_id like ? limit 1', (target, doc_id))
+        philo_id = c.fetchall()[0]['philo_id'].split()
         obj = ObjectWrapper(philo_id, db)
         text_object = generate_text_object(obj, db, request, config)
         yield json.dumps(text_object)
