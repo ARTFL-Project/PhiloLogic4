@@ -36,7 +36,13 @@ def lookup_word_service(environ,start_response):
         filename = hit.filename
         token = request.selected
     elif request.report == "navigation":
-        print >> sys.stderr, "WORD LOOKUP FROM NAVIGATION", request
+
+        token = request.selected
+        philo_id = request.philo_id.split(" ")
+        text_obj = db[philo_id]
+        byte_start, byte_end = int(text_obj.byte_start), int(text_obj.byte_end)
+        filename = text_obj.filename
+        print >> sys.stderr, "WORD LOOKUP FROM NAVIGATION", request.philo_id,request.selected, byte_start, byte_end, filename
     else:
         pass
     print >> sys.stderr, "TOKEN", token, "BYTES: ", byte_start, byte_end, "FILENAME: ", filename, "POSITION", request.position
@@ -46,26 +52,31 @@ def lookup_word_service(environ,start_response):
 def lookup_word(db,cursor,token,n,start,end,filename):
     i = 0
     query = "select * from words where (byte_start >= ?) and (byte_end <= ?) and (filename = ?);"
-    print >> sys.stderr, query, (start,end,filename)
+    print >> sys.stderr, "QUERY", query, (start,end,filename)
     cursor.execute(query,(start, end, filename))
     token_lower = token.decode("utf-8").lower().encode("utf-8")
     for row in cursor.fetchall():
 #        print >> sys.stderr, row['philo_name'], type(row['philo_name'])
         if row['philo_name'] == token_lower:
             
-            tokenid = row["tokenid"]
             best_parse = (row["lemma"],row["pos"])
+            print >> sys.stderr, "BEST PARSE", best_parse
             all_parses = {}
             authority = ""
+            defn = ""
             try:
+                tokenid = row["tokenid"]
                 lex_connect = sqlite3.connect(db.locals.db_path + "/data/lexicon.db")
                 lex_cursor = lex_connect.cursor()
-                lex_query = "select Lexicon.lemma,Lexicon.code,authority from parses,Lexicon where parses.tokenid = ? and parses.lex=Lexicon.lexid;"
+                lex_query = "select Lexicon.lemma,Lexicon.code,authority,shortdefs.def from parses,Lexicon,shortdefs where parses.tokenid = ? and parses.lex=Lexicon.lexid and shortdefs.lemma=Lexicon.lemma;"
                 lex_cursor.execute(lex_query,(tokenid,))
                 raw_parses = []
                 for parse_row in lex_cursor.fetchall():
                     if not authority:
                         authority = "Hand parsed by " + parse_row[2]
+                    if not defn and parse_row[3]:
+                        defn = parse_row[3]
+                        print >> sys.stderr, "DEFINITION:", parse_row[3]
                     p_lemma, p_pos = parse_row[0].encode("utf-8"),parse_row[1]
                     parse = (p_lemma,p_pos)
                     if parse != best_parse:
@@ -76,7 +87,8 @@ def lookup_word(db,cursor,token,n,start,end,filename):
                         else:
                             all_parses[p_lemma].append(p_pos)
                     
-            except:
+            except UnicodeDecodeError:
+                print >> sys.stderr, "QUERY ERROR"
                 pass            
                 
             if i == int(n):
@@ -84,7 +96,7 @@ def lookup_word(db,cursor,token,n,start,end,filename):
                                     [{"property": "Form", "value": row['philo_name']},
                                     {"property": "Lemma", "value": row['lemma']},
                                     {"property": "Parse", "value": row['pos']},
-                                    {"property": "Definition", "value": ''},
+                                    {"property": "Definition", "value": defn},
                                     {"property": "Provenance", "value": authority}],
                                  'problem_report': '/',
                                  'token': row['philo_name'],
