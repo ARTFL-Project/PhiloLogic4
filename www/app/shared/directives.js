@@ -45,18 +45,36 @@ philoApp.directive('selectWord', ['$location', 'request', '$rootScope', function
         restrict: 'A',
         replace: true,
         link: function(scope, element, attrs) {
+            var modalPopUp = function(reponse) {
+                if (!$.isEmptyObject(response.data)) {
+                    $rootScope.wordProperties = response.data;
+                    $('#wordProperty').modal('show');
+                }
+            }
             if (scope.philoConfig.words_facets.length > 0) {
                 element.mouseup(function() {
                     var text = window.getSelection().toString();
                     if (text.length > 0) {
                         var context = element.find('div:visible').text();
-                        var position = parseInt(attrs.position) - 1;
+                        var resultsPromise = '';
                         var query = $location.search();
-                        request.script(query, {
-                            script: 'lookup_word.py',
-                            selected: text,
-                            position: position
-                        }).then(function(response) {
+                        if ($rootScope.report === 'concordance') {
+                            var position = parseInt(attrs.position) - 1;
+                            resultsPromise = request.script(query, {
+                                script: 'lookup_word.py',
+                                selected: text,
+                                position: position
+                            });
+                        } else if ($rootScope.report === "textNavigation") {
+                            var philoID = attrs.philoId;
+                            resultsPromise = request.script(query, {
+                                script: 'lookup_word.py',
+                                selected: text,
+                                philo_id: philoID,
+                                report: "navigation"
+                            });
+                        }
+                        resultsPromise.then(function(response) {
                             if (!$.isEmptyObject(response.data)) {
                                 $rootScope.wordProperties = response.data;
                                 $('#wordProperty').modal('show');

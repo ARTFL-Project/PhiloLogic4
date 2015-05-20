@@ -20,7 +20,6 @@ from philologic.DB import DB
 from lxml import etree
 from philologic.Config import MakeWebConfig, MakeDBConfig
 
-from philologic.utils import OutputHandler
 
 sort_by_word = "-k 2,2"
 sort_by_id = "-k 3,3n -k 4,4n -k 5,5n -k 6,6n -k 7,7n -k 8,8n -k 9,9n"
@@ -109,7 +108,6 @@ class Loader(object):
     def add_files(self,files):
         for f in files:
             command = "cp %s %s/%s" % (shellquote(f),self.textdir, os.path.basename(f).replace(" ","_").replace("'","_")) 
-            print >> sys.stderr, command
             os.system(command)
         os.system("chmod 775 %s*" % self.textdir)
 
@@ -625,7 +623,6 @@ def setup_db_dir(db_destination, template_dir, safe=False):
         for f in os.listdir(template_dir):
             if f != "data":
                 cp_command = "cp -r %s %s" % (template_dir+f,db_destination+"/"+f)
-                print cp_command
                 os.system(cp_command)
 
         # os.system("cp -r %s* %s" % (template_dir,db_destination))
@@ -633,33 +630,3 @@ def setup_db_dir(db_destination, template_dir, safe=False):
         os.system("chmod -R 777 %s/app/assets/css" % db_destination)
         os.system("chmod -R 777 %s/app/assets/js" % db_destination)
 
-# a quick utility function
-#def load(path,files,filters=default_filters,xpaths=None,metadata_xpaths=None,workers=4):
-#    l = Loader(path)
-#    l.add_files(files)
-#    l.parse_files(workers,filters,xpaths,metadata_xpaths)
-#    l.merge_objects()
-#    l.analyze()
-#    l.make_tables()
-#    l.finish()
-
-#if __name__ == "__main__":
-#    os.environ["LC_ALL"] = "C" # Exceedingly important to get uniform sort order.
-#    os.environ["PYTHONIOENCODING"] = "utf-8"
-#
-#    usage = "usage: philoload.py destination_path texts ..."
-#
-#    try :
-#        destination = sys.argv[1]
-#    except IndexError:
-#        print usage
-#        exit()
-#
-#    texts = sys.argv[2:]
-#    if len(sys.argv[2:]) == 0:
-#        print usage
-#        exit()
-#
-#    load(destination,texts)
-#
-#    print "done"
