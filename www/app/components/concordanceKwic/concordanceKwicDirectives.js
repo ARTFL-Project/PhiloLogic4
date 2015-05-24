@@ -34,11 +34,10 @@ philoApp.directive('concordance', ['$rootScope', '$http', 'request', function($r
 
 philoApp.directive('kwic', ['$rootScope', function($rootScope) {
     var initializePos = function(results, index) {
-		var start = results.description.start;
-		var endPos = results.resultsLength;
+        var start = results.description.start;
         var currentPos = start + index;
         var currentPosLength = currentPos.toString().length;
-        endPos += start;
+        var endPos = start + parseInt($rootScope.formData.results_per_page || 25);
         var endPosLength = endPos.toString().length;
         var spaces = endPosLength - currentPosLength + 1;
         return currentPos + '.' + Array(spaces).join('&nbsp');
