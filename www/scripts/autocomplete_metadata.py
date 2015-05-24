@@ -60,9 +60,9 @@ def format_query(q, field, db):
         norm_tok = token.decode("utf-8").lower()
         norm_tok = [i for i in unicodedata.normalize("NFKD",norm_tok) if not unicodedata.combining(i)]
         norm_tok = "".join(norm_tok).encode("utf-8")
-        matches = metadata_pattern_search(norm_tok,db.locals["db_path"]+"/frequencies/normalized_%s_frequencies" % field)
+        matches = metadata_pattern_search(norm_tok,db.locals.db_path +"/data/frequencies/normalized_%s_frequencies" % field)
         substr_token = token.decode("utf-8").lower().encode("utf-8")
-        exact_matches = exact_word_pattern_search(substr_token + '.*',db.locals["db_path"]+"/frequencies/%s_frequencies" % field)
+        exact_matches = exact_word_pattern_search(substr_token + '.*',db.locals.db_path +"/data/frequencies/%s_frequencies" % field)
         for m in exact_matches:
             if m not in matches:
                 matches.append(m)

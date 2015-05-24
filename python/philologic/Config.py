@@ -157,7 +157,7 @@ web_config_defaults = {
                # The landing_page_browsing variable defines which browsing functions are exposed in the landing page. The only options
                # are author, title, date, and default_display. For author and title, you have to define a list of ranges, such as 'author': ['A-L', 'M-Z'],
                # and for date you need to define three variables: start_date, end_date, interval: e.g. "date": {"start": 1600, "end": 1800, "interval": 25}
-               # default_display allows you to load content by default. It is a dictionary that contains a type and a range, e.g. = "default_display": {"type": "title": "range": "A-D"}
+               # default_display allows you to load content by default. It is a dictionary that contains a type and a range, e.g. = "default_display": {"type": "title", "range": "A-D"}
                # Note that no default is provided for "date" or default_value: they are therefore disabled''',
         'index': 14
     },
