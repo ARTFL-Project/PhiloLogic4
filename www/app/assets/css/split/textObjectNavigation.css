@@ -343,6 +343,10 @@ body {
 	cursor: pointer;
     text-decoration: none;
 }
+div[type="notes"] .xml-note {
+	margin: 15px 0px;
+	display: block;
+}
 
 /*Page images*/
 .page-image-link {
