@@ -3,8 +3,8 @@
         <div class="row" id="toc-report-title">
             <div class="col-xs-offset-2 col-xs-8">
                 <div>
+					<span ng-if="toc.tocObject.citation.author">{{ ::toc.tocObject.citation.author.label }}, </span>
                     <a id="toc-title" class="citation-small-caps">{{ ::toc.tocObject.citation.title.label }}</a>
-                    <span ng-if="toc.tocObject.citation.author">, {{ ::toc.tocObject.citation.author.label }}</span>
                 </div>
                 <span ng-if="toc.tocObject.citation.more">{{ ::toc.tocObject.citation.more }}</span>
             </div>
