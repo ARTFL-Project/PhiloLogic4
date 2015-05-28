@@ -5,7 +5,6 @@ from philologic.TagCensus import TagCensus
 class TokenCounter(object):
     def __init__(self,token_regex):
         self.buffers = []
-        self.buffer_position = 0
         self.totalcount = 0
         self.wordcounts = {}
         self.whitespace = 0
