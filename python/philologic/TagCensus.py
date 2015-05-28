@@ -2,14 +2,16 @@ from philologic import shlaxtree as st
 import sys
 
 class TagCensus:
-    def __init__(self, debug = False):
+    def __init__(self, debug = False, text_target=None):
         self.tags = {}
         self.debug = debug
+        self.text_target = text_target
 
     def parse(self,text):
         self.tags = {}
         parser = st.ShlaxIngestor(target=self)
         parser.feed(text)
+        self.close()
 
     def __getitem__(self,key):
         return self.tags[key]
@@ -34,6 +36,9 @@ class TagCensus:
                     pass # a normal end tag
             else:
                 return # a hypothetical end tag to balance an empty tag
+        elif kind == "text" and self.text_target:
+            self.text_target.feed(content)
+            return
         else:
             return
         if self.debug:
@@ -52,6 +57,29 @@ class TagCensus:
             self[tag]["malformed"] += other.tags[tag]["malformed"]        
         return self
         
+    def __sub__(self,other):
+        res = {}
+        for tag in self.tags.keys():
+            if tag not in res:
+                res[tag] = {"start":0,"end":0,"empty":0,"malformed":0}
+            res[tag]["start"] += self.tags[tag]["start"]
+            res[tag]["end"] += self.tags[tag]["end"]
+            res[tag]["empty"] += self.tags[tag]["empty"]
+            res[tag]["malformed"] += self.tags[tag]["malformed"]
+        for tag in other.tags.keys():
+            if tag not in res:
+                res[tag] = {"start":0,"end":0,"empty":0,"malformed":0}
+            res[tag]["start"] -= other.tags[tag]["start"]
+            res[tag]["end"] -= other.tags[tag]["end"]
+            res[tag]["empty"] -= other.tags[tag]["empty"]
+            res[tag]["malformed"] -= other.tags[tag]["malformed"]
+
+        for tag in res.keys():
+            if res[tag] == {"start":0,"end":0,"empty":0,"malformed":0}:
+                del res[tag]
+
+        return res
+
     def __str__(self):
         longest = max(len(k) for k in self.tags.keys()) + 4 # 3 possible flags + space
         res = "    tag%s\tstart\tend\tempty\tmalformed\n" % (" " * (longest - len("tag")))
@@ -79,6 +107,8 @@ class TagCensus:
         return res
         
     def close(self):
+        if self.text_target:
+            self.text_target.close()
         pass
 
 if __name__ == "__main__":
