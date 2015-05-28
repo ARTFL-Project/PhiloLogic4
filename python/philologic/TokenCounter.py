@@ -5,6 +5,7 @@ from philologic.TagCensus import TagCensus
 class TokenCounter(object):
     def __init__(self,token_regex):
         self.buffers = []
+        self.buffer_position = 0
         self.totalcount = 0
         self.wordcounts = {}
         self.whitespace = 0
@@ -12,11 +13,32 @@ class TokenCounter(object):
 
     def feed(self,text):
         self.buffers += [text.decode("utf-8")]
+        self.flush()
 
     def close(self):
+        self.flush()
+
+    def flush(self):
+        # if len(self.buffers) > 1:
+        #     print "buffer w tail", self.buffers
         temp_buffer = "".join(buf for buf in self.buffers)
         temp_position = 0
+        last_end = 0
+
         for tok in re.finditer(self.token_regex,temp_buffer, re.U):
+            tok_length = len(tok.group())
+            tok_start = len(temp_buffer[:tok.start()])
+            tok_end = len(temp_buffer[:tok.end()])
+            # print "token", tok_start, ":", tok_end
+            if tok_end == len(temp_buffer):
+                # print "holding"
+                last_end = tok.start()
+                break
+
+            while (tok_end >= (temp_position + len(self.buffers[0]))):
+                temp_position += len(self.buffers[0])
+                discard = self.buffers.pop(0)
+
             if tok.group(1):
                 tok_type = "word"
                 word = tok.group(1)
@@ -25,22 +47,11 @@ class TokenCounter(object):
                 else:
                     self.wordcounts[word] = 1
             elif tok.group(2):
-                tok_type = "sent"
-            tok_length = len(tok.group())
-            tok_start = len(temp_buffer[:tok.start()])
-            tok_end = len(temp_buffer[:tok.end()])
-            while (tok_start >= (temp_position + len(self.buffers[0]))):
-                temp_position += len(self.buffers[0])
-                discard = self.buffers.pop(0)
-            start = tok_start - temp_position
-            while (tok_end >= (temp_position + len(self.buffers[0]))):
-                temp_position += len(self.buffers[0])
-                discard = self.buffers.pop(0)
-                if self.buffers:
-                    pass
-                else:
-                    break
-            end = tok_end - temp_position
+                tok_type = "sent"                
+            last_end = tok_end
+        tail = temp_buffer[last_end:]
+        # print "keeping tail", tail
+        self.buffers = [tail]
 
 if __name__ == "__main__":
     a = sys.argv[1]
