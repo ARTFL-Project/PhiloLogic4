@@ -12,6 +12,8 @@ You can find more detailed installation instructions for specific OSes here:
 
 ### Downloading ###
 
+IMPORTANT: Do not install from the master branch on github: this is a the development branch and in no way garanteed to be stable
+
 You can find a copy of the latest version of PhiloLogic4 [here](../../../releases/).
 
 For the rest of this document, we will assume the PhiloLogic source code is installed in 
