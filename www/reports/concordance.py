@@ -137,9 +137,10 @@ def concordance_citation(hit, citation_hrefs):
 
 def fetch_concordance(db, hit, path, context_size):
     ## Determine length of text needed
-    byte_distance = hit.bytes[-1] - hit.bytes[0]
+    bytes = sorted(hit.bytes)
+    byte_distance = bytes[-1] - bytes[0]
     length = context_size + byte_distance + context_size
-    bytes, byte_start = adjust_bytes(hit.bytes, length)
+    bytes, byte_start = adjust_bytes(bytes, context_size)
     conc_text = f.get_text(hit, byte_start, length, path)
     conc_text = format_concordance(conc_text, db.locals['word_regex'], bytes)
     conc_text = convert_entities(conc_text)

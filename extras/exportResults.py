@@ -52,6 +52,7 @@ class PhiloLogicRequest(object):
             print >> sys.stderr, "Invalid URL:"
             print >> sys.stderr, r.url
             exit()
+        print r.text
         if self.report == "time_series":
             r = self.query(start=0, end=1000)
             self.total = r.json()['results_length']
@@ -64,7 +65,7 @@ class PhiloLogicRequest(object):
         if args:
             for k, v in args.iteritems():
                 params[k] = v
-        response = requests.get(self.db_url + "/dispatcher.py", params=params, timeout=timeout)
+        response = requests.get(self.db_url + "/query", params=params, timeout=timeout)
         return response
     
     def build_result_set(self):
