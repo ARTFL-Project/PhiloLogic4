@@ -31,7 +31,7 @@ def generate_frequency(results, q, db, config):
             key = generate_key(hit, field, db)
             counts[key] += 1
                 
-        table = {'results': {}, 'more_results': True}
+        table = {}
         for key,count in counts.iteritems():
             # for each item in the table, we modify the query params to generate a link url.      
             metadata = dict(q.metadata) ## Make a distinct copy for each key in case we may modify it below

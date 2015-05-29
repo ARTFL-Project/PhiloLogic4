@@ -49,10 +49,10 @@ def generate_kwic_results(db, q, config, link_to_hit="div1"):
             
         ## Determine length of text needed
         byte_distance = hit.bytes[-1] - hit.bytes[0]
-        length = length/2 + byte_distance + length/2
+        length = config.concordance_length + byte_distance + config.concordance_length
             
         ## Get concordance and align it
-        bytes, byte_start = adjust_bytes(hit.bytes, length)
+        bytes, byte_start = adjust_bytes(hit.bytes, config.concordance_length)
         conc_text = f.get_text(hit, byte_start, length, config.db_path)
         conc_text = format_strip(conc_text, bytes)
         conc_text = KWIC_formatter(conc_text, len(hit.bytes))
@@ -70,7 +70,10 @@ def KWIC_formatter(output, hit_num, chars=40):
     output = output.replace('\n', ' ')
     output = output.replace('\r', '')
     output = output.replace('\t', ' ')
-    start_hit = output.index('<span class="highlight">')
+    try:
+        start_hit = output.index('<span class="highlight">')
+    except ValueError:
+        return output
     start_output = '<span class="kwic-before"><span class="inner-before">' + output[:start_hit] + '</span></span>'
     end_hit = output.rindex('</span>') + 7
     end_output = '<span class="kwic-after">' + output[end_hit:] + '</span>'

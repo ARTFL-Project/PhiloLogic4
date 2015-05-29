@@ -55,6 +55,7 @@ class HitWrapper(object):
                 self.words += [ parent_id + (remaining.pop(0),) ]
                 if remaining:
                     self.bytes.append(remaining.pop(0))
+            self.bytes.sort()
             self.words.sort(key=lambda x:x[-1]) # assumes words in same sent, as does search4
             self.words = [WordWrapper(word,db,byte) for word,byte in zip(self.words,self.bytes)]
 

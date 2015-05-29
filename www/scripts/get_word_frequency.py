@@ -36,7 +36,7 @@ def generate_word_frequency(hits,q,db,config):
     
     table = {}
     for k,v in counts.iteritems():
-        url = f.link.make_absolute_query_link(config,q,report="word_property_filter",word_property=field,word_property_value=k)
+        url = f.link.make_absolute_query_link(config,q,start="0", end="0", report="word_property_filter",word_property=field,word_property_value=k)
         table[k] = {'count': v, 'url': url}
     
     word_frequency_object = {"results": table, "results_length": len(hits), "more_results": more_results}

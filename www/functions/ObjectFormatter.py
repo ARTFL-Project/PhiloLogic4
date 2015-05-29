@@ -53,12 +53,12 @@ def note_content(element):
         child = note_content(child)
     return element
 
-def adjust_bytes(bytes, length):
+def adjust_bytes(bytes, padding):
     """Readjust byte offsets for concordance"""
     ### Called from every report that fetches text and needs highlighting
-    bytes = sorted(bytes) # bytes aren't stored in order
-    byte_start = bytes[0] - (length / 2)
-    first_hit =  length / 2
+#    bytes = sorted(bytes) # bytes aren't stored in order
+    byte_start = bytes[0] - padding
+    first_hit =  bytes[0] - byte_start
     if byte_start < 0:
         first_hit = first_hit + byte_start ## this is a subtraction really
         byte_start = 0
