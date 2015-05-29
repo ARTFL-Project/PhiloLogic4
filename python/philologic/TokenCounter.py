@@ -57,7 +57,7 @@ if __name__ == "__main__":
     b = sys.argv[2]
 
     print "start"
-    a_tokens = TokenCounter("(\w+)|([\.\!\?])")    
+    a_tokens = TokenCounter("(\w+)|([\.\!\?])")
     a_census = TagCensus(text_target=a_tokens)
     a_census.parse(open(a).read())
     print a, "done"
