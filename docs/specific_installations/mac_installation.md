@@ -3,12 +3,19 @@ Installing PhiloLogic on Mac OSX
 
 Note: these instructions were only tested on Mac OSX Yosemite.
 
+
 * Install Homebrew for easy installation of dependencies: see <a href="http://brew.sh/">here</a>
 
 
 * Install gdbm
 
  `brew install gdbm`
+
+* Make sure your default Python is `/usr/bin/python`
+
+  Run `which python` to check
+
+  If you are using a different python, make sure you install the following python module to the system python.
 
 
 * Install pip
@@ -19,9 +26,13 @@ Note: these instructions were only tested on Mac OSX Yosemite.
 * Install LXML
 
  `sudo pip install lxml`
+ 
+* Install Xcode if not already installed
+ 
+  `xcode-select --install`
 
 
-* Download PhiloLogic from [here](../../../../releases/) and unpack the tarball
+* Download latest stable PhiloLogic release from [here](../../../../releases/) and unpack the tarball
 
  `tar -xf PhiloLogic4.xyz.tar.gz`
 
@@ -30,7 +41,7 @@ Note: these instructions were only tested on Mac OSX Yosemite.
 
 * Compile and install the search core
 
- `cd lib``
+ `cd libphilo``
 
  `make`
 
@@ -39,22 +50,21 @@ Note: these instructions were only tested on Mac OSX Yosemite.
 
 * Install Python bindings
 
- `cd ..`
+ `cd ../python`
 
  `sudo python setup.py install`
 
 
 * Configure Apache Web Server
  * Open Apache config file:
-  `sudo vim /etc/apache2/httpd.conf``
+  `sudo vim /etc/apache2/httpd.conf`
 
- * Change:
+ * Make sure mod_cgi is loaded (remove the leading `#` if present in front of the following line):
  
-   `# LoadModule cgi_module libexec/apache2/mod_cgi.so`
-
-    to:
-   
-    `LoadModule cgi_module libexec/apache2/mod_cgi.so`
+   `LoadModule cgi_module libexec/apache2/mod_cgi.so`
+    
+ * Make sure the mod_rewrite module is loaded (remove the leading `#` if present in front of the following line):
+   `LoadModule rewrite_module libexec/apache2/mod_rewrite.so`
 
  * In `<Directory "/Library/WebServer/Documents”>`, change `AllowOverride None` to `ÀllowOverride All`
 
@@ -65,7 +75,7 @@ Note: these instructions were only tested on Mac OSX Yosemite.
 
  * Run one of the two following commands according to your prefered configuration:
 
-   `sudo chmod -R username /Library/WebServer/Documents/philologic4/`
+   `sudo chown -R username /Library/WebServer/Documents/philologic4/`
 
     OR
 
