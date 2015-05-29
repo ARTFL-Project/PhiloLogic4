@@ -32,7 +32,7 @@ Note: these instructions were only tested on Mac OSX Yosemite.
   `xcode-select --install`
 
 
-* Download PhiloLogic from [here](../../../../releases/) and unpack the tarball
+* Download latest stable PhiloLogic release from [here](../../../../releases/) and unpack the tarball
 
  `tar -xf PhiloLogic4.xyz.tar.gz`
 
