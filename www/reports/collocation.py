@@ -125,8 +125,12 @@ def build_filter_list(q, config):
         filter_list.add(word.decode('utf-8', 'ignore'))
     return filter_list
 
-def split_concordance(hit, length, path):
-    bytes, byte_start = adjust_bytes(hit.bytes, length)
+def split_concordance(hit, context_size, path):
+    ## Determine length of text needed
+    bytes = sorted(hit.bytes)
+    byte_distance = bytes[-1] - bytes[0]
+    length = context_size + byte_distance + context_size
+    bytes, byte_start = adjust_bytes(bytes, context_size)
     conc_text = f.get_text(hit, byte_start, length, path)
     
     ## Isolate left and right concordances
@@ -138,7 +142,7 @@ def split_concordance(hit, length, path):
     conc_right = left_truncate.sub('', conc_right)
     conc_left = strip_tags(conc_left)
     conc_right = strip_tags(conc_right)
-    
+        
     return conc_left, conc_right
 
 
