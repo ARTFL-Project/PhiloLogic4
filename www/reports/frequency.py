@@ -69,6 +69,7 @@ def generate_frequency(results, q, db, config):
         frequency_object['results'] = False
         frequency_object['more_results'] = False
     frequency_object['results_length'] = len(results)
+    frequency_object['query'] = dict([i for i in q])
     
     return frequency_object
 
