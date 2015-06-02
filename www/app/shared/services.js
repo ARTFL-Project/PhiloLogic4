@@ -106,8 +106,6 @@ philoApp.factory('progressiveLoad', function() {
                     }
                 });
             }
-            delete fullResults.more_results; /// Workaround for weird object inheritance issue
-            delete fullResults.results;
             var sortedList = this.sortResults(fullResults, sortKey);
             return {"sorted": sortedList, "unsorted": fullResults};
         },

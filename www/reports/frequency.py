@@ -34,7 +34,7 @@ def generate_frequency(results, q, db, config):
         table = {}
         for key,count in counts.iteritems():
             # for each item in the table, we modify the query params to generate a link url.      
-            metadata = dict(q.metadata) ## Make a distinct copy for each key in case we may modify it below
+            metadata = dict(q.metadata) ## Make a distinct copy for each key in case we modify it below
             
             ## Build a label starting with the first value as the main value
             first_metatada_key, first_metadata_value = key[0]
@@ -60,8 +60,8 @@ def generate_frequency(results, q, db, config):
             
             # Now build the url from q.
             url = f.link.make_absolute_query_link(config, q, frequency_field="", start="0", end="0", report=q.report, script='', **metadata)
-        
-            table[label] = {'count': count, 'url': url}
+            
+            table[label] = {'count': count, 'url': url, 'metadata': metadata}
         
         frequency_object['results'] = table
         frequency_object['more_results'] = True
@@ -69,6 +69,8 @@ def generate_frequency(results, q, db, config):
         frequency_object['results'] = False
         frequency_object['more_results'] = False
     frequency_object['results_length'] = len(results)
+    frequency_object['query'] = dict([i for i in q])
+    
     
     return frequency_object
 
@@ -82,3 +84,6 @@ def generate_key(hit, field_list, db):
         key.append(k)
     key = tuple(key)
     return key
+
+def total_frequencies():
+    pass

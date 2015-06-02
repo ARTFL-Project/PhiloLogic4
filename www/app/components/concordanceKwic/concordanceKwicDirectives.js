@@ -183,7 +183,7 @@ philoApp.directive('sidebarMenu', ['$rootScope', function($rootScope) {
     }
 }]);
 
-philoApp.directive('facets', ['$rootScope', '$location', 'URL', 'progressiveLoad', 'saveToLocalStorage', 'request', function($rootScope, $location, URL, progressiveLoad, save, request) {
+philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progressiveLoad', 'saveToLocalStorage', 'request', function($rootScope, $location, $http, URL, progressiveLoad, save, request) {
     var retrieveFacet = function(scope, facetObj) {
         var urlString = $location.url() + '&frequency_field=' + facetObj.alias;
         if (typeof(sessionStorage[urlString]) !== "undefined" && $rootScope.philoConfig.production === true) {
@@ -218,7 +218,6 @@ philoApp.directive('facets', ['$rootScope', '$location', 'URL', 'progressiveLoad
 			var promise = request.report(queryParams, {start: start, end: end});
 		}
         promise.then(function(response) {
-			console.log(response.data.more_results)
             if (response.data.more_results) {
                 var results = response.data.results;
                 scope.resultsLength = response.data.results_length;
@@ -250,6 +249,7 @@ philoApp.directive('facets', ['$rootScope', '$location', 'URL', 'progressiveLoad
                 }
             }  else {
                 scope.percent = 100;
+				scope.fullResults = fullResults;
                 var urlString = $location.url() + '&frequency_field=' + scope.concKwic.selectedFacet.alias;
                 save(fullResults.sorted, urlString);
             }
@@ -262,10 +262,30 @@ philoApp.directive('facets', ['$rootScope', '$location', 'URL', 'progressiveLoad
         link: function(scope, element, attrs) {
             attrs.$observe('facet', function(facetObj) {
                 if (facetObj !== '') {
+					scope.showingRelativeFrequencies = false;
+					scope.relativeFrequencies = 'undefined';
                     facetObj = scope.$eval(facetObj);
                     retrieveFacet(scope, facetObj);
                 }
             });
+			scope.displayRelativeFrequencies = function() {
+				if (scope.relativeFrequencies === 'undefined') {
+					$http.post('scripts/get_metadata_token_count.py', JSON.stringify(scope.fullResults.unsorted)).then(function(response) {
+						scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
+						scope.concKwic.frequencyResults = progressiveLoad.sortResults(response.data);
+						scope.showingRelativeFrequencies = true;
+					});
+				} else {
+					scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
+					scope.concKwic.frequencyResults = scope.relativeFrequencies;
+					scope.showingRelativeFrequencies = true;
+				}
+			}
+			scope.displayAbsoluteFrequencies = function() {
+				scope.relativeFrequencies = angular.copy(scope.concKwic.frequencyResults);
+				scope.concKwic.frequencyResults = scope.absoluteFrequencies;
+				scope.showingRelativeFrequencies = false;
+			}
         }
     }
 }]);
