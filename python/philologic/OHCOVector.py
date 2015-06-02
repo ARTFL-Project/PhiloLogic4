@@ -4,7 +4,11 @@ import os
 import sys
 import codecs
 
+### NOTE: Much of this code developed iteratively, and there are some older variants at the bottom; due for a cleanup.
+### CompoundStack is the class to use for all parsers.
+
 class ParallelRecord(object):
+    """ParallelRecord tracks page objects that are parallel to a primary record stack.  Used by CompoundStack."""
     def __init__(self,type,name,id):
         self.type = type
         self.name = name
@@ -31,6 +35,7 @@ class ParallelRecord(object):
         return [self.id[0], 0, 0, 0, 0, 0, 0, 0, self.id[1]]
         
 class CompoundRecord(object):
+    """CompoundRecord is the base Record type for the CompoundStack."""
     def __init__(self,type,name,id):
         self.type = type
         self.name = name
@@ -71,6 +76,11 @@ class CompoundRecord(object):
         return self.id + [self.attrib.get("byte_start",0)] + [self.attrib.get("page",0)]
 
 class CompoundStack(object):
+    """CompoundStack is the class instantiated by a parser.  It itself creates a NewStack, but also tracks parallel objects
+        The API is quite minimal.  You can push and pull objects by type.  
+        CompoundStack doesn't actually do deep object arithmetic or recursion--it handles parallel objects manually,
+        and passes other calls on to the NewStack.
+    """
     def __init__(self,types,parallel,docid=0,out=None,factory=CompoundRecord,p_factory = ParallelRecord):
         self.stack = NewStack(types[:],out,factory)
         self.out = out
@@ -121,6 +131,8 @@ class CompoundStack(object):
             return self.stack.pull(type,byte)
         
 class NewStack(object):            
+    """ NewStack is where the low-level object arithmetic and instantiation happens.  Pretty wonky,
+    so there's inline documentation where needed"""
     def __init__(self,types,out=None,factory=None):
         self.v = []
         self.v_max = [0,0,0,0,0,0,0,0,0]
@@ -229,6 +241,7 @@ class NewStack(object):
 
 class Record(object):
     # A baseline implementation of a PhiloLogic Record class. 
+    # Not usually used in parsers, but convenient and frequently used in loadFilters.
     def __init__(self,type,name,id):
         self.type = type
         self.name = name
@@ -250,6 +263,7 @@ class Record(object):
 
 class ARTFLRecord(Record):
     # A record subclass with some hacks specific to the standard ARTFL index layout.
+    # I believe this is replaced by CompoundRecord
     def __init__(self,type,name,id):
         self = Record.__init__(self,type,name,id)
     def __str__(self):
@@ -257,6 +271,7 @@ class ARTFLRecord(Record):
         return "%s\t%s\t%s\t%s" % (self.type,self.name," ".join(str(i) for i in self.id),self.attrib)
 
 class Stack(object):
+    # Obsolete
     def __init__(self,types,parallel,out=None,meta_out=None,factory=None):
         self.v = []
         self.v_max = []
@@ -389,6 +404,7 @@ class Stack(object):
         return r
 
 class OHCOVector:
+    # Obsolete, here for reference.
     """OHCOVector manages all the index arithmetic necessary to construct a PhiloLogic index.
     
     OHCOVector is constructed with two arguments: a list of types, 
