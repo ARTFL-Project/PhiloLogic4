@@ -7,7 +7,7 @@
                 <span ng-if="result.citation.author" class="citation-small-caps">, {{ ::result.citation.author.label }}</span>
                 <span ng-if="result.citation.date"><b>[{{ ::result.citation.date.label }}]</b></span>
 				<a href="{{result.citation.para.href}}" ng-if="result.citation.para">{{ ::result.citation.para.label }}</a>
-				<a href="{{result.citation.para.href}}" ng-if="result.citation.page">{{ ::result.citation.page.label }}</a>
+				<span ng-if="result.citation.page">{{ ::result.citation.page.label }}</span>
                 <span ng-if="result.citation.more">{{ ::result.citation.more }}</span>
             </span>
         </li>
