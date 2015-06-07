@@ -33,7 +33,10 @@ def get_metadata_token_count(environ,start_response):
         total_count = 0
         for hit in hits:
             total_count += int(hit['word_count'])
-        frequencies[label]['count'] = round(float(m['count']) / total_count * 1000000, 3)
+        try:
+            frequencies[label]['count'] = round(float(m['count']) / total_count * 1000000, 3)
+        except:
+            frequencies[label]['count'] = 0
     
         
     yield json.dumps(frequencies)

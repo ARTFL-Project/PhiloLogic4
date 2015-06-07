@@ -61,7 +61,22 @@ philoApp.directive('kwic', ['$rootScope', function($rootScope) {
 philoApp.directive('bibliography', ['$rootScope', function($rootScope) {
     return {
         templateUrl: 'app/components/concordanceKwic/bibliography.html',
-		replace: true
+		replace: true,
+		link: function(scope) {
+			scope.metadataAddition = [];
+			scope.addToSearch = function(title) {
+				title = '"' + title + '"';
+				var itemIndex = scope.metadataAddition.indexOf(title);
+				console.log(itemIndex)
+				if (itemIndex === -1) {
+					scope.metadataAddition.push(title);
+				} else {
+					scope.metadataAddition.splice(itemIndex, 1);
+				}
+				
+				$rootScope.formData.title = scope.metadataAddition.join(' | ');
+			}
+		}
     }
 }]);
 

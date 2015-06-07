@@ -34,11 +34,13 @@ def bibliography_results(db, q, config):
     bibliography_object = {"description": {"start": start, "end": end, "n": n, "results_per_page": q.results_per_page},
                           "query": dict([i for i in q])}
     results = []
+    result_type = 'doc'
     for hit in hits[start - 1:end]:
         citation_hrefs = citation_links(db, config, hit)
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
+        result_type = hit.type
         if hit.type == "doc":
             citation = biblio_citation(hit, citation_hrefs)
         else:
@@ -47,6 +49,7 @@ def bibliography_results(db, q, config):
     bibliography_object["results"] = results
     bibliography_object['results_length'] = len(hits)
     bibliography_object['query_done'] = hits.done
+    bibliography_object['result_type'] = result_type
     return bibliography_object, hits        
     
 def biblio_citation(hit, citation_hrefs):
@@ -99,7 +102,7 @@ def biblio_citation(hit, citation_hrefs):
             citation['para'] = {"href": citation_hrefs['para'], "label": hit.who.strip()}
         except KeyError: ## no who keyword
             citation['para'] = False
-    
+
     page_obj = hit.page
     if page_obj['n']:
         page_n = '[page %s]' % page_obj['n']
