@@ -93,7 +93,7 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
                     var index = scope.words.indexOf(word);
                     scope.words.splice(index, 1);
                     scope.wordListChanged = true;
-                    $rootScope.formData.q += ' NOT ' + word;
+                    $rootScope.formData.q += ' NOT "' + word.trim() + '"';
                 }
                 scope.rerunQuery = function() {
                     var url = URL.objectToUrlString($rootScope.formData);
