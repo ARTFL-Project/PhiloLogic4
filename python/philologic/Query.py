@@ -54,18 +54,27 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
             args.extend(("-o","binary",db.path,));
 
             worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err)
-            if query_debug:
-                print >> sys.stderr, "WORKER STARTED:"," ".join(args);
-            if query_debug == True:
-                print >> sys.stderr, "DEBUGGING"
-                query_log_fh = filename + ".terms"
-                print >> sys.stderr, "LOGGING to " + filename + ".terms"
-                logger = subprocess.Popen(["tee",query_log_fh],stdin=subprocess.PIPE,stdout = worker.stdin)
-                print >> sys.stderr, "EXPANDING"
-                expand_query_not(split,freq_file,logger.stdin)
-                logger.stdin.close()
-            else:
-                expand_query_not(split,freq_file,worker.stdin)
+            # if query_debug:
+            #     print >> sys.stderr, "WORKER STARTED:"," ".join(args);
+
+            query_log_fh = filename + ".terms"
+            print >> sys.stderr, "LOGGING TERMS to " + filename + ".terms"
+            logger = subprocess.Popen(["tee",query_log_fh],stdin=subprocess.PIPE,stdout = worker.stdin)
+            # print >> sys.stderr, "EXPANDING"
+            expand_query_not(split,freq_file,logger.stdin)
+            logger.stdin.close()
+
+
+            # if query_debug == True:
+            #     print >> sys.stderr, "DEBUGGING"
+            #     query_log_fh = filename + ".terms"
+            #     print >> sys.stderr, "LOGGING to " + filename + ".terms"
+            #     logger = subprocess.Popen(["tee",query_log_fh],stdin=subprocess.PIPE,stdout = worker.stdin)
+            #     print >> sys.stderr, "EXPANDING"
+            #     expand_query_not(split,freq_file,logger.stdin)
+            #     logger.stdin.close()
+            # else:
+            #     expand_query_not(split,freq_file,worker.stdin)
 
             worker.stdin.close()
 
@@ -84,6 +93,24 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
     else:
         hl.close()
         return HitList.HitList(filename,words_per_hit,db)
+
+def get_expanded_query(hitlist):
+	fn = hitlist.filename + ".terms"
+	query = []
+	term = []
+	try:
+		grep_results = open(fn,"r")
+	except:
+		return []
+	for line in grep_results:
+		if line = "\n":
+			query.append(term)
+			term = []
+		else:
+			term.append('"' + line[:-1] + '"')
+	if term:
+		query.append(term)		
+	return query
 
 def split_terms(grouped):
     #print >> sys.stderr, repr(grouped)
@@ -133,6 +160,7 @@ def expand_query(split, freq_file, dest_fh):
         filters.wait()
 #    dest_fh.close()
     return filters
+
 
 def expand_query_not(split, freq_file, dest_fh):
     first = True
