@@ -103,7 +103,7 @@ def get_expanded_query(hitlist):
 	except:
 		return []
 	for line in grep_results:
-		if line = "\n":
+		if line == "\n":
 			query.append(term)
 			term = []
 		else:
