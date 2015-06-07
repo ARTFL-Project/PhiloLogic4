@@ -1,6 +1,6 @@
 "use strict";
 
-philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL', function($rootScope, $http, $location, URL) {
+philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$location', 'URL', 'request', function($rootScope, $http, $timeout, $location, URL, request) {
     var getSearchArgs = function(queryParams) {
         var queryArgs = {};
         if ('q' in queryParams) {
@@ -25,12 +25,11 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL',
             if (typeof(facet) === 'string') {
                 facets.push(facet);
             } else {
-				facets.push(facet)
-                angular.forEach(facet, function(value, i) {
-                    if (facets.indexOf(value) < 0) {
-                        facets.push(value);
+                for (var i=0; i < facet.length; i++) {
+                    if (facets.indexOf(facet[i]) < 0) {
+                        facets.push(facet[i]);
                     }
-                });
+                }
             }
         }
         for (var k in queryArgs) {
@@ -75,6 +74,31 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL',
                     }, true);
                 scope.formData = $rootScope.formData;
                 scope.removeMetadata = removeMetadata;
+                scope.getQueryTerms = function() {
+                    request.script({
+                        script: 'get_query_terms.py',
+                        terms: $rootScope.formData.q
+                    }).then(function(response) {
+                        scope.words = response.data;
+                        $timeout(function() {
+                            $('#query-terms').velocity('fadeIn');
+                        })
+                    });
+                }
+                scope.wordListChanged = false;
+                scope.closeTermsList = function() {
+                    $('#query-terms').velocity('fadeOut')
+                }
+                scope.removeFromTermsList = function(word) {
+                    var index = scope.words.indexOf(word);
+                    scope.words.splice(index, 1);
+                    scope.wordListChanged = true;
+                    $rootScope.formData.q += ' NOT ' + word;
+                }
+                scope.rerunQuery = function() {
+                    var url = URL.objectToUrlString($rootScope.formData);
+                    $location.url(url);
+                }
         } 
     }
 }]);

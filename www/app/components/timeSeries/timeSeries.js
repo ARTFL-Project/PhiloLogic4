@@ -15,7 +15,7 @@ philoApp.controller('timeSeriesCtrl', ['$rootScope', '$location', 'accessControl
         $location.url(URL.objectToUrlString($rootScope.formData, {report: "bibliography"}));
     }
     if (typeof($rootScope.formData.year_interval) === "undefined") {
-        var urlString = URL.objectToUrlString($rootScope.formData, {year_interval: 10});
+        var urlString = URL.objectToUrlString($rootScope.formData, {year_interval: $rootScope.philoConfig.time_series_intervals[0]});
         $location.url(urlString);
     }
     

@@ -1,5 +1,27 @@
 <div id="search_arguments">
-    <span ng-if="queryArgs.queryTerm !== '' && queryArgs.report !== 'collocation'">Searching database for <b>{{ ::queryArgs.queryTerm }}</b><br></span>
+    <div ng-if="queryArgs.queryTerm !== '' && queryArgs.report !== 'collocation'">
+        Searching database for
+        <a ng-click="getQueryTerms()">{{ ::queryArgs.queryTerm }}</a>
+        <div id="query-terms" class="panel panel-default velocity-opposites-transition-fadeIn" style="display: none;" data-velocity-opts="{duration: 200}">
+            <button type="button" class="close" ng-click="closeTermsList()">
+                <span aria-hidden="true">&times;</span>
+                <span class="sr-only">Close</span>
+            </button>
+            <h4 class="panel-title">The search terms query expanded to the following {{ words.length }} terms:</h4>
+            <button type="button" class="btn btn-primary btn-sm velocity-transition-fadeIn" style="margin:10px 0px" ng-if="wordListChanged" ng-click="rerunQuery()">
+                Rerun query with the current modifications
+            </button>
+            <ol id="query-terms-list">
+                <li class="panel panel-default" ng-repeat="word in words">
+                    {{ word }}
+                    <button type="button" class="close" style="margin-top: 4px" ng-click="removeFromTermsList(word)">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                </li>
+            </ol>
+        </div>
+    </div>
     <span ng-if="queryArgs.report === 'collocation'">Displaying the top 100 collocates for {{ resultsLength || '...' }} occurrences of <b>{{ ::queryArgs.queryTerm }}</b><br></span>
     Bibliography criteria:
     <span class="biblio-criteria" ng-repeat="metadata in queryArgs.biblio" style="margin: 1px">{{ ::metadata.alias }} : <b>{{ ::metadata.value }}</b>

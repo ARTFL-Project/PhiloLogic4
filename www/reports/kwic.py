@@ -22,7 +22,7 @@ def kwic(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    kwic_object, hits = generate_kwic_results(db, request, config)
+    kwic_object = generate_kwic_results(db, request, config)
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
     yield json.dumps(kwic_object)
@@ -34,8 +34,6 @@ def generate_kwic_results(db, q, config, link_to_hit="div1"):
     kwic_object = {"description": {"start": start, "end": end, "results_per_page": q.results_per_page},
                     "query": dict([i for i in q])}
     kwic_results = []
-    default_short_citation_len = 30
-    shortest_citation_len = 0
     
     length = config.concordance_length
     
@@ -47,13 +45,7 @@ def generate_kwic_results(db, q, config, link_to_hit="div1"):
         
         ## Get all links and citations
         citation_hrefs = citation_links(db, config, hit)
-        current_citation_length = len(metadata_fields['author']) + 2 + len(metadata_fields['title'])
-        
-        ## Find smallest citation
-        if shortest_citation_len == 0:
-            shortest_citation_len = current_citation_length
-        elif shortest_citation_len > current_citation_length:
-            shortest_citation_len = current_citation_length
+        citation = concordance_citation(hit, citation_hrefs)
             
         ## Determine length of text needed
         byte_distance = hit.bytes[-1] - hit.bytes[0]
@@ -64,54 +56,15 @@ def generate_kwic_results(db, q, config, link_to_hit="div1"):
         conc_text = f.get_text(hit, byte_start, length, config.db_path)
         conc_text = format_strip(conc_text, bytes)
         conc_text = KWIC_formatter(conc_text, len(hit.bytes))
-            
-        kwic_results.append((citation_hrefs, conc_text, hit, metadata_fields))
-    
-    if default_short_citation_len > shortest_citation_len:
-        shortest_citation_len = default_short_citation_len
-    
-    ## Populate Kwic_results with bibliography    
-    for pos, result in enumerate(kwic_results):
-        hrefs, text, hit, metadata_fields = result
-        biblio, short_biblio = kwic_citation(shortest_citation_len, metadata_fields, hit[link_to_hit])
-        citation = {}
-        if len(short_biblio) < default_short_citation_len:
-            diff = default_short_citation_len - len(short_biblio)
-            short_biblio += '&nbsp;' * diff
-        citation['short_biblio'] = short_biblio
-        citation['full_biblio'] = biblio
-        kwic_results[pos] = {"philo_id": hit.philo_id, "context": text, "metadata_fields": metadata_fields,
-                             "citation_links": hrefs, "citation": citation, "bytes": hit.bytes}
+
+        kwic_result = {"philo_id": hit.philo_id, "context": conc_text, "metadata_fields": metadata_fields,
+                       "citation_links": citation_hrefs, "citation": citation, "bytes": hit.bytes}
+        kwic_results.append(kwic_result)
     kwic_object['results'] = kwic_results
     kwic_object['results_length'] = len(hits)
     kwic_object["query_done"] = hits.done
     
-    return kwic_object, hits
-
-def kwic_citation(short_citation_length, metadata_fields, hit):
-    full_citation = ""
-    short_citation = []
-    author = metadata_fields['author']
-    if author:
-        full_citation += author + ", "
-    short_citation.append(author)
-    title = metadata_fields['title']
-    full_citation += title
-    short_citation.append(title)
-    full_citation += ', %s' % hit.head
-    short_citation.append(hit.head)
-        
-    if len(', '.join([s for s in short_citation if s])) > short_citation_length:
-        short_author, short_title, head = tuple(short_citation)
-        if len(short_author) > 10:
-            short_author = short_author[:10] + "&#8230;"
-            short_citation[0] = short_author
-        title_len = short_citation_length - len(short_author)
-        if len(short_title) > title_len:
-            short_citation[1] = short_title[:title_len]
-    short_citation = ', '.join([s for s in short_citation if s])
-    
-    return full_citation, short_citation
+    return kwic_object
 
 def KWIC_formatter(output, hit_num, chars=40):
     output = output.replace('\n', ' ')
