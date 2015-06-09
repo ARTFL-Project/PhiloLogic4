@@ -83,7 +83,7 @@ class Parser(object):
         Called on every descendant object."""
         destination = self.v[obj_type]  # Note that this object will still exist after the OHCOVector has printed and discarded it.
         # Thus, extracting to a 'closed" object will silently discard values.  Which I think is the least bad option.
-        attr_pattern_match = re.search(r"@([^\/\[\]]+)$",mxp)
+        attr_pattern_match = re.search(r"\/?@([^\/\[\]]+)$",mxp)
         if attr_pattern_match:
             xp_prefix = mxp[:attr_pattern_match.start(0)]
             attr_name = attr_pattern_match.group(1).decode("utf-8")
