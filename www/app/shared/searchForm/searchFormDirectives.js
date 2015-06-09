@@ -111,10 +111,6 @@ philoApp.directive('collocationOptions', ['$rootScope', function($rootScope) {
         templateUrl: 'app/shared/searchForm/collocationOptions.html',
         replace: true,
         link: function(scope, element, attrs) {
-            scope.collocWordNum = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
-            if (!'word_num' in $rootScope.formData || typeof($rootScope.formData.word_num) === 'undefined') {
-                $rootScope.formData.word_num = scope.collocWordNum[4];
-            }
             scope.stopwords = $rootScope.philoConfig.stopwords;
             if (!'colloc_filter_choice' in $rootScope.formData || typeof($rootScope.formData.colloc_filter_choice) === 'undefined') {
                 $rootScope.formData.colloc_filter_choice = "frequency";

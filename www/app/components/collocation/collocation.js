@@ -32,9 +32,8 @@ philoApp.controller('collocationCtrl', ['$rootScope', '$http', '$location', 'acc
         }
     }
     
-    vm.concordanceFromCollocation = function(word, count, direction) {
-        var url = URL.objectToUrlString($location.search(), {report: 'concordance_from_collocation', collocate: word, collocate_num: count, direction: direction});
-        console.log(url)
+    vm.concordanceFromCollocation = function(url) {
+		console.log(url)
         $location.url(url);
     }
 
