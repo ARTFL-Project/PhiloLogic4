@@ -1,23 +1,26 @@
 <div id="search_arguments">
     <div ng-if="queryArgs.queryTerm !== '' && queryArgs.report !== 'collocation'">
         Searching database for
-        <a ng-click="getQueryTerms()">{{ ::queryArgs.queryTerm }}</a>
+        <a href='' ng-click="getQueryTerms()">{{ ::queryArgs.queryTerm }}</a>
         <div id="query-terms" class="panel panel-default velocity-opposites-transition-fadeIn" style="display: none;" data-velocity-opts="{duration: 200}">
             <button type="button" class="close" ng-click="closeTermsList()">
                 <span aria-hidden="true">&times;</span>
                 <span class="sr-only">Close</span>
             </button>
             <h4 class="panel-title">The search terms query expanded to the following {{ words.length }} terms:</h4>
+            <h6 ng-if="words.length > 100">100 most frequent terms displayed</h6>
             <button type="button" class="btn btn-primary btn-sm velocity-transition-fadeIn" style="margin:10px 0px" ng-if="wordListChanged" ng-click="rerunQuery()">
                 Rerun query with the current modifications
             </button>
-            <ol id="query-terms-list">
-                <li class="panel panel-default" ng-repeat="word in words">
-                    {{ word }}
-                    <button type="button" class="close" style="margin-top: 4px" ng-click="removeFromTermsList(word)">
-                        <span aria-hidden="true">&times;</span>
-                        <span class="sr-only">Close</span>
-                    </button>
+            <ol id="query-terms-list" class="row">
+                <li class="col-xs-6" ng-repeat="word in words | limitTo: 100">
+                    <div class="panel panel-default">
+                        {{ word }}
+                        <button type="button" class="close" style="margin-top: 4px" ng-click="removeFromTermsList(word)">
+                            <span aria-hidden="true">&times;</span>
+                            <span class="sr-only">Close</span>
+                        </button>
+                    </div>
                 </li>
             </ol>
         </div>

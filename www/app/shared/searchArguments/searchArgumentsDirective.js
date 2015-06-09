@@ -75,9 +75,8 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
                 scope.formData = $rootScope.formData;
                 scope.removeMetadata = removeMetadata;
                 scope.getQueryTerms = function() {
-                    request.script({
-                        script: 'get_query_terms.py',
-                        terms: $rootScope.formData.q
+                    request.script(scope.formData, {
+                        script: 'get_query_terms.py'
                     }).then(function(response) {
                         scope.words = response.data;
                         $timeout(function() {
@@ -93,7 +92,7 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
                     var index = scope.words.indexOf(word);
                     scope.words.splice(index, 1);
                     scope.wordListChanged = true;
-                    $rootScope.formData.q += ' NOT "' + word.trim() + '"';
+                    $rootScope.formData.q += ' NOT ' + word.trim();
                 }
                 scope.rerunQuery = function() {
                     var url = URL.objectToUrlString($rootScope.formData);
