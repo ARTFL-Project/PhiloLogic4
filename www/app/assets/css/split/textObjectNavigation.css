@@ -199,7 +199,7 @@ b.headword {
 .xml-lb[type="hyphenInWord"] {
     display: inline;
 }
-.xml-sp {
+#book-page .xml-sp {
     display: block;
 }
 .xml-sp::before {
@@ -342,6 +342,10 @@ body {
 .note:hover, .note-ref:hover {
 	cursor: pointer;
     text-decoration: none;
+}
+div[type="notes"] .xml-note {
+	margin: 15px 0px;
+	display: block;
 }
 
 /*Page images*/

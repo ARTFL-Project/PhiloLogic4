@@ -26,7 +26,7 @@ for file in sys.argv[1:]:
         if el.tag == "note":
             el.tag = "ptr"
             new_id = "philo_note_%d" % note_count
-            new_note = etree.Element("note", id=new_id)
+            new_note = etree.Element("note", id=new_id, n=str(note_count))
             new_note.text = el.text
             new_note.tail = "\n"
             el.text = ""

@@ -7,20 +7,28 @@ import HitList
 import unicodedata
 import subprocess
 from QuerySyntax import parse_query, group_terms
+from HitList import NoHits
 
 def metadata_query(db,filename,param_dicts):
     print >> sys.stderr, "METADATA_QUERY:",param_dicts
     prev = None
     #print >> sys.stderr, "METADATA_HITLIST: ",filename, param_dicts
     for d in param_dicts:
-        query = query_recursive(db,d,prev)
+        query = query_recursive(db,d,prev)          
         prev = query
-    corpus_fh = open(filename,"wb")
-    for corpus_obj in query:
+    try:
+        corpus_fh = open(filename,"wb")
+        for corpus_obj in query:
         #print >> sys.stderr, corpus_obj,
-        obj_id = [int(x) for x in corpus_obj["philo_id"].split(" ")]
-        corpus_fh.write(struct.pack("=7i",*obj_id))
-    corpus_fh.close()
+            obj_id = [int(x) for x in corpus_obj["philo_id"].split(" ")]
+            corpus_fh.write(struct.pack("=7i",*obj_id))
+        corpus_fh.close()
+    except:
+        # should clean up file
+        flag = open(filename + ".done","w")
+        flag.write("1")
+        flag.close()
+        return NoHits()
     flag = open(filename + ".done","w")
     flag.write("1")
     flag.close()

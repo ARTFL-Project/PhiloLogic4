@@ -31,7 +31,7 @@ def generate_frequency(results, q, db, config):
             key = generate_key(hit, field, db)
             counts[key] += 1
                 
-        table = {'results': {}, 'more_results': True}
+        table = {}
         for key,count in counts.iteritems():
             # for each item in the table, we modify the query params to generate a link url.      
             metadata = dict(q.metadata) ## Make a distinct copy for each key in case we may modify it below
@@ -54,7 +54,7 @@ def generate_frequency(results, q, db, config):
             ## Quote metadata to force exact matches on metadata
             for m in metadata:
                 if m not in q.metadata: # skip metadata already in original query: this could be a glob search
-                    if metadata[m] and m != "date":
+                    if metadata[m] and m != "date" and metadata[m] != "NULL":
                         if not metadata[m].startswith('"'):
                             metadata[m] = '"%s"' % metadata[m]
             
@@ -69,6 +69,7 @@ def generate_frequency(results, q, db, config):
         frequency_object['results'] = False
         frequency_object['more_results'] = False
     frequency_object['results_length'] = len(results)
+    frequency_object['query'] = dict([i for i in q])
     
     return frequency_object
 

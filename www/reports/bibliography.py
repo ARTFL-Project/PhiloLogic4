@@ -92,6 +92,20 @@ def biblio_citation(hit, citation_hrefs):
         citation['div3'] = {"href": citation_hrefs['div3'], "label": div3_name}
     else:
         citation['div3'] = False
+        
+    ## Paragraph level metadata
+    if "para" in citation_hrefs:
+        try:
+            citation['para'] = {"href": citation_hrefs['para'], "label": hit.who.strip()}
+        except KeyError: ## no who keyword
+            citation['para'] = False
+    
+    page_obj = hit.page
+    if page_obj['n']:
+        page_n = '[page %s]' % page_obj['n']
+        citation['page'] = {"href": "", "label": page_n}
+    else:
+        citation['page'] =  False
     
     more_metadata = []
     if hit.pub_place:

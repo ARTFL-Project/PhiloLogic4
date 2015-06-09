@@ -34,7 +34,7 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
     }
     return {
         restrict: 'E',
-        template: '<div id="word_cloud" class="word_cloud">' +
+        template: '<div id="word_cloud" class="word_cloud text-content-area">' +
                   '<div id="collocate_counts" class="collocation_counts"></div></div>',
         replace: true,
         link: function(scope, element, attrs) {

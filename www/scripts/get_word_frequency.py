@@ -24,7 +24,7 @@ def generate_word_frequency(hits,q,db,config):
     counts = {}
     more_results = True
     try:
-        for n in hits[q.interval_start:q.interval_end]:
+        for n in hits[q.start:q.end]:
             key = get_word_attrib(n,field,db)
             if not key:
                 key = "NULL" # NULL is a magic value for queries, don't change it recklessly.
@@ -36,7 +36,7 @@ def generate_word_frequency(hits,q,db,config):
     
     table = {}
     for k,v in counts.iteritems():
-        url = f.link.make_absolute_query_link(config,q,report="word_property_filter",word_property=field,word_property_value=k)
+        url = f.link.make_absolute_query_link(config,q,start="0", end="0", report="word_property_filter",word_property=field,word_property_value=k)
         table[k] = {'count': v, 'url': url}
     
     word_frequency_object = {"results": table, "results_length": len(hits), "more_results": more_results}

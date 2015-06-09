@@ -150,7 +150,7 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
             var absoluteObject = angular.copy(absoluteCounts[i]);
             absoluteObject.count = absoluteObject.count / dateCounts[absoluteObject.label] * 1000000;
             if (isNaN(absoluteObject.count)) {
-                absoluteObject.count = 1;
+                absoluteObject.count = 0;
             }
             relativeCounts.push(absoluteObject);
         }

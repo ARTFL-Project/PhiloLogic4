@@ -8,12 +8,18 @@ import os
 import re
 import unicodedata
 from philologic.DB import DB
+from wsgiref.handlers import CGIHandler
 from concordance import citation_links, concordance_citation, fetch_concordance
 from functions.wsgi_handler import WSGIHandler
 from collocation import tokenize, filter
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
-import functions as f
+try:
+    import simplejson as json
+except ImportError:
+    print >> sys.stderr, "Please install simplejson for better performance"
+    import json
+
 
 end_highlight_match = re.compile(r'.*<span class="highlight">[^<]*?(</span>)')
 token_regex = re.compile(r'(\W)', re.U)
@@ -89,9 +95,10 @@ def filter_words_by_property(hits, path, q, db, config, word_filter=True, filter
     else:
         word_property_total = end + 1
     concordance_object['results'] = results
-    concordance_object["query_done"] = hits.done        
+    concordance_object["query_done"] = hits.done
     concordance_object['results_length'] = word_property_total
     concordance_object["description"] = {"start": start, "end": end, "results_per_page": q.results_per_page, "more_pages": more_pages}    
+    print >> sys.stderr, "DONE"
     return concordance_object
 
 def get_word_ids(hit):
@@ -147,3 +154,7 @@ class word_property_hitlist(object):
     def __len__(self):
         return len(self.hitlist)
         
+
+if __name__ == "__main__":
+    CGIHandler().run(word_property_filter)
+
