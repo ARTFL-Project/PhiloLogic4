@@ -142,7 +142,7 @@ def split_concordance(hit, context_size, path):
     conc_right = left_truncate.sub('', conc_right)
     conc_left = strip_tags(conc_left)
     conc_right = strip_tags(conc_right)
-        
+    
     return conc_left, conc_right
 
 

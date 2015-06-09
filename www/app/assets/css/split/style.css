@@ -30,7 +30,8 @@
 }
 
 body {
-    font-family: 'Averia Serif Libre', cursive;
+    font-family: 'Open Sans', sans-serif;
+	font-family: 'Roboto', sans-serif;
 }
 .text-content-area {
 	font-family: inherit;
