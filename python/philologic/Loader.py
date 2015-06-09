@@ -337,13 +337,13 @@ class Loader(object):
             self.omax = [max(x,y) for x,y in zip(vec,self.omax)]
         print "%s: done parsing" % time.ctime()
 
-    def merge_objects(self, file_num=500,make_word_table=False):
+    def merge_objects(self, file_num=500):
         print "\n### Merge parser output ###"
         print "%s: sorting words" % time.ctime()
         words_status = self.merge_words(file_num=file_num)
         print "%s: word sort returned %d" % (time.ctime(),words_status)
 
-        if (make_word_table == True):
+        if "words" in self.tables:
             print "\n### Loading word table ###"
             print "concatenating document-order words file"
             for d in self.loaded_files:
