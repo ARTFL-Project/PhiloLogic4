@@ -230,7 +230,7 @@ def grep_word(token,freq_file,dest_fh):
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
     norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
     grep_command = ['egrep', "-i", '^%s[[:blank:]]' % norm_tok, '%s' % freq_file]
-    #print >> sys.stderr, "GREP_COMMAND", "".join(grep_command)
+    print >> sys.stderr, "GREP_COMMAND", "".join(grep_command)
     #print >> sys.stderr, repr(norm_tok)
     grep_proc = subprocess.Popen(grep_command,stdout=dest_fh)
     return grep_proc
