@@ -63,6 +63,7 @@ def generate_frequency(results, q, db, config):
             
             table[label] = {'count': count, 'url': url, 'metadata': metadata}
         
+        table = sorted(table.iteritems(), key=lambda x: x[1]['count'], reverse=True)
         frequency_object['results'] = table
         frequency_object['more_results'] = True
     except IndexError:

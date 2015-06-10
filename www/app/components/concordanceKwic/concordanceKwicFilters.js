@@ -2,6 +2,9 @@ philoApp.filter('kwicBiblioDisplay', ['$rootScope', function($rootScope) {
     return function(kwicResults) {
 		if (typeof(kwicResults) !== 'undefined') {
             var biblioFields = $rootScope.philoConfig.kwic_bibliography_fields;
+			if (typeof(biblioFields === 'undefined')) {
+                biblioFields = $rootScope.philoConfig.metadata.slice(0, 2);
+            }
 			var buildFullCitation = function(metadataField) {
 				var citationList = [];
 				for (var i=0; i < biblioFields.length; i++) {

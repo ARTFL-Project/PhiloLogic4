@@ -66,42 +66,45 @@ def fetch_collocation(hits, q, db, config):
     hits_done = q.start or 0
     start_time = timeit.default_timer()
     max_time = q.max_time or 10
-    for hit in hits[hits_done:]:
-        word_id = ' '.join([str(i) for i in hit.philo_id])
-        query = """select philo_name, parent from words where philo_id='%s'""" % word_id
-        c.execute(query)
-        result = c.fetchone()
-        parent = result['parent']
-        current_word = result['philo_name']
-        if parent != stored_sentence_id:           
-            sentence_hit_count = 1
-            stored_sentence_id = parent
-            stored_sentence_counts = {}
-            row_query = """select philo_name from words where parent='%s'"""  % (parent,)
-            c.execute(row_query)
-            for i in c.fetchall():
-                if i['philo_name'] in stored_sentence_counts:
-                    stored_sentence_counts[i['philo_name']] += 1
-                else:
-                    stored_sentence_counts[i['philo_name']] = 1
-        else:
-            sentence_hit_count += 1              
-        for word in stored_sentence_counts:
-            if word in query_words or stored_sentence_counts[word] < sentence_hit_count:
-                 continue
-            if word in filter_list:
-                continue
-            query_string = q['q'] + ' "%s"' % word
-            method = 'cooc'
-            if word in all_collocates:
-                all_collocates[word]['count'] += 1
+    try:
+        for hit in hits[hits_done:]:
+            word_id = ' '.join([str(i) for i in hit.philo_id])
+            query = """select philo_name, parent from words where philo_id='%s'""" % word_id
+            c.execute(query)
+            result = c.fetchone()
+            parent = result['parent']
+            current_word = result['philo_name']
+            if parent != stored_sentence_id:           
+                sentence_hit_count = 1
+                stored_sentence_id = parent
+                stored_sentence_counts = {}
+                row_query = """select philo_name from words where parent='%s'"""  % (parent,)
+                c.execute(row_query)
+                for i in c.fetchall():
+                    if i['philo_name'] in stored_sentence_counts:
+                        stored_sentence_counts[i['philo_name']] += 1
+                    else:
+                        stored_sentence_counts[i['philo_name']] = 1
             else:
-                all_link = f.link.make_absolute_query_link(config, q, report="concordance", q=query_string, method=method, start='0', end='0')
-                all_collocates[word] = {"count": 1, "url": all_link}
-        hits_done += 1
-        elapsed = timeit.default_timer() - start_time
-        if elapsed > int(max_time): # avoid timeouts by splitting the query if more than q.max_time (in seconds) has been spent in the loop
-            break
+                sentence_hit_count += 1              
+            for word in stored_sentence_counts:
+                if word in query_words or stored_sentence_counts[word] < sentence_hit_count:
+                     continue
+                if word in filter_list:
+                    continue
+                query_string = q['q'] + ' "%s"' % word
+                method = 'cooc'
+                if word in all_collocates:
+                    all_collocates[word]['count'] += 1
+                else:
+                    all_link = f.link.make_absolute_query_link(config, q, report="concordance", q=query_string, method=method, start='0', end='0')
+                    all_collocates[word] = {"count": 1, "url": all_link}
+            hits_done += 1
+            elapsed = timeit.default_timer() - start_time
+            if elapsed > int(max_time): # avoid timeouts by splitting the query if more than q.max_time (in seconds) has been spent in the loop
+                break
+    except IndexError:
+        collocation['hits_done'] = len(hits)
     
     collocation_object['all_collocates'] = all_collocates
     collocation_object['left_collocates'] = {}

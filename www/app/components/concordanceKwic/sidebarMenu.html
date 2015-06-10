@@ -3,7 +3,7 @@
 		<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
 			<span id="menu-header" ng-if="concKwic.selectedFacet.type === 'facet' || concKwic.selectedFacet.length === 0">Display frequency by</span>
 			<span id="menu-header" ng-if="concKwic.selectedFacet.type === 'wordFacet'">Display frequency by</span>
-			<span id="menu-header" ng-if="concKwic.selectedFacet.type === 'collocationFacet'">Display collocates on</span>
+			<span id="menu-header" ng-if="concKwic.selectedFacet.type === 'collocationFacet'">Display collocates</span>
 			<span id="selected-sidebar-option">{{ concKwic.selectedFacet.alias }}</span>
 			<span class="caret"></span>
 		</button>
@@ -16,7 +16,7 @@
 			
 			<!--Collocation facets-->
 			<li class="divider" ng-if="report !== 'bibliography'"></li>
-			<li role="presentation" class="dropdown-header" ng-if="report !== 'bibliography'">Display collocates on</li>
+			<li role="presentation" class="dropdown-header" ng-if="report !== 'bibliography'">Display collocates</li>
 			<li ng-if="report !== 'bibliography'" ng-repeat="collocationFacet in collocationFacets" ng-click="concKwic.selectFacet(collocationFacet)">
 				<a class="sidebar-option">{{ ::collocationFacet.alias }}</a>
 			</li>
