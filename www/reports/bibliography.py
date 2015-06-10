@@ -60,11 +60,11 @@ def biblio_citation(hit, citation_hrefs):
     if hit.author:
         citation['author'] = {'href': '', 'label': hit.author.strip()}
     else:
-        citation['author'] = False
+        citation['author'] = {}
     if hit.date:
         citation['date'] = {'href': '', 'label': hit.date.strip()}
     else:
-        citation["date"] = False
+        citation["date"] = {}
         
     ## Div level metadata // Copied from concordance citations
     div1_name = hit.div1.head
@@ -86,29 +86,29 @@ def biblio_citation(hit, citation_hrefs):
     if div1_name:
         citation['div1'] = {"href": citation_hrefs['div1'], "label": div1_name}
     else:
-        citation['div1'] = False
+        citation['div1'] = {}
     if div2_name:
         citation['div2'] = {"href": citation_hrefs['div2'], "label": div2_name}
     else:
-        citation['div2'] = False
+        citation['div2'] = {}
     if div3_name:
         citation['div3'] = {"href": citation_hrefs['div3'], "label": div3_name}
     else:
-        citation['div3'] = False
+        citation['div3'] = {}
         
     ## Paragraph level metadata
     if "para" in citation_hrefs:
         try:
             citation['para'] = {"href": citation_hrefs['para'], "label": hit.who.strip()}
         except KeyError: ## no who keyword
-            citation['para'] = False
+            citation['para'] = {}
 
     page_obj = hit.page
     if page_obj['n']:
         page_n = '[page %s]' % page_obj['n']
         citation['page'] = {"href": "", "label": page_n}
     else:
-        citation['page'] =  False
+        citation['page'] =  {}
     
     more_metadata = []
     if hit.pub_place:
@@ -120,11 +120,11 @@ def biblio_citation(hit, citation_hrefs):
     if more_metadata:
         citation['more'] =  '(%s)' % ' '.join([i for i in more_metadata if i])
     else:
-        citation['more'] =  False
+        citation['more'] =  ''
     if hit.genre:
         citation['genre'] = '[genre: %s]' % hit.genre
     else:
-        citation['genre'] = False
+        citation['genre'] = ''
     return citation
 
 if __name__ == "__main__":

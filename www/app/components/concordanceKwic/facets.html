@@ -2,9 +2,9 @@
     <div id="sidebar_display" class="panel panel-default" ng-style="sidebarHeight" ng-if="concKwic.frequencyResults.length > 0">
         <div id="frequency_container">
             <progress-bar progress="{{ percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{duration:400}"></progress-bar>
-            <div class="btn-group btn-group-justified" role="group" aria-label="..." ng-if="percent == 100">
-                <button type="button" class="btn btn-default active" style="width: 50%; border-left-width: 0px; border-top-width: 0px" ng-click="displayAbsoluteFrequencies()">Absolute Frequency</button>
-                <button type="button" class="btn btn-default" style="width: 50%; border-right-width: 0px; border-top-width: 0px" ng-click="displayRelativeFrequencies()">Relative Frequency</button>
+            <div class="btn-group btn-group-justified" role="group" aria-label="..." ng-if="percent == 100 && report !== 'bibliography'">
+                <button type="button" class="btn btn-default" ng-class="{'active': showingRelativeFrequencies === false}" style="width: 50%; border-left-width: 0px; border-top-width: 0px" ng-click="displayAbsoluteFrequencies()">Absolute Frequency</button>
+                <button type="button" class="btn btn-default" ng-class="{'active': showingRelativeFrequencies}" style="width: 50%; border-right-width: 0px; border-top-width: 0px" ng-click="displayRelativeFrequencies()">Relative Frequency</button>
             </div>
             <div style="text-align: center; padding: 8px;font-weight: 400;" ng-if="showingRelativeFrequencies">
                 Frequencies per 1,000,000 words

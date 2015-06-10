@@ -6,13 +6,13 @@
                    <span class="cite" data-id="{{ ::result.philo_id.join(' ') }}">
                         {{ ::position }}.
                         <span class="philologic_cite">
-                            <span ng-if="result.citation.author" class="citation-small-caps">{{ ::result.citation.author.label }}</span>
+                            <span ng-if="result.citation.author | isEmpty" class="citation-small-caps">{{ ::result.citation.author.label }}</span>
                             <a class="philologic-doc" href="{{result.citation.title.href}}" class="citation-small-caps"><i>{{ ::result.citation.title.label }}</i></a>
-                            <span ng-if="result.citation.date"> [{{ ::result.citation.date.label }}]</span>
-                            <a href="{{result.citation.div1.href}}" ng-if="result.citation.div1">{{ ::result.citation.div1.label }}</a>
-                            <a href="{{result.citation.div2.href}}" ng-if="result.citation.div2">{{ ::result.citation.div2.label }}</a>
-                            <a href="{{result.citation.div3.href}}" ng-if="result.citation.div3">{{ ::result.citation.div3.label }}</a>
-                            <a href="{{result.citation.para.href}}" ng-if="result.citation.para">{{ ::result.citation.para.label }}</a>
+                            <span ng-if="result.citation.date | isEmpty"> [{{ ::result.citation.date.label }}]</span>
+                            <a href="{{result.citation.div1.href}}" ng-if="result.citation.div1 | isEmpty">{{ ::result.citation.div1.label }}</a>
+                            <a href="{{result.citation.div2.href}}" ng-if="result.citation.div2 | isEmpty">{{ ::result.citation.div2.label }}</a>
+                            <a href="{{result.citation.div3.href}}" ng-if="result.citation.div3 | isEmpty">{{ ::result.citation.div3.label }}</a>
+                            <a href="{{result.citation.para.href}}" ng-if="result.citation.para | isEmpty">{{ ::result.citation.para.label }}</a>
                         </span>
                    </span>
                 </div>
