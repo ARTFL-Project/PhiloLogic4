@@ -59,23 +59,24 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
             $(".progress").show();
             var collocObject;
             scope.localFormData = angular.copy(scope.formData);
-            updateCollocation(scope, collocObject, 0, 1000);
+            updateCollocation(scope, collocObject, 0);
         } else {
             retrieveFromStorage(scope);
         }  
     }
-    var updateCollocation = function(scope, fullResults, start, end) {
+    var updateCollocation = function(scope, fullResults, start) {
         var collocation = this;
-        request.report(scope.localFormData, {start: start, end: end}).then(function(response) {
+        request.report(scope.localFormData, {start: start}).then(function(response) {
             var data = response.data;
             scope.resultsLength = data.results_length;
             scope.moreResults = data.more_results;
-            sortAndRenderCollocation(scope, fullResults, data, start, end)
+			start = data.hits_done;
+            sortAndRenderCollocation(scope, fullResults, data, start)
         });
     }
-    var sortAndRenderCollocation = function(scope, fullResults, data, start, end) {
-        if (end <= scope.resultsLength) {
-            scope.collocation.percent = Math.floor(end / scope.resultsLength * 100);
+    var sortAndRenderCollocation = function(scope, fullResults, data, start) {
+        if (start <= scope.resultsLength) {
+            scope.collocation.percent = Math.floor(start / scope.resultsLength * 100);
         }
         if (typeof(fullResults) === "undefined") {
             fullResults = {"all_collocates": {}, 'left_collocates': {}, 'right_collocates': {}}
@@ -92,14 +93,8 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
         scope.collocation.loading = false;
         if (scope.moreResults) {
             var tempFullResults = {"all_collocates": all.unsorted, "left_collocates": left.unsorted, "right_collocates": right.unsorted};
-            if (start === 0) {
-                start = 1000;
-            } else {
-                start += 5000;
-            }
-            end += 5000;
             if (scope.report === "collocation") { // make sure we haven't moved to a different report
-                updateCollocation(scope, tempFullResults, start, end);
+                updateCollocation(scope, tempFullResults, start);
             }
         } else {
             scope.collocation.percent = 100;

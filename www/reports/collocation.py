@@ -8,6 +8,7 @@ import os
 import re
 import json
 import unicodedata
+import timeit
 from philologic.DB import DB
 from wsgiref.handlers import CGIHandler
 from functions.wsgi_handler import WSGIHandler
@@ -59,51 +60,61 @@ def fetch_collocation(hits, q, db, config):
             word = word.replace('"', '')
             query_words.add(word)
         
-    try:
-        stored_sentence_id = None
-        stored_sentence_counts = {}
-        sentence_hit_count = 1
-        for hit in hits:
-            word_id = ' '.join([str(i) for i in hit.philo_id])
-            query = """select philo_name, parent from words where philo_id='%s'""" % word_id
-            c.execute(query)
-            result = c.fetchone()
-            parent = result['parent']
-            current_word = result['philo_name']
-            if parent != stored_sentence_id:           
-                sentence_hit_count = 1
-                stored_sentence_id = parent
-                stored_sentence_counts = {}
-                row_query = """select philo_name from words where parent='%s'"""  % (parent,)
-                c.execute(row_query)
-                for i in c.fetchall():
-                    if i['philo_name'] in stored_sentence_counts:
-                        stored_sentence_counts[i['philo_name']] += 1
-                    else:
-                        stored_sentence_counts[i['philo_name']] = 1
-            else:
-                sentence_hit_count += 1              
-            for word in stored_sentence_counts:
-                if word in query_words or stored_sentence_counts[word] < sentence_hit_count:
-                     continue
-                if word in filter_list:
-                    continue
-                query_string = q['q'] + ' "%s"' % word
-                method = 'cooc'
-                if word in all_collocates:
-                    all_collocates[word]['count'] += 1
+    stored_sentence_id = None
+    stored_sentence_counts = {}
+    sentence_hit_count = 1
+    hits_done = q.start or 0
+    start_time = timeit.default_timer()
+    max_time = q.max_time or 10
+    for hit in hits[hits_done:]:
+        word_id = ' '.join([str(i) for i in hit.philo_id])
+        query = """select philo_name, parent from words where philo_id='%s'""" % word_id
+        c.execute(query)
+        result = c.fetchone()
+        parent = result['parent']
+        current_word = result['philo_name']
+        if parent != stored_sentence_id:           
+            sentence_hit_count = 1
+            stored_sentence_id = parent
+            stored_sentence_counts = {}
+            row_query = """select philo_name from words where parent='%s'"""  % (parent,)
+            c.execute(row_query)
+            for i in c.fetchall():
+                if i['philo_name'] in stored_sentence_counts:
+                    stored_sentence_counts[i['philo_name']] += 1
                 else:
-                    all_link = f.link.make_absolute_query_link(config, q, report="concordance", q=query_string, method=method, start='0', end='0')
-                    all_collocates[word] = {"count": 1, "url": all_link}
-        
-        collocation_object['all_collocates'] = all_collocates
-        collocation_object['left_collocates'] = {}
-        collocation_object['right_collocates'] = {}
-    except IndexError: ## We've gone beyond the hitlist
-        more_results = False
+                    stored_sentence_counts[i['philo_name']] = 1
+        else:
+            sentence_hit_count += 1              
+        for word in stored_sentence_counts:
+            if word in query_words or stored_sentence_counts[word] < sentence_hit_count:
+                 continue
+            if word in filter_list:
+                continue
+            query_string = q['q'] + ' "%s"' % word
+            method = 'cooc'
+            if word in all_collocates:
+                all_collocates[word]['count'] += 1
+            else:
+                all_link = f.link.make_absolute_query_link(config, q, report="concordance", q=query_string, method=method, start='0', end='0')
+                all_collocates[word] = {"count": 1, "url": all_link}
+        hits_done += 1
+        elapsed = timeit.default_timer() - start_time
+        if elapsed > int(max_time): # avoid timeouts by splitting the query if more than q.max_time (in seconds) has been spent in the loop
+            break
+    
+    collocation_object['all_collocates'] = all_collocates
+    collocation_object['left_collocates'] = {}
+    collocation_object['right_collocates'] = {}
     
     collocation_object["results_length"] = len(hits)
-    collocation_object['more_results'] = more_results
+    if hits_done < collocation_object["results_length"]:
+        collocation_object['more_results'] = True
+        collocation_object['hits_done'] = hits_done
+        print >> sys.stderr, "COLLOC", hits_done, len(hits)
+    else:
+        collocation_object['more_results'] = False
+        collocation_object['hits_done'] = collocation_object["results_length"]
     
     return collocation_object
 
