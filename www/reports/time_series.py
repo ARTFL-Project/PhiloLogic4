@@ -35,6 +35,7 @@ def generate_time_series(config, q, db):
     total_hits = 0
     last_date_done = start_date
     start_time = timeit.default_timer()
+    max_time = q.max_time or 10
     for start_range, date_range in date_ranges:
         q.metadata['date'] = date_range
         hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
@@ -44,7 +45,7 @@ def generate_time_series(config, q, db):
         date_counts[start_range] = date_total_count(start_range, db, q['year_interval'])
         total_hits += len(hits)
         elapsed = timeit.default_timer() - start_time
-        if elapsed > int(q.max_time): # avoid timeouts by splitting the query if more than q.max_time (in seconds) has been spent in the loop
+        if elapsed > int(max_time): # avoid timeouts by splitting the query if more than q.max_time (in seconds) has been spent in the loop
             last_date_done = start_range
             break
         last_date_done = start_range
