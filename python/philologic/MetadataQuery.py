@@ -123,9 +123,14 @@ def expand_grouped_query(grouped,norm_path):
                     fully_expanded_tokens = [ ("QUOTE",'"'+norm_term+'"') ]
                 expanded_group.extend(fully_expanded_tokens)
             else:
-                if kind != "OR":
+                if kind == "NOT":
+                    if expanded_group:
+                        expanded.append(expanded_group)
+                    expanded_group = [ (kind,token) ]
+                elif kind != "OR":
                     expanded_group.append( (kind,token) )
-        expanded.append(expanded_group)
+        if expanded_group:
+            expanded.append(expanded_group)
     return expanded
 
 def make_grouped_sql_clause(expanded,column):
