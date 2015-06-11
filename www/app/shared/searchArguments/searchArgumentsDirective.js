@@ -25,11 +25,12 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
             if (typeof(facet) === 'string') {
                 facets.push(facet);
             } else {
-                for (var i=0; i < facet.length; i++) {
-                    if (facets.indexOf(facet[i]) < 0) {
-                        facets.push(facet[i]);
+                //facets.push(facet)
+                angular.forEach(facet, function(value, i) {
+                    if (facets.indexOf(value) < 0) {
+                        facets.push(value);
                     }
-                }
+                });
             }
         }
         for (var k in queryArgs) {

@@ -12,13 +12,13 @@ def generate_frequency(results, q, db, config):
     """reads through a hitlist. looks up q.frequency_field in each hit, and builds up a list of 
        unique values and their frequencies."""
     try:
-        field = eval(q.frequency_field)
+        field = eval(json.loads(q.frequency_field))
     except ValueError:
-        field = q.frequency_field
+        field = json.loads(q.frequency_field)
     
     if isinstance(field, str):
         field = [field]
-        
+                
     ## Override default value of q.end for first batch of results
     if q.end == 25:
         q.end = 5000

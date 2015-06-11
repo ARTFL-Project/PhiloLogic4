@@ -4,7 +4,7 @@ philoApp.directive('sidebarMenu', ['$rootScope', function($rootScope) {
         for (var i=0; i < $rootScope.philoConfig.facets.length; i++) {
             var alias = Object.keys($rootScope.philoConfig.facets[i])[0];
             var facet = $rootScope.philoConfig.facets[i][alias];
-            if (typeof(facet) === "objet") {
+            if (typeof(facet) === "object") {
                 facet = JSON.stringify(facet);
             }
             facets.push({facet: facet, alias: alias, type: 'facet'});

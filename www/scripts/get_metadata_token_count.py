@@ -37,11 +37,8 @@ def get_metadata_token_count(environ,start_response):
         try:
             frequencies[label]['count'] = round(float(m['count']) / total_count * 1000000, 3)
         except:
-            print >> sys.stderr, "FAILED", repr(query_metadata)
             count += 1
-            frequencies[label]['count'] = 0
-    print >> sys.stderr, "LENGTH", count
-    
+            frequencies[label]['count'] = 0    
         
     yield json.dumps(frequencies)
     
