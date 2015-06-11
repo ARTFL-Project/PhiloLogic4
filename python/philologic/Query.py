@@ -217,8 +217,9 @@ def expand_query_not(split, freq_file, dest_fh):
                 grep_proc = grep_word(token,freq_file,filter_inputs[0])
                 grep_proc.wait()
             elif kind == "QUOTE":
-                filter_inputs[0].write(token[1:-1] + "\t" + token[1:-1] + "\n") 
-
+#                filter_inputs[0].write(token[1:-1] + "\t" + token[1:-1] + "\n") 
+                grep_proc = grep_word_exact(token,freq_file,filter_inputs[0])
+                grep_proc.wait()
         # close all the pipes and wait for procs to finish.
         for pipe,proc in zip(filter_inputs,filter_procs):
             pipe.close()
