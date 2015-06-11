@@ -467,7 +467,7 @@ class Loader(object):
         for table in self.tables:
             if table == 'words':
                 file_in = self.destination + '/WORK/all_words_ordered'
-                indices = [("philo_name", "%s_ancestor" % self.default_object_level), ('philo_id',)]
+                indices = [("philo_name",), ('philo_id',), ('parent',), ('byte_start',), ('byte_end',)]
                 depth = 7
                 compressed = False
             elif table == 'pages':
@@ -617,8 +617,6 @@ def setup_db_dir(db_destination, template_dir, safe=False):
                 cp_command = "cp -r %s %s" % (template_dir+f,db_destination+"/"+f)
                 os.system(cp_command)
 
-        # os.system("cp -r %s* %s" % (template_dir,db_destination))
-        # os.system("cp %s.htaccess %s" % (template_dir,db_destination))
         os.system("chmod -R 777 %s/app/assets/css" % db_destination)
         os.system("chmod -R 777 %s/app/assets/js" % db_destination)
 
