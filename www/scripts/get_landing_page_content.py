@@ -59,7 +59,10 @@ def generate_author_list(c, letter_range, db, config, request):
 def generate_title_list(c, letter_range, db, config, request):
     c.execute('select * from toms where philo_type="doc" order by title')
     content = []
-    prefixes =  '|'.join([i + ' ' for i in config.prefix_removal_for_sorting])
+    try:
+        prefixes =  '|'.join([i + ' ' for i in config.title_prefix_removal])
+    except: # for backwards compatibility
+        prefixes = ""
     prefix_sub = re.compile('^%s' % prefixes, re.I)
     
     for i in c.fetchall():
