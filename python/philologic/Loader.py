@@ -72,12 +72,7 @@ class Loader(object):
             post_filters = PostFilters.DefaultPostFilters
         self.post_filters = post_filters
 
-        if debug == True:
-            self.clean = False
-            self.verbose = True
-        else:
-            self.clean = True
-            self.verbose = False
+        self.debug = debug
 
         self.sort_by_word = sort_by_word
         self.sort_by_id = sort_by_id
@@ -95,7 +90,6 @@ class Loader(object):
         self.metadata_types = {}
         self.normalized_fields = []
 
-        #sys.stdout = OutputHandler(console=console_output, log=log)
 
     def setup_dir(self,path):
         os.system("mkdir -p %s" % path)
@@ -316,9 +310,7 @@ class Loader(object):
                     for f in filters:
                         f(self, text)
 
-                    if self.clean:
-                        os.system('gzip -c -5 %s > %s' % (text['raw'], text['raw'] + '.gz'))
-
+                    os.system('gzip -c -5 %s > %s' % (text['raw'], text['raw'] + '.gz'))
                     os.system('rm %s' % text['raw'])
                     os.system('gzip -c -5 %s > %s' % (text['words'], text['words'] + '.gz'))
                     os.system('rm %s' % text['words'])
@@ -353,14 +345,14 @@ class Loader(object):
         print "%s: sorting objects" % time.ctime()
         toms_status = os.system(tomsargs + " > " + self.workdir + "all_toms_sorted")
         print "%s: object sort returned %d" % (time.ctime(),toms_status)
-        if self.clean:
+        if not self.debug:
             os.system('rm *.toms.sorted')
 
         pagesargs = "cat *.pages"
         print "%s: joining pages" % time.ctime()
         pages_status = os.system(pagesargs + " > " + self.workdir + "all_pages")
         print "%s: word join returned %d" % (time.ctime(), pages_status)
-        if self.clean:
+        if not self.debug:
             os.system("rm *.pages")
 
     def merge_words(self, file_num):
@@ -390,7 +382,7 @@ class Loader(object):
             wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + command_list
             command = '/bin/bash -c "%s | gzip -c -5 > %s.gz"' % (wordsargs, output)
             words_status = os.system(command)
-            if self.clean:
+            if not self.debug:
                 os.system("rm %s" % file_list)
 
         # We check if there was more than one batch sorted
@@ -410,7 +402,7 @@ class Loader(object):
         if words_status != 0:
             print "Word sorting failed\nInterrupting database load..."
             sys.exit()
-        if self.clean:
+        if not self.debug:
             os.system('rm %s' % self.workdir + '/*split.gz')
         return words_status
 

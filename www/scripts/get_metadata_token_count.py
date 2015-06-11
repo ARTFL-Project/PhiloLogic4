@@ -24,6 +24,7 @@ def get_metadata_token_count(environ,start_response):
     frequencies = json.loads(environ['wsgi.input'].read())
     word_counts = []
     c = db.dbh.cursor()
+    count = 0
     for label, m in frequencies.iteritems():
         args = []
         query_metadata = {}
@@ -36,7 +37,10 @@ def get_metadata_token_count(environ,start_response):
         try:
             frequencies[label]['count'] = round(float(m['count']) / total_count * 1000000, 3)
         except:
+            print >> sys.stderr, "FAILED", repr(query_metadata)
+            count += 1
             frequencies[label]['count'] = 0
+    print >> sys.stderr, "LENGTH", count
     
         
     yield json.dumps(frequencies)

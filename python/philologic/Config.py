@@ -169,12 +169,11 @@ web_config_defaults = {
         'index': 15
     },
     'kwic_bibliography_fields': {
-+        'value': [],
-+        'comment': '''
-+               # The kwic_bibliography_fields variable variable defines which bibliography fields will be displayed in the KWIC view. It should be
-                # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py. 
-+               # If the variable is an empty list, the first two fields in the metadata variable will be used.
-+               ''',
+         'value': [],
+         'comment': '''
+                # The kwic_bibliography_fields variable variable defines which bibliography fields will be displayed in the KWIC view. It should be
+                # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.                # If the variable is an empty list, the first two fields in the metadata variable will be used.
+                ''',
          'index': 16
      },
      'title_prefix_removal': {

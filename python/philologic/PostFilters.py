@@ -63,7 +63,7 @@ def make_sql_table(table, file_in, db_file="toms.db", gz=False, indices=[], dept
         conn.commit()
         conn.close()
         
-        if loader_obj.clean:
+        if not loader_obj.debug:
             os.system('rm %s' % file_in)
     return inner_make_sql_table
 
