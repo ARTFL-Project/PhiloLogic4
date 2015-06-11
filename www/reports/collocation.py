@@ -23,7 +23,7 @@ def collocation(environ,start_response):
     request = WSGIHandler(db, environ)
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
-    hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
+    hits = db.query(request["q"],"cooc",request["arg"],**request.metadata)
     hits.finish()
     collocation_object = fetch_collocation(hits, request, db, config)
     yield json.dumps(collocation_object)

@@ -6,6 +6,7 @@ import urlparse
 import cgi
 import json
 import sqlite3
+import re
 sys.path.append('..')
 import reports as r
 import functions as f
@@ -52,14 +53,18 @@ def generate_author_list(c, letter_range, db, config, request):
             url = 'query?report=bibliography&author="%s"' % author
         else:
             url = 'query?report=bibliography&author=NULL'
-        content.append({"author": author, "url": url, "count": count})
+        content.append({"author": author, "url": url, "count": count, "initial": author.decode('utf-8')[0]})
     return content
 
 def generate_title_list(c, letter_range, db, config, request):
     c.execute('select * from toms where philo_type="doc" order by title')
     content = []
+    prefixes =  '|'.join([i + ' ' for i in config.prefix_removal_for_sorting])
+    prefix_sub = re.compile('^%s' % prefixes, re.I)
+    
     for i in c.fetchall():
         title = i['title']
+        title = prefix_sub.sub('', title).strip()
         if title[0].lower() not in letter_range:
             continue
         try:
@@ -67,7 +72,7 @@ def generate_title_list(c, letter_range, db, config, request):
         except:
             author = ""
         url = "navigate/%s/table-of-contents" % i['philo_id'].split()[0]
-        content.append({"title": title, "url": url, "author": author})
+        content.append({"title": i['title'], "url": url, "author": author, "initial": title.decode('utf-8')[0]})
     return content
 
 def generate_year_list(c, q_range, db, config, request):
@@ -83,7 +88,7 @@ def generate_year_list(c, q_range, db, config, request):
             date = i['date']
         except:
             date = ""
-        content.append({"title": i['title'], "url": url, "date": date, "author": author})
+        content.append({"title": i['title'], "url": url, "date": date, "author": author, "initial": date})
     return content
 
 

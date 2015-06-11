@@ -113,11 +113,7 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
             var results = [];
             var oldPrefix = "";
             for (var i=0; i < content.length; i++) {
-                if (scope.contentType == "author" || scope.contentType == "title") {
-                    var prefix = content[i][scope.contentType].slice(0,1).toUpperCase();
-                } else {
-                    var prefix = content[i].date;
-                }
+				var prefix = content[i].initial;
                 if (prefix !== oldPrefix && oldPrefix !== '') {
                     scope.resultGroups.push({prefix: oldPrefix, results: results});
                     results = [];
