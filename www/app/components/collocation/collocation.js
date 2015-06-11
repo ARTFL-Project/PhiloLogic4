@@ -20,7 +20,7 @@ philoApp.controller('collocationCtrl', ['$rootScope', '$http', '$location', 'acc
     vm.filterList = false;
     vm.loading = true;
     vm.percent = 0;
-    vm.sortedLists = {};
+    vm.sortedList = {};
     vm.resultsLength = false; // set to false for now
     
     vm.showFilter = false;

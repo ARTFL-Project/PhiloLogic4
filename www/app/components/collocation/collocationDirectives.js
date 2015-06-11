@@ -38,9 +38,9 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
                   '<div id="collocate_counts" class="collocation_counts"></div></div>',
         replace: true,
         link: function(scope, element, attrs) {
-                scope.$watch('sortedLists', function() {
-                    if (!$.isEmptyObject(scope.sortedLists)) {
-                        scope.cloud = buildCloud(scope, scope.sortedLists.all);
+                scope.$watch('sortedList', function() {
+                    if (!$.isEmptyObject(scope.sortedList)) {
+                        scope.cloud = buildCloud(scope, scope.sortedList);
                     }
                 });
                 scope.$on('$destroy', function() {
@@ -79,20 +79,14 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
             scope.collocation.percent = Math.floor(start / scope.resultsLength * 100);
         }
         if (typeof(fullResults) === "undefined") {
-            fullResults = {"all_collocates": {}, 'left_collocates': {}, 'right_collocates': {}}
+            fullResults = {}
             scope.filterList = data.filter_list;
         }
-        var all = progressiveLoad.mergeResults(fullResults["all_collocates"], data["all_collocates"]);
-        var left = progressiveLoad.mergeResults(fullResults["left_collocates"], data['left_collocates']);
-        var right = progressiveLoad.mergeResults(fullResults["right_collocates"], data['right_collocates']);
-        scope.sortedLists = {
-            'all': all.sorted.slice(0, 100),
-            'left': left.sorted.slice(0, 100),
-            'right': right.sorted.slice(0, 100)
-            };
+        var collocates = progressiveLoad.mergeResults(fullResults, data["collocates"]);
+        scope.sortedList = collocates.sorted.slice(0, 100);
         scope.collocation.loading = false;
         if (scope.moreResults) {
-            var tempFullResults = {"all_collocates": all.unsorted, "left_collocates": left.unsorted, "right_collocates": right.unsorted};
+            var tempFullResults = collocates.unsorted;
             if (scope.report === "collocation") { // make sure we haven't moved to a different report
                 updateCollocation(scope, tempFullResults, start);
             }

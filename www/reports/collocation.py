@@ -106,15 +106,12 @@ def fetch_collocation(hits, q, db, config):
     except IndexError:
         collocation['hits_done'] = len(hits)
     
-    collocation_object['all_collocates'] = all_collocates
-    collocation_object['left_collocates'] = {}
-    collocation_object['right_collocates'] = {}
+    collocation_object['collocates'] = all_collocates
     
     collocation_object["results_length"] = len(hits)
     if hits_done < collocation_object["results_length"]:
         collocation_object['more_results'] = True
         collocation_object['hits_done'] = hits_done
-        print >> sys.stderr, "COLLOC", hits_done, len(hits)
     else:
         collocation_object['more_results'] = False
         collocation_object['hits_done'] = collocation_object["results_length"]
