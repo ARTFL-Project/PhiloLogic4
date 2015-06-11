@@ -140,22 +140,27 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
                 }
             });
 			scope.displayRelativeFrequencies = function() {
+				scope.loading = true;
 				if (scope.relativeFrequencies === 'undefined') {
 					$http.post('scripts/get_metadata_token_count.py', JSON.stringify(scope.fullResults.unsorted)).then(function(response) {
 						scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
 						scope.concKwic.frequencyResults = progressiveLoad.sortResults(response.data);
 						scope.showingRelativeFrequencies = true;
+						scope.loading = false;
 					});
 				} else {
 					scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
 					scope.concKwic.frequencyResults = scope.relativeFrequencies;
 					scope.showingRelativeFrequencies = true;
+					scope.loading = false;
 				}
 			}
 			scope.displayAbsoluteFrequencies = function() {
+				scope.loading = true;
 				scope.relativeFrequencies = angular.copy(scope.concKwic.frequencyResults);
 				scope.concKwic.frequencyResults = scope.absoluteFrequencies;
 				scope.showingRelativeFrequencies = false;
+				scope.loading = false;
 			}
         }
     }
