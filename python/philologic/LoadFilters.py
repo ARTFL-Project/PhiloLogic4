@@ -24,7 +24,7 @@ def normalize_unicode_raw_words(loader_obj, text):
     os.remove(text["raw"])
     os.rename(text["raw"] + ".tmp",text["raw"])
     
-def make_word_counts(loader_obj, text, depth=4):
+def make_word_counts(loader_obj, text, depth=5):
     object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
     counts = [0 for i in range(depth)]
     temp_file = text['raw'] + '.tmp'

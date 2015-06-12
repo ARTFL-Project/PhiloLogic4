@@ -72,12 +72,7 @@ class Loader(object):
             post_filters = PostFilters.DefaultPostFilters
         self.post_filters = post_filters
 
-        if debug == True:
-            self.clean = False
-            self.verbose = True
-        else:
-            self.clean = True
-            self.verbose = False
+        self.debug = debug
 
         self.sort_by_word = sort_by_word
         self.sort_by_id = sort_by_id
@@ -95,7 +90,6 @@ class Loader(object):
         self.metadata_types = {}
         self.normalized_fields = []
 
-        #sys.stdout = OutputHandler(console=console_output, log=log)
 
     def setup_dir(self,path):
         os.system("mkdir -p %s" % path)
@@ -316,9 +310,7 @@ class Loader(object):
                     for f in filters:
                         f(self, text)
 
-                    if self.clean:
-                        os.system('gzip -c -5 %s > %s' % (text['raw'], text['raw'] + '.gz'))
-
+                    os.system('gzip -c -5 %s > %s' % (text['raw'], text['raw'] + '.gz'))
                     os.system('rm %s' % text['raw'])
                     os.system('gzip -c -5 %s > %s' % (text['words'], text['words'] + '.gz'))
                     os.system('rm %s' % text['words'])
@@ -353,14 +345,14 @@ class Loader(object):
         print "%s: sorting objects" % time.ctime()
         toms_status = os.system(tomsargs + " > " + self.workdir + "all_toms_sorted")
         print "%s: object sort returned %d" % (time.ctime(),toms_status)
-        if self.clean:
+        if not self.debug:
             os.system('rm *.toms.sorted')
 
         pagesargs = "cat *.pages"
         print "%s: joining pages" % time.ctime()
         pages_status = os.system(pagesargs + " > " + self.workdir + "all_pages")
         print "%s: word join returned %d" % (time.ctime(), pages_status)
-        if self.clean:
+        if not self.debug:
             os.system("rm *.pages")
 
     def merge_words(self, file_num):
@@ -390,7 +382,7 @@ class Loader(object):
             wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + command_list
             command = '/bin/bash -c "%s | gzip -c -5 > %s.gz"' % (wordsargs, output)
             words_status = os.system(command)
-            if self.clean:
+            if not self.debug:
                 os.system("rm %s" % file_list)
 
         # We check if there was more than one batch sorted
@@ -410,7 +402,7 @@ class Loader(object):
         if words_status != 0:
             print "Word sorting failed\nInterrupting database load..."
             sys.exit()
-        if self.clean:
+        if not self.debug:
             os.system('rm %s' % self.workdir + '/*split.gz')
         return words_status
 
@@ -475,7 +467,7 @@ class Loader(object):
         for table in self.tables:
             if table == 'words':
                 file_in = self.destination + '/WORK/all_words_ordered'
-                indices = [("philo_name", "%s_ancestor" % self.default_object_level), ('philo_id',)]
+                indices = [("philo_name",), ('philo_id',), ('parent',), ('byte_start',), ('byte_end',)]
                 depth = 7
                 compressed = False
             elif table == 'pages':
@@ -573,8 +565,6 @@ def shellquote(s):
 def handle_command_line(argv):
     usage = "usage: %prog [options] database_name files"
     parser = OptionParser(usage=usage)
-    parser.add_option("-q", "--quiet", action="store_true", dest="quiet", help="suppress all output")
-    parser.add_option("-l", "--log", default=False, dest="log", help="enable logging and specify file path")
     parser.add_option("-w", "--workers", type="int", default="2", dest="workers", help="define the number of cores for parsing")
     parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
 
@@ -594,30 +584,30 @@ def handle_command_line(argv):
         sys.exit()
 
     workers = options.workers or 2
-    console_output = True
-    if options.quiet:
-        console_output = False
-    log = options.log or False
     debug = options.debug or False
 
-    return dbname,files, workers, console_output, log, debug
+    return dbname,files, workers, True, True, debug
 
 
-def setup_db_dir(db_destination, template_dir, safe=False):
+def setup_db_dir(db_destination, template_dir, safe=False, force_delete=False):
     try:
         os.mkdir(db_destination)
     except OSError:
-        if not safe:
-            print "The database folder could not be created at %s" % db_destination
-            print "Do you want to delete this database? Yes/No"
-            choice = raw_input().lower()
-            if choice.startswith('y'):
-                os.system('rm -rf %s' % db_destination)
-                os.mkdir(db_destination)
+        if force_delete: # useful to run db loads with nohup
+            os.system('rm -rf %s' % db_destination)
+            os.mkdir(db_destination)
+        else:
+            if not safe:
+                print "The database folder could not be created at %s" % db_destination
+                print "Do you want to delete this database? Yes/No"
+                choice = raw_input().lower()
+                if choice.startswith('y'):
+                    os.system('rm -rf %s' % db_destination)
+                    os.mkdir(db_destination)
+                else:
+                    sys.exit()
             else:
                 sys.exit()
-        else:
-            sys.exit()
 
     if template_dir:
         for f in os.listdir(template_dir):
@@ -625,8 +615,6 @@ def setup_db_dir(db_destination, template_dir, safe=False):
                 cp_command = "cp -r %s %s" % (template_dir+f,db_destination+"/"+f)
                 os.system(cp_command)
 
-        # os.system("cp -r %s* %s" % (template_dir,db_destination))
-        # os.system("cp %s.htaccess %s" % (template_dir,db_destination))
         os.system("chmod -R 777 %s/app/assets/css" % db_destination)
         os.system("chmod -R 777 %s/app/assets/js" % db_destination)
 
