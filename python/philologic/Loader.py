@@ -586,30 +586,30 @@ def handle_command_line(argv):
         sys.exit()
 
     workers = options.workers or 2
-    console_output = True
-    if options.quiet:
-        console_output = False
-    log = options.log or False
     debug = options.debug or False
 
-    return dbname,files, workers, console_output, log, debug
+    return dbname,files, workers, True, True, debug
 
 
-def setup_db_dir(db_destination, template_dir, safe=False):
+def setup_db_dir(db_destination, template_dir, safe=False, force_delete=False):
     try:
         os.mkdir(db_destination)
     except OSError:
-        if not safe:
-            print "The database folder could not be created at %s" % db_destination
-            print "Do you want to delete this database? Yes/No"
-            choice = raw_input().lower()
-            if choice.startswith('y'):
-                os.system('rm -rf %s' % db_destination)
-                os.mkdir(db_destination)
+        if force_delete: # useful to run db loads with nohup
+            os.system('rm -rf %s' % db_destination)
+            os.mkdir(db_destination)
+        else:
+            if not safe:
+                print "The database folder could not be created at %s" % db_destination
+                print "Do you want to delete this database? Yes/No"
+                choice = raw_input().lower()
+                if choice.startswith('y'):
+                    os.system('rm -rf %s' % db_destination)
+                    os.mkdir(db_destination)
+                else:
+                    sys.exit()
             else:
                 sys.exit()
-        else:
-            sys.exit()
 
     if template_dir:
         for f in os.listdir(template_dir):

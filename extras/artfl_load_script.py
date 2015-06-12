@@ -107,7 +107,7 @@ db_url = url_root + dbname
 
 if __name__ == "__main__":
 
-    setup_db_dir(db_destination, template_dir)
+    setup_db_dir(db_destination, template_dir, force_delete=True)
 
 
     ####################
