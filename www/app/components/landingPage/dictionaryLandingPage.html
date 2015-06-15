@@ -7,7 +7,14 @@
             <div class="panel-body" >
                 <ul class="list-group" style="margin-left: -15px; margin-right: -15px" ng-if="volumeData != []">
                     <li class="list-group-item velocity-transition-fadeIn" ng-repeat="volume in ::volumeData" data-velocity-opts="{ stagger: 10 }">
-                        <a href="navigate/{{ ::volume.philo_id }}/table-of-contents">{{ ::volume.title }}</a>
+                        <a href="navigate/{{ ::volume.philo_id }}/table-of-contents">
+							<span class="philologic-doc">
+								{{ ::volume.title }}
+								<span style="font-weight: 300" ng-if="volume.start_head">
+									({{ ::volume.start_head }}-{{ ::volume.end_head }})
+								</span>
+							</span>
+						</a>
                     </li>
                 </ul>
             </div>

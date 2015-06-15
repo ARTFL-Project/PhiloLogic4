@@ -188,7 +188,6 @@ philoApp.directive('autocompleteMetadata', ['$rootScope', function($rootScope) {
             },
             select: function( event, ui ) {
                 var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
-				var prefix = angular.copy(q);
                 q = q.split(/(\||NOT)/);
                 q[q.length - 1] = q[q.length - 1].replace(/.*CUTHERE /, '');
                 q[q.length-1] = '\"' + q[q.length-1].replace(/^\s*/g, '') + '\"';

@@ -375,6 +375,7 @@ class Loader(object):
             lists_of_words_files.append(words_files)
 
         # Then we run the merge sort on each chunk of 500 files and compress the result
+        print "Merging words in batches of %d..." % file_num
         already_merged = 0
         for pos, wordlist in enumerate(lists_of_words_files):
             command_list = ' '.join([i[0] for i in wordlist])
@@ -390,6 +391,7 @@ class Loader(object):
 
         # We check if there was more than one batch sorted
         print "merging all files..."
+        print "merging all batches of words files..."
         if len(lists_of_words_files) > 1:
             # if so we run the last merge sort on the resulting sorted files
             final_sorted_files = []
