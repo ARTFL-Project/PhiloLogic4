@@ -375,6 +375,8 @@ class Loader(object):
             lists_of_words_files.append(words_files)
 
         # Then we run the merge sort on each chunk of 500 files and compress the result
+        print "Merging words in batches of %d..." % file_num
+        already_merged = 0
         for pos, wordlist in enumerate(lists_of_words_files):
             command_list = ' '.join([i[0] for i in wordlist])
             file_list = ' '.join([i[1] for i in wordlist])
@@ -382,10 +384,13 @@ class Loader(object):
             wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + command_list
             command = '/bin/bash -c "%s | gzip -c -5 > %s.gz"' % (wordsargs, output)
             words_status = os.system(command)
+            already_merged += file_num
+            print "%d files merged..." % already_merged
             if not self.debug:
                 os.system("rm %s" % file_list)
 
         # We check if there was more than one batch sorted
+        print "merging all batches of words files..."
         if len(lists_of_words_files) > 1:
             # if so we run the last merge sort on the resulting sorted files
             final_sorted_files = []

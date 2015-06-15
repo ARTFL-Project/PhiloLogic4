@@ -52,6 +52,8 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$location', 'URL',
         if (!queryParams.q) {
             queryParams.report = 'bibliography';
         }
+		queryParams.start = 0;
+		queryParams.end = 0;
         var request = URL.report(queryParams);
         if (queryParams.report === "concordance" || queryParams.report === "kwic" || queryParams.report === "bibliography") {
             $http.get(request).success(function(data) {
