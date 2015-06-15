@@ -6,6 +6,9 @@
                 <a class="philologic-doc" href="{{result.citation.title.href}}" class="citation-small-caps"><i>{{ ::result.citation.title.label }}</i></a>
                 <span ng-if="result.citation.author" class="citation-small-caps">, {{ ::result.citation.author.label }}</span>
                 <span ng-if="result.citation.date"><b>[{{ ::result.citation.date.label }}]</b></span>
+				<a href="{{result.citation.div1.href}}" ng-if="result.citation.div1">{{ ::result.citation.div1.label }}</a>
+				<a href="{{result.citation.div2.href}}" ng-if="result.citation.div2">{{ ::result.citation.div2.label }}</a>
+                <a href="{{result.citation.div3.href}}" ng-if="result.citation.div3">{{ ::result.citation.div3.label }}</a>
 				<a href="{{result.citation.para.href}}" ng-if="result.citation.para">{{ ::result.citation.para.label }}</a>
 				<span ng-if="result.citation.page">{{ ::result.citation.page.label }}</span>
                 <span ng-if="result.citation.more">{{ ::result.citation.more }}</span>
