@@ -40,3 +40,14 @@ Searching for a div that has property `NOT x` does not guarantee that the result
 or a parent with property x.  This can often be handled at the database level by normalizing metadata to a single fine-grained layer, 
 but is tricky. Likewise, searches for `NULL` values in recursive objects will often return "virtual" philologic objects, 
 which don't exist in the XML but are necessary for balanced tree arithmetic.
+
+### Regexp syntax ###
+
+Basic regexp syntax, adapted from the egrep regular expression syntax.
+
+* The character `.` matches any single character except newline. 
+* Bracket expressions can match sets or ranges of characters: `[aeiou]` or `[a-z]`, but will only match a single character unless followed by one of the quantifiers below.
+* `*` indicates that the regular expression should match zero or more occurrences of the previous character or bracketed group.
+* `+` indicates that the regular expression should match one or more occurrences of the previous character or bracketed group.
+* `?` indicates that the regular expression should match zero or one occurrence of the previous character or bracketed group.
+Thus, `.*` is an approximate "match anything" wildcard operator, rather than the more traditional (but less precise) `*` in many other search engines.
