@@ -375,6 +375,7 @@ class Loader(object):
             lists_of_words_files.append(words_files)
 
         # Then we run the merge sort on each chunk of 500 files and compress the result
+        already_merged = 0
         for pos, wordlist in enumerate(lists_of_words_files):
             command_list = ' '.join([i[0] for i in wordlist])
             file_list = ' '.join([i[1] for i in wordlist])
@@ -382,10 +383,13 @@ class Loader(object):
             wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + command_list
             command = '/bin/bash -c "%s | gzip -c -5 > %s.gz"' % (wordsargs, output)
             words_status = os.system(command)
+            already_merged += file_num
+            print "%d files merged..." % already_merged
             if not self.debug:
                 os.system("rm %s" % file_list)
 
         # We check if there was more than one batch sorted
+        print "merging all files..."
         if len(lists_of_words_files) > 1:
             # if so we run the last merge sort on the resulting sorted files
             final_sorted_files = []
@@ -565,8 +569,6 @@ def shellquote(s):
 def handle_command_line(argv):
     usage = "usage: %prog [options] database_name files"
     parser = OptionParser(usage=usage)
-    parser.add_option("-q", "--quiet", action="store_true", dest="quiet", help="suppress all output")
-    parser.add_option("-l", "--log", default=False, dest="log", help="enable logging and specify file path")
     parser.add_option("-w", "--workers", type="int", default="2", dest="workers", help="define the number of cores for parsing")
     parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
 
