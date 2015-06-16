@@ -332,6 +332,7 @@ class Loader(object):
     def merge_objects(self, file_num=500):
         print "\n### Merge parser output ###"
         print "%s: sorting words" % time.ctime()
+        os.system('export TMPDIR=%s/' % self.workdir)
         words_status = self.merge_words(file_num=file_num)
         print "%s: word sort returned %d" % (time.ctime(),words_status)
 
