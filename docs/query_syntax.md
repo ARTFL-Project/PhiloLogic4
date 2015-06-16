@@ -43,7 +43,7 @@ which don't exist in the XML but are necessary for balanced tree arithmetic.
 
 ### Regexp syntax ###
 
-Basic regexp syntax, adapted from the egrep regular expression syntax.
+Basic regexp syntax, adapted from the [**egrep regular expression syntax**](http://www.gnu.org/software/findutils/manual/html_node/find_html/egrep-regular-expression-syntax.html#egrep-regular-expression-syntax).
 
 * The character `.` matches any single character except newline. 
 * Bracket expressions can match sets or ranges of characters: `[aeiou]` or `[a-z]`, but will only match a single character unless followed by one of the quantifiers below.
