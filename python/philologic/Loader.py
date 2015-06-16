@@ -375,40 +375,29 @@ class Loader(object):
             lists_of_words_files.append(words_files)
 
         # Then we run the merge sort on each chunk of 500 files and compress the result
-        print "Merging words in batches of %d..." % file_num
+        print "%s: Merging words in batches of %d..." % (time.ctime(), file_num)
         already_merged = 0
+        os.system("touch %s" % self.workdir + "/words.sorted.init")
+        last_sort_file = self.workdir + "/words.sorted.init"
         for pos, wordlist in enumerate(lists_of_words_files):
             command_list = ' '.join([i[0] for i in wordlist])
             file_list = ' '.join([i[1] for i in wordlist])
             output = self.workdir + "words.sorted.%d.split" % pos
             wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + command_list
-            command = '/bin/bash -c "%s | gzip -c -5 > %s.gz"' % (wordsargs, output)
+            command = '/bin/bash -c "%s | sort -m %s %s - <(gunzip -c %s 2> /dev/null) | gzip -c -5 > %s"' % (wordsargs, sort_by_word, sort_by_id, last_sort_file, output)
             words_status = os.system(command)
             already_merged += file_num
-            print "%d files merged..." % already_merged
+            os.system("rm %s" % last_sort_file)
+            last_sort_file = output
+            
+            print "%s: %d files merged..." % (time.ctime(), already_merged)
             if not self.debug:
                 os.system("rm %s" % file_list)
+        os.system('mv %s %s' % (last_sort_file, self.workdir + '/all_words_sorted.gz'))
 
-        # We check if there was more than one batch sorted
-        print "merging all batches of words files..."
-        if len(lists_of_words_files) > 1:
-            # if so we run the last merge sort on the resulting sorted files
-            final_sorted_files = []
-            for f in glob(self.workdir + '/*split.gz'):
-                f = os.path.basename(f)
-                final_sorted_files.append('<(gunzip -c %s)' % f)
-            final_sorted_files = ' '.join(final_sorted_files)
-            final_wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + final_sorted_files
-            command = '/bin/bash -c "%s | gzip -c -5 > %s/all_words_sorted.gz"' % (final_wordsargs, self.workdir)
-            words_status = os.system(command)
-        else:
-            # if not skip the last step and rename the file to all_words_sorted.gz
-            words_status = os.system('cp %s/words.sorted.0.split.gz %s/all_words_sorted.gz' % (self.workdir, self.workdir))
         if words_status != 0:
             print "Word sorting failed\nInterrupting database load..."
             sys.exit()
-        if not self.debug:
-            os.system('rm %s' % self.workdir + '/*split.gz')
         return words_status
 
     def analyze(self):
