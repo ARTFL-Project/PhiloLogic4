@@ -20,7 +20,7 @@ philoApp.controller('collocationCtrl', ['$rootScope', '$http', '$location', 'acc
     vm.filterList = false;
     vm.loading = true;
     vm.percent = 0;
-    vm.sortedLists = {};
+    vm.sortedList = {};
     vm.resultsLength = false; // set to false for now
     
     vm.showFilter = false;
@@ -32,9 +32,8 @@ philoApp.controller('collocationCtrl', ['$rootScope', '$http', '$location', 'acc
         }
     }
     
-    vm.concordanceFromCollocation = function(word, count, direction) {
-        var url = URL.objectToUrlString($location.search(), {report: 'concordance_from_collocation', collocate: word, collocate_num: count, direction: direction});
-        console.log(url)
+    vm.concordanceFromCollocation = function(url) {
+		console.log(url)
         $location.url(url);
     }
 

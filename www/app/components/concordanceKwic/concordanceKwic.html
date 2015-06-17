@@ -7,7 +7,7 @@
                             Export results
                     </button>
                     <search-arguments></search-arguments>
-                    <results-description description="{{ concKwic.description }}"></results-description>
+                    <results-description description="{{ concKwic.description }}" query-status="{{ concKwic.loading }}"></results-description>
                 </div>
                 <div class="row hidden-xs" id="act-on-report" ng-if="report !== 'concordance_from_collocation' && report !=='word_property_filter'">
                     <concordance-kwic-switch report="{{ report }}" ng-if="report !== 'bibliography'"></concordance-kwic-switch>

@@ -24,11 +24,7 @@ def get_total_results(environ,start_response):
     else:
         hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
     total_results = 0
-    if not hits.done:
-        while not hits.done:
-            time.sleep(0.05)
-            if hits.done:
-                break
+    hits.finish()
     total_results = len(hits)
         
     yield json.dumps(total_results)

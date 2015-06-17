@@ -167,7 +167,24 @@ web_config_defaults = {
                # The dico_letter_range variables defines a set of letters corresponding to the first letter of a headword. This generates a set of buttons
                # for browsing the database available on the landing page. The default represents the entire roman alphabet.''',
         'index': 15
-    }
+    },
+    'kwic_bibliography_fields': {
+         'value': [],
+         'comment': '''
+                # The kwic_bibliography_fields variable variable defines which bibliography fields will be displayed in the KWIC view. It should be
+                # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.                # If the variable is an empty list, the first two fields in the metadata variable will be used.
+                ''',
+         'index': 16
+     },
+     'title_prefix_removal': {
+          'value': [],
+          'comment': '''
+                 # The title_prefix_removal variable is only used for displaying titles in a proper order in the landing page browsing function.
+                 # It is used to ignore predefined words at the beginning of a title for sorting purposes.
+                 # e.g: ["the", "a"] will ignore "the" and "a" for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
+                 ''',
+          'index': 17
+     }
 }
 
 

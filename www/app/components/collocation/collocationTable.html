@@ -1,37 +1,15 @@
 <div class="table-reponsive">
     <table class="table table-bordered" id="collocation_table">
-        <tr>
-         <th>within {{ ::collocationParams.wordNum }} words on either side</th>
-         <th>within {{ ::collocationParams.wordNum  }} words to left</th>
-         <th>within {{ ::collocationParams.wordNum  }} words to right</th>
-        </tr>
+		<tr>
+			<th>Collocates within the same sentence</th>
+		</tr>
         <tr>
             <td id="all-collocate-column">
-                <span id="all-num-{{ ::$index}}" class="colloc-row" ng-repeat="result in sortedLists.all">
-                    <span id="all-word-{{ ::$index }}" class="colloc_link text-content-area" ng-click="collocation.concordanceFromCollocation(result.label, result.count, 'all')">
+                <span id="all-num-{{ ::$index}}" class="colloc-row" ng-repeat="result in sortedList">
+                    <a id="all-word-{{ ::$index }}" class="colloc_link text-content-area" href="{{result.url}}">
                         {{ ::result.label }}
-                    </span>
+                    </a>
                     <span id="all-count-{{ ::$index }}">
-                        &nbsp;({{ ::result.count }})
-                    </span>
-                </span>
-            </td>
-            <td id="left-collocate-column">
-                <span id="left-num-{{ ::$index}}" class="colloc-row" ng-repeat="result in sortedLists.left">
-                    <span id="left-word-{{ ::$index }}" class="colloc_link text-content-area" ng-click="collocation.concordanceFromCollocation(result.label, result.count, 'left')">
-                        {{ ::result.label }}
-                    </span>
-                    <span id="left-count-{{ ::$index }}">
-                        &nbsp;({{ ::result.count }})
-                    </span>
-                </span>
-            </td>
-            <td id="right-collocate-column">
-                <span id="right-num-{{ ::$index}}" class="colloc-row" ng-repeat="result in sortedLists.right">
-                    <span id="right-word-{{ ::$index }}" class="colloc_link text-content-area" ng-click="collocation.concordanceFromCollocation(result.label, result.count, 'right')">
-                        {{ ::result.label }}
-                    </span>
-                    <span id="right-count-{{ ::$index }}">
                         &nbsp;({{ ::result.count }})
                     </span>
                 </span>

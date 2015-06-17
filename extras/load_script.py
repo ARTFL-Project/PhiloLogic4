@@ -45,7 +45,7 @@ default_object_level = 'doc'
 navigable_objects = ('doc', 'div1', 'div2', 'div3')
 
 # Data tables to store.
-tables = ['toms', 'pages']
+tables = ['toms', 'pages', 'words']
 
 # Define filters as a list of functions to call, either those in Loader or outside
 filters = [normalize_unicode_raw_words,make_word_counts,generate_words_sorted,make_object_ancestors(*navigable_objects),

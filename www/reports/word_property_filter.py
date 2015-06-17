@@ -11,7 +11,6 @@ from philologic.DB import DB
 from wsgiref.handlers import CGIHandler
 from concordance import citation_links, concordance_citation, fetch_concordance
 from functions.wsgi_handler import WSGIHandler
-from collocation import tokenize, filter
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
 try:
