@@ -530,7 +530,7 @@ class Loader(object):
         config_values = {'dbname': os.path.basename(re.sub("/data/?$", "", self.destination)),
                          'db_url': extra_locals['db_url'],
                          'metadata': self.metadata_fields,
-                         'facets': [{i: i} for i in self.metadata_fields]}
+                         'facets': [{i: [i]} for i in self.metadata_fields]}
         ## Fetch search examples:
         search_examples = {}
         conn = sqlite3.connect(self.destination + '/toms.db')
