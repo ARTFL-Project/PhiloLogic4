@@ -102,7 +102,10 @@ def format_text_object(text, config, q, word_regex, bytes=[]):
                 el.append(etree.Element("br"))
             elif el.tag == "list":
                 el.tag = "ul"
-            elif el.tag == "ptr":
+            elif el.tag == "title":
+                el.tag = "span"
+                el.attrib['class'] = "xml-title"
+            elif el.tag == "ptr" or el.tag == "ref":
                 target = el.attrib["target"]
                 link = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_notes.py", target=target)
                 el.attrib["data-ref"] = link
