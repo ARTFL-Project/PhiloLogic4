@@ -1,13 +1,13 @@
 philoApp.filter('kwicBiblioDisplay', ['$rootScope', function($rootScope) {
     return function(kwicResults) {
-		if (typeof(kwicResults) !== 'undefined') {
-            var biblioFields = $rootScope.philoConfig.kwic_bibliography_fields;
-			if (typeof(biblioFields === 'undefined') || biblioFields.length === 0) {
-                biblioFields = $rootScope.philoConfig.metadata.slice(0, 2);
-				biblioFields.push('head');
-            }
+		if (typeof(kwicResults) !== 'undefined') {			
 			var buildFullCitation = function(metadataField) {
 				var citationList = [];
+				var biblioFields = $rootScope.philoConfig.kwic_bibliography_fields;
+				if (typeof(biblioFields) === 'undefined' || biblioFields.length === 0) {
+					biblioFields = $rootScope.philoConfig.metadata.slice(0, 2);
+					biblioFields.push('head');
+				}
 				for (var i=0; i < biblioFields.length; i++) {
 					if (biblioFields[i] in metadataField) {
                         var biblioField = metadataField[biblioFields[i]] || '';

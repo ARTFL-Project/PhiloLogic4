@@ -182,6 +182,9 @@ def format_concordance(text, word_regex, bytes=[]):
         elif el.tag == "title":
             el.tag = "span"
             el.attrib['class'] = "xml-title"
+        elif el.tag == "q":
+            el.tag = "span"
+            el.attrib['class'] = 'xml-q'
         if "id" in el.attrib:  ## kill ids in order to avoid the risk of having duplicate ids in the HTML
             del el.attrib["id"]
         if el.tag == "sc" or el.tag == "scx":

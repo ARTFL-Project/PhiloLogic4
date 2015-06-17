@@ -105,6 +105,9 @@ def format_text_object(text, config, q, word_regex, bytes=[]):
             elif el.tag == "title":
                 el.tag = "span"
                 el.attrib['class'] = "xml-title"
+            elif el.tag == "q":
+                el.tag = "span"
+                el.attrib['class'] = 'xml-q'
             elif el.tag == "ptr" or el.tag == "ref":
                 target = el.attrib["target"]
                 link = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_notes.py", target=target)
