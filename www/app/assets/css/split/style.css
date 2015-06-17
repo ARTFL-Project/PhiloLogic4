@@ -300,6 +300,7 @@ span.note {
 	display: block;
 }
 .xml-l::before {
+	content: '';
     font-family: 'Droid Sans Mono', sans-serif;
 	font-size: .7em;
 	white-space: pre;
@@ -312,6 +313,16 @@ span.note {
 }
 .xml-l[type="split"]::before {
     content: "";
+}
+.xml-milestone::before {
+	content: attr(n) "\00a0";
+	color: #909090;
+	font-family: 'Droid Sans Mono', sans-serif;
+	font-size: .6em;
+	vertical-align: .3em;
+}
+.xml-milestone[unit="card"]::before {
+	content: '';
 }
 .xml-lb[type="hyphenInWord"] {
     display: inline;
