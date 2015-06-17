@@ -11,13 +11,8 @@ import json
 def generate_frequency(results, q, db, config):
     """reads through a hitlist. looks up q.frequency_field in each hit, and builds up a list of 
        unique values and their frequencies."""
-    try:
-        field = eval(json.loads(q.frequency_field))
-    except ValueError:
-        field = json.loads(q.frequency_field)
     
-    if isinstance(field, str):
-        field = [field]
+    field = eval(json.loads(q.frequency_field))
                 
     ## Override default value of q.end for first batch of results
     if q.end == 25:
@@ -77,8 +72,10 @@ def generate_frequency(results, q, db, config):
 
 def generate_key(hit, field_list, db):
     key = []
+    # print >> sys.stderr, "FIELD", repr(field_list)
     for field in field_list:
         value = hit[field]
+        # print >> sys.stderr, "AUTHOR", repr(value)
         if not value:
             value = "NULL" # NULL is a magic value for queries, don't change it recklessly.
         k = (field, value)
