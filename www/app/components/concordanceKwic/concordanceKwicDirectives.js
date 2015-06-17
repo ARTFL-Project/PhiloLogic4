@@ -80,7 +80,7 @@ philoApp.directive('bibliography', ['$rootScope', function($rootScope) {
     }
 }]);
 
-philoApp.directive('resultsDescription', ['descriptionValues', function(descriptionValues) {
+philoApp.directive('resultsDescription', ['request', 'descriptionValues', function(request, descriptionValues) {
 	var buildDescription = function(scope) {
 		if (scope.resultsLength && scope.end <= scope.resultsPerPage && scope.end <= scope.resultsLength) {
 			var description = 'Hits ' + scope.start + ' - ' + scope.end  + ' of ' + scope.resultsLength;
@@ -126,6 +126,18 @@ philoApp.directive('resultsDescription', ['descriptionValues', function(descript
                 }
 				scope.hits = buildDescription(scope);
             });
+			attrs.$observe('queryStatus', function(loading) {
+				loading = eval(loading);
+				if (!loading) {
+                    request.script(scope.formData, {
+						script: 'get_total_results.py'
+					}).then(function(response) {
+						scope.resultsLength = response.data;
+						descriptionValues.resultsLength = scope.resultsLength;
+						scope.hits = buildDescription(scope)
+					});
+                }
+			});
         }
     }
     

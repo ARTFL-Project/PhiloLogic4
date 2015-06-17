@@ -77,6 +77,8 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
                     }, true);
                 scope.formData = $rootScope.formData;
                 scope.removeMetadata = removeMetadata;
+				
+				// Query terms functionality
                 scope.getQueryTerms = function() {
                     request.script(scope.formData, {
                         script: 'get_query_terms.py'
