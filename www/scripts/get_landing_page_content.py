@@ -7,6 +7,7 @@ import cgi
 import json
 import sqlite3
 import re
+import unicodedata
 sys.path.append('..')
 import reports as r
 import functions as f
@@ -57,7 +58,7 @@ def generate_author_list(c, letter_range, db, config, request):
     return content
 
 def generate_title_list(c, letter_range, db, config, request):
-    c.execute('select * from toms where philo_type="doc" order by title')
+    c.execute('select * from toms where philo_type="doc"')
     content = []
     try:
         prefixes =  '|'.join([i for i in config.title_prefix_removal])
@@ -74,6 +75,8 @@ def generate_title_list(c, letter_range, db, config, request):
         except:
             author = ""
         url = "navigate/%s/table-of-contents" % i['philo_id'].split()[0]
+        # Smash accents and normalize for sorting
+        title = ''.join([j for j in unicodedata.normalize("NFKD",title) if not unicodedata.combining(j)])
         content.append({"title": i['title'], "url": url, "author": author, "initial": title[0].upper(), 'truncated': title})
     content = sorted(content, key=lambda x: x['truncated'])
     return content
