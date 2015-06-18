@@ -11,7 +11,11 @@ philoApp.controller('landingPage', ['$rootScope', '$location', 'accessControl', 
             vm.authorized = $rootScope.authorized;
         });
     }
-    vm.dictionary = $rootScope.philoConfig.dictionary;
+	if ($rootScope.philoConfig.landing_page_browsing_type !== 'dictionary') {
+        vm.dictionary = false;
+    } else {
+		vm.dictionary = true;
+	}
     $rootScope.report = "landing_page";
 
     vm.getContent = function(contentType, range) {

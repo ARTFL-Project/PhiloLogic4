@@ -151,6 +151,11 @@ web_config_defaults = {
         'comment': '# The dictionary variable enables a different search interface with the headword as its starting point. It is turned off by default',
         'index': 13
     },
+    'landing_page_browsing_type': {
+        'value': 'default',
+        'comment': "# The landing_page_browsing_type variable defines what type of landing page. Values available are 'default' or 'dictionary'",
+        'index': 14
+    },
     'landing_page_browsing': {
         'value': {"author": ["A-D", "E-I", "J-M", "N-R", "S-Z"], "title": ["A-D", "E-I", "J-M", "N-R", "S-Z"], "date": {}, "default_display": {}},
         'comment': '''
@@ -159,14 +164,14 @@ web_config_defaults = {
                # and for date you need to define three variables: start_date, end_date, interval: e.g. "date": {"start": 1600, "end": 1800, "interval": 25}
                # default_display allows you to load content by default. It is a dictionary that contains a type and a range, e.g. = "default_display": {"type": "title", "range": "A-D"}
                # Note that no default is provided for "date" or default_value: they are therefore disabled''',
-        'index': 14
+        'index': 15
     },
     'dico_letter_range': {
         'value': ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"],
         'comment': '''
                # The dico_letter_range variables defines a set of letters corresponding to the first letter of a headword. This generates a set of buttons
                # for browsing the database available on the landing page. The default represents the entire roman alphabet.''',
-        'index': 15
+        'index': 16
     },
     'kwic_bibliography_fields': {
          'value': [],
@@ -174,7 +179,7 @@ web_config_defaults = {
                 # The kwic_bibliography_fields variable variable defines which bibliography fields will be displayed in the KWIC view. It should be
                 # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.                # If the variable is an empty list, the first two fields in the metadata variable will be used.
                 ''',
-         'index': 16
+         'index': 17
      },
      'title_prefix_removal': {
           'value': [],
@@ -184,7 +189,7 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-          'index': 17
+          'index': 18
      }
 }
 
