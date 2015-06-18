@@ -39,10 +39,15 @@ db_locals_defaults = {
         'comment': '# This defines the default navigation element in your database',
         'index': 6
     },
+    'lowercase_index': {
+        'value': True,
+        'comment': '# This defines whether all terms in the index have been lowercased. If so, input searches will be lowercased',
+        'index': 7
+    },
     'debug': {
         'value': False,
         'comment': '# If set to True, this enabled debugging messages to be printed out to the Apache error log',
-        'index': 7
+        'index': 8
     }
 }
 db_locals_header = '''
