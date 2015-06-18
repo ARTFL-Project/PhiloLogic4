@@ -51,7 +51,7 @@ db_locals_defaults = {
     },
     'secret': {
         'value': '',
-        'comment': 'The secret value is a random string to be used to generate a secure cookie for access control. The string value can be anything.',
+        'comment': '# The secret value is a random string to be used to generate a secure cookie for access control. The string value can be anything.',
         'index': 9
     }
 }
