@@ -217,8 +217,9 @@ def expand_query_not(split, freq_file, dest_fh):
                 grep_proc = grep_word(token,freq_file,filter_inputs[0])
                 grep_proc.wait()
             elif kind == "QUOTE":
-                filter_inputs[0].write(token[1:-1] + "\t" + token[1:-1] + "\n") 
-
+#                filter_inputs[0].write(token[1:-1] + "\t" + token[1:-1] + "\n") 
+                grep_proc = grep_exact(token,freq_file,filter_inputs[0])
+                grep_proc.wait()
         # close all the pipes and wait for procs to finish.
         for pipe,proc in zip(filter_inputs,filter_procs):
             pipe.close()
@@ -226,20 +227,25 @@ def expand_query_not(split, freq_file, dest_fh):
 
 def grep_word(token,freq_file,dest_fh):
     #print >> sys.stderr, "GREP_WORD_TOKEN", repr(token)
-    norm_tok_uni = token.decode("utf-8").lower()
+#    norm_tok_uni = token.decode("utf-8").lower()
+    norm_tok_uni = token.decode("utf-8")
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
     norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
-    grep_command = ['egrep', "-i", '^%s[[:blank:]]' % norm_tok, '%s' % freq_file]
-    print >> sys.stderr, "GREP_COMMAND", "".join(grep_command)
-    #print >> sys.stderr, repr(norm_tok)
+    grep_command = ['egrep', '^%s[[:blank:]]' % norm_tok, '%s' % freq_file]
     grep_proc = subprocess.Popen(grep_command,stdout=dest_fh)
     return grep_proc
 
 def invert_grep(token, in_fh, dest_fh):
-    norm_tok_uni = token.decode("utf-8").lower()
+    norm_tok_uni = token.decode("utf-8")
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
     norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
-    grep_command = ['egrep', '-iv', '^%s[[:blank:]]' % norm_tok]
+    grep_command = ['egrep', '-v', '^%s[[:blank:]]' % norm_tok]
+    grep_proc = subprocess.Popen(grep_command,stdin=in_fh,stdout=dest_fh)
+    return grep_proc
+
+def grep_exact(token, in_fh, dest_fh):
+    grep_command = ["egrep", "-v", "[[:blank:]]%s$" % token[1:-1]]
+    print >> sys.stderr, grep_command
     grep_proc = subprocess.Popen(grep_command,stdin=in_fh,stdout=dest_fh)
     return grep_proc
 
