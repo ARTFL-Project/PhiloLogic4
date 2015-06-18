@@ -75,17 +75,7 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 				var promise = request.report(queryParams, {start: start, end: end});
 			}
 			promise.then(function(response) {
-				if (facet.type === "facet") { // We return an ordered list for facets
-					var resultsArray = response.data.results;
-					var results = {}
-					for (var i=0; i < resultsArray.length; i++) {
-						var key = resultsArray[i][0];
-						var val = resultsArray[i][1];
-						results[key] = val;
-					}
-				} else {
-					var results = response.data.results;
-				}
+				var results = response.data.results;
 				scope.moreResults = response.data.more_results;
 				scope.resultsLength = response.data.results_length;
 				scope.sidebarHeight = {height: $('#results_container').height() - 40 + 'px'};

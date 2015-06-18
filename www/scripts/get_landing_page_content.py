@@ -60,13 +60,12 @@ def generate_title_list(c, letter_range, db, config, request):
     c.execute('select * from toms where philo_type="doc" order by title')
     content = []
     try:
-        prefixes =  '|'.join([i + ' ' for i in config.title_prefix_removal])
+        prefixes =  '|'.join([i for i in config.title_prefix_removal])
     except: # for backwards compatibility
         prefixes = ""
-    prefix_sub = re.compile('^%s' % prefixes, re.I)
-    
+    prefix_sub = re.compile(r"^%s" % prefixes, re.I|re.U)
     for i in c.fetchall():
-        title = i['title']
+        title = i['title'].decode('utf-8').lower()
         title = prefix_sub.sub('', title).strip()
         if title[0].lower() not in letter_range:
             continue
@@ -75,7 +74,8 @@ def generate_title_list(c, letter_range, db, config, request):
         except:
             author = ""
         url = "navigate/%s/table-of-contents" % i['philo_id'].split()[0]
-        content.append({"title": i['title'], "url": url, "author": author, "initial": title.decode('utf-8')[0]})
+        content.append({"title": i['title'], "url": url, "author": author, "initial": title[0].upper(), 'truncated': title})
+    content = sorted(content, key=lambda x: x['truncated'])
     return content
 
 def generate_year_list(c, q_range, db, config, request):

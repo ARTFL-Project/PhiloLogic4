@@ -181,7 +181,8 @@ web_config_defaults = {
           'comment': '''
                  # The title_prefix_removal variable is only used for displaying titles in a proper order in the landing page browsing function.
                  # It is used to ignore predefined words at the beginning of a title for sorting purposes.
-                 # e.g: ["the", "a"] will ignore "the" and "a" for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
+                 # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
+                 # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
           'index': 17
      }
