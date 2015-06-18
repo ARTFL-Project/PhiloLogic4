@@ -48,6 +48,11 @@ db_locals_defaults = {
         'value': False,
         'comment': '# If set to True, this enabled debugging messages to be printed out to the Apache error log',
         'index': 8
+    },
+    'secret': {
+        'value': '',
+        'comment': 'The secret value is a random string to be used to generate a secure cookie for access control. The string value can be anything.',
+        'index': 9
     }
 }
 db_locals_header = '''

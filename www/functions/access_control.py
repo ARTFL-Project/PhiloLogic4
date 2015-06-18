@@ -30,15 +30,14 @@ def check_access(environ, config, db):
             execfile(access_file, globals(), access)
         except:
             return ()
-        # domain_list = set(access["domain_list"])
-        # blocked_ips = set(access["blocked_ips"])
-        
         # We would add whatever other IPs have been defined in the access_file to blocks
         blocks = local_blocks
         for block in blocks:
             if addr_in_cidr(incoming_address, block):
                 return make_token(incoming_address, db)
 
+        domain_list = set(access["domain_list"])
+        blocked_ips = set(access["blocked_ips"])
         fq_domain_name = socket.getfqdn(incoming_address).split(',')[-1]
         edit_domain = re.split('\.', fq_domain_name)
 
