@@ -246,7 +246,7 @@ def invert_grep(token, in_fh, dest_fh):
     return grep_proc
 
 def grep_exact(token, in_fh, dest_fh):
-    grep_command = ["egrep", "-v", "[[:blank:]]%s$" % token[1:-1]]
+    grep_command = ["egrep", "[[:blank:]]%s$" % token[1:-1]]
     print >> sys.stderr, grep_command
     grep_proc = subprocess.Popen(grep_command,stdin=in_fh,stdout=dest_fh)
     return grep_proc
