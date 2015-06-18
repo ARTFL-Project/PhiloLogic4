@@ -9,7 +9,7 @@ import json
 import subprocess
 from wsgiref.handlers import CGIHandler
 from philologic.QuerySyntax import parse_query, group_terms
-from philologic.Query import split_terms, grep_word
+from philologic.Query import split_terms, grep_word, grep_exact
 from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
 
@@ -45,19 +45,21 @@ def format_query(q, db, config):
     else:
         prefix = ''
 
-    if kind == "OR":
-        return []
-    if kind == "QUOTE":
-        token = token.replace('"', '')
     frequency_file = config.db_path +"/data/frequencies/normalized_word_frequencies"
-
-    expanded_token = token + '.*'
-    grep_proc = grep_word(expanded_token, frequency_file, subprocess.PIPE)
+    
+    if kind == "TERM":
+        expanded_token = token + '.*'
+        grep_proc = grep_word(expanded_token, frequency_file, subprocess.PIPE, db.locals['lowercase_index'])
+    elif kind == "QUOTE":
+        expanded_token = token[:-1] + '.*' + token[-1]
+        grep_proc = grep_exact(expanded_token, frequency_file, subprocess.PIPE)
+    elif kind == "NOT" or kind == "OR":
+        return []
 
     matches = []
     len_token = len(token.decode('utf-8'))
     for line in grep_proc.stdout:
-        word = line.split('\t')[1]
+        word = line.split('\t')[1].strip()
         highlighted_word = highlighter(word, len_token)
         matches.append(highlighted_word)
 

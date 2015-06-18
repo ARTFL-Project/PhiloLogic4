@@ -81,22 +81,27 @@ web_config_defaults = {
                # otherwise access will remain open.''',
         'index': 2
     },
+    'access_file': {
+        'value': '',
+        'comment': '# Location of access file which contains authorized/unauthorized IPs and domain names',
+        'index': 3
+    },
     'production': {
         'value': True,
         'comment': '# Do not set to False unless you want to make changes in the Web Client in the app/ directory',
-        'index': 3
+        'index': 4
     },
     'search_reports': {
         'value': ['concordance', 'kwic', 'collocation', 'time_series'],
         'comment': '''
                # The search_reports variable sets which search report is viewable in the search form
                # Available reports are concordance, kwic, collocation, and time_series''',
-        'index': 4
+        'index': 5
     },
     'metadata': {
         'value': [],
         'comment': "# The metadata variable sets which metadata field is viewable in the search form",
-        'index': 5
+        'index': 6
     },
     'metadata_aliases': {
         'value': {},
@@ -104,7 +109,7 @@ web_config_defaults = {
                #The metadata_aliases variable allows to display a metadata variable under a different name in the HTML
                # For example, you could rename the who metadata to Speaker, and the create_date variable to Date like so:
                # metadata_aliases = {'who': 'Speaker', 'create_date', 'Date'}''',
-        'index': 6
+        'index': 7
     },
     'facets': {
         'value': [],
@@ -113,19 +118,19 @@ web_config_defaults = {
                # The object format is a list of objects like the following: [{'Author': 'author'}, {'Title': ['title', 'author']}
                # The dict key should describe what the facets will do, and the dict value, which can be a string or a list,
                # should list the metadata to be used for the frequency counts''',
-        'index': 7
+        'index': 8
     },
     'words_facets': {
         'value': [],
         'comment': '''
                # The word_facets variable functions much like the facets variable, but describes metadata
                # attached to word or phrases results and stored in the (optional) words table. Experimental.''',
-        'index': 8
+        'index': 9
     },
     'concordance_length': {
         'value': 300,
         'comment': "# The concordance_length variable sets the length in bytes of each concordance result",
-        'index': 9
+        'index': 10
     },
     'search_examples': {
         'value': {},
@@ -134,7 +139,7 @@ web_config_defaults = {
                # If None is the value, or there are any missing examples, defaults will be generated at runtime by picking the first
                # result for any given field. If you wish to change these default values, you should configure them here like so:
                # search_examples = {"author": "Jean-Jacques Rousseau", "title": "Du contrat social"}''',
-        'index': 10
+        'index': 11
     },
     'stopwords': {
         'value': '',
@@ -142,24 +147,24 @@ web_config_defaults = {
                # The stopwords variable defines a file path containing a list of words (one word per line) used for filtering out words
                # in the collocation report. The file must be located in the defined path. If the file is not found,
                # no option for using a stopword list will be displayed in collocation searches.''',
-        'index': 11
+        'index': 12
     },
     'theme': {
         'value': 'default_theme.css',
         'comment': '''
            # The theme variable defines the default CSS theme to be used in the WebApp. The default theme called default_theme.css
            # can be edited directly or you can define a new CSS file below. This file must be located in the app/assets/css/split/ directory for the Web App to find it.''',
-        'index': 12
+        'index': 13
     },
     'dictionary': {
         'value': False,
         'comment': '# The dictionary variable enables a different search interface with the headword as its starting point. It is turned off by default',
-        'index': 13
+        'index': 14
     },
     'landing_page_browsing_type': {
         'value': 'default',
         'comment': "# The landing_page_browsing_type variable defines what type of landing page. Values available are 'default' or 'dictionary'",
-        'index': 14
+        'index': 15
     },
     'landing_page_browsing': {
         'value': {"author": ["A-D", "E-I", "J-M", "N-R", "S-Z"], "title": ["A-D", "E-I", "J-M", "N-R", "S-Z"], "date": {}, "default_display": {}},
@@ -169,14 +174,14 @@ web_config_defaults = {
                # and for date you need to define three variables: start_date, end_date, interval: e.g. "date": {"start": 1600, "end": 1800, "interval": 25}
                # default_display allows you to load content by default. It is a dictionary that contains a type and a range, e.g. = "default_display": {"type": "title", "range": "A-D"}
                # Note that no default is provided for "date" or default_value: they are therefore disabled''',
-        'index': 15
+        'index': 16
     },
     'dico_letter_range': {
         'value': ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"],
         'comment': '''
                # The dico_letter_range variables defines a set of letters corresponding to the first letter of a headword. This generates a set of buttons
                # for browsing the database available on the landing page. The default represents the entire roman alphabet.''',
-        'index': 16
+        'index': 17
     },
     'kwic_bibliography_fields': {
          'value': [],
@@ -184,7 +189,7 @@ web_config_defaults = {
                 # The kwic_bibliography_fields variable variable defines which bibliography fields will be displayed in the KWIC view. It should be
                 # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.                # If the variable is an empty list, the first two fields in the metadata variable will be used.
                 ''',
-         'index': 17
+         'index': 18
      },
      'title_prefix_removal': {
           'value': [],
@@ -194,7 +199,7 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-          'index': 18
+          'index': 19
      }
 }
 
