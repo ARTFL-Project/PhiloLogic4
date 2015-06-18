@@ -196,10 +196,11 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
         #print >> sys.stderr, "OUTPUT", repr(dest_fh)
 
         # set up the basic filter to get the terms sorted and ready for the search engine
-        if len(group) > 1:
-            cut_proc = subprocess.Popen("cut -f 2", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)  
-        else:
-            cut_proc = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
+#        if len(group) > 1:
+#            cut_proc = subprocess.Popen("cut -f 2", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)  
+#        else:
+#            cut_proc = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
+        cut_proc = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
         filter_inputs = [cut_proc.stdin]
         filter_procs = [cut_proc]
 
