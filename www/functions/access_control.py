@@ -35,9 +35,15 @@ def check_access(environ, config, db):
         for block in blocks:
             if addr_in_cidr(incoming_address, block):
                 return make_token(incoming_address, db)
-
-        domain_list = set(access["domain_list"])
-        blocked_ips = set(access["blocked_ips"])
+        
+        try:
+            domain_list = set(access["domain_list"])
+        except:
+            return () ## No allowed domains, so access request denied
+        try:
+            blocked_ips = set(access["blocked_ips"])
+        except:
+            blocked_ips = []
         fq_domain_name = socket.getfqdn(incoming_address).split(',')[-1]
         edit_domain = re.split('\.', fq_domain_name)
 

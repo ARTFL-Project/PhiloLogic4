@@ -9,6 +9,29 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
             queryArgs.queryTerm = '';  
         }
         queryArgs.biblio = buildCriteria(queryParams);
+		var method = queryParams.method;
+		if (typeof(method) === 'undefined') {
+			method = 'proxy';
+        }
+		if (queryParams.q.split(' ').length > 1) {
+            if (method === "proxy") {
+				if (typeof(queryParams.arg_proxy) !== 'undefined' || queryParams.arg_proxy) {
+					queryArgs.proximity = 'within ' + queryParams.arg_proxy + ' words';
+				} else {
+					queryArgs.proximity = '';
+				}
+			} else if (method === 'phrase') {
+				if (typeof(queryParams.arg_proxy) !== 'undefined' || queryParams.arg_phrase) {
+					queryArgs.proximity = 'within exactly ' + queryParams.arg_phrase + ' words';
+				} else {
+					queryArgs.proximity = ''
+				}
+			} else if (method === 'cooc') {
+				queryArgs.proximity = 'in the same sentence';
+			}
+        } else {
+			queryArgs.proximity = '';
+		}
         return queryArgs;
     }
     var buildCriteria = function(queryParams) {
@@ -78,10 +101,21 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
                 scope.formData = $rootScope.formData;
                 scope.removeMetadata = removeMetadata;
 				
+				// Get parsed query group
+				request.script(scope.formData, {
+                        script: 'get_term_groups.py'
+                }).then(function(response) {
+					scope.termGroups = response.data;
+					scope.termGroupsCopy = angular.copy(scope.termGroups);
+				});
+				
 				// Query terms functionality
-                scope.getQueryTerms = function() {
-                    request.script(scope.formData, {
-                        script: 'get_query_terms.py'
+                scope.getQueryTerms = function(group, index) {
+					scope.groupIndexSelected = index;
+					console.log(index)
+					request.script(scope.formData, {
+                        script: 'get_query_terms.py',
+						q: group
                     }).then(function(response) {
                         scope.words = response.data;
                         $timeout(function() {
@@ -93,11 +127,17 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
                 scope.closeTermsList = function() {
                     $('#query-terms').velocity('fadeOut')
                 }
-                scope.removeFromTermsList = function(word) {
+                scope.removeFromTermsList = function(word, groupIndex) {
                     var index = scope.words.indexOf(word);
                     scope.words.splice(index, 1);
                     scope.wordListChanged = true;
-                    $rootScope.formData.q += ' NOT ' + word.trim();
+					console.log(scope.termGroupsCopy)
+					if (scope.termGroupsCopy[groupIndex].indexOf('NOT') !== -1) { // if there's already a NOT in the clause add an OR
+                        scope.termGroupsCopy[groupIndex] += ' | ' + word.trim();
+                    } else {
+						scope.termGroupsCopy[groupIndex] += ' NOT ' + word.trim();
+					}
+                    $rootScope.formData.q = scope.termGroupsCopy.join(' ');
                 }
                 scope.rerunQuery = function() {
                     var url = URL.objectToUrlString($rootScope.formData);

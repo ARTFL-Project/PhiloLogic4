@@ -20,8 +20,9 @@ def term_list(environ, start_response):
     start_response(status, headers)
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
-    q = WSGIHandler(db, environ)
-    hits = db.query(q["q"],q["method"],q["arg"],**q.metadata)
+    request = WSGIHandler(db, environ)
+    hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
+    hits.finish()
     expanded_terms = get_expanded_query(hits)
     yield json.dumps(expanded_terms[0])
 
