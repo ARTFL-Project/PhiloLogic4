@@ -132,7 +132,7 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
                     scope.words.splice(index, 1);
                     scope.wordListChanged = true;
 					console.log(scope.termGroupsCopy)
-					if (scope.termGroupsCopy[groupIndex].indexOf('NOT') !== -1) { // if there's already a NOT in the clause add an OR
+					if (scope.termGroupsCopy[groupIndex].indexOf(' NOT ') !== -1) { // if there's already a NOT in the clause add an OR
                         scope.termGroupsCopy[groupIndex] += ' | ' + word.trim();
                     } else {
 						scope.termGroupsCopy[groupIndex] += ' NOT ' + word.trim();
