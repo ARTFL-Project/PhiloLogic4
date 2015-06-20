@@ -36,10 +36,8 @@ def get_metadata_token_count(environ,start_response):
                     query_metadata[metadata] = m['metadata'][metadata].encode('utf-8')
         hits = db.query(**query_metadata)
         total_count = 0
-        print >> sys.stderr, "LENGTH", len(hits), repr(query_metadata)
         for hit in hits:
             total_count += int(hit['word_count'])
-        print >> sys.stderr, "TOTAL", total_count
         try:
             frequencies[label]['count'] = round(float(m['count']) / total_count * 1000000, 3)
         except:
