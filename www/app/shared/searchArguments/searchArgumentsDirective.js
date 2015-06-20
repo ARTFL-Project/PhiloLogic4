@@ -10,30 +10,33 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
             queryArgs.queryTerm = '';  
         }
         queryArgs.biblio = buildCriteria(queryParams);
-		var method = queryParams.method;
-		if (typeof(method) === 'undefined') {
-			method = 'proxy';
-        }
-		if (queryParams.q.split(' ').length > 1) {
-            if (method === "proxy") {
-				if (typeof(queryParams.arg_proxy) !== 'undefined' || queryParams.arg_proxy) {
-					queryArgs.proximity = 'within ' + queryParams.arg_proxy + ' words';
-				} else {
-					queryArgs.proximity = '';
-				}
-			} else if (method === 'phrase') {
-				if (typeof(queryParams.arg_proxy) !== 'undefined' || queryParams.arg_phrase) {
-					queryArgs.proximity = 'within exactly ' + queryParams.arg_phrase + ' words';
-				} else {
-					queryArgs.proximity = ''
-				}
-			} else if (method === 'cooc') {
-				queryArgs.proximity = 'in the same sentence';
+		
+		if ('q' in queryParams) {
+			var method = queryParams.method;
+			if (typeof(method) === 'undefined') {
+				method = 'proxy';
 			}
-        } else {
-			queryArgs.proximity = '';
+			if (queryParams.q.split(' ').length > 1) {
+				if (method === "proxy") {
+					if (typeof(queryParams.arg_proxy) !== 'undefined' || queryParams.arg_proxy) {
+						queryArgs.proximity = 'within ' + queryParams.arg_proxy + ' words';
+					} else {
+						queryArgs.proximity = '';
+					}
+				} else if (method === 'phrase') {
+					if (typeof(queryParams.arg_proxy) !== 'undefined' || queryParams.arg_phrase) {
+						queryArgs.proximity = 'within exactly ' + queryParams.arg_phrase + ' words';
+					} else {
+						queryArgs.proximity = ''
+					}
+				} else if (method === 'cooc') {
+					queryArgs.proximity = 'in the same sentence';
+				}
+			} else {
+				queryArgs.proximity = '';
+			}
 		}
-        return queryArgs;
+		return queryArgs;
     }
     var buildCriteria = function(queryParams) {
         var queryArgs = angular.copy(queryParams);
@@ -150,7 +153,10 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
 					scope.termGroups.splice(index);
 					queryTermGroups.group = angular.copy(scope.termGroups);
 					$rootScope.formData.q = scope.termGroups.join(' ');
-					var url = URL.objectToUrlString($rootScope.formData);
+					var url = URL.objectToUrlString($rootScope.formData, {
+						start: 0,
+						end: 0
+					});
                     $location.url(url);
 				}
         } 

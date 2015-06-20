@@ -127,7 +127,7 @@ philoApp.directive('resultsDescription', ['request', 'descriptionValues', functi
             });
 			attrs.$observe('queryStatus', function(loading) {
 				loading = eval(loading);
-				if (!loading) {
+				if (!loading && scope.resultsLength > 0) {
                     request.script(scope.formData, {
 						script: 'get_total_results.py'
 					}).then(function(response) {

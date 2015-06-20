@@ -20,7 +20,10 @@ def get_total_results(environ,start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
     if request.no_q:
-        hits = db.get_all(db.locals['default_object_level'])
+        if request.no_metadata:
+            hits = db.get_all(db.locals['default_object_level'])
+        else:
+            hits = db.query(**request.metadata)
     else:
         hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
     total_results = 0
