@@ -111,7 +111,7 @@ web_config_defaults = {
     'metadata_aliases': {
         'value': {},
         'comment': '''
-               #The metadata_aliases variable allows to display a metadata variable under a different name in the HTML
+               # The metadata_aliases variable allows to display a metadata variable under a different name in the HTML
                # For example, you could rename the who metadata to Speaker, and the create_date variable to Date like so:
                # metadata_aliases = {'who': 'Speaker', 'create_date', 'Date'}''',
         'index': 7
@@ -120,8 +120,8 @@ web_config_defaults = {
         'value': [],
         'comment': '''
                # The facets variable sets which metadata field can be used as a facet
-               # The object format is a list of objects like the following: [{'Author': 'author'}, {'Title': ['title', 'author']}
-               # The dict key should describe what the facets will do, and the dict value, which can be a string or a list,
+               # The object format is a list of objects like the following: [{'Author': ['author']}, {'Title': ['title', 'author']}
+               # The dict key should describe what the facets will do, and the dict value, which has to be a list,
                # should list the metadata to be used for the frequency counts''',
         'index': 8
     },
@@ -157,8 +157,8 @@ web_config_defaults = {
     'theme': {
         'value': 'default_theme.css',
         'comment': '''
-           # The theme variable defines the default CSS theme to be used in the WebApp. The default theme called default_theme.css
-           # can be edited directly or you can define a new CSS file below. This file must be located in the app/assets/css/split/ directory for the Web App to find it.''',
+               # The theme variable defines the default CSS theme to be used in the WebApp. The default theme called default_theme.css
+               # can be edited directly or you can define a new CSS file below. This file must be located in the app/assets/css/split/ directory for the Web App to find it.''',
         'index': 13
     },
     'dictionary': {
