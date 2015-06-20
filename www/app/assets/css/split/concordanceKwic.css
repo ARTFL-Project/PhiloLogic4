@@ -6,6 +6,13 @@
     font-size: 12px;
     padding: 10px 15px 15px 15px;
 }
+.term-groups {
+	display: inline-block;
+	position: relative;
+	padding: 3px 20px 3px 3px;
+	margin: 5px 5px 5px 0px;
+	white-space: inherit;
+}
 .kwic_line {
     line-height: 180%;
 	white-space: nowrap;

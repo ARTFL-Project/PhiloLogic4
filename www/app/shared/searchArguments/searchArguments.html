@@ -1,9 +1,12 @@
 <div id="search_arguments">
     <div ng-if="queryArgs.queryTerm !== '' && queryArgs.report !== 'collocation'">
         Searching database for <span ng-if="typeof(termGroups) === 'undefined'">{{ queryArgs.queryTerm }}</span>
-		<a href="" class="btn btn-default" style="padding: 3px; margin-right: 5px" ng-click="getQueryTerms(group, $index)" ng-repeat="group in termGroups">
-			{{ group }}
-		</a>
+		<div class="btn btn-default term-groups" ng-repeat="group in termGroups">
+			<a href="" ng-click="getQueryTerms(group, $index)">
+				{{ group }}
+			</a>
+		<span class="glyphicon glyphicon-remove-circle" style="position: absolute; right: 3px; top: 5px" ng-click="removeTerm($index)"</span>
+		</div>
 		{{ queryArgs.proximity }}
         <div id="query-terms" class="panel panel-default velocity-opposites-transition-fadeIn" style="display: none;" data-velocity-opts="{duration: 200}">
             <button type="button" class="close" ng-click="closeTermsList()">
@@ -32,8 +35,8 @@
 		Displaying the top 100 collocates for {{ resultsLength || '...' }} occurrences of <b>{{ ::queryArgs.queryTerm }}</b> in the same sentence
 		<br>
 	</span>
-	<div>
-    Bibliography criteria:
+	<div style="margin-top: 5px;">
+		Bibliography criteria:
 		<span class="biblio-criteria" ng-repeat="metadata in queryArgs.biblio" style="margin: 1px">{{ ::metadata.alias }} : <b>{{ ::metadata.value }}</b>
 			<span class="glyphicon glyphicon-remove-circle" ng-click="removeMetadata(metadata.key, formData, restart)"></span>
 		</span>

@@ -22,7 +22,7 @@ philoApp.controller('concordanceKwicCtrl', ['$rootScope', '$location', 'accessCo
         vm.description = vm.results.description;
         vm.loading = false;
     });
-    
+	    
     vm.frequencyResults = [];
     
     vm.selectedFacet = '';

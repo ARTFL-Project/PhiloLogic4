@@ -1,6 +1,7 @@
 "use strict";
 
-philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$location', 'URL', 'request', function($rootScope, $http, $timeout, $location, URL, request) {
+philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$location', 'URL', 'request', 'queryTermGroups',
+									   function($rootScope, $http, $timeout, $location, URL, request, queryTermGroups) {
     var getSearchArgs = function(queryParams) {
         var queryArgs = {};
         if ('q' in queryParams) {
@@ -101,18 +102,20 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
                 scope.formData = $rootScope.formData;
                 scope.removeMetadata = removeMetadata;
 				
+				scope.termGroups = queryTermGroups.group;
+				
 				// Get parsed query group
 				request.script(scope.formData, {
                         script: 'get_term_groups.py'
                 }).then(function(response) {
 					scope.termGroups = response.data;
+					queryTermGroups.group = angular.copy(scope.termGroups);
 					scope.termGroupsCopy = angular.copy(scope.termGroups);
 				});
 				
 				// Query terms functionality
                 scope.getQueryTerms = function(group, index) {
 					scope.groupIndexSelected = index;
-					console.log(index)
 					request.script(scope.formData, {
                         script: 'get_query_terms.py',
 						q: group
@@ -143,6 +146,13 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
                     var url = URL.objectToUrlString($rootScope.formData);
                     $location.url(url);
                 }
+				scope.removeTerm = function(index) {
+					scope.termGroups.splice(index);
+					queryTermGroups.group = angular.copy(scope.termGroups);
+					$rootScope.formData.q = scope.termGroups.join(' ');
+					var url = URL.objectToUrlString($rootScope.formData);
+                    $location.url(url);
+				}
         } 
     }
 }]);

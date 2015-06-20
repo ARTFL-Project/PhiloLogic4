@@ -37,6 +37,7 @@ js_files = [
     "app/shared/services.js",
     "app/shared/config.js",
     "app/shared/filters.js",
+    "app/shared/values.js",
     "app/shared/searchArguments/searchArgumentsDirective.js",
     "app/shared/exportResults/exportResults.js",
     "app/components/landingPage/landingPageDirectives.js",
