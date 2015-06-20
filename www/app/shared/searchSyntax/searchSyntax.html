@@ -5,33 +5,60 @@
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                 <h4 class="modal-title" id="syntaxLabel">Search Syntax</h4>
             </div>
-            <div class="modal-body">
-                <p>In PhiloLogic4, the search syntax and semantics are largely the same for both word/phrase searching and metadata queries, with a few exceptions. The basic rules are:
-                    <ul>
-                        <li> plain terms such as <tt>genre humain</tt> or <tt>esprit systematique</tt> are split on the space character and evaluated without regard to case or accent.</li>
-                        <li> quoted terms like <tt>"esprit de systeme"</tt> are precise matches against case and accent. In phrases they match individual tokens; in metadata fields they must
-                        match the entire string value, i.e., <tt>"Histoire de la philosophie"</tt> or <tt>"Geographie sacree"</tt>.</li>
-                        <li> "egrep-style" regular expressions (described below) are permitted in plain terms, but not quoted terms; thus, they cannot cross a token/word boundary, e.g., <tt>libert.</tt>
-                        or <tt>nous m[aeiou].*er</tt>
-                        <li> the vertical bar symbol <tt>|</tt> (on US keyboards, use the <tt>Shift + \</tt> keys) stands for a logical Boolean OR operator, and can concatenate plain, quoted, or regex
-                        terms (e.g., <tt>liberte de penser | parler</tt> or <tt>philosophie eclectique | academique</tt>).</li>
-                        <li> a space corresponds to a user-selected phrase operator in word search, controlled by the within/exactly/same-sentence option on the search form.  In metadata queries,
-                        it corresponds to the Boolean AND operator (e.g., <tt>diderot mallet</tt>).
-                        <li> the Boolean NOT operator is only permitted at the end of metadata fields; it accepts a single term or an OR expression: e.g., <tt>Geographie | Histoire NOT moderne</tt>.</li>
-                    </ul>
-                </p>
-                <p>Basic regexp syntax, adapted from
-                    <a href="http://www.gnu.org/software/findutils/manual/html_node/find_html/egrep-regular-expression-syntax.html#egrep-regular-expression-syntax">the egrep regular expression syntax</a>.
-                    <ul>
-                        <li>The character <tt>.</tt> matches any single character except newline. Bracket expressions can match sets or ranges of characters: [aeiou] or [a-z], but will only match a single character unless followed by one of the quantifiers below.</li>
-                        <li> <tt>*</tt> indicates that the regular expression should match zero or more occurrences of the previous character or bracketed group.</li>
-                        <li> <tt>+</tt> indicates that the regular expression should match one or more occurrences of the previous character or bracketed group.</li>
-                        <li> <tt>?</tt> indicates that the regular expression should match zero or one occurrence of the previous character or bracketed group.</li>
-                    </ul>
-                    <div>
-                        Thus, <tt>.*</tt> is an approximate "match anything" wildcard operator, rather than the more traditional (but less precise) <tt>*</tt> in many other search engines.
-                    </div>
-                </p>
+            <div class="modal-body" style="line-height: 170%;">
+                PhiloLogic4's query syntax has 5 basic operators:
+				<ol style="list-style-position: inside; margin-top: 10px; padding-left: 15px;">
+					<li>the plain token, essentially, any word at all, split on space, e.g. <span class="code-block">token</span></li>
+					<li>the quoted token--a string in double quotes, which may contain a space, e.g. <span class="code-block">"token"</span></li>
+					<li>the range--two tokens separated by a dash, e.g. <span class="code-block">a-f</span></li>
+					<li>boolean OR, represented grep-style as <span class="code-block">|</span>, e.g. <span class="code-block">token | word</span></li>
+					<li>boolean NOT, represented SQL-style as <span class="code-block">NOT</span>, e.g. <span class="code-block">token.* NOT tokens</span></li>
+				</ol>
+				
+				This syntax is the same, but interpreted slightly differently, for the two different types
+				of text query fields: word search and metadata search.  
+				
+				<h4 style="margin-top: 20px;">Word Searches</h4>
+				Full-text word search is unique in having the concept of a "term", which is either a single plain/quoted term, 
+				or a group of plain/quoted terms joined by <span class="code-block">|</span>, optionally followed by <span class="code-block">NOT</span>
+				and another term-like filter expression:
+				<ol style="list-style-position: inside; margin-top: 10px; padding-left: 15px;">
+					<li>plain terms are evaluated without regard to accent.  They are currently sensitive to case, to allow for named entity 
+					search--this is currently implemented only for Greek, however. Regexes are permitted.</li>
+					<li>quoted terms are case and accent sensitive.  Regexes are permitted.</li>
+					<li>the range is not operational. In the future, stub this out to make hyphenated search terms less of a pain to escape.</li>
+					<li><span class="code-block">OR</span> can conjoin plain and quoted tokens, and precedes evaluation of phrase distance.</li>
+					<li><span class="code-block">NOT</span> is a filter on a preceding term, but cannot stand alone: <span class="code-block">a.* NOT abalone</span>
+					is legal, <span class="code-block">NOT a.*</span> is illegal</li>
+				</ol>
+				
+				<h4 style="margin-top: 20px;">Metadata Searches</h4>
+				
+				Metadata search does not support phrases, but supports more sophisticated Boolean searching:
+				<ol style="list-style-position: inside; margin-top: 10px; padding-left: 15px;">
+					<li>plain tokens separated by spaces have an implied AND between them, but are treated as position-independent tokens.</li>
+					Regexes are permitted, but will not span over the bounds of a token.
+					<li>quoted tokens must now match against the ENTIRE metadata string value in the database, including spaces and punctuations.</li>
+					It will not match a single term within a larger string, no matter how precise. Regexes are permitted
+					<li>range allows for numeric and string ranges on all metadata fields.</li>
+					<li><span class="code-block">OR</span> can still be used to conjoin plain tokens, preceding the implied Boolean AND, as well as quoted tokens.</li>
+					<li><span class="code-block">NOT</span> is still available as both a filter, or a stand-alone negation: <span class="code-block">diderot NOT rousseau</span>
+					is legal, so is <span class="code-block">NOT rousseau</span></li>
+				</ol>
+				
+				<h4 style="margin-top: 20px;">Regexp syntax</h4>
+				
+				Basic regexp syntax, adapted from the <a href="http://www.gnu.org/software/findutils/manual/html_node/find_html/egrep-regular-expression-syntax.html#egrep-regular-expression-syntax">egrep regular expression syntax</a>:
+				<ol style="list-style-position: inside; margin-top: 10px; padding-left: 15px;">
+					<li>The character <span class="code-block">.</span> matches any single character except newline.</li>
+					<li>Bracket expressions can match sets or ranges of characters: <span class="code-block">[aeiou]</span> or <span class="code-block">[a-z]</span>,
+					but will only match a single character unless followed by one of the quantifiers below.</li>
+					<li><span class="code-block">*</span> indicates that the regular expression should match zero or more occurrences of the previous character or bracketed group.</li>
+					<li><span class="code-block">+</span> indicates that the regular expression should match one or more occurrences of the previous character or bracketed group.</li>
+					<li><span class="code-block">?</span> indicates that the regular expression should match zero or one occurrence of the previous character or bracketed group.</li>
+				</ol>
+				Thus, <span class="code-block">.*</span> is an approximate "match anything" wildcard operator, rather than the more traditional (but less precise)
+				<span class="code-block">*</span> in many other search engines.
             </div>
         </div>
     </div>

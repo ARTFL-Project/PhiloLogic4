@@ -498,3 +498,8 @@ progress-bar {
 #password-access .row {
 	margin-top: 15px;
 }
+.code-block {
+	padding: 2px;
+	background-color: #efefef;
+	font-family: 'Droid Sans Mono', sans-serif;
+}
