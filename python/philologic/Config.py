@@ -240,6 +240,7 @@ class Config(object):
         if self.filename and os.path.exists(self.filename):
             fh = open(self.filename)
             execfile(self.filename,globals(),self.data)
+            self.valid_config = True
 
     def __getitem__(self, item):
         return self.data[item]
