@@ -1,11 +1,11 @@
 Configuring the Web Application
 ========================================
 
-1. Layout of the Web Application
-2. UI configuration
-3. Access control
+1. [Layout of the Web Application](#layout)
+2. [UI configuration](#ui)
+3. [Access control](#access)
 
-#### Layout of a PhiloLogic Web Application Instance ####
+#### <a name="layout"></a>Layout of a PhiloLogic Web Application Instance ####
 
 This database directory contains:
 * The indexes and other data strutures
@@ -44,6 +44,8 @@ There are four distinct sections inside the application:
 * The `functions/` directory, which contains all of the generic functions used by individual reports. These functions include parsing the query string, loading web configuration options, access control, etc. 
 * The `scripts/` directory, which contains standalone CGI scripts that are called directly from JavaScript code on the client side. These functions have a very specialized purpose, such as returning the total number of hits for any given query.
 
-#### Modifying the behavior of the Web Application ####
+#### <a name="ui"></a>Modifying the behavior of the Web Application ####
 
 To change the behavior of the Web Application, you should edit the `web_config.cfg` file contained in the `data/` directory. Refer to the documentation contained in the file for editing options. Note that PhiloLogic uses the Python syntax in the config file.
+
+#### <a name="access"></a>Access control ####
