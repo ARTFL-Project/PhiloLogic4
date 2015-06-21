@@ -1,6 +1,10 @@
 Configuring the Web Application
 ========================================
 
+1. Layout of the Web Application
+2. UI configuration
+3. Access control
+
 #### Layout of a PhiloLogic Web Application Instance ####
 
 This database directory contains:
