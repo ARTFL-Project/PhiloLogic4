@@ -1,9 +1,9 @@
 Configuring the Web Application
 ========================================
 
-1. [Layout of the Web Application](#layout)
-2. [UI configuration](#ui)
-3. [Access control](#access)
+* [Layout of the Web Application](#layout)
+* [UI configuration](#ui)
+* [Access control](#access)
 
 #### <a name="layout"></a>Layout of a PhiloLogic Web Application Instance ####
 
