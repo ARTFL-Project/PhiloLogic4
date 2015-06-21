@@ -108,6 +108,8 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 					// This won't affect the full collocation report which can't be interrupted when on the page
 					$('#selected-sidebar-option').data('interrupt', false);
 				}
+			}).catch(function(response) {
+				scope.loading = false;
 			});
 		}  else {
 			scope.percent = 100;

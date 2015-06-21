@@ -72,7 +72,9 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
             scope.moreResults = data.more_results;
 			start = data.hits_done;
             sortAndRenderCollocation(scope, fullResults, data, start)
-        });
+        }).catch(function(response) {
+			scope.collocation.loading = false;
+		});;
     }
     var sortAndRenderCollocation = function(scope, fullResults, data, start) {
         if (start <= scope.resultsLength) {

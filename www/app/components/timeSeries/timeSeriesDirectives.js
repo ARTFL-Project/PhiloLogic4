@@ -71,7 +71,9 @@ philoApp.directive('timeSeriesChart', ['$rootScope', '$http', '$location', 'prog
                 scope.dateCounts[date] = timeSeriesResults.results.date_count[date];
             }
             sortAndRenderTimeSeries(scope, formData, fullResults, timeSeriesResults)
-        });
+        }).catch(function(response) {
+			scope.timeSeries.loading = false;
+		});
     }
     var sortAndRenderTimeSeries = function(scope, formData, fullResults, timeSeriesResults) {
         //console.log(scope.barChart[scope.barChart.length])

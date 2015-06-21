@@ -26,7 +26,10 @@ philoApp.directive('textObject', ['$routeParams', 'request', 'textNavigationValu
                 scope.highlight = false;
             }
             scope.textNav.loading = false;
-        });
+        })
+		.catch(function(response) {
+			scope.textNav.loading = false;
+		});
     }
     return {
         templateUrl: 'app/components/textNavigation/textObject.html',
