@@ -49,3 +49,9 @@ There are four distinct sections inside the application:
 To change the behavior of the Web Application, you should edit the `web_config.cfg` file contained in the `data/` directory. Refer to the documentation contained in the file for editing options. Note that PhiloLogic uses the Python syntax in the config file.
 
 #### <a name="access"></a>Access control ####
+
+There are two components in the built-in access control:
+* IP range check
+* user login
+
+In order for access control to be turned on, you first need to set the `access_control` variable in web_config.cfg to `True`.
