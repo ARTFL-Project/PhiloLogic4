@@ -132,7 +132,7 @@ def concordance_citation(hit, citation_hrefs):
     
     page_obj = hit.page
     if page_obj['n']:
-        page_n = '[page %s]' % page_obj['n']
+        page_n = page_obj['n']
         citation['page'] = {"href": "", "label": page_n}
     else:
         citation['page'] =  {}
