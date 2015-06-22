@@ -65,8 +65,9 @@ philoApp.directive('metadataFields', function() {
             if (metadata in scope.philoConfig.metadata_aliases) {
                 metadataObject.label = scope.philoConfig.metadata_aliases[metadata];
             } else {
-                metadataObject.label = metadata;
+                metadataObject.label = metadata[0].toUpperCase() + metadata.slice(1);
             }
+			console.log(metadataObject.label)
             metadataObject.example = scope.philoConfig.search_examples[metadata];
             metadataFields.push(metadataObject);
         }
