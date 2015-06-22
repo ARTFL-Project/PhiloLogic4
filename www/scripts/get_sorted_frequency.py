@@ -2,6 +2,7 @@
 
 import sys
 sys.path.append('..')
+from ast import literal_eval as eval
 from functions.wsgi_handler import WSGIHandler
 from philologic.DB import DB
 from wsgiref.handlers import CGIHandler
@@ -16,6 +17,7 @@ def get_frequency(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
+    setattr(request, 'frequency_field', json.dumps(eval('"%s"' % request.frequency_field)))   
     if request.q == '' and request.no_q:
         if request.no_metadata:
             hits = db.get_all(db.locals['default_object_level'])
