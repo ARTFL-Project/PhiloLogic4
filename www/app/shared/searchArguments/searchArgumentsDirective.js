@@ -153,6 +153,9 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
 					scope.termGroups.splice(index);
 					queryTermGroups.group = angular.copy(scope.termGroups);
 					$rootScope.formData.q = scope.termGroups.join(' ');
+					if (scope.termGroups.length === 0) {
+                        $rootScope.formData.report = "bibliography";
+                    }
 					var url = URL.objectToUrlString($rootScope.formData, {
 						start: 0,
 						end: 0

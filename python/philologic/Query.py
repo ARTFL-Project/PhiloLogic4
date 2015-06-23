@@ -58,7 +58,8 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
             #     print >> sys.stderr, "WORKER STARTED:"," ".join(args);
 
             query_log_fh = filename + ".terms"
-            print >> sys.stderr, "LOGGING TERMS to " + filename + ".terms"
+            if db.locals['debug']:
+                print >> sys.stderr, "LOGGING TERMS to " + filename + ".terms"
             logger = subprocess.Popen(["tee",query_log_fh],stdin=subprocess.PIPE,stdout = worker.stdin)
             # print >> sys.stderr, "EXPANDING"
             expand_query_not(split,freq_file,logger.stdin, db.locals["lowercase_index"])

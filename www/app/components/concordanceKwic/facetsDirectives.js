@@ -85,7 +85,7 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 					} else {
 						var merge = progressiveLoad.mergeResults(fullResults.unsorted, results);
 					}
-					scope.concKwic.frequencyResults = merge.sorted;
+					scope.concKwic.frequencyResults = merge.sorted.slice(0,500);
 					scope.loading = false;
 					fullResults = merge;
 					if (end < scope.resultsLength) {
@@ -118,6 +118,21 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 			save(fullResults.sorted, urlString);
 		}
     }
+	var getRelativeFrequencies = function(scope, hitsDone) {
+		$http.post('scripts/get_metadata_token_count.py',
+				   JSON.stringify({results: scope.fullResults.unsorted,	hits_done: hitsDone}))
+		.then(function(response) {
+			scope.concKwic.frequencyResults = progressiveLoad.sortResults(response.data.frequencies);
+			scope.showingRelativeFrequencies = true;
+			scope.loading = false;
+			if (response.data.more_results) {
+				getRelativeFrequencies(scope, response.data.hits_done)
+			}
+		}).catch(function(response) {
+			console.log(response);
+			scope.loading = false;
+		});	
+	}
     return {
         restrict: 'E',
         templateUrl: 'app/components/concordanceKwic/facets.html',
@@ -133,13 +148,9 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
             });
 			scope.displayRelativeFrequencies = function() {
 				scope.loading = true;
-				if (typeof(scope.relativeFrequencies) === 'undefined') {
-					$http.post('scripts/get_metadata_token_count.py', JSON.stringify(scope.fullResults.unsorted)).then(function(response) {
-						scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
-						scope.concKwic.frequencyResults = progressiveLoad.sortResults(response.data);
-						scope.showingRelativeFrequencies = true;
-						scope.loading = false;
-					});
+				if (scope.relativeFrequencies === 'undefined') {
+					scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
+					getRelativeFrequencies(scope, 0);
 				} else {
 					scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
 					scope.concKwic.frequencyResults = scope.relativeFrequencies;
