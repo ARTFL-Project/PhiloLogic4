@@ -126,7 +126,10 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 			scope.showingRelativeFrequencies = true;
 			scope.loading = false;
 			if (response.data.more_results) {
+				scope.percent = Math.floor(scope.concKwic.frequencyResults.length / scope.absoluteFrequencies.length * 100);
 				getRelativeFrequencies(scope, response.data.hits_done)
+			} else {
+				scope.percent = 100
 			}
 		}).catch(function(response) {
 			console.log(response);
@@ -150,6 +153,7 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 				scope.loading = true;
 				if (scope.relativeFrequencies === 'undefined') {
 					scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
+					scope.percent = 0;
 					getRelativeFrequencies(scope, 0);
 				} else {
 					scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
