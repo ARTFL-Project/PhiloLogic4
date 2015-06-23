@@ -1,11 +1,12 @@
-4.0 => 4.1
+#### 4.0 => 4.1 ####
 - Completely rewritten collocations: faster and accurate
 - Added relative frequencies to frequencies in facets
 - Support for regexes in quoted term searches (aka exact matches)
-- Added ability to remove words in query expansion through a popup using the NOT syntax
-- Added ability to select titles when no titles are selected in bibliograghic searches
+- Added ability to filter out words in query expansion through a popup using the NOT syntax
+- Added ability to select titles when no titles are selected in bibliographic searches
 - Move more KWIC logic to the client
 - Ability to choose wich metadata fields to display in KWIC bibliography
 - Improve compression at load time
 - Better title sorting in landing page
 - Bug fixes
+- API clean-up
