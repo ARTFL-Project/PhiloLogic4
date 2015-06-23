@@ -1,4 +1,4 @@
-### 4.0 => 4.1 ###
+#### 4.0 => 4.1 ####
 - Completely rewritten collocations: faster and accurate
 - Added relative frequencies to frequencies in facets
 - Support for regexes in quoted term searches (aka exact matches)
