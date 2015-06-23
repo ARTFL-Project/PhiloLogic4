@@ -124,6 +124,9 @@ philoApp.directive('landingPageContent', ['$rootScope', 'request', function($roo
             scope.resultGroups.push({prefix: prefix, results: results});
             scope.loadingContent = false;
         })
+		.catch(function(response) {
+			scope.loadingContent = false;
+		});
     }
     return {
         templateUrl: 'app/components/landingPage/landingPageContent.html',

@@ -58,10 +58,11 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
             #     print >> sys.stderr, "WORKER STARTED:"," ".join(args);
 
             query_log_fh = filename + ".terms"
-            print >> sys.stderr, "LOGGING TERMS to " + filename + ".terms"
+            if db.locals['debug']:
+                print >> sys.stderr, "LOGGING TERMS to " + filename + ".terms"
             logger = subprocess.Popen(["tee",query_log_fh],stdin=subprocess.PIPE,stdout = worker.stdin)
             # print >> sys.stderr, "EXPANDING"
-            expand_query_not(split,freq_file,logger.stdin)
+            expand_query_not(split,freq_file,logger.stdin, db.locals["lowercase_index"])
             logger.stdin.close()
 
 
@@ -109,7 +110,7 @@ def get_expanded_query(hitlist):
 		else:
 			term.append('"' + line[:-1] + '"')
 	if term:
-		query.append(term)		
+		query.append(term)
 	return query
 
 def split_terms(grouped):
@@ -135,6 +136,7 @@ def split_terms(grouped):
     return split
 
 def expand_query(split, freq_file, dest_fh):
+    # DEPRECATED
     first = True
     grep_proc = None
     #print >> sys.stderr, "EXPANDING", repr(split)
@@ -162,7 +164,7 @@ def expand_query(split, freq_file, dest_fh):
     return filters
 
 
-def expand_query_not(split, freq_file, dest_fh):
+def expand_query_not(split, freq_file, dest_fh, lowercase=True):
     first = True
     grep_proc = None
     #print >> sys.stderr, "SPLIT", repr(split)
@@ -195,17 +197,18 @@ def expand_query_not(split, freq_file, dest_fh):
         #print >> sys.stderr, "OUTPUT", repr(dest_fh)
 
         # set up the basic filter to get the terms sorted and ready for the search engine
-        if len(group) > 1:
-            cut_proc = subprocess.Popen("cut -f 2", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)  
-        else:
-            cut_proc = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
+#        if len(group) > 1:
+#            cut_proc = subprocess.Popen("cut -f 2", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)  
+#        else:
+#            cut_proc = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
+        cut_proc = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
         filter_inputs = [cut_proc.stdin]
         filter_procs = [cut_proc]
 
         # We will chain all NOT operators backward from the main filter.
         for kind, token in exclude:
             if kind == "TERM":
-                proc = invert_grep(token,subprocess.PIPE,filter_inputs[0])
+                proc = invert_grep(token,subprocess.PIPE,filter_inputs[0], lowercase)
             if kind == "QUOTE":
                 proc = invert_grep_exact(token,subprocess.PIPE,filter_inputs[0])    
             filter_inputs = [proc.stdin] + filter_inputs  
@@ -214,33 +217,43 @@ def expand_query_not(split, freq_file, dest_fh):
         # then we append output from all the greps into the front of that filter chain.
         for kind,token in group: # or, splits, and ranges should have been taken care of by now.
             if kind == "TERM" or kind == "RANGE":
-                grep_proc = grep_word(token,freq_file,filter_inputs[0])
+                grep_proc = grep_word(token,freq_file,filter_inputs[0], lowercase)
                 grep_proc.wait()
             elif kind == "QUOTE":
-                filter_inputs[0].write(token[1:-1] + "\t" + token[1:-1] + "\n") 
-
+#                filter_inputs[0].write(token[1:-1] + "\t" + token[1:-1] + "\n") 
+                grep_proc = grep_exact(token,freq_file,filter_inputs[0])
+                grep_proc.wait()
         # close all the pipes and wait for procs to finish.
         for pipe,proc in zip(filter_inputs,filter_procs):
             pipe.close()
             proc.wait()
 
-def grep_word(token,freq_file,dest_fh):
+def grep_word(token,freq_file,dest_fh, lowercase=True):
     #print >> sys.stderr, "GREP_WORD_TOKEN", repr(token)
-    norm_tok_uni = token.decode("utf-8").lower()
+#    norm_tok_uni = token.decode("utf-8").lower()
+    norm_tok_uni = token.decode("utf-8")
+    if lowercase:
+        norm_tok_uni = norm_tok_uni.lower()
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
     norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
-    grep_command = ['egrep', "-i", '^%s[[:blank:]]' % norm_tok, '%s' % freq_file]
-    print >> sys.stderr, "GREP_COMMAND", "".join(grep_command)
-    #print >> sys.stderr, repr(norm_tok)
+    grep_command = ['egrep', '^%s[[:blank:]]' % norm_tok, freq_file]
     grep_proc = subprocess.Popen(grep_command,stdout=dest_fh)
     return grep_proc
 
-def invert_grep(token, in_fh, dest_fh):
-    norm_tok_uni = token.decode("utf-8").lower()
+def invert_grep(token, in_fh, dest_fh, lowercase=True):
+    norm_tok_uni = token.decode("utf-8")
+    if lowercase:
+        norm_tok_uni = norm_tok_uni.lower()
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
     norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
-    grep_command = ['egrep', '-iv', '^%s[[:blank:]]' % norm_tok]
+    grep_command = ['egrep', '-v', '^%s[[:blank:]]' % norm_tok]
     grep_proc = subprocess.Popen(grep_command,stdin=in_fh,stdout=dest_fh)
+    return grep_proc
+
+def grep_exact(token, freq_file, dest_fh):
+    grep_command = ["egrep", "[[:blank:]]%s$" % token[1:-1], freq_file]
+    print >> sys.stderr, grep_command
+    grep_proc = subprocess.Popen(grep_command,stdout=dest_fh)
     return grep_proc
 
 def invert_grep_exact(token, in_fh, dest_fh):

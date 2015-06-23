@@ -75,17 +75,7 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 				var promise = request.report(queryParams, {start: start, end: end});
 			}
 			promise.then(function(response) {
-				if (facet.type === "facet") { // We return an ordered list for facets
-					var resultsArray = response.data.results;
-					var results = {}
-					for (var i=0; i < resultsArray.length; i++) {
-						var key = resultsArray[i][0];
-						var val = resultsArray[i][1];
-						results[key] = val;
-					}
-				} else {
-					var results = response.data.results;
-				}
+				var results = response.data.results;
 				scope.moreResults = response.data.more_results;
 				scope.resultsLength = response.data.results_length;
 				scope.sidebarHeight = {height: $('#results_container').height() - 40 + 'px'};
@@ -95,7 +85,7 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 					} else {
 						var merge = progressiveLoad.mergeResults(fullResults.unsorted, results);
 					}
-					scope.concKwic.frequencyResults = merge.sorted;
+					scope.concKwic.frequencyResults = merge.sorted.slice(0,500);
 					scope.loading = false;
 					fullResults = merge;
 					if (end < scope.resultsLength) {
@@ -118,6 +108,8 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 					// This won't affect the full collocation report which can't be interrupted when on the page
 					$('#selected-sidebar-option').data('interrupt', false);
 				}
+			}).catch(function(response) {
+				scope.loading = false;
 			});
 		}  else {
 			scope.percent = 100;
@@ -126,6 +118,24 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 			save(fullResults.sorted, urlString);
 		}
     }
+	var getRelativeFrequencies = function(scope, hitsDone) {
+		$http.post('scripts/get_metadata_token_count.py',
+				   JSON.stringify({results: scope.fullResults.unsorted,	hits_done: hitsDone}))
+		.then(function(response) {
+			scope.concKwic.frequencyResults = progressiveLoad.sortResults(response.data.frequencies);
+			scope.showingRelativeFrequencies = true;
+			scope.loading = false;
+			if (response.data.more_results) {
+				scope.percent = Math.floor(scope.concKwic.frequencyResults.length / scope.absoluteFrequencies.length * 100);
+				getRelativeFrequencies(scope, response.data.hits_done)
+			} else {
+				scope.percent = 100
+			}
+		}).catch(function(response) {
+			console.log(response);
+			scope.loading = false;
+		});	
+	}
     return {
         restrict: 'E',
         templateUrl: 'app/components/concordanceKwic/facets.html',
@@ -142,12 +152,9 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 			scope.displayRelativeFrequencies = function() {
 				scope.loading = true;
 				if (scope.relativeFrequencies === 'undefined') {
-					$http.post('scripts/get_metadata_token_count.py', JSON.stringify(scope.fullResults.unsorted)).then(function(response) {
-						scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
-						scope.concKwic.frequencyResults = progressiveLoad.sortResults(response.data);
-						scope.showingRelativeFrequencies = true;
-						scope.loading = false;
-					});
+					scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
+					scope.percent = 0;
+					getRelativeFrequencies(scope, 0);
 				} else {
 					scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
 					scope.concKwic.frequencyResults = scope.relativeFrequencies;

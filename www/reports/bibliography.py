@@ -82,6 +82,10 @@ def biblio_citation(hit, citation_hrefs):
     div1_name = div1_name.strip()
     div2_name = hit.div2.head.strip()
     div3_name = hit.div3.head.strip()
+    if div3_name == div2_name and hit.div3.philo_id[-1] == 0:
+        div3_name = ''
+    if div2_name == div1_name and hit.div2.philo_id[-1] == 0:
+        div2_name = ''
     
     if div1_name:
         citation['div1'] = {"href": citation_hrefs['div1'], "label": div1_name}
@@ -105,7 +109,7 @@ def biblio_citation(hit, citation_hrefs):
 
     page_obj = hit.page
     if page_obj['n']:
-        page_n = '[page %s]' % page_obj['n']
+        page_n = page_obj['n']
         citation['page'] = {"href": "", "label": page_n}
     else:
         citation['page'] =  {}
@@ -125,6 +129,7 @@ def biblio_citation(hit, citation_hrefs):
         citation['genre'] = '[genre: %s]' % hit.genre
     else:
         citation['genre'] = ''
+        
     return citation
 
 if __name__ == "__main__":

@@ -65,7 +65,7 @@ philoApp.directive('metadataFields', function() {
             if (metadata in scope.philoConfig.metadata_aliases) {
                 metadataObject.label = scope.philoConfig.metadata_aliases[metadata];
             } else {
-                metadataObject.label = metadata;
+                metadataObject.label = metadata[0].toUpperCase() + metadata.slice(1);
             }
             metadataObject.example = scope.philoConfig.search_examples[metadata];
             metadataFields.push(metadataObject);
@@ -76,6 +76,7 @@ philoApp.directive('metadataFields', function() {
         templateUrl: 'app/shared/searchForm/metadataFields.html',
         replace: true,
         link: function(scope, element, attrs) {
+			console.log(scope.metadataFields)
             if (!attrs.field && !attrs.exclude) {
                 scope.metadataFields = buildMetadata(scope, scope.philoConfig.metadata);
                 scope.head = false;

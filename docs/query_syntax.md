@@ -30,10 +30,10 @@ Metadata search does not support phrases, but supports more sophisticated Boolea
 1. plain tokens separated by spaces have an implied AND between them, but are treated as position-independent tokens. 
 Regexes are permitted, but will not span over the bounds of a token.
 2. quoted tokens must now match against the ENTIRE metadata string value in the database, including spaces and punctuations.
-It will not match a single term within a larger string, no matter how precise. **Regexes are not permitted**.
+It will not match a single term within a larger string, no matter how precise. Regexes are permitted
 3. range allows for numeric and string ranges on all metadata fields.  
 4. `OR` can still be used to conjoin plain tokens, preceding the implied Boolean AND, as well as quoted tokens.
-5. `NOT` is still available as both a filter, or a stand-alone negation: `diderot NOT rousseau` is legal, so is `NOT rousseau`
+5. `NOT` is still available as both a filter, or a stand-alone negation: `contrat NOT social` is legal, so is `NOT rousseau`
 
 Metadata objects also have the unique property of recursion, which creates some unusual consequences for search semantics.  
 Searching for a div that has property `NOT x` does not guarantee that the result does not contain a child with property x, 

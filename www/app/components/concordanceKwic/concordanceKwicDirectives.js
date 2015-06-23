@@ -67,7 +67,6 @@ philoApp.directive('bibliography', ['$rootScope', function($rootScope) {
 			scope.addToSearch = function(title) {
 				title = '"' + title + '"';
 				var itemIndex = scope.metadataAddition.indexOf(title);
-				console.log(itemIndex)
 				if (itemIndex === -1) {
 					scope.metadataAddition.push(title);
 				} else {
@@ -128,7 +127,7 @@ philoApp.directive('resultsDescription', ['request', 'descriptionValues', functi
             });
 			attrs.$observe('queryStatus', function(loading) {
 				loading = eval(loading);
-				if (!loading) {
+				if (!loading && scope.resultsLength > 0) {
                     request.script(scope.formData, {
 						script: 'get_total_results.py'
 					}).then(function(response) {
@@ -140,7 +139,6 @@ philoApp.directive('resultsDescription', ['request', 'descriptionValues', functi
 			});
         }
     }
-    
 }]);
 
 philoApp.directive('concordanceKwicSwitch', ['$location', 'URL', function($location, URL) {

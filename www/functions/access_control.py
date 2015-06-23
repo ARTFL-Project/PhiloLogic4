@@ -7,19 +7,43 @@ import socket
 import re
 import hashlib
 import time
+import socket, struct
 from wsgi_handler import WSGIHandler
+
+
+# These should always be allowed for local access
+local_blocks = ["10.0.0.0/8",
+              "172.16.0.0/12",
+              "192.168.0.0/16",
+              "127.0.0.1/32"]
 
 def check_access(environ, config, db):
     incoming_address = environ['REMOTE_ADDR']
     access = {}
     access_file = config.db_path + '/data/' + config['access_file']
+    if not access_file:
+        return make_token(incoming_address, db)
     if not os.path.isfile(access_file):
         return make_token(incoming_address, db)
     else:
-        execfile(access_file, globals(), access)
-        domain_list = set(access["domain_list"])
-        blocked_ips = set(access["blocked_ips"])
-
+        try:
+            execfile(access_file, globals(), access)
+        except:
+            return ()
+        # We would add whatever other IPs have been defined in the access_file to blocks
+        blocks = local_blocks
+        for block in blocks:
+            if addr_in_cidr(incoming_address, block):
+                return make_token(incoming_address, db)
+        
+        try:
+            domain_list = set(access["domain_list"])
+        except:
+            return () ## No allowed domains, so access request denied
+        try:
+            blocked_ips = set(access["blocked_ips"])
+        except:
+            blocked_ips = []
         fq_domain_name = socket.getfqdn(incoming_address).split(',')[-1]
         edit_domain = re.split('\.', fq_domain_name)
 
@@ -87,3 +111,38 @@ def make_token(incoming_address, db):
     secret = db.locals.secret
     h.update(secret)
     return (h.hexdigest(), now)
+
+## Adapted from http://code.activestate.com/recipes/66517/ 
+## Fixed LOTS of bugs.
+
+def dottedQuadToNum(ip):
+    "convert decimal dotted quad string to long integer"
+    return struct.unpack('!I',socket.inet_aton(ip))[0]
+
+def numToDottedQuad(n):
+    "convert long int to dotted quad string"
+    return socket.inet_ntoa(struct.pack('!I',n))
+      
+def makeMask(n):
+    "return a mask of n bits as a long integer"
+    return ((2L<<n-1)-1) << (32-n)
+
+def ipToNetAndHost(ip, maskbits):
+    "returns tuple (network, host) dotted-quad addresses given IP and mask size"
+    # (by Greg Jorgensen)
+
+    n = dottedQuadToNum(ip)
+    m = makeMask(maskbits)
+
+    host = n & m
+    net = n - host
+
+    return numToDottedQuad(net), numToDottedQuad(host)
+
+def addr_in_cidr(addr,block):
+    ip,l = block.split("/")
+    block_host, block_prefix = ipToNetAndHost(ip,int(l))
+    addr_host, addr_prefix = ipToNetAndHost(addr,int(l))
+    # print "Block:", block_host, block_prefix
+    # print "Address:", addr_host, addr_prefix
+    return block_prefix == addr_prefix

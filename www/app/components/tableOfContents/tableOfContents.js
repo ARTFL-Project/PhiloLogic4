@@ -20,7 +20,9 @@ philoApp.controller('tableOfContents', ['$rootScope', '$http', '$location', '$ro
     request.report(formData).then(function(promise) {
         vm.loading = false;
         vm.tocObject = promise.data;
-    });
+    }).catch(function(response) {
+		vm.loading = false;
+	});
     
     vm.headerButton = "Show Header";
     vm.teiHeader = false;

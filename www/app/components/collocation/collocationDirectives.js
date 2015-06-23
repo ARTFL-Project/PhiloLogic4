@@ -43,9 +43,6 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
                         scope.cloud = buildCloud(scope, scope.sortedList);
                     }
                 });
-                scope.$on('$destroy', function() {
-                    $('.cloud_term').off();
-                });
         }
         
     }
@@ -72,7 +69,9 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
             scope.moreResults = data.more_results;
 			start = data.hits_done;
             sortAndRenderCollocation(scope, fullResults, data, start)
-        });
+        }).catch(function(response) {
+			scope.collocation.loading = false;
+		});;
     }
     var sortAndRenderCollocation = function(scope, fullResults, data, start) {
         if (start <= scope.resultsLength) {
@@ -93,23 +92,13 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
         } else {
             scope.collocation.percent = 100;
             scope.done = true;
-            activateLinks();
             // Collocation cloud not showing when loading cached searches one after the other
-            //save({results: scope.sortedLists, resultsLength: scope.resultsLength, filterList: scope.filterList});
+            //save({results: scope.sortedList, resultsLength: scope.resultsLength, filterList: scope.filterList});
         }
-    }
-    var activateLinks = function() {
-        // Activate links on collocations
-        $('span[id^=all_word], span[id^=left_word], span[id^=right_word]').addClass('colloc_link');
-        var href = window.location.href;
-        $('.colloc_link, .cloud_term').click(function(e) {
-            e.preventDefault();
-            window.location = $(this).data('href');
-        });
     }
     var retrieveFromStorage = function(scope) {
         var savedObject = JSON.parse(sessionStorage[$location.url()]);
-        scope.sortedLists = savedObject.results;
+        scope.sortedList = savedObject.results;
         scope.resultsLength = savedObject.resultsLength;
         scope.filterList = savedObject.filterList;
         scope.collocation.percent = 100;

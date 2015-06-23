@@ -10,7 +10,8 @@ from QuerySyntax import parse_query, group_terms
 from HitList import NoHits
 
 def metadata_query(db,filename,param_dicts):
-    print >> sys.stderr, "METADATA_QUERY:",param_dicts
+    if db.locals['debug']:
+        print >> sys.stderr, "METADATA_QUERY:",param_dicts
     prev = None
     #print >> sys.stderr, "METADATA_HITLIST: ",filename, param_dicts
     for d in param_dicts:
@@ -64,14 +65,18 @@ def query_lowlevel(db,param_dict):
     for column,values in param_dict.items():
         norm_path = db.path+"/frequencies/normalized_" + column + "_frequencies"
         for v in values:
-            parsed = parse_query(v)            
-            print >> sys.stderr, "METADATA_TOKENS:", parsed
+            parsed = parse_query(v)
+            if db.locals['debug']:
+                print >> sys.stderr, "METADATA_TOKENS:", parsed
             grouped = group_terms(parsed)
-            print >> sys.stderr, "METADATA_SYNTAX:", grouped
+            if db.locals['debug']:
+                print >> sys.stderr, "METADATA_SYNTAX:", grouped
             expanded = expand_grouped_query(grouped,norm_path)
-            print >> sys.stderr, "METADATA_SYNTAX:", expanded
+            if db.locals['debug']:
+                print >> sys.stderr, "METADATA_SYNTAX:", expanded
             sql_clause = make_grouped_sql_clause(expanded,column)
-            print >> sys.stderr, "SQL_SYNTAX:", sql_clause
+            if db.locals['debug']:
+                print >> sys.stderr, "SQL_SYNTAX:", sql_clause
             clauses.append(sql_clause)            
 #            clause,some_vars = make_clause(column,parsed,norm_path)
 #            print >> sys.stderr, "METADATA_QUERY:",clause,some_vars
@@ -82,7 +87,8 @@ def query_lowlevel(db,param_dict):
     else:
         query = "SELECT philo_id FROM toms order by rowid;"
 #    vars = [v.decode("utf-8") for v in vars]
-    print >> sys.stderr, "INNER QUERY: ", "%s %% %s" % (query,vars)
+    if db.locals['debug']:
+        print >> sys.stderr, "INNER QUERY: ", "%s %% %s" % (query,vars)
     #for v in vars:
     #    print >> sys.stderr, "%s : %s" % (type(v),repr(v))
 

@@ -13,7 +13,7 @@ class WSGIHandler(object):
         self.script_filename = environ["SCRIPT_FILENAME"]
         self.authenticated = False
         if "HTTP_COOKIE" in environ:
-            print >> sys.stderr, 'COOKIE', environ['HTTP_COOKIE']
+            # print >> sys.stderr, 'COOKIE', environ['HTTP_COOKIE']
             self.cookies = Cookie.SimpleCookie(environ["HTTP_COOKIE"])
             if "hash" and "timestamp" in self.cookies:
                 h = hashlib.md5()
@@ -22,7 +22,7 @@ class WSGIHandler(object):
                 h.update(self.cookies["timestamp"].value)
                 h.update(secret)
                 if self.cookies["hash"].value == h.hexdigest():
-                    print >> sys.stderr, "AUTHENTICATED: ", self.cookies["hash"], " vs ", h.hexdigest()       
+                    # print >> sys.stderr, "AUTHENTICATED: ", self.cookies["hash"], " vs ", h.hexdigest()       
                     self.authenticated = True                
         self.cgi = urlparse.parse_qs(self.query_string,keep_blank_values=True)
         self.defaults = {

@@ -10,7 +10,7 @@
                 Frequencies per 1,000,000 words
             </div>
             <ol id="frequency_table" class="velocity-opposites-transition-fadeIn" data-velocity-opts="{duration:400}">
-                <li ng-repeat="result in concKwic.frequencyResults.slice(0, 500)" ng-click="concKwic.facetClick(result)">
+                <li ng-repeat="result in concKwic.frequencyResults" ng-click="concKwic.facetClick(result)">
                     <a id="freq_sidebar_text" class="text-content-area" href="{{ ::result.url }}"> {{ ::result.label }}</a>
                     <span class="sidebar-count"> {{ ::result.count }}</span>
                 </li>

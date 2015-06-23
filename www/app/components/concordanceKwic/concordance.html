@@ -13,10 +13,11 @@
                             <a href="{{result.citation.div2.href}}" ng-if="result.citation.div2 | isEmpty">{{ ::result.citation.div2.label }}</a>
                             <a href="{{result.citation.div3.href}}" ng-if="result.citation.div3 | isEmpty">{{ ::result.citation.div3.label }}</a>
                             <a href="{{result.citation.para.href}}" ng-if="result.citation.para | isEmpty">{{ ::result.citation.para.label }}</a>
+							<span class="page-display" ng-if="concKwic.results.result_type !== 'doc' && result.citation.page | isEmpty">page {{ ::result.citation.page.label }}</span>
                         </span>
                    </span>
                 </div>
-                <div class="hidden-xs col-sm-2 col-md-1" ng-if="report !== 'concordance_from_collocation' && report !=='word_property_filter'">
+                <div class="hidden-xs col-sm-2 col-md-1" ng-if="report !=='word_property_filter'">
                    <button class="btn btn-primary more_context pull-right" ng-click="moreContext($event, position - 1)">
                        More
                    </button>

@@ -7,6 +7,8 @@ from philologic.DB import DB
 import functions as f
 import os.path
 
+path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '')
+
 config = f.WebConfig()
 theme = config.theme
 
@@ -37,6 +39,7 @@ js_files = [
     "app/shared/services.js",
     "app/shared/config.js",
     "app/shared/filters.js",
+    "app/shared/values.js",
     "app/shared/searchArguments/searchArgumentsDirective.js",
     "app/shared/exportResults/exportResults.js",
     "app/components/landingPage/landingPageDirectives.js",
@@ -64,27 +67,29 @@ js_files = [
     "app/shared/accessControl/accessControlCtrl.js"
 ]
 
-path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '')
-
 
 def angular(environ, start_response):
+    headers = [('Content-type', 'text/html; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
-    headers = [('Content-type', 'text/html; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
-
-    if config.access_control:
-        if not request.authenticated:
-            token = f.check_access(environ, config, db)
-            if token:
-                print >> sys.stderr, "ISSUING TOKEN"
-                h, ts = token
-                headers.append( ("Set-Cookie", "hash=%s" % h) )
-                headers.append( ("Set-Cookie", "timestamp=%s" % ts) )
-            else:
-                print >> sys.stderr, "NOT AUTHENTICATED"
+    if not config.valid_config: ## This means we have an error in the webconfig file
+        html = build_misconfig_page(config.traceback, 'webconfig.cfg')
+    ## TODO handle errors in db.locals.py
+    else:
+        request = WSGIHandler(db, environ)   
+        if config.access_control:
+            if not request.authenticated:
+                token = f.check_access(environ, config, db)
+                if token:
+                    print >> sys.stderr, "ISSUING TOKEN"
+                    h, ts = token
+                    headers.append( ("Set-Cookie", "hash=%s" % h) )
+                    headers.append( ("Set-Cookie", "timestamp=%s" % ts) )
+                else:
+                    print >> sys.stderr, "NOT AUTHENTICATED"
+        html = build_html_page(config)
     start_response('200 OK', headers)
-    return build_html_page(config)
+    return html
 
 
 def build_html_page(config):
@@ -96,6 +101,12 @@ def build_html_page(config):
     html_page = html_page.replace('$JS', load_JS())
     return html_page
 
+def build_misconfig_page(traceback, config_file):
+    html_page = open('%s/app/misconfiguration.html' % path).read()
+    html_page = html_page.replace('$CSS', load_CSS())
+    html_page = html_page.replace('$TRACEBACK', traceback)
+    html_page = html_page.replace('$CONFIG_FILE', config_file)
+    return html_page
 
 def load_CSS():
     mainCSS = os.path.join(path, "app/assets/css/philoLogic.css")

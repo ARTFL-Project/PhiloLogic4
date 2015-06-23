@@ -56,8 +56,6 @@ metadata_xpaths = [
                 ("doc", ".//sourceDesc/bibl/publisher", "publisher"),
                 ("doc", ".//publicationStmt/publisher", "publisher"),
                 ("doc", ".//publicationStmp", "publisher"),
-                ("doc", ".//publicationStmp/p", "publisher"),
-                ("doc", ".//publicationStmp/authority", "publisher"),
                 
                 ## pub_place
                 ("doc", ".//sourceDesc/bibl/imprint/pubPlace", "pub_place"),
