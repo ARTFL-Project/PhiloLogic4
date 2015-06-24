@@ -347,6 +347,10 @@ div[type="notes"] .xml-note {
 	margin: 15px 0px;
 	display: block;
 }
+.xml-note::before {
+	content: 'note\00a0' attr(n) '\00a0:\00a0';
+	font-weight: 700;
+}
 
 /*Page images*/
 .page-image-link {
