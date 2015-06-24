@@ -43,7 +43,10 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 		scope.facet = facetObj;
         var urlString = $location.url() + '&frequency_field=' + facetObj.alias;
         if (typeof(sessionStorage[urlString]) !== "undefined" && $rootScope.philoConfig.production === true) {
-            scope.concKwic.frequencyResults = JSON.parse(sessionStorage[urlString]);
+			scope.loading = true;
+			scope.fullResults = JSON.parse(sessionStorage[urlString]);
+			scope.concKwic.frequencyResults = scope.fullResults.sorted;
+			scope.loading = false;
             scope.percent = 100;
         } else {
             // store the selected field to check whether to kill the ajax calls in populate_sidebar
@@ -115,7 +118,7 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 			scope.percent = 100;
 			scope.fullResults = fullResults;
 			var urlString = $location.url() + '&frequency_field=' + scope.concKwic.selectedFacet.alias;
-			save(fullResults.sorted, urlString);
+			save(fullResults, urlString);
 		}
     }
 	var getRelativeFrequencies = function(scope, hitsDone) {
