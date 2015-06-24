@@ -10,8 +10,10 @@ abbreviations = set([
     u"Ms",
     u"Mme",
     u"Mlle",
-    u"pp"
+    u"pp",
+    u"vol"
 ])
+
 
 def fix_sentence_boundary(loader_obj, text):
     tmp_file = open(text["raw"] + ".tmp","w")
@@ -22,7 +24,8 @@ def fix_sentence_boundary(loader_obj, text):
     parent_sent = None
     preceding_type = ""
     preceding_sent_record = ""
-    for line in open(text["raw"]):
+    infile = open(text["raw"]).read().splitlines()
+    for line_num, line in enumerate(infile):
         rec_type, word, id, attrib = line.split('\t')
         id = id.split()
         record = Record(rec_type, word, id)
@@ -41,17 +44,23 @@ def fix_sentence_boundary(loader_obj, text):
                     parent_sent = record.attrib['parent'] # we store the parent sentence id to pass it to the next words
             else:
                 flagged_word = False
-        if rec_type == "sent" and flagged_word:
-            # the previous word was flagged as an abbreviation, therefore skip this sentence marker
-            # and change all word ids in the rest of the sentence
-            change_philo_id = True
-            preceding_sent_record = record
-            preceding_sent_record.id = parent_sent.split() + record.id[7:]
-            continue
-        if rec_type == "sent" and not flagged_word: # end of sentence and last word was not flagged
-            change_philo_id = False
-            if parent_sent:
-                record.id = parent_sent.split() + record.id[7:]
+        if rec_type == "sent":
+            if flagged_word:
+                # the previous word was flagged as an abbreviation, therefore skip this sentence marker
+                # and change all word ids in the rest of the sentence
+                change_philo_id = True
+                preceding_sent_record = record
+                preceding_sent_record.id = parent_sent.split() + record.id[7:]
+                continue
+            else: # end of sentence and last word was not flagged
+                next_word = infile[line_num+1].split('\t')[1]
+                next_word = next_word.decode('utf-8')
+                if next_word.isupper(): # If next word is not in uppercase skip the sentence
+                    change_philo_id = False
+                    if parent_sent:
+                        record.id = parent_sent.split() + record.id[7:]
+                else:
+                    continue
         if rec_type == "para" and preceding_type != "sent": # Make sure we always end a sentence before a paragraph
             if preceding_sent_record:
                 print >> tmp_file, preceding_sent_record
