@@ -150,7 +150,9 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
                     $location.url(url);
                 }
 				scope.removeTerm = function(index) {
-					scope.termGroups.splice(index);
+					console.log(JSON.stringify(scope.termGroups))
+					scope.termGroups.splice(index, 1);
+					console.log(index)
 					queryTermGroups.group = angular.copy(scope.termGroups);
 					$rootScope.formData.q = scope.termGroups.join(' ');
 					if (scope.termGroups.length === 0) {
