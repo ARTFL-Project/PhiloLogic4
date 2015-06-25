@@ -137,7 +137,6 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
                     var index = scope.words.indexOf(word);
                     scope.words.splice(index, 1);
                     scope.wordListChanged = true;
-					console.log(scope.termGroupsCopy)
 					if (scope.termGroupsCopy[groupIndex].indexOf(' NOT ') !== -1) { // if there's already a NOT in the clause add an OR
                         scope.termGroupsCopy[groupIndex] += ' | ' + word.trim();
                     } else {
@@ -150,9 +149,7 @@ philoApp.directive('searchArguments', ['$rootScope','$http', '$timeout', '$locat
                     $location.url(url);
                 }
 				scope.removeTerm = function(index) {
-					console.log(JSON.stringify(scope.termGroups))
 					scope.termGroups.splice(index, 1);
-					console.log(index)
 					queryTermGroups.group = angular.copy(scope.termGroups);
 					$rootScope.formData.q = scope.termGroups.join(' ');
 					if (scope.termGroups.length === 0) {
