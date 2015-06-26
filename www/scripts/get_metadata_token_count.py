@@ -50,7 +50,7 @@ def get_metadata_token_count(environ,start_response):
             frequencies[label]['count'] = 0
         hits_done += 1
         elapsed = timeit.default_timer() - start_time
-        if elapsed > 1: # avoid timeouts by splitting the query if more than 10 seconds has been spent in the loop
+        if elapsed > 10: # avoid timeouts by splitting the query if more than 10 seconds has been spent in the loop
             break
     
     if len(sorted_frequencies) > hits_done:

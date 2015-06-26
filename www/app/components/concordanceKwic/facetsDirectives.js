@@ -125,11 +125,12 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 		$http.post('scripts/get_metadata_token_count.py',
 				   JSON.stringify({results: scope.fullResults.unsorted,	hits_done: hitsDone}))
 		.then(function(response) {
-			scope.concKwic.frequencyResults = progressiveLoad.sortResults(response.data.frequencies);
+			var sortedResults = progressiveLoad.sortResults(response.data.frequencies);
+			scope.concKwic.frequencyResults = angular.copy(sortedResults).slice(0, 500);
 			scope.showingRelativeFrequencies = true;
 			scope.loading = false;
 			if (response.data.more_results) {
-				scope.percent = Math.round(scope.absoluteFrequencies.length / scope.concKwic.frequencyResults.length * 100);
+				scope.percent = Math.round(sortedResults.length / scope.fullResults.sorted.length * 100);
 				getRelativeFrequencies(scope, response.data.hits_done)
 			} else {
 				scope.percent = 100
