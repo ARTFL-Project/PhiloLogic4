@@ -33,7 +33,9 @@ def get_metadata_token_count(environ,start_response):
         query_metadata = {}
         for metadata in m['metadata']:
             if m['metadata'][metadata] and m['metadata'][metadata] != "NULL":
-                if not m['metadata'][metadata].startswith('"'):
+                if metadata == 'date' and '-' in m['metadata'][metadata]:
+                    query_metadata[metadata] = m['metadata'][metadata].encode('utf-8')
+                elif not m['metadata'][metadata].startswith('"'):
                     query_metadata[metadata] = '"%s"' % m['metadata'][metadata].encode('utf-8')
                 else:
                     query_metadata[metadata] = m['metadata'][metadata].encode('utf-8')

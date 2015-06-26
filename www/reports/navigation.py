@@ -78,10 +78,10 @@ def get_text_obj(obj, config, q, word_regex):
     except ValueError: ## q.byte contains an empty string
         bytes = []
         
-    formatted = format_text_object(raw_text, config, q, word_regex, bytes=bytes).decode("utf-8","ignore")
+    formatted = format_text_object(obj.philo_id, raw_text, config, q, word_regex, bytes=bytes).decode("utf-8","ignore")
     return formatted
 
-def format_text_object(text, config, q, word_regex, bytes=[]):
+def format_text_object(philo_id, text, config, q, word_regex, bytes=[]):
     if bytes:
         new_text = ""
         last_offset = 0
@@ -112,6 +112,7 @@ def format_text_object(text, config, q, word_regex, bytes=[]):
                 target = el.attrib["target"]
                 link = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_notes.py", target=target)
                 el.attrib["data-ref"] = link
+                el.attrib["id"] = target.replace('#', '') + '-link-back'
                 del el.attrib["target"]
                 el.attrib['class'] = "note-ref"
                 el.attrib['tabindex'] = "0"
@@ -123,20 +124,33 @@ def format_text_object(text, config, q, word_regex, bytes=[]):
                 el.attrib["data-animation"] = "true"
                 el.text = "note"
                 el.tag = "span"
-            elif el.tag == "note" and el.getparent().attrib["type"] != "notes":
-                el.tag = 'span'
-                el.attrib['class'] = "note-content"
-                for child in el:
-                    child = note_content(child)
-                # insert an anchor before this element by scanning through the parent
-                parent = el.getparent()
-                for i,child in enumerate(parent):
-                    if child == el:
-                        attribs = {"class":"note", "tabindex": "0", "data-toggle": "popover", "data-container": "body",
-                                   "data-placement": "right", "data-trigger": "focus"}
-                        parent.insert(i,etree.Element("a",attrib=attribs))
-                        new_anchor = parent[i]
-                        new_anchor.text = "note"
+            elif el.tag == "note":
+                if el.getparent().attrib["type"] != "notes": ## inline notes
+                    el.tag = 'span'
+                    el.attrib['class'] = "note-content"
+                    for child in el:
+                        child = note_content(child)
+                    # insert an anchor before this element by scanning through the parent
+                    parent = el.getparent()
+                    for i,child in enumerate(parent):
+                        if child == el:
+                            attribs = {"class":"note", "tabindex": "0", "data-toggle": "popover", "data-container": "body",
+                                       "data-placement": "right", "data-trigger": "focus"}
+                            parent.insert(i,etree.Element("a",attrib=attribs))
+                            new_anchor = parent[i]
+                            new_anchor.text = "note"
+                else: # endnotes
+                    el.tag = "div"
+                    el.attrib['class'] = "xml-note"
+                    note_id = '#' + el.attrib['id']
+                    # el.attrib['data-href'] = "/script/get_note_link_back.py?doc_id=%s&note_id=%s" % (philo_id[0], note_id)
+                    link_back = etree.Element("a")
+                    link_back.attrib['note-link-back'] = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_note_link_back.py",
+                                                                               doc_id=str(philo_id[0]), note_id=note_id)
+                    link_back.text = "Go back to text"
+                    el.insert(0, link_back)
+                    # print >> sys.stderr, "HEYYYYY", link_back.attrib['href']
+                    
 
             elif el.tag == "item":
                 el.tag = "li"
