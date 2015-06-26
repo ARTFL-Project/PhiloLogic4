@@ -129,7 +129,7 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 			scope.showingRelativeFrequencies = true;
 			scope.loading = false;
 			if (response.data.more_results) {
-				scope.percent = Math.floor(scope.concKwic.frequencyResults.length / scope.absoluteFrequencies.length * 100);
+				scope.percent = Math.round(scope.absoluteFrequencies.length / scope.concKwic.frequencyResults.length * 100);
 				getRelativeFrequencies(scope, response.data.hits_done)
 			} else {
 				scope.percent = 100

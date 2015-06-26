@@ -270,7 +270,10 @@ philoApp.directive('noteLinkBack', ['$http', '$location', function($http, $locat
 					console.log(data.h)
 					$location.url(data.link);
 				});	
-			})
+			});
+			element.on('$destroy', function() {
+                element.off('click');
+            });
 		}
 	}
 }])

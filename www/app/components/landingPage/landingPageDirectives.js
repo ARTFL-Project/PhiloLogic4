@@ -58,9 +58,10 @@ philoApp.directive('defaultLandingPage', ['$rootScope', function($rootScope) {
 					var value = i.toString() + '-' + (i+interval)
 					dateList.push(value)
 				}
-				scope.dateRanges = createRanges(dateList, 4);
+				scope.dateRanges = createRanges(dateList, 5);
 			}
 			
+			// Set up margin offset in case author or title is not displayed
 			scope.authorOffset = "";
 			scope.titleOffset = "";
 			if (!scope.titleRanges) {
