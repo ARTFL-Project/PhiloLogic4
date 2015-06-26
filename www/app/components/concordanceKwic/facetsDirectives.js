@@ -43,7 +43,10 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 		scope.facet = facetObj;
         var urlString = $location.url() + '&frequency_field=' + facetObj.alias;
         if (typeof(sessionStorage[urlString]) !== "undefined" && $rootScope.philoConfig.production === true) {
-            scope.concKwic.frequencyResults = JSON.parse(sessionStorage[urlString]);
+			scope.loading = true;
+			scope.fullResults = JSON.parse(sessionStorage[urlString]);
+			scope.concKwic.frequencyResults = scope.fullResults.sorted;
+			scope.loading = false;
             scope.percent = 100;
         } else {
             // store the selected field to check whether to kill the ajax calls in populate_sidebar
@@ -115,18 +118,19 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 			scope.percent = 100;
 			scope.fullResults = fullResults;
 			var urlString = $location.url() + '&frequency_field=' + scope.concKwic.selectedFacet.alias;
-			save(fullResults.sorted, urlString);
+			save(fullResults, urlString);
 		}
     }
 	var getRelativeFrequencies = function(scope, hitsDone) {
 		$http.post('scripts/get_metadata_token_count.py',
 				   JSON.stringify({results: scope.fullResults.unsorted,	hits_done: hitsDone}))
 		.then(function(response) {
-			scope.concKwic.frequencyResults = progressiveLoad.sortResults(response.data.frequencies);
+			var sortedResults = progressiveLoad.sortResults(response.data.frequencies);
+			scope.concKwic.frequencyResults = angular.copy(sortedResults).slice(0, 500);
 			scope.showingRelativeFrequencies = true;
 			scope.loading = false;
 			if (response.data.more_results) {
-				scope.percent = Math.floor(scope.concKwic.frequencyResults.length / scope.absoluteFrequencies.length * 100);
+				scope.percent = Math.round(sortedResults.length / scope.fullResults.sorted.length * 100);
 				getRelativeFrequencies(scope, response.data.hits_done)
 			} else {
 				scope.percent = 100

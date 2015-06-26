@@ -1,7 +1,7 @@
 <div id="search_arguments">
     <div ng-if="queryArgs.queryTerm !== '' && queryArgs.report !== 'collocation'">
         Searching database for <span ng-if="typeof(termGroups) === 'undefined'">{{ queryArgs.queryTerm }}</span>
-		<div class="btn btn-default term-groups" ng-repeat="group in termGroups">
+		<div class="btn btn-default term-groups" ng-repeat="group in termGroups track by $index">
 			<a href="" ng-click="getQueryTerms(group, $index)">
 				{{ group }}
 			</a>

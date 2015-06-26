@@ -1,6 +1,7 @@
 "use strict";
 
-philoApp.directive('textObject', ['$routeParams', 'request', 'textNavigationValues', function($routeParams, request, textNavigationValues) {
+philoApp.directive('textObject', ['$routeParams', '$timeout', '$location', 'request', 'textNavigationValues',
+								  function($routeParams, $timeout, $location, request, textNavigationValues) {
     var getTextObject = function(scope) {
         scope.textObjectURL = $routeParams;
         scope.philoID = scope.textObjectURL.pathInfo.split('/').join(' ');
@@ -26,6 +27,13 @@ philoApp.directive('textObject', ['$routeParams', 'request', 'textNavigationValu
                 scope.highlight = false;
             }
             scope.textNav.loading = false;
+			var hash = $location.hash();
+			if (hash) {
+				$timeout(function() {
+					$('#' + hash).css({backgroundColor: 'red', color: 'white'})
+					.velocity("scroll", {duration: 200, offset: -50});
+				});
+			}
         })
 		.catch(function(response) {
 			scope.textNav.loading = false;
@@ -251,3 +259,21 @@ philoApp.directive('note', function() {
         }
     }
 });
+
+philoApp.directive('noteLinkBack', ['$http', '$location', function($http, $location) {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attrs) {
+			var linkBack = attrs['noteLinkBack'];
+			element.click(function() {
+				$http.get(linkBack).success(function(data) {
+					console.log(data.h)
+					$location.url(data.link);
+				});	
+			});
+			element.on('$destroy', function() {
+                element.off('click');
+            });
+		}
+	}
+}])

@@ -24,8 +24,8 @@ philoApp.controller('textNavigationCtrl', ['$scope', '$rootScope', '$location', 
         $timeout(function() {
             $('.current-obj').velocity("scroll", {duration: 0, container: $("#toc-content"), offset: -50});
         });
-    }
-    
+    }	
+	
     vm.toggleTableOfContents = function() {
         if (vm.tocOpen) {
             closeTableOfContents();

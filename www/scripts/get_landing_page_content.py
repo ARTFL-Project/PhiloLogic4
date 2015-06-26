@@ -77,7 +77,14 @@ def generate_title_list(c, letter_range, db, config, request):
         url = "navigate/%s/table-of-contents" % i['philo_id'].split()[0]
         # Smash accents and normalize for sorting
         title = ''.join([j for j in unicodedata.normalize("NFKD",title) if not unicodedata.combining(j)])
-        content.append({"title": i['title'], "url": url, "author": author, "initial": title[0].upper(), 'truncated': title})
+        metadata_fields = {}
+        for metadata in db.locals['metadata_fields']:
+            try:
+                metadata_fields[metadata] = i[metadata] or ''
+            except:
+                pass
+        content.append({"title": i['title'], "url": url, "author": author, "initial": title[0].upper(),
+                        'truncated': title, 'metadata_fields': metadata_fields})
     content = sorted(content, key=lambda x: x['truncated'])
     return content
 

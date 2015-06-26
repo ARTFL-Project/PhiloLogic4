@@ -7,8 +7,8 @@
                 </div>
                 <div class="panel-body">
                     <table id="author-range-selectors" class="table table-bordered" data-type="author">
-                        <tr>
-                            <td ng-repeat="range in ::authorRanges" ng-click="lp.getContent('author', '{{ ::range }}')">{{ ::range }}</td>
+                        <tr ng-repeat="ranges in ::authorRanges">
+                            <td ng-repeat="range in ::ranges" ng-click="lp.getContent('author', '{{ ::range }}')">{{ ::range }}</td>
                         </tr>
                     </table>
                 </div>
@@ -20,9 +20,9 @@
                     Title
                 </div>
                 <div class="panel-body">
-                    <table id="title-range-selectors" class="table table-bordered"" data-type="title">
-                        <tr>
-                            <td ng-repeat="range in ::titleRanges" ng-click="lp.getContent('title', '{{ ::range }}')">{{ ::range }}</td>
+                    <table id="title-range-selectors" class="table table-bordered" data-type="title">
+                        <tr ng-repeat="ranges in ::titleRanges">
+                            <td ng-repeat="range in ::ranges" ng-click="lp.getContent('title', '{{ ::range }}')">{{ ::range }}</td>
                         </tr>
                     </table>
                 </div>
@@ -35,8 +35,8 @@
                 </div>
                 <div class="panel-body">
                     <table id="year-range-selectors" class="table table-bordered" data-type="year">
-                        <tr ng-repeat="ranges in dateRanges">
-                            <td ng-repeat="range in ::ranges" ng-click="lp.getContent('date', '{{ ::range.start }}-{{ ::range.end }}')">{{ ::range.start }}-{{ ::range.end }}</td>
+                        <tr ng-repeat="ranges in ::dateRanges">
+                            <td ng-repeat="range in ::ranges" ng-click="lp.getContent('date', '{{ ::range }}')">{{ ::range }}</td>
                         </tr>
                     </table>
                 </div>

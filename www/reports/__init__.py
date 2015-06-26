@@ -2,7 +2,7 @@ from concordance import concordance, fetch_concordance, concordance_results, con
 from frequency import generate_frequency
 from kwic import kwic, generate_kwic_results
 from collocation import collocation, fetch_collocation
-from navigation import navigation
+from navigation import navigation, generate_text_object
 from table_of_contents import generate_toc_object
 from time_series import time_series, generate_time_series, get_start_end_date
 from bibliography import bibliography, biblio_citation

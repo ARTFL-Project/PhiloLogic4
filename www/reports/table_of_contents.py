@@ -64,14 +64,15 @@ def generate_toc_object(obj, db, q, config):
             continue
         elif i['word_count'] == 0:
             continue
-        elif i['type'] == "notes" or i['philo_name'] == "note": ## Hide notes from table of contents
-            continue
         else:
             philo_id = i['philo_id']
             philo_type = i['philo_type']
             display_name = ""
             if i['philo_name'] == "front":
                 display_name = "Front Matter"
+            elif i['philo_name'] == "note":
+                continue
+                #display_name = i['philo_name'] + ' ' + i['n']
             else:
                 display_name = i['head']
                 if display_name:
