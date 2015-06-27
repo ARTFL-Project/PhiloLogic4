@@ -11,7 +11,13 @@ from philologic.Loader import Loader, handle_command_line, setup_db_dir
 try:
     import artfl_xpaths
 except ImportError:
-    print "## Error ###\nYou need to copy the artfl_xpaths.py script from PhiloLogic4/scripts/ in the same directory as this script"
+    print "## Error ###\nYou need to copy the artfl_xpaths.py script from PhiloLogic4/extras/ in the same directory as this script"
+    exit()
+
+try:
+    from fix_sentence_boundaries import fix_sentence_boundary
+except ImportError:
+    print "## Error ###\nYou need to copy the fix_sentence_boundaries script from PhiloLogic/extras/utilities/ in the same directory as this script"
     exit()
 
 ## Flush buffer output
@@ -39,7 +45,7 @@ if database_root is None or url_root is None:
     print >> sys.stderr, "Please configure the loader script before use.  See INSTALLING in your PhiloLogic distribution."
     exit()
 
-template_dir = "~/PhiloLogic4/www/"
+template_dir = "/shared/PhiloLogic4/www/"
 # The load process will fail if you haven't set up the template_dir at the correct location.
 
 # Define default object level
@@ -52,7 +58,7 @@ navigable_objects = ('doc', 'div1', 'div2', 'div3')
 tables = ['toms', 'pages', 'words']
 
 # Define filters as a list of functions to call, either those in Loader or outside
-filters = [normalize_unicode_raw_words,make_word_counts,generate_words_sorted,make_object_ancestors(*navigable_objects),
+filters = [fix_sentence_boundary, normalize_unicode_raw_words,make_word_counts,generate_words_sorted,make_object_ancestors(*navigable_objects),
            make_sorted_toms(*navigable_objects),prev_next_obj(*navigable_objects),generate_pages, make_max_id]
 post_filters = [word_frequencies,normalized_word_frequencies,metadata_frequencies,normalized_metadata_frequencies]
 
@@ -107,7 +113,7 @@ db_url = url_root + dbname
 
 if __name__ == "__main__":
 
-    setup_db_dir(db_destination, template_dir, force_delete=True)
+    setup_db_dir(db_destination, template_dir)
 
 
     ####################

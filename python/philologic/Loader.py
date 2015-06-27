@@ -390,7 +390,7 @@ class Loader(object):
             wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + command_list
             command = '/bin/bash -c "%s | sort -m %s %s - <(gunzip -c %s 2> /dev/null) | gzip -c -5 > %s"' % (wordsargs, sort_by_word, sort_by_id, last_sort_file, output)
             words_status = os.system(command)
-            already_merged += file_num
+            already_merged += len(wordlist)
             os.system("rm %s" % last_sort_file)
             last_sort_file = output
             

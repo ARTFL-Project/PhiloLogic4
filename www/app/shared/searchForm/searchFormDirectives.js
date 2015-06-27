@@ -76,7 +76,6 @@ philoApp.directive('metadataFields', function() {
         templateUrl: 'app/shared/searchForm/metadataFields.html',
         replace: true,
         link: function(scope, element, attrs) {
-			console.log(scope.metadataFields)
             if (!attrs.field && !attrs.exclude) {
                 scope.metadataFields = buildMetadata(scope, scope.philoConfig.metadata);
                 scope.head = false;

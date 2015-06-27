@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-"
 #!/usr/bin/env python
 
 import os
@@ -14,58 +15,58 @@ abbreviations = set([
     u"vol"
 ])
 
+exceptions = set([
+    u"que",
+    u"qui",
+    u"quoi",
+    u"où",
+    u"what",
+    u"which",
+    u"where"
+])
+
 
 def fix_sentence_boundary(loader_obj, text):
     tmp_file = open(text["raw"] + ".tmp","w")
-    flagged_word = False
     change_philo_id = False
     prev_sent_id = None
-    last_word_id = None
-    parent_sent = None
-    preceding_type = ""
-    preceding_sent_record = ""
+    pre_word_id = None
+    prev_rec_type = None
+    current_parent_sentence = None
     infile = open(text["raw"]).read().splitlines()
     for line_num, line in enumerate(infile):
-        rec_type, word, id, attrib = line.split('\t')
-        id = id.split()
-        record = Record(rec_type, word, id)
-        record.attrib = eval(attrib)
+        rec_type, word, record  = return_record(line)
         if rec_type == "word":
-            unicode_word = word.decode('utf-8')
             if change_philo_id: # we need to change the philo_id of words to correspond to the current sentence
-                last_word_id += 1
-                record.id =  record.id[:5] + [prev_sent_id] + [str(last_word_id)] + record.id[7:] ## Store new philo_id
-                record.attrib['parent'] = parent_sent
-            if len(unicode_word) == 1 or unicode_word in abbreviations or unicode_word.isdigit(): # flagged as possible abbreviation
-                flagged_word = True
-                if not change_philo_id:
-                    prev_sent_id = id[5] # we store the sentence id of the current sentence to apply it to the following words
-                    last_word_id = int(id[6]) # we store the word id to increment word_ids in the following words
-                    parent_sent = record.attrib['parent'] # we store the parent sentence id to pass it to the next words
-            else:
-                flagged_word = False
+                prev_word_id += 1
+                record.id =  record.id[:5] + [prev_sent_id] + [str(prev_word_id)] + record.id[7:] ## Store new philo_id
+                record.attrib['parent'] = current_parent_sentence
+            prev_rec_type = rec_type
+            prev_word = word
+            prev_record = record
         if rec_type == "sent":
-            if flagged_word:
-                # the previous word was flagged as an abbreviation, therefore skip this sentence marker
-                # and change all word ids in the rest of the sentence
-                change_philo_id = True
-                preceding_sent_record = record
-                preceding_sent_record.id = parent_sent.split() + record.id[7:]
-                continue
-            else: # end of sentence and last word was not flagged
-                next_word = infile[line_num+1].split('\t')[1]
-                next_word = next_word.decode('utf-8')
-                if next_word.isupper(): # If next word is not in uppercase skip the sentence
-                    change_philo_id = False
-                    if parent_sent:
-                        record.id = parent_sent.split() + record.id[7:]
-                else:
-                    continue
-        if rec_type == "para" and preceding_type != "sent": # Make sure we always end a sentence before a paragraph
-            if preceding_sent_record:
-                print >> tmp_file, preceding_sent_record
+            if not prev_rec_type: # in case there's no preceding word in the doc
+                prev_rec_type, prev_word, prev_record = return_record(infile[line_num-1])
+            next_rec_type, next_word, next_record = return_record(infile[line_num+1])
+            if next_rec_type != "para" and prev_rec_type == "word": # We make sure this isn't the end of a paragraph
+                if len(prev_word) == 1 or prev_word in abbreviations or prev_word.isdigit() or next_word.islower():
+                    if next_word not in exceptions:
+                        change_philo_id = True
+                        current_parent_sentence = prev_record.attrib['parent']
+                        prev_word_id = int(prev_record.id[6])
+                        prev_sent_id = int(prev_record.id[5])
+                        continue # we skip this sentence marker and adjust IDs for words that follow
+            if change_philo_id: # We've been changing the current sentence, so we adjust the ID of the sentence marker
+                record.id = current_parent_sentence.split() + record.id[7:]
+            change_philo_id = False
         print >> tmp_file, record
-        preceding_type = rec_type
-    os.remove(text["raw"])
+    os.rename(text["raw"], text['raw'] + '_original')
     os.rename(text["raw"] + ".tmp",text["raw"])
-    os.system('cp %s %s_backup' % (text['raw'], text['raw']))
+    os.system('cp %s %s_new' % (text['raw'], text['raw']))
+    
+def return_record(line):
+    rec_type, word, id, attrib = line.split('\t')
+    id = id.split()
+    record = Record(rec_type, word, id)
+    record.attrib = eval(attrib)
+    return rec_type, word.decode('utf-8'), record
