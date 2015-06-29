@@ -1,5 +1,5 @@
 <div id="search_arguments">
-    <div ng-if="queryArgs.queryTerm !== '' && queryArgs.report !== 'collocation'">
+    <div ng-if="queryArgs.queryTerm !== ''">
         Searching database for <span ng-if="typeof(termGroups) === 'undefined'">{{ queryArgs.queryTerm }}</span>
 		<div class="btn btn-default term-groups" ng-repeat="group in termGroups track by $index">
 			<a href="" ng-click="getQueryTerms(group, $index)">
@@ -31,10 +31,6 @@
             </ol>
         </div>
     </div>
-    <span ng-if="queryArgs.report === 'collocation'">
-		Displaying the top 100 collocates for {{ resultsLength || '...' }} occurrences of <b>{{ ::queryArgs.queryTerm }}</b> in the same sentence
-		<br>
-	</span>
 	<div style="margin-top: 5px;">
 		Bibliography criteria:
 		<span class="biblio-criteria" ng-repeat="metadata in queryArgs.biblio" style="margin: 1px">{{ ::metadata.alias }} : <b>{{ ::metadata.value }}</b>
@@ -51,4 +47,7 @@
             <span class="glyphicon glyphicon-remove-circle" ng-click="removeMetadata('end_date', formData, restart)"></span>
         </span>
     </div>
+	<div style="margin-top: 10px;" ng-if="queryArgs.report === 'collocation'">
+		Displaying the top 100 collocates for {{ resultsLength || '...' }} occurrences
+	</div>
 </div>

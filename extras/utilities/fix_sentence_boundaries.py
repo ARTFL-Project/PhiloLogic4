@@ -32,34 +32,43 @@ def fix_sentence_boundary(loader_obj, text):
     prev_sent_id = None
     pre_word_id = None
     prev_rec_type = None
-    current_parent_sentence = None
+    prev_parent_sentence = None
     infile = open(text["raw"]).read().splitlines()
+    records = []
     for line_num, line in enumerate(infile):
         rec_type, word, record  = return_record(line)
+        if records:
+            prev_record = records[-1]
+            if prev_record.type == "page":
+                prev_record = records[-2]
+            prev_word = prev_record.name.decode('utf-8')
+            prev_rec_type = prev_record.type
         if rec_type == "word":
             if change_philo_id: # we need to change the philo_id of words to correspond to the current sentence
                 prev_word_id += 1
                 record.id =  record.id[:5] + [prev_sent_id] + [str(prev_word_id)] + record.id[7:] ## Store new philo_id
-                record.attrib['parent'] = current_parent_sentence
+                record.attrib['parent'] = prev_parent_sentence
             prev_rec_type = rec_type
             prev_word = word
             prev_record = record
-        if rec_type == "sent":
-            if not prev_rec_type: # in case there's no preceding word in the doc
-                prev_rec_type, prev_word, prev_record = return_record(infile[line_num-1])
+        elif rec_type == "sent":
+            sent_type = word
             next_rec_type, next_word, next_record = return_record(infile[line_num+1])
-            if next_rec_type != "para" and prev_rec_type == "word": # We make sure this isn't the end of a paragraph
+            if sent_type != "__philo_virtual" and next_rec_type == "word" and prev_rec_type == "word": # para and page break sentences
                 if len(prev_word) == 1 or prev_word in abbreviations or prev_word.isdigit() or next_word.islower():
                     if next_word not in exceptions:
                         change_philo_id = True
-                        current_parent_sentence = prev_record.attrib['parent']
                         prev_word_id = int(prev_record.id[6])
                         prev_sent_id = int(prev_record.id[5])
+                        prev_parent_sentence = prev_record.attrib['parent']
                         continue # we skip this sentence marker and adjust IDs for words that follow
             if change_philo_id: # We've been changing the current sentence, so we adjust the ID of the sentence marker
-                record.id = current_parent_sentence.split() + record.id[7:]
+                record.id = prev_record.id[:7] + record.id[7:]
             change_philo_id = False
-        print >> tmp_file, record
+        elif rec_type == "para":
+            change_philo_id = False
+        records.append(record)
+    print >> tmp_file, '\n'.join([str(i) for i in records])
     os.rename(text["raw"], text['raw'] + '_original')
     os.rename(text["raw"] + ".tmp",text["raw"])
     os.system('cp %s %s_new' % (text['raw'], text['raw']))

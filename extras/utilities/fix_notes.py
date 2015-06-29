@@ -23,7 +23,16 @@ for file in sys.argv[1:]:
     note_div = etree.Element("div", type="notes")
     note_div.text = "\n"
     note_count = 1
+    notes_skipped = 0
     for el in root.iter('note'):
+        inHeader = False
+        for ancestor in el.iterancestors():
+            if ancestor.tag == "teiHeader":
+                inHeader = True
+                notes_skipped += 1
+                break
+        if inHeader:
+            continue
         new_id = "philo_note_%d" % note_count
         new_note = deepcopy(el)
         for attr in new_note.attrib:
@@ -40,6 +49,7 @@ for file in sys.argv[1:]:
         note_count += 1
     root[-1].append(note_div)
     new_file = file + ".notes_fixed"
+    print note_count + notes_skipped, "notes found...", notes_skipped, "skipped..."
     print >> sys.stderr, "writing ", new_file
     new_fd = open(new_file,"w")
     new_fd.write("<?xml version='1.0' encoding='utf-8'?>")

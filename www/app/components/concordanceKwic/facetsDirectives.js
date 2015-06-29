@@ -75,7 +75,7 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 			if (facet.type !== "collocationFacet") {
 				var promise = request.script(queryParams, {start: start, end: end});
 			} else {
-				var promise = request.report(queryParams, {start: start, end: end});
+				var promise = request.report(queryParams, {start: start});
 			}
 			promise.then(function(response) {
 				var results = response.data.results;
@@ -84,7 +84,8 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 				scope.sidebarHeight = {height: $('#results_container').height() - 40 + 'px'};
 				if ($('#selected-sidebar-option').data('interrupt') != true && $('#selected-sidebar-option').data('selected') == facet.alias) {
 					if (facet.type === "collocationFacet") {
-						var merge = progressiveLoad.mergeResults(fullResults.unsorted, response.data[facet.facet]);
+						var merge = progressiveLoad.mergeResults(fullResults.unsorted, response.data.collocates);
+						end = response.data.hits_done
 					} else {
 						var merge = progressiveLoad.mergeResults(fullResults.unsorted, results);
 					}

@@ -9,9 +9,6 @@
             </div>
             <progress-bar progress="{{ collocation.percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{ duration: 400 }" ng-if="collocation.done === false"></progress-bar>
             <collocation-parameters></collocation-parameters>
-            <div class="bg-danger" style="margin-top: 20px; width: 50%;" ng-if="!config.production">
-                {{ ::error }}
-            </div>
         </div>
         <div class="results_container">
             <div id='philologic_collocation' class="row" loading="collocation.loading">

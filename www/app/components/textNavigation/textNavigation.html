@@ -1,11 +1,17 @@
 <div class="text-object" ng-controller="textNavigationCtrl as textNav">
     <div id="philo-view" ng-if="textNav.authorized">
         <div id="object-title">
-            <div>
-				<span ng-if="textObject.citation.author">{{ textObject.citation.author.label }}, </span>
+            <div id="doc-title">
+				<span ng-if="textObject.citation.author.label.length > 0">{{ textObject.citation.author.label }}, </span>
                 <a href="{{ textObject.citation.title.href }}" class="citation-small-caps"><i>{{ textObject.citation.title.label }}</i></a>
-            </div>
-            <span ng-if="textObject.citation.more">{{ textObject.citation.more }}</span>
+				<span ng-if="textObject.citation.date | isEmpty">[{{ textObject.citation.date.label }}]</span>
+			</div>
+			<div id="doc-biblio">
+				<span ng-if="textObject.citation.pub_place">{{ textObject.citation.pub_place }}</span>
+				<span ng-if="textObject.citation.publisher">{{ textObject.citation.publisher }}</span>
+				<span ng-if="textObject.citation.collection">{{ textObject.citation.collection }}</span>
+				<span ng-if="textObject.citation.pub_date">{{ textObject.citation.pub_date }}</span>
+			</div>
         </div>
         <navigation-bar toc-done="{{ textNav.tocDone }}" prev="{{ textObject.prev }}" next="{{ textObject.next }}" ng-if="textNav.navBar === true || textNav.loading === false"></navigation-bar>
         <div class="row" id="all-content" loading="textNav.loading">

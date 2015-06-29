@@ -116,19 +116,31 @@ def biblio_citation(hit, citation_hrefs):
     
     more_metadata = []
     if hit.pub_place:
+        citation['pub_place'] = hit.pub_place.strip()
         more_metadata.append(hit.pub_place.strip())
-    if hit.publisher:
-        more_metadata.append(hit.publisher.strip())
-    if hit.collection:
-        more_metadata.append(hit.collection.strip())
-    if more_metadata:
-        citation['more'] =  '(%s)' % ' '.join([i for i in more_metadata if i])
     else:
-        citation['more'] =  ''
+        citation['pub_place'] = ""
+    if hit.publisher:
+        citation['publisher'] = hit.publisher.strip()
+        more_metadata.append(hit.publisher.strip())
+    else:
+        citation['publisher'] = ""
+    if hit.collection:
+        citation['collection'] = hit.collection.strip()
+        more_metadata.append(hit.collection.strip())
+    else:
+        citation['collection'] = ""
+    if hit.pub_date:
+        citation['pub_date'] = hit.pub_date.strip()
+        more_metadata.append(hit.pub_date.strip())
     if hit.genre:
-        citation['genre'] = '[genre: %s]' % hit.genre
+        citation['genre'] = hit.genre.strip()
     else:
         citation['genre'] = ''
+    if more_metadata:
+        citation['more'] =  '%s' % ' || '.join([i for i in more_metadata if i])
+    else:
+        citation['more'] =  ''
         
     return citation
 
