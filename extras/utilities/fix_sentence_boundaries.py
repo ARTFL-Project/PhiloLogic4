@@ -40,7 +40,11 @@ def fix_sentence_boundary(loader_obj, text):
         if records:
             prev_record = records[-1]
             if prev_record.type == "page":
-                prev_record = records[-2]
+                try:
+                    prev_record = records[-2]
+                except IndexError:
+                    prev_record = records[-1]
+                    change_philo_id = False
             prev_word = prev_record.name.decode('utf-8')
             prev_rec_type = prev_record.type
         if rec_type == "word":
@@ -67,11 +71,11 @@ def fix_sentence_boundary(loader_obj, text):
             change_philo_id = False
         elif rec_type == "para":
             change_philo_id = False
+        else:
+            change_philo_id = False
         records.append(record)
     print >> tmp_file, '\n'.join([str(i) for i in records])
-    os.rename(text["raw"], text['raw'] + '_original')
     os.rename(text["raw"] + ".tmp",text["raw"])
-    os.system('cp %s %s_new' % (text['raw'], text['raw']))
     
 def return_record(line):
     rec_type, word, id, attrib = line.split('\t')
