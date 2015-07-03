@@ -25,6 +25,7 @@ metadata_xpaths = [
                 ("doc", ".//sourceDesc/bibl/titleStmt/author", "author"),
                 
                 ## Title XPATHs
+                ("doc", ".//sourceDesc/bibl/title[@type='marc245']", "title"),
                 ("doc", ".//sourceDesc/bibl/title[@type='artfl']", "title"),
                 ("doc", ".//sourceDesc/bibl/title", "title"),
                 ("doc", ".//titleStmt/title", "title"),
@@ -45,10 +46,11 @@ metadata_xpaths = [
                 ("doc", ".//profileDesc/dummy/creation/date", "date"),
                 ("doc", ".//fileDesc/sourceDesc/bibl/creation/date", "date"),
                 ("doc", "./text/front/docDate/.@value", "date"),  ## this is for the French theater
+                ("doc", "./text/front//p[@rend='center']", "date"), ## this is for some Diderot data
                 
                 ## Publisher
-                ("doc", ".//sourceDesc/bibl/imprint[@type='marc534']", "publisher"),
                 ("doc", ".//sourceDesc/bibl/imprint[@type='artfl']", "publisher"),
+                ("doc", ".//sourceDesc/bibl/imprint[@type='marc534']", "publisher"),
                 ("doc", ".//sourceDesc/bibl/imprint/publisher", "publisher"),
                 ("doc", ".//sourceDesc/biblStruct/monogr/imprint/publisher/name", "publisher"),
                 ("doc", ".//sourceDesc/biblFull/publicationStmt/publisher", "publisher"),
