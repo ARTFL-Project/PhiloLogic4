@@ -92,7 +92,8 @@ philoApp.directive('collocationTable', ['$rootScope', '$http', '$location', 'URL
         scope.collocation.loading = false;
         if (scope.moreResults) {
             var tempFullResults = collocates.unsorted;
-            if (scope.report === "collocation") { // make sure we haven't moved to a different report
+			var runningQuery = $location.search();
+            if (scope.report === "collocation" && angular.equals(runningQuery, scope.localFormData)) { // make sure we're still running the same query
                 updateCollocation(scope, tempFullResults, start);
             }
         } else {
