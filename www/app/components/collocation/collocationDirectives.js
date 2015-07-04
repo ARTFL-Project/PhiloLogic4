@@ -1,6 +1,6 @@
 "use strict";
 
-philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(defaultDiacriticsRemovalMap) {
+philoApp.directive('collocationCloud', ['$compile', 'defaultDiacriticsRemovalMap', function($compile, defaultDiacriticsRemovalMap) {
     var buildCloud = function(scope, sortedList) {
         var cloudList = angular.copy(sortedList);
         $.fn.tagcloud.defaults = {
@@ -25,10 +25,12 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
             var word = cloudList[i].label;
             var count = cloudList[i].count;
             var href = cloudList[i].url;
-            var searchLink = '<span class="cloud_term" rel="' + count + '"><a href="' + href + '&collocate_num=' + count + '">';
+            var searchLink = '<span class="cloud_term" rel="' + count + '"><a ng-click="resolveCollocateLink($event)" collocate="' + word + '">';
             html += searchLink + word + '</a> </span>';
         }
-        $("#collocate_counts").html(html);
+		var el = angular.element(html);
+		var compiledHTML = $compile(el)(scope); // Making ng-click work
+        $("#collocate_counts").html(el);
         $("#collocate_counts span").tagcloud();
         $("#collocate_counts").velocity('fadeIn');
     }
@@ -43,6 +45,10 @@ philoApp.directive('collocationCloud', ['defaultDiacriticsRemovalMap', function(
                         scope.cloud = buildCloud(scope, scope.sortedList);
                     }
                 });
+				scope.resolveCollocateLink = function(e) {
+					var word = e.target.attributes.collocate.value;
+					scope.collocation.resolveCollocateLink(word);
+				}
         }
         
     }
