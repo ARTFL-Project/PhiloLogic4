@@ -389,3 +389,8 @@ div[type="notes"] .xml-note {
 .blueimp-gallery>.prev, .blueimp-gallery>.next {
         font-size: 40px;
 }
+
+.link-back {
+	margin-left: 10px;
+	line-height: initial;
+}

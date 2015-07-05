@@ -13,9 +13,8 @@ import reports as r
 import re
 import subprocess
 import json
-from bisect import bisect_left
+from bisect import bisect_left, bisect_right
 
-header_name = 'teiHeader'  ## Not sure if this should be configurable
 
 def get_note_link_back(environ, start_response):
     config = f.WebConfig()
@@ -47,7 +46,7 @@ def get_note_link_back(environ, start_response):
         c.execute('select max(rowid) from toms;')
         end_rowid = c.fetchone()[0]
     
-    c.execute('select byte_start, philo_id from toms where rowid >= ? and rowid <=? and philo_type="div2"', (start_rowid, end_rowid))
+    c.execute('select byte_start, philo_id from toms where rowid >= ? and rowid <=? and philo_type="div1"', (start_rowid, end_rowid))
     results = [(i['byte_start'], i['philo_id']) for i in c.fetchall()]
     closest_byte = takeClosest([i[0] for i in results], note_offset)
     result_id = dict(results)[closest_byte]
@@ -58,23 +57,14 @@ def get_note_link_back(environ, start_response):
     yield json.dumps({'link': link, "h": result_id})
 
 
-def takeClosest(myList, myNumber):
-    """
-    Assumes myList is sorted. Returns closest value to myNumber.
-
-    If two numbers are equally close, return the smallest number.
-    """
-    pos = bisect_left(myList, myNumber)
+def takeClosest(array, number):
+    pos = bisect_left(array, number)
     if pos == 0:
-        return myList[0]
-    if pos == len(myList):
-        return myList[-1]
-    before = myList[pos - 1]
-    after = myList[pos]
-    if after - myNumber < myNumber - before:
-       return after
+        return array[0]
+    elif pos == len(array):
+        return array[-1]
     else:
-       return before
+        return array[pos - 1]
         
 if __name__ == "__main__":
     CGIHandler().run(get_note_link_back)
