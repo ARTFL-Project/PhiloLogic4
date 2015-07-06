@@ -26,7 +26,9 @@ def get_note_link_back(environ, start_response):
     philo_id = request.doc_id + ' 0 0 0 0 0 0'
     obj = ObjectWrapper(philo_id.split(), db)
     filename = path + '/data/TEXT/' + obj.filename
-    proc = subprocess.Popen(['grep', '-o', '--byte-offset', request.note_id, filename], stdout=subprocess.PIPE)
+    
+    match = request.note_id + '\|' + request.note_id.replace('#', '')
+    proc = subprocess.Popen(['grep', '-o', '--byte-offset', match, filename], stdout=subprocess.PIPE)
     output = proc.communicate()[0]
     first_hit = output.split('\n')[0]
     note_offset = int(first_hit.split(':')[0].strip())
