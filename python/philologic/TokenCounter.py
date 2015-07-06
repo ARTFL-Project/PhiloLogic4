@@ -79,6 +79,6 @@ if __name__ == "__main__":
         if word not in a_tokens.wordcounts.keys():
             print word, 0, b_tokens.wordcounts[word]
 
-    census_diff = a_census - b_census
+    census_diff = b_census - a_census
     for tag in census_diff.keys():
         print tag, census_diff[tag]

@@ -9,6 +9,7 @@ import re
 import json
 import unicodedata
 import timeit
+from collections import defaultdict
 from philologic.DB import DB
 from wsgiref.handlers import CGIHandler
 from functions.wsgi_handler import WSGIHandler
@@ -41,31 +42,29 @@ def fetch_collocation(hits, q, db, config):
         filter_list = []
     else:
         filter_list = build_filter_list(q, config)
-    collocation_object['filter_list'] = list(filter_list)
+    collocation_object['filter_list'] = filter_list
+    filter_list = set(filter_list)
         
     
-    ## start going though hits ##
-    all_collocates = {}
-    
-    count = 0
-    
-    more_results = False
-    c = db.dbh.cursor()
-    parents = {}
-    
     # Build list of search terms to filter out
-    query_words = set([])
+    query_words = []
     for group in get_expanded_query(hits):
         for word in group:
             word = word.replace('"', '')
-            query_words.add(word)
+            query_words.append(word)
+    filter_list.union(set(query_words))
         
     stored_sentence_id = None
-    stored_sentence_counts = {}
+    stored_sentence_counts = defaultdict(int)
     sentence_hit_count = 1
     hits_done = q.start or 0
-    start_time = timeit.default_timer()
     max_time = q.max_time or 10
+    all_collocates = {}
+    count = 0
+    more_results = False
+    c = db.dbh.cursor()
+    parents = {}
+    start_time = timeit.default_timer()
     try:
         for hit in hits[hits_done:]:
             word_id = ' '.join([str(i) for i in hit.philo_id])
@@ -77,28 +76,22 @@ def fetch_collocation(hits, q, db, config):
             if parent != stored_sentence_id:           
                 sentence_hit_count = 1
                 stored_sentence_id = parent
-                stored_sentence_counts = {}
+                stored_sentence_counts = defaultdict(int)
                 row_query = """select philo_name from words where parent='%s'"""  % (parent,)
                 c.execute(row_query)
                 for i in c.fetchall():
-                    if i['philo_name'] in stored_sentence_counts:
-                        stored_sentence_counts[i['philo_name']] += 1
-                    else:
-                        stored_sentence_counts[i['philo_name']] = 1
+                    stored_sentence_counts[i['philo_name']] += 1
             else:
                 sentence_hit_count += 1              
             for word in stored_sentence_counts:
-                if word in query_words or stored_sentence_counts[word] < sentence_hit_count:
+                if word in filter_list or stored_sentence_counts[word] < sentence_hit_count:
                      continue
-                if word in filter_list:
-                    continue
-                query_string = q['q'] + ' "%s"' % word
-                method = 'cooc'
                 if word in all_collocates:
                     all_collocates[word]['count'] += 1
                 else:
-                    all_link = f.link.make_absolute_query_link(config, q, report="concordance", q=query_string, method=method, start='0', end='0')
-                    all_collocates[word] = {"count": 1, "url": all_link}
+                    # Generating links takes too long. This can be done one the client.
+                    # all_link = f.link.make_absolute_query_link(config, q, report="concordance", q=query_string, method='cooc', start='0', end='0')
+                    all_collocates[word] = {"count": 1}
             hits_done += 1
             elapsed = timeit.default_timer() - start_time
             if elapsed > int(max_time): # avoid timeouts by splitting the query if more than q.max_time (in seconds) has been spent in the loop
@@ -129,7 +122,7 @@ def build_filter_list(q, config):
             filter_num = int(q.filter_frequency)
         else:
             filter_num = 100 ## default value in case it's not defined
-    filter_list = set([q['q']])
+    filter_list = [q['q']]
     for line_count, line in enumerate(filter_file):
         if line_count == filter_num:
             break
@@ -137,7 +130,7 @@ def build_filter_list(q, config):
             word = line.split()[0]
         except IndexError:
             continue
-        filter_list.add(word)
+        filter_list.append(word)
     return filter_list
 
 if __name__ == "__main__":

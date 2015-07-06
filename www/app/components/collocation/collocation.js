@@ -1,7 +1,7 @@
 "use strict";
 
-philoApp.controller('collocationCtrl', ['$rootScope', '$http', '$location', 'accessControl', 'URL',
-                                        function($rootScope, $http, $location, accessControl, URL) {
+philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$location', 'accessControl', 'URL',
+                                        function($scope, $rootScope, $http, $location, accessControl, URL) {
     var vm = this;
     if ($rootScope.authorized === true) {
         vm.authorized = true;
@@ -32,9 +32,18 @@ philoApp.controller('collocationCtrl', ['$rootScope', '$http', '$location', 'acc
         }
     }
     
-    vm.concordanceFromCollocation = function(url) {
-		console.log(url)
-        $location.url(url);
-    }
+	var localParams = angular.copy($location.search());
+    vm.resolveCollocateLink = function(word) {
+		var q = localParams.q + ' "' + word + '"';
+		var newUrl = URL.objectToUrlString(localParams,
+										   {
+											method: "cooc",
+											start: "0",
+											end: '0',
+											q: q,
+											report: "concordance"
+										   });
+		$location.url(newUrl);
+	}
 
 }]);

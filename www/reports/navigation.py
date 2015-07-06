@@ -143,15 +143,13 @@ def format_text_object(philo_id, text, config, q, word_regex, bytes=[]):
                     el.tag = "div"
                     el.attrib['class'] = "xml-note"
                     note_id = '#' + el.attrib['id']
-                    # el.attrib['data-href'] = "/script/get_note_link_back.py?doc_id=%s&note_id=%s" % (philo_id[0], note_id)
                     link_back = etree.Element("a")
                     link_back.attrib['note-link-back'] = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_note_link_back.py",
                                                                                doc_id=str(philo_id[0]), note_id=note_id)
+                    link_back.attrib['class'] = "btn btn-xs btn-default link-back"
+                    link_back.attrib['role'] = "button"
                     link_back.text = "Go back to text"
-                    el.insert(0, link_back)
-                    # print >> sys.stderr, "HEYYYYY", link_back.attrib['href']
-                    
-
+                    el.append(link_back)
             elif el.tag == "item":
                 el.tag = "li"
             elif el.tag == "ab" or el.tag == "ln":

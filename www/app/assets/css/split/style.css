@@ -215,6 +215,9 @@ s {
 	padding: 10px 15px;
     margin-bottom: 10px;
 }
+#collocation-container #description {
+	margin-bottom: 0px;
+}
 @media (max-width: 768px) {
 	#description {
 		padding: 5px 10px;

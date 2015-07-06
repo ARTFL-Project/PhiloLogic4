@@ -67,7 +67,7 @@ def get_start_end_date(db, start_date=None, end_date=None):
     for i in c.fetchall():
         try:
             dates.append(int(i[0]))
-        except ValueError:
+        except:
             pass
     min_date = min(dates)
     start_date = start_date or min_date
