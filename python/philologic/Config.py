@@ -205,6 +205,16 @@ web_config_defaults = {
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
           'index': 19
+     },
+     'page_images_url_root': {
+          'value': '',
+          'comment': '''
+                 # The page_images_url_root defines a root URL where pages images can be fetched when a filename is provided inside a page tag.
+                 # Note that the page image filename must be inside a fac or id attribute such as:
+                 # <pb fac="filename.jpg"> or <pb id="filename.jpg">
+                 # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
+                 ''',
+          'index': 20
      }
 }
 

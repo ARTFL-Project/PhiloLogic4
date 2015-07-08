@@ -78,10 +78,11 @@ def get_text_obj(obj, config, q, word_regex):
     except ValueError: ## q.byte contains an empty string
         bytes = []
         
-    formatted = format_text_object(obj.philo_id, raw_text, config, q, word_regex, bytes=bytes).decode("utf-8","ignore")
+    formatted = format_text_object(obj, raw_text, config, q, word_regex, bytes=bytes).decode("utf-8","ignore")
     return formatted
 
-def format_text_object(philo_id, text, config, q, word_regex, bytes=[]):
+def format_text_object(obj, text, config, q, word_regex, bytes=[]):
+    philo_id = obj.philo_id
     if bytes:
         new_text = ""
         last_offset = 0
@@ -89,6 +90,7 @@ def format_text_object(philo_id, text, config, q, word_regex, bytes=[]):
             new_text += text[last_offset:b] + "<philoHighlight/>"
             last_offset = b
         text = new_text + text[last_offset:]
+    first_img = ''
     text = "<div>" + text + "</div>"
     xml = f.FragmentParser.parse(text)
     for el in xml.iter():        
@@ -154,13 +156,25 @@ def format_text_object(philo_id, text, config, q, word_regex, bytes=[]):
                 el.tag = "li"
             elif el.tag == "ab" or el.tag == "ln":
                 el.tag = "l"
-            elif el.tag == "pb" and "fac" in el.attrib and "n" in el.attrib:
-                el.tag = "p"
-                el.append(etree.Element("a"))
-                el[-1].attrib["href"] = 'http://artflx.uchicago.edu/images/encyclopedie/' + el.attrib["fac"]
-                el[-1].text = "[page " + el.attrib["n"] + "]"
-                el[-1].attrib['class'] = "page-image-link"
-                el[-1].attrib['data-gallery'] = ''
+            elif el.tag == "pb" and "n" in el.attrib:
+                if "fac" in el.attrib :
+                    if not first_img:
+                        first_img = el.attrib["fac"]
+                    el.tag = "p"
+                    el.append(etree.Element("a"))
+                    el[-1].attrib["href"] = config.page_images_url_root + '/' + el.attrib["fac"]
+                    el[-1].text = "[page " + el.attrib["n"] + "]"
+                    el[-1].attrib['class'] = "page-image-link"
+                    el[-1].attrib['data-gallery'] = ''
+                elif "id" in el.attrib:
+                    if not first_img:
+                        first_img = el.attrib["id"]
+                    el.tag = "p"
+                    el.append(etree.Element("a"))
+                    el[-1].attrib["href"] = config.page_images_url_root + '/' + el.attrib["id"]
+                    el[-1].text = "[page " + el.attrib["n"] + "]"
+                    el[-1].attrib['class'] = "page-image-link"
+                    el[-1].attrib['data-gallery'] = ''
             elif el.tag == "figure":
                 if el[0].tag == "graphic":
                     img_url = el[0].attrib["url"].replace(":","_")
@@ -189,7 +203,36 @@ def format_text_object(philo_id, text, config, q, word_regex, bytes=[]):
     output = etree.tostring(xml)
     ## remove spaces around hyphens and apostrophes
     output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
+    # first get first page info in case the object doesn't start with a page tag
+    first_page_object = get_first_page(philo_id, config)
+    if first_page_object['byte_start'] and first_img != first_page_object['filename']:
+        if first_page_object['filename']:
+            page_href = config.page_images_url_root + '/' + first_page_object['filename']
+            output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(first_page_object["n"]) + "]</a></p>" + output
+        else:
+            output = '<p>[page ' + str(first_page_object["n"]) + "]</p>" + output
     return convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
+
+def get_first_page(philo_id, config):
+    """This function will fetch the first page of any given text object in case there's no <pb>
+    starting the object"""
+    db = DB(config.db_path + '/data/')
+    c = db.dbh.cursor()
+    c.execute('select byte_start, byte_end from toms where philo_id="%s"' % ' '.join([str(i) for i in philo_id]))
+    result = c.fetchone()
+    byte_start = result['byte_start']
+    byte_end = result['byte_end']
+    approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
+    c.execute('select * from pages where philo_id like ? and end_byte >= ? limit 1', (approx_id, byte_start))
+    print >> sys.stderr, "ERR", 'select * from pages where philo_id like "%s" and end_byte between %d and %d limit 1' % (approx_id, byte_start, byte_end)
+    page_result = c.fetchone()
+    try:
+        filename = page_result['img']
+        n = page_result['n'] or ''
+        page = {'filename': filename, "n": n, 'byte_start': page_result['start_byte'], 'byte_end': page_result['end_byte']}
+    except:
+        page = {'filename': '', 'byte_start': ''}
+    return page
 
 if __name__ == "__main__":
     CGIHandler().run(navigation)
