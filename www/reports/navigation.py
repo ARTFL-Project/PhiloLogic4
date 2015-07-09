@@ -223,8 +223,10 @@ def get_first_page(philo_id, config):
     byte_start = result['byte_start']
     byte_end = result['byte_end']
     approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
-    c.execute('select * from pages where philo_id like ? and end_byte >= ? limit 1', (approx_id, byte_start))
-    print >> sys.stderr, "ERR", 'select * from pages where philo_id like "%s" and end_byte between %d and %d limit 1' % (approx_id, byte_start, byte_end)
+    try:
+        c.execute('select * from pages where philo_id like ? and end_byte >= ? limit 1', (approx_id, byte_start))
+    except:
+        return {'filename': '', 'byte_start': ''}
     page_result = c.fetchone()
     try:
         filename = page_result['img']
