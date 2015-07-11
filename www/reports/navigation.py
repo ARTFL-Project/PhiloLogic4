@@ -157,21 +157,18 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[]):
             elif el.tag == "ab" or el.tag == "ln":
                 el.tag = "l"
             elif el.tag == "pb" and "n" in el.attrib:
-                if "fac" in el.attrib :
+                if "fac" in el.attrib or "id" in el.attrib:
                     if not first_img:
-                        first_img = el.attrib["fac"]
+                        if "fac" in el.attrib:
+                            first_img = el.attrib["fac"]
+                        else:
+                            first_img = el.attrib["id"]
                     el.tag = "p"
                     el.append(etree.Element("a"))
-                    el[-1].attrib["href"] = config.page_images_url_root + '/' + el.attrib["fac"]
-                    el[-1].text = "[page " + el.attrib["n"] + "]"
-                    el[-1].attrib['class'] = "page-image-link"
-                    el[-1].attrib['data-gallery'] = ''
-                elif "id" in el.attrib:
-                    if not first_img:
-                        first_img = el.attrib["id"]
-                    el.tag = "p"
-                    el.append(etree.Element("a"))
-                    el[-1].attrib["href"] = config.page_images_url_root + '/' + el.attrib["id"]
+                    if "fac" in el.attrib:
+                        el[-1].attrib["href"] = config.page_images_url_root + '/' + el.attrib["fac"]
+                    else:
+                        el[-1].attrib["href"] = config.page_images_url_root + '/' + el.attrib["id"]
                     el[-1].text = "[page " + el.attrib["n"] + "]"
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
@@ -235,6 +232,12 @@ def get_first_page(philo_id, config):
     except:
         page = {'filename': '', 'byte_start': ''}
     return page
+
+def get_all_page_images(philo_id, config):
+    db = DB(config.db_path + '/data/')
+    c = db.dbh.cursor()
+    pass
+
 
 if __name__ == "__main__":
     CGIHandler().run(navigation)
