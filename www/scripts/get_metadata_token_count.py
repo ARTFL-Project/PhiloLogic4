@@ -44,10 +44,11 @@ def get_metadata_token_count(environ,start_response):
         for hit in hits:
             total_count += int(hit['word_count'])
         try:
-            frequencies[label]['count'] = round(float(m['count']) / total_count * 1000000, 3)
+            frequencies[label]['count'] = round(float(m['count']) / total_count * 10000, 3)
         except:
             count += 1
             frequencies[label]['count'] = 0
+        frequencies[label]['total_count'] = total_count
         hits_done += 1
         elapsed = timeit.default_timer() - start_time
         if elapsed > 10: # avoid timeouts by splitting the query if more than 10 seconds has been spent in the loop

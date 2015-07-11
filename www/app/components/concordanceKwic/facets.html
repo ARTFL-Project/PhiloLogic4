@@ -7,12 +7,25 @@
                 <button type="button" class="btn btn-default" ng-class="{'active': showingRelativeFrequencies}" style="width: 50%; border-right-width: 0px; border-top-width: 0px" ng-click="displayRelativeFrequencies()">Relative Frequency</button>
             </div>
             <div style="text-align: center; padding: 8px;font-weight: 400;" ng-if="showingRelativeFrequencies">
-                Frequencies per 1,000,000 words
+                Frequencies per 10,000 words
             </div>
             <ol id="frequency_table" class="velocity-opposites-transition-fadeIn" data-velocity-opts="{duration:400}">
                 <li ng-repeat="result in concKwic.frequencyResults" ng-click="concKwic.facetClick(result)">
-                    <a id="freq_sidebar_text" class="text-content-area" href="{{ ::result.url }}"> {{ ::result.label }}</a>
+                    <a id="freq_sidebar_text" class="text-content-area" href="{{ ::result.url }}" ng-if="facet.facet !== 'all_collocates'">
+						{{ ::result.label }}
+					</a>
+					<a id="freq_sidebar_text" class="text-content-area" href="" ng-click="collocationToConcordance(result.label)" ng-if="facet.facet === 'all_collocates'">
+						{{ ::result.label }}
+					</a>
                     <span class="sidebar-count"> {{ ::result.count }}</span>
+					<div style="line-height: 70%; padding-bottom: 15px; padding-left: 5px; font-size: 85%;" ng-if="showingRelativeFrequencies">
+						<div style="opacity: .8">
+							{{ ::fullResults.unsorted[result.label].count }} actual
+							<ng-pluralize count="fullResults.unsorted[result.label].count" when="{'1': 'occurrence', 'other': 'occurrences'}"></ng-pluralize>
+							in {{ fullRelativeFrequencies[result.label].total_count }} words
+						</div>
+						<div style="clear: both;"></div>
+					</div>
                 </li>
             </ol>
         </div>

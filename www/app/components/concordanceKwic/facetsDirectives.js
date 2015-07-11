@@ -45,7 +45,7 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
         if (typeof(sessionStorage[urlString]) !== "undefined" && $rootScope.philoConfig.production === true) {
 			scope.loading = true;
 			scope.fullResults = JSON.parse(sessionStorage[urlString]);
-			scope.concKwic.frequencyResults = scope.fullResults.sorted;
+			scope.concKwic.frequencyResults = scope.fullResults.sorted.slice(0,500);
 			scope.loading = false;
             scope.percent = 100;
         } else {
@@ -126,12 +126,13 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 		$http.post('scripts/get_metadata_token_count.py',
 				   JSON.stringify({results: scope.fullResults.unsorted,	hits_done: hitsDone}))
 		.then(function(response) {
-			var sortedResults = progressiveLoad.sortResults(response.data.frequencies);
-			scope.concKwic.frequencyResults = angular.copy(sortedResults).slice(0, 500);
+			var relativeResults = progressiveLoad.mergeResults(scope.fullRelativeFrequencies, response.data.frequencies);
+			scope.fullRelativeFrequencies = relativeResults.unsorted
+			scope.concKwic.frequencyResults = angular.copy(relativeResults.sorted).slice(0, 500);
 			scope.showingRelativeFrequencies = true;
 			scope.loading = false;
 			if (response.data.more_results) {
-				scope.percent = Math.round(sortedResults.length / scope.fullResults.sorted.length * 100);
+				scope.percent = Math.round(relativeResults.sorted.length / scope.fullResults.sorted.length * 100);
 				getRelativeFrequencies(scope, response.data.hits_done)
 			} else {
 				scope.percent = 100
@@ -173,6 +174,18 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 				scope.concKwic.frequencyResults = scope.absoluteFrequencies;
 				scope.showingRelativeFrequencies = false;
 				scope.loading = false;
+			}
+			scope.collocationToConcordance = function(word) {
+				var q = $location.search().q + ' "' + word + '"';
+				var newUrl = URL.objectToUrlString($location.search(),
+												   {
+													method: "cooc",
+													start: "0",
+													end: '0',
+													q: q,
+													report: "concordance"
+												   });
+				$location.url(newUrl);
 			}
         }
     }
