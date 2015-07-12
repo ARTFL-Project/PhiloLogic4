@@ -44,23 +44,25 @@ philoApp.directive('textObject', ['$routeParams', '$timeout', '$location', 'requ
 		var currentObjImgs = imgObj.current_obj_img;
 		var allImgs = imgObj.all_imgs;
 		scope.beforeObjImgs = [];
-		var beforeIndex = 0;
-		for (var i=0; i < allImgs.length; i++) {
-			var img = allImgs[i];
-			if (currentObjImgs.indexOf(img) === -1) {
-                scope.beforeObjImgs.push(scope.philoConfig.page_images_url_root + '/' + img);
-            } else {
-				beforeIndex = i;
-				break;
-			}
-		}
 		scope.afterObjImgs = [];
-		for (var i=beforeIndex; i < allImgs.length; i++) {
-			var img = allImgs[i];
-			if (currentObjImgs.indexOf(img) === -1) {
-                scope.afterObjImgs.push(scope.philoConfig.page_images_url_root + '/' + img);
+		if (currentObjImgs.length > 0) {
+            var beforeIndex = 0;
+			for (var i=0; i < allImgs.length; i++) {
+				var img = allImgs[i];
+				if (currentObjImgs.indexOf(img) === -1) {
+					scope.beforeObjImgs.push(scope.philoConfig.page_images_url_root + '/' + img);
+				} else {
+					beforeIndex = i;
+					break;
+				}
 			}
-		}
+			for (var i=beforeIndex; i < allImgs.length; i++) {
+				var img = allImgs[i];
+				if (currentObjImgs.indexOf(img) === -1) {
+					scope.afterObjImgs.push(scope.philoConfig.page_images_url_root + '/' + img);
+				}
+			}
+        }
 	}
     return {
         templateUrl: 'app/components/textNavigation/textObject.html',

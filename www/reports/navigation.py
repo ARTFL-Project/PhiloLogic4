@@ -215,15 +215,14 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[]):
     output = convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
     # first get first page info in case the object doesn't start with a page tag
     first_page_object = get_first_page(philo_id, config)
-    if not current_obj_img:
-        current_obj_img.append('')
-    if first_page_object['byte_start'] and current_obj_img[0] != first_page_object['filename']:
-        if first_page_object['filename']:
-            page_href = config.page_images_url_root + '/' + first_page_object['filename']
-            output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(first_page_object["n"]) + "]</a></p>" + output
-            current_obj_img.insert(0, first_page_object['filename'])
-        else:
-            output = '<p>[page ' + str(first_page_object["n"]) + "]</p>" + output
+    if current_obj_img:
+        if first_page_object['byte_start'] and current_obj_img[0] != first_page_object['filename']:
+            if first_page_object['filename']:
+                page_href = config.page_images_url_root + '/' + first_page_object['filename']
+                output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(first_page_object["n"]) + "]</a></p>" + output
+                current_obj_img.insert(0, first_page_object['filename'])
+    else:
+        output = '<p>[page ' + str(first_page_object["n"]) + "]</p>" + output
     ## Fetch all remainging imgs in document
     all_imgs = get_all_page_images(philo_id, config, current_obj_img)
     img_obj = {'all_imgs': all_imgs, 'current_obj_img': current_obj_img}
@@ -254,7 +253,7 @@ def get_first_page(philo_id, config):
     return page
 
 def get_all_page_images(philo_id, config, current_obj_imgs):
-    if current_obj_imgs[0]:
+    if current_obj_imgs:
         # We know there are images
         db = DB(config.db_path + '/data/')
         c = db.dbh.cursor()
