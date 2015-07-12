@@ -53,8 +53,9 @@ def generate_text_object(obj, db, q, config):
     citation_hrefs = citation_links(db, config, obj)
     citation = biblio_citation(obj, citation_hrefs)
     text_object['citation'] = citation
-    text = get_text_obj(obj, config, q, db.locals['word_regex'])
+    text, imgs = get_text_obj(obj, config, q, db.locals['word_regex'])
     text_object['text'] = text
+    text_object['imgs'] = imgs
     return text_object
 
 def neighboring_object_id(db, philo_id):
@@ -90,8 +91,9 @@ def get_text_obj(obj, config, q, word_regex):
     except ValueError: ## q.byte contains an empty string
         bytes = []
         
-    formatted = format_text_object(obj, raw_text, config, q, word_regex, bytes=bytes).decode("utf-8","ignore")
-    return formatted
+    formatted_text, imgs = format_text_object(obj, raw_text, config, q, word_regex, bytes=bytes)
+    formatted_text = formatted_text.decode("utf-8","ignore")
+    return formatted_text, imgs
 
 def format_text_object(obj, text, config, q, word_regex, bytes=[]):
     philo_id = obj.philo_id
@@ -103,6 +105,7 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[]):
             last_offset = b
         text = new_text + text[last_offset:]
     first_img = ''
+    current_obj_img = []
     text = "<div>" + text + "</div>"
     xml = f.FragmentParser.parse(text)
     for el in xml.iter():        
@@ -170,17 +173,14 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[]):
                 el.tag = "l"
             elif el.tag == "pb" and "n" in el.attrib:
                 if "fac" in el.attrib or "id" in el.attrib:
-                    if not first_img:
-                        if "fac" in el.attrib:
-                            first_img = el.attrib["fac"]
-                        else:
-                            first_img = el.attrib["id"]
+                    if "fac" in el.attrib:
+                        img = el.attrib["fac"]
+                    else:
+                        img = el.attrib["id"]
+                    current_obj_img.append(img)
                     el.tag = "p"
                     el.append(etree.Element("a"))
-                    if "fac" in el.attrib:
-                        el[-1].attrib["href"] = config.page_images_url_root + '/' + el.attrib["fac"]
-                    else:
-                        el[-1].attrib["href"] = config.page_images_url_root + '/' + el.attrib["id"]
+                    el[-1].attrib["href"] = config.page_images_url_root + '/' + img
                     el[-1].text = "[page " + el.attrib["n"] + "]"
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
@@ -212,15 +212,23 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[]):
     output = etree.tostring(xml)
     ## remove spaces around hyphens and apostrophes
     output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
+    output = convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
     # first get first page info in case the object doesn't start with a page tag
     first_page_object = get_first_page(philo_id, config)
-    if first_page_object['byte_start'] and first_img != first_page_object['filename']:
+    if not current_obj_img:
+        current_obj_img.append('')
+    if first_page_object['byte_start'] and current_obj_img[0] != first_page_object['filename']:
         if first_page_object['filename']:
             page_href = config.page_images_url_root + '/' + first_page_object['filename']
             output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(first_page_object["n"]) + "]</a></p>" + output
+            current_obj_img.insert(0, first_page_object['filename'])
         else:
             output = '<p>[page ' + str(first_page_object["n"]) + "]</p>" + output
-    return convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
+    ## Fetch all remainging imgs in document
+    all_imgs = get_all_page_images(philo_id, config, current_obj_img)
+    img_obj = {'all_imgs': all_imgs, 'current_obj_img': current_obj_img}
+    
+    return output, img_obj
 
 def get_first_page(philo_id, config):
     """This function will fetch the first page of any given text object in case there's no <pb>
@@ -245,11 +253,18 @@ def get_first_page(philo_id, config):
         page = {'filename': '', 'byte_start': ''}
     return page
 
-def get_all_page_images(philo_id, config):
-    db = DB(config.db_path + '/data/')
-    c = db.dbh.cursor()
-    pass
-
+def get_all_page_images(philo_id, config, current_obj_imgs):
+    if current_obj_imgs[0]:
+        # We know there are images
+        db = DB(config.db_path + '/data/')
+        c = db.dbh.cursor()
+        approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
+        c.execute('select * from pages where philo_id like ? and img is not null and img != ""', (approx_id,))
+        current_obj_imgs = set(current_obj_imgs)
+        all_imgs = [i['img'] for i in c.fetchall()]
+        return all_imgs
+    else:
+        return []
 
 if __name__ == "__main__":
     CGIHandler().run(navigation)

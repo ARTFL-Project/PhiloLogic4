@@ -389,6 +389,9 @@ div[type="notes"] .xml-note {
 .blueimp-gallery>.prev, .blueimp-gallery>.next {
         font-size: 40px;
 }
+#blueimp-gallery ol {
+	display: none;
+}
 
 .link-back {
 	margin-left: 10px;

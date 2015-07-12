@@ -2,7 +2,13 @@
     <div class="row">
         <div class="col-xs-12">
             <div id="book-page">
+				<div id="previous-pages" ng-if="beforeObjImgs">
+					<a href="{{ img }}" class="page-image-link" ng-repeat="img in beforeObjImgs" data-gallery></a>
+				</div>
                 <div id="text-obj-content" class="panel panel-default text-content-area" ng-bind-html="textObject.text | unsafe" compile-template select-word philo-id="{{ philoID }}"></div>
+				<div id="next-pages" ng-if="afterObjImgs">
+					<a href="{{ img }}" class="page-image-link" ng-repeat="img in afterObjImgs" data-gallery></a>
+				</div>
             </div>
         </div>
     </div>

@@ -34,11 +34,34 @@ philoApp.directive('textObject', ['$routeParams', '$timeout', '$location', 'requ
 					.velocity("scroll", {duration: 200, offset: -50});
 				});
 			}
+			insertPageLinks(scope, response.data.imgs);
         })
 		.catch(function(response) {
 			scope.textNav.loading = false;
 		});
     }
+	var insertPageLinks = function(scope, imgObj) {
+		var currentObjImgs = imgObj.current_obj_img;
+		var allImgs = imgObj.all_imgs;
+		scope.beforeObjImgs = [];
+		var beforeIndex = 0;
+		for (var i=0; i < allImgs.length; i++) {
+			var img = allImgs[i];
+			if (currentObjImgs.indexOf(img) === -1) {
+                scope.beforeObjImgs.push(scope.philoConfig.page_images_url_root + '/' + img);
+            } else {
+				beforeIndex = i;
+				break;
+			}
+		}
+		scope.afterObjImgs = [];
+		for (var i=beforeIndex; i < allImgs.length; i++) {
+			var img = allImgs[i];
+			if (currentObjImgs.indexOf(img) === -1) {
+                scope.afterObjImgs.push(scope.philoConfig.page_images_url_root + '/' + img);
+			}
+		}
+	}
     return {
         templateUrl: 'app/components/textNavigation/textObject.html',
         replace: true,
@@ -198,7 +221,8 @@ philoApp.directive('pageImageLink', function() {
                     onopen: function() {
                         this.index = element.index('a.page-image-link');
                     },
-                    continuous: false
+                    continuous: false,
+					thumbnailIndicators: false
                 });
                 $('#full-size-image').off();
                 $('#full-size-image').click(function() {
