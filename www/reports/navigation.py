@@ -43,8 +43,8 @@ def generate_text_object(obj, db, q, config):
     while philo_id[-1] == 0:
         philo_id.pop()
     text_object = {"query": dict([i for i in q]), "philo_id": ' '.join([str(i) for i in philo_id])}
-    text_object['prev'] = ' '.join(obj.prev.split()[:7][:philo_slices[obj.philo_type]])
-    text_object['next'] = ' '.join(obj.next.split()[:7][:philo_slices[obj.philo_type]])
+    text_object['prev'] = neighboring_object_id(db, obj.prev)
+    text_object['next'] = neighboring_object_id(db, obj.next)
     metadata_fields = {}
     for metadata in db.locals['metadata_fields']:
         if db.locals['metadata_types'][metadata] == "doc":
@@ -56,6 +56,18 @@ def generate_text_object(obj, db, q, config):
     text = get_text_obj(obj, config, q, db.locals['word_regex'])
     text_object['text'] = text
     return text_object
+
+def neighboring_object_id(db, philo_id):
+    philo_id = philo_id.split()[:7]
+    while philo_id[-1] == '0':
+        philo_id.pop()
+    philo_id = str(" ".join(philo_id))
+    obj = db[philo_id]
+    if obj['philo_name'] == '__philo_virtual' and obj["philo_type"] != "div1":
+        # Remove the last number (1) in the philo_id and point to one object level lower
+        philo_id = ' '.join(philo_id.split()[:-1])
+    return philo_id
+
 
 def get_text_obj(obj, config, q, word_regex):
     path = config.db_path
