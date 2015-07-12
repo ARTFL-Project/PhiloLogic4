@@ -11,6 +11,7 @@ import reports as r
 import functions as f
 import cgi
 import json
+import sqlite3
 
 object_levels = set(["doc", "div1", "div2", "div3"])
 
@@ -46,13 +47,16 @@ def get_bibliography(environ,start_response):
         except TypeError: # if this is the last doc, just get the last rowid in the table.
             c.execute('select max(rowid) from toms;')
             next_doc_row = c.fetchone()[0]
-        c.execute('select head from toms where rowid between %d and %d and head is not null limit 1' % (doc_row, next_doc_row))
+        c.execute('select * from toms where rowid between %d and %d and head is not null and head !="" limit 1' % (doc_row, next_doc_row))
         try:
             start_head = c.fetchone()['head']
             start_head = start_head.decode('utf-8').lower().title().encode('utf-8')
         except:
             start_head = ''
-        c.execute('select head from toms where rowid between %d and %d and head is not null order by rowid desc limit 1' % (doc_row, next_doc_row))
+        try:
+            c.execute('select head from toms where rowid between %d and %d and head is not null and head !="" and type !="notes" order by rowid desc limit 1' % (doc_row, next_doc_row))
+        except sqlite3.OperationalError:
+            c.execute('select head from toms where rowid between %d and %d and head is not null and head !="" order by rowid desc limit 1' % (doc_row, next_doc_row))
         try:
             end_head = c.fetchone()['head']
             end_head = end_head.decode('utf-8').lower().title().encode('utf-8')
