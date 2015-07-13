@@ -8,5 +8,6 @@
 - Ability to choose wich metadata fields to display in KWIC bibliography
 - Improve compression at load time
 - Better title sorting in landing page
+- Better page image handling
 - Bug fixes
 - API clean-up
