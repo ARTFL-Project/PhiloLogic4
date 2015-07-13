@@ -118,7 +118,6 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[]):
             elif el.tag == "head":
                 el.tag = "b"
                 el.attrib["class"] = "headword"
-                el.append(etree.Element("br"))
             elif el.tag == "list":
                 el.tag = "ul"
             elif el.tag == "title":

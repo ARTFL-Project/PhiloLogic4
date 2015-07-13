@@ -330,6 +330,15 @@ body {
     margin-top: 10px;
 }
 
+/*Methodique styling*/
+div[type="article"] .headword {
+	display: inline;
+}
+.headword + p {
+	display: inline;
+}
+
+
 /*Note handling*/
 .popover {
 	max-width: 350px;
