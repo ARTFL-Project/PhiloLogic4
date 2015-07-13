@@ -82,17 +82,18 @@ philoApp.directive('tocSidebar', ['$routeParams', 'request', 'textNavigationValu
         })
         .then(function(response) {
             var tocObject = response.data;
-            scope.tocElements = filterTocElements(tocObject.toc, philoId);
+            scope.tocElements = filterTocElements(scope, tocObject.toc, philoId);
             textNavigationValues.tocElements = scope.tocElements;
             scope.tocDone = true;
         });
     }
-    var filterTocElements = function(tocElements, philoId) {
+    var filterTocElements = function(scope, tocElements, philoId) {
         var filtered = [];
-        var limit = 200;
+        var limit = 500;
         var match = false;
         var count = 0;
-        for (var i=0; i < tocElements.length; i++) {
+		scope.endFilter = false;
+        for (var i=0, tocLength = tocElements.length; i < tocLength; i+=1) {
             if (match !== false) {
                 count++;
             }
@@ -105,12 +106,15 @@ philoApp.directive('tocSidebar', ['$routeParams', 'request', 'textNavigationValu
             }
             filtered.push(element)
             if (count === limit) {
+				scope.endFilter = true;
                 break
             }
         }
         if ((match - limit) < 0) {
+			scope.beginFilter = false;
             return filtered;
         } else {
+			scope.beginFilter = true;
             return filtered.slice(match - limit);
         }
     }

@@ -59,6 +59,8 @@ def generate_text_object(obj, db, q, config):
     return text_object
 
 def neighboring_object_id(db, philo_id):
+    if not philo_id:
+        return ''
     philo_id = philo_id.split()[:7]
     while philo_id[-1] == '0':
         philo_id.pop()
@@ -213,21 +215,33 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[]):
     ## remove spaces around hyphens and apostrophes
     output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
     output = convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
+    
+    ## Page images
+    output, img_obj = page_images(config, output, current_obj_img, philo_id)
+    
+    return output, img_obj
+
+
+def page_images(config, output, current_obj_img, philo_id):
     # first get first page info in case the object doesn't start with a page tag
     first_page_object = get_first_page(philo_id, config)
-    if current_obj_img:
-        if first_page_object['byte_start'] and current_obj_img[0] != first_page_object['filename']:
-            if first_page_object['filename']:
-                page_href = config.page_images_url_root + '/' + first_page_object['filename']
-                output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(first_page_object["n"]) + "]</a></p>" + output
+    if not current_obj_img:
+        current_obj_img.append('')
+    if first_page_object['byte_start'] and current_obj_img[0] != first_page_object['filename']:
+        if first_page_object['filename']:
+            page_href = config.page_images_url_root + '/' + first_page_object['filename']
+            output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(first_page_object["n"]) + "]</a></p>" + output
+            if current_obj_img[0] == '':
+                current_obj_img[0] = first_page_object['filename']
+            else:
                 current_obj_img.insert(0, first_page_object['filename'])
-    else:
-        output = '<p>[page ' + str(first_page_object["n"]) + "]</p>" + output
+        else:
+            output = '<p class="page-image-link">[page ' + str(first_page_object["n"]) + "]</p>" + output
     ## Fetch all remainging imgs in document
     all_imgs = get_all_page_images(philo_id, config, current_obj_img)
     img_obj = {'all_imgs': all_imgs, 'current_obj_img': current_obj_img}
-    
     return output, img_obj
+
 
 def get_first_page(philo_id, config):
     """This function will fetch the first page of any given text object in case there's no <pb>
@@ -253,7 +267,7 @@ def get_first_page(philo_id, config):
     return page
 
 def get_all_page_images(philo_id, config, current_obj_imgs):
-    if current_obj_imgs:
+    if current_obj_imgs[0]:
         # We know there are images
         db = DB(config.db_path + '/data/')
         c = db.dbh.cursor()

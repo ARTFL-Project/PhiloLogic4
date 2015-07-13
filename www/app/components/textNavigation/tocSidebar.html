@@ -5,11 +5,23 @@
         </button>
     </div>
     <div id="toc-content">
+		<div ng-if="beginFilter" style="font-weight: 700;">
+			For performance considerations, the preceding content is not displayed.
+			Please click on the first element of this table and reopen it
+			to see the remaining elements.
+			<hr>
+		</div>
         <div ng-repeat="element in ::tocElements track by element.philo_id">
             <div id="{{ ::element.philo_id }}" class="toc-{{ ::element.philo_type }}" ng-click="textNav.goToTextObject(element.philo_id)">
                 <span class="bullet-point-{{ ::element.philo_type }}"></span>
                 <a class="{{ ::element.currentObj }}" href="">{{ ::element.label }}</a>
             </div>
         </div>
+		<div ng-if="endFilter" style="font-weight: 700">
+			<hr>
+			For performance considerations, the remaining content is not displayed.
+			Please click on the last element of this table and reopen it
+			to see the remaining elements.
+		</div>
     </div>
 </div>
