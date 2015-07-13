@@ -395,8 +395,8 @@ div[type="notes"] .xml-note {
         color: #fff !important;
         opacity: 1;
 }
-.blueimp-gallery>.prev, .blueimp-gallery>.next {
-        font-size: 40px;
+.blueimp-gallery .glyphicon {
+        font-size: 60%;
 }
 #blueimp-gallery ol {
 	display: none;
