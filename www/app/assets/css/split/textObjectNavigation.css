@@ -410,6 +410,9 @@ div[type="notes"] .xml-note {
 	padding-right: 15px;
 	padding-top: 15px;
 }
+.inline-img:hover {
+	cursor: pointer;
+}
 
 .link-back {
 	margin-left: 10px;

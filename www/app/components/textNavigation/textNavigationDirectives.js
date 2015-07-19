@@ -244,6 +244,40 @@ philoApp.directive('pageImageLink', function() {
     }
 });
 
+philoApp.directive('inlineImg', function() {
+    var launchGallery = function() {
+        var imageList = [];
+        $('#book-page').find('img.inline-img').parent('.inline-img-container').each(function() {
+            imageList.push($(this).attr('href'));
+        });
+        return imageList;
+    }
+    return {
+        restrict: 'C',
+        link: function(scope, element) {
+            element.click(function(e) {
+                e.preventDefault();
+                scope.gallery = blueimp.Gallery(launchGallery(), {
+                    onopen: function() {
+                        this.index = element.index('img.inline-img');
+                    },
+                    continuous: false,
+					thumbnailIndicators: false
+                });
+                $('#full-size-image').off();
+                $('#full-size-image').click(function() {
+                    var imageIndex = scope.gallery.getIndex();
+                    var img = $("#blueimp-gallery").find("[data-index='" + imageIndex + "'] img");
+                    window.open(img.attr('src'));
+                });
+            });
+            element.on('$destroy', function() {
+                $('#full-size-image').off();
+            });
+        }
+    }
+});
+
 philoApp.directive('noteRef', ['$http', function($http) {
     return {
         restrict: 'C',
