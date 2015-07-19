@@ -66,3 +66,21 @@ ul {
     transform: translateX(30px);
     opacity: 0;
 }
+
+.landing-page-logo {
+	text-align: center;
+	margin: 15px 0px 25px 0px;
+}
+.landing-page-logo img {
+	max-width: 100%;
+}
+@media (max-width: 992px) {
+	.landing-page-logo.dictionary {
+		margin: 40px 0px 25px 0px;
+	}
+}
+@media (max-width: 768px) {
+	.landing-page-logo.dictionary {
+		margin: 70px 0px 25px 0px;
+	}
+}
