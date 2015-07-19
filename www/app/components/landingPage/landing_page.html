@@ -1,5 +1,8 @@
 <div id="landing-page-container">
     <div id="philo-view" ng-if="lp.authorized">
+		<div class="landing-page-logo" ng-if="philoConfig.logo">
+			<img ng-src="{{ ::philoConfig.logo }}">
+		</div>
         <default-landing-page ng-if="lp.dictionary === false"></default-landing-page>
         <dictionary-landing-page ng-if="lp.dictionary"></dictionary-landing-page>
         <landing-page-content name="{{ lp.query }}"></landing-page-content>

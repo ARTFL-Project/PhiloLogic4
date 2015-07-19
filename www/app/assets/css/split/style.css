@@ -507,3 +507,8 @@ progress-bar {
 	font-family: 'Droid Sans Mono', sans-serif;
 	font-size: 13px;
 }
+
+.landing-page-logo {
+	text-align: center;
+	margin: 15px 0px 25px 0px;
+}

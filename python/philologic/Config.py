@@ -209,12 +209,21 @@ web_config_defaults = {
      'page_images_url_root': {
           'value': '',
           'comment': '''
-                 # The page_images_url_root defines a root URL where pages images can be fetched when a filename is provided inside a page tag.
+                 # The page_images_url_root variable defines a root URL where pages images can be fetched when a filename is provided inside a page tag.
                  # Note that the page image filename must be inside a fac or id attribute such as:
                  # <pb fac="filename.jpg"> or <pb id="filename.jpg">
                  # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
                  ''',
           'index': 20
+     },
+     'logo': {
+          'value': '',
+          'comment': ''''
+                  # The logo variable defines the location of an image to display on the landing page, just below the
+                  # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
+                  # it starts with http://. If no logo is defined, no picture will be displayed.'
+                  ''',
+          'index': 21
      }
 }
 
