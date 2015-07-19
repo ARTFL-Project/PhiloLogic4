@@ -408,6 +408,7 @@ div[type="notes"] .xml-note {
 	float: left;
 	height: auto;
 	padding-right: 15px;
+	padding-top: 15px;
 }
 
 .link-back {

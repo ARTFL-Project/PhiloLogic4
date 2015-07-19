@@ -106,6 +106,8 @@ class WSGIHandler(object):
                 self.no_q = True
             else:
                 self.no_q = False
+        else:
+            self.no_q = True
         
         if num_empty == len(self.metadata_fields):
             self.no_metadata = True

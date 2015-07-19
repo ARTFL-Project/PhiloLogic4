@@ -49,7 +49,7 @@ def get_bibliography(environ,start_response):
             c.execute('select max(rowid) from toms;')
             next_doc_row = c.fetchone()[0]
         try:
-            c.execute('select * from toms where rowid between %d and %d and head is not null and head !="" and type !="editorial" and type !="misc" limit 1' % (doc_row, next_doc_row))
+            c.execute('select * from toms where rowid between %d and %d and head is not null and head !="" and type !="editorial" and type !="misc" and type !="Misc" and type != "Avertissement" and type != "Title Page" limit 1' % (doc_row, next_doc_row))
         except sqlite3.OperationalError: # no type field in DB
             c.execute('select * from toms where rowid between %d and %d and head is not null and head !="" limit 1' % (doc_row, next_doc_row))
         try:
@@ -59,7 +59,7 @@ def get_bibliography(environ,start_response):
             print >> sys.stderr, repr(e)
             start_head = ''
         try:
-            c.execute('select head from toms where rowid between %d and %d and head is not null and head !="" and type !="notes" and type !="editorial" and type !="misc" order by rowid desc limit 1' % (doc_row, next_doc_row))
+            c.execute('select head from toms where rowid between %d and %d and head is not null and head !="" and type !="notes" and type !="editorial" and type !="misc" and type !="Misc" and type != "Avertissement" and type != "Title Page" order by rowid desc limit 1' % (doc_row, next_doc_row))
         except sqlite3.OperationalError: # no type field in DB
             c.execute('select head from toms where rowid between %d and %d and head is not null and head !="" order by rowid desc limit 1' % (doc_row, next_doc_row))
         try:

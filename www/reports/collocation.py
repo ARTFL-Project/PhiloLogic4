@@ -52,7 +52,8 @@ def fetch_collocation(hits, q, db, config):
         for word in group:
             word = word.replace('"', '')
             query_words.append(word)
-    filter_list.union(set(query_words))
+    query_words = set(query_words)
+    filter_list = filter_list.union(query_words)
         
     stored_sentence_id = None
     stored_sentence_counts = defaultdict(int)
