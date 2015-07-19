@@ -189,16 +189,17 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[]):
                 if el[0].tag == "graphic":
                     img_url = el[0].attrib["url"].replace(":","_")
                     volume = re.match("\d+",img_url).group()
-                    url_prefix = "http://artflx.uchicago.edu/images/encyclopedie/V" + volume + "/plate_"
-                    el.tag = "a"
+                    url_prefix = config.page_images_url_root + '/V' + volume + "/plate_"
+                    el.tag = "span"
                     el.attrib["href"] = url_prefix + img_url + ".jpeg"
                     el[0].tag = "img"
                     el[0].attrib["src"] = url_prefix + img_url + ".sm.jpeg"
-                    el[0].attrib["class"] = "plate_img"
-                    el.attrib["class"] = "plate-image-link"
-                    el.attrib['data-gallery'] = ''
+                    el[0].attrib["class"] = "inline-img"
+                    el.attrib["class"] = "inline-img-container"
                     del el[0].attrib["url"]
-                    el.append(etree.Element("br"))
+                    clear_float = etree.Element("span")
+                    clear_float.attrib['style'] = 'clear:both;'
+                    el[0].append(clear_float)
             elif el.tag == "philoHighlight":        
                 word_match = re.match(word_regex, el.tail, re.U)
                 if word_match:

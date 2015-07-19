@@ -2,7 +2,6 @@
 
 import os
 import sys
-import urlparse
 sys.path.append('..')
 from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
@@ -13,7 +12,9 @@ import cgi
 import json
 import sqlite3
 
+
 object_levels = set(["doc", "div1", "div2", "div3"])
+
 
 def get_bibliography(environ,start_response):
     status = '200 OK'
@@ -47,15 +48,19 @@ def get_bibliography(environ,start_response):
         except TypeError: # if this is the last doc, just get the last rowid in the table.
             c.execute('select max(rowid) from toms;')
             next_doc_row = c.fetchone()[0]
-        c.execute('select * from toms where rowid between %d and %d and head is not null and head !="" limit 1' % (doc_row, next_doc_row))
         try:
-            start_head = c.fetchone()['head']
-            start_head = start_head.decode('utf-8').lower().title().encode('utf-8')
-        except:
+            c.execute('select * from toms where rowid between %d and %d and head is not null and head !="" and type !="editorial" and type !="misc" limit 1' % (doc_row, next_doc_row))
+        except sqlite3.OperationalError: # no type field in DB
+            c.execute('select * from toms where rowid between %d and %d and head is not null and head !="" limit 1' % (doc_row, next_doc_row))
+        try:
+            start_head = c.fetchone()['head'].decode('utf-8')
+            start_head = start_head.lower().title().encode('utf-8')
+        except Exception as e:
+            print >> sys.stderr, repr(e)
             start_head = ''
         try:
-            c.execute('select head from toms where rowid between %d and %d and head is not null and head !="" and type !="notes" order by rowid desc limit 1' % (doc_row, next_doc_row))
-        except sqlite3.OperationalError:
+            c.execute('select head from toms where rowid between %d and %d and head is not null and head !="" and type !="notes" and type !="editorial" and type !="misc" order by rowid desc limit 1' % (doc_row, next_doc_row))
+        except sqlite3.OperationalError: # no type field in DB
             c.execute('select head from toms where rowid between %d and %d and head is not null and head !="" order by rowid desc limit 1' % (doc_row, next_doc_row))
         try:
             end_head = c.fetchone()['head']

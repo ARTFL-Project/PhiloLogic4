@@ -402,6 +402,14 @@ div[type="notes"] .xml-note {
 	display: none;
 }
 
+/*Inline images*/
+.inline-img {
+	max-width: 40%;
+	float: left;
+	height: auto;
+	padding-right: 15px;
+}
+
 .link-back {
 	margin-left: 10px;
 	line-height: initial;
