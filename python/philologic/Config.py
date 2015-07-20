@@ -221,7 +221,7 @@ web_config_defaults = {
           'comment': ''''
                   # The logo variable defines the location of an image to display on the landing page, just below the
                   # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
-                  # it starts with http://. If no logo is defined, no picture will be displayed.'
+                  # it starts with http://. If no logo is defined, no picture will be displayed.
                   ''',
           'index': 21
      }

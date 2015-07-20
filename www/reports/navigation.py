@@ -38,7 +38,7 @@ def navigation(environ,start_response):
     text_object = generate_text_object(obj, db, request, config)
     yield json.dumps(text_object)
 
-def generate_text_object(obj, db, q, config):
+def generate_text_object(obj, db, q, config, note=False):
     philo_id = list(obj.philo_id)
     while philo_id[-1] == 0:
         philo_id.pop()
@@ -53,7 +53,7 @@ def generate_text_object(obj, db, q, config):
     citation_hrefs = citation_links(db, config, obj)
     citation = biblio_citation(obj, citation_hrefs)
     text_object['citation'] = citation
-    text, imgs = get_text_obj(obj, config, q, db.locals['word_regex'])
+    text, imgs = get_text_obj(obj, config, q, db.locals['word_regex'], note=note)
     text_object['text'] = text
     text_object['imgs'] = imgs
     return text_object
@@ -72,7 +72,7 @@ def neighboring_object_id(db, philo_id):
     return philo_id
 
 
-def get_text_obj(obj, config, q, word_regex):
+def get_text_obj(obj, config, q, word_regex, note=False):
     path = config.db_path
     filename = obj.doc.filename
     if filename and os.path.exists(path + "/data/TEXT/" + filename):
@@ -93,11 +93,11 @@ def get_text_obj(obj, config, q, word_regex):
     except ValueError: ## q.byte contains an empty string
         bytes = []
         
-    formatted_text, imgs = format_text_object(obj, raw_text, config, q, word_regex, bytes=bytes)
+    formatted_text, imgs = format_text_object(obj, raw_text, config, q, word_regex, bytes=bytes, note=note)
     formatted_text = formatted_text.decode("utf-8","ignore")
     return formatted_text, imgs
 
-def format_text_object(obj, text, config, q, word_regex, bytes=[]):
+def format_text_object(obj, text, config, q, word_regex, bytes=[], note=False):
     philo_id = obj.philo_id
     if bytes:
         new_text = ""
@@ -215,6 +215,9 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[]):
     ## remove spaces around hyphens and apostrophes
     output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
     output = convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
+    
+    if note: ## Notes don't need to fetch images
+        return (output, {})
     
     ## Page images
     output, img_obj = page_images(config, output, current_obj_img, philo_id)
