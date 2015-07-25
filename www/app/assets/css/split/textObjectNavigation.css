@@ -91,6 +91,7 @@
 }
 #toc-content {
     display: inline-block;
+	position: relative;
     overflow: scroll;
     padding: 10px;
     line-height: 150%;
@@ -166,6 +167,23 @@
 }
 .toc-div1:hover, .toc-div2:hover, .toc-div3:hover {
 	cursor: pointer;
+}
+.toc-more {
+	text-align: center;
+	opacity: .9;
+}
+.toc-more.before {
+	margin-top: -10px;
+	margin-bottom: 10px;
+}
+.toc-more.after {
+	margin-top: 10px;
+}
+.toc-more > button {
+	width: 100%;
+	padding:2px;
+	line-height: normal;
+	font-size: initial;
 }
 
 #text-obj-content {

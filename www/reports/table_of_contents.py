@@ -72,7 +72,6 @@ def generate_toc_object(obj, db, q, config):
                 display_name = "Front Matter"
             elif i['philo_name'] == "note":
                 continue
-                #display_name = i['philo_name'] + ' ' + i['n']
             else:
                 display_name = i['head']
                 if display_name:

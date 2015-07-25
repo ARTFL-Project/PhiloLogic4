@@ -126,13 +126,16 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 		$http.post('scripts/get_metadata_token_count.py',
 				   JSON.stringify({results: scope.fullResults.unsorted,	hits_done: hitsDone}))
 		.then(function(response) {
-			var relativeResults = progressiveLoad.mergeResults(scope.fullRelativeFrequencies, response.data.frequencies);
-			scope.fullRelativeFrequencies = relativeResults.unsorted
-			scope.concKwic.frequencyResults = angular.copy(relativeResults.sorted).slice(0, 500);
+			angular.merge(scope.fullRelativeFrequencies, response.data.frequencies);
+			//scope.fullRelativeFrequencies = relativeResults.unsorted
+			console.log(response.data.frequencies)
+			var sortedRelativeResults = progressiveLoad.sortResults(scope.fullRelativeFrequencies);
+			scope.concKwic.frequencyResults = angular.copy(sortedRelativeResults.slice(0, 500));
 			scope.showingRelativeFrequencies = true;
 			scope.loading = false;
 			if (response.data.more_results) {
-				scope.percent = Math.round(relativeResults.sorted.length / scope.fullResults.sorted.length * 100);
+				console.log(sortedRelativeResults.length, scope.fullResults)
+				scope.percent = Math.round(sortedRelativeResults.length / scope.fullResults.sorted.length * 100);
 				getRelativeFrequencies(scope, response.data.hits_done)
 			} else {
 				scope.percent = 100
@@ -160,6 +163,7 @@ philoApp.directive('facets', ['$rootScope', '$location', '$http', 'URL', 'progre
 				if (scope.relativeFrequencies === 'undefined') {
 					scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
 					scope.percent = 0;
+					scope.fullRelativeFrequencies = {};
 					getRelativeFrequencies(scope, 0);
 				} else {
 					scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);

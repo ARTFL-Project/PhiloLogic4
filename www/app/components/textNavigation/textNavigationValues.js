@@ -6,5 +6,5 @@ philoApp.value('textNavigationValues', {
     tocOpen: false,
     navBar: false,
     prev: "",
-    next: ""
+    next: "",
 });

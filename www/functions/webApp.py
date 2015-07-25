@@ -29,7 +29,8 @@ js_plugins = [
     "app/assets/js/plugins/angular-velocity.min.js",
     "app/assets/js/plugins/ng-infinite-scroll.min.js",
     "app/assets/js/plugins/jquery.tagcloud.js",
-    "app/assets/js/plugins/blueimp-gallery.min.js"
+    "app/assets/js/plugins/blueimp-gallery.min.js",
+    "app/assets/js/plugins/jquery.scrollTo.min.js"
 ]
 
 ## Full List of all AngularJS specific JavaScript

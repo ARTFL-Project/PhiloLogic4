@@ -21,6 +21,13 @@ def get_table_of_contents(environ, start_response):
     path = config.db_path
     obj = ObjectWrapper(request['philo_id'].split(), db)
     toc_object = r.generate_toc_object(obj, db, request, config)
+    current_obj_position = 0
+    for pos, toc_element in enumerate(toc_object['toc']):
+        if toc_element['philo_id'] == request.philo_id:
+            toc_element['current'] = "current-obj"
+            current_obj_position = pos
+            break
+    toc_object['current_obj_position'] = current_obj_position
     yield json.dumps(toc_object)
     
 if __name__ == "__main__":

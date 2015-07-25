@@ -14,12 +14,12 @@ philoApp.controller('textNavigationCtrl', ['$scope', '$rootScope', '$location', 
     vm.textObject = {};
     vm.loading = true;
     vm.navBar = textNavigationValues.navBar; // Don't draw navBar until text has been fetched
-    vm.tocElements = textNavigationValues.tocElements;
     vm.tocOpen = false;
     vm.tocDone = false // Only fetch TOC once navBar has been drawn
+	vm.textRendered = false;
     
     vm.philoId = $routeParams.pathInfo.replace('/', ' ');
-    
+	    
     if (vm.tocOpen) {
         $timeout(function() {
             $('.current-obj').velocity("scroll", {duration: 0, container: $("#toc-content"), offset: -50});

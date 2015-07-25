@@ -4,6 +4,7 @@ from __future__ import division
 import timeit
 import sys
 sys.path.append('..')
+from copy import deepcopy
 from functions.wsgi_handler import WSGIHandler
 from philologic.DB import DB
 from wsgiref.handlers import CGIHandler
@@ -28,7 +29,9 @@ def get_metadata_token_count(environ,start_response):
     count = 0
     sorted_frequencies = sorted(frequencies.iteritems(), key= lambda x: x[0])
     
-    for label, m in sorted_frequencies[hits_done:]:
+    start_hits_done = deepcopy(hits_done)
+    
+    for label, m in sorted_frequencies[start_hits_done:]:
         args = []
         query_metadata = {}
         for metadata in m['metadata']:
@@ -51,7 +54,7 @@ def get_metadata_token_count(environ,start_response):
         frequencies[label]['total_count'] = total_count
         hits_done += 1
         elapsed = timeit.default_timer() - start_time
-        if elapsed > 10: # avoid timeouts by splitting the query if more than 10 seconds has been spent in the loop
+        if elapsed > 5: # avoid timeouts by splitting the query if more than 10 seconds has been spent in the loop
             break
     
     if len(sorted_frequencies) > hits_done:
@@ -59,7 +62,7 @@ def get_metadata_token_count(environ,start_response):
     else:
         more_results = False
         
-    yield json.dumps({"frequencies": dict(sorted_frequencies[:hits_done]),
+    yield json.dumps({"frequencies": dict(sorted_frequencies[start_hits_done:hits_done]),
                       "more_results": more_results,
                       "hits_done": hits_done})
     
