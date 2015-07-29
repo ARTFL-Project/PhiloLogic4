@@ -1,33 +1,37 @@
 "use strict";
 
 philoApp.directive('concordance', ['$rootScope', '$http', 'request', function($rootScope, $http, request) {
-     var moreContext = function($event, resultNumber) {
-        var element = $($event.currentTarget).parents('.philologic_occurrence').find('.philologic_context');
-        var defaultElement = element.find('.default-length');
-        var moreContextElement = element.find('.more-length');
-        if (defaultElement.css('display') == "none") {
-            moreContextElement.hide()
-            defaultElement.velocity('fadeIn', {duration: 300});
-        } else {
-            if (moreContextElement.is(':empty')) {
-                var extraParams = {script: 'get_more_context.py', hit_num: resultNumber};
-				request.script($rootScope.formData, extraParams).then(function(response) {
-                    defaultElement.hide();
-                    moreContextElement.html(response.data).promise().done(function() {
-                            $(this).velocity('fadeIn', {duration: 300});
-                        });
-                });
-            } else {
-                defaultElement.hide();
-                moreContextElement.velocity('fadeIn', {duration: 300});
-            }
-        }
-    } 
+    if ($rootScope.philoConfig.dico_citation) {
+        var templateType = "concordance_dico.html";
+    } else {
+		var templateType = "concordance.html";
+	}
     return {
-        templateUrl: 'app/components/concordanceKwic/concordance.html',
+        templateUrl: 'app/components/concordanceKwic/' + templateType,
 		replace: true,
         link: function(scope) {
-            scope.moreContext = moreContext;
+            scope.moreContext = function($event, resultNumber) {
+				var element = $($event.currentTarget).parents('.philologic_occurrence').find('.philologic_context');
+				var defaultElement = element.find('.default-length');
+				var moreContextElement = element.find('.more-length');
+				if (defaultElement.css('display') == "none") {
+					moreContextElement.hide()
+					defaultElement.velocity('fadeIn', {duration: 300});
+				} else {
+					if (moreContextElement.is(':empty')) {
+						var extraParams = {script: 'get_more_context.py', hit_num: resultNumber};
+						request.script($rootScope.formData, extraParams).then(function(response) {
+							defaultElement.hide();
+							moreContextElement.html(response.data).promise().done(function() {
+									$(this).velocity('fadeIn', {duration: 300});
+								});
+						});
+					} else {
+						defaultElement.hide();
+						moreContextElement.velocity('fadeIn', {duration: 300});
+					}
+				}
+			} 
         }
     }
 }]);
@@ -59,8 +63,13 @@ philoApp.directive('kwic', ['$rootScope', function($rootScope) {
 }]);
 
 philoApp.directive('bibliography', ['$rootScope', function($rootScope) {
+	if ($rootScope.philoConfig.dico_citation) {
+        var templateType = "bibliography_dico.html";
+    } else {
+		var templateType = "bibliography.html";
+	}
     return {
-        templateUrl: 'app/components/concordanceKwic/bibliography.html',
+        templateUrl: 'app/components/concordanceKwic/' + templateType,
 		replace: true,
 		link: function(scope) {
 			scope.metadataAddition = [];

@@ -188,13 +188,20 @@ web_config_defaults = {
                # for browsing the database available on the landing page. The default represents the entire roman alphabet.''',
         'index': 17
     },
+    'dico_citation': {
+        'value': False,
+        'comment': '''
+               # The dico_citation variable set to True enables a dictionary citation in concordances. Headword is cited first, followed by author if relevant,
+               # or class of knowledge if available.''',
+        'index': 18
+    },
     'kwic_bibliography_fields': {
          'value': [],
          'comment': '''
                 # The kwic_bibliography_fields variable variable defines which bibliography fields will be displayed in the KWIC view. It should be
                 # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.                # If the variable is an empty list, the first two fields in the metadata variable will be used.
                 ''',
-         'index': 18
+         'index': 19
      },
      'title_prefix_removal': {
           'value': [],
@@ -204,7 +211,7 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-          'index': 19
+          'index': 20
      },
      'page_images_url_root': {
           'value': '',
@@ -214,7 +221,7 @@ web_config_defaults = {
                  # <pb fac="filename.jpg"> or <pb id="filename.jpg">
                  # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
                  ''',
-          'index': 20
+          'index': 21
      },
      'logo': {
           'value': '',
@@ -223,7 +230,7 @@ web_config_defaults = {
                   # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
                   # it starts with http://. If no logo is defined, no picture will be displayed.
                   ''',
-          'index': 21
+          'index': 22
      }
 }
 

@@ -6,7 +6,6 @@ philoApp.directive('textObject', ['$routeParams', '$timeout', '$location', 'requ
 		scope.textNav.textRendered = false;
         scope.textObjectURL = $routeParams;
         scope.philoID = scope.textObjectURL.pathInfo.split('/').join(' ');
-		console.log(scope.philoID)
         if ("byte" in scope.textObjectURL) {
             scope.byteOffset = scope.textObjectURL.byte;
         } else {
@@ -20,7 +19,6 @@ philoApp.directive('textObject', ['$routeParams', '$timeout', '$location', 'requ
         })
         .then(function(response) {
             scope.textObject = response.data;
-			console.log('after')
             textNavigationValues.textObject = response.data;
             textNavigationValues.citation = response.data.citation;
             textNavigationValues.navBar = true;
@@ -83,13 +81,13 @@ philoApp.directive('textObject', ['$routeParams', '$timeout', '$location', 'requ
 philoApp.directive('tocSidebar', ['$routeParams', '$timeout', 'request', 'textNavigationValues',
 								  function($routeParams, $timeout, request, textNavigationValues) {
     var getTableOfContents = function(scope, philoId) {
-		scope.currentPhiloId = philoId;
         request.script({
             philo_id: philoId,
             script: 'get_table_of_contents.py'
         })
         .then(function(response) {
             scope.tocElements = response.data.toc;
+			scope.currentPhiloId = response.data.philo_id.join(' ');
 			scope.start = response.data.current_obj_position - 100;
 			if (scope.start < 0) {
                 scope.start = 0;
@@ -127,17 +125,28 @@ philoApp.directive('tocSidebar', ['$routeParams', '$timeout', 'request', 'textNa
 				scope.loadBefore = function() {
 					var firstElement = scope.tocElements[scope.start - 2].philo_id;
 					scope.start -= 200;
+					if (scope.start < 0) {
+                        scope.start = 0;
+                    }
 					scope.tocPosition = firstElement;
 				}
 				scope.loadAfter = function() {
 					scope.end += 200;
+				}
+				scope.textObjectSelection = function(philoId, index) {
+					textNavigationValues.tocElements.start = index - 100;
+					if (textNavigationValues.tocElements.start < 0) {
+                        textNavigationValues.tocElements.start = 0;
+                    }
+					textNavigationValues.tocElements.end = index + 100;
+					scope.textNav.goToTextObject(philoId);
 				}
 			});
         }
     }
 }]);
 
-philoApp.directive('scrollTo', ['$anchorScroll', '$timeout', function($anchorScroll, $timeout) {
+philoApp.directive('scrollTo', ['$timeout', function($timeout) {
 	return {
 		link: function(scope, element, attrs) {
 			attrs.$observe('scrollTo', function(id) {
@@ -147,7 +156,6 @@ philoApp.directive('scrollTo', ['$anchorScroll', '$timeout', function($anchorScr
 						element.scrollTo(target);
 					}, 0)
                 }
-				
 			});
 		}
 	}

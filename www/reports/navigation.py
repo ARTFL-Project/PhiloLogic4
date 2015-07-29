@@ -33,6 +33,10 @@ def navigation(environ,start_response):
     except ValueError:
         philo_id = ' '.join(request.path_components)
         obj = db[philo_id]
+    philo_id = obj.philo_id
+    while obj['philo_name'] == '__philo_virtual' and obj["philo_type"] != "div1":
+        philo_id.pop()
+        obj = db[philo_id]
     headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
     start_response('200 OK',headers)
     text_object = generate_text_object(obj, db, request, config)
