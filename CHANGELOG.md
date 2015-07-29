@@ -9,5 +9,7 @@
 - Improve compression at load time
 - Better title sorting in landing page
 - Better page image handling
+- Add dictionary style citations in concordance and bibliography view
+- Added an option to add a landing page logo/image
 - Bug fixes
 - API clean-up
