@@ -39,7 +39,7 @@ def concordance_results(db, q, config):
     start, end, n = f.link.page_interval(q['results_per_page'], hits, q.start, q.end)
     
     concordance_object = {"description": {"start": start, "end": end, "results_per_page": q.results_per_page},
-                          "query": dict([i for i in q])}
+                          "query": dict([i for i in q]), "default_object": db.locals['default_object_level']}
     
     results = []
     for hit in hits[start - 1:end]:

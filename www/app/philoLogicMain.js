@@ -40,6 +40,11 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'accessCo
             textNavigationValues.navBar = false;
         }
     });
+	
+	$scope.backToHome = function() {
+		$scope.$broadcast('backToHome');
+		$location.url('/');
+	}
 }]);
 
 philoApp.config(['$routeProvider', '$locationProvider',
