@@ -25,6 +25,10 @@ philoApp.controller('landingPage', ['$rootScope', '$location', 'accessControl', 
     vm.goToBibliography = function(url) {
         $location.url(url);
     }
+	
+	vm.goToToc = function(docId) {
+		$location.url('navigate/' + docId + '/table-of-contents');
+	}
 }]);
 
 philoApp.animation('.repeated-item', function() {

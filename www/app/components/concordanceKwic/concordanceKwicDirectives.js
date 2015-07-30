@@ -260,8 +260,8 @@ philoApp.directive('pages', ['$location', 'URL', function($location, URL) {
     }
     return {
         restrict: 'E',
-        template: ['<div id="page_links" class="btn-group">',
-						'<a href="{{ page.href }}" id="current_results_page" class="btn btn-default btn-lg {{ page.active }}" ng-repeat="page in pages">{{ page.display }}</a>',
+        template: ['<div id="page-links" class="btn-group">',
+						'<a href="{{ page.href }}" class="btn btn-default btn-lg {{ page.active }}" ng-repeat="page in pages">{{ page.display }}</a>',
 				   '</div>'].join(''),
 		replace: true,
         link: function(scope, element, attrs) {

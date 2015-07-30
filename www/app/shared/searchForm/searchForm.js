@@ -62,6 +62,7 @@ philoApp.controller('searchForm', ['$scope', '$rootScope', '$http', '$location',
     }
 	
 	$scope.$on('backToHome', function() {
-		$scope.toggleForm();
+		$scope.formOpen = false;
+        $scope.searchOptionsButton = "Show search options";
 	})
 }]);

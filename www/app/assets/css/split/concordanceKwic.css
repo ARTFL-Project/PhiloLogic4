@@ -178,6 +178,9 @@
 #return_to_colloc:hover {
 	cursor: pointer;
 }
+#page-links a:hover {
+	color:inherit !important;
+}
 
 /*All the sidebar classes*/
 #sidebar {
