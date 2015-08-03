@@ -1,6 +1,7 @@
 #### 4.0 => 4.1 ####
 - Completely rewritten collocations: faster and accurate
 - Added relative frequencies to frequencies in facets
+- Added sorted KWIC: by word to the left or right of match.
 - Support for regexes in quoted term searches (aka exact matches)
 - Added ability to filter out words in query expansion through a popup using the NOT syntax
 - Added ability to select titles when no titles are selected in bibliographic searches
