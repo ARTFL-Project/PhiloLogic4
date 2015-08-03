@@ -22,10 +22,11 @@ def get_sorted_kwic(environ,start_response):
     start_response(status,headers)
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
-    environ['QUERY_STRING'] = environ['HTTP_REFERER'].replace(config.db_url + '/query?', '')
-    request = WSGIHandler(db, environ)
     input_object = json.loads(environ['wsgi.input'].read())
     indices = input_object['results']
+    query_string = input_object['query_string']
+    environ['QUERY_STRING'] = query_string
+    request = WSGIHandler(db, environ)
     sorted_hits = get_sorted_hits(indices, request, config, db)
     yield json.dumps(sorted_hits)
 

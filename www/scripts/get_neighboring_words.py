@@ -41,26 +41,28 @@ def get_neighboring_words(environ,start_response):
     for hit in hits[index:]:
         word_id = ' '.join([str(i) for i in hit.philo_id])
         doc_id = str(hit.philo_id[0])
-        query = 'select rowid, philo_name from words where philo_id="%s" limit 1' % word_id
+        query = 'select rowid, philo_name, parent from words where philo_id="%s" limit 1' % word_id
         c.execute(query)
         results = c.fetchone()
         
-        if request.direction == "left":
-            row_id = results['rowid'] - 1
-        else:
-            row_id = results['rowid'] + 1
         hit_word = results['philo_name']
+        parent_sentence = results['parent']
         
-        c.execute('select philo_name, philo_id from words where rowid=? limit 1', (row_id,))
-        new_results = c.fetchone()
-        neighbor_doc_id = str(new_results['philo_id'].split()[0])
-        
-        # Make sure both words are in the same document
-        if doc_id == neighbor_doc_id:
-            neighbor_word = new_results['philo_name'].decode('utf-8')
+        if request.direction == "left":
+            c.execute('select philo_name, philo_id from words where parent=? and rowid < ?', (parent_sentence, results['rowid']))
+            string = []
+            for i in c.fetchall():
+                string.append(i['philo_name'].decode('utf-8'))
+            string.reverse()
+            string = ' '.join(string)
         else:
-            neighbor_word = hit_word.decode('utf-8')
-        kwic_words.append((neighbor_word, index))
+            c.execute('select philo_name, philo_id from words where parent=? and rowid > ?', (parent_sentence, results['rowid']))
+            string = []
+            for i in c.fetchall():
+                string.append(i['philo_name'].decode('utf-8'))
+            string = ' '.join(string)
+
+        kwic_words.append((string, index))
         
         index += 1
         

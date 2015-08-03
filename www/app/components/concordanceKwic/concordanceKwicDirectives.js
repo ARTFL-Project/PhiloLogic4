@@ -106,7 +106,12 @@ philoApp.directive('kwic', ['$rootScope', '$location', '$http', 'URL', 'request'
 			var end = start + parseInt(scope.formData.results_per_page);
 		}
 		$http.post('scripts/get_sorted_kwic.py',
-			JSON.stringify({results: scope.sortedResults.slice(start,end), hits_done: hitsDone}))
+			JSON.stringify({
+				results: scope.sortedResults.slice(start,end),
+				hits_done: hitsDone,
+				query_string: URL.objectToString($location.search())
+				})
+			)
 		.then(function(response) {
 			scope.results = response.data;
 		});
@@ -148,7 +153,7 @@ philoApp.directive('kwic', ['$rootScope', '$location', '$http', 'URL', 'request'
 					scope.concKwic.loading = false;
 				});
 			} else {
-				scope.concKwic.resultsPromise.then(function(results) {
+				scope.concKwic.resultsPromise.then(function(results) { // Rerun normal KWIC query since this could be a reload
 					scope.concKwic.description = angular.extend({}, results.data.description, {resultsLength: results.data.results_length});
 					var queryParams = $location.search();
 					queryParams.script = 'get_neighboring_words.py';
