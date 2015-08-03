@@ -10,6 +10,15 @@ philoApp.directive('concordance', ['$rootScope', '$http', 'request', function($r
         templateUrl: 'app/components/concordanceKwic/' + templateType,
 		replace: true,
         link: function(scope) {
+			scope.concKwic.resultsPromise.then(function(results) {
+				scope.results = results.data;
+				scope.concKwic.description = angular.extend({}, scope.results.description, {resultsLength: scope.results.results_length});
+				scope.concKwic.loading = false;
+			}).catch(function(response) {
+				scope.results = {};
+				scope.concKwic.description = {};
+				scope.concKwic.loading = false;
+			});
             scope.moreContext = function($event, resultNumber) {
 				var element = $($event.currentTarget).parents('.philologic_occurrence').find('.philologic_context');
 				var defaultElement = element.find('.default-length');
@@ -36,7 +45,72 @@ philoApp.directive('concordance', ['$rootScope', '$http', 'request', function($r
     }
 }]);
 
-philoApp.directive('kwic', ['$rootScope', function($rootScope) {
+philoApp.directive('kwic', ['$rootScope', '$location', '$http', 'URL', 'request', 'defaultDiacriticsRemovalMap', 'descriptionValues',
+							function($rootScope, $location, $http, URL, request, defaultDiacriticsRemovalMap, descriptionValues) {
+	var removeDiacritics = function(str) {
+		var changes = defaultDiacriticsRemovalMap.map;
+		for(var i=0; i<changes.length; i++) {
+			str = str.replace(changes[i].letters, changes[i].base);
+		}
+		return str;
+	}
+	var sortResults = function(results) {
+		results.sort(function(a,b) {
+			if (isNaN(a[0]) && !isNaN(b[0])) {
+                return -1;
+            }
+			if (isNaN(b[0]) && !isNaN(a[0])) {
+                return 1;
+            }
+            var x = removeDiacritics(a[0]);
+            var y = removeDiacritics(b[0]);
+            return x < y ? -1 : x > y ? 1 : 0;
+        });
+		return results;
+	}
+	var mergeLists = function(list1, list2) {
+		for (var i=0; i < list2.length; i+=1) {
+			list1.push(list2[i]);
+		}
+		return list1;
+	}
+	var recursiveLookup = function(scope, queryParams, direction, hitsDone) {
+		request.script(queryParams, {direction: direction, hits_done: hitsDone})
+		.then(function(response) {
+			var hitsDone = response.data.hits_done;
+			if (scope.sortedResults.length === 0) {
+				scope.sortedResults = response.data.results;
+			} else {
+				scope.sortedResults = mergeLists(scope.sortedResults, response.data.results)
+			}
+			if (hitsDone < descriptionValues.resultsLength) {
+				recursiveLookup(scope, queryParams, direction, hitsDone);
+			} else {
+				scope.sortedResults = sortResults(scope.sortedResults);
+				queryParams.start = '0';
+				queryParams.end = '0';
+				descriptionValues.sortedKwic = {
+					results: scope.sortedResults,
+					queryObject: angular.extend({}, queryParams, {direction: direction})
+				}
+				getKwicResults(scope, hitsDone);
+				scope.concKwic.loading = false;
+			}
+		});
+	}
+	var getKwicResults = function(scope, hitsDone) {
+		var start = parseInt(scope.formData.start);
+		if (typeof(scope.formData.results_per_page) === 'undefined') {
+            var end = start + 25;
+        } else {
+			var end = start + parseInt(scope.formData.results_per_page);
+		}
+		$http.post('scripts/get_sorted_kwic.py',
+			JSON.stringify({results: scope.sortedResults.slice(start,end), hits_done: hitsDone}))
+		.then(function(response) {
+			scope.results = response.data;
+		});
+	}
     var initializePos = function(results, index) {
         var start = results.description.start;
         var currentPos = start + index;
@@ -45,7 +119,7 @@ philoApp.directive('kwic', ['$rootScope', function($rootScope) {
         var endPosLength = endPos.toString().length;
         var spaces = endPosLength - currentPosLength + 1;
         return currentPos + '.' + Array(spaces).join('&nbsp');
-    } 
+    }
     return {
         templateUrl: 'app/components/concordanceKwic/kwic.html',
         link: function(scope) {
@@ -58,6 +132,44 @@ philoApp.directive('kwic', ['$rootScope', function($rootScope) {
 				var target = $(event.currentTarget).find('.full_biblio');
 				target.removeClass('show');
 			}
+			scope.sortResults = function(direction) {
+				var queryParams = $location.search();
+				queryParams.direction = direction;
+				$location.url(URL.objectToUrlString(queryParams));
+			}
+			if (typeof(scope.formData.direction) === 'undefined' || scope.formData.direction !== 'left' && scope.formData.direction !== 'right') {
+				scope.concKwic.resultsPromise.then(function(results) {
+					scope.results = results.data;
+					scope.concKwic.description = angular.extend({}, scope.results.description, {resultsLength: scope.results.results_length});
+					scope.concKwic.loading = false;
+				}).catch(function(response) {
+					scope.results = {};
+					scope.concKwic.description = {};
+					scope.concKwic.loading = false;
+				});
+			} else {
+				scope.concKwic.resultsPromise.then(function(results) {
+					scope.concKwic.description = angular.extend({}, results.data.description, {resultsLength: results.data.results_length});
+					var queryParams = $location.search();
+					queryParams.script = 'get_neighboring_words.py';
+					queryParams.max_time = 10;
+					scope.sortedResults = [];
+					queryParams.start = '0';
+					queryParams.end = "0";
+					var currentQueryObject = angular.extend({}, queryParams, {direction: scope.formData.direction});
+					if (angular.equals(descriptionValues.sortedKwic.queryObject, currentQueryObject)) {
+						scope.sortedResults = descriptionValues.sortedKwic.results;
+                        getKwicResults(scope, results.data.results_length)
+						scope.concKwic.loading = false;
+                    } else {
+						recursiveLookup(scope, queryParams, scope.formData.direction, 0);
+					}
+				}).catch(function(response) {
+					scope.results = {};
+					scope.concKwic.description = {};
+					scope.concKwic.loading = false;
+				});				
+            }
         }
     }
 }]);
@@ -72,6 +184,15 @@ philoApp.directive('bibliography', ['$rootScope', function($rootScope) {
         templateUrl: 'app/components/concordanceKwic/' + templateType,
 		replace: true,
 		link: function(scope) {
+			scope.concKwic.resultsPromise.then(function(results) {
+				scope.results = results.data;
+				scope.concKwic.description = angular.extend({}, scope.results.description, {resultsLength: scope.results.results_length});
+				scope.concKwic.loading = false;
+			}).catch(function(response) {
+				scope.results = {};
+				scope.concKwic.description = {};
+				scope.concKwic.loading = false;
+			});
 			scope.metadataAddition = [];
 			scope.addToSearch = function(title) {
 				title = '"' + title + '"';
@@ -115,8 +236,8 @@ philoApp.directive('resultsDescription', ['request', 'descriptionValues', functi
             attrs.$observe('description', function(newDescription) {
                 if (newDescription.length > 0) {
                     newDescription = JSON.parse(newDescription);
-                    if (scope.resultsLength !== scope.concKwic.results.results_length) {
-                        scope.resultsLength = scope.concKwic.results.results_length;
+                    if (scope.resultsLength !== newDescription.resultsLength) {
+                        scope.resultsLength = newDescription.resultsLength;
                         descriptionValues.resultsLength = scope.resultsLength;
                     }
                     if (newDescription.start !== scope.start) {
@@ -136,7 +257,7 @@ philoApp.directive('resultsDescription', ['request', 'descriptionValues', functi
             });
 			attrs.$observe('queryStatus', function(loading) {
 				loading = eval(loading);
-				if (!loading && scope.resultsLength > 0) {
+				if (!loading && scope.concKwic.description.resultsLength > 0) {
                     request.script(scope.formData, {
 						script: 'get_total_results.py'
 					}).then(function(response) {
@@ -177,9 +298,9 @@ philoApp.directive('concordanceKwicSwitch', ['$location', 'URL', function($locat
 
 philoApp.directive('pages', ['$location', 'URL', function($location, URL) {
     var buildPages = function(scope, morePages) {
-        var start = scope.concKwic.results.description.start;
+        var start = scope.concKwic.description.start;
         var resultsPerPage = parseInt(scope.formData.results_per_page) || 25;
-        var resultsLength = scope.concKwic.results.results_length;
+        var resultsLength = scope.concKwic.description.resultsLength;
     
         // first find out what page we are on currently.    
         var currentPage = Math.floor(start / resultsPerPage) + 1 || 1;
@@ -268,7 +389,7 @@ philoApp.directive('pages', ['$location', 'URL', function($location, URL) {
                 scope.$watch(function() {
                     return scope.results;
                     }, function() {
-                    scope.pages = buildPages(scope, scope.concKwic.results.description.more_pages);
+                    scope.pages = buildPages(scope, scope.concKwic.description.more_pages);
                 }, true);
         }
     }

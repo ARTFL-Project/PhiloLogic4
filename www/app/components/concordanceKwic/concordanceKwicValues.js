@@ -4,5 +4,9 @@ philoApp.value('descriptionValues', {
     start: '',
     end: '',
     resultsPerPage: 25,
-    resultsLength: ''
+    resultsLength: '',
+	sortedKwic: {
+		results: null,
+		queryObject: null
+	}
 });

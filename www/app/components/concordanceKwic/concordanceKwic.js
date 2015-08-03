@@ -17,15 +17,9 @@ philoApp.controller('concordanceKwicCtrl', ['$rootScope', '$location', 'accessCo
         }        
     }
     vm.loading = true;
-    request.report($rootScope.formData).then(function(results) {
-        vm.results = results.data;
-        vm.description = vm.results.description;
-        vm.loading = false;
-    }).catch(function(response) {
-		vm.results = {};
-		vm.description = {};
-		vm.loading = false;
-	});
+	//vm.description = {};
+	vm.resultsLength = 0;
+    vm.resultsPromise = request.report($rootScope.formData);
 	    
     vm.frequencyResults = [];
     
