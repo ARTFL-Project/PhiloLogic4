@@ -1,7 +1,9 @@
 var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'ngCookies', 'angular-velocity', 'ui.utils', 'infinite-scroll']);
 
-philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'accessControl', 'textNavigationValues', 'request',
-                                  function($rootScope, $scope, $location, accessControl, textNavigationValues, request) {
+philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'accessControl',
+								  'textNavigationValues', 'descriptionValues', 'request',
+                                  function($rootScope, $scope, $location, accessControl,
+										   textNavigationValues, descriptionValues, request) {
     
     $rootScope.philoConfig = philoConfig;
     
@@ -38,6 +40,10 @@ philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'accessCo
             textNavigationValues.tocElements = false;
             textNavigationValues.tocOpen = false;
             textNavigationValues.navBar = false;
+        }
+		if ($rootScope.report !== 'kwic') {
+            descriptionValues.sortedKwic.results = null;
+			descriptionValues.sortedKwic.queryObject = null;
         }
     });
 	

@@ -54,7 +54,7 @@ philoApp.directive('kwic', ['$rootScope', '$location', '$http', 'URL', 'request'
 		}
 		return str;
 	}
-	var sortResults = function(results) {
+	var sortResults = function(results, metadataSortKey) {
 		results.sort(function(a,b) {
 			if (isNaN(a[0]) && !isNaN(b[0])) {
                 return -1;
@@ -64,7 +64,29 @@ philoApp.directive('kwic', ['$rootScope', '$location', '$http', 'URL', 'request'
             }
             var x = removeDiacritics(a[0]);
             var y = removeDiacritics(b[0]);
-            return x < y ? -1 : x > y ? 1 : 0;
+            
+			if (x < y) {
+				return -1;
+			}
+			if (x > y) {
+				return 1
+			}
+			if (metadataSortKey) {
+				if (metadataSortKey != 'date') {
+                    var m = removeDiacritics(a[2][metadataSortKey]);
+					var n = removeDiacritics(b[2][metadataSortKey]);
+                } else {
+					var m = parseInt(a[2][metadataSortKey]);
+					var n = parseInt(b[2][metadataSortKey]);
+				}
+				if (m < n) {
+					return -1;
+				}
+				if (m > n) {
+					return 1
+				}
+            }
+			return 0;
         });
 		return results;
 	}
@@ -86,13 +108,17 @@ philoApp.directive('kwic', ['$rootScope', '$location', '$http', 'URL', 'request'
 			if (hitsDone < descriptionValues.resultsLength) {
 				recursiveLookup(scope, queryParams, direction, hitsDone);
 			} else {
-				scope.sortedResults = sortResults(scope.sortedResults);
+				scope.sortedResults = sortResults(scope.sortedResults, scope.formData.metadata_sorting_field);
 				queryParams.start = '0';
 				queryParams.end = '0';
+				var metadataField = angular.copy(queryParams.metadata_sorting_field);
+				queryParams.metadata_sorting_field = "";
 				descriptionValues.sortedKwic = {
 					results: scope.sortedResults,
-					queryObject: angular.extend({}, queryParams, {direction: direction})
+					queryObject: angular.extend({}, queryParams, {direction: direction}),
+					metadataField: metadataField
 				}
+				
 				getKwicResults(scope, hitsDone);
 				scope.concKwic.loading = false;
 			}
@@ -109,11 +135,14 @@ philoApp.directive('kwic', ['$rootScope', '$location', '$http', 'URL', 'request'
 			JSON.stringify({
 				results: scope.sortedResults.slice(start,end),
 				hits_done: hitsDone,
-				query_string: URL.objectToString($location.search())
+				query_string: URL.objectToString($location.search()),
+				start: start,
+				end: end
 				})
 			)
 		.then(function(response) {
 			scope.results = response.data;
+			console.log(scope.results.description.start)
 		});
 	}
     var initializePos = function(results, index) {
@@ -142,18 +171,8 @@ philoApp.directive('kwic', ['$rootScope', '$location', '$http', 'URL', 'request'
 				queryParams.direction = direction;
 				$location.url(URL.objectToUrlString(queryParams));
 			}
-			if (typeof(scope.formData.direction) === 'undefined' || scope.formData.direction !== 'left' && scope.formData.direction !== 'right') {
-				scope.concKwic.resultsPromise.then(function(results) {
-					scope.results = results.data;
-					scope.concKwic.description = angular.extend({}, scope.results.description, {resultsLength: scope.results.results_length});
-					scope.concKwic.loading = false;
-				}).catch(function(response) {
-					scope.results = {};
-					scope.concKwic.description = {};
-					scope.concKwic.loading = false;
-				});
-			} else {
-				scope.concKwic.resultsPromise.then(function(results) { // Rerun normal KWIC query since this could be a reload
+			if (typeof(scope.formData.direction) !== 'undefined' && scope.formData.direction !== "" || typeof(scope.formData.metadata_sorting_field) !== 'undefined' && scope.formData.metadata_sorting_field !== "") {
+                scope.concKwic.resultsPromise.then(function(results) { // Rerun normal KWIC query since this could be a reload
 					scope.concKwic.description = angular.extend({}, results.data.description, {resultsLength: results.data.results_length});
 					var queryParams = $location.search();
 					queryParams.script = 'get_neighboring_words.py';
@@ -161,14 +180,28 @@ philoApp.directive('kwic', ['$rootScope', '$location', '$http', 'URL', 'request'
 					scope.sortedResults = [];
 					queryParams.start = '0';
 					queryParams.end = "0";
+					queryParams.metadata_sorting_field = "";
 					var currentQueryObject = angular.extend({}, queryParams, {direction: scope.formData.direction});
 					if (angular.equals(descriptionValues.sortedKwic.queryObject, currentQueryObject)) {
 						scope.sortedResults = descriptionValues.sortedKwic.results;
+						if (scope.formData.metadata_sorting_field !== descriptionValues.sortedKwic.metadataField) {
+                            scope.sortedResults = sortResults(scope.sortedResults, scope.formData.metadata_sorting_field)
+                        }
                         getKwicResults(scope, results.data.results_length)
 						scope.concKwic.loading = false;
                     } else {
 						recursiveLookup(scope, queryParams, scope.formData.direction, 0);
 					}
+				}).catch(function(response) {
+					scope.results = {};
+					scope.concKwic.description = {};
+					scope.concKwic.loading = false;
+				});
+            } else {
+				scope.concKwic.resultsPromise.then(function(results) {
+					scope.results = results.data;
+					scope.concKwic.description = angular.extend({}, scope.results.description, {resultsLength: scope.results.results_length});
+					scope.concKwic.loading = false;
 				}).catch(function(response) {
 					scope.results = {};
 					scope.concKwic.description = {};
@@ -288,7 +321,7 @@ philoApp.directive('concordanceKwicSwitch', ['$location', 'URL', function($locat
             labelBig: "View occurrences line by line (KWIC)",
             labelSmall: "Keyword in context",
             name: "kwic",
-			href: URL.objectToUrlString(scope.formData, {report: 'kwic'})
+			href: URL.objectToUrlString(scope.formData, {report: 'kwic', direction: '', metadata_sorting_field: ''})
         }
         return [concordance, kwic];
     }

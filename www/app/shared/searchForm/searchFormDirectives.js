@@ -48,12 +48,12 @@ philoApp.directive('searchTerms', function() {
     }
 });
 
-philoApp.directive('searchMethods', ['$rootScope', function($rootScope) {
+philoApp.directive('searchMethods', function() {
     return {
         templateUrl: 'app/shared/searchForm/searchMethods.html',
         replace: true
     }
-}]);
+});
 
 philoApp.directive('metadataFields', function() {
     var buildMetadata = function(scope, fields) {
@@ -132,6 +132,29 @@ philoApp.directive('timeSeriesOptions', ['$rootScope', function($rootScope) {
                 $rootScope.formData.year_interval = 10;
             }
         }
+    }
+}]);
+
+philoApp.directive('kwicOptions', ['$rootScope', function($rootScope) {
+    return {
+        templateUrl: 'app/shared/searchForm/kwicOptions.html',
+        replace: true,
+		link: function(scope) {
+			if ($rootScope.formData.metadata_sorting_field) {
+                scope.kwicMetaSelection = $rootScope.formData.metadata_sorting_field;
+            } else {
+				scope.kwicMetaSelection = 'select a bibliographic field'
+			}
+			scope.metadataSortingFields = $rootScope.philoConfig.kwic_metadata_sorting_fields;
+			scope.selectMetadataSortingField = function(field) {
+				$('#selected-kwic-bibliography').text(field);
+				if (field === "None") {
+                    $rootScope.formData.metadata_sorting_field = "";
+                } else {
+					$rootScope.formData.metadata_sorting_field = field;
+				}
+			}
+		}
     }
 }]);
 

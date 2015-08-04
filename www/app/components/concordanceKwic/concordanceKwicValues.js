@@ -7,6 +7,7 @@ philoApp.value('descriptionValues', {
     resultsLength: '',
 	sortedKwic: {
 		results: null,
-		queryObject: null
+		queryObject: null,
+		metadataField: null
 	}
 });

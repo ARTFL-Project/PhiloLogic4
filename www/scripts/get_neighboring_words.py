@@ -4,6 +4,7 @@ import sys
 import timeit
 from operator import itemgetter
 from philologic.DB import DB
+from philologic.HitWrapper import ObjectWrapper
 sys.path.append('..')
 from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
@@ -55,14 +56,20 @@ def get_neighboring_words(environ,start_response):
                 string.append(i['philo_name'].decode('utf-8'))
             string.reverse()
             string = ' '.join(string)
-        else:
+        elif request.direction == "right":
             c.execute('select philo_name, philo_id from words where parent=? and rowid > ?', (parent_sentence, results['rowid']))
             string = []
             for i in c.fetchall():
                 string.append(i['philo_name'].decode('utf-8'))
             string = ' '.join(string)
-
-        kwic_words.append((string, index))
+        else:
+            string = ""
+        
+        metadata_fields = {}
+        for metadata in config.kwic_metadata_sorting_fields:
+            metadata_fields[metadata] = hit[metadata].lower()
+        
+        kwic_words.append((string, index, metadata_fields))
         
         index += 1
         
