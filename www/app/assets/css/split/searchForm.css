@@ -18,7 +18,7 @@
     background: #fff;
 	margin-top: 98px;
     padding: 10px 10px 10px 20px;
-    overflow: hidden;
+    overflow: visible;
 	width: inherit;
 }
 #search-elements.dico {

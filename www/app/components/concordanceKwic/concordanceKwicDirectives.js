@@ -157,20 +157,56 @@ philoApp.directive('kwic', ['$rootScope', '$location', '$http', 'URL', 'request'
     return {
         templateUrl: 'app/components/concordanceKwic/kwic.html',
         link: function(scope) {
+			
             scope.initializePos = initializePos;
 			scope.showFullBiblio = function(event) {
 				var target = $(event.currentTarget).find('.full_biblio');
 				target.addClass('show');
 			}
+			
 			scope.hideFullBiblio = function(event) {
 				var target = $(event.currentTarget).find('.full_biblio');
 				target.removeClass('show');
 			}
-			scope.sortResults = function(direction) {
-				var queryParams = $location.search();
-				queryParams.direction = direction;
-				$location.url(URL.objectToUrlString(queryParams));
+			
+			// Sorting fields
+			scope.metadataSortingFields = [];
+			for (var i=0; i < $rootScope.philoConfig.kwic_metadata_sorting_fields.length; i+=1) {
+				var field = $rootScope.philoConfig.kwic_metadata_sorting_fields[i];
+				if (field in scope.philoConfig.metadata_aliases) {
+					var label = scope.philoConfig.metadata_aliases[field];
+                    scope.metadataSortingFields.push({label:label, field:field});
+                } else {
+					scope.metadataSortingFields.push({label: field[0].toUpperCase() + field.slice(1), field: field});
+				}
 			}
+			if ($rootScope.formData.metadata_sorting_field) {
+                if ($rootScope.formData.metadata_sorting_field in scope.philoConfig.metadata_aliases) {
+					scope.kwicMetaSelection = scope.philoConfig.metadata_aliases[$rootScope.formData.metadata_sorting_field];
+                } else {
+					scope.kwicMetaSelection = $rootScope.formData.metadata_sorting_field[0].toUpperCase() + $rootScope.formData.metadata_sorting_field.slice(1);
+				}
+            } else {
+				scope.kwicMetaSelection =  "None";
+            }
+			scope.updateMetadataSorting = function(metadata) {
+				scope.kwicMetaSelection = metadata.label;
+				$rootScope.formData.metadata_sorting_field = metadata.field
+			}
+			scope.kwicWordSelection = $rootScope.formData.direction || 'None';
+			scope.updateWordSorting = function(direction) {
+				if (direction) {
+                    scope.kwicWordSelection = direction;
+                } else {
+					scope.kwicWordSelection = "None";
+				}
+				$rootScope.formData.direction = direction;
+			}
+			scope.sortResults = function() {
+				var urlString = URL.objectToUrlString($rootScope.formData);
+				$location.url(urlString);
+			}
+			
 			if (typeof(scope.formData.direction) !== 'undefined' && scope.formData.direction !== "" || typeof(scope.formData.metadata_sorting_field) !== 'undefined' && scope.formData.metadata_sorting_field !== "") {
                 scope.concKwic.resultsPromise.then(function(results) { // Rerun normal KWIC query since this could be a reload
 					scope.concKwic.description = angular.extend({}, results.data.description, {resultsLength: results.data.results_length});

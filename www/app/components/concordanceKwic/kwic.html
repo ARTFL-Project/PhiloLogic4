@@ -1,22 +1,39 @@
 <div id="results_container" ng-class="{'col-xs-12': concKwic.frequencyResults.length === 0, 'col-xs-8': concKwic.frequencyResults.length > 0}">
-	<div style="margin: 15px 15px 0px 15px; text-align: center;">
-		Resort results by
+	<div style="margin: 15px 15px 0px 15px;">
+		Resort results by words to the
 		<div class="btn-group">
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				<span id="selected-kwic-option" ng-if="formData.direction !== 'right'">word to the left&nbsp;</span>
-				<span id="selected-kwic-option" ng-if="formData.direction === 'right'">word to the right&nbsp;</span>
+				{{ kwicWordSelection }}
 				<span class="caret"></span>
 			</button>
 			<ul class="dropdown-menu" role="menu">
-				<li ng-click="sortResults('left')">
-					<a href="" class="kwic-option">words to the left</a>
+				<li ng-click="updateWordSorting('left')">
+					<a href="" class="kwic-option">left</a>
 				</li>
-				<li ng-click="sortResults('right')">
-					<a href="" class="kwic-option">words to the right</a>
+				<li ng-click="updateWordSorting('right')">
+					<a href="" class="kwic-option">right</a>
+				</li>
+				<li ng-click="updateWordSorting('')">
+					<a href="" class="kwic-option">None</a>
 				</li>
 			</ul>
 		</div>
-		of match
+		and/or by
+		<div class="btn-group">
+			<button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<span>{{ kwicMetaSelection }}</span>
+				<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu" role="menu">
+				<li ng-repeat="metadata in metadataSortingFields" ng-click="updateMetadataSorting(metadata)">
+					<a href="">{{ metadata.label }}</a>
+				</li>
+				<li ng-click="selectMetadataSortingField('')">
+					<a href="">No sorting</a>
+				</li>
+			</ul>
+		</div>
+		<button type="button" class="btn btn-primary btn-sm" ng-click="sortResults()">Sort</button>
 	</div>
     <div id="kwic_concordance" ng-if="report === 'kwic'">
         <div class="kwic_line velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger: 10}" ng-repeat="result in results.results | kwicBiblioDisplay" ng-init="currentPos = initializePos(results, $index)">
