@@ -10,9 +10,9 @@ from wsgiref.handlers import CGIHandler
 from functions.wsgi_handler import WSGIHandler
 from concordance import citation_links
 try:
-    import simplejson as json
+    import ujson as json
 except ImportError:
-    print >> sys.stderr, "Please install simplejson for better performance"
+    print >> sys.stderr, "Please install ujson for better performance"
     import json
 
 

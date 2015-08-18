@@ -14,9 +14,9 @@ from functions.wsgi_handler import WSGIHandler
 from functions.ObjectFormatter import adjust_bytes, convert_entities
 from functions.FragmentParser import strip_tags
 try:
-    import simplejson as json
+    import ujson as json
 except ImportError:
-    print >> sys.stderr, "Please install simplejson for better performance"
+    print >> sys.stderr, "Please install ujson for better performance"
     import json
 
 

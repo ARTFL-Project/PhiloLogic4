@@ -11,7 +11,7 @@ import reports as r
 import functions as f
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
 try:
-    import simplejson as json
+    import ujson as json
 except ImportError:
     import json
 

@@ -203,6 +203,13 @@ web_config_defaults = {
                 ''',
          'index': 19
      },
+     'kwic_metadata_sorting_fields': {
+         'value': [],
+         'comment': '''
+                # The kwic_metadata_sorting_fields variable allows you to pick wich metadata field can be used for sorting KWIC results.
+                ''',
+         'index': 20
+     },
      'title_prefix_removal': {
           'value': [],
           'comment': '''
@@ -211,7 +218,7 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-          'index': 20
+          'index': 21
      },
      'page_images_url_root': {
           'value': '',
@@ -221,7 +228,7 @@ web_config_defaults = {
                  # <pb fac="filename.jpg"> or <pb id="filename.jpg">
                  # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
                  ''',
-          'index': 21
+          'index': 22
      },
      'logo': {
           'value': '',
@@ -230,7 +237,7 @@ web_config_defaults = {
                   # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
                   # it starts with http://. If no logo is defined, no picture will be displayed.
                   ''',
-          'index': 22
+          'index': 23
      }
 }
 

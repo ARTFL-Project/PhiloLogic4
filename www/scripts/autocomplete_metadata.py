@@ -5,7 +5,10 @@ import cgi
 import sys
 sys.path.append('..')
 import functions as f
-import json
+try:
+    import ujson as json
+except ImportError:
+    import json
 import subprocess
 import re
 import unicodedata

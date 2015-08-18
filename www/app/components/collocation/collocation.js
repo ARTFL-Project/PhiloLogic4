@@ -35,9 +35,17 @@ philoApp.controller('collocationCtrl', ['$scope', '$rootScope', '$http', '$locat
 	var localParams = angular.copy($location.search());
     vm.resolveCollocateLink = function(word) {
 		var q = localParams.q + ' "' + word + '"';
+		if (typeof(localParams.word_num) === 'undefined' || isNaN(localParams.word_num)) {
+            var method = "cooc";
+			var arg = 6
+        } else {
+			var method = "proxy";
+			var arg = localParams.word_num;
+		}
 		var newUrl = URL.objectToUrlString(localParams,
 										   {
-											method: "cooc",
+											method: method,
+											arg: arg,
 											start: "0",
 											end: '0',
 											q: q,

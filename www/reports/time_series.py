@@ -10,9 +10,9 @@ from philologic.DB import DB
 from collections import defaultdict
 import timeit
 try:
-    import simplejson as json
+    import ujson as json
 except ImportError:
-    print >> sys.stderr, "Please install simplejson for better performance"
+    print >> sys.stderr, "Please install ujson for better performance"
     import json
 
 

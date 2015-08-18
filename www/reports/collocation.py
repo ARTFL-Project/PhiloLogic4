@@ -6,7 +6,10 @@ import functions as f
 import reports as r
 import os
 import re
-import json
+try:
+    import ujson as json
+except ImportError:
+    import json
 import unicodedata
 import timeit
 from collections import defaultdict
@@ -36,7 +39,7 @@ def fetch_collocation(hits, q, db, config):
     try:
         within_x_words = int(q['word_num'])
     except ValueError: ## Getting an empty string since the keyword is not specificed in the URL
-        within_x_words = 5
+        within_x_words = None
     
     if q.colloc_filter_choice == "nofilter":
         filter_list = []
@@ -44,7 +47,6 @@ def fetch_collocation(hits, q, db, config):
         filter_list = build_filter_list(q, config)
     collocation_object['filter_list'] = filter_list
     filter_list = set(filter_list)
-        
     
     # Build list of search terms to filter out
     query_words = []
@@ -69,16 +71,24 @@ def fetch_collocation(hits, q, db, config):
     try:
         for hit in hits[hits_done:]:
             word_id = ' '.join([str(i) for i in hit.philo_id])
-            query = """select philo_name, parent from words where philo_id='%s'""" % word_id
+            query = """select philo_name, parent, rowid from words where philo_id='%s'""" % word_id
             c.execute(query)
             result = c.fetchone()
             parent = result['parent']
             current_word = result['philo_name']
+            rowid = int(result['rowid'])
             if parent != stored_sentence_id:           
                 sentence_hit_count = 1
                 stored_sentence_id = parent
                 stored_sentence_counts = defaultdict(int)
-                row_query = """select philo_name from words where parent='%s'"""  % (parent,)
+                if within_x_words:
+                    begin_rowid = rowid - within_x_words
+                    if begin_rowid < 0:
+                        begin_rowid = 0
+                    end_rowid = rowid + within_x_words
+                    row_query = """select philo_name from words where parent='%s' and rowid between %d and %d"""  % (parent, begin_rowid, rowid)
+                else:
+                    row_query = """select philo_name from words where parent='%s'"""  % (parent,)
                 c.execute(row_query)
                 for i in c.fetchall():
                     stored_sentence_counts[i['philo_name']] += 1

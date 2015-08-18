@@ -6,7 +6,10 @@ import functions as f
 from functions.wsgi_handler import WSGIHandler
 from collections import defaultdict
 from ast import literal_eval as eval
-import json
+try:
+    import ujson as json
+except ImportError:
+    import json
 
 def generate_frequency(results, q, db, config):
     """reads through a hitlist. looks up q.frequency_field in each hit, and builds up a list of 

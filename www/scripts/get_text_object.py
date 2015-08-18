@@ -9,7 +9,10 @@ from wsgiref.handlers import CGIHandler
 from philologic.HitWrapper import ObjectWrapper
 import functions as f
 from reports.navigation import generate_text_object
-import json
+try:
+    import ujson as json
+except ImportError:
+    import json
 
 def get_text_object(environ,start_response):
     status = '200 OK'

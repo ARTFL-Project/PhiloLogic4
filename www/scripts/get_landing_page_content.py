@@ -4,7 +4,10 @@ import os
 import sys
 import urlparse
 import cgi
-import json
+try:
+    import ujson as json
+except ImportError:
+    import json
 import sqlite3
 import re
 import unicodedata

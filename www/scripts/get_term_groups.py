@@ -5,7 +5,10 @@ import cgi
 import sys
 sys.path.append('..')
 import functions as f
-import json
+try:
+    import ujson as json
+except ImportError:
+    import json
 import subprocess
 from wsgiref.handlers import CGIHandler
 from philologic.QuerySyntax import parse_query, group_terms

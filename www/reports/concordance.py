@@ -13,9 +13,9 @@ from functions.ObjectFormatter import convert_entities, adjust_bytes, valid_html
 from functions.FragmentParser import parse
 from lxml import etree
 try:
-    import simplejson as json
+    import ujson as json
 except ImportError:
-    print >> sys.stderr, "Please install simplejson for better performance"
+    print >> sys.stderr, "Please install ujson for better performance"
     import json
 from inspect import getmembers
 
