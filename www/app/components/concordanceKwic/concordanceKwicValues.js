@@ -1,13 +1,17 @@
-"use strict";
+(function() {
+    "use strict";
 
-philoApp.value('descriptionValues', {
-    start: '',
-    end: '',
-    resultsPerPage: 25,
-    resultsLength: '',
-	sortedKwic: {
-		results: null,
-		queryObject: null,
-		metadataField: null
-	}
-});
+    angular
+        .module('philoApp')
+        .value('descriptionValues', {
+            start: '',
+            end: '',
+            resultsPerPage: 25,
+            resultsLength: '',
+            sortedKwic: {
+                results: null,
+                queryObject: null,
+                metadataField: null
+            }
+        });
+})();

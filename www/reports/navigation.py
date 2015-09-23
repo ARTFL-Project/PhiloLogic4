@@ -3,16 +3,13 @@
 import sys
 sys.path.append('..')
 import os
-import sqlite3
 import re
 import functions as f
 from lxml import etree
 from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
-from functions.ObjectFormatter import convert_entities, valid_html_tags, xml_to_html_class
-from functions.FragmentParser import parse
-from philologic import HitWrapper
+from functions.ObjectFormatter import convert_entities, valid_html_tags, xml_to_html_class, note_content
 from concordance import citation_links
 from bibliography import biblio_citation
 try:
@@ -96,7 +93,7 @@ def get_text_obj(obj, config, q, word_regex, note=False):
         bytes = sorted([int(byte) - byte_start for byte in q.byte])
     except ValueError: ## q.byte contains an empty string
         bytes = []
-        
+
     formatted_text, imgs = format_text_object(obj, raw_text, config, q, word_regex, bytes=bytes, note=note)
     formatted_text = formatted_text.decode("utf-8","ignore")
     return formatted_text, imgs
@@ -114,7 +111,7 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[], note=False):
     current_obj_img = []
     text = "<div>" + text + "</div>"
     xml = f.FragmentParser.parse(text)
-    for el in xml.iter():        
+    for el in xml.iter():
         try:
             if el.tag == "sc" or el.tag == "scx":
                 el.tag = "span"
@@ -192,7 +189,7 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[], note=False):
             elif el.tag == "figure":
                 if el[0].tag == "graphic":
                     img_url = el[0].attrib["url"].replace(":","_")
-                    volume = re.match("\d+",img_url).group()
+                    volume = re.match("\d+", img_url).group()
                     url_prefix = config.page_images_url_root + '/V' + volume + "/plate_"
                     el.tag = "span"
                     el.attrib["href"] = url_prefix + img_url + ".jpeg"
@@ -204,7 +201,7 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[], note=False):
                     clear_float = etree.Element("span")
                     clear_float.attrib['style'] = 'clear:both;'
                     el[0].append(clear_float)
-            elif el.tag == "philoHighlight":        
+            elif el.tag == "philoHighlight":
                 word_match = re.match(word_regex, el.tail, re.U)
                 if word_match:
                     el.text = el.tail[:word_match.end()]
@@ -219,13 +216,13 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[], note=False):
     ## remove spaces around hyphens and apostrophes
     output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
     output = convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
-    
+
     if note: ## Notes don't need to fetch images
         return (output, {})
-    
+
     ## Page images
     output, img_obj = page_images(config, output, current_obj_img, philo_id)
-    
+
     return output, img_obj
 
 
@@ -258,7 +255,6 @@ def get_first_page(philo_id, config):
     c.execute('select byte_start, byte_end from toms where philo_id="%s"' % ' '.join([str(i) for i in philo_id]))
     result = c.fetchone()
     byte_start = result['byte_start']
-    byte_end = result['byte_end']
     approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
     try:
         c.execute('select * from pages where philo_id like ? and end_byte >= ? limit 1', (approx_id, byte_start))

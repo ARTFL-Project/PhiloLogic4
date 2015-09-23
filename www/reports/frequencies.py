@@ -3,8 +3,6 @@
 import sys
 sys.path.append('..')
 import functions as f
-import os
-import re
 from functions.wsgi_handler import WSGIHandler
 from bibliography import bibliography
 from functions.ObjectFormatter import format_strip, convert_entities, adjust_bytes
@@ -47,7 +45,7 @@ def make_frequency_query(db,metadata):
         if clauses:
             inner_query = "SELECT philo_id FROM toms WHERE " + " AND ".join("(%s)" % c for c in clauses) + ""
             query = "SELECT philo_name,count(*) as c FROM words WHERE doc_ancestor IN (%s) group by philo_name ORDER BY count(*) DESC;" % inner_query
-            for row in db.dbh.execute(query,vars):                
+            for row in db.dbh.execute(query,vars):
                 print >> sys.stderr, query
                 yield row["philo_name"] + " " + str(row["c"]) + "<br/>"
             return
@@ -55,19 +53,19 @@ def make_frequency_query(db,metadata):
     for row in open(db.locals["db_path"]+"/frequencies/word_frequencies"):
 #            print >> sys.stderr, row
         yield row + "<br/>"
-        
+
 def frequencies(environ,start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
 #    results = prominent_features(q, db)
     res = ""
-    count = 0;
+    count = 0
     res = []
     for result in make_frequency_query(db,request.metadata):
 #        print >> sys.stderr,result
         res.append(result)
-        count += 1;
+        count += 1
         if count > 1000:
             break
     #hits = db.query(q["q"],q["method"],q["arg"],**q["metadata"])
@@ -75,8 +73,7 @@ def frequencies(environ,start_response):
     #                       f=f, path=path, results_per_page=q['results_per_page'],
     #                       template_name="concordance.mako")
     return ""#f.render_template(results=res,db=db,dbname=config.db_name,q=q,f=f,template_name="frequencies.mako", report="frequencies")
-    
+
 def prominent_features(q):
     conn = db.dbh
     c = conn.cursor()
-    

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 import sys
 sys.path.append('..')
 from functions.wsgi_handler import WSGIHandler
@@ -11,12 +10,14 @@ from lxml import etree
 import functions as f
 import re
 
-header_name = 'teiHeader'  ## Not sure if this should be configurable
+header_name = 'teiHeader'  # Not sure if this should be configurable
+
 
 def get_header(environ, start_response):
     status = '200 OK'
-    headers = [('Content-type', 'text/html; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-    start_response(status,headers)
+    headers = [('Content-type', 'text/html; charset=UTF-8'),
+               ("Access-Control-Allow-Origin", "*")]
+    start_response(status, headers)
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
@@ -28,7 +29,7 @@ def get_header(environ, start_response):
     header = xml_tree.find(header_name)
     try:
         header_text = etree.tostring(header, pretty_print=True)
-    except TypeError: ## workaround for when lxml doesn't find the header for whatever reason
+    except TypeError:  # workaround for when lxml doesn't find the header for whatever reason
         header_text = ''
         start = 0
         for line in open(filename):
@@ -37,8 +38,9 @@ def get_header(environ, start_response):
             if start:
                 header_text += line
             if re.search('</%s' % header_name, line):
-                break        
+                break
     yield header_text.replace('<', '&lt;').replace('>', '&gt;')
-    
+
+
 if __name__ == "__main__":
     CGIHandler().run(get_header)

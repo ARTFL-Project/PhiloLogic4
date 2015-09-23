@@ -1,4 +1,4 @@
-<div class="modal fade" id="export-dialog" tabindex="-1" role="dialog" aria-labelledby="exportLabel" aria-hidden="true" ng-controller="exportResults">
+<div class="modal fade" id="export-dialog" tabindex="-1" role="dialog" aria-labelledby="exportLabel" aria-hidden="true" ng-controller="ExportResultsController as exportResults">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -7,7 +7,7 @@
             </div>
             <div class="modal-body">
                 <div ng-if="report !== 'collocation'">
-                    <a class="btn btn-primary pull-right" ng-click="exportResults()">Export</a>
+                    <a class="btn btn-primary pull-right" ng-click="exportResults.export()">Export</a>
                     Results of the current page will be serialized to JSON and displayed in a new tab
                 </div>
                 <div ng-if="report === 'collocation'">

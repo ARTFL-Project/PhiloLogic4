@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 import sys
 sys.path.append('..')
 from philologic.DB import DB
@@ -17,15 +16,15 @@ except ImportError:
 
 def get_table_of_contents(environ, start_response):
     status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-    start_response(status,headers)
+    headers = [('Content-type', 'application/json; charset=UTF-8'),
+               ("Access-Control-Allow-Origin", "*")]
+    start_response(status, headers)
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    path = config.db_path
     philo_id = request['philo_id'].split()
     obj = ObjectWrapper(philo_id, db)
-    while obj.philo_name == '__philo_virtual' and obj.philo_type !="div1":
+    while obj.philo_name == '__philo_virtual' and obj.philo_type != "div1":
         philo_id.pop()
         obj = ObjectWrapper(philo_id, db)
     toc_object = r.generate_toc_object(obj, db, request, config)
@@ -37,6 +36,7 @@ def get_table_of_contents(environ, start_response):
             break
     toc_object['current_obj_position'] = current_obj_position
     yield json.dumps(toc_object)
-    
+
+
 if __name__ == "__main__":
     CGIHandler().run(get_table_of_contents)

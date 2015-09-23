@@ -1,13 +1,10 @@
 #! /usr/bin/env python
 
-import os
 import sys
-import sqlite3
 sys.path.append('..')
 import functions as f
 from functions.wsgi_handler import WSGIHandler
 from philologic.DB import DB
-from cgi import FieldStorage
 from wsgiref.handlers import CGIHandler
 from ast import literal_eval as eval
 import json

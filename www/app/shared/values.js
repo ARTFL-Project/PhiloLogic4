@@ -1,5 +1,8 @@
-"use strict";
+(function() {
+    "use strict";
 
-philoApp.value('queryTermGroups', {
-	groups: []
-});
+    angular
+        .module("philoApp").value("queryTermGroups", {
+            groups: []
+        });
+})();

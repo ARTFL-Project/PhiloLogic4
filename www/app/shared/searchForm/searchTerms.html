@@ -15,12 +15,12 @@
                     <button type="submit" class="btn btn-primary" id="button-search">
                         <span class="glyphicon glyphicon-search" style="vertical-align:text-top;"></span>
                     </button>
-                </span> 
+                </span>
             </div>
         </div>
         <div class="col-xs-12 col-sm-12 col-md-4" ng-if="!philoConfig.dictionary" id="search-buttons">
-            <button type="reset" id="reset_form" class="btn btn-danger" ng-click="clearFormData()">Clear</button>
-            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" ng-click="toggleForm()">{{ searchOptionsButton }}</button>
+            <button type="reset" id="reset_form" class="btn btn-danger" ng-click="search.clearFormData()">Clear</button>
+            <button type="button" id="show-search-form" class="btn btn-primary" data-display="none" ng-click="search.toggleForm()">{{ search.searchOptionsButton }}</button>
         </div>
     </div>
 </div>

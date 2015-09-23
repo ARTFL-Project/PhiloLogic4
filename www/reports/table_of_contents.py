@@ -51,8 +51,8 @@ def nav_query(obj,db):
     # use start_rowid and end_rowid to fetch every div in the document.
     c.execute("select * from toms where rowid >= ? and rowid <=? and philo_type>='div' and philo_type<='div3'", (start_rowid, end_rowid))
     for o in c.fetchall():
-        id = [int(n) for n in o["philo_id"].split(" ")]
-        i = HitWrapper.ObjectWrapper(id,db,row=o)
+        philo_id = [int(n) for n in o["philo_id"].split(" ")]
+        i = HitWrapper.ObjectWrapper(philo_id,db,row=o)
         yield i
 
 def generate_toc_object(obj, db, q, config):
@@ -78,7 +78,7 @@ def generate_toc_object(obj, db, q, config):
                     display_name = display_name.strip()
                 if not display_name:
                     if i["type"] and i["n"]:
-                        display_name = i['type'] + " " + i["n"]                       
+                        display_name = i['type'] + " " + i["n"]
                     else:
                         display_name = i["head"] or i['type'] or i['philo_name'] or i['philo_type']
                         if display_name == "__philo_virtual":

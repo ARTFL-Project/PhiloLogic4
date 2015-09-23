@@ -1,100 +1,106 @@
-var philoApp = angular.module('philoApp', ['ngRoute', 'ngTouch', 'ngSanitize', 'ngCookies', 'angular-velocity', 'ui.utils', 'infinite-scroll']);
+(function() {
+    "use strict";
 
-philoApp.controller('philoMain', ['$rootScope', '$scope', '$location', 'accessControl',
-								  'textNavigationValues', 'descriptionValues', 'request',
-                                  function($rootScope, $scope, $location, accessControl,
-										   textNavigationValues, descriptionValues, request) {
-    
-    $rootScope.philoConfig = philoConfig;
-    
-    // Check access control
-    if (!$rootScope.philoConfig.access_control) {
-        $rootScope.authorized = true;
-    } else {
-        $rootScope.accessRequest = request.script({
-            script: 'access_request.py'
-        });
-    }
-        
-    $rootScope.report = $location.search().report || philoReport;
-    $rootScope.formData = {
-        report: $rootScope.report,
-        method: "proxy"
-        };
-    
-    $scope.$on('$locationChangeStart', function(e) {
-        var paths = $location.path().split('/').filter(Boolean);
-        if (paths[0] == "query") {
-            $rootScope.report = $location.search().report;
-        } else if (paths[0] == "navigate") {
-            if (paths[paths.length-1] === "table-of-contents") {
-                $rootScope.report = "table-of-contents";
-            } else {
-                $rootScope.report = 'textNavigation';
-            }
+    angular
+        .module("philoApp", ["ngRoute", "ngTouch", "ngSanitize", "ngCookies", "angular-velocity", "ui.utils", "infinite-scroll"])
+        .controller("PhiloMainController", PhiloMainController)
+        .config(philoRoutes);
+
+    function PhiloMainController($rootScope, $location, accessControl,
+        textNavigationValues, descriptionValues, request) {
+
+        var vm = this;
+
+        $rootScope.philoConfig = philoConfig;
+
+        // Check access control
+        if (!$rootScope.philoConfig.access_control) {
+            $rootScope.authorized = true;
         } else {
-            $rootScope.report = "landing_page";
-        } 
-        if ($rootScope.report !== 'textNavigation') {
-            textNavigationValues.citation = {};
-            textNavigationValues.tocElements = false;
-            textNavigationValues.tocOpen = false;
-            textNavigationValues.navBar = false;
+            $rootScope.accessRequest = request.script({
+                script: "access_request.py"
+            });
         }
-		if ($rootScope.report !== 'kwic') {
-            descriptionValues.sortedKwic.results = null;
-			descriptionValues.sortedKwic.queryObject = null;
-        }
-    });
-	
-	$scope.backToHome = function() {
-		$scope.$broadcast('backToHome');
-		$location.url('/');
-	}
-}]);
 
-philoApp.config(['$routeProvider', '$locationProvider',
-  function($routeProvider, $locationProvider) {
-    $routeProvider.
-        when('/', {
-            templateUrl: function(array) {
-                return 'app/components/landingPage/landing_page.html';
+        $rootScope.report = $location.search().report || philoReport;
+        $rootScope.formData = {
+            report: $rootScope.report,
+            method: "proxy"
+        };
+
+        var urlChange = $rootScope.$on("$locationChangeStart", function() {
+            var paths = $location.path().split("/").filter(Boolean);
+            if (paths[0] === "query") {
+                $rootScope.report = $location.search().report;
+            } else if (paths[0] === "navigate") {
+                if (paths[paths.length - 1] === "table-of-contents") {
+                    $rootScope.report = "table-of-contents";
+                } else {
+                    $rootScope.report = "textNavigation";
+                }
+            } else {
+                $rootScope.report = "landing_page";
+            }
+            if ($rootScope.report !== "textNavigation") {
+                textNavigationValues.citation = {};
+                textNavigationValues.tocElements = false;
+                textNavigationValues.tocOpen = false;
+                textNavigationValues.navBar = false;
+            }
+            if ($rootScope.report !== "kwic") {
+                descriptionValues.sortedKwic.results = null;
+                descriptionValues.sortedKwic.queryObject = null;
+            }
+        });
+
+        vm.backToHome = function() {
+            $scope.$broadcast("backToHome");
+            $location.url("/");
+        };
+    }
+
+    function philoRoutes($routeProvider, $locationProvider) {
+        $routeProvider.
+        when("/", {
+            templateUrl: function() {
+                return "app/components/landingPage/landing_page.html";
             },
-            controller: 'landingPage',
-            controllerAs: 'lp'
+            controller: "LandingPageController",
+            controllerAs: "lp"
         }).
-        when('/query?:queryArgs', {
+        when("/query?:queryArgs", {
             templateUrl: function(queryArgs) {
                 var report = queryArgs.report;
                 if (report === "concordance" || report === "kwic" || report === "bibliography" || report === "concordance_from_collocation" || report === "word_property_filter") {
-                    var template = 'app/components/concordanceKwic/concordanceKwic.html';
+                    var template = "app/components/concordanceKwic/concordanceKwic.html";
                 } else if (report === "collocation") {
-                    var template = 'app/components/collocation/collocation.html';
+                    template = "app/components/collocation/collocation.html";
                 } else if (report === "time_series") {
-                    var template = 'app/components/timeSeries/timeSeries.html';
+                    template = "app/components/timeSeries/timeSeries.html";
                 } else {
-                    var template = 'app/components/landingPage/landing_page.html'; 
+                    template = "app/components/landingPage/landing_page.html";
                 }
                 return template;
             }
         }).
-        when('/navigate/:pathInfo*\/', {
+        when("/navigate/:pathInfo*\/", {
             templateUrl: function(queryArgs) {
-                var pathInfo = queryArgs.pathInfo.split('/');
-                if (pathInfo[pathInfo.length - 1] == "table-of-contents") {
-                    return 'app/components/tableOfContents/tableOfContents.html';
+                var pathInfo = queryArgs.pathInfo.split("/");
+                if (pathInfo[pathInfo.length - 1] === "table-of-contents") {
+                    return "app/components/tableOfContents/tableOfContents.html";
                 } else {
-                    return 'app/components/textNavigation/textNavigation.html';
+                    return "app/components/textNavigation/textNavigation.html";
                 }
             }
         }).
-        when('/access-control', {
-            templateUrl: 'app/components/accessControl/accessControl.html'
+        when("/access-control", {
+            templateUrl: "app/components/accessControl/accessControl.html"
         }).
         otherwise({
-          redirectTo: '/'
+            redirectTo: "/"
         });
-    $locationProvider.html5Mode({
-        enabled: true
-    });
-}]);
+        $locationProvider.html5Mode({
+            enabled: true
+        });
+    }
+})();
