@@ -5,7 +5,7 @@
         .module("philoApp")
         .controller('SearchFormController', SearchFormController)
 
-    function SearchFormController($rootScope, $http, $location, radio, URL) {
+    function SearchFormController($scope, $rootScope, $http, $location, radio, URL) {
         var vm = this;
         vm.formOpen = false;
         vm.searchOptionsButton = "Show search options";
@@ -54,7 +54,7 @@
             $location.url(URL.objectToUrlString($rootScope.formData, extraParams));
         }
 
-    	$rootScope.$on('backToHome', function() {
+    	$scope.$on('backToHome', function() {
     		vm.formOpen = false;
             vm.searchOptionsButton = "Show search options";
     	})

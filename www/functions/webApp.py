@@ -34,9 +34,9 @@ js_plugins = [
 
 # Full List of all AngularJS specific JavaScript
 js_files = [
-    "app/philoLogicMain.js", "app/shared/directives.js",
-    "app/shared/services.js", "app/shared/config.js", "app/shared/filters.js",
-    "app/shared/values.js",
+    "app/bootstrapApp.js", "app/philoLogicMain.js", "app/routes.js",
+    "app/shared/directives.js", "app/shared/services.js",
+    "app/shared/config.js", "app/shared/filters.js", "app/shared/values.js",
     "app/shared/searchArguments/searchArgumentsDirective.js",
     "app/shared/exportResults/exportResults.js",
     "app/components/landingPage/landingPageDirectives.js",
@@ -94,7 +94,6 @@ def build_html_page(config):
     html_page = open('%s/app/index.html' % config.db_path).read()
     html_page = html_page.replace('$DBNAME', config.dbname)
     html_page = html_page.replace('$DBURL', config.db_url)
-    html_page = html_page.replace('$PHILOCONFIG', config.to_json())
     html_page = html_page.replace('$CSS', load_CSS())
     html_page = html_page.replace('$JS', load_JS())
     return html_page

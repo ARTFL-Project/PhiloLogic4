@@ -128,9 +128,7 @@ def concordance_citation(hit, citation_hrefs):
             if hit.div1["type"] and hit.div1["n"]:
                 div1_name = hit.div1['type'] + " " + hit.div1["n"]
             else:
-                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1[
-                    'philo_name'
-                ] or hit.div1['philo_type']
+                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
     div1_name = div1_name[0].upper() + div1_name[1:]
 
     ## Remove leading/trailing spaces
