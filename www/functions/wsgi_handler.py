@@ -83,7 +83,6 @@ class WSGIHandler(object):
             self.cgi['q'][0] = self.cgi["q"][0].replace(';', '')
             self.cgi['q'][0] = self.cgi["q"][0].replace(',', '')
             self.cgi['q'][0] = self.cgi["q"][0].replace('!', '')
-            self.cgi['q'][0] = self.cgi["q"][0].replace('?', '')
 
         for field in self.metadata_fields:
             if field in self.cgi and self.cgi[field]:

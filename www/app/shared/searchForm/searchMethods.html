@@ -4,15 +4,15 @@
     </div>
     <div class="col-xs-12 col-sm-3 col-lg-2" id="method-buttons">
         <div class="btn-group-vertical" data-toggle="buttons">
-            <label class="btn btn-primary" ng-class="{'active': formData.method === 'proxy'}" ng-click="radioClick('method', 'proxy')">
+            <label class="btn btn-primary" ng-class="{'active': formData.method === 'proxy'}" ng-click="search.radioClick('method', 'proxy')">
                 <input type="radio" name="method" id="method1" value='proxy' checked>
                 Within
             </label>
-            <label class="btn btn-primary" ng-class="{'active': formData.method === 'phrase'}" ng-click="radioClick('method', 'phrase')">
+            <label class="btn btn-primary" ng-class="{'active': formData.method === 'phrase'}" ng-click="search.radioClick('method', 'phrase')">
                 <input type="radio" name="method" id="method2" value='phrase'>
                 Exactly
             </label>
-            <label class="btn btn-primary" ng-class="{'active': formData.method === 'cooc'}" ng-click="radioClick('method', 'cooc')">
+            <label class="btn btn-primary" ng-class="{'active': formData.method === 'cooc'}" ng-click="search.radioClick('method', 'cooc')">
                 <input type="radio" name="method" id="method3" value='cooc'>
                 In the same sentence
             </label>
@@ -20,7 +20,7 @@
     </div>
     <div class="col-xs-12 col-sm-7 col-lg-8">
         <input type='text' name='arg_proxy' id='arg_proxy' class="form-control" style="width:40px; text-align: center;" ng-model="formData.arg_proxy">
-        <span style="padding-left: 10px">words in the same sentence</span><br>  
+        <span style="padding-left: 10px">words in the same sentence</span><br>
         <input type='text' name='arg_phrase' id='arg_phrase' class="form-control" style="width:40px; text-align: center;" ng-model="formData.arg_phrase">
         <span style="padding-left: 10px">words in the same sentence</span>
     </div>

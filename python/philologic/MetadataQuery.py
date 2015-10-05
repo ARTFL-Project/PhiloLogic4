@@ -202,7 +202,7 @@ def make_grouped_sql_clause(expanded,column):
             clauses += "(%s)" % clause
         else:
             clauses += " AND (%s)" % clause
-    print >> sys.stderr, column, ":: ",clauses
+    #print >> sys.stderr, column, ":: ",clauses
     return "(%s)" % clauses
 
 def metadata_pattern_search(term, path):

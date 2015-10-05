@@ -75,6 +75,10 @@ def query_lowlevel(db, param_dict):
     for column, values in param_dict.items():
         norm_path = db.path + "/frequencies/normalized_" + column + "_frequencies"
         for v in values:
+            try:
+                v = v.decode('utf-8')
+            except:
+                pass
             parsed = parse_query(v)
             if db.locals['debug']:
                 print >> sys.stderr, "METADATA_TOKENS:", parsed

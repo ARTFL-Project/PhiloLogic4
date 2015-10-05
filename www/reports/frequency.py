@@ -77,7 +77,7 @@ def generate_key(hit, field_list, db):
     for field in field_list:
         value = hit[field]
         if not value:
-            print >> sys.stderr, "NULL FOUND", hit.head, hit.philo_id, hit[field]
+            # print >> sys.stderr, "NULL FOUND", hit.head, hit.philo_id, hit[field]
             value = "NULL" # NULL is a magic value for queries, don't change it recklessly.
         k = (field, value)
         key.append(k)

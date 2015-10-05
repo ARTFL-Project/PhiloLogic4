@@ -136,9 +136,8 @@
                 if (!'colloc_filter_choice' in $rootScope.formData || typeof($rootScope.formData.colloc_filter_choice) === 'undefined') {
                     $rootScope.formData.colloc_filter_choice = "frequency";
                 }
-                scope.wordFiltering = ['25', '50', '75', '100', '125', '150', '175', '200'];
                 if (!'filter_frequency' in $rootScope.formData || typeof($rootScope.formData.filter_frequency) === 'undefined') {
-                    $rootScope.formData.filter_frequency = scope.wordFiltering[3];
+                    $rootScope.formData.filter_frequency = 100;
                 }
             }
         }

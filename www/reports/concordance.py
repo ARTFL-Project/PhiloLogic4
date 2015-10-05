@@ -9,6 +9,7 @@ from philologic.DB import DB
 from functions.wsgi_handler import WSGIHandler
 from functions.ObjectFormatter import convert_entities, adjust_bytes, valid_html_tags, xml_to_html_class
 from lxml import etree
+from itertools import chain
 try:
     import ujson as json
 except ImportError:
@@ -33,17 +34,23 @@ def concordance(environ, start_response):
     yield json.dumps(concordance_object)
 
 
-def concordance_results(db, q, config):
-    hits = db.query(q["q"], q["method"], q["arg"], **q.metadata)
-    start, end, n = f.link.page_interval(q['results_per_page'], hits, q.start,
-                                         q.end)
+def concordance_results(db, request, config):
+    if request.collocation_type:
+        first_hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+        second_hits = db.query(request["left"], request["method"], request["arg"], **request.metadata)
+        hits = CombinedHitlist(first_hits, second_hits)
+        print >> sys.stderr ,"LEN COMBINED", len(hits)
+    else:
+        hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+    start, end, n = f.link.page_interval(request['results_per_page'], hits, request.start,
+                                         request.end)
 
     concordance_object = {
         "description":
         {"start": start,
          "end": end,
-         "results_per_page": q.results_per_page},
-        "query": dict([i for i in q]),
+         "results_per_page": request.results_per_page},
+        "query": dict([i for i in request]),
         "default_object": db.locals['default_object_level']
     }
 
@@ -128,7 +135,9 @@ def concordance_citation(hit, citation_hrefs):
             if hit.div1["type"] and hit.div1["n"]:
                 div1_name = hit.div1['type'] + " " + hit.div1["n"]
             else:
-                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
+                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1[
+                    'philo_name'
+                ] or hit.div1['philo_type']
     div1_name = div1_name[0].upper() + div1_name[1:]
 
     ## Remove leading/trailing spaces
@@ -242,6 +251,39 @@ def format_concordance(text, word_regex, bytes=[]):
     ## remove spaces around hyphens and apostrophes
     output = space_match.sub('\\1', output)
     return output
+
+
+class CombinedHitlist(object):
+    """A combined hitlists used for binding collocation hits"""
+
+    def __init__(self, *hitlists):
+        self.combined_hitlist = []
+        # sentence_ids = set()
+        # for hit in sorted(chain(*hitlists), key=lambda x: x.date):
+        #     sentence_id = hit.philo_id[:6]
+        #     if sentence_id not in sentence_ids:
+        #         self.combined_hitlist.append(hit)
+        #         sentence_ids.add(sentence_id)
+        from collections import defaultdict
+        sentence_counts = defaultdict(int)
+        for pos, hitlist in enumerate(hitlists):
+            max_sent_count = 2
+            for hit in hitlist:
+                sentence_id = repr(hit.philo_id[:6])
+                if sentence_id not in sentence_counts or sentence_counts[sentence_id] == max_sent_count:
+                    self.combined_hitlist.append(hit)
+                    sentence_counts[sentence_id] += 1
+
+        self.done = True
+
+    def __len__(self):
+        return len(self.combined_hitlist)
+
+    def __getitem__(self, key):
+        return self.combined_hitlist[key]
+
+    def __getattr__(self, name):
+        return self.combined_hitlist[name]
 
 
 if __name__ == "__main__":

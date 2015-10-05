@@ -24,4 +24,4 @@
             angular.bootstrap(document, ['philoApp']);
         });
     }
-})()
+})();

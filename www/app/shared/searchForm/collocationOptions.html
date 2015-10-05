@@ -1,22 +1,22 @@
-<div id="collocation-options" class="row" ng-if="formData.report == 'collocation'">
+<div class="row" id="collocation-options" ng-if="formData.report == 'collocation'">
     <div class="col-xs-12" style="margin-top: 10px;">
         <div class="row">
             <div class="col-xs-3 col-sm-2 col-md-2 text-row">
                 Word Filtering
             </div>
             <div class="col-xs-3 col-sm-1">
-                <input type='text' name="filter_frequency" style="width:40px; text-align: center;" ng-model="formData.filter_frequency">
+                <input name="filter_frequency" ng-model="formData.filter_frequency" style="width:40px; text-align: center;" type='text'>
             </div>
             <div class="col-xs-6 col-sm-2">
-                <div class="btn-group-vertical" role="group" data-toggle="buttons" id="colloc_filter_choice">
-                    <label class="btn btn-primary" ng-class="{'active': formData.colloc_filter_choice === 'frequency'}" id="colloc-filter-frequency" ng-click="radioClick('colloc_filter_choice', 'frequency')">
-                        <input type="radio" name="colloc_filter_choice" value="frequency" checked="checked">Most frequent terms
+                <div class="btn-group-vertical" data-toggle="buttons" id="colloc_filter_choice" role="group">
+                    <label class="btn btn-primary" id="colloc-filter-frequency" ng-class="{'active': formData.colloc_filter_choice === 'frequency'}" ng-click="search.radioClick('colloc_filter_choice', 'frequency')">
+                        <input checked="checked" name="colloc_filter_choice" type="radio" value="frequency">Most frequent terms
                     </label>
-                    <label class="btn btn-primary" ng-class="{'active': formData.colloc_filter_choice === 'stopwords'}" id="colloc-filter-stopwords" ng-if="stopwords" ng-click="radioClick('colloc_filter_choice', 'stopwords')">
-                        <input type="radio" name="colloc_filter_choice" value="stopwords">Stopwords
+                    <label class="btn btn-primary" id="colloc-filter-stopwords" ng-class="{'active': formData.colloc_filter_choice === 'stopwords'}" ng-click="search.radioClick('colloc_filter_choice', 'stopwords')" ng-if="stopwords">
+                        <input name="colloc_filter_choice" type="radio" value="stopwords">Stopwords
                     </label>
-                    <label class="btn btn-primary" ng-class="{'active': formData.colloc_filter_choice === 'nofilter'}" id="colloc-no-filter" ng-click="radioClick('colloc_filter_choice', 'nofilter')">
-                        <input type="radio" name="colloc_filter_choice" value="nofilter">No filtering
+                    <label class="btn btn-primary" id="colloc-no-filter" ng-class="{'active': formData.colloc_filter_choice === 'nofilter'}" ng-click="search.radioClick('colloc_filter_choice', 'nofilter')">
+                        <input name="colloc_filter_choice" type="radio" value="nofilter">No filtering
                     </label>
                 </div>
             </div>

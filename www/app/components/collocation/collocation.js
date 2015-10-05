@@ -41,21 +41,29 @@
         var localParams = angular.copy($location.search());
         vm.resolveCollocateLink = function(word) {
             var q = localParams.q + ' "' + word + '"';
-            if (typeof(localParams.word_num) === 'undefined' || isNaN(localParams.word_num)) {
-                var method = "cooc";
-                var arg = 6
+            if ('collocate_distance' in localParams && !(isNaN(localParams.collocate_distance))) {
+                var newUrl = URL.objectToUrlString(localParams, {
+                    method: "proxy",
+                    arg: localParams.collocate_distance,
+                    start: "0",
+                    end: '0',
+                    q: q,
+                    report: "concordance",
+                    collocation_type: "combined",
+                    left: '"' + word + '" ' + localParams.q
+                });
             } else {
-                var method = "proxy";
-                var arg = localParams.word_num;
+                var method = "cooc";
+                var arg = 6;
+                var newUrl = URL.objectToUrlString(localParams, {
+                    method: method,
+                    arg: arg,
+                    start: "0",
+                    end: '0',
+                    q: q,
+                    report: "concordance"
+                });
             }
-            var newUrl = URL.objectToUrlString(localParams, {
-                method: method,
-                arg: arg,
-                start: "0",
-                end: '0',
-                q: q,
-                report: "concordance"
-            });
             $location.url(newUrl);
         }
 
