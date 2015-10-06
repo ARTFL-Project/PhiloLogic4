@@ -2,7 +2,7 @@ import re
 import cgi
 import sys
 import struct
-import sqlite3 
+import sqlite3
 import HitList
 import unicodedata
 import subprocess
@@ -15,7 +15,7 @@ def metadata_query(db,filename,param_dicts):
     prev = None
     #print >> sys.stderr, "METADATA_HITLIST: ",filename, param_dicts
     for d in param_dicts:
-        query = query_recursive(db,d,prev)          
+        query = query_recursive(db,d,prev)
         prev = query
     try:
         corpus_fh = open(filename,"wb")
@@ -57,7 +57,7 @@ def query_recursive(db,param_dict,parent):
     else:
         for row in r:
             yield row
-            
+
 def query_lowlevel(db,param_dict):
     vars = []
     clauses = []
@@ -77,7 +77,7 @@ def query_lowlevel(db,param_dict):
             sql_clause = make_grouped_sql_clause(expanded,column)
             if db.locals['debug']:
                 print >> sys.stderr, "SQL_SYNTAX:", sql_clause
-            clauses.append(sql_clause)            
+            clauses.append(sql_clause)
 #            clause,some_vars = make_clause(column,parsed,norm_path)
 #            print >> sys.stderr, "METADATA_QUERY:",clause,some_vars
 #            clauses.append(clause)
@@ -111,11 +111,14 @@ def expand_grouped_query(grouped,norm_path):
         expanded_group = []
         for kind,token in group:
             if kind == "TERM":
-                norm_term = token.decode("utf-8").lower()
+                try:
+                    norm_term = token.decode("utf-8").lower()
+                except:
+                    norm_term = token.lower()
                 norm_term = [c for c in unicodedata.normalize("NFKD",norm_term) if not unicodedata.combining(c)]
                 norm_term = u"".join(norm_term).encode("utf-8")
                 expanded_terms = metadata_pattern_search(norm_term,norm_path)
-                if expanded_terms: 
+                if expanded_terms:
                     expanded_tokens = [ ("QUOTE",'"'+e+'"') for e in expanded_terms]
                     fully_expanded_tokens = []
                     first = True
@@ -124,7 +127,7 @@ def expand_grouped_query(grouped,norm_path):
                             first = False
                         else:
                             fully_expanded_tokens.append( ("OR","|") )
-                        fully_expanded_tokens.append(e)                        
+                        fully_expanded_tokens.append(e)
                 else: # if we have no matches, just put an inexact match in as placeholder.  Will fail later.
                     fully_expanded_tokens = [ ("QUOTE",'"'+norm_term+'"') ]
                 expanded_group.extend(fully_expanded_tokens)
@@ -146,7 +149,7 @@ def make_grouped_sql_clause(expanded,column):
     first_group = True
     for group in expanded:
         clause = ""
-        neg = False                
+        neg = False
         has_null = False
         first_token,first_value = group[0]
         if first_token == "NOT":
@@ -156,18 +159,18 @@ def make_grouped_sql_clause(expanded,column):
                 if second_token == "RANGE":
                     lower,upper = second_value.split("-")
                     clause += "(%s < %s OR %s > %s)" % (column, esc(lower), column, esc(upper) )
-                    if first_group: 
+                    if first_group:
                         first_group = False
                         clauses += clause
                     else:
                         clauses += "AND %s" % clause
-                    continue                    
+                    continue
             clause += "%s NOT IN (" % column
         else:
             if first_token == "RANGE":
                 lower,upper = first_value.split("-")
                 clause += "(%s >= %s AND %s <= %s)" % (column, esc(lower), column, esc(upper) )
-                if first_group: 
+                if first_group:
                     first_group = False
                     clauses += clause
                 else:
@@ -189,7 +192,10 @@ def make_grouped_sql_clause(expanded,column):
             else:
                 clause += ", "
             if kind == "QUOTE":
-                clause += esc(token[1:-1])
+                try:
+                    clause += esc(token[1:-1])
+                except:
+                    clause += esc(token.decode('utf-8')[1:-1])
                 # but harmless, as well was its own clause below.  Fix later, if possible.
         clause += ")"
         if has_null:
@@ -217,7 +223,7 @@ def metadata_pattern_search(term, path):
     return [m.split("\t")[1].strip().decode('utf-8', 'ignore').encode('utf-8') for m in match]
 
 def escape_sql_string(s):
-    s = s.replace("'","''")    
+    s = s.replace("'","''")
     return "'%s'" % s
 
 
@@ -253,5 +259,3 @@ def corpus_cmp(x,y):
     else:
         depth = len(x)
     return obj_cmp(x[:depth],y[:depth])
-
-            
