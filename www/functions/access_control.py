@@ -1,21 +1,17 @@
 #!/usr/bin/env python
 
 import os
-from philologic.DB import DB
-import sys
 import socket
 import re
 import hashlib
 import time
-import socket, struct
+import struct
 from wsgi_handler import WSGIHandler
 
-
 # These should always be allowed for local access
-local_blocks = ["10.0.0.0/8",
-              "172.16.0.0/12",
-              "192.168.0.0/16",
-              "127.0.0.1/32"]
+local_blocks = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.1/32"
+                ]
+
 
 def check_access(environ, config, db):
     incoming_address = environ['REMOTE_ADDR']
@@ -35,11 +31,11 @@ def check_access(environ, config, db):
         for block in blocks:
             if addr_in_cidr(incoming_address, block):
                 return make_token(incoming_address, db)
-        
+
         try:
             domain_list = set(access["domain_list"])
         except:
-            return () ## No allowed domains, so access request denied
+            return ()  ## No allowed domains, so access request denied
         try:
             blocked_ips = set(access["blocked_ips"])
         except:
@@ -65,7 +61,8 @@ def check_access(environ, config, db):
             return make_token(incoming_address, db)
         else:
             return ()
-        
+
+
 def login_access(environ, config, db, headers):
     request = WSGIHandler(db, environ)
     if request.authenticated:
@@ -78,11 +75,12 @@ def login_access(environ, config, db, headers):
                 token = make_token(incoming_address, db)
                 if token:
                     h, ts = token
-                    headers.append( ("Set-Cookie", "hash=%s" % h) )
-                    headers.append( ("Set-Cookie", "timestamp=%s" % ts) )
+                    headers.append(("Set-Cookie", "hash=%s" % h))
+                    headers.append(("Set-Cookie", "timestamp=%s" % ts))
         else:
             access = False
     return access, headers
+
 
 def check_login_info(config, request):
     try:
@@ -103,6 +101,7 @@ def check_login_info(config, request):
                 break
     return access
 
+
 def make_token(incoming_address, db):
     h = hashlib.md5()
     h.update(incoming_address)
@@ -112,20 +111,24 @@ def make_token(incoming_address, db):
     h.update(secret)
     return (h.hexdigest(), now)
 
-## Adapted from http://code.activestate.com/recipes/66517/ 
+## Adapted from http://code.activestate.com/recipes/66517/
 ## Fixed LOTS of bugs.
+
 
 def dottedQuadToNum(ip):
     "convert decimal dotted quad string to long integer"
-    return struct.unpack('!I',socket.inet_aton(ip))[0]
+    return struct.unpack('!I', socket.inet_aton(ip))[0]
+
 
 def numToDottedQuad(n):
     "convert long int to dotted quad string"
-    return socket.inet_ntoa(struct.pack('!I',n))
-      
+    return socket.inet_ntoa(struct.pack('!I', n))
+
+
 def makeMask(n):
     "return a mask of n bits as a long integer"
-    return ((2L<<n-1)-1) << (32-n)
+    return ((2L << n - 1) - 1) << (32 - n)
+
 
 def ipToNetAndHost(ip, maskbits):
     "returns tuple (network, host) dotted-quad addresses given IP and mask size"
@@ -139,10 +142,11 @@ def ipToNetAndHost(ip, maskbits):
 
     return numToDottedQuad(net), numToDottedQuad(host)
 
-def addr_in_cidr(addr,block):
-    ip,l = block.split("/")
-    block_host, block_prefix = ipToNetAndHost(ip,int(l))
-    addr_host, addr_prefix = ipToNetAndHost(addr,int(l))
+
+def addr_in_cidr(addr, block):
+    ip, l = block.split("/")
+    block_host, block_prefix = ipToNetAndHost(ip, int(l))
+    addr_host, addr_prefix = ipToNetAndHost(addr, int(l))
     # print "Block:", block_host, block_prefix
     # print "Address:", addr_host, addr_prefix
     return block_prefix == addr_prefix

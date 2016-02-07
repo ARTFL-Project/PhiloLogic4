@@ -1,6 +1,6 @@
 <div id="results_container" ng-class="{'col-xs-12': concKwic.frequencyResults.length === 0, 'col-xs-8': concKwic.frequencyResults.length > 0}">
     <ol id="philologic_concordance">
-        <li class="philologic_occurrence panel panel-default velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger:50}" ng-repeat="result in ::concKwic.results.results" ng-init="position = $index + concKwic.results.description.start">
+        <li class="philologic_occurrence panel panel-default velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger:50}" ng-repeat="result in ::results.results" ng-init="position = $index + results.description.start">
             <div class="citation-container row">
                 <div class="col-xs-12 col-sm-10 col-md-11">
                    <span class="cite" data-id="{{ ::result.philo_id.join(' ') }}">
@@ -13,7 +13,7 @@
                             <a href="{{result.citation.div2.href}}" ng-if="result.citation.div2 | isEmpty">{{ ::result.citation.div2.label }}</a>
                             <a href="{{result.citation.div3.href}}" ng-if="result.citation.div3 | isEmpty">{{ ::result.citation.div3.label }}</a>
                             <a href="{{result.citation.para.href}}" ng-if="result.citation.para | isEmpty">{{ ::result.citation.para.label }}</a>
-							<span class="page-display" ng-if="concKwic.results.result_type !== 'doc' && result.citation.page | isEmpty">page {{ ::result.citation.page.label }}</span>
+							<span class="page-display" ng-if="results.result_type !== 'doc' && result.citation.page | isEmpty">page {{ ::result.citation.page.label }}</span>
                         </span>
                    </span>
                 </div>

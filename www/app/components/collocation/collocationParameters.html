@@ -11,7 +11,7 @@
             <span class="sr-only">Close</span>
         </button>
         <ol>
-            <li ng-repeat="word in filterList">{{ ::word }}</li>
+            <li ng-repeat="word in filterList track by $index">{{ ::word }}</li>
         </ol>
     </div>
 </div>

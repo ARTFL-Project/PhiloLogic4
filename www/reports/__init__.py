@@ -1,6 +1,6 @@
-from concordance import concordance, fetch_concordance, concordance_results, concordance_citation
+from concordance import concordance, fetch_concordance, concordance_results, concordance_citation, citation_links
 from frequency import generate_frequency
-from kwic import kwic, generate_kwic_results
+from kwic import kwic, generate_kwic_results, kwic_hit_object
 from collocation import collocation, fetch_collocation
 from navigation import navigation, generate_text_object
 from table_of_contents import generate_toc_object

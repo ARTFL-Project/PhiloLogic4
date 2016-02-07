@@ -1,8 +1,8 @@
-<div class="text-object" ng-controller="textNavigationCtrl as textNav">
+<div class="text-object" ng-controller="TextNavigationController as textNav">
     <div id="philo-view" ng-if="textNav.authorized">
         <div id="object-title">
             <div id="doc-title">
-				<span ng-if="textObject.citation.author.label.length > 0">{{ textObject.citation.author.label }}, </span>
+				<span ng-if="textObject.citation.author.label.length > 0 && philoConfig.dico_citation === False">{{ textObject.citation.author.label }}, </span>
                 <a href="{{ textObject.citation.title.href }}" class="citation-small-caps"><i>{{ textObject.citation.title.label }}</i></a>
 				<span ng-if="textObject.citation.date | isEmpty">[{{ textObject.citation.date.label }}]</span>
 			</div>
@@ -23,8 +23,8 @@
 <div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-full-screen="true" data-continuous="false" style="display: none">
     <div class="slides"></div>
     <h3 class="title"></h3>
-    <a class="prev">&lt;</a>
-    <a class="next">&gt;</a>
+    <a class="prev"><span class="glyphicon glyphicon-arrow-left"></span></a>
+    <a class="next"><span class="glyphicon glyphicon-arrow-right"></span></a>
     <a id="full-size-image" class="glyphicon glyphicon-new-window" ng-click="textNav.fullSizeImage()"></a>
     <a class="close">&#10005;</a>
     <ol class="indicator"></ol>

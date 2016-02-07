@@ -475,7 +475,7 @@ class Loader(object):
                 compressed = False
             elif table == 'toms':
                 file_in = self.destination + '/WORK/all_toms_sorted'
-                indices = [('philo_type',), ('philo_id',)] + self.metadata_fields
+                indices = [('philo_type',), ('philo_id',), ('img',)] + self.metadata_fields
                 depth = 7
                 compressed = False
             post_filter = make_sql_table(table, file_in, gz=compressed, indices=indices, depth=depth)

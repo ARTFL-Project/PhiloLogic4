@@ -1,0 +1,17 @@
+<div id="results_container" ng-class="{'col-xs-12': concKwic.frequencyResults.length === 0, 'col-xs-8': concKwic.frequencyResults.length > 0}">
+	<ol class="bibliographic-results text-content-area">
+		<li class="biblio-occurrence panel panel-default velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger:20}" ng-repeat="result in ::results.results">
+			<input type="checkbox" style="margin-left:10px" ng-click="addToSearch(result.citation.title.label)" ng-if="results.result_type === 'doc' && philoConfig.metadata.indexOf('title') !== -1">
+			<span style="padding-left: 5px;" ng-init="position = $index + results.description.start">{{ ::position }}.</span>
+			<span class="philologic_cite">
+				<a href="{{result.citation.div1.href}}" ng-if="results.default_object !== 'div2' && results.default_object !== 'div3' && result.citation.div1 | isEmpty">{{ ::result.citation.div1.label }}</a>
+				<a href="{{result.citation.div2.href}}" ng-if="results.default_object !== 'div3' && result.citation.div2 | isEmpty">{{ ::result.citation.div2.label }}</a>
+				<a href="{{result.citation.div3.href}}" ng-if="result.citation.div3 | isEmpty">{{ ::result.citation.div3.label }}</a>
+				<span ng-if="result.metadata_fields.normalizedClass">&nbsp;[{{ ::result.metadata_fields.normalizedClass }}]</span>
+				<span ng-if="result.metadata_fields.pos">&nbsp;(<i>{{ ::result.metadata_fields.pos }}</i>)</span>
+				<span ng-if="result.citation.author | isEmpty" class="citation-small-caps">&nbsp;{{ ::result.citation.author.label }}</span>
+				<span class="page-display" ng-if="results.result_type !== 'doc' && result.citation.page | isEmpty">page {{ ::result.citation.page.label }}</span>
+			</span>
+		</li>
+	</ol>
+</div>

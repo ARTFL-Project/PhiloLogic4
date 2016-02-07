@@ -140,5 +140,6 @@ metadata_xpaths = [
                 #######################
                 
                 ("page",".@n","n"),
+                ("page",".@id","img"),
                 ("page",".@fac","img")
                 ]

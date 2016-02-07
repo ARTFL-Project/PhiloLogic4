@@ -1,23 +1,25 @@
 #!/usr/bin/env python
 
-import os
 import sys
-import urlparse
 sys.path.append('..')
 from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
 from philologic.DB import DB
-import reports as r
 import functions as f
-import cgi
-import json
+try:
+    import ujson as json
+except ImportError:
+    import json
+import sqlite3
 
 object_levels = set(["doc", "div1", "div2", "div3"])
 
-def get_bibliography(environ,start_response):
+
+def get_bibliography(environ, start_response):
     status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-    start_response(status,headers)
+    headers = [('Content-type', 'application/json; charset=UTF-8'),
+               ("Access-Control-Allow-Origin", "*")]
+    start_response(status, headers)
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
@@ -43,16 +45,32 @@ def get_bibliography(environ,start_response):
         c.execute('select rowid from toms where philo_id="%s"' % next_doc_id)
         try:
             next_doc_row = c.fetchone()['rowid']
-        except TypeError: # if this is the last doc, just get the last rowid in the table.
+        except TypeError:  # if this is the last doc, just get the last rowid in the table.
             c.execute('select max(rowid) from toms;')
             next_doc_row = c.fetchone()[0]
-        c.execute('select head from toms where rowid between %d and %d and head is not null limit 1' % (doc_row, next_doc_row))
         try:
-            start_head = c.fetchone()['head']
-            start_head = start_head.decode('utf-8').lower().title().encode('utf-8')
-        except:
+            c.execute(
+                'select * from toms where rowid between %d and %d and head is not null and head !="" and type !="editorial" and type !="misc" and type !="Misc" and type != "Avertissement" and type != "Title Page" and type != "Avis" limit 1'
+                % (doc_row, next_doc_row))
+        except sqlite3.OperationalError:  # no type field in DB
+            c.execute(
+                'select * from toms where rowid between %d and %d and head is not null and head !="" limit 1'
+                % (doc_row, next_doc_row))
+        try:
+            start_head = c.fetchone()['head'].decode('utf-8')
+            start_head = start_head.lower().title().encode('utf-8')
+        except Exception as e:
+            print >> sys.stderr, repr(e)
             start_head = ''
-        c.execute('select head from toms where rowid between %d and %d and head is not null order by rowid desc limit 1' % (doc_row, next_doc_row))
+        try:
+            c.execute(
+                'select head from toms where rowid between %d and %d and head is not null and head !="" and type !="notes" and type !="editorial" and type !="misc" and type !="Misc" and type != "Avertissement" and type != "Title Page" and type != "Avis" order by rowid desc limit 1'
+                % (doc_row, next_doc_row))
+        except sqlite3.OperationalError:  # no type field in DB
+            c.execute(
+                'select head from toms where rowid between %d and %d and head is not null and head !="" order by rowid desc limit 1'
+                % (
+                    doc_row, next_doc_row))
         try:
             end_head = c.fetchone()['head']
             end_head = end_head.decode('utf-8').lower().title().encode('utf-8')
@@ -60,10 +78,11 @@ def get_bibliography(environ,start_response):
             end_head = ''
         hit_object['start_head'] = start_head
         hit_object['end_head'] = end_head
-        
+
         results.append(hit_object)
-    
+
     yield json.dumps(results)
+
 
 if __name__ == "__main__":
     CGIHandler().run(get_bibliography)

@@ -188,13 +188,27 @@ web_config_defaults = {
                # for browsing the database available on the landing page. The default represents the entire roman alphabet.''',
         'index': 17
     },
+    'dico_citation': {
+        'value': False,
+        'comment': '''
+               # The dico_citation variable set to True enables a dictionary citation in concordances. Headword is cited first, followed by author if relevant,
+               # or class of knowledge if available.''',
+        'index': 18
+    },
     'kwic_bibliography_fields': {
          'value': [],
          'comment': '''
                 # The kwic_bibliography_fields variable variable defines which bibliography fields will be displayed in the KWIC view. It should be
                 # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.                # If the variable is an empty list, the first two fields in the metadata variable will be used.
                 ''',
-         'index': 18
+         'index': 19
+     },
+     'kwic_metadata_sorting_fields': {
+         'value': [],
+         'comment': '''
+                # The kwic_metadata_sorting_fields variable allows you to pick wich metadata field can be used for sorting KWIC results.
+                ''',
+         'index': 20
      },
      'title_prefix_removal': {
           'value': [],
@@ -204,7 +218,26 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-          'index': 19
+          'index': 21
+     },
+     'page_images_url_root': {
+          'value': '',
+          'comment': '''
+                 # The page_images_url_root variable defines a root URL where pages images can be fetched when a filename is provided inside a page tag.
+                 # Note that the page image filename must be inside a fac or id attribute such as:
+                 # <pb fac="filename.jpg"> or <pb id="filename.jpg">
+                 # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
+                 ''',
+          'index': 22
+     },
+     'logo': {
+          'value': '',
+          'comment': '''
+                  # The logo variable defines the location of an image to display on the landing page, just below the
+                  # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
+                  # it starts with http://. If no logo is defined, no picture will be displayed.
+                  ''',
+          'index': 23
      }
 }
 

@@ -9,10 +9,12 @@ import reports as r
 import functions as f
 import json
 
-def get_frequency(environ,start_response):
+
+def get_frequency(environ, start_response):
     status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-    start_response(status,headers)
+    headers = [('Content-type', 'application/json; charset=UTF-8'),
+               ("Access-Control-Allow-Origin", "*")]
+    start_response(status, headers)
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
@@ -22,10 +24,11 @@ def get_frequency(environ,start_response):
         else:
             hits = db.query(**request.metadata)
     else:
-        hits = db.query(request["q"],request["method"],request["arg"],**request.metadata)
+        hits = db.query(request["q"], request["method"], request["arg"],
+                        **request.metadata)
     results = r.generate_frequency(hits, request, db, config)
     yield json.dumps(results)
-    
+
 
 if __name__ == "__main__":
     CGIHandler().run(get_frequency)

@@ -91,6 +91,7 @@
 }
 #toc-content {
     display: inline-block;
+	position: relative;
     overflow: scroll;
     padding: 10px;
     line-height: 150%;
@@ -166,6 +167,23 @@
 }
 .toc-div1:hover, .toc-div2:hover, .toc-div3:hover {
 	cursor: pointer;
+}
+.toc-more {
+	text-align: center;
+	opacity: .9;
+}
+.toc-more.before {
+	margin-top: -10px;
+	margin-bottom: 10px;
+}
+.toc-more.after {
+	margin-top: 10px;
+}
+.toc-more > button {
+	width: 100%;
+	padding:2px;
+	line-height: normal;
+	font-size: initial;
 }
 
 #text-obj-content {
@@ -330,6 +348,15 @@ body {
     margin-top: 10px;
 }
 
+/*Methodique styling*/
+div[type="article"] .headword {
+	display: inline;
+}
+.headword + p {
+	display: inline;
+}
+
+
 /*Note handling*/
 .popover {
 	max-width: 350px;
@@ -386,8 +413,23 @@ div[type="notes"] .xml-note {
         color: #fff !important;
         opacity: 1;
 }
-.blueimp-gallery>.prev, .blueimp-gallery>.next {
-        font-size: 40px;
+.blueimp-gallery .glyphicon {
+        font-size: 60%;
+}
+#blueimp-gallery ol {
+	display: none;
+}
+
+/*Inline images*/
+.inline-img {
+	max-width: 40%;
+	float: left;
+	height: auto;
+	padding-right: 15px;
+	padding-top: 15px;
+}
+.inline-img:hover {
+	cursor: pointer;
 }
 
 .link-back {

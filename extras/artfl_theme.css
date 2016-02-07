@@ -48,6 +48,17 @@ a:hover {
 	text-decoration: none;
 }
 
+#dico-landing-volume li, #dico-landing-alpha td {
+	color: rgb(21, 95, 131);
+	transition: all 0ms;
+}
+#dico-landing-volume li:hover, #dico-landing-alpha td:hover {
+	background: rgb(21, 95, 131) !important;
+	border-color: transparent !important;
+	color: #fff !important;
+	transition: all 100ms;
+}
+
 /*Metadata criteria in results*/
 .biblio-criteria, .btn-danger {
     color: #fff;

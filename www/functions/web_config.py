@@ -1,12 +1,10 @@
 #! /usr/bin/env python
 
 import os
-from traceback import print_exc
 from philologic.Config import MakeWebConfig
 
 
 class brokenConfig(object):
-    
     def __init__(self, db_path, traceback):
         self.production = True
         self.db_path = db_path
@@ -14,8 +12,10 @@ class brokenConfig(object):
         self.valid_config = False
         self.traceback = traceback
 
+
 def WebConfig():
-    db_path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '')
+    db_path = os.path.abspath(os.path.dirname(__file__)).replace('functions',
+                                                                 '')
     try:
         return MakeWebConfig(db_path + '/data/web_config.cfg')
     except Exception, e:

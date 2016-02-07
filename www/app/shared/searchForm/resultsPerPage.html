@@ -1,19 +1,19 @@
-<div id="results_per_page" class="row" ng-if="formData.report != 'collocation' && formData.report != 'time_series'">
+<div class="row" id="results_per_page" ng-if="formData.report != 'collocation' && formData.report != 'time_series'">
     <div class="col-xs-12 col-sm-2 col-md-2 text-row">
         Results per page:
     </div>
     <div class="col-xs-12 col-sm-10 col-md-10">
-        <div class="btn-group" id='results_per_page' data-toggle="buttons">
-            <label class="btn btn-primary" ng-class="{'active': formData.results_per_page !== '50' && formData.results_per_page !== '100'}" ng-click="radioClick('results_per_page', '25')">
-                <input type="radio" name="results_per_page" id="pagenum1" value='25' checked>
+        <div class="btn-group" data-toggle="buttons" id='results_per_page'>
+            <label class="btn btn-primary" ng-class="{'active': formData.results_per_page !== '50' && formData.results_per_page !== '100'}" ng-click="search.radioClick('results_per_page', '25')">
+                <input checked id="pagenum1" name="results_per_page" type="radio" value='25'>
                 25
             </label>
-            <label class="btn btn-primary" ng-class="{'active': formData.results_per_page === '50'}" ng-click="radioClick('results_per_page', '50')">
-                <input type="radio" name="results_per_page" id="pagenum2" value='50'>
+            <label class="btn btn-primary" ng-class="{'active': formData.results_per_page === '50'}" ng-click="search.radioClick('results_per_page', '50')">
+                <input id="pagenum2" name="results_per_page" type="radio" value='50'>
                 50
             </label>
-            <label class="btn btn-primary" ng-class="{'active': formData.results_per_page === '100'}" ng-click="radioClick('results_per_page', '100')">
-                <input type="radio" name="results_per_page" id="pagenum3" value='100'>
+            <label class="btn btn-primary" ng-class="{'active': formData.results_per_page === '100'}" ng-click="search.radioClick('results_per_page', '100')">
+                <input id="pagenum3" name="results_per_page" type="radio" value='100'>
                 100
             </label>
         </div>

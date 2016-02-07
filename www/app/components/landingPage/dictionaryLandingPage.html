@@ -6,15 +6,13 @@
             </div>
             <div class="panel-body" >
                 <ul class="list-group" style="margin-left: -15px; margin-right: -15px" ng-if="volumeData != []">
-                    <li class="list-group-item velocity-transition-fadeIn" ng-repeat="volume in ::volumeData" data-velocity-opts="{ stagger: 10 }">
-                        <a href="navigate/{{ ::volume.philo_id }}/table-of-contents">
-							<span class="philologic-doc">
-								{{ ::volume.title }}
-								<span style="font-weight: 300" ng-if="volume.start_head">
-									({{ ::volume.start_head }}-{{ ::volume.end_head }})
-								</span>
+                    <li class="list-group-item velocity-transition-fadeIn" ng-repeat="volume in ::volumeData" ng-click="lp.goToToc(volume.philo_id)" data-velocity-opts="{ stagger: 10 }">
+						<span class="philologic-doc">
+							{{ ::volume.title }}
+							<span style="font-weight: 300" ng-if="volume.start_head">
+								({{ ::volume.start_head }} - {{ ::volume.end_head }})
 							</span>
-						</a>
+						</span>
                     </li>
                 </ul>
             </div>
