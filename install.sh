@@ -10,6 +10,9 @@ echo "$PYTHON_INSTALL"
 cd ../python;
 sudo pip install .
 sudo mkdir -p /etc/philologic/
+cd ..;
+sudo rm /usr/bin/philoload4
+sudo cp extras/philoload4.py /usr/bin/philoload4
 if [ ! -f /etc/philologic/philologic4.cfg ]
     then
         sudo rm /etc/philologic/philologic4.cfg

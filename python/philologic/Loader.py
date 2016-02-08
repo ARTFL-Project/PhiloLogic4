@@ -125,10 +125,12 @@ class Loader(object):
         load_metadata = []
         if "reverse" in options:
             reverse = options["reverse"]
-        else: reverse = False
+        else:
+            reverse = False
         if "whole_file" in options:
             whole_file = options["whole_file"]
-        else: whole_file = False
+        else:
+            whole_file = False
 
         for f in self.list_files():
             data = {"filename":f}
