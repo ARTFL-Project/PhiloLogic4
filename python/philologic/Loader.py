@@ -1,25 +1,26 @@
 #!/usr/bin/env python
-import re
-import os
-import time
-import sys
 import codecs
-import math
 import cPickle
-import subprocess
+import math
+import os
+import re
 import sqlite3
+import subprocess
+import sys
+import time
 from ast import literal_eval as eval
-from optparse import OptionParser
 from glob import glob
+from optparse import OptionParser
 
-import philologic.Parser as Parser
 import philologic.LoadFilters as LoadFilters
+import philologic.Parser as Parser
 import philologic.PostFilters as PostFilters
-from philologic.PostFilters import make_sql_table
-from philologic.DB import DB
 from lxml import etree
-from philologic.Config import MakeWebConfig, MakeDBConfig
+from philologic.Config import MakeDBConfig, MakeWebConfig
+from philologic.PostFilters import make_sql_table
 
+## Flush buffer output
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 
 sort_by_word = "-k 2,2"
 sort_by_id = "-k 3,3n -k 4,4n -k 5,5n -k 6,6n -k 7,7n -k 8,8n -k 9,9n"
@@ -32,57 +33,41 @@ index_cutoff = 10 # index frequency cutoff.  Don't. alter.
 ## While these tables are loaded by default, you can override that default, although be aware
 ## that you will only have reduced functionality if you do. It is strongly recommended that you
 ## at least keep the 'toms' table from toms.db.
+DEFAULT_TABLES = ['toms', 'pages', 'words']
 
-default_tables = ['toms', 'pages', 'words']
+DEFAULT_OBJECT_LEVEL = "doc"
 
+NAVIGABLE_OBJECTS = ('doc', 'div1', 'div2', 'div3')
 
 
 class Loader(object):
 
-    def __init__(self,destination,tables = default_tables,default_object_level='doc',
-                 post_filters = None, debug=False, **parser_defaults):
+    def __init__(self, **loader_options):
         self.omax = [1,1,1,1,1,1,1,1,1]
-        self.debug = debug
         self.parse_pool = None
         self.types = object_types
-        self.tables = tables
-        self.default_object_level = default_object_level
-
-        self.parser_defaults = {}
-
-        if "parser_factory" not in parser_defaults:
-            parser_defaults["parser_factory"] = Parser.Parser
-        if "token_regex" not in parser_defaults:
-            parser_defaults["token_regex"] = Parser.DefaultTokenRegex
-        if "xpaths" not in parser_defaults:
-            parser_defaults["xpaths"] = Parser.DefaultXPaths
-        if "metadata_xpaths" not in parser_defaults:
-            parser_defaults["metadata_xpaths"] = Parser.DefaultMetadataXPaths
-        if "pseudo_empty_tags" not in parser_defaults:
-            parser_defaults["pseudo_empty_tags"] = []
-        if "suppress_tags" not in parser_defaults:
-            parser_defaults["suppress_tags"] = []
-        if "load_filters" not in parser_defaults:
-            parser_defaults["load_filters"] = LoadFilters.DefaultLoadFilters
-
-        for option in ["parser_factory","token_regex","xpaths","metadata_xpaths","pseudo_empty_tags","suppress_tags","load_filters"]:
-            self.parser_defaults[option] = parser_defaults[option]
-
-        if not post_filters:
-            post_filters = PostFilters.DefaultPostFilters
-        self.post_filters = post_filters
-
-        self.debug = debug
-
+        self.tables = DEFAULT_TABLES
         self.sort_by_word = sort_by_word
         self.sort_by_id = sort_by_id
 
+        self.debug = loader_options["debug"]
+        self.db_url = loader_options["db_url"]
+        self.default_object_level = loader_options["default_object_level"]
+        self.post_filters = loader_options["post_filters"]
+        self.word_regex = loader_options["word_regex"]
+        self.punct_regex = loader_options["punct_regex"]
+
+        self.parser_defaults = {}
+        for option in ["parser_factory","token_regex","xpaths","metadata_xpaths","pseudo_empty_tags","suppress_tags","load_filters"]:
+            self.parser_defaults[option] = loader_options[option]
+
         try:
-            os.stat(destination + "/WORK/")
-            self.destination = destination
+            work_dir = os.path.join(loader_options["data_destination"], "WORK")
+            os.stat(work_dir)
+            self.destination = loader_options["data_destination"]
             self.is_new = False
         except OSError:
-            self.setup_dir(destination)
+            self.setup_dir(loader_options["data_destination"]) ### TO TEST!!!!
             self.is_new = True
 
         self.metadata_fields = []
@@ -101,7 +86,7 @@ class Loader(object):
 
     def add_files(self,files):
         for f in files:
-            command = "cp %s %s/%s" % (shellquote(f),self.textdir, os.path.basename(f).replace(" ","_").replace("'","_")) 
+            command = "cp %s %s/%s" % (shellquote(f),self.textdir, os.path.basename(f).replace(" ","_").replace("'","_"))
             os.system(command)
         os.system("chmod 775 %s*" % self.textdir)
 
@@ -332,7 +317,7 @@ class Loader(object):
     def merge_objects(self, file_num=500):
         print "\n### Merge parser output ###"
         print "%s: sorting words" % time.ctime()
-        
+
         # Make all sorting happen in workdir rather than /tmp
         os.system('export TMPDIR=%s/' % self.workdir)
 
@@ -359,13 +344,15 @@ class Loader(object):
         if not self.debug:
             os.system("rm *.pages")
 
-    def merge_words(self, file_num):
+    def merge_words(self, file_num=100):
         """This function runs a multi-stage merge sort on words
         Since PhilLogic can potentially merge thousands of files, we need to split
         the sorting stage into multiple steps to avoid running out of file descriptors"""
         lists_of_words_files = []
         words_files = []
         if file_num > 500:
+            print "file_num should not be set above 500 or the OS might run out of file descriptors"
+            print "Setting file_num to 500..."
             file_num = 500  # We want to be conservative and avoid running out of file descriptors
 
         # First we split the sort workload into chunks of 500 (default defined in the file_num keyword)
@@ -393,7 +380,7 @@ class Loader(object):
             already_merged += len(wordlist)
             os.system("rm %s" % last_sort_file)
             last_sort_file = output
-            
+
             print "%s: %d files merged..." % (time.ctime(), already_merged)
             if not self.debug:
                 os.system("rm %s" % file_list)
@@ -494,7 +481,7 @@ class Loader(object):
                 f(self)
                 print 'done.'
 
-    def finish(self, **extra_locals):
+    def finish(self):
         """Write important runtime information to the database directory"""
         print "\n### Finishing up ###"
         os.mkdir(self.destination + "/src/")
@@ -507,10 +494,10 @@ class Loader(object):
         fh.write('deny from all')
         fh.close()
 
-        self.write_db_config(**extra_locals)
-        self.write_web_config(**extra_locals)
+        self.write_db_config()
+        self.write_web_config()
 
-    def write_db_config(self, **extra_locals):
+    def write_db_config(self):
         """ Write local variables used by libphilo"""
         filename = self.destination + "/db.locals.py"
         db_values = {'metadata_fields': self.metadata_fields,
@@ -518,17 +505,17 @@ class Loader(object):
                      'metadata_types': self.metadata_types,
                      'normalized_fields': self.normalized_fields,
                      'debug': self.debug}
-        for k, v in extra_locals.items():
-            if k != "db_url":  # This should be changed in the load_script
-                db_values[k] = v
+        db_values["word_regex"] = self.word_regex
+        db_values["punct_regex"] = self.punct_regex
+        db_values["default_object_level"] = self.default_object_level
         db_config = MakeDBConfig(filename, **db_values)
         print >> open(filename, 'w'), db_config
         print "wrote database info to %s." % (filename)
 
-    def write_web_config(self, **extra_locals):
+    def write_web_config(self):
         """ Write configuration variables for the Web application"""
         config_values = {'dbname': os.path.basename(re.sub("/data/?$", "", self.destination)),
-                         'db_url': extra_locals['db_url'],
+                         'db_url': self.db_url,
                          'metadata': self.metadata_fields,
                          'facets': [{i: [i]} for i in self.metadata_fields]}
         ## Fetch search examples:
@@ -551,7 +538,7 @@ class Loader(object):
             except (TypeError, AttributeError):
                 continue
         config_values['search_examples'] = search_examples
-    
+
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)
         print >> open(filename, 'w'), web_config
@@ -560,34 +547,7 @@ class Loader(object):
 def shellquote(s):
     return "'" + s.replace("'", "'\\''") + "'"
 
-def handle_command_line(argv):
-    usage = "usage: %prog [options] database_name files"
-    parser = OptionParser(usage=usage)
-    parser.add_option("-w", "--workers", type="int", default="2", dest="workers", help="define the number of cores for parsing")
-    parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
-
-    ## Parse command-line arguments
-    (options, args) = parser.parse_args(argv[1:])
-    try:
-        dbname = args[0]
-        args.pop(0)
-        files = args[:]
-        if args[-1].endswith('/') or os.path.isdir(args[-1]):
-            files = glob(args[-1] + '/*')
-        else:
-            files = args[:]
-    except IndexError:
-        print >> sys.stderr, "\nError: you did not supply a database name or a path for your file(s) to be loaded\n"
-        parser.print_help()
-        sys.exit()
-
-    workers = options.workers or 2
-    debug = options.debug or False
-
-    return dbname,files, workers, True, True, debug
-
-
-def setup_db_dir(db_destination, template_dir, safe=False, force_delete=False):
+def setup_db_dir(db_destination, web_app_dir, safe=False, force_delete=False):
     try:
         os.mkdir(db_destination)
     except OSError:
@@ -607,12 +567,11 @@ def setup_db_dir(db_destination, template_dir, safe=False, force_delete=False):
             else:
                 sys.exit()
 
-    if template_dir:
-        for f in os.listdir(template_dir):
+    if web_app_dir:
+        for f in os.listdir(web_app_dir):
             if f != "data":
-                cp_command = "cp -r %s %s" % (template_dir+f,db_destination+"/"+f)
+                cp_command = "cp -r %s %s" % (web_app_dir+f,db_destination+"/"+f)
                 os.system(cp_command)
 
         os.system("chmod -R 777 %s/app/assets/css" % db_destination)
         os.system("chmod -R 777 %s/app/assets/js" % db_destination)
-
