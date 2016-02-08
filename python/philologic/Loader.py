@@ -61,6 +61,8 @@ class Loader(object):
         for option in ["parser_factory","token_regex","xpaths","metadata_xpaths","pseudo_empty_tags","suppress_tags","load_filters"]:
             self.parser_defaults[option] = loader_options[option]
 
+        setup_db_dir(loader_options["db_destination"], loader_options["web_app_dir"])
+
         try:
             work_dir = os.path.join(loader_options["data_destination"], "WORK")
             os.stat(work_dir)

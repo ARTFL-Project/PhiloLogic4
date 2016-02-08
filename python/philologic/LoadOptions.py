@@ -52,7 +52,7 @@ class LoadOptions(object):
         self.values["header"] = "tei"
         self.values["debug"] = False
 
-        if load_options.database_root is None or load_options.url_root is None:
+        if self.database_root is None or self.url_root is None:
             print >> sys.stderr, "Please configure the loader script before use."
             print >> sys.stderr, "See INSTALLING in your PhiloLogic distribution."
             sys.exit()
@@ -73,7 +73,7 @@ class LoadOptions(object):
                           type="string",
                           dest="parser_factory",
                           help="Define parser to use for file parsing")
-        parser.add_option("-h", "--header", type="string", dest="header", help="Set header type for parsing")
+        # parser.add_option("-h", "--header", type="string", dest="header", help="Set header type for parsing")
         parser.add_option("-L",
                           "--load_filters",
                           type="string",
@@ -139,7 +139,7 @@ class LoadOptions(object):
             if args[-1].endswith('/') or os.path.isdir(args[-1]):
                 self.values['files'] = glob(args[-1] + '/*')
             else:
-                self.files = args[:]
+                self.values["files"] = args[:]
         except IndexError:
             print >> sys.stderr, ("\nError: you did not supply a database name "
                                   "or a path for your file(s) to be loaded\n")
