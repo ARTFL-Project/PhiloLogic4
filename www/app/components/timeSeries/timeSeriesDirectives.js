@@ -112,8 +112,9 @@
             templateUrl: 'app/components/timeSeries/timeSeriesChart.html',
             replace: true,
             link: function(scope, element, attrs) {
-                scope.height = angular.element(window).height() - angular.element('#footer').height() - angular.element('#initial_report').height() - angular.element('#header').height() - 190;
+                scope.height = angular.element(window).height() - angular.element('#footer').height() - angular.element('#initial_report').height() - angular.element('#header').height() - 70;
                 Chart.defaults.global.tooltipCornerRadius = 0;
+                Chart.defaults.global.maintainAspectRatio = false;
                 Chart.defaults.Bar.scaleGridLineColor = "rgba(240, 240, 240,.5)";
                 Chart.defaults.Bar.barShowStroke = false;
                 Chart.defaults.Bar.barValueSpacing = 1;

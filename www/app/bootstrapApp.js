@@ -2,7 +2,7 @@
     "use strict";
 
     angular
-        .module("philoApp", ["ngRoute", "ngTouch", "ngSanitize", "ngCookies", "angular-velocity", "ui.utils", "infinite-scroll", "chart.js"]);
+        .module("philoApp", ["ngRoute", "ngTouch", "ngSanitize", "ngCookies", "angular-velocity", "ui.utils", "infinite-scroll", "chart.js", "nvd3"]);
 
     getConfig().then(bootstrapApplication);
 
