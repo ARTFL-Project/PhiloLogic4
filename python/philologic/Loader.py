@@ -318,7 +318,7 @@ class Loader(object):
             self.omax = [max(x,y) for x,y in zip(vec,self.omax)]
         print "%s: done parsing" % time.ctime()
 
-    def merge_objects(self, file_num=500):
+    def merge_objects(self, file_num=100):
         print "\n### Merge parser output ###"
         print "%s: sorting words" % time.ctime()
 
@@ -354,12 +354,8 @@ class Loader(object):
         the sorting stage into multiple steps to avoid running out of file descriptors"""
         lists_of_words_files = []
         words_files = []
-        if file_num > 500:
-            print "file_num should not be set above 500 or the OS might run out of file descriptors"
-            print "Setting file_num to 500..."
-            file_num = 500  # We want to be conservative and avoid running out of file descriptors
 
-        # First we split the sort workload into chunks of 500 (default defined in the file_num keyword)
+        # First we split the sort workload into chunks of 100 (default defined in the file_num keyword)
         for f in glob(self.workdir + '/*words.sorted.gz'):
             f = os.path.basename(f)
             words_files.append(('<(gunzip -c %s)' % f, self.workdir + '/' + f))
