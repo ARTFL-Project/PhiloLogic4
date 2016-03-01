@@ -47,6 +47,7 @@ class LoadOptions(object):
         self.values["suppress_tags"] = []
         self.values["cores"] = 2
         self.values["dbname"] = ""
+        self.values["db_url"] = ""
         self.values["files"] = []
         self.values["sort_order"] = ["date", "author", "title", "filename"]
         self.values["header"] = "tei"
@@ -56,6 +57,8 @@ class LoadOptions(object):
             print >> sys.stderr, "Please configure the loader script before use."
             print >> sys.stderr, "See INSTALLING in your PhiloLogic distribution."
             sys.exit()
+
+        self
 
     def setup_parser(self):
         usage = "usage: %prog [options] database_name files"
@@ -146,14 +149,14 @@ class LoadOptions(object):
 
             parser.print_help()
             sys.exit()
-        self.update(options)
-
-    def update(self, parser_output):
-        for a in dir(parser_output):
-            if not a.startswith('__') and not callable(getattr(parser_output, a)):
-                value = getattr(parser_output, a)
+        for a in dir(options):
+            if not a.startswith('__') and not callable(getattr(options, a)):
+                value = getattr(options, a)
                 if value != None:
                     self.values[a] = value
+        self.update()
+
+    def update(self):
         self.values["token_regex"] = "%s|%s" % (self.word_regex, self.punct_regex)
         self.values["db_url"] = os.path.join(self.url_root, self.dbname)
         self.values["db_destination"] = os.path.join(self.database_root, self.dbname)
@@ -173,6 +176,8 @@ class LoadOptions(object):
 
     def __setitem__(self, attr, value):
         self.values[attr] = value
+        if attr == "dbname":
+            self.db_url = os.path.join(self.database_root, self.dbname)
 
     def __contains__(self, key):
         if key in self.values:

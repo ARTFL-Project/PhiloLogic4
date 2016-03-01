@@ -117,7 +117,7 @@
                 Chart.defaults.global.maintainAspectRatio = false;
                 Chart.defaults.Bar.scaleGridLineColor = "rgba(240, 240, 240,.5)";
                 Chart.defaults.Bar.barShowStroke = false;
-                Chart.defaults.Bar.barValueSpacing = 1;
+                Chart.defaults.Bar.barValueSpacing = 4;
                 scope.chart_options = tooltipBuilder(scope, "absolute_time");
                 scope.series = ["Absolute Count"];
                 scope.absoluteCounts = [];
