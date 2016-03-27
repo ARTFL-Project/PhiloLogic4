@@ -9,7 +9,7 @@ sudo make install
 PYTHON_INSTALL="\n## INSTALLING PYTHON LIBRARY ##"
 echo "$PYTHON_INSTALL"
 cd ../python;
-sudo pip install --upgrade .
+sudo -H pip install --upgrade .
 sudo mkdir -p /etc/philologic/
 
 cd ..;

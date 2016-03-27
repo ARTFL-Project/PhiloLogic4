@@ -107,7 +107,6 @@ def metadata_frequencies(loader_obj):
     frequencies = loader_obj.destination + '/frequencies'
     conn = sqlite3.connect(loader_obj.destination + '/toms.db')
     c = conn.cursor()
-    fields_not_found = []
     for field in loader_obj.metadata_fields:
         query = 'select %s, count(*) from toms group by %s order by count(%s) desc' % (
             field, field, field)
@@ -122,10 +121,10 @@ def metadata_frequencies(loader_obj):
             output.close()
             print >> sys.stderr, 'Generated metadata frequencies for %s' % field
         except sqlite3.OperationalError:
-            fields_not_found.append(field)
-    if fields_not_found:
+            loader_obj.metadata_fields_not_found.append(field)
+    if loader_obj.metadata_fields_not_found:
         print >> sys.stderr, 'The following fields were not found in the input corpus %s' % ', '.join(
-            fields_not_found)
+            loader_obj.metadata_fields_not_found)
     conn.close()
 
 

@@ -74,6 +74,7 @@ class Loader(object):
         self.metadata_hierarchy = []
         self.metadata_types = {}
         self.normalized_fields = []
+        self.metadata_fields_not_found = []
 
 
     def setup_dir(self,path):
@@ -467,6 +468,7 @@ class Loader(object):
             self.post_filters.insert(0, post_filter)
 
     def post_processing(self, *extra_filters):
+        """Run important post-parsing functions for frequencies and word normalization"""
         print '\n### Post-processing filters ###'
         for f in self.post_filters:
             f(self)
@@ -514,8 +516,8 @@ class Loader(object):
         """ Write configuration variables for the Web application"""
         config_values = {'dbname': os.path.basename(re.sub("/data/?$", "", self.destination)),
                          'db_url': self.db_url,
-                         'metadata': self.metadata_fields,
-                         'facets': [{i: [i]} for i in self.metadata_fields]}
+                         'metadata': [i for i in self.metadata_fields if i not in self.metadata_fields_not_found],
+                         'facets': [{i: [i]} for i in self.metadata_fields if i not in self.metadata_fields_not_found]}
         ## Fetch search examples:
         search_examples = {}
         conn = sqlite3.connect(self.destination + '/toms.db')
