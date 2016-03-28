@@ -32,6 +32,7 @@ Installing PhiloLogic's libraries requires administrator privileges.
 The C library depends on `gdbm`_, which *must* be installed first, to compile correctly.
 
 Just run the install.sh in the top level directory to install the C Core, Python dependencies, and the Python PhiloLogic library:
+
 ``./install.sh``
 
 ### Setting up PhiloLogic Web Application ###
