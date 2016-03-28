@@ -13,15 +13,15 @@ config_file = imp.load_source("philologic4", "/etc/philologic/philologic4.cfg")
 
 if config_file.url_root == None:
     print >> sys.stderr, "url_root variable is not set in /etc/philologic/philologic4.cfg"
-    print >> sys.stderr, "See INSTALLING in your PhiloLogic distribution."
+    print >> sys.stderr, "See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md."
     exit()
 elif config_file.web_app_dir == None:
     print >> sys.stderr, "web_app_dir variable is not set in /etc/philologic/philologic4.cfg"
-    print >> sys.stderr, "See INSTALLING in your PhiloLogic distribution."
+    print >> sys.stderr, "See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md."
     exit()
 elif config_file.database_root == None:
     print >> sys.stderr, "database_root variable is not set in /etc/philologic/philologic4.cfg"
-    print >> sys.stderr, "See INSTALLING in your PhiloLogic distribution."
+    print >> sys.stderr, "See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md."
     exit()
 
 
@@ -64,72 +64,22 @@ class LoadOptions(object):
         usage = "usage: %prog [options] database_name files"
         parser = OptionParser(usage=usage)
         parser.add_option("-a",
-                          "--web_app_dir",
+                          "--app_dir",
                           type="string",
                           dest="web_app_dir",
                           help="Define the location of the web app directory")
         parser.add_option("-c", "--cores", type="int", dest="cores", help="define the number of cores for parsing")
         parser.add_option("-d", "--debug", type="string", dest="debug", help="Set debug to true or false")
-        parser.add_option("-e", "--pseudo_empty_tags", type="string", dest="pseudo_empty_tags", help="?")
-        parser.add_option("-f",
+        parser.add_option("-l",
+                          "--load_config",
+                          type="string",
+                          dest="load_config",
+                          help="load external config for specialized load")
+        parser.add_option("-p",
                           "--parser_factory",
                           type="string",
                           dest="parser_factory",
                           help="Define parser to use for file parsing")
-        # parser.add_option("-h", "--header", type="string", dest="header", help="Set header type for parsing")
-        parser.add_option("-L",
-                          "--load_filters",
-                          type="string",
-                          dest="load_filters",
-                          help="Define filters as a list of functions to call")
-        parser.add_option("-m",
-                          "--metadata_xpaths",
-                          type="string",
-                          dest="metadata_xpaths",
-                          help="Define metadata xpaths for the XML parser")
-        parser.add_option("-n",
-                          "--navigable_objects",
-                          type="string",
-                          dest="navigable_objects",
-                          help="Define navigable objects separated by comma")
-        parser.add_option("-o",
-                          "--default_object_level",
-                          type="string",
-                          dest="default_object_level",
-                          help="Define default object level for navigation")
-        parser.add_option("-P",
-                          "--post_filters",
-                          type="string",
-                          dest="post_filters",
-                          help="Define filters to run after parsing")
-        parser.add_option("-p",
-                          "--punct_regex",
-                          type="string",
-                          dest="punct_regex",
-                          help="Define punctuation regex to split sentences")
-        parser.add_option("-r",
-                          "--token_regex",
-                          type="string",
-                          dest="token_regex",
-                          help="Define regex to use for tokenizing")
-        parser.add_option("-s",
-                          "--suppress_tags",
-                          type="string",
-                          dest="suppress_tags",
-                          help="Define tags where content will not be indexed")
-        parser.add_option("-t",
-                          "--plain_text_obj",
-                          type="string",
-                          dest="plain_text_obj",
-                          help="List objects to generate plain text files")
-        parser.add_option("-w",
-                          "--word_regex",
-                          type="string",
-                          dest="word_regex",
-                          help="Define regex to tokenize words")
-
-        parser.add_option("-x", "--xpaths", type="string", dest="xpaths", help="Define xpaths for the XML parser")
-
         return parser
 
     def parse(self, argv):
@@ -152,7 +102,13 @@ class LoadOptions(object):
         for a in dir(options):
             if not a.startswith('__') and not callable(getattr(options, a)):
                 value = getattr(options, a)
-                if value != None:
+                if value == "load_config":
+                    load_config = LoadConfig()
+                    load_config.parse(value)
+                    for config_key, config_value in load_config.config:
+                        if config_value:
+                            self.values[config_key] = config_value
+                elif value != None:
                     self.values[a] = value
         self.update()
 
@@ -194,3 +150,34 @@ class LoadOptions(object):
         for i in self.values:
             string_list.append("%s: %s" % (i, self.values[i]))
         return "\n".join(string_list)
+
+
+class LoadConfig(object):
+    def __init__(self):
+        self.config = {}
+        self.config["database_root"] = config_file.database_root
+        self.config["url_root"] = config_file.url_root
+        self.config["web_app_dir"] = config_file.web_app_dir
+        self.config["destination"] = "./"
+        self.config["default_object_level"] = Loader.DEFAULT_OBJECT_LEVEL
+        self.config["navigable_objects"] = Loader.NAVIGABLE_OBJECTS
+        self.config["load_filters"] = LoadFilters.DefaultLoadFilters
+        self.config["post_filters"] = PostFilters.DefaultPostFilters
+        self.config["plain_text_obj"] = []
+        self.config["parser_factory"] = Parser.Parser
+        self.config["word_regex"] = Parser.DefaultWordRegex
+        self.config["punct_regex"] = Parser.DafaultPunctRegex
+        self.config["token_regex"] = Parser.DefaultTokenRegex
+        self.config["xpaths"] = Parser.DefaultXPaths
+        self.config["metadata_xpaths"] = Parser.DefaultMetadataXPaths
+        self.config["pseudo_empty_tags"] = []
+        self.config["suppress_tags"] = []
+        self.config["dbname"] = ""
+        self.config["db_url"] = ""
+        self.config["sort_order"] = ["date", "author", "title", "filename"]
+        self.config["header"] = "tei"
+
+    def parse(self, config_file):
+        config_file = imp.load_source("external_load_config", "./PhiloLogic4/extras/load_config.cfg")
+        for k, v in config_file:
+            self.config[k] = v

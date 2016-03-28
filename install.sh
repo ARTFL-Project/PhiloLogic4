@@ -6,9 +6,13 @@ cd libphilo/
 make
 sudo make install
 
+cd ..;
+echo "Installing Python dependencies"
+sudo -H pip install -r requirements.txt
+
 PYTHON_INSTALL="\n## INSTALLING PYTHON LIBRARY ##"
 echo "$PYTHON_INSTALL"
-cd ../python;
+cd python;
 sudo -H pip install --upgrade .
 sudo mkdir -p /etc/philologic/
 

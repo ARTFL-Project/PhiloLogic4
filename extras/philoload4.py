@@ -6,6 +6,7 @@ import sys
 from philologic.LoadOptions import LoadOptions
 from philologic.Loader import Loader, setup_db_dir
 
+
 os.environ["LC_ALL"] = "C"  # Exceedingly important to get uniform sort order.
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
