@@ -1,42 +1,39 @@
 #!/usr/bin env python
 from __future__ import division
+
 import sys
+import timeit
+from ast import literal_eval as eval
+from collections import defaultdict
+
 sys.path.append('..')
 import functions as f
-from collections import defaultdict
-from ast import literal_eval as eval
-try:
-    import ujson as json
-except ImportError:
-    import json
+
+import ujson as json
 
 
-def generate_frequency(results, q, db, config):
+
+def generate_frequency(results, request, db, config):
     """reads through a hitlist. looks up q.frequency_field in each hit, and builds up a list of
        unique values and their frequencies."""
 
     field_list = eval(json.loads(q.frequency_field))
 
-    # Override default value of q.end for first batch of results
-    if q.end == 25:
-        q.end = 5000
-
     counts = defaultdict(int)
     frequency_object = {}
+    start_time = timeit.default_timer()
+    last_hit_done = q.start
 
     try:
-        for hit in results[q.start:q.end]:
-            key = []
-            for field in field_list:
-                value = hit[field]
-                if not value:
-                    # print >> sys.stderr, "NULL FOUND", hit.head, hit.philo_id, hit[field]
-                    # NULL is a magic value for queries, don't change it recklessly.
-                    value = "NULL"
-                k = (field, value)
-                key.append(k)
-            key = tuple(key)
+        for hit in results[q.start:]:
+            key = tuple((field, hit[field]) for field in field_list)
             counts[key] += 1
+
+            # avoid timeouts by splitting the query if more than q.max_time (in seconds) has been spent in the loop
+            elapsed = timeit.default_timer() - start_time
+            last_hit_done += 1
+            if elapsed > 5:
+                break
 
         table = {}
         for key, count in counts.iteritems():
@@ -46,12 +43,12 @@ def generate_frequency(results, q, db, config):
             metadata = dict(q.metadata)
 
             # Build a label starting with the first value as the main value
-            first_metatada_key, first_metadata_value = key[0]
+            first_metatada_key, first_metadata_value = key[0] or "NULL"
             label = first_metadata_value
             metadata[first_metatada_key] = first_metadata_value.encode('utf-8', 'ignore')
             append_to_label = []
             for metadata_key, metadata_value in key[1:]:
-                if metadata_value == "NULL":
+                if not metadata_value:
                     # replace NULL with '[None]', 'N.A.', 'Untitled', etc.
                     metadata[metadata_key] = "NULL"
                 else:
@@ -79,7 +76,11 @@ def generate_frequency(results, q, db, config):
                                                   **metadata)
             table[label] = {'count': count, 'url': url, 'metadata': metadata}
         frequency_object['results'] = table
-        frequency_object['more_results'] = True
+        frequency_object["hits_done"] = last_hit_done
+        if last_hit_done == len(results):
+            frequency_object['more_results'] = False
+        else:
+            frequency_object['more_results'] = True
     except IndexError:
         frequency_object['results'] = {}
         frequency_object['more_results'] = False

@@ -87,15 +87,14 @@
                     queryParams.field = facetObj.facet;
                     queryParams.script = "get_word_frequency.py";
                 }
-                populateSidebar(scope, facetObj, fullResults, 0, 3000, queryParams);
+                populateSidebar(scope, facetObj, fullResults, 0, queryParams);
             }
         }
-        var populateSidebar = function(scope, facet, fullResults, start, end, queryParams) {
+        var populateSidebar = function(scope, facet, fullResults, start, queryParams) {
             if (scope.moreResults) {
                 if (facet.type !== "collocationFacet") {
                     var promise = request.script(queryParams, {
-                        start: start,
-                        end: end
+                        start: start
                     });
                 } else {
                     var promise = request.report(queryParams, {
@@ -112,29 +111,18 @@
                     if (angular.element('#selected-sidebar-option').data('interrupt') != true && angular.element('#selected-sidebar-option').data('selected') == facet.alias) {
                         if (facet.type === "collocationFacet") {
                             var merge = progressiveLoad.mergeResults(fullResults.unsorted, response.data.collocates);
-                            end = response.data.hits_done
                         } else {
                             var merge = progressiveLoad.mergeResults(fullResults.unsorted, results);
                         }
                         scope.concKwic.frequencyResults = merge.sorted.slice(0, 500);
                         scope.loading = false;
                         fullResults = merge;
-                        if (end < scope.resultsLength) {
-                            $rootScope.percentComplete = end / scope.resultsLength * 100;
+                        if (response.data.hits_done < scope.resultsLength) {
+                            $rootScope.percentComplete = response.data.hits_done / scope.resultsLength * 100;
                             scope.percent = Math.floor($rootScope.percentComplete);
                         }
-                        if (facet.type === "collocationFacet") {
-                            start = response.data.hits_done;
-                        } else {
-                            if (start === 0) {
-                                start = 3000;
-                                end = 13000;
-                            } else {
-                                start += 10000;
-                                end += 10000;
-                            }
-                        }
-                        populateSidebar(scope, facet, fullResults, start, end, queryParams);
+                        start = response.data.hits_done;
+                        populateSidebar(scope, facet, fullResults, start, queryParams);
                     } else {
                         // This won't affect the full collocation report which can't be interrupted when on the page
                         angular.element('#selected-sidebar-option').data('interrupt', false);

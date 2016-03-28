@@ -10,11 +10,8 @@ from functions.wsgi_handler import WSGIHandler
 from functions.ObjectFormatter import convert_entities, adjust_bytes, valid_html_tags, xml_to_html_class
 from lxml import etree
 from itertools import chain
-try:
-    import ujson as json
-except ImportError:
-    print >> sys.stderr, "Please install ujson for better performance"
-    import json
+import ujson as json
+
 
 strip_start_punctuation = re.compile("^[,?;.:!']")
 begin_match = re.compile(r'^[^<]*?>')
