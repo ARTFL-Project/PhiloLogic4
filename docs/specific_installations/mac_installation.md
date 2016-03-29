@@ -22,10 +22,6 @@ Note: these instructions were only tested on Mac OSX Yosemite.
 
  `sudo easy_install pip`
 
-
-* Install LXML
-
- `sudo pip install lxml`
  
 * Install Xcode if not already installed
  
@@ -39,20 +35,9 @@ Note: these instructions were only tested on Mac OSX Yosemite.
  `cd PhiloLogic4/`
 
 
-* Compile and install the search core
+* Run the install script
 
- `cd libphilo``
-
- `make`
-
- `sudo make install`
-
-
-* Install Python bindings
-
- `cd ../python`
-
- `sudo python setup.py install`
+ `./install.sh``
 
 
 * Configure Apache Web Server
