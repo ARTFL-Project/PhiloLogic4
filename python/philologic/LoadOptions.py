@@ -58,8 +58,6 @@ class LoadOptions(object):
             print >> sys.stderr, "See INSTALLING in your PhiloLogic distribution."
             sys.exit()
 
-        self
-
     def setup_parser(self):
         usage = "usage: %prog [options] database_name files"
         parser = OptionParser(usage=usage)
@@ -80,6 +78,7 @@ class LoadOptions(object):
                           type="string",
                           dest="parser_factory",
                           help="Define parser to use for file parsing")
+        parser.add_option("-H", "--header", type="string", dest="header", help="define header type (tei or dc)")
         return parser
 
     def parse(self, argv):
@@ -102,14 +101,15 @@ class LoadOptions(object):
         for a in dir(options):
             if not a.startswith('__') and not callable(getattr(options, a)):
                 value = getattr(options, a)
-                if value == "load_config":
+                if a == "load_config":
                     load_config = LoadConfig()
                     load_config.parse(value)
-                    for config_key, config_value in load_config.config:
+                    for config_key, config_value in load_config.config.iteritems():
                         if config_value:
                             self.values[config_key] = config_value
-                elif value != None:
-                    self.values[a] = value
+                else:
+                    if value != None:
+                        self.values[a] = value
         self.update()
 
     def update(self):
@@ -149,7 +149,7 @@ class LoadOptions(object):
         string_list = []
         for i in self.values:
             string_list.append("%s: %s" % (i, self.values[i]))
-        return "\n".join(string_list)
+        return "\n".join(string_list).encode('utf-8')
 
 
 class LoadConfig(object):
@@ -158,7 +158,6 @@ class LoadConfig(object):
         self.config["database_root"] = config_file.database_root
         self.config["url_root"] = config_file.url_root
         self.config["web_app_dir"] = config_file.web_app_dir
-        self.config["destination"] = "./"
         self.config["default_object_level"] = Loader.DEFAULT_OBJECT_LEVEL
         self.config["navigable_objects"] = Loader.NAVIGABLE_OBJECTS
         self.config["load_filters"] = LoadFilters.DefaultLoadFilters
@@ -175,9 +174,11 @@ class LoadConfig(object):
         self.config["dbname"] = ""
         self.config["db_url"] = ""
         self.config["sort_order"] = ["date", "author", "title", "filename"]
-        self.config["header"] = "tei"
 
-    def parse(self, config_file):
-        config_file = imp.load_source("external_load_config", "./PhiloLogic4/extras/load_config.cfg")
-        for k, v in config_file:
-            self.config[k] = v
+    def parse(self, load_config_file):
+        config_file = imp.load_source("external_load_config", load_config_file)
+        for a in dir(config_file):
+            if not a.startswith('__') and not callable(getattr(config_file, a)):
+                value = getattr(config_file, a)
+                if value:
+                    self.config[a] = value

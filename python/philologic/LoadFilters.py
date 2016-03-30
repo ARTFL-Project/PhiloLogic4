@@ -391,7 +391,7 @@ def fix_sentence_boundary(loader_obj, text):
 
 
 DefaultNavigableObjects = ("div1", "div2", "div3")
-DefaultLoadFilters = [fix_sentence_boundary, normalize_unicode_raw_words, make_word_counts, generate_words_sorted,
+DefaultLoadFilters = [normalize_unicode_raw_words, make_word_counts, generate_words_sorted,
                       make_object_ancestors, make_sorted_toms, prev_next_obj, generate_pages, make_max_id]
 
 

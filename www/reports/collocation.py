@@ -11,10 +11,10 @@ from wsgiref.handlers import CGIHandler
 from philologic.DB import DB
 from philologic.Query import get_expanded_query
 
+sys.path.append('..')
 import functions as f
 from functions.wsgi_handler import WSGIHandler
 
-sys.path.append('..')
 try:
     import ujson as json
 except ImportError:

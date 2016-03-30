@@ -16,7 +16,7 @@ except ImportError:
 
 
 
-def generate_frequency(results, request, db, config):
+def generate_frequency(results, q, db, config):
     """reads through a hitlist. looks up q.frequency_field in each hit, and builds up a list of
        unique values and their frequencies."""
 
