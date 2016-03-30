@@ -7,7 +7,10 @@ from philologic.DB import DB
 from wsgiref.handlers import CGIHandler
 import reports as r
 import functions as f
-import ujson as json
+try:
+    import ujson as json
+except ImportError:
+    import json
 
 
 def get_frequency(environ, start_response):

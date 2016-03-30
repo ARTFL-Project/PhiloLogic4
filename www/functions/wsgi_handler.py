@@ -3,6 +3,7 @@
 import urlparse
 import Cookie
 import hashlib
+from find_similar_words import find_similar_words
 
 
 class WSGIHandler(object):
@@ -121,6 +122,13 @@ class WSGIHandler(object):
             self.path_components = [c for c in self.path_info.split("/") if c]
         except:
             self.path_components = []
+
+        # Determine if similar matching is happening, and if so, expand query
+        self.approximate = False
+        if "approximate" in self.cgi:
+            if self.cgi["approximate"][0] == "yes":
+                self.approximate = True
+                self.cgi['q'][0] = find_similar_words(self.cgi['q'][0], self)
 
     def __getattr__(self, key):
         return self[key]

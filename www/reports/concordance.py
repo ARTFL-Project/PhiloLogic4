@@ -10,7 +10,10 @@ from functions.wsgi_handler import WSGIHandler
 from functions.ObjectFormatter import convert_entities, adjust_bytes, valid_html_tags, xml_to_html_class
 from lxml import etree
 from itertools import chain
-import ujson as json
+try:
+    import ujson as json
+except ImportError:
+    import json
 
 
 strip_start_punctuation = re.compile("^[,?;.:!']")

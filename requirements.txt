@@ -1,3 +1,4 @@
 #### Dependencies for PhiloLogic4 ####
 lxml
 ujson
+python-levenshtein

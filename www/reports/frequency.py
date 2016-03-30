@@ -9,7 +9,10 @@ from collections import defaultdict
 sys.path.append('..')
 import functions as f
 
-import ujson as json
+try:
+    import ujson as json
+except ImportError:
+    import json
 
 
 
