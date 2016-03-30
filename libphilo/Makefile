@@ -1,12 +1,12 @@
 # $Id: Makefile.in,v 2.11 2004/05/28 19:22:06 o Exp $
-LDFLAGS= 
+LDFLAGS=
 CFLAGS= -O3
-CPPFLAGS= 
-LDFLAGS= 
+CPPFLAGS=
+LDFLAGS=
 PH_CFLAGS= -I./unpack -D_REENTRANT -fomit-frame-pointer -funroll-all-loops -finline-functions
 CC= gcc
-PH_BUILDENV = 
-PH_LDSEARCHFLAGS = 
+PH_BUILDENV =
+PH_LDSEARCHFLAGS =
 
 all: 	db/corpus_search db/pack4
 
@@ -79,10 +79,7 @@ out.o:		out.h out.c
 
 log.o:		log.h log.c
 
-install:	all
-	/usr/bin/install -c db/corpus_search ${exec_prefix}/bin
-	/usr/bin/install -c db/pack4 ${exec_prefix}/bin
-clean: 
+clean:
 	rm -f *.o *~ db/search4 db/pack4
 	(cd plugin; make clean)
 	(cd db; make clean)
