@@ -125,7 +125,8 @@
     					scope.groupIndexSelected = index;
     					request.script(scope.formData, {
                             script: 'get_query_terms.py',
-    						q: group
+    						q: group,
+                            approximate: 0
                         }).then(function(response) {
                             scope.words = response.data;
                             $timeout(function() {

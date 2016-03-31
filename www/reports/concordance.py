@@ -13,8 +13,8 @@ from itertools import chain
 try:
     import ujson as json
 except ImportError:
-    print >> sys.stderr, "Please install ujson for better performance"
     import json
+
 
 strip_start_punctuation = re.compile("^[,?;.:!']")
 begin_match = re.compile(r'^[^<]*?>')

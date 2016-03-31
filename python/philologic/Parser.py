@@ -6,7 +6,7 @@ import re
 import StringIO
 from philologic import OHCOVector
 
-class ExpatWrapper:    
+class ExpatWrapper:
     def start_element(self,name, attrs):
         buffer = self.p.GetInputContext()
         tag_end = buffer.index(">") + 1
@@ -44,8 +44,8 @@ class ExpatWrapper:
         self.p.EndElementHandler = self.end_element
         self.p.CharacterDataHandler = self.char_data
         self.p.buffer_text = False
-    def parse(self,file):      
-        self.p.ParseFile(file)        
+    def parse(self,file):
+        self.p.ParseFile(file)
         return self.target.close()
 
 class Parser(object):
@@ -77,9 +77,9 @@ class Parser(object):
         self.input = input
         lexer = ExpatWrapper(self)
         return lexer.parse(self.input)
-        
+
     def make_extractor(self,new_element,obj_type,mxp,field):
-        """Constructs metadata-xpath extraction callbacks.  Called from feed() when a new object is constructed.  
+        """Constructs metadata-xpath extraction callbacks.  Called from feed() when a new object is constructed.
         Called on every descendant object."""
         destination = self.v[obj_type]  # Note that this object will still exist after the OHCOVector has printed and discarded it.
         # Thus, extracting to a 'closed" object will silently discard values.  Which I think is the least bad option.
@@ -143,25 +143,25 @@ class Parser(object):
                 tok_type = "word"
             elif tok.group(2):
                 tok_type = "sent"
-                
+
             tok_length = len(tok.group().encode("utf-8"))
             tok_start = len(temp_buffer[:tok.start()].encode("utf-8"))
             tok_end = len(temp_buffer[:tok.end()].encode("utf-8"))
-            while (tok_start >= (temp_position + self.buffers[0]["length"])):                
+            while (tok_start >= (temp_position + self.buffers[0]["length"])):
                 temp_position += self.buffers[0]["length"]
                 discard = self.buffers.pop(0)
                 offset = self.buffers[0]["offset"]
             start = offset + tok_start - temp_position
             while (tok_end >= self.buffers[0]["length"] + temp_position):
                 temp_position += self.buffers[0]["length"]
-                discard = self.buffers.pop(0)             
+                discard = self.buffers.pop(0)
                 if self.buffers:
-                    offset = self.buffers[0]["offset"]                
+                    offset = self.buffers[0]["offset"]
                 # we have to catch the case where the last word goes right up to the end of the last buffer, which is surprisingly rare in TEI XML.
                 else:
                     offset = discard["offset"] + discard["length"]
                     break
-            end = offset + tok_end - temp_position    
+            end = offset + tok_end - temp_position
             if tok_type == "word":
                 self.v.push("word",tok.group(1).encode("utf-8"),start)
 #                print >> sys.stderr,tok.group(1).encode("utf-8")
@@ -172,7 +172,7 @@ class Parser(object):
                 self.v["sent"].name = tok.group(2).encode("utf-8")
                 self.v.pull("sent",end)
         self.buffers = []
-#            print >> self.output, tok_type, tok.group().encode("utf-8"), start, end                    
+#            print >> self.output, tok_type, tok.group().encode("utf-8"), start, end
 
     def feed(self,*event):
         e_type, content, offset, name, attrib = event
@@ -180,12 +180,12 @@ class Parser(object):
         if e_type == "start":
             #create a new element, and initalize the tree if necessary
             if self.root is None:
-                self.root = etree.Element(name,attrib) 
+                self.root = etree.Element(name,attrib)
                 new_element = self.root
             else:
                 new_element = etree.SubElement(self.stack[-1],name,attrib)
             self.stack.append(new_element)
-            
+
             for obj_type,xpath in self.xpaths:
                 # test xpaths and create new objects for the current element
                 if new_element in self.root.findall(xpath):
@@ -194,21 +194,21 @@ class Parser(object):
                     self.v.push(obj_type,name,offset)
                     if obj_type == "doc":
                         for key,value in self.known_metadata.items():
-                            self.v[obj_type][key] = value                        
+                            self.v[obj_type][key] = value
 
                     # should not attach cleanup for page and milestone objects
                     def cleanup(event,element):
                         if event[0] == "end":
                             if id(element) == id(new_element):
                                 self.flush_buffer()
-                                
+
 #                                print "DONE:",obj_type,repr(new_element)
                                 self.v.pull(obj_type,event[2])
                                 return True
                         return False
 #                    self.handlers[new_element] = [cleanup]
                     self.handlers[new_element] = []
-                    for m_obj_type,m_xpath,field in self.metadata_xpaths:      
+                    for m_obj_type,m_xpath,field in self.metadata_xpaths:
                         if m_obj_type == obj_type:
                             self.handlers[new_element] += [self.make_extractor(new_element,m_obj_type,m_xpath,field)]
 #                            print >> sys.stderr, "adding handler for ", m_obj_type, m_xpath, field, "to", new_element
@@ -236,7 +236,7 @@ class Parser(object):
             # Let OHCOVector handle them numerically instead.
             if (obj_type == self.parallel_type) or (new_element.tag in self.pseudo_empty_tags):
                 self.handlers[new_element] = []
-            
+
         if e_type == "text":
             if self.stack:
                 # check for metadata handlers:
@@ -260,7 +260,7 @@ class Parser(object):
                 sys.exit()
             else:
                 popped = self.stack.pop()
-                
+
                 # do any cleanup for the element that just ended
                 for open_object in self.handlers.keys():
                     for handler in self.handlers[open_object]:
@@ -268,7 +268,7 @@ class Parser(object):
                         if handler(event,popped):
                             # If a handler returns True in the end phase, delete it to prevent future evaluation.
                             self.handlers[open_object].remove(handler)
-                
+
                 # clear out the removed element, and delete it's reference in its parent.
                 if popped in self.handlers:
                     del self.handlers[popped]
@@ -282,24 +282,160 @@ class Parser(object):
         self.v.pull("doc",self.filesize) # This does nothing if all elements are already closed.
         return self.v.v_max
 
-DefaultTokenRegex = r"(\w+)|([\.?!])"
+DefaultWordRegex = r"([\w]+)"
+DafaultPunctRegex = r"([\.?!])"
 
-DefaultXPaths =  [("doc","."),("div",".//div1"),("div",".//div2"),("div",".//div3"),("page",".//pb")]         
+DefaultTokenRegex = "%s|%s" % (DefaultWordRegex, DafaultPunctRegex)
 
-DefaultMetadataXPaths = [ # metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
+DefaultXPaths =  [
+    ("doc","."),("div",".//div"), ("div",".//div1"), ("div", ".//front"),
+    ("div", ".//note"), ("div",".//div2"),("div",".//div3"),("para", ".//text//p"),
+    ("para", ".//body//p"), ("para",".//sp"), ("para", ".//lg"), ("para", ".//epigraph"),
+    ("para", ".//argument"), ("para", ".//postscript"),("page",".//pb")
+    ]
+
+
+DefaultMetadataXPaths = [
+    # Metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
     # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
-    ("doc","./teiHeader//titleStmt/title","title"),
-    ("doc","./teiHeader//titleStmt/author","author"),
-    ("doc","./teiHeader//profileDesc/creation/date","date"),
+
+    ######################
+    ## DOC LEVEL XPATHS ##
+    ######################
+
+    ## Author
+    ("doc", ".//sourceDesc/bibl/author[@type='marc100']", "author"),
+    ("doc", ".//sourceDesc/bibl/author[@type='artfl']", "author"),
+    ("doc", ".//sourceDesc/bibl/author", "author"),
+    ("doc", ".//titleStmt/author", "author"),
+    ("doc", ".//sourceDesc/biblStruct/monogr/author/name", "author"),
+    ("doc", ".//sourceDesc/biblFull/titleStmt/author", "author"),
+    ("doc", ".//sourceDesc/biblFull/titleStmt/respStmt/name", "author"),
+    ("doc", ".//sourceDesc/biblFull/titleStmt/author", "author"),
+    ("doc", ".//sourceDesc/bibl/titleStmt/author", "author"),
+
+    ## Title XPATHs
+    ("doc", ".//sourceDesc/bibl/title[@type='marc245']", "title"),
+    ("doc", ".//sourceDesc/bibl/title[@type='artfl']", "title"),
+    ("doc", ".//sourceDesc/bibl/title", "title"),
+    ("doc", ".//titleStmt/title", "title"),
+    ("doc", ".//sourceDesc/bibl/titleStmt/title", "title"),
+    ("doc", ".//sourceDesc/biblStruct/monogr/title", "title"),
+    ("doc", ".//sourceDesc/biblFull/titleStmt/title", "title"),
+
+    ## Author dates
+    ("doc", ".//sourceDesc/bibl/author/date", "author_dates"),
+    ("doc", ".//titlestmt/author/date", "author_dates"),
+
+    ## Date
+    ("doc", ".//profileDesc/creation/date", "date"),
+    ("doc", ".//fileDesc/sourceDesc/bibl/imprint/date", "date"),
+    ("doc", ".//sourceDesc/biblFull/publicationStmt/date", "date"),
+    ("doc", ".//sourceDesc/bibl/imprint/date", "date"),
+    ("doc", ".//sourceDesc/biblFull/publicationStmt/date", "date"),
+    ("doc", ".//profileDesc/dummy/creation/date", "date"),
+    ("doc", ".//fileDesc/sourceDesc/bibl/creation/date", "date"),
+    ("doc", "./text/front/docDate/.@value", "date"),  ## this is for the French theater
+    ("doc", "./text/front//p[@rend='center']", "date"), ## this is for some Diderot data
+
+    ## Publisher
+    ("doc", ".//sourceDesc/bibl/imprint[@type='artfl']", "publisher"),
+    ("doc", ".//sourceDesc/bibl/imprint[@type='marc534']", "publisher"),
+    ("doc", ".//sourceDesc/bibl/imprint/publisher", "publisher"),
+    ("doc", ".//sourceDesc/biblStruct/monogr/imprint/publisher/name", "publisher"),
+    ("doc", ".//sourceDesc/biblFull/publicationStmt/publisher", "publisher"),
+    ("doc", ".//sourceDesc/bibl/publicationStmt/publisher", "publisher"),
+    ("doc", ".//sourceDesc/bibl/publisher", "publisher"),
+    ("doc", ".//publicationStmt/publisher", "publisher"),
+    ("doc", ".//publicationStmp", "publisher"),
+
+    ## pub_place
+    ("doc", ".//sourceDesc/bibl/imprint/pubPlace", "pub_place"),
+    ("doc", ".//sourceDesc/biblFull/publicationStmt/pubPlace", "pub_place"),
+    ("doc", ".//sourceDesc/biblStruct/monog/imprint/pubPlace", "pub_place"),
+    ("doc", ".//sourceDesc/bibl/pubPlace", "pub_place"),
+    ("doc", ".//sourceDesc/bibl/publicationStmt/pubPlace", "pub_place"),
+
+    ## pub_date
+    ("doc", ".//sourceDesc/bibl/imprint/date", "pub_date"),
+    ("doc", ".//sourceDesc/biblStruct/monog/imprint/date", "pub_date"),
+    ("doc", ".//sourceDesc/biblFull/publicationStmt/date", "pub_date"),
+    ("doc", ".//sourceDesc/bibFull/imprint/date", "pub_date"),
+    ("doc", ".//sourceDesc/bibl/date", "pub_date"),
+    ("doc", ".//text/front/docImprint/acheveImprime", "pub_date"),
+
+    ## extent
+    ("doc", ".//sourceDesc/bibl/extent", "extent"),
+    ("doc", ".//sourceDesc/biblStruct/monog//extent", "extent"),
+    ("doc", ".//sourceDesc/biblFull/extent", "extent"),
+
+    ## editor
+    ("doc", ".//sourceDesc/bibl/editor", "editor"),
+    ("doc", ".//sourceDesc/biblFull/titleStmt/editor", "editor"),
+    ("doc", ".//sourceDesc/bibl/title/Stmt/editor", "editor"),
+
+    ## identifiers
+    ("doc", ".//publicationStmt/idno", "identifiers"),
+
+    ## text_genre
+    ("doc", ".//profileDesc/textClass/keywords[@scheme='genre']/term", "text_genre"),
+    ("doc", ".//SourceDesc/genre", "text_genre"),
+
+    ## keywords
+    ("doc", ".//profileDesc/textClass/keywords/list/item", "keywords"),
+
+    ## language
+    ("doc", ".//profileDesc/language/language", "language"),
+
+    ## notes
+    ("doc", ".//fileDesc/notesStmt/note", "notes"),
+    ("doc", ".//publicationStmt/notesStmt/note", "notes"),
+
+    ## auth_gender
+    ("doc", ".//publicationStmt/notesStmt/note", "auth_gender"),
+
+    ## collection
+    ("doc", ".//seriesStmt/title", "collection"),
+
+    ## period
+    ("doc", ".//profileDesc/textClass/keywords[@scheme='period']/list/item", "period"),
+    ("doc", ".//SourceDesc/period", "period"),
+
+    ## text_form
+    ("doc", ".//profileDesc/textClass/keywords[@scheme='form']/term", "text_form"),
+
+    ## structure
+    ("doc", ".//SourceDesc/structure", "structure"),
+
+
+    ######################
+    ## DIV LEVEL XPATHS ##
+    ######################
+
     ("div","./head","head"),
+    ("div", ".@type", "type"),
     ("div",".@n","n"),
     ("div",".@id","id"),
+
+
+    ############################
+    ## PARAGRAPH LEVEL XPATHS ##
+    ############################
+
+    ("para", ".@who", "who"),
+
+
+    #######################
+    ## PAGE LEVEL XPATHS ##
+    #######################
+
     ("page",".@n","n"),
+    ("page",".@id","img"),
     ("page",".@fac","img")
 ]
 
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     for docid,fn in enumerate(sys.argv[1:],1):
         print >> sys.stderr, docid,fn
         size = os.path.getsize(fn)
@@ -310,4 +446,3 @@ if __name__ == "__main__":
                                                       suppress_tags=["teiheader","head"])
         lexer = ExpatWrapper(parser)
         lexer.parse(fh)
-        

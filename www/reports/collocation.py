@@ -1,20 +1,24 @@
 #!/usr/bin/env python
 
 from __future__ import division
+
 import sys
+import timeit
+from collections import defaultdict
+from math import log10 as log
+from wsgiref.handlers import CGIHandler
+
+from philologic.DB import DB
+from philologic.Query import get_expanded_query
+
 sys.path.append('..')
 import functions as f
+from functions.wsgi_handler import WSGIHandler
+
 try:
     import ujson as json
 except ImportError:
     import json
-import timeit
-from collections import defaultdict
-from math import log10 as log
-from philologic.DB import DB
-from wsgiref.handlers import CGIHandler
-from functions.wsgi_handler import WSGIHandler
-from philologic.Query import get_expanded_query
 
 
 def collocation(environ, start_response):
