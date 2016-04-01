@@ -353,28 +353,31 @@ class Loader(object):
         # Make all sorting happen in workdir rather than /tmp
         os.system('export TMPDIR=%s/' % self.workdir)
 
-        words_status = self.merge_words(file_num=file_num)
+        print "%s: sorting words" % time.ctime()
+        words_status = self.merge_words()
         print "%s: word sort returned %d" % (time.ctime(),words_status)
 
         if "words" in self.tables:
-            print "\n### Loading word table ###"
-            print "concatenating document-order words file"
+            print "concatenating document-order words file...",
             for d in self.loaded_files:
                 os.system('gunzip -c %s | egrep "^word" >> all_words_ordered' % (d["raw"] + ".gz"))
+            print "done"
 
         tomsargs = "sort -m " + sort_by_id + " " + "*.toms.sorted"
         print "%s: sorting objects" % time.ctime()
-        toms_status = os.system(tomsargs + " > " + self.workdir + "all_toms_sorted")
+        toms_status = self.merge_files("toms")
         print "%s: object sort returned %d" % (time.ctime(),toms_status)
         if not self.debug:
-            os.system('rm *.toms.sorted')
+            for toms_file in glob(self.workdir + "/*toms.sorted"):
+                os.system('rm %s' % toms_file)
 
         pagesargs = "cat *.pages"
         print "%s: joining pages" % time.ctime()
-        pages_status = os.system(pagesargs + " > " + self.workdir + "all_pages")
-        print "%s: word join returned %d" % (time.ctime(), pages_status)
-        if not self.debug:
-            os.system("rm *.pages")
+        for page_file in glob(self.workdir + "/*pages"):
+            pages_status = os.system("cat %s >> %s/all_pages" % (page_file, self.workdir))
+            if not self.debug:
+                os.system("rm %s" % page_file)
+        # print "%s: page join returned %d" % (time.ctime(), pages_status)
 
     def merge_words(self, file_num=100):
         """This function runs a multi-stage merge sort on words
@@ -418,6 +421,63 @@ class Loader(object):
             print "Word sorting failed\nInterrupting database load..."
             sys.exit()
         return words_status
+
+    def merge_files(self, file_type, file_num=100):
+        """This function runs a multi-stage merge sort on words
+        Since PhilLogic can potentially merge thousands of files, we need to split
+        the sorting stage into multiple steps to avoid running out of file descriptors"""
+        lists_of_files = []
+        files = []
+        if file_type == "words":
+            suffix = "/*words.sorted.gz"
+            open_file_command = "gunzip -c"
+            sort_command = "sort -m %s %s " % (sort_by_word, sort_by_id)
+            all_object_file = "/all_words_sorted.gz"
+        elif file_type == "toms":
+            suffix = "/*.toms.sorted"
+            open_file_command = "cat"
+            sort_command = "sort -m %s " % sort_by_id
+            all_object_file = "/all_toms_sorted.gz"
+
+
+        # First we split the sort workload into chunks of 100 (default defined in the file_num keyword)
+        for f in glob(self.workdir + suffix):
+            f = os.path.basename(f)
+            files.append(('<(%s %s)' % (open_file_command, f), self.workdir + '/' + f))
+            if len(files) ==  file_num:
+                lists_of_files.append(files)
+                files = []
+        if len(files):
+            lists_of_files.append(files)
+
+        # Then we run the merge sort on each chunk of 500 files and compress the result
+        print "%s: Merging %s in batches of %d..." % (time.ctime(), file_type, file_num)
+        already_merged = 0
+        os.system("touch %s" % self.workdir + "/sorted.init")
+        last_sort_file = self.workdir + "/sorted.init"
+        for pos, object_list in enumerate(lists_of_files):
+            command_list = ' '.join([i[0] for i in object_list])
+            file_list = ' '.join([i[1] for i in object_list])
+            output = self.workdir + "sorted.%d.split" % pos
+            args = sort_command + command_list
+            command = '/bin/bash -c "%s | %s - <(gunzip -c %s 2> /dev/null) | gzip -c -5 > %s"' % (args, sort_command, last_sort_file, output)
+            status = os.system(command)
+            if status != 0:
+                print "%s sorting failed\nInterrupting database load..." % file_type
+                sys.exit()
+            already_merged += len(object_list)
+            os.system("rm %s" % last_sort_file)
+            last_sort_file = output
+
+            print "%s: %d files merged..." % (time.ctime(), already_merged)
+            if not self.debug:
+                os.system("rm %s" % file_list)
+        status = os.system('mv %s %s' % (last_sort_file, self.workdir + all_object_file))
+
+        if status != 0:
+            print "%s sorting failed\nInterrupting database load..." % file_type
+            sys.exit()
+        return status
 
     def analyze(self):
         print "\n### Create inverted index ###"
@@ -489,10 +549,10 @@ class Loader(object):
                 depth = 9
                 compressed = False
             elif table == 'toms':
-                file_in = self.destination + '/WORK/all_toms_sorted'
+                file_in = self.destination + '/WORK/all_toms_sorted.gz'
                 indices = [('philo_type',), ('philo_id',), ('img',)] + self.metadata_fields
                 depth = 7
-                compressed = False
+                compressed = True
             post_filter = make_sql_table(table, file_in, gz=compressed, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)
 

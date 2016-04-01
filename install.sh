@@ -10,8 +10,8 @@ then
 /usr/bin/install -c db/corpus_search /usr/local/bin/
 /usr/bin/install -c db/pack4 /usr/local/bin/
 else
-    /usr/bin/install -c db/corpus_search /usr/bin/
-    /usr/bin/install -c db/pack4 /usr/bin/
+    /usr/bin/install -c db/corpus_search /bin/
+    /usr/bin/install -c db/pack4 /bin/
 fi
 
 cd ..;

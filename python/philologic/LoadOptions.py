@@ -101,7 +101,7 @@ class LoadOptions(object):
         for a in dir(options):
             if not a.startswith('__') and not callable(getattr(options, a)):
                 value = getattr(options, a)
-                if a == "load_config":
+                if a == "load_config" and value:
                     load_config = LoadConfig()
                     load_config.parse(value)
                     for config_key, config_value in load_config.config.iteritems():
