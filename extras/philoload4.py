@@ -6,15 +6,13 @@ import sys
 from philologic.LoadOptions import LoadOptions
 from philologic.Loader import Loader, setup_db_dir
 
-
 os.environ["LC_ALL"] = "C"  # Exceedingly important to get uniform sort order.
 os.environ["PYTHONIOENCODING"] = "utf-8"
-
 
 if __name__ == '__main__':
     load_options = LoadOptions()
     load_options.parse(sys.argv)
-    setup_db_dir(load_options["db_destination"], load_options["web_app_dir"])
+    setup_db_dir(load_options["db_destination"], load_options["web_app_dir"], force_delete=load_options.force_delete)
 
     # Database load
     l = Loader(**load_options.values)
