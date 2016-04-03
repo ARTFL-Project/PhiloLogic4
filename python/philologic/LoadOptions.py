@@ -53,6 +53,7 @@ class LoadOptions(object):
         self.values["header"] = "tei"
         self.values["debug"] = False
         self.values["force_delete"] = False
+        self.values["file_list"] = []
 
     def setup_parser(self):
         usage = "usage: %prog [options] database_name files"
@@ -62,7 +63,7 @@ class LoadOptions(object):
                           type="string",
                           dest="web_app_dir",
                           help="Define custom location for the web app directory")
-        parser.add_option("-c", "--cores", type="int", dest="cores", help="define the number of cores for parsing")
+        parser.add_option("-c", "--cores", type="int", dest="cores", help="define the number of cores used for parsing")
         parser.add_option("-d",
                           "--debug",
                           action="store_true",
@@ -75,6 +76,12 @@ class LoadOptions(object):
                           default=False,
                           dest="force_delete",
                           help="overwrite database without confirmation")
+        parser.add_option("-F",
+                          "--file-list",
+                          action="store_true",
+                          default=False,
+                          dest="file_list",
+                          help="Defines whether the file argument is a file containing fullpaths to the files to load")
         parser.add_option("-l",
                           "--load_config",
                           type="string",
@@ -85,7 +92,11 @@ class LoadOptions(object):
                           type="string",
                           dest="parser_factory",
                           help="Define parser to use for file parsing")
-        parser.add_option("-H", "--header", type="string", dest="header", help="define header type (tei or dc)")
+        parser.add_option("-H",
+                          "--header",
+                          type="string",
+                          dest="header",
+                          help="define header type (tei or dc) of files to parse")
         return parser
 
     def parse(self, argv):
@@ -95,7 +106,11 @@ class LoadOptions(object):
         try:
             self.values['dbname'] = args[0]
             args.pop(0)
-            if args[-1].endswith('/') or os.path.isdir(args[-1]):
+            if options.file_list:
+                with open(args[-1]) as fh:
+                    for line in fh:
+                        self.values["files"].append(line.strip())
+            elif args[-1].endswith('/') or os.path.isdir(args[-1]):
                 self.values['files'] = glob(args[-1] + '/*')
             else:
                 self.values["files"] = args[:]
