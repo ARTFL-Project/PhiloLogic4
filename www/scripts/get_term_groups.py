@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 
 import sys
+from wsgiref.handlers import CGIHandler
+
+from philologic.DB import DB
+from philologic.Query import split_terms
+from philologic.QuerySyntax import group_terms, parse_query
+
 sys.path.append('..')
 import functions as f
+from functions.wsgi_handler import WSGIHandler
+
 try:
     import ujson as json
 except ImportError:
     import json
-from wsgiref.handlers import CGIHandler
-from philologic.QuerySyntax import parse_query, group_terms
-from philologic.Query import split_terms
-from philologic.DB import DB
-from functions.wsgi_handler import WSGIHandler
 
 
 def term_group(environ, start_response):
@@ -33,7 +36,7 @@ def term_group(environ, start_response):
         not_started = False
         for kind, term in g:
             if kind == 'NOT':
-                if not_started == False:
+                if not_started is False:
                     not_started = True
                     term_group += ' NOT '
             elif kind == 'OR':

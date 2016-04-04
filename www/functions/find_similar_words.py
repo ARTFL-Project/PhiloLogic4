@@ -1,23 +1,17 @@
 #!/usr/bin/env python
+"""Find similar words to query term."""
 
 import os
-import sys
 import unicodedata
-
-from web_config import WebConfig
 
 from Levenshtein import ratio
 
+from web_config import WebConfig
+
 
 def find_similar_words(word_to_match, request):
-    """Edit distance function"""
+    """Edit distance function."""
     config = WebConfig()
-    db = DB(config.db_path + '/data/')
-    hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
-    hits.finish()
-    expanded_terms = get_expanded_query(hits)[0]
-    words = []
-    
     file_path = os.path.join(config.db_path, "data/frequencies/normalized_word_frequencies")
     word = word_to_match.decode("utf-8", 'ignore').lower()
     word = u''.join([i for i in unicodedata.normalize("NFKD", word) if not unicodedata.combining(i)]).encode("utf-8")
