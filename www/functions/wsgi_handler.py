@@ -3,9 +3,11 @@
 
 import Cookie
 import hashlib
+import re
 import urlparse
 
 from query_parser import parse_query
+from find_similar_words import find_similar_words
 
 
 class WSGIHandler(object):
@@ -88,6 +90,7 @@ class WSGIHandler(object):
                 if field != "date" and isinstance(self.cgi[field][0], str or unicode):
                     if not self.cgi[field][0].startswith('"'):
                         self.cgi[field][0] = self.cgi[field][0].replace('-', ' ')
+                        self.cgi[field][0] = parse_query(self.cgi[field][0])
                 # these ifs are to fix the no results you get when you do a
                 # metadata query
                 if self["q"] != '':
@@ -116,11 +119,16 @@ class WSGIHandler(object):
                 self.approximate = True
 
         if 'q' in self.cgi:
-            self.cgi['q'][0] = parse_query(self.cgi['q'][0], self)
-            if self.cgi["q"][0] == "":
-                self.no_q = True
-            else:
+            self.cgi['q'][0] = parse_query(self.cgi['q'][0])
+            # Fuzzy matching, but only for one word
+            if self.approximate:
+                query_length = len([i for i in re.split(r'[\|| NOT | ]', self.cgi['q'][0]) if i])
+                if query_length == 1:
+                    self.cgi['q'][0] = find_similar_words(self.cgi['q'][0], self)
+            if self.cgi["q"][0] != "":
                 self.no_q = False
+            else:
+                self.no_q = True
         else:
             self.no_q = True
 

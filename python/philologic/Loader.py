@@ -193,7 +193,7 @@ class Loader(object):
             load_metadata = self.parse_dc_header()
         print "done."
 
-        print "Sorting files by the following metadata fields: %s" % ", ".join([i for i in sort_by_field]),
+        print "Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]),
         def make_sort_key(d):
             key = [d.get(f, "") for f in sort_by_field]
             return key
