@@ -11,15 +11,15 @@ from philologic import Loader, LoadFilters, Parser, PostFilters
 # Load global config
 config_file = imp.load_source("philologic4", "/etc/philologic/philologic4.cfg")
 
-if config_file.url_root == None:
+if config_file.url_root is None:
     print >> sys.stderr, "url_root variable is not set in /etc/philologic/philologic4.cfg"
     print >> sys.stderr, "See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md."
     exit()
-elif config_file.web_app_dir == None:
+elif config_file.web_app_dir is None:
     print >> sys.stderr, "web_app_dir variable is not set in /etc/philologic/philologic4.cfg"
     print >> sys.stderr, "See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md."
     exit()
-elif config_file.database_root == None:
+elif config_file.database_root is None:
     print >> sys.stderr, "database_root variable is not set in /etc/philologic/philologic4.cfg"
     print >> sys.stderr, "See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md."
     exit()
@@ -53,6 +53,7 @@ class LoadOptions(object):
         self.values["header"] = "tei"
         self.values["debug"] = False
         self.values["force_delete"] = False
+        self.values["file_list"] = False
 
     def setup_parser(self):
         usage = "usage: %prog [options] database_name files"
@@ -99,20 +100,25 @@ class LoadOptions(object):
         return parser
 
     def parse(self, argv):
-        ''' Parse command-line arguments'''
+        """Parse command-line arguments."""
         parser = self.setup_parser()
         options, args = parser.parse_args(argv[1:])
         try:
             self.values['dbname'] = args[0]
             args.pop(0)
+            print "OPTION FILE LIST", options.file_list
             if options.file_list:
                 with open(args[-1]) as fh:
                     for line in fh:
                         self.values["files"].append(line.strip())
-            elif args[-1].endswith('/') or os.path.isdir(args[-1]):
+            if args[-1].endswith('/') or os.path.isdir(args[-1]):
                 self.values['files'] = glob(args[-1] + '/*')
             else:
                 self.values["files"] = args[:]
+            if len(self.values["files"]) == 0:
+                print >> sys.stderr, ("\nError: No files found in supplied path\n")
+                exit()
+
         except IndexError:
             print >> sys.stderr, ("\nError: you did not supply a database name "
                                   "or a path for your file(s) to be loaded\n")
@@ -129,7 +135,7 @@ class LoadOptions(object):
                         if config_value:
                             self.values[config_key] = config_value
                 else:
-                    if value != None:
+                    if value is not None:
                         self.values[a] = value
         self.update()
 

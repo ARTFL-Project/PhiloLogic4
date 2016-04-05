@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 
 import sys
-from philologic.DB import DB
-sys.path.append('..')
-from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
-import reports as r
+
+from philologic.DB import DB
+
+sys.path.append('..')
 import functions as f
+import reports as r
+from functions.wsgi_handler import WSGIHandler
+
 try:
     import ujson as json
 except ImportError:
@@ -23,7 +26,7 @@ def get_sorted_kwic(environ, start_response):
     input_object = json.loads(environ['wsgi.input'].read())
     indices = input_object['results']
     query_string = input_object['query_string']
-    environ['QUERY_STRING'] = query_string
+    environ['QUERY_STRING'] = query_string.encode('utf8')
     request = WSGIHandler(db, environ)
     sorted_hits = get_sorted_hits(indices, request, config, db,
                                   input_object['start'], input_object['end'])

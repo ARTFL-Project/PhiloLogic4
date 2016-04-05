@@ -53,7 +53,6 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
 
             args.extend(("-o","binary",db.path,));
 
-            print >> sys.stderr, "SEARCH ARGS", " ".join(args), "HL:", hl, "STDERR:", repr(err)
             worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err)
             # if query_debug:
             #     print >> sys.stderr, "WORKER STARTED:"," ".join(args);
