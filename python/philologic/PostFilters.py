@@ -4,6 +4,7 @@ import os
 import sqlite3
 import unicodedata
 import gzip
+import io
 from collections import defaultdict
 
 
@@ -23,10 +24,9 @@ def make_sql_table(table,
         columns = 'philo_type,philo_name,philo_id,philo_seq'
         query = 'create table if not exists %s (%s)' % (table, columns)
         c.execute(query)
-
         sequence = 0
         if gz:
-            file_in_handle = gzip.open(file_in, "rb")
+            file_in_handle = io.BufferedReader(gzip.open(file_in, "rb"))
         else:
             file_in_handle = open(file_in)
         for line in file_in_handle:

@@ -7,3 +7,4 @@ from access_control import check_access, make_token, login_access
 from find_similar_words import find_similar_words
 import FragmentParser
 import webApp
+from query_parser import parse_query

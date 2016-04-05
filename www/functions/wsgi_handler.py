@@ -1,13 +1,18 @@
 #!/usr/bin/env python
+"""Parses queries stored in the environ object."""
 
-import urlparse
 import Cookie
 import hashlib
-from find_similar_words import find_similar_words
+import urlparse
+
+from query_parser import parse_query
 
 
 class WSGIHandler(object):
+    """Class which parses the environ object and massages query arguments for PhiloLogic4."""
+
     def __init__(self, db, environ):
+        """Initialize class."""
         self.path_info = environ.get("PATH_INFO", '')
         self.query_string = environ["QUERY_STRING"]
         self.script_filename = environ["SCRIPT_FILENAME"]
@@ -28,7 +33,7 @@ class WSGIHandler(object):
         self.defaults = {
             "results_per_page": "25",
             "start": "0",
-            "end": "0",  #"arg":"0",
+            "end": "0"
         }
 
         # Check the header for JSON content_type or look for a format=json
@@ -77,22 +82,12 @@ class WSGIHandler(object):
         if self.end_date:
             self.end_date = int(self['end_date'])
 
-        # cgi parameter string hacks here.
-        if 'q' in self.cgi:
-            # HACK ALERT: this is for French.
-            self.cgi['q'][0] = self.cgi["q"][0].replace("'", " ")
-            self.cgi['q'][0] = self.cgi["q"][0].replace(';', '')
-            self.cgi['q'][0] = self.cgi["q"][0].replace(',', '')
-            self.cgi['q'][0] = self.cgi["q"][0].replace('!', '')
-
         for field in self.metadata_fields:
             if field in self.cgi and self.cgi[field]:
                 # Hack to remove hyphens in Frantext
-                if field != "date" and isinstance(self.cgi[field][0], str or
-                                                      unicode):
+                if field != "date" and isinstance(self.cgi[field][0], str or unicode):
                     if not self.cgi[field][0].startswith('"'):
-                        self.cgi[field][0] = self.cgi[
-                            field][0].replace('-', ' ')
+                        self.cgi[field][0] = self.cgi[field][0].replace('-', ' ')
                 # these ifs are to fix the no results you get when you do a
                 # metadata query
                 if self["q"] != '':
@@ -105,14 +100,6 @@ class WSGIHandler(object):
 
         self.metadata['philo_type'] = self['philo_type']
 
-        if "q" in self.cgi:
-            if self.cgi["q"][0] == "":
-                self.no_q = True
-            else:
-                self.no_q = False
-        else:
-            self.no_q = True
-
         if num_empty == len(self.metadata_fields):
             self.no_metadata = True
         else:
@@ -123,17 +110,26 @@ class WSGIHandler(object):
         except:
             self.path_components = []
 
-        # Determine if similar matching is happening, and if so, expand query
         self.approximate = False
         if "approximate" in self.cgi:
             if self.cgi["approximate"][0] == "yes":
                 self.approximate = True
-                self.cgi['q'][0] = find_similar_words(self.cgi['q'][0], self)
+
+        if 'q' in self.cgi:
+            self.cgi['q'][0] = parse_query(self.cgi['q'][0], self)
+            if self.cgi["q"][0] == "":
+                self.no_q = True
+            else:
+                self.no_q = False
+        else:
+            self.no_q = True
 
     def __getattr__(self, key):
+        """Return query arg as attribute of class."""
         return self[key]
 
     def __getitem__(self, key):
+        """Return query arg as key of class."""
         if key in self.cgi:
             return self.cgi[key][0]
         elif key in self.defaults:
@@ -142,5 +138,6 @@ class WSGIHandler(object):
             return ""
 
     def __iter__(self):
+        """Iterate over query args."""
         for key in self.cgi.keys():
             yield (key, self[key])

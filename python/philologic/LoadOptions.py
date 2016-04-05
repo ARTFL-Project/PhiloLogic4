@@ -52,11 +52,7 @@ class LoadOptions(object):
         self.values["sort_order"] = ["date", "author", "title", "filename"]
         self.values["header"] = "tei"
         self.values["debug"] = False
-
-        if self.database_root is None or self.url_root is None:
-            print >> sys.stderr, "Please configure the loader script before use."
-            print >> sys.stderr, "See INSTALLING in your PhiloLogic distribution."
-            sys.exit()
+        self.values["force_delete"] = False
 
     def setup_parser(self):
         usage = "usage: %prog [options] database_name files"
@@ -65,9 +61,26 @@ class LoadOptions(object):
                           "--app_dir",
                           type="string",
                           dest="web_app_dir",
-                          help="Define the location of the web app directory")
-        parser.add_option("-c", "--cores", type="int", dest="cores", help="define the number of cores for parsing")
-        parser.add_option("-d", "--debug", type="string", dest="debug", help="Set debug to true or false")
+                          help="Define custom location for the web app directory")
+        parser.add_option("-c", "--cores", type="int", dest="cores", help="define the number of cores used for parsing")
+        parser.add_option("-d",
+                          "--debug",
+                          action="store_true",
+                          default=False,
+                          dest="debug",
+                          help="add debugging to your load")
+        parser.add_option("-f",
+                          "--force_delete",
+                          action="store_true",
+                          default=False,
+                          dest="force_delete",
+                          help="overwrite database without confirmation")
+        parser.add_option("-F",
+                          "--file-list",
+                          action="store_true",
+                          default=False,
+                          dest="file_list",
+                          help="Defines whether the file argument is a file containing fullpaths to the files to load")
         parser.add_option("-l",
                           "--load_config",
                           type="string",
@@ -78,7 +91,11 @@ class LoadOptions(object):
                           type="string",
                           dest="parser_factory",
                           help="Define parser to use for file parsing")
-        parser.add_option("-H", "--header", type="string", dest="header", help="define header type (tei or dc)")
+        parser.add_option("-H",
+                          "--header",
+                          type="string",
+                          dest="header",
+                          help="define header type (tei or dc) of files to parse")
         return parser
 
     def parse(self, argv):
@@ -88,7 +105,11 @@ class LoadOptions(object):
         try:
             self.values['dbname'] = args[0]
             args.pop(0)
-            if args[-1].endswith('/') or os.path.isdir(args[-1]):
+            if options.file_list:
+                with open(args[-1]) as fh:
+                    for line in fh:
+                        self.values["files"].append(line.strip())
+            elif args[-1].endswith('/') or os.path.isdir(args[-1]):
                 self.values['files'] = glob(args[-1] + '/*')
             else:
                 self.values["files"] = args[:]
@@ -101,7 +122,7 @@ class LoadOptions(object):
         for a in dir(options):
             if not a.startswith('__') and not callable(getattr(options, a)):
                 value = getattr(options, a)
-                if a == "load_config":
+                if a == "load_config" and value:
                     load_config = LoadConfig()
                     load_config.parse(value)
                     for config_key, config_value in load_config.config.iteritems():
@@ -122,7 +143,7 @@ class LoadOptions(object):
             plain_text_filter = LoadFilters.store_in_plain_text(*self.plain_text_obj)
             self.load_filters.append(plain_text_filter)
         if self.debug:
-            print load_options
+            print self
 
     def __getitem__(self, item):
         return self.values[item]
