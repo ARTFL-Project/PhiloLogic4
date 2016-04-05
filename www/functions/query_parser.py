@@ -32,4 +32,6 @@ def parse_query(query_terms, request):
     if request.approximate and query_length == 1:
         query_terms = find_similar_words(query_terms, request)
 
+    import sys
+    print >> sys.stderr, "PARSED QUERY TERMS", query_terms
     return query_terms

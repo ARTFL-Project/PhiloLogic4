@@ -5,7 +5,7 @@ import Cookie
 import hashlib
 import urlparse
 
-import parse_query
+from query_parser import parse_query
 
 
 class WSGIHandler(object):
