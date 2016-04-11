@@ -109,7 +109,6 @@ class LoadOptions(object):
             if options.file_list:
                 with open(args[-1]) as fh:
                     for line in fh:
-                        print line
                         self.values["files"].append(line.strip())
             elif args[-1].endswith('/') or os.path.isdir(args[-1]):
                 self.values['files'] = glob(args[-1] + '/*')
