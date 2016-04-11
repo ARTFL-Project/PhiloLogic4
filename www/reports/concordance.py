@@ -1,20 +1,24 @@
 #!/usr/bin/env python
 
+import re
 import sys
+from itertools import chain
+from wsgiref.handlers import CGIHandler
+
+from lxml import etree
+from philologic.DB import DB
+
 sys.path.append('..')
 import functions as f
-import re
-from wsgiref.handlers import CGIHandler
-from philologic.DB import DB
+from functions.ObjectFormatter import (adjust_bytes, convert_entities,
+                                       valid_html_tags, xml_to_html_class)
 from functions.wsgi_handler import WSGIHandler
-from functions.ObjectFormatter import convert_entities, adjust_bytes, valid_html_tags, xml_to_html_class
-from lxml import etree
-from itertools import chain
+
 try:
     import ujson as json
 except ImportError:
-    print >> sys.stderr, "Please install ujson for better performance"
     import json
+
 
 strip_start_punctuation = re.compile("^[,?;.:!']")
 begin_match = re.compile(r'^[^<]*?>')
@@ -41,6 +45,7 @@ def concordance_results(db, request, config):
         hits = CombinedHitlist(first_hits, second_hits)
         print >> sys.stderr ,"LEN COMBINED", len(hits)
     else:
+        print >> sys.stderr, "QUERY", request.q
         hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
     start, end, n = f.link.page_interval(request['results_per_page'], hits, request.start,
                                          request.end)

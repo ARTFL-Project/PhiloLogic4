@@ -1,15 +1,7 @@
-<div id="time-series" ng-style="chartSize">
-    <div id="top-division" ng-style="divisionWidth">
-        <div id="top-number">{{ topNumber }}</div>
-    </div>
-    <div id="middle-division" ng-style="divisionWidth">
-        <div id="middle-number">{{ middleNumber }}</div>
-    </div>
-    <div id="bottom-division" ng-style="divisionWidth">
-        <div id="bottom-number">{{ bottomNumber }}</div>
-    </div>
-    <div id="side-text">{{ sideText }}</div>
-    <a class='graph-bar' href="{{ bar.url }}" tooltip tooltip-title="{{bar.title}}" ng-style="bar.barStyle" ng-repeat="bar in barChart | filterTimeSeries">
-        <span class="graph-years">{{ ::bar.date }}</span>
-    </a>
+<div id="time-series">
+    <h5 style="position: absolute; top: -25px; text-align: center; width: 100%;">
+        <span ng-if="frequencyType == 'relative_time'">Counts per 10,000 words for every {{ formData.year_interval }} years</span>
+        <span ng-if="frequencyType !== 'relative_time'">Raw counts for every {{ formData.year_interval }} years</span>
+    </h5>
+    <canvas id="bar" class="chart chart-bar" chart-data="data" chart-labels="dateList" chart-series="series" chart-options="chart_options" chart-click="goToConcordance" height="{{ height }}"></canvas>
 </div>

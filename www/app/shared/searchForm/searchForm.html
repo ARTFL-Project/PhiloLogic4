@@ -8,6 +8,19 @@
                 </div>
                 <div id="search-elements" ng-if="search.formOpen" class="velocity-opposites-transition-slideDownBigIn" data-velocity-opts="{ duration: 400 }">
                     <h5>Refine your search with the following options and fields:</h5>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-2" style="margin-top: 10px;">
+                            Search Terms
+                        </div>
+                        <div class="col-xs-12 col-sm-3 col-lg-2">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" ng-model="formData.approximate" ng-true-value="'yes'"/>
+                                    Approximate match
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                     <search-methods></search-methods>
                     <metadata-fields></metadata-fields>
                     <collocation-options></collocation-options>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>PhiloLogic4 Web Loader</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,700,700italic&subset=latin,cyrillic-ext,greek-ext,greek,latin-ext,cyrillic' rel='stylesheet' type='text/css'>
+
+        <!--Load all required CSS-->
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+        <link rel="icon" href="favicon.ico" type="image/x-icon">
+        <!-- Bootstrap core CSS -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="default_theme.css">
+    </head>
+    <body ng-app="philoLoader">
+        <div class="container-fluid">
+            <div class="page-header">
+                <h1>PhiloLogic4 Web Loader
+                    <small>Load your database from the web!</small>
+                </h1>
+            </div>
+            <div class="row" ng-controller="PhiloLoaderController as ctrl">
+                <div class="col-xs-12">
+                    <div class="panel panel-default" style="padding: 10px">
+                        <form class="form-horizontal" ng-submit="ctrl.submit()">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-6">
+                                    <h4 style="text-align: center; margin-bottom: 30px;">Main configuration</h4>
+                                    <div class="form-group">
+                                        <label for="dbname" class="col-sm-4 control-label">Database Name</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="dbname" placeholder="my_database_name" ng-model="ctrl.formData.dbname">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <span class="col-sm-4 control-label"><b>Location of files</b></span>
+                                        <div class="col-sm-8">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="fileSource" value="server" ng-model="ctrl.formData.fileSource">Server
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="fileSource" value="local" ng-model="ctrl.formData.fileSource">Local
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" ng-if="ctrl.formData.fileSource == 'server'">
+                                        <label for="path" class="col-sm-4 control-label">Select path on server hosting PhiloLogic4</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="path" placeholder="/path/to/files/" ng-model="ctrl.formData.files">
+                                            <p class="help-block">
+                                                Note that you can use bash syntax for your selection, such as /path/to/files/*.tei
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" ng-if="ctrl.formData.fileSource == 'local'">
+                                        <label for="files" class="col-sm-4 control-label">Local Files to load</label>
+                                        <div class="col-sm-8">
+                                            <input type="file" id="files" multiple>
+                                            <p class="help-block">
+                                                You can select as many files as you wish. Though it might take a while for the files to upload to the server
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-6">
+                                    <h4 style="text-align: center; margin-bottom: 30px;">Load Options</h4>
+                                    <div class="form-group">
+                                        <label for="cores" class="col-sm-4 control-label">Select numbers of threads for parsing</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="cores" placeholder="4" ng-model="ctrl.formData.cores">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="default_object_level" class="col-sm-4 control-label">Select the default object level</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="default_object_level" placeholder="doc" ng-model="ctrl.formData.default_object_level">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="navigable_objects" class="col-sm-4 control-label">Select navigable objects (comma separated)</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="navigable_objects" placeholder="doc, div1, div2, div3, para" ng-model="ctrl.formData.navigable_objects">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="sort_order" class="col-sm-4 control-label">Select sort order (comma separated)</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="sort_order" placeholder="date, author, title" ng-model="sort_order">
+                                        </div>
+                                    </div>
+                                </div>
+                                <h4>For more options, please use the command line interface</h4>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-8">
+                                    <button type="submit" class="btn btn-primary">Start Database Load</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Load all required JavaScript-->
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js" type="text/javascript"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-route.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-resource.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-route.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-touch.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src="//cdn.jsdelivr.net/velocity/1.2.2/velocity.min.js"></script>
+        <script src="//cdn.jsdelivr.net/velocity/1.2.2/velocity.ui.min.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>
