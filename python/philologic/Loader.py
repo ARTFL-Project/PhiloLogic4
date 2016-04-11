@@ -120,6 +120,13 @@ class Loader(object):
     def pre_parse_whole_file(self, fn):
         fh = open(fn)
         tree = etree.fromstring(fh.read())
+        # Remove namespace
+        for el in tree.iter():
+            try:
+                if el.tag.startswith('{'):
+                    el.tag = el.tag.rsplit('}', 1)[-1]
+            except AttributeError:  # el.tag is not a string for some reason
+                pass
         return tree
 
     def parse_tei_header(self, whole_file):
@@ -131,7 +138,6 @@ class Loader(object):
                 tree = self.pre_parse_whole_file(fn)
             else:
                 tree = self.pre_parse_header(fn)
-
             trimmed_metadata_xpaths = []
             for type, xpath, field in self.parser_defaults["metadata_xpaths"]:
                 if type == "doc":
@@ -144,11 +150,13 @@ class Loader(object):
                             for el in elements:
                                 if el is not None and el.get(attr_name, ""):
                                     data[field] = el.get(attr_name, "").encode("utf-8")
+                                    print "FOUND", field, data[field]
                                     break
                         else:
                             el = tree.find(xpath)
                             if el is not None and el.text is not None:
                                 data[field] = el.text.encode("utf-8")
+                                print "FOUND", field, data[field]
                 else:
                     trimmed_metadata_xpaths.append((type, xpath, field))
             data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
@@ -200,6 +208,8 @@ class Loader(object):
 
         load_metadata.sort(key=make_sort_key, reverse=reverse_sort)
         print "done."
+        if self.debug:
+            print load_metadata
         return load_metadata
 
     def parse_files(self, max_workers, data_dicts=None):

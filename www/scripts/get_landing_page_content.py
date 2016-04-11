@@ -27,8 +27,7 @@ def landing_page_content(environ, start_response):
     content_type = request.landing_page_content_type
     q_range = request.range.lower().split('-')
     if content_type != "date":
-        letter_range = set([chr(i) for i in range(
-            ord(q_range[0]), ord(q_range[1]) + 1)])
+        letter_range = set([unichr(i) for i in range(ord(q_range[0]), ord(q_range[1]) + 1)])
     c = db.dbh.cursor()
     content = ''
     if content_type == "author":
@@ -40,9 +39,9 @@ def landing_page_content(environ, start_response):
     yield json.dumps(content)
 
 
-def generate_author_list(c, letter_range):
-    c.execute(
-        'select distinct author, count(*) from toms where philo_type="doc" group by author order by author')
+def generate_author_list(c, letter_range, custom_sort_field=None):
+    sort_field = custom_sort_field or "author"
+    c.execute('select distinct author, count(*) from toms where philo_type="doc" group by author order by ' + sort_field)
     content = []
     for author, count in c.fetchall():
         if not author:
@@ -62,7 +61,8 @@ def generate_author_list(c, letter_range):
     return content
 
 
-def generate_title_list(c, letter_range, db, config):
+def generate_title_list(c, letter_range, db, config, custom_sort_field=None):
+    sort_field = custom_sort_field or "title"
     c.execute('select * from toms where philo_type="doc"')
     content = []
     try:
@@ -71,7 +71,7 @@ def generate_title_list(c, letter_range, db, config):
         prefixes = ""
     prefix_sub = re.compile(r"^%s" % prefixes, re.I | re.U)
     for i in c.fetchall():
-        title = i['title'].decode('utf-8').lower()
+        title = i[sort_field].decode('utf-8').lower()
         title = prefix_sub.sub('', title).strip()
         if title[0].lower() not in letter_range:
             continue
@@ -81,8 +81,7 @@ def generate_title_list(c, letter_range, db, config):
             author = ""
         url = "navigate/%s/table-of-contents" % i['philo_id'].split()[0]
         # Smash accents and normalize for sorting
-        title = ''.join([j for j in unicodedata.normalize(
-            "NFKD", title) if not unicodedata.combining(j)])
+        title = ''.join([j for j in unicodedata.normalize("NFKD", title) if not unicodedata.combining(j)])
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
             try:
