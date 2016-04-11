@@ -28,7 +28,6 @@ def philo_dispatcher(environ, start_response):
                 yield ''.join([i for i in reports.table_of_contents(environ, start_response)])
             else:
                 yield ''.join([i for i in getattr(reports, "navigation")(environ, start_response)])
-            yield ''.join([i for i in getattr(reports, report or "navigation")(environ, start_response)])
         else:
             yield ''.join([i for i in getattr(reports, report or "concordance")(environ, start_response)])
     else:
