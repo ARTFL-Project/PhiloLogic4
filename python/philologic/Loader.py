@@ -150,13 +150,11 @@ class Loader(object):
                             for el in elements:
                                 if el is not None and el.get(attr_name, ""):
                                     data[field] = el.get(attr_name, "").encode("utf-8")
-                                    print "FOUND", field, data[field]
                                     break
                         else:
                             el = tree.find(xpath)
                             if el is not None and el.text is not None:
                                 data[field] = el.text.encode("utf-8")
-                                print "FOUND", field, data[field]
                 else:
                     trimmed_metadata_xpaths.append((type, xpath, field))
             data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
