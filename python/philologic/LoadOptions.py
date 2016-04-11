@@ -106,12 +106,12 @@ class LoadOptions(object):
         try:
             self.values['dbname'] = args[0]
             args.pop(0)
-            print "OPTION FILE LIST", options.file_list
             if options.file_list:
                 with open(args[-1]) as fh:
                     for line in fh:
+                        print line
                         self.values["files"].append(line.strip())
-            if args[-1].endswith('/') or os.path.isdir(args[-1]):
+            elif args[-1].endswith('/') or os.path.isdir(args[-1]):
                 self.values['files'] = glob(args[-1] + '/*')
             else:
                 self.values["files"] = args[:]
