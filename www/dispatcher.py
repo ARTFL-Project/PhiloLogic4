@@ -14,7 +14,6 @@ from functions.wsgi_handler import WSGIHandler
 
 def philo_dispatcher(environ, start_response):
     """Dispatcher function."""
-    report = FieldStorage().getvalue('report')
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
@@ -29,6 +28,7 @@ def philo_dispatcher(environ, start_response):
             else:
                 yield ''.join([i for i in getattr(reports, "navigation")(environ, start_response)])
         else:
+            report = FieldStorage().getvalue('report')
             yield ''.join([i for i in getattr(reports, report or "concordance")(environ, start_response)])
     else:
         yield f.webApp.angular(environ, start_response)

@@ -11,6 +11,7 @@ import time
 from ast import literal_eval as eval
 from glob import glob
 from optparse import OptionParser
+import shutil
 
 import philologic.LoadFilters as LoadFilters
 import philologic.Parser as Parser
@@ -84,12 +85,12 @@ class Loader(object):
         self.destination = path
 
     def add_files(self, files):
+        print "\nCopying files to database directory...",
         for f in files:
-            command = "cp %s %s/%s" % (shellquote(f), self.textdir,
-                                       os.path.basename(f).replace(" ", "_").replace("'", "_"))
-            os.system(command)
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
+            shutil.copy(f, new_file_path)
             os.chmod(new_file_path, 775)
+        print "done.\n"
 
     def status(self):
         pass
