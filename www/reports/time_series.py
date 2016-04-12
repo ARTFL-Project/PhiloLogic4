@@ -2,6 +2,7 @@
 
 from __future__ import division
 
+import re
 import sys
 import timeit
 from collections import defaultdict
@@ -15,6 +16,8 @@ from functions.wsgi_handler import WSGIHandler
 
 import ujson as json
 
+
+date_finder = re.compile(r'^.*?(\d{1,}).*')
 
 def time_series(environ, start_response):
     config = f.WebConfig()
@@ -71,7 +74,11 @@ def get_start_end_date(db, start_date=None, end_date=None):
         try:
             dates.append(int(i[0]))
         except:
-            pass
+            date_match = date_finder.search(i[0])
+            if date_match:
+                dates.append(int(date_match.groups()[0]))
+            else:
+                pass
     min_date = min(dates)
     start_date = start_date or min_date
     if start_date < min_date:

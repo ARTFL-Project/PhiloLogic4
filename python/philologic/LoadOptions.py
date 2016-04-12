@@ -106,12 +106,11 @@ class LoadOptions(object):
         try:
             self.values['dbname'] = args[0]
             args.pop(0)
-            print "OPTION FILE LIST", options.file_list
             if options.file_list:
                 with open(args[-1]) as fh:
                     for line in fh:
                         self.values["files"].append(line.strip())
-            if args[-1].endswith('/') or os.path.isdir(args[-1]):
+            elif args[-1].endswith('/') or os.path.isdir(args[-1]):
                 self.values['files'] = glob(args[-1] + '/*')
             else:
                 self.values["files"] = args[:]
@@ -169,10 +168,12 @@ class LoadOptions(object):
             return False
 
     def __iter__(self):
+        """Iterate over loader config."""
         for i in self.values:
             yield i
 
     def __str__(self):
+        """String representation of parsed loader config."""
         string_list = []
         for i in self.values:
             string_list.append("%s: %s" % (i, self.values[i]))

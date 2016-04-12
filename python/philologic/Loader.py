@@ -11,6 +11,7 @@ import time
 from ast import literal_eval as eval
 from glob import glob
 from optparse import OptionParser
+import shutil
 
 import philologic.LoadFilters as LoadFilters
 import philologic.Parser as Parser
@@ -84,15 +85,12 @@ class Loader(object):
         self.destination = path
 
     def add_files(self, files):
+        print "\nCopying files to database directory...",
         for f in files:
-            command = "cp %s %s/%s" % (shellquote(f), self.textdir,
-                                       os.path.basename(f).replace(" ", "_").replace("'", "_"))
-            os.system(command)
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
+            shutil.copy(f, new_file_path)
             os.chmod(new_file_path, 775)
-
-    def status(self):
-        pass
+        print "done.\n"
 
     def list_files(self):
         return os.listdir(self.textdir)
@@ -120,6 +118,13 @@ class Loader(object):
     def pre_parse_whole_file(self, fn):
         fh = open(fn)
         tree = etree.fromstring(fh.read())
+        # Remove namespace
+        for el in tree.iter():
+            try:
+                if el.tag.startswith('{'):
+                    el.tag = el.tag.rsplit('}', 1)[-1]
+            except AttributeError:  # el.tag is not a string for some reason
+                pass
         return tree
 
     def parse_tei_header(self, whole_file):
@@ -131,7 +136,6 @@ class Loader(object):
                 tree = self.pre_parse_whole_file(fn)
             else:
                 tree = self.pre_parse_header(fn)
-
             trimmed_metadata_xpaths = []
             for type, xpath, field in self.parser_defaults["metadata_xpaths"]:
                 if type == "doc":
@@ -200,6 +204,8 @@ class Loader(object):
 
         load_metadata.sort(key=make_sort_key, reverse=reverse_sort)
         print "done."
+        if self.debug:
+            print load_metadata
         return load_metadata
 
     def parse_files(self, max_workers, data_dicts=None):
