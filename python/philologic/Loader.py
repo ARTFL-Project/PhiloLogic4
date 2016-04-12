@@ -92,9 +92,6 @@ class Loader(object):
             os.chmod(new_file_path, 775)
         print "done.\n"
 
-    def status(self):
-        pass
-
     def list_files(self):
         return os.listdir(self.textdir)
 
