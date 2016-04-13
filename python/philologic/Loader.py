@@ -389,7 +389,6 @@ class Loader(object):
             pages_status = os.system("cat %s >> %s/all_pages" % (page_file, self.workdir))
             if not self.debug:
                 os.system("rm %s" % page_file)
-        # print "%s: page join returned %d" % (time.ctime(), pages_status)
 
     def merge_words(self, file_num=100):
         """This function runs a multi-stage merge sort on words
