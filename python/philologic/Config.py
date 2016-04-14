@@ -175,18 +175,33 @@ web_config_defaults = {
         "# The landing_page_browsing_type variable defines what type of landing page. Values available are 'default' or 'dictionary'",
         'index': 15
     },
-    'landing_page_browsing': {
-        'value': {"author": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
-                  "title": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
-                  "date": {},
-                  "default_display": {}},
+    'default_landing_page_browsing': {
+        'value': [{"label": "Author",
+                 "group_by_field": "author",
+                 "metadata_display": "author",
+                 "display_count": True,
+                 "ranges": ["A-D", "E-I", "J-M", "N-R", "S-Z"]
+                },
+                {"label": "Title",
+                 "group_by_field": "title",
+                 "metadata_display": "title",
+                 "display_count": False,
+                 "ranges": ["A-D", "E-I", "J-M", "N-R", "S-Z"]
+                }],
         'comment': '''
-               # The landing_page_browsing variable defines which browsing functions are exposed in the landing page. The only options
-               # are author, title, date, and default_display. For author and title, you have to define a list of ranges, such as 'author': ['A-L', 'M-Z'],
-               # and for date you need to define three variables: start_date, end_date, interval: e.g. "date": {"start": 1600, "end": 1800, "interval": 25}
-               # default_display allows you to load content by default. It is a dictionary that contains a type and a range, e.g. = "default_display": {"type": "title", "range": "A-D"}
-               # Note that no default is provided for "date" or default_value: they are therefore disabled''',
+               # The landing_page_browsing variable defines which browsing functions are exposed in the landing page.
+               # You can choose any document-level metadata (such as author, title, date, genre...) for browsing
+               # and you can even choose a different metadata field to display in your results.
+               # The prepopulated defaults should serve as a guide.''',
         'index': 16
+    },
+    'default_landing_page_display': {
+        'value': {},
+        'comment': '''
+               # The default landing page display variable allows you to load content by default. It is configured
+               # in the same way as default_landing_page_display objects except that you need to define just one
+               # range (the one you wish to display) as a string, such as 'A-D'. An empty dict will disable the feature.''',
+        'index': 17
     },
     'dico_letter_range': {
         'value': ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
@@ -194,14 +209,14 @@ web_config_defaults = {
         'comment': '''
                # The dico_letter_range variables defines a set of letters corresponding to the first letter of a headword. This generates a set of buttons
                # for browsing the database available on the landing page. The default represents the entire roman alphabet.''',
-        'index': 17
+        'index': 18
     },
     'dico_citation': {
         'value': False,
         'comment': '''
                # The dico_citation variable set to True enables a dictionary citation in concordances. Headword is cited first, followed by author if relevant,
                # or class of knowledge if available.''',
-        'index': 18
+        'index': 19
     },
     'kwic_bibliography_fields': {
         'value': [],
@@ -209,14 +224,14 @@ web_config_defaults = {
                 # The kwic_bibliography_fields variable variable defines which bibliography fields will be displayed in the KWIC view. It should be
                 # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.                # If the variable is an empty list, the first two fields in the metadata variable will be used.
                 ''',
-        'index': 19
+        'index': 20
     },
     'kwic_metadata_sorting_fields': {
         'value': [],
         'comment': '''
                 # The kwic_metadata_sorting_fields variable allows you to pick wich metadata field can be used for sorting KWIC results.
                 ''',
-        'index': 20
+        'index': 21
     },
     'title_prefix_removal': {
         'value': [],
@@ -226,7 +241,7 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-        'index': 21
+        'index': 22
     },
     'page_images_url_root': {
         'value': '',
@@ -236,7 +251,7 @@ web_config_defaults = {
                  # <pb fac="filename.jpg"> or <pb id="filename.jpg">
                  # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
                  ''',
-        'index': 22
+        'index': 23
     },
     'logo': {
         'value': '',
@@ -245,7 +260,7 @@ web_config_defaults = {
                   # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
                   # it starts with http://. If no logo is defined, no picture will be displayed.
                   ''',
-        'index': 23
+        'index': 24
     }
 }
 
@@ -326,7 +341,7 @@ def pretty(value, htchar='\t', lfchar='\n', indent=0):
     if type(value) is dict:
         if value:
             if len(value) == 1:
-                return "{%s: %s}" % (value.keys()[0], pretty(value.values()[0]))
+                return "{%s: %s}" % (repr(value.keys()[0]), pretty(value.values()[0]))
             else:
                 items = [nlch + repr(key) + ': ' + pretty(value[key], htchar, lfchar, indent + 1) for key in value]
                 return '{%s}' % (','.join(items) + lfchar + htchar * indent)
