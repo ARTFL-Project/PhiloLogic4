@@ -13,7 +13,7 @@
             var ranges = [];
             var row = [];
             var position = 0;
-            for (var i = 0; i < list.length; i++) {
+            for (var i = 0; i < list.length; i+=1) {
                 position++;
                 row.push(list[i]);
                 if (position === columnLimit) {
@@ -31,51 +31,19 @@
             templateUrl: 'app/components/landingPage/defaultLandingPage.html',
             replace: true,
             link: function(scope) {
-                // Create author range boxes
-                if (typeof($rootScope.philoConfig.landing_page_browsing.author) !== 'undefined' && $rootScope.philoConfig.landing_page_browsing.author.length > 0) {
-                    var authorRanges = $rootScope.philoConfig.landing_page_browsing.author;
-                } else {
-                    scope.authorRanges = false;
+                scope.defaultLandingPageBrowsing = $rootScope.philoConfig.default_landing_page_browsing;
+                // Cache generated ranges since they were disappearing with the back button
+                if (typeof($rootScope.philoConfig.default_landing_page_browsing.splitRanges) === 'undefined') {
+                    $rootScope.philoConfig.default_landing_page_browsing.splitRanges = [];
                 }
-                if (typeof(authorRanges) !== 'undefined') {
-                    scope.authorRanges = createRanges(authorRanges, 5);
-                }
-
-                // Create title range boxes
-                if (typeof($rootScope.philoConfig.landing_page_browsing.title) !== 'undefined' && $rootScope.philoConfig.landing_page_browsing.title.length > 0) {
-                    var titleRanges = $rootScope.philoConfig.landing_page_browsing.title;
-                } else {
-                    scope.titleRanges = false;
-                }
-                if (typeof(titleRanges) !== 'undefined') {
-                    scope.titleRanges = createRanges(titleRanges, 5);
-                }
-
-                // Create date range boxes
-                var start = $rootScope.philoConfig.landing_page_browsing.date.start;
-                var end = $rootScope.philoConfig.landing_page_browsing.date.end;
-                var interval = $rootScope.philoConfig.landing_page_browsing.date.interval;
-                if (typeof(start) === 'undefined' || typeof(end) === 'undefined' || typeof(interval) === 'undefined') {
-                    scope.dateRanges = false;
-                } else if (start.length === 0 || end.length === 0 || interval.length === 0) {
-                    scope.dateRanges = false;
-                } else {
-                    var dateList = []
-                    for (var i = start; i < end; i += interval) {
-                        var value = i.toString() + '-' + (i + interval)
-                        dateList.push(value)
+                for (var i=0; i < scope.defaultLandingPageBrowsing.length; i+=1) {
+                    if (typeof($rootScope.philoConfig.default_landing_page_browsing.splitRanges[i]) === 'undefined') {
+                        var browseType = scope.defaultLandingPageBrowsing[i];
+                        scope.defaultLandingPageBrowsing[i].ranges = createRanges(browseType.ranges, 5);
+                        $rootScope.philoConfig.default_landing_page_browsing.splitRanges[i] = scope.defaultLandingPageBrowsing[i].ranges
+                    } else {
+                        scope.defaultLandingPageBrowsing[i].ranges = $rootScope.philoConfig.default_landing_page_browsing.splitRanges[i];
                     }
-                    scope.dateRanges = createRanges(dateList, 5);
-                }
-
-                // Set up margin offset in case author or title is not displayed
-                scope.authorOffset = "";
-                scope.titleOffset = "";
-                if (!scope.titleRanges) {
-                    scope.authorOffset = "col-sm-offset-3";
-                }
-                if (!scope.authorRanges) {
-                    scope.titleOffset = "col-sm-offset-3";
                 }
             }
         }
@@ -125,17 +93,19 @@
 
     function landingPageContent($rootScope, request) {
         var getContent = function(scope, query) {
-            scope.contentType = query.contentType;
-            scope.range = query.range;
             scope.loadingContent = true;
             request.script({
                     script: 'get_landing_page_content.py',
-                    landing_page_content_type: scope.contentType,
-                    range: scope.range
+                    group_by_field: query.browseType.group_by_field,
+                    metadata_display: query.browseType.metadata_display,
+                    display_count: query.browseType.display_count,
+                    range: query.range
                 })
                 .then(function(response) {
                     scope.resultGroups = [];
-                    var content = response.data;
+                    scope.displayCount = response.data.display_count;
+                    scope.contentType = response.data.content_type;
+                    var content = response.data.content;
                     var resultGroups = [];
                     var results = [];
                     var oldPrefix = "";
@@ -166,28 +136,27 @@
             replace: true,
             link: function(scope, element, attrs) {
                 scope.resultGroups = [];
-                scope.displayLimit = 4;
+                scope.displayLimit = 8;
                 var contentTypeClass = {
                     author: "col-xs-12 col-sm-6",
                     title: "col-xs-12",
                     year: "col-xs-12"
                 }
-                if (!$.isEmptyObject(scope.philoConfig.landing_page_browsing.default_display)) {
+                if (!$.isEmptyObject(scope.philoConfig.default_landing_page_display)) {
                     var query = {
-                        contentType: scope.philoConfig.landing_page_browsing.default_display.type,
-                        range: scope.philoConfig.landing_page_browsing.default_display.range
+                        browseType: scope.philoConfig.default_landing_page_display,
+                        range: scope.philoConfig.default_landing_page_display.range
                     }
                     getContent(scope, query);
                 }
                 attrs.$observe('name', function(query) {
                     if (query !== '') {
-                        if (scope.displayLimit > 4) {
-                            scope.displayLimit = 4;
+                        if (scope.displayLimit > 8) {
+                            scope.displayLimit = 8;
                         }
                         query = scope.$eval(query);
                         scope.loadingContent = true;
                         getContent(scope, query);
-                        scope.contentClass = contentTypeClass[scope.contentType];
                     }
                 });
                 scope.displayMoreItems = function() {
