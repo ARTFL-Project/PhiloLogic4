@@ -373,6 +373,8 @@ def MakeWebConfig(path, **extra_values):
     web_config = Config(path, web_config_defaults, header=web_config_header)
     if extra_values:
         for key, value in extra_values.iteritems():
+            if isinstance(key, unicode):
+                key = str(key)
             web_config[key] = value
     return web_config
 
@@ -381,6 +383,8 @@ def MakeDBConfig(path, **extra_values):
     db_config = Config(path, db_locals_defaults, header=db_locals_header)
     if extra_values:
         for key, value in extra_values.iteritems():
+            if isinstance(key, unicode):
+                key = str(key)
             db_config[key] = value
     return db_config
 
