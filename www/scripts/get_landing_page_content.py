@@ -16,8 +16,6 @@ try:
 except ImportError:
     import json
 
-object_depth = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
-
 
 def landing_page_content(environ, start_response):
     status = '200 OK'
