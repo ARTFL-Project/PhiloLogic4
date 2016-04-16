@@ -16,6 +16,8 @@ try:
 except ImportError:
     import json
 
+object_depth = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
+
 
 def landing_page_content(environ, start_response):
     status = '200 OK'
@@ -24,9 +26,28 @@ def landing_page_content(environ, start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    if type(request.range) == str:
-        request_range = request.range.decode("utf8")
-    request_range = request_range.lower().split('-')
+    if request.is_range == 'true':
+        if type(request.query) == str:
+            request_range = request.query.decode("utf8")
+        request_range = request_range.lower().split('-')
+        results = group_by_range(request_range, request, db)
+    else:
+        results = group_by_metadata(request, db)
+    yield results
+
+
+def date_range(query_range):
+    is_date = False
+    try:
+        int(query_range[0])
+        int(query_range[1])
+        is_date = True
+    except ValueError:
+        pass
+    return is_date
+
+
+def group_by_range(request_range, request, db):
     is_date = date_range(request_range)
     if is_date:
         content_type = "date"
@@ -38,58 +59,69 @@ def landing_page_content(environ, start_response):
     c.execute('select *, count(*) as count from toms where philo_type="doc" group by %s' % request.group_by_field)
     content = []
     metadata_displayed = ""
-    if request.group_by_field == "title":
-        prefixes = '|'.join([i for i in config.title_prefix_removal])
-        prefix_sub = re.compile(r"^%s" % prefixes, re.I | re.U)
-    for i in c.fetchall():
-        if i[request.group_by_field] is None:
+    for doc in c.fetchall():
+        normalized_test_value = ''
+        if doc[request.group_by_field] is None:
             continue
         if is_date:
             try:
-                initial = int(i[request.group_by_field])
+                initial = int(doc[request.group_by_field])
                 test_value = initial
             except:
                 continue
-        elif request.group_by_field == "title":
-            title = i['title'].decode('utf-8').lower()
-            title = prefix_sub.sub('', title).strip()
-            initial = title[0].upper().encode('utf8')
-            test_value = ord(title[0].lower())
         else:
-            initial = i[request.group_by_field].decode('utf-8')[0].upper().encode("utf8")
-            test_value = ord(i[request.group_by_field].decode('utf8')[0].lower())
-        if test_value not in query_range:
-            continue
-        if not i[request.metadata_display]:
-            metadata_displayed = "NA"
-            url = 'query?report=bibliography&%s=NULL' % request.metadata_display
-        else:
-            metadata_displayed = i[request.metadata_display]
-            url = 'query?report=bibliography&%s="%s"' % (request.metadata_display, metadata_displayed)
+            initial_letter = doc[request.group_by_field].decode('utf-8')[0].lower()
+            test_value = ord(initial_letter)
+            normalized_test_value = ord(''.join([i for i in unicodedata.normalize("NFKD", initial_letter) if not unicodedata.combining(i)]))
+            initial = initial_letter.upper().encode("utf8")
+        if test_value in query_range or normalized_test_value in query_range:
+            if normalized_test_value in query_range:
+                initial = ''.join([i for i in unicodedata.normalize("NFKD", initial_letter) if not unicodedata.combining(i)]).upper().encode('utf8')
+            if request.group_by_field == "title":
+                url = "navigate/%s/table-of-contents" % doc['philo_id'].split()[0]
+            elif not doc[request.metadata_display]:
+                metadata_displayed = "NA"
+                url = 'query?report=bibliography&%s=NULL' % request.metadata_display
+            else:
+                metadata_displayed = doc[request.metadata_display]
+                url = 'query?report=bibliography&%s="%s"' % (request.metadata_display, metadata_displayed)
+            content.append({
+                "metadata_display": metadata_displayed,
+                "metadata": get_all_metadata(db, doc),
+                "url": url,
+                "count": doc['count'],
+                "initial": initial
+            })
+    return json.dumps({"display_count": request.display_count, "content_type": content_type, "content": content})
 
+
+def group_by_metadata(request, db):
+    c = db.dbh.cursor()
+    query = '''select * from toms where philo_type="doc" and %s=?''' % request.group_by_field
+    c.execute(query, (request.query, ))
+    content = []
+    for doc in c.fetchall():
         content.append({
-            "metadata_display": metadata_displayed,
-            "author": i["author"] or "NA",
-            "title": i["title"] or "NA",
-            "url": url,
-            "count": i['count'],
-            "initial": initial
+            "metadata_display": doc["title"] or "NA",
+            "metadata": get_all_metadata(db, doc),
+            "url": "navigate/%s/table-of-contents" % doc['philo_id'].split()[0],
+            "initial": request.query
         })
-    yield json.dumps({
+    return json.dumps({
         "display_count": request.display_count,
-        "content_type": content_type,
+        "content_type": request.group_by_field,
         "content": content
     })
 
-def date_range(query_range):
-    is_date = False
-    try:
-        int(query_range[0])
-        int(query_range[1])
-        is_date = True
-    except ValueError:
-        pass
-    return is_date
+
+def get_all_metadata(db, doc):
+    doc_metadata = {}
+    for metadata in db.locals.metadata_fields:
+        try:
+            doc_metadata[metadata] = doc[metadata] or "NA"
+        except IndexError:
+            doc_metadata[metadata] = "NA"
+    return doc_metadata
 
 
 if __name__ == "__main__":

@@ -74,12 +74,9 @@ def get_start_end_date(db, start_date=None, end_date=None):
         try:
             dates.append(int(i[0]))
         except:
-            if isinstance(i[0], str):
-                date_match = date_finder.search(i[0])
-                if date_match:
-                    dates.append(int(date_match.groups()[0]))
-                else:
-                    pass
+            date_match = date_finder.search(i[0])
+            if date_match:
+                dates.append(int(date_match.groups()[0]))
             else:
                 pass
     min_date = min(dates)

@@ -5,14 +5,14 @@
             <li class="{{ ::contentClass }}" ng-repeat="result in ::group.results">
                     <a href="{{ ::result.url }}">
                         <span ng-if="contentType == 'title' || contentType == 'date'">
-                            <i>{{ ::result.title }}</i>
+                            <i>{{ ::result.metadata.title }}</i>
                         </span>
                         <span ng-if="contentType != 'title' && contentType != 'date'">
                             {{ ::result.metadata_display }}
                         </span>
                     </a>
                     <span ng-if="contentType != 'author'">
-                        &nbsp;&nbsp;<b>&#124;&#124;</b>&nbsp;&nbsp;{{ ::result.author }}
+                        &nbsp;&nbsp;<b>&#124;&#124;</b>&nbsp;&nbsp;{{ ::result.metadata.author }}
                     </span>
                     <span ng-if="displayCount ==  'true'">
                         &nbsp;({{ ::result.count }})
