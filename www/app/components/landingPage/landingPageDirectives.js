@@ -98,35 +98,14 @@
             request.script({
                     script: 'get_landing_page_content.py',
                     group_by_field: query.browseType.group_by_field,
-                    metadata_display: query.browseType.metadata_display,
                     display_count: query.browseType.display_count,
                     is_range: query.browseType.is_range,
-                    query: query.query                    
+                    query: query.query
                 })
                 .then(function(response) {
-                    scope.resultGroups = [];
+                    scope.resultGroups = response.data.content;
                     scope.displayCount = response.data.display_count;
                     scope.contentType = response.data.content_type;
-                    var content = response.data.content;
-                    var resultGroups = [];
-                    var results = [];
-                    var oldPrefix = "";
-                    for (var i = 0; i < content.length; i++) {
-                        var prefix = content[i].initial;
-                        if (prefix !== oldPrefix && oldPrefix !== '') {
-                            scope.resultGroups.push({
-                                prefix: oldPrefix,
-                                results: results
-                            });
-                            results = [];
-                        }
-                        results.push(content[i])
-                        oldPrefix = prefix;
-                    }
-                    scope.resultGroups.push({
-                        prefix: prefix,
-                        results: results
-                    });
                     scope.loadingContent = false;
                 })
                 .catch(function(response) {
