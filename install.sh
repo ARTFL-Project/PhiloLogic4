@@ -46,8 +46,10 @@ sudo cp www/.htaccess  /var/lib/philologic4/web_app/
 # sudo cp -R www/app/assets/css/split/style.css /var/lib/philologic4/web_loader/
 # sudo cp -R www/app/assets/css/split/default_theme.css /var/lib/philologic4/web_loader/
 
-sudo rm /usr/bin/philoload4
-sudo cp extras/philoload4.py /usr/bin/philoload4
+if [ -f /usr/local/bin/philoload4 ]; then
+	sudo rm /usr/local/bin/philoload4;
+fi
+sudo cp extras/philoload4.py /usr/local/bin/philoload4
 
 if [ ! -f /etc/philologic/philologic4.cfg ]
     then
