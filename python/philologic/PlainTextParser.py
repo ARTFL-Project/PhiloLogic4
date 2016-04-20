@@ -73,7 +73,7 @@ class PlainTextParser(object):
                 self.v.pull("word", byte_end)
             elif tok_type == "sent":
                 # a little hack--we don't know the punctuation mark that will end a sentence
-                # until we encounter it--so instead, we let the push on "word" create a 
+                # until we encounter it--so instead, we let the push on "word" create a
                 # implicit philo_virtual sentence, then change its name once we actually encounter
                 # the punctuation token.
                 if "sent" not in self.v:

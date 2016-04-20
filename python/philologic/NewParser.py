@@ -1,3 +1,4 @@
+"""This is a port of the PhiloLogic3 parser originally written by Mark Olsen in Perl."""
 import os
 import re
 import sys
@@ -44,10 +45,15 @@ class XMLParser(object):
         # Set to 1 to break words on apostrophe.  Probably True for French.
         self.break_apost = False
 
+        # Convert SGML ligatures to base characters for indexing.
+        # &oelig; = oe.
+        self.flatten_ligatures = True
+
         # List of global variables used for the tag handler
         self.bytes_read_in = 0
         self.in_the_text = False
         self.in_text_quote = False
+        self.in_front_matter = False
         self.in_quote_text_tag = False
         self.do_this_para = True
         self.in_a_note = False
@@ -63,11 +69,12 @@ class XMLParser(object):
         self.in_tagged_sentence = False
         self.got_a_div = False
         self.got_a_para = False
+        self.context_div_level = 0
 
     def parse(self, input):
         """Top level function for reading a file and printing out the output."""
         self.input = input
-        self.content = input.read().decode("utf-8")
+        self.content = input.read()
         if div_tag.search(self.content):
             self.got_a_div = True
         if para_tag(self.content):
@@ -97,13 +104,14 @@ class XMLParser(object):
             self.line_count += 1
 
             if line.starswith('<'):
-                self.bytes_read_in += len(line.encode('utf8'))
-                # TODO : implement DUMPXPATHS
+                self.bytes_read_in += len(line)
+                # TODO : implement DUMPXPATHS?
                 if self.in_the_text:
                     self.tag_handler(line)
             else:
                 # TODO wordhandler
-                self.bytes_read_in += len(line.encode('utf8'))
+                self.word_handler(line)
+                self.bytes_read_in += len(line)
 
         self.v.pull("doc", self.filesize)
 
@@ -138,7 +146,7 @@ class XMLParser(object):
     def tag_handler(self, tag):
         '''Tag handler for parser.'''
 
-        byte_start = self.bytes_read_in - len(tag.encode('utf8'))
+        byte_start = self.bytes_read_in - len(tag)
         tag_name = tag_matcher.findall(tag)[0]
 
         # Handle <q> tags
@@ -315,16 +323,97 @@ class XMLParser(object):
         if front_tag.search(tag):
             if self.open_div1:
                 self.close_div1(byte_start)
+            self.in_front_matter = True
             self.v.push("div1", tag_name, byte_start)
             self.get_attributes(tag, "div1")
+            self.context_div_level = 1
             self.open_div1 = True
         if closed_front_tag.search(tag):
+            self.in_front_matter = False
+            self.context_div_level = 0
             self.close_div1(self.bytes_read_in)
 
         # BODY TAG: Let's set it as a <div object if we have no divs in the document.
         # These tend to carry on as FRONTMATTER. Don't have to check for lower divs, etc.
         if body_tag.search(tag) and not self.got_a_div:
             self.push("div1", tag_name, byte_start)
+            self.context_div_level = 1
+            self.open_div1 = True
+            div_head = self.get_div_head(tag)
+            if '[NA]' in div_head or '[na]' in div_head:
+                div_head = "Document Body"
+            self.v["div1"]["head"] = div_head
+
+        # HyperDiv: This is a Brown WWP construct. It is defined as a place to put
+        # a number of different kinds of information which are related to the body
+        # of the text but do not appear directly within its flow, for instance footnotes,
+        # acrostics, and castlist information which is not printed in the text but
+        # is required to provide IDREFs for the who attribute on <speaker>.
+        if hyper_div_tag.search(tag):
+            if self.open_div1:
+                self.close_div1(byte_start)
+            self.context_div_level = 1
+            self.open_div1 = True
+            self.push("div1", tag_name, byte_start)
+            self.v["div1"]["head"] = "[HyperDiv]"
+
+        # DIV TAGS: set division levels and print out div info. A couple of assumptions:
+        # - I assume divs are numbered 1,2,3.
+        # - I output <head> info where I find it.  This could also be modified to output
+        #   a structured table record with div type, and other attributes, along with
+        #   the Philoid and head for searching under document levels.
+        if closed_div_tag.search(tag):
+            self.context_div_level = self.context_div_level - 1
+            self.no_deeper_objects = False
+        if "<div" in tag:
+            self.context_div_level += 1
+            if self.context_div_level > 3:
+                if self.open_div3:
+                    self.close_div3(byte_start)
+                self.context_div_level = 3
+            if self.context_div_level < 1:
+                self.context_div_level = 1
+
+            div_level = div_num_tag.findall(tag)[0]
+            if not isinstance(int, div_level):
+                div_level = self.context_div_level
+            elif div_level == "0" or int(div_level) > 3:
+                div_level = self.context_div_level
+            else:
+                div_level = int(div_level)
+
+            # TODO what to do with div0? See philo3???
+
+            # <FRONT will be the top level div, so let's use context divlevel
+            if self.in_front_matter:
+                div_level = self.context_div_level
+
+            # TODO: ignore divs inside of internal text tags.  Setable
+            # from configuration.  But we will bump the para and sent args
+
+            if div_level == 1:
+                if self.open_div1:
+                    self.close_div1(byte_start)
+                self.open_div1 = True
+                self.v.push("div1", tag_name, byte_start)
+                self.v["div1"]['head'] = self.get_div_head(tag)
+                self.get_attributes(tag, object_type="div1")
+            elif div_level == 2:
+                if self.open_div2:
+                    self.close_div2(byte_start)
+                self.open_div2 = True
+                self.v.push("div2", tag_name, byte_start)
+                self.v["div2"]['head'] = self.get_div_head(tag)
+                self.get_attributes(tag, object_type="div2")
+            else:
+                if self.open_div3:
+                    self.close_div3(byte_start)
+                self.open_div3 = True
+                self.v.push("div3", tag_name, byte_start)
+                self.v["div3"]['head'] = self.get_div_head(tag)
+                self.get_attributes(tag, object_type="div3")
+
+            # TODO: unclear if we need to add EEBO hack when no subdiv objects...
 
     def close_sent(self, byte_end):
         """Close sentence objects."""
@@ -400,133 +489,454 @@ class XMLParser(object):
                         div_head += next_line + " "
         if div_head:
             div_head = self.clear_char_ents(div_head)
+            div_head = self.latin1_ents_to_utf8(div_head)
+            div_head = self.convert_other_ents(div_head)
+            div_head = re.sub(r'\n<[^>]*>\n', '', div_head)
+            div_head = div_head.replace('_', '')
+            div_head = div_head.replace('\t', '')
+            div_head = ' '.join(div_head.split())  # remove double or more spaces
+            div_head = div_head.strip()
+        elif "type=" in tag:
+            try:
+                div_head = type_attrib.findall(tag)[0]
+            except IndexError:
+                pass
+
+        if not div_head:
+            div_head = "[NA]"
+
+        # TODO: evaluate need for below...
+        if div_head == "[>]" or div_head == "[<]":
+            div_head == "[NA]"
+
+        return div_head
 
     def clear_char_ents(self, text):
         """Replaces a selected set of SGML character ents with spaces in order to keep the byte count right."""
         # We would want to read a list of character ents that should NOT be considered
         # valid for including in words or, more likely, a list of VALID characters from a general table.
         if self.break_apost:
-            text = break_apost.sub(lambda match: "," + " " * len(match.group(1) - 1))
+            text = apost_ent.sub(lambda match: "," + " " * len(match.group(1) - 1))
         for regex in entity_regex:
             text = regex.sub(lambda match: " " * len(match.group(1)))
         return text
 
+    def latin1_ents_to_utf8(self, text):
+        """Converts ISO-LATIN-1 character entities in index words to UTF-8
+        for standard word index search consistency. This is for SGML data sets
+        and XML that have character ents rather than UTF-8 characters."""
+        if self.flatten_ligatures:
+            text = text.replace('&AElig;', '\xc3\x86')
+            text = text.replace('&szlig;', '\xc3\x9F')
+            text = text.replace('&aelig;' '\xc3\xA6')
+        text = text.replace('&Agrave;', '\xc3\x80')
+        text = text.replace('&Aacute;', '\xc3\x81')
+        text = text.replace('&Acirc;', '\xc3\x82')
+        text = text.replace('&Atilde;', '\xc3\x83')
+        text = text.replace('&Auml;', '\xc3\x84')
+        text = text.replace('&Aring;', '\xc3\x85')
+        text = text.replace('&Ccedil;', '\xc3\x87')
+        text = text.replace('&Egrave;', '\xc3\x88')
+        text = text.replace('&Eacute;', '\xc3\x89')
+        text = text.replace('&Ecirc;', '\xc3\x8A')
+        text = text.replace('&Euml;', '\xc3\x8B')
+        text = text.replace('&Igrave;', '\xc3\x8C')
+        text = text.replace('&Iacute;', '\xc3\x8D')
+        text = text.replace('&Icirc;', '\xc3\x8E')
+        text = text.replace('&Iuml;', '\xc3\x8F')
+        text = text.replace('&ETH;', '\xc3\x90')
+        text = text.replace('&Ntilde;', '\xc3\x91')
+        text = text.replace('&Ograve;', '\xc3\x92')
+        text = text.replace('&Oacute;', '\xc3\x93')
+        text = text.replace('&Ocirc;', '\xc3\x94')
+        text = text.replace('&Otilde;', '\xc3\x95')
+        text = text.replace('&Ouml;', '\xc3\x96')
+        text = text.replace('&#215;', '\xc3\x97')  # MULTIPLICATION SIGN
+        text = text.replace('&Oslash;', '\xc3\x98')
+        text = text.replace('&Ugrave;', '\xc3\x99')
+        text = text.replace('&Uacute;', '\xc3\x9A')
+        text = text.replace('&Ucirc;', '\xc3\x9B')
+        text = text.replace('&Uuml;', '\xc3\x9C')
+        text = text.replace('&Yacute;', '\xc3\x9D')
+        text = text.replace('&THORN;', '\xc3\x9E')
+        text = text.replace('&agrave;', '\xc3\xA0')
+        text = text.replace('&aacute;', '\xc3\xA1')
+        text = text.replace('&acirc;', '\xc3\xA2')
+        text = text.replace('&atilde;', '\xc3\xA3')
+        text = text.replace('&auml;', '\xc3\xA4')
+        text = text.replace('&aring;', '\xc3\xA5')
+        text = text.replace('&ccedil;', '\xc3\xA7')
+        text = text.replace('&egrave;', '\xc3\xA8')
+        text = text.replace('&eacute;', '\xc3\xA9')
+        text = text.replace('&ecirc;', '\xc3\xAA')
+        text = text.replace('&euml;', '\xc3\xAB')
+        text = text.replace('&igrave;', '\xc3\xAC')
+        text = text.replace('&iacute;', '\xc3\xAD')
+        text = text.replace('&icirc;', '\xc3\xAE')
+        text = text.replace('&iuml;', '\xc3\xAF')
+        text = text.replace('&eth;', '\xc3\xB0')
+        text = text.replace('&ntilde;', '\xc3\xB1')
+        text = text.replace('&ograve;', '\xc3\xB2')
+        text = text.replace('&oacute;', '\xc3\xB3')
+        text = text.replace('&ocirc;', '\xc3\xB4')
+        text = text.replace('&otilde;', '\xc3\xB5')
+        text = text.replace('&ouml;', '\xc3\xB6')
+        text = text.replace('&#247;', '\xc3\xB7')  # DIVISION SIGN
+        text = text.replace('&oslash;', '\xc3\xB8')
+        text = text.replace('&ugrave;', '\xc3\xB9')
+        text = text.replace('&uacute;', '\xc3\xBA')
+        text = text.replace('&ucirc;', '\xc3\xBB')
+        text = text.replace('&uuml;', '\xc3\xBC')
+        text = text.replace('&yacute;', '\xc3\xBD')
+        text = text.replace('&thorn;', '\xc3\xBE')
+        text = text.replace('&yuml;', '\xc3\xBF')
+
+        # Greek Entities for HTML4 and Chadwock Healey -- Charles Cooney
+        text = text.replace('&agr;', '\xce\xb1')
+        text = text.replace('&alpha;', '\xce\xb1')
+        text = text.replace('&bgr;', '\xce\xb2')
+        text = text.replace('&beta;', '\xce\xb2')
+        text = text.replace('&ggr;', '\xce\xb3')
+        text = text.replace('&gamma;', '\xce\xb3')
+        text = text.replace('&dgr;', '\xce\xb4')
+        text = text.replace('&delta;', '\xce\xb4')
+        text = text.replace('&egr;', '\xce\xb5')
+        text = text.replace('&epsilon;', '\xce\xb5')
+        text = text.replace('&zgr;', '\xce\xb6')
+        text = text.replace('&zeta;', '\xce\xb6')
+        text = text.replace('&eegr;', '\xce\xb7')
+        text = text.replace('&eta;', '\xce\xb7')
+        text = text.replace('&thgr;', '\xce\xb8')
+        text = text.replace('&theta;', '\xce\xb8')
+        text = text.replace('&igr;', '\xce\xb9')
+        text = text.replace('&iota;', '\xce\xb9')
+        text = text.replace('&kgr;', '\xce\xba')
+        text = text.replace('&kappa;', '\xce\xba')
+        text = text.replace('&lgr;', '\xce\xbb')
+        text = text.replace('&lambda;', '\xce\xbb')
+        text = text.replace('&mgr;', '\xce\xbc')
+        text = text.replace('&mu;', '\xce\xbc')
+        text = text.replace('&ngr;', '\xce\xbd')
+        text = text.replace('&nu;', '\xce\xbd')
+        text = text.replace('&xgr;', '\xce\xbe')
+        text = text.replace('&xi;', '\xce\xbe')
+        text = text.replace('&ogr;', '\xce\xbf')
+        text = text.replace('&omicron;', '\xce\xbf')
+        text = text.replace('&pgr;', '\xcf\x80')
+        text = text.replace('&pi;', '\xcf\x80')
+        text = text.replace('&rgr;', '\xcf\x81')
+        text = text.replace('&rho;', '\xcf\x81')
+        text = text.replace('&sfgr;', '\xcf\x82')
+        text = text.replace('&sigmaf;', '\xcf\x82')
+        text = text.replace('&sgr;', '\xcf\x83')
+        text = text.replace('&sigma;', '\xcf\x83')
+        text = text.replace('&tgr;', '\xcf\x84')
+        text = text.replace('&tau;', '\xcf\x84')
+        text = text.replace('&ugr;', '\xcf\x85')
+        text = text.replace('&upsilon;', '\xcf\x85')
+        text = text.replace('&phgr;', '\xcf\x86')
+        text = text.replace('&phi;', '\xcf\x86')
+        text = text.replace('&khgr;', '\xcf\x87')
+        text = text.replace('&chi;', '\xcf\x87')
+        text = text.replace('&psgr;', '\xcf\x88')
+        text = text.replace('&psi;', '\xcf\x88')
+        text = text.replace('&ohgr;', '\xcf\x89')
+        text = text.replace('&omega;', '\xcf\x89')
+        text = text.replace('&Agr;', '\xce\x91')
+        text = text.replace('&Alpha;', '\xce\x91')
+        text = text.replace('&Bgr;', '\xce\x92')
+        text = text.replace('&Beta;', '\xce\x92')
+        text = text.replace('&Ggr;', '\xce\x93')
+        text = text.replace('&Gamma;', '\xce\x93')
+        text = text.replace('&Dgr;', '\xce\x94')
+        text = text.replace('&Delta;', '\xce\x94')
+        text = text.replace('&Egr;', '\xce\x95')
+        text = text.replace('&Epsilon;', '\xce\x95')
+        text = text.replace('&Zgr;', '\xce\x96')
+        text = text.replace('&Zeta;', '\xce\x96')
+        text = text.replace('&EEgr;', '\xce\x97')
+        text = text.replace('&Eta;', '\xce\x97')
+        text = text.replace('&THgr;', '\xce\x98')
+        text = text.replace('&Theta;', '\xce\x98')
+        text = text.replace('&Igr;', '\xce\x99')
+        text = text.replace('&Iota;', '\xce\x99')
+        text = text.replace('&Kgr;', '\xce\x9a')
+        text = text.replace('&Kappa;', '\xce\x9a')
+        text = text.replace('&Lgr;', '\xce\x9b')
+        text = text.replace('&Lambda;', '\xce\x9b')
+        text = text.replace('&Mgr;', '\xce\x9c')
+        text = text.replace('&Mu;', '\xce\x9c')
+        text = text.replace('&Ngr;', '\xce\x9d')
+        text = text.replace('&Nu;', '\xce\x9d')
+        text = text.replace('&Xgr;', '\xce\x9e')
+        text = text.replace('&Xi;', '\xce\x9e')
+        text = text.replace('&Ogr;', '\xce\x9f')
+        text = text.replace('&Omicron;', '\xce\x9f')
+        text = text.replace('&Pgr;', '\xce\xa0')
+        text = text.replace('&Pi;', '\xce\xa0')
+        text = text.replace('&Rgr;', '\xce\xa1')
+        text = text.replace('&Rho;', '\xce\xa1')
+        text = text.replace('&Sgr;', '\xce\xa3')
+        text = text.replace('&Sigma;', '\xce\xa3')
+        text = text.replace('&Tgr;', '\xce\xa4')
+        text = text.replace('&Tau;', '\xce\xa4')
+        text = text.replace('&Ugr;', '\xce\xa5')
+        text = text.replace('&Upsilon;', '\xce\xa5')
+        text = text.replace('&PHgr;', '\xce\xa6')
+        text = text.replace('&Phi;', '\xce\xa6')
+        text = text.replace('&KHgr;', '\xce\xa7')
+        text = text.replace('&Chi;', '\xce\xa7')
+        text = text.replace('&PSgr;', '\xce\xa8')
+        text = text.replace('&Psi;', '\xce\xa8')
+        text = text.replace('&OHgr;', '\xce\xa9')
+        text = text.replace('&Omega;', '\xce\xa9')
+        return text
+
+    def convert_other_ents(self, text):
+        """ handles character entities in index words.
+        There should not be many of these."""
+        text = text.replace('&apos;', "'")
+        text = text.replace('&s;', 's')
+        text = macr_ent.sub('\1', text)
+        text = inverted_ent.sub('\1', text)
+        text = supp_ent.sub('\1', text)
+        if self.flatten_ligatures:
+            text = ligatures_ent.sub(r'\1', text)
+        return text
+
+    def word_handler(self, words):
+        """Word handler. It takes an artbitrary string or words between two tags and
+        splits them into words.
+        It also identifies sentence breaks.  I am not checking for existing sentence
+        tags, but could and conditionalize it. Also note that it does not check for
+        sentences inside of linegroups ... which are typically broken on lines.
+        I am not currently handling ";" at the end of words because of confusion with
+        character ents. Easily fixed."""
+
+        # We don't like many character entities, so let's change them
+        # into spaces to get a clean break.
+        if char_ents.search(words):
+            words = clear_char_ents(words)
+
+        # TODO: Now, we also know that there are Unicode characters which
+        # we normally want to break words.  Often, these are Microsoft characters
+        # like the curly quotes. These are set in textload.cfg
+        # in @UnicodeWordBreakers.
+
+        # TODO: Now, here's something you did not think of: Brown WWP: M&sup-r;
+        # You are going to split words, on hyphens just below.  That would
+        # be a mess.  So a little exception handler which we will convert
+        # to the supp(.) for indexing.
+
+        # we're splitting the line of words into distinct words
+        # separated by "\n"
+        words = chars_in_words.sub('\n\1\n', words)
+
+        if self.break_apost:
+            words = words.replace("'", "'\n")
+
+        words = newline_shortener.sub('\n', words)
+
+        current_pos = self.bytes_read_in
+        count = 0
+        if self.in_the_text:
+            for word in words.split('\n'):
+                word_length = len(word)
+                count += 1
+
+                # Keep track of your bytes since this is where you are getting
+                # the byte offsets for words.
+                current_pos += word_length
+
+                # Do we have a word? At least one of these characters.
+                if check_if_char_word.search(word):
+                    last_word = word
+                    word_pos = current_pos - len(word)
+
+                    # Set your byte position now, since you will be modifying the
+                    # word you are sending to the index after this.
+                    byte_start = word_pos
+
+                    if "&" in word:
+                        # Convert ents to utf-8
+                        word = self.latin1_ents_to_utf8(word)
+                        # Convert other ents to things....
+                        word = self.convert_other_ents(word)
+
+                    # You may have some semi-colons...
+                    if word[-1] == ";":
+                        if "&" in word:
+                            pass  # TODO
+                        else:
+                            word = word[:-1]
+
+                    # Get rid of certain characters that don't break words, but don't index.
+                    # These are defined in a compiled regex below: chars_not_to_index
+                    word = chars_not_to_index.sub('', word)
+
+                    # TODO: Call a function to distinguish between words beginning with an
+                    # upper case and lower case character.  This USED to be a proper
+                    # name split in ARTFL, but we don't see many databases with proper
+                    # names tagged.
+
+                    # Switch everything to lower case
+                    word = word.decode('utf8', 'ignore').lower().encode('utf8')
+
+                    # TODO: If you have tag exemptions and you have some of the replacement
+                    # characters "_", then delete them from the index entry.  I've put
+                    # in both options, just in case.  I'm on the fence about this at the
+                    # moment since I have "_" in characters to match above.
+
+                    # Check to see if the word is longer than we want.  More than 235
+                    # characters appear to cause problems in the indexer.
+                    # TODO: make this limit configurable?
+                    if len(word) > 235:
+                        print >> sys.stderr, "Long word: %s" % word
+                        print >> sys.stderr, "Truncating for index..."
+                        word = word[:235]
+
+                    self.v.push("word", word, word_pos)
+                    self.v.pull("word", current_pos)
+                elif not self.in_line_group and not self.in_tagged_sentence:
+                    if self.open_sent:
+                        self.close_sent(current_pos)
+
+                    # TODO: Always break on ! and ?
+                    if exclamation_question.search(word):
+                        self.v.push('sent', word, current_pos - len(word))
+
+
+
 # Pre-compiled regexes used for parsing
-join_hyphen_with_lb = re.compile(r'(\&shy;[\n \t]*<lb\/>)', re.U | re.I | re.M)
-join_hyphen = re.compile(r'(\&shy;[\n \t]*)', re.U | re.I | re.M)
-in_word_tag_del = re.compile(r'([A-Za-z;])($e)([A-Za-z&])', re.U | re.I | re.M)
-text_tag = re.compile(r'<text\W', re.U | re.I)
-closed_text_tag = re.compile(r'</text\W', re.U | re.I)
-doc_body_tag = re.compile(r'<docbody', re.U | re.I)
-body_tag = re.compile(r'<body\W', re.U | re.I)
-div_tag = re.compile(r'<div', re.U | re.I)
-para_tag = re.compile(r'<p\W', re.U | re.I)
-quote_tag = re.compile(r'<q[ >]', re.U | re.I)
-closed_quote_tag = re.compile(r'</q>', re.U | re.I)
-parag_tag = re.compile(r'<p>', re.U | re.I)
-parag_with_attrib_tag = re.compile(r'<p ', re.U | re.I)
-closed_para_tag = re.compile(r'</p>', re.U | re.I)
-note_tag = re.compile(r'<note\W', re.U | re.I)
-closed_note_tag = re.compile(r'</note>', re.U | re.I)
-epigraph_tag = re.compile(r'<epigraph\W', re.U | re.I)
-closed_epigraph_tag = re.compile(r'</epigraph>', re.U | re.I)
-list_tag = re.compile(r'<list ', re.U | re.I)
-closed_list_tag = re.compile(r'</list>', re.U | re.I)
-speaker_tag = re.compile(r'<sp\W', re.U | re.I)
-closed_speaker_tag = re.compile(r'</sp>', re.U | re.I)
-argument_tag = re.compile(r'<argument\W', re.U | re.I)
-closed_argument_tag = re.compile(r'</argument>', re.U | re.I)
-opener_tag = re.compile(r'<opener\W', re.U | re.I)
-closed_opener_tag = re.compile(r'</opener\W', re.U | re.I)
-closer_tag = re.compile(r'<closer\W', re.U | re.I)
-closed_closer_tag = re.compile(r'</closer\W', re.U | re.I)
-stage_tag = re.compile(r'<stage\W', re.U | re.I)
-closed_stage_tag = re.compile(r'</stage\W', re.U | re.I)
-castlist_tag = re.compile(r'<castlist\W', re.U | re.I)
-closed_castlist_tag = re.compile(r'</castlist\W', re.U | re.I)
-page_tag = re.compile(r'<pb\W', re.U | re.I)
-n_attribute = re.compile(r'n="([^"]*)', re.U | re.I)
-line_group_tag = re.compile(r'<lg\W', re.U | re.I)
-closed_line_group = re.compile(r'</lg\W', re.U | re.I)
-line_tag = re.compile(r'<l\W', re.U | re.I)
-closed_line_tag = re.compile(r'</l\W', re.U | re.I)
-sentence_tag = re.compile(r'<s\W', re.U | re.I)
-closed_sentence_tag = re.compile(r'</s\W', re.U | re.I)
-front_tag = re.compile(r'<front\W', re.U | re.I)
-closed_front_tag = re.compile(r'</front\W', re.U | re.I)
-attrib_matcher = re.compile(r'''(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?''', re.U | re.I)
-tag_matcher = re.compile(r'<(\w+)[^>]*>', re.U | re.I)
-head_self_close_tag = re.compile(r'<head\/>', re.I | re.U)
-closed_div_tag = re.compile(r'<\/div', re.I | re.U)
-head_tag = re.compile(r'<head', re.U | re.I)
-closed_head_tag = re.compile(r'<\/head>', re.U | re.I)
-break_apost = re.compile(r'\&apos;', re.U | re.I)
+join_hyphen_with_lb = re.compile(r'(\&shy;[\n \t]*<lb\/>)', re.I | re.M)
+join_hyphen = re.compile(r'(\&shy;[\n \t]*)', re.I | re.M)
+in_word_tag_del = re.compile(r'([A-Za-z;])($e)([A-Za-z&])', re.I | re.M)
+text_tag = re.compile(r'<text\W', re.I)
+closed_text_tag = re.compile(r'</text\W', re.I)
+doc_body_tag = re.compile(r'<docbody', re.I)
+body_tag = re.compile(r'<body\W', re.I)
+div_tag = re.compile(r'<div', re.I)
+closed_div_tag = re.compile(r'<\/div', re.I)
+para_tag = re.compile(r'<p\W', re.I)
+quote_tag = re.compile(r'<q[ >]', re.I)
+closed_quote_tag = re.compile(r'</q>', re.I)
+parag_tag = re.compile(r'<p>', re.I)
+parag_with_attrib_tag = re.compile(r'<p ', re.I)
+closed_para_tag = re.compile(r'</p>', re.I)
+note_tag = re.compile(r'<note\W', re.I)
+closed_note_tag = re.compile(r'</note>', re.I)
+epigraph_tag = re.compile(r'<epigraph\W', re.I)
+closed_epigraph_tag = re.compile(r'</epigraph>', re.I)
+list_tag = re.compile(r'<list ', re.I)
+closed_list_tag = re.compile(r'</list>', re.I)
+speaker_tag = re.compile(r'<sp\W', re.I)
+closed_speaker_tag = re.compile(r'</sp>', re.I)
+argument_tag = re.compile(r'<argument\W', re.I)
+closed_argument_tag = re.compile(r'</argument>', re.I)
+opener_tag = re.compile(r'<opener\W', re.I)
+closed_opener_tag = re.compile(r'</opener\W', re.I)
+closer_tag = re.compile(r'<closer\W', re.I)
+closed_closer_tag = re.compile(r'</closer\W', re.I)
+stage_tag = re.compile(r'<stage\W', re.I)
+closed_stage_tag = re.compile(r'</stage\W', re.I)
+castlist_tag = re.compile(r'<castlist\W', re.I)
+closed_castlist_tag = re.compile(r'</castlist\W', re.I)
+page_tag = re.compile(r'<pb\W', re.I)
+n_attribute = re.compile(r'n="([^"]*)', re.I)
+line_group_tag = re.compile(r'<lg\W', re.I)
+closed_line_group = re.compile(r'</lg\W', re.I)
+line_tag = re.compile(r'<l\W', re.I)
+closed_line_tag = re.compile(r'</l\W', re.I)
+sentence_tag = re.compile(r'<s\W', re.I)
+closed_sentence_tag = re.compile(r'</s\W', re.I)
+front_tag = re.compile(r'<front\W', re.I)
+closed_front_tag = re.compile(r'</front\W', re.I)
+attrib_matcher = re.compile(r'''(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?''', re.I)
+tag_matcher = re.compile(r'<(\w+)[^>]*>', re.I)
+head_self_close_tag = re.compile(r'<head\/>', re.I)
+closed_div_tag = re.compile(r'<\/div', re.I)
+head_tag = re.compile(r'<head', re.I)
+closed_head_tag = re.compile(r'<\/head>', re.I)
+apost_ent = re.compile(r'\&apos;', re.I)
+macr_ent = re.compile(r'\&([A-Za-z])macr;', re.I)
+inverted_ent = re.compile(r'\&inverted([a-zA-Z0-9]);', re.I)
+supp_ent = re.compile(r'&supp([a-z0-9]);', re.I)
+ligatures_ent = re.compile(r'\&([A-Za-z][A-Za-z])lig;', re.I)
+type_attrib = re.compile(r'type="([^"]*)"', re.I)
+hyper_div_tag = re.compile(r'<hyperdiv\W', re.I)
+div_num_tag = re.compile(r'<div(.)', re.I)
+char_ents = re.compile(r'\&[a-zA-Z0-9\#][a-zA-Z0-9]*;', re.I)
+chars_in_words = re.compile(r'[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*', re.I)  # IMPORTANT: this replaces word_regex
+newline_shortener = re.compile(r'\n\n*')
+check_if_char_word = re.compile(r'[A-Za-z0-9\177-\377]', re.I)
+chars_not_to_index = re.compile(r'\[\{\]\}', re.I)
+exclamation_question = re.compile(r'[\!\?]', re.I)
 
 # Entities regexes
 entity_regex = [
-    re.compile(r'(\&space;)', re.U | re.I),
-    re.compile(r'(\&mdash;)', re.U | re.I),
-    re.compile(r'(\&nbsp;)', re.U | re.I),
-    re.compile(r'(\&para;)', re.U | re.I),
-    re.compile(r'(\&sect;)', re.U | re.I),
-    re.compile(r'(\&ast;)', re.U | re.I),
-    re.compile(r'(\&commat;)', re.U | re.I),
-    re.compile(r'(\&ldquo;)', re.U | re.I),
-    re.compile(r'(\&laquo;)', re.U | re.I),
-    re.compile(r'(\&rdquo;)', re.U | re.I),
-    re.compile(r'(\&raquo;)', re.U | re.I),
-    re.compile(r'(\&lsquo;)', re.U | re.I),
-    re.compile(r'(\&rsquo;)', re.U | re.I),
-    re.compile(r'(\&quot;)', re.U | re.I),
-    re.compile(r'(\&sup[0-9]*;)', re.U | re.I),
-    re.compile(r'(\&mdash;)', re.U | re.I),
-    re.compile(r'(\&amp;)', re.U | re.I),
-    re.compile(r'(\&deg;)', re.U | re.I),
-    re.compile(r'(\&ndash;)', re.U | re.I),
-    re.compile(r'(\&copy;)', re.U | re.I),
-    re.compile(r'(\&gt;)', re.U | re.I),
-    re.compile(r'(\&lt;)', re.U | re.I),
-    re.compile(r'(\&frac[0-9]*;)', re.U | re.I),
-    re.compile(r'(\&pound;)', re.U | re.I),
-    re.compile(r'(\&colon;)', re.U | re.I),
-    re.compile(r'(\&hyphen;)', re.U | re.I),
-    re.compile(r'(\&dash;)', re.U | re.I),
-    re.compile(r'(\&excl;)', re.U | re.I),
-    re.compile(r'(\&dagger;)', re.U | re.I),
-    re.compile(r'(\&ddagger;)', re.U | re.I),
-    re.compile(r'(\&times;)', re.U | re.I),
-    re.compile(r'(\&blank;)', re.U | re.I),
-    re.compile(r'(\&dollar;)', re.U | re.I),
-    re.compile(r'(\&cent;)', re.U | re.I),
-    re.compile(r'(\&verbar;)', re.U | re.I),
-    re.compile(r'(\&quest;)', re.U | re.I),
-    re.compile(r'(\&hellip;)', re.U | re.I),
-    re.compile(r'(\&percnt;)', re.U | re.I),
-    re.compile(r'(\&middot;)', re.U | re.I),
-    re.compile(r'(\&plusmn;)', re.U | re.I),
-    re.compile(r'(\&sqrt;)', re.U | re.I),
-    re.compile(r'(\&sol;)', re.U | re.I),
-    re.compile(r'(\&sdash;)', re.U | re.I),
-    re.compile(r'(\&equals;)', re.U | re.I),
-    re.compile(r'(\&ornament;)', re.U | re.I),
-    re.compile(r'(\&rule;)', re.U | re.I),
-    re.compile(r'(\&prime;)', re.U | re.I),
-    re.compile(r'(\&rsqb;)', re.U | re.I),
-    re.compile(r'(\&lsqb;)', re.U | re.I),
-    re.compile(r'(\&punc;)', re.U | re.I),
-    re.compile(r'(\&cross;)', re.U | re.I),
-    re.compile(r'(\&diamond;)', re.U | re.I),
-    re.compile(r'(\&lpunctel;)', re.U | re.I),
-    re.compile(r'(\&lsemicol;)', re.U | re.I),
-    re.compile(r'(\&plus;)', re.U | re.I),
-    re.compile(r'(\&minus;)', re.U | re.I),
-    re.compile(r'(\&ounce;)', re.U | re.I),
-    re.compile(r'(\&rindx;)', re.U | re.I),
-    re.compile(r'(\&lindx;)', re.U | re.I),
-    re.compile(r'(\&leaf;)', re.U | re.I),
-    re.compile(r'(\&radic;)', re.U | re.I),
-    re.compile(r'(\&dram;)', re.U | re.I),
-    re.compile(r'(\&sun;)', re.U | re.I),
+    re.compile(r'(\&space;)', re.I),
+    re.compile(r'(\&mdash;)', re.I),
+    re.compile(r'(\&nbsp;)', re.I),
+    re.compile(r'(\&para;)', re.I),
+    re.compile(r'(\&sect;)', re.I),
+    re.compile(r'(\&ast;)', re.I),
+    re.compile(r'(\&commat;)', re.I),
+    re.compile(r'(\&ldquo;)', re.I),
+    re.compile(r'(\&laquo;)', re.I),
+    re.compile(r'(\&rdquo;)', re.I),
+    re.compile(r'(\&raquo;)', re.I),
+    re.compile(r'(\&lsquo;)', re.I),
+    re.compile(r'(\&rsquo;)', re.I),
+    re.compile(r'(\&quot;)', re.I),
+    re.compile(r'(\&sup[0-9]*;)', re.I),
+    re.compile(r'(\&mdash;)', re.I),
+    re.compile(r'(\&amp;)', re.I),
+    re.compile(r'(\&deg;)', re.I),
+    re.compile(r'(\&ndash;)', re.I),
+    re.compile(r'(\&copy;)', re.I),
+    re.compile(r'(\&gt;)', re.I),
+    re.compile(r'(\&lt;)', re.I),
+    re.compile(r'(\&frac[0-9]*;)', re.I),
+    re.compile(r'(\&pound;)', re.I),
+    re.compile(r'(\&colon;)', re.I),
+    re.compile(r'(\&hyphen;)', re.I),
+    re.compile(r'(\&dash;)', re.I),
+    re.compile(r'(\&excl;)', re.I),
+    re.compile(r'(\&dagger;)', re.I),
+    re.compile(r'(\&ddagger;)', re.I),
+    re.compile(r'(\&times;)', re.I),
+    re.compile(r'(\&blank;)', re.I),
+    re.compile(r'(\&dollar;)', re.I),
+    re.compile(r'(\&cent;)', re.I),
+    re.compile(r'(\&verbar;)', re.I),
+    re.compile(r'(\&quest;)', re.I),
+    re.compile(r'(\&hellip;)', re.I),
+    re.compile(r'(\&percnt;)', re.I),
+    re.compile(r'(\&middot;)', re.I),
+    re.compile(r'(\&plusmn;)', re.I),
+    re.compile(r'(\&sqrt;)', re.I),
+    re.compile(r'(\&sol;)', re.I),
+    re.compile(r'(\&sdash;)', re.I),
+    re.compile(r'(\&equals;)', re.I),
+    re.compile(r'(\&ornament;)', re.I),
+    re.compile(r'(\&rule;)', re.I),
+    re.compile(r'(\&prime;)', re.I),
+    re.compile(r'(\&rsqb;)', re.I),
+    re.compile(r'(\&lsqb;)', re.I),
+    re.compile(r'(\&punc;)', re.I),
+    re.compile(r'(\&cross;)', re.I),
+    re.compile(r'(\&diamond;)', re.I),
+    re.compile(r'(\&lpunctel;)', re.I),
+    re.compile(r'(\&lsemicol;)', re.I),
+    re.compile(r'(\&plus;)', re.I),
+    re.compile(r'(\&minus;)', re.I),
+    re.compile(r'(\&ounce;)', re.I),
+    re.compile(r'(\&rindx;)', re.I),
+    re.compile(r'(\&lindx;)', re.I),
+    re.compile(r'(\&leaf;)', re.I),
+    re.compile(r'(\&radic;)', re.I),
+    re.compile(r'(\&dram;)', re.I),
+    re.compile(r'(\&sun;)', re.I),
 ]
 
 if __name__ == "__main__":
@@ -534,9 +944,5 @@ if __name__ == "__main__":
         print >> sys.stderr, docid, fn
         size = os.path.getsize(fn)
         fh = open(fn)
-        parser = PlainTextParser(sys.stdout,
-                                 docid,
-                                 size,
-                                 token_regex=r"(\w+)|([\.\?\!])",
-                                 known_metadata={"filename": fn})
+        parser = XMLParser(sys.stdout, docid, size, token_regex=r"(\w+)|([\.\?\!])", known_metadata={"filename": fn})
         parser.parse(fh)
