@@ -7,7 +7,6 @@ from philologic import OHCOVector
 
 
 class XMLParser(object):
-
     def __init__(self,
                  output,
                  docid,
@@ -18,6 +17,7 @@ class XMLParser(object):
                  suppress_tags=[],
                  pseudo_empty_tags=[],
                  known_metadata=["doc", "div1", "div2", "div3", "para", "sent", "word"]):
+        self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
         self.parallel_type = "page"
         self.output = output
         self.docid = docid
@@ -77,9 +77,9 @@ class XMLParser(object):
         self.content = input.read()
         if div_tag.search(self.content):
             self.got_a_div = True
-        if para_tag(self.content):
+        if para_tag.search(self.content):
             self.got_a_para = True
-        self.content = self.cleanup_content()
+        self.cleanup_content()
 
         # Begin by creating a document level object, just call it "text" for now.
         self.v.push("doc", "text", 0)
@@ -103,7 +103,7 @@ class XMLParser(object):
 
             self.line_count += 1
 
-            if line.starswith('<'):
+            if line.startswith('<'):
                 self.bytes_read_in += len(line)
                 # TODO : implement DUMPXPATHS?
                 if self.in_the_text:
@@ -121,7 +121,6 @@ class XMLParser(object):
         self.content = self.content.replace('\r', ' ')
 
         # Join hyphens
-        # TODO : len() does not work as intented below
         self.content = join_hyphen_with_lb.sub(lambda match: "_" * len(match.group(1)), self.content)
         self.content = join_hyphen.sub(lambda match: "_" * len(match.group(1)), self.content)
 
@@ -145,7 +144,6 @@ class XMLParser(object):
 
     def tag_handler(self, tag):
         '''Tag handler for parser.'''
-
         byte_start = self.bytes_read_in - len(tag)
         tag_name = tag_matcher.findall(tag)[0]
 
@@ -375,7 +373,7 @@ class XMLParser(object):
                 self.context_div_level = 1
 
             div_level = div_num_tag.findall(tag)[0]
-            if not isinstance(int, div_level):
+            if not isinstance(div_level, int):
                 div_level = self.context_div_level
             elif div_level == "0" or int(div_level) > 3:
                 div_level = self.context_div_level
@@ -431,21 +429,21 @@ class XMLParser(object):
         """Close div3 objects."""
         if self.open_para:
             self.close_para(byte_end)
-        self.v.push("div3", byte_end)
+        self.v.pull("div3", byte_end)
         self.open_div3 = False
 
     def close_div2(self, byte_end):
         """Close div2 objects."""
         if self.open_div3:
             self.close_div3(byte_end)
-        self.v.push("div2", byte_end)
+        self.v.pull("div2", byte_end)
         self.open_div1 = False
 
     def close_div1(self, byte_end):
         """Close div1 objects."""
         if self.open_div2:
             self.close_div2(byte_end)
-        self.v.push("div1", byte_end)
+        self.v.pull("div1", byte_end)
         self.open_div1 = False
 
     def get_attributes(self, tag, object_type):
@@ -517,8 +515,9 @@ class XMLParser(object):
         # valid for including in words or, more likely, a list of VALID characters from a general table.
         if self.break_apost:
             text = apost_ent.sub(lambda match: "," + " " * len(match.group(1) - 1))
-        for regex in entity_regex:
-            text = regex.sub(lambda match: " " * len(match.group(1)))
+        ## TODO: not working....
+        # for regex in entity_regex:
+        #     text = regex.sub(lambda match: " " * len(match.group(1)))
         return text
 
     def latin1_ents_to_utf8(self, text):
@@ -528,7 +527,7 @@ class XMLParser(object):
         if self.flatten_ligatures:
             text = text.replace('&AElig;', '\xc3\x86')
             text = text.replace('&szlig;', '\xc3\x9F')
-            text = text.replace('&aelig;' '\xc3\xA6')
+            text = text.replace('&aelig;', '\xc3\xA6')
         text = text.replace('&Agrave;', '\xc3\x80')
         text = text.replace('&Aacute;', '\xc3\x81')
         text = text.replace('&Acirc;', '\xc3\x82')
@@ -697,9 +696,9 @@ class XMLParser(object):
         There should not be many of these."""
         text = text.replace('&apos;', "'")
         text = text.replace('&s;', 's')
-        text = macr_ent.sub('\1', text)
-        text = inverted_ent.sub('\1', text)
-        text = supp_ent.sub('\1', text)
+        text = macr_ent.sub(r'\1', text)
+        text = inverted_ent.sub(r'\1', text)
+        text = supp_ent.sub(r'\1', text)
         if self.flatten_ligatures:
             text = ligatures_ent.sub(r'\1', text)
         return text
@@ -716,7 +715,7 @@ class XMLParser(object):
         # We don't like many character entities, so let's change them
         # into spaces to get a clean break.
         if char_ents.search(words):
-            words = clear_char_ents(words)
+            words = self.clear_char_ents(words)
 
         # TODO: Now, we also know that there are Unicode characters which
         # we normally want to break words.  Often, these are Microsoft characters
@@ -730,17 +729,19 @@ class XMLParser(object):
 
         # we're splitting the line of words into distinct words
         # separated by "\n"
-        words = chars_in_words.sub('\n\1\n', words)
+        words = chars_in_words.sub(r'\n\1\n', words)
 
         if self.break_apost:
             words = words.replace("'", "'\n")
 
-        words = newline_shortener.sub('\n', words)
+        words = newline_shortener.sub(r'\n', words)
 
         current_pos = self.bytes_read_in
         count = 0
+        word_list = words.split('\n')
+        last_word = ""
         if self.in_the_text:
-            for word in words.split('\n'):
+            for word in word_list:
                 word_length = len(word)
                 count += 1
 
@@ -798,12 +799,35 @@ class XMLParser(object):
                     self.v.push("word", word, word_pos)
                     self.v.pull("word", current_pos)
                 elif not self.in_line_group and not self.in_tagged_sentence:
-                    if self.open_sent:
-                        self.close_sent(current_pos)
-
-                    # TODO: Always break on ! and ?
+                    # Always break on ! and ?
+                    # TODO: why test if word > 2 in p3?
                     if exclamation_question.search(word):
-                        self.v.push('sent', word, current_pos - len(word))
+                        if self.open_sent:
+                            self.close_sent(current_pos)
+                        self.v.push('sent', word, current_pos)
+
+                    # Periods are messy. Let's try by length of previous word and
+                    # capital letters to avoid hitting abbreviations.
+                    elif period.search(word):
+                        is_sent = True
+                        if len(last_word.decode('utf8')) < 3:
+                            if cap_char_or_num.search(last_word):
+                                is_sent = False
+
+                        # Periods in numbers don't break sentences.
+                        try:
+                            next_word = word_list[count + 1]
+                            if lower_char_or_num.search(next_word):
+                                is_sent = False
+                        except IndexError:
+                            pass
+
+                        if is_sent:
+                            if self.open_sent:
+                                self.close_sent(current_pos)
+                            self.v.push("sent", word, current_pos)
+
+
 
 
 
@@ -852,7 +876,7 @@ closed_sentence_tag = re.compile(r'</s\W', re.I)
 front_tag = re.compile(r'<front\W', re.I)
 closed_front_tag = re.compile(r'</front\W', re.I)
 attrib_matcher = re.compile(r'''(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?''', re.I)
-tag_matcher = re.compile(r'<(\w+)[^>]*>', re.I)
+tag_matcher = re.compile(r'<(\/?\w+)[^>]*>', re.I)
 head_self_close_tag = re.compile(r'<head\/>', re.I)
 closed_div_tag = re.compile(r'<\/div', re.I)
 head_tag = re.compile(r'<head', re.I)
@@ -866,11 +890,14 @@ type_attrib = re.compile(r'type="([^"]*)"', re.I)
 hyper_div_tag = re.compile(r'<hyperdiv\W', re.I)
 div_num_tag = re.compile(r'<div(.)', re.I)
 char_ents = re.compile(r'\&[a-zA-Z0-9\#][a-zA-Z0-9]*;', re.I)
-chars_in_words = re.compile(r'[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*', re.I)  # IMPORTANT: this replaces word_regex
+chars_in_words = re.compile(r'([\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*)', re.I)  # IMPORTANT: this replaces word_regex
 newline_shortener = re.compile(r'\n\n*')
 check_if_char_word = re.compile(r'[A-Za-z0-9\177-\377]', re.I)
 chars_not_to_index = re.compile(r'\[\{\]\}', re.I)
-exclamation_question = re.compile(r'[\!\?]', re.I)
+exclamation_question = re.compile(r'[\!\?]')
+period = re.compile(r'\.')
+cap_char_or_num = re.compile(r'[A-Z0-9]')  # Capitals
+lower_char_or_num = re.compile(r'^[a-z0-9]', re.I)
 
 # Entities regexes
 entity_regex = [
