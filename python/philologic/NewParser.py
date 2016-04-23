@@ -522,19 +522,19 @@ class XMLParser(object):
 
                     # Always break on ! and ?
                     # TODO: why test if word > 2 in p3?
-                    if exclamation_question.search(word):
+                    if "!" in word or "?" in word:
                         is_sent = True
 
                     # Periods are messy. Let's try by length of previous word and
                     # capital letters to avoid hitting abbreviations.
-                    elif period.search(word):
+                    elif '.' in word:
                         is_sent = True
                         if len(last_word.decode('utf8')) < 3:
                             if cap_char_or_num.search(last_word):
                                 is_sent = False
 
                         # Periods in numbers don't break sentences.
-                        if lower_char_or_num.search(next_word):
+                        if next_word.islower() or next_word.isdigit():
                             is_sent = False
 
                     if is_sent:
@@ -900,10 +900,7 @@ chars_in_words = re.compile(r'([\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]
 newline_shortener = re.compile(r'\n\n*')
 check_if_char_word = re.compile(r'[A-Za-z0-9\177-\377]', re.I)
 chars_not_to_index = re.compile(r'\[\{\]\}', re.I)
-exclamation_question = re.compile(r'[\!\?]')
-period = re.compile(r'\.')
 cap_char_or_num = re.compile(r'[A-Z0-9]')  # Capitals
-lower_char_or_num = re.compile(r'^[a-z0-9]')
 
 # Entities regexes
 entity_regex = [
