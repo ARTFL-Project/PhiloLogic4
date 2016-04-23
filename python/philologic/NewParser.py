@@ -414,6 +414,139 @@ class XMLParser(object):
 
             # TODO: unclear if we need to add EEBO hack when no subdiv objects...
 
+    def word_handler(self, words):
+        """Word handler. It takes an artbitrary string or words between two tags and
+        splits them into words.
+        It also identifies sentence breaks.  I am not checking for existing sentence
+        tags, but could and conditionalize it. Also note that it does not check for
+        sentences inside of linegroups ... which are typically broken on lines.
+        I am not currently handling ";" at the end of words because of confusion with
+        character ents. Easily fixed."""
+
+        # We don't like many character entities, so let's change them
+        # into spaces to get a clean break.
+        if char_ents.search(words):
+            words = self.clear_char_ents(words)
+
+        # TODO: Now, we also know that there are Unicode characters which
+        # we normally want to break words.  Often, these are Microsoft characters
+        # like the curly quotes. These are set in textload.cfg
+        # in @UnicodeWordBreakers.
+
+        # TODO: Now, here's something you did not think of: Brown WWP: M&sup-r;
+        # You are going to split words, on hyphens just below.  That would
+        # be a mess.  So a little exception handler which we will convert
+        # to the supp(.) for indexing.
+
+        # we're splitting the line of words into distinct words
+        # separated by "\n"
+        words = chars_in_words.sub(r'\n\1\n', words)
+
+        if self.break_apost:
+            words = words.replace("'", "'\n")
+
+        words = newline_shortener.sub(r'\n', words)
+
+        current_pos = self.bytes_read_in
+        count = 0
+        word_list = words.split('\n')
+        last_word = ""
+        next_word = ""
+        if self.in_the_text:
+            for word in word_list:
+                # print word, current_pos - len(word)
+                word_length = len(word)
+                try:
+                    next_word = word_list[count + 1]
+                except IndexError:
+                    pass
+                count += 1
+
+                # Keep track of your bytes since this is where you are getting
+                # the byte offsets for words.
+                current_pos += word_length
+
+                # Do we have a word? At least one of these characters.
+                if check_if_char_word.search(word):
+                    last_word = word
+                    word_pos = current_pos - len(word)
+
+                    # Set your byte position now, since you will be modifying the
+                    # word you are sending to the index after this.
+                    byte_start = word_pos
+
+                    if "&" in word:
+                        # Convert ents to utf-8
+                        word = self.latin1_ents_to_utf8(word)
+                        # Convert other ents to things....
+                        word = self.convert_other_ents(word)
+
+                    # You may have some semi-colons...
+                    if word[-1] == ";":
+                        if "&" in word:
+                            pass  # TODO
+                        else:
+                            word = word[:-1]
+
+                    # Get rid of certain characters that don't break words, but don't index.
+                    # These are defined in a compiled regex below: chars_not_to_index
+                    word = chars_not_to_index.sub('', word)
+
+                    # TODO: Call a function to distinguish between words beginning with an
+                    # upper case and lower case character.  This USED to be a proper
+                    # name split in ARTFL, but we don't see many databases with proper
+                    # names tagged.
+
+                    # Switch everything to lower case
+                    word = word.decode('utf8', 'ignore').lower().encode('utf8')
+
+                    # TODO: If you have tag exemptions and you have some of the replacement
+                    # characters "_", then delete them from the index entry.  I've put
+                    # in both options, just in case.  I'm on the fence about this at the
+                    # moment since I have "_" in characters to match above.
+
+                    # Check to see if the word is longer than we want.  More than 235
+                    # characters appear to cause problems in the indexer.
+                    # TODO: make this limit configurable?
+                    if len(word) > 235:
+                        print >> sys.stderr, "Long word: %s" % word
+                        print >> sys.stderr, "Truncating for index..."
+                        word = word[:235]
+
+                    self.v.push("word", word.strip(), word_pos)
+                    self.v.pull("word", current_pos)
+
+                # Sentence break handler
+                elif not self.in_line_group and not self.in_tagged_sentence:
+                    is_sent = False
+
+                    # Always break on ! and ?
+                    # TODO: why test if word > 2 in p3?
+                    if exclamation_question.search(word):
+                        is_sent = True
+
+                    # Periods are messy. Let's try by length of previous word and
+                    # capital letters to avoid hitting abbreviations.
+                    elif period.search(word):
+                        is_sent = True
+                        if len(last_word.decode('utf8')) < 3:
+                            if cap_char_or_num.search(last_word):
+                                is_sent = False
+
+                        # Periods in numbers don't break sentences.
+                        if lower_char_or_num.search(next_word):
+                            is_sent = False
+
+                    if is_sent:
+                        # a little hack--we don't know the punctuation mark that will end a sentence
+                        # until we encounter it--so instead, we let the push on "word" create a
+                        # implicit philo_virtual sentence, then change its name once we actually encounter
+                        # the punctuation token.
+                        if "sent" not in self.v:
+                            self.v.push("sent", word, current_pos)
+                        self.v["sent"].name = word.strip()
+                        self.v.pull("sent", current_pos + len(word))
+
     def close_sent(self, byte_end):
         """Close sentence objects."""
         self.v.pull("sent", byte_end)
@@ -703,149 +836,6 @@ class XMLParser(object):
             text = ligatures_ent.sub(r'\1', text)
         return text
 
-    def word_handler(self, words):
-        """Word handler. It takes an artbitrary string or words between two tags and
-        splits them into words.
-        It also identifies sentence breaks.  I am not checking for existing sentence
-        tags, but could and conditionalize it. Also note that it does not check for
-        sentences inside of linegroups ... which are typically broken on lines.
-        I am not currently handling ";" at the end of words because of confusion with
-        character ents. Easily fixed."""
-
-        # We don't like many character entities, so let's change them
-        # into spaces to get a clean break.
-        if char_ents.search(words):
-            words = self.clear_char_ents(words)
-
-        # TODO: Now, we also know that there are Unicode characters which
-        # we normally want to break words.  Often, these are Microsoft characters
-        # like the curly quotes. These are set in textload.cfg
-        # in @UnicodeWordBreakers.
-
-        # TODO: Now, here's something you did not think of: Brown WWP: M&sup-r;
-        # You are going to split words, on hyphens just below.  That would
-        # be a mess.  So a little exception handler which we will convert
-        # to the supp(.) for indexing.
-
-        # we're splitting the line of words into distinct words
-        # separated by "\n"
-        words = chars_in_words.sub(r'\n\1\n', words)
-
-        if self.break_apost:
-            words = words.replace("'", "'\n")
-
-        words = newline_shortener.sub(r'\n', words)
-
-        current_pos = self.bytes_read_in
-        count = 0
-        word_list = words.split('\n')
-        last_word = ""
-        if self.in_the_text:
-            for word in word_list:
-                # print word, current_pos - len(word)
-                word_length = len(word)
-                count += 1
-
-                # Keep track of your bytes since this is where you are getting
-                # the byte offsets for words.
-                current_pos += word_length
-
-                # Do we have a word? At least one of these characters.
-                if check_if_char_word.search(word):
-                    last_word = word
-                    word_pos = current_pos - len(word)
-
-                    # Set your byte position now, since you will be modifying the
-                    # word you are sending to the index after this.
-                    byte_start = word_pos
-
-                    if "&" in word:
-                        # Convert ents to utf-8
-                        word = self.latin1_ents_to_utf8(word)
-                        # Convert other ents to things....
-                        word = self.convert_other_ents(word)
-
-                    # You may have some semi-colons...
-                    if word[-1] == ";":
-                        if "&" in word:
-                            pass  # TODO
-                        else:
-                            word = word[:-1]
-
-                    # Get rid of certain characters that don't break words, but don't index.
-                    # These are defined in a compiled regex below: chars_not_to_index
-                    word = chars_not_to_index.sub('', word)
-
-                    # TODO: Call a function to distinguish between words beginning with an
-                    # upper case and lower case character.  This USED to be a proper
-                    # name split in ARTFL, but we don't see many databases with proper
-                    # names tagged.
-
-                    # Switch everything to lower case
-                    word = word.decode('utf8', 'ignore').lower().encode('utf8')
-
-                    # TODO: If you have tag exemptions and you have some of the replacement
-                    # characters "_", then delete them from the index entry.  I've put
-                    # in both options, just in case.  I'm on the fence about this at the
-                    # moment since I have "_" in characters to match above.
-
-                    # Check to see if the word is longer than we want.  More than 235
-                    # characters appear to cause problems in the indexer.
-                    # TODO: make this limit configurable?
-                    if len(word) > 235:
-                        print >> sys.stderr, "Long word: %s" % word
-                        print >> sys.stderr, "Truncating for index..."
-                        word = word[:235]
-
-                    self.v.push("word", word, word_pos)
-                    self.v.pull("word", current_pos)
-                elif not self.in_line_group and not self.in_tagged_sentence:
-                    # Always break on ! and ?
-                    # TODO: why test if word > 2 in p3?
-                    if exclamation_question.search(word):
-                        # if self.open_sent:
-                        #     self.close_sent(current_pos)
-                        # a little hack--we don't know the punctuation mark that will end a sentence
-                        # until we encounter it--so instead, we let the push on "word" create a
-                        # implicit philo_virtual sentence, then change its name once we actually encounter
-                        # the punctuation token.
-                        if "sent" not in self.v:
-                            self.v.push("sent", token, current_pos)
-                        self.v["sent"].name = word
-                        self.v.pull("sent", current_pos + len(word))
-
-                    # Periods are messy. Let's try by length of previous word and
-                    # capital letters to avoid hitting abbreviations.
-                    elif period.search(word):
-                        is_sent = True
-                        if len(last_word.decode('utf8')) < 3:
-                            if cap_char_or_num.search(last_word):
-                                is_sent = False
-
-                        # Periods in numbers don't break sentences.
-                        try:
-                            next_word = word_list[count + 1]
-                            if lower_char_or_num.search(next_word):
-                                is_sent = False
-                        except IndexError:
-                            pass
-
-                        if is_sent:
-                            # if self.open_sent:
-                            #     self.close_sent(current_pos)
-                            # a little hack--we don't know the punctuation mark that will end a sentence
-                            # until we encounter it--so instead, we let the push on "word" create a
-                            # implicit philo_virtual sentence, then change its name once we actually encounter
-                            # the punctuation token.
-                            if "sent" not in self.v:
-                                self.v.push("sent", word, current_pos)
-                            self.v["sent"].name = word
-                            self.v.pull("sent", current_pos + len(word))
-
-
-
-
-
 # Pre-compiled regexes used for parsing
 join_hyphen_with_lb = re.compile(r'(\&shy;[\n \t]*<lb\/>)', re.I | re.M)
 join_hyphen = re.compile(r'(\&shy;[\n \t]*)', re.I | re.M)
@@ -905,14 +895,15 @@ type_attrib = re.compile(r'type="([^"]*)"', re.I)
 hyper_div_tag = re.compile(r'<hyperdiv\W', re.I)
 div_num_tag = re.compile(r'<div(.)', re.I)
 char_ents = re.compile(r'\&[a-zA-Z0-9\#][a-zA-Z0-9]*;', re.I)
-chars_in_words = re.compile(r'([\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*)', re.I)  # IMPORTANT: this replaces word_regex
+chars_in_words = re.compile(r'([\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*)', re.I
+                            )  # IMPORTANT: this replaces word_regex
 newline_shortener = re.compile(r'\n\n*')
 check_if_char_word = re.compile(r'[A-Za-z0-9\177-\377]', re.I)
 chars_not_to_index = re.compile(r'\[\{\]\}', re.I)
 exclamation_question = re.compile(r'[\!\?]')
 period = re.compile(r'\.')
 cap_char_or_num = re.compile(r'[A-Z0-9]')  # Capitals
-lower_char_or_num = re.compile(r'^[a-z0-9]', re.I)
+lower_char_or_num = re.compile(r'^[a-z0-9]')
 
 # Entities regexes
 entity_regex = [
