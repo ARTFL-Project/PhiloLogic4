@@ -43,7 +43,7 @@ class XMLParser(object):
         self.get_multiple_div_heads = 1  # TODO: remove??
 
         # Set to 1 to break words on apostrophe.  Probably True for French.
-        self.break_apost = False
+        self.break_apost = True
 
         # Convert SGML ligatures to base characters for indexing.
         # &oelig; = oe.
@@ -147,6 +147,7 @@ class XMLParser(object):
         byte_start = self.bytes_read_in - len(tag)
         tag_name = tag_matcher.findall(tag)[0]
 
+        # print tag_name, byte_start
         # Handle <q> tags
         if text_tag.search(tag) and self.in_text_quote:
             self.in_quote_text_tag = True
@@ -268,7 +269,7 @@ class XMLParser(object):
             if self.open_page:
                 self.v.pull("page", self.bytes_read_in)
                 self.open_page = False
-            self.v.pull("page", tag_name, byte_start)
+            self.v.push("page", tag_name, byte_start)
             n_attrib = n_attribute.search(tag)
             if n_attrib:
                 n = n_attrib.group()[0]
@@ -322,7 +323,7 @@ class XMLParser(object):
             if self.open_div1:
                 self.close_div1(byte_start)
             self.in_front_matter = True
-            self.v.push("div1", tag_name, byte_start)
+            self.v.push("div1", "front", byte_start)
             self.get_attributes(tag, "div1")
             self.context_div_level = 1
             self.open_div1 = True
@@ -363,7 +364,7 @@ class XMLParser(object):
         if closed_div_tag.search(tag):
             self.context_div_level = self.context_div_level - 1
             self.no_deeper_objects = False
-        if "<div" in tag:
+        if tag.startswith('<div'):
             self.context_div_level += 1
             if self.context_div_level > 3:
                 if self.open_div3:
@@ -373,7 +374,7 @@ class XMLParser(object):
                 self.context_div_level = 1
 
             div_level = div_num_tag.findall(tag)[0]
-            if not isinstance(div_level, int):
+            if not div_level.isdigit():
                 div_level = self.context_div_level
             elif div_level == "0" or int(div_level) > 3:
                 div_level = self.context_div_level
@@ -514,10 +515,9 @@ class XMLParser(object):
         # We would want to read a list of character ents that should NOT be considered
         # valid for including in words or, more likely, a list of VALID characters from a general table.
         if self.break_apost:
-            text = apost_ent.sub(lambda match: "," + " " * len(match.group(1) - 1))
-        ## TODO: not working....
-        # for regex in entity_regex:
-        #     text = regex.sub(lambda match: " " * len(match.group(1)))
+            text = apost_ent.sub(lambda match: "," + " " * len(match.group(1) - 1), text)
+        for regex in entity_regex:
+            text = regex.sub(lambda match: " " * len(match.group(1)), text)
         return text
 
     def latin1_ents_to_utf8(self, text):
@@ -742,6 +742,7 @@ class XMLParser(object):
         last_word = ""
         if self.in_the_text:
             for word in word_list:
+                # print word, current_pos - len(word)
                 word_length = len(word)
                 count += 1
 
@@ -802,9 +803,16 @@ class XMLParser(object):
                     # Always break on ! and ?
                     # TODO: why test if word > 2 in p3?
                     if exclamation_question.search(word):
-                        if self.open_sent:
-                            self.close_sent(current_pos)
-                        self.v.push('sent', word, current_pos)
+                        # if self.open_sent:
+                        #     self.close_sent(current_pos)
+                        # a little hack--we don't know the punctuation mark that will end a sentence
+                        # until we encounter it--so instead, we let the push on "word" create a
+                        # implicit philo_virtual sentence, then change its name once we actually encounter
+                        # the punctuation token.
+                        if "sent" not in self.v:
+                            self.v.push("sent", token, current_pos)
+                        self.v["sent"].name = word
+                        self.v.pull("sent", current_pos + len(word))
 
                     # Periods are messy. Let's try by length of previous word and
                     # capital letters to avoid hitting abbreviations.
@@ -823,9 +831,16 @@ class XMLParser(object):
                             pass
 
                         if is_sent:
-                            if self.open_sent:
-                                self.close_sent(current_pos)
-                            self.v.push("sent", word, current_pos)
+                            # if self.open_sent:
+                            #     self.close_sent(current_pos)
+                            # a little hack--we don't know the punctuation mark that will end a sentence
+                            # until we encounter it--so instead, we let the push on "word" create a
+                            # implicit philo_virtual sentence, then change its name once we actually encounter
+                            # the punctuation token.
+                            if "sent" not in self.v:
+                                self.v.push("sent", word, current_pos)
+                            self.v["sent"].name = word
+                            self.v.pull("sent", current_pos + len(word))
 
 
 
