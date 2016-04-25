@@ -112,12 +112,14 @@ class Loader(object):
                 break
             else:
                 header = header + line
-        tree = etree.fromstring(header)
+        parser = etree.XMLParser(recover=True)
+        tree = etree.fromstring(header, parser)
         return tree
 
     def pre_parse_whole_file(self, fn):
         fh = open(fn)
-        tree = etree.fromstring(fh.read())
+        parser = etree.XMLParser(recover=True)
+        tree = etree.fromstring(fh.read(), parser)
         # Remove namespace
         for el in tree.iter():
             try:

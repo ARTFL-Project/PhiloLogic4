@@ -40,7 +40,7 @@
         vm.getContent = function(browseType, range) {
             vm.query = {
                 browseType: browseType,
-                range: range
+                query: range
             };
         }
 

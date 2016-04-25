@@ -39,10 +39,11 @@
                 for (var i=0; i < scope.defaultLandingPageBrowsing.length; i+=1) {
                     if (typeof($rootScope.philoConfig.default_landing_page_browsing.splitRanges[i]) === 'undefined') {
                         var browseType = scope.defaultLandingPageBrowsing[i];
-                        scope.defaultLandingPageBrowsing[i].ranges = createRanges(browseType.ranges, 5);
-                        $rootScope.philoConfig.default_landing_page_browsing.splitRanges[i] = scope.defaultLandingPageBrowsing[i].ranges
+                        scope.defaultLandingPageBrowsing[i].queries = createRanges(browseType.queries, 5);
+                        console.log(scope.defaultLandingPageBrowsing[i].queries)
+                        $rootScope.philoConfig.default_landing_page_browsing.splitRanges[i] = scope.defaultLandingPageBrowsing[i].queries
                     } else {
-                        scope.defaultLandingPageBrowsing[i].ranges = $rootScope.philoConfig.default_landing_page_browsing.splitRanges[i];
+                        scope.defaultLandingPageBrowsing[i].queries = $rootScope.philoConfig.default_landing_page_browsing.splitRanges[i];
                     }
                 }
             }
@@ -97,34 +98,14 @@
             request.script({
                     script: 'get_landing_page_content.py',
                     group_by_field: query.browseType.group_by_field,
-                    metadata_display: query.browseType.metadata_display,
                     display_count: query.browseType.display_count,
-                    range: query.range
+                    is_range: query.browseType.is_range,
+                    query: query.query
                 })
                 .then(function(response) {
-                    scope.resultGroups = [];
+                    scope.resultGroups = response.data.content;
                     scope.displayCount = response.data.display_count;
                     scope.contentType = response.data.content_type;
-                    var content = response.data.content;
-                    var resultGroups = [];
-                    var results = [];
-                    var oldPrefix = "";
-                    for (var i = 0; i < content.length; i++) {
-                        var prefix = content[i].initial;
-                        if (prefix !== oldPrefix && oldPrefix !== '') {
-                            scope.resultGroups.push({
-                                prefix: oldPrefix,
-                                results: results
-                            });
-                            results = [];
-                        }
-                        results.push(content[i])
-                        oldPrefix = prefix;
-                    }
-                    scope.resultGroups.push({
-                        prefix: prefix,
-                        results: results
-                    });
                     scope.loadingContent = false;
                 })
                 .catch(function(response) {
@@ -145,7 +126,7 @@
                 if (!$.isEmptyObject(scope.philoConfig.default_landing_page_display)) {
                     var query = {
                         browseType: scope.philoConfig.default_landing_page_display,
-                        range: scope.philoConfig.default_landing_page_display.range
+                        range: scope.philoConfig.default_landing_page_display.queries
                     }
                     getContent(scope, query);
                 }

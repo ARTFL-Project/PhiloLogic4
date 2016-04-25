@@ -6,7 +6,8 @@ import sys
 from glob import glob
 from optparse import OptionParser
 
-from philologic import Loader, LoadFilters, Parser, PostFilters
+from philologic import Loader, LoadFilters, Parser, PostFilters, NewParser
+
 
 # Load global config
 config_file = imp.load_source("philologic4", "/etc/philologic/philologic4.cfg")
@@ -133,6 +134,9 @@ class LoadOptions(object):
                     for config_key, config_value in load_config.config.iteritems():
                         if config_value:
                             self.values[config_key] = config_value
+                elif a == "parser_factory":
+                    if value == "NewParser":
+                        self.values["parser_factory"] = NewParser.XMLParser
                 else:
                     if value is not None:
                         self.values[a] = value

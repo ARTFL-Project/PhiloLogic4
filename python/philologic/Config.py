@@ -178,20 +178,20 @@ web_config_defaults = {
     'default_landing_page_browsing': {
         'value': [{"label": "Author",
                  "group_by_field": "author",
-                 "metadata_display": "author",
                  "display_count": True,
-                 "ranges": ["A-D", "E-I", "J-M", "N-R", "S-Z"]
+                 "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
+                 "is_range": True
                 },
                 {"label": "Title",
                  "group_by_field": "title",
-                 "metadata_display": "title",
                  "display_count": False,
-                 "ranges": ["A-D", "E-I", "J-M", "N-R", "S-Z"]
+                 "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
+                 "is_range": True
                 }],
         'comment': '''
-               # The landing_page_browsing variable defines which browsing functions are exposed in the landing page.
+               # The landing_page_browsing variable allows for configuration of navigation by metadata within the landing page.
                # You can choose any document-level metadata (such as author, title, date, genre...) for browsing
-               # and you can even choose a different metadata field to display in your results.
+               # and define two different types of queries to group your data: ranges and exact matches, i.e. "A-D" or "Comedy".
                # The prepopulated defaults should serve as a guide.''',
         'index': 16
     },
@@ -373,6 +373,8 @@ def MakeWebConfig(path, **extra_values):
     web_config = Config(path, web_config_defaults, header=web_config_header)
     if extra_values:
         for key, value in extra_values.iteritems():
+            if isinstance(key, unicode):
+                key = str(key)
             web_config[key] = value
     return web_config
 
@@ -381,6 +383,8 @@ def MakeDBConfig(path, **extra_values):
     db_config = Config(path, db_locals_defaults, header=db_locals_header)
     if extra_values:
         for key, value in extra_values.iteritems():
+            if isinstance(key, unicode):
+                key = str(key)
             db_config[key] = value
     return db_config
 

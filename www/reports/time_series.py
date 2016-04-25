@@ -68,7 +68,7 @@ def generate_time_series(config, q, db):
 
 def get_start_end_date(db, start_date=None, end_date=None):
     c = db.dbh.cursor()
-    c.execute('select date from toms where philo_type="doc"')
+    c.execute('select date from toms where date is not null')
     dates = []
     for i in c.fetchall():
         try:

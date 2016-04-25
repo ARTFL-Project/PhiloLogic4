@@ -4,16 +4,14 @@
             <h4>{{ ::group.prefix }}</h4>
             <li class="{{ ::contentClass }}" ng-repeat="result in ::group.results">
                     <a href="{{ ::result.url }}">
-                        <span ng-if="contentType == 'title' || contentType == 'date'">
-                            <i>{{ ::result.title }}</i>
+                        <span ng-if="contentType !='author'">
+                            <i>{{ ::result.metadata.title }}</i>
+                            &nbsp;&nbsp;<b>&#124;&#124;</b>&nbsp;&nbsp;{{ ::result.metadata.author }}
                         </span>
-                        <span ng-if="contentType != 'title' && contentType != 'date'">
-                            {{ ::result.metadata_display }}
+                        <span ng-if="contentType == 'author'">
+                            {{ ::result.metadata.author }}
                         </span>
                     </a>
-                    <span ng-if="contentType != 'author'">
-                        &nbsp;&nbsp;<b>&#124;&#124;</b>&nbsp;&nbsp;{{ ::result.author }}
-                    </span>
                     <span ng-if="displayCount ==  'true'">
                         &nbsp;({{ ::result.count }})
                     </span>

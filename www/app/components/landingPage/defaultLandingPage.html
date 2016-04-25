@@ -7,7 +7,7 @@
                 </div>
                 <div class="panel-body">
                     <table class="table table-bordered range-selectors" data-type="author">
-                        <tr ng-repeat="ranges in ::browseType.ranges">
+                        <tr ng-repeat="ranges in ::browseType.queries">
                             <td ng-repeat="range in ::ranges" ng-click="lp.getContent(browseType, range)">{{ ::range }}</td>
                         </tr>
                     </table>
