@@ -145,7 +145,10 @@ class XMLParser(object):
     def tag_handler(self, tag):
         '''Tag handler for parser.'''
         byte_start = self.bytes_read_in - len(tag)
-        tag_name = tag_matcher.findall(tag)[0]
+        try:
+            tag_name = tag_matcher.findall(tag)[0]
+        except IndexError:
+            tag_name = "unparsable_tag"
 
         # print tag_name, byte_start
         # Handle <q> tags
@@ -881,7 +884,7 @@ closed_sentence_tag = re.compile(r'</s\W', re.I)
 front_tag = re.compile(r'<front\W', re.I)
 closed_front_tag = re.compile(r'</front\W', re.I)
 attrib_matcher = re.compile(r'''(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?''', re.I)
-tag_matcher = re.compile(r'<(\/?\w+)[^>]*>', re.I)
+tag_matcher = re.compile(r'<(\/?\w+)[^>]*>?', re.I)
 head_self_close_tag = re.compile(r'<head\/>', re.I)
 closed_div_tag = re.compile(r'<\/div', re.I)
 head_tag = re.compile(r'<head', re.I)
