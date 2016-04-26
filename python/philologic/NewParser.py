@@ -651,9 +651,15 @@ class XMLParser(object):
         # We would want to read a list of character ents that should NOT be considered
         # valid for including in words or, more likely, a list of VALID characters from a general table.
         if self.break_apost:
-            text = apost_ent.sub(lambda match: "," + " " * len(match.group(1) - 1), text)
+            try:
+                text = apost_ent.sub(lambda match: "," + " " * len(match.group(1) - 1), text)
+            except IndexError:
+                pass
         for regex in entity_regex:
-            text = regex.sub(lambda match: " " * len(match.group(1)), text)
+            try:
+                text = regex.sub(lambda match: " " * len(match.group(1)), text)
+            except IndexError:
+                pass
         return text
 
     def latin1_ents_to_utf8(self, text):
