@@ -546,8 +546,8 @@ class XMLParser(object):
                         # implicit philo_virtual sentence, then change its name once we actually encounter
                         # the punctuation token.
                         if "sent" not in self.v:
-                            self.v.push("sent", word, current_pos)
-                        self.v["sent"].name = word.strip()
+                            self.v.push("sent", ".", current_pos)
+                        self.v["sent"].name = "."  # TODO: evaluate if this is right: avoid unwanted chars such tabs in ASP
                         self.v.pull("sent", current_pos + len(word))
 
     def close_sent(self, byte_end):
