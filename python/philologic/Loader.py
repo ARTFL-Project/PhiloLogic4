@@ -95,9 +95,9 @@ class Loader(object):
     def list_files(self):
         return os.listdir(self.textdir)
 
-    def parse_bibliography_file(self, sort_by_field):
+    def parse_bibliography_file(self, bibliography_file, sort_by_field, reverse_sort=True):
         load_metadata = []
-        with open(self.bibliography) as input_file:
+        with open(bibliography_file) as input_file:
             metadata_fields = input_file.readline().split("\t")
             for line in input_file:
                 file_metadata = {}
@@ -106,6 +106,7 @@ class Loader(object):
                     file_metadata[field] = values[pos]
                 load_metadata.append(file_metadata)
         print "Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]),
+
         def make_sort_key(d):
             key = [d.get(f, "") for f in sort_by_field]
             return key
@@ -153,7 +154,7 @@ class Loader(object):
         for f in self.list_files():
             data = {"filename": f}
             fn = self.textdir + f
-            if whole_file == True:
+            if whole_file is True:
                 tree = self.pre_parse_whole_file(fn)
             else:
                 tree = self.pre_parse_header(fn)
@@ -204,7 +205,7 @@ class Loader(object):
                 metadata_value = metadata_value.decode('utf-8', 'ignore').lower()
                 metadata_name = metadata_name.decode('utf-8', 'ignore').lower()
                 data[metadata_name] = metadata_value
-            data["filename"] = filename  ## place at the end in case the value was in the header
+            data["filename"] = filename  # place at the end in case the value was in the header
             load_metadata.append(data)
         return load_metadata
 
@@ -219,6 +220,7 @@ class Loader(object):
         print "done."
 
         print "Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]),
+
         def make_sort_key(d):
             key = [d.get(f, "") for f in sort_by_field]
             return key

@@ -55,7 +55,7 @@ class LoadOptions(object):
         self.values["debug"] = False
         self.values["force_delete"] = False
         self.values["file_list"] = False
-        self.values["bibliography"] = []
+        self.values["bibliography"] = ""
 
     def setup_parser(self):
         usage = "usage: %prog [options] database_name files"

@@ -18,7 +18,8 @@ if __name__ == '__main__':
     l = Loader(**load_options.values)
     l.add_files(load_options.files)
     if load_options.bibliography:
-        load_metadata = self.parse_bibliography_file(load_options.sort_order)
+        load_metadata = l.parse_bibliography_file(load_options.bibliography, load_options.sort_order)
+        print load_metadata
     else:
         load_metadata = l.parse_metadata(load_options.sort_order, header=load_options.header)
     l.parse_files(load_options.cores, load_metadata)
