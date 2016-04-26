@@ -6,6 +6,7 @@ import unicodedata
 import gzip
 import io
 from collections import defaultdict
+from simplejson import loads
 
 
 def make_sql_table(table,
@@ -24,37 +25,30 @@ def make_sql_table(table,
         columns = 'philo_type,philo_name,philo_id,philo_seq'
         query = 'create table if not exists %s (%s)' % (table, columns)
         c.execute(query)
-        sequence = 0
         if gz:
             file_in_handle = io.BufferedReader(gzip.open(file_in, "rb"))
         else:
             file_in_handle = open(file_in)
-        for line in file_in_handle:
-            philo_type, philo_name, id, attrib = line.split("\t", 3)
-            fields = id.split(" ", 8)
-            if len(fields) == 9:
-                row = {}
-                philo_id = " ".join(fields[:depth])
-                row["philo_type"] = philo_type
-                row["philo_name"] = philo_name
-                row["philo_id"] = philo_id
-                row["philo_seq"] = sequence
-                row.update(eval(attrib))
-                columns = "(%s)" % ",".join([i for i in row])
-                insert = "INSERT INTO %s %s values (%s);" % (
-                    table, columns, ",".join(["?" for i in row]))
-                values = [v for k, v in row.items()]
-                try:
-                    c.execute(insert, values)
-                except sqlite3.OperationalError:
-                    c.execute("PRAGMA table_info(%s)" % table)
-                    column_list = [i[1] for i in c.fetchall()]
-                    for column in row:
-                        if column not in column_list:
-                            c.execute("ALTER TABLE %s ADD COLUMN %s;" %
-                                      (table, column))
-                    c.execute(insert, values)
-                sequence += 1
+        with file_in_handle:
+            for sequence, line in enumerate(file_in_handle):
+                philo_type, philo_name, id, attrib = line.split("\t", 3)
+                fields = id.split(None, 8)
+                if len(fields) == 9:
+                    row = loads(attrib)
+                    row["philo_type"] = philo_type
+                    row["philo_name"] = philo_name
+                    row["philo_id"] = " ".join(fields[:depth])
+                    row["philo_seq"] = sequence
+                    insert = "INSERT INTO %s (%s) values (%s);" % (table, ",".join(row.keys()), ",".join("?" for i in xrange(len(row))))
+                    try:
+                        c.execute(insert, row.values())
+                    except sqlite3.OperationalError:
+                        c.execute("PRAGMA table_info(%s)" % table)
+                        column_list = [i[1] for i in c.fetchall()]
+                        for column in row:
+                            if column not in column_list:
+                                c.execute("ALTER TABLE %s ADD COLUMN %s;" % (table, column))
+                        c.execute(insert, row.values())
         conn.commit()
 
         for index in indices:

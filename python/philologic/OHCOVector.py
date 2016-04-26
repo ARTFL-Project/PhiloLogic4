@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import re
 import sys
+from simplejson import dumps
 
 ### NOTE: Much of this code developed iteratively, and there are some older variants at the bottom; due for a cleanup.
 ### CompoundStack is the class to use for all parsers.
@@ -17,7 +18,7 @@ class ParallelRecord(object):
 
     def __str__(self):
         print_id = [self.id[0], 0, 0, 0, 0, 0, 0, 0, self.id[1]]
-        return "%s\t%s\t%s\t%s" % (self.type, self.name, " ".join(str(i) for i in print_id), self.attrib)
+        return "%s\t%s\t%s\t%s" % (self.type, self.name, " ".join(str(i) for i in print_id), dumps(self.attrib))
 
     def __getitem__(self, n):
         return self.attrib[n]
@@ -60,7 +61,7 @@ class CompoundRecord(object):
                 clean_attrib[k] = " ".join(v.split())
             else:
                 clean_attrib[k] = v
-        return "%s\t%s\t%s\t%s" % (self.type, self.name, " ".join(str(i) for i in print_id), clean_attrib)
+        return "%s\t%s\t%s\t%s" % (self.type, self.name, " ".join(str(i) for i in print_id), dumps(clean_attrib))
 
     def __getitem__(self, n):
         return self.attrib[n]
@@ -261,7 +262,8 @@ class Record(object):
             else:
                 clean_attrib[k] = v
 
-        return "%s\t%s\t%s\t%s" % (self.type, self.name, " ".join(str(i) for i in self.id), clean_attrib)
+        # Using simplejson.dumps to write dict as it is much faster to read from a json string
+        return "%s\t%s\t%s\t%s" % (self.type, self.name, " ".join(str(i) for i in self.id), dumps(clean_attrib))
 
     def __repr__(self):
         return "Record('%s','%s',%s)" % (self.type, self.name, self.id)

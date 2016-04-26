@@ -11,7 +11,7 @@ import functions as f
 from functions.wsgi_handler import WSGIHandler
 
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
     import json
 

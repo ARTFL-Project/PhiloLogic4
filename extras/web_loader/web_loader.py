@@ -4,7 +4,7 @@ import os
 import sys
 from cgi import FieldStorage
 from glob import glob
-from json import dumps
+from simplejson import dumps
 from wsgiref.handlers import CGIHandler
 
 from philologic.Loader import Loader, setup_db_dir

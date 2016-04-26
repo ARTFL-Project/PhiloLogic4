@@ -11,7 +11,7 @@ from philologic.QuerySyntax import parse_query, group_terms
 from wsgiref.handlers import CGIHandler
 import functions as f
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
     import json
 

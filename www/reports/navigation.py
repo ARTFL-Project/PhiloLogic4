@@ -17,9 +17,9 @@ from functions.ObjectFormatter import (convert_entities, note_content, valid_htm
 from functions.wsgi_handler import WSGIHandler
 
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
-    print >> sys.stderr, "Import Error, please install ujson for better performance"
+    print >> sys.stderr, "Import Error, please install simplejson for better performance"
     import json
 
 philo_types = set(['div1', 'div2', 'div3'])
