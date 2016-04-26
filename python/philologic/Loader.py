@@ -95,6 +95,25 @@ class Loader(object):
     def list_files(self):
         return os.listdir(self.textdir)
 
+    def parse_bibliography_file(self, sort_by_field):
+        load_metadata = []
+        with open(self.bibliography) as input_file:
+            metadata_fields = input_file.readline().split("\t")
+            for line in input_file:
+                file_metadata = {}
+                values = line.split("\t")
+                for pos, field in enumerate(metadata_fields):
+                    file_metadata[field] = values[pos]
+                load_metadata.append(file_metadata)
+        print "Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]),
+        def make_sort_key(d):
+            key = [d.get(f, "") for f in sort_by_field]
+            return key
+
+        load_metadata.sort(key=make_sort_key, reverse=reverse_sort)
+        print "done."
+        return load_metadata
+
     def pre_parse_header(self, fn):
         fh = open(fn)
         header = ""

@@ -17,7 +17,10 @@ if __name__ == '__main__':
     # Database load
     l = Loader(**load_options.values)
     l.add_files(load_options.files)
-    load_metadata = l.parse_metadata(load_options.sort_order, header=load_options.header)
+    if load_options.bibliography:
+        load_metadata = self.parse_bibliography_file(load_options.sort_order)
+    else:
+        load_metadata = l.parse_metadata(load_options.sort_order, header=load_options.header)
     l.parse_files(load_options.cores, load_metadata)
     l.merge_objects()
     l.analyze()

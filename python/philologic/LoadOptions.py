@@ -55,6 +55,7 @@ class LoadOptions(object):
         self.values["debug"] = False
         self.values["force_delete"] = False
         self.values["file_list"] = False
+        self.values["bibliography"] = []
 
     def setup_parser(self):
         usage = "usage: %prog [options] database_name files"
@@ -64,6 +65,11 @@ class LoadOptions(object):
                           type="string",
                           dest="web_app_dir",
                           help="Define custom location for the web app directory")
+        parser.add_option("-b",
+                          "--bibliography",
+                          type="string",
+                          dest="bibliography",
+                          help="Defines a file containing the document-level bibliography of the texts")
         parser.add_option("-c", "--cores", type="int", dest="cores", help="define the number of cores used for parsing")
         parser.add_option("-d",
                           "--debug",
