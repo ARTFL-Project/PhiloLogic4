@@ -7,6 +7,8 @@ from philologic import OHCOVector
 
 
 class XMLParser(object):
+    """Parses clean or dirty XML."""
+
     def __init__(self,
                  output,
                  docid,
@@ -21,14 +23,25 @@ class XMLParser(object):
         self.parallel_type = "page"
         self.output = output
         self.docid = docid
-        ## Initialize an OHCOVector Stack. operations on this stack produce all parser output.
+        # Initialize an OHCOVector Stack. operations on this stack produce all parser output.
         self.v = OHCOVector.CompoundStack(self.types, self.parallel_type, docid, output)
 
         self.filesize = filesize
 
         self.token_regex = token_regex
         self.xpaths = xpaths[:]
-        self.metadata_xpaths = metadata_xpaths[:]
+
+        # TODO: remove flattening inside the try block when we kill the old parser
+        self.metadata_xpaths = {}
+        try:
+            for obj_type, path, field_name in metadata_xpaths:
+                if obj_type not in self.metadata_xpaths:
+                    self.metadata_xpaths[obj_type] = {}
+                if field_name not in self.metadata_xpaths[obj_type]:
+                    self.metadata_xpaths[obj_type][field_name] = []
+                self.metadata_xpaths[obj_type][field_name].append(path)
+        except ValueError:
+            self.metadata_xpaths = metadata_xpaths
 
         self.suppress_xpaths = suppress_tags
         self.pseudo_empty_tags = pseudo_empty_tags
@@ -178,18 +191,6 @@ class XMLParser(object):
                 self.open_para = True
         if closed_para_tag.search(tag):
             self.close_para(self.bytes_read_in)
-
-        # Notes: treat as para objects and set flag to not set paras in notes.
-        # Currently treating them as distinct paragraphs.
-        # TODO: what to when note has id= statement: like in Philo3?
-        if note_tag.search(tag):
-            self.open_para = True
-            self.v.push("para", tag_name, byte_start)
-            self.get_attributes(tag, "para")
-            self.in_a_note = True
-        if closed_note_tag.search(tag):
-            self.close_para(self.bytes_read_in)
-            self.in_a_note = False
 
         # Epigraph: treat as paragraph objects
         if epigraph_tag.search(tag):
@@ -346,6 +347,19 @@ class XMLParser(object):
                 div_head = "Document Body"
             self.v["div1"]["head"] = div_head
 
+        # Notes: treat as div objects and set flag to not set paras in notes.
+        # TODO: should these really be hardcoded as div2s?
+        if note_tag.search(tag):
+            self.context_div_level = 2
+            if self.open_div2:
+                self.close_div2(byte_start)
+            self.v.push("div2", tag_name, byte_start)
+            self.get_attributes(tag, "div2")
+            self.in_a_note = True
+        if closed_note_tag.search(tag):
+            self.close_div2(self.bytes_read_in)
+            self.in_a_note = False
+
         # HyperDiv: This is a Brown WWP construct. It is defined as a place to put
         # a number of different kinds of information which are related to the body
         # of the text but do not appear directly within its flow, for instance footnotes,
@@ -418,14 +432,14 @@ class XMLParser(object):
             # TODO: unclear if we need to add EEBO hack when no subdiv objects...
 
     def word_handler(self, words):
-        """Word handler. It takes an artbitrary string or words between two tags and
-        splits them into words.
-        It also identifies sentence breaks.  I am not checking for existing sentence
+        """
+        Word handler. It takes an artbitrary string or words between two tags and
+        splits them into words. It also identifies sentence breaks.  I am not checking for existing sentence
         tags, but could and conditionalize it. Also note that it does not check for
         sentences inside of linegroups ... which are typically broken on lines.
         I am not currently handling ";" at the end of words because of confusion with
-        character ents. Easily fixed."""
-
+        character ents. Easily fixed.
+        """
         # We don't like many character entities, so let's change them
         # into spaces to get a clean break.
         if char_ents.search(words):
@@ -547,7 +561,8 @@ class XMLParser(object):
                         # the punctuation token.
                         if "sent" not in self.v:
                             self.v.push("sent", ".", current_pos)
-                        self.v["sent"].name = "."  # TODO: evaluate if this is right: avoid unwanted chars such tabs in ASP
+                        self.v[
+                            "sent"].name = "."  # TODO: evaluate if this is right: avoid unwanted chars such tabs in ASP
                         self.v.pull("sent", current_pos + len(word))
 
     def close_sent(self, byte_end):
@@ -583,10 +598,26 @@ class XMLParser(object):
         self.v.pull("div1", byte_end)
         self.open_div1 = False
 
+    def camel_case_to_snake_case(self, word):
+        word = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', word)
+        word = re.sub('([a-z0-9])([A-Z])', r'\1_\2', word).lower()
+        return word
+
     def get_attributes(self, tag, object_type):
         """Find all attributes for any given tag and attach metadata to element."""
+        try:
+            fields_to_match = set(self.metadata_xpaths[object_type].keys())
+        except KeyError:
+            fields_to_match = set([])
+        if object_type.startswith("div"):
+            try:
+                fields_to_match = fields_to_match.union(self.metadata_xpaths["div"].keys())
+            except KeyError:
+                pass
         for attrib, value in attrib_matcher.findall(tag):
-            self.v[object_type][attrib] = value
+            snake_attrib = self.camel_case_to_snake_case(attrib)
+            if attrib in fields_to_match or snake_attrib in fields_to_match:
+                self.v[object_type][snake_attrib] = value
 
     def get_div_head(self, tag):
         """Get div head."""
@@ -904,8 +935,8 @@ type_attrib = re.compile(r'type="([^"]*)"', re.I)
 hyper_div_tag = re.compile(r'<hyperdiv\W', re.I)
 div_num_tag = re.compile(r'<div(.)', re.I)
 char_ents = re.compile(r'\&[a-zA-Z0-9\#][a-zA-Z0-9]*;', re.I)
-chars_in_words = re.compile(r'([\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*)', re.I
-                            )  # IMPORTANT: this replaces word_regex
+chars_in_words = re.compile(r'([\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*)',
+                            re.I)  # IMPORTANT: this replaces word_regex
 newline_shortener = re.compile(r'\n\n*')
 check_if_char_word = re.compile(r'[A-Za-z0-9\177-\377]', re.I)
 chars_not_to_index = re.compile(r'\[\{\]\}', re.I)
@@ -977,6 +1008,168 @@ entity_regex = [
     re.compile(r'(\&dram;)', re.I),
     re.compile(r'(\&sun;)', re.I),
 ]
+
+TagToObjMap = {
+    "div": "div",
+    "div1": "div",
+    "div2": "div",
+    "div3": "div",
+    "front": "div",
+    "note": "div",
+    "para": "p",
+    "para": "sp",
+    "para": "lg",
+    "para": "epigraph",
+    "para": "argument",
+    "para": "postscript",
+    "pb": "page"
+}
+
+DefaultMetadataXPaths = {
+    # Metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
+    # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
+
+    ####################
+    # DOC LEVEL XPATHS #
+    ####################
+    "doc": {
+        "author": [
+            ".//sourceDesc/bibl/author[@type='marc100']",
+            ".//sourceDesc/bibl/author[@type='artfl']",
+            ".//sourceDesc/bibl/author",
+            ".//titleStmt/author",
+            ".//sourceDesc/biblStruct/monogr/author/name",
+            ".//sourceDesc/biblFull/titleStmt/author",
+            ".//sourceDesc/biblFull/titleStmt/respStmt/name",
+            ".//sourceDesc/biblFull/titleStmt/author",
+            ".//sourceDesc/bibl/titleStmt/author",
+        ],
+        "title": [
+            ".//sourceDesc/bibl/title[@type='marc245']",
+            ".//sourceDesc/bibl/title[@type='artfl']",
+            ".//sourceDesc/bibl/title",
+            ".//titleStmt/title",
+            ".//sourceDesc/bibl/titleStmt/title",
+            ".//sourceDesc/biblStruct/monogr/title",
+            ".//sourceDesc/biblFull/titleStmt/title",
+        ],
+        "author_dates": [
+            ".//sourceDesc/bibl/author/date",
+            ".//titlestmt/author/date",
+        ],
+        "date": [
+            ".//profileDesc/creation/date",
+            ".//fileDesc/sourceDesc/bibl/imprint/date",
+            ".//sourceDesc/biblFull/publicationStmt/date",
+            ".//sourceDesc/bibl/imprint/date",
+            ".//sourceDesc/biblFull/publicationStmt/date",
+            ".//profileDesc/dummy/creation/date",
+            ".//fileDesc/sourceDesc/bibl/creation/date",
+            "./text/front/docDate/.@value",
+            "./text/front//p[@rend='center']",
+        ],
+        "publisher": [
+            ".//sourceDesc/bibl/imprint[@type='artfl']",
+            ".//sourceDesc/bibl/imprint[@type='marc534']",
+            ".//sourceDesc/bibl/imprint/publisher",
+            ".//sourceDesc/biblStruct/monogr/imprint/publisher/name",
+            ".//sourceDesc/biblFull/publicationStmt/publisher",
+            ".//sourceDesc/bibl/publicationStmt/publisher",
+            ".//sourceDesc/bibl/publisher",
+            ".//publicationStmt/publisher",
+            ".//publicationStmp",
+        ],
+        "pub_place": [
+            ".//sourceDesc/bibl/imprint/pubPlace",
+            ".//sourceDesc/biblFull/publicationStmt/pubPlace",
+            ".//sourceDesc/biblStruct/monog/imprint/pubPlace",
+            ".//sourceDesc/bibl/pubPlace",
+            ".//sourceDesc/bibl/publicationStmt/pubPlace",
+        ],
+        "pub_date": [
+            ".//sourceDesc/bibl/imprint/date",
+            ".//sourceDesc/biblStruct/monog/imprint/date",
+            ".//sourceDesc/biblFull/publicationStmt/date",
+            ".//sourceDesc/bibFull/imprint/date",
+            ".//sourceDesc/bibl/date",
+            ".//text/front/docImprint/acheveImprime",
+        ],
+        "extent": [
+            ".//sourceDesc/bibl/extent",
+            ".//sourceDesc/biblStruct/monog//extent",
+            ".//sourceDesc/biblFull/extent",
+        ],
+        "editor": [
+            ".//sourceDesc/bibl/editor",
+            ".//sourceDesc/biblFull/titleStmt/editor",
+            ".//sourceDesc/bibl/title/Stmt/editor",
+        ],
+        "identifiers": [
+            ".//publicationStmt/idno"
+        ],
+        "text_genre": [
+            ".//profileDesc/textClass/keywords[@scheme='genre']/term",
+            ".//SourceDesc/genre",
+        ],
+        "keywords": [
+            # keywords
+            ".//profileDesc/textClass/keywords/list/item",
+        ],
+        "language": [
+            # language
+            ".//profileDesc/language/language",
+        ],
+        "notes": [
+            # notes
+            ".//fileDesc/notesStmt/note",
+            ".//publicationStmt/notesStmt/note",
+        ],
+        "auth_gender": [
+
+            # auth_gender
+            ".//publicationStmt/notesStmt/note",
+        ],
+        "collection": [
+            # collection
+            ".//seriesStmt/title",
+        ],
+        "period": [
+            # period
+            ".//profileDesc/textClass/keywords[@scheme='period']/list/item",
+            ".//SourceDesc/period",
+        ],
+        "text_form": [
+            # text_form
+            ".//profileDesc/textClass/keywords[@scheme='form']/term",
+        ],
+        "structure": [
+            # structure
+            ".//SourceDesc/structure",
+        ]
+    },
+    "div": {
+        "head": [
+            "./head",
+        ],
+        "type": [
+            ".@type"
+        ],
+        "n": [
+            ".@n"
+        ],
+        "id": [
+            ".@id"
+        ]
+    },
+    "para": {
+        "who": [".@who"]
+    },
+    "page": {
+        "n": [".@n"],
+        "id": [".@id"],
+        "fac": [".@fac"]
+    }
+}
 
 if __name__ == "__main__":
     for docid, fn in enumerate(sys.argv[1:], 1):

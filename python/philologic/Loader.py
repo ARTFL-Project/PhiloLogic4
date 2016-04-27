@@ -97,11 +97,15 @@ class Loader(object):
 
     def parse_bibliography_file(self, bibliography_file, sort_by_field, reverse_sort=True):
         load_metadata = []
+        files = set(self.list_files())
         with open(bibliography_file) as input_file:
             metadata_fields = input_file.readline().split("\t")
+            filename_index = metadata_fields.index("filename")
             for line in input_file:
                 file_metadata = {}
                 values = line.split("\t")
+                if values[filename_index] not in files:
+                    continue
                 for pos, field in enumerate(metadata_fields):
                     file_metadata[field] = values[pos]
                 load_metadata.append(file_metadata)
@@ -151,6 +155,7 @@ class Loader(object):
 
     def parse_tei_header(self, whole_file):
         load_metadata = []
+        metadata_xpaths = self.parser_defaults["metadata_xpaths"]
         for f in self.list_files():
             data = {"filename": f}
             fn = self.textdir + f
@@ -159,9 +164,9 @@ class Loader(object):
             else:
                 tree = self.pre_parse_header(fn)
             trimmed_metadata_xpaths = []
-            for type, xpath, field in self.parser_defaults["metadata_xpaths"]:
-                if type == "doc":
-                    if field not in data:
+            for field in metadata_xpaths["doc"]:
+                if field not in data:
+                    for xpath in metadata_xpaths["doc"][field]:
                         attr_pattern_match = re.search(r"@([^\/\[\]]+)$", xpath)
                         if attr_pattern_match:
                             xp_prefix = xpath[:attr_pattern_match.start(0)]
@@ -175,8 +180,12 @@ class Loader(object):
                             el = tree.find(xpath)
                             if el is not None and el.text is not None:
                                 data[field] = el.text.encode("utf-8")
-                else:
-                    trimmed_metadata_xpaths.append((type, xpath, field))
+            trimmed_metadata_xpaths = [
+                (metadata_type, xpath, field)
+                for metadata_type in ["div", "para", "sent", "word", "page"] if metadata_type in metadata_xpaths
+                for field in metadata_xpaths[metadata_type]
+                for xpath in metadata_xpaths[metadata_type][field]
+            ]
             data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
             load_metadata.append(data)
         return load_metadata
@@ -270,7 +279,7 @@ class Loader(object):
 
         indexed_types = []
 
-        for o_type, path, param in self.parser_defaults["metadata_xpaths"]:
+        for o_type in self.parser_defaults["metadata_xpaths"]:
             if o_type not in indexed_types and o_type != "page":
                 indexed_types.append(o_type)
 
@@ -279,15 +288,16 @@ class Loader(object):
 
         for t in indexed_types:
             self.metadata_hierarchy.append([])
-            for e_type, path, param in self.parser_defaults["metadata_xpaths"]:
+            for e_type in self.parser_defaults["metadata_xpaths"]:
                 if t == e_type:
-                    if param not in self.metadata_fields:
-                        self.metadata_fields.append(param)
-                        self.metadata_hierarchy[-1].append(param)
-                    if param not in self.metadata_types:
-                        self.metadata_types[param] = t
-                    else:  # we have a serious error here!  Should raise going forward.
-                        pass
+                    for param in self.parser_defaults["metadata_xpaths"][o_type]:
+                        if param not in self.metadata_fields:
+                            self.metadata_fields.append(param)
+                            self.metadata_hierarchy[-1].append(param)
+                        if param not in self.metadata_types:
+                            self.metadata_types[param] = t
+                        else:  # we have a serious error here!  Should raise going forward.
+                            pass
             if t == "doc":
                 for d in data_dicts:
                     for k in d.keys():
