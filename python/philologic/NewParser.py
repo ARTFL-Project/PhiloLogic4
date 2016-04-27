@@ -661,6 +661,8 @@ class XMLParser(object):
             div_head = div_head.replace('_', '')
             div_head = div_head.replace('\t', '')
             div_head = ' '.join(div_head.split())  # remove double or more spaces
+            div_head = div_head.replace('[', '').replace(']', '')
+            div_head = div_head.replace('"', '')
             div_head = div_head.strip()
         elif "type=" in tag:
             try:

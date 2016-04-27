@@ -2,7 +2,7 @@
 	transition: width .2s;
 }
 #kwic_concordance {
-    font-family: 'Droid Sans Mono', sans-serif;
+    font-family: monospace;;
     font-size: 12px;
     padding: 10px 15px 15px 15px;
 }
