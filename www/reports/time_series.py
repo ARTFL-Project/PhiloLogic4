@@ -14,7 +14,7 @@ sys.path.append('..')
 import functions as f
 from functions.wsgi_handler import WSGIHandler
 
-import ujson as json
+import simplejson as json
 
 
 date_finder = re.compile(r'^.*?(\d{1,}).*')

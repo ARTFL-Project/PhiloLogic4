@@ -10,7 +10,7 @@ sys.path.append('..')
 import functions as f
 
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
     import json
 

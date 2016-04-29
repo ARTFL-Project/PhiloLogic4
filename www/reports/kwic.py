@@ -9,9 +9,9 @@ from wsgiref.handlers import CGIHandler
 from concordance import concordance_citation, citation_links
 from functions.ObjectFormatter import format_strip, adjust_bytes
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
-    print >> sys.stderr, "Import Error, please install ujson for better performance"
+    print >> sys.stderr, "Import Error, please install simplejson for better performance"
     import json
 
 

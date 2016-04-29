@@ -8,7 +8,7 @@ from wsgiref.handlers import CGIHandler
 from reports.word_property_filter import get_word_attrib
 import functions as f
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
     import json
 

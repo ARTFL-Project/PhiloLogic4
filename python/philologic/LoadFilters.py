@@ -5,7 +5,8 @@ import os
 import re
 import sys
 import unicodedata
-from ast import literal_eval as eval
+# from ast import literal_eval as eval
+from simplejson import loads
 from subprocess import PIPE, Popen
 
 from philologic.OHCOVector import Record
@@ -20,7 +21,7 @@ def normalize_unicode_raw_words(loader_obj, text):
         if rec_type == "word":
             word = word.decode("utf-8").lower().encode("utf-8")
         record = Record(rec_type, word, id)
-        record.attrib = eval(attrib)
+        record.attrib = loads(attrib)
         print >> tmp_file, record
     os.remove(text["raw"])
     os.rename(text["raw"] + ".tmp", text["raw"])
@@ -35,7 +36,7 @@ def make_word_counts(loader_obj, text, depth=5):
         type, word, id, attrib = line.split('\t')
         id = id.split()
         record = Record(type, word, id)
-        record.attrib = eval(attrib)
+        record.attrib = loads(attrib)
         for d, count in enumerate(counts):
             if type == 'word':
                 counts[d] += 1
@@ -65,7 +66,7 @@ def make_object_ancestors(*types):
             type, word, id, attrib = line.split('\t')
             id = id.split()
             record = Record(type, word, id)
-            record.attrib = eval(attrib)
+            record.attrib = loads(attrib)
             for type in types:
                 zeros_to_add = ['0' for i in range(7 - type_depth[type])]
                 philo_id = id[:type_depth[type]] + zeros_to_add
@@ -101,7 +102,7 @@ def prev_next_obj(*types):
             type, word, id, attrib = line.split('\t')
             id = id.split()
             record = Record(type, word, id)
-            record.attrib = eval(attrib)
+            record.attrib = loads(attrib)
             if type in record_dict:
                 record_dict[type].attrib['next'] = ' '.join(id)
                 if type in types:
@@ -163,7 +164,7 @@ def normalize_divs(*columns):
             type, word, id, attrib = line.split('\t')
             id = id.split()
             record = Record(type, word, id)
-            record.attrib = eval(attrib)
+            record.attrib = loads(attrib)
             if type == "div1":
                 for column in columns:
                     if column in record.attrib:
@@ -194,7 +195,7 @@ def normalize_unicode_columns(*columns):
             type, word, id, attrib = line.split('\t')
             id = id.split()
             record = Record(type, word, id)
-            record.attrib = eval(attrib)
+            record.attrib = loads(attrib)
             for column in columns:
                 if column in record.attrib:
                     #                    print >> sys.stderr, repr(record.attrib)
@@ -250,7 +251,7 @@ def tree_tagger(tt_path, param_file, maxlines=20000):
             type, word, id, attrib = line.split('\t')
             id = id.split()
             record = Record(type, word, id)
-            record.attrib = eval(attrib)
+            record.attrib = loads(attrib)
             if type == "word":
                 tag_l = tag_fh.readline()
                 next_word, tag = tag_l.split("\t")[0:2]
@@ -334,7 +335,7 @@ def fix_sentence_boundary(loader_obj, text):
         rec_type, word, id, attrib = line.split('\t')
         id = id.split()
         record = Record(rec_type, word, id)
-        record.attrib = eval(attrib)
+        record.attrib = loads(attrib)
         return rec_type, word.decode('utf-8'), record
 
     tmp_file = open(text["raw"] + ".tmp", "w")

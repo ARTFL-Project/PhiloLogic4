@@ -15,7 +15,7 @@ from functions.ObjectFormatter import (adjust_bytes, convert_entities,
 from functions.wsgi_handler import WSGIHandler
 
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
     import json
 
