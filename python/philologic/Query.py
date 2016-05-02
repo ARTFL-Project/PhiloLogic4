@@ -9,6 +9,10 @@ import re
 import unicodedata
 from QuerySyntax import parse_query, group_terms
 
+
+# Work around issue where environ PATH does not contain path to C core
+os.environ["PATH"] += ":/usr/local/bin/" 
+
 def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,limit=3000,filename="", query_debug=False):
     sys.stdout.flush()
     tstart = datetime.now()
@@ -52,8 +56,8 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
                 args.extend(("-m",method,"-a",str(method_arg)))
 
             args.extend(("-o","binary",db.path,));
-
-            worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err)
+            
+            worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err, env=os.environ)
             # if query_debug:
             #     print >> sys.stderr, "WORKER STARTED:"," ".join(args);
 
