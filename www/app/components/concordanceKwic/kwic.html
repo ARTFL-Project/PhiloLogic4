@@ -36,7 +36,7 @@
 		<button type="button" class="btn btn-primary btn-sm" ng-click="sortResults()">Sort</button>
 	</div>
     <div id="kwic_concordance" ng-if="report === 'kwic'">
-        <div class="kwic_line velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger: 10}" ng-repeat="result in results.results | kwicBiblioDisplay" ng-init="currentPos = initializePos(results, $index)">
+        <div class="kwic_line" ng-repeat="result in results.results | kwicBiblioDisplay" ng-init="currentPos = initializePos(results, $index)">
             <span ng-bind-html="currentPos | unsafe"></span>
             <a href="{{ ::result.citation_links.div1 }}" class="kwic_biblio" ng-mouseover="showFullBiblio($event)" ng-mouseleave="hideFullBiblio($event)">
                 <span class="full_biblio" style="display:none;">{{ result.fullBiblio }}</span>
