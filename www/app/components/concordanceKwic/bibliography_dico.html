@@ -1,4 +1,4 @@
-<div id="results_container" ng-class="{'col-xs-12': concKwic.frequencyResults.length === 0, 'col-xs-8': concKwic.frequencyResults.length > 0}">
+<div id="results_container" class="col-xs-12 col-sm-8">
 	<ol class="bibliographic-results text-content-area">
 		<li class="biblio-occurrence panel panel-default" ng-repeat="result in ::results.results">
 			<input type="checkbox" style="margin-left:10px" ng-click="addToSearch(result.citation.title.label)" ng-if="results.result_type === 'doc' && philoConfig.metadata.indexOf('title') !== -1">
