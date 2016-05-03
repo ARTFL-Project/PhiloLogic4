@@ -8,20 +8,24 @@
                 </div>
                 <div id="search-elements" ng-if="search.formOpen" class="velocity-opposites-transition-slideDownBigIn" data-velocity-opts="{ duration: 400 }">
                     <h5>Refine your search with the following options and fields:</h5>
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-2" style="margin-top: 10px;">
+                    <div class="row" style="margin-top: 10px; height: 24px;">
+                        <div class="col-xs-12 col-sm-2">
                             Search Terms
                         </div>
                         <div class="col-xs-12 col-sm-10">
-                            <div class="row" style="margin-top: 6px;">
+                            <div class="row">
                                 <div class="col-xs-12 col-sm-3">
-                                    <input type="checkbox" ng-model="formData.approximate" ng-true-value="'yes'"/>
-                                    Approximate match
+                                    <span>
+                                        <input type="checkbox" ng-model="formData.approximate" ng-true-value="'yes'"/>
+                                        Approximate match
+                                    </span>
                                 </div>
-                                <div class="col-xs-12 col-sm-9" ng-if="formData.approximate === 'yes'">
-                                    How approximate?
-                                    <input type="text" style="width: 30px; text-align: center;" ng-model="formData.approximate_ratio">
-                                    % or more
+                                <div class="col-xs-12 col-sm-9" style="margin-top: -3px" ng-if="formData.approximate === 'yes'">
+                                    <span>
+                                        How approximate?
+                                        <input type="text" style="width: 30px; text-align: center;" ng-model="formData.approximate_ratio">
+                                        % or more
+                                    </span>
                                 </div>
                             </div>
                         </div>
