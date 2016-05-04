@@ -33,7 +33,7 @@
                     scope.concKwic.loading = false;
                 });
                 scope.moreContext = function($event, resultNumber) {
-                    var element = angular.element($event.currentTarget).parents('.philologic_occurrence').find('.philologic_context');
+                    var element = angular.element($event.currentTarget).parents('.philologic-occurrence').find('.philologic_context');
                     var defaultElement = element.find('.default-length');
                     var moreContextElement = element.find('.more-length');
                     if (defaultElement.css('display') == "none") {
@@ -42,7 +42,7 @@
                             duration: 300
                         });
                     } else {
-                        if (moreContextElement.is(':empty')) {
+                        if (moreContextElement.children().length == 0) {
                             var extraParams = {
                                 script: 'get_more_context.py',
                                 hit_num: resultNumber

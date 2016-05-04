@@ -1,10 +1,12 @@
-<div id="facet-search"class="hidden-xs col-sm-4">
-    <div class="panel panel-default clearfix" id="facet-selection">
-        <button type="button" class="btn btn-default show-facet-selection" ng-if="!showFacetSelection" ng-click="displayFacetSelection()">
-            <span class="glyphicon glyphicon-menu-down"></span>
+<div id="facet-search" class="hidden-xs col-sm-4" loading="loading">
+    <div id="facet-panel-wrapper" class="panel panel-default clearfix" ng-style="sidebarHeight" >
+        <button type="button" class="btn btn-primary btn-sm close-box" ng-click="hideFacets()">X</button>
+        <button type="button" id="facet-header" class="btn btn-default" ng-click="toggleDisplayFacetSelection()">
+            <span id="facet-menu-toggle" class="glyphicon glyphicon-menu-right" ng-if="!showFacetSelection"></span>
+            <span id="facet-menu-toggle" class="glyphicon glyphicon-menu-down" ng-if="showFacetSelection"></span>
+            Browse by facet
         </button>
-        <h4 id="facet-header">Browse by facet</h4>
-        <div id="select-facets" class="list-group" ng-if="showFacetSelection">
+        <div id="select-facets" class="list-group" ng-show="showFacetSelection">
             <div class="dropdown-header facet-divider">
                 Frequency by
             </div>
@@ -12,44 +14,43 @@
                 {{ ::facet.alias }}
             </a>
             <div class="dropdown-header facet-divider" ng-if="report !== 'bibliography'">
-                Collocates in the same sentence
+                Collocates of query term(s)
             </div>
-            <a class="list-group-item" href="#" ng-repeat="collocationFacet in collocationFacets" ng-click="getFacet(collocationFacet)">
+            <a class="list-group-item" href="#" ng-if="report !== 'bibliography'" ng-repeat="collocationFacet in collocationFacets" ng-click="getFacet(collocationFacet)">
                 {{ ::collocationFacet.alias }}
             </a>
             <div class="dropdown-header facet-divider" ng-if="report !== 'bibliography' && wordsFacets.length > 0">
                 Count results by
             </div>
-            <a class="list-group-item" href="#" ng-repeat="facet in wordsFacets" ng-click="getFacet(facet)">
+            <a class="list-group-item" href="#" ng-if="report !== 'bibliography'" ng-repeat="facet in wordsFacets" ng-click="getFacet(facet)">
                 {{ ::facet.alias }}
             </a>
         </div>
-        <button type="button" class="btn btn-primary btn-sm close-box" ng-click="hideFacets()">X</button>
-        <spinner show="{{ facetLoading }}"></spinner>
-    </div>
-    <div class="panel panel-default facet-results" ng-style="sidebarHeight" ng-if="showFacetResults">
-        <button type="button" class="btn btn-primary btn-sm close-box" ng-click="closeFacets()">X</button>
-        <h5 style="text-align: center;">
-            Top 500 results for {{ selectedFacet.alias }}
-        </h5>
-        <ul class="list-group" class="velocity-opposites-transition-fadeIn" data-velocity-opts="{duration:400}">
-            <li class="list-group-item row"  style="margin-left:0;margin-right:0" ng-repeat="result in facetResults" ng-click="facetClick(result)">
-                <a id="freq_sidebar_text" class="text-content-area" href="{{ ::result.url }}" ng-if="facet.facet !== 'all_collocates'">
-                    {{ ::result.label }}
-                </a>
-                <a id="freq_sidebar_text" class="text-content-area" href="" ng-click="collocationToConcordance(result.label)" ng-if="facet.facet === 'all_collocates'">
-                    {{ ::result.label }}
-                </a>
-                <span class="sidebar-count"> {{ ::result.count }}</span>
-                <div style="line-height: 70%; padding-bottom: 15px; padding-left: 5px; font-size: 85%;" ng-if="showingRelativeFrequencies">
-                    <div style="opacity: .8">
-                        {{ ::fullResults.unsorted[result.label].count }} actual
-                        <ng-pluralize count="fullResults.unsorted[result.label].count" when="{'1': 'occurrence', 'other': 'occurrences'}"></ng-pluralize>
-                        in {{ fullRelativeFrequencies[result.label].total_count }} words
+        <div class="facet-results" ng-if="showFacetResults">
+            <h5 style="text-align: center;">
+                Top 500 results for {{ selectedFacet.alias }}
+            </h5>
+            <progress-bar progress="{{ percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{duration:400}"></progress-bar>
+            <ul class="velocity-opposites-transition-fadeIn" data-velocity-opts="{duration:400}">
+                <li style="margin-left:0;margin-right:0" ng-repeat="result in facetResults" ng-click="facetClick(result)">
+                    <a id="freq_sidebar_text" class="text-content-area" href="{{ ::result.url }}" ng-if="facet.facet !== 'all_collocates'">
+                        {{ ::result.label }}
+                    </a>
+                    <a id="freq_sidebar_text" class="text-content-area" href="" ng-click="collocationToConcordance(result.label)" ng-if="facet.facet === 'all_collocates'">
+                        {{ ::result.label }}
+                    </a>
+                    <span class="sidebar-count"> {{ ::result.count }}</span>
+                    <div style="line-height: 70%; padding-bottom: 15px; padding-left: 5px; font-size: 85%;" ng-if="showingRelativeFrequencies">
+                        <div style="opacity: .8">
+                            {{ ::fullResults.unsorted[result.label].count }} actual
+                            <ng-pluralize count="fullResults.unsorted[result.label].count" when="{'1': 'occurrence', 'other': 'occurrences'}"></ng-pluralize>
+                            in {{ fullRelativeFrequencies[result.label].total_count }} words
+                        </div>
+                        <div style="clear: both;"></div>
                     </div>
-                    <div style="clear: both;"></div>
-                </div>
-            </li>
-        </ul>
+                </li>
+            </ul>
+        </div>
     </div>
+
 </div>

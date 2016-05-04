@@ -24,6 +24,7 @@
                 $location.url(urlString);
             }
         }
+        vm.showFacetedBrowsing = true;
         vm.loading = true;
         vm.resultsLength = 0;
         vm.resultsPromise = request.report($rootScope.formData);
@@ -33,6 +34,9 @@
         vm.selectedFacet = '';
         vm.selectFacet = function(facetObj) {
             vm.selectedFacet = facetObj;
+        }
+        vm.showFacets = function() {
+            vm.showFacetedBrowsing = true;
         }
 
         vm.removeSidebar = function() {

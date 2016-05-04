@@ -205,10 +205,6 @@ s {
 }
 
 /*Random stuff to be organized*/
-#bibliographic_results {
-    list-style-type: none;
-    border-top: solid 1px #ECECEC;
-}
 #description {
     font-size: 1.1em;
 	padding: 10px 15px;
@@ -368,10 +364,6 @@ br {
 		margin-left: 0;
 		margin-right: 0;
 	}
-}
-.bibliographic-results li {
-    margin-top: 20px;
-    padding: 10px 0px 10px 0px;
 }
 a.sidebar-option:hover {
     cursor: pointer;

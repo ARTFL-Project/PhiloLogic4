@@ -87,12 +87,13 @@
                         start: start
                     });
                 }
+                scope.showFacetSelection = false;
                 promise.then(function(response) {
                     var results = response.data.results;
                     scope.moreResults = response.data.more_results;
                     scope.resultsLength = response.data.results_length;
                     scope.sidebarHeight = {
-                        height: angular.element('#results_container').height() - 40 + 'px'
+                        maxHeight: angular.element('#results_container').height() - 41 + 'px'
                     };
                     if (angular.element('#select-facets').data('interrupt') != true && angular.element('#select-facets').data('selected') == facet.alias) {
                         if (facet.type === "collocationFacet") {
@@ -103,7 +104,6 @@
                         scope.facetResults = merge.sorted.slice(0, 500);
                         scope.loading = false;
                         scope.showFacetResults = true;
-                        scope.showFacetSelection = false;
                         fullResults = merge;
                         if (response.data.hits_done < scope.resultsLength) {
                             $rootScope.percentComplete = response.data.hits_done / scope.resultsLength * 100;
@@ -196,8 +196,15 @@
                     scope.showFacetResults = false;
                     scope.showFacetSelection = true;
                 }
-                scope.displayFacetSelection = function() {
-                    scope.showFacetSelection = true;
+                scope.toggleDisplayFacetSelection = function() {
+                    if (scope.showFacetSelection) {
+                        scope.showFacetSelection = false;
+                    } else {
+                        scope.showFacetSelection = true;
+                    }
+                }
+                scope.hideFacets = function() {
+                    scope.concKwic.showFacetedBrowsing = false;
                 }
             }
         }
