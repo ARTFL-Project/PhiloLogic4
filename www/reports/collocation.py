@@ -16,10 +16,7 @@ sys.path.append('..')
 import functions as f
 from functions.wsgi_handler import WSGIHandler
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import simplejson as json
 
 
 def collocation(environ, start_response):

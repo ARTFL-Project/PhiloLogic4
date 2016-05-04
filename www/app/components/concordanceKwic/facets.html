@@ -1,33 +1,56 @@
-<div ng-class="{'col-xs-4': concKwic.frequencyResults.length > 0}" id="sidebar" loading="loading">
-    <div id="sidebar_display" class="panel panel-default" ng-style="sidebarHeight" ng-if="concKwic.frequencyResults.length > 0">
-        <div id="frequency_container">
+<div id="facet-search" class="hidden-xs col-sm-4" loading="loading">
+    <div id="facet-panel-wrapper" class="panel panel-default clearfix" ng-style="sidebarHeight" >
+        <button type="button" class="btn btn-primary btn-sm close-box" ng-click="hideFacets()">X</button>
+        <button type="button" id="facet-header" class="btn btn-default" ng-click="toggleDisplayFacetSelection()">
+            <span id="facet-menu-toggle" class="glyphicon glyphicon-menu-right" ng-if="!showFacetSelection"></span>
+            <span id="facet-menu-toggle" class="glyphicon glyphicon-menu-down" ng-if="showFacetSelection"></span>
+            Browse by facet
+        </button>
+        <div id="select-facets" class="list-group" ng-show="showFacetSelection">
+            <div class="dropdown-header facet-divider">
+                Frequency by
+            </div>
+            <a class="list-group-item" href="#" ng-repeat="facet in facets" ng-click="getFacet(facet)">
+                {{ ::facet.alias }}
+            </a>
+            <div class="dropdown-header facet-divider" ng-if="report !== 'bibliography'">
+                Collocates of query term(s)
+            </div>
+            <a class="list-group-item" href="#" ng-if="report !== 'bibliography'" ng-repeat="collocationFacet in collocationFacets" ng-click="getFacet(collocationFacet)">
+                {{ ::collocationFacet.alias }}
+            </a>
+            <div class="dropdown-header facet-divider" ng-if="report !== 'bibliography' && wordsFacets.length > 0">
+                Count results by
+            </div>
+            <a class="list-group-item" href="#" ng-if="report !== 'bibliography'" ng-repeat="facet in wordsFacets" ng-click="getFacet(facet)">
+                {{ ::facet.alias }}
+            </a>
+        </div>
+        <div class="facet-results" ng-if="showFacetResults">
+            <h5 style="text-align: center;">
+                Top 500 results for {{ selectedFacet.alias }}
+            </h5>
             <progress-bar progress="{{ percent }}" class="velocity-opposites-transition-slideDownIn" data-velocity-opts="{duration:400}"></progress-bar>
-            <div class="btn-group btn-group-justified" role="group" aria-label="..." ng-if="percent == 100 && report !== 'bibliography' && facet.type === 'facet'">
-                <button type="button" class="btn btn-default" ng-class="{'active': showingRelativeFrequencies === false}" style="width: 50%; border-left-width: 0px; border-top-width: 0px" ng-click="displayAbsoluteFrequencies()">Absolute Frequency</button>
-                <button type="button" class="btn btn-default" ng-class="{'active': showingRelativeFrequencies}" style="width: 50%; border-right-width: 0px; border-top-width: 0px" ng-click="displayRelativeFrequencies()">Relative Frequency</button>
-            </div>
-            <div style="text-align: center; padding: 8px;font-weight: 400;" ng-if="showingRelativeFrequencies">
-                Frequencies per 10,000 words
-            </div>
-            <ol id="frequency_table" class="velocity-opposites-transition-fadeIn" data-velocity-opts="{duration:400}">
-                <li ng-repeat="result in concKwic.frequencyResults" ng-click="concKwic.facetClick(result)">
+            <ul class="velocity-opposites-transition-fadeIn" data-velocity-opts="{duration:400}">
+                <li style="margin-left:0;margin-right:0" ng-repeat="result in facetResults" ng-click="facetClick(result)">
                     <a id="freq_sidebar_text" class="text-content-area" href="{{ ::result.url }}" ng-if="facet.facet !== 'all_collocates'">
-						{{ ::result.label }}
-					</a>
-					<a id="freq_sidebar_text" class="text-content-area" href="" ng-click="collocationToConcordance(result.label)" ng-if="facet.facet === 'all_collocates'">
-						{{ ::result.label }}
-					</a>
+                        {{ ::result.label }}
+                    </a>
+                    <a id="freq_sidebar_text" class="text-content-area" href="" ng-click="collocationToConcordance(result.label)" ng-if="facet.facet === 'all_collocates'">
+                        {{ ::result.label }}
+                    </a>
                     <span class="sidebar-count"> {{ ::result.count }}</span>
-					<div style="line-height: 70%; padding-bottom: 15px; padding-left: 5px; font-size: 85%;" ng-if="showingRelativeFrequencies">
-						<div style="opacity: .8">
-							{{ ::fullResults.unsorted[result.label].count }} actual
-							<ng-pluralize count="fullResults.unsorted[result.label].count" when="{'1': 'occurrence', 'other': 'occurrences'}"></ng-pluralize>
-							in {{ fullRelativeFrequencies[result.label].total_count }} words
-						</div>
-						<div style="clear: both;"></div>
-					</div>
+                    <div style="line-height: 70%; padding-bottom: 15px; padding-left: 5px; font-size: 85%;" ng-if="showingRelativeFrequencies">
+                        <div style="opacity: .8">
+                            {{ ::fullResults.unsorted[result.label].count }} actual
+                            <ng-pluralize count="fullResults.unsorted[result.label].count" when="{'1': 'occurrence', 'other': 'occurrences'}"></ng-pluralize>
+                            in {{ fullRelativeFrequencies[result.label].total_count }} words
+                        </div>
+                        <div style="clear: both;"></div>
+                    </div>
                 </li>
-            </ol>
+            </ul>
         </div>
     </div>
+
 </div>

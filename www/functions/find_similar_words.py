@@ -21,6 +21,6 @@ def find_similar_words(word_to_match, request):
             w = w.strip()
             w_norm = w.split()[0]
             w_orig = w.split()[1]
-            if ratio(word, w_norm) >= 0.8 and w_orig not in results:
+            if ratio(word, w_norm) >= float(request.approximate_ratio) and w_orig not in results:
                 results.add(w_orig)
     return ' | '.join(['"%s"' % i for i in results])

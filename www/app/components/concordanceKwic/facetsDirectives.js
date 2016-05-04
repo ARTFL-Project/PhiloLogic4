@@ -4,11 +4,9 @@
 
     angular
         .module('philoApp')
-        .directive('sidebarMenu', sidebarMenu)
         .directive('facets', facets);
 
-
-    function sidebarMenu($rootScope) {
+    function facets($rootScope, $location, request, progressiveLoad, saveToLocalStorage) {
         var populateFacets = function() {
             var facets = [];
             for (var i = 0; i < $rootScope.philoConfig.facets.length; i++) {
@@ -46,32 +44,20 @@
             }
             return wordsFacets;
         }
-        return {
-            restrict: 'E',
-            templateUrl: 'app/components/concordanceKwic/sidebarMenu.html',
-            replace: true,
-            link: function(scope) {
-                scope.facets = populateFacets();
-                scope.collocationFacets = populateCollocationFacets();
-                scope.wordsFacets = populateWordFacets();
-            }
-        }
-    }
-
-    function facets($rootScope, $location, $http, URL, progressiveLoad, saveToLocalStorage, request) {
-        var retrieveFacet = function(scope, facetObj) {
+        var getFacet = function(scope, facetObj) {
             scope.facet = facetObj;
+            scope.selectedFacet = facetObj;
             var urlString = $location.url() + '&frequency_field=' + facetObj.alias;
             if (typeof(sessionStorage[urlString]) !== "undefined" && $rootScope.philoConfig.production === true) {
                 scope.loading = true;
                 scope.fullResults = fromJson(sessionStorage[urlString]);
-                scope.concKwic.frequencyResults = scope.fullResults.sorted.slice(0, 500);
+                scope.facetResults = scope.fullResults.sorted.slice(0, 500);
                 scope.loading = false;
                 scope.percent = 100;
             } else {
                 // store the selected field to check whether to kill the ajax calls in populate_sidebar
-                angular.element('#selected-sidebar-option').data('selected', facetObj.alias);
-                angular.element('#selected-sidebar-option').data('interrupt', false);
+                angular.element('#select-facets').data('selected', facetObj.alias);
+                angular.element('#select-facets').data('interrupt', false);
                 scope.done = false;
                 var fullResults = {};
                 scope.loading = true;
@@ -101,21 +87,23 @@
                         start: start
                     });
                 }
+                scope.showFacetSelection = false;
                 promise.then(function(response) {
                     var results = response.data.results;
                     scope.moreResults = response.data.more_results;
                     scope.resultsLength = response.data.results_length;
                     scope.sidebarHeight = {
-                        height: angular.element('#results_container').height() - 40 + 'px'
+                        maxHeight: angular.element('#results_container').height() - 41 + 'px'
                     };
-                    if (angular.element('#selected-sidebar-option').data('interrupt') != true && angular.element('#selected-sidebar-option').data('selected') == facet.alias) {
+                    if (angular.element('#select-facets').data('interrupt') != true && angular.element('#select-facets').data('selected') == facet.alias) {
                         if (facet.type === "collocationFacet") {
                             var merge = progressiveLoad.mergeResults(fullResults.unsorted, response.data.collocates);
                         } else {
                             var merge = progressiveLoad.mergeResults(fullResults.unsorted, results);
                         }
-                        scope.concKwic.frequencyResults = merge.sorted.slice(0, 500);
+                        scope.facetResults = merge.sorted.slice(0, 500);
                         scope.loading = false;
+                        scope.showFacetResults = true;
                         fullResults = merge;
                         if (response.data.hits_done < scope.resultsLength) {
                             $rootScope.percentComplete = response.data.hits_done / scope.resultsLength * 100;
@@ -125,7 +113,7 @@
                         populateSidebar(scope, facet, fullResults, start, queryParams);
                     } else {
                         // This won't affect the full collocation report which can't be interrupted when on the page
-                        angular.element('#selected-sidebar-option').data('interrupt', false);
+                        angular.element('#select-facets').data('interrupt', false);
                     }
                 }).catch(function(response) {
                     scope.loading = false;
@@ -133,7 +121,7 @@
             } else {
                 scope.percent = 100;
                 scope.fullResults = fullResults;
-                var urlString = $location.url() + '&frequency_field=' + scope.concKwic.selectedFacet.alias;
+                var urlString = $location.url() + '&frequency_field=' + scope.selectedFacet.alias;
                 saveToLocalStorage(fullResults, urlString);
             }
         }
@@ -146,7 +134,7 @@
                 .then(function(response) {
                     angular.merge(scope.fullRelativeFrequencies, response.data.frequencies);
                     var sortedRelativeResults = progressiveLoad.sortResults(scope.fullRelativeFrequencies);
-                    scope.concKwic.frequencyResults = angular.copy(sortedRelativeResults.slice(0, 500));
+                    scope.facetResults = angular.copy(sortedRelativeResults.slice(0, 500));
                     scope.showingRelativeFrequencies = true;
                     scope.loading = false;
                     if (response.data.more_results) {
@@ -163,33 +151,33 @@
             restrict: 'E',
             templateUrl: 'app/components/concordanceKwic/facets.html',
             replace: true,
-            link: function(scope, element, attrs) {
-                attrs.$observe('facet', function(facetObj) {
-                    if (facetObj !== '') {
-                        scope.showingRelativeFrequencies = false;
-                        scope.relativeFrequencies = 'undefined';
-                        facetObj = scope.$eval(facetObj);
-                        retrieveFacet(scope, facetObj);
-                    }
-                });
+            link: function(scope) {
+                scope.showFacetSelection = true;
+                scope.showFacetResults = false;
+                scope.facets = populateFacets();
+                scope.collocationFacets = populateCollocationFacets();
+                scope.wordsFacets = populateWordFacets();
+                scope.getFacet = function(facetObj) {
+                    getFacet(scope, facetObj);
+                }
                 scope.displayRelativeFrequencies = function() {
                     scope.loading = true;
                     if (scope.relativeFrequencies === 'undefined') {
-                        scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
+                        scope.absoluteFrequencies = angular.copy(scope.facetResults);
                         scope.percent = 0;
                         scope.fullRelativeFrequencies = {};
                         getRelativeFrequencies(scope, 0);
                     } else {
-                        scope.absoluteFrequencies = angular.copy(scope.concKwic.frequencyResults);
-                        scope.concKwic.frequencyResults = scope.relativeFrequencies;
+                        scope.absoluteFrequencies = angular.copy(scope.facetResults);
+                        scope.facetResults = scope.relativeFrequencies;
                         scope.showingRelativeFrequencies = true;
                         scope.loading = false;
                     }
                 }
                 scope.displayAbsoluteFrequencies = function() {
                     scope.loading = true;
-                    scope.relativeFrequencies = angular.copy(scope.concKwic.frequencyResults);
-                    scope.concKwic.frequencyResults = scope.absoluteFrequencies;
+                    scope.relativeFrequencies = angular.copy(scope.facetResults);
+                    scope.facetResults = scope.absoluteFrequencies;
                     scope.showingRelativeFrequencies = false;
                     scope.loading = false;
                 }
@@ -203,6 +191,20 @@
                         report: "concordance"
                     });
                     $location.url(newUrl);
+                }
+                scope.closeFacets = function() {
+                    scope.showFacetResults = false;
+                    scope.showFacetSelection = true;
+                }
+                scope.toggleDisplayFacetSelection = function() {
+                    if (scope.showFacetSelection) {
+                        scope.showFacetSelection = false;
+                    } else {
+                        scope.showFacetSelection = true;
+                    }
+                }
+                scope.hideFacets = function() {
+                    scope.concKwic.showFacetedBrowsing = false;
                 }
             }
         }

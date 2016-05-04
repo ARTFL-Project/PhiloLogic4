@@ -117,6 +117,10 @@ class WSGIHandler(object):
         if "approximate" in self.cgi:
             if self.cgi["approximate"][0] == "yes":
                 self.approximate = True
+            if "approximate_ratio" in self.cgi:
+                self.approximate_ratio = float(self.cgi["approximate_ratio"][0]) / 100
+            else:
+                self.approximate_ratio = 1
 
         if 'q' in self.cgi:
             self.cgi['q'][0] = parse_query(self.cgi['q'][0])
