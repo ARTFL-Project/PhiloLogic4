@@ -21,11 +21,18 @@
                                     </span>
                                 </div>
                                 <div class="col-xs-12 col-sm-9" style="margin-top: -3px" ng-if="formData.approximate === 'yes'">
-                                    <span>
-                                        How approximate?
-                                        <input type="text" style="width: 30px; text-align: center;" ng-model="formData.approximate_ratio">
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle" type="button" id="approximateDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                            {{ approximateValue }}
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="approximateDropDown">
+                                            <li ng-repeat="value in approximateValues" ng-click="selectApproximate(value)">
+                                                <a href="#">{{ ::value }}</a>
+                                            </li>
+                                        </ul>
                                         % or more
-                                    </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
