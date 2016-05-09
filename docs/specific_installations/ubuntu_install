@@ -1,0 +1,8 @@
+Dependencies:
+* libxml2-dev
+* libxslt-dev
+* python-pip
+* zlib1g-dev
+* apache2
+
+Set-up Apache
