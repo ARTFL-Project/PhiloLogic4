@@ -50,6 +50,7 @@ def make_word_counts(loader_obj, text, depth=5):
 
 
 def generate_words_sorted(loader_obj, text):
+    # -a in grep to avoid issues with NULL chars in file
     wordcommand = "cat %s | egrep -a \"^word\" | sort %s %s > %s" % (text["raw"], loader_obj.sort_by_word,
                                                                   loader_obj.sort_by_id, text["words"])
     os.system(wordcommand)

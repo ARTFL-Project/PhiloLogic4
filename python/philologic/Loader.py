@@ -405,7 +405,7 @@ class Loader(object):
         if "words" in self.tables:
             print "concatenating document-order words file...",
             for d in self.loaded_files:
-                os.system('gunzip -c %s | egrep "^word" >> all_words_ordered' % (d["raw"] + ".gz"))
+                os.system('gunzip -c %s | egrep -a "^word" >> all_words_ordered' % (d["raw"] + ".gz"))
             print "done"
 
         tomsargs = "sort -m " + sort_by_id + " " + "*.toms.sorted"
