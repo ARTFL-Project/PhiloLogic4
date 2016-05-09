@@ -399,7 +399,7 @@ class Loader(object):
         os.system('export TMPDIR=%s/' % self.workdir)
 
         print "%s: sorting words" % time.ctime()
-        words_status = self.merge_words()
+        words_status = self.merge_files("words")
         print "%s: word sort returned %d" % (time.ctime(), words_status)
 
         if "words" in self.tables:
@@ -422,50 +422,6 @@ class Loader(object):
             pages_status = os.system("cat %s >> %s/all_pages" % (page_file, self.workdir))
             if not self.debug:
                 os.system("rm %s" % page_file)
-
-    def merge_words(self, file_num=100):
-        """This function runs a multi-stage merge sort on words
-        Since PhilLogic can potentially merge thousands of files, we need to split
-        the sorting stage into multiple steps to avoid running out of file descriptors"""
-        lists_of_words_files = []
-        words_files = []
-
-        # First we split the sort workload into chunks of 100 (default defined in the file_num keyword)
-        for f in glob(self.workdir + '/*words.sorted.gz'):
-            f = os.path.basename(f)
-            words_files.append(('<(gunzip -c %s)' % f, self.workdir + '/' + f))
-            if len(words_files) == file_num:
-                lists_of_words_files.append(words_files)
-                words_files = []
-        if len(words_files):
-            lists_of_words_files.append(words_files)
-
-        # Then we run the merge sort on each chunk of 500 files and compress the result
-        print "%s: Merging words in batches of %d..." % (time.ctime(), file_num)
-        already_merged = 0
-        os.system("touch %s" % self.workdir + "/words.sorted.init")
-        last_sort_file = self.workdir + "/words.sorted.init"
-        for pos, wordlist in enumerate(lists_of_words_files):
-            command_list = ' '.join([i[0] for i in wordlist])
-            file_list = ' '.join([i[1] for i in wordlist])
-            output = self.workdir + "words.sorted.%d.split" % pos
-            wordsargs = "sort -m " + sort_by_word + " " + sort_by_id + " " + command_list
-            command = '/bin/bash -c "%s | sort -m %s %s - <(gunzip -c %s 2> /dev/null) | gzip -c -5 > %s"' % (
-                wordsargs, sort_by_word, sort_by_id, last_sort_file, output)
-            words_status = os.system(command)
-            already_merged += len(wordlist)
-            os.system("rm %s" % last_sort_file)
-            last_sort_file = output
-
-            print "%s: %d files merged..." % (time.ctime(), already_merged)
-            if not self.debug:
-                os.system("rm %s" % file_list)
-        os.system('mv %s %s' % (last_sort_file, self.workdir + '/all_words_sorted.gz'))
-
-        if words_status != 0:
-            print "Word sorting failed\nInterrupting database load..."
-            sys.exit()
-        return words_status
 
     def merge_files(self, file_type, file_num=100):
         """This function runs a multi-stage merge sort on words

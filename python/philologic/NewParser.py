@@ -83,6 +83,7 @@ class XMLParser(object):
         self.got_a_div = False
         self.got_a_para = False
         self.context_div_level = 0
+        self.current_tag = "doc"
 
     def parse(self, input):
         """Top level function for reading a file and printing out the output."""
@@ -122,7 +123,6 @@ class XMLParser(object):
                 if self.in_the_text:
                     self.tag_handler(line)
             else:
-                # TODO wordhandler
                 self.word_handler(line)
                 self.bytes_read_in += len(line)
 
@@ -162,6 +162,8 @@ class XMLParser(object):
             tag_name = tag_matcher.findall(tag)[0]
         except IndexError:
             tag_name = "unparsable_tag"
+        self.current_tag = tag_name
+        print "TAG", self.current_tag
 
         # print tag_name, byte_start
         # Handle <q> tags
@@ -431,6 +433,11 @@ class XMLParser(object):
 
             # TODO: unclear if we need to add EEBO hack when no subdiv objects...
 
+        if tag_name == "w":
+            print "We have a word"
+            self.v.push("word", "word_tag", byte_start)
+            self.word_tag_attributes = self.get_attributes(tag, object_type="word")
+
     def word_handler(self, words):
         """
         Word handler. It takes an artbitrary string or words between two tags and
@@ -530,7 +537,11 @@ class XMLParser(object):
                         print >> sys.stderr, "Truncating for index..."
                         word = word[:235]
 
-                    self.v.push("word", word.strip(), word_pos)
+                    if self.current_tag == "w":
+                        self.v["word"].name = word.strip()
+                        self.v["word"]["byte_start"] = word_pos
+                    else:
+                        self.v.push("word", word.strip(), word_pos)
                     self.v.pull("word", current_pos)
 
                 # Sentence break handler
