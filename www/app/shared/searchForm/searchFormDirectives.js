@@ -20,7 +20,15 @@
         return {
             templateUrl: 'app/shared/searchForm/searchForm.html',
             replace: true,
-            scope: false
+            scope: false,
+            link: function(scope) {
+                scope.approximateValues = [50, 60, 70, 80, 90];
+                scope.approximateValue = "How approximate?";
+                scope.selectApproximate = function(value) {
+                    scope.approximateValue = value;
+                    $rootScope.formData.approximate_ratio = value;
+                }
+            }
         };
     }
 
