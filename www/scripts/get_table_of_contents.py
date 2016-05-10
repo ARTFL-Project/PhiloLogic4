@@ -9,7 +9,7 @@ from philologic.HitWrapper import ObjectWrapper
 import reports as r
 import functions as f
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
     import json
 

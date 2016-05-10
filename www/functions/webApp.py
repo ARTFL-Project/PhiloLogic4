@@ -19,7 +19,8 @@ css_files = [
     "app/assets/css/split/concordanceKwic.css",
     "app/assets/css/split/timeSeries.css",
     "app/assets/css/image_gallery/blueimp-gallery.min.css",
-    "app/assets/css/split/textObjectNavigation.css"
+    "app/assets/css/split/textObjectNavigation.css",
+    "app/assets/css/angular_chart/angular-chart.min.css"
 ]
 
 # External JavaScript assets
@@ -29,7 +30,9 @@ js_plugins = [
     "app/assets/js/plugins/ng-infinite-scroll.min.js",
     "app/assets/js/plugins/jquery.tagcloud.js",
     "app/assets/js/plugins/blueimp-gallery.min.js",
-    "app/assets/js/plugins/jquery.scrollTo.min.js"
+    "app/assets/js/plugins/jquery.scrollTo.min.js",
+    "app/assets/js/plugins/Chart.min.js",
+    "app/assets/js/plugins/angular-chart.min.js"
 ]
 
 # Full List of all AngularJS specific JavaScript

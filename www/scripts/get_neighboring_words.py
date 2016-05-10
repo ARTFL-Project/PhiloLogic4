@@ -2,21 +2,23 @@
 
 import sys
 import timeit
-from philologic.DB import DB
-sys.path.append('..')
-from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
+
+from philologic.DB import DB
+
+sys.path.append('..')
 import functions as f
+from functions.wsgi_handler import WSGIHandler
+
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
     import json
 
 
 def get_neighboring_words(environ, start_response):
     status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),
-               ("Access-Control-Allow-Origin", "*")]
+    headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
 
     config = f.WebConfig()
@@ -32,8 +34,7 @@ def get_neighboring_words(environ, start_response):
 
     kwic_words = []
     start_time = timeit.default_timer()
-    hits = db.query(request["q"], request["method"], request["arg"],
-                    **request.metadata)
+    hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
     c = db.dbh.cursor()
 
     for hit in hits[index:]:
@@ -45,18 +46,16 @@ def get_neighboring_words(environ, start_response):
         parent_sentence = results['parent']
 
         if request.direction == "left":
-            c.execute(
-                'select philo_name, philo_id from words where parent=? and rowid < ?',
-                (parent_sentence, results['rowid']))
+            c.execute('select philo_name, philo_id from words where parent=? and rowid < ?',
+                      (parent_sentence, results['rowid']))
             string = []
             for i in c.fetchall():
                 string.append(i['philo_name'].decode('utf-8'))
             string.reverse()
             string = ' '.join(string)
         elif request.direction == "right":
-            c.execute(
-                'select philo_name, philo_id from words where parent=? and rowid > ?',
-                (parent_sentence, results['rowid']))
+            c.execute('select philo_name, philo_id from words where parent=? and rowid > ?',
+                      (parent_sentence, results['rowid']))
             string = []
             for i in c.fetchall():
                 string.append(i['philo_name'].decode('utf-8'))

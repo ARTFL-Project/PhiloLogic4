@@ -58,19 +58,19 @@ class DB:
         c = self.dbh.cursor()
         c.execute("SELECT * FROM toms WHERE philo_id=? LIMIT 1;",(hit_s,))
         return c.fetchone()
-        
+
     def get_word(self,item):
         word_s = hit_to_string(item,self.width)
         c = self.dbh.cursor()
         c.execute("SELECT * FROM words WHERE philo_id=? LIMIT 1;",(word_s,))
         return c.fetchone()
-        
+
     def get_page(self,item):
         #print >> sys.stderr, "PAGE_ITEM", item
         page_id_s = " ".join(str(s) for s in item)
         #print >> sys.stderr, "PAGE_ITEM_STRING", page_id_s
         c = self.dbh.cursor()
-        c.execute("SELECT * FROM pages WHERE philo_id=? LIMIT 1;",(page_id_s,))       
+        c.execute("SELECT * FROM pages WHERE philo_id=? LIMIT 1;",(page_id_s,))
         return c.fetchone()
 
     def get_all(self,philo_type="doc"):
@@ -151,7 +151,7 @@ class DB:
             else:
 #                print >> sys.stderr, "cached @ %s" % corpus_file
                 corpus = HitList.HitList(corpus_file,0,self)
-                corpus.finish()             
+                corpus.finish()
             #print >> sys.stderr, "corpus file of length %d" % len(corpus)
             if len(corpus) == 0:
                 return corpus
@@ -184,7 +184,7 @@ class DB:
 #                        parsed_split += [(l,t)]
 #                command = Query.format_parsed_query(parsed_split,self)
 #                words_per_hit = len(command.split("\n\n"))
-        
+
                 return HitList.HitList(search_file,words_per_hit,self)
         else:
             if corpus:

@@ -1,27 +1,32 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.append('..')
 import os
 import re
-import functions as f
+import sqlite3
+import sys
+from wsgiref.handlers import CGIHandler
+
 from lxml import etree
 from philologic.DB import DB
-from functions.wsgi_handler import WSGIHandler
-from wsgiref.handlers import CGIHandler
-from functions.ObjectFormatter import convert_entities, valid_html_tags, xml_to_html_class, note_content
-from concordance import citation_links
+
+sys.path.append('..')
+import functions as f
 from bibliography import biblio_citation
+from concordance import citation_links
+from functions.ObjectFormatter import (convert_entities, note_content, valid_html_tags, xml_to_html_class)
+from functions.wsgi_handler import WSGIHandler
+
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
-    print >> sys.stderr, "Import Error, please install ujson for better performance"
+    print >> sys.stderr, "Import Error, please install simplejson for better performance"
     import json
 
 philo_types = set(['div1', 'div2', 'div3'])
 philo_slices = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
 
-def navigation(environ,start_response):
+
+def navigation(environ, start_response):
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
@@ -34,10 +39,11 @@ def navigation(environ,start_response):
     while obj['philo_name'] == '__philo_virtual' and obj["philo_type"] != "div1":
         philo_id.pop()
         obj = db[philo_id]
-    headers = [('Content-type', 'application/json; charset=UTF-8'),("Access-Control-Allow-Origin","*")]
-    start_response('200 OK',headers)
+    headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
+    start_response('200 OK', headers)
     text_object = generate_text_object(obj, db, request, config)
     yield json.dumps(text_object)
+
 
 def generate_text_object(obj, db, q, config, note=False):
     philo_id = list(obj.philo_id)
@@ -58,6 +64,7 @@ def generate_text_object(obj, db, q, config, note=False):
     text_object['text'] = text
     text_object['imgs'] = imgs
     return text_object
+
 
 def neighboring_object_id(db, philo_id):
     if not philo_id:
@@ -82,7 +89,7 @@ def get_text_obj(obj, config, q, word_regex, note=False):
         ## workaround for when no filename is returned with the full philo_id of the object
         philo_id = obj.philo_id[0] + ' 0 0 0 0 0 0'
         c = obj.db.dbh.cursor()
-        c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id,))
+        c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id, ))
         path += "/data/TEXT/" + c.fetchone()["filename"]
     file = open(path)
     byte_start = int(obj.byte_start)
@@ -91,12 +98,13 @@ def get_text_obj(obj, config, q, word_regex, note=False):
     raw_text = file.read(width)
     try:
         bytes = sorted([int(byte) - byte_start for byte in q.byte])
-    except ValueError: ## q.byte contains an empty string
+    except ValueError:  ## q.byte contains an empty string
         bytes = []
 
     formatted_text, imgs = format_text_object(obj, raw_text, config, q, word_regex, bytes=bytes, note=note)
-    formatted_text = formatted_text.decode("utf-8","ignore")
+    formatted_text = formatted_text.decode("utf-8", "ignore")
     return formatted_text, imgs
+
 
 def format_text_object(obj, text, config, q, word_regex, bytes=[], note=False):
     philo_id = obj.philo_id
@@ -144,27 +152,35 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[], note=False):
                 el.text = "note"
                 el.tag = "span"
             elif el.tag == "note":
-                if el.getparent().attrib["type"] != "notes": ## inline notes
+                if el.getparent().attrib["type"] != "notes":  ## inline notes
                     el.tag = 'span'
                     el.attrib['class'] = "note-content"
                     for child in el:
                         child = note_content(child)
                     # insert an anchor before this element by scanning through the parent
                     parent = el.getparent()
-                    for i,child in enumerate(parent):
+                    for i, child in enumerate(parent):
                         if child == el:
-                            attribs = {"class":"note", "tabindex": "0", "data-toggle": "popover", "data-container": "body",
-                                       "data-placement": "right", "data-trigger": "focus"}
-                            parent.insert(i,etree.Element("a",attrib=attribs))
+                            attribs = {"class": "note",
+                                       "tabindex": "0",
+                                       "data-toggle": "popover",
+                                       "data-container": "body",
+                                       "data-placement": "right",
+                                       "data-trigger": "focus"}
+                            parent.insert(i, etree.Element("a", attrib=attribs))
                             new_anchor = parent[i]
                             new_anchor.text = "note"
-                else: # endnotes
+                else:  # endnotes
                     el.tag = "div"
                     el.attrib['class'] = "xml-note"
                     note_id = '#' + el.attrib['id']
                     link_back = etree.Element("a")
-                    link_back.attrib['note-link-back'] = f.link.make_absolute_query_link(config, q, script_name="/scripts/get_note_link_back.py",
-                                                                               doc_id=str(philo_id[0]), note_id=note_id)
+                    link_back.attrib['note-link-back'] = f.link.make_absolute_query_link(
+                        config,
+                        q,
+                        script_name="/scripts/get_note_link_back.py",
+                        doc_id=str(philo_id[0]),
+                        note_id=note_id)
                     link_back.attrib['class'] = "btn btn-xs btn-default link-back"
                     link_back.attrib['role'] = "button"
                     link_back.text = "Go back to text"
@@ -188,7 +204,7 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[], note=False):
                     el[-1].attrib['data-gallery'] = ''
             elif el.tag == "figure":
                 if el[0].tag == "graphic":
-                    img_url = el[0].attrib["url"].replace(":","_")
+                    img_url = el[0].attrib["url"].replace(":", "_")
                     volume = re.match("\d+", img_url).group()
                     url_prefix = config.page_images_url_root + '/V' + volume + "/plate_"
                     el.tag = "span"
@@ -217,7 +233,7 @@ def format_text_object(obj, text, config, q, word_regex, bytes=[], note=False):
     output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
     output = convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
 
-    if note: ## Notes don't need to fetch images
+    if note:  ## Notes don't need to fetch images
         return (output, {})
 
     ## Page images
@@ -234,7 +250,8 @@ def page_images(config, output, current_obj_img, philo_id):
     if first_page_object['byte_start'] and current_obj_img[0] != first_page_object['filename']:
         if first_page_object['filename']:
             page_href = config.page_images_url_root + '/' + first_page_object['filename']
-            output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(first_page_object["n"]) + "]</a></p>" + output
+            output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(
+                first_page_object["n"]) + "]</a></p>" + output
             if current_obj_img[0] == '':
                 current_obj_img[0] = first_page_object['filename']
             else:
@@ -264,10 +281,14 @@ def get_first_page(philo_id, config):
     try:
         filename = page_result['img']
         n = page_result['n'] or ''
-        page = {'filename': filename, "n": n, 'byte_start': page_result['start_byte'], 'byte_end': page_result['end_byte']}
+        page = {'filename': filename,
+                "n": n,
+                'byte_start': page_result['start_byte'],
+                'byte_end': page_result['end_byte']}
     except:
         page = {'filename': '', 'byte_start': ''}
     return page
+
 
 def get_all_page_images(philo_id, config, current_obj_imgs):
     if current_obj_imgs[0]:
@@ -275,12 +296,16 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
         db = DB(config.db_path + '/data/')
         c = db.dbh.cursor()
         approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
-        c.execute('select * from pages where philo_id like ? and img is not null and img != ""', (approx_id,))
-        current_obj_imgs = set(current_obj_imgs)
-        all_imgs = [i['img'] for i in c.fetchall()]
+        try:
+            c.execute('select * from pages where philo_id like ? and img is not null and img != ""', (approx_id, ))
+            current_obj_imgs = set(current_obj_imgs)
+            all_imgs = [i['img'] for i in c.fetchall()]
+        except sqlite3.OperationalError:
+            all_imgs = []
         return all_imgs
     else:
         return []
+
 
 if __name__ == "__main__":
     CGIHandler().run(navigation)

@@ -1,6 +1,6 @@
-<div id="results_container" ng-class="{'col-xs-12': concKwic.frequencyResults.length === 0, 'col-xs-8': concKwic.frequencyResults.length > 0}">
+<div id="results_container" class="col-xs-12 col-sm-8">
 	<ol id="philologic_concordance">
-		<li class="philologic_occurrence panel panel-default velocity-opposites-transition-slideLeftIn" data-velocity-opts="{duration:400, stagger:50}" ng-repeat="result in ::results.results" ng-init="position = $index + results.description.start">
+		<li class="philologic-occurrence panel panel-default" ng-repeat="result in ::results.results" ng-init="position = $index + results.description.start">
 			<div class="citation-container row">
 				<div class="col-xs-12 col-sm-10 col-md-11">
 				   <span class="cite" data-id="{{ ::result.philo_id.join(' ') }}">

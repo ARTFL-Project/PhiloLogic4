@@ -3,6 +3,9 @@
 
     angular
         .module("philoApp")
+        .config(['$compileProvider', function($compileProvider) {
+            $compileProvider.debugInfoEnabled(false);
+        }])
         .controller("PhiloMainController", PhiloMainController);
 
 

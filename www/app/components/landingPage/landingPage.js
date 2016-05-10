@@ -37,10 +37,10 @@
         }
         $rootScope.report = "landing_page";
 
-        vm.getContent = function(contentType, range) {
+        vm.getContent = function(browseType, range) {
             vm.query = {
-                contentType: contentType,
-                range: range
+                browseType: browseType,
+                query: range
             };
         }
 

@@ -7,7 +7,7 @@ from wsgiref.handlers import CGIHandler
 from philologic.DB import DB
 import functions as f
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
     import json
 import sqlite3

@@ -9,7 +9,7 @@ from philologic.HitWrapper import ObjectWrapper
 import functions as f
 from reports.navigation import generate_text_object
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
     import json
 

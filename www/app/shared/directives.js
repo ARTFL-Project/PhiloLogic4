@@ -1,4 +1,4 @@
-(function() {
+(function () {
     "use strict";
 
     angular
@@ -6,7 +6,8 @@
         .directive('loading', loading)
         .directive('progressBar', progressBar)
         .directive('selectWord', selectWord)
-        .directive('tooltip', tooltip);
+        .directive('tooltip', tooltip)
+        .directive('animateOnLoad', animateOnLoad);
 
     function loading() {
         return {
@@ -14,13 +15,16 @@
             scope: {
                 loading: '='
             },
-            link: function(scope, element) {
-                element.prepend('<div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div>');
-                scope.$watch('loading', function(value) {
+            link: function (scope, element) {
+                element.prepend(['<div class="spinner-wrapper"><div class="showbox"><div class="loader">',
+                       '<svg class="circular" viewBox="25 25 50 50">',
+                       '<circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/>',
+                       '</svg></div></div></div>'].join(''));
+                scope.$watch('loading', function (value) {
                     if (value) {
-                       element.find('.spinner').velocity('fadeIn', {duration: 200});
+                        element.find('.spinner-wrapper').velocity('fadeIn', { duration: 200 });
                     } else {
-                        element.find('.spinner').velocity('fadeOut', {duration: 200});
+                        element.find('.spinner-wrapper').velocity('fadeOut', { duration: 200 });
                     }
                 })
             }
@@ -32,13 +36,13 @@
             restrict: 'E',
             template: '<div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div></div>',
             replace: true,
-            link: function(scope, element, attrs) {
-                attrs.$observe('progress', function(percent) {
+            link: function (scope, element, attrs) {
+                attrs.$observe('progress', function (percent) {
                     element.show(); // Make sure it's always visible
                     var progressElement = element.find('.progress-bar');
-                    progressElement.velocity({'width': percent.toString() + '%'}, {
+                    progressElement.velocity({ 'width': percent.toString() + '%' }, {
                         queue: false,
-                        complete: function() {
+                        complete: function () {
                             progressElement.text(percent.toString() + '%');
                             if (percent == 100) {
                                 progressElement.parent().delay(500).velocity('slideUp');
@@ -54,15 +58,15 @@
         return {
             restrict: 'A',
             replace: true,
-            link: function(scope, element, attrs) {
-                var modalPopUp = function(reponse) {
+            link: function (scope, element, attrs) {
+                var modalPopUp = function (reponse) {
                     if (!$.isEmptyObject(response.data)) {
                         $rootScope.wordProperties = response.data;
                         angular.element('#wordProperty').modal('show');
                     }
                 }
                 if (scope.philoConfig.words_facets.length > 0) {
-                    element.mouseup(function() {
+                    element.mouseup(function () {
                         var text = $window.getSelection().toString();
                         if (text.length > 0) {
                             var context = element.find('div:visible').text();
@@ -84,7 +88,7 @@
                                     report: "navigation"
                                 });
                             }
-                            resultsPromise.then(function(response) {
+                            resultsPromise.then(function (response) {
                                 if (!$.isEmptyObject(response.data)) {
                                     $rootScope.wordProperties = response.data;
                                     angular.element('#wordProperty').modal('show');
@@ -93,7 +97,7 @@
                         }
                     });
                 }
-                element.on('$destroy', function() {
+                element.on('$destroy', function () {
                     element.off();
                     $rootScope.wordProperties = undefined;
                 });
@@ -104,8 +108,8 @@
     function tooltip() {
         return {
             restrict: 'A',
-            link: function(scope, element, attrs) {
-                element.mouseenter(function() {
+            link: function (scope, element, attrs) {
+                element.mouseenter(function () {
                     var text = attrs.tooltipTitle;
                     if (!text.length && scope.formData.report === 'time_series') {
                         var startDate = element.find('.graph-years').text();
@@ -120,14 +124,26 @@
                         var tooltipContainer = angular.element('<div class="tooltip left" style="width: 150px; margin-left: -150px;"><div class="tooltip-arrow"></div><div class="tooltip-inner">' + text + '</div></div>');
                     }
                     element.append(tooltipContainer);
-                    element.find('.tooltip').velocity({'opacity': .9}, {duration: 200});
+                    element.find('.tooltip').velocity({ 'opacity': .9 }, { duration: 200 });
                 });
-                element.mouseleave(function() {
+                element.mouseleave(function () {
                     element.find('.tooltip').remove();
                 });
-                element.on('$destroy', function() {
+                element.on('$destroy', function () {
                     element.off();
                 });
+            }
+        };
+    }
+    
+    // Force animate on load
+    function animateOnLoad($animateCss) {
+        return {
+            'link': function (scope, element) {
+                $animateCss(element, {
+                    'event': 'enter',
+                    structural: true
+                }).start();
             }
         };
     }

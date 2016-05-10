@@ -1,42 +1,14 @@
 <div id="default-landing-page">
     <div class="row" id="landingGroup">
-        <div class="{{ ::authorOffset }} col-xs-12 col-sm-6" id="col-author" ng-if="authorRanges">
+        <div class="col-xs-12 col-sm-6 col-ranges" ng-class="{'col-sm-offset-3': defaultLandingPageBrowsing.length == 1}" ng-repeat="browseType in ::defaultLandingPageBrowsing">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    Author
+                    {{ ::browseType.label }}
                 </div>
                 <div class="panel-body">
-                    <table id="author-range-selectors" class="table table-bordered" data-type="author">
-                        <tr ng-repeat="ranges in ::authorRanges">
-                            <td ng-repeat="range in ::ranges" ng-click="lp.getContent('author', '{{ ::range }}')">{{ ::range }}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="{{ ::titleOffset }} col-xs-12 col-sm-6" id="col-title" ng-if="titleRanges">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Title
-                </div>
-                <div class="panel-body">
-                    <table id="title-range-selectors" class="table table-bordered" data-type="title">
-                        <tr ng-repeat="ranges in ::titleRanges">
-                            <td ng-repeat="range in ::ranges" ng-click="lp.getContent('title', '{{ ::range }}')">{{ ::range }}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="col-xs-12" id="col-year" ng-if="dateRanges">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Date
-                </div>
-                <div class="panel-body">
-                    <table id="year-range-selectors" class="table table-bordered" data-type="year">
-                        <tr ng-repeat="ranges in ::dateRanges">
-                            <td ng-repeat="range in ::ranges" ng-click="lp.getContent('date', '{{ ::range }}')">{{ ::range }}</td>
+                    <table class="table table-bordered range-selectors" data-type="author">
+                        <tr ng-repeat="ranges in ::browseType.queries">
+                            <td ng-repeat="range in ::ranges" ng-click="lp.getContent(browseType, range)">{{ ::range }}</td>
                         </tr>
                     </table>
                 </div>

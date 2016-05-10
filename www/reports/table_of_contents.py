@@ -10,9 +10,9 @@ from philologic import HitWrapper
 from concordance import citation_links
 from bibliography import biblio_citation
 try:
-    import ujson as json
+    import simplejson as json
 except ImportError:
-    print >> sys.stderr, "Import Error, please install ujson for better performance"
+    print >> sys.stderr, "Import Error, please install simplejson for better performance"
     import json
 
 philo_types = set(['div1', 'div2', 'div3'])

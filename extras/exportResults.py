@@ -3,7 +3,7 @@
 import requests
 import sys
 from optparse import OptionParser, BadOptionError, AmbiguousOptionError
-from json import dump
+from simplejson import dump
 from time import sleep
 
 

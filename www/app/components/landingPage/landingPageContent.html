@@ -3,15 +3,18 @@
         <ul class="row" ng-repeat="group in resultGroups | limitTo: displayLimit">
             <h4>{{ ::group.prefix }}</h4>
             <li class="{{ ::contentClass }}" ng-repeat="result in ::group.results">
-                <span ng-if="contentType === 'author'">
-                    <a href="{{ ::result.url }}">{{ ::result.author }}</a>&nbsp;({{ ::result.count }})
-                </span>
-                <span ng-if="contentType === 'title'">
-                    <a href="{{ ::result.url }}" ><i>{{ ::result.title }}</i></a>&nbsp;({{ ::result.author }})
-                </span>
-                <span ng-if="contentType === 'date'">
-                    <a href="{{ ::result.url }}" ><i>{{ ::result.title }}</i></a>&nbsp;({{ ::result.author }})
-                </span>
+                    <a href="{{ ::result.url }}">
+                        <span ng-if="contentType !='author'">
+                            <i>{{ ::result.metadata.title }}</i>
+                            &nbsp;&nbsp;<b>&#124;&#124;</b>&nbsp;&nbsp;{{ ::result.metadata.author }}
+                        </span>
+                        <span ng-if="contentType == 'author'">
+                            {{ ::result.metadata.author }}
+                        </span>
+                    </a>
+                    <span ng-if="displayCount ==  'true'">
+                        &nbsp;({{ ::result.count }})
+                    </span>
             </li>
         </ul>
     </div>

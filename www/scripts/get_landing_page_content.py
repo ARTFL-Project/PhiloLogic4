@@ -1,128 +1,131 @@
 #!/usr/bin/env python
 
-import sys
-try:
-    import ujson as json
-except ImportError:
-    import json
 import re
+import sys
 import unicodedata
+from operator import itemgetter
+from wsgiref.handlers import CGIHandler
+
+from philologic.DB import DB
+
 sys.path.append('..')
 import functions as f
 from functions.wsgi_handler import WSGIHandler
-from philologic.DB import DB
-from wsgiref.handlers import CGIHandler
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 object_depth = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
 
 
 def landing_page_content(environ, start_response):
     status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),
-               ("Access-Control-Allow-Origin", "*")]
+    headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
     config = f.WebConfig()
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(db, environ)
-    content_type = request.landing_page_content_type
-    q_range = request.range.lower().split('-')
-    if content_type != "date":
-        letter_range = set([chr(i) for i in range(
-            ord(q_range[0]), ord(q_range[1]) + 1)])
-    c = db.dbh.cursor()
-    content = ''
-    if content_type == "author":
-        content = generate_author_list(c, letter_range)
-    elif content_type == "title":
-        content = generate_title_list(c, letter_range, db, config)
-    elif content_type == "date":
-        content = generate_year_list(c, q_range)
-    yield json.dumps(content)
+    if request.is_range == 'true':
+        if type(request.query) == str:
+            request_range = request.query.decode("utf8")
+        request_range = request_range.lower().split('-')
+        results = group_by_range(request_range, request, db)
+    else:
+        results = group_by_metadata(request, db)
+    yield results
 
 
-def generate_author_list(c, letter_range):
-    c.execute(
-        'select distinct author, count(*) from toms where philo_type="doc" group by author order by author')
-    content = []
-    for author, count in c.fetchall():
-        if not author:
-            author = "Unknown"
-        if author[0].lower() not in letter_range:
-            continue
-        if author != "Unknown":
-            url = 'query?report=bibliography&author="%s"' % author
-        else:
-            url = 'query?report=bibliography&author=NULL'
-        content.append({
-            "author": author,
-            "url": url,
-            "count": count,
-            "initial": author.decode('utf-8')[0]
-        })
-    return content
-
-
-def generate_title_list(c, letter_range, db, config):
-    c.execute('select * from toms where philo_type="doc"')
-    content = []
+def date_range(query_range):
+    is_date = False
     try:
-        prefixes = '|'.join([i for i in config.title_prefix_removal])
-    except:  # for backwards compatibility
-        prefixes = ""
-    prefix_sub = re.compile(r"^%s" % prefixes, re.I | re.U)
-    for i in c.fetchall():
-        title = i['title'].decode('utf-8').lower()
-        title = prefix_sub.sub('', title).strip()
-        if title[0].lower() not in letter_range:
+        int(query_range[0])
+        int(query_range[1])
+        is_date = True
+    except ValueError:
+        pass
+    return is_date
+
+
+def group_by_range(request_range, request, db):
+    metadata_queried = request.group_by_field
+    is_date = date_range(request_range)
+    if is_date:
+        content_type = "date"
+        query_range = set(range(int(request_range[0]), int(request_range[1])))
+    else:
+        content_type = metadata_queried
+        query_range = set(range(ord(request_range[0]), ord(request_range[1]) + 1))  # Ordinal avoids unicode issues...
+    c = db.dbh.cursor()
+    c.execute('select *, count(*) as count from toms where philo_type="doc" group by %s' % metadata_queried)
+    content = {}
+    for doc in c.fetchall():
+        normalized_test_value = ''
+        if doc[metadata_queried] is None:
             continue
-        try:
-            author = i["author"] or "Anonymous"
-        except:
-            author = ""
-        url = "navigate/%s/table-of-contents" % i['philo_id'].split()[0]
-        # Smash accents and normalize for sorting
-        title = ''.join([j for j in unicodedata.normalize(
-            "NFKD", title) if not unicodedata.combining(j)])
-        metadata_fields = {}
-        for metadata in db.locals['metadata_fields']:
+        if is_date:
             try:
-                metadata_fields[metadata] = i[metadata] or ''
+                initial = int(doc[metadata_queried])
+                test_value = initial
             except:
-                pass
-        content.append({
-            "title": i['title'],
-            "url": url,
-            "author": author,
-            "initial": title[0].upper(),
-            'truncated': title,
-            'metadata_fields': metadata_fields
+                continue
+        else:
+            initial_letter = doc[metadata_queried].decode('utf-8')[0].lower()
+            test_value = ord(initial_letter)
+            normalized_test_value = ord(''.join([i for i in unicodedata.normalize("NFKD", initial_letter) if not unicodedata.combining(i)]))
+            initial = initial_letter.upper().encode("utf8")
+        # Are we within the range?
+        if test_value in query_range or normalized_test_value in query_range:
+            if normalized_test_value in query_range:
+                initial = ''.join([i for i in unicodedata.normalize("NFKD", initial_letter) if not unicodedata.combining(i)]).upper().encode('utf8')
+            if metadata_queried == "title":
+                url = "navigate/%s/table-of-contents" % doc['philo_id'].split()[0]
+            elif not doc[metadata_queried]:
+                url = 'query?report=bibliography&%s=NULL' % metadata_queried
+            else:
+                url = 'query?report=bibliography&%s="%s"' % (metadata_queried, doc[metadata_queried])
+            if initial not in content:
+                content[initial] = []
+            content[initial].append({
+                "metadata": get_all_metadata(db, doc),
+                "url": url,
+                "count": doc['count']
+            })
+    results = []
+    for result_set in sorted(content.iteritems(), key=itemgetter(0)):
+        results.append({"prefix": result_set[0], "results": result_set[1]})
+    return json.dumps({"display_count": request.display_count, "content_type": content_type, "content": results})
+
+
+def group_by_metadata(request, db):
+    c = db.dbh.cursor()
+    query = '''select * from toms where philo_type="doc" and %s=?''' % request.group_by_field
+    c.execute(query, (request.query, ))
+    result_group = []
+    for doc in c.fetchall():
+        result_group.append({
+            "metadata": get_all_metadata(db, doc),
+            "url": "navigate/%s/table-of-contents" % doc['philo_id'].split()[0]
         })
-    content = sorted(content, key=lambda x: x['truncated'])
-    return content
+    return json.dumps({
+        "display_count": request.display_count,
+        "content_type": request.group_by_field,
+        "content": [{
+            "prefix": request.query,
+            "results": result_group
+        }]
+    })
 
 
-def generate_year_list(c, q_range):
-    low_range = int(q_range[0])
-    high_range = int(q_range[1])
-    query = 'select * from toms where philo_type="doc" and date >= "%d" and date <= "%d" order by date' % (
-        low_range, high_range)
-    c.execute(query)
-    content = []
-    for i in c.fetchall():
-        author = i['author'] or "Anonymous"
-        url = "navigate/%s/table-of-contents" % i['philo_id'].split()[0]
+def get_all_metadata(db, doc):
+    doc_metadata = {}
+    for metadata in db.locals.metadata_fields:
         try:
-            date = i['date']
-        except:
-            date = ""
-        content.append({
-            "title": i['title'],
-            "url": url,
-            "date": date,
-            "author": author,
-            "initial": date
-        })
-    return content
+            doc_metadata[metadata] = doc[metadata] or "NA"
+        except IndexError:
+            doc_metadata[metadata] = "NA"
+    return doc_metadata
 
 
 if __name__ == "__main__":

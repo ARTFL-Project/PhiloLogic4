@@ -9,6 +9,10 @@ import re
 import unicodedata
 from QuerySyntax import parse_query, group_terms
 
+
+# Work around issue where environ PATH does not contain path to C core
+os.environ["PATH"] += ":/usr/local/bin/" 
+
 def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,limit=3000,filename="", query_debug=False):
     sys.stdout.flush()
     tstart = datetime.now()
@@ -28,7 +32,7 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
     hl = open(filename, "w")
     err = open("/dev/null", "w")
     freq_file = db.path+"/frequencies/normalized_word_frequencies"
-    if (query_debug):
+    if query_debug:
         print >> sys.stderr, "FORKING"
     pid = os.fork()
     if pid == 0:
@@ -50,15 +54,15 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
 #                args.extend(("--corpusfile", corpus_file , "--corpussize" , str(corpus_size)))
             if method and method_arg:
                 args.extend(("-m",method,"-a",str(method_arg)))
-            
-            args.extend(("-o","binary",db.path,));
 
-            worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err)
+            args.extend(("-o","binary",db.path,));
+            
+            worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err, env=os.environ)
             # if query_debug:
             #     print >> sys.stderr, "WORKER STARTED:"," ".join(args);
 
             query_log_fh = filename + ".terms"
-            if db.locals['debug']:
+            if query_debug:
                 print >> sys.stderr, "LOGGING TERMS to " + filename + ".terms"
             logger = subprocess.Popen(["tee",query_log_fh],stdin=subprocess.PIPE,stdout = worker.stdin)
             # print >> sys.stderr, "EXPANDING"
@@ -148,7 +152,7 @@ def expand_query(split, freq_file, dest_fh):
         # if we have multiple terms in the group, should check to make sure they don't repeat
         # if it's a single term, we can skip that
         if len(group) == 1: # if we have a one-token group, don't need to sort and uniq
-            filters = subprocess.Popen("cut -f 2", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)            
+            filters = subprocess.Popen("cut -f 2", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
         else: # otherwise we need to merge the egrep results and remove duplicates.
             filters = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
 
@@ -156,7 +160,7 @@ def expand_query(split, freq_file, dest_fh):
             if kind == "TERM" or kind == "RANGE":
                 grep_word(token,freq_file,filters.stdin)
             elif kind == "QUOTE":
-                filters.stdin.write(token[1:-1] + "\n") 
+                filters.stdin.write(token[1:-1] + "\n")
             # what to do about NOT?
         filters.stdin.close()
         filters.wait()
@@ -198,7 +202,7 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
 
         # set up the basic filter to get the terms sorted and ready for the search engine
 #        if len(group) > 1:
-#            cut_proc = subprocess.Popen("cut -f 2", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)  
+#            cut_proc = subprocess.Popen("cut -f 2", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
 #        else:
 #            cut_proc = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
         cut_proc = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
@@ -210,8 +214,8 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
             if kind == "TERM":
                 proc = invert_grep(token,subprocess.PIPE,filter_inputs[0], lowercase)
             if kind == "QUOTE":
-                proc = invert_grep_exact(token,subprocess.PIPE,filter_inputs[0])    
-            filter_inputs = [proc.stdin] + filter_inputs  
+                proc = invert_grep_exact(token,subprocess.PIPE,filter_inputs[0])
+            filter_inputs = [proc.stdin] + filter_inputs
             filter_procs = [proc] + filter_procs
 
         # then we append output from all the greps into the front of that filter chain.
@@ -220,7 +224,7 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
                 grep_proc = grep_word(token,freq_file,filter_inputs[0], lowercase)
                 grep_proc.wait()
             elif kind == "QUOTE":
-#                filter_inputs[0].write(token[1:-1] + "\t" + token[1:-1] + "\n") 
+#                filter_inputs[0].write(token[1:-1] + "\t" + token[1:-1] + "\n")
                 grep_proc = grep_exact(token,freq_file,filter_inputs[0])
                 grep_proc.wait()
         # close all the pipes and wait for procs to finish.
@@ -264,6 +268,7 @@ def invert_grep_exact(token, in_fh, dest_fh):
     #can't wait because input isn't ready yet.
     return grep_proc
 
+
 if __name__ == "__main__":
     path = sys.argv[1]
     terms = sys.argv[2:]
@@ -280,7 +285,7 @@ if __name__ == "__main__":
     fake_db.locals = {"db_path":path + "/data/"}
     fake_db.path = path + "/data/"
     fake_db.encoding = "utf-8"
-    freq_file = path + "/data/frequencies/normalized_word_frequencies"    
+    freq_file = path + "/data/frequencies/normalized_word_frequencies"
 #    freq_file = "/Library/WebServer/Documents/philologic/plain_text_test/data/frequencies/normalized_word_frequencies"
     expand_query_not(split,freq_file,sys.stdout)
     hits = query(fake_db," ".join(terms),query_debug = True)
