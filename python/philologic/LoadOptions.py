@@ -148,7 +148,7 @@ class LoadOptions(object):
                 elif a == "parser_factory":
                     if value == "NewParser":
                         self.values["parser_factory"] = NewParser.XMLParser
-                elif a == "navigable_objects":
+                elif a == "navigable_objects" and value is not None:
                     self.values["navigable_objects"] = [v.strip() for v in value.split(',')]
                 else:
                     if value is not None:

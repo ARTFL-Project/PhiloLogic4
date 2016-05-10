@@ -279,18 +279,18 @@ class Loader(object):
 
         indexed_types = []
 
-        for o_type in self.parser_defaults["metadata_xpaths"]:
-            if o_type not in indexed_types and o_type != "page":
-                indexed_types.append(o_type)
+        for object_type in self.parser_defaults["metadata_xpaths"]:
+            if object_type not in indexed_types and object_type != "page":
+                indexed_types.append(object_type)
 
         if "doc" not in indexed_types:
             indexed_types = ["doc"] + indexed_types
 
         for t in indexed_types:
             self.metadata_hierarchy.append([])
-            for e_type in self.parser_defaults["metadata_xpaths"]:
-                if t == e_type:
-                    for param in self.parser_defaults["metadata_xpaths"][o_type]:
+            for element_type in self.parser_defaults["metadata_xpaths"]:
+                if t == element_type:
+                    for param in self.parser_defaults["metadata_xpaths"][element_type]:
                         if param not in self.metadata_fields:
                             self.metadata_fields.append(param)
                             self.metadata_hierarchy[-1].append(param)
