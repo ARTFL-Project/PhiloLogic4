@@ -1,33 +1,17 @@
 #!/usr/bin/env python
 
+import re
 import sys
+from wsgiref.handlers import CGIHandler
+
+import simplejson as json
+from philologic.DB import DB
+
 sys.path.append('..')
 import functions as f
-from reports.concordance import fetch_concordance
-import re
-from philologic.DB import DB
-from wsgiref.handlers import CGIHandler
 from concordance import citation_links, concordance_citation, fetch_concordance
 from functions.wsgi_handler import WSGIHandler
-try:
-    import simplejson as json
-except ImportError:
-    print >> sys.stderr, "Please install simplejson for better performance"
-    import json
-
-end_highlight_match = re.compile(r'.*<span class="highlight">[^<]*?(</span>)')
-token_regex = re.compile(r'(\W)', re.U)
-
-left_truncate = re.compile(r"^\w+", re.U)
-right_truncate = re.compile("\w+$", re.U)
-word_identifier = re.compile("\w", re.U)
-highlight_match = re.compile(r'<span class="highlight">[^<]*?</span>')
-#token_regex = re.compile(r'[\W\d]+', re.U)
-
-begin_match = re.compile(r'^[^<]*?>')
-start_cutoff_match = re.compile(r'^[^ <]+')
-end_match = re.compile(r'<[^>]*?\Z')
-no_tag = re.compile(r'<[^>]+>')
+from reports.concordance import fetch_concordance
 
 
 def word_property_filter(environ, start_response):
@@ -38,8 +22,8 @@ def word_property_filter(environ, start_response):
                ("Access-Control-Allow-Origin", "*")]
     start_response('200 OK', headers)
 
-    hits = db.query(request["q"], request["method"], request["arg"], **
-                    request.metadata)
+    hits = db.query(request["q"], request["method"], request["arg"],
+                    **request.metadata)
     filter_results = filter_words_by_property(hits, config.db_path, request,
                                               db, config)
     yield json.dumps(filter_results)
@@ -108,7 +92,6 @@ def filter_words_by_property(hits, path, q, db, config):
         "results_per_page": q.results_per_page,
         "more_pages": more_pages
     }
-    print >> sys.stderr, "DONE"
     return concordance_object
 
 
@@ -127,15 +110,12 @@ def get_word_ids(hit):
 
 
 def get_word_attrib(n, field, db):
-    print >> sys.stderr, "HIT", repr(n.philo_id)
     words = n.words
-    print >> sys.stderr, "WORDS", repr(words)
     key = field
     if key == "token":
         key = "philo_name"
     if key == "morph":
         key = "pos"
-    print >> sys.stderr, "looking up %s" % key
     val = ""
     for word in words:
         word_obj = word
@@ -145,7 +125,6 @@ def get_word_attrib(n, field, db):
             val += word_obj[key]
         else:
             val += "NULL"
-        print >> sys.stderr, "ROW", repr(word_obj.row)
 
     if isinstance(val, unicode):
         return val.encode("utf-8")
