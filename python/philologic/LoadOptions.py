@@ -89,6 +89,11 @@ class LoadOptions(object):
                           default=False,
                           dest="file_list",
                           help="Defines whether the file argument is a file containing fullpaths to the files to load")
+        parser.add_option("-H",
+                          "--header",
+                          type="string",
+                          dest="header",
+                          help="define header type (tei or dc) of files to parse")
         parser.add_option("-l",
                           "--load_config",
                           type="string",
@@ -99,11 +104,11 @@ class LoadOptions(object):
                           type="string",
                           dest="parser_factory",
                           help="Define parser to use for file parsing")
-        parser.add_option("-H",
-                          "--header",
+        parser.add_option("-n",
+                          "--navigable_objects",
                           type="string",
-                          dest="header",
-                          help="define header type (tei or dc) of files to parse")
+                          dest="navigable_objects",
+                          help="Define navigable objects: doc, div1, div2, div3, para. Must be comma separated with no space")
         return parser
 
     def parse(self, argv):
@@ -143,6 +148,8 @@ class LoadOptions(object):
                 elif a == "parser_factory":
                     if value == "NewParser":
                         self.values["parser_factory"] = NewParser.XMLParser
+                elif a == "navigable_objects":
+                    self.values["navigable_objects"] = [v.strip() for v in value.split(',')]
                 else:
                     if value is not None:
                         self.values[a] = value

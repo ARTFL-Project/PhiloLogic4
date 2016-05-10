@@ -25,6 +25,7 @@ def make_sql_table(table,
         columns = 'philo_type,philo_name,philo_id,philo_seq'
         query = 'create table if not exists %s (%s)' % (table, columns)
         c.execute(query)
+        alter_command = "ALTER TABLE %s ADD COLUMN ?" % table
         if gz:
             file_in_handle = io.BufferedReader(gzip.open(file_in, "rb"))
         else:
