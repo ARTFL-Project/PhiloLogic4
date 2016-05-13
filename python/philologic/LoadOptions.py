@@ -38,7 +38,7 @@ class LoadOptions(object):
         self.values["load_filters"] = LoadFilters.DefaultLoadFilters
         self.values["post_filters"] = PostFilters.DefaultPostFilters
         self.values["plain_text_obj"] = []
-        self.values["parser_factory"] = Parser.Parser
+        self.values["parser_factory"] = NewParser.XMLParser
         self.values["word_regex"] = Parser.DefaultWordRegex
         self.values["punct_regex"] = Parser.DafaultPunctRegex
         self.values["token_regex"] = Parser.DefaultTokenRegex

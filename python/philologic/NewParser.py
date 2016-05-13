@@ -204,7 +204,7 @@ class XMLParser(object):
         # Epigraph: treat as paragraph objects
         elif epigraph_tag.search(tag):
             self.open_para = True
-            self.v.push("para", byte_start)
+            self.v.push("para", tag_name, byte_start)
             self.get_object_attributes(tag, "para")
             self.no_deeper_objects = True
         elif closed_epigraph_tag.search(tag):
@@ -654,7 +654,10 @@ class XMLParser(object):
         div_head = ""
         while not read_more and local_line_count < self.head_look_ahead_lines:
             look_ahead += 1
-            next_line = self.content[look_ahead]
+            try:
+                next_line = self.content[look_ahead]
+            except IndexError:
+                break
             local_line_count += 1
             next_line = head_self_close_tag.sub("", next_line)
             if div_tag.search(next_line) or closed_div_tag.search(next_line):
