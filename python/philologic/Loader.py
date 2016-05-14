@@ -140,6 +140,8 @@ class Loader(object):
                     break
                 else:
                     header = header + line
+            if self.debug:
+                print "parsing %s header..." % f
             parser = etree.XMLParser(recover=True)
             tree = etree.fromstring(header, parser)
             trimmed_metadata_xpaths = []
