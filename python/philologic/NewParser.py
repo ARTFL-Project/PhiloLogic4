@@ -18,6 +18,7 @@ class XMLParser(object):
                  metadata_xpaths=[],
                  suppress_tags=[],
                  pseudo_empty_tags=[],
+                 filtered_words=[],
                  known_metadata=["doc", "div1", "div2", "div3", "para", "sent", "word"]):
         self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
         self.parallel_type = "page"
@@ -48,6 +49,8 @@ class XMLParser(object):
         self.suppress_xpaths = suppress_tags
         self.pseudo_empty_tags = pseudo_empty_tags
         self.known_metadata = known_metadata
+
+        self.filtered_words = []]
 
         self.buffer_position = 0
         self.buffers = []
@@ -126,7 +129,8 @@ class XMLParser(object):
                 if self.in_the_text:
                     self.tag_handler(line)
             else:
-                self.word_handler(line)
+                if line not in self.filtered_words:
+                    self.word_handler(line)
                 self.bytes_read_in += len(line)
 
         self.v.pull("doc", self.filesize)

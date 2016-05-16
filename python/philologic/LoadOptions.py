@@ -56,6 +56,7 @@ class LoadOptions(object):
         self.values["force_delete"] = False
         self.values["file_list"] = False
         self.values["bibliography"] = ""
+        self.values["filtered_words"] = set([])
 
     def setup_parser(self):
         usage = "usage: %prog [options] database_name files"
@@ -104,11 +105,6 @@ class LoadOptions(object):
                           type="string",
                           dest="parser_factory",
                           help="Define parser to use for file parsing")
-        parser.add_option("-n",
-                          "--navigable_objects",
-                          type="string",
-                          dest="navigable_objects",
-                          help="Define navigable objects: doc, div1, div2, div3, para. Must be comma separated with no space")
         return parser
 
     def parse(self, argv):
@@ -226,4 +222,11 @@ class LoadConfig(object):
             if not a.startswith('__') and not callable(getattr(config_file, a)):
                 value = getattr(config_file, a)
                 if value:
-                    self.config[a] = value
+                    if a == "filtered_words_list":
+                        word_list = set([])
+                        with open(value) as fh:
+                            for line in fh:
+                                word_list.add(line.strip())
+                        self.config["filtered_words"] = word_list
+                    else:
+                        self.config[a] = value

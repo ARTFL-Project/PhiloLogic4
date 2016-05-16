@@ -17,7 +17,7 @@ import philologic.LoadFilters as LoadFilters
 import philologic.Parser as Parser
 import philologic.PostFilters as PostFilters
 from lxml import etree
-from philologic.Config import MakeDBConfig, MakeWebConfig
+from philologic.Config import MakeDBConfig, MakeWebConfig, pretty
 from philologic.PostFilters import make_sql_table
 
 # Flush buffer output
@@ -55,6 +55,7 @@ class Loader(object):
         self.post_filters = loader_options["post_filters"]
         self.word_regex = loader_options["word_regex"]
         self.punct_regex = loader_options["punct_regex"]
+        self.filtered_words = loader_options["filtered_words"]
 
         self.parser_defaults = {}
         for option in ["parser_factory", "token_regex", "xpaths", "metadata_xpaths", "pseudo_empty_tags",
@@ -218,7 +219,7 @@ class Loader(object):
         load_metadata.sort(key=make_sort_key, reverse=reverse_sort)
         print "done."
         if self.debug:
-            print load_metadata
+            print pretty(load_metadata)
         return load_metadata
 
     def parse_files(self, max_workers, data_dicts=None):
@@ -340,7 +341,7 @@ class Loader(object):
                     filters = options["load_filters"]
                     del options["load_filters"]
 
-                    parser = parser_factory(o, text["id"], text["size"], known_metadata=metadata, **options)
+                    parser = parser_factory(o, text["id"], text["size"], known_metadata=metadata, filtered_words=self.filtered_words, **options)
                     try:
                         r = parser.parse(i)
                     except RuntimeError:
