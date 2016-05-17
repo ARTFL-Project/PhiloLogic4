@@ -9,11 +9,7 @@ from collections import defaultdict
 sys.path.append('..')
 import functions as f
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
+import simplejson as json
 
 
 def generate_frequency(results, q, db, config):

@@ -17,7 +17,7 @@ import philologic.LoadFilters as LoadFilters
 import philologic.Parser as Parser
 import philologic.PostFilters as PostFilters
 from lxml import etree
-from philologic.Config import MakeDBConfig, MakeWebConfig
+from philologic.Config import MakeDBConfig, MakeWebConfig, pretty
 from philologic.PostFilters import make_sql_table
 
 # Flush buffer output
@@ -55,6 +55,7 @@ class Loader(object):
         self.post_filters = loader_options["post_filters"]
         self.word_regex = loader_options["word_regex"]
         self.punct_regex = loader_options["punct_regex"]
+        self.filtered_words = loader_options["filtered_words"]
 
         self.parser_defaults = {}
         for option in ["parser_factory", "token_regex", "xpaths", "metadata_xpaths", "pseudo_empty_tags",
@@ -119,50 +120,31 @@ class Loader(object):
         print "done."
         return load_metadata
 
-    def pre_parse_header(self, fn):
-        fh = open(fn)
-        header = ""
-        while True:
-            line = fh.readline()
-            scan = re.search("<teiheader>|<temphead>", line, re.IGNORECASE)
-            if scan:
-                header = line[scan.start():]
-                break
-        while True:
-            line = fh.readline()
-            scan = re.search("</teiheader>|<\/?temphead>", line, re.IGNORECASE)
-            if scan:
-                header = header + line[:scan.end()]
-                break
-            else:
-                header = header + line
-        parser = etree.XMLParser(recover=True)
-        tree = etree.fromstring(header, parser)
-        return tree
-
-    def pre_parse_whole_file(self, fn):
-        fh = open(fn)
-        parser = etree.XMLParser(recover=True)
-        tree = etree.fromstring(fh.read(), parser)
-        # Remove namespace
-        for el in tree.iter():
-            try:
-                if el.tag.startswith('{'):
-                    el.tag = el.tag.rsplit('}', 1)[-1]
-            except AttributeError:  # el.tag is not a string for some reason
-                pass
-        return tree
-
-    def parse_tei_header(self, whole_file):
+    def parse_tei_header(self):
         load_metadata = []
         metadata_xpaths = self.parser_defaults["metadata_xpaths"]
         for f in self.list_files():
             data = {"filename": f}
-            fn = self.textdir + f
-            if whole_file is True:
-                tree = self.pre_parse_whole_file(fn)
-            else:
-                tree = self.pre_parse_header(fn)
+            fh = open(self.textdir + f)
+            header = ""
+            while True:
+                line = fh.readline()
+                scan = re.search("<teiheader>|<temphead>", line, re.IGNORECASE)
+                if scan:
+                    header = line[scan.start():]
+                    break
+            while True:
+                line = fh.readline()
+                scan = re.search("</teiheader>|<\/?temphead>", line, re.IGNORECASE)
+                if scan:
+                    header = header + line[:scan.end()]
+                    break
+                else:
+                    header = header + line
+            if self.debug:
+                print "parsing %s header..." % f
+            parser = etree.XMLParser(recover=True)
+            tree = etree.fromstring(header, parser)
             trimmed_metadata_xpaths = []
             for field in metadata_xpaths["doc"]:
                 if field not in data:
@@ -218,12 +200,12 @@ class Loader(object):
             load_metadata.append(data)
         return load_metadata
 
-    def parse_metadata(self, sort_by_field, reverse_sort=True, whole_file=True, header="tei"):
+    def parse_metadata(self, sort_by_field, reverse_sort=True, header="tei"):
         """Parsing metadata fields in TEI or Dublin Core headers"""
         print "### Parsing metadata ###"
         print "Parsing metadata in %d files..." % len(self.list_files()),
         if header == "tei":
-            load_metadata = self.parse_tei_header(whole_file)
+            load_metadata = self.parse_tei_header()
         elif header == "dc":
             load_metadata = self.parse_dc_header()
         print "done."
@@ -237,7 +219,7 @@ class Loader(object):
         load_metadata.sort(key=make_sort_key, reverse=reverse_sort)
         print "done."
         if self.debug:
-            print load_metadata
+            print pretty(load_metadata)
         return load_metadata
 
     def parse_files(self, max_workers, data_dicts=None):
@@ -359,7 +341,7 @@ class Loader(object):
                     filters = options["load_filters"]
                     del options["load_filters"]
 
-                    parser = parser_factory(o, text["id"], text["size"], known_metadata=metadata, **options)
+                    parser = parser_factory(o, text["id"], text["size"], known_metadata=metadata, filtered_words=self.filtered_words, **options)
                     try:
                         r = parser.parse(i)
                     except RuntimeError:

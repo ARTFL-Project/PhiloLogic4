@@ -18,6 +18,7 @@ class XMLParser(object):
                  metadata_xpaths=[],
                  suppress_tags=[],
                  pseudo_empty_tags=[],
+                 filtered_words=[],
                  known_metadata=["doc", "div1", "div2", "div3", "para", "sent", "word"]):
         self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
         self.parallel_type = "page"
@@ -49,11 +50,10 @@ class XMLParser(object):
         self.pseudo_empty_tags = pseudo_empty_tags
         self.known_metadata = known_metadata
 
+        self.filtered_words = []
+
         self.buffer_position = 0
         self.buffers = []
-
-        # In a <div, how far to look ahead for a <head.
-        self.head_look_ahead_lines = 7
 
         self.get_multiple_div_heads = 1  # TODO: remove??
 
@@ -126,7 +126,8 @@ class XMLParser(object):
                 if self.in_the_text:
                     self.tag_handler(line)
             else:
-                self.word_handler(line)
+                if line not in self.filtered_words:
+                    self.word_handler(line)
                 self.bytes_read_in += len(line)
 
         self.v.pull("doc", self.filesize)
@@ -204,7 +205,7 @@ class XMLParser(object):
         # Epigraph: treat as paragraph objects
         elif epigraph_tag.search(tag):
             self.open_para = True
-            self.v.push("para", byte_start)
+            self.v.push("para", tag_name, byte_start)
             self.get_object_attributes(tag, "para")
             self.no_deeper_objects = True
         elif closed_epigraph_tag.search(tag):
@@ -349,7 +350,7 @@ class XMLParser(object):
         # BODY TAG: Let's set it as a <div object if we have no divs in the document.
         # These tend to carry on as FRONTMATTER. Don't have to check for lower divs, etc.
         elif body_tag.search(tag) and not self.got_a_div:
-            self.push("div1", tag_name, byte_start)
+            self.v.push("div1", tag_name, byte_start)
             self.context_div_level = 1
             self.open_div1 = True
             div_head = self.get_div_head(tag)
@@ -540,11 +541,14 @@ class XMLParser(object):
                         print >> sys.stderr, "Truncating for index..."
                         word = word[:235]
 
-                    self.v.push("word", word.strip(), word_pos)
-                    if self.current_tag == "w":
-                        for attrib, value in self.word_tag_attributes:
-                            self.v["word"][attrib] = value
-                    self.v.pull("word", current_pos)
+                    #word = self.remove_control_chars(word)
+                    word = word.strip()
+                    if len(word):
+                        self.v.push("word", word, word_pos)
+                        if self.current_tag == "w":
+                            for attrib, value in self.word_tag_attributes:
+                                self.v["word"][attrib] = value
+                        self.v.pull("word", current_pos)
 
                 # Sentence break handler
                 elif not self.in_line_group and not self.in_tagged_sentence:
@@ -559,7 +563,7 @@ class XMLParser(object):
                     # capital letters to avoid hitting abbreviations.
                     elif '.' in word:
                         is_sent = True
-                        if len(last_word.decode('utf8')) < 3:
+                        if len(last_word.decode('utf8', 'ignore')) < 3:
                             if cap_char_or_num.search(last_word):
                                 is_sent = False
 
@@ -574,8 +578,7 @@ class XMLParser(object):
                         # the punctuation token.
                         if "sent" not in self.v:
                             self.v.push("sent", ".", current_pos)
-                        self.v[
-                            "sent"].name = "."  # TODO: evaluate if this is right: avoid unwanted chars such tabs in ASP
+                        self.v["sent"].name = "."  # TODO: evaluate if this is right: avoid unwanted chars such tabs in ASP
                         self.v.pull("sent", current_pos + len(word))
 
     def close_sent(self, byte_end):
@@ -625,6 +628,7 @@ class XMLParser(object):
             # Because of some bug in the attrib regex, single char values keep the initial quote
             if value.startswith('"'):
                 value = value[1:]
+            value = self.remove_control_chars(value)
             attribs.append((attrib, value))
         return attribs
 
@@ -649,13 +653,14 @@ class XMLParser(object):
         get_head_count = self.get_multiple_div_heads
         read_more = False
         look_ahead = self.line_count
-        local_line_count = 0
         overflow_trap = 0
         div_head = ""
-        while not read_more and local_line_count < self.head_look_ahead_lines:
+        while not read_more:
             look_ahead += 1
-            next_line = self.content[look_ahead]
-            local_line_count += 1
+            try:
+                next_line = self.content[look_ahead]
+            except IndexError:
+                break
             next_line = head_self_close_tag.sub("", next_line)
             if div_tag.search(next_line) or closed_div_tag.search(next_line):
                 break  # don't go past an open or close <div.
@@ -669,13 +674,9 @@ class XMLParser(object):
                     if closed_head_tag.search(next_line):
                         read_more = False
                         if self.get_multiple_div_heads:
-                            local_line_count = 2
                             get_head_count -= 1
-                        else:
-                            local_line_count = self.head_look_ahead_lines + 1
                     elif overflow_trap > 10:  # Overflow trap in case you miss </head
                         read_more = False
-                        local_line_count = self.head_look_ahead_lines + 1
                     else:
                         div_head += next_line + " "
         if div_head:
@@ -702,6 +703,7 @@ class XMLParser(object):
         if div_head == "[>]" or div_head == "[<]":
             div_head == "[NA]"
 
+        div_head = self.remove_control_chars(div_head)
         return div_head
 
     def clear_char_ents(self, text):
@@ -903,6 +905,10 @@ class XMLParser(object):
             text = ligatures_ent.sub(r'\1', text)
         return text
 
+    def remove_control_chars(self, text):
+        # return control_char_re.sub('', text)
+        return text
+
 # Pre-compiled regexes used for parsing
 join_hyphen_with_lb = re.compile(r'(\&shy;[\n \t]*<lb\/>)', re.I | re.M)
 join_hyphen = re.compile(r'(\&shy;[\n \t]*)', re.I | re.M)
@@ -968,6 +974,16 @@ newline_shortener = re.compile(r'\n\n*')
 check_if_char_word = re.compile(r'[A-Za-z0-9\177-\377]', re.I)
 chars_not_to_index = re.compile(r'\[\{\]\}', re.I)
 cap_char_or_num = re.compile(r'[A-Z0-9]')  # Capitals
+
+## Build a list of control characters to remove
+## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
+all_chars = (unichr(i) for i in xrange(0x110000))
+control_chars_range =  range(0,32) + range(127,160)
+control_chars_range.remove(9)
+control_chars_range.remove(10)
+control_chars_range.remove(13) ## Keeping newlines, carriage returns and tabs
+control_chars = ''.join(map(unichr, control_chars_range))
+control_char_re = re.compile('[%s]' % re.escape(control_chars))
 
 # Entities regexes
 entity_regex = [
