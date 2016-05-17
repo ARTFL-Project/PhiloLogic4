@@ -66,6 +66,7 @@ class Parser(object):
                  metadata_xpaths=[],
                  suppress_tags=[],
                  pseudo_empty_tags=[],
+                 filtered_words=[],
                  known_metadata={}):
         self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
         self.parallel_type = "page"

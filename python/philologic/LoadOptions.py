@@ -196,25 +196,6 @@ class LoadOptions(object):
 class LoadConfig(object):
     def __init__(self):
         self.config = {}
-        self.config["database_root"] = config_file.database_root
-        self.config["url_root"] = config_file.url_root
-        self.config["web_app_dir"] = config_file.web_app_dir
-        self.config["default_object_level"] = Loader.DEFAULT_OBJECT_LEVEL
-        self.config["navigable_objects"] = Loader.NAVIGABLE_OBJECTS
-        self.config["load_filters"] = LoadFilters.DefaultLoadFilters
-        self.config["post_filters"] = PostFilters.DefaultPostFilters
-        self.config["plain_text_obj"] = []
-        self.config["parser_factory"] = Parser.Parser
-        self.config["word_regex"] = Parser.DefaultWordRegex
-        self.config["punct_regex"] = Parser.DafaultPunctRegex
-        self.config["token_regex"] = Parser.DefaultTokenRegex
-        self.config["xpaths"] = Parser.DefaultXPaths
-        self.config["metadata_xpaths"] = Parser.DefaultMetadataXPaths
-        self.config["pseudo_empty_tags"] = []
-        self.config["suppress_tags"] = []
-        self.config["dbname"] = ""
-        self.config["db_url"] = ""
-        self.config["sort_order"] = ["date", "author", "title", "filename"]
 
     def parse(self, load_config_file):
         config_file = imp.load_source("external_load_config", load_config_file)

@@ -1,4 +1,4 @@
-from philologic import Loader, LoadFilters, Parser, PostFilters
+from philologic import Loader, LoadFilters, Parser, NewParser, PlainTextParser, PostFilters
 
 
 ###############################
