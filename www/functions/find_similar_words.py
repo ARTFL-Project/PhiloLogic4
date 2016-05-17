@@ -19,8 +19,10 @@ def find_similar_words(word_to_match, request):
     with open(file_path) as infile:
         for w in infile:
             w = w.strip()
-            w_norm = w.split()[0]
-            w_orig = w.split()[1]
-            if ratio(word, w_norm) >= float(request.approximate_ratio) and w_orig not in results:
-                results.add(w_orig)
+            try:
+                w_norm, w_orig = w.split('\t')
+                if ratio(word, w_norm) >= float(request.approximate_ratio) and w_orig not in results:
+                    results.add(w_orig)
+            except ValueError:
+                pass
     return ' | '.join(['"%s"' % i for i in results])
