@@ -11,7 +11,7 @@ from QuerySyntax import parse_query, group_terms
 
 
 # Work around issue where environ PATH does not contain path to C core
-os.environ["PATH"] += ":/usr/local/bin/" 
+os.environ["PATH"] += ":/usr/local/bin/"
 
 def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,limit=3000,filename="", query_debug=False):
     sys.stdout.flush()
@@ -56,7 +56,7 @@ def query(db,terms,corpus_file=None,corpus_size=0,method=None,method_arg=None,li
                 args.extend(("-m",method,"-a",str(method_arg)))
 
             args.extend(("-o","binary",db.path,));
-            
+
             worker = subprocess.Popen(args,stdin=subprocess.PIPE,stdout=hl,stderr=err, env=os.environ)
             # if query_debug:
             #     print >> sys.stderr, "WORKER STARTED:"," ".join(args);
@@ -240,7 +240,7 @@ def grep_word(token,freq_file,dest_fh, lowercase=True):
         norm_tok_uni = norm_tok_uni.lower()
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
     norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
-    grep_command = ['egrep', '^%s[[:blank:]]' % norm_tok, freq_file]
+    grep_command = ['egrep', '-a', '^%s[[:blank:]]' % norm_tok, freq_file]
     grep_proc = subprocess.Popen(grep_command,stdout=dest_fh)
     return grep_proc
 
@@ -250,19 +250,19 @@ def invert_grep(token, in_fh, dest_fh, lowercase=True):
         norm_tok_uni = norm_tok_uni.lower()
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD",norm_tok_uni) if not unicodedata.combining(i)]
     norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
-    grep_command = ['egrep', '-v', '^%s[[:blank:]]' % norm_tok]
+    grep_command = ['egrep', '-a', '-v', '^%s[[:blank:]]' % norm_tok]
     grep_proc = subprocess.Popen(grep_command,stdin=in_fh,stdout=dest_fh)
     return grep_proc
 
 def grep_exact(token, freq_file, dest_fh):
-    grep_command = ["egrep", "[[:blank:]]%s$" % token[1:-1], freq_file]
+    grep_command = ["egrep", '-a', "[[:blank:]]%s$" % token[1:-1], freq_file]
     print >> sys.stderr, grep_command
     grep_proc = subprocess.Popen(grep_command,stdout=dest_fh)
     return grep_proc
 
 def invert_grep_exact(token, in_fh, dest_fh):
     #don't strip accent or case, exact match only.
-    grep_command = ["egrep", "-v", "[[:blank:]]%s$" % token[1:-1]]
+    grep_command = ["egrep", "-a", "-v", "[[:blank:]]%s$" % token[1:-1]]
     print >> sys.stderr, grep_command
     grep_proc = subprocess.Popen(grep_command,stdin=in_fh,stdout=dest_fh)
     #can't wait because input isn't ready yet.
