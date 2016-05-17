@@ -125,51 +125,50 @@ class Loader(object):
         metadata_xpaths = self.parser_defaults["metadata_xpaths"]
         for f in self.list_files():
             data = {"filename": f}
-            fh = open(self.textdir + f)
             header = ""
-            while True:
-                line = fh.readline()
-                scan = re.search("<teiheader>|<temphead>", line, re.IGNORECASE)
-                if scan:
-                    header = line[scan.start():]
-                    break
-            while True:
-                line = fh.readline()
-                scan = re.search("</teiheader>|<\/?temphead>", line, re.IGNORECASE)
-                if scan:
-                    header = header + line[:scan.end()]
-                    break
-                else:
-                    header = header + line
+            in_header = False
+            file_content = "".join(open(self.textdir + f).readlines())
+            try:
+                start_header_index = re.search(r'<teiheader', file_content, re.I).start()
+                end_header_index = re.search(r'</teiheader', file_content, re.I).start()
+            except AttributeError:  # tag not found
+                print "%s has no valid TEI header, removing from database load..."
+                continue
+            header = file_content[start_header_index:end_header_index]
             if self.debug:
                 print "parsing %s header..." % f
             parser = etree.XMLParser(recover=True)
-            tree = etree.fromstring(header, parser)
-            trimmed_metadata_xpaths = []
-            for field in metadata_xpaths["doc"]:
-                if field not in data:
-                    for xpath in metadata_xpaths["doc"][field]:
-                        attr_pattern_match = re.search(r"@([^\/\[\]]+)$", xpath)
-                        if attr_pattern_match:
-                            xp_prefix = xpath[:attr_pattern_match.start(0)]
-                            attr_name = attr_pattern_match.group(1)
-                            elements = tree.findall(xp_prefix)
-                            for el in elements:
-                                if el is not None and el.get(attr_name, ""):
-                                    data[field] = el.get(attr_name, "").encode("utf-8")
-                                    break
-                        else:
-                            el = tree.find(xpath)
-                            if el is not None and el.text is not None:
-                                data[field] = el.text.encode("utf-8")
-            trimmed_metadata_xpaths = [
-                (metadata_type, xpath, field)
-                for metadata_type in ["div", "para", "sent", "word", "page"] if metadata_type in metadata_xpaths
-                for field in metadata_xpaths[metadata_type]
-                for xpath in metadata_xpaths[metadata_type][field]
-            ]
-            data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
-            load_metadata.append(data)
+            try:
+                tree = etree.fromstring(header, parser)
+                trimmed_metadata_xpaths = []
+                for field in metadata_xpaths["doc"]:
+                    if field not in data:
+                        for xpath in metadata_xpaths["doc"][field]:
+                            attr_pattern_match = re.search(r"@([^\/\[\]]+)$", xpath)
+                            if attr_pattern_match:
+                                xp_prefix = xpath[:attr_pattern_match.start(0)]
+                                attr_name = attr_pattern_match.group(1)
+                                elements = tree.findall(xp_prefix)
+                                for el in elements:
+                                    if el is not None and el.get(attr_name, ""):
+                                        data[field] = el.get(attr_name, "").encode("utf-8")
+                                        break
+                            else:
+                                el = tree.find(xpath)
+                                if el is not None and el.text is not None:
+                                    data[field] = el.text.encode("utf-8")
+                trimmed_metadata_xpaths = [
+                    (metadata_type, xpath, field)
+                    for metadata_type in ["div", "para", "sent", "word", "page"] if metadata_type in metadata_xpaths
+                    for field in metadata_xpaths[metadata_type]
+                    for xpath in metadata_xpaths[metadata_type][field]
+                ]
+                if self.debug:
+                    print pretty(data)
+                data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
+                load_metadata.append(data)
+            except etree.XMLSyntaxError:
+                print "%s has invalid data in the header, removing from database load..." % f
         return load_metadata
 
     def parse_dc_header(self):
@@ -200,7 +199,7 @@ class Loader(object):
             load_metadata.append(data)
         return load_metadata
 
-    def parse_metadata(self, sort_by_field, reverse_sort=True, header="tei"):
+    def parse_metadata(self, sort_by_field, reverse_sort=False, header="tei"):
         """Parsing metadata fields in TEI or Dublin Core headers"""
         print "### Parsing metadata ###"
         print "Parsing metadata in %d files..." % len(self.list_files()),
@@ -218,8 +217,6 @@ class Loader(object):
 
         load_metadata.sort(key=make_sort_key, reverse=reverse_sort)
         print "done."
-        if self.debug:
-            print pretty(load_metadata)
         return load_metadata
 
     def parse_files(self, max_workers, data_dicts=None):
