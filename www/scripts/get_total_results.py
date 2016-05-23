@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.append('..')
-from functions.wsgi_handler import WSGIHandler
+import os
 from wsgiref.handlers import CGIHandler
+
+import simplejson
 from philologic.DB import DB
-import functions as f
-import json
+
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
 
 
 def get_total_results(environ, start_response):
@@ -14,9 +15,9 @@ def get_total_results(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig()
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
+    request = WSGIHandler(environ, config)
     if request.no_q:
         if request.no_metadata:
             hits = db.get_all(db.locals['default_object_level'])
@@ -29,7 +30,7 @@ def get_total_results(environ, start_response):
     hits.finish()
     total_results = len(hits)
 
-    yield json.dumps(total_results)
+    yield simplejson.dumps(total_results)
 
 
 if __name__ == "__main__":

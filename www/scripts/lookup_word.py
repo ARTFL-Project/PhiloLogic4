@@ -1,29 +1,29 @@
 #!/usr/bin/env python
 
-import sys
-import json
+import os
 import sqlite3
-sys.path.append('..')
-import functions as f
-from functions.ObjectFormatter import adjust_bytes
-from philologic.DB import DB
-from functions.wsgi_handler import WSGIHandler
+import sys
 from wsgiref.handlers import CGIHandler
+
+import simplejson
+from philologic.app import adjust_bytes
+from philologic.DB import DB
+
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
 
 
 def lookup_word_service(environ, start_response):
     status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),
-               ("Access-Control-Allow-Origin", "*")]
+    headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig()
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
+    request = WSGIHandler(environ, config)
     cursor = db.dbh.cursor()
 
     if request.report == "concordance":
-        hits = db.query(request["q"], request["method"], request["arg"],
-                        **request.metadata)
+        hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
         context_size = config['concordance_length'] * 3
         hit = hits[int(request.position)]
         bytes = hit.bytes
@@ -45,8 +45,7 @@ def lookup_word_service(environ, start_response):
         pass
 #    print >> sys.stderr, "TOKEN", token, "BYTES: ", byte_start, byte_end, "FILENAME: ", filename, "POSITION", request.position
     token_n = 0
-    yield lookup_word(db, cursor, token, token_n, byte_start, byte_end,
-                      filename)
+    yield lookup_word(db, cursor, token, token_n, byte_start, byte_end, filename)
 
 
 def lookup_word(db, cursor, token, n, start, end, filename):
@@ -66,12 +65,10 @@ def lookup_word(db, cursor, token, n, start, end, filename):
             defn = ""
             try:
                 tokenid = row["tokenid"]
-                lex_connect = sqlite3.connect(
-                    db.locals.db_path + "/data/lexicon.db")
+                lex_connect = sqlite3.connect(db.locals.db_path + "/data/lexicon.db")
                 lex_cursor = lex_connect.cursor()
                 auth_query = "select authority from parses where authority is not null and tokenid = ?;"
-                auth_result = lex_cursor.execute(
-                    auth_query, (tokenid, )).fetchone()
+                auth_result = lex_cursor.execute(auth_query, (tokenid, )).fetchone()
                 #                print >> sys.stderr, "AUTHORITY", auth_result
                 if auth_result:
                     authority = auth_result[0]
@@ -104,31 +101,25 @@ def lookup_word(db, cursor, token, n, start, end, filename):
                 pass
             if i == int(n):
                 result_object = {
-                    'properties':
-                    [{"property": "Form",
-                      "value":
-                      token}, {"property": "Lemma",
-                               "value": row['lemma']},
-                     {"property": "Parse",
-                      "value": row['pos']},
-                     {"property": "Definition",
-                      "value":
-                      defn}, {"property": "Parsed By",
-                              "value": authority}],
+                    'properties': [{"property": "Form",
+                                    "value": token}, {"property": "Lemma",
+                                                      "value": row['lemma']}, {"property": "Parse",
+                                                                               "value": row['pos']},
+                                   {"property": "Definition",
+                                    "value": defn}, {"property": "Parsed By",
+                                                     "value": authority}],
                     'problem_report': '/',
                     'token': token,
                     'lemma': row['lemma'],
                     'philo_id': row['philo_id'],
                     'alt_lemma': [],
                     "dictionary_name": 'Logeion',
-                    "dictionary_lookup":
-                    "http://logeion.uchicago.edu/index.html#" + row['lemma'],
+                    "dictionary_lookup": "http://logeion.uchicago.edu/index.html#" + row['lemma'],
                     "alt_parses": [{
                         "lemma": l,
                         "parse": all_parses[l],
-                        "dictionary_lookup":
-                        "http://logeion.uchicago.edu/index.html#" + l
-                    } for l, p in all_parses.items()]#,
+                        "dictionary_lookup": "http://logeion.uchicago.edu/index.html#" + l
+                    } for l, p in all_parses.items()]  #,
                     # "alt_parses": [
                     #     {
                     #         'lemma': 'x',
@@ -143,18 +134,16 @@ def lookup_word(db, cursor, token, n, start, end, filename):
                     #     }
                     # ]
                 }
-                return json.dumps(result_object)
+                return simplejson.dumps(result_object)
             else:
                 i += 1
-    return json.dumps({})
+    return simplejson.dumps({})
 
 if __name__ == "__main__":
     if len(sys.argv) > 6:
         db = DB(sys.argv[1])
         print >> sys.stderr, db.dbh
         cursor = db.dbh.cursor()
-        lookup_word(cursor, sys.argv[2], sys.argv[
-            3
-        ], sys.argv[4], sys.argv[5], sys.argv[6])
+        lookup_word(cursor, sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
     else:
         CGIHandler().run(lookup_word_service)

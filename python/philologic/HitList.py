@@ -30,12 +30,12 @@ class HitList(object):
         self.done = False
         #self.hitsize = 4 * (6 + self.words) # roughly.  packed 32-bit ints, 4 bytes each.
         self.update()
-        
+
     def __getitem__(self,n):
         self.update()
         if isinstance(n,slice):
             return self.get_slice(n)
-        else:            
+        else:
             self.readhit(n)
             return HitWrapper(self.readhit(n),self.dbh)
 
@@ -54,11 +54,11 @@ class HitList(object):
                 break
             yield HitWrapper(hit,self.dbh)
             slice_position += 1
-                
+
     def __len__(self):
         self.update()
         return self.count
-        
+
     def __iter__(self):
         self.update()
         iter_position = 0
@@ -97,13 +97,13 @@ class HitList(object):
         if self.done:
             pass
         else:
-            try: 
+            try:
                 os.stat(self.filename + ".done")
                 self.done = True
             except OSError:
                 pass
             self.size = os.stat(self.filename).st_size # in bytes
-            self.count = self.size / self.hitsize 
+            self.count = self.size / self.hitsize
             #print >> sys.stderr, "size:%d  count:%d" % (self.size, self.count)
 
     def finish(self):
@@ -131,22 +131,71 @@ class HitList(object):
         return(struct.unpack(self.format,buffer))
 
 
+# TODO: check if we still need this...
+class CombinedHitlist(object):
+    """A combined hitlists used for binding collocation hits"""
+
+    def __init__(self, *hitlists):
+        self.combined_hitlist = []
+        # sentence_ids = set()
+        # for hit in sorted(chain(*hitlists), key=lambda x: x.date):
+        #     sentence_id = hit.philo_id[:6]
+        #     if sentence_id not in sentence_ids:
+        #         self.combined_hitlist.append(hit)
+        #         sentence_ids.add(sentence_id)
+        from collections import defaultdict
+        sentence_counts = defaultdict(int)
+        for pos, hitlist in enumerate(hitlists):
+            max_sent_count = 2
+            for hit in hitlist:
+                sentence_id = repr(hit.philo_id[:6])
+                if sentence_id not in sentence_counts or sentence_counts[sentence_id] == max_sent_count:
+                    self.combined_hitlist.append(hit)
+                    sentence_counts[sentence_id] += 1
+
+        self.done = True
+
+    def __len__(self):
+        return len(self.combined_hitlist)
+
+    def __getitem__(self, key):
+        return self.combined_hitlist[key]
+
+    def __getattr__(self, name):
+        return self.combined_hitlist[name]
+
+
+class WordPropertyHitlist(object):
+    def __init__(self, hitlist):
+        self.done = True
+        self.hitlist = hitlist
+
+    def __getitem__(self, key):
+        return self.hitlist[key]
+
+    def __getattr__(self, name):
+        return self.hitlist[name]
+
+    def __len__(self):
+        return len(self.hitlist)
+
+
 class NoHits(object):
-    
+
     def __init__(self):
         self.done = True
-    
+
     def __len__(self):
         return 0
-    
+
     def __getitem__(self, item):
         return ''
-    
+
     def __iter__(self):
         return ''
-    
+
     def finish(self):
         return
-    
+
     def update(self):
         return

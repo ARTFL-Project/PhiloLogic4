@@ -1,42 +1,48 @@
 #!/usr/bin/env python
 
 import os
-import sys
-sys.path.append('..')
-import functions as f
-try:
-    import simplejson as json
-except ImportError:
-    import json
-import subprocess
 import re
+import subprocess
+import sys
 import unicodedata
 from wsgiref.handlers import CGIHandler
-from philologic.QuerySyntax import parse_query
-from philologic.MetadataQuery import metadata_pattern_search
+
+import simplejson
 from philologic.DB import DB
-from functions.wsgi_handler import WSGIHandler
+from philologic.MetadataQuery import metadata_pattern_search
+from philologic.QuerySyntax import parse_query
+
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
+
+environ = os.environ
+environ["LANG"] = "C"
 
 
-def exact_word_pattern_search(term, path):
-    command = ['egrep', '-wie', "%s" % term, '%s' % path]
-    process = subprocess.Popen(command, stdout=subprocess.PIPE)
-    match, stderr = process.communicate()
-    match = match.split('\n')
-    match.remove('')
-    ## HACK: The extra decode/encode are there to fix errors when this list is converted to a json object
-    no_num = re.compile('\d+$')
-    matches = [no_num.sub('', m).strip() for m in match]
-    return matches
+def metadata_list(environ, start_response):
+    status = '200 OK'
+    headers = [('Content-type', 'application/json; charset=UTF-8'),
+               ("Access-Control-Allow-Origin", "*")]
+    start_response(status, headers)
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
+    db = DB(config.db_path + '/data/')
+    request = WSGIHandler(environ, config)
+    metadata = request.term
+    field = request.field
+    yield autocomplete_metadata(metadata, field, db)
 
+def autocomplete_metadata(metadata, field, db):
+    path = os.environ['SCRIPT_FILENAME'].replace('scripts/metadata_list.py',
+                                                 '')
+    path += 'data/frequencies/%s_frequencies' % field
 
-def highlighter(words, norm_tok, substr_tok):
-    new_list = []
-    regex = re.compile(r'(%s|%s)' % (norm_tok, substr_tok), re.I)
-    for word in words:
-        w = regex.sub('<span class="highlight">\\1</span>', word)
-        new_list.append(w)
-    return new_list
+    ## Workaround for when jquery sends a list of words: this happens when using the back button
+    if isinstance(metadata, list):
+        metadata = metadata[-1]
+        field = field[-1]
+
+    words = format_query(metadata, field, db)[:100]
+    return simplesimplejson.dumps(words)
 
 
 def format_query(q, field, db):
@@ -49,8 +55,8 @@ def format_query(q, field, db):
             if t[-1] != '"':
                 t += '"'
             subtokens = t[1:-1].split("|")
-            parsed_split += [("QUOTE_S", sub_t) for sub_t in subtokens if sub_t
-                             ]
+            parsed_split += [("QUOTE_S", sub_t) for sub_t in subtokens
+                             if sub_t]
         elif l == "RANGE":
             parsed_split += [("TERM", t)]
         else:
@@ -64,7 +70,8 @@ def format_query(q, field, db):
     expanded = []
     if label == "QUOTE_S" or label == "TERM":
         norm_tok = token.decode("utf-8").lower()
-        norm_tok = [i for i in unicodedata.normalize("NFKD", norm_tok)
+        norm_tok = [i
+                    for i in unicodedata.normalize("NFKD", norm_tok)
                     if not unicodedata.combining(i)]
         norm_tok = "".join(norm_tok).encode("utf-8")
         matches = metadata_pattern_search(
@@ -88,31 +95,24 @@ def format_query(q, field, db):
     return output_string
 
 
-def autocomplete_metadata(metadata, field, db):
-    path = os.environ['SCRIPT_FILENAME'].replace('scripts/metadata_list.py',
-                                                 '')
-    path += 'data/frequencies/%s_frequencies' % field
-
-    ## Workaround for when jquery sends a list of words: this happens when using the back button
-    if isinstance(metadata, list):
-        metadata = metadata[-1]
-        field = field[-1]
-
-    words = format_query(metadata, field, db)[:100]
-    return json.dumps(words)
+def exact_word_pattern_search(term, path):
+    command = ['egrep', '-awie', term, path]
+    grep = subprocess.Popen(command, stdout=subprocess.PIPE, env=environ)
+    cut = subprocess.Popen(["cut", "-f", "1"],
+                           stdin=grep.stdout,
+                           stdout=subprocess.PIPE)
+    match, stderr = cut.communicate()
+    matches = [i for i in match.split('\n') if i]
+    return matches
 
 
-def metadata_list(environ, start_response):
-    status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),
-               ("Access-Control-Allow-Origin", "*")]
-    start_response(status, headers)
-    config = f.WebConfig()
-    db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
-    metadata = request.term
-    field = request.field
-    yield autocomplete_metadata(metadata, field, db)
+def highlighter(words, norm_tok, substr_tok):
+    new_list = []
+    regex = re.compile(r'(%s|%s)' % (norm_tok, substr_tok), re.I)
+    for word in words:
+        w = regex.sub('<span class="highlight">\\1</span>', word)
+        new_list.append(w)
+    return new_list
 
 
 if __name__ == "__main__":

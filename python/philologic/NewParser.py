@@ -285,13 +285,13 @@ class XMLParser(object):
                 self.v.pull("page", self.bytes_read_in)
                 self.open_page = False
             self.v.push("page", tag_name, byte_start)
-            n_attrib = n_attribute.search(tag)
-            if n_attrib:
-                n = n_attrib.group()[0]
+            self.get_object_attributes(tag, "page")
+            try:
+                n = self.v["page"]["n"]
                 n = n.replace(' ', '_').replace('-', '_').lower()
                 if not n:
                     n = "na"
-            else:
+            except KeyError:
                 n = "na"
             self.v["page"]["n"] = n
             self.open_page = True
@@ -381,7 +381,7 @@ class XMLParser(object):
                 self.close_div1(byte_start)
             self.context_div_level = 1
             self.open_div1 = True
-            self.push("div1", tag_name, byte_start)
+            self.v.push("div1", tag_name, byte_start)
             self.v["div1"]["head"] = "[HyperDiv]"
 
         # DIV TAGS: set division levels and print out div info. A couple of assumptions:

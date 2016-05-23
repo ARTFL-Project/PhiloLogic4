@@ -61,7 +61,7 @@
 #tei-header {
 	display: none;
 	white-space: pre;
-	font-family: 'Droid Sans Mono', sans-serif;
+	font-family: monospace;;
 	font-size: 80%;
 	overflow-x: scroll;
 	padding: 10px;

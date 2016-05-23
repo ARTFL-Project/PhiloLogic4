@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.append('..')
-from functions.wsgi_handler import WSGIHandler
-from wsgiref.handlers import CGIHandler
-from philologic.DB import DB
-import functions as f
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import os
 import sqlite3
+from wsgiref.handlers import CGIHandler
 
-object_levels = set(["doc", "div1", "div2", "div3"])
+import simplejson
+from philologic.DB import DB
+
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
 
 
 def get_bibliography(environ, start_response):
@@ -20,68 +16,10 @@ def get_bibliography(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig()
-    db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
-    object_level = request.object_level
-    if object_level and object_level in object_levels:
-        hits = db.get_all(object_level)
-    else:
-        hits = db.get_all(db.locals['default_object_level'])
-    results = []
-    c = db.dbh.cursor()
-    for hit in hits:
-        hit_object = {}
-        for field in db.locals['metadata_fields']:
-            hit_object[field] = hit[field] or ''
-        if object_level == "doc":
-            hit_object['philo_id'] = hit.philo_id[0]
-        else:
-            hit_object['philo_id'] = '/'.join([str(i) for i in hit.philo_id])
-        doc_id = str(hit.philo_id[0]) + ' 0 0 0 0 0 0'
-        next_doc_id = str(hit.philo_id[0] + 1) + ' 0 0 0 0 0 0'
-        c.execute('select rowid from toms where philo_id="%s"' % doc_id)
-        doc_row = c.fetchone()['rowid']
-        c.execute('select rowid from toms where philo_id="%s"' % next_doc_id)
-        try:
-            next_doc_row = c.fetchone()['rowid']
-        except TypeError:  # if this is the last doc, just get the last rowid in the table.
-            c.execute('select max(rowid) from toms;')
-            next_doc_row = c.fetchone()[0]
-        try:
-            c.execute(
-                'select * from toms where rowid between %d and %d and head is not null and head !="" and type !="editorial" and type !="misc" and type !="Misc" and type != "Avertissement" and type != "Title Page" and type != "Avis" limit 1'
-                % (doc_row, next_doc_row))
-        except sqlite3.OperationalError:  # no type field in DB
-            c.execute(
-                'select * from toms where rowid between %d and %d and head is not null and head !="" limit 1'
-                % (doc_row, next_doc_row))
-        try:
-            start_head = c.fetchone()['head'].decode('utf-8')
-            start_head = start_head.lower().title().encode('utf-8')
-        except Exception as e:
-            print >> sys.stderr, repr(e)
-            start_head = ''
-        try:
-            c.execute(
-                'select head from toms where rowid between %d and %d and head is not null and head !="" and type !="notes" and type !="editorial" and type !="misc" and type !="Misc" and type != "Avertissement" and type != "Title Page" and type != "Avis" order by rowid desc limit 1'
-                % (doc_row, next_doc_row))
-        except sqlite3.OperationalError:  # no type field in DB
-            c.execute(
-                'select head from toms where rowid between %d and %d and head is not null and head !="" order by rowid desc limit 1'
-                % (
-                    doc_row, next_doc_row))
-        try:
-            end_head = c.fetchone()['head']
-            end_head = end_head.decode('utf-8').lower().title().encode('utf-8')
-        except:
-            end_head = ''
-        hit_object['start_head'] = start_head
-        hit_object['end_head'] = end_head
-
-        results.append(hit_object)
-
-    yield json.dumps(results)
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
+    request = WSGIHandler(environ, config)
+    results = landing_page_bibliography(request, config)
+    yield simplejson.dumps(results)
 
 
 if __name__ == "__main__":

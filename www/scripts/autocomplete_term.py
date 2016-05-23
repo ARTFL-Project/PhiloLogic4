@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.append('..')
-import functions as f
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import os
 import subprocess
+import sys
 from wsgiref.handlers import CGIHandler
-from philologic.QuerySyntax import parse_query, group_terms
-from philologic.Query import split_terms, grep_word, grep_exact
+
+import simplejson
 from philologic.DB import DB
-from functions.wsgi_handler import WSGIHandler
+from philologic.Query import grep_exact, grep_word, split_terms
+from philologic.QuerySyntax import group_terms, parse_query
+
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
 
 
 def term_list(environ, start_response):
@@ -20,14 +19,14 @@ def term_list(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig()
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
+    request = WSGIHandler(environ, config)
     term = request.term
     if isinstance(term, list):
         term = term[-1]
     all_words = format_query(term, db, config)[:100]
-    yield json.dumps(all_words)
+    yield simplejson.dumps(all_words)
 
 
 def format_query(q, db, config):
@@ -52,8 +51,8 @@ def format_query(q, db, config):
 
     if kind == "TERM":
         expanded_token = token + '.*'
-        grep_proc = grep_word(expanded_token, frequency_file,
-                              subprocess.PIPE, db.locals['lowercase_index'])
+        grep_proc = grep_word(expanded_token, frequency_file, subprocess.PIPE,
+                              db.locals['lowercase_index'])
     elif kind == "QUOTE":
         expanded_token = token[:-1] + '.*' + token[-1]
         grep_proc = grep_exact(expanded_token, frequency_file, subprocess.PIPE)
@@ -84,6 +83,7 @@ def highlighter(word, token_len):
         highlighted_section + '</span>' + end_word
     highlighted_word = highlighted_word.encode('utf-8')
     return highlighted_word
+
 
 if __name__ == "__main__":
     CGIHandler().run(term_list)

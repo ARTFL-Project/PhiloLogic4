@@ -1,23 +1,24 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.append('..')
-from functions.wsgi_handler import WSGIHandler
+import os
+import subprocess
+from bisect import bisect_left
 from wsgiref.handlers import CGIHandler
+
+import simplejson
 from philologic.DB import DB
 from philologic.HitWrapper import ObjectWrapper
-import functions as f
-import subprocess
-import json
-from bisect import bisect_left
+
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
 
 
 def get_note_link_back(environ, start_response):
-    config = f.WebConfig()
-    db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
+    request = WSGIHandler(environ, config)
 
     # Get byte offset of hash
+    db = DB(config.db_path + '/data/')
     path = config.db_path
     philo_id = request.doc_id + ' 0 0 0 0 0 0'
     obj = ObjectWrapper(philo_id.split(), db)
@@ -61,7 +62,7 @@ def get_note_link_back(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    yield json.dumps({'link': link, "h": result_id})
+    yield simplesimplejson.dumps({'link': link, "h": result_id})
 
 
 def takeClosest(array, number):

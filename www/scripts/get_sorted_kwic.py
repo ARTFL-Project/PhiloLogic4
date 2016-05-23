@@ -1,19 +1,13 @@
 #!/usr/bin/env python
 
-import sys
+import os
 from wsgiref.handlers import CGIHandler
 
 from philologic.DB import DB
+from philologic.app import page_interval, kwic_hit_object
 
-sys.path.append('..')
-import functions as f
-import reports as r
-from functions.wsgi_handler import WSGIHandler
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+from philologic.app import WSGIHandler
+import simplejson
 
 
 def get_sorted_kwic(environ, start_response):
@@ -21,34 +15,34 @@ def get_sorted_kwic(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig()
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
     input_object = json.loads(environ['wsgi.input'].read())
     indices = input_object['results']
     query_string = input_object['query_string']
     environ['QUERY_STRING'] = query_string.encode('utf8')
-    request = WSGIHandler(db, environ)
+    request = WSGIHandler(environ, config)
     sorted_hits = get_sorted_hits(indices, request, config, db,
                                   input_object['start'], input_object['end'])
-    yield json.dumps(sorted_hits)
+    yield simplejson.dumps(sorted_hits)
 
 
-def get_sorted_hits(indices, q, config, db, start, end):
-    hits = db.query(q["q"], q["method"], q["arg"], **q.metadata)
-    start, end, n = f.link.page_interval(q.results_per_page, hits, start, end)
+def get_sorted_hits(indices, request, config, db, start, end):
+    hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+    start, end, n = page_interval(request.results_per_page, hits, start, end)
     kwic_object = {
         "description":
         {"start": start,
          "end": end,
-         "results_per_page": q.results_per_page},
-        "query": dict([i for i in q])
+         "results_per_page": request.results_per_page},
+        "query": dict([i for i in request])
     }
 
     kwic_results = []
 
     for index in indices:
         hit = hits[index[1]]
-        kwic_result = r.kwic_hit_object(hit, config, db)
+        kwic_result = kwic_hit_object(hit, config, db)
         kwic_results.append(kwic_result)
 
     kwic_object['results'] = kwic_results

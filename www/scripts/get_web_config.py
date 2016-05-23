@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.append('..')
-import functions as f
+import os
 from wsgiref.handlers import CGIHandler
+
+from philologic.app import WebConfig
 
 
 def get_web_config(environ, start_response):
@@ -11,7 +11,7 @@ def get_web_config(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig().to_json()
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', '')).to_json()
     yield config
 
 

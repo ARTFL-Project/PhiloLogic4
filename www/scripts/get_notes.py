@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.append('..')
-from philologic.DB import DB
-from functions.wsgi_handler import WSGIHandler
+import os
 from wsgiref.handlers import CGIHandler
+
+import simplejson
+from philologic.app import generate_text_object
+from philologic.DB import DB
 from philologic.HitWrapper import ObjectWrapper
-import functions as f
-from reports.navigation import generate_text_object
-import json
+
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
 
 
 def get_notes(environ, start_response):
@@ -16,9 +17,9 @@ def get_notes(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig()
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
+    request = WSGIHandler(environ, config)
     target = request.target.replace('#', '')
     doc_id = request.philo_id.split()[0] + ' %'
     try:
@@ -29,9 +30,9 @@ def get_notes(environ, start_response):
         philo_id = c.fetchall()[0]['philo_id'].split()
         obj = ObjectWrapper(philo_id, db)
         text_object = generate_text_object(obj, db, request, config, note=True)
-        yield json.dumps(text_object)
+        yield simplesimplejson.dumps(text_object)
     except IndexError:
-        yield json.dumps('')
+        yield simplesimplejson.dumps('')
 
 
 if __name__ == "__main__":
