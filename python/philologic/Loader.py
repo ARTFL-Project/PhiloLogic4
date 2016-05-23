@@ -33,11 +33,11 @@ index_cutoff = 10  # index frequency cutoff.  Don't. alter.
 # While these tables are loaded by default, you can override that default, although be aware
 # that you will only have reduced functionality if you do. It is strongly recommended that you
 # at least keep the 'toms' table from toms.db.
-DEFAULT_TABLES = ['toms', 'pages', 'words']
+DEFAULT_TABLES = ('toms', 'pages', 'words')
 
 DEFAULT_OBJECT_LEVEL = "doc"
 
-NAVIGABLE_OBJECTS = ('doc', 'div1', 'div2', 'div3')
+NAVIGABLE_OBJECTS = ('doc', 'div1', 'div2', 'div3', 'para')
 
 
 class Loader(object):
@@ -132,7 +132,7 @@ class Loader(object):
                 start_header_index = re.search(r'<teiheader', file_content, re.I).start()
                 end_header_index = re.search(r'</teiheader', file_content, re.I).start()
             except AttributeError:  # tag not found
-                print "%s has no valid TEI header, removing from database load..."
+                print "%s has no valid TEI header, removing from database load..." % f
                 continue
             header = file_content[start_header_index:end_header_index]
             if self.debug:

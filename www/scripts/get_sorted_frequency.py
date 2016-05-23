@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.append('..')
+import os
 from ast import literal_eval as eval
-from functions.wsgi_handler import WSGIHandler
-from philologic.DB import DB
 from wsgiref.handlers import CGIHandler
-import reports as r
-import functions as f
-import json
+
+import simplejson
+from philologic.app import frequency_results
+from philologic.DB import DB
+
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
 
 
 def get_frequency(environ, start_response):
@@ -16,25 +17,13 @@ def get_frequency(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig()
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
-    setattr(request, 'frequency_field', json.dumps(
+    request = WSGIHandler(environ, config)
+    setattr(request, 'frequency_field', simplejson.dumps(
         eval('"%s"' % request.frequency_field)))
-    if request.q == '' and request.no_q:
-        if request.no_metadata:
-            hits = db.get_all(db.locals['default_object_level'])
-        else:
-            hits = db.query(**request.metadata)
-    else:
-        hits = db.query(request["q"], request["method"], request["arg"],
-                        **request.metadata)
-    hits.finish()
-    results = r.generate_frequency(hits, request, db, config)
-    results['results'] = sorted(results['results'].iteritems(),
-                                key=lambda x: x[1]['count'],
-                                reverse=True)
-    yield json.dumps(results)
+    results = frequency_results(request, config, sorted=True)
+    yield simplejson.dumps(results)
 
 
 if __name__ == "__main__":

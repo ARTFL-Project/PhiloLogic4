@@ -13,8 +13,7 @@ class brokenConfig(object):
         self.traceback = traceback
 
 
-def WebConfig():
-    db_path = os.path.abspath(os.path.dirname(__file__)).replace('functions', '')
+def WebConfig(db_path):
     try:
         return MakeWebConfig(db_path + '/data/web_config.cfg')
     except Exception, e:

@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.append('..')
-import functions as f
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import os
 from wsgiref.handlers import CGIHandler
-from philologic.Query import get_expanded_query
+
+import simplejson
 from philologic.DB import DB
-from functions.wsgi_handler import WSGIHandler
+from philologic.Query import get_expanded_query
+
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
 
 
 def term_list(environ, start_response):
@@ -18,14 +16,14 @@ def term_list(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig()
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
+    request = WSGIHandler(environ, config)
     hits = db.query(request["q"], request["method"], request["arg"],
                     **request.metadata)
     hits.finish()
     expanded_terms = get_expanded_query(hits)
-    yield json.dumps(expanded_terms[0])
+    yield simplejson.dumps(expanded_terms[0])
 
 
 if __name__ == "__main__":

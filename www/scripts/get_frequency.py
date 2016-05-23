@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.append('..')
-from functions.wsgi_handler import WSGIHandler
-from philologic.DB import DB
+import os
 from wsgiref.handlers import CGIHandler
-import reports as r
-import functions as f
-try:
-    import simplejson as json
-except ImportError:
-    import json
+
+import simplejson
+from philologic.app import frequency_results
+
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
 
 
 def get_frequency(environ, start_response):
@@ -20,19 +17,11 @@ def get_frequency(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig()
-    db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
-    if request.q == '' and request.no_q:
-        if request.no_metadata:
-            hits = db.get_all(db.locals['default_object_level'])
-        else:
-            hits = db.query(**request.metadata)
-    else:
-        hits = db.query(request["q"], request["method"], request["arg"],
-                        **request.metadata)
-    results = r.generate_frequency(hits, request, db, config)
-    yield json.dumps(results)
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
+    request = WSGIHandler(environ, config)
+
+    results = frequency_results(request, config)
+    yield simplejson.dumps(results)
 
 if __name__ == "__main__":
     CGIHandler().run(get_frequency)

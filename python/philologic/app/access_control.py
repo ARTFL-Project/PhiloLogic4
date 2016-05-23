@@ -6,14 +6,15 @@ import re
 import hashlib
 import time
 import struct
-from wsgi_handler import WSGIHandler
+from philologic.DB import DB
 
 # These should always be allowed for local access
 local_blocks = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.1/32"
                 ]
 
 
-def check_access(environ, config, db):
+def check_access(environ, config):
+    db = DB(config.db_path + '/data/')
     incoming_address = environ['REMOTE_ADDR']
     access = {}
     access_file = config.db_path + '/data/' + config['access_file']
@@ -63,8 +64,8 @@ def check_access(environ, config, db):
             return ()
 
 
-def login_access(environ, config, db, headers):
-    request = WSGIHandler(db, environ)
+def login_access(environ, request, config, headers):
+    db = DB(config.db_path + '/data/')
     if request.authenticated:
         access = True
     else:

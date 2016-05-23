@@ -6,6 +6,7 @@ import hashlib
 import re
 import urlparse
 
+from philologic.DB import DB
 from query_parser import parse_query
 from find_similar_words import find_similar_words
 
@@ -13,8 +14,10 @@ from find_similar_words import find_similar_words
 class WSGIHandler(object):
     """Class which parses the environ object and massages query arguments for PhiloLogic4."""
 
-    def __init__(self, db, environ):
+    def __init__(self, environ, config):
         """Initialize class."""
+        # Create db object to access config variables
+        db = DB(config.db_path + '/data/')
         self.path_info = environ.get("PATH_INFO", '')
         self.query_string = environ["QUERY_STRING"]
         self.script_filename = environ["SCRIPT_FILENAME"]
@@ -128,7 +131,7 @@ class WSGIHandler(object):
             if self.approximate:
                 query_length = len([i for i in re.split(r'[\|| NOT | ]', self.cgi['q'][0]) if i])
                 if query_length == 1:
-                    self.cgi['q'][0] = find_similar_words(self.cgi['q'][0], self)
+                    self.cgi['q'][0] = find_similar_words(self.cgi['q'][0], config, self)
             if self.cgi["q"][0] != "":
                 self.no_q = False
             else:

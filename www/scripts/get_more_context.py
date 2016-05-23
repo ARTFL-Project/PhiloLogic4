@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
+import os
 import sys
-from philologic.DB import DB
-sys.path.append('..')
-from functions.wsgi_handler import WSGIHandler
 from wsgiref.handlers import CGIHandler
-import reports as r
-import functions as f
-import json
+
+import simplejson
+from philologic.app import get_concordance_text
+from philologic.DB import DB
+
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
 
 
 def get_more_context(environ, start_response):
@@ -15,16 +17,16 @@ def get_more_context(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig()
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
+    request = WSGIHandler(environ, config)
     hit_num = int(request.hit_num)
     hits = db.query(request["q"], request["method"], request["arg"],
                     **request.metadata)
     context_size = config['concordance_length'] * 3
-    hit_context = r.fetch_concordance(
-        db, hits[hit_num], config.db_path, context_size)
-    yield json.dumps(hit_context)
+    hit_context = get_concordance_text(db, hits[hit_num], config.db_path,
+                                       context_size)
+    yield simplejson.dumps(hit_context)
 
 
 if __name__ == "__main__":

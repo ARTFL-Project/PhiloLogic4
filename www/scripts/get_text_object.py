@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.append('..')
-from philologic.DB import DB
-from functions.wsgi_handler import WSGIHandler
+import os
 from wsgiref.handlers import CGIHandler
+
+import simplejson
+from philologic.app import generate_text_object
+from philologic.DB import DB
 from philologic.HitWrapper import ObjectWrapper
-import functions as f
-from reports.navigation import generate_text_object
-try:
-    import simplejson as json
-except ImportError:
-    import json
+
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
 
 
 def get_text_object(environ, start_response):
@@ -19,16 +17,16 @@ def get_text_object(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig()
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
+    request = WSGIHandler(environ, config)
     path = config.db_path
     zeros = 7 - len(request.philo_id)
     if zeros:
         request.philo_id += zeros * " 0"
     obj = ObjectWrapper(request['philo_id'].split(), db)
-    text_object = generate_text_object(obj, db, request, config)
-    yield json.dumps(text_object)
+    text_object = generate_text_object(request, config)
+    yield simplejson.dumps(text_object)
 
 
 if __name__ == "__main__":

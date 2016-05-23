@@ -41,18 +41,3 @@ def make_absolute_query_link(config, params, script_name="query", **extra_params
 def byte_query(hit_bytes):
     """This is used for navigating concordance results and highlighting hits"""
     return '?' + '&'.join(['byte=%d' % int(byte) for byte in hit_bytes])
-
-
-def page_interval(num, results, start, end):
-    start = int(start)
-    end = int(end)
-    num = int(num)
-    if start <= 0:
-        start = 1
-    if end <= 0:
-        end = start + (num - 1)
-    results_len = len(results)
-    if end > results_len and results.done:
-        end = results_len
-    n = start - 1
-    return start, end, n

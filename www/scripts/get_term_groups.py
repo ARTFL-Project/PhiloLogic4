@@ -1,20 +1,15 @@
 #!/usr/bin/env python
 
-import sys
+import os
 from wsgiref.handlers import CGIHandler
 
+import simplejson
 from philologic.DB import DB
 from philologic.Query import split_terms
 from philologic.QuerySyntax import group_terms, parse_query
 
-sys.path.append('..')
-import functions as f
-from functions.wsgi_handler import WSGIHandler
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+from philologic.app import WebConfig
+from philologic.app import WSGIHandler
 
 
 def term_group(environ, start_response):
@@ -22,9 +17,9 @@ def term_group(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = f.WebConfig()
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
-    request = WSGIHandler(db, environ)
+    request = WSGIHandler(environ, config)
     hits = db.query(request["q"], request["method"], request["arg"],
                     **request.metadata)
     parsed = parse_query(request.q)
@@ -47,7 +42,7 @@ def term_group(environ, start_response):
                 term_group += ' %s ' % term
         term_group = term_group.strip()
         term_groups.append(term_group)
-    yield json.dumps(term_groups)
+    yield simplejson.dumps(term_groups)
 
 
 if __name__ == "__main__":
