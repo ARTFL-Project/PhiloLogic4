@@ -88,7 +88,7 @@ def bibliography_results(request, config):
         if hit.type == "doc":
             citation = biblio_citation(hit, citation_hrefs)
         else:
-            citation = r.concordance_citation(hit, citation_hrefs)
+            citation = concordance_citation(hit, citation_hrefs)
         results.append({
             'citation': citation,
             'citation_links': citation_hrefs,

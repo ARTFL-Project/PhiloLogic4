@@ -212,7 +212,7 @@ def make_grouped_sql_clause(expanded,column):
     return "(%s)" % clauses
 
 def metadata_pattern_search(term, path):
-    command = ['egrep', '-wi', "%s" % term, '%s' % path]
+    command = ['egrep', '-awi', "%s" % term, '%s' % path]
     #print >> sys.stderr, "METADATA COMMAND:", repr(command)
     process = subprocess.Popen(command, stdout=subprocess.PIPE)
     match, stderr = process.communicate()

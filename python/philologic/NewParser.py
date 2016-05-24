@@ -542,7 +542,7 @@ class XMLParser(object):
                         word = word[:235]
 
                     #word = self.remove_control_chars(word)
-                    word = word.strip()
+                    word = word.strip().replace("_", "")
                     if len(word):
                         self.v.push("word", word, word_pos)
                         if self.current_tag == "w":
