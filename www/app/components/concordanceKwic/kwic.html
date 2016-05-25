@@ -1,35 +1,14 @@
 <div id="results_container" class="col-xs-12 col-sm-8" ng-class="{'col-sm-8': concKwic.showFacetedBrowsing}">
 	<div style="margin: 15px 15px 0px 15px;">
-		Resort results by words to the
-		<div class="btn-group">
+		Resort results by
+		<div class="btn-group" style="margin-left: 3px;" ng-repeat="fields in sortingFields track by $index" ng-init="index=$index">
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				{{ kwicWordSelection }}
+				<span>{{ sortingSelection[index] }}</span>
 				<span class="caret"></span>
 			</button>
 			<ul class="dropdown-menu" role="menu">
-				<li ng-click="updateWordSorting('left')">
-					<a href="" class="kwic-option">left</a>
-				</li>
-				<li ng-click="updateWordSorting('right')">
-					<a href="" class="kwic-option">right</a>
-				</li>
-				<li ng-click="updateWordSorting('')">
-					<a href="" class="kwic-option">None</a>
-				</li>
-			</ul>
-		</div>
-		and/or by
-		<div class="btn-group">
-			<button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				<span>{{ kwicMetaSelection }}</span>
-				<span class="caret"></span>
-			</button>
-			<ul class="dropdown-menu" role="menu">
-				<li ng-repeat="metadata in metadataSortingFields" ng-click="updateMetadataSorting(metadata)">
-					<a href="">{{ metadata.label }}</a>
-				</li>
-				<li ng-click="selectMetadataSortingField('')">
-					<a href="">No sorting</a>
+				<li ng-repeat="selection in fields" ng-click="updateSortingSelection(index, selection)">
+					<a href="">{{ selection.label }}</a>
 				</li>
 			</ul>
 		</div>

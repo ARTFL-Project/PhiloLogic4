@@ -15,8 +15,8 @@ def get_header(environ, start_response):
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
-    request = WSGIHandler(environ, request)
-    header = get_header(request, config)
+    request = WSGIHandler(environ, config)
+    header = get_tei_header(request, config)
     yield header
 
 

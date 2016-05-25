@@ -6,6 +6,7 @@ from wsgiref.handlers import CGIHandler
 from philologic.DB import DB
 from philologic.app import page_interval, kwic_hit_object
 
+from philologic.app import WebConfig
 from philologic.app import WSGIHandler
 import simplejson
 
@@ -17,7 +18,7 @@ def get_sorted_kwic(environ, start_response):
     start_response(status, headers)
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
-    input_object = json.loads(environ['wsgi.input'].read())
+    input_object = simplejson.loads(environ['wsgi.input'].read())
     indices = input_object['results']
     query_string = input_object['query_string']
     environ['QUERY_STRING'] = query_string.encode('utf8')
@@ -37,11 +38,13 @@ def get_sorted_hits(indices, request, config, db, start, end):
          "results_per_page": request.results_per_page},
         "query": dict([i for i in request])
     }
+    import sys
+    print >> sys.stderr, "INDICES", indices
 
     kwic_results = []
 
     for index in indices:
-        hit = hits[index[1]]
+        hit = hits[index["index"]]
         kwic_result = kwic_hit_object(hit, config, db)
         kwic_results.append(kwic_result)
 
