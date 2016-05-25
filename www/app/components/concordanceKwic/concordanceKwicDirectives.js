@@ -68,87 +68,6 @@
     }
 
     function kwic($rootScope, $location, $http, URL, request, defaultDiacriticsRemovalMap, descriptionValues) {
-        var removeDiacritics = function(str) {
-            var changes = defaultDiacriticsRemovalMap.map;
-            for (var i = 0; i < changes.length; i++) {
-                str = str.replace(changes[i].letters, changes[i].base);
-            }
-            return str;
-        }
-        var sortResults = function(results, queryParams) {
-            results.sort(function(a, b) {
-                var x = a[queryParams.first_kwic_sorting_option];
-                var y = b[queryParams.first_kwic_sorting_option];
-                if (x === "") {
-                    return 1;
-                }
-                if (y === "") {
-                    return -1;
-                }
-                if (isNaN(x)) {
-                    x = removeDiacritics(x);
-                    y = removeDiacritics(y);
-                } else {
-                    x = parseInt(x);
-                    y = parseInt(y)
-                }
-                if (x < y) {
-                    return -1;
-                }
-                if (x > y) {
-                    return 1
-                }
-                if (typeof(queryParams.second_kwic_sorting_option) !== 'undefined') {
-                    x = a[queryParams.second_kwic_sorting_option];
-                    y = b[queryParams.second_kwic_sorting_option];
-                    if (x === "") {
-                        return 1;
-                    }
-                    if (y === "") {
-                        return -1;
-                    }
-                    if (isNaN(x)) {
-                        x = removeDiacritics(x);
-                        y = removeDiacritics(y);
-                    } else {
-                        x = parseInt(x);
-                        y = parseInt(y)
-                    }
-                    if (x < y) {
-                        return -1;
-                    }
-                    if (x > y) {
-                        return 1
-                    }
-                }
-                if (typeof(queryParams.third_kwic_sorting_option) !== 'undefined') {
-                    x = a[queryParams.third_kwic_sorting_option];
-                    y = b[queryParams.third_kwic_sorting_option];
-                    if (x === "") {
-                        return 1;
-                    }
-                    if (y === "") {
-                        return -1;
-                    }
-                    if (isNaN(x)) {
-                        x = removeDiacritics(x);
-                        y = removeDiacritics(y);
-                    } else {
-                        x = parseInt(x);
-                        y = parseInt(y)
-                    }
-                    if (x < y) {
-                        return -1;
-                    }
-                    if (x > y) {
-                        return 1
-                    }
-                }
-                return 0;
-            });
-            console.log(results)
-            return results;
-        }
         var mergeLists = function(list1, list2) {
             for (var i = 0; i < list2.length; i += 1) {
                 list1.push(list2[i]);
@@ -169,7 +88,6 @@
                     if (hitsDone < descriptionValues.resultsLength) {
                         recursiveLookup(scope, queryParams, hitsDone);
                     } else {
-                        scope.sortedResults = sortResults(scope.sortedResults, queryParams);
                         queryParams.start = '0';
                         queryParams.end = '0';
                         descriptionValues.sortedKwic = {
@@ -192,14 +110,14 @@
             } else {
                 var end = start + parseInt(scope.formData.results_per_page);
             }
-            console.log(start, end, hitsDone)
             $http.post('scripts/get_sorted_kwic.py',
                     angular.toJson({
-                        results: scope.sortedResults.slice(start, end),
+                        results: scope.sortedResults,
                         hits_done: hitsDone,
                         query_string: URL.objectToString($location.search()),
                         start: start,
-                        end: end
+                        end: end,
+                        sort_keys: [scope.formData.first_kwic_sorting_option, scope.formData.second_kwic_sorting_option, scope.formData.third_kwic_sorting_option]
                     })
                 )
                 .then(function(response) {
@@ -261,9 +179,10 @@
                     }
                 }
                 scope.sortingFields = [sortingFields, sortingFields, sortingFields];
-                scope.sortingSelection = ['None', 'None', 'None'];
+                scope.sortingSelection = [{label:'None'}, {label:'None'}, {label:'None'}];
+                scope.sortKeys = [];
                 scope.updateSortingSelection = function(index, selection) {
-                    scope.sortingSelection[index] = selection.label;
+                    scope.sortingSelection[index] = selection;
                     if (index === 0) {
                         if (selection.label == "None") {
                             delete $rootScope.formData.first_kwic_sorting_option;
@@ -283,6 +202,7 @@
                             $rootScope.formData.third_kwic_sorting_option = selection.field;
                         }
                     }
+                    console.log(scope.sortingSelection)
                 }
                 scope.sortResults = function() {
                     var urlString = URL.objectToUrlString($rootScope.formData);

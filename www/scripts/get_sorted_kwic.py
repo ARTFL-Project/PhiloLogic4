@@ -19,16 +19,17 @@ def get_sorted_kwic(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
     input_object = simplejson.loads(environ['wsgi.input'].read())
-    indices = input_object['results']
+    all_results = input_object['results']
     query_string = input_object['query_string']
+    sort_keys = [i for i in input_object["sort_keys"] if i]
     environ['QUERY_STRING'] = query_string.encode('utf8')
     request = WSGIHandler(environ, config)
-    sorted_hits = get_sorted_hits(indices, request, config, db,
+    sorted_hits = get_sorted_hits(all_results, sort_keys, request, config, db,
                                   input_object['start'], input_object['end'])
     yield simplejson.dumps(sorted_hits)
 
 
-def get_sorted_hits(indices, request, config, db, start, end):
+def get_sorted_hits(all_results, sort_keys, request, config, db, start, end):
     hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
     start, end, n = page_interval(request.results_per_page, hits, start, end)
     kwic_object = {
@@ -38,12 +39,15 @@ def get_sorted_hits(indices, request, config, db, start, end):
          "results_per_page": request.results_per_page},
         "query": dict([i for i in request])
     }
-    import sys
-    print >> sys.stderr, "INDICES", indices
 
     kwic_results = []
 
-    for index in indices:
+    def make_sort_key(d):
+        key = [d[f] for f in sort_keys]
+        return key
+
+    all_results.sort(key=make_sort_key, reverse=False)
+    for index in all_results[start:end]:
         hit = hits[index["index"]]
         kwic_result = kwic_hit_object(hit, config, db)
         kwic_results.append(kwic_result)

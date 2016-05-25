@@ -22,12 +22,12 @@ def get_neighboring_words(environ, start_response):
     request = WSGIHandler(environ, config)
 
     # Define whether we get words to the left or to the right or both
-    left = False
-    right = False
-    if request.first_kwic_sorting_option == "left" or request.second_kwic_sorting_option == "left" or request.third_kwic_sorting_option == "left":
-        left = True
-    if request.first_kwic_sorting_option == "right" or request.second_kwic_sorting_option == "right" or request.third_kwic_sorting_option == "right":
-        right = True
+    # left = False
+    # right = False
+    # if request.first_kwic_sorting_option == "left" or request.second_kwic_sorting_option == "left" or request.third_kwic_sorting_option == "left":
+    #     left = True
+    # if request.first_kwic_sorting_option == "right" or request.second_kwic_sorting_option == "right" or request.third_kwic_sorting_option == "right":
+    #     right = True
     try:
         index = int(request.hits_done)
     except:
@@ -63,21 +63,23 @@ def get_neighboring_words(environ, start_response):
             "index": index
         }
 
-        if left and hit.philo_id[-1] != 1: # avoid a lookup if the word is the first in the sentence
-            c.execute('select philo_name, philo_id from words where parent=? and rowid < ?',
-                      (parent_sentence, results['rowid']))
-            result_obj["left"] = []
-            for i in c.fetchall():
-                result_obj["left"].append(i['philo_name'].decode('utf-8'))
-            result_obj["left"].reverse()
-            result_obj["left"] = ' '.join(result_obj["left"])
-        if right:
-            c.execute('select philo_name, philo_id from words where parent=? and rowid > ?',
-                      (parent_sentence, results['rowid']))
-            result_obj["right"] = []
-            for i in c.fetchall():
-                result_obj["right"].append(i['philo_name'].decode('utf-8'))
-            result_obj["right"] = ' '.join(result_obj["right"])
+        left_rowid = results["rowid"] - 10
+        right_rowid = results["rowid"] + 10
+
+        c.execute('select philo_name, philo_id from words where rowid between ? and ?',
+                  (left_rowid, results['rowid']-1))
+        result_obj["left"] = []
+        for i in c.fetchall():
+            result_obj["left"].append(i['philo_name'].decode('utf-8'))
+        result_obj["left"].reverse()
+        result_obj["left"] = ' '.join(result_obj["left"])
+
+        c.execute('select philo_name, philo_id from words where rowid between ? and ?',
+                  (results['rowid']+1, right_rowid))
+        result_obj["right"] = []
+        for i in c.fetchall():
+            result_obj["right"].append(i['philo_name'].decode('utf-8'))
+        result_obj["right"] = ' '.join(result_obj["right"])
 
         metadata_fields = {}
         for metadata in metadata_to_extract:
