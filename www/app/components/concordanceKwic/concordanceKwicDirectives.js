@@ -68,58 +68,14 @@
     }
 
     function kwic($rootScope, $location, $http, URL, request, defaultDiacriticsRemovalMap, descriptionValues) {
-        var removeDiacritics = function(str) {
-            var changes = defaultDiacriticsRemovalMap.map;
-            for (var i = 0; i < changes.length; i++) {
-                str = str.replace(changes[i].letters, changes[i].base);
-            }
-            return str;
-        }
-        var sortResults = function(results, metadataSortKey) {
-            results.sort(function(a, b) {
-                if (isNaN(a[0]) && !isNaN(b[0])) {
-                    return -1;
-                }
-                if (isNaN(b[0]) && !isNaN(a[0])) {
-                    return 1;
-                }
-                var x = removeDiacritics(a[0]);
-                var y = removeDiacritics(b[0]);
-
-                if (x < y) {
-                    return -1;
-                }
-                if (x > y) {
-                    return 1
-                }
-                if (metadataSortKey) {
-                    if (metadataSortKey != 'date') {
-                        var m = removeDiacritics(a[2][metadataSortKey]);
-                        var n = removeDiacritics(b[2][metadataSortKey]);
-                    } else {
-                        var m = parseInt(a[2][metadataSortKey]);
-                        var n = parseInt(b[2][metadataSortKey]);
-                    }
-                    if (m < n) {
-                        return -1;
-                    }
-                    if (m > n) {
-                        return 1
-                    }
-                }
-                return 0;
-            });
-            return results;
-        }
         var mergeLists = function(list1, list2) {
             for (var i = 0; i < list2.length; i += 1) {
                 list1.push(list2[i]);
             }
             return list1;
         }
-        var recursiveLookup = function(scope, queryParams, direction, hitsDone) {
+        var recursiveLookup = function(scope, queryParams, hitsDone) {
             request.script(queryParams, {
-                    direction: direction,
                     hits_done: hitsDone
                 })
                 .then(function(response) {
@@ -130,21 +86,18 @@
                         scope.sortedResults = mergeLists(scope.sortedResults, response.data.results)
                     }
                     if (hitsDone < descriptionValues.resultsLength) {
-                        recursiveLookup(scope, queryParams, direction, hitsDone);
+                        recursiveLookup(scope, queryParams, hitsDone);
                     } else {
-                        scope.sortedResults = sortResults(scope.sortedResults, scope.formData.metadata_sorting_field);
                         queryParams.start = '0';
                         queryParams.end = '0';
-                        var metadataField = angular.copy(queryParams.metadata_sorting_field);
-                        queryParams.metadata_sorting_field = "";
                         descriptionValues.sortedKwic = {
                             results: scope.sortedResults,
                             queryObject: angular.extend({}, queryParams, {
-                                direction: direction
-                            }),
-                            metadataField: metadataField
+                                first: queryParams.first_kwic_sorting_option,
+                                second: queryParams.first_kwic_sorting_option,
+                                third: queryParams.third_kwic_sorting_option
+                            })
                         }
-
                         getKwicResults(scope, hitsDone);
                         scope.concKwic.loading = false;
                     }
@@ -159,11 +112,12 @@
             }
             $http.post('scripts/get_sorted_kwic.py',
                     angular.toJson({
-                        results: scope.sortedResults.slice(start, end),
+                        results: scope.sortedResults,
                         hits_done: hitsDone,
                         query_string: URL.objectToString($location.search()),
                         start: start,
-                        end: end
+                        end: end,
+                        sort_keys: [scope.formData.first_kwic_sorting_option, scope.formData.second_kwic_sorting_option, scope.formData.third_kwic_sorting_option]
                     })
                 )
                 .then(function(response) {
@@ -195,50 +149,67 @@
                 }
 
                 // Sorting fields
-                scope.metadataSortingFields = [];
+                var sortingFields = [
+                    {
+                        label: 'None',
+                        field: ''
+                    },
+                    {
+                        label: 'words to the left',
+                        field: 'left'
+                    },
+                    {
+                        label: 'words to the right',
+                        field: 'right'
+                    },
+                ];
                 for (var i = 0; i < $rootScope.philoConfig.kwic_metadata_sorting_fields.length; i += 1) {
                     var field = $rootScope.philoConfig.kwic_metadata_sorting_fields[i];
                     if (field in scope.philoConfig.metadata_aliases) {
                         var label = scope.philoConfig.metadata_aliases[field];
-                        scope.metadataSortingFields.push({
+                        sortingFields.push({
                             label: label,
                             field: field
                         });
                     } else {
-                        scope.metadataSortingFields.push({
+                        sortingFields.push({
                             label: field[0].toUpperCase() + field.slice(1),
                             field: field
                         });
                     }
                 }
-                if ($rootScope.formData.metadata_sorting_field) {
-                    if ($rootScope.formData.metadata_sorting_field in scope.philoConfig.metadata_aliases) {
-                        scope.kwicMetaSelection = scope.philoConfig.metadata_aliases[$rootScope.formData.metadata_sorting_field];
+                scope.sortingFields = [sortingFields, sortingFields, sortingFields];
+                scope.sortingSelection = [{label:'None'}, {label:'None'}, {label:'None'}];
+                scope.sortKeys = [];
+                scope.updateSortingSelection = function(index, selection) {
+                    scope.sortingSelection[index] = selection;
+                    if (index === 0) {
+                        if (selection.label == "None") {
+                            delete $rootScope.formData.first_kwic_sorting_option;
+                        } else {
+                            $rootScope.formData.first_kwic_sorting_option = selection.field;
+                        }
+                    } else if (index == 1) {
+                        if (selection.label == "None") {
+                            delete $rootScope.formData.second_kwic_sorting_option;
+                        } else {
+                            $rootScope.formData.second_kwic_sorting_option = selection.field;
+                        }
                     } else {
-                        scope.kwicMetaSelection = $rootScope.formData.metadata_sorting_field[0].toUpperCase() + $rootScope.formData.metadata_sorting_field.slice(1);
+                        if (selection.label == "None") {
+                            delete $rootScope.formData.third_kwic_sorting_option;
+                        } else {
+                            $rootScope.formData.third_kwic_sorting_option = selection.field;
+                        }
                     }
-                } else {
-                    scope.kwicMetaSelection = "None";
-                }
-                scope.updateMetadataSorting = function(metadata) {
-                    scope.kwicMetaSelection = metadata.label;
-                    $rootScope.formData.metadata_sorting_field = metadata.field
-                }
-                scope.kwicWordSelection = $rootScope.formData.direction || 'None';
-                scope.updateWordSorting = function(direction) {
-                    if (direction) {
-                        scope.kwicWordSelection = direction;
-                    } else {
-                        scope.kwicWordSelection = "None";
-                    }
-                    $rootScope.formData.direction = direction;
+                    console.log(scope.sortingSelection)
                 }
                 scope.sortResults = function() {
                     var urlString = URL.objectToUrlString($rootScope.formData);
                     $location.url(urlString);
                 }
 
-                if (typeof(scope.formData.direction) !== 'undefined' && scope.formData.direction !== "" || typeof(scope.formData.metadata_sorting_field) !== 'undefined' && scope.formData.metadata_sorting_field !== "") {
+                if (typeof(scope.formData.first_kwic_sorting_option) !== 'undefined' && scope.formData.first_kwic_sorting_option !== "") {
                     scope.concKwic.resultsPromise.then(function(results) { // Rerun normal KWIC query since this could be a reload
                         scope.concKwic.description = angular.extend({}, results.data.description, {
                             resultsLength: results.data.results_length
@@ -249,19 +220,17 @@
                         scope.sortedResults = [];
                         queryParams.start = '0';
                         queryParams.end = "0";
-                        queryParams.metadata_sorting_field = "";
                         var currentQueryObject = angular.extend({}, queryParams, {
-                            direction: scope.formData.direction
+                            first: queryParams.first_kwic_sorting_option,
+                            second: queryParams.second_kwic_sorting_option,
+                            third: queryParams.third_kwic_sorting_option
                         });
                         if (angular.equals(descriptionValues.sortedKwic.queryObject, currentQueryObject)) {
                             scope.sortedResults = descriptionValues.sortedKwic.results;
-                            if (scope.formData.metadata_sorting_field !== descriptionValues.sortedKwic.metadataField) {
-                                scope.sortedResults = sortResults(scope.sortedResults, scope.formData.metadata_sorting_field)
-                            }
                             getKwicResults(scope, results.data.results_length)
                             scope.concKwic.loading = false;
                         } else {
-                            recursiveLookup(scope, queryParams, scope.formData.direction, 0);
+                            recursiveLookup(scope, queryParams, 0);
                         }
                     }).catch(function(response) {
                         scope.results = {};

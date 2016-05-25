@@ -6,6 +6,7 @@ import re
 from lxml import etree
 from ObjectFormatter import adjust_bytes, format_concordance, format_text_object
 from philologic.HitWrapper import ObjectWrapper
+from philologic.DB import DB
 
 
 def get_text(hit, byte_start, length, path):
@@ -62,6 +63,7 @@ def get_text_obj(obj, config, request, word_regex, note=False):
 
 def get_tei_header(request, config):
     path = config.db_path
+    db = DB(path + "/data")
     obj = ObjectWrapper(request['philo_id'].split(), db)
     filename = path + '/data/TEXT/' + obj.filename
     parser = etree.XMLParser(remove_blank_text=True, recover=True)
@@ -73,10 +75,10 @@ def get_tei_header(request, config):
         header_text = ''
         start = 0
         for line in open(filename):
-            if re.search('<%s' % header_name, line):
+            if re.search(r'<teiheader|head', line, re.I):
                 start = 1
             if start:
                 header_text += line
-            if re.search('</%s' % header_name, line):
+            if re.search(r'</teiheader|head', line, re.I):
                 break
     return header_text.replace('<', '&lt;').replace('>', '&gt;')

@@ -261,6 +261,13 @@ web_config_defaults = {
                   # it starts with http://. If no logo is defined, no picture will be displayed.
                   ''',
         'index': 24
+    },
+    'header_in_toc': {
+        'value': False,
+        'comment': '''
+                  # The header_in_toc variable defines whether to display a button to show the header in the table of contents
+                  ''',
+        'index': 25
     }
 }
 

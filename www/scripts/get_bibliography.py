@@ -7,6 +7,7 @@ from wsgiref.handlers import CGIHandler
 import simplejson
 from philologic.DB import DB
 
+from philologic.app import landing_page_bibliography
 from philologic.app import WebConfig
 from philologic.app import WSGIHandler
 

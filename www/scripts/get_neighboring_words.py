@@ -14,25 +14,39 @@ from philologic.app import WSGIHandler
 
 def get_neighboring_words(environ, start_response):
     status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),
-               ("Access-Control-Allow-Origin", "*")]
+    headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
 
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(environ, config)
 
+    # Define whether we get words to the left or to the right or both
+    # left = False
+    # right = False
+    # if request.first_kwic_sorting_option == "left" or request.second_kwic_sorting_option == "left" or request.third_kwic_sorting_option == "left":
+    #     left = True
+    # if request.first_kwic_sorting_option == "right" or request.second_kwic_sorting_option == "right" or request.third_kwic_sorting_option == "right":
+    #     right = True
     try:
         index = int(request.hits_done)
     except:
         index = 0
 
+    # Do we have metadata to extract?
+    metadata_to_extract = []
+    if request.first_kwic_sorting_option in db.locals.metadata_fields:
+        metadata_to_extract.append(request.first_kwic_sorting_option)
+    if request.second_kwic_sorting_option in db.locals.metadata_fields:
+        metadata_to_extract.append(request.second_kwic_sorting_option)
+    if request.third_kwic_sorting_option in db.locals.metadata_fields:
+        metadata_to_extract.append(request.third_kwic_sorting_option)
+
     max_time = int(request.max_time)
 
     kwic_words = []
     start_time = timeit.default_timer()
-    hits = db.query(request["q"], request["method"], request["arg"], **
-                    request.metadata)
+    hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
     c = db.dbh.cursor()
 
     for hit in hits[index:]:
@@ -43,31 +57,35 @@ def get_neighboring_words(environ, start_response):
 
         parent_sentence = results['parent']
 
-        if request.direction == "left":
-            c.execute(
-                'select philo_name, philo_id from words where parent=? and rowid < ?',
-                (parent_sentence, results['rowid']))
-            string = []
-            for i in c.fetchall():
-                string.append(i['philo_name'].decode('utf-8'))
-            string.reverse()
-            string = ' '.join(string)
-        elif request.direction == "right":
-            c.execute(
-                'select philo_name, philo_id from words where parent=? and rowid > ?',
-                (parent_sentence, results['rowid']))
-            string = []
-            for i in c.fetchall():
-                string.append(i['philo_name'].decode('utf-8'))
-            string = ' '.join(string)
-        else:
-            string = ""
+        result_obj = {
+            "left": "",
+            "right": "",
+            "index": index
+        }
+
+        left_rowid = results["rowid"] - 10
+        right_rowid = results["rowid"] + 10
+
+        c.execute('select philo_name, philo_id from words where rowid between ? and ?',
+                  (left_rowid, results['rowid']-1))
+        result_obj["left"] = []
+        for i in c.fetchall():
+            result_obj["left"].append(i['philo_name'].decode('utf-8'))
+        result_obj["left"].reverse()
+        result_obj["left"] = ' '.join(result_obj["left"])
+
+        c.execute('select philo_name, philo_id from words where rowid between ? and ?',
+                  (results['rowid']+1, right_rowid))
+        result_obj["right"] = []
+        for i in c.fetchall():
+            result_obj["right"].append(i['philo_name'].decode('utf-8'))
+        result_obj["right"] = ' '.join(result_obj["right"])
 
         metadata_fields = {}
-        for metadata in config.kwic_metadata_sorting_fields:
-            metadata_fields[metadata] = hit[metadata].lower()
+        for metadata in metadata_to_extract:
+            result_obj[metadata] = hit[metadata].lower()
 
-        kwic_words.append((string, index, metadata_fields))
+        kwic_words.append(result_obj)
 
         index += 1
 
@@ -75,7 +93,7 @@ def get_neighboring_words(environ, start_response):
         if elapsed > max_time:  # avoid timeouts by splitting the query if more than 10 seconds has been spent in the loop
             break
 
-    yield simplesimplejson.dumps({"results": kwic_words, "hits_done": index})
+    yield simplejson.dumps({"results": kwic_words, "hits_done": index})
 
 
 if __name__ == "__main__":

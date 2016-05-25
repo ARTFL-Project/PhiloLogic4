@@ -10,8 +10,6 @@
             resultsLength: '',
             sortedKwic: {
                 results: null,
-                queryObject: null,
-                metadataField: null
-            }
+                queryObject: null            }
         });
 })();

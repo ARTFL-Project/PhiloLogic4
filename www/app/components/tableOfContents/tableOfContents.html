@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="panel panel-default">
-            <button id="show-header" class="btn btn-primary" ng-if="!philoConfig.production" ng-click="toc.showHeader()">{{ toc.headerButton }}</button>
+            <button id="show-header" class="btn btn-primary" ng-if="philoConfig.header_in_toc" ng-click="toc.showHeader()">{{ toc.headerButton }}</button>
             <div id="tei-header" class="panel panel-default tei-header velocity-opposites-transition-slideDownIn" data-velocity-opts="{duration: 200}" ng-if="toc.teiHeader" ng-bind-html="toc.teiHeader | unsafe"></div>
             <div id="toc-report" class="text-content-area" loading="toc.loading">
                 <div id="toc-content" infinite-scroll="toc.getMoreItems()" infinite-scroll-distance="4">

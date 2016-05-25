@@ -42,7 +42,7 @@ def autocomplete_metadata(metadata, field, db):
         field = field[-1]
 
     words = format_query(metadata, field, db)[:100]
-    return simplesimplejson.dumps(words)
+    return simplejson.dumps(words)
 
 
 def format_query(q, field, db):
@@ -108,10 +108,12 @@ def exact_word_pattern_search(term, path):
 
 def highlighter(words, norm_tok, substr_tok):
     new_list = []
-    regex = re.compile(r'(%s|%s)' % (norm_tok, substr_tok), re.I)
+    token_len = len(norm_tok)
     for word in words:
-        w = regex.sub('<span class="highlight">\\1</span>', word)
-        new_list.append(w)
+        highlighted_section = word.decode('utf8')[:token_len]
+        end_word = word.decode('utf-8')[token_len:]
+        highlighted_word = u'<span class="highlight">' + highlighted_section + '</span>' + end_word
+        new_list.append(highlighted_word.encode('utf8'))
     return new_list
 
 
