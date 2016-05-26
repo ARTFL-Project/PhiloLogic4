@@ -709,9 +709,12 @@ def kwic_hit_object(hit, config, db):
     except ValueError:
         pass
 
+    highlighted_text = conc_text[start_hit:end_hit]
+
     kwic_result = {
         "philo_id": hit.philo_id,
         "context": conc_text,
+        "highlighted_text": highlighted_text,
         "metadata_fields": metadata_fields,
         "citation_links": citation_hrefs,
         "citation": citation,

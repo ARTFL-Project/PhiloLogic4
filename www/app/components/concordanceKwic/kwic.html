@@ -3,7 +3,7 @@
 		Resort results by
 		<div class="btn-group" style="margin-left: 3px;" ng-repeat="fields in sortingFields track by $index" ng-init="index=$index">
 			<button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				<span>{{ sortingSelection[index].label }}</span>
+				<span>{{ sortingSelection[index] }}</span>
 				<span class="caret"></span>
 			</button>
 			<ul class="dropdown-menu" role="menu">
