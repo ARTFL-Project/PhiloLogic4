@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import string
 import sys
 import timeit
 from wsgiref.handlers import CGIHandler
@@ -12,6 +13,8 @@ from philologic.app import kwic_hit_object
 from philologic.app import WebConfig
 from philologic.app import WSGIHandler
 
+
+remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
 
 def get_neighboring_words(environ, start_response):
     status = '200 OK'
@@ -26,15 +29,6 @@ def get_neighboring_words(environ, start_response):
         index = int(request.hits_done)
     except:
         index = 0
-
-    # Do we have metadata to extract?
-    metadata_to_extract = []
-    if request.first_kwic_sorting_option in db.locals.metadata_fields:
-        metadata_to_extract.append(request.first_kwic_sorting_option)
-    if request.second_kwic_sorting_option in db.locals.metadata_fields:
-        metadata_to_extract.append(request.second_kwic_sorting_option)
-    if request.third_kwic_sorting_option in db.locals.metadata_fields:
-        metadata_to_extract.append(request.third_kwic_sorting_option)
 
     max_time = int(request.max_time)
 
@@ -51,11 +45,15 @@ def get_neighboring_words(environ, start_response):
 
         parent_sentence = results['parent']
 
+        highlighted_text = kwic_hit_object(hit, config, db)["highlighted_text"]
+        highlighted_text = highlighted_text.translate(remove_punctuation_map)
+        highlighted_text = highlighted_text.strip()
+
         result_obj = {
             "left": "",
             "right": "",
             "index": index,
-            "q": kwic_hit_object(hit, config, db)["highlighted_text"]
+            "q": highlighted_text
         }
 
         left_rowid = results["rowid"] - 10

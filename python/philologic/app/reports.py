@@ -700,16 +700,15 @@ def kwic_hit_object(hit, config, db):
     conc_text = conc_text.replace('\t', ' ')
     try:
         start_hit = conc_text.index('<span class="highlight">')
-        start_output = '<span class="kwic-before"><span class="inner-before">' + conc_text[:
-                                                                                           start_hit] + '</span></span>'
+        start_output = '<span class="kwic-before"><span class="inner-before">' + conc_text[:start_hit] + '</span></span>'
         end_hit = conc_text.rindex('</span>') + 7
+        highlighted_text = conc_text[start_hit+23:end_hit-7].lower()  # for use in KWIC sorting
         end_output = '<span class="kwic-after">' + conc_text[end_hit:] + '</span>'
         conc_text = '<span class="kwic-text">' + start_output + '&nbsp;<span class="kwic-highlight">' + conc_text[
             start_hit:end_hit] + "</span>&nbsp;" + end_output + '</span>'
     except ValueError:
         pass
 
-    highlighted_text = conc_text[start_hit:end_hit]
 
     kwic_result = {
         "philo_id": hit.philo_id,

@@ -153,7 +153,7 @@
                     label: 'None',
                     field: ''
                 }, {
-                    label: 'Searched term(s)',
+                    label: 'searched term(s)',
                     field: 'q'
                 }, {
                     label: 'words to the left',
@@ -162,7 +162,7 @@
                     label: 'words to the right',
                     field: 'right'
                 }];
-                var sortKeys = {"q": "Searched term(s)", "left": 'words to the left', "right": 'words to the right'}
+                var sortKeys = {"q": "searched term(s)", "left": 'words to the left', "right": 'words to the right'}
                 for (var i = 0; i < $rootScope.philoConfig.kwic_metadata_sorting_fields.length; i += 1) {
                     var field = $rootScope.philoConfig.kwic_metadata_sorting_fields[i];
                     if (field in scope.philoConfig.metadata_aliases) {

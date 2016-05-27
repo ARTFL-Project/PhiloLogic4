@@ -4,17 +4,21 @@
     </div>
     <div class="col-xs-12 col-sm-10 col-md-10">
         <div class="btn-group" data-toggle="buttons" id='results_per_page'>
-            <label class="btn btn-primary" ng-class="{'active': formData.results_per_page !== '50' && formData.results_per_page !== '100'}" ng-click="search.radioClick('results_per_page', '25')">
+            <label class="btn btn-primary" ng-class="{'active': formData.results_per_page !== '100' && formData.results_per_page !== '500'}" ng-click="search.radioClick('results_per_page', '25')">
                 <input checked id="pagenum1" name="results_per_page" type="radio" value='25'>
                 25
             </label>
-            <label class="btn btn-primary" ng-class="{'active': formData.results_per_page === '50'}" ng-click="search.radioClick('results_per_page', '50')">
-                <input id="pagenum2" name="results_per_page" type="radio" value='50'>
-                50
-            </label>
             <label class="btn btn-primary" ng-class="{'active': formData.results_per_page === '100'}" ng-click="search.radioClick('results_per_page', '100')">
-                <input id="pagenum3" name="results_per_page" type="radio" value='100'>
+                <input id="pagenum2" name="results_per_page" type="radio" value='50'>
                 100
+            </label>
+            <label class="btn btn-primary" ng-class="{'active': formData.results_per_page === '500'}" ng-click="search.radioClick('results_per_page', '500')">
+                <input id="pagenum3" name="results_per_page" type="radio" value='500'>
+                500
+            </label>
+            <label class="btn btn-primary hidden-xs" ng-class="{'active': formData.results_per_page === '1000'}" ng-click="search.radioClick('results_per_page', '1000')">
+                <input id="pagenum3" name="results_per_page" type="radio" value='1000'>
+                1000
             </label>
         </div>
     </div>
