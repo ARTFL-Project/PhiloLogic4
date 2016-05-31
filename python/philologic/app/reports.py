@@ -451,10 +451,10 @@ def generate_time_series(request, config):
         # Get date total count
         if interval != '1':
             dates = [start_range]
-            dates.append(start_range + (int(request['year_interval']) - 1))
-            query = 'select sum(word_count) from toms where date between "%d" and "%d"' % tuple(dates)
+            end_range = start_range + (int(request['year_interval']) - 1)
+            query = 'select sum(word_count) from toms where %s between "%d" and "%d"' % (config.time_series_year_field, start_range, end_range)
         else:
-            query = "select sum(word_count) from toms where date='%s'" % start_range
+            query = "select sum(word_count) from toms where %s='%s'" % (config.time_series_year_field, start_range)
         c = db.dbh.cursor()
         c.execute(query)
         date_counts[start_range] = c.fetchone()[0] or 0

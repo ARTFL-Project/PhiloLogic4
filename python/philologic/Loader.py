@@ -166,6 +166,7 @@ class Loader(object):
                 if self.debug:
                     print pretty(data)
                 data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
+                data = self.create_year_field(data)
                 load_metadata.append(data)
             except etree.XMLSyntaxError:
                 print "%s has invalid data in the header, removing from database load..." % f
@@ -196,8 +197,23 @@ class Loader(object):
                 metadata_name = metadata_name.decode('utf-8', 'ignore').lower()
                 data[metadata_name] = metadata_value
             data["filename"] = filename  # place at the end in case the value was in the header
+            data = self.create_year_field(data)
             load_metadata.append(data)
         return load_metadata
+
+    def create_year_field(self, metadata):
+        year_finder = re.compile(r'^.*?(\d{4}).*')
+        earliest_year = 2500
+        for field in ["date, ""create_date", "pub_date", "period"]:
+            if field in metadata:
+                year_match = year_finder.search(metadata[field])
+                if year:
+                    year = int(year_match.groups()[0]))
+                    if year < earliest_year:
+                        earliest_year = year
+        if earliest_year != 2500:
+            metadata["year"] = earliest_year
+        return metadata
 
     def parse_metadata(self, sort_by_field, reverse_sort=False, header="tei"):
         """Parsing metadata fields in TEI or Dublin Core headers"""
@@ -207,6 +223,9 @@ class Loader(object):
             load_metadata = self.parse_tei_header()
         elif header == "dc":
             load_metadata = self.parse_dc_header()
+
+        # Create year fields
+        load_metadata = sel.create_year_field(load_metadata)
         print "done."
 
         print "Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]),

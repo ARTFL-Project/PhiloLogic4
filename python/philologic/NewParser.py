@@ -185,14 +185,9 @@ class XMLParser(object):
             self.word_tag_attributes = self.get_attributes(tag)
 
         # Paragraphs
-        # TODO: consistency with handling of self.no_deeper_objects variable in para type objects
         elif parag_tag.search(tag) or parag_with_attrib_tag.search(tag):
             self.do_this_para = True
-            if self.in_a_note:
-                self.do_this_para = False
-            if self.no_deeper_objects:
-                self.do_this_para = False
-            if self.do_this_para:
+            if not self.in_a_note and not self.no_deeper_objects:
                 if self.open_para:  # account for unclosed paragraph tags
                     para_byte_end = self.bytes_read_in - len(tag.encode('utf8'))
                     self.close_para(para_byte_end)
@@ -204,6 +199,9 @@ class XMLParser(object):
 
         # Epigraph: treat as paragraph objects
         elif epigraph_tag.search(tag):
+            if self.open_para:  # account for unclosed paragraph tags
+                para_byte_end = self.bytes_read_in - len(tag.encode('utf8'))
+                self.close_para(para_byte_end)
             self.open_para = True
             self.v.push("para", tag_name, byte_start)
             self.get_object_attributes(tag, "para")
@@ -211,18 +209,28 @@ class XMLParser(object):
         elif closed_epigraph_tag.search(tag):
             self.close_para(self.bytes_read_in)
             self.no_deeper_objects = False
+            self.open_para = False
 
         # LIST: treat as para objects
         elif list_tag.search(tag) and not self.no_deeper_objects:
+            if self.open_para:  # account for unclosed paragraph tags
+                para_byte_end = self.bytes_read_in - len(tag.encode('utf8'))
+                self.close_para(para_byte_end)
             self.open_para = True
             self.v.push("para", tag_name, byte_start)
             self.get_object_attributes(tag, "para")
+            self.no_deeper_objects = True
         # TODO: investigate why no closed tag handling in Philo3
         elif closed_list_tag.search(tag):
             self.close_para(self.bytes_read_in)
+            self.no_deeper_objects = False
+            self.open_para = False
 
         # SPEECH BREAKS: treat them as para objects
         elif speaker_tag.search(tag):
+            if self.open_para:  # account for unclosed paragraph tags
+                para_byte_end = self.bytes_read_in - len(tag.encode('utf8'))
+                self.close_para(para_byte_end)
             self.open_para = True
             self.v.push("para", tag_name, byte_start)
             self.get_object_attributes(tag, "para")
@@ -230,9 +238,13 @@ class XMLParser(object):
         elif closed_speaker_tag.search(tag):
             self.close_para(self.bytes_read_in)
             self.no_deeper_objects = False
+            self.open_para = False
 
         # ARGUMENT BREAKS: treat them as para objects
         elif argument_tag.search(tag):
+            if self.open_para:  # account for unclosed paragraph tags
+                para_byte_end = self.bytes_read_in - len(tag.encode('utf8'))
+                self.close_para(para_byte_end)
             self.open_para = True
             self.v.push("para", tag_name, byte_start)
             self.get_object_attributes(tag, "para")
@@ -240,9 +252,13 @@ class XMLParser(object):
         elif closed_argument_tag.search(tag):
             self.close_para(self.bytes_read_in)
             self.no_deeper_objects = False
+            self.open_para = False
 
         # OPENER BREAKS: treat them as para objects
         elif opener_tag.search(tag):
+            if self.open_para:  # account for unclosed paragraph tags
+                para_byte_end = self.bytes_read_in - len(tag.encode('utf8'))
+                self.close_para(para_byte_end)
             self.open_para = True
             self.v.push("para", tag_name, byte_start)
             self.get_object_attributes(tag, "para")
@@ -250,9 +266,13 @@ class XMLParser(object):
         elif closed_opener_tag.search(tag):
             self.close_para(self.bytes_read_in)
             self.no_deeper_objects = False
+            self.open_para = False
 
         # CLOSER BREAKS: treat them as para objects
         elif closer_tag.search(tag):
+            if self.open_para:  # account for unclosed paragraph tags
+                para_byte_end = self.bytes_read_in - len(tag.encode('utf8'))
+                self.close_para(para_byte_end)
             self.open_para = True
             self.v.push("para", tag_name, byte_start)
             self.get_object_attributes(tag, "para")
@@ -260,6 +280,7 @@ class XMLParser(object):
         elif closed_closer_tag.search(tag):
             self.close_para(self.bytes_read_in)
             self.no_deeper_objects = False
+            self.open_para = False
 
         # STAGE DIRECTIONS: treat them as para objects
         # TODO: what to do with stage direction??? deactivated to avoid clashing with <sp> tags
@@ -272,11 +293,17 @@ class XMLParser(object):
 
         # CAST LIST: treat them as para objects
         elif castlist_tag.search(tag):
+            if self.open_para:  # account for unclosed paragraph tags
+                para_byte_end = self.bytes_read_in - len(tag.encode('utf8'))
+                self.close_para(para_byte_end)
             self.open_para = True
             self.v.push("para", tag_name, byte_start)
             self.get_object_attributes(tag, "para")
+            self.no_deeper_objects = True
         elif closed_castlist_tag.search(tag):
             self.close_para(self.bytes_read_in)
+            self.no_deeper_objects = False
+            self.open_para = False
 
         # PAGE BREAKS: this updates the currentpagetag or sets it to "na" if not found.
         # TODO: handling of attributes
@@ -301,6 +328,9 @@ class XMLParser(object):
         elif line_group_tag.search(tag) and not self.no_deeper_objects:
             if self.line_group_break_sent:
                 self.in_line_group = True
+            if self.open_para:  # account for unclosed paragraph tags
+                para_byte_end = self.bytes_read_in - len(tag.encode('utf8'))
+                self.close_para(para_byte_end)
             self.open_para = True
             self.v.push("para", tag_name, byte_start)
             self.get_object_attributes(tag, "para")
@@ -635,17 +665,14 @@ class XMLParser(object):
     def get_object_attributes(self, tag, object_type):
         """Get all attributes for any given tag and attach metadata to element."""
         try:
-            fields_to_match = set(self.metadata_xpaths[object_type].keys())
+            text_object = TagToObjMap[tag]
+            retrieve_attrib = True
         except KeyError:
-            fields_to_match = set([])
-        if object_type.startswith("div"):
-            try:
-                fields_to_match = fields_to_match.union(self.metadata_xpaths["div"].keys())
-            except KeyError:
-                pass
+            retrieve_attrib = False
+        if retrieve_attrib:
         for attrib, value in self.get_attributes(tag):
-            snake_attrib = self.camel_case_to_snake_case(attrib)
-            if attrib in fields_to_match or snake_attrib in fields_to_match:
+            attrib = self.camel_case_to_snake_case(attrib)
+            if attrib in DefaultMetadataFields[text_object]:
                 self.v[object_type][snake_attrib] = value
 
     def get_div_head(self, tag):
@@ -908,6 +935,7 @@ class XMLParser(object):
     def remove_control_chars(self, text):
         return control_char_re.sub('', text.decode('utf8', 'ignore')).encode('utf8')
 
+
 # Pre-compiled regexes used for parsing
 join_hyphen_with_lb = re.compile(r'(\&shy;[\n \t]*<lb\/>)', re.I | re.M)
 join_hyphen = re.compile(r'(\&shy;[\n \t]*)', re.I | re.M)
@@ -1063,6 +1091,12 @@ TagToObjMap = {
     "pb": "page"
 }
 
+DefaultMetadataFields = {
+    "div": set(["head", "type", "n", "id"]),
+    "para": set(["who"]),
+    "page": set(["n", "id", "fac"])
+}
+
 DefaultMetadataXPaths = {
     # Metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
     # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
@@ -1095,16 +1129,12 @@ DefaultMetadataXPaths = {
             ".//sourceDesc/bibl/author/date",
             ".//titlestmt/author/date",
         ],
-        "date": [
+        "create_date": [
             ".//profileDesc/creation/date",
             ".//fileDesc/sourceDesc/bibl/imprint/date",
             ".//sourceDesc/biblFull/publicationStmt/date",
-            ".//sourceDesc/bibl/imprint/date",
-            ".//sourceDesc/biblFull/publicationStmt/date",
             ".//profileDesc/dummy/creation/date",
             ".//fileDesc/sourceDesc/bibl/creation/date",
-            "./text/front/docDate/.@value",
-            "./text/front//p[@rend='center']",
         ],
         "publisher": [
             ".//sourceDesc/bibl/imprint[@type='artfl']",
@@ -1184,28 +1214,6 @@ DefaultMetadataXPaths = {
             # structure
             ".//SourceDesc/structure",
         ]
-    },
-    "div": {
-        "head": [
-            "./head",
-        ],
-        "type": [
-            ".@type"
-        ],
-        "n": [
-            ".@n"
-        ],
-        "id": [
-            ".@id"
-        ]
-    },
-    "para": {
-        "who": [".@who"]
-    },
-    "page": {
-        "n": [".@n"],
-        "id": [".@id"],
-        "fac": [".@fac"]
     }
 }
 

@@ -222,8 +222,12 @@
                     }
                 }
                 scope.sortResults = function() {
-                    var urlString = URL.objectToUrlString($rootScope.formData);
-                    $location.url(urlString);
+                    if (scope.concKwic.description.resultsLength < 30000) {
+                        var urlString = URL.objectToUrlString($rootScope.formData);
+                        $location.url(urlString);
+                    } else {
+                        alert("For performance reasons, you cannot sort KWIC reports of more than 30,000 results. Please narrow your query to filter results.")
+                    }
                 }
 
                 if (typeof(scope.formData.first_kwic_sorting_option) !== 'undefined' && scope.formData.first_kwic_sorting_option !== "") {
