@@ -149,20 +149,20 @@
                 }
 
                 // Sorting fields
-                var sortingFields = [
-                    {
-                        label: 'None',
-                        field: ''
-                    },
-                    {
-                        label: 'words to the left',
-                        field: 'left'
-                    },
-                    {
-                        label: 'words to the right',
-                        field: 'right'
-                    },
-                ];
+                var sortingFields = [{
+                    label: 'None',
+                    field: ''
+                }, {
+                    label: 'searched term(s)',
+                    field: 'q'
+                }, {
+                    label: 'words to the left',
+                    field: 'left'
+                }, {
+                    label: 'words to the right',
+                    field: 'right'
+                }];
+                var sortKeys = {"q": "searched term(s)", "left": 'words to the left', "right": 'words to the right'}
                 for (var i = 0; i < $rootScope.philoConfig.kwic_metadata_sorting_fields.length; i += 1) {
                     var field = $rootScope.philoConfig.kwic_metadata_sorting_fields[i];
                     if (field in scope.philoConfig.metadata_aliases) {
@@ -171,18 +171,36 @@
                             label: label,
                             field: field
                         });
+                        sortKeys[field] = label;
                     } else {
                         sortingFields.push({
                             label: field[0].toUpperCase() + field.slice(1),
                             field: field
                         });
+                        sortKeys[field] = field[0].toUpperCase() + field.slice(1);
                     }
                 }
                 scope.sortingFields = [sortingFields, sortingFields, sortingFields];
-                scope.sortingSelection = [{label:'None'}, {label:'None'}, {label:'None'}];
-                scope.sortKeys = [];
+                scope.sortingSelection = [];
+                if (typeof(scope.formData.first_kwic_sorting_option) !== 'undefined') {
+                    scope.sortingSelection.push(sortKeys[scope.formData.first_kwic_sorting_option])
+                }
+                if (typeof(scope.formData.second_kwic_sorting_option) !== 'undefined') {
+                    scope.sortingSelection.push(sortKeys[scope.formData.second_kwic_sorting_option])
+                }
+                if (typeof(scope.formData.third_kwic_sorting_option) !== 'undefined') {
+                    scope.sortingSelection.push(sortKeys[scope.formData.third_kwic_sorting_option])
+                }
+                if (scope.sortingSelection.length === 0) {
+                    scope.sortingSelection = ["None", "None", "None"]
+                } else if (scope.sortingSelection.length === 1) {
+                    scope.sortingSelection.push('None');
+                    scope.sortingSelection.push("None");
+                } else if (scope.sortingSelection.length === 2) {
+                    scope.sortingSelection.push("None");
+                }
                 scope.updateSortingSelection = function(index, selection) {
-                    scope.sortingSelection[index] = selection;
+                    scope.sortingSelection[index] = selection.label;
                     if (index === 0) {
                         if (selection.label == "None") {
                             delete $rootScope.formData.first_kwic_sorting_option;
@@ -202,7 +220,6 @@
                             $rootScope.formData.third_kwic_sorting_option = selection.field;
                         }
                     }
-                    console.log(scope.sortingSelection)
                 }
                 scope.sortResults = function() {
                     var urlString = URL.objectToUrlString($rootScope.formData);

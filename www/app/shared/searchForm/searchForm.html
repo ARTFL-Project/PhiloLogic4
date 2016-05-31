@@ -41,7 +41,6 @@
                     <metadata-fields></metadata-fields>
                     <collocation-options></collocation-options>
                     <time-series-options></time-series-options>
-                    <kwic-options></kwic-options>
                     <results-per-page></results-per-page>
                 </div>
             </div>
@@ -60,11 +59,11 @@
                     </div>
                     <div id="search-elements" ng-if="search.formOpen" class="dico velocity-opposites-transition-slideDownBigIn" data-velocity-opts="{ duration: 400 }">
                         <h5>Refine your search with the following options and fields:</h5>
+                        {{ formData.report }}
                         <search-methods></search-methods>
                         <metadata-fields exclude="head"></metadata-fields>
                         <collocation-options></collocation-options>
                         <time-series-options></time-series-options>
-                        <kwic-options></kwic-options>
                         <results-per-page></results-per-page>
                     </div>
                 </div>

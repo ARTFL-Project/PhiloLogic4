@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import string
 import sys
 import timeit
 from wsgiref.handlers import CGIHandler
@@ -8,9 +9,12 @@ from wsgiref.handlers import CGIHandler
 import simplejson
 from philologic.DB import DB
 
+from philologic.app import kwic_hit_object
 from philologic.app import WebConfig
 from philologic.app import WSGIHandler
 
+
+remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
 
 def get_neighboring_words(environ, start_response):
     status = '200 OK'
@@ -21,26 +25,10 @@ def get_neighboring_words(environ, start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(environ, config)
 
-    # Define whether we get words to the left or to the right or both
-    # left = False
-    # right = False
-    # if request.first_kwic_sorting_option == "left" or request.second_kwic_sorting_option == "left" or request.third_kwic_sorting_option == "left":
-    #     left = True
-    # if request.first_kwic_sorting_option == "right" or request.second_kwic_sorting_option == "right" or request.third_kwic_sorting_option == "right":
-    #     right = True
     try:
         index = int(request.hits_done)
     except:
         index = 0
-
-    # Do we have metadata to extract?
-    metadata_to_extract = []
-    if request.first_kwic_sorting_option in db.locals.metadata_fields:
-        metadata_to_extract.append(request.first_kwic_sorting_option)
-    if request.second_kwic_sorting_option in db.locals.metadata_fields:
-        metadata_to_extract.append(request.second_kwic_sorting_option)
-    if request.third_kwic_sorting_option in db.locals.metadata_fields:
-        metadata_to_extract.append(request.third_kwic_sorting_option)
 
     max_time = int(request.max_time)
 
@@ -57,10 +45,15 @@ def get_neighboring_words(environ, start_response):
 
         parent_sentence = results['parent']
 
+        highlighted_text = kwic_hit_object(hit, config, db)["highlighted_text"]
+        highlighted_text = highlighted_text.translate(remove_punctuation_map)
+        highlighted_text = highlighted_text.strip()
+
         result_obj = {
             "left": "",
             "right": "",
-            "index": index
+            "index": index,
+            "q": highlighted_text
         }
 
         left_rowid = results["rowid"] - 10
@@ -82,7 +75,7 @@ def get_neighboring_words(environ, start_response):
         result_obj["right"] = ' '.join(result_obj["right"])
 
         metadata_fields = {}
-        for metadata in metadata_to_extract:
+        for metadata in config.kwic_metadata_sorting_fields:
             result_obj[metadata] = hit[metadata].lower()
 
         kwic_words.append(result_obj)

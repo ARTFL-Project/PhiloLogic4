@@ -10,7 +10,6 @@
         .directive('metadataFields', metadataFields)
         .directive('collocationOptions', collocationOptions)
         .directive('timeSeriesOptions', timeSeriesOptions)
-        .directive('kwicOptions', kwicOptions)
         .directive('resultsPerPage', resultsPerPage)
         .directive('autocompleteTerm', autocompleteTerm)
         .directive('autocompleteMetadata', autocompleteMetadata);
@@ -163,67 +162,9 @@
         }
     }
 
-    function kwicOptions($rootScope) {
-        return {
-            templateUrl: 'app/shared/searchForm/kwicOptions.html',
-            replace: true,
-            link: function(scope) {
-                if ($rootScope.formData.direction) {
-                    scope.kwicDirectionSelection = $rootScope.formData.direction;
-                } else {
-                    scope.kwicDirectionSelection = "No sorting"
-                }
-                scope.selectDirectionSortingField = function(direction) {
-                    if (!direction) {
-                        $rootScope.formData.direction = "";
-                        scope.kwicDirectionSelection = "No sorting"
-                    } else {
-                        $rootScope.formData.direction = direction;
-                        scope.kwicDirectionSelection = direction;
-                    }
-                }
-                scope.metadataSortingFields = [];
-                for (var i = 0; i < $rootScope.philoConfig.kwic_metadata_sorting_fields.length; i += 1) {
-                    var field = $rootScope.philoConfig.kwic_metadata_sorting_fields[i];
-                    if (field in scope.philoConfig.metadata_aliases) {
-                        var label = scope.philoConfig.metadata_aliases[field];
-                        scope.metadataSortingFields.push({
-                            label: label,
-                            field: field
-                        });
-                    } else {
-                        scope.metadataSortingFields.push({
-                            label: field[0].toUpperCase() + field.slice(1),
-                            field: field
-                        });
-                    }
-                }
-                if ($rootScope.formData.metadata_sorting_field) {
-                    if ($rootScope.formData.metadata_sorting_field in scope.philoConfig.metadata_aliases) {
-                        scope.kwicMetaSelection = scope.philoConfig.metadata_aliases[$rootScope.formData.metadata_sorting_field];
-                    } else {
-                        scope.kwicMetaSelection = $rootScope.formData.metadata_sorting_field[0].toUpperCase() + $rootScope.formData.metadata_sorting_field.slice(1);
-                    }
-                } else {
-                    scope.kwicMetaSelection = 'No sorting'
-                }
-                scope.selectMetadataSortingField = function(field) {
-                    if (!field) {
-                        $rootScope.formData.metadata_sorting_field = "";
-                        scope.kwicMetaSelection = "No sorting";
-                    } else {
-                        $rootScope.formData.metadata_sorting_field = field.field;
-                        scope.kwicMetaSelection = field.label;
-                    }
-                }
-            }
-        }
-    }
-
     function resultsPerPage() {
         return {
-            templateUrl: 'app/shared/searchForm/resultsPerPage.html',
-            replace: true
+            templateUrl: 'app/shared/searchForm/resultsPerPage.html'
         }
     }
 
