@@ -4,7 +4,7 @@ import re
 import sqlite3
 
 from lxml import etree
-from philologic.DB import DB 
+from philologic.DB import DB
 import FragmentParser
 
 begin_match = re.compile(r'^[^<]*?>')
@@ -372,7 +372,7 @@ def clean_tags(element):
     for child in element:
         text += clean_tags(child)
     if element.tag == "philoHighlight":
-        word_match = term_match.match(element.tail)
+        word_match = term_match.match(convert_entities(element.tail))
         if word_match:
             return '<span class="highlight">' + element.text + text + element.tail[:word_match.end(
             )] + "</span>" + element.tail[word_match.end():]

@@ -706,7 +706,9 @@ def kwic_hit_object(hit, config, db):
         end_output = '<span class="kwic-after">' + conc_text[end_hit:] + '</span>'
         conc_text = '<span class="kwic-text">' + start_output + '&nbsp;<span class="kwic-highlight">' + conc_text[
             start_hit:end_hit] + "</span>&nbsp;" + end_output + '</span>'
-    except ValueError:
+    except ValueError as v:
+        import sys
+        print >> sys.stderr, "KWIC ERROR:", v
         pass
 
 

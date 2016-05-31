@@ -541,7 +541,7 @@ class XMLParser(object):
                         print >> sys.stderr, "Truncating for index..."
                         word = word[:235]
 
-                    #word = self.remove_control_chars(word)
+                    word = self.remove_control_chars(word)
                     word = word.strip().replace("_", "")
                     if len(word):
                         self.v.push("word", word, word_pos)
@@ -906,8 +906,7 @@ class XMLParser(object):
         return text
 
     def remove_control_chars(self, text):
-        # return control_char_re.sub('', text)
-        return text
+        return control_char_re.sub('', text.decode('utf8', 'ignore')).encode('utf8')
 
 # Pre-compiled regexes used for parsing
 join_hyphen_with_lb = re.compile(r'(\&shy;[\n \t]*<lb\/>)', re.I | re.M)
@@ -977,13 +976,9 @@ cap_char_or_num = re.compile(r'[A-Z0-9]')  # Capitals
 
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
-all_chars = (unichr(i) for i in xrange(0x110000))
-control_chars_range =  range(0,32) + range(127,160)
-control_chars_range.remove(9)
-control_chars_range.remove(10)
-control_chars_range.remove(13) ## Keeping newlines, carriage returns and tabs
-control_chars = ''.join(map(unichr, control_chars_range))
-control_char_re = re.compile('[%s]' % re.escape(control_chars))
+tab_newline = re.compile(r'[\n|\t]')
+control_chars = ''.join([i for i in map(lambda x: unichr(x).encode('utf8'), range(0,32) + range(127,160)) if not tab_newline.search(i)])
+control_char_re = re.compile(r'[%s]' % re.escape(control_chars))
 
 # Entities regexes
 entity_regex = [

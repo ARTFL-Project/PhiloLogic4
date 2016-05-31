@@ -95,11 +95,23 @@ class FragmentStripper:
         return self.buffer
 
 def parse(text):
-    parser = FragmentParser()
-    driver = LXMLTreeDriver(target=parser)
-    feeder = st.ShlaxIngestor(target=driver)
-    feeder.feed(text)
-    return feeder.close()
+    try:
+        parser = FragmentParser()
+        driver = LXMLTreeDriver(target=parser)
+        feeder = st.ShlaxIngestor(target=driver)
+        feeder.feed(text)
+        return feeder.close()
+    except ValueError:
+        # we use LXML's HTML parser which is more flexible and then feed the result to fragment parser
+        parser = etree.HTMLParser()
+        tree = etree.fromstring(text.decode('utf8', 'ignore'), parser=parser)
+        new_text = etree.tostring(tree, method="xml").replace("<html><body>", '').replace("</body></html>", '').replace("philohighlight", "philoHighlight")
+        parser = FragmentParser()
+        driver = LXMLTreeDriver(target=parser)
+        feeder = st.ShlaxIngestor(target=driver)
+        feeder.feed(new_text)
+        return feeder.close()
+
 
 def strip_tags(text):
     parser = FragmentStripper()
