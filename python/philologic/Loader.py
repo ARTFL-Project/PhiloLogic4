@@ -163,10 +163,10 @@ class Loader(object):
                     for field in metadata_xpaths[metadata_type]
                     for xpath in metadata_xpaths[metadata_type][field]
                 ]
+                data = self.create_year_field(data)
                 if self.debug:
                     print pretty(data)
                 data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
-                data = self.create_year_field(data)
                 load_metadata.append(data)
             except etree.XMLSyntaxError:
                 print "%s has invalid data in the header, removing from database load..." % f
@@ -207,12 +207,12 @@ class Loader(object):
         for field in ["date, ""create_date", "pub_date", "period"]:
             if field in metadata:
                 year_match = year_finder.search(metadata[field])
-                if year:
-                    year = int(year_match.groups()[0]))
+                if year_match:
+                    year = int(year_match.groups()[0])
                     if year < earliest_year:
                         earliest_year = year
         if earliest_year != 2500:
-            metadata["year"] = earliest_year
+            metadata["year"] = str(earliest_year)
         return metadata
 
     def parse_metadata(self, sort_by_field, reverse_sort=False, header="tei"):
@@ -224,8 +224,6 @@ class Loader(object):
         elif header == "dc":
             load_metadata = self.parse_dc_header()
 
-        # Create year fields
-        load_metadata = sel.create_year_field(load_metadata)
         print "done."
 
         print "Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]),

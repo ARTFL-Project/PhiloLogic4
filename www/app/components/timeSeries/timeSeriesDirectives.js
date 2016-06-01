@@ -5,7 +5,7 @@
         .module('philoApp')
         .directive('timeSeriesChart', timeSeriesChart);
 
-    function timeSeriesChart($rootScope, $http, $location, $log, progressiveLoad, URL, request, saveToLocalStorage) {
+    function timeSeriesChart($rootScope, $http, $location, $log, philoConfig, progressiveLoad, URL, request, saveToLocalStorage) {
         var getTimeSeries = function(scope) {
             var formData = angular.copy(scope.formData);
             scope.resultsLength = 0;
@@ -147,7 +147,7 @@
                     var formData = angular.copy(scope.formData);
                     var startDate  = parseInt(p[0].label);
                     var endDate = startDate + parseInt(formData.year_interval) - 1;
-                    formData.date = startDate + "-" + endDate;
+                    formData[philoConfig.time_series_year_field] = startDate + "-" + endDate;
                     formData.report = "concordance";
                     var urlString = "query?" + URL.objectToString(formData);
                     $location.url(urlString);

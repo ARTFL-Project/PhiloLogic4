@@ -18,7 +18,7 @@ def get_start_end_date(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(environ, config)
-    start_date, end_date = start_end_date(db, start_date=request.start_date, end_date=request.end_date)
+    start_date, end_date = start_end_date(db, config, start_date=request.start_date, end_date=request.end_date)
     yield simplejson.dumps({"start_date": start_date, "end_date": end_date})
 
 

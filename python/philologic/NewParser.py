@@ -13,13 +13,11 @@ class XMLParser(object):
                  output,
                  docid,
                  filesize,
-                 token_regex=r"(\w+)|([\.\?\!])",
-                 xpaths=[("doc", "./")],
-                 metadata_xpaths=[],
                  suppress_tags=[],
                  pseudo_empty_tags=[],
                  filtered_words=[],
-                 known_metadata=["doc", "div1", "div2", "div3", "para", "sent", "word"]):
+                 known_metadata=["doc", "div1", "div2", "div3", "para", "sent", "word"],
+                 **kwargs):
         self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
         self.parallel_type = "page"
         self.output = output
@@ -28,23 +26,6 @@ class XMLParser(object):
         self.v = OHCOVector.CompoundStack(self.types, self.parallel_type, docid, output)
 
         self.filesize = filesize
-
-        self.token_regex = token_regex
-        self.xpaths = xpaths[:]
-
-        # TODO: remove flattening inside the try block when we kill the old parser
-        self.metadata_xpaths = {}
-        try:
-            for obj_type, path, field_name in metadata_xpaths:
-                if obj_type not in self.metadata_xpaths:
-                    self.metadata_xpaths[obj_type] = {}
-                if field_name not in self.metadata_xpaths[obj_type]:
-                    self.metadata_xpaths[obj_type][field_name] = []
-                self.metadata_xpaths[obj_type][field_name].append(path)
-        except ValueError:
-            self.metadata_xpaths = metadata_xpaths
-        if not self.metadata_xpaths:
-            self.metadata_xpaths = DefaultMetadataXPaths
 
         self.suppress_xpaths = suppress_tags
         self.pseudo_empty_tags = pseudo_empty_tags
@@ -670,10 +651,10 @@ class XMLParser(object):
         except KeyError:
             retrieve_attrib = False
         if retrieve_attrib:
-        for attrib, value in self.get_attributes(tag):
-            attrib = self.camel_case_to_snake_case(attrib)
-            if attrib in DefaultMetadataFields[text_object]:
-                self.v[object_type][snake_attrib] = value
+            for attrib, value in self.get_attributes(tag):
+                attrib = self.camel_case_to_snake_case(attrib)
+                if attrib in DefaultMetadataFields[text_object]:
+                    self.v[object_type][snake_attrib] = value
 
     def get_div_head(self, tag):
         """Get div head."""

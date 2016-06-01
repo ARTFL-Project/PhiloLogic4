@@ -6,7 +6,7 @@ import sys
 from glob import glob
 from optparse import OptionParser
 
-from philologic import Loader, LoadFilters, Parser, PostFilters, NewParser
+from philologic import Loader, LoadFilters, Parser, PostFilters, NewParser, PlainTextParser
 
 
 # Load global config
@@ -43,20 +43,21 @@ class LoadOptions(object):
         self.values["punct_regex"] = Parser.DafaultPunctRegex
         self.values["token_regex"] = Parser.DefaultTokenRegex
         self.values["xpaths"] = Parser.DefaultXPaths
-        self.values["metadata_xpaths"] = NewParser.DefaultMetadataXPaths
+        self.values["metadata_xpaths"] = Parser.DefaultMetadataXPaths
         self.values["pseudo_empty_tags"] = []
         self.values["suppress_tags"] = []
         self.values["cores"] = 2
         self.values["dbname"] = ""
         self.values["db_url"] = ""
         self.values["files"] = []
-        self.values["sort_order"] = ["date", "author", "title", "filename"]
+        self.values["sort_order"] = ["year", "author", "title", "filename"]
         self.values["header"] = "tei"
         self.values["debug"] = False
         self.values["force_delete"] = False
         self.values["file_list"] = False
         self.values["bibliography"] = ""
         self.values["filtered_words"] = set([])
+        self.values["file_type"] = "xml"
 
     def setup_parser(self):
         usage = "usage: %prog [options] database_name files"
@@ -100,11 +101,11 @@ class LoadOptions(object):
                           type="string",
                           dest="load_config",
                           help="load external config for specialized load")
-        parser.add_option("-p",
-                          "--parser_factory",
+        parser.add_option("-t",
+                          "--file-type",
                           type="string",
-                          dest="parser_factory",
-                          help="Define parser to use for file parsing")
+                          dest="file_type",
+                          help="Define file type for parsing: plain_text or xml")
         return parser
 
     def parse(self, argv):
@@ -141,9 +142,9 @@ class LoadOptions(object):
                     for config_key, config_value in load_config.config.iteritems():
                         if config_value:
                             self.values[config_key] = config_value
-                elif a == "parser_factory":
-                    if value == "NewParser":
-                        self.values["parser_factory"] = NewParser.XMLParser
+                elif a == "file_type":
+                    if value == "plain_text":
+                        self.values["parser_factory"] = PlainTextParser.PlainTextParser
                 elif a == "navigable_objects" and value is not None:
                     self.values["navigable_objects"] = [v.strip() for v in value.split(',')]
                 else:

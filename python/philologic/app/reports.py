@@ -245,6 +245,7 @@ def frequency_results(request, config, sorted=False):
             metadata[first_metatada_key] = first_metadata_value.encode('utf-8', 'ignore')
             append_to_label = []
             for metadata_key, metadata_value in key[1:]:
+                metadata_value = metadata_value.strip()
                 if not metadata_value:
                     # replace NULL with '[None]', 'N.A.', 'Untitled', etc.
                     metadata[metadata_key] = "NULL"
@@ -422,7 +423,7 @@ def generate_time_series(request, config):
     db = DB(config.db_path + '/data/')
     time_series_object = {'query': dict([i for i in request]), 'query_done': False}
 
-    start_date, end_date = get_start_end_date(db, start_date=None, end_date=None)
+    start_date, end_date = get_start_end_date(db, config, start_date=None, end_date=None)
 
     # Generate date ranges
     interval = int(request.year_interval)
@@ -435,6 +436,9 @@ def generate_time_series(request, config):
         date_range = "%d-%d" % (start, end)
         date_ranges.append((start, date_range))
 
+    import sys
+    print >> sys.stderr, "RANGES", date_ranges
+
     absolute_count = defaultdict(int)
     date_counts = {}
     total_hits = 0
@@ -442,7 +446,7 @@ def generate_time_series(request, config):
     start_time = timeit.default_timer()
     max_time = request.max_time or 10
     for start_range, date_range in date_ranges:
-        request.metadata['date'] = date_range
+        request.metadata[config.time_series_year_field] = date_range
         hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
         hits.finish()
         url = make_absolute_query_link(config, request, report="concordance", date=date_range, start="0", end="0")
@@ -455,10 +459,12 @@ def generate_time_series(request, config):
             query = 'select sum(word_count) from toms where %s between "%d" and "%d"' % (config.time_series_year_field, start_range, end_range)
         else:
             query = "select sum(word_count) from toms where %s='%s'" % (config.time_series_year_field, start_range)
+
         c = db.dbh.cursor()
         c.execute(query)
         date_counts[start_range] = c.fetchone()[0] or 0
         total_hits += len(hits)
+        print >> sys.stderr, "TOTAL", total_hits
         elapsed = timeit.default_timer() - start_time
         # avoid timeouts by splitting the query if more than request.max_time (in seconds) has been spent in the loop
         if elapsed > int(max_time):
@@ -725,10 +731,10 @@ def kwic_hit_object(hit, config, db):
     return kwic_result
 
 
-def get_start_end_date(db, start_date=None, end_date=None):
+def get_start_end_date(db, config, start_date=None, end_date=None):
     date_finder = re.compile(r'^.*?(\d{1,}).*')
     c = db.dbh.cursor()
-    c.execute('select date from toms where date is not null')
+    c.execute('select %s from toms where %s is not null' % (config.time_series_year_field, config.time_series_year_field))
     dates = []
     for i in c.fetchall():
         try:

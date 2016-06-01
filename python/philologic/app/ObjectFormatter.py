@@ -215,7 +215,7 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                 el.text = "note"
                 el.tag = "span"
             elif el.tag == "note":
-                if el.getparent().attrib["type"] != "notes":  ## inline notes
+                if el.getparent().attrib["type"] != "notes" or el.getparent().getparent()["type"] != "notes":  ## inline notes
                     el.tag = 'span'
                     el.attrib['class'] = "note-content"
                     for child in el:

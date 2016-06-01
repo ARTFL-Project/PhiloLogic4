@@ -240,7 +240,7 @@ web_config_defaults = {
                 # in multiple date fields.
                 ''',
         'index': 22
-    }
+    },
     'title_prefix_removal': {
         'value': [],
         'comment': '''
