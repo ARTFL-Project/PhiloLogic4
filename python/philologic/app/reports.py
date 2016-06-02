@@ -240,9 +240,9 @@ def frequency_results(request, config, sorted=False):
             metadata = dict(request.metadata)
 
             # Build a label starting with the first value as the main value
-            first_metatada_key, first_metadata_value = key[0] or "NULL"
-            label = first_metadata_value
-            metadata[first_metatada_key] = first_metadata_value.encode('utf-8', 'ignore')
+            first_metatada_key, first_metadata_value = key[0]
+            label = first_metadata_value or "NULL"
+            metadata[first_metatada_key] = first_metadata_value.encode('utf-8', 'ignore') or "NULL"
             append_to_label = []
             for metadata_key, metadata_value in key[1:]:
                 metadata_value = metadata_value.strip()

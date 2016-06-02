@@ -42,8 +42,8 @@ class LoadOptions(object):
         self.values["word_regex"] = Parser.DefaultWordRegex
         self.values["punct_regex"] = Parser.DafaultPunctRegex
         self.values["token_regex"] = Parser.DefaultTokenRegex
-        self.values["xpaths"] = Parser.DefaultXPaths
-        self.values["metadata_xpaths"] = Parser.DefaultMetadataXPaths
+        self.values["doc_xpaths"] = NewParser.DefaultDocXPaths
+        self.values["metadata_fields"] = NewParser.DefaultMetadataFields
         self.values["pseudo_empty_tags"] = []
         self.values["suppress_tags"] = []
         self.values["cores"] = 2

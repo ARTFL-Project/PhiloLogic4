@@ -58,7 +58,7 @@ class Loader(object):
         self.filtered_words = loader_options["filtered_words"]
 
         self.parser_defaults = {}
-        for option in ["parser_factory", "token_regex", "xpaths", "metadata_xpaths", "pseudo_empty_tags",
+        for option in ["parser_factory", "token_regex", "doc_xpaths", "metadata_fields", "pseudo_empty_tags",
                        "suppress_tags", "load_filters"]:
             self.parser_defaults[option] = loader_options[option]
 
@@ -122,7 +122,7 @@ class Loader(object):
 
     def parse_tei_header(self):
         load_metadata = []
-        metadata_xpaths = self.parser_defaults["metadata_xpaths"]
+        metadata_xpaths = self.parser_defaults["doc_xpaths"]
         for f in self.list_files():
             data = {"filename": f}
             header = ""
@@ -273,36 +273,30 @@ class Loader(object):
 
         self.loaded_files = self.filequeue[:]
 
-        indexed_types = []
 
-        for object_type in self.parser_defaults["metadata_xpaths"]:
-            if object_type not in indexed_types and object_type != "page":
-                indexed_types.append(object_type)
+        self.metadata_hierarchy.append([])
+        # Adding in doc level metadata
+        for d in data_dicts:
+            for k in d.keys():
+                if k not in self.metadata_fields:
+                    self.metadata_fields.append(k)
+                    self.metadata_hierarchy[0].append(k)
+                if k not in self.metadata_types:
+                    self.metadata_types[k] = "doc"
+                    # don't need to check for conflicts, since doc is first.
 
-        if "doc" not in indexed_types:
-            indexed_types = ["doc"] + indexed_types
-
-        for t in indexed_types:
-            self.metadata_hierarchy.append([])
-            for element_type in self.parser_defaults["metadata_xpaths"]:
-                if t == element_type:
-                    for param in self.parser_defaults["metadata_xpaths"][element_type]:
-                        if param not in self.metadata_fields:
-                            self.metadata_fields.append(param)
-                            self.metadata_hierarchy[-1].append(param)
-                        if param not in self.metadata_types:
-                            self.metadata_types[param] = t
-                        else:  # we have a serious error here!  Should raise going forward.
-                            pass
-            if t == "doc":
-                for d in data_dicts:
-                    for k in d.keys():
-                        if k not in self.metadata_fields:
-                            self.metadata_fields.append(k)
-                            self.metadata_hierarchy[-1].append(k)
-                        if k not in self.metadata_types:
-                            self.metadata_types[k] = t
-                            # don't need to check for conflicts, since doc is first.
+        # Adding non-doc level metadata
+        self.metadata_hierarchy.append([])
+        for element_type in self.parser_defaults["metadata_fields"]:
+            if element_type != "page":
+                for param in self.parser_defaults["metadata_fields"][element_type]:
+                    if param not in self.metadata_fields:
+                        self.metadata_fields.append(param)
+                        self.metadata_hierarchy[-1].append(param)
+                    if param not in self.metadata_types:
+                        self.metadata_types[param] = element_type
+                    else:  # we have a serious error here!  Should raise going forward.
+                        pass
 
         print "%s: parsing %d files." % (time.ctime(), len(self.filequeue))
         procs = {}
@@ -341,10 +335,10 @@ class Loader(object):
 
                     if "token_regex" not in options:
                         options["token_regex"] = self.parser_defaults["token_regex"]
-                    if "xpaths" not in options:
-                        options["xpaths"] = self.parser_defaults["xpaths"]
-                    if "metadata_xpaths" not in options:
-                        options["metadata_xpaths"] = self.parser_defaults["metadata_xpaths"]
+                    if "doc_xpaths" not in options:
+                        options["xpaths"] = self.parser_defaults["doc_xpaths"]
+                    if "metadata_fields" not in options:
+                        options["metadata_xpaths"] = self.parser_defaults["metadata_fields"]
                     if "suppress_tags" not in options:
                         options["suppress_tags"] = self.parser_defaults["suppress_tags"]
                     if "pseudo_empty_tags" not in options:
