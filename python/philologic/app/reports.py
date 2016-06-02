@@ -315,14 +315,15 @@ def kwic_results(request, config):
     return kwic_object
 
 
-def generate_text_object(request, config, note=False):
+def generate_text_object(request, config, note=False, obj=None):
     db = DB(config.db_path + '/data/')
-    try:
-        obj = db[request.philo_id]
-    except ValueError:
-        philo_id = ' '.join(request.path_components)
-        obj = db[philo_id]
-    philo_id = obj.philo_id
+    if not obj:
+        try:
+            obj = db[request.philo_id]
+        except ValueError:
+            philo_id = ' '.join(request.path_components)
+            obj = db[philo_id]
+        philo_id = obj.philo_id
     while obj['philo_name'] == '__philo_virtual' and obj["philo_type"] != "div1":
         philo_id.pop()
         obj = db[philo_id]

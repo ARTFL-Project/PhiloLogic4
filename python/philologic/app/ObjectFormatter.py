@@ -5,7 +5,9 @@ import sqlite3
 
 from lxml import etree
 from philologic.DB import DB
+
 import FragmentParser
+from link import *
 
 begin_match = re.compile(r'^[^<]*?>')
 start_cutoff_match = re.compile(r'^[^ <]+')
@@ -78,6 +80,7 @@ def adjust_bytes(bytes, padding):
             new_bytes.append(word_byte - byte_start)
     return new_bytes, byte_start
 
+
 def format_concordance(text, word_regex, bytes=[]):
     removed_from_start = 0
     begin = begin_match.search(text)
@@ -138,6 +141,7 @@ def format_concordance(text, word_regex, bytes=[]):
     output = strip_start_punctuation.sub("", output)
     return output
 
+
 def format_strip(text, bytes=[]):
     """Remove formatting for HTML rendering
     Called from: -kwic.py
@@ -169,7 +173,11 @@ def format_strip(text, bytes=[]):
     output = space_match.sub('\\1', output)
     return output
 
-def format_text_object(obj, text, config, request, word_regex, bytes=[], note=False):
+
+def format_text_object(
+        obj, text, config,
+        request, word_regex,
+        bytes=[], note=False):
     philo_id = obj.philo_id
     if bytes:
         new_text = ""
@@ -198,24 +206,59 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
             elif el.tag == "q":
                 el.tag = "span"
                 el.attrib['class'] = 'xml-q'
-            elif el.tag == "ptr" or el.tag == "ref":
-                target = el.attrib["target"]
-                link = f.link.make_absolute_query_link(config, request, script_name="/scripts/get_notes.py", target=target)
-                el.attrib["data-ref"] = link
-                el.attrib["id"] = target.replace('#', '') + '-link-back'
-                del el.attrib["target"]
-                el.attrib['class'] = "note-ref"
-                el.attrib['tabindex'] = "0"
-                el.attrib['data-toggle'] = "popover"
-                el.attrib['data-container'] = "body"
-                el.attrib["data-placement"] = "right"
-                el.attrib["data-trigger"] = "focus"
-                el.attrib["data-html"] = "true"
-                el.attrib["data-animation"] = "true"
-                el.text = "note"
-                el.tag = "span"
+            elif el.tag == "ref":
+                if el.attrib["type"] == "note":
+                    target = el.attrib["target"]
+                    link = make_absolute_query_link(
+                        config,
+                        request,
+                        script_name="/scripts/get_notes.py",
+                        target=target)
+                    if "n" in el.attrib:
+                        el.text = el.attrib["n"]
+                    else:
+                        el.text = "note"
+                    el.tag = "span"
+                    el.attrib["data-ref"] = link
+                    el.attrib["id"] = target.replace('#', '') + '-link-back'
+                    del el.attrib["target"]
+                    # attributes for popover note
+                    el.attrib['class'] = "note-ref"
+                    el.attrib['tabindex'] = "0"
+                    el.attrib['data-toggle'] = "popover"
+                    el.attrib['data-container'] = "body"
+                    el.attrib["data-placement"] = "right"
+                    el.attrib["data-trigger"] = "focus"
+                    el.attrib["data-html"] = "true"
+                    el.attrib["data-animation"] = "true"
             elif el.tag == "note":
-                if el.getparent().attrib["type"] != "notes" or el.getparent().getparent()["type"] != "notes":  ## inline notes
+                import sys
+                # endnotes
+                in_end_note = False
+                for div in el.iterancestors(tag="div"):
+                    if div.attrib["type"] == "notes":
+                        in_end_note = True
+                        break
+                if in_end_note:
+                    print >> sys.stderr, "IN A NOTE"
+                    el.tag = "div"
+                    el.attrib['class'] = "xml-note"
+                    note_id = '#' + el.attrib['id']
+                    link_back = etree.Element("a")
+                    link_back.attrib[
+                        'note-link-back'] = make_absolute_query_link(
+                            config,
+                            request,
+                            script_name="/scripts/get_note_link_back.py",
+                            doc_id=str(philo_id[0]),
+                            note_id=note_id)
+                    link_back.attrib[
+                        'class'] = "btn btn-xs btn-default link-back"
+                    link_back.attrib['role'] = "button"
+                    link_back.text = "Go back to text"
+                    print >> sys.stderr, "LINK", link_back, link_back.attrib
+                    el.append(link_back)
+                else:  ## inline notes
                     el.tag = 'span'
                     el.attrib['class'] = "note-content"
                     for child in el:
@@ -230,24 +273,10 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                                        "data-container": "body",
                                        "data-placement": "right",
                                        "data-trigger": "focus"}
-                            parent.insert(i, etree.Element("a", attrib=attribs))
+                            parent.insert(
+                                i, etree.Element("a", attrib=attribs))
                             new_anchor = parent[i]
                             new_anchor.text = "note"
-                else:  # endnotes
-                    el.tag = "div"
-                    el.attrib['class'] = "xml-note"
-                    note_id = '#' + el.attrib['id']
-                    link_back = etree.Element("a")
-                    link_back.attrib['note-link-back'] = f.link.make_absolute_query_link(
-                        config,
-                        request,
-                        script_name="/scripts/get_note_link_back.py",
-                        doc_id=str(philo_id[0]),
-                        note_id=note_id)
-                    link_back.attrib['class'] = "btn btn-xs btn-default link-back"
-                    link_back.attrib['role'] = "button"
-                    link_back.text = "Go back to text"
-                    el.append(link_back)
             elif el.tag == "item":
                 el.tag = "li"
             elif el.tag == "ab" or el.tag == "ln":
@@ -261,7 +290,8 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     current_obj_img.append(img)
                     el.tag = "p"
                     el.append(etree.Element("a"))
-                    el[-1].attrib["href"] = config.page_images_url_root + '/' + img
+                    el[-1].attrib[
+                        "href"] = config.page_images_url_root + '/' + img
                     el[-1].text = "[page " + el.attrib["n"] + "]"
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
@@ -289,7 +319,9 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                 el.attrib["class"] = "highlight"
             if el.tag not in valid_html_tags:
                 el = xml_to_html_class(el)
-        except:
+        except Exception as e:
+            import sys
+            print >> sys.stderr, e
             pass
     output = etree.tostring(xml)
     ## remove spaces around hyphens and apostrophes
@@ -304,14 +336,17 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
 
     return output, img_obj
 
+
 def page_images(config, output, current_obj_img, philo_id):
     # first get first page info in case the object doesn't start with a page tag
     first_page_object = get_first_page(philo_id, config)
     if not current_obj_img:
         current_obj_img.append('')
-    if first_page_object['byte_start'] and current_obj_img[0] != first_page_object['filename']:
+    if first_page_object['byte_start'] and current_obj_img[
+            0] != first_page_object['filename']:
         if first_page_object['filename']:
-            page_href = config.page_images_url_root + '/' + first_page_object['filename']
+            page_href = config.page_images_url_root + '/' + first_page_object[
+                'filename']
             output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(
                 first_page_object["n"]) + "]</a></p>" + output
             if current_obj_img[0] == '':
@@ -319,23 +354,28 @@ def page_images(config, output, current_obj_img, philo_id):
             else:
                 current_obj_img.insert(0, first_page_object['filename'])
         else:
-            output = '<p class="page-image-link">[page ' + str(first_page_object["n"]) + "]</p>" + output
+            output = '<p class="page-image-link">[page ' + str(
+                first_page_object["n"]) + "]</p>" + output
     ## Fetch all remainging imgs in document
     all_imgs = get_all_page_images(philo_id, config, current_obj_img)
     img_obj = {'all_imgs': all_imgs, 'current_obj_img': current_obj_img}
     return output, img_obj
+
 
 def get_first_page(philo_id, config):
     """This function will fetch the first page of any given text object in case there's no <pb>
     starting the object"""
     db = DB(config.db_path + '/data/')
     c = db.dbh.cursor()
-    c.execute('select byte_start, byte_end from toms where philo_id="%s"' % ' '.join([str(i) for i in philo_id]))
+    c.execute('select byte_start, byte_end from toms where philo_id="%s"' %
+              ' '.join([str(i) for i in philo_id]))
     result = c.fetchone()
     byte_start = result['byte_start']
     approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
     try:
-        c.execute('select * from pages where philo_id like ? and end_byte >= ? limit 1', (approx_id, byte_start))
+        c.execute(
+            'select * from pages where philo_id like ? and end_byte >= ? limit 1',
+            (approx_id, byte_start))
     except:
         return {'filename': '', 'byte_start': ''}
     page_result = c.fetchone()
@@ -358,7 +398,9 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
         c = db.dbh.cursor()
         approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
         try:
-            c.execute('select * from pages where philo_id like ? and img is not null and img != ""', (approx_id, ))
+            c.execute(
+                'select * from pages where philo_id like ? and img is not null and img != ""',
+                (approx_id, ))
             current_obj_imgs = set(current_obj_imgs)
             all_imgs = [i['img'] for i in c.fetchall()]
         except sqlite3.OperationalError:
@@ -366,6 +408,7 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
         return all_imgs
     else:
         return []
+
 
 def clean_tags(element):
     text = u''

@@ -24,7 +24,7 @@ class XMLParser(object):
         self.output = output
         self.docid = docid
         # Initialize an OHCOVector Stack. operations on this stack produce all parser output.
-        self.v = OHCOVector.CompoundStack(self.types, self.parallel_type, docid, output)
+        self.v = OHCOVector.CompoundStack(self.types, self.parallel_type, docid=docid, out=output, ref="ref")
 
         self.filesize = filesize
 
@@ -69,6 +69,7 @@ class XMLParser(object):
         self.context_div_level = 0
         self.current_tag = "doc"
         self.in_a_word_tag = False
+        self.in_notes_div = False
 
     def parse(self, input):
         """Top level function for reading a file and printing out the output."""
@@ -151,6 +152,8 @@ class XMLParser(object):
         if not tag_name.startswith('/'):
             self.current_tag = tag_name
 
+
+
         # print tag_name, byte_start
         # Handle <q> tags
         if text_tag.search(tag) and self.in_text_quote:
@@ -162,14 +165,21 @@ class XMLParser(object):
         if closed_quote_tag.search(tag):
             self.in_text_quote = False
 
+        if tag_name == "ref":
+            self.ref_handler(tag)
+
         # Word tags: store attributes to be attached to the actual word in word_handler
-        if self.current_tag == "w":
+        elif self.current_tag == "w":
             self.word_tag_attributes = self.get_attributes(tag)
 
         # Paragraphs
         elif parag_tag.search(tag) or parag_with_attrib_tag.search(tag):
-            self.do_this_para = True
-            if not self.in_a_note and not self.no_deeper_objects:
+            do_this_para = True
+            if self.in_a_note and not self.in_notes_div:
+                do_this_para = False
+            if self.no_deeper_objects:
+                do_this_para = False
+            if do_this_para:
                 if self.open_para:  # account for unclosed paragraph tags
                     para_byte_end = self.bytes_read_in - len(tag)
                     self.close_para(para_byte_end)
@@ -182,9 +192,9 @@ class XMLParser(object):
             if self.open_para:  # account for unclosed paragraph tags
                 para_byte_end = self.bytes_read_in - len(tag)
                 self.close_para(para_byte_end)
-            self.open_para = True
-            self.v.push("para", tag_name, byte_start)
-            self.get_object_attributes(tag, tag_name, "para")
+            self.open_div2 = True
+            self.v.push("div2", tag_name, byte_start)
+            self.get_object_attributes(tag, tag_name, "div2")
             self.in_a_note = True
 
         # Epigraph: treat as paragraph objects
@@ -424,6 +434,10 @@ class XMLParser(object):
                 self.v.push("div1", tag_name, byte_start)
                 self.v["div1"]['head'] = self.get_div_head(tag)
                 self.get_object_attributes(tag, tag_name, object_type="div1")
+                if "type" in self.v["div1"]:
+                    if self.v["div1"]["type"] == "notes":
+                        self.in_notes_div = True
+                        self.no_deeper_objects = False
             elif div_level == 2:
                 if self.open_div2:
                     self.close_div2(byte_start)
@@ -440,6 +454,9 @@ class XMLParser(object):
                 self.get_object_attributes(tag, tag_name, object_type="div3")
 
             # TODO: unclear if we need to add EEBO hack when no subdiv objects...
+
+    def ref_handler(self, tag):
+
 
     def word_handler(self, words):
         """

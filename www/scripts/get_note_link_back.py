@@ -62,7 +62,7 @@ def get_note_link_back(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    yield simplesimplejson.dumps({'link': link, "h": result_id})
+    yield simplejson.dumps({'link': link, "h": result_id})
 
 
 def takeClosest(array, number):
