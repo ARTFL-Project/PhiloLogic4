@@ -17,6 +17,7 @@ def make_sql_table(table,
                    depth=7):
     def inner_make_sql_table(loader_obj):
         print "Loading the %s SQLite table..." % table,
+        print "with file %s" % file_in
         db_destination = os.path.join(loader_obj.destination, db_file)
         conn = sqlite3.connect(db_destination)
         conn.text_factory = str

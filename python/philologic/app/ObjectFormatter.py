@@ -20,20 +20,15 @@ entities_match = re.compile("&#?\w+;")
 
 # Source: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/HTML5_element_list
 valid_html_tags = set(
-    ['html', 'head', 'title', 'base', 'link', 'meta', 'style', 'script',
-     'noscript', 'template', 'body', 'section', 'nav', 'article', 'aside',
-     'h1', ',h2', ',h3', ',h4', ',h5', ',h6', 'header', 'footer', 'address',
-     'main', 'p', 'hr', 'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt',
-     'dd', 'figure', 'figcaption', 'div', 'a', 'em', 'strong', 'small', 's',
-     'cite', 'q', 'dfn', 'abbr', 'data', 'time', 'code', 'var', 'samp', 'kbd',
-     'sub', 'sup', 'i', 'b', 'u', 'mark', 'ruby', 'rt', 'rp', 'bdi', 'bdo',
-     'span', 'br', 'wbr', 'ins', 'del', 'img', 'iframe', 'embed', 'object',
-     'param', 'video', 'audio', 'source', 'track', 'canvas', 'map', 'area',
-     'svg', 'math', 'table', 'caption', 'colgroup', 'col', 'tbody', 'thead',
-     'tfoot', 'tr', 'td', 'th', 'form', 'fieldset', 'legend', 'label', 'input',
-     'button', 'select', 'datalist', 'optgroup', 'option', 'textarea',
-     'keygen', 'output', 'progress', 'meter', 'details', 'summary', 'menuitem',
-     'menu'])
+    ['html', 'head', 'title', 'base', 'link', 'meta', 'style', 'script', 'noscript', 'template', 'body', 'section',
+     'nav', 'article', 'aside', 'h1', ',h2', ',h3', ',h4', ',h5', ',h6', 'header', 'footer', 'address', 'main', 'p',
+     'hr', 'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'figure', 'figcaption', 'div', 'a', 'em', 'strong',
+     'small', 's', 'cite', 'q', 'dfn', 'abbr', 'data', 'time', 'code', 'var', 'samp', 'kbd', 'sub', 'sup', 'i', 'b',
+     'u', 'mark', 'ruby', 'rt', 'rp', 'bdi', 'bdo', 'span', 'br', 'wbr', 'ins', 'del', 'img', 'iframe', 'embed',
+     'object', 'param', 'video', 'audio', 'source', 'track', 'canvas', 'map', 'area', 'svg', 'math', 'table', 'caption',
+     'colgroup', 'col', 'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'form', 'fieldset', 'legend', 'label', 'input',
+     'button', 'select', 'datalist', 'optgroup', 'option', 'textarea', 'keygen', 'output', 'progress', 'meter',
+     'details', 'summary', 'menuitem', 'menu'])
 
 
 def get_all_text(element):
@@ -104,8 +99,7 @@ def format_concordance(text, word_regex, bytes=[]):
                 last_offset = b
         text = new_text + text[last_offset:]
     xml = FragmentParser.parse(text)
-    allowed_tags = set(['philoHighlight', 'l', 'ab', 'ln', 'w', 'sp',
-                        'speaker', 'stage', 'i', 'sc', 'scx', 'br'])
+    allowed_tags = set(['philoHighlight', 'l', 'ab', 'ln', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx', 'br'])
     text = u''
     for el in xml.iter():
         if el.tag not in allowed_tags:
@@ -174,10 +168,7 @@ def format_strip(text, bytes=[]):
     return output
 
 
-def format_text_object(
-        obj, text, config,
-        request, word_regex,
-        bytes=[], note=False):
+def format_text_object(obj, text, config, request, word_regex, bytes=[], note=False):
     philo_id = obj.philo_id
     if bytes:
         new_text = ""
@@ -190,6 +181,7 @@ def format_text_object(
     current_obj_img = []
     text = "<div>" + text + "</div>"
     xml = FragmentParser.parse(text)
+    c = obj.db.dbh.cursor()
     for el in xml.iter():
         try:
             if el.tag == "sc" or el.tag == "scx":
@@ -209,11 +201,7 @@ def format_text_object(
             elif el.tag == "ref":
                 if el.attrib["type"] == "note":
                     target = el.attrib["target"]
-                    link = make_absolute_query_link(
-                        config,
-                        request,
-                        script_name="/scripts/get_notes.py",
-                        target=target)
+                    link = make_absolute_query_link(config, request, script_name="/scripts/get_notes.py", target=target)
                     if "n" in el.attrib:
                         el.text = el.attrib["n"]
                     else:
@@ -232,7 +220,6 @@ def format_text_object(
                     el.attrib["data-html"] = "true"
                     el.attrib["data-animation"] = "true"
             elif el.tag == "note":
-                import sys
                 # endnotes
                 in_end_note = False
                 for div in el.iterancestors(tag="div"):
@@ -240,23 +227,16 @@ def format_text_object(
                         in_end_note = True
                         break
                 if in_end_note:
-                    print >> sys.stderr, "IN A NOTE"
                     el.tag = "div"
                     el.attrib['class'] = "xml-note"
-                    note_id = '#' + el.attrib['id']
                     link_back = etree.Element("a")
-                    link_back.attrib[
-                        'note-link-back'] = make_absolute_query_link(
-                            config,
-                            request,
-                            script_name="/scripts/get_note_link_back.py",
-                            doc_id=str(philo_id[0]),
-                            note_id=note_id)
-                    link_back.attrib[
-                        'class'] = "btn btn-xs btn-default link-back"
+                    c.execute('select parent, byte_start from refs where target=?', (el.attrib['id'], ))
+                    object_id, byte_start = c.fetchone()
+                    link_back.attrib['href'] = 'navigate/%s%s' % (
+                        '/'.join(object_id.split()[:2]), '#%s-link-back' % el.attrib['id'])
+                    link_back.attrib['class'] = "btn btn-xs btn-default link-back"
                     link_back.attrib['role'] = "button"
                     link_back.text = "Go back to text"
-                    print >> sys.stderr, "LINK", link_back, link_back.attrib
                     el.append(link_back)
                 else:  ## inline notes
                     el.tag = 'span'
@@ -273,8 +253,7 @@ def format_text_object(
                                        "data-container": "body",
                                        "data-placement": "right",
                                        "data-trigger": "focus"}
-                            parent.insert(
-                                i, etree.Element("a", attrib=attribs))
+                            parent.insert(i, etree.Element("a", attrib=attribs))
                             new_anchor = parent[i]
                             new_anchor.text = "note"
             elif el.tag == "item":
@@ -290,8 +269,7 @@ def format_text_object(
                     current_obj_img.append(img)
                     el.tag = "p"
                     el.append(etree.Element("a"))
-                    el[-1].attrib[
-                        "href"] = config.page_images_url_root + '/' + img
+                    el[-1].attrib["href"] = config.page_images_url_root + '/' + img
                     el[-1].text = "[page " + el.attrib["n"] + "]"
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
@@ -342,11 +320,9 @@ def page_images(config, output, current_obj_img, philo_id):
     first_page_object = get_first_page(philo_id, config)
     if not current_obj_img:
         current_obj_img.append('')
-    if first_page_object['byte_start'] and current_obj_img[
-            0] != first_page_object['filename']:
+    if first_page_object['byte_start'] and current_obj_img[0] != first_page_object['filename']:
         if first_page_object['filename']:
-            page_href = config.page_images_url_root + '/' + first_page_object[
-                'filename']
+            page_href = config.page_images_url_root + '/' + first_page_object['filename']
             output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(
                 first_page_object["n"]) + "]</a></p>" + output
             if current_obj_img[0] == '':
@@ -354,8 +330,7 @@ def page_images(config, output, current_obj_img, philo_id):
             else:
                 current_obj_img.insert(0, first_page_object['filename'])
         else:
-            output = '<p class="page-image-link">[page ' + str(
-                first_page_object["n"]) + "]</p>" + output
+            output = '<p class="page-image-link">[page ' + str(first_page_object["n"]) + "]</p>" + output
     ## Fetch all remainging imgs in document
     all_imgs = get_all_page_images(philo_id, config, current_obj_img)
     img_obj = {'all_imgs': all_imgs, 'current_obj_img': current_obj_img}
@@ -367,15 +342,12 @@ def get_first_page(philo_id, config):
     starting the object"""
     db = DB(config.db_path + '/data/')
     c = db.dbh.cursor()
-    c.execute('select byte_start, byte_end from toms where philo_id="%s"' %
-              ' '.join([str(i) for i in philo_id]))
+    c.execute('select byte_start, byte_end from toms where philo_id="%s"' % ' '.join([str(i) for i in philo_id]))
     result = c.fetchone()
     byte_start = result['byte_start']
     approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
     try:
-        c.execute(
-            'select * from pages where philo_id like ? and end_byte >= ? limit 1',
-            (approx_id, byte_start))
+        c.execute('select * from pages where philo_id like ? and end_byte >= ? limit 1', (approx_id, byte_start))
     except:
         return {'filename': '', 'byte_start': ''}
     page_result = c.fetchone()
@@ -398,9 +370,7 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
         c = db.dbh.cursor()
         approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
         try:
-            c.execute(
-                'select * from pages where philo_id like ? and img is not null and img != ""',
-                (approx_id, ))
+            c.execute('select * from pages where philo_id like ? and img is not null and img != ""', (approx_id, ))
             current_obj_imgs = set(current_obj_imgs)
             all_imgs = [i['img'] for i in c.fetchall()]
         except sqlite3.OperationalError:

@@ -70,6 +70,7 @@ class XMLParser(object):
         self.current_tag = "doc"
         self.in_a_word_tag = False
         self.in_notes_div = False
+        self.current_div1_id = ""
 
     def parse(self, input):
         """Top level function for reading a file and printing out the output."""
@@ -152,8 +153,6 @@ class XMLParser(object):
         if not tag_name.startswith('/'):
             self.current_tag = tag_name
 
-
-
         # print tag_name, byte_start
         # Handle <q> tags
         if text_tag.search(tag) and self.in_text_quote:
@@ -165,11 +164,8 @@ class XMLParser(object):
         if closed_quote_tag.search(tag):
             self.in_text_quote = False
 
-        if tag_name == "ref":
-            self.ref_handler(tag)
-
         # Word tags: store attributes to be attached to the actual word in word_handler
-        elif self.current_tag == "w":
+        if self.current_tag == "w":
             self.word_tag_attributes = self.get_attributes(tag)
 
         # Paragraphs
@@ -373,6 +369,7 @@ class XMLParser(object):
         # These tend to carry on as FRONTMATTER. Don't have to check for lower divs, etc.
         elif body_tag.search(tag) and not self.got_a_div:
             self.v.push("div1", tag_name, byte_start)
+            self.current_div1_id = self.v["div1"].id
             self.context_div_level = 1
             self.open_div1 = True
             div_head = self.get_div_head(tag)
@@ -391,6 +388,7 @@ class XMLParser(object):
             self.context_div_level = 1
             self.open_div1 = True
             self.v.push("div1", tag_name, byte_start)
+            self.current_div1_id = self.v["div1"].id
             self.v["div1"]["head"] = "[HyperDiv]"
 
         # DIV TAGS: set division levels and print out div info. A couple of assumptions:
@@ -432,6 +430,7 @@ class XMLParser(object):
                     self.close_div1(byte_start)
                 self.open_div1 = True
                 self.v.push("div1", tag_name, byte_start)
+                self.current_div1_id = self.v["div1"].id
                 self.v["div1"]['head'] = self.get_div_head(tag)
                 self.get_object_attributes(tag, tag_name, object_type="div1")
                 if "type" in self.v["div1"]:
@@ -455,8 +454,10 @@ class XMLParser(object):
 
             # TODO: unclear if we need to add EEBO hack when no subdiv objects...
 
-    def ref_handler(self, tag):
-
+        elif tag_name == "ref":
+            self.v.push("ref", tag_name, byte_start)
+            self.get_object_attributes(tag, tag_name, "ref")
+            self.v["ref"].attrib["parent"] = " ".join([str(i) for i in self.current_div1_id])
 
     def word_handler(self, words):
         """
@@ -594,7 +595,8 @@ class XMLParser(object):
                         # the punctuation token.
                         if "sent" not in self.v:
                             self.v.push("sent", ".", current_pos)
-                        self.v["sent"].name = "."  # TODO: evaluate if this is right: avoid unwanted chars such tabs in ASP
+                        self.v[
+                            "sent"].name = "."  # TODO: evaluate if this is right: avoid unwanted chars such tabs in ASP
                         self.v.pull("sent", current_pos + len(word))
 
     def close_sent(self, byte_end):
@@ -922,7 +924,6 @@ class XMLParser(object):
     def remove_control_chars(self, text):
         return control_char_re.sub('', text.decode('utf8', 'ignore')).encode('utf8')
 
-
 # Pre-compiled regexes used for parsing
 join_hyphen_with_lb = re.compile(r'(\&shy;[\n \t]*<lb\/>)', re.I | re.M)
 join_hyphen = re.compile(r'(\&shy;[\n \t]*)', re.I | re.M)
@@ -993,7 +994,8 @@ ending_punctuation = re.compile(r'[%s]$' % string.punctuation)
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
 tab_newline = re.compile(r'[\n|\t]')
-control_chars = ''.join([i for i in map(lambda x: unichr(x).encode('utf8'), range(0,32) + range(127,160)) if not tab_newline.search(i)])
+control_chars = ''.join(
+    [i for i in map(lambda x: unichr(x).encode('utf8'), range(0, 32) + range(127, 160)) if not tab_newline.search(i)])
 control_char_re = re.compile(r'[%s]' % re.escape(control_chars))
 
 # Entities regexes
@@ -1076,13 +1078,15 @@ TagToObjMap = {
     "epigraph": "para",
     "argument": "para",
     "postscript": "para",
-    "pb": "page"
+    "pb": "page",
+    "ref": "ref"
 }
 
 DefaultMetadataFields = {
     "div": set(["head", "type", "n", "id"]),
     "para": set(["who"]),
-    "page": set(["n", "id", "fac"])
+    "page": set(["n", "id", "fac"]),
+    "ref": set(["target", "n"])
 }
 
 DefaultDocXPaths = {

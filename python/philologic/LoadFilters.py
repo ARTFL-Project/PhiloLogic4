@@ -5,11 +5,10 @@ import os
 import re
 import sys
 import unicodedata
-# from ast import literal_eval as eval
-from simplejson import loads
 from subprocess import PIPE, Popen
 
 from philologic.OHCOVector import Record
+from simplejson import loads
 
 
 # Default filters
@@ -52,7 +51,7 @@ def make_word_counts(loader_obj, text, depth=5):
 def generate_words_sorted(loader_obj, text):
     # -a in grep to avoid issues with NULL chars in file
     wordcommand = "cat %s | egrep -a \"^word\" | sort %s %s > %s" % (text["raw"], loader_obj.sort_by_word,
-                                                                  loader_obj.sort_by_id, text["words"])
+                                                                     loader_obj.sort_by_id, text["words"])
     os.system(wordcommand)
 
 
@@ -138,6 +137,11 @@ def prev_next_obj(*types):
 def generate_pages(loader_obj, text):
     pagescommand = "cat %s | egrep \"^page\" > %s" % (text["raw"], text["pages"])
     os.system(pagescommand)
+
+
+def generate_refs(loader_obj, text):
+    refscommand = "cat %s | egrep \"^ref\" > %s" % (text["raw"], text["refs"])
+    os.system(refscommand)
 
 
 def make_max_id(loader_obj, text):
@@ -393,8 +397,8 @@ def fix_sentence_boundary(loader_obj, text):
 
 
 DefaultNavigableObjects = ("div1", "div2", "div3")
-DefaultLoadFilters = [normalize_unicode_raw_words, make_word_counts, generate_words_sorted,
-                      make_object_ancestors, make_sorted_toms, prev_next_obj, generate_pages, make_max_id]
+DefaultLoadFilters = [normalize_unicode_raw_words, make_word_counts, generate_words_sorted, make_object_ancestors,
+                      make_sorted_toms, prev_next_obj, generate_pages, generate_refs, make_max_id]
 
 
 def set_load_filters(load_filters=DefaultLoadFilters, navigable_objects=DefaultNavigableObjects):

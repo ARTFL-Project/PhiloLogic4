@@ -12,8 +12,7 @@
         .directive('pageImageLink', pageImageLink)
         .directive('inlineImg', inlineImg)
         .directive('noteRef', noteRef)
-        .directive('note', note)
-        .directive('noteLinkBack', noteLinkBack);
+        .directive('note', note);
 
 
     function textObject($routeParams, $timeout, $location, request, textNavigationValues) {
@@ -379,23 +378,6 @@
                 });
                 element.on('$destroy', function () {
                     element.popover('destroy');
-                });
-            }
-        }
-    }
-
-    function noteLinkBack($http, $location) {
-        return {
-            restrict: 'A',
-            link: function (scope, element, attrs) {
-                var linkBack = attrs['noteLinkBack'];
-                element.click(function () {
-                    $http.get(linkBack).success(function (data) {
-                        $location.url(data.link);
-                    });
-                });
-                element.on('$destroy', function () {
-                    element.off('click');
                 });
             }
         }

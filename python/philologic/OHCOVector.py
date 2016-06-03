@@ -96,7 +96,7 @@ class CompoundStack(object):
         self.out = out
         self.v_max = self.stack.v_max
         self.stack.v[0] = docid
-        self.p_type = parallel
+        self.p_type = page
         self.current_p = None
         self.ref = ref
         self.current_ref = None

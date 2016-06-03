@@ -33,7 +33,7 @@ index_cutoff = 10  # index frequency cutoff.  Don't. alter.
 # While these tables are loaded by default, you can override that default, although be aware
 # that you will only have reduced functionality if you do. It is strongly recommended that you
 # at least keep the 'toms' table from toms.db.
-DEFAULT_TABLES = ('toms', 'pages', 'words')
+DEFAULT_TABLES = ('toms', 'pages', 'refs', 'words')
 
 DEFAULT_OBJECT_LEVEL = "doc"
 
@@ -159,8 +159,8 @@ class Loader(object):
                                     data[field] = el.text.encode("utf-8")
                 trimmed_metadata_xpaths = [
                     (metadata_type, xpath, field)
-                    for metadata_type in ["div", "para", "sent", "word", "page"] if metadata_type in metadata_xpaths
-                    for field in metadata_xpaths[metadata_type]
+                    for metadata_type in ["div", "para", "sent", "word", "page"]
+                    if metadata_type in metadata_xpaths for field in metadata_xpaths[metadata_type]
                     for xpath in metadata_xpaths[metadata_type][field]
                 ]
                 data = self.create_year_field(data)
@@ -204,7 +204,7 @@ class Loader(object):
     def create_year_field(self, metadata):
         year_finder = re.compile(r'^.*?(\d{4}).*')
         earliest_year = 2500
-        for field in ["date, ""create_date", "pub_date", "period"]:
+        for field in ["date, " "create_date", "pub_date", "period"]:
             if field in metadata:
                 year_match = year_finder.search(metadata[field])
                 if year_match:
@@ -253,6 +253,7 @@ class Loader(object):
                                "toms": self.workdir + os.path.basename(x) + ".toms",
                                "sortedtoms": self.workdir + os.path.basename(x) + ".toms.sorted",
                                "pages": self.workdir + os.path.basename(x) + ".pages",
+                               "refs": self.workdir + os.path.basename(x) + ".refs",
                                "results": self.workdir + os.path.basename(x) + ".results"}
                               for n, x in enumerate(self.list_files())]
 
@@ -268,11 +269,11 @@ class Loader(object):
                                "toms": self.workdir + os.path.basename(d["filename"]) + ".toms",
                                "sortedtoms": self.workdir + os.path.basename(d["filename"]) + ".toms.sorted",
                                "pages": self.workdir + os.path.basename(d["filename"]) + ".pages",
+                               "refs": self.workdir + os.path.basename(d["filename"]) + ".refs",
                                "results": self.workdir + os.path.basename(d["filename"]) + ".results"}
                               for n, d in enumerate(data_dicts)]
 
         self.loaded_files = self.filequeue[:]
-
 
         self.metadata_hierarchy.append([])
         # Adding in doc level metadata
@@ -288,7 +289,7 @@ class Loader(object):
         # Adding non-doc level metadata
         self.metadata_hierarchy.append([])
         for element_type in self.parser_defaults["metadata_fields"]:
-            if element_type != "page":
+            if element_type != "page" and element_type != "ref":
                 for param in self.parser_defaults["metadata_fields"][element_type]:
                     if param not in self.metadata_fields:
                         self.metadata_fields.append(param)
@@ -349,7 +350,12 @@ class Loader(object):
                     filters = options["load_filters"]
                     del options["load_filters"]
 
-                    parser = parser_factory(o, text["id"], text["size"], known_metadata=metadata, filtered_words=self.filtered_words, **options)
+                    parser = parser_factory(o,
+                                            text["id"],
+                                            text["size"],
+                                            known_metadata=metadata,
+                                            filtered_words=self.filtered_words,
+                                            **options)
                     try:
                         r = parser.parse(i)
                     except RuntimeError:
@@ -369,8 +375,8 @@ class Loader(object):
                     exit()
 
             # if we are at max_workers children, or we're out of texts, the parent waits for any child to exit.
-            pid, status = os.waitpid(0, 0
-                                     )  # this hangs until any one child finishes.  should check status for problems.
+            pid, status = os.waitpid(0,
+                                     0)  # this hangs until any one child finishes.  should check status for problems.
             if status:
                 print "parsing failed for %s" % procs[pid]
                 exit()
@@ -406,12 +412,17 @@ class Loader(object):
             for toms_file in glob(self.workdir + "/*toms.sorted"):
                 os.system('rm %s' % toms_file)
 
-        pagesargs = "cat *.pages"
         print "%s: joining pages" % time.ctime()
         for page_file in glob(self.workdir + "/*pages"):
             pages_status = os.system("cat %s >> %s/all_pages" % (page_file, self.workdir))
             if not self.debug:
                 os.system("rm %s" % page_file)
+
+        print "%s: joining references" % time.ctime()
+        for ref_file in glob(self.workdir + "/*refs"):
+            refs_status = os.system("cat %s >> %s/all_refs" % (ref_file, self.workdir))
+            if not self.debug:
+                os.system("rm %s" % ref_file)
 
     def merge_files(self, file_type, file_num=100):
         """This function runs a multi-stage merge sort on words
@@ -546,6 +557,11 @@ class Loader(object):
                 indices = [('philo_type', ), ('philo_id', ), ('img', )] + self.metadata_fields
                 depth = 7
                 compressed = True
+            elif table == "refs":
+                file_in = self.destination + '/WORK/all_refs'
+                indices = [("parent",),  ("target",)]
+                depth = 9
+                compressed = False
             post_filter = make_sql_table(table, file_in, gz=compressed, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)
 
