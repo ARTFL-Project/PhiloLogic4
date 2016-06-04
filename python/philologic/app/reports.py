@@ -437,9 +437,6 @@ def generate_time_series(request, config):
         date_range = "%d-%d" % (start, end)
         date_ranges.append((start, date_range))
 
-    import sys
-    print >> sys.stderr, "RANGES", date_ranges
-
     absolute_count = defaultdict(int)
     date_counts = {}
     total_hits = 0
@@ -450,7 +447,9 @@ def generate_time_series(request, config):
         request.metadata[config.time_series_year_field] = date_range
         hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
         hits.finish()
-        url = make_absolute_query_link(config, request, report="concordance", date=date_range, start="0", end="0")
+        params = {report: "concordance",start:"0", end:"0"}
+        params[config.time_series_year_field] = date_range
+        url = make_absolute_query_link(config, request, **params)
         absolute_count[start_range] = {"label": start_range, "count": len(hits), "url": url}
 
         # Get date total count
