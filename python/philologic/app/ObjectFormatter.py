@@ -230,10 +230,11 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     el.tag = "div"
                     el.attrib['class'] = "xml-note"
                     link_back = etree.Element("a")
-                    c.execute('select parent, byte_start from refs where target=?', (el.attrib['id'], ))
+                    c.execute('select parent, byte_start from refs where target=? and parent like ?',
+                              (el.attrib['id'], str(philo_id[0]) + " %"))
                     object_id, byte_start = c.fetchone()
-                    link_back.attrib['href'] = 'navigate/%s%s' % (
-                        '/'.join(object_id.split()[:2]), '#%s-link-back' % el.attrib['id'])
+                    link_back.attrib['href'] = 'navigate/%s%s' % ('/'.join(object_id.split()[:2]),
+                                                                  '#%s-link-back' % el.attrib['id'])
                     link_back.attrib['class'] = "btn btn-xs btn-default link-back"
                     link_back.attrib['role'] = "button"
                     link_back.text = "Go back to text"

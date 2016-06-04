@@ -26,9 +26,9 @@ if plain_text_obj:
 ## Parsing Options ##
 #####################
 
-xpaths =  Parser.DefaultXPaths
+doc_xpaths =  NewParser.DefaultDocXPaths
 
-metadata_xpaths = NewParser.DefaultMetadataXPaths
+metadata_fields = NewParser.DefaultMetadataFields
 
 pseudo_empty_tags = []
 
