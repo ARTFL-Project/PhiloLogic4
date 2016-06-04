@@ -4,7 +4,7 @@
             <div id="doc-title">
 				<span ng-if="textObject.citation.author.label.length > 0 && philoConfig.dico_citation === False">{{ textObject.citation.author.label }}, </span>
                 <a href="{{ textObject.citation.title.href }}" class="citation-small-caps"><i>{{ textObject.citation.title.label }}</i></a>
-				<span ng-if="textObject.citation.date | isEmpty">[{{ textObject.citation.date.label }}]</span>
+				<span ng-if="textObject.citation.year | isEmpty">[{{ textObject.citation.year.label }}]</span>
 			</div>
 			<div id="doc-biblio">
 				<span ng-if="textObject.citation.pub_place">{{ textObject.citation.pub_place }}</span>
