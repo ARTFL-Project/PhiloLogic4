@@ -475,6 +475,8 @@ class Loader(object):
             if not self.debug:
                 os.system("rm %s" % file_list)
         status = os.system('mv %s %s' % (last_sort_file, self.workdir + all_object_file))
+        if file_type == "toms":
+            os.system("gunzip -d %s" % self.workdir + all_object_file)
 
         if status != 0:
             print "%s sorting failed\nInterrupting database load..." % file_type
@@ -546,23 +548,19 @@ class Loader(object):
                 file_in = self.destination + '/WORK/all_words_ordered'
                 indices = [("philo_name", ), ('philo_id', ), ('parent', ), ('byte_start', ), ('byte_end', )]
                 depth = 7
-                compressed = False
             elif table == 'pages':
                 file_in = self.destination + '/WORK/all_pages'
                 indices = [("philo_id", )]
                 depth = 9
-                compressed = False
             elif table == 'toms':
-                file_in = self.destination + '/WORK/all_toms_sorted.gz'
+                file_in = self.destination + '/WORK/all_toms_sorted'
                 indices = [('philo_type', ), ('philo_id', ), ('img', )] + self.metadata_fields
                 depth = 7
-                compressed = True
             elif table == "refs":
                 file_in = self.destination + '/WORK/all_refs'
-                indices = [("parent",),  ("target",)]
+                indices = [("parent",),  ("target",), ("type",)]
                 depth = 9
-                compressed = False
-            post_filter = make_sql_table(table, file_in, gz=compressed, indices=indices, depth=depth)
+            post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)
 
     def post_processing(self, *extra_filters):

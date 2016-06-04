@@ -458,6 +458,7 @@ class XMLParser(object):
             self.v.push("ref", tag_name, byte_start)
             self.get_object_attributes(tag, tag_name, "ref")
             self.v["ref"].attrib["parent"] = " ".join([str(i) for i in self.current_div1_id])
+            self.v.pull("ref", self.bytes_read_in)
 
     def word_handler(self, words):
         """
@@ -1086,7 +1087,7 @@ DefaultMetadataFields = {
     "div": set(["head", "type", "n", "id"]),
     "para": set(["who"]),
     "page": set(["n", "id", "fac"]),
-    "ref": set(["target", "n"])
+    "ref": set(["target", "n", "type"])
 }
 
 DefaultDocXPaths = {
