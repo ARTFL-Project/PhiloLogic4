@@ -53,12 +53,11 @@ class Loader(object):
         self.db_url = loader_options["db_url"]
         self.default_object_level = loader_options["default_object_level"]
         self.post_filters = loader_options["post_filters"]
-        self.word_regex = loader_options["word_regex"]
-        self.punct_regex = loader_options["punct_regex"]
         self.filtered_words = loader_options["filtered_words"]
+        self.token_regex = loader_options["token_regex"]
 
         self.parser_defaults = {}
-        for option in ["parser_factory", "token_regex", "doc_xpaths", "metadata_fields", "pseudo_empty_tags",
+        for option in ["parser_factory", "doc_xpaths", "token_regex", "metadata_fields", "pseudo_empty_tags",
                        "suppress_tags", "load_filters"]:
             self.parser_defaults[option] = loader_options[option]
 
@@ -601,8 +600,7 @@ class Loader(object):
                      'metadata_types': self.metadata_types,
                      'normalized_fields': self.normalized_fields,
                      'debug': self.debug}
-        db_values["word_regex"] = self.word_regex
-        db_values["punct_regex"] = self.punct_regex
+        db_values["token_regex"] = self.token_regex
         db_values["default_object_level"] = self.default_object_level
         db_config = MakeDBConfig(filename, **db_values)
         print >> open(filename, 'w'), db_config

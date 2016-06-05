@@ -35,10 +35,7 @@ pseudo_empty_tags = []
 ## A list of tags to ignore
 suppress_tags = []
 
-word_regex = Parser.DefaultWordRegex
-punct_regex = Parser.DafaultPunctRegex
-
-token_regex = word_regex + "|" + punct_regex
+token_regex = NewParser.TokenRegex
 
 # Define a file (with full path) containing words to filter out. Must be one word per line.
 # Useful for dirty OCR.
@@ -48,4 +45,4 @@ filtered_words_list = ""
 ## This will affect the order in which results are displayed
 ## Supply a list of metadata strings, e.g.:
 ## ["date", "author", "title"]
-sort_order = ["date", "author", "title", "filename"]
+sort_order = ["year", "author", "title", "filename"]

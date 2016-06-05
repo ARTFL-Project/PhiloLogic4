@@ -39,9 +39,7 @@ class LoadOptions(object):
         self.values["post_filters"] = PostFilters.DefaultPostFilters
         self.values["plain_text_obj"] = []
         self.values["parser_factory"] = NewParser.XMLParser
-        self.values["word_regex"] = Parser.DefaultWordRegex
-        self.values["punct_regex"] = Parser.DafaultPunctRegex
-        self.values["token_regex"] = Parser.DefaultTokenRegex
+        self.values["token_regex"] = NewParser.TokenRegex
         self.values["doc_xpaths"] = NewParser.DefaultDocXPaths
         self.values["metadata_fields"] = NewParser.DefaultMetadataFields
         self.values["pseudo_empty_tags"] = []
@@ -153,7 +151,6 @@ class LoadOptions(object):
         self.update()
 
     def update(self):
-        self.values["token_regex"] = "%s|%s" % (self.word_regex, self.punct_regex)
         self.values["db_url"] = os.path.join(self.url_root, self.dbname)
         self.values["db_destination"] = os.path.join(self.database_root, self.dbname)
         self.values["data_destination"] = os.path.join(self.db_destination, "data")

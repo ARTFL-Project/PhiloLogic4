@@ -7,6 +7,7 @@ import sys
 from philologic import OHCOVector
 
 
+
 class XMLParser(object):
     """Parses clean or dirty XML."""
 
@@ -23,6 +24,11 @@ class XMLParser(object):
         self.parallel_type = "page"
         self.output = output
         self.docid = docid
+
+        if "token_regex" in kwargs:
+            self.token_regex = re.compile(r"%s" % kwargs["token_regex"], re.I)
+        else:
+            self.token_regex = re.compile(r"%s" % TokenRegex, re.I)
         # Initialize an OHCOVector Stack. operations on this stack produce all parser output.
         self.v = OHCOVector.CompoundStack(self.types, self.parallel_type, docid=docid, out=output, ref="ref")
 
@@ -486,7 +492,7 @@ class XMLParser(object):
 
         # we're splitting the line of words into distinct words
         # separated by "\n"
-        words = chars_in_words.sub(r'\n\1\n', words)
+        words = self.token_regex.sub(r'\n\1\n', words)
 
         if self.break_apost:
             words = words.replace("'", "\n'\n")
@@ -925,6 +931,9 @@ class XMLParser(object):
     def remove_control_chars(self, text):
         return control_char_re.sub('', text.decode('utf8', 'ignore')).encode('utf8')
 
+
+TokenRegex = "([\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*)"
+
 # Pre-compiled regexes used for parsing
 join_hyphen_with_lb = re.compile(r'(\&shy;[\n \t]*<lb\/>)', re.I | re.M)
 join_hyphen = re.compile(r'(\&shy;[\n \t]*)', re.I | re.M)
@@ -984,8 +993,6 @@ type_attrib = re.compile(r'type="([^"]*)"', re.I)
 hyper_div_tag = re.compile(r'<hyperdiv\W', re.I)
 div_num_tag = re.compile(r'<div(.)', re.I)
 char_ents = re.compile(r'\&[a-zA-Z0-9\#][a-zA-Z0-9]*;', re.I)
-chars_in_words = re.compile(r'([\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*)',
-                            re.I)  # IMPORTANT: this replaces word_regex
 newline_shortener = re.compile(r'\n\n*')
 check_if_char_word = re.compile(r'[A-Za-z0-9\177-\377]', re.I)
 chars_not_to_index = re.compile(r'\[\{\]\}', re.I)
