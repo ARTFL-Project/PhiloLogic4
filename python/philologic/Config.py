@@ -233,6 +233,14 @@ web_config_defaults = {
                 ''',
         'index': 21
     },
+    'time_series_year_field':{
+        'value': 'year',
+        'comment': '''
+                # The time_series_year_field variable defines which metadata field to use for time series. The year field is built at load time by finding the earliest 4 digit number
+                # in multiple date fields.
+                ''',
+        'index': 22
+    },
     'title_prefix_removal': {
         'value': [],
         'comment': '''
@@ -241,7 +249,7 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-        'index': 22
+        'index': 23
     },
     'page_images_url_root': {
         'value': '',
@@ -251,7 +259,7 @@ web_config_defaults = {
                  # <pb fac="filename.jpg"> or <pb id="filename.jpg">
                  # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
                  ''',
-        'index': 23
+        'index': 24
     },
     'logo': {
         'value': '',
@@ -260,14 +268,14 @@ web_config_defaults = {
                   # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
                   # it starts with http://. If no logo is defined, no picture will be displayed.
                   ''',
-        'index': 24
+        'index': 25
     },
     'header_in_toc': {
         'value': False,
         'comment': '''
                   # The header_in_toc variable defines whether to display a button to show the header in the table of contents
                   ''',
-        'index': 25
+        'index': 26
     }
 }
 

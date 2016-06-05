@@ -36,9 +36,7 @@ def get_text_obj(obj, config, request, word_regex, note=False):
         ## workaround for when no filename is returned with the full philo_id of the object
         philo_id = obj.philo_id[0] + ' 0 0 0 0 0 0'
         c = obj.db.dbh.cursor()
-        c.execute(
-            "select filename from toms where philo_type='doc' and philo_id =? limit 1",
-            (philo_id, ))
+        c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id, ))
         path += "/data/TEXT/" + c.fetchone()["filename"]
     file = open(path)
     byte_start = int(obj.byte_start)
@@ -50,13 +48,7 @@ def get_text_obj(obj, config, request, word_regex, note=False):
     except ValueError:  ## request.byte contains an empty string
         bytes = []
 
-    formatted_text, imgs = format_text_object(obj,
-                                              raw_text,
-                                              config,
-                                              request,
-                                              word_regex,
-                                              bytes=bytes,
-                                              note=note)
+    formatted_text, imgs = format_text_object(obj, raw_text, config, request, word_regex, bytes=bytes, note=note)
     formatted_text = formatted_text.decode("utf-8", "ignore")
     return formatted_text, imgs
 

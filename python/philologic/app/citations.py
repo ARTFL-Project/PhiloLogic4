@@ -42,13 +42,13 @@ def concordance_citation(hit, citation_hrefs):
         }
     else:
         citation['author'] = {}
-    if hit.date:
-        citation['date'] = {
+    if hit.year:
+        citation['year'] = {
             "href": citation_hrefs['doc'],
-            "label": hit.date.strip()
+            "label": hit.year.strip()
         }
     else:
-        citation['date'] = {}
+        citation['year'] = {}
 
     ## Div level metadata
     div1_name = hit.div1.head
@@ -115,10 +115,10 @@ def biblio_citation(hit, citation_hrefs):
         citation['author'] = {'href': '', 'label': hit.author.strip()}
     else:
         citation['author'] = {}
-    if hit.date:
-        citation['date'] = {'href': '', 'label': hit.date.strip()}
+    if hit.year:
+        citation['year'] = {'href': '', 'label': hit.year.strip()}
     else:
-        citation["date"] = {}
+        citation["year"] = {}
 
         ## Div level metadata // Copied from concordance citations
     div1_name = hit.div1.head

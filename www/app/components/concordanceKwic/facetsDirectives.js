@@ -6,7 +6,7 @@
         .module('philoApp')
         .directive('facets', facets);
 
-    function facets($rootScope, $location, request, progressiveLoad, saveToLocalStorage) {
+    function facets($rootScope, $location, request, progressiveLoad, saveToLocalStorage, URL) {
         var populateFacets = function() {
             var facets = [];
             for (var i = 0; i < $rootScope.philoConfig.facets.length; i++) {

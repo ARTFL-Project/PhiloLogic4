@@ -5,7 +5,7 @@
         .module("philoApp")
         .directive('searchArguments', searchArguments);
 
-    function searchArguments($rootScope, $http, $timeout, $location, URL, request, queryTermGroups) {
+    function searchArguments($rootScope, $http, $timeout, $location, URL, request, queryTermGroups, philoConfig) {
         var getSearchArgs = function(queryParams) {
             var queryArgs = {};
             if ('q' in queryParams) {
@@ -46,7 +46,7 @@
             var queryArgs = angular.copy(queryParams);
             var biblio = []
             if (queryArgs.report === "time_series") {
-                delete queryParams.date;
+                delete queryParams[philoConfig.time_series_year_field];
             }
             var config = $rootScope.philoConfig;
             var facets = [];

@@ -318,138 +318,125 @@ DefaultXPaths = [
     ("para", ".//epigraph"), ("para", ".//argument"), ("para", ".//postscript"), ("page", ".//pb")
 ]
 
-DefaultMetadataXPaths = [
+DefaultMetadataXPaths = {
     # Metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
     # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
 
     ####################
     # DOC LEVEL XPATHS #
     ####################
+    "doc": {
+        "author": [
+            ".//sourceDesc/bibl/author[@type='marc100']",
+            ".//sourceDesc/bibl/author[@type='artfl']",
+            ".//sourceDesc/bibl/author",
+            ".//titleStmt/author",
+            ".//sourceDesc/biblStruct/monogr/author/name",
+            ".//sourceDesc/biblFull/titleStmt/author",
+            ".//sourceDesc/biblFull/titleStmt/respStmt/name",
+            ".//sourceDesc/biblFull/titleStmt/author",
+            ".//sourceDesc/bibl/titleStmt/author",
+        ],
+        "title": [
+            ".//sourceDesc/bibl/title[@type='marc245']",
+            ".//sourceDesc/bibl/title[@type='artfl']",
+            ".//sourceDesc/bibl/title",
+            ".//titleStmt/title",
+            ".//sourceDesc/bibl/titleStmt/title",
+            ".//sourceDesc/biblStruct/monogr/title",
+            ".//sourceDesc/biblFull/titleStmt/title",
+        ],
+        "author_dates": [
+            ".//sourceDesc/bibl/author/date",
+            ".//titlestmt/author/date",
+        ],
+        "create_date": [
+            ".//profileDesc/creation/date",
+            ".//fileDesc/sourceDesc/bibl/imprint/date",
+            ".//sourceDesc/biblFull/publicationStmt/date",
+            ".//profileDesc/dummy/creation/date",
+            ".//fileDesc/sourceDesc/bibl/creation/date",
+        ],
+        "publisher": [
+            ".//sourceDesc/bibl/imprint[@type='artfl']",
+            ".//sourceDesc/bibl/imprint[@type='marc534']",
+            ".//sourceDesc/bibl/imprint/publisher",
+            ".//sourceDesc/biblStruct/monogr/imprint/publisher/name",
+            ".//sourceDesc/biblFull/publicationStmt/publisher",
+            ".//sourceDesc/bibl/publicationStmt/publisher",
+            ".//sourceDesc/bibl/publisher",
+            ".//publicationStmt/publisher",
+            ".//publicationStmp",
+        ],
+        "pub_place": [
+            ".//sourceDesc/bibl/imprint/pubPlace",
+            ".//sourceDesc/biblFull/publicationStmt/pubPlace",
+            ".//sourceDesc/biblStruct/monog/imprint/pubPlace",
+            ".//sourceDesc/bibl/pubPlace",
+            ".//sourceDesc/bibl/publicationStmt/pubPlace",
+        ],
+        "pub_date": [
+            ".//sourceDesc/bibl/imprint/date",
+            ".//sourceDesc/biblStruct/monog/imprint/date",
+            ".//sourceDesc/biblFull/publicationStmt/date",
+            ".//sourceDesc/bibFull/imprint/date",
+            ".//sourceDesc/bibl/date",
+            ".//text/front/docImprint/acheveImprime",
+        ],
+        "extent": [
+            ".//sourceDesc/bibl/extent",
+            ".//sourceDesc/biblStruct/monog//extent",
+            ".//sourceDesc/biblFull/extent",
+        ],
+        "editor": [
+            ".//sourceDesc/bibl/editor",
+            ".//sourceDesc/biblFull/titleStmt/editor",
+            ".//sourceDesc/bibl/title/Stmt/editor",
+        ],
+        "identifiers": [
+            ".//publicationStmt/idno"
+        ],
+        "text_genre": [
+            ".//profileDesc/textClass/keywords[@scheme='genre']/term",
+            ".//SourceDesc/genre",
+        ],
+        "keywords": [
+            # keywords
+            ".//profileDesc/textClass/keywords/list/item",
+        ],
+        "language": [
+            # language
+            ".//profileDesc/language/language",
+        ],
+        "notes": [
+            # notes
+            ".//fileDesc/notesStmt/note",
+            ".//publicationStmt/notesStmt/note",
+        ],
+        "auth_gender": [
 
-    # Author
-    ("doc", ".//sourceDesc/bibl/author[@type='marc100']", "author"),
-    ("doc", ".//sourceDesc/bibl/author[@type='artfl']", "author"),
-    ("doc", ".//sourceDesc/bibl/author", "author"),
-    ("doc", ".//titleStmt/author", "author"),
-    ("doc", ".//sourceDesc/biblStruct/monogr/author/name", "author"),
-    ("doc", ".//sourceDesc/biblFull/titleStmt/author", "author"),
-    ("doc", ".//sourceDesc/biblFull/titleStmt/respStmt/name", "author"),
-    ("doc", ".//sourceDesc/biblFull/titleStmt/author", "author"),
-    ("doc", ".//sourceDesc/bibl/titleStmt/author", "author"),
-
-    # Title XPATHs
-    ("doc", ".//sourceDesc/bibl/title[@type='marc245']", "title"),
-    ("doc", ".//sourceDesc/bibl/title[@type='artfl']", "title"),
-    ("doc", ".//sourceDesc/bibl/title", "title"),
-    ("doc", ".//titleStmt/title", "title"),
-    ("doc", ".//sourceDesc/bibl/titleStmt/title", "title"),
-    ("doc", ".//sourceDesc/biblStruct/monogr/title", "title"),
-    ("doc", ".//sourceDesc/biblFull/titleStmt/title", "title"),
-
-    # Author dates
-    ("doc", ".//sourceDesc/bibl/author/date", "author_dates"),
-    ("doc", ".//titlestmt/author/date", "author_dates"),
-
-    # Date
-    ("doc", ".//profileDesc/creation/date", "date"),
-    ("doc", ".//fileDesc/sourceDesc/bibl/imprint/date", "date"),
-    ("doc", ".//sourceDesc/biblFull/publicationStmt/date", "date"),
-    ("doc", ".//sourceDesc/bibl/imprint/date", "date"),
-    ("doc", ".//sourceDesc/biblFull/publicationStmt/date", "date"),
-    ("doc", ".//profileDesc/dummy/creation/date", "date"),
-    ("doc", ".//fileDesc/sourceDesc/bibl/creation/date", "date"),
-    ("doc", "./text/front/docDate/.@value", "date"),  # this is for the French theater
-    ("doc", "./text/front//p[@rend='center']", "date"),  # this is for some Diderot data
-
-    # Publisher
-    ("doc", ".//sourceDesc/bibl/imprint[@type='artfl']", "publisher"),
-    ("doc", ".//sourceDesc/bibl/imprint[@type='marc534']", "publisher"),
-    ("doc", ".//sourceDesc/bibl/imprint/publisher", "publisher"),
-    ("doc", ".//sourceDesc/biblStruct/monogr/imprint/publisher/name", "publisher"),
-    ("doc", ".//sourceDesc/biblFull/publicationStmt/publisher", "publisher"),
-    ("doc", ".//sourceDesc/bibl/publicationStmt/publisher", "publisher"),
-    ("doc", ".//sourceDesc/bibl/publisher", "publisher"),
-    ("doc", ".//publicationStmt/publisher", "publisher"),
-    ("doc", ".//publicationStmp", "publisher"),
-
-    # pub_place
-    ("doc", ".//sourceDesc/bibl/imprint/pubPlace", "pub_place"),
-    ("doc", ".//sourceDesc/biblFull/publicationStmt/pubPlace", "pub_place"),
-    ("doc", ".//sourceDesc/biblStruct/monog/imprint/pubPlace", "pub_place"),
-    ("doc", ".//sourceDesc/bibl/pubPlace", "pub_place"),
-    ("doc", ".//sourceDesc/bibl/publicationStmt/pubPlace", "pub_place"),
-
-    # pub_date
-    ("doc", ".//sourceDesc/bibl/imprint/date", "pub_date"),
-    ("doc", ".//sourceDesc/biblStruct/monog/imprint/date", "pub_date"),
-    ("doc", ".//sourceDesc/biblFull/publicationStmt/date", "pub_date"),
-    ("doc", ".//sourceDesc/bibFull/imprint/date", "pub_date"),
-    ("doc", ".//sourceDesc/bibl/date", "pub_date"),
-    ("doc", ".//text/front/docImprint/acheveImprime", "pub_date"),
-
-    # extent
-    ("doc", ".//sourceDesc/bibl/extent", "extent"),
-    ("doc", ".//sourceDesc/biblStruct/monog//extent", "extent"),
-    ("doc", ".//sourceDesc/biblFull/extent", "extent"),
-
-    # editor
-    ("doc", ".//sourceDesc/bibl/editor", "editor"),
-    ("doc", ".//sourceDesc/biblFull/titleStmt/editor", "editor"),
-    ("doc", ".//sourceDesc/bibl/title/Stmt/editor", "editor"),
-
-    # identifiers
-    ("doc", ".//publicationStmt/idno", "identifiers"),
-
-    # text_genre
-    ("doc", ".//profileDesc/textClass/keywords[@scheme='genre']/term", "text_genre"),
-    ("doc", ".//SourceDesc/genre", "text_genre"),
-
-    # keywords
-    ("doc", ".//profileDesc/textClass/keywords/list/item", "keywords"),
-
-    # language
-    ("doc", ".//profileDesc/language/language", "language"),
-
-    # notes
-    ("doc", ".//fileDesc/notesStmt/note", "notes"),
-    ("doc", ".//publicationStmt/notesStmt/note", "notes"),
-
-    # auth_gender
-    ("doc", ".//publicationStmt/notesStmt/note", "auth_gender"),
-
-    # collection
-    ("doc", ".//seriesStmt/title", "collection"),
-
-    # period
-    ("doc", ".//profileDesc/textClass/keywords[@scheme='period']/list/item", "period"),
-    ("doc", ".//SourceDesc/period", "period"),
-
-    # text_form
-    ("doc", ".//profileDesc/textClass/keywords[@scheme='form']/term", "text_form"),
-
-    # structure
-    ("doc", ".//SourceDesc/structure", "structure"),
-
-    ####################
-    # DIV LEVEL XPATHS #
-    ####################
-    ("div", "./head", "head"),
-    ("div", ".@type", "type"),
-    ("div", ".@n", "n"),
-    ("div", ".@id", "id"),
-
-    ##########################
-    # PARAGRAPH LEVEL XPATHS #
-    ##########################
-    ("para", ".@who", "who"),
-
-    #####################
-    # PAGE LEVEL XPATHS #
-    #####################
-    ("page", ".@n", "n"),
-    ("page", ".@id", "img"),
-    ("page", ".@fac", "img")
-]
+            # auth_gender
+            ".//publicationStmt/notesStmt/note",
+        ],
+        "collection": [
+            # collection
+            ".//seriesStmt/title",
+        ],
+        "period": [
+            # period
+            ".//profileDesc/textClass/keywords[@scheme='period']/list/item",
+            ".//SourceDesc/period",
+        ],
+        "text_form": [
+            # text_form
+            ".//profileDesc/textClass/keywords[@scheme='form']/term",
+        ],
+        "structure": [
+            # structure
+            ".//SourceDesc/structure",
+        ]
+    }
+}
 
 if __name__ == "__main__":
     for docid, fn in enumerate(sys.argv[1:], 1):

@@ -12,7 +12,6 @@ from simplejson import loads
 def make_sql_table(table,
                    file_in,
                    db_file="toms.db",
-                   gz=False,
                    indices=[],
                    depth=7):
     def inner_make_sql_table(loader_obj):
@@ -26,10 +25,7 @@ def make_sql_table(table,
         query = 'create table if not exists %s (%s)' % (table, columns)
         c.execute(query)
         alter_command = "ALTER TABLE %s ADD COLUMN ?" % table
-        if gz:
-            file_in_handle = io.BufferedReader(gzip.open(file_in, "rb"))
-        else:
-            file_in_handle = open(file_in)
+        file_in_handle = open(file_in)
         with file_in_handle:
             for sequence, line in enumerate(file_in_handle):
                 philo_type, philo_name, id, attrib = line.split("\t", 3)

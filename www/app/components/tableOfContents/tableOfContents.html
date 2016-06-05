@@ -5,7 +5,7 @@
                 <div id="doc-title">
 					<span ng-if="toc.tocObject.citation.author.label.length > 0">{{ ::toc.tocObject.citation.author.label }}, </span>
                     <a id="toc-title" class="citation-small-caps">{{ ::toc.tocObject.citation.title.label }}</a>
-					<span ng-if="toc.tocObject.citation.date | isEmpty">[{{ toc.tocObject.citation.date.label }}]</span>
+					<span ng-if="toc.tocObject.citation.year | isEmpty">[{{ toc.tocObject.citation.year.label }}]</span>
                 </div>
                 <div id="doc-biblio">
 					<span ng-if="toc.tocObject.citation.pub_place">{{ toc.tocObject.citation.pub_place }}</span>

@@ -33,7 +33,7 @@ index_cutoff = 10  # index frequency cutoff.  Don't. alter.
 # While these tables are loaded by default, you can override that default, although be aware
 # that you will only have reduced functionality if you do. It is strongly recommended that you
 # at least keep the 'toms' table from toms.db.
-DEFAULT_TABLES = ('toms', 'pages', 'words')
+DEFAULT_TABLES = ('toms', 'pages', 'refs', 'words')
 
 DEFAULT_OBJECT_LEVEL = "doc"
 
@@ -53,12 +53,11 @@ class Loader(object):
         self.db_url = loader_options["db_url"]
         self.default_object_level = loader_options["default_object_level"]
         self.post_filters = loader_options["post_filters"]
-        self.word_regex = loader_options["word_regex"]
-        self.punct_regex = loader_options["punct_regex"]
         self.filtered_words = loader_options["filtered_words"]
+        self.token_regex = loader_options["token_regex"]
 
         self.parser_defaults = {}
-        for option in ["parser_factory", "token_regex", "xpaths", "metadata_xpaths", "pseudo_empty_tags",
+        for option in ["parser_factory", "doc_xpaths", "token_regex", "metadata_fields", "pseudo_empty_tags",
                        "suppress_tags", "load_filters"]:
             self.parser_defaults[option] = loader_options[option]
 
@@ -122,7 +121,7 @@ class Loader(object):
 
     def parse_tei_header(self):
         load_metadata = []
-        metadata_xpaths = self.parser_defaults["metadata_xpaths"]
+        metadata_xpaths = self.parser_defaults["doc_xpaths"]
         for f in self.list_files():
             data = {"filename": f}
             header = ""
@@ -159,10 +158,11 @@ class Loader(object):
                                     data[field] = el.text.encode("utf-8")
                 trimmed_metadata_xpaths = [
                     (metadata_type, xpath, field)
-                    for metadata_type in ["div", "para", "sent", "word", "page"] if metadata_type in metadata_xpaths
-                    for field in metadata_xpaths[metadata_type]
+                    for metadata_type in ["div", "para", "sent", "word", "page"]
+                    if metadata_type in metadata_xpaths for field in metadata_xpaths[metadata_type]
                     for xpath in metadata_xpaths[metadata_type][field]
                 ]
+                data = self.create_year_field(data)
                 if self.debug:
                     print pretty(data)
                 data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
@@ -196,8 +196,23 @@ class Loader(object):
                 metadata_name = metadata_name.decode('utf-8', 'ignore').lower()
                 data[metadata_name] = metadata_value
             data["filename"] = filename  # place at the end in case the value was in the header
+            data = self.create_year_field(data)
             load_metadata.append(data)
         return load_metadata
+
+    def create_year_field(self, metadata):
+        year_finder = re.compile(r'^.*?(\d{4}).*')
+        earliest_year = 2500
+        for field in ["date, " "create_date", "pub_date", "period"]:
+            if field in metadata:
+                year_match = year_finder.search(metadata[field])
+                if year_match:
+                    year = int(year_match.groups()[0])
+                    if year < earliest_year:
+                        earliest_year = year
+        if earliest_year != 2500:
+            metadata["year"] = str(earliest_year)
+        return metadata
 
     def parse_metadata(self, sort_by_field, reverse_sort=False, header="tei"):
         """Parsing metadata fields in TEI or Dublin Core headers"""
@@ -207,6 +222,7 @@ class Loader(object):
             load_metadata = self.parse_tei_header()
         elif header == "dc":
             load_metadata = self.parse_dc_header()
+
         print "done."
 
         print "Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]),
@@ -236,6 +252,7 @@ class Loader(object):
                                "toms": self.workdir + os.path.basename(x) + ".toms",
                                "sortedtoms": self.workdir + os.path.basename(x) + ".toms.sorted",
                                "pages": self.workdir + os.path.basename(x) + ".pages",
+                               "refs": self.workdir + os.path.basename(x) + ".refs",
                                "results": self.workdir + os.path.basename(x) + ".results"}
                               for n, x in enumerate(self.list_files())]
 
@@ -251,41 +268,35 @@ class Loader(object):
                                "toms": self.workdir + os.path.basename(d["filename"]) + ".toms",
                                "sortedtoms": self.workdir + os.path.basename(d["filename"]) + ".toms.sorted",
                                "pages": self.workdir + os.path.basename(d["filename"]) + ".pages",
+                               "refs": self.workdir + os.path.basename(d["filename"]) + ".refs",
                                "results": self.workdir + os.path.basename(d["filename"]) + ".results"}
                               for n, d in enumerate(data_dicts)]
 
         self.loaded_files = self.filequeue[:]
 
-        indexed_types = []
+        self.metadata_hierarchy.append([])
+        # Adding in doc level metadata
+        for d in data_dicts:
+            for k in d.keys():
+                if k not in self.metadata_fields:
+                    self.metadata_fields.append(k)
+                    self.metadata_hierarchy[0].append(k)
+                if k not in self.metadata_types:
+                    self.metadata_types[k] = "doc"
+                    # don't need to check for conflicts, since doc is first.
 
-        for object_type in self.parser_defaults["metadata_xpaths"]:
-            if object_type not in indexed_types and object_type != "page":
-                indexed_types.append(object_type)
-
-        if "doc" not in indexed_types:
-            indexed_types = ["doc"] + indexed_types
-
-        for t in indexed_types:
-            self.metadata_hierarchy.append([])
-            for element_type in self.parser_defaults["metadata_xpaths"]:
-                if t == element_type:
-                    for param in self.parser_defaults["metadata_xpaths"][element_type]:
-                        if param not in self.metadata_fields:
-                            self.metadata_fields.append(param)
-                            self.metadata_hierarchy[-1].append(param)
-                        if param not in self.metadata_types:
-                            self.metadata_types[param] = t
-                        else:  # we have a serious error here!  Should raise going forward.
-                            pass
-            if t == "doc":
-                for d in data_dicts:
-                    for k in d.keys():
-                        if k not in self.metadata_fields:
-                            self.metadata_fields.append(k)
-                            self.metadata_hierarchy[-1].append(k)
-                        if k not in self.metadata_types:
-                            self.metadata_types[k] = t
-                            # don't need to check for conflicts, since doc is first.
+        # Adding non-doc level metadata
+        self.metadata_hierarchy.append([])
+        for element_type in self.parser_defaults["metadata_fields"]:
+            if element_type != "page" and element_type != "ref":
+                for param in self.parser_defaults["metadata_fields"][element_type]:
+                    if param not in self.metadata_fields:
+                        self.metadata_fields.append(param)
+                        self.metadata_hierarchy[-1].append(param)
+                    if param not in self.metadata_types:
+                        self.metadata_types[param] = element_type
+                    else:  # we have a serious error here!  Should raise going forward.
+                        pass
 
         print "%s: parsing %d files." % (time.ctime(), len(self.filequeue))
         procs = {}
@@ -324,10 +335,10 @@ class Loader(object):
 
                     if "token_regex" not in options:
                         options["token_regex"] = self.parser_defaults["token_regex"]
-                    if "xpaths" not in options:
-                        options["xpaths"] = self.parser_defaults["xpaths"]
-                    if "metadata_xpaths" not in options:
-                        options["metadata_xpaths"] = self.parser_defaults["metadata_xpaths"]
+                    if "doc_xpaths" not in options:
+                        options["xpaths"] = self.parser_defaults["doc_xpaths"]
+                    if "metadata_fields" not in options:
+                        options["metadata_xpaths"] = self.parser_defaults["metadata_fields"]
                     if "suppress_tags" not in options:
                         options["suppress_tags"] = self.parser_defaults["suppress_tags"]
                     if "pseudo_empty_tags" not in options:
@@ -338,7 +349,12 @@ class Loader(object):
                     filters = options["load_filters"]
                     del options["load_filters"]
 
-                    parser = parser_factory(o, text["id"], text["size"], known_metadata=metadata, filtered_words=self.filtered_words, **options)
+                    parser = parser_factory(o,
+                                            text["id"],
+                                            text["size"],
+                                            known_metadata=metadata,
+                                            filtered_words=self.filtered_words,
+                                            **options)
                     try:
                         r = parser.parse(i)
                     except RuntimeError:
@@ -358,8 +374,8 @@ class Loader(object):
                     exit()
 
             # if we are at max_workers children, or we're out of texts, the parent waits for any child to exit.
-            pid, status = os.waitpid(0, 0
-                                     )  # this hangs until any one child finishes.  should check status for problems.
+            pid, status = os.waitpid(0,
+                                     0)  # this hangs until any one child finishes.  should check status for problems.
             if status:
                 print "parsing failed for %s" % procs[pid]
                 exit()
@@ -395,12 +411,17 @@ class Loader(object):
             for toms_file in glob(self.workdir + "/*toms.sorted"):
                 os.system('rm %s' % toms_file)
 
-        pagesargs = "cat *.pages"
         print "%s: joining pages" % time.ctime()
         for page_file in glob(self.workdir + "/*pages"):
             pages_status = os.system("cat %s >> %s/all_pages" % (page_file, self.workdir))
             if not self.debug:
                 os.system("rm %s" % page_file)
+
+        print "%s: joining references" % time.ctime()
+        for ref_file in glob(self.workdir + "/*refs"):
+            refs_status = os.system("cat %s >> %s/all_refs" % (ref_file, self.workdir))
+            if not self.debug:
+                os.system("rm %s" % ref_file)
 
     def merge_files(self, file_type, file_num=100):
         """This function runs a multi-stage merge sort on words
@@ -453,6 +474,8 @@ class Loader(object):
             if not self.debug:
                 os.system("rm %s" % file_list)
         status = os.system('mv %s %s' % (last_sort_file, self.workdir + all_object_file))
+        if file_type == "toms":
+            os.system("gunzip -d %s" % self.workdir + all_object_file)
 
         if status != 0:
             print "%s sorting failed\nInterrupting database load..." % file_type
@@ -524,18 +547,19 @@ class Loader(object):
                 file_in = self.destination + '/WORK/all_words_ordered'
                 indices = [("philo_name", ), ('philo_id', ), ('parent', ), ('byte_start', ), ('byte_end', )]
                 depth = 7
-                compressed = False
             elif table == 'pages':
                 file_in = self.destination + '/WORK/all_pages'
                 indices = [("philo_id", )]
                 depth = 9
-                compressed = False
             elif table == 'toms':
-                file_in = self.destination + '/WORK/all_toms_sorted.gz'
+                file_in = self.destination + '/WORK/all_toms_sorted'
                 indices = [('philo_type', ), ('philo_id', ), ('img', )] + self.metadata_fields
                 depth = 7
-                compressed = True
-            post_filter = make_sql_table(table, file_in, gz=compressed, indices=indices, depth=depth)
+            elif table == "refs":
+                file_in = self.destination + '/WORK/all_refs'
+                indices = [("parent",),  ("target",), ("type",)]
+                depth = 9
+            post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)
 
     def post_processing(self, *extra_filters):
@@ -576,8 +600,7 @@ class Loader(object):
                      'metadata_types': self.metadata_types,
                      'normalized_fields': self.normalized_fields,
                      'debug': self.debug}
-        db_values["word_regex"] = self.word_regex
-        db_values["punct_regex"] = self.punct_regex
+        db_values["token_regex"] = self.token_regex
         db_values["default_object_level"] = self.default_object_level
         db_config = MakeDBConfig(filename, **db_values)
         print >> open(filename, 'w'), db_config

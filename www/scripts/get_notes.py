@@ -29,8 +29,8 @@ def get_notes(environ, start_response):
             (target, doc_id))
         philo_id = c.fetchall()[0]['philo_id'].split()
         obj = ObjectWrapper(philo_id, db)
-        text_object = generate_text_object(obj, db, request, config, note=True)
-        yield simplesimplejson.dumps(text_object)
+        text_object = generate_text_object(request, config, note=True, obj=obj)
+        yield simplejson.dumps(text_object)
     except IndexError:
         yield simplesimplejson.dumps('')
 

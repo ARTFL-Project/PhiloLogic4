@@ -5,13 +5,13 @@
         .module('philoApp')
         .filter('metadataFieldsFilter', metadataFieldsFilter)
 
-    function metadataFieldsFilter($rootScope) {
+    function metadataFieldsFilter($rootScope, philoConfig) {
         return function(metadataFields) {
             var filtered = [];
             for (var i = 0; i < metadataFields.length; i++) {
                 var metadata = metadataFields[i].value;
                 if ($rootScope.formData.report === "time_series") {
-                    if (metadata !== "date") {
+                    if (metadata !== philoConfig.time_series_year_field) {
                         filtered.push(metadataFields[i]);
                     }
                 } else {

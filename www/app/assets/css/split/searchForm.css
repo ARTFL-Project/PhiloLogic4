@@ -31,7 +31,7 @@
 #report label {
 	font-size: 1.1em;
 	font-variant: small-caps;
-	text-transform: capitalize;	
+	text-transform: capitalize;
 }
 .search_box {
     width: 250px;
@@ -60,10 +60,10 @@
 .no-example {
 	display: none;
 }
-#method, #metadata_fields, #collocation-options > div, #time-series-options > div {
+#method, .metadata_fields, #collocation-options > div, #time-series-options > div {
 	margin-top: 10px;
 }
-#method, #metadata_fields.row, #time_series_num.row, #date_range.row, #results_per_page.row, #collocation-options > div, #time-series-options > div {
+#method, .metadata_fields.row, #time_series_num.row, #date_range.row, #results_per_page.row, #collocation-options > div, #time-series-options > div {
 	padding-top: 10px;
 	padding-bottom: 10px;
 }
@@ -113,11 +113,11 @@
 	#search-buttons {
 		padding-top: 15px;
 	}
-	#search_terms > div:nth-of-type(2), #head-search-container #metadata_fields div:nth-of-type(2) {
+	#search_terms > div:nth-of-type(2), #head-search-container .metadata_fields div:nth-of-type(2) {
 		padding-right: 20px;
 		padding-left: 20px;
 	}
-	#head-search-container #metadata-fields 
+	#head-search-container #metadata-fields
 	#initial-form, #search-elements {
 		left: 40px;
 		right: 40px;

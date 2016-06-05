@@ -240,11 +240,12 @@ def frequency_results(request, config, sorted=False):
             metadata = dict(request.metadata)
 
             # Build a label starting with the first value as the main value
-            first_metatada_key, first_metadata_value = key[0] or "NULL"
-            label = first_metadata_value
-            metadata[first_metatada_key] = first_metadata_value.encode('utf-8', 'ignore')
+            first_metatada_key, first_metadata_value = key[0]
+            label = first_metadata_value or "NULL"
+            metadata[first_metatada_key] = first_metadata_value.encode('utf-8', 'ignore') or "NULL"
             append_to_label = []
             for metadata_key, metadata_value in key[1:]:
+                metadata_value = metadata_value.strip()
                 if not metadata_value:
                     # replace NULL with '[None]', 'N.A.', 'Untitled', etc.
                     metadata[metadata_key] = "NULL"
@@ -314,14 +315,15 @@ def kwic_results(request, config):
     return kwic_object
 
 
-def generate_text_object(request, config, note=False):
+def generate_text_object(request, config, note=False, obj=None):
     db = DB(config.db_path + '/data/')
-    try:
-        obj = db[request.philo_id]
-    except ValueError:
-        philo_id = ' '.join(request.path_components)
-        obj = db[philo_id]
-    philo_id = obj.philo_id
+    if not obj:
+        try:
+            obj = db[request.philo_id]
+        except ValueError:
+            philo_id = ' '.join(request.path_components)
+            obj = db[philo_id]
+        philo_id = obj.philo_id
     while obj['philo_name'] == '__philo_virtual' and obj["philo_type"] != "div1":
         philo_id.pop()
         obj = db[philo_id]
@@ -422,7 +424,7 @@ def generate_time_series(request, config):
     db = DB(config.db_path + '/data/')
     time_series_object = {'query': dict([i for i in request]), 'query_done': False}
 
-    start_date, end_date = get_start_end_date(db, start_date=None, end_date=None)
+    start_date, end_date = get_start_end_date(db, config, start_date=None, end_date=None)
 
     # Generate date ranges
     interval = int(request.year_interval)
@@ -442,23 +444,27 @@ def generate_time_series(request, config):
     start_time = timeit.default_timer()
     max_time = request.max_time or 10
     for start_range, date_range in date_ranges:
-        request.metadata['date'] = date_range
+        request.metadata[config.time_series_year_field] = date_range
         hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
         hits.finish()
-        url = make_absolute_query_link(config, request, report="concordance", date=date_range, start="0", end="0")
+        params = {report: "concordance",start:"0", end:"0"}
+        params[config.time_series_year_field] = date_range
+        url = make_absolute_query_link(config, request, **params)
         absolute_count[start_range] = {"label": start_range, "count": len(hits), "url": url}
 
         # Get date total count
         if interval != '1':
             dates = [start_range]
-            dates.append(start_range + (int(request['year_interval']) - 1))
-            query = 'select sum(word_count) from toms where date between "%d" and "%d"' % tuple(dates)
+            end_range = start_range + (int(request['year_interval']) - 1)
+            query = 'select sum(word_count) from toms where %s between "%d" and "%d"' % (config.time_series_year_field, start_range, end_range)
         else:
-            query = "select sum(word_count) from toms where date='%s'" % start_range
+            query = "select sum(word_count) from toms where %s='%s'" % (config.time_series_year_field, start_range)
+
         c = db.dbh.cursor()
         c.execute(query)
         date_counts[start_range] = c.fetchone()[0] or 0
         total_hits += len(hits)
+        print >> sys.stderr, "TOTAL", total_hits
         elapsed = timeit.default_timer() - start_time
         # avoid timeouts by splitting the query if more than request.max_time (in seconds) has been spent in the loop
         if elapsed > int(max_time):
@@ -725,10 +731,10 @@ def kwic_hit_object(hit, config, db):
     return kwic_result
 
 
-def get_start_end_date(db, start_date=None, end_date=None):
+def get_start_end_date(db, config, start_date=None, end_date=None):
     date_finder = re.compile(r'^.*?(\d{1,}).*')
     c = db.dbh.cursor()
-    c.execute('select date from toms where date is not null')
+    c.execute('select %s from toms where %s is not null' % (config.time_series_year_field, config.time_series_year_field))
     dates = []
     for i in c.fetchall():
         try:
