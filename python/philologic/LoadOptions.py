@@ -7,6 +7,7 @@ from glob import glob
 from optparse import OptionParser
 
 from philologic import Loader, LoadFilters, Parser, PostFilters, NewParser, PlainTextParser
+from philologic.utils import pretty_print
 
 
 # Load global config
@@ -185,10 +186,7 @@ class LoadOptions(object):
 
     def __str__(self):
         """String representation of parsed loader config."""
-        string_list = []
-        for i in self.values:
-            string_list.append("%s: %s" % (i, self.values[i]))
-        return "\n".join(string_list).encode('utf-8')
+        return pretty_print(self.values)
 
 
 class LoadConfig(object):

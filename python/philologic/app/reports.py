@@ -316,7 +316,11 @@ def kwic_results(request, config):
 
 
 def generate_text_object(request, config, note=False, obj=None):
-    db = DB(config.db_path + '/data/')
+    if len(request.philo_id.split()) == 9:  # verify this isn't a page ID
+        width = 9
+    else:
+        width = 7
+    db = DB(config.db_path + '/data/', width=width)
     if not obj:
         try:
             obj = db[request.philo_id]
@@ -324,9 +328,12 @@ def generate_text_object(request, config, note=False, obj=None):
             philo_id = ' '.join(request.path_components)
             obj = db[philo_id]
         philo_id = obj.philo_id
-    while obj['philo_name'] == '__philo_virtual' and obj["philo_type"] != "div1":
-        philo_id.pop()
-        obj = db[philo_id]
+    if width != 9:
+        while obj['philo_name'] == '__philo_virtual' and obj["philo_type"] != "div1":
+            philo_id.pop()
+            obj = db[philo_id]
+    else:
+        obj= db[philo_id]
     philo_id = list(obj.philo_id)
     while philo_id[-1] == 0:
         philo_id.pop()
@@ -338,7 +345,11 @@ def generate_text_object(request, config, note=False, obj=None):
         if db.locals['metadata_types'][metadata] == "doc":
             metadata_fields[metadata] = obj[metadata]
     text_object['metadata_fields'] = metadata_fields
-    citation_hrefs = citation_links(db, config, obj)
+    if width != 9:
+        citation_hrefs = citation_links(db, config, obj)
+    else:
+        doc_obj = db[obj.philo_id[0]]
+        citation_hrefs = citation_links(db, config, doc_obj)
     citation = biblio_citation(obj, citation_hrefs)
     text_object['citation'] = citation
     text, imgs = get_text_obj(obj, config, request, db.locals['word_regex'], note=note)
@@ -698,8 +709,8 @@ def kwic_hit_object(hit, config, db):
     length = config.concordance_length + byte_distance + config.concordance_length
 
     ## Get concordance and align it
-    bytes, byte_start = adjust_bytes(hit.bytes, config.concordance_length)
-    conc_text = get_text(hit, byte_start, length, config.db_path)
+    bytes, start_byte = adjust_bytes(hit.bytes, config.concordance_length)
+    conc_text = get_text(hit, start_byte, length, config.db_path)
     conc_text = format_strip(conc_text, bytes)
     conc_text = conc_text.replace('\n', ' ')
     conc_text = conc_text.replace('\r', '')

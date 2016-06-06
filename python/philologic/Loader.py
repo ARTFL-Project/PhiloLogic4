@@ -4,6 +4,7 @@ import cPickle
 import math
 import os
 import re
+import shutil
 import sqlite3
 import subprocess
 import sys
@@ -11,14 +12,14 @@ import time
 from ast import literal_eval as eval
 from glob import glob
 from optparse import OptionParser
-import shutil
 
+from lxml import etree
 import philologic.LoadFilters as LoadFilters
 import philologic.Parser as Parser
 import philologic.PostFilters as PostFilters
-from lxml import etree
-from philologic.Config import MakeDBConfig, MakeWebConfig, pretty
+from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.PostFilters import make_sql_table
+from philologic.utils import pretty_print
 
 # Flush buffer output
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
@@ -164,7 +165,7 @@ class Loader(object):
                 ]
                 data = self.create_year_field(data)
                 if self.debug:
-                    print pretty(data)
+                    print pretty_print(data)
                 data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
                 load_metadata.append(data)
             except etree.XMLSyntaxError:
@@ -545,7 +546,7 @@ class Loader(object):
         for table in self.tables:
             if table == 'words':
                 file_in = self.destination + '/WORK/all_words_ordered'
-                indices = [("philo_name", ), ('philo_id', ), ('parent', ), ('byte_start', ), ('byte_end', )]
+                indices = [("philo_name", ), ('philo_id', ), ('parent', ), ('start_byte', ), ('end_byte', )]
                 depth = 7
             elif table == 'pages':
                 file_in = self.destination + '/WORK/all_pages'

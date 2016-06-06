@@ -151,7 +151,7 @@ class XMLParser(object):
 
     def tag_handler(self, tag):
         '''Tag handler for parser.'''
-        byte_start = self.bytes_read_in - len(tag)
+        start_byte = self.bytes_read_in - len(tag)
         try:
             tag_name = tag_matcher.findall(tag)[0]
         except IndexError:
@@ -159,7 +159,7 @@ class XMLParser(object):
         if not tag_name.startswith('/'):
             self.current_tag = tag_name
 
-        # print tag_name, byte_start
+        # print tag_name, start_byte
         # Handle <q> tags
         if text_tag.search(tag) and self.in_text_quote:
             self.in_quote_text_tag = True
@@ -183,29 +183,29 @@ class XMLParser(object):
                 do_this_para = False
             if do_this_para:
                 if self.open_para:  # account for unclosed paragraph tags
-                    para_byte_end = self.bytes_read_in - len(tag)
-                    self.close_para(para_byte_end)
-                self.v.push("para", tag_name, byte_start)
+                    para_end_byte = self.bytes_read_in - len(tag)
+                    self.close_para(para_end_byte)
+                self.v.push("para", tag_name, start_byte)
                 self.get_object_attributes(tag, tag_name, "para")
                 self.open_para = True
 
         # Notes: treat as para objects and set flag to not set paras in notes.
         elif note_tag.search(tag) and not self.no_deeper_objects:
             if self.open_para:  # account for unclosed paragraph tags
-                para_byte_end = self.bytes_read_in - len(tag)
-                self.close_para(para_byte_end)
+                para_end_byte = self.bytes_read_in - len(tag)
+                self.close_para(para_end_byte)
             self.open_div2 = True
-            self.v.push("div2", tag_name, byte_start)
+            self.v.push("div2", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "div2")
             self.in_a_note = True
 
         # Epigraph: treat as paragraph objects
         elif epigraph_tag.search(tag):
             if self.open_para:  # account for unclosed paragraph tags
-                para_byte_end = self.bytes_read_in - len(tag)
-                self.close_para(para_byte_end)
+                para_end_byte = self.bytes_read_in - len(tag)
+                self.close_para(para_end_byte)
             self.open_para = True
-            self.v.push("para", tag_name, byte_start)
+            self.v.push("para", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "para")
             self.no_deeper_objects = True
         elif closed_epigraph_tag.search(tag):
@@ -216,19 +216,19 @@ class XMLParser(object):
         # LIST: treat as para objects
         elif list_tag.search(tag) and not self.no_deeper_objects:
             if self.open_para:  # account for unclosed paragraph tags
-                para_byte_end = self.bytes_read_in - len(tag)
-                self.close_para(para_byte_end)
+                para_end_byte = self.bytes_read_in - len(tag)
+                self.close_para(para_end_byte)
             self.open_para = True
-            self.v.push("para", tag_name, byte_start)
+            self.v.push("para", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "para")
 
         # SPEECH BREAKS: treat them as para objects
         elif speaker_tag.search(tag):
             if self.open_para:  # account for unclosed paragraph tags
-                para_byte_end = self.bytes_read_in - len(tag)
-                self.close_para(para_byte_end)
+                para_end_byte = self.bytes_read_in - len(tag)
+                self.close_para(para_end_byte)
             self.open_para = True
-            self.v.push("para", tag_name, byte_start)
+            self.v.push("para", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "para")
             self.no_deeper_objects = True
         elif closed_speaker_tag.search(tag):
@@ -239,10 +239,10 @@ class XMLParser(object):
         # ARGUMENT BREAKS: treat them as para objects
         elif argument_tag.search(tag):
             if self.open_para:  # account for unclosed paragraph tags
-                para_byte_end = self.bytes_read_in - len(tag)
-                self.close_para(para_byte_end)
+                para_end_byte = self.bytes_read_in - len(tag)
+                self.close_para(para_end_byte)
             self.open_para = True
-            self.v.push("para", tag_name, byte_start)
+            self.v.push("para", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "para")
             self.no_deeper_objects = True
         elif closed_argument_tag.search(tag):
@@ -253,10 +253,10 @@ class XMLParser(object):
         # OPENER BREAKS: treat them as para objects
         elif opener_tag.search(tag):
             if self.open_para:  # account for unclosed paragraph tags
-                para_byte_end = self.bytes_read_in - len(tag)
-                self.close_para(para_byte_end)
+                para_end_byte = self.bytes_read_in - len(tag)
+                self.close_para(para_end_byte)
             self.open_para = True
-            self.v.push("para", tag_name, byte_start)
+            self.v.push("para", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "para")
             self.no_deeper_objects = True
         elif closed_opener_tag.search(tag):
@@ -267,10 +267,10 @@ class XMLParser(object):
         # CLOSER BREAKS: treat them as para objects
         elif closer_tag.search(tag):
             if self.open_para:  # account for unclosed paragraph tags
-                para_byte_end = self.bytes_read_in - len(tag)
-                self.close_para(para_byte_end)
+                para_end_byte = self.bytes_read_in - len(tag)
+                self.close_para(para_end_byte)
             self.open_para = True
-            self.v.push("para", tag_name, byte_start)
+            self.v.push("para", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "para")
             self.no_deeper_objects = True
         elif closed_closer_tag.search(tag):
@@ -282,10 +282,10 @@ class XMLParser(object):
         # TODO: what to do with stage direction??? deactivated to avoid clashing with <sp> tags
         elif stage_tag.search(tag) and not self.no_deeper_objects:
             if self.open_para:  # account for unclosed paragraph tags
-                para_byte_end = self.bytes_read_in - len(tag)
-                self.close_para(para_byte_end)
+                para_end_byte = self.bytes_read_in - len(tag)
+                self.close_para(para_end_byte)
             self.open_para = True
-            self.v.push("para", tag_name, byte_start)
+            self.v.push("para", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "para")
         elif closed_stage_tag.search(tag):
             self.close_para(self.bytes_read_in)
@@ -293,10 +293,10 @@ class XMLParser(object):
         # CAST LIST: treat them as para objects
         elif castlist_tag.search(tag):
             if self.open_para:  # account for unclosed paragraph tags
-                para_byte_end = self.bytes_read_in - len(tag)
-                self.close_para(para_byte_end)
+                para_end_byte = self.bytes_read_in - len(tag)
+                self.close_para(para_end_byte)
             self.open_para = True
-            self.v.push("para", tag_name, byte_start)
+            self.v.push("para", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "para")
 
         # PAGE BREAKS: this updates the currentpagetag or sets it to "na" if not found.
@@ -305,7 +305,7 @@ class XMLParser(object):
             if self.open_page:
                 self.v.pull("page", self.bytes_read_in)
                 self.open_page = False
-            self.v.push("page", tag_name, byte_start)
+            self.v.push("page", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "page")
             try:
                 n = self.v["page"]["n"]
@@ -323,10 +323,10 @@ class XMLParser(object):
             if self.line_group_break_sent:
                 self.in_line_group = True
             if self.open_para:  # account for unclosed paragraph tags
-                para_byte_end = self.bytes_read_in - len(tag)
-                self.close_para(para_byte_end)
+                para_end_byte = self.bytes_read_in - len(tag)
+                self.close_para(para_end_byte)
             self.open_para = True
-            self.v.push("para", tag_name, byte_start)
+            self.v.push("para", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "para")
         elif closed_line_group.search(tag):
             self.in_line_group = False
@@ -337,7 +337,7 @@ class XMLParser(object):
         # TODO: not sure I got this right...
         elif line_tag.search(tag):
             if self.in_line_group and self.line_group_break_sent:
-                self.v.push("sent", tag_name, self.byte_start)
+                self.v.push("sent", tag_name, self.start_byte)
                 self.v.pull("sent", self.bytes_read_in)
 
         # SENTENCE TAG: <s> </s>.  We have never seen a sample of these
@@ -345,8 +345,8 @@ class XMLParser(object):
         # sentence and to turn off automatic sentence tagging
         elif sentence_tag.search(tag):
             if self.open_sent or self.in_tagged_sentence:
-                self.v.pull("sent", tag_name, byte_start)  # should cache name
-            self.v.push("sent", tag_name, byte_start)
+                self.v.pull("sent", tag_name, start_byte)  # should cache name
+            self.v.push("sent", tag_name, start_byte)
             self.in_tagged_sentence = True
             self.open_sent = True
         elif closed_sentence_tag.search(tag):
@@ -360,9 +360,9 @@ class XMLParser(object):
         # TODO : test for inner divs as in Philo3???
         elif front_tag.search(tag):
             if self.open_div1:
-                self.close_div1(byte_start)
+                self.close_div1(start_byte)
             self.in_front_matter = True
-            self.v.push("div1", "front", byte_start)
+            self.v.push("div1", "front", start_byte)
             self.get_object_attributes(tag, tag_name, "div1")
             self.context_div_level = 1
             self.open_div1 = True
@@ -374,7 +374,7 @@ class XMLParser(object):
         # BODY TAG: Let's set it as a <div object if we have no divs in the document.
         # These tend to carry on as FRONTMATTER. Don't have to check for lower divs, etc.
         elif body_tag.search(tag) and not self.got_a_div:
-            self.v.push("div1", tag_name, byte_start)
+            self.v.push("div1", tag_name, start_byte)
             self.current_div1_id = self.v["div1"].id
             self.context_div_level = 1
             self.open_div1 = True
@@ -390,10 +390,10 @@ class XMLParser(object):
         # is required to provide IDREFs for the who attribute on <speaker>.
         elif hyper_div_tag.search(tag):
             if self.open_div1:
-                self.close_div1(byte_start)
+                self.close_div1(start_byte)
             self.context_div_level = 1
             self.open_div1 = True
-            self.v.push("div1", tag_name, byte_start)
+            self.v.push("div1", tag_name, start_byte)
             self.current_div1_id = self.v["div1"].id
             self.v["div1"]["head"] = "[HyperDiv]"
 
@@ -409,7 +409,7 @@ class XMLParser(object):
             self.context_div_level += 1
             if self.context_div_level > 3:
                 if self.open_div3:
-                    self.close_div3(byte_start)
+                    self.close_div3(start_byte)
                 self.context_div_level = 3
             if self.context_div_level < 1:
                 self.context_div_level = 1
@@ -433,9 +433,9 @@ class XMLParser(object):
 
             if div_level == 1:
                 if self.open_div1:
-                    self.close_div1(byte_start)
+                    self.close_div1(start_byte)
                 self.open_div1 = True
-                self.v.push("div1", tag_name, byte_start)
+                self.v.push("div1", tag_name, start_byte)
                 self.current_div1_id = self.v["div1"].id
                 self.v["div1"]['head'] = self.get_div_head(tag)
                 self.get_object_attributes(tag, tag_name, object_type="div1")
@@ -445,23 +445,23 @@ class XMLParser(object):
                         self.no_deeper_objects = False
             elif div_level == 2:
                 if self.open_div2:
-                    self.close_div2(byte_start)
+                    self.close_div2(start_byte)
                 self.open_div2 = True
-                self.v.push("div2", tag_name, byte_start)
+                self.v.push("div2", tag_name, start_byte)
                 self.v["div2"]['head'] = self.get_div_head(tag)
                 self.get_object_attributes(tag, tag_name, object_type="div2")
             else:
                 if self.open_div3:
-                    self.close_div3(byte_start)
+                    self.close_div3(start_byte)
                 self.open_div3 = True
-                self.v.push("div3", tag_name, byte_start)
+                self.v.push("div3", tag_name, start_byte)
                 self.v["div3"]['head'] = self.get_div_head(tag)
                 self.get_object_attributes(tag, tag_name, object_type="div3")
 
             # TODO: unclear if we need to add EEBO hack when no subdiv objects...
 
         elif tag_name == "ref":
-            self.v.push("ref", tag_name, byte_start)
+            self.v.push("ref", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "ref")
             self.v["ref"].attrib["parent"] = " ".join([str(i) for i in self.current_div1_id])
             self.v.pull("ref", self.bytes_read_in)
@@ -525,7 +525,7 @@ class XMLParser(object):
 
                     # Set your byte position now, since you will be modifying the
                     # word you are sending to the index after this.
-                    byte_start = word_pos
+                    start_byte = word_pos
 
                     if "&" in word:
                         # Convert ents to utf-8
@@ -606,37 +606,37 @@ class XMLParser(object):
                             "sent"].name = "."  # TODO: evaluate if this is right: avoid unwanted chars such tabs in ASP
                         self.v.pull("sent", current_pos + len(word))
 
-    def close_sent(self, byte_end):
+    def close_sent(self, end_byte):
         """Close sentence objects."""
-        self.v.pull("sent", byte_end)
+        self.v.pull("sent", end_byte)
         self.open_sent = False
 
-    def close_para(self, byte_end):
+    def close_para(self, end_byte):
         """Close paragraph objects."""
         if self.open_sent:
-            self.close_sent(byte_end)
-        self.v.pull("para", byte_end)
+            self.close_sent(end_byte)
+        self.v.pull("para", end_byte)
         self.open_para = False
 
-    def close_div3(self, byte_end):
+    def close_div3(self, end_byte):
         """Close div3 objects."""
         if self.open_para:
-            self.close_para(byte_end)
-        self.v.pull("div3", byte_end)
+            self.close_para(end_byte)
+        self.v.pull("div3", end_byte)
         self.open_div3 = False
 
-    def close_div2(self, byte_end):
+    def close_div2(self, end_byte):
         """Close div2 objects."""
         if self.open_div3:
-            self.close_div3(byte_end)
-        self.v.pull("div2", byte_end)
+            self.close_div3(end_byte)
+        self.v.pull("div2", end_byte)
         self.open_div1 = False
 
-    def close_div1(self, byte_end):
+    def close_div1(self, end_byte):
         """Close div1 objects."""
         if self.open_div2:
-            self.close_div2(byte_end)
-        self.v.pull("div1", byte_end)
+            self.close_div2(end_byte)
+        self.v.pull("div1", end_byte)
         self.open_div1 = False
 
     def camel_case_to_snake_case(self, word):

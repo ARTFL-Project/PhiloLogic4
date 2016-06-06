@@ -10,14 +10,14 @@ obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4,
 
 def _safe_lookup(row,field,encoding="utf-8"):
     metadata = ""
-    try: 
+    try:
         metadata = row[field]
     except:
         pass
     if metadata is None:
         return u""
     metadata_string = ""
-    try: 
+    try:
         metadata_string = metadata.decode(encoding,"ignore")
     except AttributeError:
         metadata_string = str(metadata).decode(encoding,"ignore")
@@ -45,7 +45,7 @@ class HitWrapper(object):
         self.words = []
         if len(list(hit)) == 7:
             self.philo_id = hit
-            self.words.append(WordWrapper(hit,db,self.byte_start))
+            self.words.append(WordWrapper(hit,db,self.start_byte))
             page_i = self["page"]
         else:
             self.philo_id = hit[:6] + (self.hit[7],)
@@ -83,16 +83,16 @@ class HitWrapper(object):
                     return val
                 else:
                     return self.ancestors[f_type][key]
-            else:    
+            else:
                 if self.row == None:
                     self.row = self.db.get_id_lowlevel(self.philo_id)
                 return _safe_lookup(self.row,key,self.db.encoding)
-        
+
     def __getattr__(self, name):
         return self[name]
-                   
+
 class ObjectWrapper(object):
-    
+
     def __init__(self, hit, db, obj_type=False, row=None):
         self.db = db
         self.hit = hit
@@ -125,10 +125,10 @@ class ObjectWrapper(object):
                 self.row = self.db.get_id_lowlevel(self.philo_id)
                 shared_cache[self.type] = (self.philo_id,self.row)
             return _safe_lookup(self.row,key,self.db.encoding)
-        
+
     def __getattr__(self, name):
         return self[name]
-            
+
 class PageWrapper(object):
     def __init__(self,id,db):
         self.db = db
@@ -136,14 +136,19 @@ class PageWrapper(object):
         self.type = "page"
         self.row = None
         self.bytes = []
-        
+
     def __getitem__(self,key):
         if self.row == None:
             self.row = self.db.get_page(self.philo_id)
         return _safe_lookup(self.row,key,self.db.encoding)
 
     def __getattr__(self,name):
-        return self[name]
+        if name in obj_dict:
+            return ObjectWrapper(self.philo_id, self.db)
+        elif name == "page":
+            return self
+        else:
+            return self[name]
 
 class WordWrapper(object):
     def __init__(self,id,db,byte):
@@ -162,5 +167,3 @@ class WordWrapper(object):
 
     def __getattr__(self,name):
         return self[name]
-
-

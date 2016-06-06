@@ -63,25 +63,25 @@ class PlainTextParser(object):
             tok_start = len(content[buffer_pos:tok.start()].encode("utf-8"))
             tok_end = len(content[buffer_pos:tok.end()].encode("utf-8"))
 
-            byte_start = byte_pos + tok_start
-            byte_end = byte_pos + tok_end
+            start_byte = byte_pos + tok_start
+            end_byte = byte_pos + tok_end
 
-            # for all tokens, push with byte_start and token content, pull with byte_end
+            # for all tokens, push with start_byte and token content, pull with end_byte
             if tok_type == "word":
-                self.v.push("word", tok.group(1).encode("utf-8"), byte_start)
+                self.v.push("word", tok.group(1).encode("utf-8"), start_byte)
                 #                print >> sys.stderr,tok.group(1).encode("utf-8")
-                self.v.pull("word", byte_end)
+                self.v.pull("word", end_byte)
             elif tok_type == "sent":
                 # a little hack--we don't know the punctuation mark that will end a sentence
                 # until we encounter it--so instead, we let the push on "word" create a
                 # implicit philo_virtual sentence, then change its name once we actually encounter
                 # the punctuation token.
                 if "sent" not in self.v:
-                    self.v.push("sent", tok.group(2).encode("utf-8"), byte_start)
+                    self.v.push("sent", tok.group(2).encode("utf-8"), start_byte)
                 self.v["sent"].name = tok.group(2).encode("utf-8")
-                self.v.pull("sent", byte_end)
+                self.v.pull("sent", end_byte)
             buffer_pos = tok.end()
-            byte_pos = byte_end
+            byte_pos = end_byte
         self.v.pull("doc", self.filesize)
 
 

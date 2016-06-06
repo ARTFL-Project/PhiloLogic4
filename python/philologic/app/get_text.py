@@ -9,10 +9,10 @@ from philologic.HitWrapper import ObjectWrapper
 from philologic.DB import DB
 
 
-def get_text(hit, byte_start, length, path):
+def get_text(hit, start_byte, length, path):
     file_path = path + '/data/TEXT/' + hit.doc.filename
     text_file = open(file_path)
-    text_file.seek(byte_start)
+    text_file.seek(start_byte)
     return text_file.read(length)
 
 
@@ -21,8 +21,8 @@ def get_concordance_text(db, hit, path, context_size):
     bytes = sorted(hit.bytes)
     byte_distance = bytes[-1] - bytes[0]
     length = context_size + byte_distance + context_size
-    bytes, byte_start = adjust_bytes(bytes, context_size)
-    conc_text = get_text(hit, byte_start, length, path)
+    bytes, start_byte = adjust_bytes(bytes, context_size)
+    conc_text = get_text(hit, start_byte, length, path)
     conc_text = format_concordance(conc_text, db.locals['word_regex'], bytes)
     return conc_text
 
@@ -34,17 +34,17 @@ def get_text_obj(obj, config, request, word_regex, note=False):
         path += "/data/TEXT/" + filename
     else:
         ## workaround for when no filename is returned with the full philo_id of the object
-        philo_id = obj.philo_id[0] + ' 0 0 0 0 0 0'
+        philo_id = str(obj.philo_id[0]) + ' 0 0 0 0 0 0'
         c = obj.db.dbh.cursor()
         c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id, ))
         path += "/data/TEXT/" + c.fetchone()["filename"]
     file = open(path)
-    byte_start = int(obj.byte_start)
-    file.seek(byte_start)
-    width = int(obj.byte_end) - byte_start
+    start_byte = int(obj.start_byte)
+    file.seek(start_byte)
+    width = int(obj.end_byte) - start_byte
     raw_text = file.read(width)
     try:
-        bytes = sorted([int(byte) - byte_start for byte in request.byte])
+        bytes = sorted([int(byte) - start_byte for byte in request.byte])
     except ValueError:  ## request.byte contains an empty string
         bytes = []
 
