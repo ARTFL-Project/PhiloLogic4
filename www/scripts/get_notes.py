@@ -20,19 +20,8 @@ def get_notes(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(environ, config)
-    target = request.target.replace('#', '')
-    doc_id = request.philo_id.split()[0] + ' %'
-    try:
-        c = db.dbh.cursor()
-        c.execute(
-            'select philo_id from toms where id=? and philo_id like ? limit 1',
-            (target, doc_id))
-        philo_id = c.fetchall()[0]['philo_id'].split()
-        obj = ObjectWrapper(philo_id, db)
-        text_object = generate_text_object(request, config, note=True, obj=obj)
-        yield simplejson.dumps(text_object)
-    except IndexError:
-        yield simplesimplejson.dumps('')
+    text_object = generate_text_object(request, config, note=True)
+    yield simplejson.dumps(text_object)
 
 
 if __name__ == "__main__":
