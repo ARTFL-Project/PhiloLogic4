@@ -6,14 +6,10 @@
                    <span class="cite" data-id="{{ ::result.philo_id.join(' ') }}">
                         <span class="result-number">{{ ::position }}</span>
                         <span class="philologic_cite">
-                            <span ng-if="result.citation.author | isEmpty" class="citation-small-caps">{{ ::result.citation.author.label }}</span>
-                            <a class="philologic-doc" href="{{::result.citation.title.href}}" class="citation-small-caps"><i>{{ ::result.citation.title.label }}</i></a>
-                            <span ng-if="result.citation.year | isEmpty"> [{{ ::result.citation.year.label }}]</span>
-                            <a href="{{::result.citation.div1.href}}" ng-if="result.citation.div1 | isEmpty">{{ ::result.citation.div1.label }}</a>
-                            <a href="{{::result.citation.div2.href}}" ng-if="result.citation.div2 | isEmpty">{{ ::result.citation.div2.label }}</a>
-                            <a href="{{::result.citation.div3.href}}" ng-if="result.citation.div3 | isEmpty">{{ ::result.citation.div3.label }}</a>
-                            <a href="{{::result.citation.para.href}}" ng-if="result.citation.para | isEmpty">{{ ::result.citation.para.label }}</a>
-							<a href="{{::result.citation.page.href}}" ng-if="results.result_type !== 'doc' && result.citation.page | isEmpty">page {{ ::result.citation.page.label }}</a>
+                            <span class="citation" ng-repeat="citation in result.citation">
+                                <a ng-href="{{ ::citation.href }}" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style" ng-if="citation.href">{{ ::citation.label }}</a>
+                                <span ng-if="!citation.href" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style">{{ ::citation.label }}</span>
+                            </span>
                         </span>
                    </span>
                 </div>

@@ -47,7 +47,7 @@ def concordance_results(request, config):
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
-        citation = concordance_citation(hit, citation_hrefs)
+        citation = citations(hit, citation_hrefs, config, report="concordance")
         context = get_concordance_text(db, hit, config.db_path,
                                        config.concordance_length)
         result_obj = {
@@ -92,9 +92,9 @@ def bibliography_results(request, config):
             metadata_fields[metadata] = hit[metadata]
         result_type = hit.type
         if hit.type == "doc":
-            citation = biblio_citation(hit, citation_hrefs)
+            citation = citations(hit, citation_hrefs, config, report="bibliography")
         else:
-            citation = concordance_citation(hit, citation_hrefs)
+            citation = citations(hit, citation_hrefs, config, report="concordance")
         results.append({
             'citation': citation,
             'citation_links': citation_hrefs,
@@ -379,7 +379,7 @@ def generate_text_object(request, config, note=False):
     else:
         doc_obj = db[obj.philo_id[0]]
         citation_hrefs = citation_links(db, config, doc_obj)
-    citation = biblio_citation(obj, citation_hrefs)
+    citation = citations(obj, citation_hrefs, config, report="navigation")
     text_object['citation'] = citation
     text, imgs = get_text_obj(
         obj, config, request,
@@ -463,7 +463,7 @@ def generate_toc_object(request, config):
         if db.locals['metadata_types'][metadata] == "doc":
             metadata_fields[metadata] = obj[metadata]
     citation_hrefs = citation_links(db, config, obj)
-    citation = biblio_citation(obj, citation_hrefs)
+    citation = citations(obj, citation_hrefs, config, report="navigation")
     toc_object = {"query": dict([i for i in request]),
                   "philo_id": obj.philo_id,
                   "toc": text_hierarchy,
@@ -578,7 +578,7 @@ def filter_words_by_property(request, config):
             metadata_fields = {}
             for metadata in db.locals['metadata_fields']:
                 metadata_fields[metadata] = hit[metadata]
-            citation = concordance_citation(hit, citation_hrefs)
+            citation = citations(hit, citation_hrefs, config)
             context = fetch_concordance(db, hit, config.db_path,
                                         config.concordance_length)
             result_obj = {
@@ -756,7 +756,7 @@ def kwic_hit_object(hit, config, db):
 
     ## Get all links and citations
     citation_hrefs = citation_links(db, config, hit)
-    citation = concordance_citation(hit, citation_hrefs)
+    citation = citations(hit, citation_hrefs, config)
 
     ## Determine length of text needed
     byte_distance = hit.bytes[-1] - hit.bytes[0]

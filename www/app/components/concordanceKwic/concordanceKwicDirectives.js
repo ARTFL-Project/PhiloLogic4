@@ -12,13 +12,8 @@
 
 
     function concordance($rootScope, $http, request) {
-        if ($rootScope.philoConfig.dico_citation) {
-            var templateType = "concordance_dico.html";
-        } else {
-            var templateType = "concordance.html";
-        }
         return {
-            templateUrl: 'app/components/concordanceKwic/' + templateType,
+            templateUrl: 'app/components/concordanceKwic/concordance.html',
             replace: true,
             link: function(scope) {
                 scope.concKwic.resultsPromise.then(function(results) {
@@ -276,13 +271,8 @@
     }
 
     function bibliography($rootScope) {
-        if ($rootScope.philoConfig.dico_citation) {
-            var templateType = "bibliography_dico.html";
-        } else {
-            var templateType = "bibliography.html";
-        }
         return {
-            templateUrl: 'app/components/concordanceKwic/' + templateType,
+            templateUrl: 'app/components/concordanceKwic/bibliography.html',
             replace: true,
             link: function(scope) {
                 scope.concKwic.resultsPromise.then(function(results) {
