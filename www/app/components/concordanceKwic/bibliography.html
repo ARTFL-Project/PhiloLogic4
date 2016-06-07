@@ -11,7 +11,7 @@
 				<a href="{{result.citation.div2.href}}" ng-if="result.citation.div2 | isEmpty">{{ ::result.citation.div2.label }}</a>
                 <a href="{{result.citation.div3.href}}" ng-if="results.result_type !== 'doc' && result.citation.div3 | isEmpty">{{ ::result.citation.div3.label }}</a>
                 <a href="{{result.citation.para.href}}" ng-if="results.result_type !== 'doc' && result.citation.para | isEmpty">{{ ::result.citation.para.label }}</a>
-                <span class="page-display" ng-if="results.result_type !== 'doc' && result.citation.page | isEmpty">page {{ ::result.citation.page.label }}</span>
+                <a href="{{::result.citation.page.href}}" ng-if="results.result_type !== 'doc' && result.citation.page | isEmpty">page {{ ::result.citation.page.label }}</a>
             </span>
         </li>
     </ol>

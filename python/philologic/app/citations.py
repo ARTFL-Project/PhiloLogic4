@@ -10,7 +10,6 @@ def citation_links(db, config, i):
     div1_href = make_absolute_object_link(config, i.philo_id[:2], i.bytes)
     div2_href = make_absolute_object_link(config, i.philo_id[:3], i.bytes)
     div3_href = make_absolute_object_link(config, i.philo_id[:4], i.bytes)
-    # page_id = find_page_id(db, i)
     page_href = make_absolute_object_link(config, i.page.philo_id, i.bytes)
 
     links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href, "page": page_href}
