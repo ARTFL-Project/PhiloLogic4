@@ -62,18 +62,18 @@ def adjust_bytes(bytes, padding):
     """Readjust byte offsets for concordance"""
     ### Called from every report that fetches text and needs highlighting
     #    bytes = sorted(bytes) # bytes aren't stored in order
-    byte_start = bytes[0] - padding
-    first_hit = bytes[0] - byte_start
-    if byte_start < 0:
-        first_hit = first_hit + byte_start  ## this is a subtraction really
-        byte_start = 0
+    start_byte = bytes[0] - padding
+    first_hit = bytes[0] - start_byte
+    if start_byte < 0:
+        first_hit = first_hit + start_byte  ## this is a subtraction really
+        start_byte = 0
     new_bytes = []
     for pos, word_byte in enumerate(bytes):
         if pos == 0:
             new_bytes.append(first_hit)
         else:
-            new_bytes.append(word_byte - byte_start)
-    return new_bytes, byte_start
+            new_bytes.append(word_byte - start_byte)
+    return new_bytes, start_byte
 
 
 def format_concordance(text, word_regex, bytes=[]):
@@ -230,9 +230,9 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     el.tag = "div"
                     el.attrib['class'] = "xml-note"
                     link_back = etree.Element("a")
-                    c.execute('select parent, byte_start from refs where target=? and parent like ?',
+                    c.execute('select parent, start_byte from refs where target=? and parent like ?',
                               (el.attrib['id'], str(philo_id[0]) + " %"))
-                    object_id, byte_start = c.fetchone()
+                    object_id, start_byte = c.fetchone()
                     link_back.attrib['href'] = 'navigate/%s%s' % ('/'.join(object_id.split()[:2]),
                                                                   '#%s-link-back' % el.attrib['id'])
                     link_back.attrib['class'] = "btn btn-xs btn-default link-back"
@@ -321,7 +321,7 @@ def page_images(config, output, current_obj_img, philo_id):
     first_page_object = get_first_page(philo_id, config)
     if not current_obj_img:
         current_obj_img.append('')
-    if first_page_object['byte_start'] and current_obj_img[0] != first_page_object['filename']:
+    if first_page_object['start_byte'] and current_obj_img[0] != first_page_object['filename']:
         if first_page_object['filename']:
             page_href = config.page_images_url_root + '/' + first_page_object['filename']
             output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(
@@ -343,24 +343,27 @@ def get_first_page(philo_id, config):
     starting the object"""
     db = DB(config.db_path + '/data/')
     c = db.dbh.cursor()
-    c.execute('select byte_start, byte_end from toms where philo_id="%s"' % ' '.join([str(i) for i in philo_id]))
-    result = c.fetchone()
-    byte_start = result['byte_start']
-    approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
-    try:
-        c.execute('select * from pages where philo_id like ? and end_byte >= ? limit 1', (approx_id, byte_start))
-    except:
-        return {'filename': '', 'byte_start': ''}
+    if len(philo_id) < 9:
+        c.execute('select start_byte, end_byte from toms where philo_id="%s"' % ' '.join([str(i) for i in philo_id]))
+        result = c.fetchone()
+        start_byte = result['start_byte']
+        approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
+        try:
+            c.execute('select * from pages where philo_id like ? and end_byte >= ? limit 1', (approx_id, start_byte))
+        except:
+            return {'filename': '', 'start_byte': ''}
+    else:
+        c.execute('select * from pages where philo_id like ? limit 1', (' '.join([str(i) for i in philo_id]),))
     page_result = c.fetchone()
     try:
         filename = page_result['img']
         n = page_result['n'] or ''
         page = {'filename': filename,
                 "n": n,
-                'byte_start': page_result['start_byte'],
-                'byte_end': page_result['end_byte']}
+                'start_byte': page_result['start_byte'],
+                'end_byte': page_result['end_byte']}
     except:
-        page = {'filename': '', 'byte_start': ''}
+        page = {'filename': '', 'start_byte': ''}
     return page
 
 

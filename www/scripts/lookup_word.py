@@ -29,8 +29,8 @@ def lookup_word_service(environ, start_response):
         bytes = hit.bytes
         hit_span = hit.bytes[-1] - hit.bytes[0]
         length = context_size + hit_span + context_size
-        bytes, byte_start = adjust_bytes(bytes, length)
-        byte_end = byte_start + length
+        bytes, start_byte = adjust_bytes(bytes, length)
+        end_byte = start_byte + length
         filename = hit.filename
         token = request.selected
     elif request.report == "navigation":
@@ -38,19 +38,19 @@ def lookup_word_service(environ, start_response):
         token = request.selected
         philo_id = request.philo_id.split(" ")
         text_obj = db[philo_id]
-        byte_start, byte_end = int(text_obj.byte_start), int(text_obj.byte_end)
+        start_byte, end_byte = int(text_obj.start_byte), int(text_obj.end_byte)
         filename = text_obj.filename
-#        print >> sys.stderr, "WORD LOOKUP FROM NAVIGATION", request.philo_id,request.selected, byte_start, byte_end, filename
+#        print >> sys.stderr, "WORD LOOKUP FROM NAVIGATION", request.philo_id,request.selected, start_byte, end_byte, filename
     else:
         pass
-#    print >> sys.stderr, "TOKEN", token, "BYTES: ", byte_start, byte_end, "FILENAME: ", filename, "POSITION", request.position
+#    print >> sys.stderr, "TOKEN", token, "BYTES: ", start_byte, end_byte, "FILENAME: ", filename, "POSITION", request.position
     token_n = 0
-    yield lookup_word(db, cursor, token, token_n, byte_start, byte_end, filename)
+    yield lookup_word(db, cursor, token, token_n, start_byte, end_byte, filename)
 
 
 def lookup_word(db, cursor, token, n, start, end, filename):
     i = 0
-    query = "select * from words where (byte_start >= ?) and (byte_end <= ?) and (filename = ?);"
+    query = "select * from words where (start_byte >= ?) and (end_byte <= ?) and (filename = ?);"
     #    print >> sys.stderr, "QUERY", query, (start,end,filename)
     cursor.execute(query, (start, end, filename))
     token_lower = token.decode("utf-8").lower().encode("utf-8")

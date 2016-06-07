@@ -2,26 +2,25 @@
 
 from link import *
 
+
 def citation_links(db, config, i):
     """ Returns a representation of a PhiloLogic object and all its ancestors
         suitable for a precise concordance citation. """
-    doc_href = make_absolute_object_link(
-        config, i.philo_id[:1]) + '/table-of-contents'
+    doc_href = make_absolute_object_link(config, i.philo_id[:1]) + '/table-of-contents'
     div1_href = make_absolute_object_link(config, i.philo_id[:2], i.bytes)
     div2_href = make_absolute_object_link(config, i.philo_id[:3], i.bytes)
     div3_href = make_absolute_object_link(config, i.philo_id[:4], i.bytes)
+    # page_id = find_page_id(db, i)
+    page_href = make_absolute_object_link(config, i.page.philo_id, i.bytes)
 
-    links = {
-        "doc": doc_href,
-        "div1": div1_href,
-        "div2": div2_href,
-        "div3": div3_href
-    }
+    links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href, "page": page_href}
 
-    speaker_name = i.para.who
-    if speaker_name:
-        links['para'] = make_absolute_object_link(config, i.philo_id[:5],
-                                                    i.bytes)
+    try:
+        speaker_name = i.para.who
+        if speaker_name:
+            links['para'] = make_absolute_object_link(config, i.philo_id[:5], i.bytes)
+    except AttributeError:
+        links["para"] = ""
     return links
 
 
@@ -32,21 +31,13 @@ def concordance_citation(hit, citation_hrefs):
     citation = {}
 
     ## Doc level metadata
-    citation['title'
-             ] = {"href": citation_hrefs['doc'],
-                  "label": hit.title.strip()}
+    citation['title'] = {"href": citation_hrefs['doc'], "label": hit.title.strip()}
     if hit.author:
-        citation['author'] = {
-            "href": citation_hrefs['doc'],
-            "label": hit.author.strip()
-        }
+        citation['author'] = {"href": citation_hrefs['doc'], "label": hit.author.strip()}
     else:
         citation['author'] = {}
     if hit.year:
-        citation['year'] = {
-            "href": citation_hrefs['doc'],
-            "label": hit.year.strip()
-        }
+        citation['year'] = {"href": citation_hrefs['doc'], "label": hit.year.strip()}
     else:
         citation['year'] = {}
 
@@ -59,9 +50,7 @@ def concordance_citation(hit, citation_hrefs):
             if hit.div1["type"] and hit.div1["n"]:
                 div1_name = hit.div1['type'] + " " + hit.div1["n"]
             else:
-                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1[
-                    'philo_name'
-                ] or hit.div1['philo_type']
+                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
     div1_name = div1_name[0].upper() + div1_name[1:]
 
     ## Remove leading/trailing spaces
@@ -89,28 +78,24 @@ def concordance_citation(hit, citation_hrefs):
     ## Paragraph level metadata
     if "para" in citation_hrefs:
         try:
-            citation['para'] = {
-                "href": citation_hrefs['para'],
-                "label": hit.who.strip()
-            }
+            citation['para'] = {"href": citation_hrefs['para'], "label": hit.who.strip()}
         except KeyError:  ## no who keyword
             citation['para'] = {}
 
     page_obj = hit.page
     if page_obj['n']:
         page_n = page_obj['n']
-        citation['page'] = {"href": "", "label": page_n}
+        citation['page'] = {"href": citation_hrefs["page"], "label": page_n}
     else:
         citation['page'] = {}
     return citation
+
 
 def biblio_citation(hit, citation_hrefs):
     """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
 
     citation = {}
-    citation['title'
-             ] = {'href': citation_hrefs['doc'],
-                  'label': hit.title.strip()}
+    citation['title'] = {'href': citation_hrefs['doc'], 'label': hit.title.strip()}
     if hit.author:
         citation['author'] = {'href': '', 'label': hit.author.strip()}
     else:
@@ -120,7 +105,7 @@ def biblio_citation(hit, citation_hrefs):
     else:
         citation["year"] = {}
 
-        ## Div level metadata // Copied from concordance citations
+    ## Div level metadata // Copied from concordance citations
     div1_name = hit.div1.head
     if not div1_name:
         if hit.div1.philo_name == "__philo_virtual":
@@ -129,10 +114,9 @@ def biblio_citation(hit, citation_hrefs):
             if hit.div1["type"] and hit.div1["n"]:
                 div1_name = hit.div1['type'] + " " + hit.div1["n"]
             else:
-                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1[
-                    'philo_name'
-                ] or hit.div1['philo_type']
-    div1_name = div1_name[0].upper() + div1_name[1:]
+                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
+    if div1_name:
+        div1_name = div1_name[0].upper() + div1_name[1:]
 
     ## Remove leading/trailing spaces
     div1_name = div1_name.strip()
@@ -159,18 +143,18 @@ def biblio_citation(hit, citation_hrefs):
         ## Paragraph level metadata
     if "para" in citation_hrefs:
         try:
-            citation['para'] = {
-                "href": citation_hrefs['para'],
-                "label": hit.who.strip()
-            }
+            citation['para'] = {"href": citation_hrefs['para'], "label": hit.who.strip()}
         except KeyError:  ## no who keyword
             citation['para'] = {}
 
     page_obj = hit.page
-    if page_obj['n']:
-        page_n = page_obj['n']
-        citation['page'] = {"href": "", "label": page_n}
-    else:
+    try:
+        if page_obj['n']:
+            page_n = page_obj['n']
+            citation['page'] = {"href": "", "label": page_n}
+        else:
+            citation['page'] = {}
+    except TypeError:
         citation['page'] = {}
 
     more_metadata = []

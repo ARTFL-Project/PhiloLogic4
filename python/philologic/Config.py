@@ -2,6 +2,7 @@
 import sys
 import os
 import json
+from philologic.utils import pretty_print
 
 db_locals_defaults = {
     'metadata_fields': {
@@ -327,12 +328,12 @@ class Config(object):
             if value["comment"]:
                 string += "\n" + "\n".join(line.strip() for line in value["comment"].splitlines() if line.strip())
             # string += "\n%s = %s\n" % (key,repr(self.data[key]))
-            string += "\n%s = %s\n" % (key, pretty(self.data[key]))
+            string += "\n%s = %s\n" % (key, pretty_print(self.data[key]))
             written_keys.append(key)
         for key in self.data:
             if key not in written_keys:
                 # string += "\n%s = %s\n" % (key,repr(self.data[key]))
-                string += "\n%s = %s\n" % (key, pretty(self.data[key]))
+                string += "\n%s = %s\n" % (key, pretty_print(self.data[key]))
                 written_keys.append(key)
         return string
 
@@ -347,41 +348,6 @@ class Config(object):
                 out_obj[key] = self.data[key]
                 written.append(key)
         return json.dumps(out_obj)
-
-
-def pretty(value, htchar='\t', lfchar='\n', indent=0):
-    '''Pretty printing heavily inspired from a Stack Overflow answer:
-    http://stackoverflow.com/questions/3229419/pretty-printing-nested-dictionaries-in-python#answer-26209900.'''
-    nlch = lfchar + htchar * (indent + 1)
-    if type(value) is dict:
-        if value:
-            if len(value) == 1:
-                return "{%s: %s}" % (repr(value.keys()[0]), pretty(value.values()[0]))
-            else:
-                items = [nlch + repr(key) + ': ' + pretty(value[key], htchar, lfchar, indent + 1) for key in value]
-                return '{%s}' % (','.join(items) + lfchar + htchar * indent)
-        else:
-            return "{}"
-    elif type(value) is list:
-        if value:
-            if len(value) == 1:
-                return "[%s]" % pretty(value[0])
-            else:
-                items = [nlch + pretty(item, htchar, lfchar, indent + 1) for item in value]
-                return '[%s]' % (','.join(items) + lfchar + htchar * indent)
-        else:
-            return "[]"
-    elif type(value) is tuple:
-        if value:
-            if len(value) == 1:
-                return "(%s)" % pretty(value[0])
-            else:
-                items = [nlch + pretty(item, htchar, lfchar, indent + 1) for item in value]
-                return '(%s)' % (','.join(items) + lfchar + htchar * indent)
-        else:
-            return "()"
-    else:
-        return repr(value)
 
 
 def MakeWebConfig(path, **extra_values):
