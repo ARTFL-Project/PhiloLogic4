@@ -57,7 +57,7 @@ def generate_words_sorted(loader_obj, text):
 
 def make_object_ancestors(*types):
     # We should add support for a 'div' type in the future
-    type_depth = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
+    type_depth = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7, "page": 9}
 
     def inner_make_object_ancestors(loader_obj, text):
         temp_file = text['words'] + '.tmp'
@@ -137,6 +137,42 @@ def prev_next_obj(*types):
 def generate_pages(loader_obj, text):
     pagescommand = "cat %s | egrep \"^page\" > %s" % (text["raw"], text["pages"])
     os.system(pagescommand)
+
+
+def prev_next_page(loader_obj, text):
+    # Inner function
+    def load_record(line):
+        type, word, id, attrib = line.split('\t')
+        id = id.split()
+        record = Record(type, word, id)
+        record.attrib = loads(attrib)
+        record.attrib["prev"] = ""
+        record.attrib["next"] = ""
+        return record
+
+    record_dict = {}
+    temp_file = text['pages'] + '.tmp'
+    output_file = open(temp_file, 'w')
+    prev_record = None
+    next_record = None
+    record = None
+    with open(text['pages']) as fh:
+        whole_file = fh.readlines()
+        last_pos = len(whole_file) - 1
+        for pos in xrange(len(whole_file)):
+            if not record:
+                record = load_record(whole_file[pos])
+            if prev_record:
+                record.attrib["prev"] = " ".join(prev_record.id)
+            if pos != last_pos:
+                next_record = load_record(whole_file[pos+1])
+                record.attrib["next"] = " ".join(next_record.id)
+            print >> output_file, record
+            prev_record = record
+            record = next_record
+    output_file.close()
+    os.remove(text['pages'])
+    os.rename(temp_file, text["pages"])
 
 
 def generate_refs(loader_obj, text):
@@ -398,7 +434,7 @@ def fix_sentence_boundary(loader_obj, text):
 
 DefaultNavigableObjects = ("div1", "div2", "div3")
 DefaultLoadFilters = [normalize_unicode_raw_words, make_word_counts, generate_words_sorted, make_object_ancestors,
-                      make_sorted_toms, prev_next_obj, generate_pages, generate_refs, make_max_id]
+                      make_sorted_toms, prev_next_obj, generate_pages, prev_next_page, generate_refs, make_max_id]
 
 
 def set_load_filters(load_filters=DefaultLoadFilters, navigable_objects=DefaultNavigableObjects):

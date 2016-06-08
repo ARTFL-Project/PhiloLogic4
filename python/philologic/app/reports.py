@@ -22,12 +22,16 @@ from philologic.Query import get_expanded_query
 def concordance_results(request, config):
     db = DB(config.db_path + '/data/')
     if request.collocation_type:
-        first_hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
-        second_hits = db.query(request["left"], request["method"], request["arg"], **request.metadata)
+        first_hits = db.query(request["q"], request["method"], request["arg"],
+                              **request.metadata)
+        second_hits = db.query(request["left"], request["method"],
+                               request["arg"], **request.metadata)
         hits = CombinedHitlist(first_hits, second_hits)
     else:
-        hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
-    start, end, n = page_interval(request['results_per_page'], hits, request.start, request.end)
+        hits = db.query(request["q"], request["method"], request["arg"], **
+                        request.metadata)
+    start, end, n = page_interval(request['results_per_page'], hits,
+                                  request.start, request.end)
 
     concordance_object = {
         "description": {"start": start,
@@ -43,8 +47,9 @@ def concordance_results(request, config):
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
-        citation = concordance_citation(hit, citation_hrefs)
-        context = get_concordance_text(db, hit, config.db_path, config.concordance_length)
+        citation = citations(hit, citation_hrefs, config, report="concordance")
+        context = get_concordance_text(db, hit, config.db_path,
+                                       config.concordance_length)
         result_obj = {
             "philo_id": hit.philo_id,
             "citation": citation,
@@ -66,7 +71,8 @@ def bibliography_results(request, config):
         hits = db.get_all(db.locals['default_object_level'])
     else:
         hits = db.query(**request.metadata)
-    start, end, n = page_interval(request.results_per_page, hits, request.start, request.end)
+    start, end, n = page_interval(request.results_per_page, hits,
+                                  request.start, request.end)
     bibliography_object = {
         "description": {
             "start": start,
@@ -86,9 +92,9 @@ def bibliography_results(request, config):
             metadata_fields[metadata] = hit[metadata]
         result_type = hit.type
         if hit.type == "doc":
-            citation = biblio_citation(hit, citation_hrefs)
+            citation = citations(hit, citation_hrefs, config, report="bibliography")
         else:
-            citation = concordance_citation(hit, citation_hrefs)
+            citation = citations(hit, citation_hrefs, config, report="concordance")
         results.append({
             'citation': citation,
             'citation_links': citation_hrefs,
@@ -105,9 +111,11 @@ def bibliography_results(request, config):
 def collocation_results(request, config):
     db = DB(config.db_path + '/data/')
     if request["collocate_distance"]:
-        hits = db.query(request["q"], "proxy", int(request['collocate_distance']), **request.metadata)
+        hits = db.query(request["q"], "proxy",
+                        int(request['collocate_distance']), **request.metadata)
     else:
-        hits = db.query(request["q"], "cooc", request["arg"], **request.metadata)
+        hits = db.query(request["q"], "cooc", request["arg"], **
+                        request.metadata)
     hits.finish()
     collocation_object = {"query": dict([i for i in request])}
 
@@ -135,9 +143,11 @@ def collocation_results(request, config):
 
     db = DB(config.db_path + '/data/')
     if request["collocate_distance"]:
-        hits = db.query(request["q"], "proxy", int(request['collocate_distance']), **request.metadata)
+        hits = db.query(request["q"], "proxy",
+                        int(request['collocate_distance']), **request.metadata)
     else:
-        hits = db.query(request["q"], "cooc", request["arg"], **request.metadata)
+        hits = db.query(request["q"], "cooc", request["arg"], **
+                        request.metadata)
     hits.finish()
 
     stored_sentence_id = None
@@ -168,14 +178,16 @@ def collocation_results(request, config):
                     row_query = """select philo_name from words where parent='%s' and rowid between %d and %d""" % (
                         parent, begin_rowid, end_rowid)
                 else:
-                    row_query = """select philo_name from words where parent='%s'""" % (parent, )
+                    row_query = """select philo_name from words where parent='%s'""" % (
+                        parent, )
                 cursor.execute(row_query)
                 for i in cursor.fetchall():
                     stored_sentence_counts[i['philo_name']] += 1
             else:
                 sentence_hit_count += 1
             for word in stored_sentence_counts:
-                if word in filter_list or stored_sentence_counts[word] < sentence_hit_count:
+                if word in filter_list or stored_sentence_counts[
+                        word] < sentence_hit_count:
                     continue
                 all_collocates[word]['count'] += 1
             hits_done += 1
@@ -209,7 +221,8 @@ def frequency_results(request, config, sorted=False):
         else:
             hits = db.query(**request.metadata)
     else:
-        hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+        hits = db.query(request["q"], request["method"], request["arg"], **
+                        request.metadata)
 
     if sorted:
         hits.finish()
@@ -242,7 +255,8 @@ def frequency_results(request, config, sorted=False):
             # Build a label starting with the first value as the main value
             first_metatada_key, first_metadata_value = key[0]
             label = first_metadata_value or "NULL"
-            metadata[first_metatada_key] = first_metadata_value.encode('utf-8', 'ignore') or "NULL"
+            metadata[first_metatada_key] = first_metadata_value.encode(
+                'utf-8', 'ignore') or "NULL"
             append_to_label = []
             for metadata_key, metadata_value in key[1:]:
                 metadata_value = metadata_value.strip()
@@ -251,7 +265,8 @@ def frequency_results(request, config, sorted=False):
                     metadata[metadata_key] = "NULL"
                 else:
                     # we want to run exact queries on defined values.
-                    metadata[metadata_key] = metadata_value.encode('utf-8', 'ignore')
+                    metadata[metadata_key] = metadata_value.encode('utf-8',
+                                                                   'ignore')
                     append_to_label.append(metadata_value)
             # Add parentheses to other value, as they are secondary
             if append_to_label:
@@ -286,7 +301,9 @@ def frequency_results(request, config, sorted=False):
     frequency_object['query'] = dict([i for i in request])
 
     if sorted:
-        frequency_object["results"] = sorted(frequency_object['results'].iteritems(), key=lambda x: x[1]['count'], reverse=True)
+        frequency_object["results"] = sorted(
+            frequency_object['results'].iteritems(),
+            key=lambda x: x[1]['count'], reverse=True)
 
     return frequency_object
 
@@ -294,8 +311,10 @@ def frequency_results(request, config, sorted=False):
 def kwic_results(request, config):
     """ The link_to_hit keyword defines the text object to which the metadata link leads to"""
     db = DB(config.db_path + '/data/')
-    hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
-    start, end, n = page_interval(request.results_per_page, hits, request.start, request.end)
+    hits = db.query(request["q"], request["method"], request["arg"], **
+                    request.metadata)
+    start, end, n = page_interval(request.results_per_page, hits,
+                                  request.start, request.end)
     kwic_object = {
         "description": {"start": start,
                         "end": end,
@@ -315,13 +334,23 @@ def kwic_results(request, config):
     return kwic_object
 
 
-def generate_text_object(request, config, note=False, obj=None):
-    if len(request.philo_id.split()) == 9:  # verify this isn't a page ID
+def generate_text_object(request, config, note=False):
+    # verify this isn't a page ID or if this is a note
+    if len(request.philo_id.split()) == 9 and note is not True:
         width = 9
     else:
         width = 7
     db = DB(config.db_path + '/data/', width=width)
-    if not obj:
+    if note:
+        target = request.target.replace('#', '')
+        doc_id = request.philo_id.split()[0] + ' %'
+        c = db.dbh.cursor()
+        c.execute(
+            'select philo_id from toms where id=? and philo_id like ? limit 1',
+            (target, doc_id))
+        philo_id = c.fetchall()[0]['philo_id'].split()[:7]
+        obj = db[philo_id]
+    else:
         try:
             obj = db[request.philo_id]
         except ValueError:
@@ -329,17 +358,17 @@ def generate_text_object(request, config, note=False, obj=None):
             obj = db[philo_id]
         philo_id = obj.philo_id
     if width != 9:
-        while obj['philo_name'] == '__philo_virtual' and obj["philo_type"] != "div1":
+        while obj['philo_name'] == '__philo_virtual' and obj[
+                "philo_type"] != "div1":
             philo_id.pop()
             obj = db[philo_id]
-    else:
-        obj= db[philo_id]
     philo_id = list(obj.philo_id)
-    while philo_id[-1] == 0:
+    while int(philo_id[-1]) == 0:
         philo_id.pop()
-    text_object = {"query": dict([i for i in request]), "philo_id": ' '.join([str(i) for i in philo_id])}
-    text_object['prev'] = neighboring_object_id(db, obj.prev)
-    text_object['next'] = neighboring_object_id(db, obj.next)
+    text_object = {"query": dict([i for i in request]),
+                   "philo_id": ' '.join([str(i) for i in philo_id])}
+    text_object['prev'] = neighboring_object_id(db, obj.prev, width)
+    text_object['next'] = neighboring_object_id(db, obj.next, width)
     metadata_fields = {}
     for metadata in db.locals['metadata_fields']:
         if db.locals['metadata_types'][metadata] == "doc":
@@ -350,9 +379,12 @@ def generate_text_object(request, config, note=False, obj=None):
     else:
         doc_obj = db[obj.philo_id[0]]
         citation_hrefs = citation_links(db, config, doc_obj)
-    citation = biblio_citation(obj, citation_hrefs)
+    citation = citations(obj, citation_hrefs, config, report="navigation")
     text_object['citation'] = citation
-    text, imgs = get_text_obj(obj, config, request, db.locals['word_regex'], note=note)
+    text, imgs = get_text_obj(
+        obj, config, request,
+        db.locals['word_regex'],
+        note=note)
     text_object['text'] = text
     text_object['imgs'] = imgs
     return text_object
@@ -371,10 +403,12 @@ def generate_toc_object(request, config):
     doc_id = int(obj.philo_id[0])
     next_doc_id = doc_id + 1
     # find the starting rowid for this doc
-    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % doc_id)
+    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' %
+              doc_id)
     start_rowid = c.fetchone()[0]
     # find the starting rowid for the next doc
-    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % next_doc_id)
+    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' %
+              next_doc_id)
     try:
         end_rowid = c.fetchone()[0]
     except TypeError:  # if this is the last doc, just get the last rowid in the table.
@@ -384,12 +418,14 @@ def generate_toc_object(request, config):
     # use start_rowid and end_rowid to fetch every div in the document.
     philo_slices = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
     text_hierarchy = []
-    c.execute("select * from toms where rowid >= ? and rowid <=? and philo_type>='div' and philo_type<='div3'",
-              (start_rowid, end_rowid))
+    c.execute(
+        "select * from toms where rowid >= ? and rowid <=? and philo_type>='div' and philo_type<='div3'",
+        (start_rowid, end_rowid))
     for row in c.fetchall():
         philo_id = [int(n) for n in row["philo_id"].split(" ")]
         text = HitWrapper.ObjectWrapper(philo_id, db, row=row)
-        if text['philo_name'] == '__philo_virtual' and text["philo_type"] != "div1":
+        if text['philo_name'] == '__philo_virtual' and text[
+                "philo_type"] != "div1":
             continue
         elif text['word_count'] == 0:
             continue
@@ -409,20 +445,25 @@ def generate_toc_object(request, config):
                     if text["type"] and text["n"]:
                         display_name = text['type'] + " " + text["n"]
                     else:
-                        display_name = text["head"] or text['type'] or text['philo_name'] or text['philo_type']
+                        display_name = text["head"] or text['type'] or text[
+                            'philo_name'] or text['philo_type']
                         if display_name == "__philo_virtual":
                             display_name = text['philo_type']
             display_name = display_name[0].upper() + display_name[1:]
-            link = make_absolute_object_link(config, philo_id.split()[:philo_slices[philo_type]])
+            link = make_absolute_object_link(
+                config, philo_id.split()[:philo_slices[philo_type]])
             philo_id = ' '.join(philo_id.split()[:philo_slices[philo_type]])
-            toc_element = {"philo_id": philo_id, "philo_type": philo_type, "label": display_name, "href": link}
+            toc_element = {"philo_id": philo_id,
+                           "philo_type": philo_type,
+                           "label": display_name,
+                           "href": link}
             text_hierarchy.append(toc_element)
     metadata_fields = {}
     for metadata in db.locals['metadata_fields']:
         if db.locals['metadata_types'][metadata] == "doc":
             metadata_fields[metadata] = obj[metadata]
     citation_hrefs = citation_links(db, config, obj)
-    citation = biblio_citation(obj, citation_hrefs)
+    citation = citations(obj, citation_hrefs, config, report="navigation")
     toc_object = {"query": dict([i for i in request]),
                   "philo_id": obj.philo_id,
                   "toc": text_hierarchy,
@@ -433,9 +474,11 @@ def generate_toc_object(request, config):
 
 def generate_time_series(request, config):
     db = DB(config.db_path + '/data/')
-    time_series_object = {'query': dict([i for i in request]), 'query_done': False}
+    time_series_object = {'query': dict([i for i in request]),
+                          'query_done': False}
 
-    start_date, end_date = get_start_end_date(db, config, start_date=None, end_date=None)
+    start_date, end_date = get_start_end_date(
+        db, config, start_date=None, end_date=None)
 
     # Generate date ranges
     interval = int(request.year_interval)
@@ -456,20 +499,25 @@ def generate_time_series(request, config):
     max_time = request.max_time or 10
     for start_range, date_range in date_ranges:
         request.metadata[config.time_series_year_field] = date_range
-        hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+        hits = db.query(request["q"], request["method"], request["arg"], **
+                        request.metadata)
         hits.finish()
-        params = {report: "concordance",start:"0", end:"0"}
+        params = {report: "concordance", start: "0", end: "0"}
         params[config.time_series_year_field] = date_range
         url = make_absolute_query_link(config, request, **params)
-        absolute_count[start_range] = {"label": start_range, "count": len(hits), "url": url}
+        absolute_count[start_range] = {"label": start_range,
+                                       "count": len(hits),
+                                       "url": url}
 
         # Get date total count
         if interval != '1':
             dates = [start_range]
             end_range = start_range + (int(request['year_interval']) - 1)
-            query = 'select sum(word_count) from toms where %s between "%d" and "%d"' % (config.time_series_year_field, start_range, end_range)
+            query = 'select sum(word_count) from toms where %s between "%d" and "%d"' % (
+                config.time_series_year_field, start_range, end_range)
         else:
-            query = "select sum(word_count) from toms where %s='%s'" % (config.time_series_year_field, start_range)
+            query = "select sum(word_count) from toms where %s='%s'" % (
+                config.time_series_year_field, start_range)
 
         c = db.dbh.cursor()
         c.execute(query)
@@ -488,15 +536,18 @@ def generate_time_series(request, config):
         time_series_object['more_results'] = False
     else:
         time_series_object['more_results'] = True
-        time_series_object['new_start_date'] = last_date_done + int(request.year_interval)
-    time_series_object['results'] = {'absolute_count': absolute_count, 'date_count': date_counts}
+        time_series_object['new_start_date'] = last_date_done + int(
+            request.year_interval)
+    time_series_object['results'] = {'absolute_count': absolute_count,
+                                     'date_count': date_counts}
 
     return time_series_object
 
 
 def filter_words_by_property(request, config):
     db = DB(config.db_path + '/data/')
-    hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+    hits = db.query(request["q"], request["method"], request["arg"], **
+                    request.metadata)
     concordance_object = {"query": dict([i for i in request])}
 
     # Do these need to be captured in wsgi_handler?
@@ -527,8 +578,9 @@ def filter_words_by_property(request, config):
             metadata_fields = {}
             for metadata in db.locals['metadata_fields']:
                 metadata_fields[metadata] = hit[metadata]
-            citation = concordance_citation(hit, citation_hrefs)
-            context = fetch_concordance(db, hit, config.db_path, config.concordance_length)
+            citation = citations(hit, citation_hrefs, config)
+            context = fetch_concordance(db, hit, config.db_path,
+                                        config.concordance_length)
             result_obj = {
                 "philo_id": hit.philo_id,
                 "citation": citation,
@@ -565,7 +617,8 @@ def generate_word_frequency(request, config):
     """reads through a hitlist. looks up request["field"] in each hit, and builds up a list of
        unique values and their frequencies."""
     db = DB(config.db_path + '/data/')
-    hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+    hits = db.query(request["q"], request["method"], request["arg"], **
+                    request.metadata)
     field = request["field"]
     counts = {}
     frequency_object = {}
@@ -631,10 +684,10 @@ def page_interval(num, results, start, end):
     return start, end, n
 
 
-def neighboring_object_id(db, philo_id):
+def neighboring_object_id(db, philo_id, width):
     if not philo_id:
         return ''
-    philo_id = philo_id.split()[:7]
+    philo_id = philo_id.split()[:width]
     while philo_id[-1] == '0':
         philo_id.pop()
     philo_id = str(" ".join(philo_id))
@@ -676,7 +729,8 @@ def build_filter_list(request, config):
             filter_file = os.path.join(config.db_path, config.stopwords)
         filter_num = float("inf")
     else:
-        filter_file = open(config.db_path + '/data/frequencies/word_frequencies')
+        filter_file = open(config.db_path +
+                           '/data/frequencies/word_frequencies')
         if request.filter_frequency:
             filter_num = int(request.filter_frequency)
         else:
@@ -702,7 +756,7 @@ def kwic_hit_object(hit, config, db):
 
     ## Get all links and citations
     citation_hrefs = citation_links(db, config, hit)
-    citation = concordance_citation(hit, citation_hrefs)
+    citation = citations(hit, citation_hrefs, config)
 
     ## Determine length of text needed
     byte_distance = hit.bytes[-1] - hit.bytes[0]
@@ -717,17 +771,19 @@ def kwic_hit_object(hit, config, db):
     conc_text = conc_text.replace('\t', ' ')
     try:
         start_hit = conc_text.index('<span class="highlight">')
-        start_output = '<span class="kwic-before"><span class="inner-before">' + conc_text[:start_hit] + '</span></span>'
+        start_output = '<span class="kwic-before"><span class="inner-before">' + conc_text[:
+                                                                                           start_hit] + '</span></span>'
         end_hit = conc_text.rindex('</span>') + 7
-        highlighted_text = conc_text[start_hit+23:end_hit-7].lower()  # for use in KWIC sorting
-        end_output = '<span class="kwic-after">' + conc_text[end_hit:] + '</span>'
+        highlighted_text = conc_text[start_hit + 23:end_hit - 7].lower(
+        )  # for use in KWIC sorting
+        end_output = '<span class="kwic-after">' + conc_text[
+            end_hit:] + '</span>'
         conc_text = '<span class="kwic-text">' + start_output + '&nbsp;<span class="kwic-highlight">' + conc_text[
             start_hit:end_hit] + "</span>&nbsp;" + end_output + '</span>'
     except ValueError as v:
         import sys
         print >> sys.stderr, "KWIC ERROR:", v
         pass
-
 
     kwic_result = {
         "philo_id": hit.philo_id,
@@ -745,7 +801,8 @@ def kwic_hit_object(hit, config, db):
 def get_start_end_date(db, config, start_date=None, end_date=None):
     date_finder = re.compile(r'^.*?(\d{1,}).*')
     c = db.dbh.cursor()
-    c.execute('select %s from toms where %s is not null' % (config.time_series_year_field, config.time_series_year_field))
+    c.execute('select %s from toms where %s is not null' %
+              (config.time_series_year_field, config.time_series_year_field))
     dates = []
     for i in c.fetchall():
         try:

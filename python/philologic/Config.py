@@ -212,27 +212,58 @@ web_config_defaults = {
                # for browsing the database available on the landing page. The default represents the entire roman alphabet.''',
         'index': 18
     },
-    'dico_citation': {
-        'value': False,
+    'concordance_citation': {
+        'value': [{"field": "author", "style": "small-caps", "link": False},
+                  {"field": "title", "style": "small-caps, italic, bold", "link": False},
+                  {"field": "year", "style": "brackets", "link": False}],
         'comment': '''
-               # The dico_citation variable set to True enables a dictionary citation in concordances. Headword is cited first, followed by author if relevant,
-               # or class of knowledge if available.''',
+               # The concordance_citation variable define how and in what field order citations are displayed in concordance reports.
+               # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]),
+               # or normal for no styling. The link key enables linking for that metadata field. It links to the table of contents for title and filename,
+               # and to a metadata query for all other metadata fields.''',
         'index': 19
+    },
+    'bibliography_citation': {
+        'value': [{"field": "title", "style": "italic, small-caps, bold", "link": True},
+                  {"field": "author", "style": "small-caps", "link": False},
+                  {"field": "year", "style": "brackets", "link": False}],
+        'comment': '''
+               # The bibligraphy_citation variable define how and in what field order citations are displayed in bibliography reports.
+               # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]),
+               # or normal for no styling. The link key enables linking for that metadata field. It links to the table of contents for title and filename,
+               # and to a metadata query for all other metadata fields.''',
+        'index': 20
+    },
+    'navigation_citation': {
+        'value': [{"field": "author", "style": "small-caps", "link": False},
+                  {"field": "title", "style": "italic, small-caps", "link": False},
+                  {"field": "year", "style": "brackets", "link": False},
+                  {"field": "pub_place", "style": "normal", "link": False},
+                  {"field": "publisher", "style": "normal", "link": False},
+                  {"field": "collection", "style": "normal", "link": False},
+                  {"field": "pub_date", "style": "normal", "link": False}],
+        'comment': '''
+               # The navigation_citation variable define how and in what field order citations are displayed in navigation reports.
+               # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]),
+               # or normal for no styling. The link key enables linking for that metadata field. It links to the table of contents for title and filename,
+               # and to a metadata query for all other metadata fields.''',
+        'index': 21
     },
     'kwic_bibliography_fields': {
         'value': [],
         'comment': '''
                 # The kwic_bibliography_fields variable variable defines which bibliography fields will be displayed in the KWIC view. It should be
-                # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.                # If the variable is an empty list, the first two fields in the metadata variable will be used.
+                # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.
+                # If the variable is an empty list, filename will be used.
                 ''',
-        'index': 20
+        'index': 22
     },
     'kwic_metadata_sorting_fields': {
         'value': [],
         'comment': '''
                 # The kwic_metadata_sorting_fields variable allows you to pick wich metadata field can be used for sorting KWIC results.
                 ''',
-        'index': 21
+        'index': 23
     },
     'time_series_year_field':{
         'value': 'year',
@@ -240,7 +271,7 @@ web_config_defaults = {
                 # The time_series_year_field variable defines which metadata field to use for time series. The year field is built at load time by finding the earliest 4 digit number
                 # in multiple date fields.
                 ''',
-        'index': 22
+        'index': 24
     },
     'title_prefix_removal': {
         'value': [],
@@ -250,7 +281,7 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-        'index': 23
+        'index': 25
     },
     'page_images_url_root': {
         'value': '',
@@ -260,7 +291,7 @@ web_config_defaults = {
                  # <pb fac="filename.jpg"> or <pb id="filename.jpg">
                  # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
                  ''',
-        'index': 24
+        'index': 26
     },
     'logo': {
         'value': '',
@@ -269,14 +300,14 @@ web_config_defaults = {
                   # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
                   # it starts with http://. If no logo is defined, no picture will be displayed.
                   ''',
-        'index': 25
+        'index': 27
     },
     'header_in_toc': {
         'value': False,
         'comment': '''
                   # The header_in_toc variable defines whether to display a button to show the header in the table of contents
                   ''',
-        'index': 26
+        'index': 28
     }
 }
 

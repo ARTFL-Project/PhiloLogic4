@@ -2,17 +2,10 @@
     <div id="philo-view" ng-if="toc.authorized">
         <div class="row" id="toc-report-title">
             <div class="col-xs-offset-2 col-xs-8">
-                <div id="doc-title">
-					<span ng-if="toc.tocObject.citation.author.label.length > 0">{{ ::toc.tocObject.citation.author.label }}, </span>
-                    <a id="toc-title" class="citation-small-caps">{{ ::toc.tocObject.citation.title.label }}</a>
-					<span ng-if="toc.tocObject.citation.year | isEmpty">[{{ toc.tocObject.citation.year.label }}]</span>
-                </div>
-                <div id="doc-biblio">
-					<span ng-if="toc.tocObject.citation.pub_place">{{ toc.tocObject.citation.pub_place }}</span>
-					<span ng-if="toc.tocObject.citation.publisher">{{ toc.tocObject.citation.publisher }}</span>
-					<span ng-if="toc.tocObject.citation.collection">{{ toc.tocObject.citation.collection }}</span>
-					<span ng-if="toc.tocObject.citation.pub_date">{{ toc.tocObject.citation.pub_date }}</span>
-				</div>
+                <span class="citation" ng-repeat="citation in toc.tocObject.citation">
+                    <a ng-href="{{ ::citation.href }}" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style" ng-if="citation.href">{{ ::citation.label }}</a>
+                    <span ng-if="!citation.href" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style">{{ ::citation.label }}</span>
+                </span>
             </div>
         </div>
         <div class="panel panel-default">

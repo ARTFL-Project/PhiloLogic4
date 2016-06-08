@@ -89,8 +89,8 @@ def group_by_range(request_range, request, config):
     else:
         content_type = metadata_queried
         query_range = set(range(
-            ord(request_range[0]), ord(request_range[1]) + 1)
-                          )  # Ordinal avoids unicode issues...
+            ord(request_range[0]),
+            ord(request_range[1]) + 1))  # Ordinal avoids unicode issues...
     c = db.dbh.cursor()
     c.execute(
         'select *, count(*) as count from toms where philo_type="doc" group by %s'
@@ -140,8 +140,8 @@ def group_by_range(request_range, request, config):
     for result_set in sorted(content.iteritems(), key=itemgetter(0)):
         results.append({"prefix": result_set[0], "results": result_set[1]})
     return simplejson.dumps({"display_count": request.display_count,
-                       "content_type": content_type,
-                       "content": results})
+                             "content_type": content_type,
+                             "content": results})
 
 
 def group_by_metadata(request):

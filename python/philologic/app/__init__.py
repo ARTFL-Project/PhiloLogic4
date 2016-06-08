@@ -1,6 +1,6 @@
 from ObjectFormatter import adjust_bytes, format_concordance, format_strip, format_text_object
 from get_text import get_text, get_concordance_text, get_text_obj, get_tei_header
-from citations import citation_links, concordance_citation, biblio_citation
+from citations import citation_links, citations
 from query_parser import parse_query
 from find_similar_words import find_similar_words
 from reports import *

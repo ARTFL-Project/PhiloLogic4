@@ -10,7 +10,6 @@ def citation_links(db, config, i):
     div1_href = make_absolute_object_link(config, i.philo_id[:2], i.bytes)
     div2_href = make_absolute_object_link(config, i.philo_id[:3], i.bytes)
     div3_href = make_absolute_object_link(config, i.philo_id[:4], i.bytes)
-    # page_id = find_page_id(db, i)
     page_href = make_absolute_object_link(config, i.page.philo_id, i.bytes)
 
     links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href, "page": page_href}
@@ -24,165 +23,85 @@ def citation_links(db, config, i):
     return links
 
 
-def concordance_citation(hit, citation_hrefs):
+def citations(hit, citation_hrefs, config, report="concordance"):
     """ Returns a representation of a PhiloLogic object and all its ancestors
-        suitable for a precise concordance citation. """
+        suitable for a precise citation. """
 
-    citation = {}
+    citation_type = config[report + "_citation"]
+    citation = []
 
-    ## Doc level metadata
-    citation['title'] = {"href": citation_hrefs['doc'], "label": hit.title.strip()}
-    if hit.author:
-        citation['author'] = {"href": citation_hrefs['doc'], "label": hit.author.strip()}
-    else:
-        citation['author'] = {}
-    if hit.year:
-        citation['year'] = {"href": citation_hrefs['doc'], "label": hit.year.strip()}
-    else:
-        citation['year'] = {}
-
-    ## Div level metadata
-    div1_name = hit.div1.head
-    if not div1_name:
-        if hit.div1.philo_name == "__philo_virtual":
-            div1_name = "Section"
-        else:
-            if hit.div1["type"] and hit.div1["n"]:
-                div1_name = hit.div1['type'] + " " + hit.div1["n"]
+    for pos, citation_object in enumerate(citation_type):
+        cite = {}
+        cite["label"] = hit[citation_object["field"]].strip()
+        if cite["label"]:
+            if report != "concordance" and pos != 0:
+                cite["separator"] = True
             else:
-                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
-    div1_name = div1_name[0].upper() + div1_name[1:]
-
-    ## Remove leading/trailing spaces
-    div1_name = div1_name.strip()
-    div2_name = hit.div2.head.strip()
-    div3_name = hit.div3.head.strip()
-    if div3_name == div2_name and hit.div3.philo_id[-1] == 0:
-        div3_name = ''
-    if div2_name == div1_name and hit.div2.philo_id[-1] == 0:
-        div2_name = ''
-
-    if div1_name:
-        citation['div1'] = {"href": citation_hrefs['div1'], "label": div1_name}
-    else:
-        citation['div1'] = {}
-    if div2_name:
-        citation['div2'] = {"href": citation_hrefs['div2'], "label": div2_name}
-    else:
-        citation['div2'] = {}
-    if div3_name:
-        citation['div3'] = {"href": citation_hrefs['div3'], "label": div3_name}
-    else:
-        citation['div3'] = {}
-
-    ## Paragraph level metadata
-    if "para" in citation_hrefs:
-        try:
-            citation['para'] = {"href": citation_hrefs['para'], "label": hit.who.strip()}
-        except KeyError:  ## no who keyword
-            citation['para'] = {}
-
-    page_obj = hit.page
-    if page_obj['n']:
-        page_n = page_obj['n']
-        citation['page'] = {"href": citation_hrefs["page"], "label": page_n}
-    else:
-        citation['page'] = {}
-    return citation
-
-
-def biblio_citation(hit, citation_hrefs):
-    """ Returns a representation of a PhiloLogic object suitable for a bibliographic report. """
-
-    citation = {}
-    citation['title'] = {'href': citation_hrefs['doc'], 'label': hit.title.strip()}
-    if hit.author:
-        citation['author'] = {'href': '', 'label': hit.author.strip()}
-    else:
-        citation['author'] = {}
-    if hit.year:
-        citation['year'] = {'href': '', 'label': hit.year.strip()}
-    else:
-        citation["year"] = {}
-
-    ## Div level metadata // Copied from concordance citations
-    div1_name = hit.div1.head
-    if not div1_name:
-        if hit.div1.philo_name == "__philo_virtual":
-            div1_name = "Section"
-        else:
-            if hit.div1["type"] and hit.div1["n"]:
-                div1_name = hit.div1['type'] + " " + hit.div1["n"]
+                cite["separator"] = False
+            if citation_object["link"]:
+                if citation_object["field"] == "title" or citation_object["field"] == "filename":
+                    cite["href"] = citation_hrefs['doc']
+                else:
+                    params = [("report", "bibliography"), (citation_object["field"], '"%s"' % hit[citation_object["field"]])]
+                    cite["href"] = make_absolute_query_link(config, params)
             else:
-                div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
-    if div1_name:
+                cite["href"] = None
+            if citation_object["style"] == "normal":
+                cite["style"] = None
+            else:
+                style_list = [i.strip() for i in citation_object["style"].split(',') if i and i != "normal"]
+                cite["style"] = {}
+                for style in style_list:
+                    if style == "brackets":
+                        cite["label"] = "[%s]" % cite["label"]
+                    elif style == "italic":
+                        cite["style"]["font-style"] = "italic"
+                    elif style == "bold":
+                        cite["style"]["font-weight"] = 700
+                    elif style == "small-caps":
+                        cite["style"]["font-variant"] = "small-caps"
+            citation.append(cite)
+
+    if report == "concordance":
+        # We want to display div, para and page metadata as well
+        div1_name = hit.div1.head
+        if not div1_name:
+            if hit.div1.philo_name == "__philo_virtual":
+                div1_name = "Section"
+            else:
+                if hit.div1["type"] and hit.div1["n"]:
+                    div1_name = hit.div1['type'] + " " + hit.div1["n"]
+                else:
+                    div1_name = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
         div1_name = div1_name[0].upper() + div1_name[1:]
 
-    ## Remove leading/trailing spaces
-    div1_name = div1_name.strip()
-    div2_name = hit.div2.head.strip()
-    div3_name = hit.div3.head.strip()
-    if div3_name == div2_name and hit.div3.philo_id[-1] == 0:
-        div3_name = ''
-    if div2_name == div1_name and hit.div2.philo_id[-1] == 0:
-        div2_name = ''
+        # Remove leading/trailing spaces
+        div1_name = div1_name.strip()
+        div2_name = hit.div2.head.strip()
+        div3_name = hit.div3.head.strip()
+        if div3_name == div2_name and hit.div3.philo_id[-1] == 0:
+            div3_name = ''
+        if div2_name == div1_name and hit.div2.philo_id[-1] == 0:
+            div2_name = ''
+        if div1_name:
+            citation.append({"href": citation_hrefs['div1'], "label": div1_name, "style": None, "separator": True})
+        if div2_name:
+            citation.append({"href": citation_hrefs['div2'], "label": div2_name, "style": None, "separator": True})
+        if div3_name:
+            citation.append({"href": citation_hrefs['div3'], "label": div3_name, "style": None, "separator": True})
 
-    if div1_name:
-        citation['div1'] = {"href": citation_hrefs['div1'], "label": div1_name}
-    else:
-        citation['div1'] = {}
-    if div2_name:
-        citation['div2'] = {"href": citation_hrefs['div2'], "label": div2_name}
-    else:
-        citation['div2'] = {}
-    if div3_name:
-        citation['div3'] = {"href": citation_hrefs['div3'], "label": div3_name}
-    else:
-        citation['div3'] = {}
+        # Paragraph level metadata
+        if "para" in citation_hrefs:
+            try:
+                citation.append({"href": citation_hrefs['para'], "label": hit.who.strip(), "style": None, "separator": True})
+            except KeyError:  ## no who keyword
+                pass
 
-        ## Paragraph level metadata
-    if "para" in citation_hrefs:
-        try:
-            citation['para'] = {"href": citation_hrefs['para'], "label": hit.who.strip()}
-        except KeyError:  ## no who keyword
-            citation['para'] = {}
-
-    page_obj = hit.page
-    try:
+        # Page level metadata
+        page_obj = hit.page
         if page_obj['n']:
-            page_n = page_obj['n']
-            citation['page'] = {"href": "", "label": page_n}
-        else:
-            citation['page'] = {}
-    except TypeError:
-        citation['page'] = {}
-
-    more_metadata = []
-    if hit.pub_place:
-        citation['pub_place'] = hit.pub_place.strip()
-        more_metadata.append(hit.pub_place.strip())
-    else:
-        citation['pub_place'] = ""
-    if hit.publisher:
-        citation['publisher'] = hit.publisher.strip()
-        more_metadata.append(hit.publisher.strip())
-    else:
-        citation['publisher'] = ""
-    if hit.collection:
-        citation['collection'] = hit.collection.strip()
-        more_metadata.append(hit.collection.strip())
-    else:
-        citation['collection'] = ""
-    if hit.pub_date:
-        citation['pub_date'] = hit.pub_date.strip()
-        more_metadata.append(hit.pub_date.strip())
-    if hit.genre:
-        citation['genre'] = hit.genre.strip()
-    else:
-        citation['genre'] = ''
-    if more_metadata:
-        citation['more'] = '%s' % ' || '.join([i for i in more_metadata if i])
-    else:
-        citation['more'] = ''
+            page_n = "page %s" % str(page_obj['n'])
+            if page_n:
+                citation.append({"href": citation_hrefs["page"], "label": page_n, "style": None, "separator": True})
 
     return citation
