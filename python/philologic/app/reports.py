@@ -367,8 +367,8 @@ def generate_text_object(request, config, note=False):
         philo_id.pop()
     text_object = {"query": dict([i for i in request]),
                    "philo_id": ' '.join([str(i) for i in philo_id])}
-    text_object['prev'] = neighboring_object_id(db, obj.prev)
-    text_object['next'] = neighboring_object_id(db, obj.next)
+    text_object['prev'] = neighboring_object_id(db, obj.prev, width)
+    text_object['next'] = neighboring_object_id(db, obj.next, width)
     metadata_fields = {}
     for metadata in db.locals['metadata_fields']:
         if db.locals['metadata_types'][metadata] == "doc":
@@ -684,10 +684,10 @@ def page_interval(num, results, start, end):
     return start, end, n
 
 
-def neighboring_object_id(db, philo_id):
+def neighboring_object_id(db, philo_id, width):
     if not philo_id:
         return ''
-    philo_id = philo_id.split()[:7]
+    philo_id = philo_id.split()[:width]
     while philo_id[-1] == '0':
         philo_id.pop()
     philo_id = str(" ".join(philo_id))

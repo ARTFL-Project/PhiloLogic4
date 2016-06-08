@@ -218,7 +218,9 @@ web_config_defaults = {
                   {"field": "year", "style": "brackets", "link": False}],
         'comment': '''
                # The concordance_citation variable define how and in what field order citations are displayed in concordance reports.
-               # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]), or normal for no styling.''',
+               # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]),
+               # or normal for no styling. The link key enables linking for that metadata field. It links to the table of contents for title and filename,
+               # and to a metadata query for all other metadata fields.''',
         'index': 19
     },
     'bibliography_citation': {
@@ -227,7 +229,9 @@ web_config_defaults = {
                   {"field": "year", "style": "brackets", "link": False}],
         'comment': '''
                # The bibligraphy_citation variable define how and in what field order citations are displayed in bibliography reports.
-               # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]), or normal for no styling.''',
+               # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]),
+               # or normal for no styling. The link key enables linking for that metadata field. It links to the table of contents for title and filename,
+               # and to a metadata query for all other metadata fields.''',
         'index': 20
     },
     'navigation_citation': {
@@ -240,14 +244,17 @@ web_config_defaults = {
                   {"field": "pub_date", "style": "normal", "link": False}],
         'comment': '''
                # The navigation_citation variable define how and in what field order citations are displayed in navigation reports.
-               # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]), or normal for no styling.''',
+               # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]),
+               # or normal for no styling. The link key enables linking for that metadata field. It links to the table of contents for title and filename,
+               # and to a metadata query for all other metadata fields.''',
         'index': 21
     },
     'kwic_bibliography_fields': {
         'value': [],
         'comment': '''
                 # The kwic_bibliography_fields variable variable defines which bibliography fields will be displayed in the KWIC view. It should be
-                # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.                # If the variable is an empty list, the first two fields in the metadata variable will be used.
+                # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.
+                # If the variable is an empty list, filename will be used.
                 ''',
         'index': 22
     },

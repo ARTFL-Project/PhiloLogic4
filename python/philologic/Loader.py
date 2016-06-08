@@ -640,13 +640,16 @@ class Loader(object):
         # Populate kwic metadata sorting variable with metadata which isn't empty
         # Check if title and author are empty, if so, default to filename
         config_values["kwic_metadata_sorting_fields"] = []
+        config_values["kwic_bibliography_fields"] = []
         if "author" in config_values["search_examples"]:
             config_values["kwic_metadata_sorting_fields"].append("author")
+            config_values["kwic_bibliography_fields"].append("author")
         if "title" in config_values["search_examples"]:
             config_values["kwic_metadata_sorting_fields"].append("title")
+            config_values["kwic_bibliography_fields"].append("title")
         if not config_values["kwic_metadata_sorting_fields"]:
             config_values["kwic_metadata_sorting_fields"] = ["filename"]
-
+            config_values["kwic_bibliography_fields"] = ["filename"]
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)
         print >> open(filename, 'w'), web_config
