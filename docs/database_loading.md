@@ -132,10 +132,10 @@ DefaultMetadataFields = {
 
 `sort_order` is a list of metadata fields which defines the order in which the parser will load and store files in the database. This affects the default order in which search results are returned.
 
-And that's it!
-
 So to use a load config file as an argument, you would run the following:
 
 `philoload4 -l load_config.py db_name path_to_files`
+
+And that's it!
 
 
