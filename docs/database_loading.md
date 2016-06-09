@@ -1,57 +1,46 @@
 Database Loading
 ================
 
-Loading PhiloLogic databases requires two separate steps:
-* [Configuring the loading script](#sysconfig)
-* [Executing the loading script with command-line arguments](#loading)
-
-## <a name="sysconfig">Configuring the loading script ##
+Loading PhiloLogic databases is very straight forward, and most of the time, you shouldn't need to specify any specialized load option. 
 
 A few important notes:
-* The load script is not installed system-wide--you generally want to keep it near your data, with any other scripts. 
-* The load script has no global configuration file--all configuration is kept separate in each copy of the script that you create.
-* The PhiloLogic4 Parser class is fully configurable from the load script--you can change any Xpaths you want, or even supply a replacement Parser class if you need to.
-* The load script is designed to be short, and easy to understand and modify.
+* Before loading any databases, you should first make sure the global configuration file located in `/etc/philologic/philologic4.cfg has been edited appropriately. For more info, see [here](../installation.md)
+* The PhiloLogic4 Parser's behavior is configurable from an external load config file, though only to a certain extent. You can also supply a replacement Parser class if you need to.
+* The loading process is designed to be short, and easy to understand and configure.
 
-The most important pieces of information in any load script are the system setup variables at the top of the file.  These will give immediate errors if they aren't set up right. 
+## Executing the load command ##
 
-You can find the load script in extras/load_script.py. 
+In order for PhiloLogic to index your files, you need to execute the `philoload4` command. The basic command is run as so:
 
-#### System Configuration ####
+`philoload4 [database_name] [path_to_files]``
 
-<pre><code>
-##########################
-## System Configuration ##
-##########################
+The `philoload4` command requires the following required arguments::
 
-# Set the filesytem path to the root web directory for your PhiloLogic install.
-database_root = None
-# /var/www/html/philologic/ is conventional for linux,
-# /Library/WebServer/Documents/philologic for Mac OS.
-# Please follow the instructions in INSTALLING before use.
+1.  the name of the database to create, which will be the subdirectory
+    into your web space directory, i.e. ``/var/www/html/mydatabase``,
+2.  the paths to each of the files you wish to load,
+    i.e. ``mycorpus/xml/*.xml``.
 
-# Set the URL path to the same root directory for your philologic install.
-url_root = None 
-# http://localhost/philologic/ is appropriate if you don't have a DNS hostname.
+`philoload4` also accepts a number of optional command line arguments::
 
-if database_root is None or url_root is None:
-    print >> sys.stderr, "Please configure the loader script before use.  See INSTALLING in your PhiloLogic distribution."
-    exit()
+``-c CORES`` / ``--cores=CORES``:
+    This option set the number of CPU processes the loader will use when parsing the files.
+    This will greatly speed-up parse time.
 
-template_dir = database_root + "_system_dir/_install_dir/"
-# The load process will fail if you haven't set up the template_dir at the correct location.
+``-d`` / ``--debug``
+    Set both ``load_script.py`` and web application in debug mode.
 
-# Define default object level
-default_object_level = 'doc'
-</code></pre>
+So our command line for loading could be::
 
-`database_root` is the filesystem path to the web-accessible directory where your PhiloLogic4 database will live, like /var/www/philologic/--so your webserver process will need read access to it, and you will need write access to create the database--and don't forget to keep the slash at the end of the directory, or you'll get errors.  
+`philoload4 -c 8 my_database files/*xml`
 
-`url_root` is the HTTP URL that the database_root directory is accessible at: http://your.server.com/philologic/could be a reasonable mapping of the example above, but it will depend on your DNS setup, server configuration, and other hosting issues outside the scope of this document.
 
-`template_dir`, which defaults to database_root + "/_system_dir/_install_dir/", is the directory containing all the scripts, reports, templates, and stylesheets that make up a PhiloLogic4 database application.  If you have customized behaviors or designs that you want reflected in all of the databases you build, you can keep those templates in a directory on their own where they won't get overwritten.  
+### DEPRECATED ###
 
-At the moment, you can't "clone" the templates from an existing database, because they actual database content can be very large, but we'd very much like to implement that feature in the future to allow for easy reloads.
+    python ~/mycorpus/load_script.py mydatabase ~/mycorpus/xml/*.xml
+
+The above command should have populated the ``/var/www/html/mydatabase``
+directory with both web application and data files.
 
 #### Database Configuration ####
 
@@ -190,40 +179,4 @@ Usually, these load functions should all be executed in the same order, but it i
 
 For this purpose, we've added a powerful new Loader function called `sort_by_metadata` which integrates the functions of a PhiloLogic3 style metadata guesser and sorter, while still being modular enough to replaced entirely when necessary.
 
-## <a name="loading">Running the load script ##
 
-Once all files are in place and ``load_script.py`` script is customized, it's time
-for PhiloLogic to actually index your text files, by running the script
-on TEI-XML files::
-
-    python ~/mycorpus/load_script.py [database name] [path to TEI-XML files]
-
-This script takes the following required arguments:
-
-1.  the name of the database to create, which will be the subdirectory
-    into ``/var/www/html`` directory, i.e. ``mydatabase``,
-2.  the paths to each of `TEI-XML` files from which fulfill database content,
-    i.e. ``~/mycorpus/xml/*.xml``.
-
-The full list of arguments ``load_script.py`` accepts will be displayed  when running ``loader.py`` without
-a database name::
-
-    python ~/mycorpus/load_script.py
-
-The script also accepts optional arguments, among others most common are::
-``--workers`` and ``--debug``:
-
-``-w WORKERS`` / ``--workers=WORKERS``:
-    This option set the number of workers the ``loader.py`` will use.
-    It is mostly usefull for multi-cores hardware.
-
-``-d`` / ``--debug``
-    Set both ``load_script.py`` and web application in debug mode.
-
-So our command line for loading would be::
-
-    cd /var/www/html
-    python ~/mycorpus/load_script.py mydatabase ~/mycorpus/xml/*.xml
-
-The above command should have populated the ``/var/www/html/mydatabase``
-directory with both web application and data files.
