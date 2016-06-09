@@ -23,24 +23,30 @@ The `philoload4` command requires the following required arguments::
 
 `philoload4` also accepts a number of optional command line arguments::
 
-``-c CORES`` / ``--cores=CORES``:
-    This option set the number of CPU processes the loader will use when parsing the files.
-    This will greatly speed-up parse time.
-
-``-d`` / ``--debug``
-    Add debugging output at parse time
+  `-h`, `--help`        show this help message and exit
+  
+  `-a WEB_APP_DIR`, `--app_dir=WEB_APP_DIR`     Define custom location for the web app directory
+                        
+  `-b BIBLIOGRAPHY`, `--bibliography=BIBLIOGRAPHY`      Defines a file containing the document-level bibliography of the texts
+                        
+  `-c CORES`, `--cores=CORES`       define the number of cores used for parsing
+                        
+  `-d`, `--debug`           add debugging at parse time
+  
+  `-f`, `--force_delete`    overwrite database without confirmation
+  
+  `-F`, `--file-list`       Defines whether the file argument is a file containing fullpaths to the files to load
+                        
+  `-H HEADER`, `--header=HEADER`        define header type (tei or dc) of files to parse
+                        
+  `-l LOAD_CONFIG`, `--load_config=LOAD_CONFIG`     load external config for specialized load
+                        
+  `-t FILE_TYPE`, `--file-type=FILE_TYPE`       Define file type for parsing: plain_text or xml
 
 So our command line for loading could be::
 
 `philoload4 -c 8 -d my_database files/*xml`
 
-
-### DEPRECATED ###
-
-    python ~/mycorpus/load_script.py mydatabase ~/mycorpus/xml/*.xml
-
-The above command should have populated the ``/var/www/html/mydatabase``
-directory with both web application and data files.
 
 #### Database Configuration ####
 
