@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 
 import os
-import unicodedata
 from wsgiref.handlers import CGIHandler
 
-from philologic.DB import DB
-from philologic.app import page_interval, kwic_hit_object
-
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
 import simplejson
+from philologic.app import (WebConfig, WSGIHandler, kwic_hit_object,
+                            page_interval)
+from philologic.DB import DB
+from philologic.utils import sort_list
 
 
 def get_sorted_kwic(environ, start_response):
@@ -40,19 +38,7 @@ def get_sorted_hits(all_results, sort_keys, request, config, db, start, end):
     }
 
     kwic_results = []
-
-    def smash_accents(char):
-        try:
-            return [i for i in unicodedata.normalize("NFKD", char) if not unicodedata.combining(i)]
-        except TypeError:
-            return [i for i in unicodedata.normalize("NFKD", char.decode('utf8')) if not unicodedata.combining(i)]
-
-    def make_sort_key(d):
-        key = [smash_accents(d[f]) for f in sort_keys]
-        return key
-
-    all_results.sort(key=make_sort_key, reverse=False)
-    for index in all_results[start:end]:
+    for index in sort_list(all_results, sort_keys)[start:end]:
         hit = hits[index["index"]]
         kwic_result = kwic_hit_object(hit, config, db)
         kwic_results.append(kwic_result)
