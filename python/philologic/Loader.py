@@ -19,7 +19,7 @@ import philologic.Parser as Parser
 import philologic.PostFilters as PostFilters
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.PostFilters import make_sql_table
-from philologic.utils import pretty_print
+from philologic.utils import pretty_print, sort_list
 
 # Flush buffer output
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
@@ -228,11 +228,8 @@ class Loader(object):
 
         print "Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]),
 
-        def make_sort_key(d):
-            key = [d.get(f, "") for f in sort_by_field]
-            return key
-
-        load_metadata.sort(key=make_sort_key, reverse=reverse_sort)
+        load_metadata = sort_list(load_metadata, sort_by_field)
+        self.sort_order = sort_by_field  # to be used for the sort by concordance biblio key in web config
         print "done."
         return load_metadata
 
@@ -637,7 +634,7 @@ class Loader(object):
                 continue
         config_values['search_examples'] = search_examples
 
-        # Populate kwic metadata sorting variable with metadata which isn't empty
+        # Populate kwic metadata sorting and kwic biblio fields variables with metadata
         # Check if title and author are empty, if so, default to filename
         config_values["kwic_metadata_sorting_fields"] = []
         config_values["kwic_bibliography_fields"] = []
@@ -650,6 +647,10 @@ class Loader(object):
         if not config_values["kwic_metadata_sorting_fields"]:
             config_values["kwic_metadata_sorting_fields"] = ["filename"]
             config_values["kwic_bibliography_fields"] = ["filename"]
+
+        if "author" in config_values["search_examples"] and "title" in config_values["search_examples"]:
+            config_values["concordance_biblio_sorting"] = [("author", "title"), ("title", "author")]
+
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)
         print >> open(filename, 'w'), web_config

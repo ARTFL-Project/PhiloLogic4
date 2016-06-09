@@ -6,14 +6,17 @@
         .module('philoApp')
         .directive('facets', facets);
 
-    function facets($rootScope, $location, request, progressiveLoad, saveToLocalStorage, URL) {
+    function facets($rootScope, $location, request, progressiveLoad, saveToLocalStorage, URL, philoConfig) {
         var populateFacets = function() {
+            var facetConfig = philoConfig.facets;
             var facets = [];
-            for (var i = 0; i < $rootScope.philoConfig.facets.length; i++) {
-                var alias = Object.keys($rootScope.philoConfig.facets[i])[0];
-                var facet = $rootScope.philoConfig.facets[i][alias];
-                if (angular.isObject(facet)) {
-                    facet = angular.toJson(facet);
+            for (var i = 0; i < facetConfig.length; i++) {
+                var facet = facetConfig[i];
+                console.log(facet)
+                if (facet in philoConfig.metadata_aliases) {
+                    var alias = philoConfig.metadata_aliases[facet];
+                } else {
+                    var alias = facet;
                 }
                 facets.push({
                     facet: facet,
@@ -66,7 +69,7 @@
                 var queryParams = angular.copy($rootScope.formData);
                 if (facetObj.type === "facet") {
                     queryParams.script = "get_frequency.py";
-                    queryParams.frequency_field = angular.toJson(facetObj.facet);
+                    queryParams.frequency_field = facetObj.facet;
                 } else if (facetObj.type === "collocationFacet") {
                     queryParams.report = "collocation";
                 } else {

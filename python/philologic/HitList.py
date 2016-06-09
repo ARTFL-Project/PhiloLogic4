@@ -42,7 +42,7 @@ class HitList(object):
         self.done = False
         #self.hitsize = 4 * (6 + self.words) # roughly.  packed 32-bit ints, 4 bytes each.
         self.update()
-        if self.sort_order:
+        if self.sort_order and self.sort_order != ["rowid"]:
             c = self.dbh.dbh.cursor()
             c.execute('select * from toms where philo_type="doc" and %s' % " and ".join(s + ' is not null' for s in self.sort_order))
             metadata = {}

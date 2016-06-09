@@ -147,7 +147,7 @@ class WSGIHandler(object):
                 sort_order.append(metadata)
             self.cgi["sort_order"][0] = sort_order
         else:
-            self.cgi["sort_order"][0] = ["rowid"]
+            self.cgi["sort_order"] = [["rowid"]]
 
     def __getattr__(self, key):
         """Return query arg as attribute of class."""
