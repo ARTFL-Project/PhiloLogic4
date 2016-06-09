@@ -66,7 +66,7 @@ class DB:
         c.execute("SELECT * FROM pages WHERE philo_id=? LIMIT 1;", (page_id_s, ))
         return c.fetchone()
 
-    def get_all(self, philo_type="doc"):
+    def get_all(self, philo_type="doc", sort_order=["rowid"]):
         """ get all objects of type philo_type """
         hash = hashlib.sha1()
         hash.update(self.path)
@@ -75,11 +75,11 @@ class DB:
         all_file = self.path + "/hitlists/" + all_hash + ".hitlist"
         if not os.path.isfile(all_file):
             #write out the corpus file
-            return MetadataQuery.metadata_query(self, all_file, [{"philo_type": ['"%s"' % philo_type]}])
+            return MetadataQuery.metadata_query(self, all_file, [{"philo_type": ['"%s"' % philo_type]}], sort_order)
         else:
             return HitList.HitList(all_file, 0, self)
 
-    def query(self, qs="", method="", method_arg="", limit="", **metadata):
+    def query(self, qs="", method="", method_arg="", limit="", sort_order=["rowid"], **metadata):
         """query the PhiloLogic database"""
         method = method or "proxy"
         if isinstance(method_arg, str):
@@ -140,10 +140,12 @@ class DB:
                         metadata_dicts[-1]["philo_id"] = metadata["philo_id"]
                     else:
                         metadata_dicts.append({"philo_id": metadata["philo_id"]})
-                corpus = MetadataQuery.metadata_query(self, corpus_file, metadata_dicts)
+                corpus = MetadataQuery.metadata_query(self, corpus_file, metadata_dicts, sort_order)
             else:
                 #                print >> sys.stderr, "cached @ %s" % corpus_file
-                corpus = HitList.HitList(corpus_file, 0, self)
+                if sort_order == ["rowid"]:
+                    sort_order = None
+                corpus = HitList.HitList(corpus_file, 0, self, sort_order=sort_order)
                 corpus.finish()
             #print >> sys.stderr, "corpus file of length %d" % len(corpus)
             if len(corpus) == 0:
@@ -159,16 +161,18 @@ class DB:
             hash.update(str(limit))
             search_hash = hash.hexdigest()
             search_file = self.path + "/hitlists/" + search_hash + ".hitlist"
+            if sort_order == ["rowid"]:
+                sort_order = None
             if not os.path.isfile(search_file):
-                return Query.query(self, qs, corpus_file, self.width, method, method_arg, limit, filename=search_file)
+                return Query.query(self, qs, corpus_file, self.width, method, method_arg, limit, filename=search_file, sort_order=sort_order)
             else:
                 parsed = QuerySyntax.parse_query(qs)
                 grouped = QuerySyntax.group_terms(parsed)
                 split = Query.split_terms(grouped)
                 words_per_hit = len(split)
-                return HitList.HitList(search_file, words_per_hit, self)
+                return HitList.HitList(search_file, words_per_hit, self, sort_order=sort_order)
         else:
             if corpus:
                 return corpus
             else:
-                return self.get_all("doc")
+                return self.get_all("doc", sort_order)

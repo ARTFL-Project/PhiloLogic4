@@ -139,6 +139,9 @@ class WSGIHandler(object):
         else:
             self.no_q = True
 
+        if "sort_order" in self.cgi:
+            self.cgi["sort_order"][0] = [i.strip() for i in self.cgi["sort_order"][0].split(',')]
+
     def __getattr__(self, key):
         """Return query arg as attribute of class."""
         return self[key]

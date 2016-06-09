@@ -10,13 +10,13 @@ from QuerySyntax import parse_query, group_terms
 from HitList import NoHits
 
 
-def metadata_query(db, filename, param_dicts):
+def metadata_query(db, filename, param_dicts, sort_order):
     if db.locals['debug']:
         print >> sys.stderr, "METADATA_QUERY:", param_dicts
     prev = None
     #print >> sys.stderr, "METADATA_HITLIST: ",filename, param_dicts
     for d in param_dicts:
-        query = query_recursive(db, d, prev)
+        query = query_recursive(db, d, prev, sort_order)
         prev = query
     try:
         corpus_fh = open(filename, "wb")
@@ -37,9 +37,9 @@ def metadata_query(db, filename, param_dicts):
     return HitList.HitList(filename, 0, db)
 
 
-def query_recursive(db, param_dict, parent):
+def query_recursive(db, param_dict, parent, sort_order):
     #    print >> sys.stderr, "query_recursive:",param_dict,parent
-    r = query_lowlevel(db, param_dict)
+    r = query_lowlevel(db, param_dict, sort_order)
     if parent:
         try:
             outer_hit = next(parent)
@@ -61,7 +61,7 @@ def query_recursive(db, param_dict, parent):
             yield row
 
 
-def query_lowlevel(db, param_dict):
+def query_lowlevel(db, param_dict, sort_order):
     vars = []
     clauses = []
     for column, values in param_dict.items():
@@ -80,13 +80,14 @@ def query_lowlevel(db, param_dict):
             if db.locals['debug']:
                 print >> sys.stderr, "SQL_SYNTAX:", sql_clause
             clauses.append(sql_clause)
+    if not sort_order:
+        sort_order = ["rowid"]
     if clauses:
-        query = "SELECT philo_id FROM toms WHERE " + " AND ".join("(%s)" % c for c in clauses) + " order by rowid;"
+        query = "SELECT philo_id FROM toms WHERE " + " AND ".join("(%s)" % c for c in clauses) + " order by %s;" % ", ".join(sort_order)
     else:
-        query = "SELECT philo_id FROM toms order by rowid;"
+        query = "SELECT philo_id FROM toms order by %s;" % ", ".join(sort_order)
     if db.locals['debug']:
-        print >> sys.stderr, "INNER QUERY: ", "%s %% %s" % (query, vars)
-
+        print >> sys.stderr, "INNER QUERY: ", "%s %% %s" % (query, vars), sort_order
     results = db.dbh.execute(query, vars)
     return results
 

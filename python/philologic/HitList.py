@@ -6,70 +6,114 @@ import time
 import codecs
 import struct
 from HitWrapper import HitWrapper, ObjectWrapper
+from utils import smash_accents
+
 
 class HitList(object):
-    def __init__(self,filename,words,dbh,encoding=None,doc=0,byte=6,method="proxy",methodarg = 3):
+    def __init__(self,
+                 filename,
+                 words,
+                 dbh,
+                 encoding=None,
+                 doc=0,
+                 byte=6,
+                 method="proxy",
+                 methodarg=3,
+                 sort_order=None):
         self.filename = filename
         self.words = words
         self.method = method
         self.methodarg = methodarg
+        self.sort_order = sort_order
         self.dbh = dbh
         self.encoding = encoding or dbh.encoding
         if method is not "cooc":
             self.has_word_id = 1
             self.length = 7 + 2 * (words)
         else:
-            self.has_word_id = 0 #unfortunately.  fix this next time I have 3 months to spare.
+            self.has_word_id = 0  #unfortunately.  fix this next time I have 3 months to spare.
             self.length = methodarg + 1 + (words)
-        self.fh = open(self.filename) #need a full path here.
-        self.format = "=%dI" % self.length #short for object id's, int for byte offset.
+        self.fh = open(self.filename)  #need a full path here.
+        self.format = "=%dI" % self.length  #short for object id's, int for byte offset.
         self.hitsize = struct.calcsize(self.format)
         self.doc = doc
         self.byte = byte
-        self.position = 0;
+        self.position = 0
         self.done = False
         #self.hitsize = 4 * (6 + self.words) # roughly.  packed 32-bit ints, 4 bytes each.
         self.update()
+        if self.sort_order:
+            c = self.dbh.dbh.cursor()
+            c.execute('select * from toms where philo_type="doc" and %s is not null' % sort_order[0])
+            metadata = {}
+            for i in c.fetchall():
+                doc_id = int(i['philo_id'].split()[0])
+                metadata[doc_id] = [smash_accents(i[m]) for m in sort_order]
+            self.sorted_hitlist = []
+            iter_position = 0
+            self.seek(iter_position)
+            while True:
+                try:
+                    hit = self.readhit(iter_position)
+                except IndexError, IOError:
+                    break
+                self.sorted_hitlist.append(hit)
+                iter_position += 1
+            self.sorted_hitlist.sort(key=lambda x: metadata[x[0]])
 
-    def __getitem__(self,n):
-        self.update()
-        if isinstance(n,slice):
+    def __getitem__(self, n):
+        if self.sort_order:
             return self.get_slice(n)
         else:
-            self.readhit(n)
-            return HitWrapper(self.readhit(n),self.dbh)
+            self.update()
+            if isinstance(n, slice):
+                return self.get_slice(n)
+            else:
+                self.readhit(n)
+                return HitWrapper(self.readhit(n), self.dbh)
 
-    def get_slice(self,n):
-        self.update()
-        #need to handle negative offsets.
-        slice_position = n.start or 0
-        self.seek(slice_position)
-        while True:
-            if n.stop is not None:
-                if slice_position >= n.stop:
-                    break
+    def get_slice(self, n):
+        if self.sort_order:
             try:
-                hit = self.readhit(slice_position)
-            except IndexError,IOError:
-                break
-            yield HitWrapper(hit,self.dbh)
-            slice_position += 1
+                for hit in self.sorted_hitlist[n]:
+                    yield HitWrapper(hit, self.dbh)
+            except IndexError:
+                pass
+        else:
+            self.update()
+            #need to handle negative offsets.
+            slice_position = n.start or 0
+            self.seek(slice_position)
+            while True:
+                if n.stop is not None:
+                    if slice_position >= n.stop:
+                        break
+                try:
+                    hit = self.readhit(slice_position)
+                except IndexError, IOError:
+                    break
+                yield HitWrapper(hit, self.dbh)
+                slice_position += 1
 
     def __len__(self):
         self.update()
         return self.count
 
     def __iter__(self):
-        self.update()
-        iter_position = 0
-        self.seek(iter_position)
-        while True:
-            try:
-                hit = self.readhit(iter_position)
-            except IndexError,IOError:
-                break
-            yield HitWrapper(hit,self.dbh)
-            iter_position += 1
+        if self.sort_order:
+            for hit in self.sorted_hitlist:
+                yield hit
+        else:
+            self.update()
+            iter_position = 0
+            self.seek(iter_position)
+            while True:
+                try:
+                    hit = self.readhit(iter_position)
+                except IndexError, IOError:
+                    break
+                yield HitWrapper(hit, self.dbh)
+                iter_position += 1
 
     def finish(self):
         self.update()
@@ -77,7 +121,7 @@ class HitList(object):
             time.sleep(.02)
             self.update()
 
-    def seek(self,n):
+    def seek(self, n):
         if self.position == n:
             pass
         else:
@@ -102,7 +146,7 @@ class HitList(object):
                 self.done = True
             except OSError:
                 pass
-            self.size = os.stat(self.filename).st_size # in bytes
+            self.size = os.stat(self.filename).st_size  # in bytes
             self.count = self.size / self.hitsize
             #print >> sys.stderr, "size:%d  count:%d" % (self.size, self.count)
 
@@ -111,7 +155,7 @@ class HitList(object):
             self.update()
             time.sleep(0.05)
 
-    def readhit(self,n):
+    def readhit(self, n):
         #reads hitlist into buffer, unpacks
         #should do some work to read k at once, track buffer state.
         self.update()
@@ -122,13 +166,13 @@ class HitList(object):
                 time.sleep(.05)
                 self.update()
         if n != self.position:
-            offset = self.hitsize * n;
+            offset = self.hitsize * n
             #print >> sys.stderr, "reading %d, seeking %d" % (n,offset)
             self.fh.seek(offset)
             self.position = n
         buffer = self.fh.read(self.hitsize)
         self.position += 1
-        return(struct.unpack(self.format,buffer))
+        return (struct.unpack(self.format, buffer))
 
 
 # TODO: check if we still need this...
@@ -181,7 +225,6 @@ class WordPropertyHitlist(object):
 
 
 class NoHits(object):
-
     def __init__(self):
         self.done = True
 

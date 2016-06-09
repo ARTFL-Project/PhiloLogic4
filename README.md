@@ -1,4 +1,4 @@
-PhiloLogic4
+![alt text](www/app/assets/img/philo.png) 4
 ===========
 
 PhiloLogic is an XML database/search engine/web app that is designed 
