@@ -252,18 +252,26 @@ web_config_defaults = {
     'kwic_bibliography_fields': {
         'value': [],
         'comment': '''
-                # The kwic_bibliography_fields variable variable defines which bibliography fields will be displayed in the KWIC view. It should be
+                # The kwic_bibliography_fields variable  defines which bibliography fields will be displayed in the KWIC view. It should be
                 # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.
                 # If the variable is an empty list, filename will be used.
                 ''',
         'index': 22
+    },
+    'concordance_biblio_sorting': {
+        'value': [],
+        'comment': '''
+                # The concordance_biblio_sorting variable allows you to pick wich metadata field can be used for sorting concordance or bibliography results.
+                # It is a list of tuples where multiple metadata fields can be used for sorting, such as [('author', 'title'), ('year', 'author', 'title')].
+                ''',
+        'index': 23
     },
     'kwic_metadata_sorting_fields': {
         'value': [],
         'comment': '''
                 # The kwic_metadata_sorting_fields variable allows you to pick wich metadata field can be used for sorting KWIC results.
                 ''',
-        'index': 23
+        'index': 24
     },
     'time_series_year_field':{
         'value': 'year',
@@ -271,7 +279,7 @@ web_config_defaults = {
                 # The time_series_year_field variable defines which metadata field to use for time series. The year field is built at load time by finding the earliest 4 digit number
                 # in multiple date fields.
                 ''',
-        'index': 24
+        'index': 25
     },
     'title_prefix_removal': {
         'value': [],
@@ -281,7 +289,7 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-        'index': 25
+        'index': 26
     },
     'page_images_url_root': {
         'value': '',
@@ -291,7 +299,7 @@ web_config_defaults = {
                  # <pb fac="filename.jpg"> or <pb id="filename.jpg">
                  # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
                  ''',
-        'index': 26
+        'index': 27
     },
     'logo': {
         'value': '',
@@ -300,14 +308,15 @@ web_config_defaults = {
                   # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
                   # it starts with http://. If no logo is defined, no picture will be displayed.
                   ''',
-        'index': 27
+        'index': 28
     },
     'header_in_toc': {
         'value': False,
         'comment': '''
                   # The header_in_toc variable defines whether to display a button to show the header in the table of contents
                   ''',
-        'index': 28
+        'index': 29
+        
     }
 }
 

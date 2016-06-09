@@ -44,7 +44,7 @@ class HitList(object):
         self.update()
         if self.sort_order:
             c = self.dbh.dbh.cursor()
-            c.execute('select * from toms where philo_type="doc" and %s is not null' % sort_order[0])
+            c.execute('select * from toms where philo_type="doc" and %s' % " and ".join(s + ' is not null' for s in self.sort_order))
             metadata = {}
             for i in c.fetchall():
                 doc_id = int(i['philo_id'].split()[0])

@@ -35,11 +35,7 @@ class WSGIHandler(object):
                     # print >> sys.stderr, "AUTHENTICATED: ", self.cookies["hash"], " vs ", h.hexdigest()
                     self.authenticated = True
         self.cgi = urlparse.parse_qs(self.query_string, keep_blank_values=True)
-        self.defaults = {
-            "results_per_page": "25",
-            "start": "0",
-            "end": "0"
-        }
+        self.defaults = {"results_per_page": "25", "start": "0", "end": "0"}
 
         # Check the header for JSON content_type or look for a format=json
         # keyword
@@ -90,9 +86,11 @@ class WSGIHandler(object):
         for field in self.metadata_fields:
             if field in self.cgi and self.cgi[field]:
                 # Hack to remove hyphens in Frantext
-                if field != "date" and isinstance(self.cgi[field][0], str or unicode):
+                if field != "date" and isinstance(self.cgi[field][0], str or
+                                                  unicode):
                     if not self.cgi[field][0].startswith('"'):
-                        self.cgi[field][0] = self.cgi[field][0].replace('-', ' ')
+                        self.cgi[field][0] = self.cgi[field][0].replace('-',
+                                                                        ' ')
                         self.cgi[field][0] = parse_query(self.cgi[field][0])
                 # these ifs are to fix the no results you get when you do a
                 # metadata query
@@ -121,7 +119,8 @@ class WSGIHandler(object):
             if self.cgi["approximate"][0] == "yes":
                 self.approximate = True
             if "approximate_ratio" in self.cgi:
-                self.approximate_ratio = float(self.cgi["approximate_ratio"][0]) / 100
+                self.approximate_ratio = float(self.cgi["approximate_ratio"][
+                    0]) / 100
             else:
                 self.approximate_ratio = 1
 
@@ -129,9 +128,12 @@ class WSGIHandler(object):
             self.cgi['q'][0] = parse_query(self.cgi['q'][0])
             # Fuzzy matching, but only for one word
             if self.approximate:
-                query_length = len([i for i in re.split(r'[\|| NOT | ]', self.cgi['q'][0]) if i])
+                query_length = len(
+                    [i for i in re.split(r'[\|| NOT | ]', self.cgi['q'][0]) if
+                     i])
                 if query_length == 1:
-                    self.cgi['q'][0] = find_similar_words(self.cgi['q'][0], config, self)
+                    self.cgi['q'][0] = find_similar_words(self.cgi['q'][0],
+                                                          config, self)
             if self.cgi["q"][0] != "":
                 self.no_q = False
             else:
@@ -140,7 +142,12 @@ class WSGIHandler(object):
             self.no_q = True
 
         if "sort_order" in self.cgi:
-            self.cgi["sort_order"][0] = [i.strip() for i in self.cgi["sort_order"][0].split(',')]
+            sort_order = []
+            for metadata in self.cgi["sort_order"]:
+                sort_order.append(metadata)
+            self.cgi["sort_order"][0] = sort_order
+        else:
+            self.cgi["sort_order"][0] = ["rowid"]
 
     def __getattr__(self, key):
         """Return query arg as attribute of class."""

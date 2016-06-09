@@ -142,19 +142,15 @@ class DB:
                         metadata_dicts.append({"philo_id": metadata["philo_id"]})
                 corpus = MetadataQuery.metadata_query(self, corpus_file, metadata_dicts, sort_order)
             else:
-                #                print >> sys.stderr, "cached @ %s" % corpus_file
                 if sort_order == ["rowid"]:
                     sort_order = None
                 corpus = HitList.HitList(corpus_file, 0, self, sort_order=sort_order)
                 corpus.finish()
-            #print >> sys.stderr, "corpus file of length %d" % len(corpus)
             if len(corpus) == 0:
                 return corpus
         else:
             corpus = None
         if qs:
-            #            words_per_hit = len(qs.split(" "))
-            #            words_per_hit = len(qs.split("\n\n"))
             hash.update(qs)
             hash.update(method)
             hash.update(str(method_arg))
