@@ -32,7 +32,6 @@ database/
 │       ├── searchForm
 │       └── searchSyntax
 ├── data
-├── functions
 ├── reports
 └── scripts
 </code></pre>
@@ -41,7 +40,6 @@ There are four distinct sections inside the application:
 * The `app/` directory: this contains the web client, and is organized according to functionality and shared components.
 * The `data/`directory contains all the indexes and SQLite tables needing for search and retrieval, as well as database and web configuration files.
 * The `reports/` directory, which contains the major search reports which fetch data from the database by interfacing with the core library, and then return a specialized results report as a JSON object. These reports include concordance, KWIC (Key Word In Context), collocation, and time series. 
-* The `functions/` directory, which contains all of the generic functions used by individual reports. These functions include parsing the query string, loading web configuration options, access control, etc. 
 * The `scripts/` directory, which contains standalone CGI scripts that are called directly from JavaScript code on the client side. These functions have a very specialized purpose, such as returning the total number of hits for any given query.
 
 #### <a name="ui"></a>Modifying the behavior of the Web Application ####
