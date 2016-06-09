@@ -20,7 +20,7 @@ post_filters = PostFilters.DefaultPostFilters
 ## For instance, this could be ['doc', 'div1']
 plain_text_obj = []
 if plain_text_obj:
-    filters.extend([store_in_plain_text(*plaint_text_obj)])
+    filters.extend([store_in_plain_text(*plain_text_obj)])
 
 #####################
 ## Parsing Options ##
