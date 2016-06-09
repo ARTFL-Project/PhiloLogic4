@@ -28,11 +28,11 @@ The `philoload4` command requires the following required arguments::
     This will greatly speed-up parse time.
 
 ``-d`` / ``--debug``
-    Set both ``load_script.py`` and web application in debug mode.
+    Add debugging output at parse time
 
 So our command line for loading could be::
 
-`philoload4 -c 8 my_database files/*xml`
+`philoload4 -c 8 -d my_database files/*xml`
 
 
 ### DEPRECATED ###
