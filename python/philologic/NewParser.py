@@ -345,7 +345,7 @@ class XMLParser(object):
         # sentence and to turn off automatic sentence tagging
         elif sentence_tag.search(tag):
             if self.open_sent or self.in_tagged_sentence:
-                self.v.pull("sent", tag_name, start_byte)  # should cache name
+                self.v.pull("sent", self.bytes_read_in)  # should cache name
             self.v.push("sent", tag_name, start_byte)
             self.in_tagged_sentence = True
             self.open_sent = True

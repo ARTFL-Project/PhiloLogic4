@@ -123,7 +123,7 @@ web_config_defaults = {
         'value': [],
         'comment': '''
                # The facets variable sets which metadata field can be used as a facet
-               # The object format is a list of objects like the following: [{'Author': ['author']}, {'Title': ['title', 'author']}
+               # The object format is a list of metadata like the following: ['author', 'title', 'year'}
                # The dict key should describe what the facets will do, and the dict value, which has to be a list,
                # should list the metadata to be used for the frequency counts''',
         'index': 8
@@ -316,7 +316,7 @@ web_config_defaults = {
                   # The header_in_toc variable defines whether to display a button to show the header in the table of contents
                   ''',
         'index': 29
-        
+
     }
 }
 

@@ -9,6 +9,15 @@ from HitWrapper import HitWrapper, ObjectWrapper
 from utils import smash_accents
 
 
+obj_dict = {'doc': 1,
+            'div1': 2,
+            'div2': 3,
+            'div3': 4,
+            'para': 5,
+            'sent': 6,
+            'word': 7}
+
+
 class HitList(object):
     def __init__(self,
                  filename,
@@ -25,6 +34,8 @@ class HitList(object):
         self.method = method
         self.methodarg = methodarg
         self.sort_order = sort_order
+        if self.sort_order == ["rowid"]:
+            self.sort_order = None
         self.dbh = dbh
         self.encoding = encoding or dbh.encoding
         if method is not "cooc":
@@ -40,11 +51,24 @@ class HitList(object):
         self.byte = byte
         self.position = 0
         self.done = False
-        #self.hitsize = 4 * (6 + self.words) # roughly.  packed 32-bit ints, 4 bytes each.
         self.update()
-        if self.sort_order and self.sort_order != ["rowid"]:
+
+        if self.sort_order:
+            metadata_types = set([dbh.locals["metadata_types"][i] for i in self.sort_order])
+            if "div" in metadata_types:
+                metadata_types.remove("div")
+                metadata_types.union(set(["div1", "div2", "div3"]))
             c = self.dbh.dbh.cursor()
-            c.execute('select * from toms where philo_type="doc" and %s' % " and ".join(s + ' is not null' for s in self.sort_order))
+            query = "select * from toms where "
+            params = []
+            for metadata_type in metadata_types:
+                params.append('philo_type="%s"' % metadata_type)
+            query += " and ".join(params) + " and "
+            order_params = []
+            for s in self.sort_order:
+                order_params.append('%s is not null' % s)
+            query += " and ".join(order_params)
+            c.execute(query)
             metadata = {}
             for i in c.fetchall():
                 doc_id = int(i['philo_id'].split()[0])
