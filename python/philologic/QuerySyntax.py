@@ -8,7 +8,7 @@ patterns = [("QUOTE",r'".+?"'),
             ('RANGE',r'[^|\s]+?\-[^|\s]+'),
             ('NULL',r'NULL'),
             ('TERM',r'[^\-|\s"]+')]
-            
+
 def parse_query(qstring):
     buf = qstring[:]
     parsed = []
