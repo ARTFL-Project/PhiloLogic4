@@ -214,7 +214,7 @@ web_config_defaults = {
     },
     'concordance_citation': {
         'value': [{"field": "author", "style": "small-caps", "link": False},
-                  {"field": "title", "style": "small-caps, italic, bold", "link": False},
+                  {"field": "title", "style": "small-caps, italic, bold", "link": True},
                   {"field": "year", "style": "brackets", "link": False}],
         'comment': '''
                # The concordance_citation variable define how and in what field order citations are displayed in concordance reports.
@@ -225,7 +225,7 @@ web_config_defaults = {
     },
     'bibliography_citation': {
         'value': [{"field": "title", "style": "italic, small-caps, bold", "link": True},
-                  {"field": "author", "style": "small-caps", "link": False},
+                  {"field": "author", "style": "small-caps", "link": True},
                   {"field": "year", "style": "brackets", "link": False}],
         'comment': '''
                # The bibligraphy_citation variable define how and in what field order citations are displayed in bibliography reports.

@@ -141,9 +141,9 @@ class Loader(object):
             try:
                 tree = etree.fromstring(header, parser)
                 trimmed_metadata_xpaths = []
-                for field in metadata_xpaths["doc"]:
+                for field in metadata_xpaths:
                     if field not in data:
-                        for xpath in metadata_xpaths["doc"][field]:
+                        for xpath in metadata_xpaths[field]:
                             attr_pattern_match = re.search(r"@([^\/\[\]]+)$", xpath)
                             if attr_pattern_match:
                                 xp_prefix = xpath[:attr_pattern_match.start(0)]

@@ -28,14 +28,16 @@
                     scope.concKwic.loading = false;
                 });
                 scope.moreContext = function($event, resultNumber) {
-                    var element = angular.element($event.currentTarget).parents('.philologic-occurrence').find('.philologic_context');
+                    var clickTarget = angular.element($event.currentTarget);
+                    var element = clickTarget.parents('.philologic-occurrence').find('.philologic_context');
                     var defaultElement = element.find('.default-length');
                     var moreContextElement = element.find('.more-length');
                     if (defaultElement.css('display') == "none") {
-                        moreContextElement.hide()
+                        moreContextElement.hide();
                         defaultElement.velocity('fadeIn', {
                             duration: 300
                         });
+                        clickTarget.text("More");
                     } else {
                         if (moreContextElement.children().length == 0) {
                             var extraParams = {
@@ -49,12 +51,14 @@
                                         duration: 300
                                     });
                                 });
+                                clickTarget.text("Less");
                             });
                         } else {
                             defaultElement.hide();
                             moreContextElement.velocity('fadeIn', {
                                 duration: 300
                             });
+                            clickTarget.text("Less");
                         }
                     }
                 }
