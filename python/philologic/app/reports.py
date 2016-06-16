@@ -513,7 +513,7 @@ def generate_time_series(request, config):
         hits = db.query(request["q"], request["method"], request["arg"],
                         **request.metadata)
         hits.finish()
-        params = {report: "concordance", start: "0", end: "0"}
+        params = {"report": "concordance", "start": "0", "end": "0"}
         params[config.time_series_year_field] = date_range
         url = make_absolute_query_link(config, request, **params)
         absolute_count[start_range] = {"label": start_range,
@@ -534,7 +534,6 @@ def generate_time_series(request, config):
         c.execute(query)
         date_counts[start_range] = c.fetchone()[0] or 0
         total_hits += len(hits)
-        print >> sys.stderr, "TOTAL", total_hits
         elapsed = timeit.default_timer() - start_time
         # avoid timeouts by splitting the query if more than request.max_time (in seconds) has been spent in the loop
         if elapsed > int(max_time):
