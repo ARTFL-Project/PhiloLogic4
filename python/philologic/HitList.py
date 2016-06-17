@@ -8,14 +8,7 @@ import struct
 from HitWrapper import HitWrapper, ObjectWrapper
 from utils import smash_accents
 
-
-obj_dict = {'doc': 1,
-            'div1': 2,
-            'div2': 3,
-            'div3': 4,
-            'para': 5,
-            'sent': 6,
-            'word': 7}
+obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
 
 
 class HitList(object):

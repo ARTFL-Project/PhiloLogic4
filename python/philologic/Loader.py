@@ -386,7 +386,6 @@ class Loader(object):
 
     def merge_objects(self, file_num=100):
         print "\n### Merge parser output ###"
-        print "%s: sorting words" % time.ctime()
 
         # Make all sorting happen in workdir rather than /tmp
         os.system('export TMPDIR=%s/' % self.workdir)
@@ -396,7 +395,7 @@ class Loader(object):
         print "%s: word sort returned %d" % (time.ctime(), words_status)
 
         if "words" in self.tables:
-            print "concatenating document-order words file...",
+            print "%s: concatenating document-order words file..." % time.ctime(),
             for d in self.loaded_files:
                 os.system('gunzip -c %s | egrep -a "^word" >> all_words_ordered' % (d["raw"] + ".gz"))
             print "done"
@@ -565,14 +564,12 @@ class Loader(object):
         print '\n### Post-processing filters ###'
         for f in self.post_filters:
             f(self)
-            print 'done.'
 
         if extra_filters:
             print 'Running the following additional filters:'
             for f in extra_filters:
                 print f.__name__ + '...',
                 f(self)
-                print 'done.'
 
     def finish(self):
         """Write important runtime information to the database directory"""

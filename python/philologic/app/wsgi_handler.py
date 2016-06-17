@@ -89,8 +89,6 @@ class WSGIHandler(object):
                 if field != "date" and isinstance(self.cgi[field][0], str or
                                                   unicode):
                     if not self.cgi[field][0].startswith('"'):
-                        self.cgi[field][0] = self.cgi[field][0].replace('-',
-                                                                        ' ')
                         self.cgi[field][0] = parse_query(self.cgi[field][0])
                 # these ifs are to fix the no results you get when you do a
                 # metadata query
