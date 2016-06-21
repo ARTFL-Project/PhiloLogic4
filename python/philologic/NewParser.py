@@ -105,7 +105,7 @@ class XMLParser(object):
             # Let's start indexing words and objects at either the <text
             # of the <docbody tag.  We can add more.
 
-            if text_tag.search(line) or doc_body_tag.search(line) or body_tag.search(line):
+            if text_tag.search(line) or doc_body_tag.search(line) or body_tag.search(line) or closed_head_tag.search(line):
                 self.in_the_text = True
 
             self.line_count += 1

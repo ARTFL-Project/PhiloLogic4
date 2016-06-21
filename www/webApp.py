@@ -14,15 +14,14 @@ config = WebConfig(os.path.abspath(os.path.dirname(__file__)))
 theme = config.theme
 
 css_files = [
-    "app/assets/css/bootstrap/bootstrap.min.css",
+    "app/assets/css/bootstrap.min.css",
     "app/assets/css/split/style.css", "app/assets/css/split/%s" % theme,
     "app/assets/css/split/searchForm.css",
     "app/assets/css/split/landingPage.css",
     "app/assets/css/split/concordanceKwic.css",
     "app/assets/css/split/timeSeries.css",
     "app/assets/css/image_gallery/blueimp-gallery.min.css",
-    "app/assets/css/split/textObjectNavigation.css",
-    "app/assets/css/angular_chart/angular-chart.min.css"
+    "app/assets/css/split/textObjectNavigation.css"
 ]
 
 # External JavaScript assets

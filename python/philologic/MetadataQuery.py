@@ -10,7 +10,7 @@ from QuerySyntax import parse_query, group_terms
 from HitList import NoHits
 
 
-def metadata_query(db, filename, param_dicts, sort_order):
+def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
     if db.locals['debug']:
         print >> sys.stderr, "METADATA_QUERY:", param_dicts
     prev = None
@@ -34,7 +34,7 @@ def metadata_query(db, filename, param_dicts, sort_order):
     flag = open(filename + ".done", "w")
     flag.write("1")
     flag.close()
-    return HitList.HitList(filename, 0, db)
+    return HitList.HitList(filename, 0, db, raw=raw_results)
 
 
 def query_recursive(db, param_dict, parent, sort_order):

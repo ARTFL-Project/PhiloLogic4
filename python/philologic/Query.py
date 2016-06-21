@@ -22,7 +22,8 @@ def query(db,
           limit=3000,
           filename="",
           query_debug=False,
-          sort_order=None):
+          sort_order=None,
+          raw_results=False):
     sys.stdout.flush()
     tstart = datetime.now()
 
@@ -92,7 +93,7 @@ def query(db,
             os._exit(0)
     else:
         hl.close()
-        return HitList.HitList(filename, words_per_hit, db, sort_order=sort_order)
+        return HitList.HitList(filename, words_per_hit, db, sort_order=sort_order, raw=raw_results)
 
 
 def get_expanded_query(hitlist):

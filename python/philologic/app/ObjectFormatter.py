@@ -5,6 +5,7 @@ import sqlite3
 
 from lxml import etree
 from philologic.DB import DB
+from philologic.utils import convert_entities
 
 import FragmentParser
 from link import *
@@ -15,8 +16,6 @@ end_match = re.compile(r'<[^>]*?\Z')
 space_match = re.compile(r" ?([-'])+ ")
 term_match = re.compile(r"\w+", re.U)
 strip_start_punctuation = re.compile("^[,?;.:!']")
-
-entities_match = re.compile("&#?\w+;")
 
 # Source: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/HTML5_element_list
 valid_html_tags = set(
@@ -396,26 +395,3 @@ def clean_tags(element):
         text = element.text + text + element.tail
         return '<span class="highlight">' + element.text + text + "</span>" + element.tail
     return element.text + text + element.tail
-
-
-def convert_entities(text):
-    def fixup(m):
-        text = m.group(0)
-        if text[:2] == "&#":
-            # character reference
-            try:
-                if text[:3] == "&#x":
-                    return unichr(int(text[3:-1], 16))
-                else:
-                    return unichr(int(text[2:-1]))
-            except ValueError:
-                pass
-        else:
-            # named entity
-            try:
-                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
-            except KeyError:
-                pass
-        return text  # leave as is
-
-    return entities_match.sub(fixup, text)

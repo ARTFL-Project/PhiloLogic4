@@ -5,7 +5,7 @@
         .module('philoApp')
         .directive('timeSeriesChart', timeSeriesChart);
 
-    function timeSeriesChart($rootScope, $http, $location, $log, philoConfig, progressiveLoad, URL, request, saveToLocalStorage) {
+    function timeSeriesChart($rootScope, $http, $location, $timeout, philoConfig, progressiveLoad, URL, request, saveToLocalStorage) {
         var updateTimeSeries = function(scope, formData, fullResults) {
             request.report(formData, {
                 start_date: scope.startDate,
@@ -37,15 +37,12 @@
                     scope.relativeCounts[i] = 0;
                 }
             };
-            // var maxValueAbsolute = Math.max.apply(Math, scope.absoluteCounts);
-            // var maxValueRelative = Math.max.apply(Math, scope.relativeCounts);
-            // scope.divider = maxValueRelative / maxValueAbsolute;
-            // scope.relativeCounts = scope.relativeCounts.map(function(count) {
-            //     return count / scope.divider;
-            // });
             scope.myBarChart.data.datasets[0].data = scope.absoluteCounts;
             scope.myBarChart.data.datasets[1].data = scope.relativeCounts;
             scope.myBarChart.update();
+            $timeout(function () {
+                chartLinker(scope);
+            });
             // scope.data[1] = scope.relativeCounts;
             if (scope.report === 'time_series' && angular.equals($rootScope.globalQuery, scope.localQuery)) { // are we running a different query?
                 if (scope.moreResults) {
@@ -76,6 +73,22 @@
                     }
                 }
             }
+        }
+        var chartLinker = function(scope) {
+            angular.element("#bar").off();
+            angular.element("#bar").on("click touchstart", function(e) {
+                var formData = angular.copy(scope.formData);
+                var target = scope.myBarChart.getElementAtEvent(e);
+                if (typeof(target[0]) !== 'undefined') {
+                    var startDate = parseInt(target[0]._view.label);
+                    var endDate = startDate + parseInt(formData.year_interval) - 1;
+                    formData[philoConfig.time_series_year_field] = startDate + "-" + endDate;
+                    formData.report = "concordance";
+                    var urlString = "query?" + URL.objectToString(formData);
+                    $location.url(urlString);
+                    scope.$apply();
+                }
+            });
         }
         return {
             restrict: 'E',
@@ -198,7 +211,6 @@
                             }
                         }
                     });
-
                     scope.absoluteCounts = angular.copy(zeros);
                     scope.relativeCounts = angular.copy(zeros);
                     scope.dateCounts = {};
@@ -210,20 +222,6 @@
                     if (scope.restart) {
                         scope.timeSeries.loading = false;
                         getTimeSeries(scope);
-                    }
-                });
-
-                angular.element("#bar").on("click touchstart", function(e) {
-                    var formData = angular.copy(scope.formData);
-                    var target = scope.myBarChart.getElementAtEvent(e);
-                    if (typeof(target[0]) !== 'undefined') {
-                        var startDate = parseInt(target[0]._view.label);
-                        var endDate = startDate + parseInt(formData.year_interval) - 1;
-                        formData[philoConfig.time_series_year_field] = startDate + "-" + endDate;
-                        formData.report = "concordance";
-                        var urlString = "query?" + URL.objectToString(formData);
-                        $location.url(urlString);
-                        scope.$apply();
                     }
                 });
             }

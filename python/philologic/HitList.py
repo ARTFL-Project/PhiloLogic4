@@ -21,7 +21,8 @@ class HitList(object):
                  byte=6,
                  method="proxy",
                  methodarg=3,
-                 sort_order=None):
+                 sort_order=None,
+                 raw=False):
         self.filename = filename
         self.words = words
         self.method = method
@@ -29,6 +30,7 @@ class HitList(object):
         self.sort_order = sort_order
         if self.sort_order == ["rowid"]:
             self.sort_order = None
+        self.raw = raw  # if true, this return the raw hitlist consisting of a list of philo_ids
         self.dbh = dbh
         self.encoding = encoding or dbh.encoding
         if method is not "cooc":
@@ -78,6 +80,7 @@ class HitList(object):
                 iter_position += 1
             self.sorted_hitlist.sort(key=lambda x: metadata[x[0]])
 
+
     def __getitem__(self, n):
         if self.sort_order:
             return self.get_slice(n)
@@ -86,8 +89,11 @@ class HitList(object):
             if isinstance(n, slice):
                 return self.get_slice(n)
             else:
-                self.readhit(n)
-                return HitWrapper(self.readhit(n), self.dbh)
+                if self.raw:
+                    return self.readhit(n)
+                else:
+                    self.readhit(n)
+                    return HitWrapper(self.readhit(n), self.dbh)
 
     def get_slice(self, n):
         if self.sort_order:
@@ -109,7 +115,10 @@ class HitList(object):
                     hit = self.readhit(slice_position)
                 except IndexError, IOError:
                     break
-                yield HitWrapper(hit, self.dbh)
+                if self.raw:
+                    yield hit
+                else:
+                    yield HitWrapper(hit, self.dbh)
                 slice_position += 1
 
     def __len__(self):
@@ -119,7 +128,7 @@ class HitList(object):
     def __iter__(self):
         if self.sort_order:
             for hit in self.sorted_hitlist:
-                yield hit
+                yield HitWrapper(hit, self.dbh)
         else:
             self.update()
             iter_position = 0
@@ -129,7 +138,10 @@ class HitList(object):
                     hit = self.readhit(iter_position)
                 except IndexError, IOError:
                     break
-                yield HitWrapper(hit, self.dbh)
+                if self.raw:
+                    yield hit
+                else:
+                    yield HitWrapper(hit, self.dbh)
                 iter_position += 1
 
     def finish(self):
