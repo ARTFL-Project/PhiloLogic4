@@ -5,7 +5,7 @@
         .module('philoApp')
         .controller('TimeSeriesController', TimeSeriesController);
 
-    function TimeSeriesController($rootScope, $location, accessControl, URL) {
+    function TimeSeriesController($rootScope, $location, accessControl, URL, philoConfig) {
         var vm = this;
         if ($rootScope.authorized === true) {
             vm.authorized = true;
@@ -23,7 +23,7 @@
         }
         if (typeof($rootScope.formData.year_interval) === "undefined") {
             var urlString = URL.objectToUrlString($rootScope.formData, {
-                year_interval: 10
+                year_interval: philoConfig.time_series_interval
             });
             $location.url(urlString);
         }

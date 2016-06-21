@@ -20,42 +20,49 @@ db_locals_defaults = {
         'comment': '',
         'index': 2
     },
+    'metadata_query_types': {
+        'value': {},
+        'comment': '''# metadata_query_types determines how these fields are stored in SQLite. Three types are possible:
+                      # string, integer, date. By default, all fields are stored as strings unless defined otherwise in the optional
+                      # load_config.py file. DISABLED AT THIS TIME.''',
+        'index': 3
+    },
     'normalized_fields': {
         'value': [],
         'comment': '',
-        'index': 3
+        'index': 4
     },
     'word_regex': {
         'value': '([\\w]+)',
         'comment': '# Regex used for tokenizing outgoing text',
-        'index': 4
+        'index': 5
     },
     'punct_regex': {
         'value': '([\\.?!])',
         'comment': '# Regex used for punctuation',
-        'index': 5
+        'index': 6
     },
     'default_object_level': {
         'value': 'doc',
         'comment': '# This defines the default navigation element in your database',
-        'index': 6
+        'index': 7
     },
     'lowercase_index': {
         'value': True,
         'comment':
         '# This defines whether all terms in the index have been lowercased. If so, input searches will be lowercased',
-        'index': 7
+        'index': 8
     },
     'debug': {
         'value': False,
         'comment': '# If set to True, this enabled debugging messages to be printed out to the Apache error log',
-        'index': 8
+        'index': 9
     },
     'secret': {
         'value': '',
         'comment':
         '# The secret value is a random string to be used to generate a secure cookie for access control. The string value can be anything.',
-        'index': 9
+        'index': 10
     }
 }
 db_locals_header = '''
@@ -273,13 +280,18 @@ web_config_defaults = {
                 ''',
         'index': 24
     },
-    'time_series_year_field':{
+    'time_series_year_field': {
         'value': 'year',
         'comment': '''
                 # The time_series_year_field variable defines which metadata field to use for time series. The year field is built at load time by finding the earliest 4 digit number
                 # in multiple date fields.
                 ''',
         'index': 25
+    },
+    'time_series_interval': {
+        'value': 10,
+        'comment': '# The time_series_interval variable defines the default year span used for time series.',
+        'index': 26
     },
     'title_prefix_removal': {
         'value': [],
@@ -289,7 +301,7 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-        'index': 26
+        'index': 27
     },
     'page_images_url_root': {
         'value': '',
@@ -299,7 +311,7 @@ web_config_defaults = {
                  # <pb fac="filename.jpg"> or <pb id="filename.jpg">
                  # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
                  ''',
-        'index': 27
+        'index': 28
     },
     'logo': {
         'value': '',
@@ -308,14 +320,14 @@ web_config_defaults = {
                   # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
                   # it starts with http://. If no logo is defined, no picture will be displayed.
                   ''',
-        'index': 28
+        'index': 29
     },
     'header_in_toc': {
         'value': False,
         'comment': '''
                   # The header_in_toc variable defines whether to display a button to show the header in the table of contents
                   ''',
-        'index': 29
+        'index': 30
 
     }
 }

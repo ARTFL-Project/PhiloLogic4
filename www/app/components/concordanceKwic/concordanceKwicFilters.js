@@ -26,7 +26,7 @@
                     if (citationList.length > 0) {
                         return citationList.join(', ');
                     } else {
-                        return '';
+                        return 'NA';
                     }
                 }
                 var filteredResults = [];

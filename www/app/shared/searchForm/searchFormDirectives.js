@@ -151,13 +151,13 @@
         }
     }
 
-    function timeSeriesOptions($rootScope) {
+    function timeSeriesOptions($rootScope, philoConfig) {
         return {
             templateUrl: 'app/shared/searchForm/timeSeriesOptions.html',
             replace: true,
             link: function() {
                 if (!$rootScope.formData.year_interval) {
-                    $rootScope.formData.year_interval = 10;
+                    $rootScope.formData.year_interval = philoConfig.time_series_interval;
                 }
             }
         }

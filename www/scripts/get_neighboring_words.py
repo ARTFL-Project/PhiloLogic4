@@ -34,7 +34,7 @@ def get_neighboring_words(environ, start_response):
 
     kwic_words = []
     start_time = timeit.default_timer()
-    hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+    hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
     c = db.dbh.cursor()
 
     for hit in hits[index:]:
