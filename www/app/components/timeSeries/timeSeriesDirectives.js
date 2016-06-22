@@ -32,7 +32,7 @@
                 var date = allResults.sorted[i].label;
                 var value = allResults.sorted[i].count;
                 scope.absoluteCounts[i] = value;
-                scope.relativeCounts[i] = Math.round(value / scope.dateCounts[date] * 10000);
+                scope.relativeCounts[i] = Math.round(value / scope.dateCounts[date] * 10000 * 100) / 100;
                 if (isNaN(scope.relativeCounts[i])) {
                     scope.relativeCounts[i] = 0;
                 }
