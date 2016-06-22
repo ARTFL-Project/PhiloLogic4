@@ -6,7 +6,7 @@
         .module('philoApp')
         .directive('facets', facets);
 
-    function facets($rootScope, $location, request, progressiveLoad, saveToLocalStorage, URL, philoConfig) {
+    function facets($rootScope, $location, request, progressiveLoad, saveToLocalStorage, URL, philoConfig, facetedBrowsing) {
         var populateFacets = function() {
             var facetConfig = philoConfig.facets;
             var facets = [];
@@ -208,6 +208,7 @@
                 }
                 scope.hideFacets = function() {
                     scope.concKwic.showFacetedBrowsing = false;
+                    facetedBrowsing.show = false;
                 }
             }
         }

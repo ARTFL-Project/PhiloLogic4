@@ -10,7 +10,7 @@
 
 
     function PhiloMainController($scope, $rootScope, $location, philoConfig, accessControl,
-        textNavigationValues, descriptionValues, request) {
+        textNavigationValues, descriptionValues, request, sortedKwicCached) {
 
         var vm = this;
 
@@ -51,8 +51,8 @@
                 textNavigationValues.navBar = false;
             }
             if ($rootScope.report !== "kwic") {
-                descriptionValues.sortedKwic.results = null;
-                descriptionValues.sortedKwic.queryObject = null;
+                sortedKwicCached.results = null;
+                sortedKwicCached.queryObject = null;
             }
         });
 

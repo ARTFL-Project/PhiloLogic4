@@ -18,7 +18,7 @@
                 <concordance ng-if="report === 'concordance' || report === 'word_property_filter'"></concordance>
                 <kwic ng-if="report === 'kwic'"></kwic>
                 <bibliography ng-if="report === 'bibliography'"></bibliography>
-                <facets facet="{{ concKwic.selectedFacet }}" ng-if="concKwic.showFacetedBrowsing"></facets>
+                <facets ng-if="concKwic.showFacetedBrowsing"></facets>
             </div>
         </div>
         <div class="more" ng-if="concKwic.description.resultsLength > 0">

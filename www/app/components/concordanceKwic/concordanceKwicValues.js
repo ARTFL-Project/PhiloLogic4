@@ -8,8 +8,12 @@
             end: '',
             resultsPerPage: 25,
             resultsLength: '',
-            sortedKwic: {
-                results: null,
-                queryObject: null            }
+        })
+        .value('facetedBrowsing', {
+            show: true
+        })
+        .value('sortedKwicCached', {
+            results: null,
+            queryObject: null
         });
 })();

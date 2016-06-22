@@ -5,7 +5,7 @@
         .module('philoApp')
         .controller('ConcordanceKwicController', ConcordanceKwicController);
 
-    function ConcordanceKwicController($rootScope, $location, accessControl, request, URL) {
+    function ConcordanceKwicController($rootScope, $location, accessControl, request, URL, facetedBrowsing) {
         var vm = this;
         if ($rootScope.authorized === true) {
             vm.authorized = true;
@@ -24,7 +24,7 @@
                 $location.url(urlString);
             }
         }
-        vm.showFacetedBrowsing = true;
+        vm.showFacetedBrowsing = facetedBrowsing.show;
         vm.loading = true;
         vm.resultsLength = 0;
         vm.resultsPromise = request.report($rootScope.formData);
@@ -37,6 +37,7 @@
         }
         vm.showFacets = function() {
             vm.showFacetedBrowsing = true;
+            facetedBrowsing.show = true;
         }
 
         vm.removeSidebar = function() {

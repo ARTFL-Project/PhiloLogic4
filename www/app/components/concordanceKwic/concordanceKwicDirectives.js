@@ -66,7 +66,7 @@
         }
     }
 
-    function kwic($rootScope, $location, $http, URL, request, defaultDiacriticsRemovalMap, descriptionValues) {
+    function kwic($rootScope, $location, $http, URL, request, defaultDiacriticsRemovalMap, descriptionValues, sortedKwicCached) {
         var mergeLists = function(list1, list2) {
             for (var i = 0; i < list2.length; i += 1) {
                 list1.push(list2[i]);
@@ -89,14 +89,12 @@
                     } else {
                         queryParams.start = '0';
                         queryParams.end = '0';
-                        descriptionValues.sortedKwic = {
-                            results: scope.sortedResults,
-                            queryObject: angular.extend({}, queryParams, {
-                                first: queryParams.first_kwic_sorting_option,
-                                second: queryParams.first_kwic_sorting_option,
-                                third: queryParams.third_kwic_sorting_option
-                            })
-                        }
+                        sortedKwicCached.results = scope.sortedResults;
+                        sortedKwicCached.queryObject = angular.extend({}, queryParams, {
+                            first: queryParams.first_kwic_sorting_option,
+                            second: queryParams.second_kwic_sorting_option,
+                            third: queryParams.third_kwic_sorting_option
+                        })
                         getKwicResults(scope, hitsDone);
                         scope.concKwic.loading = false;
                     }
@@ -161,7 +159,11 @@
                     label: 'words to the right',
                     field: 'right'
                 }];
-                var sortKeys = {"q": "searched term(s)", "left": 'words to the left', "right": 'words to the right'}
+                var sortKeys = {
+                    "q": "searched term(s)",
+                    "left": 'words to the left',
+                    "right": 'words to the right'
+                }
                 for (var i = 0; i < $rootScope.philoConfig.kwic_metadata_sorting_fields.length; i += 1) {
                     var field = $rootScope.philoConfig.kwic_metadata_sorting_fields[i];
                     if (field in scope.philoConfig.metadata_aliases) {
@@ -245,8 +247,8 @@
                             second: queryParams.second_kwic_sorting_option,
                             third: queryParams.third_kwic_sorting_option
                         });
-                        if (angular.equals(descriptionValues.sortedKwic.queryObject, currentQueryObject)) {
-                            scope.sortedResults = descriptionValues.sortedKwic.results;
+                        if (angular.equals(sortedKwicCached.queryObject, currentQueryObject)) {
+                            scope.sortedResults = sortedKwicCached.results;
                             getKwicResults(scope, results.data.results_length)
                             scope.concKwic.loading = false;
                         } else {
