@@ -515,9 +515,10 @@ def generate_time_series(request, config):
     # Generate date ranges
     interval = int(request.year_interval)
     date_ranges = []
-    for i in xrange(start_date, end_date, interval):
-        start = i
-        end = i + interval - 1
+    if interval == 1:  # Make sure last date gets included in for loop below
+        end_date += 1
+    for start in xrange(start_date, end_date, interval):
+        end = start + interval - 1
         if end > end_date:
             end = end_date
         date_range = "%d-%d" % (start, end)
