@@ -38,7 +38,6 @@
                 }
             };
             scope.myBarChart.data.datasets[0].data = scope.absoluteCounts;
-            scope.myBarChart.data.datasets[1].data = scope.relativeCounts;
             scope.myBarChart.update();
             $timeout(function () {
                 chartLinker(scope);
@@ -95,9 +94,10 @@
             templateUrl: 'app/components/timeSeries/timeSeriesChart.html',
             replace: true,
             link: function(scope, element, attrs) {
-                scope.height = angular.element(window).height() - angular.element('#footer').height() - angular.element('#initial_report').height() - angular.element('#header').height() - 110;
+                scope.height = angular.element(window).height() - angular.element('#footer').height() - angular.element('#initial_report').height() - angular.element('#header').height() - 150;
                 var formData = angular.copy(scope.formData);
-                scope.resultsLength = 0;
+                scope.resultsLength = 0
+                scope.frequencyType = "absolute_time";
                 angular.element(".progress").show();
                 request.script(formData, {
                     script: 'get_start_end_date.py'
@@ -143,21 +143,11 @@
                                 hoverBorderColor: backgroundColor,
                                 yAxisID: "absolute",
                                 data: zeros
-                            }, {
-                                label: "Relative Frequency",
-                                backgroundColor: "rgba(255, 40, 25, .5)",
-                                borderColor: backgroundColor,
-                                borderWidth: 1,
-                                hoverBackgroundColor: "rgba(255, 40, 25, .7)",
-                                hoverBorderColor: backgroundColor,
-                                yAxisID: "relative",
-                                data: zeros
                             }],
                         },
                         options: {
                             legend: {
-                                display: true,
-                                fontSize: 14
+                                display: false,
                             },
                             scales: {
                                 yAxes: [{
@@ -165,32 +155,12 @@
                                     display: true,
                                     position: "left",
                                     id: "absolute",
-                                    scaleLabel: {
-                                        display: true,
-                                        labelString: 'Absolute Frequency'
-                                    },
-                                    ticks: {
-                                        maxTicksLimit: 8,
-                                    },
                                     gridLines: {
                                         // drawOnChartArea: false,
                                         offsetGridLines: true
-                                    }
-                                }, {
-                                    type: "linear",
-                                    display: true,
-                                    position: "right",
-                                    id: "relative",
-                                    scaleLabel: {
-                                        display: true,
-                                        labelString: 'Relative Frequency'
                                     },
                                     ticks: {
-                                        maxTicksLimit: 8
-                                    },
-                                    gridLines: {
-                                        drawOnChartArea: false,
-                                        offsetGridLines: true
+                                        beginAtZero: true
                                     }
                                 }]
                             },
@@ -201,7 +171,7 @@
                                         return tooltipItem[0].xLabel + "-" + (parseInt(tooltipItem[0].xLabel) + parseInt(formData.year_interval) - 1);
                                     },
                                     label: function(tooltipItem) {
-                                        if (tooltipItem.datasetIndex == 0) {
+                                        if (scope.frequencyType == "absolute_time") {
                                             return tooltipItem.yLabel + " occurrences";
                                         } else {
                                             return tooltipItem.yLabel + " occurrences per 10,000 words";
@@ -217,6 +187,18 @@
                     var fullResults;
                     updateTimeSeries(scope, formData, fullResults);
                 });
+                scope.toggleFrequency = function(type) {
+                    if (type == "absolute_time") {
+                        scope.myBarChart.data.datasets[0].data = scope.absoluteCounts;
+                        scope.myBarChart.data.datasets[0].label = "Absolute Frequency";
+                        scope.frequencyType = type;
+                    } else {
+                        scope.myBarChart.data.datasets[0].data = scope.relativeCounts;
+                        scope.myBarChart.data.datasets[0].label = "Relative Frequency";
+                        scope.frequencyType = type;
+                    }
+                    scope.myBarChart.update();
+                }
                 scope.restart = false;
                 scope.$watch('restart', function() {
                     if (scope.restart) {
@@ -224,6 +206,9 @@
                         getTimeSeries(scope);
                     }
                 });
+                scope.$on("$destroy", function() {
+                    scope.myBarChart.destroy();
+                })
             }
         }
     }

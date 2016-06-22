@@ -66,7 +66,7 @@
         }
     }
 
-    function kwic($rootScope, $location, $http, URL, request, defaultDiacriticsRemovalMap, descriptionValues, sortedKwicCached) {
+    function kwic($rootScope, $location, $http, URL, request, defaultDiacriticsRemovalMap, descriptionValues, sortedKwicCache) {
         var mergeLists = function(list1, list2) {
             for (var i = 0; i < list2.length; i += 1) {
                 list1.push(list2[i]);
@@ -89,8 +89,8 @@
                     } else {
                         queryParams.start = '0';
                         queryParams.end = '0';
-                        sortedKwicCached.results = scope.sortedResults;
-                        sortedKwicCached.queryObject = angular.extend({}, queryParams, {
+                        sortedKwicCache.results = scope.sortedResults;
+                        sortedKwicCache.queryObject = angular.extend({}, queryParams, {
                             first: queryParams.first_kwic_sorting_option,
                             second: queryParams.second_kwic_sorting_option,
                             third: queryParams.third_kwic_sorting_option
@@ -247,8 +247,8 @@
                             second: queryParams.second_kwic_sorting_option,
                             third: queryParams.third_kwic_sorting_option
                         });
-                        if (angular.equals(sortedKwicCached.queryObject, currentQueryObject)) {
-                            scope.sortedResults = sortedKwicCached.results;
+                        if (angular.equals(sortedKwicCache.queryObject, currentQueryObject)) {
+                            scope.sortedResults = sortedKwicCache.results;
                             getKwicResults(scope, results.data.results_length)
                             scope.concKwic.loading = false;
                         } else {

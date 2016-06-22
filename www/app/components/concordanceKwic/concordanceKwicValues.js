@@ -12,7 +12,7 @@
         .value('facetedBrowsing', {
             show: true
         })
-        .value('sortedKwicCached', {
+        .value('sortedKwicCache', {
             results: null,
             queryObject: null
         });
