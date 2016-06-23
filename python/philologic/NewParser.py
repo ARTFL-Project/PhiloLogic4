@@ -1212,6 +1212,9 @@ DefaultDocXPaths = {
     "structure": [
         # structure
         ".//SourceDesc/structure",
+    ],
+    "idno": [
+        ".//teiHeader/fileDesc/publicationStmt/idno/"
     ]
 }
 
