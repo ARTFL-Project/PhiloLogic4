@@ -211,14 +211,14 @@ def make_grouped_sql_clause(expanded, column):
 
 
 def metadata_pattern_search(term, path):
-    command = ['egrep', '-awi', "%s" % term, '%s' % path]
-    process = subprocess.Popen(command, stdout=subprocess.PIPE)
-    match, stderr = process.communicate()
-    #print >> sys.stderr, "RESULTS:",repr(match)
-    match = match.split('\n')
-    match.remove('')
-    ## HACK: The extra decode/encode are there to fix errors when this list is converted to a json object
-    return [m.split("\t")[1].strip().decode('utf-8', 'ignore').encode('utf-8') for m in match]
+    command = ['egrep', '-awie', "[[:blank:]]%s" % term, '%s' % path]
+    grep = subprocess.Popen(command, stdout=subprocess.PIPE)
+    cut = subprocess.Popen(["cut", "-f", "2"],
+                           stdin=grep.stdout,
+                           stdout=subprocess.PIPE)
+    match, stderr = cut.communicate()
+    matches = [i for i in match.split('\n') if i]
+    return matches
 
 
 def escape_sql_string(s):
