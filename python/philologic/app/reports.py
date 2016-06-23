@@ -760,7 +760,7 @@ def build_filter_list(request, config):
         if os.path.isabs(config.stopwords):
             filter_file = open(config.stopwords)
         else:
-            filter_file = os.path.join(config.db_path, config.stopwords)
+            return ["stopwords list not found"]
         filter_num = float("inf")
     else:
         filter_file = open(config.db_path +
