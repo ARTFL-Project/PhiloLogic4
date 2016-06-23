@@ -62,9 +62,10 @@
             <h5>Refine your search with the following options and fields:</h5> {{ formData.report }}
             <search-methods></search-methods>
             <metadata-fields exclude="head"></metadata-fields>
-            <collocation-options></collocation-options>
-            <time-series-options></time-series-options>
-            <results-per-page></results-per-page>
+            <collocation-options ng-if="formData.report == 'collocation'"></collocation-options>
+            <time-series-options ng-if="formData.report == 'time_series'"></time-series-options>
+            <sort-results  ng-if="formData.report === 'concordance' || formData.report === 'bibliography'"></sort-results>
+            <results-per-page ng-if="formData.report != 'collocation' && formData.report != 'time_series'"></results-per-page>
           </div>
         </div>
       </form>
