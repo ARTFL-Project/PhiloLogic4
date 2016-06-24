@@ -276,13 +276,36 @@
         }
     }
 
-    function bibliography($rootScope) {
+    function bibliography($rootScope, philoConfig) {
+        var dictionaryBibliography = function(data) {
+            var groupedResults = [];
+            var currentTitle = data.results[0].metadata_fields.title;
+            var titleGroup = [];
+            for (var i=0; i < data.results.length; i+=1) {
+                if (data.results[i].metadata_fields.title !== currentTitle) {
+                    groupedResults.push(titleGroup);
+                    titleGroup = [];
+                    currentTitle = data.results[i].metadata_fields.title;
+                }
+                data.results[i].position = i +1;
+                titleGroup.push(data.results[i]);
+                if (i+1 == data.results.length) {
+                    groupedResults.push(titleGroup);
+                }
+            }
+            data.results = groupedResults;
+            return data;
+        }
         return {
             templateUrl: 'app/components/concordanceKwic/bibliography.html',
             replace: true,
             link: function(scope) {
                 scope.concKwic.resultsPromise.then(function(results) {
-                    scope.results = results.data;
+                    if (!philoConfig.dictionary_bibliography) {
+                        scope.results = results.data;
+                    } else {
+                        scope.results = dictionaryBibliography(results.data);
+                    }
                     scope.concKwic.description = angular.extend({}, scope.results.description, {
                         resultsLength: scope.results.results_length
                     });
@@ -301,7 +324,6 @@
                     } else {
                         scope.metadataAddition.splice(itemIndex, 1);
                     }
-
                     $rootScope.formData.title = scope.metadataAddition.join(' | ');
                 }
             }

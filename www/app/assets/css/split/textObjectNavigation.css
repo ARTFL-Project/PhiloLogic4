@@ -218,6 +218,12 @@ b.headword {
     display: block;
     margin-top: 20px;
 }
+#bibliographic-results b.headword {
+    font-weight: 400 !important;
+    font-size: 100%;
+    display: inline;
+    margin-top: 0;
+}
 .xml-lb {
     display: block;
 }

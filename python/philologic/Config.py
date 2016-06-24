@@ -177,6 +177,12 @@ web_config_defaults = {
         '# The dictionary variable enables a different search interface with the headword as its starting point. It is turned off by default',
         'index': 14
     },
+    'dictionary_bibliography': {
+        'value': False,
+        'comment': '''# The dictionary_bibliography variable enables a different a bibliography report where entries are displayed
+                   #in their entirety and grouped under the same title. It is turned off by default''',
+        'index': 14
+    },
     'landing_page_browsing_type': {
         'value': 'default',
         'comment':
