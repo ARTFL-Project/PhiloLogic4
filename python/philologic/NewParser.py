@@ -405,7 +405,7 @@ class XMLParser(object):
         elif closed_div_tag.search(tag):
             self.context_div_level = self.context_div_level - 1
             self.no_deeper_objects = False
-        elif tag.startswith('<div'):
+        elif div_tag.search(tag):
             self.context_div_level += 1
             if self.context_div_level > 3:
                 if self.open_div3:
