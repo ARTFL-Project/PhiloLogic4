@@ -89,7 +89,7 @@ The next section of the load script is setup for the XML Parser:
 
 doc_xpaths =  NewParser.DefaultDocXPaths
 
-metadata_fields = NewParser.DefaultMetadataFields
+metadata_fields = NewParser.DefaultMetadataToParse
 
 pseudo_empty_tags = []
 
@@ -115,7 +115,7 @@ The basic layout is this:
 
 `metadata_fields` is a dictionary that maps one or more non-document-level object types to a list of metadata (usually attributes) to retrieve. . e.g.:
 <pre><code>
-DefaultMetadataFields = {
+DefaultMetadataToParse = {
     "div": ["head", "type", "n", "id"],
     "para": ["who"],
     "page": ["n", "id", "fac"],

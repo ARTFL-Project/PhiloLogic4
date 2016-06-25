@@ -7,6 +7,37 @@ import sys
 from philologic import OHCOVector
 
 
+DefaultTagToObjMap = {
+    "div": "div",
+    "div1": "div",
+    "div2": "div",
+    "div3": "div",
+    "hyperdiv": "div",
+    "front": "div",
+    "note": "div",
+    "p": "para",
+    "sp": "para",
+    "lg": "para",
+    "epigraph": "para",
+    "argument": "para",
+    "postscript": "para",
+    "opener": "para",
+    "closer": "para",
+    "stage": "para",
+    "castlist": "para",
+    "list": "para",
+    "q": "para",
+    "pb": "page",
+    "ref": "ref"
+}
+
+DefaultMetadataToParse = {
+    "div": ["head", "type", "n", "id", "vol"],
+    "para": ["who"],
+    "page": ["n", "id", "fac"],
+    "ref": ["target", "n", "type"]
+}
+
 
 class XMLParser(object):
     """Parses clean or dirty XML."""
@@ -19,6 +50,8 @@ class XMLParser(object):
                  pseudo_empty_tags=[],
                  filtered_words=[],
                  known_metadata=["doc", "div1", "div2", "div3", "para", "sent", "word"],
+                 tag_to_obj=DefaultTagToObjMap,
+                 metadata_to_parse=DefaultMetadataToParse,
                  **kwargs):
         self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
         self.parallel_type = "page"
@@ -29,6 +62,13 @@ class XMLParser(object):
             self.token_regex = re.compile(r"%s" % kwargs["token_regex"], re.I)
         else:
             self.token_regex = re.compile(r"%s" % TokenRegex, re.I)
+
+        self.tag_to_obj_map = tag_to_obj
+
+        self.metadata_to_parse = {}
+        for obj in metadata_to_parse:
+            self.metadata_to_parse[obj] = set(metadata_to_parse[obj])
+
         # Initialize an OHCOVector Stack. operations on this stack produce all parser output.
         self.v = OHCOVector.CompoundStack(self.types, self.parallel_type, docid=docid, out=output, ref="ref")
 
@@ -105,7 +145,8 @@ class XMLParser(object):
             # Let's start indexing words and objects at either the <text
             # of the <docbody tag.  We can add more.
 
-            if text_tag.search(line) or doc_body_tag.search(line) or body_tag.search(line) or closed_head_tag.search(line):
+            if text_tag.search(line) or doc_body_tag.search(line) or body_tag.search(line) or closed_head_tag.search(
+                    line):
                 self.in_the_text = True
 
             self.line_count += 1
@@ -661,14 +702,14 @@ class XMLParser(object):
     def get_object_attributes(self, tag, tag_name, object_type):
         """Get all attributes for any given tag and attach metadata to element."""
         try:
-            text_object = TagToObjMap[tag_name]
+            text_object = self.tag_to_obj_map[tag_name.lower()]
             retrieve_attrib = True
         except KeyError:
             retrieve_attrib = False
         if retrieve_attrib:
             for attrib, value in self.get_attributes(tag):
                 attrib = self.camel_case_to_snake_case(attrib)
-                if attrib in DefaultMetadataFields[text_object]:
+                if attrib in self.metadata_to_parse[text_object]:
                     self.v[object_type][attrib] = value
 
     def get_div_head(self, tag):
@@ -1073,37 +1114,7 @@ entity_regex = [
     re.compile(r'(\&sun;)', re.I),
 ]
 
-TagToObjMap = {
-    "div": "div",
-    "div1": "div",
-    "div2": "div",
-    "div3": "div",
-    "front": "div",
-    "note": "div",
-    "p": "para",
-    "sp": "para",
-    "lg": "para",
-    "epigraph": "para",
-    "argument": "para",
-    "postscript": "para",
-    "pb": "page",
-    "ref": "ref"
-}
-
-DefaultMetadataFields = {
-    "div": set(["head", "type", "n", "id"]),
-    "para": set(["who"]),
-    "page": set(["n", "id", "fac"]),
-    "ref": set(["target", "n", "type"])
-}
-
 DefaultDocXPaths = {
-    # Metadata per type.  '.' is in this case the base element for the type, as specified in XPaths above.
-    # MUST MUST MUST BE SPECIFIED IN OUTER TO INNER ORDER--DOC FIRST, WORD LAST
-
-    ####################
-    # DOC LEVEL XPATHS #
-    ####################
     "author": [
         ".//sourceDesc/bibl/author[@type='marc100']",
         ".//sourceDesc/bibl/author[@type='artfl']",
