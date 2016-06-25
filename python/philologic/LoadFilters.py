@@ -421,7 +421,7 @@ def fix_sentence_boundary(loader_obj, text):
     os.rename(text["raw"] + ".tmp", text["raw"])
 
 
-DefaultNavigableObjects = ("div1", "div2", "div3")
+DefaultNavigableObjects = ("div1", "div2", "div3", "para")
 DefaultLoadFilters = [normalize_unicode_raw_words, make_word_counts, generate_words_sorted, make_object_ancestors,
                       make_sorted_toms, prev_next_obj, generate_pages, prev_next_page, generate_refs, make_max_id]
 

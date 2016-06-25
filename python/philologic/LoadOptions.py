@@ -42,7 +42,7 @@ class LoadOptions(object):
         self.values["parser_factory"] = NewParser.XMLParser
         self.values["token_regex"] = NewParser.TokenRegex
         self.values["doc_xpaths"] = NewParser.DefaultDocXPaths
-        self.values["metadata_fields"] = NewParser.DefaultMetadataFields
+        self.values["metadata_to_parse"] = NewParser.DefaultMetadataToParse
         self.values["pseudo_empty_tags"] = []
         self.values["suppress_tags"] = []
         self.values["cores"] = 2
@@ -205,5 +205,7 @@ class LoadConfig(object):
                             for line in fh:
                                 word_list.add(line.strip())
                         self.config["filtered_words"] = word_list
+                    elif a == "plain_text_obj":
+                        self.config["load_filters"].append(LoadFilters.store_in_plain_text(*value))
                     else:
                         self.config[a] = value

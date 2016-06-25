@@ -58,7 +58,7 @@ class Loader(object):
         self.token_regex = loader_options["token_regex"]
 
         self.parser_defaults = {}
-        for option in ["parser_factory", "doc_xpaths", "token_regex", "metadata_fields", "pseudo_empty_tags",
+        for option in ["parser_factory", "doc_xpaths", "token_regex", "metadata_to_parse", "pseudo_empty_tags",
                        "suppress_tags", "load_filters"]:
             self.parser_defaults[option] = loader_options[option]
 
@@ -292,9 +292,9 @@ class Loader(object):
 
         # Adding non-doc level metadata
         self.metadata_hierarchy.append([])
-        for element_type in self.parser_defaults["metadata_fields"]:
+        for element_type in self.parser_defaults["metadata_to_parse"]:
             if element_type != "page" and element_type != "ref":
-                for param in self.parser_defaults["metadata_fields"][element_type]:
+                for param in self.parser_defaults["metadata_to_parse"][element_type]:
                     if param not in self.metadata_fields:
                         self.metadata_fields.append(param)
                         self.metadata_hierarchy[-1].append(param)
@@ -342,8 +342,6 @@ class Loader(object):
                         options["token_regex"] = self.parser_defaults["token_regex"]
                     if "doc_xpaths" not in options:
                         options["xpaths"] = self.parser_defaults["doc_xpaths"]
-                    if "metadata_fields" not in options:
-                        options["metadata_xpaths"] = self.parser_defaults["metadata_fields"]
                     if "suppress_tags" not in options:
                         options["suppress_tags"] = self.parser_defaults["suppress_tags"]
                     if "pseudo_empty_tags" not in options:
@@ -358,6 +356,7 @@ class Loader(object):
                                             text["id"],
                                             text["size"],
                                             known_metadata=metadata,
+                                            metadata_to_parse=self.parser_defaults["metadata_to_parse"],
                                             filtered_words=self.filtered_words,
                                             **options)
                     try:
