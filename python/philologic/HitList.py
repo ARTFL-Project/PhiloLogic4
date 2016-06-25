@@ -8,6 +8,8 @@ import struct
 from HitWrapper import HitWrapper, ObjectWrapper
 from utils import smash_accents
 
+obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
+
 
 class HitList(object):
     def __init__(self,
@@ -19,12 +21,16 @@ class HitList(object):
                  byte=6,
                  method="proxy",
                  methodarg=3,
-                 sort_order=None):
+                 sort_order=None,
+                 raw=False):
         self.filename = filename
         self.words = words
         self.method = method
         self.methodarg = methodarg
         self.sort_order = sort_order
+        if self.sort_order == ["rowid"]:
+            self.sort_order = None
+        self.raw = raw  # if true, this return the raw hitlist consisting of a list of philo_ids
         self.dbh = dbh
         self.encoding = encoding or dbh.encoding
         if method is not "cooc":
@@ -40,11 +46,24 @@ class HitList(object):
         self.byte = byte
         self.position = 0
         self.done = False
-        #self.hitsize = 4 * (6 + self.words) # roughly.  packed 32-bit ints, 4 bytes each.
         self.update()
+
         if self.sort_order:
+            metadata_types = set([dbh.locals["metadata_types"][i] for i in self.sort_order])
+            if "div" in metadata_types:
+                metadata_types.remove("div")
+                metadata_types.union(set(["div1", "div2", "div3"]))
             c = self.dbh.dbh.cursor()
-            c.execute('select * from toms where philo_type="doc" and %s is not null' % sort_order[0])
+            query = "select * from toms where "
+            params = []
+            for metadata_type in metadata_types:
+                params.append('philo_type="%s"' % metadata_type)
+            query += " and ".join(params) + " and "
+            order_params = []
+            for s in self.sort_order:
+                order_params.append('%s is not null' % s)
+            query += " and ".join(order_params)
+            c.execute(query)
             metadata = {}
             for i in c.fetchall():
                 doc_id = int(i['philo_id'].split()[0])
@@ -61,6 +80,7 @@ class HitList(object):
                 iter_position += 1
             self.sorted_hitlist.sort(key=lambda x: metadata[x[0]])
 
+
     def __getitem__(self, n):
         if self.sort_order:
             return self.get_slice(n)
@@ -69,8 +89,11 @@ class HitList(object):
             if isinstance(n, slice):
                 return self.get_slice(n)
             else:
-                self.readhit(n)
-                return HitWrapper(self.readhit(n), self.dbh)
+                if self.raw:
+                    return self.readhit(n)
+                else:
+                    self.readhit(n)
+                    return HitWrapper(self.readhit(n), self.dbh)
 
     def get_slice(self, n):
         if self.sort_order:
@@ -92,7 +115,10 @@ class HitList(object):
                     hit = self.readhit(slice_position)
                 except IndexError, IOError:
                     break
-                yield HitWrapper(hit, self.dbh)
+                if self.raw:
+                    yield hit
+                else:
+                    yield HitWrapper(hit, self.dbh)
                 slice_position += 1
 
     def __len__(self):
@@ -102,7 +128,7 @@ class HitList(object):
     def __iter__(self):
         if self.sort_order:
             for hit in self.sorted_hitlist:
-                yield hit
+                yield HitWrapper(hit, self.dbh)
         else:
             self.update()
             iter_position = 0
@@ -112,7 +138,10 @@ class HitList(object):
                     hit = self.readhit(iter_position)
                 except IndexError, IOError:
                     break
-                yield HitWrapper(hit, self.dbh)
+                if self.raw:
+                    yield hit
+                else:
+                    yield HitWrapper(hit, self.dbh)
                 iter_position += 1
 
     def finish(self):

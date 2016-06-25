@@ -2,61 +2,12 @@
     margin-top: 15px;
 }
 #time-series {
-    margin-top: 10px;
+    margin-top: 0px;
     margin-bottom: 10px;
     position: relative;
     padding-left: 1px;
     padding-right: 1px;
 }
-.graph-bar {
-    height: 0px;
-    position:absolute;
-    bottom:0;
-    overflow: visible !important; /* make sure years don't temporarily disappear when switching between absolute and relative frequencies */
-}
-.graph-bar:hover {
-    cursor: pointer;
-}
-#side-text {
-    position: absolute;
-    bottom: 50%;
-    margin-left: -115px;
-    font-size: 90%;
-    width: 200px;
-    text-align: center;
-    -webkit-transform: rotate(-90deg);
-    -moz-transform: rotate(-90deg);
-    -ms-transform: rotate(-90deg);
-    -o-transform: rotate(-90deg);
-    transform: rotate(-90deg);
-}
-.graph-years {
-    position: absolute;
-    bottom: -30px;
-	left: -10px;
-    -webkit-transform: rotate(-45deg);
-    -moz-transform: rotate(-45deg);
-    -ms-transform: rotate(-45deg);
-    -o-transform: rotate(-45deg);
-    transform: rotate(-45deg);
-}
-
-
-
-#bottom-division, #middle-division, #top-division {
-    position: absolute;
-    width: 100%;
-    z-index: 50;
-    border-top: dashed 1px #B8B8B8;
-}
-#bottom-division {
-    bottom: 33%;
-}
-#middle-division {
-    bottom: 66%;
-}
-#top-number, #middle-number, #bottom-number {
-    margin-top: -16px;
-    position: absolute;
-    z-index: 100;
+#time-series-buttons {
+    margin-bottom: 20px;
 }

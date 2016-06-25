@@ -1,5 +1,5 @@
 <div id="results_container" class="col-xs-12 col-sm-8" ng-class="{'col-sm-8': concKwic.showFacetedBrowsing}">
-    <ol id="bibliographic-results" class="text-content-area">
+    <ol id="bibliographic-results" class="text-content-area" ng-if="!philoConfig.dictionary_bibliography">
         <li class="biblio-occurrence panel panel-default" ng-repeat="result in ::results.results">
 			<input type="checkbox" style="margin-left:10px" ng-click="addToSearch(result.citation.title.label)" ng-if="results.result_type === 'doc' && philoConfig.metadata.indexOf('title') !== -1">
             <span style="padding-left: 5px;" ng-init="position = $index + results.description.start">{{ ::position }}.</span>
@@ -9,6 +9,28 @@
                     <span ng-if="!citation.href" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style">{{ ::citation.label }}</span>
                 </span>
             </span>
+        </li>
+    </ol>
+    <ol id="bibliographic-results" class="text-content-area" ng-if="philoConfig.dictionary_bibliography">
+        <li class="biblio-occurrence panel panel-default" ng-repeat="group in ::results.results">
+            <h3 style="margin: 0; padding: 0px 10px; text-align: center; font-variant: small-caps;">
+                <i>{{ ::group[0].metadata_fields.title }}</i>
+            </h3>
+            <ol style="margin-top: 10px;">
+                <li style="margin-top: 0;" ng-repeat="result in ::group">
+                    <input type="checkbox" style="margin-left:10px" ng-click="addToSearch(result.citation.title.label)" ng-if="results.result_type === 'doc' && philoConfig.metadata.indexOf('title') !== -1">
+                    <span style="padding-left: 10px;">{{ ::result.position }}.</span>
+                    <span class="philologic_cite">
+                        <span class="citation" ng-repeat="citation in result.citation">
+                            <a ng-href="{{ ::citation.href }}" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style" ng-if="citation.href">{{ ::citation.label }}</a>
+                            <span ng-if="!citation.href" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style">{{ ::citation.label }}</span>
+                        </span>
+                    </span>
+                    <div class='philologic_context text-content-area' select-word position="{{ result.position }}">
+                        <div style="padding: 0px 15px 0px 30px;" ng-bind-html="result.context | unsafe"></div>
+                    </div>
+                </li>
+            </ol>
         </li>
     </ol>
 </div>

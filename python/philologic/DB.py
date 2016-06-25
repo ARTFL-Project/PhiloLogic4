@@ -1,15 +1,17 @@
-import os, sys
 import hashlib
-import struct
-import sqlite3
+import os
 import re
-import MetadataQuery
-import HitList
+import sqlite3
+import struct
 import sys
+from Config import Config, db_locals_defaults, db_locals_header
+
+from philologic import Query, shlax
+
+import HitList
+import MetadataQuery
 import QuerySyntax
 from HitWrapper import HitWrapper, PageWrapper
-from philologic import Query, shlax
-from Config import Config, db_locals_defaults, db_locals_header
 
 
 def hit_to_string(hit, width):
@@ -66,7 +68,7 @@ class DB:
         c.execute("SELECT * FROM pages WHERE philo_id=? LIMIT 1;", (page_id_s, ))
         return c.fetchone()
 
-    def get_all(self, philo_type="doc", sort_order=["rowid"]):
+    def get_all(self, philo_type="doc", sort_order=["rowid"], raw_results=False):
         """ get all objects of type philo_type """
         hash = hashlib.sha1()
         hash.update(self.path)
@@ -74,12 +76,12 @@ class DB:
         all_hash = hash.hexdigest()
         all_file = self.path + "/hitlists/" + all_hash + ".hitlist"
         if not os.path.isfile(all_file):
-            #write out the corpus file
-            return MetadataQuery.metadata_query(self, all_file, [{"philo_type": ['"%s"' % philo_type]}], sort_order)
+            # write out the corpus file
+            return MetadataQuery.metadata_query(self, all_file, [{"philo_type": ['"%s"' % philo_type]}], sort_order, raw_results=raw_results)
         else:
-            return HitList.HitList(all_file, 0, self)
+            return HitList.HitList(all_file, 0, self, raw=raw_results)
 
-    def query(self, qs="", method="", method_arg="", limit="", sort_order=["rowid"], **metadata):
+    def query(self, qs="", method="", method_arg="", limit="", sort_order=["rowid"], raw_results=False, **metadata):
         """query the PhiloLogic database"""
         method = method or "proxy"
         if isinstance(method_arg, str):
@@ -142,19 +144,15 @@ class DB:
                         metadata_dicts.append({"philo_id": metadata["philo_id"]})
                 corpus = MetadataQuery.metadata_query(self, corpus_file, metadata_dicts, sort_order)
             else:
-                #                print >> sys.stderr, "cached @ %s" % corpus_file
                 if sort_order == ["rowid"]:
                     sort_order = None
-                corpus = HitList.HitList(corpus_file, 0, self, sort_order=sort_order)
+                corpus = HitList.HitList(corpus_file, 0, self, sort_order=sort_order, raw=raw_results)
                 corpus.finish()
-            #print >> sys.stderr, "corpus file of length %d" % len(corpus)
             if len(corpus) == 0:
                 return corpus
         else:
             corpus = None
         if qs:
-            #            words_per_hit = len(qs.split(" "))
-            #            words_per_hit = len(qs.split("\n\n"))
             hash.update(qs)
             hash.update(method)
             hash.update(str(method_arg))
@@ -164,13 +162,22 @@ class DB:
             if sort_order == ["rowid"]:
                 sort_order = None
             if not os.path.isfile(search_file):
-                return Query.query(self, qs, corpus_file, self.width, method, method_arg, limit, filename=search_file, sort_order=sort_order)
+                return Query.query(self,
+                                   qs,
+                                   corpus_file,
+                                   self.width,
+                                   method,
+                                   method_arg,
+                                   limit,
+                                   filename=search_file,
+                                   sort_order=sort_order,
+                                   raw_results=raw_results)
             else:
                 parsed = QuerySyntax.parse_query(qs)
                 grouped = QuerySyntax.group_terms(parsed)
                 split = Query.split_terms(grouped)
                 words_per_hit = len(split)
-                return HitList.HitList(search_file, words_per_hit, self, sort_order=sort_order)
+                return HitList.HitList(search_file, words_per_hit, self, sort_order=sort_order, raw=raw_results)
         else:
             if corpus:
                 return corpus

@@ -105,7 +105,7 @@ class XMLParser(object):
             # Let's start indexing words and objects at either the <text
             # of the <docbody tag.  We can add more.
 
-            if text_tag.search(line) or doc_body_tag.search(line) or body_tag.search(line):
+            if text_tag.search(line) or doc_body_tag.search(line) or body_tag.search(line) or closed_head_tag.search(line):
                 self.in_the_text = True
 
             self.line_count += 1
@@ -345,7 +345,7 @@ class XMLParser(object):
         # sentence and to turn off automatic sentence tagging
         elif sentence_tag.search(tag):
             if self.open_sent or self.in_tagged_sentence:
-                self.v.pull("sent", tag_name, start_byte)  # should cache name
+                self.v.pull("sent", self.bytes_read_in)  # should cache name
             self.v.push("sent", tag_name, start_byte)
             self.in_tagged_sentence = True
             self.open_sent = True
@@ -405,7 +405,7 @@ class XMLParser(object):
         elif closed_div_tag.search(tag):
             self.context_div_level = self.context_div_level - 1
             self.no_deeper_objects = False
-        elif tag.startswith('<div'):
+        elif div_tag.search(tag):
             self.context_div_level += 1
             if self.context_div_level > 3:
                 if self.open_div3:
@@ -1104,117 +1104,118 @@ DefaultDocXPaths = {
     ####################
     # DOC LEVEL XPATHS #
     ####################
-    "doc": {
-        "author": [
-            ".//sourceDesc/bibl/author[@type='marc100']",
-            ".//sourceDesc/bibl/author[@type='artfl']",
-            ".//sourceDesc/bibl/author",
-            ".//titleStmt/author",
-            ".//sourceDesc/biblStruct/monogr/author/name",
-            ".//sourceDesc/biblFull/titleStmt/author",
-            ".//sourceDesc/biblFull/titleStmt/respStmt/name",
-            ".//sourceDesc/biblFull/titleStmt/author",
-            ".//sourceDesc/bibl/titleStmt/author",
-        ],
-        "title": [
-            ".//sourceDesc/bibl/title[@type='marc245']",
-            ".//sourceDesc/bibl/title[@type='artfl']",
-            ".//sourceDesc/bibl/title",
-            ".//titleStmt/title",
-            ".//sourceDesc/bibl/titleStmt/title",
-            ".//sourceDesc/biblStruct/monogr/title",
-            ".//sourceDesc/biblFull/titleStmt/title",
-        ],
-        "author_dates": [
-            ".//sourceDesc/bibl/author/date",
-            ".//titlestmt/author/date",
-        ],
-        "create_date": [
-            ".//profileDesc/creation/date",
-            ".//fileDesc/sourceDesc/bibl/imprint/date",
-            ".//sourceDesc/biblFull/publicationStmt/date",
-            ".//profileDesc/dummy/creation/date",
-            ".//fileDesc/sourceDesc/bibl/creation/date",
-        ],
-        "publisher": [
-            ".//sourceDesc/bibl/imprint[@type='artfl']",
-            ".//sourceDesc/bibl/imprint[@type='marc534']",
-            ".//sourceDesc/bibl/imprint/publisher",
-            ".//sourceDesc/biblStruct/monogr/imprint/publisher/name",
-            ".//sourceDesc/biblFull/publicationStmt/publisher",
-            ".//sourceDesc/bibl/publicationStmt/publisher",
-            ".//sourceDesc/bibl/publisher",
-            ".//publicationStmt/publisher",
-            ".//publicationStmp",
-        ],
-        "pub_place": [
-            ".//sourceDesc/bibl/imprint/pubPlace",
-            ".//sourceDesc/biblFull/publicationStmt/pubPlace",
-            ".//sourceDesc/biblStruct/monog/imprint/pubPlace",
-            ".//sourceDesc/bibl/pubPlace",
-            ".//sourceDesc/bibl/publicationStmt/pubPlace",
-        ],
-        "pub_date": [
-            ".//sourceDesc/bibl/imprint/date",
-            ".//sourceDesc/biblStruct/monog/imprint/date",
-            ".//sourceDesc/biblFull/publicationStmt/date",
-            ".//sourceDesc/bibFull/imprint/date",
-            ".//sourceDesc/bibl/date",
-            ".//text/front/docImprint/acheveImprime",
-        ],
-        "extent": [
-            ".//sourceDesc/bibl/extent",
-            ".//sourceDesc/biblStruct/monog//extent",
-            ".//sourceDesc/biblFull/extent",
-        ],
-        "editor": [
-            ".//sourceDesc/bibl/editor",
-            ".//sourceDesc/biblFull/titleStmt/editor",
-            ".//sourceDesc/bibl/title/Stmt/editor",
-        ],
-        "identifiers": [
-            ".//publicationStmt/idno"
-        ],
-        "text_genre": [
-            ".//profileDesc/textClass/keywords[@scheme='genre']/term",
-            ".//SourceDesc/genre",
-        ],
-        "keywords": [
-            # keywords
-            ".//profileDesc/textClass/keywords/list/item",
-        ],
-        "language": [
-            # language
-            ".//profileDesc/language/language",
-        ],
-        "notes": [
-            # notes
-            ".//fileDesc/notesStmt/note",
-            ".//publicationStmt/notesStmt/note",
-        ],
-        "auth_gender": [
+    "author": [
+        ".//sourceDesc/bibl/author[@type='marc100']",
+        ".//sourceDesc/bibl/author[@type='artfl']",
+        ".//sourceDesc/bibl/author",
+        ".//titleStmt/author",
+        ".//sourceDesc/biblStruct/monogr/author/name",
+        ".//sourceDesc/biblFull/titleStmt/author",
+        ".//sourceDesc/biblFull/titleStmt/respStmt/name",
+        ".//sourceDesc/biblFull/titleStmt/author",
+        ".//sourceDesc/bibl/titleStmt/author",
+    ],
+    "title": [
+        ".//sourceDesc/bibl/title[@type='marc245']",
+        ".//sourceDesc/bibl/title[@type='artfl']",
+        ".//sourceDesc/bibl/title",
+        ".//titleStmt/title",
+        ".//sourceDesc/bibl/titleStmt/title",
+        ".//sourceDesc/biblStruct/monogr/title",
+        ".//sourceDesc/biblFull/titleStmt/title",
+    ],
+    "author_dates": [
+        ".//sourceDesc/bibl/author/date",
+        ".//titlestmt/author/date",
+    ],
+    "create_date": [
+        ".//profileDesc/creation/date",
+        ".//fileDesc/sourceDesc/bibl/imprint/date",
+        ".//sourceDesc/biblFull/publicationStmt/date",
+        ".//profileDesc/dummy/creation/date",
+        ".//fileDesc/sourceDesc/bibl/creation/date",
+    ],
+    "publisher": [
+        ".//sourceDesc/bibl/imprint[@type='artfl']",
+        ".//sourceDesc/bibl/imprint[@type='marc534']",
+        ".//sourceDesc/bibl/imprint/publisher",
+        ".//sourceDesc/biblStruct/monogr/imprint/publisher/name",
+        ".//sourceDesc/biblFull/publicationStmt/publisher",
+        ".//sourceDesc/bibl/publicationStmt/publisher",
+        ".//sourceDesc/bibl/publisher",
+        ".//publicationStmt/publisher",
+        ".//publicationStmp",
+    ],
+    "pub_place": [
+        ".//sourceDesc/bibl/imprint/pubPlace",
+        ".//sourceDesc/biblFull/publicationStmt/pubPlace",
+        ".//sourceDesc/biblStruct/monog/imprint/pubPlace",
+        ".//sourceDesc/bibl/pubPlace",
+        ".//sourceDesc/bibl/publicationStmt/pubPlace",
+    ],
+    "pub_date": [
+        ".//sourceDesc/bibl/imprint/date",
+        ".//sourceDesc/biblStruct/monog/imprint/date",
+        ".//sourceDesc/biblFull/publicationStmt/date",
+        ".//sourceDesc/bibFull/imprint/date",
+        ".//sourceDesc/bibl/date",
+        ".//text/front/docImprint/acheveImprime",
+    ],
+    "extent": [
+        ".//sourceDesc/bibl/extent",
+        ".//sourceDesc/biblStruct/monog//extent",
+        ".//sourceDesc/biblFull/extent",
+    ],
+    "editor": [
+        ".//sourceDesc/bibl/editor",
+        ".//sourceDesc/biblFull/titleStmt/editor",
+        ".//sourceDesc/bibl/title/Stmt/editor",
+    ],
+    "identifiers": [
+        ".//publicationStmt/idno"
+    ],
+    "text_genre": [
+        ".//profileDesc/textClass/keywords[@scheme='genre']/term",
+        ".//SourceDesc/genre",
+    ],
+    "keywords": [
+        # keywords
+        ".//profileDesc/textClass/keywords/list/item",
+    ],
+    "language": [
+        # language
+        ".//profileDesc/language/language",
+    ],
+    "notes": [
+        # notes
+        ".//fileDesc/notesStmt/note",
+        ".//publicationStmt/notesStmt/note",
+    ],
+    "auth_gender": [
 
-            # auth_gender
-            ".//publicationStmt/notesStmt/note",
-        ],
-        "collection": [
-            # collection
-            ".//seriesStmt/title",
-        ],
-        "period": [
-            # period
-            ".//profileDesc/textClass/keywords[@scheme='period']/list/item",
-            ".//SourceDesc/period",
-        ],
-        "text_form": [
-            # text_form
-            ".//profileDesc/textClass/keywords[@scheme='form']/term",
-        ],
-        "structure": [
-            # structure
-            ".//SourceDesc/structure",
-        ]
-    }
+        # auth_gender
+        ".//publicationStmt/notesStmt/note",
+    ],
+    "collection": [
+        # collection
+        ".//seriesStmt/title",
+    ],
+    "period": [
+        # period
+        ".//profileDesc/textClass/keywords[@scheme='period']/list/item",
+        ".//SourceDesc/period",
+    ],
+    "text_form": [
+        # text_form
+        ".//profileDesc/textClass/keywords[@scheme='form']/term",
+    ],
+    "structure": [
+        # structure
+        ".//SourceDesc/structure",
+    ],
+    "idno": [
+        ".//teiHeader/fileDesc/publicationStmt/idno/"
+    ]
 }
 
 if __name__ == "__main__":

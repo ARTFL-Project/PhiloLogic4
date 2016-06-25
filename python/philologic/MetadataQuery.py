@@ -10,7 +10,7 @@ from QuerySyntax import parse_query, group_terms
 from HitList import NoHits
 
 
-def metadata_query(db, filename, param_dicts, sort_order):
+def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
     if db.locals['debug']:
         print >> sys.stderr, "METADATA_QUERY:", param_dicts
     prev = None
@@ -34,7 +34,7 @@ def metadata_query(db, filename, param_dicts, sort_order):
     flag = open(filename + ".done", "w")
     flag.write("1")
     flag.close()
-    return HitList.HitList(filename, 0, db)
+    return HitList.HitList(filename, 0, db, raw=raw_results)
 
 
 def query_recursive(db, param_dict, parent, sort_order):
@@ -211,14 +211,14 @@ def make_grouped_sql_clause(expanded, column):
 
 
 def metadata_pattern_search(term, path):
-    command = ['egrep', '-awi', "%s" % term, '%s' % path]
-    process = subprocess.Popen(command, stdout=subprocess.PIPE)
-    match, stderr = process.communicate()
-    #print >> sys.stderr, "RESULTS:",repr(match)
-    match = match.split('\n')
-    match.remove('')
-    ## HACK: The extra decode/encode are there to fix errors when this list is converted to a json object
-    return [m.split("\t")[1].strip().decode('utf-8', 'ignore').encode('utf-8') for m in match]
+    command = ['egrep', '-awie', "[[:blank:]]%s" % term, '%s' % path]
+    grep = subprocess.Popen(command, stdout=subprocess.PIPE)
+    cut = subprocess.Popen(["cut", "-f", "2"],
+                           stdin=grep.stdout,
+                           stdout=subprocess.PIPE)
+    match, stderr = cut.communicate()
+    matches = [i for i in match.split('\n') if i]
+    return matches
 
 
 def escape_sql_string(s):

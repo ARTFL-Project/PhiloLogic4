@@ -126,15 +126,6 @@ a.current-obj, #toc-container a:hover {
 }
 
 /*Time series*/
-.graph-bar {
-    background-color: rgb(255,219,158); /* fallback color if gradients are not supported */
-    background-image: -webkit-linear-gradient(top, rgb(255,219,158), rgb(255,242,219)); /* For Chrome and Safari */
-    background-image:    -moz-linear-gradient(top, rgb(255,219,158), rgb(255,242,219)); /* For old Fx (3.6 to 15) */
-    background-image:     -ms-linear-gradient(top, rgb(255,219,158), rgb(255,242,219)); /* For pre-releases of IE 10*/
-    background-image:      -o-linear-gradient(top, rgb(255,219,158), rgb(255,242,219)); /* For old Opera (11.1 to 12.0) */ 
-    background-image:         linear-gradient(to bottom, rgb(255,219,158), rgb(255,242,219)); /* Standard syntax; must be last */
-}
-
 .progress-bar {
 	background-color: rgb(78, 93, 108);
 }

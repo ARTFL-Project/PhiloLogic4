@@ -5,7 +5,7 @@
         .module("philoApp")
         .controller('SearchFormController', SearchFormController)
 
-    function SearchFormController($scope, $rootScope, $http, $location, radio, URL) {
+    function SearchFormController($scope, $rootScope, $http, $location, radio, URL, philoConfig) {
         var vm = this;
         vm.formOpen = false;
         vm.searchOptionsButton = "Show search options";
@@ -24,13 +24,13 @@
 
         vm.clearFormData = function() {
             $rootScope.formData = {
-                report: $rootScope.philoConfig.search_reports[0],
+                report: philoConfig.search_reports[0],
                 method: "proxy",
                 results_per_page: "25",
-                stopwords: $rootScope.philoConfig.stopwords,
+                stopwords: philoConfig.stopwords,
                 wordFiltering: ['25', '50', '75', '100', '125', '150', '175', '200'],
                 collocWordNum: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-                year_interval: 10
+                year_interval: philoConfig.time_series_interval
             };
             vm.toggleForm();
         }

@@ -113,13 +113,13 @@ The basic layout is this:
 
 `doc_xpaths` is a dictionary that maps philologic document-level object contained in the TEI header to absolute XPaths--that is, XPaths evaluated where `.` refers to the TEI document root element.  You can define multiple XPaths for the same type of object, but you will get much better and more consistent results if you do not.
 
-`metadata_fields` is a dictionary that map one or more non-document-level object types to list of metadata to retrieve. e.g.:
+`metadata_fields` is a dictionary that maps one or more non-document-level object types to a list of metadata (usually attributes) to retrieve. . e.g.:
 <pre><code>
 DefaultMetadataFields = {
-    "div": set(["head", "type", "n", "id"]),
-    "para": set(["who"]),
-    "page": set(["n", "id", "fac"]),
-    "ref": set(["target", "n", "type"])
+    "div": ["head", "type", "n", "id"],
+    "para": ["who"],
+    "page": ["n", "id", "fac"],
+    "ref": ["target", "n", "type"]
 }
 </code></pre>
 `pseudo_empty_tags` is a very obscure option for things that you want to treat as containers, even if they are encoded as self-closing tags.  

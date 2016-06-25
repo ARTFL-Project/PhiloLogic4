@@ -12,7 +12,8 @@
         .directive('timeSeriesOptions', timeSeriesOptions)
         .directive('resultsPerPage', resultsPerPage)
         .directive('autocompleteTerm', autocompleteTerm)
-        .directive('autocompleteMetadata', autocompleteMetadata);
+        .directive('autocompleteMetadata', autocompleteMetadata)
+        .directive('sortResults', sortResults);
 
 
     function searchForm($rootScope) {
@@ -150,13 +151,13 @@
         }
     }
 
-    function timeSeriesOptions($rootScope) {
+    function timeSeriesOptions($rootScope, philoConfig) {
         return {
             templateUrl: 'app/shared/searchForm/timeSeriesOptions.html',
             replace: true,
             link: function() {
                 if (!$rootScope.formData.year_interval) {
-                    $rootScope.formData.year_interval = 10;
+                    $rootScope.formData.year_interval = philoConfig.time_series_interval;
                 }
             }
         }
@@ -234,6 +235,51 @@
             restrict: 'A',
             link: function(scope, element, attrs) {
                 autocomplete(element, attrs.id);
+            }
+        }
+    }
+
+    function sortResults($rootScope, philoConfig) {
+        return {
+            templateUrl: 'app/shared/searchForm/sortResults.html',
+            link: function(scope) {
+                if ("sort_order" in $rootScope.formData && $rootScope.formData.sort_order.length >= 1) {
+                    var label = []
+                    for (var j = 0; j < $rootScope.formData.sort_order.length; j += 1) {
+                        if ($rootScope.formData.sort_order[j] in philoConfig.metadata_aliases) {
+                            label.push(philoConfig.metadata_aliases[$rootScope.formData.sort_order[j]]);
+                        } else {
+                            label.push($rootScope.formData.sort_order[j]);
+                        }
+                    }
+                    scope.selectedSortValues = label.join(", ");
+                } else {
+                    scope.selectedSortValues = "None";
+                }
+                scope.sortValues = [{
+                    value: [],
+                    label: "None"
+                }];
+                for (var i = 0; i < philoConfig.concordance_biblio_sorting.length; i += 1) {
+                    var sortValue = philoConfig.concordance_biblio_sorting[i];
+                    var label = [];
+                    for (var j = 0; j < sortValue.length; j += 1) {
+                        if (sortValue[j] in philoConfig.metadata_aliases) {
+                            label.push(philoConfig.metadata_aliases[sortValue[j]]);
+                        } else {
+                            label.push(sortValue[j]);
+                        }
+                    }
+                    var value = {
+                        label: label.join(', '),
+                        value: sortValue
+                    }
+                    scope.sortValues.push(value);
+                }
+                scope.sortChoice = function(value) {
+                    $rootScope.formData.sort_order = value.value;
+                    scope.selectedSortValues = value.label;
+                }
             }
         }
     }

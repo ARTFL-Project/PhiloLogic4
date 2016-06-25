@@ -1,73 +1,74 @@
 <div class="container" style="overflow: hidden;" ng-controller="SearchFormController as search">
-    <div ng-if="philoConfig.dictionary === false">
-        <form id="search" role="form" ng-submit="search.submit()">
-            <div id="form_body">
-                <div id="initial-form">
-                    <search-reports></search-reports>
-                    <search-terms></search-terms>
-                </div>
-                <div id="search-elements" ng-if="search.formOpen" class="velocity-opposites-transition-slideDownBigIn" data-velocity-opts="{ duration: 400 }">
-                    <h5>Refine your search with the following options and fields:</h5>
-                    <div class="row" style="margin-top: 10px; height: 24px;">
-                        <div class="col-xs-12 col-sm-2">
-                            Search Terms
-                        </div>
-                        <div class="col-xs-12 col-sm-10">
-                            <div class="row">
-                                <div class="col-xs-12 col-sm-3">
-                                    <span>
+  <div ng-if="philoConfig.dictionary === false">
+    <form id="search" role="form" ng-submit="search.submit()">
+      <div id="form_body">
+        <div id="initial-form">
+          <search-reports></search-reports>
+          <search-terms></search-terms>
+        </div>
+        <div id="search-elements" ng-if="search.formOpen" class="velocity-opposites-transition-slideDownBigIn" data-velocity-opts="{ duration: 400 }">
+          <h5>Refine your search with the following options and fields:</h5>
+          <div class="row" style="margin-top: 10px; height: 24px;">
+            <div class="col-xs-12 col-sm-2">
+              Search Terms
+            </div>
+            <div class="col-xs-12 col-sm-10">
+              <div class="row">
+                <div class="col-xs-12 col-sm-3">
+                  <span>
                                         <input type="checkbox" ng-model="formData.approximate" ng-true-value="'yes'"/>
                                         Approximate match
                                     </span>
-                                </div>
-                                <div class="col-xs-12 col-sm-9" style="margin-top: -3px" ng-if="formData.approximate === 'yes'">
-                                    <div class="dropdown">
-                                        <button class="btn btn-default dropdown-toggle" type="button" id="approximateDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                            {{ approximateValue }}
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="approximateDropDown">
-                                            <li ng-repeat="value in approximateValues" ng-click="selectApproximate(value)">
-                                                <a href="#">{{ ::value }}</a>
-                                            </li>
-                                        </ul>
-                                        % or more
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <search-methods></search-methods>
-                    <metadata-fields></metadata-fields>
-                    <collocation-options></collocation-options>
-                    <time-series-options></time-series-options>
-                    <results-per-page></results-per-page>
                 </div>
+                <div class="col-xs-12 col-sm-9" style="margin-top: -3px" ng-if="formData.approximate === 'yes'">
+                  <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="approximateDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                      {{ approximateValue }}
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="approximateDropDown">
+                      <li ng-repeat="value in approximateValues" ng-click="selectApproximate(value)">
+                        <a href="#">{{ ::value }}</a>
+                      </li>
+                    </ul>
+                    % or more
+                  </div>
+                </div>
+              </div>
             </div>
-        </form>
-    </div>
-    <div ng-if="philoConfig.dictionary">
-        <div class="container" style="overflow: hidden;" ng-controller="SearchFormController as search">
-            <form id="search" role="form" ng-submit="search.submit()">
-                <div id="form_body">
-                    <div id="initial-form">
-                        <search-reports></search-reports>
-                        <search-terms></search-terms>
-                        <div id="head-search-container">
-                            <metadata-fields field="head"></metadata-fields>
-                        </div>
-                    </div>
-                    <div id="search-elements" ng-if="search.formOpen" class="dico velocity-opposites-transition-slideDownBigIn" data-velocity-opts="{ duration: 400 }">
-                        <h5>Refine your search with the following options and fields:</h5>
-                        {{ formData.report }}
-                        <search-methods></search-methods>
-                        <metadata-fields exclude="head"></metadata-fields>
-                        <collocation-options></collocation-options>
-                        <time-series-options></time-series-options>
-                        <results-per-page></results-per-page>
-                    </div>
-                </div>
-            </form>
+          </div>
+          <search-methods ng-if="formData.report != 'collocation'"></search-methods>
+          <metadata-fields></metadata-fields>
+          <collocation-options ng-if="formData.report == 'collocation'"></collocation-options>
+          <time-series-options ng-if="formData.report == 'time_series'"></time-series-options>
+          <sort-results  ng-if="formData.report === 'concordance' || formData.report === 'bibliography'"></sort-results>
+          <results-per-page ng-if="formData.report != 'collocation' && formData.report != 'time_series'"></results-per-page>
         </div>
+      </div>
+    </form>
+  </div>
+  <div ng-if="philoConfig.dictionary">
+    <div class="container" style="overflow: hidden;" ng-controller="SearchFormController as search">
+      <form id="search" role="form" ng-submit="search.submit()">
+        <div id="form_body">
+          <div id="initial-form">
+            <search-reports></search-reports>
+            <search-terms></search-terms>
+            <div id="head-search-container">
+              <metadata-fields field="head"></metadata-fields>
+            </div>
+          </div>
+          <div id="search-elements" ng-if="search.formOpen" class="dico velocity-opposites-transition-slideDownBigIn" data-velocity-opts="{ duration: 400 }">
+            <h5>Refine your search with the following options and fields:</h5> {{ formData.report }}
+            <search-methods></search-methods>
+            <metadata-fields exclude="head"></metadata-fields>
+            <collocation-options ng-if="formData.report == 'collocation'"></collocation-options>
+            <time-series-options ng-if="formData.report == 'time_series'"></time-series-options>
+            <sort-results  ng-if="formData.report === 'concordance' || formData.report === 'bibliography'"></sort-results>
+            <results-per-page ng-if="formData.report != 'collocation' && formData.report != 'time_series'"></results-per-page>
+          </div>
+        </div>
+      </form>
     </div>
+  </div>
 </div>

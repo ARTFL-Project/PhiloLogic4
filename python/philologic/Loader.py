@@ -19,7 +19,7 @@ import philologic.Parser as Parser
 import philologic.PostFilters as PostFilters
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.PostFilters import make_sql_table
-from philologic.utils import pretty_print
+from philologic.utils import pretty_print, sort_list, convert_entities
 
 # Flush buffer output
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
@@ -123,6 +123,7 @@ class Loader(object):
     def parse_tei_header(self):
         load_metadata = []
         metadata_xpaths = self.parser_defaults["doc_xpaths"]
+        deleted_files = []
         for f in self.list_files():
             data = {"filename": f}
             header = ""
@@ -132,7 +133,7 @@ class Loader(object):
                 start_header_index = re.search(r'<teiheader', file_content, re.I).start()
                 end_header_index = re.search(r'</teiheader', file_content, re.I).start()
             except AttributeError:  # tag not found
-                print "%s has no valid TEI header, removing from database load..." % f
+                deleted_files.append(f)
                 continue
             header = file_content[start_header_index:end_header_index]
             if self.debug:
@@ -141,9 +142,9 @@ class Loader(object):
             try:
                 tree = etree.fromstring(header, parser)
                 trimmed_metadata_xpaths = []
-                for field in metadata_xpaths["doc"]:
+                for field in metadata_xpaths:
                     if field not in data:
-                        for xpath in metadata_xpaths["doc"][field]:
+                        for xpath in metadata_xpaths[field]:
                             attr_pattern_match = re.search(r"@([^\/\[\]]+)$", xpath)
                             if attr_pattern_match:
                                 xp_prefix = xpath[:attr_pattern_match.start(0)]
@@ -169,7 +170,10 @@ class Loader(object):
                 data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
                 load_metadata.append(data)
             except etree.XMLSyntaxError:
-                print "%s has invalid data in the header, removing from database load..." % f
+                deleted_files.append(f)
+        if deleted_files:
+            for f in deleted_files:
+                print "%s has no valid TEI header or contains invalid data: removing from database load..." % f
         return load_metadata
 
     def parse_dc_header(self):
@@ -193,18 +197,21 @@ class Loader(object):
             if not matches:
                 matches = re.findall('<dc:([^>]+)>([^>]+)>', header)
             for metadata_name, metadata_value in matches:
-                metadata_value = metadata_value.decode('utf-8', 'ignore').lower()
-                metadata_name = metadata_name.decode('utf-8', 'ignore').lower()
+                metadata_value = metadata_value
+                metadata_value = convert_entities(metadata_value.decode('utf-8')).encode('utf-8')
+                metadata_name = metadata_name.lower()
                 data[metadata_name] = metadata_value
             data["filename"] = filename  # place at the end in case the value was in the header
             data = self.create_year_field(data)
+            if self.debug:
+                print pretty_print(data)
             load_metadata.append(data)
         return load_metadata
 
     def create_year_field(self, metadata):
         year_finder = re.compile(r'^.*?(\d{4}).*')
         earliest_year = 2500
-        for field in ["date, " "create_date", "pub_date", "period"]:
+        for field in ["date", "create_date", "pub_date", "period"]:
             if field in metadata:
                 year_match = year_finder.search(metadata[field])
                 if year_match:
@@ -218,7 +225,7 @@ class Loader(object):
     def parse_metadata(self, sort_by_field, reverse_sort=False, header="tei"):
         """Parsing metadata fields in TEI or Dublin Core headers"""
         print "### Parsing metadata ###"
-        print "Parsing metadata in %d files..." % len(self.list_files()),
+        print "%s: Parsing metadata in %d files..." % (time.ctime(), len(self.list_files())),
         if header == "tei":
             load_metadata = self.parse_tei_header()
         elif header == "dc":
@@ -226,13 +233,10 @@ class Loader(object):
 
         print "done."
 
-        print "Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]),
+        print "%s: Sorting files by the following metadata fields: %s..." % (time.ctime(), ", ".join([i for i in sort_by_field])),
 
-        def make_sort_key(d):
-            key = [d.get(f, "") for f in sort_by_field]
-            return key
-
-        load_metadata.sort(key=make_sort_key, reverse=reverse_sort)
+        load_metadata = sort_list(load_metadata, sort_by_field)
+        self.sort_order = sort_by_field  # to be used for the sort by concordance biblio key in web config
         print "done."
         return load_metadata
 
@@ -389,7 +393,6 @@ class Loader(object):
 
     def merge_objects(self, file_num=100):
         print "\n### Merge parser output ###"
-        print "%s: sorting words" % time.ctime()
 
         # Make all sorting happen in workdir rather than /tmp
         os.system('export TMPDIR=%s/' % self.workdir)
@@ -399,7 +402,7 @@ class Loader(object):
         print "%s: word sort returned %d" % (time.ctime(), words_status)
 
         if "words" in self.tables:
-            print "concatenating document-order words file...",
+            print "%s: concatenating document-order words file..." % time.ctime(),
             for d in self.loaded_files:
                 os.system('gunzip -c %s | egrep -a "^word" >> all_words_ordered' % (d["raw"] + ".gz"))
             print "done"
@@ -568,14 +571,12 @@ class Loader(object):
         print '\n### Post-processing filters ###'
         for f in self.post_filters:
             f(self)
-            print 'done.'
 
         if extra_filters:
             print 'Running the following additional filters:'
             for f in extra_filters:
                 print f.__name__ + '...',
                 f(self)
-                print 'done.'
 
     def finish(self):
         """Write important runtime information to the database directory"""
@@ -612,7 +613,7 @@ class Loader(object):
         config_values = {'dbname': os.path.basename(re.sub("/data/?$", "", self.destination)),
                          'db_url': self.db_url,
                          'metadata': [i for i in self.metadata_fields if i not in self.metadata_fields_not_found],
-                         'facets': [{i: [i]} for i in self.metadata_fields if i not in self.metadata_fields_not_found]}
+                         'facets': [i for i in self.metadata_fields if i not in self.metadata_fields_not_found]}
         # Fetch search examples:
         search_examples = {}
         conn = sqlite3.connect(self.destination + '/toms.db')
@@ -637,7 +638,7 @@ class Loader(object):
                 continue
         config_values['search_examples'] = search_examples
 
-        # Populate kwic metadata sorting variable with metadata which isn't empty
+        # Populate kwic metadata sorting and kwic biblio fields variables with metadata
         # Check if title and author are empty, if so, default to filename
         config_values["kwic_metadata_sorting_fields"] = []
         config_values["kwic_bibliography_fields"] = []
@@ -650,6 +651,10 @@ class Loader(object):
         if not config_values["kwic_metadata_sorting_fields"]:
             config_values["kwic_metadata_sorting_fields"] = ["filename"]
             config_values["kwic_bibliography_fields"] = ["filename"]
+
+        if "author" in config_values["search_examples"] and "title" in config_values["search_examples"]:
+            config_values["concordance_biblio_sorting"] = [("author", "title"), ("title", "author")]
+
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)
         print >> open(filename, 'w'), web_config

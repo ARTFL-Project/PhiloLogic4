@@ -41,6 +41,8 @@ def citations(hit, citation_hrefs, config, report="concordance"):
             if citation_object["link"]:
                 if citation_object["field"] == "title" or citation_object["field"] == "filename":
                     cite["href"] = citation_hrefs['doc']
+                elif report == "bibliography" and citation_object["field"] == "head":
+                    cite["href"] = make_absolute_object_link(config, hit.philo_id)
                 else:
                     params = [("report", "bibliography"), (citation_object["field"], '"%s"' % hit[citation_object["field"]])]
                     cite["href"] = make_absolute_query_link(config, params)

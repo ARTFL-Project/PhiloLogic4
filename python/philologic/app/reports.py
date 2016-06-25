@@ -67,7 +67,7 @@ def concordance_results(request, config):
 def bibliography_results(request, config):
     db = DB(config.db_path + '/data/')
     if request.no_metadata:
-        hits = db.get_all(db.locals['default_object_level'], request["sort_order"],)
+        hits = db.get_all(db.locals['default_object_level'], request["sort_order"], )
     else:
         hits = db.query(**request.metadata)
     start, end, n = page_interval(request.results_per_page, hits, request.start, request.end)
@@ -89,16 +89,24 @@ def bibliography_results(request, config):
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
         result_type = hit.type
-        if hit.type == "doc":
-            citation = citations(hit, citation_hrefs, config, report="bibliography")
+        citation = citations(hit, citation_hrefs, config, report="bibliography")
+        if config.dictionary_bibliography is False:
+            results.append({
+                'citation': citation,
+                'citation_links': citation_hrefs,
+                'philo_id': hit.philo_id,
+                "metadata_fields": metadata_fields
+            })
         else:
-            citation = citations(hit, citation_hrefs, config, report="concordance")
-        results.append({
-            'citation': citation,
-            'citation_links': citation_hrefs,
-            'philo_id': hit.philo_id,
-            "metadata_fields": metadata_fields
-        })
+            context = get_text_obj(hit, config, request, db.locals['word_regex'], images=False)
+            results.append({
+                'citation': citation,
+                'citation_links': citation_hrefs,
+                'philo_id': hit.philo_id,
+                "metadata_fields": metadata_fields,
+                "context": context
+            })
+
     bibliography_object["results"] = results
     bibliography_object['results_length'] = len(hits)
     bibliography_object['query_done'] = hits.done
@@ -139,9 +147,9 @@ def collocation_results(request, config):
 
     db = DB(config.db_path + '/data/')
     if request["collocate_distance"]:
-        hits = db.query(request["q"], "proxy", int(request['collocate_distance']), **request.metadata)
+        hits = db.query(request["q"], "proxy", int(request['collocate_distance']), raw_results=True, **request.metadata)
     else:
-        hits = db.query(request["q"], "cooc", request["arg"], **request.metadata)
+        hits = db.query(request["q"], "cooc", request["arg"], raw_results=True, **request.metadata)
     hits.finish()
 
     stored_sentence_id = None
@@ -154,7 +162,7 @@ def collocation_results(request, config):
     start_time = timeit.default_timer()
     try:
         for hit in hits[hits_done:]:
-            word_id = ' '.join([str(i) for i in hit.philo_id])
+            word_id = ' '.join([str(i) for i in hit[:6]]) + ' ' + str(hit[7])
             query = """select philo_name, parent, rowid from words where philo_id='%s'""" % word_id
             cursor.execute(query)
             result = cursor.fetchone()
@@ -207,77 +215,93 @@ def frequency_results(request, config, sorted=False):
     """reads through a hitlist. looks up request.frequency_field in each hit, and builds up a list of
        unique values and their frequencies."""
     db = DB(config.db_path + '/data/')
+    biblio_search = False
     if request.q == '' and request.no_q:
+        biblio_search = True
         if request.no_metadata:
-            hits = db.get_all(db.locals['default_object_level'])
+            hits = db.get_all(db.locals['default_object_level'], sort_order=["rowid"], raw_results=True)
         else:
-            hits = db.query(**request.metadata)
+            hits = db.query(sort_order=["rowid"], raw_results=True, **request.metadata)
     else:
-        hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+        hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
 
     if sorted:
         hits.finish()
 
-    field_list = eval(simplejson.loads(request.frequency_field))
+    metadata_list = {}
+    c = db.dbh.cursor()
 
-    counts = defaultdict(int)
+    c.execute('select philo_id, %s from toms where %s is not null' % (request.frequency_field, request.frequency_field))
+    metadata_dict = {}
+    for i in c.fetchall():
+        philo_id, field = i
+        philo_id = tuple(int(s) for s in philo_id.split() if int(s))
+        metadata_dict[philo_id] = field
+
+    counts = {}
     frequency_object = {}
     start_time = timeit.default_timer()
     last_hit_done = request.start
 
+    obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
+    metadata_type = db.locals["metadata_types"][request.frequency_field]
     try:
-        for hit in hits[request.start:]:
-            key = tuple((field, hit[field]) for field in field_list)
-            counts[key] += 1
+        object_level = obj_dict[metadata_type]
+    except KeyError:
+        # metadata_type == "div"
+        pass
 
-            # avoid timeouts by splitting the query if more than request.max_time (in seconds) has been spent in the loop
+    try:
+        for philo_id in hits[request.start:]:
+            orig_id = philo_id
+            if not biblio_search:
+                philo_id = tuple(list(philo_id[:6]) + [philo_id[7]])
+            if metadata_type == "div":
+                key = ""
+                for div in ["div3", "div2", "div1"]:
+                    if philo_id[:obj_dict[div]] in metadata_dict:
+                        key = metadata_dict[philo_id[:obj_dict[div]]]
+                while not key:
+                    if philo_id[:4] in metadata_dict:
+                        key = metadata_dict[philo_id[:4]]
+                        break
+                    if philo_id[:5] in metadata_dict:
+                        key = metadata_dict[philo_id[:5]]
+                        break
+                    break
+                if not key:
+                    last_hit_done += 1
+                    import sys
+                    print >> sys.stderr, "FAILED", philo_id
+                    continue
+            else:
+                try:
+                    key = metadata_dict[philo_id[:object_level]]
+                except:
+                    last_hit_done += 1
+                    import sys
+                    print >> sys.stderr, "FAILED", philo_id
+                    continue
+            if key not in counts:
+                counts[key] = {"count": 0, 'metadata': {request.frequency_field: key}}
+                counts[key]["url"] = make_absolute_query_link(config,
+                                                              request,
+                                                              frequency_field="",
+                                                              start="0",
+                                                              end="0",
+                                                              report=request.report,
+                                                              script='',
+                                                              **{request.frequency_field: '"%s"' % key})
+            counts[key]["count"] += 1
+
+            # avoid timeouts by splitting the query if more than
+            # request.max_time (in seconds) has been spent in the loop
             elapsed = timeit.default_timer() - start_time
             last_hit_done += 1
             if elapsed > 5:
                 break
 
-        table = {}
-        for key, count in counts.iteritems():
-            # for each item in the table, we modify the query params to
-            # generate a link url.
-            # Make a distinct copy for each key in case we modify it below
-            metadata = dict(request.metadata)
-
-            # Build a label starting with the first value as the main value
-            first_metatada_key, first_metadata_value = key[0]
-            label = first_metadata_value or "NULL"
-            metadata[first_metatada_key] = first_metadata_value.encode('utf-8', 'ignore') or "NULL"
-            append_to_label = []
-            for metadata_key, metadata_value in key[1:]:
-                metadata_value = metadata_value.strip()
-                if not metadata_value:
-                    # replace NULL with '[None]', 'N.A.', 'Untitled', etc.
-                    metadata[metadata_key] = "NULL"
-                else:
-                    # we want to run exact queries on defined values.
-                    metadata[metadata_key] = metadata_value.encode('utf-8', 'ignore')
-                    append_to_label.append(metadata_value)
-            # Add parentheses to other value, as they are secondary
-            if append_to_label:
-                label = label + ' (' + ', '.join(append_to_label) + ')'
-
-            # Quote metadata to force exact matches on metadata
-            for m in metadata:
-                if m not in request.metadata:  # skip metadata already in original query: this could be a glob search
-                    if metadata[m] and m != "date" and metadata[m] != "NULL":
-                        if not metadata[m].startswith('"'):
-                            metadata[m] = '"%s"' % metadata[m]
-            # Now build the url from request.
-            url = make_absolute_query_link(config,
-                                           request,
-                                           frequency_field="",
-                                           start="0",
-                                           end="0",
-                                           report=request.report,
-                                           script='',
-                                           **metadata)
-            table[label] = {'count': count, 'url': url, 'metadata': metadata}
-        frequency_object['results'] = table
+        frequency_object['results'] = counts
         frequency_object["hits_done"] = last_hit_done
         if last_hit_done == len(hits):
             frequency_object['more_results'] = False
@@ -452,9 +476,10 @@ def generate_time_series(request, config):
     # Generate date ranges
     interval = int(request.year_interval)
     date_ranges = []
-    for i in xrange(start_date, end_date, interval):
-        start = i
-        end = i + interval - 1
+    if interval == 1:  # Make sure last date gets included in for loop below
+        end_date += 1
+    for start in xrange(start_date, end_date, interval):
+        end = start + interval - 1
         if end > end_date:
             end = end_date
         date_range = "%d-%d" % (start, end)
@@ -468,9 +493,9 @@ def generate_time_series(request, config):
     max_time = request.max_time or 10
     for start_range, date_range in date_ranges:
         request.metadata[config.time_series_year_field] = date_range
-        hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+        hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
         hits.finish()
-        params = {report: "concordance", start: "0", end: "0"}
+        params = {"report": "concordance", "start": "0", "end": "0"}
         params[config.time_series_year_field] = date_range
         url = make_absolute_query_link(config, request, **params)
         absolute_count[start_range] = {"label": start_range, "count": len(hits), "url": url}
@@ -488,9 +513,9 @@ def generate_time_series(request, config):
         c.execute(query)
         date_counts[start_range] = c.fetchone()[0] or 0
         total_hits += len(hits)
-        print >> sys.stderr, "TOTAL", total_hits
         elapsed = timeit.default_timer() - start_time
-        # avoid timeouts by splitting the query if more than request.max_time (in seconds) has been spent in the loop
+        # avoid timeouts by splitting the query if more than request.max_time
+        # (in seconds) has been spent in the loop
         if elapsed > int(max_time):
             last_date_done = start_range
             break
@@ -653,7 +678,8 @@ def neighboring_object_id(db, philo_id, width):
     philo_id = str(" ".join(philo_id))
     obj = db[philo_id]
     if obj['philo_name'] == '__philo_virtual' and obj["philo_type"] != "div1":
-        # Remove the last number (1) in the philo_id and point to one object level lower
+        # Remove the last number (1) in the philo_id and point to one object
+        # level lower
         philo_id = ' '.join(philo_id.split()[:-1])
     return philo_id
 
@@ -686,7 +712,7 @@ def build_filter_list(request, config):
         if os.path.isabs(config.stopwords):
             filter_file = open(config.stopwords)
         else:
-            filter_file = os.path.join(config.db_path, config.stopwords)
+            return ["stopwords list not found"]
         filter_num = float("inf")
     else:
         filter_file = open(config.db_path + '/data/frequencies/word_frequencies')
@@ -713,15 +739,15 @@ def kwic_hit_object(hit, config, db):
     for metadata in db.locals['metadata_fields']:
         metadata_fields[metadata] = hit[metadata].strip()
 
-    ## Get all links and citations
+    # Get all links and citations
     citation_hrefs = citation_links(db, config, hit)
     citation = citations(hit, citation_hrefs, config)
 
-    ## Determine length of text needed
+    # Determine length of text needed
     byte_distance = hit.bytes[-1] - hit.bytes[0]
     length = config.concordance_length + byte_distance + config.concordance_length
 
-    ## Get concordance and align it
+    # Get concordance and align it
     bytes, start_byte = adjust_bytes(hit.bytes, config.concordance_length)
     conc_text = get_text(hit, start_byte, length, config.db_path)
     conc_text = format_strip(conc_text, bytes)

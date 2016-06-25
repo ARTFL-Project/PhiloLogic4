@@ -28,14 +28,16 @@
                     scope.concKwic.loading = false;
                 });
                 scope.moreContext = function($event, resultNumber) {
-                    var element = angular.element($event.currentTarget).parents('.philologic-occurrence').find('.philologic_context');
+                    var clickTarget = angular.element($event.currentTarget);
+                    var element = clickTarget.parents('.philologic-occurrence').find('.philologic_context');
                     var defaultElement = element.find('.default-length');
                     var moreContextElement = element.find('.more-length');
                     if (defaultElement.css('display') == "none") {
-                        moreContextElement.hide()
+                        moreContextElement.hide();
                         defaultElement.velocity('fadeIn', {
                             duration: 300
                         });
+                        clickTarget.text("More");
                     } else {
                         if (moreContextElement.children().length == 0) {
                             var extraParams = {
@@ -49,12 +51,14 @@
                                         duration: 300
                                     });
                                 });
+                                clickTarget.text("Less");
                             });
                         } else {
                             defaultElement.hide();
                             moreContextElement.velocity('fadeIn', {
                                 duration: 300
                             });
+                            clickTarget.text("Less");
                         }
                     }
                 }
@@ -62,7 +66,7 @@
         }
     }
 
-    function kwic($rootScope, $location, $http, URL, request, defaultDiacriticsRemovalMap, descriptionValues) {
+    function kwic($rootScope, $location, $http, URL, request, defaultDiacriticsRemovalMap, descriptionValues, sortedKwicCache) {
         var mergeLists = function(list1, list2) {
             for (var i = 0; i < list2.length; i += 1) {
                 list1.push(list2[i]);
@@ -85,14 +89,12 @@
                     } else {
                         queryParams.start = '0';
                         queryParams.end = '0';
-                        descriptionValues.sortedKwic = {
-                            results: scope.sortedResults,
-                            queryObject: angular.extend({}, queryParams, {
-                                first: queryParams.first_kwic_sorting_option,
-                                second: queryParams.first_kwic_sorting_option,
-                                third: queryParams.third_kwic_sorting_option
-                            })
-                        }
+                        sortedKwicCache.results = scope.sortedResults;
+                        sortedKwicCache.queryObject = angular.extend({}, queryParams, {
+                            first: queryParams.first_kwic_sorting_option,
+                            second: queryParams.second_kwic_sorting_option,
+                            third: queryParams.third_kwic_sorting_option
+                        })
                         getKwicResults(scope, hitsDone);
                         scope.concKwic.loading = false;
                     }
@@ -157,7 +159,11 @@
                     label: 'words to the right',
                     field: 'right'
                 }];
-                var sortKeys = {"q": "searched term(s)", "left": 'words to the left', "right": 'words to the right'}
+                var sortKeys = {
+                    "q": "searched term(s)",
+                    "left": 'words to the left',
+                    "right": 'words to the right'
+                }
                 for (var i = 0; i < $rootScope.philoConfig.kwic_metadata_sorting_fields.length; i += 1) {
                     var field = $rootScope.philoConfig.kwic_metadata_sorting_fields[i];
                     if (field in scope.philoConfig.metadata_aliases) {
@@ -241,8 +247,8 @@
                             second: queryParams.second_kwic_sorting_option,
                             third: queryParams.third_kwic_sorting_option
                         });
-                        if (angular.equals(descriptionValues.sortedKwic.queryObject, currentQueryObject)) {
-                            scope.sortedResults = descriptionValues.sortedKwic.results;
+                        if (angular.equals(sortedKwicCache.queryObject, currentQueryObject)) {
+                            scope.sortedResults = sortedKwicCache.results;
                             getKwicResults(scope, results.data.results_length)
                             scope.concKwic.loading = false;
                         } else {
@@ -270,13 +276,36 @@
         }
     }
 
-    function bibliography($rootScope) {
+    function bibliography($rootScope, philoConfig) {
+        var dictionaryBibliography = function(data) {
+            var groupedResults = [];
+            var currentTitle = data.results[0].metadata_fields.title;
+            var titleGroup = [];
+            for (var i=0; i < data.results.length; i+=1) {
+                if (data.results[i].metadata_fields.title !== currentTitle) {
+                    groupedResults.push(titleGroup);
+                    titleGroup = [];
+                    currentTitle = data.results[i].metadata_fields.title;
+                }
+                data.results[i].position = i +1;
+                titleGroup.push(data.results[i]);
+                if (i+1 == data.results.length) {
+                    groupedResults.push(titleGroup);
+                }
+            }
+            data.results = groupedResults;
+            return data;
+        }
         return {
             templateUrl: 'app/components/concordanceKwic/bibliography.html',
             replace: true,
             link: function(scope) {
                 scope.concKwic.resultsPromise.then(function(results) {
-                    scope.results = results.data;
+                    if (!philoConfig.dictionary_bibliography) {
+                        scope.results = results.data;
+                    } else {
+                        scope.results = dictionaryBibliography(results.data);
+                    }
                     scope.concKwic.description = angular.extend({}, scope.results.description, {
                         resultsLength: scope.results.results_length
                     });
@@ -295,7 +324,6 @@
                     } else {
                         scope.metadataAddition.splice(itemIndex, 1);
                     }
-
                     $rootScope.formData.title = scope.metadataAddition.join(' | ');
                 }
             }

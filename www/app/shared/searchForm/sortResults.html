@@ -1,0 +1,22 @@
+<div class="row">
+  <div class="col-xs-12" style="margin-top: 10px;">
+    <div class="row">
+      <div class="col-xs-3 col-sm-2 col-md-2 text-row">
+        Sort results by
+      </div>
+      <div class="col-xs-6 col-sm-10">
+        <div class="dropdown">
+          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuSORT" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            {{ selectedSortValues }}
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuSORT">
+            <li ng-repeat="value in sortValues">
+                <a href="#" ng-click="sortChoice(value)">{{ value.label }}</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

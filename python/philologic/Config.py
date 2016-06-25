@@ -20,42 +20,49 @@ db_locals_defaults = {
         'comment': '',
         'index': 2
     },
+    'metadata_query_types': {
+        'value': {},
+        'comment': '''# metadata_query_types determines how these fields are stored in SQLite. Three types are possible:
+                      # string, integer, date. By default, all fields are stored as strings unless defined otherwise in the optional
+                      # load_config.py file. DISABLED AT THIS TIME.''',
+        'index': 3
+    },
     'normalized_fields': {
         'value': [],
         'comment': '',
-        'index': 3
+        'index': 4
     },
     'word_regex': {
         'value': '([\\w]+)',
         'comment': '# Regex used for tokenizing outgoing text',
-        'index': 4
+        'index': 5
     },
     'punct_regex': {
         'value': '([\\.?!])',
         'comment': '# Regex used for punctuation',
-        'index': 5
+        'index': 6
     },
     'default_object_level': {
         'value': 'doc',
         'comment': '# This defines the default navigation element in your database',
-        'index': 6
+        'index': 7
     },
     'lowercase_index': {
         'value': True,
         'comment':
         '# This defines whether all terms in the index have been lowercased. If so, input searches will be lowercased',
-        'index': 7
+        'index': 8
     },
     'debug': {
         'value': False,
         'comment': '# If set to True, this enabled debugging messages to be printed out to the Apache error log',
-        'index': 8
+        'index': 9
     },
     'secret': {
         'value': '',
         'comment':
         '# The secret value is a random string to be used to generate a secure cookie for access control. The string value can be anything.',
-        'index': 9
+        'index': 10
     }
 }
 db_locals_header = '''
@@ -123,7 +130,7 @@ web_config_defaults = {
         'value': [],
         'comment': '''
                # The facets variable sets which metadata field can be used as a facet
-               # The object format is a list of objects like the following: [{'Author': ['author']}, {'Title': ['title', 'author']}
+               # The object format is a list of metadata like the following: ['author', 'title', 'year'}
                # The dict key should describe what the facets will do, and the dict value, which has to be a list,
                # should list the metadata to be used for the frequency counts''',
         'index': 8
@@ -170,6 +177,12 @@ web_config_defaults = {
         '# The dictionary variable enables a different search interface with the headword as its starting point. It is turned off by default',
         'index': 14
     },
+    'dictionary_bibliography': {
+        'value': False,
+        'comment': '''# The dictionary_bibliography variable enables a different a bibliography report where entries are displayed
+                   #in their entirety and grouped under the same title. It is turned off by default''',
+        'index': 14
+    },
     'landing_page_browsing_type': {
         'value': 'default',
         'comment':
@@ -214,7 +227,7 @@ web_config_defaults = {
     },
     'concordance_citation': {
         'value': [{"field": "author", "style": "small-caps", "link": False},
-                  {"field": "title", "style": "small-caps, italic, bold", "link": False},
+                  {"field": "title", "style": "small-caps, italic, bold", "link": True},
                   {"field": "year", "style": "brackets", "link": False}],
         'comment': '''
                # The concordance_citation variable define how and in what field order citations are displayed in concordance reports.
@@ -225,7 +238,7 @@ web_config_defaults = {
     },
     'bibliography_citation': {
         'value': [{"field": "title", "style": "italic, small-caps, bold", "link": True},
-                  {"field": "author", "style": "small-caps", "link": False},
+                  {"field": "author", "style": "small-caps", "link": True},
                   {"field": "year", "style": "brackets", "link": False}],
         'comment': '''
                # The bibligraphy_citation variable define how and in what field order citations are displayed in bibliography reports.
@@ -252,26 +265,39 @@ web_config_defaults = {
     'kwic_bibliography_fields': {
         'value': [],
         'comment': '''
-                # The kwic_bibliography_fields variable variable defines which bibliography fields will be displayed in the KWIC view. It should be
+                # The kwic_bibliography_fields variable  defines which bibliography fields will be displayed in the KWIC view. It should be
                 # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.
                 # If the variable is an empty list, filename will be used.
                 ''',
         'index': 22
+    },
+    'concordance_biblio_sorting': {
+        'value': [],
+        'comment': '''
+                # The concordance_biblio_sorting variable allows you to pick wich metadata field can be used for sorting concordance or bibliography results.
+                # It is a list of tuples where multiple metadata fields can be used for sorting, such as [('author', 'title'), ('year', 'author', 'title')].
+                ''',
+        'index': 23
     },
     'kwic_metadata_sorting_fields': {
         'value': [],
         'comment': '''
                 # The kwic_metadata_sorting_fields variable allows you to pick wich metadata field can be used for sorting KWIC results.
                 ''',
-        'index': 23
+        'index': 24
     },
-    'time_series_year_field':{
+    'time_series_year_field': {
         'value': 'year',
         'comment': '''
                 # The time_series_year_field variable defines which metadata field to use for time series. The year field is built at load time by finding the earliest 4 digit number
                 # in multiple date fields.
                 ''',
-        'index': 24
+        'index': 25
+    },
+    'time_series_interval': {
+        'value': 10,
+        'comment': '# The time_series_interval variable defines the default year span used for time series.',
+        'index': 26
     },
     'title_prefix_removal': {
         'value': [],
@@ -281,7 +307,7 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-        'index': 25
+        'index': 27
     },
     'page_images_url_root': {
         'value': '',
@@ -291,7 +317,7 @@ web_config_defaults = {
                  # <pb fac="filename.jpg"> or <pb id="filename.jpg">
                  # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
                  ''',
-        'index': 26
+        'index': 28
     },
     'logo': {
         'value': '',
@@ -300,14 +326,15 @@ web_config_defaults = {
                   # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
                   # it starts with http://. If no logo is defined, no picture will be displayed.
                   ''',
-        'index': 27
+        'index': 29
     },
     'header_in_toc': {
         'value': False,
         'comment': '''
                   # The header_in_toc variable defines whether to display a button to show the header in the table of contents
                   ''',
-        'index': 28
+        'index': 30
+
     }
 }
 

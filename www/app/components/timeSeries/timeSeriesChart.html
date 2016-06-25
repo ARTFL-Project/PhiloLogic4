@@ -1,7 +1,11 @@
 <div id="time-series">
-    <h5 style="position: absolute; top: -25px; text-align: center; width: 100%;">
-        <span ng-if="frequencyType == 'relative_time'">Counts per 10,000 words for every {{ formData.year_interval }} years</span>
-        <span ng-if="frequencyType !== 'relative_time'">Raw counts for every {{ formData.year_interval }} years</span>
-    </h5>
-    <canvas id="bar" class="chart chart-bar" chart-data="data" chart-labels="dateList" chart-series="series" chart-options="chart_options" chart-click="goToConcordance" height="{{ height }}"></canvas>
+    <div id="time-series-buttons" class="btn-group" role="group" aria-label="...">
+        <button type="button" class="btn btn-primary active" id="absolute_time" ng-click="toggleFrequency('absolute_time')">
+            Absolute Frequency
+        </button>
+        <button type="button" class="btn btn-primary" disabled="disabled" id="relative_time" ng-click="toggleFrequency('relative_time')">
+            Relative Frequency
+        </button>
+    </div>
+    <canvas id="bar" class="chart" height="{{ height }}"></canvas>
 </div>

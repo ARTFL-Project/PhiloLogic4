@@ -313,26 +313,15 @@ def tree_tagger(tt_path, param_file, maxlines=20000):
     return tag_words
 
 
-def evaluate_word(word, word_pattern):
-    word = word.decode('utf-8', 'ignore')
-    if word_pattern.search(word) and len(word) > 1:
-        return True
-    else:
-        return False
-
-
 def store_in_plain_text(*types):
     object_types = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
     obj_to_track = []
     for obj in types:
-        if obj not in object_types:
-            print >> sys.stderr, "%s object type not supported",
-            print >> sys.stderr, "only 'doc', 'div1', 'div2' and 'div3' are supported"
         obj_to_track.append(object_types[obj])
 
     def inner_store_in_plain_text(loader_obj, text):
         files_path = loader_obj.destination + '/plain_text_objects/'
-        word_pattern = re.compile('[^\W\d_]', re.UNICODE)
+        token = re.compile(r"%s" % loader_obj.token_regex, re.I)
         try:
             os.mkdir(files_path)
         except OSError:
@@ -347,7 +336,7 @@ def store_in_plain_text(*types):
                 if type != 'word':
                     continue
                 # Check if we're in the top level object
-                if evaluate_word(word, word_pattern):
+                if token.search(word):
                     philo_id = id.split()[:obj_depth]
                     if not old_philo_id:
                         old_philo_id = philo_id

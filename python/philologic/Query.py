@@ -22,7 +22,8 @@ def query(db,
           limit=3000,
           filename="",
           query_debug=False,
-          sort_order=None):
+          sort_order=None,
+          raw_results=False):
     sys.stdout.flush()
     tstart = datetime.now()
 
@@ -92,7 +93,7 @@ def query(db,
             os._exit(0)
     else:
         hl.close()
-        return HitList.HitList(filename, words_per_hit, db, sort_order=sort_order)
+        return HitList.HitList(filename, words_per_hit, db, sort_order=sort_order, raw=raw_results)
 
 
 def get_expanded_query(hitlist):
@@ -188,21 +189,8 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
             if kind == "NOT":
                 exclude = group[i + 1:]
                 group = group[:i]
-
-                for kind, token in exclude:
-                    if kind == "TERM":
-                        term_exclude.append((kind, token))
-                    if kind == "QUOTE":
-                        quote_exclude.append((kind, token))
                 break
 
-        #print >> sys.stderr, "OUTPUT", repr(dest_fh)
-
-        # set up the basic filter to get the terms sorted and ready for the search engine
-        #        if len(group) > 1:
-        #            cut_proc = subprocess.Popen("cut -f 2", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
-        #        else:
-        #            cut_proc = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE,stdout=dest_fh, shell=True)
         cut_proc = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE, stdout=dest_fh, shell=True)
         filter_inputs = [cut_proc.stdin]
         filter_procs = [cut_proc]

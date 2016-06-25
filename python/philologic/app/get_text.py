@@ -27,7 +27,7 @@ def get_concordance_text(db, hit, path, context_size):
     return conc_text
 
 
-def get_text_obj(obj, config, request, word_regex, note=False):
+def get_text_obj(obj, config, request, word_regex, note=False, images=True):
     path = config.db_path
     filename = obj.doc.filename
     if filename and os.path.exists(path + "/data/TEXT/" + filename):
@@ -50,7 +50,10 @@ def get_text_obj(obj, config, request, word_regex, note=False):
 
     formatted_text, imgs = format_text_object(obj, raw_text, config, request, word_regex, bytes=bytes, note=note)
     formatted_text = formatted_text.decode("utf-8", "ignore")
-    return formatted_text, imgs
+    if images:
+        return formatted_text, imgs
+    else:
+        return formatted_text
 
 
 def get_tei_header(request, config):
