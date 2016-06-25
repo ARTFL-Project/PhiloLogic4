@@ -50,7 +50,7 @@ class XMLParser(object):
                  pseudo_empty_tags=[],
                  filtered_words=[],
                  known_metadata=["doc", "div1", "div2", "div3", "para", "sent", "word"],
-                 tag_to_obj=DefaultTagToObjMap,
+                 tag_to_obj_map=DefaultTagToObjMap,
                  metadata_to_parse=DefaultMetadataToParse,
                  **kwargs):
         self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
@@ -63,7 +63,7 @@ class XMLParser(object):
         else:
             self.token_regex = re.compile(r"%s" % TokenRegex, re.I)
 
-        self.tag_to_obj_map = tag_to_obj
+        self.tag_to_obj_map = tag_to_obj_map
 
         self.metadata_to_parse = {}
         for obj in metadata_to_parse:

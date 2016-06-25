@@ -58,8 +58,8 @@ class Loader(object):
         self.token_regex = loader_options["token_regex"]
 
         self.parser_defaults = {}
-        for option in ["parser_factory", "doc_xpaths", "token_regex", "metadata_to_parse", "pseudo_empty_tags",
-                       "suppress_tags", "load_filters"]:
+        for option in ["parser_factory", "doc_xpaths", "token_regex", "tag_to_obj_map", "metadata_to_parse",
+                       "pseudo_empty_tags", "suppress_tags", "load_filters"]:
             self.parser_defaults[option] = loader_options[option]
 
         try:
@@ -233,7 +233,8 @@ class Loader(object):
 
         print "done."
 
-        print "%s: Sorting files by the following metadata fields: %s..." % (time.ctime(), ", ".join([i for i in sort_by_field])),
+        print "%s: Sorting files by the following metadata fields: %s..." % (time.ctime(),
+                                                                             ", ".join([i for i in sort_by_field])),
 
         load_metadata = sort_list(load_metadata, sort_by_field)
         self.sort_order = sort_by_field  # to be used for the sort by concordance biblio key in web config
@@ -290,7 +291,7 @@ class Loader(object):
                     self.metadata_types[k] = "doc"
                     # don't need to check for conflicts, since doc is first.
 
-        # Adding non-doc level metadata
+                    # Adding non-doc level metadata
         self.metadata_hierarchy.append([])
         for element_type in self.parser_defaults["metadata_to_parse"]:
             if element_type != "page" and element_type != "ref":
@@ -356,6 +357,7 @@ class Loader(object):
                                             text["id"],
                                             text["size"],
                                             known_metadata=metadata,
+                                            tag_to_obj_map=self.parser_defaults["tag_to_obj_map"],
                                             metadata_to_parse=self.parser_defaults["metadata_to_parse"],
                                             filtered_words=self.filtered_words,
                                             **options)
@@ -560,7 +562,7 @@ class Loader(object):
                 depth = 7
             elif table == "refs":
                 file_in = self.destination + '/WORK/all_refs'
-                indices = [("parent",),  ("target",), ("type",)]
+                indices = [("parent", ), ("target", ), ("type", )]
                 depth = 9
             post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)

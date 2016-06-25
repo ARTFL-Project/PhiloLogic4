@@ -101,6 +101,8 @@ def format_concordance(text, word_regex, bytes=[]):
     allowed_tags = set(['philoHighlight', 'l', 'ab', 'ln', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx', 'br'])
     text = u''
     for el in xml.iter():
+        if el.tag.startswith("DIV"):
+            el.tag = el.tag.lower()
         if el.tag not in allowed_tags:
             el.tag = 'span'
         elif el.tag == "ab" or el.tag == "ln":
@@ -183,6 +185,8 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
     c = obj.db.dbh.cursor()
     for el in xml.iter():
         try:
+            if el.tag.startswith("DIV"):
+                el.tag = el.tag.lower()
             if el.tag == "sc" or el.tag == "scx":
                 el.tag = "span"
                 el.attrib["class"] = "small-caps"
