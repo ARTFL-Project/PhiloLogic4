@@ -36,7 +36,7 @@ Just run the install.sh in the top level directory to install the C Core, Python
 
 ``./install.sh``
 
-### Global Configuration ###
+### <a name="global-config"></a>Global Configuration ###
 
 The installer creates a file in `/etc/philologic/philologic4.cfg` which contains several important global variables:
 
