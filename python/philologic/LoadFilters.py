@@ -180,6 +180,11 @@ def generate_refs(loader_obj, text):
     os.system(refscommand)
 
 
+def generate_lines(loader_obj, text):
+    lines_command = "cat %s | egrep \"^line\" > %s" % (text["raw"], text["lines"])
+    os.system(lines_command)
+
+
 def make_max_id(loader_obj, text):
     max_id = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     for line in open(text["words"]):
@@ -423,7 +428,7 @@ def fix_sentence_boundary(loader_obj, text):
 
 DefaultNavigableObjects = ("div1", "div2", "div3", "para")
 DefaultLoadFilters = [normalize_unicode_raw_words, make_word_counts, generate_words_sorted, make_object_ancestors,
-                      make_sorted_toms, prev_next_obj, generate_pages, prev_next_page, generate_refs, make_max_id]
+                      make_sorted_toms, prev_next_obj, generate_pages, prev_next_page, generate_refs, generate_lines, make_max_id]
 
 
 def set_load_filters(load_filters=DefaultLoadFilters, navigable_objects=DefaultNavigableObjects):

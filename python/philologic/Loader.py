@@ -29,12 +29,9 @@ sort_by_id = "-k 3,3n -k 4,4n -k 5,5n -k 6,6n -k 7,7n -k 8,8n -k 9,9n"
 object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
 
 blocksize = 2048  # index block size.  Don't alter.
-index_cutoff = 10  # index frequency cutoff.  Don't. alter.
+index_cutoff = 10  # index frequency cutoff.  Don't alter.
 
-# While these tables are loaded by default, you can override that default, although be aware
-# that you will only have reduced functionality if you do. It is strongly recommended that you
-# at least keep the 'toms' table from toms.db.
-DEFAULT_TABLES = ('toms', 'pages', 'refs', 'words')
+DEFAULT_TABLES = ('toms', 'pages', 'refs', 'lines', 'words')
 
 DEFAULT_OBJECT_LEVEL = "doc"
 
@@ -259,6 +256,7 @@ class Loader(object):
                                "sortedtoms": self.workdir + os.path.basename(x) + ".toms.sorted",
                                "pages": self.workdir + os.path.basename(x) + ".pages",
                                "refs": self.workdir + os.path.basename(x) + ".refs",
+                               "lines": self.workdir + os.path.basename(x) + ".lines",
                                "results": self.workdir + os.path.basename(x) + ".results"}
                               for n, x in enumerate(self.list_files())]
 
@@ -275,6 +273,7 @@ class Loader(object):
                                "sortedtoms": self.workdir + os.path.basename(d["filename"]) + ".toms.sorted",
                                "pages": self.workdir + os.path.basename(d["filename"]) + ".pages",
                                "refs": self.workdir + os.path.basename(d["filename"]) + ".refs",
+                               "lines": self.workdir + os.path.basename(d["filename"]) + ".lines",
                                "results": self.workdir + os.path.basename(d["filename"]) + ".results"}
                               for n, d in enumerate(data_dicts)]
 
@@ -428,6 +427,12 @@ class Loader(object):
             if not self.debug:
                 os.system("rm %s" % ref_file)
 
+        print "%s: joining lines" % time.ctime()
+        for line_file in glob(self.workdir + "/*lines"):
+            lines_status = os.system("cat %s >> %s/all_lines" % (line_file, self.workdir))
+            if not self.debug:
+                os.system("rm %s" % line_file)
+
     def merge_files(self, file_type, file_num=100):
         """This function runs a multi-stage merge sort on words
         Since PhilLogic can potentially merge thousands of files, we need to split
@@ -563,6 +568,10 @@ class Loader(object):
             elif table == "refs":
                 file_in = self.destination + '/WORK/all_refs'
                 indices = [("parent", ), ("target", ), ("type", )]
+                depth = 9
+            elif table == "lines":
+                file_in = self.destination + '/WORK/all_lines'
+                indices = [("doc_id", "start_byte", "end_byte")]
                 depth = 9
             post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)

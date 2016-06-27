@@ -28,14 +28,17 @@ DefaultTagToObjMap = {
     "list": "para",
     "q": "para",
     "pb": "page",
-    "ref": "ref"
+    "ref": "ref",
+    "l": "line",
+    "ab": "line"
 }
 
 DefaultMetadataToParse = {
     "div": ["head", "type", "n", "id", "vol"],
     "para": ["who"],
     "page": ["n", "id", "fac"],
-    "ref": ["target", "n", "type"]
+    "ref": ["target", "n", "type"],
+    "line": ["n"]
 }
 
 
@@ -70,7 +73,7 @@ class XMLParser(object):
             self.metadata_to_parse[obj] = set(metadata_to_parse[obj])
 
         # Initialize an OHCOVector Stack. operations on this stack produce all parser output.
-        self.v = OHCOVector.CompoundStack(self.types, self.parallel_type, docid=docid, out=output, ref="ref")
+        self.v = OHCOVector.CompoundStack(self.types, self.parallel_type, docid=docid, out=output, ref="ref", line="line")
 
         self.filesize = filesize
 
@@ -378,8 +381,24 @@ class XMLParser(object):
         # TODO: not sure I got this right...
         elif line_tag.search(tag):
             if self.in_line_group and self.line_group_break_sent:
-                self.v.push("sent", tag_name, self.start_byte)
+                self.v.push("sent", tag_name, start_byte)
                 self.v.pull("sent", self.bytes_read_in)
+            # Create line parallel object
+            self.v.push("line", tag_name, start_byte)
+            self.get_object_attributes(tag, tag_name, "line")
+            self.v["line"].attrib["doc_id"] = self.docid
+        elif closed_line_tag.search(tag):
+            self.v.pull("line", self.bytes_read_in)
+
+        if ab_tag.search(tag):
+            # Create line parallel object
+            self.v.push("line", tag_name, start_byte)
+            self.get_object_attributes(tag, tag_name, "line")
+            self.v["line"].attrib["doc_id"] = self.docid
+        elif closed_ab_tag.search(tag):
+            self.v.pull("line", self.bytes_read_in)
+
+
 
         # SENTENCE TAG: <s> </s>.  We have never seen a sample of these
         # but let's add the required code to note the beginning of a new
@@ -1014,7 +1033,9 @@ n_attribute = re.compile(r'n="([^"]*)', re.I)
 line_group_tag = re.compile(r'<lg\W', re.I)
 closed_line_group = re.compile(r'</lg\W', re.I)
 line_tag = re.compile(r'<l\W', re.I)
+ab_tag = re.compile(r'<ab\W', re.I)
 closed_line_tag = re.compile(r'</l\W', re.I)
+closed_ab_tag = re.compile(r'</ab\W', re.I)
 sentence_tag = re.compile(r'<s\W', re.I)
 closed_sentence_tag = re.compile(r'</s\W', re.I)
 front_tag = re.compile(r'<front\W', re.I)
