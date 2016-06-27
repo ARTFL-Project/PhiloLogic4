@@ -139,7 +139,7 @@ doc_xpaths =  {
 
 # Maps any given tag to one of PhiloLogic's types. Available types are div, para, page, and ref.
 # Below is the default mapping.
-tag_to_obj = {
+tag_to_obj_map = {
     "div": "div",
     "div1": "div",
     "div2": "div",

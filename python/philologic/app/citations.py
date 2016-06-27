@@ -106,4 +106,11 @@ def citations(hit, citation_hrefs, config, report="concordance"):
             if page_n:
                 citation.append({"href": citation_hrefs["page"], "label": page_n, "style": None, "separator": True})
 
+        # Line number
+        line_obj = hit.line
+        if line_obj["n"]:
+            line_n = "line %s" % str(line_obj['n'])
+            if line_n:
+                citation.append({"href": "", "label": line_n, "style": None, "separator": True})
+
     return citation

@@ -68,6 +68,11 @@ class DB:
         c.execute("SELECT * FROM pages WHERE philo_id=? LIMIT 1;", (page_id_s, ))
         return c.fetchone()
 
+    def get_line(self, byte_offset, doc_id):
+        c = self.dbh.cursor()
+        c.execute("SELECT * FROM lines WHERE doc_id=? and start_byte < ? and end_byte > ? LIMIT 1", (doc_id, byte_offset, byte_offset))
+        return c.fetchone()
+
     def get_all(self, philo_type="doc", sort_order=["rowid"], raw_results=False):
         """ get all objects of type philo_type """
         hash = hashlib.sha1()

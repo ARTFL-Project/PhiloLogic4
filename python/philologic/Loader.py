@@ -29,12 +29,9 @@ sort_by_id = "-k 3,3n -k 4,4n -k 5,5n -k 6,6n -k 7,7n -k 8,8n -k 9,9n"
 object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
 
 blocksize = 2048  # index block size.  Don't alter.
-index_cutoff = 10  # index frequency cutoff.  Don't. alter.
+index_cutoff = 10  # index frequency cutoff.  Don't alter.
 
-# While these tables are loaded by default, you can override that default, although be aware
-# that you will only have reduced functionality if you do. It is strongly recommended that you
-# at least keep the 'toms' table from toms.db.
-DEFAULT_TABLES = ('toms', 'pages', 'refs', 'words')
+DEFAULT_TABLES = ('toms', 'pages', 'refs', 'lines', 'words')
 
 DEFAULT_OBJECT_LEVEL = "doc"
 
@@ -58,8 +55,8 @@ class Loader(object):
         self.token_regex = loader_options["token_regex"]
 
         self.parser_defaults = {}
-        for option in ["parser_factory", "doc_xpaths", "token_regex", "metadata_to_parse", "pseudo_empty_tags",
-                       "suppress_tags", "load_filters"]:
+        for option in ["parser_factory", "doc_xpaths", "token_regex", "tag_to_obj_map", "metadata_to_parse",
+                       "pseudo_empty_tags", "suppress_tags", "load_filters"]:
             self.parser_defaults[option] = loader_options[option]
 
         try:
@@ -233,7 +230,8 @@ class Loader(object):
 
         print "done."
 
-        print "%s: Sorting files by the following metadata fields: %s..." % (time.ctime(), ", ".join([i for i in sort_by_field])),
+        print "%s: Sorting files by the following metadata fields: %s..." % (time.ctime(),
+                                                                             ", ".join([i for i in sort_by_field])),
 
         load_metadata = sort_list(load_metadata, sort_by_field)
         self.sort_order = sort_by_field  # to be used for the sort by concordance biblio key in web config
@@ -258,6 +256,7 @@ class Loader(object):
                                "sortedtoms": self.workdir + os.path.basename(x) + ".toms.sorted",
                                "pages": self.workdir + os.path.basename(x) + ".pages",
                                "refs": self.workdir + os.path.basename(x) + ".refs",
+                               "lines": self.workdir + os.path.basename(x) + ".lines",
                                "results": self.workdir + os.path.basename(x) + ".results"}
                               for n, x in enumerate(self.list_files())]
 
@@ -274,6 +273,7 @@ class Loader(object):
                                "sortedtoms": self.workdir + os.path.basename(d["filename"]) + ".toms.sorted",
                                "pages": self.workdir + os.path.basename(d["filename"]) + ".pages",
                                "refs": self.workdir + os.path.basename(d["filename"]) + ".refs",
+                               "lines": self.workdir + os.path.basename(d["filename"]) + ".lines",
                                "results": self.workdir + os.path.basename(d["filename"]) + ".results"}
                               for n, d in enumerate(data_dicts)]
 
@@ -290,7 +290,7 @@ class Loader(object):
                     self.metadata_types[k] = "doc"
                     # don't need to check for conflicts, since doc is first.
 
-        # Adding non-doc level metadata
+                    # Adding non-doc level metadata
         self.metadata_hierarchy.append([])
         for element_type in self.parser_defaults["metadata_to_parse"]:
             if element_type != "page" and element_type != "ref":
@@ -356,6 +356,7 @@ class Loader(object):
                                             text["id"],
                                             text["size"],
                                             known_metadata=metadata,
+                                            tag_to_obj_map=self.parser_defaults["tag_to_obj_map"],
                                             metadata_to_parse=self.parser_defaults["metadata_to_parse"],
                                             filtered_words=self.filtered_words,
                                             **options)
@@ -425,6 +426,12 @@ class Loader(object):
             refs_status = os.system("cat %s >> %s/all_refs" % (ref_file, self.workdir))
             if not self.debug:
                 os.system("rm %s" % ref_file)
+
+        print "%s: joining lines" % time.ctime()
+        for line_file in glob(self.workdir + "/*lines"):
+            lines_status = os.system("cat %s >> %s/all_lines" % (line_file, self.workdir))
+            if not self.debug:
+                os.system("rm %s" % line_file)
 
     def merge_files(self, file_type, file_num=100):
         """This function runs a multi-stage merge sort on words
@@ -560,7 +567,11 @@ class Loader(object):
                 depth = 7
             elif table == "refs":
                 file_in = self.destination + '/WORK/all_refs'
-                indices = [("parent",),  ("target",), ("type",)]
+                indices = [("parent", ), ("target", ), ("type", )]
+                depth = 9
+            elif table == "lines":
+                file_in = self.destination + '/WORK/all_lines'
+                indices = [("doc_id", "start_byte", "end_byte")]
                 depth = 9
             post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)

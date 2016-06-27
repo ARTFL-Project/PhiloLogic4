@@ -90,7 +90,7 @@ class CompoundStack(object):
     CompoundStack doesn't actually do deep object arithmetic or recursion--it handles parallel objects manually,
     and passes other calls on to the NewStack."""
 
-    def __init__(self, types, page, docid=0, out=None, ref="", factory=CompoundRecord, p_factory=ParallelRecord):
+    def __init__(self, types, page, docid=0, out=None, ref="", line="", factory=CompoundRecord, p_factory=ParallelRecord):
         self.stack = NewStack(types[:], out, factory)
         self.out = out
         self.v_max = self.stack.v_max
@@ -99,8 +99,11 @@ class CompoundStack(object):
         self.current_p = None
         self.ref = ref
         self.current_ref = None
+        self.line = line
+        self.current_line = None
         self.p = 0
         self.r = 0
+        self.l = 0
         self.p_factory = p_factory
 
     def __getitem__(self, n):
@@ -108,6 +111,8 @@ class CompoundStack(object):
             return self.current_p
         elif n == self.ref:
             return self.current_ref
+        elif n == self.line:
+            return self.current_line
         else:
             return self.stack[n]
 
@@ -119,6 +124,11 @@ class CompoundStack(object):
                 return False
         elif n == self.ref:
             if self.current_ref:
+                return True
+            else:
+                return False
+        elif n == self.line:
+            if self.current_line:
                 return True
             else:
                 return False
@@ -141,6 +151,12 @@ class CompoundStack(object):
             self.current_ref = self.p_factory(type, name, [self.stack.v[0], self.r])
             self.current_ref.attrib["start_byte"] = byte
             return self.current_ref
+        elif type == self.line:
+            self.pull(type, byte)
+            self.l += 1
+            self.current_line = self.p_factory(type, name, [self.stack.v[0], self.l])
+            self.current_line.attrib["start_byte"] = byte
+            return self.current_line
         else:
             self.stack.push(type, name, byte)
             if self.current_p:
@@ -156,6 +172,10 @@ class CompoundStack(object):
             if self.current_ref:
                 self.current_ref.attrib["end_byte"] = byte
                 print >> self.out, self.current_ref
+        elif type == self.line:
+            if self.current_line:
+                self.current_line.attrib["end_byte"] = byte
+                print >> self.out, self.current_line
         else:
             return self.stack.pull(type, byte)
 

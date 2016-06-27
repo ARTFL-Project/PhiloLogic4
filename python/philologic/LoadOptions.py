@@ -42,6 +42,7 @@ class LoadOptions(object):
         self.values["parser_factory"] = NewParser.XMLParser
         self.values["token_regex"] = NewParser.TokenRegex
         self.values["doc_xpaths"] = NewParser.DefaultDocXPaths
+        self.values["tag_to_obj_map"] = NewParser.DefaultTagToObjMap
         self.values["metadata_to_parse"] = NewParser.DefaultMetadataToParse
         self.values["pseudo_empty_tags"] = []
         self.values["suppress_tags"] = []
