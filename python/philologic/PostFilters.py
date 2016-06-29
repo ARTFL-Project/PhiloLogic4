@@ -13,7 +13,7 @@ from simplejson import loads
 
 def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
     def inner_make_sql_table(loader_obj):
-        print "%s: Loading the %s SQLite table..." % (time.ctime(), table),
+        print "%s: Loading the %s SQLite table..." % (time.ctime(), table)
         db_destination = os.path.join(loader_obj.destination, db_file)
         conn = sqlite3.connect(db_destination)
         conn.text_factory = str

@@ -120,6 +120,7 @@ class XMLParser(object):
         self.in_a_word_tag = False
         self.in_notes_div = False
         self.current_div1_id = ""
+        self.current_div_level = 0
 
     def parse(self, input):
         """Top level function for reading a file and printing out the output."""
@@ -463,7 +464,13 @@ class XMLParser(object):
         #   a structured table record with div type, and other attributes, along with
         #   the Philoid and head for searching under document levels.
         elif closed_div_tag.search(tag):
-            self.context_div_level = self.context_div_level - 1
+            if "div1" in tag_name:
+                self.v.pull("div1", self.bytes_read_in)
+            elif "div2" in tag_name:
+                self.v.pull("div2", self.bytes_read_in)
+            elif "div3" in tag_name:
+                self.v.pull("div3", self.bytes_read_in)
+            self.context_div_level -= 1
             self.no_deeper_objects = False
         elif div_tag.search(tag):
             self.context_div_level += 1
@@ -474,13 +481,14 @@ class XMLParser(object):
             if self.context_div_level < 1:
                 self.context_div_level = 1
 
-            div_level = div_num_tag.findall(tag)[0]
+            div_level = tag_name[-1]
             if not div_level.isdigit():
                 div_level = self.context_div_level
             elif div_level == "0" or int(div_level) > 3:
                 div_level = self.context_div_level
             else:
                 div_level = int(div_level)
+            self.context_div_level = div_level
 
             # TODO what to do with div0? See philo3???
 
@@ -519,6 +527,14 @@ class XMLParser(object):
                 self.get_object_attributes(tag, tag_name, object_type="div3")
 
             # TODO: unclear if we need to add EEBO hack when no subdiv objects...
+
+        # We are handling the case of index tags containing attributes which describe the parent div
+        # the type attrib has its value in the value attrib
+        elif tag_name == "index" and self.context_div_level != 0:
+            attrib = dict(self.get_attributes(tag))
+            div = "div%d" % self.context_div_level
+            if attrib["type"] in self.metadata_to_parse["div"]:
+                self.v[div].attrib[attrib["type"]] = attrib["value"]
 
         elif tag_name == "ref":
             self.v.push("ref", tag_name, start_byte)
