@@ -70,8 +70,11 @@ class DB:
 
     def get_line(self, byte_offset, doc_id):
         c = self.dbh.cursor()
-        c.execute("SELECT * FROM lines WHERE doc_id=? and start_byte < ? and end_byte > ? LIMIT 1", (doc_id, byte_offset, byte_offset))
-        return c.fetchone()
+        try:
+            c.execute("SELECT * FROM lines WHERE doc_id=? and start_byte < ? and end_byte > ? LIMIT 1", (doc_id, byte_offset, byte_offset))
+            return c.fetchone()
+        except sqlite3.OperationalError:
+            return ""
 
     def get_all(self, philo_type="doc", sort_order=["rowid"], raw_results=False):
         """ get all objects of type philo_type """

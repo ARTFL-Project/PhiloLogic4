@@ -86,7 +86,11 @@ class HitWrapper(object):
                             break
                     return val
                 elif f_type == "line":
-                    return LineWrapper(self.philo_id, self.bytes[0], self.db)["n"]
+                    try:
+                        return LineWrapper(self.philo_id, self.bytes[0], self.db)["n"]
+                    except IndexError:
+                        # Not a word hit
+                        return ""
                 else:
                     return self.ancestors[f_type][key]
             else:
