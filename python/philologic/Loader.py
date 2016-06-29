@@ -97,7 +97,7 @@ class Loader(object):
         load_metadata = []
         files = set(self.list_files())
         with open(bibliography_file) as input_file:
-            metadata_fields = input_file.readline().split("\t")
+            metadata_fields = input_file.readline().strip().split("\t")
             filename_index = metadata_fields.index("filename")
             for line in input_file:
                 file_metadata = {}
