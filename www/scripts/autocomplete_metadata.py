@@ -97,8 +97,6 @@ def format_query(q, field, db):
 
 def exact_word_pattern_search(term, path):
     command = ['egrep', '-awie', "[[:blank:]]?" + term, path]
-    import sys
-    print >> sys.stderr, "COMMAND", " ".join(command)
     grep = subprocess.Popen(command, stdout=subprocess.PIPE, env=environ)
     cut = subprocess.Popen(["cut", "-f", "1"],
                            stdin=grep.stdout,
