@@ -74,6 +74,8 @@ def landing_page_bibliography(request, config):
 
 
 def group_by_range(request_range, request, config):
+    import sys
+    print >> sys.stderr, "RANGE", request_range
     db = DB(config.db_path + '/data/')
     metadata_queried = request.group_by_field
     is_date = False

@@ -94,6 +94,7 @@
 
     function landingPageContent($rootScope, request) {
         var getContent = function(scope, query) {
+            console.log(query)
             scope.loadingContent = true;
             request.script({
                     script: 'get_landing_page_content.py',
@@ -126,8 +127,9 @@
                 if (!$.isEmptyObject(scope.philoConfig.default_landing_page_display)) {
                     var query = {
                         browseType: scope.philoConfig.default_landing_page_display,
-                        range: scope.philoConfig.default_landing_page_display.queries
+                        query: scope.philoConfig.default_landing_page_display.queries
                     }
+                    console.log(query)
                     getContent(scope, query);
                 }
                 attrs.$observe('name', function(query) {
