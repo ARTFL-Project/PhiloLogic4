@@ -16,6 +16,7 @@ from philologic.app import WebConfig
 from philologic.app import WSGIHandler
 
 environ = os.environ
+environ["PATH"] += ":/usr/local/bin/"
 environ["LANG"] = "C"
 
 

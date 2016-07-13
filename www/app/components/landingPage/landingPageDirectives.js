@@ -40,7 +40,6 @@
                     if (typeof($rootScope.philoConfig.default_landing_page_browsing.splitRanges[i]) === 'undefined') {
                         var browseType = scope.defaultLandingPageBrowsing[i];
                         scope.defaultLandingPageBrowsing[i].queries = createRanges(browseType.queries, 5);
-                        console.log(scope.defaultLandingPageBrowsing[i].queries)
                         $rootScope.philoConfig.default_landing_page_browsing.splitRanges[i] = scope.defaultLandingPageBrowsing[i].queries
                     } else {
                         scope.defaultLandingPageBrowsing[i].queries = $rootScope.philoConfig.default_landing_page_browsing.splitRanges[i];
@@ -100,7 +99,8 @@
                     group_by_field: query.browseType.group_by_field,
                     display_count: query.browseType.display_count,
                     is_range: query.browseType.is_range,
-                    query: query.query
+                    query: query.query,
+                    citation: JSON.stringify(query.browseType.citation)
                 })
                 .then(function(response) {
                     scope.resultGroups = response.data.content;
@@ -126,7 +126,7 @@
                 if (!$.isEmptyObject(scope.philoConfig.default_landing_page_display)) {
                     var query = {
                         browseType: scope.philoConfig.default_landing_page_display,
-                        range: scope.philoConfig.default_landing_page_display.queries
+                        query: scope.philoConfig.default_landing_page_display.queries
                     }
                     getContent(scope, query);
                 }

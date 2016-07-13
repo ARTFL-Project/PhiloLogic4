@@ -1,3 +1,4 @@
+import os
 import re
 import cgi
 import sys
@@ -9,6 +10,7 @@ import subprocess
 from QuerySyntax import parse_query, group_terms
 from HitList import NoHits
 
+os.environ["PATH"] += ":/usr/local/bin/"
 
 def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
     if db.locals['debug']:
@@ -211,8 +213,8 @@ def make_grouped_sql_clause(expanded, column):
 
 
 def metadata_pattern_search(term, path):
-    command = ['egrep', '-awie', "[[:blank:]]%s" % term, '%s' % path]
-    grep = subprocess.Popen(command, stdout=subprocess.PIPE)
+    command = ['egrep', '-awie', "[[:blank:]]?%s" % term, '%s' % path]
+    grep = subprocess.Popen(command, stdout=subprocess.PIPE, env=os.environ)
     cut = subprocess.Popen(["cut", "-f", "2"],
                            stdin=grep.stdout,
                            stdout=subprocess.PIPE)

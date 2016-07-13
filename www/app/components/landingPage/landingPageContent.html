@@ -3,18 +3,13 @@
         <ul class="row" ng-repeat="group in resultGroups | limitTo: displayLimit">
             <h4>{{ ::group.prefix }}</h4>
             <li class="{{ ::contentClass }}" ng-repeat="result in ::group.results">
-                    <a href="{{ ::result.url }}">
-                        <span ng-if="contentType !='author'">
-                            <i>{{ ::result.metadata.title }}</i>
-                            &nbsp;&nbsp;<b>&#124;&#124;</b>&nbsp;&nbsp;{{ ::result.metadata.author }}
-                        </span>
-                        <span ng-if="contentType == 'author'">
-                            {{ ::result.metadata.author }}
-                        </span>
-                    </a>
-                    <span ng-if="displayCount ==  'true'">
-                        &nbsp;({{ ::result.count }})
-                    </span>
+                <span class="citation" ng-repeat="citation in result.citation">
+                    <a ng-href="{{ ::citation.href }}" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style" ng-if="citation.href">{{ ::citation.label }}</a>
+                    <span ng-if="!citation.href" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style">{{ ::citation.label }}</span>
+                </span>
+                <span ng-if="displayCount ==  'true'">
+                    &nbsp;({{ ::result.count }})
+                </span>
             </li>
         </ul>
     </div>

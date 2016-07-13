@@ -23,11 +23,12 @@ def citation_links(db, config, i):
     return links
 
 
-def citations(hit, citation_hrefs, config, report="concordance"):
+def citations(hit, citation_hrefs, config, report="concordance", citation_type=[]):
     """ Returns a representation of a PhiloLogic object and all its ancestors
         suitable for a precise citation. """
 
-    citation_type = config[report + "_citation"]
+    if not citation_type:
+        citation_type = config[report + "_citation"]
     citation = []
 
     for pos, citation_object in enumerate(citation_type):
@@ -108,9 +109,12 @@ def citations(hit, citation_hrefs, config, report="concordance"):
 
         # Line number
         line_obj = hit.line
-        if line_obj["n"]:
-            line_n = "line %s" % str(line_obj['n'])
-            if line_n:
-                citation.append({"href": "", "label": line_n, "style": None, "separator": True})
+        try:
+            if line_obj["n"]:
+                line_n = "line %s" % str(line_obj['n'])
+                if line_n:
+                    citation.append({"href": "", "label": line_n, "style": None, "separator": True})
+        except TypeError:
+            pass
 
     return citation
