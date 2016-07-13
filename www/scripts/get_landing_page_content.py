@@ -28,7 +28,7 @@ def landing_page_content(environ, start_response):
         request_range = request_range.lower().split('-')
         results = group_by_range(request_range, request, config)
     else:
-        results = group_by_metadata(request)
+        results = group_by_metadata(request, config)
     yield results
 
 

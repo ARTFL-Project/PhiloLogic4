@@ -10,6 +10,7 @@ from operator import itemgetter
 import simplejson
 
 from philologic.DB import DB
+from citations import citations, citation_links
 
 
 def landing_page_bibliography(request, config):
@@ -74,10 +75,9 @@ def landing_page_bibliography(request, config):
 
 
 def group_by_range(request_range, request, config):
-    import sys
-    print >> sys.stderr, "RANGE", request_range
     db = DB(config.db_path + '/data/')
     metadata_queried = request.group_by_field
+    citation_types = simplejson.loads(request.citation)
     is_date = False
     try:
         int(request_range[0])
@@ -123,19 +123,14 @@ def group_by_range(request_range, request, config):
                     [i
                      for i in unicodedata.normalize("NFKD", initial_letter)
                      if not unicodedata.combining(i)]).upper().encode('utf8')
-            if metadata_queried == "title":
-                url = "navigate/%s/table-of-contents" % doc['philo_id'].split(
-                )[0]
-            elif not doc[metadata_queried]:
-                url = 'query?report=bibliography&%s=NULL' % metadata_queried
-            else:
-                url = 'query?report=bibliography&%s="%s"' % (
-                    metadata_queried, doc[metadata_queried])
+            obj = db[doc["philo_id"]]
+            links = citation_links(db, config, obj)
+            citation = citations(obj, links, config, report="landing_page", citation_type=citation_types)
             if initial not in content:
                 content[initial] = []
             content[initial].append({
                 "metadata": get_all_metadata(db, doc),
-                "url": url,
+                "citation": citation,
                 "count": doc['count']
             })
     results = []
@@ -146,16 +141,20 @@ def group_by_range(request_range, request, config):
                              "content": results})
 
 
-def group_by_metadata(request):
+def group_by_metadata(request, config):
+    citation_types = simplejson.loads(request.citation)
     db = DB(config.db_path + '/data/')
     c = db.dbh.cursor()
     query = '''select * from toms where philo_type="doc" and %s=?''' % request.group_by_field
     c.execute(query, (request.query, ))
     result_group = []
     for doc in c.fetchall():
+        obj = db[doc["philo_id"]]
+        links = citation_links(db, config, obj)
+        citation = citations(obj, links, config, report="landing_page", citation_type=citation_types)
         result_group.append({
             "metadata": get_all_metadata(db, doc),
-            "url": "navigate/%s/table-of-contents" % doc['philo_id'].split()[0]
+            "citation": citation
         })
     return simplejson.dumps({
         "display_count": request.display_count,

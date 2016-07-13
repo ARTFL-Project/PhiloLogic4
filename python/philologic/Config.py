@@ -194,13 +194,36 @@ web_config_defaults = {
                  "group_by_field": "author",
                  "display_count": True,
                  "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
-                 "is_range": True
+                 "is_range": True,
+                 'citation': [
+                    {'field': 'author',
+                     'style': 'small-caps',
+                     'link': True
+                    }
+                 ]
                 },
                 {"label": "Title",
                  "group_by_field": "title",
                  "display_count": False,
                  "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
-                 "is_range": True
+                 "is_range": True,
+                 'citation': [
+                    {
+                    'field': 'title',
+                    'style': 'small-caps, italic',
+                    'link': True
+                    },
+                    {
+                    'field': 'author',
+                    'style': '',
+                    'link': False
+                    },
+                    {
+                    'field': 'year',
+                    'style': 'brackets',
+                    'link': False
+                    }
+                ],
                 }],
         'comment': '''
                # The landing_page_browsing variable allows for configuration of navigation by metadata within the landing page.
@@ -370,6 +393,8 @@ class Config(object):
             execfile(self.filename, globals(), self.data)
             self.valid_config = True
 
+        self.time_series_status = True
+
     def __getitem__(self, item):
         return self.data[item]
 
@@ -405,6 +430,8 @@ class Config(object):
             if key not in written:
                 out_obj[key] = self.data[key]
                 written.append(key)
+        if self.time_series_status is False:
+            out_obj["search_reports"].remove("time_series")
         return json.dumps(out_obj)
 
 

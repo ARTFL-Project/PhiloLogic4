@@ -140,21 +140,21 @@ class Loader(object):
                 tree = etree.fromstring(header, parser)
                 trimmed_metadata_xpaths = []
                 for field in metadata_xpaths:
-                    if field not in data:
-                        for xpath in metadata_xpaths[field]:
-                            attr_pattern_match = re.search(r"@([^\/\[\]]+)$", xpath)
-                            if attr_pattern_match:
-                                xp_prefix = xpath[:attr_pattern_match.start(0)]
-                                attr_name = attr_pattern_match.group(1)
-                                elements = tree.findall(xp_prefix)
-                                for el in elements:
-                                    if el is not None and el.get(attr_name, ""):
-                                        data[field] = el.get(attr_name, "").encode("utf-8")
-                                        break
-                            else:
-                                el = tree.find(xpath)
-                                if el is not None and el.text is not None:
-                                    data[field] = el.text.encode("utf-8")
+                    for xpath in metadata_xpaths[field]:
+                        attr_pattern_match = re.search(r"@([^\/\[\]]+)$", xpath)
+                        if attr_pattern_match:
+                            xp_prefix = xpath[:attr_pattern_match.start(0)]
+                            attr_name = attr_pattern_match.group(1)
+                            elements = tree.findall(xp_prefix)
+                            for el in elements:
+                                if el is not None and el.get(attr_name, ""):
+                                    data[field] = el.get(attr_name, "").encode("utf-8")
+                                    break
+                        else:
+                            el = tree.find(xpath)
+                            if el is not None and el.text is not None:
+                                data[field] = el.text.encode("utf-8")
+                                break
                 trimmed_metadata_xpaths = [
                     (metadata_type, xpath, field)
                     for metadata_type in ["div", "para", "sent", "word", "page"]
