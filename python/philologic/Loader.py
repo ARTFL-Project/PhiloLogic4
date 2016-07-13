@@ -442,12 +442,12 @@ class Loader(object):
         if file_type == "words":
             suffix = "/*words.sorted.gz"
             open_file_command = "gunzip -c"
-            sort_command = "sort -m %s %s " % (sort_by_word, sort_by_id)
+            sort_command = "LANG=C sort -m %s %s " % (sort_by_word, sort_by_id)
             all_object_file = "/all_words_sorted.gz"
         elif file_type == "toms":
             suffix = "/*.toms.sorted"
             open_file_command = "cat"
-            sort_command = "sort -m %s " % sort_by_id
+            sort_command = "LANG=C sort -m %s " % sort_by_id
             all_object_file = "/all_toms_sorted.gz"
 
         # First we split the sort workload into chunks of 100 (default defined in the file_num keyword)
@@ -506,7 +506,7 @@ class Loader(object):
         offset = 0
 
         # unix one-liner for a frequency table
-        os.system('/bin/bash -c "cut -f 2 <(gunzip -c %s) | uniq -c | sort -rn -k 1,1> %s"' %
+        os.system('/bin/bash -c "cut -f 2 <(gunzip -c %s) | uniq -c | LANG=C sort -rn -k 1,1> %s"' %
                   (self.workdir + "/all_words_sorted.gz", self.workdir + "/all_frequencies"))
 
         # now scan over the frequency table to figure out how wide (in bits) the frequency fields are, and how large the block file will be.
