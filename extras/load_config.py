@@ -1,6 +1,5 @@
 from philologic import Loader, LoadFilters, Parser, NewParser, PlainTextParser, PostFilters
 
-
 ###############################
 ## General Loading Variables ##
 ###############################
@@ -22,7 +21,7 @@ plain_text_obj = []
 # These are doc level XPATHS used to parse a standard TEI header.
 # These XPATHS need to be inside a <teiHeader> and strictly apply to an entire document..
 # Only useful if you parse a TEI header.
-doc_xpaths =  {
+doc_xpaths = {
     "author": [
         ".//sourceDesc/bibl/author[@type='marc100']",
         ".//sourceDesc/bibl/author[@type='artfl']",
@@ -172,11 +171,8 @@ metadata_to_parse = {
     "ref": ["target", "n", "type"]
 }
 
-## A list of tags to ignore
-suppress_tags = []
-
 # This regex defines how to tokenize words and punctuation
-token_regex = "([\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*)"
+token_regex = "[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*"
 
 # Define a file (with full path) containing words to filter out. Must be one word per line.
 # Useful for dirty OCR.
@@ -186,3 +182,50 @@ filtered_words_list = ""
 # results are displayed. Supply a list of metadata strings, e.g.:
 # ["date", "author", "title"]
 sort_order = ["year", "author", "title", "filename"]
+
+#############################################################################
+# --------- All options below are either NOT implemented or untested -------#
+#############################################################################
+
+## A list of tags to ignore: contents will not be indexed
+suppress_tags = []
+
+# --------------------- Set Apostrophe Break ------------------------
+# Set to True to break words on apostrophe.  Probably False for
+# English, True for French.  Your milage may vary.
+break_apost = True
+
+# ------------- Define Characters to Exclude from Index words -------
+# Leading to a second list, characters which can be in words
+# but you don't want to index.
+chars_not_to_index = "\[\{\]\}"
+
+# ---------------------- Treat Lines as Sentences --------------------
+# In linegroups, break sentence objects on </l> and turns off
+# automatic sentence recognition.  Normally off.
+break_sent_in_line_group = False
+
+# ------------------ Skip in word tags -------------------------------
+# Tags normally break words.  There may be exceptions.  To run the
+# exception, turn on the exception and list them as patterns.
+# Tags will not be indexed and will not break words. An empty list turns of the feature
+tag_exceptions = ['<hi[^>]*>', '<emph[^>]*>', '<\/hi>', '<\/emph>', '<orig[^>]*>', '<\/orig>', '<sic[^>]*>', '<\/sic>',
+                  '<abbr[^>]*>', '<\/abbr>']
+
+# ------------------ Hyphenated Word Joiner ----------------------------
+# Softhypen word joiner.  At this time, I'm trying to join
+# words broken by &shy;\n and possibly some additional
+# selected tags.  Could be extended.
+join_hyphen_in_words = True
+
+# ------------------ Abbreviation Expander for Indexing. ---------------
+# This is to handle abbreviation tags.  I have seen two types:
+#       <abbr expan="en">&emacr;</abbr>
+#       <abbr expan="Valerius Maximus">Val. Max.</abbr>
+# For now, lets's try the first.
+abbrev_expand = True
+
+#  ----------------- Set Long Word Limit  -------------------
+#  Words greater than 235 characters (bytes) cause an indexing
+#  error.  This sets a limit.  Words are then truncated to fit.
+long_word_limit = 200

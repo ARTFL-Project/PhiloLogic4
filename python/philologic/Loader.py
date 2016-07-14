@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import codecs
 import cPickle
 import math
 import os
@@ -11,15 +10,14 @@ import sys
 import time
 from ast import literal_eval as eval
 from glob import glob
-from optparse import OptionParser
 
-from lxml import etree
 import philologic.LoadFilters as LoadFilters
 import philologic.Parser as Parser
 import philologic.PostFilters as PostFilters
+from lxml import etree
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.PostFilters import make_sql_table
-from philologic.utils import pretty_print, sort_list, convert_entities
+from philologic.utils import convert_entities, pretty_print, sort_list
 
 # Flush buffer output
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)

@@ -50,7 +50,6 @@ class XMLParser(object):
                  docid,
                  filesize,
                  suppress_tags=[],
-                 pseudo_empty_tags=[],
                  filtered_words=[],
                  known_metadata=["doc", "div1", "div2", "div3", "para", "sent", "word"],
                  tag_to_obj_map=DefaultTagToObjMap,
@@ -60,11 +59,6 @@ class XMLParser(object):
         self.parallel_type = "page"
         self.output = output
         self.docid = docid
-
-        if "token_regex" in kwargs:
-            self.token_regex = re.compile(r"%s" % kwargs["token_regex"], re.I)
-        else:
-            self.token_regex = re.compile(r"%s" % TokenRegex, re.I)
 
         self.tag_to_obj_map = tag_to_obj_map
 
@@ -76,27 +70,59 @@ class XMLParser(object):
         self.v = OHCOVector.CompoundStack(self.types, self.parallel_type, docid=docid, out=output, ref="ref", line="line")
 
         self.filesize = filesize
-
-        self.suppress_xpaths = suppress_tags
-        self.pseudo_empty_tags = pseudo_empty_tags
         self.known_metadata = known_metadata
 
         self.filtered_words = []
 
-        self.buffer_position = 0
-        self.buffers = []
-
-        self.get_multiple_div_heads = 1  # TODO: remove??
-
-        # Set to 1 to break words on apostrophe.  Probably True for French.
-        self.break_apost = True
-
-        # Convert SGML ligatures to base characters for indexing.
-        # &oelig; = oe.
-        self.flatten_ligatures = True
-
         # List of global variables used for the tag handler
-        self.bytes_read_in = 0
+        if "token_regex" in kwargs:
+            self.token_regex = re.compile(r"(%s)" % kwargs["token_regex"], re.I)
+        else:
+            self.token_regex = re.compile(r"(%s)" % TokenRegex, re.I)
+
+        if "suppress_tags" in kwargs:
+            self.suppress_xpaths = kwargs["suppress_tags"]
+        else:
+            self.suppress_xpaths = []
+
+        if "break_apost" in kwargs:
+            self.break_apost = kwargs["break_apost"]
+        else:
+            self.break_apost = True
+
+        if "chars_not_to_index" in kwargs:
+            self.chars_not_to_index = re.compile(r'%s' % kwargs["chars_not_to_index"], re.I)
+        else:
+            self.chars_not_to_index = re.compile(r'%s' % CharsNotToIndex, re.I)
+
+        if "break_sent_in_line_group" in kwargs:
+            self.break_sent_in_line_group = kwargs["break_sent_in_line_group"]
+        else:
+            self.break_sent_in_line_group = False
+
+        if "tag_exceptions" in kwargs:
+            self.tag_exceptions = kwargs["tag_exceptions"]
+        else:
+            self.tag_exceptions = TagExceptions
+
+        if "join_hyphen_in_words" in kwargs:
+            self.join_hyphen_in_words = kwargs["join_hyphen_in_words"]
+        else:
+            self.join_hyphen_in_words = True
+
+        if "abbrev_expand" in kwargs:
+            self.abbrev_expand = kwargs["abbrev_expand"]
+        else:
+            self.abbrev_expand = True
+
+        if "long_word_limit" in kwargs:
+            self.long_word_limit = kwargs["long_word_limit"]
+        else:
+            self.long_word_limit = 200
+
+        # Convert SGML ligatures to base characters for indexing, e.g. &oelig; = oe.
+        self.flatten_ligatures = True
+        self.get_multiple_div_heads = 1  # TODO: remove??
         self.in_the_text = False
         self.in_text_quote = False
         self.in_front_matter = False
@@ -111,7 +137,6 @@ class XMLParser(object):
         self.open_para = False
         self.open_sent = False
         self.open_page = False
-        self.line_group_break_sent = False
         self.in_tagged_sentence = False
         self.got_a_div = False
         self.got_a_para = False
@@ -144,6 +169,7 @@ class XMLParser(object):
         # Split content into a list on newlines.
         self.content = self.content.split('\n')
 
+        self.bytes_read_in = 0
         self.line_count = 0
         for line in self.content:
             # Let's start indexing words and objects at either the <text
@@ -365,7 +391,7 @@ class XMLParser(object):
         # LINE GROUP TAGS: treat linegroups same a paragraphs, set or unset the global
         # variable self.in_line_group.
         elif line_group_tag.search(tag) and not self.no_deeper_objects:
-            if self.line_group_break_sent:
+            if self.break_sent_in_line_group:
                 self.in_line_group = True
             if self.open_para:  # account for unclosed paragraph tags
                 para_end_byte = self.bytes_read_in - len(tag)
@@ -381,7 +407,7 @@ class XMLParser(object):
         # if to set searching in line groups to lines rather than sentences.
         # TODO: not sure I got this right...
         elif line_tag.search(tag):
-            if self.in_line_group and self.line_group_break_sent:
+            if self.in_line_group and self.break_sent_in_line_group:
                 self.v.push("sent", tag_name, start_byte)
                 self.v.pull("sent", self.bytes_read_in)
             # Create line parallel object
@@ -1008,7 +1034,7 @@ class XMLParser(object):
         return control_char_re.sub('', text.decode('utf8', 'ignore')).encode('utf8')
 
 
-TokenRegex = "([\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*)"
+TokenRegex = "[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*"
 
 # Pre-compiled regexes used for parsing
 join_hyphen_with_lb = re.compile(r'(\&shy;[\n \t]*<lb\/>)', re.I | re.M)
@@ -1265,6 +1291,20 @@ DefaultDocXPaths = {
         ".//teiHeader/fileDesc/publicationStmt/idno/"
     ]
 }
+
+TagExceptions = ['<hi[^>]*>',
+                      '<emph[^>]*>',
+                      '<\/hi>',
+                      '<\/emph>',
+		              '<orig[^>]*>',
+                      '<\/orig>',
+		              '<sic[^>]*>',
+                      '<\/sic>',
+		              '<abbr[^>]*>',
+                      '<\/abbr>']
+
+CharsNotToIndex = "\[\{\]\}"
+
 
 if __name__ == "__main__":
     for docid, fn in enumerate(sys.argv[1:], 1):
