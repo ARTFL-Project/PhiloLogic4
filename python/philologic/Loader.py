@@ -220,20 +220,17 @@ class Loader(object):
     def parse_metadata(self, sort_by_field, reverse_sort=False, header="tei"):
         """Parsing metadata fields in TEI or Dublin Core headers"""
         print "### Parsing metadata ###"
-        print "%s: Parsing metadata in %d files..." % (time.ctime(), len(self.list_files())),
+        print "%s: Parsing metadata in %d files..." % (time.ctime(), len(self.list_files()))
         if header == "tei":
             load_metadata = self.parse_tei_header()
         elif header == "dc":
             load_metadata = self.parse_dc_header()
-
-        print "done."
 
         print "%s: Sorting files by the following metadata fields: %s..." % (time.ctime(),
                                                                              ", ".join([i for i in sort_by_field])),
 
         load_metadata = sort_list(load_metadata, sort_by_field)
         self.sort_order = sort_by_field  # to be used for the sort by concordance biblio key in web config
-        print "done."
         return load_metadata
 
     def parse_files(self, max_workers, data_dicts=None):

@@ -77,7 +77,7 @@ def word_frequencies(loader_obj):
 
 
 def normalized_word_frequencies(loader_obj):
-    print '%s: Generating normalized word frequencies...' % time.ctime(),
+    print '%s: Generating normalized word frequencies...' % time.ctime()
     frequencies = loader_obj.destination + '/frequencies'
     output = open(frequencies + "/normalized_word_frequencies", "w")
     for line in open(frequencies + '/word_frequencies'):
@@ -107,7 +107,6 @@ def metadata_frequencies(loader_obj):
             output.close()
         except sqlite3.OperationalError:
             loader_obj.metadata_fields_not_found.append(field)
-    print 'done.'
     if loader_obj.metadata_fields_not_found:
         print 'The following fields were not found in the input corpus %s' % ', '.join(
             loader_obj.metadata_fields_not_found)
@@ -115,7 +114,7 @@ def metadata_frequencies(loader_obj):
 
 
 def normalized_metadata_frequencies(loader_obj):
-    print '%s: Generating normalized metadata frequencies...' % time.ctime(),
+    print '%s: Generating normalized metadata frequencies...' % time.ctime()
     frequencies = loader_obj.destination + '/frequencies'
     for field in loader_obj.metadata_fields:
         try:
