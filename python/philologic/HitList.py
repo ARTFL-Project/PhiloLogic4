@@ -78,7 +78,7 @@ class HitList(object):
                     break
                 self.sorted_hitlist.append(hit)
                 iter_position += 1
-            self.sorted_hitlist.sort(key=lambda x: metadata[x[0]])
+            self.sorted_hitlist.sort(key=lambda x: metadata.get(x[0], "ZZZZZ"), reverse=False)
 
 
     def __getitem__(self, n):
