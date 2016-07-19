@@ -1,6 +1,5 @@
 from philologic import Loader, LoadFilters, Parser, NewParser, PlainTextParser, PostFilters
 
-
 ###############################
 ## General Loading Variables ##
 ###############################
@@ -22,7 +21,7 @@ plain_text_obj = []
 # These are doc level XPATHS used to parse a standard TEI header.
 # These XPATHS need to be inside a <teiHeader> and strictly apply to an entire document..
 # Only useful if you parse a TEI header.
-doc_xpaths =  {
+doc_xpaths = {
     "author": [
         ".//sourceDesc/bibl/author[@type='marc100']",
         ".//sourceDesc/bibl/author[@type='artfl']",
@@ -32,7 +31,7 @@ doc_xpaths =  {
         ".//sourceDesc/biblFull/titleStmt/author",
         ".//sourceDesc/biblFull/titleStmt/respStmt/name",
         ".//sourceDesc/biblFull/titleStmt/author",
-        ".//sourceDesc/bibl/titleStmt/author",
+        ".//sourceDesc/bibl/titleStmt/author"
     ],
     "title": [
         ".//sourceDesc/bibl/title[@type='marc245']",
@@ -41,18 +40,18 @@ doc_xpaths =  {
         ".//titleStmt/title",
         ".//sourceDesc/bibl/titleStmt/title",
         ".//sourceDesc/biblStruct/monogr/title",
-        ".//sourceDesc/biblFull/titleStmt/title",
+        ".//sourceDesc/biblFull/titleStmt/title"
     ],
     "author_dates": [
         ".//sourceDesc/bibl/author/date",
-        ".//titlestmt/author/date",
+        ".//titlestmt/author/date"
     ],
     "create_date": [
         ".//profileDesc/creation/date",
         ".//fileDesc/sourceDesc/bibl/imprint/date",
         ".//sourceDesc/biblFull/publicationStmt/date",
         ".//profileDesc/dummy/creation/date",
-        ".//fileDesc/sourceDesc/bibl/creation/date",
+        ".//fileDesc/sourceDesc/bibl/creation/date"
     ],
     "publisher": [
         ".//sourceDesc/bibl/imprint[@type='artfl']",
@@ -63,14 +62,14 @@ doc_xpaths =  {
         ".//sourceDesc/bibl/publicationStmt/publisher",
         ".//sourceDesc/bibl/publisher",
         ".//publicationStmt/publisher",
-        ".//publicationStmp",
+        ".//publicationStmp"
     ],
     "pub_place": [
         ".//sourceDesc/bibl/imprint/pubPlace",
         ".//sourceDesc/biblFull/publicationStmt/pubPlace",
         ".//sourceDesc/biblStruct/monog/imprint/pubPlace",
         ".//sourceDesc/bibl/pubPlace",
-        ".//sourceDesc/bibl/publicationStmt/pubPlace",
+        ".//sourceDesc/bibl/publicationStmt/pubPlace"
     ],
     "pub_date": [
         ".//sourceDesc/bibl/imprint/date",
@@ -78,59 +77,52 @@ doc_xpaths =  {
         ".//sourceDesc/biblFull/publicationStmt/date",
         ".//sourceDesc/bibFull/imprint/date",
         ".//sourceDesc/bibl/date",
-        ".//text/front/docImprint/acheveImprime",
+        ".//text/front/docImprint/acheveImprime"
     ],
     "extent": [
         ".//sourceDesc/bibl/extent",
         ".//sourceDesc/biblStruct/monog//extent",
-        ".//sourceDesc/biblFull/extent",
+        ".//sourceDesc/biblFull/extent"
     ],
     "editor": [
         ".//sourceDesc/bibl/editor",
         ".//sourceDesc/biblFull/titleStmt/editor",
-        ".//sourceDesc/bibl/title/Stmt/editor",
+        ".//sourceDesc/bibl/title/Stmt/editor"
     ],
     "identifiers": [
         ".//publicationStmt/idno"
     ],
     "text_genre": [
         ".//profileDesc/textClass/keywords[@scheme='genre']/term",
-        ".//SourceDesc/genre",
+        ".//SourceDesc/genre"
     ],
     "keywords": [
-        # keywords
-        ".//profileDesc/textClass/keywords/list/item",
+        ".//profileDesc/textClass/keywords/list/item"
     ],
     "language": [
-        # language
-        ".//profileDesc/language/language",
+        ".//profileDesc/language/language"
     ],
     "notes": [
-        # notes
         ".//fileDesc/notesStmt/note",
-        ".//publicationStmt/notesStmt/note",
+        ".//publicationStmt/notesStmt/note"
     ],
     "auth_gender": [
-
-        # auth_gender
-        ".//publicationStmt/notesStmt/note",
+        ".//publicationStmt/notesStmt/note"
     ],
     "collection": [
-        # collection
-        ".//seriesStmt/title",
+        ".//seriesStmt/title"
     ],
     "period": [
-        # period
         ".//profileDesc/textClass/keywords[@scheme='period']/list/item",
         ".//SourceDesc/period",
+        ".//sourceDesc/period"
     ],
     "text_form": [
-        # text_form
-        ".//profileDesc/textClass/keywords[@scheme='form']/term",
+        ".//profileDesc/textClass/keywords[@scheme='form']/term"
     ],
     "structure": [
-        # structure
         ".//SourceDesc/structure",
+        ".//sourceDesc/structure"
     ],
     "idno": [
         ".//fileDesc/publicationStmt/idno/"
@@ -172,11 +164,8 @@ metadata_to_parse = {
     "ref": ["target", "n", "type"]
 }
 
-## A list of tags to ignore
-suppress_tags = []
-
 # This regex defines how to tokenize words and punctuation
-token_regex = "([\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*)"
+token_regex = "[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*"
 
 # Define a file (with full path) containing words to filter out. Must be one word per line.
 # Useful for dirty OCR.
@@ -186,3 +175,50 @@ filtered_words_list = ""
 # results are displayed. Supply a list of metadata strings, e.g.:
 # ["date", "author", "title"]
 sort_order = ["year", "author", "title", "filename"]
+
+#############################################################################
+# --------- All options below are either NOT implemented or untested ------ #
+#############################################################################
+
+## A list of tags to ignore: contents will not be indexed
+suppress_tags = []
+
+# --------------------- Set Apostrophe Break ------------------------
+# Set to True to break words on apostrophe.  Probably False for
+# English, True for French.  Your milage may vary.
+break_apost = True
+
+# ------------- Define Characters to Exclude from Index words -------
+# Leading to a second list, characters which can be in words
+# but you don't want to index.
+chars_not_to_index = "\[\{\]\}"
+
+# ---------------------- Treat Lines as Sentences --------------------
+# In linegroups, break sentence objects on </l> and turns off
+# automatic sentence recognition.  Normally off.
+break_sent_in_line_group = False
+
+# ------------------ Skip in word tags -------------------------------
+# Tags normally break words.  There may be exceptions.  To run the
+# exception, turn on the exception and list them as patterns.
+# Tags will not be indexed and will not break words. An empty list turns of the feature
+tag_exceptions = ['<hi[^>]*>', '<emph[^>]*>', '<\/hi>', '<\/emph>', '<orig[^>]*>', '<\/orig>', '<sic[^>]*>', '<\/sic>',
+                  '<abbr[^>]*>', '<\/abbr>']
+
+# ------------------ Hyphenated Word Joiner ----------------------------
+# Softhypen word joiner.  At this time, I'm trying to join
+# words broken by &shy;\n and possibly some additional
+# selected tags.  Could be extended.
+join_hyphen_in_words = True
+
+# ------------------ Abbreviation Expander for Indexing. ---------------
+# This is to handle abbreviation tags.  I have seen two types:
+#       <abbr expan="en">&emacr;</abbr>
+#       <abbr expan="Valerius Maximus">Val. Max.</abbr>
+# For now, lets's try the first.
+abbrev_expand = True
+
+#  ----------------- Set Long Word Limit  -------------------
+#  Words greater than 235 characters (bytes) cause an indexing
+#  error.  This sets a limit.  Words are then truncated to fit.
+long_word_limit = 200

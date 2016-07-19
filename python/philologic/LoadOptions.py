@@ -46,6 +46,13 @@ class LoadOptions(object):
         self.values["metadata_to_parse"] = NewParser.DefaultMetadataToParse
         self.values["pseudo_empty_tags"] = []
         self.values["suppress_tags"] = []
+        self.values["break_apost"] = True
+        self.values["chars_not_to_index"] = NewParser.CharsNotToIndex
+        self.values["break_sent_in_line_group"] = False
+        self.values["tag_exceptions"] = NewParser.TagExceptions
+        self.values["join_hyphen_in_words"] = True
+        self.values["abbrev_expand"] = True
+        self.values["long_word_limit"] = 200
         self.values["cores"] = 2
         self.values["dbname"] = ""
         self.values["db_url"] = ""
