@@ -470,8 +470,7 @@ def generate_toc_object(request, config):
 def generate_time_series(request, config):
     db = DB(config.db_path + '/data/')
     time_series_object = {'query': dict([i for i in request]), 'query_done': False}
-
-    start_date, end_date = get_start_end_date(db, config, start_date=None, end_date=None)
+    start_date, end_date = get_start_end_date(db, config, start_date=request.start_date or None, end_date=request.end_date or None)
 
     # Generate date ranges
     interval = int(request.year_interval)
@@ -495,10 +494,11 @@ def generate_time_series(request, config):
         request.metadata[config.time_series_year_field] = date_range
         hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
         hits.finish()
+        hit_len = len(hits)
         params = {"report": "concordance", "start": "0", "end": "0"}
         params[config.time_series_year_field] = date_range
         url = make_absolute_query_link(config, request, **params)
-        absolute_count[start_range] = {"label": start_range, "count": len(hits), "url": url}
+        absolute_count[start_range] = {"label": start_range, "count": hit_len, "url": url}
 
         # Get date total count
         if interval != '1':
@@ -512,14 +512,13 @@ def generate_time_series(request, config):
         c = db.dbh.cursor()
         c.execute(query)
         date_counts[start_range] = c.fetchone()[0] or 0
-        total_hits += len(hits)
+        total_hits += hit_len
         elapsed = timeit.default_timer() - start_time
+        last_date_done = start_range
         # avoid timeouts by splitting the query if more than request.max_time
         # (in seconds) has been spent in the loop
         if elapsed > int(max_time):
-            last_date_done = start_range
             break
-        last_date_done = start_range
 
     time_series_object['results_length'] = total_hits
     if (last_date_done + int(request.year_interval)) >= end_date:
