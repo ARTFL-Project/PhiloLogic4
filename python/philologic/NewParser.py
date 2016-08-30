@@ -491,9 +491,15 @@ class XMLParser(object):
         #   the Philoid and head for searching under document levels.
         elif closed_div_tag.search(tag):
             if "div1" in tag_name:
-                self.v.pull("div1", self.bytes_read_in)
+                if self.in_front_matter:
+                    self.v.pull("div2", self.bytes_read_in)
+                else:
+                    self.v.pull("div1", self.bytes_read_in)
             elif "div2" in tag_name:
-                self.v.pull("div2", self.bytes_read_in)
+                if self.in_front_matter:
+                    self.v.pull("div3", self.bytes_read_in)
+                else:
+                    self.v.pull("div2", self.bytes_read_in)
             elif "div3" in tag_name:
                 self.v.pull("div3", self.bytes_read_in)
             self.context_div_level -= 1
@@ -514,13 +520,14 @@ class XMLParser(object):
                 div_level = self.context_div_level
             else:
                 div_level = int(div_level)
+            # <Front is top level div1, so inner divs should be div2s or div3s
+            if self.in_front_matter:
+                div_level = self.context_div_level
             self.context_div_level = div_level
 
             # TODO what to do with div0? See philo3???
 
-            # <FRONT will be the top level div, so let's use context divlevel
-            if self.in_front_matter:
-                div_level = self.context_div_level
+
 
             # TODO: ignore divs inside of internal text tags.  Setable
             # from configuration.  But we will bump the para and sent args
@@ -800,7 +807,7 @@ class XMLParser(object):
                         read_more = False
                         if self.get_multiple_div_heads:
                             get_head_count -= 1
-                    elif overflow_trap > 10:  # Overflow trap in case you miss </head
+                    elif overflow_trap > 50:  # Overflow trap in case you miss </head
                         read_more = False
                     else:
                         div_head += next_line + " "
