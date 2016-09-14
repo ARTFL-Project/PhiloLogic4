@@ -12,14 +12,12 @@ def citation_links(db, config, i):
     div3_href = make_absolute_object_link(config, i.philo_id[:4], i.bytes)
     page_href = make_absolute_object_link(config, i.page.philo_id, i.bytes)
 
-    links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href, "page": page_href}
+    links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href, "para": "", "page": page_href}
 
-    try:
-        speaker_name = i.para.who
-        if speaker_name:
+    for field, metadata_type in db.locals["metadata_types"].iteritems():
+        if metadata_type == 'para':
             links['para'] = make_absolute_object_link(config, i.philo_id[:5], i.bytes)
-    except AttributeError:
-        links["para"] = ""
+            break
     return links
 
 
@@ -95,8 +93,11 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=[
 
         # Paragraph level metadata
         if "para" in citation_hrefs:
+            para_name = hit.who.strip()
+            if not para_name:
+                para_name = hit.para.resp.strip().title()
             try:
-                citation.append({"href": citation_hrefs['para'], "label": hit.who.strip(), "style": None, "separator": True})
+                citation.append({"href": citation_hrefs['para'], "label": para_name, "style": None, "separator": True})
             except KeyError:  ## no who keyword
                 pass
 
