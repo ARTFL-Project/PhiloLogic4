@@ -442,3 +442,10 @@ div[type="notes"] .xml-note {
 	margin-left: 10px;
 	line-height: initial;
 }
+
+.xml-add {
+    color: #EF4500;
+}
+.xml-seg {
+    display: block;
+}

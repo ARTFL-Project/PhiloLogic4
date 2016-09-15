@@ -42,6 +42,8 @@ def concordance_results(request, config):
     }
 
     results = []
+    import sys
+    print >> sys.stderr, "LENNNN", len(hits)
     for hit in hits[start - 1:end]:
         citation_hrefs = citation_links(db, config, hit)
         metadata_fields = {}
@@ -82,12 +84,14 @@ def bibliography_results(request, config):
         "default_object": db.locals['default_object_level']
     }
     results = []
-    result_type = 'doc'
+    result_type = ''
     for hit in hits[start - 1:end]:
         citation_hrefs = citation_links(db, config, hit)
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
+        if not result_type:
+            result_type = hit.object_type
         citation = citations(hit, citation_hrefs, config, report="bibliography")
         if config.dictionary_bibliography is False:
             results.append({
@@ -109,7 +113,7 @@ def bibliography_results(request, config):
     bibliography_object["results"] = results
     bibliography_object['results_length'] = len(hits)
     bibliography_object['query_done'] = hits.done
-    bibliography_object['result_type'] = hit.object_type
+    bibliography_object['result_type'] = result_type
     return bibliography_object, hits
 
 
