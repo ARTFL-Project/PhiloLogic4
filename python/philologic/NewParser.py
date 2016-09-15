@@ -944,7 +944,7 @@ class XMLParser(object):
                     elif overflow_trap > 50:  # Overflow trap in case you miss </head
                         read_more = False
                     else:
-                        div_head += next_line + " "
+                        div_head += next_line
         if div_head:
             div_head = self.clear_char_ents(div_head)
             div_head = self.latin1_ents_to_utf8(div_head)

@@ -174,7 +174,10 @@ def make_grouped_sql_clause(expanded, column):
                     first_group = False
                     clauses += clause
                 else:
-                    clauses += "AND %s" % clause
+                    try:
+                        clauses += "AND %s" % clause
+                    except UnicodeDecodeError:
+                        clauses += "AND %s" % clause.encode('utf8')
                 continue
             clause += "%s IN (" % column
         # if we don't have a range, we have something that we can evaluate

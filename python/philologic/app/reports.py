@@ -291,6 +291,10 @@ def frequency_results(request, config, sorted=False):
                                                               report=request.report,
                                                               script='',
                                                               **{request.frequency_field: '"%s"' % key})
+                query_metadata = dict([(k, v) for k, v in request.metadata.iteritems() if v])
+                query_metadata[request.frequency_field] = '"%s"' % key
+                local_hits = db.query(**query_metadata)
+                counts[key]["total_word_count"] = local_hits.get_total_word_count()
             counts[key]["count"] += 1
 
             # avoid timeouts by splitting the query if more than
@@ -303,6 +307,27 @@ def frequency_results(request, config, sorted=False):
         frequency_object['results'] = counts
         frequency_object["hits_done"] = last_hit_done
         if last_hit_done == len(hits):
+            new_metadata = dict([(k, v) for k, v in request.metadata.iteritems() if v])
+            new_metadata[request.frequency_field] = "NULL"
+            if request.q == '' and request.no_q:
+                new_hits = db.query(sort_order=["rowid"], raw_results=True, **new_metadata)
+            else:
+                new_hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **new_metadata)
+            new_hits.finish()
+            if len(new_hits):
+                null_url = make_absolute_query_link(config,
+                                                    request,
+                                                    frequency_field="",
+                                                    start="0",
+                                                    end="0",
+                                                    report=request.report,
+                                                    script='',
+                                                    **{request.frequency_field: 'NULL'})
+                local_hits = db.query(**new_metadata)
+                frequency_object["results"]["NULL"] = {"count": len(new_hits),
+                                                       "url": null_url,
+                                                       "metadata": {request.frequency_field: "NULL"},
+                                                       "total_word_count": local_hits.get_total_word_count()}
             frequency_object['more_results'] = False
         else:
             frequency_object['more_results'] = True
@@ -469,7 +494,10 @@ def generate_toc_object(request, config):
 def generate_time_series(request, config):
     db = DB(config.db_path + '/data/')
     time_series_object = {'query': dict([i for i in request]), 'query_done': False}
-    start_date, end_date = get_start_end_date(db, config, start_date=request.start_date or None, end_date=request.end_date or None)
+    start_date, end_date = get_start_end_date(db,
+                                              config,
+                                              start_date=request.start_date or None,
+                                              end_date=request.end_date or None)
 
     # Generate date ranges
     interval = int(request.year_interval)

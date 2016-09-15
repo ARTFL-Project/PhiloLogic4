@@ -27,6 +27,10 @@
             </a>
         </div>
         <div class="facet-results" ng-if="showFacetResults">
+            <div class="btn-group btn-group-justified" role="group" aria-label="..." ng-if="percent == 100 && report !== 'bibliography' && facet.type === 'facet'">
+               <button type="button" class="btn btn-default" ng-class="{'active': showingRelativeFrequencies === false}" style="width: 50%; border-left-width: 0px; border-top-width: 0px" ng-click="displayAbsoluteFrequencies()">Absolute Frequency</button>
+               <button type="button" class="btn btn-default" ng-class="{'active': showingRelativeFrequencies}" style="width: 50%; border-right-width: 0px; border-top-width: 0px" ng-click="displayRelativeFrequencies()">Relative Frequency</button>
+           </div>
             <h5 style="text-align: center;">
                 Top 500 results for {{ selectedFacet.alias }}
             </h5>
@@ -38,8 +42,8 @@
                         <span ng-if="result.label == 'NULL'">NA</span>
                     </a>
                     <a id="freq_sidebar_text" class="text-content-area" href="" ng-click="collocationToConcordance(result.label)" ng-if="facet.facet === 'all_collocates'">
-                        <span ng-if="result.label != 'NULL'">{{ ::result.label }}</span>
-                        <span ng-if="result.label == 'NULL'">NA</span>
+                        <span>{{ ::result.label }}</span>
+                        <!-- <span ng-if="result.label == 'NULL'">NA</span> -->
                     </a>
                     <span class="sidebar-count"> {{ ::result.count }}</span>
                     <div style="line-height: 70%; padding-bottom: 15px; padding-left: 5px; font-size: 85%;" ng-if="showingRelativeFrequencies">

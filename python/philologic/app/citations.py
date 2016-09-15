@@ -43,7 +43,8 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=[
                 elif report == "bibliography" and citation_object["field"] == "head":
                     cite["href"] = make_absolute_object_link(config, hit.philo_id)
                 else:
-                    params = [("report", "bibliography"), (citation_object["field"], '"%s"' % hit[citation_object["field"]])]
+                    params = [("report", "bibliography"),
+                              (citation_object["field"], '"%s"' % hit[citation_object["field"]])]
                     cite["href"] = make_absolute_query_link(config, params)
             else:
                 cite["href"] = None
@@ -96,10 +97,8 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=[
             para_name = hit.who.strip()
             if not para_name:
                 para_name = hit.para.resp.strip().title()
-            try:
+            if para_name:
                 citation.append({"href": citation_hrefs['para'], "label": para_name, "style": None, "separator": True})
-            except KeyError:  ## no who keyword
-                pass
 
         # Page level metadata
         page_obj = hit.page
