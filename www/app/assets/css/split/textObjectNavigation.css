@@ -397,9 +397,14 @@ div[type="notes"] .xml-note {
 }
 
 /*Page images*/
+.xml-pb-image {
+    display: block;
+    text-align: center;
+    margin: 10px;
+}
 .page-image-link {
 	margin-top: 10px;
-	display: block;
+	/*display: block;*/
 	text-align: center;
 }
 #full-size-image {

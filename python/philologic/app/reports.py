@@ -42,8 +42,6 @@ def concordance_results(request, config):
     }
 
     results = []
-    import sys
-    print >> sys.stderr, "LENNNN", len(hits)
     for hit in hits[start - 1:end]:
         citation_hrefs = citation_links(db, config, hit)
         metadata_fields = {}

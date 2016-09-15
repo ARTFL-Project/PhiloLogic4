@@ -271,7 +271,8 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     else:
                         img = el.attrib["id"]
                     current_obj_img.append(img)
-                    el.tag = "p"
+                    el.tag = "span"
+                    el.attrib["class"] = "xml-pb-image"
                     el.append(etree.Element("a"))
                     el[-1].attrib["href"] = config.page_images_url_root + '/' + img
                     el[-1].text = "[page " + el.attrib["n"] + "]"
