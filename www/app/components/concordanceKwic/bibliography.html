@@ -5,8 +5,12 @@
             <span style="padding-left: 5px;" ng-init="position = $index + results.description.start">{{ ::position }}.</span>
             <span class="philologic_cite">
                 <span class="citation" ng-repeat="citation in result.citation">
-                    <a ng-href="{{ ::citation.href }}" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style" ng-if="citation.href">{{ ::citation.label }}</a>
-                    <span ng-if="!citation.href" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style">{{ ::citation.label }}</span>
+                    <span ng-if="citation.href">
+                        <span ng-bind-html="citation.begin"></span><a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a><span ng-bind-html="citation.end"></span>
+                    </span>
+                    <span ng-if="!citation.href">
+                        <span ng-bind-html="citation.begin"></span><span ng-style="citation.style">{{ ::citation.label }}</span><span ng-bind-html="citation.end"></span>
+                    </span>
                 </span>
             </span>
         </li>
@@ -22,8 +26,12 @@
                     <span style="padding-left: 10px;">{{ ::result.position }}.</span>
                     <span class="philologic_cite">
                         <span class="citation" ng-repeat="citation in result.citation">
-                            <a ng-href="{{ ::citation.href }}" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style" ng-if="citation.href">{{ ::citation.label }}</a>
-                            <span ng-if="!citation.href" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style">{{ ::citation.label }}</span>
+                            <span ng-if="citation.href">
+                                <span ng-bind-html="citation.begin"></span><a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a><span ng-bind-html="citation.end"></span>
+                            </span>
+                            <span ng-if="!citation.href">
+                                <span ng-bind-html="citation.begin"></span><span ng-style="citation.style">{{ ::citation.label }}</span><span ng-bind-html="citation.end"></span>
+                            </span>
                         </span>
                     </span>
                     <div class='philologic_context text-content-area' select-word position="{{ result.position }}">
