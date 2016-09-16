@@ -32,14 +32,14 @@ class HitWrapper(object):
         self.db = db
         self.hit = hit
         if obj_type:
-            self.type = obj_type
+            self.object_type = obj_type
         else:
             try:
                 length = len(hit[:hit.index(0)])
             except ValueError:
                 length = len(hit)
             if length >= 7: length = 7
-            self.type = [k for k in obj_dict if obj_dict[k] == length][0]
+            self.object_type = [k for k in obj_dict if obj_dict[k] == length][0]
         self.row = None
         self.bytes = []
         self.words = []
@@ -108,14 +108,14 @@ class ObjectWrapper(object):
         self.hit = hit
         if obj_type:
             self.philo_id = hit[:obj_dict[obj_type]]
-            self.type = obj_type
+            self.object_type = obj_type
         else:
             self.philo_id = hit
             try:
                 length = len(hit[:hit.index(0)])
             except ValueError:
                 length = len(hit)
-            self.type = [k for k in obj_dict if obj_dict[k] == length][0]
+            self.object_type = [k for k in obj_dict if obj_dict[k] == length][0]
         self.bytes = []
         self.row = row
         self.words = []
@@ -127,13 +127,13 @@ class ObjectWrapper(object):
         if key in obj_dict:
             return ObjectWrapper(self.hit, self.db, key)
         else:
-            if self.type in shared_cache:
-                philo_id, row = shared_cache[self.type]
+            if self.object_type in shared_cache:
+                philo_id, row = shared_cache[self.object_type]
                 if philo_id == self.philo_id:
                     self.row = row
             if self.row == None:
                 self.row = self.db.get_id_lowlevel(self.philo_id)
-                shared_cache[self.type] = (self.philo_id, self.row)
+                shared_cache[self.object_type] = (self.philo_id, self.row)
             return _safe_lookup(self.row, key, self.db.encoding)
 
     def __getattr__(self, name):
@@ -144,7 +144,7 @@ class PageWrapper(object):
     def __init__(self, id, db):
         self.db = db
         self.philo_id = id
-        self.type = "page"
+        self.object_type = "page"
         self.row = None
         self.bytes = []
 
@@ -167,7 +167,7 @@ class LineWrapper(object):
         self.db = db
         self.philo_id = philo_id
         self.doc_id = philo_id[0]
-        self.type = "line"
+        self.object_type = "line"
         self.hit_offset = byte_offset
         self.row = None
         self.bytes = []
@@ -190,7 +190,7 @@ class WordWrapper(object):
     def __init__(self, id, db, byte):
         self.db = db
         self.philo_id = id
-        self.type = "word"
+        self.object_type = "word"
         self.row = None
         self.byte = byte
 

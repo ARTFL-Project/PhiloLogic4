@@ -27,6 +27,7 @@ DefaultTagToObjMap = {
     "castlist": "para",
     "list": "para",
     "q": "para",
+    "add": "para",
     "pb": "page",
     "ref": "ref",
     "l": "line",
@@ -35,11 +36,130 @@ DefaultTagToObjMap = {
 
 DefaultMetadataToParse = {
     "div": ["head", "type", "n", "id", "vol"],
-    "para": ["who"],
+    "para": ["who", "resp"], # for <sp> and <add> tags
     "page": ["n", "id", "fac"],
     "ref": ["target", "n", "type"],
     "line": ["n"]
 }
+
+DefaultDocXPaths = {
+    "author": [
+        ".//sourceDesc/bibl/author[@type='marc100']",
+        ".//sourceDesc/bibl/author[@type='artfl']",
+        ".//sourceDesc/bibl/author",
+        ".//titleStmt/author",
+        ".//sourceDesc/biblStruct/monogr/author/name",
+        ".//sourceDesc/biblFull/titleStmt/author",
+        ".//sourceDesc/biblFull/titleStmt/respStmt/name",
+        ".//sourceDesc/biblFull/titleStmt/author",
+        ".//sourceDesc/bibl/titleStmt/author"
+    ],
+    "title": [
+        ".//sourceDesc/bibl/title[@type='marc245']",
+        ".//sourceDesc/bibl/title[@type='artfl']",
+        ".//sourceDesc/bibl/title",
+        ".//titleStmt/title",
+        ".//sourceDesc/bibl/titleStmt/title",
+        ".//sourceDesc/biblStruct/monogr/title",
+        ".//sourceDesc/biblFull/titleStmt/title"
+    ],
+    "author_dates": [
+        ".//sourceDesc/bibl/author/date",
+        ".//titlestmt/author/date"
+    ],
+    "create_date": [
+        ".//profileDesc/creation/date",
+        ".//fileDesc/sourceDesc/bibl/imprint/date",
+        ".//sourceDesc/biblFull/publicationStmt/date",
+        ".//profileDesc/dummy/creation/date",
+        ".//fileDesc/sourceDesc/bibl/creation/date"
+    ],
+    "publisher": [
+        ".//sourceDesc/bibl/imprint[@type='artfl']",
+        ".//sourceDesc/bibl/imprint[@type='marc534']",
+        ".//sourceDesc/bibl/imprint/publisher",
+        ".//sourceDesc/biblStruct/monogr/imprint/publisher/name",
+        ".//sourceDesc/biblFull/publicationStmt/publisher",
+        ".//sourceDesc/bibl/publicationStmt/publisher",
+        ".//sourceDesc/bibl/publisher",
+        ".//publicationStmt/publisher",
+        ".//publicationStmp"
+    ],
+    "pub_place": [
+        ".//sourceDesc/bibl/imprint/pubPlace",
+        ".//sourceDesc/biblFull/publicationStmt/pubPlace",
+        ".//sourceDesc/biblStruct/monog/imprint/pubPlace",
+        ".//sourceDesc/bibl/pubPlace",
+        ".//sourceDesc/bibl/publicationStmt/pubPlace"
+    ],
+    "pub_date": [
+        ".//sourceDesc/bibl/imprint/date",
+        ".//sourceDesc/biblStruct/monog/imprint/date",
+        ".//sourceDesc/biblFull/publicationStmt/date",
+        ".//sourceDesc/bibFull/imprint/date",
+        ".//sourceDesc/bibl/date",
+        ".//text/front/docImprint/acheveImprime"
+    ],
+    "extent": [
+        ".//sourceDesc/bibl/extent",
+        ".//sourceDesc/biblStruct/monog//extent",
+        ".//sourceDesc/biblFull/extent"
+    ],
+    "editor": [
+        ".//sourceDesc/bibl/editor",
+        ".//sourceDesc/biblFull/titleStmt/editor",
+        ".//sourceDesc/bibl/title/Stmt/editor"
+    ],
+    "text_genre": [
+        ".//profileDesc/textClass/keywords[@scheme='genre']/term",
+        ".//SourceDesc/genre"
+    ],
+    "keywords": [
+        ".//profileDesc/textClass/keywords/list/item"
+    ],
+    "language": [
+        ".//profileDesc/language/language"
+    ],
+    "notes": [
+        ".//fileDesc/notesStmt/note",
+        ".//publicationStmt/notesStmt/note"
+    ],
+    "auth_gender": [
+        ".//publicationStmt/notesStmt/note"
+    ],
+    "collection": [
+        ".//seriesStmt/title"
+    ],
+    "period": [
+        ".//profileDesc/textClass/keywords[@scheme='period']/list/item",
+        ".//SourceDesc/period",
+        ".//sourceDesc/period"
+    ],
+    "text_form": [
+        ".//profileDesc/textClass/keywords[@scheme='form']/term"
+    ],
+    "structure": [
+        ".//SourceDesc/structure",
+        ".//sourceDesc/structure"
+    ],
+    "idno": [
+        ".//publicationStmt/idno/",
+        ".//seriesStmt/idno/"
+    ]
+}
+
+TagExceptions = ['<hi[^>]*>',
+                 '<emph[^>]*>',
+                 '<\/hi>',
+                 '<\/emph>',
+		         '<orig[^>]*>',
+                 '<\/orig>',
+		         '<sic[^>]*>',
+                 '<\/sic>',
+		         '<abbr[^>]*>',
+                 '<\/abbr>']
+
+CharsNotToIndex = "\[\{\]\}"
 
 
 class XMLParser(object):
@@ -146,6 +266,7 @@ class XMLParser(object):
         self.in_notes_div = False
         self.current_div1_id = ""
         self.current_div_level = 0
+        self.in_seg = False
 
     def parse(self, input):
         """Top level function for reading a file and printing out the output."""
@@ -370,6 +491,19 @@ class XMLParser(object):
             self.v.push("para", tag_name, start_byte)
             self.get_object_attributes(tag, tag_name, "para")
 
+        # Handle <add> tags as a para.
+        elif add_tag.search(tag):
+            if self.open_para:  # account for unclosed paragraph tags
+                para_end_byte = self.bytes_read_in - len(tag)
+                self.close_para(para_end_byte)
+            self.open_para = True
+            self.v.push("para", tag_name, start_byte)
+            self.get_object_attributes(tag, tag_name, "para")
+            self.no_deeper_objects = True
+        elif tag == "</add>":
+            self.close_para(self.bytes_read_in)
+            self.no_deeper_objects = False
+
         # PAGE BREAKS: this updates the currentpagetag or sets it to "na" if not found.
         # TODO: handling of attributes
         elif page_tag.search(tag):
@@ -491,9 +625,15 @@ class XMLParser(object):
         #   the Philoid and head for searching under document levels.
         elif closed_div_tag.search(tag):
             if "div1" in tag_name:
-                self.v.pull("div1", self.bytes_read_in)
+                if self.in_front_matter:
+                    self.v.pull("div2", self.bytes_read_in)
+                else:
+                    self.v.pull("div1", self.bytes_read_in)
             elif "div2" in tag_name:
-                self.v.pull("div2", self.bytes_read_in)
+                if self.in_front_matter:
+                    self.v.pull("div3", self.bytes_read_in)
+                else:
+                    self.v.pull("div2", self.bytes_read_in)
             elif "div3" in tag_name:
                 self.v.pull("div3", self.bytes_read_in)
             self.context_div_level -= 1
@@ -514,13 +654,14 @@ class XMLParser(object):
                 div_level = self.context_div_level
             else:
                 div_level = int(div_level)
+            # <Front is top level div1, so inner divs should be div2s or div3s
+            if self.in_front_matter:
+                div_level = self.context_div_level
             self.context_div_level = div_level
 
             # TODO what to do with div0? See philo3???
 
-            # <FRONT will be the top level div, so let's use context divlevel
-            if self.in_front_matter:
-                div_level = self.context_div_level
+
 
             # TODO: ignore divs inside of internal text tags.  Setable
             # from configuration.  But we will bump the para and sent args
@@ -800,10 +941,10 @@ class XMLParser(object):
                         read_more = False
                         if self.get_multiple_div_heads:
                             get_head_count -= 1
-                    elif overflow_trap > 10:  # Overflow trap in case you miss </head
+                    elif overflow_trap > 50:  # Overflow trap in case you miss </head
                         read_more = False
                     else:
-                        div_head += next_line + " "
+                        div_head += next_line
         if div_head:
             div_head = self.clear_char_ents(div_head)
             div_head = self.latin1_ents_to_utf8(div_head)
@@ -1102,6 +1243,8 @@ check_if_char_word = re.compile(r'[A-Za-z0-9\177-\377]', re.I)
 chars_not_to_index = re.compile(r'\[\{\]\}', re.I)
 cap_char_or_num = re.compile(r'[A-Z0-9]')  # Capitals
 ending_punctuation = re.compile(r'[%s]$' % string.punctuation)
+add_tag = re.compile(r'<add\W', re.I)
+seg_attrib = re.compile(r'<seg \w+=', re.I)
 
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
@@ -1176,128 +1319,6 @@ entity_regex = [
     re.compile(r'(\&dram;)', re.I),
     re.compile(r'(\&sun;)', re.I),
 ]
-
-DefaultDocXPaths = {
-    "author": [
-        ".//sourceDesc/bibl/author[@type='marc100']",
-        ".//sourceDesc/bibl/author[@type='artfl']",
-        ".//sourceDesc/bibl/author",
-        ".//titleStmt/author",
-        ".//sourceDesc/biblStruct/monogr/author/name",
-        ".//sourceDesc/biblFull/titleStmt/author",
-        ".//sourceDesc/biblFull/titleStmt/respStmt/name",
-        ".//sourceDesc/biblFull/titleStmt/author",
-        ".//sourceDesc/bibl/titleStmt/author"
-    ],
-    "title": [
-        ".//sourceDesc/bibl/title[@type='marc245']",
-        ".//sourceDesc/bibl/title[@type='artfl']",
-        ".//sourceDesc/bibl/title",
-        ".//titleStmt/title",
-        ".//sourceDesc/bibl/titleStmt/title",
-        ".//sourceDesc/biblStruct/monogr/title",
-        ".//sourceDesc/biblFull/titleStmt/title"
-    ],
-    "author_dates": [
-        ".//sourceDesc/bibl/author/date",
-        ".//titlestmt/author/date"
-    ],
-    "create_date": [
-        ".//profileDesc/creation/date",
-        ".//fileDesc/sourceDesc/bibl/imprint/date",
-        ".//sourceDesc/biblFull/publicationStmt/date",
-        ".//profileDesc/dummy/creation/date",
-        ".//fileDesc/sourceDesc/bibl/creation/date"
-    ],
-    "publisher": [
-        ".//sourceDesc/bibl/imprint[@type='artfl']",
-        ".//sourceDesc/bibl/imprint[@type='marc534']",
-        ".//sourceDesc/bibl/imprint/publisher",
-        ".//sourceDesc/biblStruct/monogr/imprint/publisher/name",
-        ".//sourceDesc/biblFull/publicationStmt/publisher",
-        ".//sourceDesc/bibl/publicationStmt/publisher",
-        ".//sourceDesc/bibl/publisher",
-        ".//publicationStmt/publisher",
-        ".//publicationStmp"
-    ],
-    "pub_place": [
-        ".//sourceDesc/bibl/imprint/pubPlace",
-        ".//sourceDesc/biblFull/publicationStmt/pubPlace",
-        ".//sourceDesc/biblStruct/monog/imprint/pubPlace",
-        ".//sourceDesc/bibl/pubPlace",
-        ".//sourceDesc/bibl/publicationStmt/pubPlace"
-    ],
-    "pub_date": [
-        ".//sourceDesc/bibl/imprint/date",
-        ".//sourceDesc/biblStruct/monog/imprint/date",
-        ".//sourceDesc/biblFull/publicationStmt/date",
-        ".//sourceDesc/bibFull/imprint/date",
-        ".//sourceDesc/bibl/date",
-        ".//text/front/docImprint/acheveImprime"
-    ],
-    "extent": [
-        ".//sourceDesc/bibl/extent",
-        ".//sourceDesc/biblStruct/monog//extent",
-        ".//sourceDesc/biblFull/extent"
-    ],
-    "editor": [
-        ".//sourceDesc/bibl/editor",
-        ".//sourceDesc/biblFull/titleStmt/editor",
-        ".//sourceDesc/bibl/title/Stmt/editor"
-    ],
-    "identifiers": [
-        ".//publicationStmt/idno"
-    ],
-    "text_genre": [
-        ".//profileDesc/textClass/keywords[@scheme='genre']/term",
-        ".//SourceDesc/genre"
-    ],
-    "keywords": [
-        ".//profileDesc/textClass/keywords/list/item"
-    ],
-    "language": [
-        ".//profileDesc/language/language"
-    ],
-    "notes": [
-        ".//fileDesc/notesStmt/note",
-        ".//publicationStmt/notesStmt/note"
-    ],
-    "auth_gender": [
-        ".//publicationStmt/notesStmt/note"
-    ],
-    "collection": [
-        ".//seriesStmt/title"
-    ],
-    "period": [
-        ".//profileDesc/textClass/keywords[@scheme='period']/list/item",
-        ".//SourceDesc/period",
-        ".//sourceDesc/period"
-    ],
-    "text_form": [
-        ".//profileDesc/textClass/keywords[@scheme='form']/term"
-    ],
-    "structure": [
-        ".//SourceDesc/structure",
-        ".//sourceDesc/structure"
-    ],
-    "idno": [
-        ".//fileDesc/publicationStmt/idno/"
-    ]
-}
-
-TagExceptions = ['<hi[^>]*>',
-                 '<emph[^>]*>',
-                 '<\/hi>',
-                 '<\/emph>',
-		         '<orig[^>]*>',
-                 '<\/orig>',
-		         '<sic[^>]*>',
-                 '<\/sic>',
-		         '<abbr[^>]*>',
-                 '<\/abbr>']
-
-CharsNotToIndex = "\[\{\]\}"
-
 
 if __name__ == "__main__":
     for docid, fn in enumerate(sys.argv[1:], 1):

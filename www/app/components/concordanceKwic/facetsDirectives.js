@@ -6,13 +6,12 @@
         .module('philoApp')
         .directive('facets', facets);
 
-    function facets($rootScope, $location, request, progressiveLoad, saveToLocalStorage, URL, philoConfig, facetedBrowsing) {
+    function facets($rootScope, $location, $http, request, progressiveLoad, saveToLocalStorage, URL, philoConfig, facetedBrowsing) {
         var populateFacets = function() {
             var facetConfig = philoConfig.facets;
             var facets = [];
             for (var i = 0; i < facetConfig.length; i++) {
                 var facet = facetConfig[i];
-                console.log(facet)
                 if (facet in philoConfig.metadata_aliases) {
                     var alias = philoConfig.metadata_aliases[facet];
                 } else {
@@ -128,27 +127,27 @@
                 saveToLocalStorage(fullResults, urlString);
             }
         }
+        var roundToTwo = function(num) {
+            // Thanks http://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places-in-javascript
+            return +(Math.round(num + "e+2") + "e-2");
+        }
         var getRelativeFrequencies = function(scope, hitsDone) {
-            $http.post('scripts/get_metadata_token_count.py',
-                    angular.toJson({
-                        results: scope.fullResults.unsorted,
-                        hits_done: hitsDone
-                    }))
-                .then(function(response) {
-                    angular.merge(scope.fullRelativeFrequencies, response.data.frequencies);
-                    var sortedRelativeResults = progressiveLoad.sortResults(scope.fullRelativeFrequencies);
-                    scope.facetResults = angular.copy(sortedRelativeResults.slice(0, 500));
-                    scope.showingRelativeFrequencies = true;
-                    scope.loading = false;
-                    if (response.data.more_results) {
-                        scope.percent = Math.round(sortedRelativeResults.length / scope.fullResults.sorted.length * 100);
-                        getRelativeFrequencies(scope, response.data.hits_done)
-                    } else {
-                        scope.percent = 100
-                    }
-                }).catch(function(response) {
-                    scope.loading = false;
-                });
+            var relativeResults = {};
+            for (var label in scope.fullResults.unsorted) {
+                var resultObj = scope.fullResults.unsorted[label];
+                relativeResults[label] = {
+                    count: roundToTwo(resultObj.count / resultObj.total_word_count * 10000),
+                    url: resultObj.url,
+                    label: label,
+                    total_count: resultObj.total_word_count
+                };
+            }
+            scope.fullRelativeFrequencies = relativeResults;
+            var sortedRelativeResults = progressiveLoad.sortResults(scope.fullRelativeFrequencies);
+            scope.facetResults = angular.copy(sortedRelativeResults.slice(0, 500));
+            scope.showingRelativeFrequencies = true;
+            scope.loading = false;
+            scope.percent = 100;
         }
         return {
             restrict: 'E',
@@ -165,7 +164,7 @@
                 }
                 scope.displayRelativeFrequencies = function() {
                     scope.loading = true;
-                    if (scope.relativeFrequencies === 'undefined') {
+                    if (typeof(scope.relativeFrequencies) === 'undefined') {
                         scope.absoluteFrequencies = angular.copy(scope.facetResults);
                         scope.percent = 0;
                         scope.fullRelativeFrequencies = {};

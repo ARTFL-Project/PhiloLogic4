@@ -2,8 +2,12 @@
     <div id="philo-view" ng-if="textNav.authorized">
         <div id="object-title">
             <span class="citation" ng-repeat="citation in textObject.citation">
-                <a ng-href="{{ ::citation.href }}" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style" ng-if="citation.href">{{ ::citation.label }}</a>
-                <span ng-if="!citation.href" ng-class="{'citation-separator': citation.separator}" ng-style="citation.style">{{ ::citation.label }}</span>
+                <span ng-if="citation.href">
+                    <span ng-bind-html="citation.begin"></span><a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a><span ng-bind-html="citation.end"></span>
+                </span>
+                <span ng-if="!citation.href">
+                    <span ng-bind-html="citation.begin"></span><span ng-style="citation.style">{{ ::citation.label }}</span><span ng-bind-html="citation.end"></span>
+                </span>
             </span>
         </div>
         <navigation-bar toc-done="{{ textNav.tocDone }}" prev="{{ textObject.prev }}" next="{{ textObject.next }}" ng-if="textNav.navBar === true || textNav.loading === false"></navigation-bar>

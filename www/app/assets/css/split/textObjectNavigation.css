@@ -397,9 +397,14 @@ div[type="notes"] .xml-note {
 }
 
 /*Page images*/
+.xml-pb-image {
+    display: block;
+    text-align: center;
+    margin: 10px;
+}
 .page-image-link {
 	margin-top: 10px;
-	display: block;
+	/*display: block;*/
 	text-align: center;
 }
 #full-size-image {
@@ -441,4 +446,11 @@ div[type="notes"] .xml-note {
 .link-back {
 	margin-left: 10px;
 	line-height: initial;
+}
+
+.xml-add {
+    color: #EF4500;
+}
+.xml-seg {
+    display: block;
 }

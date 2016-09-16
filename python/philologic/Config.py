@@ -209,20 +209,31 @@ web_config_defaults = {
                  "is_range": True,
                  'citation': [
                     {
-                    'field': 'title',
-                    'style': 'small-caps, italic',
-                    'link': True
-                    },
-                    {
-                    'field': 'author',
-                    'style': '',
-                    'link': False
-                    },
-                    {
-                    'field': 'year',
-                    'style': 'brackets',
-                    'link': False
-                    }
+                        'begin': '',
+                        'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+                		'field': 'author',
+                		'style': {"font-variant": "small-caps"},
+                		'link': False,
+                        'object_level': 'doc'
+                	},
+                	{
+                        'begin': '',
+                        'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+                        'field': 'title',
+                		'style': {"font-variant": "small-caps",
+                                  "font-style": "italic",
+                                  "font-weight": 700},
+                		'link': True,
+                        'object_level': 'doc'
+                	},
+                	{
+                        'begin': '&nbsp;&nbsp;[',
+                        'end': ']',
+                        'field': 'year',
+                		'style': 'normal',
+                		'link': False,
+                        'object_level': 'doc'
+                	}
                 ],
                 }],
         'comment': '''
@@ -249,9 +260,56 @@ web_config_defaults = {
         'index': 18
     },
     'concordance_citation': {
-        'value': [{"field": "author", "style": "small-caps", "link": False},
-                  {"field": "title", "style": "small-caps, italic, bold", "link": True},
-                  {"field": "year", "style": "brackets", "link": False}],
+        'value': [{
+            'begin': '',
+            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+    		'field': 'author',
+    		'style': {"font-variant": "small-caps"},
+    		'link': False,
+            'object_level': 'doc'
+    	},
+    	{
+            'begin': '',
+            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+            'field': 'title',
+    		'style': {"font-variant": "small-caps",
+                      "font-style": "italic",
+                      "font-weight": 700},
+    		'link': True,
+            'object_level': 'doc'
+    	},
+    	{
+            'begin': '&nbsp;&nbsp;[',
+            'end': ']&nbsp;&nbsp;|&nbsp;&nbsp;',
+            'field': 'year',
+    		'style': 'normal',
+    		'link': False,
+            'object_level': 'doc'
+    	},
+        {
+            'begin': '',
+            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+            'field': 'head',
+    		'style': {"font-variant": "small-caps"},
+    		'link': True,
+            'object_level': 'div1'
+    	},
+        {
+            'begin': '',
+            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+    		'field': 'head',
+    		'style': {"font-variant": "small-caps"},
+    		'link': True,
+            'object_level': 'div2'
+    	},
+        {
+            'begin': '',
+            'end': '',
+    		'field': 'head',
+    		'style': {"font-variant": "small-caps"},
+    		'link': True,
+            'object_level': 'div3'
+    	}],
         'comment': '''
                # The concordance_citation variable define how and in what field order citations are displayed in concordance reports.
                # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]),
@@ -260,9 +318,32 @@ web_config_defaults = {
         'index': 19
     },
     'bibliography_citation': {
-        'value': [{"field": "title", "style": "italic, small-caps, bold", "link": True},
-                  {"field": "author", "style": "small-caps", "link": True},
-                  {"field": "year", "style": "brackets", "link": False}],
+        'value': [{
+            'begin': '',
+            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+            'field': 'title',
+    		'style': {"font-variant": "small-caps",
+                      "font-style": "italic",
+                      "font-weight": 700},
+    		'link': True,
+            'object_level': 'doc'
+    	},
+        {
+            'begin': '',
+            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+    		'field': 'author',
+    		'style': {"font-variant": "small-caps"},
+    		'link': False,
+            'object_level': 'doc'
+    	},
+    	{
+            'begin': '&nbsp;&nbsp;[',
+            'end': ']',
+            'field': 'year',
+    		'style': 'normal',
+    		'link': False,
+            'object_level': 'doc'
+    	}],
         'comment': '''
                # The bibligraphy_citation variable define how and in what field order citations are displayed in bibliography reports.
                # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]),
@@ -271,13 +352,64 @@ web_config_defaults = {
         'index': 20
     },
     'navigation_citation': {
-        'value': [{"field": "author", "style": "small-caps", "link": False},
-                  {"field": "title", "style": "italic, small-caps", "link": False},
-                  {"field": "year", "style": "brackets", "link": False},
-                  {"field": "pub_place", "style": "normal", "link": False},
-                  {"field": "publisher", "style": "normal", "link": False},
-                  {"field": "collection", "style": "normal", "link": False},
-                  {"field": "pub_date", "style": "normal", "link": False}],
+        'value': [{
+            'begin': '',
+            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+    		'field': 'author',
+    		'style': {"font-variant": "small-caps"},
+    		'link': False,
+            'object_level': 'doc'
+    	},
+    	{
+            'begin': '',
+            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+            'field': 'title',
+    		'style': {"font-variant": "small-caps",
+                      "font-style": "italic",
+                      "font-weight": 700},
+    		'link': True,
+            'object_level': 'doc'
+    	},
+    	{
+            'begin': '&nbsp;&nbsp;[',
+            'end': ']&nbsp;&nbsp;|&nbsp;&nbsp;',
+            'field': 'year',
+    		'style': 'normal',
+    		'link': False,
+            'object_level': 'doc'
+    	},
+    	{
+            'begin': '',
+            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+    		'field': 'pub_place',
+    		'style': {},
+    		'link': False,
+            'object_level': 'doc'
+    	},
+    	{
+            'begin': '',
+            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+            'field': 'publisher',
+    		'style': {},
+    		'link': False,
+            'object_level': 'doc'
+    	},
+    	{
+            'begin': '',
+            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+    		'field': 'collection',
+    		'style': {},
+    		'link': False,
+            'object_level': 'doc'
+    	},
+    	{
+            'begin': '',
+            'end': '',
+    		'field': 'pub_date',
+    		'style': {},
+    		'link': False,
+            'object_level': 'doc'
+    	}],
         'comment': '''
                # The navigation_citation variable define how and in what field order citations are displayed in navigation reports.
                # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]),

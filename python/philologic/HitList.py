@@ -203,6 +203,21 @@ class HitList(object):
         self.position += 1
         return (struct.unpack(self.format, buffer))
 
+    def get_total_word_count(self):
+        # self.finish()
+        total_count = 0
+        iter_position = 0
+        self.seek(iter_position)
+        while True:
+            try:
+                hit = self.readhit(iter_position)
+                hit_wrapped = HitWrapper(hit, self.dbh)
+                total_count += int(hit_wrapped.word_count)
+            except IndexError, IOError:
+                break
+            iter_position += 1
+        return total_count
+
 
 # TODO: check if we still need this...
 class CombinedHitlist(object):

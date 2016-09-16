@@ -285,10 +285,10 @@ class Loader(object):
                     self.metadata_types[k] = "doc"
                     # don't need to check for conflicts, since doc is first.
 
-                    # Adding non-doc level metadata
-        self.metadata_hierarchy.append([])
+        # Adding non-doc level metadata
         for element_type in self.parser_defaults["metadata_to_parse"]:
-            if element_type != "page" and element_type != "ref":
+            if element_type != "page" and element_type != "ref" and element_type != "line":
+                self.metadata_hierarchy.append([])
                 for param in self.parser_defaults["metadata_to_parse"][element_type]:
                     if param not in self.metadata_fields:
                         self.metadata_fields.append(param)

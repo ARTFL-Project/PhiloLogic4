@@ -125,7 +125,7 @@
                 for (var key in fullResults) {
                     sortedList.push({
                         label: key,
-                        count: parseInt(fullResults[key].count),
+                        count: parseFloat(fullResults[key].count),
                         url: fullResults[key].url
                     });
                 }
