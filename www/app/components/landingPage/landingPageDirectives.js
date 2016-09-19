@@ -64,6 +64,7 @@
 
             var dicoLetterRange = $rootScope.philoConfig.dico_letter_range;
             scope.dicoLetterRows = [];
+            scope.showDicoLetterRows = true;
             var row = [];
             var position = 0;
             for (var i = 0; i < dicoLetterRange.length; i++) {
@@ -80,6 +81,9 @@
             }
             if (row.length) {
                 scope.dicoLetterRows.push(row);
+            }
+            if (scope.dicoLetterRows.length == 0) {
+                scope.showDicoLetterRows = false;
             }
         }
         return {

@@ -46,6 +46,8 @@ def get_label(hit, citation_object):
         if citation_object["field"] == "head":
             if citation_object["object_level"] == "div1":
                 label = get_div1_name(hit)
+                if label == "Text" and hit.div1.philo_id[-1] == 0:  # This is a fake div1 of id 0
+                    label = ""
             else:
                 div1_name = get_div1_name(hit)
                 div2_name = hit.div2.head.strip()

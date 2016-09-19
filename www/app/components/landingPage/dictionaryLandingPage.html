@@ -1,6 +1,6 @@
 <div id="dictionary-landing-page">
     <div class="row">
-        <div id="dico-landing-volume" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;">
+        <div id="dico-landing-volume" class="col-xs-6 panel panel-default" ng-class="{'col-xs-offset-3': !showDicoLetterRows}" style="border-width: 0px; box-shadow: 0 0 0;">
             <div class="panel-heading" style="margin-left: -15px; margin-right: -15px">
                 Browse by volume
             </div>
@@ -17,7 +17,7 @@
                 </ul>
             </div>
         </div>
-        <div id="dico-landing-alpha" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;">
+        <div id="dico-landing-alpha" class="col-xs-6 panel panel-default" style="border-width: 0px; box-shadow: 0 0 0;" ng-if="showDicoLetterRows">
             <div class="panel-heading">
                 Browse by letter
             </div>
