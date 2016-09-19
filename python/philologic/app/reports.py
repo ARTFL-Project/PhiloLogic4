@@ -70,7 +70,13 @@ def bibliography_results(request, config):
         hits = db.get_all(db.locals['default_object_level'], request["sort_order"], )
     else:
         hits = db.query(**request.metadata)
-    start, end, n = page_interval(request.results_per_page, hits, request.start, request.end)
+    if request.simple_bibliography == "all": # request from simple landing page report which gets all biblio in load order
+        hits.finish()
+        start = 1
+        end = len(hits)
+        n = end
+    else:
+        start, end, n = page_interval(request.results_per_page, hits, request.start, request.end)
     bibliography_object = {
         "description": {
             "start": start,

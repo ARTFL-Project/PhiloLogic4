@@ -274,7 +274,7 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     el.tag = "span"
                     el.attrib["class"] = "xml-pb-image"
                     el.append(etree.Element("a"))
-                    el[-1].attrib["href"] = config.page_images_url_root + '/' + img
+                    el[-1].attrib["href"] = config.page_images_url_root + '/' + img + config.page_image_extension
                     el[-1].text = "[page " + el.attrib["n"] + "]"
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
@@ -327,7 +327,7 @@ def page_images(config, output, current_obj_img, philo_id):
         current_obj_img.append('')
     if first_page_object['start_byte'] and current_obj_img[0] != first_page_object['filename']:
         if first_page_object['filename']:
-            page_href = config.page_images_url_root + '/' + first_page_object['filename']
+            page_href = config.page_images_url_root + '/' + first_page_object['filename'] + config.page_image_extension
             output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(
                 first_page_object["n"]) + "]</a></p>" + output
             if current_obj_img[0] == '':
@@ -357,7 +357,7 @@ def get_first_page(philo_id, config):
         except:
             return {'filename': '', 'start_byte': ''}
     else:
-        c.execute('select * from pages where philo_id like ? limit 1', (' '.join([str(i) for i in philo_id]),))
+        c.execute('select * from pages where philo_id like ? limit 1', (' '.join([str(i) for i in philo_id]), ))
     page_result = c.fetchone()
     try:
         filename = page_result['img']

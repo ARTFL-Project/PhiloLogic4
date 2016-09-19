@@ -30,11 +30,9 @@
                 vm.authorized = $rootScope.authorized;
             });
         }
-        if ($rootScope.philoConfig.landing_page_browsing_type !== 'dictionary') {
-            vm.dictionary = false;
-        } else {
-            vm.dictionary = true;
-        }
+
+        vm.landingPageType = $rootScope.philoConfig.landing_page_browsing_type;
+
         $rootScope.report = "landing_page";
 
         vm.getContent = function(browseType, range) {

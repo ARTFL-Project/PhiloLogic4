@@ -3,8 +3,9 @@
 		<div class="landing-page-logo" ng-class="{'dictionary': philoConfig.dictionary}" ng-if="philoConfig.logo">
 			<img ng-src="{{ ::philoConfig.logo }}">
 		</div>
-        <default-landing-page ng-if="lp.dictionary === false"></default-landing-page>
-        <dictionary-landing-page ng-if="lp.dictionary"></dictionary-landing-page>
+        <default-landing-page ng-if="lp.landingPageType === 'default'"></default-landing-page>
+        <dictionary-landing-page ng-if="lp.landingPageType === 'dictionary'"></dictionary-landing-page>
+        <simple-landing-page ng-if="lp.landingPageType === 'simple'"></simple-landing-page>
         <landing-page-content name="{{ lp.query }}"></landing-page-content>
     </div>
     <access-control ng-if="!lp.authorized"></access-control>

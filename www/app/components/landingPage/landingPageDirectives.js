@@ -5,6 +5,7 @@
         .module('philoApp')
         .directive('defaultLandingPage', defaultLandingPage)
         .directive('dictionaryLandingPage', dictionaryLandingPage)
+        .directive('simpleLandingPage', simpleLandingPage)
         .directive('landingPageContent', landingPageContent)
 
 
@@ -13,7 +14,7 @@
             var ranges = [];
             var row = [];
             var position = 0;
-            for (var i = 0; i < list.length; i+=1) {
+            for (var i = 0; i < list.length; i += 1) {
                 position++;
                 row.push(list[i]);
                 if (position === columnLimit) {
@@ -36,7 +37,7 @@
                 if (typeof($rootScope.philoConfig.default_landing_page_browsing.splitRanges) === 'undefined') {
                     $rootScope.philoConfig.default_landing_page_browsing.splitRanges = [];
                 }
-                for (var i=0; i < scope.defaultLandingPageBrowsing.length; i+=1) {
+                for (var i = 0; i < scope.defaultLandingPageBrowsing.length; i += 1) {
                     if (typeof($rootScope.philoConfig.default_landing_page_browsing.splitRanges[i]) === 'undefined') {
                         var browseType = scope.defaultLandingPageBrowsing[i];
                         scope.defaultLandingPageBrowsing[i].queries = createRanges(browseType.queries, 5);
@@ -88,6 +89,25 @@
         }
         return {
             templateUrl: 'app/components/landingPage/dictionaryLandingPage.html',
+            replace: true,
+            link: function(scope) {
+                setupPage(scope);
+            }
+        }
+    }
+
+    function simpleLandingPage(request) {
+        var setupPage = function(scope) {
+            request.report({
+                    report: 'bibliography',
+                    simple_bibliography: 'all'
+                })
+                .then(function(response) {
+                    scope.bibliography = response.data;
+                });
+        }
+        return {
+            templateUrl: 'app/components/landingPage/simpleLandingPage.html',
             replace: true,
             link: function(scope) {
                 setupPage(scope);

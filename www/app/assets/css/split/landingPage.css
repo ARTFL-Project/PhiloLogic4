@@ -84,3 +84,16 @@ ul {
 		margin: 70px 0px 25px 0px;
 	}
 }
+
+#simple-landing-page li {
+    padding: 10px;
+}
+.landing-bullet-point {
+    border: solid 1px #000;
+    background: #000;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
