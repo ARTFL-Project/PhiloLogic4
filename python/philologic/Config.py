@@ -280,7 +280,31 @@ web_config_defaults = {
             'end': ']',
             'link': False,
             'style': {}
-        }],
+        },
+        {
+            'field': 'pub_place',
+            'object_level': 'doc',
+            'begin': '',
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {}
+    	},
+    	{
+            'field': 'publisher',
+            'object_level': 'doc',
+            'begin': '',
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {}
+    	},
+    	{
+            'field': 'collection',
+            'object_level': 'doc',
+            'begin': '',
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {}
+    	}],
         'comment': '# This variable defines the citation for the simple landing page.',
         'index': 18
     },

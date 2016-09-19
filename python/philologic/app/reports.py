@@ -96,7 +96,10 @@ def bibliography_results(request, config):
             metadata_fields[metadata] = hit[metadata]
         if not result_type:
             result_type = hit.object_type
-        citation = citations(hit, citation_hrefs, config, report="bibliography")
+        if request.simple_bibliography == "all":
+            citation = citations(hit, citation_hrefs, config, report="simple_landing")
+        else:
+            citation = citations(hit, citation_hrefs, config, report="bibliography")
         if config.dictionary_bibliography is False:
             results.append({
                 'citation': citation,
