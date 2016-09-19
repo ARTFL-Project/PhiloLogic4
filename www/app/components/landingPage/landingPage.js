@@ -31,7 +31,7 @@
             });
         }
 
-        vm.landingPageType = $rootScope.philoConfig.landing_page_browsing_type;
+        vm.landingPageBrowsing = $rootScope.philoConfig.landing_page_browsing;
 
         $rootScope.report = "landing_page";
 

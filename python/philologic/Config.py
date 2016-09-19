@@ -183,10 +183,12 @@ web_config_defaults = {
                    #in their entirety and grouped under the same title. It is turned off by default''',
         'index': 14
     },
-    'landing_page_browsing_type': {
+    'landing_page_browsing': {
         'value': 'default',
-        'comment':
-        "# The landing_page_browsing_type variable defines what type of landing page. Values available are 'default' or 'dictionary' or 'simple'",
+        'comment': '''
+               # The landing_page_browsing variable defines what type of landing page. There are 3 built-in reports available: 'default',
+               # 'dictionary' or 'simple'. You can otherwise supply a relative path to a custom HTML template. Note that this path is relative
+               # to the database root. The only constraint for custom templates is that the HTML must be encapsulated inside a div''',
         'index': 15
     },
     'default_landing_page_browsing': {

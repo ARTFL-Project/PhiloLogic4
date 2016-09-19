@@ -6,6 +6,7 @@
         .directive('defaultLandingPage', defaultLandingPage)
         .directive('dictionaryLandingPage', dictionaryLandingPage)
         .directive('simpleLandingPage', simpleLandingPage)
+        .directive('customLandingPage', customLandingPage)
         .directive('landingPageContent', landingPageContent)
 
 
@@ -112,6 +113,13 @@
             link: function(scope) {
                 setupPage(scope);
             }
+        }
+    }
+
+    function customLandingPage(philoConfig) {
+        return {
+            templateUrl: philoConfig.landing_page_browsing,
+            replace: true
         }
     }
 
