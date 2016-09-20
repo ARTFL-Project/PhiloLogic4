@@ -1,0 +1,21 @@
+<div id="simple-landing-page">
+    <div class="row" id="landingGroup">
+        <ol>
+            <li ng-repeat="biblioObj in ::bibliography.results">
+                <span class="landing-bullet-point"></span>
+                <span class="citation" ng-repeat="citation in biblioObj.citation">
+                    <span ng-if="citation.href">
+                        <span ng-bind-html="citation.begin"></span>
+                        <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
+                        <span ng-bind-html="citation.end"></span>
+                    </span>
+                    <span ng-if="!citation.href">
+                        <span ng-bind-html="citation.begin"></span>
+                        <span ng-style="citation.style">{{ ::citation.label }}</span>
+                        <span ng-bind-html="citation.end"></span>
+                    </span>
+                </span>
+            </li>
+        </ol>
+    </div>
+</div>

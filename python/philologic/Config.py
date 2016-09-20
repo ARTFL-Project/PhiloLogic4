@@ -183,10 +183,12 @@ web_config_defaults = {
                    #in their entirety and grouped under the same title. It is turned off by default''',
         'index': 14
     },
-    'landing_page_browsing_type': {
+    'landing_page_browsing': {
         'value': 'default',
-        'comment':
-        "# The landing_page_browsing_type variable defines what type of landing page. Values available are 'default' or 'dictionary'",
+        'comment': '''
+               # The landing_page_browsing variable defines what type of landing page. There are 3 built-in reports available: 'default',
+               # 'dictionary' or 'simple'. You can otherwise supply a relative path to a custom HTML template. Note that this path is relative
+               # to the database root. The only constraint for custom templates is that the HTML must be encapsulated inside a div''',
         'index': 15
     },
     'default_landing_page_browsing': {
@@ -209,30 +211,30 @@ web_config_defaults = {
                  "is_range": True,
                  'citation': [
                     {
+                        'field': 'author',
+                        'object_level': 'doc',
                         'begin': '',
-                        'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
-                		'field': 'author',
-                		'style': {"font-variant": "small-caps"},
+                        'end': ',&nbsp;',
                 		'link': False,
-                        'object_level': 'doc'
+                        'style': {"font-variant": "small-caps"}
                 	},
                 	{
-                        'begin': '',
-                        'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
                         'field': 'title',
-                		'style': {"font-variant": "small-caps",
-                                  "font-style": "italic",
-                                  "font-weight": 700},
+                        'object_level': 'doc',
+                        'begin': '',
+                        'end': '',
                 		'link': True,
-                        'object_level': 'doc'
+                        'style': {"font-variant": "small-caps",
+                                  "font-style": "italic",
+                                  "font-weight": 700}
                 	},
                 	{
+                        'field': 'year',
+                        'object_level': 'doc',
                         'begin': '&nbsp;&nbsp;[',
                         'end': ']',
-                        'field': 'year',
-                		'style': 'normal',
                 		'link': False,
-                        'object_level': 'doc'
+                        'style': {}
                 	}
                 ],
                 }],
@@ -240,7 +242,8 @@ web_config_defaults = {
                # The landing_page_browsing variable allows for configuration of navigation by metadata within the landing page.
                # You can choose any document-level metadata (such as author, title, date, genre...) for browsing
                # and define two different types of queries to group your data: ranges and exact matches, i.e. "A-D" or "Comedy".
-               # The prepopulated defaults should serve as a guide.''',
+               # You can define styling with a dictionary of valid CSS property/value such as those in the default values.
+               # begin and end keywords define what precedes and follows each field. You can use HTML for these strings.''',
         'index': 16
     },
     'default_landing_page_display': {
@@ -251,171 +254,276 @@ web_config_defaults = {
                # range (the one you wish to display) as a string, such as 'A-D'. An empty dict will disable the feature.''',
         'index': 17
     },
+    'simple_landing_citation': {
+        'value': [{
+            'field': 'author',
+            'object_level': 'doc',
+            'begin': '',
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {"font-variant": "small-caps"}
+        },
+        {
+            'field': 'title',
+            'object_level': 'doc',
+            'begin': '',
+            'end': '',
+            'link': True,
+            'style': {"font-variant": "small-caps",
+                      "font-style": "italic",
+                      "font-weight": 700}
+        },
+        {
+            'field': 'year',
+            'object_level': 'doc',
+            'begin': '&nbsp;&nbsp;[',
+            'end': ']',
+            'link': False,
+            'style': {}
+        },
+        {
+            'field': 'pub_place',
+            'object_level': 'doc',
+            'begin': '',
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {}
+    	},
+    	{
+            'field': 'publisher',
+            'object_level': 'doc',
+            'begin': '',
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {}
+    	},
+    	{
+            'field': 'collection',
+            'object_level': 'doc',
+            'begin': '',
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {}
+    	}],
+        'comment': '# This variable defines the citation for the simple landing page.',
+        'index': 18
+    },
     'dico_letter_range': {
         'value': ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
                   "U", "V", "W", "X", "Y", "Z"],
         'comment': '''
                # The dico_letter_range variables defines a set of letters corresponding to the first letter of a headword. This generates a set of buttons
-               # for browsing the database available on the landing page. The default represents the entire roman alphabet.''',
-        'index': 18
+               # for browsing the database available on the landing page. The default represents the entire roman alphabet. An empty list hides the table.''',
+        'index': 19
     },
     'concordance_citation': {
         'value': [{
+            'field': 'author',
+            'object_level': 'doc',
             'begin': '',
-            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
-    		'field': 'author',
-    		'style': {"font-variant": "small-caps"},
-    		'link': False,
-            'object_level': 'doc'
-    	},
-    	{
-            'begin': '',
-            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {"font-variant": "small-caps"}
+        },
+        {
             'field': 'title',
-    		'style': {"font-variant": "small-caps",
-                      "font-style": "italic",
-                      "font-weight": 700},
-    		'link': True,
-            'object_level': 'doc'
-    	},
-    	{
-            'begin': '&nbsp;&nbsp;[',
-            'end': ']&nbsp;&nbsp;|&nbsp;&nbsp;',
-            'field': 'year',
-    		'style': 'normal',
-    		'link': False,
-            'object_level': 'doc'
-    	},
-        {
-            'begin': '',
-            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
-            'field': 'head',
-    		'style': {"font-variant": "small-caps"},
-    		'link': True,
-            'object_level': 'div1'
-    	},
-        {
-            'begin': '',
-            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
-    		'field': 'head',
-    		'style': {"font-variant": "small-caps"},
-    		'link': True,
-            'object_level': 'div2'
-    	},
-        {
+            'object_level': 'doc',
             'begin': '',
             'end': '',
-    		'field': 'head',
-    		'style': {"font-variant": "small-caps"},
+            'link': True,
+            'style': {"font-variant": "small-caps",
+                      "font-style": "italic",
+                      "font-weight": 700}
+        },
+        {
+            'field': 'year',
+            'object_level': 'doc',
+            'begin': '&nbsp;&nbsp;[',
+            'end': ']',
+            'link': False,
+            'style': {}
+        },
+        {
+            'field': 'head',
+            'object_level': 'div1',
+            'begin': '&nbsp;&nbsp;&gt;&nbsp;&nbsp;',
+            'end': '&nbsp;&nbsp;',
     		'link': True,
-            'object_level': 'div3'
+            'style': {"font-variant": "small-caps"}
+    	},
+        {
+            'field': 'head',
+            'object_level': 'div2',
+            'begin': '&gt;&nbsp;&nbsp;',
+            'end': '&nbsp;&nbsp;',
+    		'link': True,
+            'style': {"font-variant": "small-caps"}
+    	},
+        {
+            'field': 'head',
+            'object_level': 'div3',
+            'begin': '&gt;&nbsp;&nbsp;',
+            'end': '&nbsp;&nbsp;',
+    		'link': True,
+            'style': {"font-variant": "small-caps"}
+    	},
+        {
+            'field': 'who',
+            'object_level': 'para',
+            'begin': '&gt;&nbsp;&nbsp;',
+            'end': '&nbsp;&nbsp;',
+    		'link': True,
+            'style': {"font-variant": "small-caps"}
+    	},
+        {
+            'field': 'resp',
+            'object_level': 'para',
+            'begin': '&gt;&nbsp;&nbsp;',
+            'end': '&nbsp;&nbsp;',
+    		'link': True,
+            'style': {"font-variant": "small-caps"}
     	}],
         'comment': '''
                # The concordance_citation variable define how and in what field order citations are displayed in concordance reports.
-               # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]),
-               # or normal for no styling. The link key enables linking for that metadata field. It links to the table of contents for title and filename,
-               # and to a metadata query for all other metadata fields.''',
-        'index': 19
+               # You can define styling with a dictionary of valid CSS property/value such as those in the default values.
+               # begin and end keywords define what precedes and follows each field. You can use HTML for these strings.
+               # The link key enables linking for that metadata field. It links to the table of contents for title and filename,
+               # and to a regular query for all other metadata fields.''',
+        'index': 20
     },
     'bibliography_citation': {
         'value': [{
+            'field': 'author',
+            'object_level': 'doc',
             'begin': '',
-            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
-            'field': 'title',
-    		'style': {"font-variant": "small-caps",
-                      "font-style": "italic",
-                      "font-weight": 700},
-    		'link': True,
-            'object_level': 'doc'
-    	},
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {"font-variant": "small-caps"}
+        },
         {
+            'field': 'title',
+            'object_level': 'doc',
             'begin': '',
-            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
-    		'field': 'author',
-    		'style': {"font-variant": "small-caps"},
-    		'link': False,
-            'object_level': 'doc'
-    	},
-    	{
+            'end': '',
+            'link': True,
+            'style': {"font-variant": "small-caps",
+                      "font-style": "italic",
+                      "font-weight": 700}
+        },
+        {
+            'field': 'year',
+            'object_level': 'doc',
             'begin': '&nbsp;&nbsp;[',
             'end': ']',
-            'field': 'year',
-    		'style': 'normal',
-    		'link': False,
-            'object_level': 'doc'
+            'link': False,
+            'style': {}
+        },
+        {
+            'field': 'head',
+            'object_level': 'div1',
+            'begin': '&nbsp;&nbsp;&gt;&nbsp;&nbsp;',
+            'end': '&nbsp;&nbsp;',
+    		'link': True,
+            'style': {"font-variant": "small-caps"}
+    	},
+        {
+            'field': 'head',
+            'object_level': 'div2',
+            'begin': '&gt;&nbsp;&nbsp;',
+            'end': '&nbsp;&nbsp;',
+    		'link': True,
+            'style': {"font-variant": "small-caps"}
+    	},
+        {
+            'field': 'head',
+            'object_level': 'div3',
+            'begin': '&gt;&nbsp;&nbsp;',
+            'end': '&nbsp;&nbsp;',
+    		'link': True,
+            'style': {"font-variant": "small-caps"}
+    	},
+        {
+            'field': 'who',
+            'object_level': 'para',
+            'begin': '&gt;&nbsp;&nbsp;',
+            'end': '&nbsp;&nbsp;',
+    		'link': True,
+            'style': {"font-variant": "small-caps"}
+    	},
+        {
+            'field': 'resp',
+            'object_level': 'para',
+            'begin': '&gt;&nbsp;&nbsp;',
+            'end': '&nbsp;&nbsp;',
+    		'link': True,
+            'style': {"font-variant": "small-caps"}
     	}],
         'comment': '''
                # The bibligraphy_citation variable define how and in what field order citations are displayed in bibliography reports.
-               # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]),
-               # or normal for no styling. The link key enables linking for that metadata field. It links to the table of contents for title and filename,
-               # and to a metadata query for all other metadata fields.''',
-        'index': 20
+               # You can define styling with a dictionary of valid CSS property/value such as those in the default values.
+               # begin and end keywords define what precedes and follows each field. You can use HTML for these strings.
+               # The link key enables linking for that metadata field. It links to the table of contents for title and filename,
+               # and to a regular query for all other metadata fields.''',
+        'index': 21
     },
     'navigation_citation': {
         'value': [{
+            'field': 'author',
+            'object_level': 'doc',
             'begin': '',
-            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
-    		'field': 'author',
-    		'style': {"font-variant": "small-caps"},
-    		'link': False,
-            'object_level': 'doc'
-    	},
-    	{
-            'begin': '',
-            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {"font-variant": "small-caps"}
+        },
+        {
             'field': 'title',
-    		'style': {"font-variant": "small-caps",
-                      "font-style": "italic",
-                      "font-weight": 700},
-    		'link': True,
-            'object_level': 'doc'
-    	},
-    	{
-            'begin': '&nbsp;&nbsp;[',
-            'end': ']&nbsp;&nbsp;|&nbsp;&nbsp;',
-            'field': 'year',
-    		'style': 'normal',
-    		'link': False,
-            'object_level': 'doc'
-    	},
-    	{
-            'begin': '',
-            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
-    		'field': 'pub_place',
-    		'style': {},
-    		'link': False,
-            'object_level': 'doc'
-    	},
-    	{
-            'begin': '',
-            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
-            'field': 'publisher',
-    		'style': {},
-    		'link': False,
-            'object_level': 'doc'
-    	},
-    	{
-            'begin': '',
-            'end': '&nbsp;&nbsp;|&nbsp;&nbsp;',
-    		'field': 'collection',
-    		'style': {},
-    		'link': False,
-            'object_level': 'doc'
-    	},
-    	{
+            'object_level': 'doc',
             'begin': '',
             'end': '',
-    		'field': 'pub_date',
-    		'style': {},
-    		'link': False,
-            'object_level': 'doc'
+            'link': True,
+            'style': {"font-variant": "small-caps",
+                      "font-style": "italic",
+                      "font-weight": 700}
+        },
+        {
+            'field': 'year',
+            'object_level': 'doc',
+            'begin': '&nbsp;&nbsp;[',
+            'end': ']',
+            'link': False,
+            'style': {}
+        },
+    	{
+            'field': 'pub_place',
+            'object_level': 'doc',
+            'begin': '',
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {}
+    	},
+    	{
+            'field': 'publisher',
+            'object_level': 'doc',
+            'begin': '',
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {}
+    	},
+    	{
+            'field': 'collection',
+            'object_level': 'doc',
+            'begin': '',
+            'end': ',&nbsp;',
+            'link': False,
+            'style': {}
     	}],
         'comment': '''
                # The navigation_citation variable define how and in what field order citations are displayed in navigation reports.
-               # You can define styling with the following options: small-caps, italic, bold, brackets (value surround by brackets like [1789]),
-               # or normal for no styling. The link key enables linking for that metadata field. It links to the table of contents for title and filename,
+               # You can define styling with a dictionary of valid CSS property/value such as those in the default values.
+               # begin and end keywords define what precedes and follows each field. You can use HTML for these strings.
+               # The link key enables linking for that metadata field. It links to the table of contents for title and filename,
                # and to a metadata query for all other metadata fields.''',
-        'index': 21
+        'index': 22
     },
     'kwic_bibliography_fields': {
         'value': [],
@@ -424,7 +532,7 @@ web_config_defaults = {
                 # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.
                 # If the variable is an empty list, filename will be used.
                 ''',
-        'index': 22
+        'index': 23
     },
     'concordance_biblio_sorting': {
         'value': [],
@@ -432,14 +540,14 @@ web_config_defaults = {
                 # The concordance_biblio_sorting variable allows you to pick wich metadata field can be used for sorting concordance or bibliography results.
                 # It is a list of tuples where multiple metadata fields can be used for sorting, such as [('author', 'title'), ('year', 'author', 'title')].
                 ''',
-        'index': 23
+        'index': 24
     },
     'kwic_metadata_sorting_fields': {
         'value': [],
         'comment': '''
                 # The kwic_metadata_sorting_fields variable allows you to pick wich metadata field can be used for sorting KWIC results.
                 ''',
-        'index': 24
+        'index': 25
     },
     'time_series_year_field': {
         'value': 'year',
@@ -447,12 +555,12 @@ web_config_defaults = {
                 # The time_series_year_field variable defines which metadata field to use for time series. The year field is built at load time by finding the earliest 4 digit number
                 # in multiple date fields.
                 ''',
-        'index': 25
+        'index': 26
     },
     'time_series_interval': {
         'value': 10,
         'comment': '# The time_series_interval variable defines the default year span used for time series.',
-        'index': 26
+        'index': 27
     },
     'title_prefix_removal': {
         'value': [],
@@ -462,7 +570,7 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-        'index': 27
+        'index': 28
     },
     'page_images_url_root': {
         'value': '',
@@ -472,7 +580,16 @@ web_config_defaults = {
                  # <pb fac="filename.jpg"> or <pb id="filename.jpg">
                  # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
                  ''',
-        'index': 28
+        'index': 29
+    },
+    'page_image_extension': {
+        'value': '',
+        'comment': '''
+                 # The page_image_extension value is useful when the image name does not have an extension defined in the markup.
+                 # For instance, given <pb n="1" fac="image1">, you could define the extension as ".jpeg" and the browser would fetch
+                 # the image at http://some-url/image1.jpeg (where some-url is defined in the above page_images_url_root variable).
+                 ''',
+        'index': 30
     },
     'logo': {
         'value': '',
@@ -481,14 +598,14 @@ web_config_defaults = {
                   # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
                   # it starts with http://. If no logo is defined, no picture will be displayed.
                   ''',
-        'index': 29
+        'index': 31
     },
     'header_in_toc': {
         'value': False,
         'comment': '''
                   # The header_in_toc variable defines whether to display a button to show the header in the table of contents
                   ''',
-        'index': 30
+        'index': 32
 
     }
 }

@@ -5,6 +5,8 @@
         .module('philoApp')
         .directive('defaultLandingPage', defaultLandingPage)
         .directive('dictionaryLandingPage', dictionaryLandingPage)
+        .directive('simpleLandingPage', simpleLandingPage)
+        .directive('customLandingPage', customLandingPage)
         .directive('landingPageContent', landingPageContent)
 
 
@@ -13,7 +15,7 @@
             var ranges = [];
             var row = [];
             var position = 0;
-            for (var i = 0; i < list.length; i+=1) {
+            for (var i = 0; i < list.length; i += 1) {
                 position++;
                 row.push(list[i]);
                 if (position === columnLimit) {
@@ -36,7 +38,7 @@
                 if (typeof($rootScope.philoConfig.default_landing_page_browsing.splitRanges) === 'undefined') {
                     $rootScope.philoConfig.default_landing_page_browsing.splitRanges = [];
                 }
-                for (var i=0; i < scope.defaultLandingPageBrowsing.length; i+=1) {
+                for (var i = 0; i < scope.defaultLandingPageBrowsing.length; i += 1) {
                     if (typeof($rootScope.philoConfig.default_landing_page_browsing.splitRanges[i]) === 'undefined') {
                         var browseType = scope.defaultLandingPageBrowsing[i];
                         scope.defaultLandingPageBrowsing[i].queries = createRanges(browseType.queries, 5);
@@ -64,6 +66,7 @@
 
             var dicoLetterRange = $rootScope.philoConfig.dico_letter_range;
             scope.dicoLetterRows = [];
+            scope.showDicoLetterRows = true;
             var row = [];
             var position = 0;
             for (var i = 0; i < dicoLetterRange.length; i++) {
@@ -81,6 +84,9 @@
             if (row.length) {
                 scope.dicoLetterRows.push(row);
             }
+            if (scope.dicoLetterRows.length == 0) {
+                scope.showDicoLetterRows = false;
+            }
         }
         return {
             templateUrl: 'app/components/landingPage/dictionaryLandingPage.html',
@@ -88,6 +94,32 @@
             link: function(scope) {
                 setupPage(scope);
             }
+        }
+    }
+
+    function simpleLandingPage(request) {
+        var setupPage = function(scope) {
+            request.report({
+                    report: 'bibliography',
+                    simple_bibliography: 'all'
+                })
+                .then(function(response) {
+                    scope.bibliography = response.data;
+                });
+        }
+        return {
+            templateUrl: 'app/components/landingPage/simpleLandingPage.html',
+            replace: true,
+            link: function(scope) {
+                setupPage(scope);
+            }
+        }
+    }
+
+    function customLandingPage(philoConfig) {
+        return {
+            templateUrl: philoConfig.landing_page_browsing,
+            replace: true
         }
     }
 
