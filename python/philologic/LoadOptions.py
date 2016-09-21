@@ -53,6 +53,7 @@ class LoadOptions(object):
         self.values["join_hyphen_in_words"] = True
         self.values["abbrev_expand"] = True
         self.values["long_word_limit"] = 200
+        self.values["flatten_ligatures"] = True
         self.values["cores"] = 2
         self.values["dbname"] = ""
         self.values["db_url"] = ""

@@ -5,15 +5,11 @@ import os
 import re
 import shutil
 import sqlite3
-import subprocess
 import sys
 import time
-from ast import literal_eval as eval
 from glob import glob
 
-import philologic.LoadFilters as LoadFilters
 import philologic.Parser as Parser
-import philologic.PostFilters as PostFilters
 from lxml import etree
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.PostFilters import make_sql_table
@@ -35,6 +31,11 @@ DEFAULT_OBJECT_LEVEL = "doc"
 
 NAVIGABLE_OBJECTS = ('doc', 'div1', 'div2', 'div3', 'para')
 
+ParserOptions = ["parser_factory", "doc_xpaths", "token_regex", "tag_to_obj_map", "metadata_to_parse", "suppress_tags",
+                 "load_filters", "break_apost", "chars_not_to_index", "break_sent_in_line_group", "tag_exceptions",
+                 "join_hyphen_in_words", "unicode_word_breakers", "abbrev_expand", "long_word_limit",
+                 "flatten_ligatures"]
+
 
 class Loader(object):
     def __init__(self, **loader_options):
@@ -52,10 +53,9 @@ class Loader(object):
         self.filtered_words = loader_options["filtered_words"]
         self.token_regex = loader_options["token_regex"]
 
-        self.parser_defaults = {}
-        for option in ["parser_factory", "doc_xpaths", "token_regex", "tag_to_obj_map", "metadata_to_parse",
-                       "pseudo_empty_tags", "suppress_tags", "load_filters"]:
-            self.parser_defaults[option] = loader_options[option]
+        self.parser_config = {}
+        for option in ParserOptions:
+            self.parser_config[option] = loader_options[option]
 
         try:
             work_dir = os.path.join(loader_options["data_destination"], "WORK")
@@ -117,12 +117,11 @@ class Loader(object):
 
     def parse_tei_header(self):
         load_metadata = []
-        metadata_xpaths = self.parser_defaults["doc_xpaths"]
+        metadata_xpaths = self.parser_config["doc_xpaths"]
         deleted_files = []
         for f in self.list_files():
             data = {"filename": f}
             header = ""
-            in_header = False
             file_content = "".join(open(self.textdir + f).readlines())
             try:
                 start_header_index = re.search(r'<teiheader', file_content, re.I).start()
@@ -235,7 +234,7 @@ class Loader(object):
 
     def parse_files(self, max_workers, data_dicts=None):
         print "\n### Parsing files ###"
-        os.chdir(self.workdir)  #questionable
+        os.chdir(self.workdir)  # questionable
 
         if not data_dicts:
             data_dicts = [{"filename": self.textdir + fn} for fn in self.list_files()]
@@ -285,11 +284,11 @@ class Loader(object):
                     self.metadata_types[k] = "doc"
                     # don't need to check for conflicts, since doc is first.
 
-        # Adding non-doc level metadata
-        for element_type in self.parser_defaults["metadata_to_parse"]:
+                    # Adding non-doc level metadata
+        for element_type in self.parser_config["metadata_to_parse"]:
             if element_type != "page" and element_type != "ref" and element_type != "line":
                 self.metadata_hierarchy.append([])
-                for param in self.parser_defaults["metadata_to_parse"][element_type]:
+                for param in self.parser_config["metadata_to_parse"][element_type]:
                     if param not in self.metadata_fields:
                         self.metadata_fields.append(param)
                         self.metadata_hierarchy[-1].append(param)
@@ -311,13 +310,13 @@ class Loader(object):
                 text = self.filequeue.pop(0)  # parent and child will both know the relevant filenames
                 metadata = data_dicts.pop(0)
                 options = text["options"]
-                if "options" in metadata:  #cleanup, should do above.
+                if "options" in metadata:  # cleanup, should do above.
                     del metadata["options"]
 
                 pid = os.fork()  # fork returns 0 to the child, the id of the child to the parent.
                 # so pid is true in parent, false in child.
 
-                if pid:  #the parent process tracks the child
+                if pid:  # the parent process tracks the child
                     procs[pid] = text["results"]  # we need to know where to grab the results from.
                     workers += 1
                     # loops to create up to max_workers children at any one time.
@@ -329,34 +328,30 @@ class Loader(object):
                     print "%s: parsing %d : %s" % (time.ctime(), text["id"], text["name"])
 
                     if "parser_factory" not in options:
-                        options["parser_factory"] = self.parser_defaults["parser_factory"]
+                        options["parser_factory"] = self.parser_config["parser_factory"]
                     parser_factory = options["parser_factory"]
                     del options["parser_factory"]
 
-                    if "token_regex" not in options:
-                        options["token_regex"] = self.parser_defaults["token_regex"]
-                    if "doc_xpaths" not in options:
-                        options["xpaths"] = self.parser_defaults["doc_xpaths"]
-                    if "suppress_tags" not in options:
-                        options["suppress_tags"] = self.parser_defaults["suppress_tags"]
-                    if "pseudo_empty_tags" not in options:
-                        options["pseudo_empty_tags"] = self.parser_defaults["pseudo_empty_tags"]
-
                     if "load_filters" not in options:
-                        options["load_filters"] = self.parser_defaults["load_filters"]
+                        options["load_filters"] = self.parser_config["load_filters"]
                     filters = options["load_filters"]
                     del options["load_filters"]
+
+                    for option in ["token_regex", "suppress_tags", "break_apost", "chars_not_to_index",
+                                   "break_sent_in_line_group", "tag_exceptions", "join_hyphen_in_words",
+                                   "unicode_word_breakers", "abbrev_expand", "long_word_limit", "flatten_ligatures"]:
+                        options[option] = self.parser_config[option]
 
                     parser = parser_factory(o,
                                             text["id"],
                                             text["size"],
                                             known_metadata=metadata,
-                                            tag_to_obj_map=self.parser_defaults["tag_to_obj_map"],
-                                            metadata_to_parse=self.parser_defaults["metadata_to_parse"],
+                                            tag_to_obj_map=self.parser_config["tag_to_obj_map"],
+                                            metadata_to_parse=self.parser_config["metadata_to_parse"],
                                             filtered_words=self.filtered_words,
                                             **options)
                     try:
-                        r = parser.parse(i)
+                        parser.parse(i)
                     except RuntimeError:
                         print >> sys.stderr, "parse failure: XML stack explosion : %s" % [el.tag for el in parser.stack]
                         exit(1)
@@ -381,7 +376,7 @@ class Loader(object):
                 exit()
             done += 1
             workers -= 1
-            vec = cPickle.load(open(procs[pid]))  #load in the results from the child's parsework() function.
+            vec = cPickle.load(open(procs[pid]))  # load in the results from the child's parsework() function.
             # print vec
             self.omax = [max(x, y) for x, y in zip(vec, self.omax)]
         print "%s: done parsing" % time.ctime()
@@ -402,7 +397,6 @@ class Loader(object):
                 os.system('gunzip -c %s | egrep -a "^word" >> all_words_ordered' % (d["raw"] + ".gz"))
             print "done"
 
-        tomsargs = "sort -m " + sort_by_id + " " + "*.toms.sorted"
         print "%s: sorting objects" % time.ctime()
         toms_status = self.merge_files("toms")
         print "%s: object sort returned %d" % (time.ctime(), toms_status)
@@ -412,19 +406,19 @@ class Loader(object):
 
         print "%s: joining pages" % time.ctime()
         for page_file in glob(self.workdir + "/*pages"):
-            pages_status = os.system("cat %s >> %s/all_pages" % (page_file, self.workdir))
+            os.system("cat %s >> %s/all_pages" % (page_file, self.workdir))
             if not self.debug:
                 os.system("rm %s" % page_file)
 
         print "%s: joining references" % time.ctime()
         for ref_file in glob(self.workdir + "/*refs"):
-            refs_status = os.system("cat %s >> %s/all_refs" % (ref_file, self.workdir))
+            os.system("cat %s >> %s/all_refs" % (ref_file, self.workdir))
             if not self.debug:
                 os.system("rm %s" % ref_file)
 
         print "%s: joining lines" % time.ctime()
         for line_file in glob(self.workdir + "/*lines"):
-            lines_status = os.system("cat %s >> %s/all_lines" % (line_file, self.workdir))
+            os.system("cat %s >> %s/all_lines" % (line_file, self.workdir))
             if not self.debug:
                 os.system("rm %s" % line_file)
 
@@ -504,7 +498,8 @@ class Loader(object):
         os.system('/bin/bash -c "cut -f 2 <(gunzip -c %s) | uniq -c | LANG=C sort -rn -k 1,1> %s"' %
                   (self.workdir + "/all_words_sorted.gz", self.workdir + "/all_frequencies"))
 
-        # now scan over the frequency table to figure out how wide (in bits) the frequency fields are, and how large the block file will be.
+        # now scan over the frequency table to figure out how wide (in bits) the frequency fields are,
+        # and how large the block file will be.
         for line in open(self.workdir + "/all_frequencies"):
             f, word = line.rsplit(" ", 1)  # uniq -c pads output on the left side, so we split on the right.
             f = int(f)
@@ -513,7 +508,7 @@ class Loader(object):
             if f < index_cutoff:
                 pass  # low-frequency words don't go into the block-mode index.
             else:
-                blocks = 1 + f // (hits_per_block + 1)  #high frequency words have at least one block.
+                blocks = 1 + f // (hits_per_block + 1)  # high frequency words have at least one block.
                 offset += blocks * blocksize
 
         # take the log base 2 for the length of the binary representation.

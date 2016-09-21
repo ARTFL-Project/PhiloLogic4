@@ -1,5 +1,3 @@
-from philologic import Loader, LoadFilters, Parser, NewParser, PlainTextParser, PostFilters
-
 ###############################
 ## General Loading Variables ##
 ###############################
@@ -19,82 +17,55 @@ plain_text_obj = []
 #####################
 
 # These are doc level XPATHS used to parse a standard TEI header.
-# These XPATHS need to be inside a <teiHeader> and strictly apply to an entire document..
+# These XPATHS need to be inside a <teiHeader> and strictly apply to the entire document..
 # Only useful if you parse a TEI header.
 doc_xpaths = {
     "author": [
-        ".//sourceDesc/bibl/author[@type='marc100']",
-        ".//sourceDesc/bibl/author[@type='artfl']",
-        ".//sourceDesc/bibl/author",
-        ".//titleStmt/author",
-        ".//sourceDesc/biblStruct/monogr/author/name",
-        ".//sourceDesc/biblFull/titleStmt/author",
-        ".//sourceDesc/biblFull/titleStmt/respStmt/name",
-        ".//sourceDesc/biblFull/titleStmt/author",
-        ".//sourceDesc/bibl/titleStmt/author"
+        ".//sourceDesc/bibl/author[@type='marc100']", ".//sourceDesc/bibl/author[@type='artfl']",
+        ".//sourceDesc/bibl/author", ".//titleStmt/author", ".//sourceDesc/biblStruct/monogr/author/name",
+        ".//sourceDesc/biblFull/titleStmt/author", ".//sourceDesc/biblFull/titleStmt/respStmt/name",
+        ".//sourceDesc/biblFull/titleStmt/author", ".//sourceDesc/bibl/titleStmt/author"
     ],
     "title": [
-        ".//sourceDesc/bibl/title[@type='marc245']",
-        ".//sourceDesc/bibl/title[@type='artfl']",
-        ".//sourceDesc/bibl/title",
-        ".//titleStmt/title",
-        ".//sourceDesc/bibl/titleStmt/title",
-        ".//sourceDesc/biblStruct/monogr/title",
-        ".//sourceDesc/biblFull/titleStmt/title"
+        ".//sourceDesc/bibl/title[@type='marc245']", ".//sourceDesc/bibl/title[@type='artfl']",
+        ".//sourceDesc/bibl/title", ".//titleStmt/title", ".//sourceDesc/bibl/titleStmt/title",
+        ".//sourceDesc/biblStruct/monogr/title", ".//sourceDesc/biblFull/titleStmt/title"
     ],
     "author_dates": [
-        ".//sourceDesc/bibl/author/date",
-        ".//titlestmt/author/date"
+        ".//sourceDesc/bibl/author/date", ".//titlestmt/author/date"
     ],
     "create_date": [
-        ".//profileDesc/creation/date",
-        ".//fileDesc/sourceDesc/bibl/imprint/date",
-        ".//sourceDesc/biblFull/publicationStmt/date",
-        ".//profileDesc/dummy/creation/date",
+        ".//profileDesc/creation/date", ".//fileDesc/sourceDesc/bibl/imprint/date",
+        ".//sourceDesc/biblFull/publicationStmt/date", ".//profileDesc/dummy/creation/date",
         ".//fileDesc/sourceDesc/bibl/creation/date"
     ],
     "publisher": [
-        ".//sourceDesc/bibl/imprint[@type='artfl']",
-        ".//sourceDesc/bibl/imprint[@type='marc534']",
-        ".//sourceDesc/bibl/imprint/publisher",
-        ".//sourceDesc/biblStruct/monogr/imprint/publisher/name",
-        ".//sourceDesc/biblFull/publicationStmt/publisher",
-        ".//sourceDesc/bibl/publicationStmt/publisher",
-        ".//sourceDesc/bibl/publisher",
-        ".//publicationStmt/publisher",
-        ".//publicationStmp"
+        ".//sourceDesc/bibl/imprint[@type='artfl']", ".//sourceDesc/bibl/imprint[@type='marc534']",
+        ".//sourceDesc/bibl/imprint/publisher", ".//sourceDesc/biblStruct/monogr/imprint/publisher/name",
+        ".//sourceDesc/biblFull/publicationStmt/publisher", ".//sourceDesc/bibl/publicationStmt/publisher",
+        ".//sourceDesc/bibl/publisher", ".//publicationStmt/publisher", ".//publicationStmp"
     ],
     "pub_place": [
-        ".//sourceDesc/bibl/imprint/pubPlace",
-        ".//sourceDesc/biblFull/publicationStmt/pubPlace",
-        ".//sourceDesc/biblStruct/monog/imprint/pubPlace",
-        ".//sourceDesc/bibl/pubPlace",
+        ".//sourceDesc/bibl/imprint/pubPlace", ".//sourceDesc/biblFull/publicationStmt/pubPlace",
+        ".//sourceDesc/biblStruct/monog/imprint/pubPlace", ".//sourceDesc/bibl/pubPlace",
         ".//sourceDesc/bibl/publicationStmt/pubPlace"
     ],
     "pub_date": [
-        ".//sourceDesc/bibl/imprint/date",
-        ".//sourceDesc/biblStruct/monog/imprint/date",
-        ".//sourceDesc/biblFull/publicationStmt/date",
-        ".//sourceDesc/bibFull/imprint/date",
-        ".//sourceDesc/bibl/date",
+        ".//sourceDesc/bibl/imprint/date", ".//sourceDesc/biblStruct/monog/imprint/date",
+        ".//sourceDesc/biblFull/publicationStmt/date", ".//sourceDesc/bibFull/imprint/date", ".//sourceDesc/bibl/date",
         ".//text/front/docImprint/acheveImprime"
     ],
     "extent": [
-        ".//sourceDesc/bibl/extent",
-        ".//sourceDesc/biblStruct/monog//extent",
-        ".//sourceDesc/biblFull/extent"
+        ".//sourceDesc/bibl/extent", ".//sourceDesc/biblStruct/monog//extent", ".//sourceDesc/biblFull/extent"
     ],
     "editor": [
-        ".//sourceDesc/bibl/editor",
-        ".//sourceDesc/biblFull/titleStmt/editor",
-        ".//sourceDesc/bibl/title/Stmt/editor"
+        ".//sourceDesc/bibl/editor", ".//sourceDesc/biblFull/titleStmt/editor", ".//sourceDesc/bibl/title/Stmt/editor"
     ],
     "identifiers": [
         ".//publicationStmt/idno"
     ],
     "text_genre": [
-        ".//profileDesc/textClass/keywords[@scheme='genre']/term",
-        ".//SourceDesc/genre"
+        ".//profileDesc/textClass/keywords[@scheme='genre']/term", ".//SourceDesc/genre"
     ],
     "keywords": [
         ".//profileDesc/textClass/keywords/list/item"
@@ -103,8 +74,7 @@ doc_xpaths = {
         ".//profileDesc/language/language"
     ],
     "notes": [
-        ".//fileDesc/notesStmt/note",
-        ".//publicationStmt/notesStmt/note"
+        ".//fileDesc/notesStmt/note", ".//publicationStmt/notesStmt/note"
     ],
     "auth_gender": [
         ".//publicationStmt/notesStmt/note"
@@ -113,16 +83,13 @@ doc_xpaths = {
         ".//seriesStmt/title"
     ],
     "period": [
-        ".//profileDesc/textClass/keywords[@scheme='period']/list/item",
-        ".//SourceDesc/period",
-        ".//sourceDesc/period"
+        ".//profileDesc/textClass/keywords[@scheme='period']/list/item", ".//SourceDesc/period", ".//sourceDesc/period"
     ],
     "text_form": [
         ".//profileDesc/textClass/keywords[@scheme='form']/term"
     ],
     "structure": [
-        ".//SourceDesc/structure",
-        ".//sourceDesc/structure"
+        ".//SourceDesc/structure", ".//sourceDesc/structure"
     ],
     "idno": [
         ".//fileDesc/publicationStmt/idno/"
@@ -151,6 +118,7 @@ tag_to_obj_map = {
     "castlist": "para",
     "list": "para",
     "q": "para",
+    "add": "para",
     "pb": "page",
     "ref": "ref"
 }
@@ -159,7 +127,7 @@ tag_to_obj_map = {
 # with the exception of head which is its own tag. Below are defaults.
 metadata_to_parse = {
     "div": ["head", "type", "n", "id", "vol"],
-    "para": ["who"],
+    "para": ["who", "resp"],
     "page": ["n", "id", "fac"],
     "ref": ["target", "n", "type"]
 }
@@ -175,10 +143,6 @@ filtered_words_list = ""
 # results are displayed. Supply a list of metadata strings, e.g.:
 # ["date", "author", "title"]
 sort_order = ["year", "author", "title", "filename"]
-
-#############################################################################
-# --------- All options below are either NOT implemented or untested ------ #
-#############################################################################
 
 ## A list of tags to ignore: contents will not be indexed
 suppress_tags = []
@@ -203,7 +167,35 @@ break_sent_in_line_group = False
 # exception, turn on the exception and list them as patterns.
 # Tags will not be indexed and will not break words. An empty list turns of the feature
 tag_exceptions = ['<hi[^>]*>', '<emph[^>]*>', '<\/hi>', '<\/emph>', '<orig[^>]*>', '<\/orig>', '<sic[^>]*>', '<\/sic>',
-                  '<abbr[^>]*>', '<\/abbr>']
+                  '<abbr[^>]*>', '<\/abbr>', '<i>', '</i>', '<sup>', '</sup>']
+
+# ------------- UTF8 Strings to consider as word breakers -----------
+# In SGML, these are ents.  But in Unicode, these are characters
+# like any others.  Consult the table at:
+# www.utf8-chartable.de/unicode-utf8-table.pl?start=8016&utf8=dec&htmlent=1
+# to see about others. An empty list disables the feature.
+unicode_word_breakers = ['\xe2\x80\x93',  # U+2013 &ndash; EN DASH
+                         '\xe2\x80\x94',  # U+2014 &mdash; EM DASH
+                         '\xc2\xab',  # &laquo;
+                         '\xc2\xbb',  # &raquo;
+                         '\xef\xbc\x89',  # fullwidth right parenthesis
+                         '\xef\xbc\x88',  # fullwidth left parenthesis
+                         '\xe2\x80\x90',  # U+2010 hyphen for greek stuff
+                         '\xce\x87',  # U+00B7 ano teleia
+                         '\xe2\x80\xa0',  # U+2020 dagger
+                         '\xe2\x80\x98',  # U+2018 &lsquo; LEFT SINGLE QUOTATION
+                         '\xe2\x80\x99',  # U+2019 &rsquo; RIGHT SINGLE QUOTATION
+                         '\xe2\x80\x9c',  # U+201C &ldquo; LEFT DOUBLE QUOTATION
+                         '\xe2\x80\x9d',  # U+201D &rdquo; RIGHT DOUBLE QUOTATION
+                         '\xe2\x80\xb9',  # U+2039 &lsaquo; SINGLE LEFT-POINTING ANGLE QUOTATION
+                         '\xe2\x80\xba',  # U+203A &rsaquo; SINGLE RIGHT-POINTING ANGLE QUOTATION
+                         '\xe2\x80\xa6'  # U+2026 &hellip; HORIZONTAL ELLIPSIS
+                         ]
+
+#  ----------------- Set Long Word Limit  -------------------
+#  Words greater than 235 characters (bytes) cause an indexing
+#  error.  This sets a limit.  Words are then truncated to fit.
+long_word_limit = 200
 
 # ------------------ Hyphenated Word Joiner ----------------------------
 # Softhypen word joiner.  At this time, I'm trying to join
@@ -218,7 +210,8 @@ join_hyphen_in_words = True
 # For now, lets's try the first.
 abbrev_expand = True
 
-#  ----------------- Set Long Word Limit  -------------------
-#  Words greater than 235 characters (bytes) cause an indexing
-#  error.  This sets a limit.  Words are then truncated to fit.
-long_word_limit = 200
+# ---------------------- Flatten Ligatures for Indexing --------------
+# Convert SGML ligatures to base characters for indexing.
+# &oelig; = oe.  Leave this on.  At one point we should think
+# Unicode, but who knows if this is important.
+flatten_ligatures = True

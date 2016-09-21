@@ -1,11 +1,11 @@
-"""This is a port of the PhiloLogic3 parser originally written by Mark Olsen in Perl."""
+#!/usr/bin/env python
+
 import os
 import re
 import string
 import sys
 
 from philologic import OHCOVector
-
 
 DefaultTagToObjMap = {
     "div": "div",
@@ -36,7 +36,7 @@ DefaultTagToObjMap = {
 
 DefaultMetadataToParse = {
     "div": ["head", "type", "n", "id", "vol"],
-    "para": ["who", "resp"], # for <sp> and <add> tags
+    "para": ["who", "resp"],  # for <sp> and <add> tags
     "page": ["n", "id", "fac"],
     "ref": ["target", "n", "type"],
     "line": ["n"]
@@ -44,75 +44,48 @@ DefaultMetadataToParse = {
 
 DefaultDocXPaths = {
     "author": [
-        ".//sourceDesc/bibl/author[@type='marc100']",
-        ".//sourceDesc/bibl/author[@type='artfl']",
-        ".//sourceDesc/bibl/author",
-        ".//titleStmt/author",
-        ".//sourceDesc/biblStruct/monogr/author/name",
-        ".//sourceDesc/biblFull/titleStmt/author",
-        ".//sourceDesc/biblFull/titleStmt/respStmt/name",
-        ".//sourceDesc/biblFull/titleStmt/author",
-        ".//sourceDesc/bibl/titleStmt/author"
+        ".//sourceDesc/bibl/author[@type='marc100']", ".//sourceDesc/bibl/author[@type='artfl']",
+        ".//sourceDesc/bibl/author", ".//titleStmt/author", ".//sourceDesc/biblStruct/monogr/author/name",
+        ".//sourceDesc/biblFull/titleStmt/author", ".//sourceDesc/biblFull/titleStmt/respStmt/name",
+        ".//sourceDesc/biblFull/titleStmt/author", ".//sourceDesc/bibl/titleStmt/author"
     ],
     "title": [
-        ".//sourceDesc/bibl/title[@type='marc245']",
-        ".//sourceDesc/bibl/title[@type='artfl']",
-        ".//sourceDesc/bibl/title",
-        ".//titleStmt/title",
-        ".//sourceDesc/bibl/titleStmt/title",
-        ".//sourceDesc/biblStruct/monogr/title",
-        ".//sourceDesc/biblFull/titleStmt/title"
+        ".//sourceDesc/bibl/title[@type='marc245']", ".//sourceDesc/bibl/title[@type='artfl']",
+        ".//sourceDesc/bibl/title", ".//titleStmt/title", ".//sourceDesc/bibl/titleStmt/title",
+        ".//sourceDesc/biblStruct/monogr/title", ".//sourceDesc/biblFull/titleStmt/title"
     ],
     "author_dates": [
-        ".//sourceDesc/bibl/author/date",
-        ".//titlestmt/author/date"
+        ".//sourceDesc/bibl/author/date", ".//titlestmt/author/date"
     ],
     "create_date": [
-        ".//profileDesc/creation/date",
-        ".//fileDesc/sourceDesc/bibl/imprint/date",
-        ".//sourceDesc/biblFull/publicationStmt/date",
-        ".//profileDesc/dummy/creation/date",
+        ".//profileDesc/creation/date", ".//fileDesc/sourceDesc/bibl/imprint/date",
+        ".//sourceDesc/biblFull/publicationStmt/date", ".//profileDesc/dummy/creation/date",
         ".//fileDesc/sourceDesc/bibl/creation/date"
     ],
     "publisher": [
-        ".//sourceDesc/bibl/imprint[@type='artfl']",
-        ".//sourceDesc/bibl/imprint[@type='marc534']",
-        ".//sourceDesc/bibl/imprint/publisher",
-        ".//sourceDesc/biblStruct/monogr/imprint/publisher/name",
-        ".//sourceDesc/biblFull/publicationStmt/publisher",
-        ".//sourceDesc/bibl/publicationStmt/publisher",
-        ".//sourceDesc/bibl/publisher",
-        ".//publicationStmt/publisher",
-        ".//publicationStmp"
+        ".//sourceDesc/bibl/imprint[@type='artfl']", ".//sourceDesc/bibl/imprint[@type='marc534']",
+        ".//sourceDesc/bibl/imprint/publisher", ".//sourceDesc/biblStruct/monogr/imprint/publisher/name",
+        ".//sourceDesc/biblFull/publicationStmt/publisher", ".//sourceDesc/bibl/publicationStmt/publisher",
+        ".//sourceDesc/bibl/publisher", ".//publicationStmt/publisher", ".//publicationStmp"
     ],
     "pub_place": [
-        ".//sourceDesc/bibl/imprint/pubPlace",
-        ".//sourceDesc/biblFull/publicationStmt/pubPlace",
-        ".//sourceDesc/biblStruct/monog/imprint/pubPlace",
-        ".//sourceDesc/bibl/pubPlace",
+        ".//sourceDesc/bibl/imprint/pubPlace", ".//sourceDesc/biblFull/publicationStmt/pubPlace",
+        ".//sourceDesc/biblStruct/monog/imprint/pubPlace", ".//sourceDesc/bibl/pubPlace",
         ".//sourceDesc/bibl/publicationStmt/pubPlace"
     ],
     "pub_date": [
-        ".//sourceDesc/bibl/imprint/date",
-        ".//sourceDesc/biblStruct/monog/imprint/date",
-        ".//sourceDesc/biblFull/publicationStmt/date",
-        ".//sourceDesc/bibFull/imprint/date",
-        ".//sourceDesc/bibl/date",
+        ".//sourceDesc/bibl/imprint/date", ".//sourceDesc/biblStruct/monog/imprint/date",
+        ".//sourceDesc/biblFull/publicationStmt/date", ".//sourceDesc/bibFull/imprint/date", ".//sourceDesc/bibl/date",
         ".//text/front/docImprint/acheveImprime"
     ],
     "extent": [
-        ".//sourceDesc/bibl/extent",
-        ".//sourceDesc/biblStruct/monog//extent",
-        ".//sourceDesc/biblFull/extent"
+        ".//sourceDesc/bibl/extent", ".//sourceDesc/biblStruct/monog//extent", ".//sourceDesc/biblFull/extent"
     ],
     "editor": [
-        ".//sourceDesc/bibl/editor",
-        ".//sourceDesc/biblFull/titleStmt/editor",
-        ".//sourceDesc/bibl/title/Stmt/editor"
+        ".//sourceDesc/bibl/editor", ".//sourceDesc/biblFull/titleStmt/editor", ".//sourceDesc/bibl/title/Stmt/editor"
     ],
     "text_genre": [
-        ".//profileDesc/textClass/keywords[@scheme='genre']/term",
-        ".//SourceDesc/genre"
+        ".//profileDesc/textClass/keywords[@scheme='genre']/term", ".//SourceDesc/genre"
     ],
     "keywords": [
         ".//profileDesc/textClass/keywords/list/item"
@@ -121,8 +94,7 @@ DefaultDocXPaths = {
         ".//profileDesc/language/language"
     ],
     "notes": [
-        ".//fileDesc/notesStmt/note",
-        ".//publicationStmt/notesStmt/note"
+        ".//fileDesc/notesStmt/note", ".//publicationStmt/notesStmt/note"
     ],
     "auth_gender": [
         ".//publicationStmt/notesStmt/note"
@@ -131,45 +103,53 @@ DefaultDocXPaths = {
         ".//seriesStmt/title"
     ],
     "period": [
-        ".//profileDesc/textClass/keywords[@scheme='period']/list/item",
-        ".//SourceDesc/period",
-        ".//sourceDesc/period"
+        ".//profileDesc/textClass/keywords[@scheme='period']/list/item", ".//SourceDesc/period", ".//sourceDesc/period"
     ],
     "text_form": [
         ".//profileDesc/textClass/keywords[@scheme='form']/term"
     ],
     "structure": [
-        ".//SourceDesc/structure",
-        ".//sourceDesc/structure"
+        ".//SourceDesc/structure", ".//sourceDesc/structure"
     ],
     "idno": [
-        ".//publicationStmt/idno/",
-        ".//seriesStmt/idno/"
+        ".//publicationStmt/idno/", ".//seriesStmt/idno/"
     ]
 }
 
-TagExceptions = ['<hi[^>]*>',
-                 '<emph[^>]*>',
-                 '<\/hi>',
-                 '<\/emph>',
-		         '<orig[^>]*>',
-                 '<\/orig>',
-		         '<sic[^>]*>',
-                 '<\/sic>',
-		         '<abbr[^>]*>',
-                 '<\/abbr>']
+TagExceptions = ['<hi[^>]*>', '<emph[^>]*>', '<\/hi>', '<\/emph>', '<orig[^>]*>', '<\/orig>', '<sic[^>]*>', '<\/sic>',
+                 '<abbr[^>]*>', '<\/abbr>', '<i>', '</i>', '<sup>', '</sup>']
+
+TokenRegex = "[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*"
 
 CharsNotToIndex = "\[\{\]\}"
 
+UnicodeWordBreakers = ['\xe2\x80\x93',  # U+2013 &ndash; EN DASH
+                       '\xe2\x80\x94',  # U+2014 &mdash; EM DASH
+                       '\xc2\xab',  # &laquo;
+                       '\xc2\xbb',  # &raquo;
+                       '\xef\xbc\x89',  # fullwidth right parenthesis
+                       '\xef\xbc\x88',  # fullwidth left parenthesis
+                       '\xe2\x80\x90',  # U+2010 hyphen for greek stuff
+                       '\xce\x87',  # U+00B7 ano teleia
+                       '\xe2\x80\xa0',  # U+2020 dagger
+                       '\xe2\x80\x98',  # U+2018 &lsquo; LEFT SINGLE QUOTATION
+                       '\xe2\x80\x99',  # U+2019 &rsquo; RIGHT SINGLE QUOTATION
+                       '\xe2\x80\x9c',  # U+201C &ldquo; LEFT DOUBLE QUOTATION
+                       '\xe2\x80\x9d',  # U+201D &rdquo; RIGHT DOUBLE QUOTATION
+                       '\xe2\x80\xb9',  # U+2039 &lsaquo; SINGLE LEFT-POINTING ANGLE QUOTATION
+                       '\xe2\x80\xba',  # U+203A &rsaquo; SINGLE RIGHT-POINTING ANGLE QUOTATION
+                       '\xe2\x80\xa6']  # U+2026 &hellip; HORIZONTAL ELLIPSIS
+
 
 class XMLParser(object):
-    """Parses clean or dirty XML."""
+    """Parses clean or dirty XML.
+    This is a port of the PhiloLogic3 parser originally written by Mark Olsen in Perl.
+    """
 
     def __init__(self,
                  output,
                  docid,
                  filesize,
-                 suppress_tags=[],
                  filtered_words=[],
                  known_metadata=["doc", "div1", "div2", "div3", "para", "sent", "word"],
                  tag_to_obj_map=DefaultTagToObjMap,
@@ -187,7 +167,12 @@ class XMLParser(object):
             self.metadata_to_parse[obj] = set(metadata_to_parse[obj])
 
         # Initialize an OHCOVector Stack. operations on this stack produce all parser output.
-        self.v = OHCOVector.CompoundStack(self.types, self.parallel_type, docid=docid, out=output, ref="ref", line="line")
+        self.v = OHCOVector.CompoundStack(self.types,
+                                          self.parallel_type,
+                                          docid=docid,
+                                          out=output,
+                                          ref="ref",
+                                          line="line")
 
         self.filesize = filesize
         self.known_metadata = known_metadata
@@ -201,9 +186,12 @@ class XMLParser(object):
             self.token_regex = re.compile(r"(%s)" % TokenRegex, re.I)
 
         if "suppress_tags" in parse_options:
-            self.suppress_xpaths = parse_options["suppress_tags"]
+            self.suppress_tags = set([i.replace('<', '').replace('>', '') for i in parse_options["suppress_tags"] if i])
         else:
-            self.suppress_xpaths = []
+            self.suppress_tags = []
+        self.in_suppressed_tag = False
+        self.current_suppressed_tag = ''
+        print self.suppress_tags, parse_options["suppress_tags"]
 
         if "break_apost" in parse_options:
             self.break_apost = parse_options["break_apost"]
@@ -213,7 +201,7 @@ class XMLParser(object):
         if "chars_not_to_index" in parse_options:
             self.chars_not_to_index = re.compile(r'%s' % parse_options["chars_not_to_index"], re.I)
         else:
-            self.chars_not_to_index = re.compile(r'%s' % CharsNotToIndex, re.I)
+            self.chars_not_to_index = re.compile(r"%s" % CharsNotToIndex, re.I)
 
         if "break_sent_in_line_group" in parse_options:
             self.break_sent_in_line_group = parse_options["break_sent_in_line_group"]
@@ -221,14 +209,27 @@ class XMLParser(object):
             self.break_sent_in_line_group = False
 
         if "tag_exceptions" in parse_options:
-            self.tag_exceptions = parse_options["tag_exceptions"]
+            tag_exceptions = parse_options["tag_exceptions"]
         else:
-            self.tag_exceptions = TagExceptions
+            tag_exceptions = TagExceptions
+        self.tag_exceptions = []
+        for tag in tag_exceptions:
+            compiled_tag = re.compile(r'(%s)(%s)(%s)' % (self.token_regex, tag, self.token_regex), re.I | re.M)
+            self.tag_exceptions.append(compiled_tag)
 
         if "join_hyphen_in_words" in parse_options:
             self.join_hyphen_in_words = parse_options["join_hyphen_in_words"]
         else:
             self.join_hyphen_in_words = True
+
+        if "unicode_word_breakers" in parse_options:
+            unicode_word_breakers = parse_options["unicode_word_breakers"]
+        else:
+            unicode_word_breakers = UnicodeWordBreakers
+        self.unicode_word_breakers = []
+        for char in unicode_word_breakers:
+            compiled_char = re.compile(r'(%s)' % char, re.I)
+            self.unicode_word_breakers.append(compiled_char)
 
         if "abbrev_expand" in parse_options:
             self.abbrev_expand = parse_options["abbrev_expand"]
@@ -240,8 +241,11 @@ class XMLParser(object):
         else:
             self.long_word_limit = 200
 
-        # Convert SGML ligatures to base characters for indexing, e.g. &oelig; = oe.
-        self.flatten_ligatures = True
+        if "flatten_ligatures" in parse_options:
+            self.flatten_ligatures = parse_options["flatten_ligatures"]
+        else:
+            self.flatten_ligatures = True
+
         self.get_multiple_div_heads = 1  # TODO: remove??
         self.in_the_text = False
         self.in_text_quote = False
@@ -320,23 +324,25 @@ class XMLParser(object):
         self.content = self.content.replace('\r', ' ')
 
         # Join hyphens
-        self.content = join_hyphen_with_lb.sub(lambda match: "_" * len(match.group(1)), self.content)
-        self.content = join_hyphen.sub(lambda match: "_" * len(match.group(1)), self.content)
+        if self.join_hyphen_in_words:
+            self.content = join_hyphen_with_lb.sub(lambda match: "_" * len(match.group(1)), self.content)
+            self.content = join_hyphen.sub(lambda match: "_" * len(match.group(1)), self.content)
 
         # Replace newlines with spaces.  Remember that we have seen lots of
         # tags with newlines, which can make a mess of things.
         self.content = self.content.replace('\n', ' ')
 
-        # Abbreviation expander TODO...
+        # Abbreviation expander
+        if self.abbrev_expand:
+            self.content = abbrev_expand.sub("\1\4\3\2\5", self.content)
 
         # An experimental inword tag spanner. For selected tags between letters, this replaces the tag with "_"
         # (in order to keep the byte count).  This is to allow indexing of words broken by tags.
-        # TODO
+        def replace_tag(m):
+            return ''.join([m[0], m[2], ' ' * len(m[1])])
 
-        # TODO: TagWordDel
-        # Delete tag data endtag set specified in the list @listoignore.
-        # Replace with string of " "in order to keep the byte count.  This is
-        # selection of things to NOT to index.
+        for tag in self.tag_exceptions:
+            self.content = tag.sub(lambda match: replace_tag(match.groups()), self.content)
 
         # Add newlines to the beginning and end of all tags
         self.content = self.content.replace('<', '\n<').replace('>', '>\n')
@@ -348,366 +354,369 @@ class XMLParser(object):
             tag_name = tag_matcher.findall(tag)[0]
         except IndexError:
             tag_name = "unparsable_tag"
-        if not tag_name.startswith('/'):
-            self.current_tag = tag_name
+        if tag_name.replace('/', '') == self.current_suppressed_tag and tag.startswith('</'):
+            self.in_suppressed_tag = False
+            self.current_suppressed_tag = ''
+        elif tag_name in self.suppress_tags:
+            self.in_suppressed_tag = True
+            self.current_suppressed_tag = tag_name
+        else:
+            if not tag_name.startswith('/'):
+                self.current_tag = tag_name
 
-        # print tag_name, start_byte
-        # Handle <q> tags
-        if text_tag.search(tag) and self.in_text_quote:
-            self.in_quote_text_tag = True
-        if closed_text_tag.search(tag):
-            self.in_quote_text_tag = False
-        if quote_tag.search(tag):
-            self.in_text_quote = True
-        if closed_quote_tag.search(tag):
-            self.in_text_quote = False
+            # print tag_name, start_byte
+            # Handle <q> tags
+            if text_tag.search(tag) and self.in_text_quote:
+                self.in_quote_text_tag = True
+            if closed_text_tag.search(tag):
+                self.in_quote_text_tag = False
+            if quote_tag.search(tag):
+                self.in_text_quote = True
+            if closed_quote_tag.search(tag):
+                self.in_text_quote = False
 
-        # Word tags: store attributes to be attached to the actual word in word_handler
-        if self.current_tag == "w":
-            self.word_tag_attributes = self.get_attributes(tag)
+            # Word tags: store attributes to be attached to the actual word in word_handler
+            if self.current_tag == "w":
+                self.word_tag_attributes = self.get_attributes(tag)
 
-        # Paragraphs
-        elif parag_tag.search(tag) or parag_with_attrib_tag.search(tag):
-            do_this_para = True
-            if self.in_a_note and not self.in_notes_div:
-                do_this_para = False
-            if self.no_deeper_objects:
-                do_this_para = False
-            if do_this_para:
+            # Paragraphs
+            elif parag_tag.search(tag) or parag_with_attrib_tag.search(tag):
+                do_this_para = True
+                if self.in_a_note and not self.in_notes_div:
+                    do_this_para = False
+                if self.no_deeper_objects:
+                    do_this_para = False
+                if do_this_para:
+                    if self.open_para:  # account for unclosed paragraph tags
+                        para_end_byte = self.bytes_read_in - len(tag)
+                        self.close_para(para_end_byte)
+                    self.v.push("para", tag_name, start_byte)
+                    self.get_object_attributes(tag, tag_name, "para")
+                    self.open_para = True
+
+            # Notes: treat as para objects and set flag to not set paras in notes.
+            elif note_tag.search(tag) and not self.no_deeper_objects:
                 if self.open_para:  # account for unclosed paragraph tags
                     para_end_byte = self.bytes_read_in - len(tag)
                     self.close_para(para_end_byte)
+                self.open_div2 = True
+                self.v.push("div2", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "div2")
+                self.in_a_note = True
+
+            # Epigraph: treat as paragraph objects
+            elif epigraph_tag.search(tag):
+                if self.open_para:  # account for unclosed paragraph tags
+                    para_end_byte = self.bytes_read_in - len(tag)
+                    self.close_para(para_end_byte)
+                self.open_para = True
                 self.v.push("para", tag_name, start_byte)
                 self.get_object_attributes(tag, tag_name, "para")
+                self.no_deeper_objects = True
+            elif closed_epigraph_tag.search(tag):
+                self.close_para(self.bytes_read_in)
+                self.no_deeper_objects = False
+                self.open_para = False
+
+            # LIST: treat as para objects
+            elif list_tag.search(tag) and not self.no_deeper_objects:
+                if self.open_para:  # account for unclosed paragraph tags
+                    para_end_byte = self.bytes_read_in - len(tag)
+                    self.close_para(para_end_byte)
                 self.open_para = True
+                self.v.push("para", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "para")
 
-        # Notes: treat as para objects and set flag to not set paras in notes.
-        elif note_tag.search(tag) and not self.no_deeper_objects:
-            if self.open_para:  # account for unclosed paragraph tags
-                para_end_byte = self.bytes_read_in - len(tag)
-                self.close_para(para_end_byte)
-            self.open_div2 = True
-            self.v.push("div2", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "div2")
-            self.in_a_note = True
+            # SPEECH BREAKS: treat them as para objects
+            elif speaker_tag.search(tag):
+                if self.open_para:  # account for unclosed paragraph tags
+                    para_end_byte = self.bytes_read_in - len(tag)
+                    self.close_para(para_end_byte)
+                self.open_para = True
+                self.v.push("para", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "para")
+                self.no_deeper_objects = True
+            elif closed_speaker_tag.search(tag):
+                self.close_para(self.bytes_read_in)
+                self.no_deeper_objects = False
+                self.open_para = False
 
-        # Epigraph: treat as paragraph objects
-        elif epigraph_tag.search(tag):
-            if self.open_para:  # account for unclosed paragraph tags
-                para_end_byte = self.bytes_read_in - len(tag)
-                self.close_para(para_end_byte)
-            self.open_para = True
-            self.v.push("para", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "para")
-            self.no_deeper_objects = True
-        elif closed_epigraph_tag.search(tag):
-            self.close_para(self.bytes_read_in)
-            self.no_deeper_objects = False
-            self.open_para = False
+            # ARGUMENT BREAKS: treat them as para objects
+            elif argument_tag.search(tag):
+                if self.open_para:  # account for unclosed paragraph tags
+                    para_end_byte = self.bytes_read_in - len(tag)
+                    self.close_para(para_end_byte)
+                self.open_para = True
+                self.v.push("para", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "para")
+                self.no_deeper_objects = True
+            elif closed_argument_tag.search(tag):
+                self.close_para(self.bytes_read_in)
+                self.no_deeper_objects = False
+                self.open_para = False
 
-        # LIST: treat as para objects
-        elif list_tag.search(tag) and not self.no_deeper_objects:
-            if self.open_para:  # account for unclosed paragraph tags
-                para_end_byte = self.bytes_read_in - len(tag)
-                self.close_para(para_end_byte)
-            self.open_para = True
-            self.v.push("para", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "para")
+            # OPENER BREAKS: treat them as para objects
+            elif opener_tag.search(tag):
+                if self.open_para:  # account for unclosed paragraph tags
+                    para_end_byte = self.bytes_read_in - len(tag)
+                    self.close_para(para_end_byte)
+                self.open_para = True
+                self.v.push("para", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "para")
+                self.no_deeper_objects = True
+            elif closed_opener_tag.search(tag):
+                self.close_para(self.bytes_read_in)
+                self.no_deeper_objects = False
+                self.open_para = False
 
-        # SPEECH BREAKS: treat them as para objects
-        elif speaker_tag.search(tag):
-            if self.open_para:  # account for unclosed paragraph tags
-                para_end_byte = self.bytes_read_in - len(tag)
-                self.close_para(para_end_byte)
-            self.open_para = True
-            self.v.push("para", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "para")
-            self.no_deeper_objects = True
-        elif closed_speaker_tag.search(tag):
-            self.close_para(self.bytes_read_in)
-            self.no_deeper_objects = False
-            self.open_para = False
+            # CLOSER BREAKS: treat them as para objects
+            elif closer_tag.search(tag):
+                if self.open_para:  # account for unclosed paragraph tags
+                    para_end_byte = self.bytes_read_in - len(tag)
+                    self.close_para(para_end_byte)
+                self.open_para = True
+                self.v.push("para", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "para")
+                self.no_deeper_objects = True
+            elif closed_closer_tag.search(tag):
+                self.close_para(self.bytes_read_in)
+                self.no_deeper_objects = False
+                self.open_para = False
 
-        # ARGUMENT BREAKS: treat them as para objects
-        elif argument_tag.search(tag):
-            if self.open_para:  # account for unclosed paragraph tags
-                para_end_byte = self.bytes_read_in - len(tag)
-                self.close_para(para_end_byte)
-            self.open_para = True
-            self.v.push("para", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "para")
-            self.no_deeper_objects = True
-        elif closed_argument_tag.search(tag):
-            self.close_para(self.bytes_read_in)
-            self.no_deeper_objects = False
-            self.open_para = False
+            # STAGE DIRECTIONS: treat them as para objects
+            # TODO: what to do with stage direction??? deactivated to avoid clashing with <sp> tags
+            elif stage_tag.search(tag) and not self.no_deeper_objects:
+                if self.open_para:  # account for unclosed paragraph tags
+                    para_end_byte = self.bytes_read_in - len(tag)
+                    self.close_para(para_end_byte)
+                self.open_para = True
+                self.v.push("para", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "para")
+            elif closed_stage_tag.search(tag):
+                self.close_para(self.bytes_read_in)
 
-        # OPENER BREAKS: treat them as para objects
-        elif opener_tag.search(tag):
-            if self.open_para:  # account for unclosed paragraph tags
-                para_end_byte = self.bytes_read_in - len(tag)
-                self.close_para(para_end_byte)
-            self.open_para = True
-            self.v.push("para", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "para")
-            self.no_deeper_objects = True
-        elif closed_opener_tag.search(tag):
-            self.close_para(self.bytes_read_in)
-            self.no_deeper_objects = False
-            self.open_para = False
+            # CAST LIST: treat them as para objects
+            elif castlist_tag.search(tag):
+                if self.open_para:  # account for unclosed paragraph tags
+                    para_end_byte = self.bytes_read_in - len(tag)
+                    self.close_para(para_end_byte)
+                self.open_para = True
+                self.v.push("para", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "para")
 
-        # CLOSER BREAKS: treat them as para objects
-        elif closer_tag.search(tag):
-            if self.open_para:  # account for unclosed paragraph tags
-                para_end_byte = self.bytes_read_in - len(tag)
-                self.close_para(para_end_byte)
-            self.open_para = True
-            self.v.push("para", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "para")
-            self.no_deeper_objects = True
-        elif closed_closer_tag.search(tag):
-            self.close_para(self.bytes_read_in)
-            self.no_deeper_objects = False
-            self.open_para = False
+            # Handle <add> tags as a para.
+            elif add_tag.search(tag):
+                if self.open_para:  # account for unclosed paragraph tags
+                    para_end_byte = self.bytes_read_in - len(tag)
+                    self.close_para(para_end_byte)
+                self.open_para = True
+                self.v.push("para", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "para")
+                self.no_deeper_objects = True
+            elif tag == "</add>":
+                self.close_para(self.bytes_read_in)
+                self.no_deeper_objects = False
 
-        # STAGE DIRECTIONS: treat them as para objects
-        # TODO: what to do with stage direction??? deactivated to avoid clashing with <sp> tags
-        elif stage_tag.search(tag) and not self.no_deeper_objects:
-            if self.open_para:  # account for unclosed paragraph tags
-                para_end_byte = self.bytes_read_in - len(tag)
-                self.close_para(para_end_byte)
-            self.open_para = True
-            self.v.push("para", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "para")
-        elif closed_stage_tag.search(tag):
-            self.close_para(self.bytes_read_in)
-
-        # CAST LIST: treat them as para objects
-        elif castlist_tag.search(tag):
-            if self.open_para:  # account for unclosed paragraph tags
-                para_end_byte = self.bytes_read_in - len(tag)
-                self.close_para(para_end_byte)
-            self.open_para = True
-            self.v.push("para", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "para")
-
-        # Handle <add> tags as a para.
-        elif add_tag.search(tag):
-            if self.open_para:  # account for unclosed paragraph tags
-                para_end_byte = self.bytes_read_in - len(tag)
-                self.close_para(para_end_byte)
-            self.open_para = True
-            self.v.push("para", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "para")
-            self.no_deeper_objects = True
-        elif tag == "</add>":
-            self.close_para(self.bytes_read_in)
-            self.no_deeper_objects = False
-
-        # PAGE BREAKS: this updates the currentpagetag or sets it to "na" if not found.
-        # TODO: handling of attributes
-        elif page_tag.search(tag):
-            if self.open_page:
-                self.v.pull("page", self.bytes_read_in)
-                self.open_page = False
-            self.v.push("page", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "page")
-            try:
-                n = self.v["page"]["n"]
-                n = n.replace(' ', '_').replace('-', '_').lower()
-                if not n:
+            # PAGE BREAKS: this updates the currentpagetag or sets it to "na" if not found.
+            # TODO: handling of attributes
+            elif page_tag.search(tag):
+                if self.open_page:
+                    self.v.pull("page", self.bytes_read_in)
+                    self.open_page = False
+                self.v.push("page", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "page")
+                try:
+                    n = self.v["page"]["n"]
+                    n = n.replace(' ', '_').replace('-', '_').lower()
+                    if not n:
+                        n = "na"
+                except KeyError:
                     n = "na"
-            except KeyError:
-                n = "na"
-            self.v["page"]["n"] = n
-            self.open_page = True
+                self.v["page"]["n"] = n
+                self.open_page = True
 
-        # LINE GROUP TAGS: treat linegroups same a paragraphs, set or unset the global
-        # variable self.in_line_group.
-        elif line_group_tag.search(tag) and not self.no_deeper_objects:
-            if self.break_sent_in_line_group:
-                self.in_line_group = True
-            if self.open_para:  # account for unclosed paragraph tags
-                para_end_byte = self.bytes_read_in - len(tag)
-                self.close_para(para_end_byte)
-            self.open_para = True
-            self.v.push("para", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "para")
-        elif closed_line_group.search(tag):
-            self.in_line_group = False
-            self.close_para(self.bytes_read_in)
+            # LINE GROUP TAGS: treat linegroups same a paragraphs, set or unset the global
+            # variable self.in_line_group.
+            elif line_group_tag.search(tag) and not self.no_deeper_objects:
+                if self.break_sent_in_line_group:
+                    self.in_line_group = True
+                if self.open_para:  # account for unclosed paragraph tags
+                    para_end_byte = self.bytes_read_in - len(tag)
+                    self.close_para(para_end_byte)
+                self.open_para = True
+                self.v.push("para", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "para")
+            elif closed_line_group.search(tag):
+                self.in_line_group = False
+                self.close_para(self.bytes_read_in)
 
-        # END LINE TAG: use this to break "sentences" if self.in_line_group.  This is
-        # if to set searching in line groups to lines rather than sentences.
-        # TODO: not sure I got this right...
-        elif line_tag.search(tag):
-            if self.in_line_group and self.break_sent_in_line_group:
+            # END LINE TAG: use this to break "sentences" if self.in_line_group.  This is
+            # if to set searching in line groups to lines rather than sentences.
+            # TODO: not sure I got this right...
+            elif line_tag.search(tag):
+                if self.in_line_group and self.break_sent_in_line_group:
+                    self.v.push("sent", tag_name, start_byte)
+                    self.v.pull("sent", self.bytes_read_in)
+                # Create line parallel object
+                self.v.push("line", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "line")
+                self.v["line"].attrib["doc_id"] = self.docid
+            elif closed_line_tag.search(tag):
+                self.v.pull("line", self.bytes_read_in)
+
+            if ab_tag.search(tag):
+                # Create line parallel object
+                self.v.push("line", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "line")
+                self.v["line"].attrib["doc_id"] = self.docid
+            elif closed_ab_tag.search(tag):
+                self.v.pull("line", self.bytes_read_in)
+
+            # SENTENCE TAG: <s> </s>.  We have never seen a sample of these
+            # but let's add the required code to note the beginning of a new
+            # sentence and to turn off automatic sentence tagging
+            elif sentence_tag.search(tag):
+                if self.open_sent or self.in_tagged_sentence:
+                    self.v.pull("sent", self.bytes_read_in)  # should cache name
                 self.v.push("sent", tag_name, start_byte)
+                self.in_tagged_sentence = True
+                self.open_sent = True
+            elif closed_sentence_tag.search(tag):
                 self.v.pull("sent", self.bytes_read_in)
-            # Create line parallel object
-            self.v.push("line", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "line")
-            self.v["line"].attrib["doc_id"] = self.docid
-        elif closed_line_tag.search(tag):
-            self.v.pull("line", self.bytes_read_in)
+                self.in_tagged_sentence = False
+                self.open_sent = False
 
-        if ab_tag.search(tag):
-            # Create line parallel object
-            self.v.push("line", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "line")
-            self.v["line"].attrib["doc_id"] = self.docid
-        elif closed_ab_tag.search(tag):
-            self.v.pull("line", self.bytes_read_in)
+            # TODO: handle docbody
 
-
-
-        # SENTENCE TAG: <s> </s>.  We have never seen a sample of these
-        # but let's add the required code to note the beginning of a new
-        # sentence and to turn off automatic sentence tagging
-        elif sentence_tag.search(tag):
-            if self.open_sent or self.in_tagged_sentence:
-                self.v.pull("sent", self.bytes_read_in)  # should cache name
-            self.v.push("sent", tag_name, start_byte)
-            self.in_tagged_sentence = True
-            self.open_sent = True
-        elif closed_sentence_tag.search(tag):
-            self.v.pull("sent", self.bytes_read_in)
-            self.in_tagged_sentence = False
-            self.open_sent = False
-
-        # TODO: handle docbody
-
-        # FRONT: Treat <front as a <div
-        # TODO : test for inner divs as in Philo3???
-        elif front_tag.search(tag):
-            if self.open_div1:
-                self.close_div1(start_byte)
-            self.in_front_matter = True
-            self.v.push("div1", "front", start_byte)
-            self.get_object_attributes(tag, tag_name, "div1")
-            self.context_div_level = 1
-            self.open_div1 = True
-        elif closed_front_tag.search(tag):
-            self.in_front_matter = False
-            self.context_div_level = 0
-            self.close_div1(self.bytes_read_in)
-
-        # BODY TAG: Let's set it as a <div object if we have no divs in the document.
-        # These tend to carry on as FRONTMATTER. Don't have to check for lower divs, etc.
-        elif body_tag.search(tag) and not self.got_a_div:
-            self.v.push("div1", tag_name, start_byte)
-            self.current_div1_id = self.v["div1"].id
-            self.context_div_level = 1
-            self.open_div1 = True
-            div_head = self.get_div_head(tag)
-            if '[NA]' in div_head or '[na]' in div_head:
-                div_head = "Document Body"
-            self.v["div1"]["head"] = div_head
-
-        # HyperDiv: This is a Brown WWP construct. It is defined as a place to put
-        # a number of different kinds of information which are related to the body
-        # of the text but do not appear directly within its flow, for instance footnotes,
-        # acrostics, and castlist information which is not printed in the text but
-        # is required to provide IDREFs for the who attribute on <speaker>.
-        elif hyper_div_tag.search(tag):
-            if self.open_div1:
-                self.close_div1(start_byte)
-            self.context_div_level = 1
-            self.open_div1 = True
-            self.v.push("div1", tag_name, start_byte)
-            self.current_div1_id = self.v["div1"].id
-            self.v["div1"]["head"] = "[HyperDiv]"
-
-        # DIV TAGS: set division levels and print out div info. A couple of assumptions:
-        # - I assume divs are numbered 1,2,3.
-        # - I output <head> info where I find it.  This could also be modified to output
-        #   a structured table record with div type, and other attributes, along with
-        #   the Philoid and head for searching under document levels.
-        elif closed_div_tag.search(tag):
-            if "div1" in tag_name:
-                if self.in_front_matter:
-                    self.v.pull("div2", self.bytes_read_in)
-                else:
-                    self.v.pull("div1", self.bytes_read_in)
-            elif "div2" in tag_name:
-                if self.in_front_matter:
-                    self.v.pull("div3", self.bytes_read_in)
-                else:
-                    self.v.pull("div2", self.bytes_read_in)
-            elif "div3" in tag_name:
-                self.v.pull("div3", self.bytes_read_in)
-            self.context_div_level -= 1
-            self.no_deeper_objects = False
-        elif div_tag.search(tag):
-            self.context_div_level += 1
-            if self.context_div_level > 3:
-                if self.open_div3:
-                    self.close_div3(start_byte)
-                self.context_div_level = 3
-            if self.context_div_level < 1:
-                self.context_div_level = 1
-
-            div_level = tag_name[-1]
-            if not div_level.isdigit():
-                div_level = self.context_div_level
-            elif div_level == "0" or int(div_level) > 3:
-                div_level = self.context_div_level
-            else:
-                div_level = int(div_level)
-            # <Front is top level div1, so inner divs should be div2s or div3s
-            if self.in_front_matter:
-                div_level = self.context_div_level
-            self.context_div_level = div_level
-
-            # TODO what to do with div0? See philo3???
-
-
-
-            # TODO: ignore divs inside of internal text tags.  Setable
-            # from configuration.  But we will bump the para and sent args
-
-            if div_level == 1:
+            # FRONT: Treat <front as a <div
+            # TODO : test for inner divs as in Philo3???
+            elif front_tag.search(tag):
                 if self.open_div1:
                     self.close_div1(start_byte)
+                self.in_front_matter = True
+                self.v.push("div1", "front", start_byte)
+                self.get_object_attributes(tag, tag_name, "div1")
+                self.context_div_level = 1
+                self.open_div1 = True
+            elif closed_front_tag.search(tag):
+                self.in_front_matter = False
+                self.context_div_level = 0
+                self.close_div1(self.bytes_read_in)
+
+            # BODY TAG: Let's set it as a <div object if we have no divs in the document.
+            # These tend to carry on as FRONTMATTER. Don't have to check for lower divs, etc.
+            elif body_tag.search(tag) and not self.got_a_div:
+                self.v.push("div1", tag_name, start_byte)
+                self.current_div1_id = self.v["div1"].id
+                self.context_div_level = 1
+                self.open_div1 = True
+                div_head = self.get_div_head(tag)
+                if '[NA]' in div_head or '[na]' in div_head:
+                    div_head = "Document Body"
+                self.v["div1"]["head"] = div_head
+
+            # HyperDiv: This is a Brown WWP construct. It is defined as a place to put
+            # a number of different kinds of information which are related to the body
+            # of the text but do not appear directly within its flow, for instance footnotes,
+            # acrostics, and castlist information which is not printed in the text but
+            # is required to provide IDREFs for the who attribute on <speaker>.
+            elif hyper_div_tag.search(tag):
+                if self.open_div1:
+                    self.close_div1(start_byte)
+                self.context_div_level = 1
                 self.open_div1 = True
                 self.v.push("div1", tag_name, start_byte)
                 self.current_div1_id = self.v["div1"].id
-                self.v["div1"]['head'] = self.get_div_head(tag)
-                self.get_object_attributes(tag, tag_name, object_type="div1")
-                if "type" in self.v["div1"]:
-                    if self.v["div1"]["type"] == "notes":
-                        self.in_notes_div = True
-                        self.no_deeper_objects = False
-            elif div_level == 2:
-                if self.open_div2:
-                    self.close_div2(start_byte)
-                self.open_div2 = True
-                self.v.push("div2", tag_name, start_byte)
-                self.v["div2"]['head'] = self.get_div_head(tag)
-                self.get_object_attributes(tag, tag_name, object_type="div2")
-            else:
-                if self.open_div3:
-                    self.close_div3(start_byte)
-                self.open_div3 = True
-                self.v.push("div3", tag_name, start_byte)
-                self.v["div3"]['head'] = self.get_div_head(tag)
-                self.get_object_attributes(tag, tag_name, object_type="div3")
+                self.v["div1"]["head"] = "[HyperDiv]"
 
-            # TODO: unclear if we need to add EEBO hack when no subdiv objects...
+            # DIV TAGS: set division levels and print out div info. A couple of assumptions:
+            # - I assume divs are numbered 1,2,3.
+            # - I output <head> info where I find it.  This could also be modified to output
+            #   a structured table record with div type, and other attributes, along with
+            #   the Philoid and head for searching under document levels.
+            elif closed_div_tag.search(tag):
+                if "div1" in tag_name:
+                    if self.in_front_matter:
+                        self.v.pull("div2", self.bytes_read_in)
+                    else:
+                        self.v.pull("div1", self.bytes_read_in)
+                elif "div2" in tag_name:
+                    if self.in_front_matter:
+                        self.v.pull("div3", self.bytes_read_in)
+                    else:
+                        self.v.pull("div2", self.bytes_read_in)
+                elif "div3" in tag_name:
+                    self.v.pull("div3", self.bytes_read_in)
+                self.context_div_level -= 1
+                self.no_deeper_objects = False
+            elif div_tag.search(tag):
+                self.context_div_level += 1
+                if self.context_div_level > 3:
+                    if self.open_div3:
+                        self.close_div3(start_byte)
+                    self.context_div_level = 3
+                if self.context_div_level < 1:
+                    self.context_div_level = 1
 
-        # We are handling the case of index tags containing attributes which describe the parent div
-        # the type attrib has its value in the value attrib
-        elif tag_name == "index" and self.context_div_level != 0:
-            attrib = dict(self.get_attributes(tag))
-            div = "div%d" % self.context_div_level
-            if attrib["type"] in self.metadata_to_parse["div"]:
-                self.v[div].attrib[attrib["type"]] = attrib["value"]
+                div_level = tag_name[-1]
+                if not div_level.isdigit():
+                    div_level = self.context_div_level
+                elif div_level == "0" or int(div_level) > 3:
+                    div_level = self.context_div_level
+                else:
+                    div_level = int(div_level)
+                # <Front is top level div1, so inner divs should be div2s or div3s
+                if self.in_front_matter:
+                    div_level = self.context_div_level
+                self.context_div_level = div_level
 
-        elif tag_name == "ref":
-            self.v.push("ref", tag_name, start_byte)
-            self.get_object_attributes(tag, tag_name, "ref")
-            self.v["ref"].attrib["parent"] = " ".join([str(i) for i in self.current_div1_id])
-            self.v.pull("ref", self.bytes_read_in)
+                # TODO what to do with div0? See philo3???
+
+                # TODO: ignore divs inside of internal text tags.  Setable
+                # from configuration.  But we will bump the para and sent args
+
+                if div_level == 1:
+                    if self.open_div1:
+                        self.close_div1(start_byte)
+                    self.open_div1 = True
+                    self.v.push("div1", tag_name, start_byte)
+                    self.current_div1_id = self.v["div1"].id
+                    self.v["div1"]['head'] = self.get_div_head(tag)
+                    self.get_object_attributes(tag, tag_name, object_type="div1")
+                    if "type" in self.v["div1"]:
+                        if self.v["div1"]["type"] == "notes":
+                            self.in_notes_div = True
+                            self.no_deeper_objects = False
+                elif div_level == 2:
+                    if self.open_div2:
+                        self.close_div2(start_byte)
+                    self.open_div2 = True
+                    self.v.push("div2", tag_name, start_byte)
+                    self.v["div2"]['head'] = self.get_div_head(tag)
+                    self.get_object_attributes(tag, tag_name, object_type="div2")
+                else:
+                    if self.open_div3:
+                        self.close_div3(start_byte)
+                    self.open_div3 = True
+                    self.v.push("div3", tag_name, start_byte)
+                    self.v["div3"]['head'] = self.get_div_head(tag)
+                    self.get_object_attributes(tag, tag_name, object_type="div3")
+
+                # TODO: unclear if we need to add EEBO hack when no subdiv objects...
+
+                # We are handling the case of index tags containing attributes which describe the parent div
+                # the type attrib has its value in the value attrib
+            elif tag_name == "index" and self.context_div_level != 0:
+                attrib = dict(self.get_attributes(tag))
+                div = "div%d" % self.context_div_level
+                if attrib["type"] in self.metadata_to_parse["div"]:
+                    self.v[div].attrib[attrib["type"]] = attrib["value"]
+
+            elif tag_name == "ref":
+                self.v.push("ref", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "ref")
+                self.v["ref"].attrib["parent"] = " ".join([str(i) for i in self.current_div1_id])
+                self.v.pull("ref", self.bytes_read_in)
 
     def word_handler(self, words):
         """
@@ -718,136 +727,136 @@ class XMLParser(object):
         I am not currently handling ";" at the end of words because of confusion with
         character ents. Easily fixed.
         """
-        # We don't like many character entities, so let's change them
-        # into spaces to get a clean break.
-        if char_ents.search(words):
-            words = self.clear_char_ents(words)
 
-        # TODO: Now, we also know that there are Unicode characters which
-        # we normally want to break words.  Often, these are Microsoft characters
-        # like the curly quotes. These are set in textload.cfg
-        # in @UnicodeWordBreakers.
+        if self.in_suppressed_tag is False:
+            # We don't like many character entities, so let's change them
+            # into spaces to get a clean break.
+            if char_ents.search(words):
+                words = self.clear_char_ents(words)
 
-        # TODO: Now, here's something you did not think of: Brown WWP: M&sup-r;
-        # You are going to split words, on hyphens just below.  That would
-        # be a mess.  So a little exception handler which we will convert
-        # to the supp(.) for indexing.
+            # TODO: Now, we also know that there are Unicode characters which
+            # we normally want to break words.  Often, these are Microsoft characters
+            # like the curly quotes. These are set in textload.cfg
+            # in @UnicodeWordBreakers.
+            if self.unicode_word_breakers:
+                for word_breaker in self.unicode_word_breakers:
+                    words = word_breaker.sub(lambda match: ' ' * len(match.group(1)), words)
 
-        # we're splitting the line of words into distinct words
-        # separated by "\n"
-        words = self.token_regex.sub(r'\n\1\n', words)
+            # TODO: Now, here's something you did not think of: Brown WWP: M&sup-r;
+            # You are going to split words, on hyphens just below.  That would
+            # be a mess.  So a little exception handler which we will convert
+            # to the supp(.) for indexing.
 
-        if self.break_apost:
-            words = words.replace("'", "\n'\n")
+            # we're splitting the line of words into distinct words
+            # separated by "\n"
+            words = self.token_regex.sub(r'\n\1\n', words)
 
-        words = newline_shortener.sub(r'\n', words)
+            if self.break_apost:
+                words = words.replace("'", "\n'\n")
 
-        current_pos = self.bytes_read_in
-        count = 0
-        word_list = words.split('\n')
-        last_word = ""
-        next_word = ""
-        if self.in_the_text:
-            for word in word_list:
-                # print word, current_pos - len(word)
-                word_length = len(word)
-                try:
-                    next_word = word_list[count + 1]
-                except IndexError:
-                    pass
-                count += 1
+            words = newline_shortener.sub(r'\n', words)
 
-                # Keep track of your bytes since this is where you are getting
-                # the byte offsets for words.
-                current_pos += word_length
+            current_pos = self.bytes_read_in
+            count = 0
+            word_list = words.split('\n')
+            last_word = ""
+            next_word = ""
+            if self.in_the_text:
+                for word in word_list:
+                    # print word, current_pos - len(word)
+                    word_length = len(word)
+                    try:
+                        next_word = word_list[count + 1]
+                    except IndexError:
+                        pass
+                    count += 1
 
-                # Do we have a word? At least one of these characters.
-                if check_if_char_word.search(word):
-                    last_word = word
-                    word_pos = current_pos - len(word)
+                    # Keep track of your bytes since this is where you are getting
+                    # the byte offsets for words.
+                    current_pos += word_length
 
-                    # Set your byte position now, since you will be modifying the
-                    # word you are sending to the index after this.
-                    start_byte = word_pos
+                    # Do we have a word? At least one of these characters.
+                    if check_if_char_word.search(word):
+                        last_word = word
+                        word_pos = current_pos - len(word)
 
-                    if "&" in word:
-                        # Convert ents to utf-8
-                        word = self.latin1_ents_to_utf8(word)
-                        # Convert other ents to things....
-                        word = self.convert_other_ents(word)
-
-                    # You may have some semi-colons...
-                    if word[-1] == ";":
                         if "&" in word:
-                            pass  # TODO
-                        else:
-                            word = word[:-1]
+                            # Convert ents to utf-8
+                            word = self.latin1_ents_to_utf8(word)
+                            # Convert other ents to things....
+                            word = self.convert_other_ents(word)
 
-                    # Get rid of certain characters that don't break words, but don't index.
-                    # These are defined in a compiled regex below: chars_not_to_index
-                    word = chars_not_to_index.sub('', word)
+                        # You may have some semi-colons...
+                        if word[-1] == ";":
+                            if "&" in word:
+                                pass  # TODO
+                            else:
+                                word = word[:-1]
 
-                    # TODO: Call a function to distinguish between words beginning with an
-                    # upper case and lower case character.  This USED to be a proper
-                    # name split in ARTFL, but we don't see many databases with proper
-                    # names tagged.
+                        # Get rid of certain characters that don't break words, but don't index.
+                        # These are defined in a compiled regex below: chars_not_to_index
+                        word = self.chars_not_to_index.sub('', word)
 
-                    # Switch everything to lower case
-                    word = word.decode('utf8', 'ignore').lower().encode('utf8')
+                        # TODO: Call a function to distinguish between words beginning with an
+                        # upper case and lower case character.  This USED to be a proper
+                        # name split in ARTFL, but we don't see many databases with proper
+                        # names tagged.
 
-                    # TODO: If you have tag exemptions and you have some of the replacement
-                    # characters "_", then delete them from the index entry.  I've put
-                    # in both options, just in case.  I'm on the fence about this at the
-                    # moment since I have "_" in characters to match above.
+                        # Switch everything to lower case
+                        word = word.decode('utf8', 'ignore').lower().encode('utf8')
 
-                    # Check to see if the word is longer than we want.  More than 235
-                    # characters appear to cause problems in the indexer.
-                    # TODO: make this limit configurable?
-                    if len(word) > 235:
-                        print >> sys.stderr, "Long word: %s" % word
-                        print >> sys.stderr, "Truncating for index..."
-                        word = word[:235]
+                        # TODO: If you have tag exemptions and you have some of the replacement
+                        # characters "_", then delete them from the index entry.  I've put
+                        # in both options, just in case.  I'm on the fence about this at the
+                        # moment since I have "_" in characters to match above.
 
-                    word = self.remove_control_chars(word)
-                    word = word.strip().replace("_", "")
-                    if len(word):
-                        self.v.push("word", word, word_pos)
-                        if self.current_tag == "w":
-                            for attrib, value in self.word_tag_attributes:
-                                self.v["word"][attrib] = value
-                        self.v.pull("word", current_pos)
+                        # Check to see if the word is longer than we want.  More than 235
+                        # characters appear to cause problems in the indexer.
+                        if len(word) > self.long_word_limit:
+                            print >> sys.stderr, "Long word: %s" % word
+                            print >> sys.stderr, "Truncating to %d characters for index..." % self.long_word_limit
+                            word = word[:self.long_word_limit]
 
-                # Sentence break handler
-                elif not self.in_line_group and not self.in_tagged_sentence:
-                    is_sent = False
+                        word = self.remove_control_chars(word)
+                        word = word.strip().replace("_", "")
+                        if len(word):
+                            self.v.push("word", word, word_pos)
+                            if self.current_tag == "w":
+                                for attrib, value in self.word_tag_attributes:
+                                    self.v["word"][attrib] = value
+                            self.v.pull("word", current_pos)
 
-                    # Always break on ! and ?
-                    # TODO: why test if word > 2 in p3?
-                    if "!" in word or "?" in word:
-                        is_sent = True
+                    # Sentence break handler
+                    elif not self.in_line_group and not self.in_tagged_sentence:
+                        is_sent = False
 
-                    # Periods are messy. Let's try by length of previous word and
-                    # capital letters to avoid hitting abbreviations.
-                    elif '.' in word:
-                        is_sent = True
-                        if len(last_word.decode('utf8', 'ignore')) < 3:
-                            if cap_char_or_num.search(last_word):
+                        # Always break on ! and ?
+                        # TODO: why test if word > 2 in p3?
+                        if "!" in word or "?" in word:
+                            is_sent = True
+
+                        # Periods are messy. Let's try by length of previous word and
+                        # capital letters to avoid hitting abbreviations.
+                        elif '.' in word:
+                            is_sent = True
+                            if len(last_word.decode('utf8', 'ignore')) < 3:
+                                if cap_char_or_num.search(last_word):
+                                    is_sent = False
+
+                            # Periods in numbers don't break sentences.
+                            if next_word.islower() or next_word.isdigit():
                                 is_sent = False
 
-                        # Periods in numbers don't break sentences.
-                        if next_word.islower() or next_word.isdigit():
-                            is_sent = False
-
-                    if is_sent:
-                        # a little hack--we don't know the punctuation mark that will end a sentence
-                        # until we encounter it--so instead, we let the push on "word" create a
-                        # implicit philo_virtual sentence, then change its name once we actually encounter
-                        # the punctuation token.
-                        if "sent" not in self.v:
-                            self.v.push("sent", ".", current_pos)
-                        self.v[
-                            "sent"].name = "."  # TODO: evaluate if this is right: avoid unwanted chars such tabs in ASP
-                        self.v.pull("sent", current_pos + len(word))
+                        if is_sent:
+                            # a little hack--we don't know the punctuation mark that will end a sentence
+                            # until we encounter it--so instead, we let the push on "word" create a
+                            # implicit philo_virtual sentence, then change its name once we actually encounter
+                            # the punctuation token.
+                            if "sent" not in self.v:
+                                self.v.push("sent", ".", current_pos)
+                            self.v[
+                                "sent"].name = "."  # TODO: correct? avoid unwanted chars such tabs in ASP
+                            self.v.pull("sent", current_pos + len(word))
 
     def close_sent(self, end_byte):
         """Close sentence objects."""
@@ -1174,13 +1183,9 @@ class XMLParser(object):
     def remove_control_chars(self, text):
         return control_char_re.sub('', text.decode('utf8', 'ignore')).encode('utf8')
 
-
-TokenRegex = "[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*"
-
 # Pre-compiled regexes used for parsing
 join_hyphen_with_lb = re.compile(r'(\&shy;[\n \t]*<lb\/>)', re.I | re.M)
 join_hyphen = re.compile(r'(\&shy;[\n \t]*)', re.I | re.M)
-in_word_tag_del = re.compile(r'([A-Za-z;])($e)([A-Za-z&])', re.I | re.M)
 text_tag = re.compile(r'<text\W', re.I)
 closed_text_tag = re.compile(r'</text\W', re.I)
 doc_body_tag = re.compile(r'<docbody', re.I)
@@ -1240,11 +1245,11 @@ div_num_tag = re.compile(r'<div(.)', re.I)
 char_ents = re.compile(r'\&[a-zA-Z0-9\#][a-zA-Z0-9]*;', re.I)
 newline_shortener = re.compile(r'\n\n*')
 check_if_char_word = re.compile(r'[A-Za-z0-9\177-\377]', re.I)
-chars_not_to_index = re.compile(r'\[\{\]\}', re.I)
 cap_char_or_num = re.compile(r'[A-Z0-9]')  # Capitals
 ending_punctuation = re.compile(r'[%s]$' % string.punctuation)
 add_tag = re.compile(r'<add\W', re.I)
 seg_attrib = re.compile(r'<seg \w+=', re.I)
+abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)', re.I | re.M)
 
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
@@ -1325,6 +1330,10 @@ if __name__ == "__main__":
         print >> sys.stderr, docid, fn
         size = os.path.getsize(fn)
         fh = open(fn)
-        parser = XMLParser(sys.stdout, docid, size, known_metadata={"filename": fn}, tag_to_obj_map=DefaultTagToObjMap,
+        parser = XMLParser(sys.stdout,
+                           docid,
+                           size,
+                           known_metadata={"filename": fn},
+                           tag_to_obj_map=DefaultTagToObjMap,
                            metadata_to_parse=DefaultMetadataToParse)
         parser.parse(fh)
