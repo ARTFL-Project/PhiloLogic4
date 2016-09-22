@@ -1,5 +1,5 @@
 <div id="results_container" class="col-xs-12 col-sm-8" ng-class="{'col-sm-8': concKwic.showFacetedBrowsing}">
-    <ol id="bibliographic-results" class="text-content-area" ng-if="!philoConfig.dictionary_bibliography">
+    <ol id="bibliographic-results" class="text-content-area" ng-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'">
         <li class="biblio-occurrence panel panel-default" ng-repeat="result in ::results.results">
 			<input type="checkbox" style="margin-left:10px" ng-click="addToSearch(result.citation.title.label)" ng-if="results.result_type === 'doc' && philoConfig.metadata.indexOf('title') !== -1">
             <span style="padding-left: 5px;" ng-init="position = $index + results.description.start">{{ ::position }}.</span>
@@ -15,7 +15,7 @@
             </span>
         </li>
     </ol>
-    <ol id="bibliographic-results" class="text-content-area" ng-if="philoConfig.dictionary_bibliography">
+    <ol id="bibliographic-results" class="text-content-area" ng-if="philoConfig.dictionary_bibliography && results.result_type != 'doc'">
         <li class="biblio-occurrence panel panel-default" ng-repeat="group in ::results.results">
             <h3 style="margin: 0; padding: 0px 10px; text-align: center; font-variant: small-caps;">
                 <i>{{ ::group[0].metadata_fields.title }}</i>

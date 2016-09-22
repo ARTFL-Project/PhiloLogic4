@@ -23,7 +23,7 @@ def get_concordance_text(db, hit, path, context_size):
     length = context_size + byte_distance + context_size
     bytes, start_byte = adjust_bytes(bytes, context_size)
     conc_text = get_text(hit, start_byte, length, path)
-    conc_text = format_concordance(conc_text, db.locals['word_regex'], bytes)
+    conc_text = format_concordance(conc_text, db.locals["token_regex"], bytes)
     return conc_text
 
 

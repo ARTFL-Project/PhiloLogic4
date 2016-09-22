@@ -301,7 +301,7 @@
             replace: true,
             link: function(scope) {
                 scope.concKwic.resultsPromise.then(function(results) {
-                    if (!philoConfig.dictionary_bibliography) {
+                    if (!philoConfig.dictionary_bibliography || results.data.result_type == 'doc') {
                         scope.results = results.data;
                     } else {
                         scope.results = dictionaryBibliography(results.data);

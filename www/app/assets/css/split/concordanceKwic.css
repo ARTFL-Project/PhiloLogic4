@@ -301,10 +301,9 @@
 }
 .facet-results {
     position: relative;
-    padding: 10px;
 }
 .facet-results li {
-    padding: 10px 0px;
+    padding: 10px 10px;
 }
 .facet-results li:nth-child(2n-1), #wordProperty li:nth-child(2n-1) {
     background-color: #FAFAFA;

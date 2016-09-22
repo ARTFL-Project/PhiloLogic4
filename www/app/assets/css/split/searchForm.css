@@ -154,3 +154,28 @@
 		display: none;
 	}
 }
+
+.select {
+  font-size: inherit;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+}
+.select select {
+  outline: none;
+  -webkit-appearance: none;
+  display: block;
+  padding: 6px 12px;
+  margin: 0;
+  transition: border-color 0.2s;
+  border: 1px solid #ccc;
+  border-radius: 0px;
+  background: #fff;
+  color: #555;
+  line-height: normal;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  width: 100%;
+}

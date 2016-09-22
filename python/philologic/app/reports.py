@@ -100,7 +100,7 @@ def bibliography_results(request, config):
             citation = citations(hit, citation_hrefs, config, report="simple_landing")
         else:
             citation = citations(hit, citation_hrefs, config, report="bibliography")
-        if config.dictionary_bibliography is False:
+        if config.dictionary_bibliography is False or result_type == "doc":
             results.append({
                 'citation': citation,
                 'citation_links': citation_hrefs,
@@ -108,7 +108,7 @@ def bibliography_results(request, config):
                 "metadata_fields": metadata_fields
             })
         else:
-            context = get_text_obj(hit, config, request, db.locals['word_regex'], images=False)
+            context = get_text_obj(hit, config, request, db.locals["token_regex"], images=False)
             results.append({
                 'citation': citation,
                 'citation_links': citation_hrefs,
@@ -302,10 +302,11 @@ def frequency_results(request, config, sorted=False):
                                                               report=request.report,
                                                               script='',
                                                               **{request.frequency_field: '"%s"' % key})
-                query_metadata = dict([(k, v) for k, v in request.metadata.iteritems() if v])
-                query_metadata[request.frequency_field] = '"%s"' % key
-                local_hits = db.query(**query_metadata)
-                counts[key]["total_word_count"] = local_hits.get_total_word_count()
+                if not biblio_search:
+                    query_metadata = dict([(k, v) for k, v in request.metadata.iteritems() if v])
+                    query_metadata[request.frequency_field] = '"%s"' % key
+                    local_hits = db.query(**query_metadata)
+                    counts[key]["total_word_count"] = local_hits.get_total_word_count()
             counts[key]["count"] += 1
 
             # avoid timeouts by splitting the query if more than
@@ -335,10 +336,15 @@ def frequency_results(request, config, sorted=False):
                                                     script='',
                                                     **{request.frequency_field: 'NULL'})
                 local_hits = db.query(**new_metadata)
-                frequency_object["results"]["NULL"] = {"count": len(new_hits),
-                                                       "url": null_url,
-                                                       "metadata": {request.frequency_field: "NULL"},
-                                                       "total_word_count": local_hits.get_total_word_count()}
+                if not biblio_search:
+                    frequency_object["results"]["NULL"] = {"count": len(new_hits),
+                                                           "url": null_url,
+                                                           "metadata": {request.frequency_field: "NULL"},
+                                                           "total_word_count": local_hits.get_total_word_count()}
+                else:
+                    frequency_object["results"]["NULL"] = {"count": len(new_hits),
+                                                           "url": null_url,
+                                                           "metadata": {request.frequency_field: "NULL"}}
             frequency_object['more_results'] = False
         else:
             frequency_object['more_results'] = True
@@ -423,7 +429,7 @@ def generate_text_object(request, config, note=False):
         citation_hrefs = citation_links(db, config, doc_obj)
     citation = citations(obj, citation_hrefs, config, report="navigation")
     text_object['citation'] = citation
-    text, imgs = get_text_obj(obj, config, request, db.locals['word_regex'], note=note)
+    text, imgs = get_text_obj(obj, config, request, db.locals["token_regex"], note=note)
     text_object['text'] = text
     text_object['imgs'] = imgs
     return text_object

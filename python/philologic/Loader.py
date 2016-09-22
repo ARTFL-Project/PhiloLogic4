@@ -55,7 +55,10 @@ class Loader(object):
 
         self.parser_config = {}
         for option in ParserOptions:
-            self.parser_config[option] = loader_options[option]
+            try:
+                self.parser_config[option] = loader_options[option]
+            except KeyError:  # option hasn't been set
+                pass
 
         try:
             work_dir = os.path.join(loader_options["data_destination"], "WORK")
@@ -233,7 +236,7 @@ class Loader(object):
         return load_metadata
 
     def parse_files(self, max_workers, data_dicts=None):
-        print "\n### Parsing files ###"
+        print "\n\n### Parsing files ###"
         os.chdir(self.workdir)  # questionable
 
         if not data_dicts:
@@ -340,7 +343,10 @@ class Loader(object):
                     for option in ["token_regex", "suppress_tags", "break_apost", "chars_not_to_index",
                                    "break_sent_in_line_group", "tag_exceptions", "join_hyphen_in_words",
                                    "unicode_word_breakers", "abbrev_expand", "long_word_limit", "flatten_ligatures"]:
-                        options[option] = self.parser_config[option]
+                        try:
+                            options[option] = self.parser_config[option]
+                        except KeyError:  # option hasn't been set
+                            pass
 
                     parser = parser_factory(o,
                                             text["id"],

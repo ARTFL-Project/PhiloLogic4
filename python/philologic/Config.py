@@ -32,16 +32,6 @@ db_locals_defaults = {
         'comment': '',
         'index': 4
     },
-    'word_regex': {
-        'value': '([\\w]+)',
-        'comment': '# Regex used for tokenizing outgoing text',
-        'index': 5
-    },
-    'punct_regex': {
-        'value': '([\\.?!])',
-        'comment': '# Regex used for punctuation',
-        'index': 6
-    },
     'default_object_level': {
         'value': 'doc',
         'comment': '# This defines the default navigation element in your database',
@@ -180,8 +170,24 @@ web_config_defaults = {
     'dictionary_bibliography': {
         'value': False,
         'comment': '''# The dictionary_bibliography variable enables a different a bibliography report where entries are displayed
-                   #in their entirety and grouped under the same title. It is turned off by default''',
-        'index': 14
+                      # in their entirety and grouped under the same title. It is turned off by default''',
+        'index': 15
+    },
+    'dictionary_selection': {
+        'value': False,
+        'comment': '''# If set to True, this option creates a dropdown menu to select searching within only a single volume or title.
+                      # This replaces the title field in the search form.
+                      # You need to configure the dictionary_selection_options variable below to define your options.''',
+        'index': 16
+    },
+    'dictionary_selection_options': {
+        'value': [],
+        'comment': '''# If dictionary_selection is set to True, you need to populate this variable as in the following:
+                      # [{"label": "DAF 1932", "title": "Dictionnaire de l'Académie Française 1932"}]
+                      # Each volume is represented as an object containing the label which is displayed in the search form
+                      # and a title value which should either be the exact string stored in the SQL table, or an egrep expression
+                      # such as "Dictionnaire de Littre.*" if you wish to match more than one title.''',
+        'index': 17
     },
     'landing_page_browsing': {
         'value': 'default',
@@ -189,7 +195,7 @@ web_config_defaults = {
                # The landing_page_browsing variable defines what type of landing page. There are 3 built-in reports available: 'default',
                # 'dictionary' or 'simple'. You can otherwise supply a relative path to a custom HTML template. Note that this path is relative
                # to the database root. The only constraint for custom templates is that the HTML must be encapsulated inside a div''',
-        'index': 15
+        'index': 18
     },
     'default_landing_page_browsing': {
         'value': [{"label": "Author",
@@ -244,7 +250,7 @@ web_config_defaults = {
                # and define two different types of queries to group your data: ranges and exact matches, i.e. "A-D" or "Comedy".
                # You can define styling with a dictionary of valid CSS property/value such as those in the default values.
                # begin and end keywords define what precedes and follows each field. You can use HTML for these strings.''',
-        'index': 16
+        'index': 19
     },
     'default_landing_page_display': {
         'value': {},
@@ -252,7 +258,7 @@ web_config_defaults = {
                # The default landing page display variable allows you to load content by default. It is configured
                # in the same way as default_landing_page_display objects except that you need to define just one
                # range (the one you wish to display) as a string, such as 'A-D'. An empty dict will disable the feature.''',
-        'index': 17
+        'index': 20
     },
     'simple_landing_citation': {
         'value': [{
@@ -306,15 +312,15 @@ web_config_defaults = {
             'style': {}
     	}],
         'comment': '# This variable defines the citation for the simple landing page.',
-        'index': 18
+        'index': 21
     },
     'dico_letter_range': {
         'value': ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
                   "U", "V", "W", "X", "Y", "Z"],
         'comment': '''
-               # The dico_letter_range variables defines a set of letters corresponding to the first letter of a headword. This generates a set of buttons
+               # If landing_page_browsing is set to dictionary, the dico_letter_range variable allows you to define set of letters corresponding to the first letter of a headword. This generates a set of buttons
                # for browsing the database available on the landing page. The default represents the entire roman alphabet. An empty list hides the table.''',
-        'index': 19
+        'index': 22
     },
     'concordance_citation': {
         'value': [{
@@ -389,7 +395,7 @@ web_config_defaults = {
                # begin and end keywords define what precedes and follows each field. You can use HTML for these strings.
                # The link key enables linking for that metadata field. It links to the table of contents for title and filename,
                # and to a regular query for all other metadata fields.''',
-        'index': 20
+        'index': 23
     },
     'bibliography_citation': {
         'value': [{
@@ -464,7 +470,7 @@ web_config_defaults = {
                # begin and end keywords define what precedes and follows each field. You can use HTML for these strings.
                # The link key enables linking for that metadata field. It links to the table of contents for title and filename,
                # and to a regular query for all other metadata fields.''',
-        'index': 21
+        'index': 24
     },
     'navigation_citation': {
         'value': [{
@@ -523,7 +529,7 @@ web_config_defaults = {
                # begin and end keywords define what precedes and follows each field. You can use HTML for these strings.
                # The link key enables linking for that metadata field. It links to the table of contents for title and filename,
                # and to a metadata query for all other metadata fields.''',
-        'index': 22
+        'index': 25
     },
     'kwic_bibliography_fields': {
         'value': [],
@@ -532,7 +538,7 @@ web_config_defaults = {
                 # modified with extra care in conjunction with the concordance_citation function located in reports/concordance.py.
                 # If the variable is an empty list, filename will be used.
                 ''',
-        'index': 23
+        'index': 26
     },
     'concordance_biblio_sorting': {
         'value': [],
@@ -540,14 +546,14 @@ web_config_defaults = {
                 # The concordance_biblio_sorting variable allows you to pick wich metadata field can be used for sorting concordance or bibliography results.
                 # It is a list of tuples where multiple metadata fields can be used for sorting, such as [('author', 'title'), ('year', 'author', 'title')].
                 ''',
-        'index': 24
+        'index': 27
     },
     'kwic_metadata_sorting_fields': {
         'value': [],
         'comment': '''
                 # The kwic_metadata_sorting_fields variable allows you to pick wich metadata field can be used for sorting KWIC results.
                 ''',
-        'index': 25
+        'index': 28
     },
     'time_series_year_field': {
         'value': 'year',
@@ -555,12 +561,12 @@ web_config_defaults = {
                 # The time_series_year_field variable defines which metadata field to use for time series. The year field is built at load time by finding the earliest 4 digit number
                 # in multiple date fields.
                 ''',
-        'index': 26
+        'index': 29
     },
     'time_series_interval': {
         'value': 10,
         'comment': '# The time_series_interval variable defines the default year span used for time series.',
-        'index': 27
+        'index': 30
     },
     'title_prefix_removal': {
         'value': [],
@@ -570,7 +576,7 @@ web_config_defaults = {
                  # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
                  # Don't forget to add a space after your prefix or the prefix will match partial words.
                  ''',
-        'index': 28
+        'index': 31
     },
     'page_images_url_root': {
         'value': '',
@@ -580,7 +586,7 @@ web_config_defaults = {
                  # <pb fac="filename.jpg"> or <pb id="filename.jpg">
                  # So a URL of http://my-server.com/images/ will resolve to http://my-server.com/images/filename.jpg.
                  ''',
-        'index': 29
+        'index': 32
     },
     'page_image_extension': {
         'value': '',
@@ -589,7 +595,7 @@ web_config_defaults = {
                  # For instance, given <pb n="1" fac="image1">, you could define the extension as ".jpeg" and the browser would fetch
                  # the image at http://some-url/image1.jpeg (where some-url is defined in the above page_images_url_root variable).
                  ''',
-        'index': 30
+        'index': 33
     },
     'logo': {
         'value': '',
@@ -598,14 +604,14 @@ web_config_defaults = {
                   # search form. It can be a relative URL, or an absolute link, in which case you want to make sure
                   # it starts with http://. If no logo is defined, no picture will be displayed.
                   ''',
-        'index': 31
+        'index': 34
     },
     'header_in_toc': {
         'value': False,
         'comment': '''
                   # The header_in_toc variable defines whether to display a button to show the header in the table of contents
                   ''',
-        'index': 32
+        'index': 35
 
     }
 }

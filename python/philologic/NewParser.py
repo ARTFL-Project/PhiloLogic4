@@ -191,7 +191,6 @@ class XMLParser(object):
             self.suppress_tags = []
         self.in_suppressed_tag = False
         self.current_suppressed_tag = ''
-        print self.suppress_tags, parse_options["suppress_tags"]
 
         if "break_apost" in parse_options:
             self.break_apost = parse_options["break_apost"]
@@ -686,7 +685,7 @@ class XMLParser(object):
                     if "type" in self.v["div1"]:
                         if self.v["div1"]["type"] == "notes":
                             self.in_notes_div = True
-                            self.no_deeper_objects = False
+                            self.no_deeper_objects = True
                 elif div_level == 2:
                     if self.open_div2:
                         self.close_div2(start_byte)
@@ -805,11 +804,6 @@ class XMLParser(object):
                         # Switch everything to lower case
                         word = word.decode('utf8', 'ignore').lower().encode('utf8')
 
-                        # TODO: If you have tag exemptions and you have some of the replacement
-                        # characters "_", then delete them from the index entry.  I've put
-                        # in both options, just in case.  I'm on the fence about this at the
-                        # moment since I have "_" in characters to match above.
-
                         # Check to see if the word is longer than we want.  More than 235
                         # characters appear to cause problems in the indexer.
                         if len(word) > self.long_word_limit:
@@ -854,8 +848,7 @@ class XMLParser(object):
                             # the punctuation token.
                             if "sent" not in self.v:
                                 self.v.push("sent", ".", current_pos)
-                            self.v[
-                                "sent"].name = "."  # TODO: correct? avoid unwanted chars such tabs in ASP
+                            self.v["sent"].name = "."  # TODO: correct? avoid unwanted chars such tabs in ASP
                             self.v.pull("sent", current_pos + len(word))
 
     def close_sent(self, end_byte):
