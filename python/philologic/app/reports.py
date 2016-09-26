@@ -4,16 +4,14 @@
 import os
 import re
 import timeit
-from ast import literal_eval as eval
 from collections import defaultdict
 
-import simplejson
 from get_text import *
 from link import *
 from citations import *
 from ObjectFormatter import format_strip
 from philologic.DB import DB
-from philologic.HitList import CombinedHitlist, ObjectWrapper
+from philologic.HitList import CombinedHitlist
 from philologic import HitWrapper
 from philologic.app import adjust_bytes
 from philologic.Query import get_expanded_query
@@ -133,7 +131,6 @@ def collocation_results(request, config):
     hits.finish()
     collocation_object = {"query": dict([i for i in request])}
 
-    length = config['concordance_length']
     try:
         collocate_distance = int(request['collocate_distance'])
     except ValueError:  # Getting an empty string since the keyword is not specificed in the URL
@@ -238,7 +235,6 @@ def frequency_results(request, config, sorted=False):
     if sorted:
         hits.finish()
 
-    metadata_list = {}
     c = db.dbh.cursor()
 
     c.execute('select philo_id, %s from toms where %s is not null' % (request.frequency_field, request.frequency_field))
@@ -263,7 +259,6 @@ def frequency_results(request, config, sorted=False):
 
     try:
         for philo_id in hits[request.start:]:
-            orig_id = philo_id
             if not biblio_search:
                 philo_id = tuple(list(philo_id[:6]) + [philo_id[7]])
             if metadata_type == "div":
@@ -546,7 +541,6 @@ def generate_time_series(request, config):
 
         # Get date total count
         if interval != '1':
-            dates = [start_range]
             end_range = start_range + (int(request['year_interval']) - 1)
             query = 'select sum(word_count) from toms where %s between "%d" and "%d"' % (config.time_series_year_field,
                                                                                          start_range, end_range)
@@ -596,7 +590,7 @@ def filter_words_by_property(request, config):
         start = request.start
 
     for hit in hits:
-        ## get my chunk of text ##
+        # get my chunk of text
         hit_val = get_word_attrib(hit, word_property, db)
 
         if hit_val == word_property_value:
@@ -650,7 +644,6 @@ def generate_word_frequency(request, config):
     field = request["field"]
     counts = {}
     frequency_object = {}
-    more_results = True
     start_time = timeit.default_timer()
     last_hit_done = request.start
     try:
@@ -799,8 +792,7 @@ def kwic_hit_object(hit, config, db):
     conc_text = conc_text.replace('\t', ' ')
     try:
         start_hit = conc_text.index('<span class="highlight">')
-        start_output = '<span class="kwic-before"><span class="inner-before">' + conc_text[:
-                                                                                           start_hit] + '</span></span>'
+        start_output = '<span class="kwic-before"><span class="inner-before">' + conc_text[:start_hit] + '</span></span>'
         end_hit = conc_text.rindex('</span>') + 7
         highlighted_text = conc_text[start_hit + 23:end_hit - 7].lower()  # for use in KWIC sorting
         end_output = '<span class="kwic-after">' + conc_text[end_hit:] + '</span>'
