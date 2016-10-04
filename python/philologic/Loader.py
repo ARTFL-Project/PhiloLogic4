@@ -85,10 +85,12 @@ class Loader(object):
 
     def add_files(self, files):
         print "\nCopying files to database directory...",
+        self.filenames = []
         for f in files:
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
             shutil.copy(f, new_file_path)
             os.chmod(new_file_path, 775)
+            self.filenames.append(f)
         print "done.\n"
 
     def list_files(self):
@@ -231,9 +233,17 @@ class Loader(object):
         print "%s: Sorting files by the following metadata fields: %s..." % (time.ctime(),
                                                                              ", ".join([i for i in sort_by_field])),
 
-        load_metadata = sort_list(load_metadata, sort_by_field)
         self.sort_order = sort_by_field  # to be used for the sort by concordance biblio key in web config
-        return load_metadata
+        if sort_by_field:
+            return sort_list(load_metadata, sort_by_field)
+        else:
+            sorted_load_metadata = []
+            for filename in self.filenames:
+                for m in load_metadata:
+                    if m["filename"] == filename:
+                        sorted_load_metadata.append(m)
+                        break
+            return sorted_load_metadata
 
     def parse_files(self, max_workers, data_dicts=None):
         print "\n\n### Parsing files ###"

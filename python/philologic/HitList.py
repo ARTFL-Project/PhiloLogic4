@@ -101,7 +101,7 @@ class HitList(object):
                 pass
         else:
             self.update()
-            #need to handle negative offsets.
+            # need to handle negative offsets.
             slice_position = n.start or 0
             self.seek(slice_position)
             while True:
@@ -140,12 +140,6 @@ class HitList(object):
                 else:
                     yield HitWrapper(hit, self.dbh)
                 iter_position += 1
-
-    def finish(self):
-        self.update()
-        while not self.done:
-            time.sleep(.02)
-            self.update()
 
     def seek(self, n):
         if self.position == n:
@@ -214,8 +208,8 @@ class HitList(object):
         ids = []
         for id in philo_ids:
             ids.append('philo_id="%s"' % " ".join([str(i) for i in id]))
-            if len(ids) == 500:
-                clause = " ".join(ids)
+            if len(ids) == 999:  # max expression tree in sqlite is 1000
+                clause = " OR ".join(ids)
                 c.execute(query + clause)
                 total_count += int(c.fetchone()[0])
                 ids = []

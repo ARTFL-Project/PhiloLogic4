@@ -1,9 +1,6 @@
 #!/usr/bin/python
 
-import time
 import sys
-from itertools import islice
-import sqlite3
 
 obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
 
@@ -38,7 +35,8 @@ class HitWrapper(object):
                 length = len(hit[:hit.index(0)])
             except ValueError:
                 length = len(hit)
-            if length >= 7: length = 7
+            if length >= 7:
+                length = 7
             self.object_type = [k for k in obj_dict if obj_dict[k] == length][0]
         self.row = None
         self.bytes = []
@@ -94,7 +92,7 @@ class HitWrapper(object):
                 else:
                     return self.ancestors[f_type][key]
             else:
-                if self.row == None:
+                if self.row is None:
                     self.row = self.db.get_id_lowlevel(self.philo_id)
                 return _safe_lookup(self.row, key, self.db.encoding)
 
@@ -131,7 +129,7 @@ class ObjectWrapper(object):
                 philo_id, row = shared_cache[self.object_type]
                 if philo_id == self.philo_id:
                     self.row = row
-            if self.row == None:
+            if self.row is None:
                 self.row = self.db.get_id_lowlevel(self.philo_id)
                 shared_cache[self.object_type] = (self.philo_id, self.row)
             return _safe_lookup(self.row, key, self.db.encoding)
@@ -149,7 +147,7 @@ class PageWrapper(object):
         self.bytes = []
 
     def __getitem__(self, key):
-        if self.row == None:
+        if self.row is None:
             self.row = self.db.get_page(self.philo_id)
         return _safe_lookup(self.row, key, self.db.encoding)
 
@@ -173,7 +171,7 @@ class LineWrapper(object):
         self.bytes = []
 
     def __getitem__(self, key):
-        if self.row == None:
+        if self.row is None:
             self.row = self.db.get_line(self.hit_offset, self.doc_id)
         return _safe_lookup(self.row, key, self.db.encoding)
 
@@ -195,9 +193,9 @@ class WordWrapper(object):
         self.byte = byte
 
     def __getitem__(self, key):
-        if self.row == None:
+        if self.row is None:
             self.row = self.db.get_word(self.philo_id)
-            if self.row == None:
+            if self.row is None:
                 print >> sys.stderr, "WORD LOOKUP ERROR for ", repr(self.philo_id)
         return _safe_lookup(self.row, key, self.db.encoding)
 
