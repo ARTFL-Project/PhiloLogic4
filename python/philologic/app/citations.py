@@ -32,7 +32,7 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=[
         if cite["label"]:
             cite["begin"] = citation_object["begin"]
             cite["end"] = citation_object["end"]
-            cite["href"] = cite_linker(hit, citation_object, citation_hrefs)
+            cite["href"] = cite_linker(hit, citation_object, citation_hrefs, config, report)
             cite["style"] = citation_object["style"]
             citation.append(cite)
     return citation
@@ -67,6 +67,7 @@ def get_label(hit, citation_object):
         if page_obj[citation_object["field"]]:
             label = "page %s" % str(page_num)
     elif citation_object["object_level"] == "line":
+        # TODO: fix this...
         line_obj = hit.line
         try:
             line = citation_object["field"]
@@ -91,7 +92,7 @@ def get_div1_name(hit):
     return label
 
 
-def cite_linker(hit, citation_object, citation_hrefs):
+def cite_linker(hit, citation_object, citation_hrefs, config, report):
     href = None
     if citation_object["link"]:
         if citation_object["object_level"] == "doc":

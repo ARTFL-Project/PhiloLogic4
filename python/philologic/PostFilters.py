@@ -66,7 +66,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
 
 
 def word_frequencies(loader_obj):
-    print '%s: Generating word frequencies...' % time.ctime(),
+    print '%s: Generating word frequencies...' % time.ctime()
     frequencies = loader_obj.destination + '/frequencies'
     os.system('mkdir %s' % frequencies)
     output = open(frequencies + "/word_frequencies", "w")

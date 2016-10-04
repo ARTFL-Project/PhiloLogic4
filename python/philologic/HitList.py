@@ -1,11 +1,8 @@
 #!/usr/bin/env python
-import re
 import os
-import sys
 import time
-import codecs
 import struct
-from HitWrapper import HitWrapper, ObjectWrapper
+from HitWrapper import HitWrapper
 from utils import smash_accents
 
 obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
@@ -37,10 +34,10 @@ class HitList(object):
             self.has_word_id = 1
             self.length = 7 + 2 * (words)
         else:
-            self.has_word_id = 0  #unfortunately.  fix this next time I have 3 months to spare.
+            self.has_word_id = 0  # unfortunately.  fix this next time I have 3 months to spare.
             self.length = methodarg + 1 + (words)
-        self.fh = open(self.filename)  #need a full path here.
-        self.format = "=%dI" % self.length  #short for object id's, int for byte offset.
+        self.fh = open(self.filename)  # need a full path here.
+        self.format = "=%dI" % self.length  # short for object id's, int for byte offset.
         self.hitsize = struct.calcsize(self.format)
         self.doc = doc
         self.byte = byte
@@ -104,7 +101,7 @@ class HitList(object):
                 pass
         else:
             self.update()
-            #need to handle negative offsets.
+            # need to handle negative offsets.
             slice_position = n.start or 0
             self.seek(slice_position)
             while True:
@@ -144,12 +141,6 @@ class HitList(object):
                     yield HitWrapper(hit, self.dbh)
                 iter_position += 1
 
-    def finish(self):
-        self.update()
-        while not self.done:
-            time.sleep(.02)
-            self.update()
-
     def seek(self, n):
         if self.position == n:
             pass
@@ -161,12 +152,11 @@ class HitList(object):
                     time.sleep(.05)
                     self.update()
             offset = self.hitsize * n
-            #print >> sys.stderr, "seeking %d:%d" % (n,offset)
             self.fh.seek(offset)
             self.position = n
 
     def update(self):
-        #Since the file could be growing, we should frequently check size/ if it's finished yet.
+        # Since the file could be growing, we should frequently check size/ if it's finished yet.
         if self.done:
             pass
         else:
@@ -177,7 +167,6 @@ class HitList(object):
                 pass
             self.size = os.stat(self.filename).st_size  # in bytes
             self.count = self.size / self.hitsize
-            #print >> sys.stderr, "size:%d  count:%d" % (self.size, self.count)
 
     def finish(self):
         while not self.done:
@@ -185,8 +174,8 @@ class HitList(object):
             time.sleep(0.05)
 
     def readhit(self, n):
-        #reads hitlist into buffer, unpacks
-        #should do some work to read k at once, track buffer state.
+        # reads hitlist into buffer, unpacks
+        # should do some work to read k at once, track buffer state.
         self.update()
         while n >= len(self):
             if self.done:
@@ -196,7 +185,6 @@ class HitList(object):
                 self.update()
         if n != self.position:
             offset = self.hitsize * n
-            #print >> sys.stderr, "reading %d, seeking %d" % (n,offset)
             self.fh.seek(offset)
             self.position = n
         buffer = self.fh.read(self.hitsize)
@@ -204,18 +192,31 @@ class HitList(object):
         return (struct.unpack(self.format, buffer))
 
     def get_total_word_count(self):
-        # self.finish()
+        philo_ids = []
         total_count = 0
         iter_position = 0
         self.seek(iter_position)
         while True:
             try:
                 hit = self.readhit(iter_position)
-                hit_wrapped = HitWrapper(hit, self.dbh)
-                total_count += int(hit_wrapped.word_count)
+                philo_ids.append(hit)
             except IndexError, IOError:
                 break
             iter_position += 1
+        c = self.dbh.dbh.cursor()
+        query = "SELECT SUM(word_count) FROM toms WHERE "
+        ids = []
+        for id in philo_ids:
+            ids.append('philo_id="%s"' % " ".join([str(i) for i in id]))
+            if len(ids) == 999:  # max expression tree in sqlite is 1000
+                clause = " OR ".join(ids)
+                c.execute(query + clause)
+                total_count += int(c.fetchone()[0])
+                ids = []
+        if ids:
+            clause = " OR ".join(ids)
+            c.execute(query + clause)
+            total_count += int(c.fetchone()[0])
         return total_count
 
 

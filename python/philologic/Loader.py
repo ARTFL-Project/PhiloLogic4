@@ -55,7 +55,10 @@ class Loader(object):
 
         self.parser_config = {}
         for option in ParserOptions:
-            self.parser_config[option] = loader_options[option]
+            try:
+                self.parser_config[option] = loader_options[option]
+            except KeyError:  # option hasn't been set
+                pass
 
         try:
             work_dir = os.path.join(loader_options["data_destination"], "WORK")
@@ -82,10 +85,12 @@ class Loader(object):
 
     def add_files(self, files):
         print "\nCopying files to database directory...",
+        self.filenames = []
         for f in files:
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
             shutil.copy(f, new_file_path)
             os.chmod(new_file_path, 775)
+            self.filenames.append(f)
         print "done.\n"
 
     def list_files(self):
@@ -228,12 +233,20 @@ class Loader(object):
         print "%s: Sorting files by the following metadata fields: %s..." % (time.ctime(),
                                                                              ", ".join([i for i in sort_by_field])),
 
-        load_metadata = sort_list(load_metadata, sort_by_field)
         self.sort_order = sort_by_field  # to be used for the sort by concordance biblio key in web config
-        return load_metadata
+        if sort_by_field:
+            return sort_list(load_metadata, sort_by_field)
+        else:
+            sorted_load_metadata = []
+            for filename in self.filenames:
+                for m in load_metadata:
+                    if m["filename"] == filename:
+                        sorted_load_metadata.append(m)
+                        break
+            return sorted_load_metadata
 
     def parse_files(self, max_workers, data_dicts=None):
-        print "\n### Parsing files ###"
+        print "\n\n### Parsing files ###"
         os.chdir(self.workdir)  # questionable
 
         if not data_dicts:
@@ -340,7 +353,10 @@ class Loader(object):
                     for option in ["token_regex", "suppress_tags", "break_apost", "chars_not_to_index",
                                    "break_sent_in_line_group", "tag_exceptions", "join_hyphen_in_words",
                                    "unicode_word_breakers", "abbrev_expand", "long_word_limit", "flatten_ligatures"]:
-                        options[option] = self.parser_config[option]
+                        try:
+                            options[option] = self.parser_config[option]
+                        except KeyError:  # option hasn't been set
+                            pass
 
                     parser = parser_factory(o,
                                             text["id"],

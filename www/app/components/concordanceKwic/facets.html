@@ -27,7 +27,7 @@
             </a>
         </div>
         <div class="facet-results" ng-if="showFacetResults">
-            <div class="btn-group btn-group-justified" role="group" aria-label="..." ng-if="percent == 100 && report !== 'bibliography' && facet.type === 'facet'">
+            <div class="btn-group btn-group-justified" role="group" aria-label="..." ng-if="percent == 100 && report !== 'bibliography' && facet.type === 'facet'" style="margin-top: -10px;">
                <button type="button" class="btn btn-default" ng-class="{'active': showingRelativeFrequencies === false}" style="width: 50%; border-left-width: 0px; border-top-width: 0px" ng-click="displayAbsoluteFrequencies()">Absolute Frequency</button>
                <button type="button" class="btn btn-default" ng-class="{'active': showingRelativeFrequencies}" style="width: 50%; border-right-width: 0px; border-top-width: 0px" ng-click="displayRelativeFrequencies()">Relative Frequency</button>
            </div>

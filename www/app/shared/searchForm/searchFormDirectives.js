@@ -84,7 +84,7 @@
         }
     }
 
-    function metadataFields() {
+    function metadataFields(philoConfig) {
         var buildMetadata = function(scope, fields) {
             var metadataFields = [];
             for (var i = 0; i < fields.length; i++) {
@@ -105,6 +105,12 @@
             templateUrl: 'app/shared/searchForm/metadataFields.html',
             replace: true,
             link: function(scope, element, attrs) {
+                if (philoConfig.dictionary_selection) {
+                    scope.dico_selection = true;
+                    scope.dico_selection_options = philoConfig.dictionary_selection_options;
+                } else {
+                    scope.dico_selection = false;
+                }
                 if (!attrs.field && !attrs.exclude) {
                     scope.metadataFields = buildMetadata(scope, scope.philoConfig.metadata);
                     scope.head = false;
@@ -254,6 +260,9 @@
                     }
                     scope.selectedSortValues = label.join(", ");
                 } else {
+                    scope.selectedSortValues = "None";
+                }
+                if (scope.selectedSortValues = "r,o,w,i,d") {
                     scope.selectedSortValues = "None";
                 }
                 scope.sortValues = [{
