@@ -634,6 +634,15 @@ web_config_defaults = {
                   ''',
         'index': 37
 
+    },
+    'search_syntax_template': {
+        'value': 'default',
+        'comment': '''
+                  # You can define a custom HTML template for the search syntax pop-up window, in which case you need to supply the 
+                  # relative path to the template. Note that this path is relative to the database root. The only constraint 
+                  # for custom templates is that the HTML must be encapsulated inside a div
+                  ''',
+        "index": 38
     }
 }
 

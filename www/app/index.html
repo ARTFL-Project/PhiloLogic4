@@ -7,7 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <base href="$DBURL/">
 
-  <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,700,700italic&subset=latin,cyrillic-ext,greek-ext,greek,latin-ext,cyrillic' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,700,700italic&subset=latin,cyrillic-ext,greek-ext,greek,latin-ext,cyrillic'
+    rel='stylesheet' type='text/css'>
 
   <!-- This is an optional font to use for Greek -->
   <!--<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700&subset=latin,cyrillic-ext,greek-ext,greek,latin-ext,cyrillic' rel='stylesheet' type='text/css'>-->
@@ -67,7 +68,21 @@
   </div>
 
   <!--Modal dialog-->
-  <div ng-include="'app/shared/searchSyntax/searchSyntax.html'"></div>
+  <div id="syntax" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="syntaxLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title" id="syntaxLabel">Search Syntax</h4>
+        </div>
+        <div class="modal-body" style="line-height: 170%;">
+          <div ng-include="'app/shared/searchSyntax/searchSyntax.html'" ng-if="philoConfig.search_syntax_template == 'default'"></div>
+          <div ng-include="philoConfig.search_syntax_template" ng-if="philoConfig.search_syntax_template != 'default'"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Export results modal -->
   <div ng-include="'app/shared/exportResults/exportResults.html'"></div>
