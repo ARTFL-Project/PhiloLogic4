@@ -626,17 +626,18 @@ class Loader(object):
 
     def write_web_config(self):
         """ Write configuration variables for the Web application"""
+        metadata = [i for i in self.metadata_fields if i not in self.metadata_fields_not_found]
         config_values = {'dbname': os.path.basename(re.sub("/data/?$", "", self.destination)),
                          'db_url': self.db_url,
-                         'metadata': [i for i in self.metadata_fields if i not in self.metadata_fields_not_found],
-                         'facets': [i for i in self.metadata_fields if i not in self.metadata_fields_not_found]}
+                         'metadata': metadata,
+                         'facets': metadata}
         # Fetch search examples:
         search_examples = {}
         conn = sqlite3.connect(self.destination + '/toms.db')
         conn.text_factory = str
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        for field in self.metadata_fields:
+        for field in metadata:
             object_type = self.metadata_types[field]
             try:
                 if object_type != 'div':
@@ -653,6 +654,8 @@ class Loader(object):
             except (TypeError, AttributeError):
                 continue
         config_values['search_examples'] = search_examples
+
+        config_values["metadata_input_style"] = dict([(f, "text") for f in metadata])
 
         # Populate kwic metadata sorting and kwic biblio fields variables with metadata
         # Check if title and author are empty, if so, default to filename

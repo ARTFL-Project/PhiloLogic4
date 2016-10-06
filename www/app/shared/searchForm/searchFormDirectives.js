@@ -1,4 +1,4 @@
-(function() {
+(function () {
     "use strict";
 
     angular
@@ -21,10 +21,10 @@
             templateUrl: 'app/shared/searchForm/searchForm.html',
             replace: true,
             scope: false,
-            link: function(scope) {
+            link: function (scope) {
                 scope.approximateValues = [50, 60, 70, 80, 90];
                 scope.approximateValue = "How approximate?";
-                scope.selectApproximate = function(value) {
+                scope.selectApproximate = function (value) {
                     scope.approximateValue = value;
                     $rootScope.formData.approximate_ratio = value;
                 }
@@ -33,7 +33,7 @@
     }
 
     function searchReports($rootScope, $location) {
-        var reportChange = function(report) {
+        var reportChange = function (report) {
             if (report === 'landing_page') {
                 report = $rootScope.philoConfig.search_reports[0];
             }
@@ -53,15 +53,15 @@
             restrict: 'E',
             templateUrl: 'app/shared/searchForm/searchReports.html',
             replace: true,
-            link: function(scope, element, attrs) {
+            link: function (scope, element, attrs) {
                 scope.reportChange = reportChange;
-                scope.$watch('report', function(report) {
+                scope.$watch('report', function (report) {
                     var reportToSelect = angular.copy(report);
                     if (reportToSelect === "bibliography") {
                         reportToSelect = "concordance";
                     } else if (reportToSelect === "textNavigation" || reportToSelect === "table-of-contents") {
                         reportToSelect = "concordance";
-                    } else if (typeof(reportToSelect) == "undefined") {
+                    } else if (typeof (reportToSelect) == "undefined") {
                         reportToSelect = $location.search().report || "concordance";
                     }
                     scope.reports = reportChange(reportToSelect);
@@ -84,8 +84,8 @@
         }
     }
 
-    function metadataFields(philoConfig) {
-        var buildMetadata = function(scope, fields) {
+    function metadataFields(philoConfig, $rootScope) {
+        var buildMetadata = function (scope, fields) {
             var metadataFields = [];
             for (var i = 0; i < fields.length; i++) {
                 var metadata = fields[i];
@@ -104,12 +104,29 @@
         return {
             templateUrl: 'app/shared/searchForm/metadataFields.html',
             replace: true,
-            link: function(scope, element, attrs) {
-                if (philoConfig.dictionary_selection) {
-                    scope.dico_selection = true;
-                    scope.dico_selection_options = philoConfig.dictionary_selection_options;
-                } else {
-                    scope.dico_selection = false;
+            link: function (scope, element, attrs) {
+                scope.dropdownValues = {};
+                scope.selectedDropdownValue = {};
+                for (var metadata in philoConfig.metadata_dropdown_values) {
+                    scope.dropdownValues[metadata] = [];
+                    var dropdownValue = philoConfig.metadata_dropdown_values[metadata];
+                    if (typeof($rootScope.formData[metadata]) == 'undefined' || $rootScope.formData[metadata].length == 0) {
+                        scope.selectedDropdownValue[metadata] = 'None';
+                    }
+                    for (var i = 0; i < dropdownValue.length; i++) {
+                        var quotedValue = '"' + dropdownValue[i].value + '"';
+                        if (typeof($rootScope.formData[metadata]) != 'undefined' && $rootScope.formData[metadata] == quotedValue) {
+                            scope.selectedDropdownValue[metadata] = dropdownValue[i].label;
+                        }
+                        scope.dropdownValues[metadata].push({
+                            label: dropdownValue[i].label,
+                            value: quotedValue
+                        });
+                    }
+                }
+                scope.metadataDropdownChoice = function(metadata, field) {
+                    $rootScope.formData[metadata] = field.value;
+                    scope.selectedDropdownValue[metadata] = field.label;
                 }
                 if (!attrs.field && !attrs.exclude) {
                     scope.metadataFields = buildMetadata(scope, scope.philoConfig.metadata);
@@ -145,12 +162,12 @@
         return {
             templateUrl: 'app/shared/searchForm/collocationOptions.html',
             replace: true,
-            link: function(scope, element, attrs) {
+            link: function (scope, element, attrs) {
                 scope.stopwords = $rootScope.philoConfig.stopwords;
-                if (!'colloc_filter_choice' in $rootScope.formData || typeof($rootScope.formData.colloc_filter_choice) === 'undefined') {
+                if (!'colloc_filter_choice' in $rootScope.formData || typeof ($rootScope.formData.colloc_filter_choice) === 'undefined') {
                     $rootScope.formData.colloc_filter_choice = "frequency";
                 }
-                if (!'filter_frequency' in $rootScope.formData || typeof($rootScope.formData.filter_frequency) === 'undefined') {
+                if (!'filter_frequency' in $rootScope.formData || typeof ($rootScope.formData.filter_frequency) === 'undefined') {
                     $rootScope.formData.filter_frequency = 100;
                 }
             }
@@ -161,7 +178,7 @@
         return {
             templateUrl: 'app/shared/searchForm/timeSeriesOptions.html',
             replace: true,
-            link: function() {
+            link: function () {
                 if (!$rootScope.formData.year_interval) {
                     $rootScope.formData.year_interval = philoConfig.time_series_interval;
                 }
@@ -176,22 +193,22 @@
     }
 
     function autocompleteTerm($rootScope) {
-        var autocomplete = function(element) {
+        var autocomplete = function (element) {
             element.autocomplete({
                 source: 'scripts/autocomplete_term.py',
                 minLength: 2,
                 "dataType": "json",
-                focus: function(event, ui) {
+                focus: function (event, ui) {
                     var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
                     return false;
                 },
-                select: function(event, ui) {
+                select: function (event, ui) {
                     var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
                     element.val(q);
                     $rootScope.formData.q = q;
                     return false;
                 }
-            }).data("ui-autocomplete")._renderItem = function(ul, item) {
+            }).data("ui-autocomplete")._renderItem = function (ul, item) {
                 var term = item.label.replace(/^[^<]*/g, '');
                 return angular.element("<li></li>")
                     .data("item.autocomplete", item)
@@ -201,25 +218,25 @@
         }
         return {
             restrict: 'A',
-            link: function(scope, element) {
+            link: function (scope, element) {
                 autocomplete(element);
             }
         }
     }
 
     function autocompleteMetadata($rootScope) {
-        var autocomplete = function(element, field) {
+        var autocomplete = function (element, field) {
             element.autocomplete({
                 source: 'scripts/autocomplete_metadata.py?field=' + field,
                 minLength: 2,
                 timeout: 1000,
                 dataType: "json",
-                focus: function(event, ui) {
+                focus: function (event, ui) {
                     var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
                     q = q.replace(/ CUTHERE /, ' ');
                     return false;
                 },
-                select: function(event, ui) {
+                select: function (event, ui) {
                     var q = ui.item.label.replace(/<\/?span[^>]*?>/g, '');
                     q = q.split(/(\||NOT)/);
                     q[q.length - 1] = q[q.length - 1].replace(/.*CUTHERE /, '');
@@ -229,7 +246,7 @@
                     $rootScope.formData[field] = q
                     return false;
                 }
-            }).data("ui-autocomplete")._renderItem = function(ul, item) {
+            }).data("ui-autocomplete")._renderItem = function (ul, item) {
                 var term = item.label.replace(/.*(?=CUTHERE)CUTHERE /, '');
                 return angular.element("<li></li>")
                     .data("item.autocomplete", item)
@@ -239,7 +256,7 @@
         }
         return {
             restrict: 'A',
-            link: function(scope, element, attrs) {
+            link: function (scope, element, attrs) {
                 autocomplete(element, attrs.id);
             }
         }
@@ -248,7 +265,7 @@
     function sortResults($rootScope, philoConfig) {
         return {
             templateUrl: 'app/shared/searchForm/sortResults.html',
-            link: function(scope) {
+            link: function (scope) {
                 if ("sort_order" in $rootScope.formData && $rootScope.formData.sort_order.length >= 1) {
                     var label = []
                     for (var j = 0; j < $rootScope.formData.sort_order.length; j += 1) {
@@ -285,7 +302,7 @@
                     }
                     scope.sortValues.push(value);
                 }
-                scope.sortChoice = function(value) {
+                scope.sortChoice = function (value) {
                     $rootScope.formData.sort_order = value.value;
                     scope.selectedSortValues = value.label;
                 }
