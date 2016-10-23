@@ -16,13 +16,14 @@
               <div class="row">
                 <div class="col-xs-12 col-sm-3">
                   <span>
-                                        <input type="checkbox" ng-model="formData.approximate" ng-true-value="'yes'"/>
-                                        Approximate match
-                                    </span>
+                    <input type="checkbox" ng-model="formData.approximate" ng-true-value="'yes'"/>
+                      Approximate match
+                  </span>
                 </div>
                 <div class="col-xs-12 col-sm-9" style="margin-top: -3px" ng-if="formData.approximate === 'yes'">
                   <div class="dropdown">
-                    <button class="btn btn-default dropdown-toggle" type="button" id="approximateDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="approximateDropDown" data-toggle="dropdown" aria-haspopup="true"
+                      aria-expanded="true">
                       {{ approximateValue }}
                       <span class="caret"></span>
                     </button>
@@ -41,7 +42,7 @@
           <metadata-fields></metadata-fields>
           <collocation-options ng-if="formData.report == 'collocation'"></collocation-options>
           <time-series-options ng-if="formData.report == 'time_series'"></time-series-options>
-          <sort-results  ng-if="formData.report === 'concordance' || formData.report === 'bibliography'"></sort-results>
+          <sort-results ng-if="formData.report === 'concordance' || formData.report === 'bibliography'"></sort-results>
           <results-per-page ng-if="formData.report != 'collocation' && formData.report != 'time_series'"></results-per-page>
         </div>
       </div>
@@ -64,7 +65,7 @@
             <metadata-fields exclude="head"></metadata-fields>
             <collocation-options ng-if="formData.report == 'collocation'"></collocation-options>
             <time-series-options ng-if="formData.report == 'time_series'"></time-series-options>
-            <sort-results  ng-if="formData.report === 'concordance' || formData.report === 'bibliography'"></sort-results>
+            <sort-results ng-if="formData.report === 'concordance' || formData.report === 'bibliography'"></sort-results>
             <results-per-page ng-if="formData.report != 'collocation' && formData.report != 'time_series'"></results-per-page>
           </div>
         </div>

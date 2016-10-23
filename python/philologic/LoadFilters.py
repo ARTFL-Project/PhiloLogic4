@@ -14,14 +14,16 @@ from simplejson import loads
 # Default filters
 def normalize_unicode_raw_words(loader_obj, text):
     tmp_file = open(text["raw"] + ".tmp", "w")
-    for line in open(text["raw"]):
-        rec_type, word, id, attrib = line.split('\t')
-        id = id.split()
-        if rec_type == "word":
-            word = word.decode("utf-8").lower().encode("utf-8")
-        record = Record(rec_type, word, id)
-        record.attrib = loads(attrib)
-        print >> tmp_file, record
+    with open(text["raw"]) as fh:
+        for line in fh:
+            rec_type, word, id, attrib = line.split('\t')
+            id = id.split()
+            if rec_type == "word":
+                word = word.decode("utf-8").lower().encode("utf-8")
+            record = Record(rec_type, word, id)
+            record.attrib = loads(attrib)
+            print >> tmp_file, record
+    tmp_file.close()
     os.remove(text["raw"])
     os.rename(text["raw"] + ".tmp", text["raw"])
 
@@ -31,18 +33,19 @@ def make_word_counts(loader_obj, text, depth=5):
     counts = [0 for i in range(depth)]
     temp_file = text['raw'] + '.tmp'
     output_file = open(temp_file, 'w')
-    for line in open(text['raw']):
-        type, word, id, attrib = line.split('\t')
-        id = id.split()
-        record = Record(type, word, id)
-        record.attrib = loads(attrib)
-        for d, count in enumerate(counts):
-            if type == 'word':
-                counts[d] += 1
-            elif type == object_types[d]:
-                record.attrib['word_count'] = counts[d]
-                counts[d] = 0
-        print >> output_file, record
+    with open(text['raw']) as fh:
+        for line in fh:
+            type, word, id, attrib = line.split('\t')
+            id = id.split()
+            record = Record(type, word, id)
+            record.attrib = loads(attrib)
+            for d, count in enumerate(counts):
+                if type == 'word':
+                    counts[d] += 1
+                elif type == object_types[d]:
+                    record.attrib['word_count'] = counts[d]
+                    counts[d] = 0
+            print >> output_file, record
     output_file.close()
     os.remove(text['raw'])
     os.rename(temp_file, text['raw'])
@@ -62,16 +65,17 @@ def make_object_ancestors(*types):
     def inner_make_object_ancestors(loader_obj, text):
         temp_file = text['words'] + '.tmp'
         output_file = open(temp_file, 'w')
-        for line in open(text['words']):
-            type, word, id, attrib = line.split('\t')
-            id = id.split()
-            record = Record(type, word, id)
-            record.attrib = loads(attrib)
-            for type in types:
-                zeros_to_add = ['0' for i in range(7 - type_depth[type])]
-                philo_id = id[:type_depth[type]] + zeros_to_add
-                record.attrib[type + '_ancestor'] = ' '.join(philo_id)
-            print >> output_file, record
+        with open(text['words']) as fh:
+            for line in fh:
+                type, word, id, attrib = line.split('\t')
+                id = id.split()
+                record = Record(type, word, id)
+                record.attrib = loads(attrib)
+                for type in types:
+                    zeros_to_add = ['0' for i in range(7 - type_depth[type])]
+                    philo_id = id[:type_depth[type]] + zeros_to_add
+                    record.attrib[type + '_ancestor'] = ' '.join(philo_id)
+                print >> output_file, record
         output_file.close()
         os.remove(text['words'])
         os.rename(temp_file, text['words'])
@@ -90,32 +94,34 @@ def make_sorted_toms(*types):
 
 
 def prev_next_obj(*types):
-    """Store the previous and next object for every object passed to this function
-    By default, this is doc, div1, div2, div3."""
+    """Outer function"""
     types = list(types)
 
     def inner_prev_next_obj(loader_obj, text):
+        """Store the previous and next object for every object passed to this function
+        By default, this is doc, div1, div2, div3."""
         record_dict = {}
         temp_file = text['raw'] + '.tmp'
         output_file = open(temp_file, 'w')
-        for line in open(text['sortedtoms']):
-            type, word, id, attrib = line.split('\t')
-            id = id.split()
-            record = Record(type, word, id)
-            record.attrib = loads(attrib)
-            if type in record_dict:
-                record_dict[type].attrib['next'] = ' '.join(id)
-                if type in types:
-                    print >> output_file, record_dict[type]
+        with open(text['sortedtoms']) as fh:
+            for line in fh:
+                type, word, id, attrib = line.split('\t')
+                id = id.split()
+                record = Record(type, word, id)
+                record.attrib = loads(attrib)
+                if type in record_dict:
+                    record_dict[type].attrib['next'] = ' '.join(id)
+                    if type in types:
+                        print >> output_file, record_dict[type]
+                    else:
+                        del record_dict[type].attrib['next']
+                        del record_dict[type].attrib['prev']
+                        print >> output_file, record_dict[type]
+                    record.attrib['prev'] = ' '.join(record_dict[type].id)
+                    record_dict[type] = record
                 else:
-                    del record_dict[type].attrib['next']
-                    del record_dict[type].attrib['prev']
-                    print >> output_file, record_dict[type]
-                record.attrib['prev'] = ' '.join(record_dict[type].id)
-                record_dict[type] = record
-            else:
-                record.attrib['prev'] = ''
-                record_dict[type] = record
+                    record.attrib['prev'] = ''
+                    record_dict[type] = record
         types.reverse()
         for obj in types:
             try:
@@ -187,10 +193,11 @@ def generate_lines(loader_obj, text):
 
 def make_max_id(loader_obj, text):
     max_id = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    for line in open(text["words"]):
-        (key, type, id, attr) = line.split("\t")
-        id = [int(i) for i in id.split(" ")]
-        max_id = [max(new, prev) for new, prev in zip(id, max_id)]
+    with open(text["words"]) as fh:
+        for line in fh:
+            (key, type, id, attr) = line.split("\t")
+            id = [int(i) for i in id.split(" ")]
+            max_id = [max(new, prev) for new, prev in zip(id, max_id)]
     rf = open(text["results"], "w")
     cPickle.dump(
         max_id,
@@ -336,23 +343,24 @@ def store_in_plain_text(*types):
             old_philo_id = []
             philo_id = []
             words = []
-            for line in open(text['raw']):
-                type, word, id, attrib = line.split('\t')
-                if type != 'word':
-                    continue
-                # Check if we're in the top level object
-                if token.search(word):
-                    philo_id = id.split()[:obj_depth]
-                    if not old_philo_id:
-                        old_philo_id = philo_id
-                    if philo_id != old_philo_id:
-                        filename = files_path + '_'.join(old_philo_id)
-                        output = open(filename, 'w')
-                        print >> output, ' '.join(words)
-                        output.close()
-                        words = []
-                        old_philo_id = philo_id
-                    words.append(word)
+            with open(text['raw']) as fh:
+                for line in fh:
+                    type, word, id, attrib = line.split('\t')
+                    if type != 'word':
+                        continue
+                    # Check if we're in the top level object
+                    if token.search(word):
+                        philo_id = id.split()[:obj_depth]
+                        if not old_philo_id:
+                            old_philo_id = philo_id
+                        if philo_id != old_philo_id:
+                            filename = files_path + '_'.join(old_philo_id)
+                            output = open(filename, 'w')
+                            print >> output, ' '.join(words)
+                            output.close()
+                            words = []
+                            old_philo_id = philo_id
+                        words.append(word)
             if words:
                 filename = files_path + '_'.join(philo_id)
                 output = open(filename, 'w')
@@ -360,70 +368,6 @@ def store_in_plain_text(*types):
                 output.close()
 
     return inner_store_in_plain_text
-
-
-def fix_sentence_boundary(loader_obj, text):
-    abbreviations = set([u"Mr", u"Mrs", u"Ms", u"Mme", u"Mlle", u"pp", u"vol"])
-    exceptions = set([u"que", u"qui", u"quoi", u"où", u"what", u"which", u"where"])
-
-    def return_record(line):
-        rec_type, word, id, attrib = line.split('\t')
-        id = id.split()
-        record = Record(rec_type, word, id)
-        record.attrib = loads(attrib)
-        return rec_type, word.decode('utf-8'), record
-
-    tmp_file = open(text["raw"] + ".tmp", "w")
-    change_philo_id = False
-    prev_sent_id = None
-    pre_word_id = None
-    prev_rec_type = None
-    prev_parent_sentence = None
-    infile = open(text["raw"]).read().splitlines()
-    records = []
-    for line_num, line in enumerate(infile):
-        rec_type, word, record = return_record(line)
-        if records:
-            prev_record = records[-1]
-            if prev_record.type == "page":
-                try:
-                    prev_record = records[-2]
-                except IndexError:
-                    prev_record = records[-1]
-                    change_philo_id = False
-            prev_word = prev_record.name.decode('utf-8')
-            prev_rec_type = prev_record.type
-        if rec_type == "word":
-            if change_philo_id:  # we need to change the philo_id of words to correspond to the current sentence
-                prev_word_id += 1
-                # Store new philo_id
-                record.id = record.id[:5] + [prev_sent_id] + \
-                    [str(prev_word_id)] + record.id[7:]
-                record.attrib['parent'] = prev_parent_sentence
-            prev_rec_type = rec_type
-            prev_word = word
-            prev_record = record
-        elif rec_type == "sent":
-            sent_type = word
-            next_rec_type, next_word, next_record = return_record(infile[line_num + 1])
-            if sent_type != "__philo_virtual" and next_rec_type == "word" and prev_rec_type == "word":  # para and page break sentences
-                if len(prev_word) == 1 or prev_word in abbreviations or prev_word.isdigit() or next_word.islower():
-                    if next_word not in exceptions:
-                        change_philo_id = True
-                        prev_word_id = int(prev_record.id[6])
-                        prev_sent_id = int(prev_record.id[5])
-                        prev_parent_sentence = prev_record.attrib['parent']
-                        continue  # we skip this sentence marker and adjust IDs for words that follow
-            if change_philo_id:  # We've been changing the current sentence, so we adjust the ID of the sentence marker
-                record.id = prev_record.id[:7] + record.id[7:]
-            change_philo_id = False
-        elif rec_type == "para":
-            change_philo_id = False
-        else:
-            change_philo_id = False
-        records.append(record)
-    print >> tmp_file, '\n'.join([str(i) for i in records])
-    os.rename(text["raw"] + ".tmp", text["raw"])
 
 
 DefaultNavigableObjects = ("div1", "div2", "div3", "para")
