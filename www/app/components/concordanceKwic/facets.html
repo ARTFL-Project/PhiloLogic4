@@ -38,12 +38,10 @@
             <ul class="velocity-opposites-transition-fadeIn" data-velocity-opts="{duration:400}">
                 <li style="margin-left:0;margin-right:0" ng-repeat="result in facetResults" ng-click="facetClick(result)">
                     <a id="freq_sidebar_text" class="text-content-area" href="{{ ::result.url }}" ng-if="facet.facet !== 'all_collocates'">
-                        <span ng-if="result.label != 'NULL'">{{ ::result.label }}</span>
-                        <span ng-if="result.label == 'NULL'">NA</span>
+                        <span>{{ ::result.label }}</span>
                     </a>
                     <a id="freq_sidebar_text" class="text-content-area" href="" ng-click="collocationToConcordance(result.label)" ng-if="facet.facet === 'all_collocates'">
                         <span>{{ ::result.label }}</span>
-                        <!-- <span ng-if="result.label == 'NULL'">NA</span> -->
                     </a>
                     <span class="sidebar-count"> {{ ::result.count }}</span>
                     <div style="line-height: 70%; padding-bottom: 15px; padding-left: 5px; font-size: 85%;" ng-if="showingRelativeFrequencies">

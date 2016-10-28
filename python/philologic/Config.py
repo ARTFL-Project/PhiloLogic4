@@ -127,7 +127,7 @@ web_config_defaults = {
     'metadata_dropdown_values': {
         'value': {},
         'comment': '''
-               # The metadata_input_style variable defines what values to display in the metadata dropdown. It defaults to an empty dict.
+               # The metadata_dropdown_values variable defines what values to display in the metadata dropdown. It defaults to an empty dict.
                # If no value is provided for a metadata field which has an input type of dropdown, no value will be displayed. You should
                # provide a list of strings with labels and values for metadata.
                # ex: {"title": [{"label": "Contrat Social", "value": "Du Contrat Social"}, {"label": "Emile", "value": "Emile, ou de l'éducation"]}}''',

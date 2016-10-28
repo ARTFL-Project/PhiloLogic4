@@ -25,5 +25,7 @@ def convert_entities(text):
             except KeyError:
                 pass
         return text  # leave as is
-
-    return entities_match.sub(fixup, text)
+    try:
+        return entities_match.sub(fixup, text)
+    except UnicodeDecodeError:
+        return entities_match.sub(fixup, text.decode('utf8'))
