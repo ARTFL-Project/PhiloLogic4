@@ -315,7 +315,7 @@ def frequency_results(request, config, sorted=False):
         frequency_object["hits_done"] = last_hit_done
         if last_hit_done == len(hits):
             new_metadata = dict([(k, v) for k, v in request.metadata.iteritems() if v])
-            new_metadata[request.frequency_field] = "NULL"
+            new_metadata[request.frequency_field] = '"NULL"'
             if request.q == '' and request.no_q:
                 new_hits = db.query(sort_order=["rowid"], raw_results=True, **new_metadata)
             else:
@@ -329,17 +329,17 @@ def frequency_results(request, config, sorted=False):
                                                     end="0",
                                                     report=request.report,
                                                     script='',
-                                                    **{request.frequency_field: 'NULL'})
+                                                    **{request.frequency_field: '"NULL"'})
                 local_hits = db.query(**new_metadata)
                 if not biblio_search:
                     frequency_object["results"]["NULL"] = {"count": len(new_hits),
                                                            "url": null_url,
-                                                           "metadata": {request.frequency_field: "NULL"},
+                                                           "metadata": {request.frequency_field: '"NULL"'},
                                                            "total_word_count": local_hits.get_total_word_count()}
                 else:
                     frequency_object["results"]["NULL"] = {"count": len(new_hits),
                                                            "url": null_url,
-                                                           "metadata": {request.frequency_field: "NULL"}}
+                                                           "metadata": {request.frequency_field: '"NULL"'}}
             frequency_object['more_results'] = False
         else:
             frequency_object['more_results'] = True

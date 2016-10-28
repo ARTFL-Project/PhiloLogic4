@@ -6,6 +6,7 @@ import string
 import sys
 
 from philologic import OHCOVector
+from philologic.utils import convert_entities
 
 DefaultTagToObjMap = {
     "div": "div",
@@ -903,6 +904,7 @@ class XMLParser(object):
                 value = value[1:]
             value = self.remove_control_chars(value)
             value = ending_punctuation.sub("", value.strip())
+            value = convert_entities(value)
             attribs.append((attrib, value))
         return attribs
 
@@ -975,6 +977,7 @@ class XMLParser(object):
             div_head == "[NA]"
 
         div_head = self.remove_control_chars(div_head)
+        div_head = convert_entities(div_head)
         return div_head
 
     def clear_char_ents(self, text):

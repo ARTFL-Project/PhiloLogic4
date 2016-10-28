@@ -142,7 +142,8 @@
                     }
                     scope.head = true;
                     scope.exclude = false;
-                    scope.metadataFields = buildMetadata(scope, head);
+                    scope.metadataFields = buildMetadata(scope, ["head"]);
+                    console.log(scope.metadataFields, "hey")
                 } else if (attrs.exclude === "head") {
                     var fields = [];
                     for (var i = 0; i < scope.philoConfig.metadata.length; i++) {

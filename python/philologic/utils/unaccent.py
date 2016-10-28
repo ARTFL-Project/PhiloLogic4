@@ -3,9 +3,10 @@
 import unicodedata
 
 def smash_accents(char):
-    if char.isdigit():
+    """Smash accents"""
+    try:
         return int(char)
-    else:
+    except ValueError:
         try:
             return ''.join([i for i in unicodedata.normalize("NFKD", char) if not unicodedata.combining(i)])
         except TypeError:
