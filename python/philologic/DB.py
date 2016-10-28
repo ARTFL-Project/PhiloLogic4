@@ -85,7 +85,11 @@ class DB:
         all_file = self.path + "/hitlists/" + all_hash + ".hitlist"
         if not os.path.isfile(all_file):
             # write out the corpus file
-            return MetadataQuery.metadata_query(self, all_file, [{"philo_type": ['"%s"' % philo_type]}], sort_order, raw_results=raw_results)
+            if philo_type == "div":
+                param_dicts = [{"philo_type": ['"div1"|"div2"|"div3"']}, {"philo_name": ['"div1"|"div2"|"div3"']}]
+            else:
+                param_dicts = [{"philo_type": ['"%s"' % philo_type]}]
+            return MetadataQuery.metadata_query(self, all_file, param_dicts, sort_order, raw_results=raw_results)
         else:
             return HitList.HitList(all_file, 0, self, raw=raw_results)
 

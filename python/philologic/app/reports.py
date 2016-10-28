@@ -64,8 +64,10 @@ def concordance_results(request, config):
 
 def bibliography_results(request, config):
     db = DB(config.db_path + '/data/')
+    import sys
+    print >> sys.stderr, "REQUEST", repr(request.no_metadata), db.locals['default_object_level']
     if request.no_metadata:
-        hits = db.get_all(db.locals['default_object_level'], request["sort_order"], )
+        hits = db.get_all(db.locals['default_object_level'], request["sort_order"])
     else:
         hits = db.query(**request.metadata)
     if request.simple_bibliography == "all": # request from simple landing page report which gets all biblio in load order
