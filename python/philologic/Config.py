@@ -566,6 +566,7 @@ web_config_defaults = {
         'comment': '''
                 # The concordance_biblio_sorting variable allows you to pick wich metadata field can be used for sorting concordance or bibliography results.
                 # It is a list of tuples where multiple metadata fields can be used for sorting, such as [('author', 'title'), ('year', 'author', 'title')].
+                # Note that these fields must belong to the same object type, such as "doc" or "div".
                 ''',
         'index': 29
     },

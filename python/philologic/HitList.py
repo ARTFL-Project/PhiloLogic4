@@ -49,13 +49,16 @@ class HitList(object):
             metadata_types = set([dbh.locals["metadata_types"][i] for i in self.sort_order])
             if "div" in metadata_types:
                 metadata_types.remove("div")
-                metadata_types.union(set(["div1", "div2", "div3"]))
+                metadata_types.add("div1")
+                metadata_types.add("div2")
+                metadata_types.add("div3")
             c = self.dbh.dbh.cursor()
             query = "select * from toms where "
             params = []
             for metadata_type in metadata_types:
                 params.append('philo_type="%s"' % metadata_type)
-            query += " and ".join(params) + " and "
+            if params:
+                query += " OR ".join(params) + " and "
             order_params = []
             for s in self.sort_order:
                 order_params.append('%s is not null' % s)
@@ -63,8 +66,9 @@ class HitList(object):
             c.execute(query)
             metadata = {}
             for i in c.fetchall():
-                doc_id = int(i['philo_id'].split()[0])
-                metadata[doc_id] = [smash_accents(i[m]) for m in sort_order]
+                sql_row = dict(i)
+                philo_id = tuple(int(s) for s in sql_row["philo_id"].split() if int(s))
+                metadata[philo_id] = [smash_accents(sql_row[m] or "ZZZZZ") for m in sort_order]
             self.sorted_hitlist = []
             iter_position = 0
             self.seek(iter_position)
@@ -75,7 +79,16 @@ class HitList(object):
                     break
                 self.sorted_hitlist.append(hit)
                 iter_position += 1
-            self.sorted_hitlist.sort(key=lambda x: metadata.get(x[0], "ZZZZZ"), reverse=False)
+            def sort_by_metadata(philo_id):
+                while philo_id:
+                    try:
+                        return metadata[philo_id]
+                    except KeyError:
+                        if len(philo_id) == 1:
+                            break
+                        philo_id = philo_id[:-1]
+                return "ZZZZZ"
+            self.sorted_hitlist.sort(key=sort_by_metadata, reverse=False)
 
 
     def __getitem__(self, n):

@@ -20,13 +20,15 @@ def citation_links(db, config, i):
     return links
 
 
-def citations(hit, citation_hrefs, config, report="concordance", citation_type=[]):
+def citations(hit, citation_hrefs, config, report="concordance", citation_type=[], result_type="doc"):
     """ Returns a representation of a PhiloLogic object and all its ancestors
         suitable for a precise citation. """
     if not citation_type:
         citation_type = config[report + "_citation"]
     citation = []
     for pos, citation_object in enumerate(citation_type):
+        if report == "bibliography" and result_type != citation_object["object_level"]:
+            continue
         cite = {}
         cite["label"] = get_label(hit, citation_object)
         if cite["label"]:
@@ -34,6 +36,7 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=[
             cite["end"] = citation_object["end"]
             cite["href"] = cite_linker(hit, citation_object, citation_hrefs, config, report)
             cite["style"] = citation_object["style"]
+            cite["object_type"] = citation_object["object_level"]
             citation.append(cite)
     return citation
 
@@ -60,11 +63,13 @@ def get_label(hit, citation_object):
                     label = div2_name
                 else:
                     label = div3_name
+        else:
+            label = hit[citation_object["object_level"]][citation_object["field"]].strip()
     elif citation_object["object_level"] == "para":
         label = hit[citation_object["field"]].strip().title()
     elif citation_object["object_level"] == "page":
         page_num = hit.page[citation_object["field"]]
-        if page_obj[citation_object["field"]]:
+        if page_num[citation_object["field"]]:
             label = "page %s" % str(page_num)
     elif citation_object["object_level"] == "line":
         # TODO: fix this...

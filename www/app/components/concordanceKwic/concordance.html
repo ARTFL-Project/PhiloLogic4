@@ -8,10 +8,14 @@
                         <span class="philologic_cite">
                             <span class="citation" ng-repeat="citation in result.citation">
                                 <span ng-if="citation.href">
-                                    <span ng-bind-html="citation.begin"></span><a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a><span ng-bind-html="citation.end"></span>
+                                    <span ng-bind-html="citation.begin" ng-if="!$first"></span>
+                                    <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
+                                    <span ng-bind-html="citation.end" ng-if="!$last"></span>
                                 </span>
                                 <span ng-if="!citation.href">
-                                    <span ng-bind-html="citation.begin"></span><span ng-style="citation.style">{{ ::citation.label }}</span><span ng-bind-html="citation.end"></span>
+                                    <span ng-bind-html="citation.begin" ng-if="!$first"></span>
+                                    <span ng-style="citation.style">{{ ::citation.label }}</span>
+                                    <span ng-bind-html="citation.end" ng-if="!$last"></span>
                                 </span>
                             </span>
                         </span>

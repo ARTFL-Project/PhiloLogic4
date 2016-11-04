@@ -1,6 +1,4 @@
 import os
-import re
-import cgi
 import sys
 import struct
 import sqlite3
@@ -36,7 +34,7 @@ def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
     flag = open(filename + ".done", "w")
     flag.write("1")
     flag.close()
-    return HitList.HitList(filename, 0, db, raw=raw_results)
+    return HitList.HitList(filename, 0, db, raw=raw_results, sort_order=sort_order)
 
 
 def query_recursive(db, param_dict, parent, sort_order):

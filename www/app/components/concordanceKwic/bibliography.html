@@ -1,36 +1,47 @@
 <div id="results_container" class="col-xs-12 col-sm-8" ng-class="{'col-sm-8': concKwic.showFacetedBrowsing}">
-    <ol id="bibliographic-results" class="text-content-area" ng-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'">
+    <ol id="bibliographic-results" class="text-content-area" ng-if="!philoConfig.dictionary_bibliography || results.doc_level">
         <li class="biblio-occurrence panel panel-default" ng-repeat="result in ::results.results">
-			<input type="checkbox" style="margin-left:10px" ng-click="addToSearch(result.citation.title.label)" ng-if="results.result_type === 'doc' && philoConfig.metadata.indexOf('title') !== -1">
+			<input type="checkbox" style="margin-left:10px" ng-click="addToSearch(result.citation.title.label)" ng-if="results.doc_level && philoConfig.metadata.indexOf('title') !== -1">
             <span style="padding-left: 5px;" ng-init="position = $index + results.description.start">{{ ::position }}.</span>
             <span class="philologic_cite">
                 <span class="citation" ng-repeat="citation in result.citation">
-                    <span ng-if="citation.href">
-                        <span ng-bind-html="citation.begin"></span><a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a><span ng-bind-html="citation.end"></span>
-                    </span>
-                    <span ng-if="!citation.href">
-                        <span ng-bind-html="citation.begin"></span><span ng-style="citation.style">{{ ::citation.label }}</span><span ng-bind-html="citation.end"></span>
+                    <span ng-if="citation.object_type == result.object_type">
+                        <span ng-if="citation.href">
+                            <span ng-bind-html="citation.begin" ng-if="!$first"></span>
+                            <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
+                            <span ng-bind-html="citation.end" ng-if="!$last"></span>
+                        </span>
+                        <span ng-if="!citation.href">
+                            <span ng-bind-html="citation.begin" ng-if="!$first"></span>
+                            <span ng-style="citation.style">{{ ::citation.label }}</span>
+                            <span ng-bind-html="citation.end" ng-if="!$last"></span>
+                        </span>
                     </span>
                 </span>
             </span>
         </li>
     </ol>
-    <ol id="bibliographic-results" class="text-content-area" ng-if="philoConfig.dictionary_bibliography && results.result_type != 'doc'">
+    <ol id="bibliographic-results" class="text-content-area" ng-if="philoConfig.dictionary_bibliography && results.doc_level">
         <li class="biblio-occurrence panel panel-default" ng-repeat="group in ::results.results">
             <h3 style="margin: 0; padding: 0px 10px; text-align: center; font-variant: small-caps;">
                 <i>{{ ::group[0].metadata_fields.title }}</i>
             </h3>
             <ol style="margin-top: 10px;">
                 <li style="margin-top: 0;" ng-repeat="result in ::group">
-                    <input type="checkbox" style="margin-left:10px" ng-click="addToSearch(result.citation.title.label)" ng-if="results.result_type === 'doc' && philoConfig.metadata.indexOf('title') !== -1">
+                    <input type="checkbox" style="margin-left:10px" ng-click="addToSearch(result.citation.title.label)" ng-if="results.doc_level && philoConfig.metadata.indexOf('title') !== -1">
                     <span style="padding-left: 10px;">{{ ::result.position }}.</span>
                     <span class="philologic_cite">
                         <span class="citation" ng-repeat="citation in result.citation">
+                            <span ng-if="citation.object_type == result.object_type">
                             <span ng-if="citation.href">
-                                <span ng-bind-html="citation.begin"></span><a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a><span ng-bind-html="citation.end"></span>
+                                <span ng-bind-html="citation.begin" ng-if="!$first"></span>
+                                <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
+                                <span ng-bind-html="citation.end" ng-if="!$last"></span>
                             </span>
                             <span ng-if="!citation.href">
-                                <span ng-bind-html="citation.begin"></span><span ng-style="citation.style">{{ ::citation.label }}</span><span ng-bind-html="citation.end"></span>
+                                <span ng-bind-html="citation.begin" ng-if="!$first"></span>
+                                <span ng-style="citation.style">{{ ::citation.label }}</span>
+                                <span ng-bind-html="citation.end" ng-if="!$last"></span>
                             </span>
                         </span>
                     </span>
