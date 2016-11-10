@@ -4,10 +4,16 @@
             <div class="col-xs-offset-2 col-xs-8">
                 <span class="citation" ng-repeat="citation in toc.tocObject.citation">
                     <span ng-if="citation.href">
-                        <span ng-bind-html="citation.begin"></span><a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a><span ng-bind-html="citation.end"></span>
+                        <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
+                        <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
+                        <span ng-bind-html="citation.suffix"></span>
+                        <span ng-bind-html="citation.separator" ng-if="!$last"></span>
                     </span>
                     <span ng-if="!citation.href">
-                        <span ng-bind-html="citation.begin"></span><span ng-style="citation.style">{{ ::citation.label }}</span><span ng-bind-html="citation.end"></span>
+                        <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
+                        <span ng-style="citation.style">{{ ::citation.label }}</span>
+                        <span ng-bind-html="citation.suffix"></span>
+                        <span ng-bind-html="citation.separator" ng-if="!$last"></span>
                     </span>
                 </span>
             </div>

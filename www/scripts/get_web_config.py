@@ -10,12 +10,12 @@ from philologic.DB import DB
 
 def get_web_config(environ, start_response):
     status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),
-               ("Access-Control-Allow-Origin", "*")]
+    headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     config.time_series_status = time_series_tester(config)
     yield config.to_json()
+
 
 def time_series_tester(config):
     db = DB(config.db_path + '/data/')

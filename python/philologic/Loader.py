@@ -34,7 +34,7 @@ NAVIGABLE_OBJECTS = ('doc', 'div1', 'div2', 'div3', 'para')
 ParserOptions = ["parser_factory", "doc_xpaths", "token_regex", "tag_to_obj_map", "metadata_to_parse", "suppress_tags",
                  "load_filters", "break_apost", "chars_not_to_index", "break_sent_in_line_group", "tag_exceptions",
                  "join_hyphen_in_words", "unicode_word_breakers", "abbrev_expand", "long_word_limit",
-                 "flatten_ligatures"]
+                 "flatten_ligatures", "sentence_breakers"]
 
 
 class Loader(object):
@@ -47,7 +47,6 @@ class Loader(object):
         self.sort_by_id = sort_by_id
 
         self.debug = loader_options["debug"]
-        self.db_url = loader_options["db_url"]
         self.default_object_level = loader_options["default_object_level"]
         self.post_filters = loader_options["post_filters"]
         self.filtered_words = loader_options["filtered_words"]
@@ -67,7 +66,28 @@ class Loader(object):
             self.is_new = False
         except OSError:
             self.setup_dir(loader_options["data_destination"])  # TO TEST!!!!
+            with open(os.path.join(loader_options["data_destination"], "load_config.py"), "w") as l:
+                print >> l, "#!/usr/bin/env python"
+                print >> l, '"""This is a dump of the configuration used to load this database,'
+                print >> l, 'including non-configurable options. You can use this file to reload'
+                print >> l, 'the current database using the -l flag. See load documentation for more details"""\n\n'
+                for option in ["default_object_level", "navigable_objects", "plain_text_obj", "doc_xpaths", "tag_to_obj_map",
+                               "metadata_to_parse", "token_regex", "filtered_words_list", "sort_order", "suppress_tags",
+                               "break_apost", "chars_not_to_index", "break_sent_in_line_group", "tag_exceptions",
+                               "unicode_word_breakers", "long_word_limit", "join_hyphen_in_words", "abbrev_expand",
+                               "flatten_ligatures"]:
+                    if option in loader_options:
+                        print >> l, "%s = %s" % (option, repr(loader_options[option]))
             self.is_new = True
+
+        if "web_config" in loader_options:
+            web_config_path = os.path.join(loader_options["data_destination"], "web_config.cfg")
+            print "\nSaving predefined web_config.cfg file to %s..." % web_config_path
+            with open(web_config_path, "w") as w:
+                w.write(loader_options["web_config"])
+            self.predefined_web_config = True
+        else:
+            self.predefined_web_config = False
 
         self.metadata_fields = []
         self.metadata_hierarchy = []
@@ -84,6 +104,7 @@ class Loader(object):
         self.destination = path
 
     def add_files(self, files):
+        """Copy files to database directory"""
         print "\nCopying files to database directory...",
         self.filenames = []
         for f in files:
@@ -352,7 +373,8 @@ class Loader(object):
 
                     for option in ["token_regex", "suppress_tags", "break_apost", "chars_not_to_index",
                                    "break_sent_in_line_group", "tag_exceptions", "join_hyphen_in_words",
-                                   "unicode_word_breakers", "abbrev_expand", "long_word_limit", "flatten_ligatures"]:
+                                   "unicode_word_breakers", "abbrev_expand", "long_word_limit", "flatten_ligatures",
+                                   "sentence_breakers"]:
                         try:
                             options[option] = self.parser_config[option]
                         except KeyError:  # option hasn't been set
@@ -398,7 +420,7 @@ class Loader(object):
             self.omax = [max(x, y) for x, y in zip(vec, self.omax)]
         print "%s: done parsing" % time.ctime()
 
-    def merge_objects(self, file_num=100):
+    def merge_objects(self, file_num=500):
         print "\n### Merge parser output ###"
 
         # Make all sorting happen in workdir rather than /tmp
@@ -609,7 +631,8 @@ class Loader(object):
         fh.close()
 
         self.write_db_config()
-        self.write_web_config()
+        if self.predefined_web_config is False:
+            self.write_web_config()
 
     def write_db_config(self):
         """ Write local variables used by libphilo"""
@@ -629,7 +652,6 @@ class Loader(object):
         """ Write configuration variables for the Web application"""
         metadata = [i for i in self.metadata_fields if i not in self.metadata_fields_not_found]
         config_values = {'dbname': os.path.basename(re.sub("/data/?$", "", self.destination)),
-                         'db_url': self.db_url,
                          'metadata': metadata,
                          'facets': metadata}
         # Fetch search examples:

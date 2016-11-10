@@ -1,12 +1,9 @@
 import hashlib
 import os
-import re
 import sqlite3
-import struct
-import sys
 from Config import Config, db_locals_defaults, db_locals_header
 
-from philologic import Query, shlax
+from philologic import Query
 
 import HitList
 import MetadataQuery
@@ -61,9 +58,7 @@ class DB:
         return c.fetchone()
 
     def get_page(self, item):
-        #print >> sys.stderr, "PAGE_ITEM", item
         page_id_s = " ".join(str(s) for s in item)
-        #print >> sys.stderr, "PAGE_ITEM_STRING", page_id_s
         c = self.dbh.cursor()
         c.execute("SELECT * FROM pages WHERE philo_id=? LIMIT 1;", (page_id_s, ))
         return c.fetchone()
@@ -131,7 +126,6 @@ class DB:
         if has_metadata:
             corpus_hash = hash.hexdigest()
             corpus_file = self.path + "/hitlists/" + corpus_hash + ".hitlist"
-            corpus_width = 7
 
             if not os.path.isfile(corpus_file):
                 # before we query, we need to figure out what type each parameter belongs to,

@@ -1,14 +1,16 @@
 #!/usr/bin/env python
+"""Bootstrap Web app"""
 
+import imp
 import os.path
 import sys
-
-from philologic.DB import DB
 
 from philologic.app import WebConfig
 from philologic.app import WSGIHandler
 
+global_config = imp.load_source("philologic4", "/etc/philologic/philologic4.cfg")
 path = os.path.abspath(os.path.dirname(__file__))
+dbname = path.strip().split('/')[-1]
 
 config = WebConfig(os.path.abspath(os.path.dirname(__file__)))
 theme = config.theme
@@ -98,7 +100,7 @@ def angular(environ, start_response):
 def build_html_page(config):
     html_page = open('%s/app/index.html' % config.db_path).read()
     html_page = html_page.replace('$DBNAME', config.dbname)
-    html_page = html_page.replace('$DBURL', config.db_url)
+    html_page = html_page.replace('$DBURL', os.path.join(global_config.url_root, dbname))
     html_page = html_page.replace('$CSS', load_CSS())
     html_page = html_page.replace('$JS', load_JS())
     return html_page

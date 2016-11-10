@@ -186,6 +186,11 @@ class XMLParser(object):
         else:
             self.token_regex = re.compile(r"(%s)" % TokenRegex, re.I)
 
+        if "sentence_breakers" in parse_options:
+            self.sentence_breakers = parse_options["sentence_breakers"]
+        else:
+            self.sentence_breakers = []
+
         if "suppress_tags" in parse_options:
             self.suppress_tags = set([i.replace('<', '').replace('>', '') for i in parse_options["suppress_tags"] if i])
         else:
@@ -737,10 +742,6 @@ class XMLParser(object):
             if char_ents.search(words):
                 words = self.clear_char_ents(words)
 
-            # TODO: Now, we also know that there are Unicode characters which
-            # we normally want to break words.  Often, these are Microsoft characters
-            # like the curly quotes. These are set in textload.cfg
-            # in @UnicodeWordBreakers.
             if self.unicode_word_breakers:
                 for word_breaker in self.unicode_word_breakers:
                     words = word_breaker.sub(lambda match: ' ' * len(match.group(1)), words)
@@ -779,7 +780,7 @@ class XMLParser(object):
                     current_pos += word_length
 
                     # Do we have a word? At least one of these characters.
-                    if check_if_char_word.search(word):
+                    if check_if_char_word.search(word.decode('utf8')):
                         last_word = word
                         word_pos = current_pos - len(word)
 
@@ -845,14 +846,17 @@ class XMLParser(object):
                             if next_word.islower() or next_word.isdigit():
                                 is_sent = False
 
+                        elif word in self.sentence_breakers:
+                            is_sent = True
+
                         if is_sent:
                             # a little hack--we don't know the punctuation mark that will end a sentence
                             # until we encounter it--so instead, we let the push on "word" create a
                             # implicit philo_virtual sentence, then change its name once we actually encounter
                             # the punctuation token.
                             if "sent" not in self.v:
-                                self.v.push("sent", ".", current_pos)
-                            self.v["sent"].name = "."  # TODO: correct? avoid unwanted chars such tabs in ASP
+                                self.v.push("sent", word, current_pos)
+                            self.v["sent"].name = word  # TODO: correct? avoid unwanted chars such tabs in ASP
                             self.v.pull("sent", current_pos + len(word))
 
     def close_sent(self, end_byte):
@@ -899,9 +903,6 @@ class XMLParser(object):
         for attrib, value in attrib_matcher.findall(tag):
             # Replace ":" with "_" for attribute nanames since they are illegal in SQLite
             attrib = attrib.replace(':', "_")
-            # Because of some bug in the attrib regex, single char values keep the initial quote
-            if value.startswith('"'):
-                value = value[1:]
             value = self.remove_control_chars(value)
             value = ending_punctuation.sub("", value.strip())
             value = convert_entities(value)
@@ -1227,7 +1228,7 @@ sentence_tag = re.compile(r'<s\W', re.I)
 closed_sentence_tag = re.compile(r'</s\W', re.I)
 front_tag = re.compile(r'<front\W', re.I)
 closed_front_tag = re.compile(r'</front\W', re.I)
-attrib_matcher = re.compile(r'''(\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?''', re.I)
+attrib_matcher = re.compile(r'''(\S+)="?((?:.(?!"?\s+(?:\S+)=|[>"]))+.)"?''', re.I)
 tag_matcher = re.compile(r'<(\/?\w+)[^>]*>?', re.I)
 head_self_close_tag = re.compile(r'<head\/>', re.I)
 closed_div_tag = re.compile(r'<\/div', re.I)
@@ -1243,7 +1244,7 @@ hyper_div_tag = re.compile(r'<hyperdiv\W', re.I)
 div_num_tag = re.compile(r'<div(.)', re.I)
 char_ents = re.compile(r'\&[a-zA-Z0-9\#][a-zA-Z0-9]*;', re.I)
 newline_shortener = re.compile(r'\n\n*')
-check_if_char_word = re.compile(r'[A-Za-z0-9\177-\377]', re.I)
+check_if_char_word = re.compile(r'\w', re.I | re.U)
 cap_char_or_num = re.compile(r'[A-Z0-9]')  # Capitals
 ending_punctuation = re.compile(r'[%s]$' % string.punctuation)
 add_tag = re.compile(r'<add\W', re.I)

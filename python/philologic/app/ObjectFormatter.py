@@ -20,7 +20,7 @@ strip_start_punctuation = re.compile("^[,?;.:!']")
 # Source: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/HTML5_element_list
 valid_html_tags = set(
     ['html', 'head', 'title', 'base', 'link', 'meta', 'style', 'script', 'noscript', 'template', 'body', 'section',
-     'nav', 'article', 'aside', 'h1', ',h2', ',h3', ',h4', ',h5', ',h6', 'header', 'footer', 'address', 'main', 'p',
+     'nav', 'article', 'aside', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'footer', 'address', 'main', 'p',
      'hr', 'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'figure', 'figcaption', 'div', 'a', 'em', 'strong',
      'small', 's', 'cite', 'q', 'dfn', 'abbr', 'data', 'time', 'code', 'var', 'samp', 'kbd', 'sub', 'sup', 'i', 'b',
      'u', 'mark', 'ruby', 'rt', 'rp', 'bdi', 'bdo', 'span', 'br', 'wbr', 'ins', 'del', 'img', 'iframe', 'embed',
@@ -76,6 +76,7 @@ def adjust_bytes(bytes, padding):
 
 
 def format_concordance(text, word_regex, bytes=[]):
+    word_regex = "\w+" # text is converted to unicode so we use the \w boundary to match
     removed_from_start = 0
     begin = begin_match.search(text)
     if begin:
@@ -118,6 +119,8 @@ def format_concordance(text, word_regex, bytes=[]):
         if el.tag == "sc" or el.tag == "scx":
             el.tag = "span"
             el.attrib["class"] = "small-caps"
+        elif el.tag == "img":  # Remove img elements from parent in concordances
+            el.getparent().remove(el)
         if el.tag == "philoHighlight":
             word_match = re.match(word_regex, el.tail, re.U)
             if word_match:
@@ -264,6 +267,8 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                 el.tag = "li"
             elif el.tag == "ab" or el.tag == "ln":
                 el.tag = "l"
+            elif el.tag == "img":
+                el.attrib["onerror"] = "this.style.display='none'"
             elif el.tag == "pb" and "n" in el.attrib:
                 if "fac" in el.attrib or "id" in el.attrib:
                     if "fac" in el.attrib:

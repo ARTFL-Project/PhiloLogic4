@@ -190,7 +190,7 @@ unicode_word_breakers = ['\xe2\x80\x93',  # U+2013 &ndash; EN DASH
                          '\xe2\x80\xb9',  # U+2039 &lsaquo; SINGLE LEFT-POINTING ANGLE QUOTATION
                          '\xe2\x80\xba',  # U+203A &rsaquo; SINGLE RIGHT-POINTING ANGLE QUOTATION
                          '\xe2\x80\xa6'  # U+2026 &hellip; HORIZONTAL ELLIPSIS
-                         ]
+                        ]
 
 #  ----------------- Set Long Word Limit  -------------------
 #  Words greater than 235 characters (bytes) cause an indexing
@@ -215,3 +215,7 @@ abbrev_expand = True
 # &oelig; = oe.  Leave this on.  At one point we should think
 # Unicode, but who knows if this is important.
 flatten_ligatures = True
+
+# Define a list of strings which mark the end of a sentence.
+# Note that this list will be added to the current one which is [".", "?", "!"]
+sentence_breakers = []

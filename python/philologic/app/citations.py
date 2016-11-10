@@ -32,8 +32,8 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=[
         cite = {}
         cite["label"] = get_label(hit, citation_object)
         if cite["label"]:
-            cite["begin"] = citation_object["begin"]
-            cite["end"] = citation_object["end"]
+            cite["prefix"] = citation_object["prefix"]
+            cite["suffix"] = citation_object["suffix"]
             cite["href"] = cite_linker(hit, citation_object, citation_hrefs, config, report)
             cite["style"] = citation_object["style"]
             cite["object_type"] = citation_object["object_level"]
@@ -65,6 +65,11 @@ def get_label(hit, citation_object):
                     label = div3_name
         else:
             label = hit[citation_object["object_level"]][citation_object["field"]].strip()
+        if label == "[NA]":
+            if citation_object["object_level"] == "div1":
+                label = "Section"
+            else:
+                label = "Subsection"
     elif citation_object["object_level"] == "para":
         label = hit[citation_object["field"]].strip().title()
     elif citation_object["object_level"] == "page":
