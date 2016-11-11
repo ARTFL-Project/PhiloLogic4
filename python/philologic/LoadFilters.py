@@ -343,31 +343,44 @@ def store_in_plain_text(*types):
             old_philo_id = []
             philo_id = []
             words = []
+            stored_objects = []
             with open(text['raw']) as fh:
                 for line in fh:
                     type, word, id, attrib = line.split('\t')
-                    if type != 'word':
-                        continue
-                    # Check if we're in the top level object
-                    if token.search(word):
+                    if type == 'word' or type == "sent":
                         philo_id = id.split()[:obj_depth]
                         if not old_philo_id:
                             old_philo_id = philo_id
                         if philo_id != old_philo_id:
-                            filename = files_path + '_'.join(old_philo_id)
-                            output = open(filename, 'w')
-                            print >> output, ' '.join(words)
-                            output.close()
+                            stored_objects.append({"philo_id": old_philo_id, "words": words})
                             words = []
                             old_philo_id = philo_id
                         words.append(word)
             if words:
-                filename = files_path + '_'.join(philo_id)
-                output = open(filename, 'w')
-                print >> output, ' '.join(words)
-                output.close()
+                stored_objects.append({"philo_id": philo_id, "words": words})
+            filename = files_path + philo_id[0] + '_' + obj_depth
+            output = open(filename, 'w')
+            for obj in stored_objects:
+                output.write('\n### %s ###' % ' '.join(obj["philo_id"]))
+                print >> output, ' '.join(obj["words"])
+            output.close()
 
     return inner_store_in_plain_text
+
+
+def store_words_and_philo_ids(loader_obj, text):
+    files_path = loader_obj.destination + '/words_and_philo_ids/'
+    try:
+        os.mkdir(files_path)
+    except OSError:
+        # Path was already created
+        pass
+    output = open(os.path.join(files_path, str(text["id"])), "w")
+    with open(text['raw']) as fh:
+        for line in fh:
+            type, word, id, attrib = line.split('\t')
+            print >> output, "\t".join([word, id])
+    output.close()
 
 
 DefaultNavigableObjects = ("div1", "div2", "div3", "para")

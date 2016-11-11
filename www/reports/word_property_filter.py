@@ -4,10 +4,23 @@ import os
 from wsgiref.handlers import CGIHandler
 
 import simplejson
-from philologic.app import filter_words_by_property
 
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
+import sys
+sys.path.append("..")
+import custom_functions
+
+try:
+    from custom_functions import filter_words_by_property
+except ImportError:
+    from philologic.app import filter_words_by_property
+try:
+    from custom_functions import WebConfig
+except ImportError:
+    from philologic.app import WebConfig
+try:
+    from custom_functions import WSGIHandler
+except ImportError:
+    from philologic.app import WSGIHandler
 
 
 def word_property_filter(environ, start_response):

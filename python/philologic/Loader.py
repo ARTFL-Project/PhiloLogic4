@@ -732,3 +732,5 @@ def setup_db_dir(db_destination, web_app_dir, force_delete=False):
 
         os.system("chmod -R 777 %s/app/assets/css" % db_destination)
         os.system("chmod -R 777 %s/app/assets/js" % db_destination)
+        os.system("mkdir -p " + os.path.join(db_destination, "custom_functions"))
+        os.system("touch " + os.path.join(db_destination, "custom_functions/__init__.py"))

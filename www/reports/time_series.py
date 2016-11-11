@@ -4,10 +4,23 @@ import os
 from wsgiref.handlers import CGIHandler
 
 import simplejson
-from philologic.app import generate_time_series
 
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
+import sys
+sys.path.append("..")
+import custom_functions
+
+try:
+    from custom_functions import generate_time_series
+except ImportError:
+    from philologic.app import generate_time_series
+try:
+    from custom_functions import WebConfig
+except ImportError:
+    from philologic.app import WebConfig
+try:
+    from custom_functions import WSGIHandler
+except ImportError:
+    from philologic.app import WSGIHandler
 
 
 def time_series(environ, start_response):
