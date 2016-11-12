@@ -80,6 +80,7 @@ class LoadOptions(object):
                           dest="bibliography",
                           help="Defines a file containing the document-level bibliography of the texts")
         parser.add_option("-c", "--cores", type="int", dest="cores", help="define the number of cores used for parsing")
+        parser.add_option("--custom_functions", type="string", dest="custom_functions", help="copy contents of path for custom functions")
         parser.add_option("-d",
                           "--debug",
                           action="store_true",
@@ -222,6 +223,12 @@ class LoadConfig(object):
                                 word_list.add(line.strip())
                         self.config["filtered_words"] = word_list
                     if a == "plain_text_obj":
+                        if "load_filters" not in self.config:
+                            self.config["load_filters"] = LoadFilters.DefaultLoadFilters
                         self.config["load_filters"].append(LoadFilters.store_in_plain_text(*value))
+                    if a == "store_words_and_ids":
+                        if "load_filters" not in self.config:
+                            self.config["load_filters"] = LoadFilters.DefaultLoadFilters
+                        self.config["load_filters"].append(LoadFilters.store_words_and_philo_ids)
                     self.config[a] = value
                     

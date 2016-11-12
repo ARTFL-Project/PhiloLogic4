@@ -205,7 +205,7 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                 el.tag = "span"
                 el.attrib['class'] = 'xml-q'
             elif el.tag == "ref":
-                if el.attrib["type"] == "note":
+                if el.attrib["type"] == "note" or el.attrib["type"] == "footnote":
                     target = el.attrib["target"]
                     link = make_absolute_query_link(config, request, script_name="/scripts/get_notes.py", target=target)
                     if "n" in el.attrib:
@@ -215,7 +215,7 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     el.tag = "span"
                     el.attrib["data-ref"] = link
                     el.attrib["id"] = target.replace('#', '') + '-link-back'
-                    del el.attrib["target"]
+                    el.attrib["target"]
                     # attributes for popover note
                     el.attrib['class'] = "note-ref"
                     el.attrib['tabindex'] = "0"
@@ -239,7 +239,7 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     c.execute('select parent, start_byte from refs where target=? and parent like ?',
                               (el.attrib['id'], str(philo_id[0]) + " %"))
                     object_id, start_byte = c.fetchone()
-                    link_back.attrib['href'] = 'navigate/%s%s' % ('/'.join(object_id.split()[:2]),
+                    link_back.attrib['href'] = 'navigate/%s%s' % ('/'.join([i for i in object_id.split() if i != "0"]),
                                                                   '#%s-link-back' % el.attrib['id'])
                     link_back.attrib['class'] = "btn btn-xs btn-default link-back"
                     link_back.attrib['role'] = "button"

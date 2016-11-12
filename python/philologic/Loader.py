@@ -461,7 +461,7 @@ class Loader(object):
             if not self.debug:
                 os.system("rm %s" % line_file)
 
-    def merge_files(self, file_type, file_num=100):
+    def merge_files(self, file_type, file_num=500):
         """This function runs a multi-stage merge sort on words
         Since PhilLogic can potentially merge thousands of files, we need to split
         the sorting stage into multiple steps to avoid running out of file descriptors"""
@@ -732,5 +732,3 @@ def setup_db_dir(db_destination, web_app_dir, force_delete=False):
 
         os.system("chmod -R 777 %s/app/assets/css" % db_destination)
         os.system("chmod -R 777 %s/app/assets/js" % db_destination)
-        os.system("mkdir -p " + os.path.join(db_destination, "custom_functions"))
-        os.system("touch " + os.path.join(db_destination, "custom_functions/__init__.py"))
