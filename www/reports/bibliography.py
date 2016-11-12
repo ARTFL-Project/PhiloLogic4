@@ -4,10 +4,23 @@ import os
 from wsgiref.handlers import CGIHandler
 
 import simplejson
-from philologic.app import bibliography_results
 
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
+import sys
+sys.path.append("..")
+import custom_functions
+
+try:
+    from custom_functions import bibliography_results
+except ImportError:
+    from philologic.app import bibliography_results
+try:
+    from custom_functions import WebConfig
+except ImportError:
+    from philologic.app import WebConfig
+try:
+    from custom_functions import WSGIHandler
+except ImportError:
+    from philologic.app import WSGIHandler
 
 
 def bibliography(environ, start_response):

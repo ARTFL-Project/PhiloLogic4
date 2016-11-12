@@ -7,8 +7,8 @@ import re
 import urlparse
 
 from philologic.DB import DB
-from query_parser import parse_query
-from find_similar_words import find_similar_words
+from philologic.app.query_parser import parse_query
+from philologic.app.find_similar_words import find_similar_words
 
 
 class WSGIHandler(object):

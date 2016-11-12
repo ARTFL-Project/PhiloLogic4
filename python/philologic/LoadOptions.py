@@ -31,7 +31,6 @@ class LoadOptions(object):
     def __init__(self):
         self.values = {}
         self.values["database_root"] = config_file.database_root
-        self.values["url_root"] = config_file.url_root
         self.values["web_app_dir"] = config_file.web_app_dir
         self.values["destination"] = "./"
         self.values["default_object_level"] = Loader.DEFAULT_OBJECT_LEVEL
@@ -56,7 +55,6 @@ class LoadOptions(object):
         self.values["flatten_ligatures"] = True
         self.values["cores"] = 2
         self.values["dbname"] = ""
-        self.values["db_url"] = ""
         self.values["files"] = []
         self.values["sort_order"] = ["year", "author", "title", "filename"]
         self.values["header"] = "tei"
@@ -66,6 +64,7 @@ class LoadOptions(object):
         self.values["bibliography"] = ""
         self.values["filtered_words"] = set([])
         self.values["file_type"] = "xml"
+        self.values["sentence_breakers"] = []
 
     def setup_parser(self):
         usage = "usage: %prog [options] database_name files"
@@ -81,6 +80,7 @@ class LoadOptions(object):
                           dest="bibliography",
                           help="Defines a file containing the document-level bibliography of the texts")
         parser.add_option("-c", "--cores", type="int", dest="cores", help="define the number of cores used for parsing")
+        parser.add_option("--custom_functions", type="string", dest="custom_functions", help="copy contents of path for custom functions")
         parser.add_option("-d",
                           "--debug",
                           action="store_true",
@@ -114,6 +114,11 @@ class LoadOptions(object):
                           type="string",
                           dest="file_type",
                           help="Define file type for parsing: plain_text or xml")
+        parser.add_option("-w",
+                          "--use-webconfig",
+                          type="string",
+                          dest="web_config",
+                          help="use predefined web_config.cfg file")
         return parser
 
     def parse(self, argv):
@@ -155,6 +160,10 @@ class LoadOptions(object):
                         self.values["parser_factory"] = PlainTextParser.PlainTextParser
                 elif a == "navigable_objects" and value is not None:
                     self.values["navigable_objects"] = [v.strip() for v in value.split(',')]
+                elif a == "web_config":
+                    if value is not None:
+                        with open(value) as f:
+                            self.values["web_config"] = f.read()
                 else:
                     if value is not None:
                         self.values[a] = value
@@ -163,7 +172,6 @@ class LoadOptions(object):
         self.update()
 
     def update(self):
-        self.values["db_url"] = os.path.join(self.url_root, self.dbname)
         self.values["db_destination"] = os.path.join(self.database_root, self.dbname)
         self.values["data_destination"] = os.path.join(self.db_destination, "data")
         self.values["load_filters"] = LoadFilters.set_load_filters(navigable_objects=self.navigable_objects)
@@ -181,8 +189,6 @@ class LoadOptions(object):
 
     def __setitem__(self, attr, value):
         self.values[attr] = value
-        if attr == "dbname":
-            self.db_url = os.path.join(self.database_root, self.dbname)
 
     def __contains__(self, key):
         if key in self.values:
@@ -216,7 +222,13 @@ class LoadConfig(object):
                             for line in fh:
                                 word_list.add(line.strip())
                         self.config["filtered_words"] = word_list
-                    elif a == "plain_text_obj":
+                    if a == "plain_text_obj":
+                        if "load_filters" not in self.config:
+                            self.config["load_filters"] = LoadFilters.DefaultLoadFilters
                         self.config["load_filters"].append(LoadFilters.store_in_plain_text(*value))
-                    else:
-                        self.config[a] = value
+                    if a == "store_words_and_ids":
+                        if "load_filters" not in self.config:
+                            self.config["load_filters"] = LoadFilters.DefaultLoadFilters
+                        self.config["load_filters"].append(LoadFilters.store_words_and_philo_ids)
+                    self.config[a] = value
+                    

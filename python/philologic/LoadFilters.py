@@ -329,7 +329,7 @@ def store_in_plain_text(*types):
     object_types = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
     obj_to_track = []
     for obj in types:
-        obj_to_track.append(object_types[obj])
+        obj_to_track.append((obj, object_types[obj]))
 
     def inner_store_in_plain_text(loader_obj, text):
         files_path = loader_obj.destination + '/plain_text_objects/'
@@ -339,35 +339,51 @@ def store_in_plain_text(*types):
         except OSError:
             # Path was already created
             pass
-        for obj_depth in obj_to_track:
+        for obj, obj_depth in obj_to_track:
             old_philo_id = []
             philo_id = []
             words = []
+            stored_objects = []
             with open(text['raw']) as fh:
                 for line in fh:
                     type, word, id, attrib = line.split('\t')
-                    if type != 'word':
+                    if word == '__philo_virtual':
                         continue
-                    # Check if we're in the top level object
-                    if token.search(word):
+                    if type == 'word' or type == "sent":
                         philo_id = id.split()[:obj_depth]
                         if not old_philo_id:
                             old_philo_id = philo_id
                         if philo_id != old_philo_id:
-                            filename = files_path + '_'.join(old_philo_id)
-                            output = open(filename, 'w')
-                            print >> output, ' '.join(words)
-                            output.close()
+                            stored_objects.append({"philo_id": old_philo_id, "words": words})
                             words = []
-                            old_philo_id = philo_id
+                            old_phil__philo_virtualo_id = philo_id
                         words.append(word)
             if words:
-                filename = files_path + '_'.join(philo_id)
-                output = open(filename, 'w')
-                print >> output, ' '.join(words)
-                output.close()
+                stored_objects.append({"philo_id": philo_id, "words": words})
+            filename = files_path + philo_id[0] + '_' + obj
+            output = open(filename, 'w')
+            for obj in stored_objects:
+                print >> output, '\n###\t%s\t###' % ' '.join(obj["philo_id"])
+                print >> output, ' '.join(obj["words"])
+            output.close()
 
     return inner_store_in_plain_text
+
+
+def store_words_and_philo_ids(loader_obj, text):
+    files_path = loader_obj.destination + '/words_and_philo_ids/'
+    try:
+        os.mkdir(files_path)
+    except OSError:
+        # Path was already created
+        pass
+    output = open(os.path.join(files_path, str(text["id"])), "w")
+    with open(text['raw']) as fh:
+        for line in fh:
+            type, word, id, attrib = line.split('\t')
+            if word != '__philo_virtual':
+                print >> output, "\t".join([word, id])
+    output.close()
 
 
 DefaultNavigableObjects = ("div1", "div2", "div3", "para")

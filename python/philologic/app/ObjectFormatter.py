@@ -20,7 +20,7 @@ strip_start_punctuation = re.compile("^[,?;.:!']")
 # Source: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/HTML5_element_list
 valid_html_tags = set(
     ['html', 'head', 'title', 'base', 'link', 'meta', 'style', 'script', 'noscript', 'template', 'body', 'section',
-     'nav', 'article', 'aside', 'h1', ',h2', ',h3', ',h4', ',h5', ',h6', 'header', 'footer', 'address', 'main', 'p',
+     'nav', 'article', 'aside', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'footer', 'address', 'main', 'p',
      'hr', 'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'figure', 'figcaption', 'div', 'a', 'em', 'strong',
      'small', 's', 'cite', 'q', 'dfn', 'abbr', 'data', 'time', 'code', 'var', 'samp', 'kbd', 'sub', 'sup', 'i', 'b',
      'u', 'mark', 'ruby', 'rt', 'rp', 'bdi', 'bdo', 'span', 'br', 'wbr', 'ins', 'del', 'img', 'iframe', 'embed',
@@ -76,6 +76,7 @@ def adjust_bytes(bytes, padding):
 
 
 def format_concordance(text, word_regex, bytes=[]):
+    word_regex = "\w+" # text is converted to unicode so we use the \w boundary to match
     removed_from_start = 0
     begin = begin_match.search(text)
     if begin:
@@ -118,6 +119,8 @@ def format_concordance(text, word_regex, bytes=[]):
         if el.tag == "sc" or el.tag == "scx":
             el.tag = "span"
             el.attrib["class"] = "small-caps"
+        elif el.tag == "img":  # Remove img elements from parent in concordances
+            el.getparent().remove(el)
         if el.tag == "philoHighlight":
             word_match = re.match(word_regex, el.tail, re.U)
             if word_match:
@@ -202,7 +205,7 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                 el.tag = "span"
                 el.attrib['class'] = 'xml-q'
             elif el.tag == "ref":
-                if el.attrib["type"] == "note":
+                if el.attrib["type"] == "note" or el.attrib["type"] == "footnote":
                     target = el.attrib["target"]
                     link = make_absolute_query_link(config, request, script_name="/scripts/get_notes.py", target=target)
                     if "n" in el.attrib:
@@ -212,7 +215,7 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     el.tag = "span"
                     el.attrib["data-ref"] = link
                     el.attrib["id"] = target.replace('#', '') + '-link-back'
-                    del el.attrib["target"]
+                    el.attrib["target"]
                     # attributes for popover note
                     el.attrib['class'] = "note-ref"
                     el.attrib['tabindex'] = "0"
@@ -236,7 +239,7 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     c.execute('select parent, start_byte from refs where target=? and parent like ?',
                               (el.attrib['id'], str(philo_id[0]) + " %"))
                     object_id, start_byte = c.fetchone()
-                    link_back.attrib['href'] = 'navigate/%s%s' % ('/'.join(object_id.split()[:2]),
+                    link_back.attrib['href'] = 'navigate/%s%s' % ('/'.join([i for i in object_id.split() if i != "0"]),
                                                                   '#%s-link-back' % el.attrib['id'])
                     link_back.attrib['class'] = "btn btn-xs btn-default link-back"
                     link_back.attrib['role'] = "button"
@@ -264,6 +267,8 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                 el.tag = "li"
             elif el.tag == "ab" or el.tag == "ln":
                 el.tag = "l"
+            elif el.tag == "img":
+                el.attrib["onerror"] = "this.style.display='none'"
             elif el.tag == "pb" and "n" in el.attrib:
                 if "fac" in el.attrib or "id" in el.attrib:
                     if "fac" in el.attrib:

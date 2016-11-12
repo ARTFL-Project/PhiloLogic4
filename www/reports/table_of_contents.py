@@ -4,10 +4,23 @@ import os
 from wsgiref.handlers import CGIHandler
 
 import simplejson
-from philologic.app import generate_toc_object
 
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
+import sys
+sys.path.append("..")
+import custom_functions
+
+try:
+    from custom_functions import generate_toc_object
+except ImportError:
+    from philologic.app import generate_toc_object
+try:
+    from custom_functions import WebConfig
+except ImportError:
+    from philologic.app import WebConfig
+try:
+    from custom_functions import WSGIHandler
+except ImportError:
+    from philologic.app import WSGIHandler
 
 
 def table_of_contents(environ,start_response):

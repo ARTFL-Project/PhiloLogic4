@@ -1,6 +1,4 @@
 import os
-import re
-import cgi
 import sys
 import struct
 import sqlite3
@@ -12,18 +10,18 @@ from HitList import NoHits
 
 os.environ["PATH"] += ":/usr/local/bin/"
 
+
 def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
+    """Prepare and execute SQL metadata query."""
     if db.locals['debug']:
         print >> sys.stderr, "METADATA_QUERY:", param_dicts
     prev = None
-    #print >> sys.stderr, "METADATA_HITLIST: ",filename, param_dicts
     for d in param_dicts:
         query = query_recursive(db, d, prev, sort_order)
         prev = query
     try:
         corpus_fh = open(filename, "wb")
         for corpus_obj in query:
-            #print >> sys.stderr, corpus_obj,
             obj_id = [int(x) for x in corpus_obj["philo_id"].split(" ")]
             corpus_fh.write(struct.pack("=7i", *obj_id))
         corpus_fh.close()
@@ -36,7 +34,7 @@ def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
     flag = open(filename + ".done", "w")
     flag.write("1")
     flag.close()
-    return HitList.HitList(filename, 0, db, raw=raw_results)
+    return HitList.HitList(filename, 0, db, raw=raw_results, sort_order=sort_order)
 
 
 def query_recursive(db, param_dict, parent, sort_order):
@@ -78,7 +76,7 @@ def query_lowlevel(db, param_dict, sort_order):
             expanded = expand_grouped_query(grouped, norm_path)
             if db.locals['debug']:
                 print >> sys.stderr, "METADATA_SYNTAX EXPANDED:", expanded
-            sql_clause = make_grouped_sql_clause(expanded, column)
+            sql_clause = make_grouped_sql_clause(expanded, column, db)
             if db.locals['debug']:
                 print >> sys.stderr, "SQL_SYNTAX:", sql_clause
             clauses.append(sql_clause)
@@ -142,9 +140,8 @@ def expand_grouped_query(grouped, norm_path):
     return expanded
 
 
-def make_grouped_sql_clause(expanded, column):
+def make_grouped_sql_clause(expanded, column, db):
     clauses = ""
-    vars = []
     esc = escape_sql_string
     first_group = True
     for group in expanded:
@@ -169,6 +166,14 @@ def make_grouped_sql_clause(expanded, column):
         else:
             if first_token == "RANGE":
                 lower, upper = first_value.split("-")
+                if not lower:
+                    c = db.dbh.cursor()
+                    c.execute('select min(%s) from toms' % column)
+                    lower = str(c.fetchone()[0])
+                if not upper:
+                    c = db.dbh.cursor()
+                    c.execute('select max(%s) from toms' % column)
+                    upper = str(c.fetchone()[0])
                 clause += "(%s >= %s AND %s <= %s)" % (column, esc(lower), column, esc(upper))
                 if first_group:
                     first_group = False
@@ -211,7 +216,6 @@ def make_grouped_sql_clause(expanded, column):
             clauses += "(%s)" % clause
         else:
             clauses += " AND (%s)" % clause
-    #print >> sys.stderr, column, ":: ",clauses
     return "(%s)" % clauses
 
 

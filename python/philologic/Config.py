@@ -186,13 +186,15 @@ web_config_defaults = {
     },
     'dictionary_bibliography': {
         'value': False,
-        'comment': '''# The dictionary_bibliography variable enables a different a bibliography report where entries are displayed
+        'comment':
+        '''# The dictionary_bibliography variable enables a different a bibliography report where entries are displayed
                       # in their entirety and grouped under the same title. It is turned off by default''',
         'index': 17
     },
     'dictionary_selection': {
         'value': False,
-        'comment': '''# If set to True, this option creates a dropdown menu to select searching within only a single volume or title.
+        'comment':
+        '''# If set to True, this option creates a dropdown menu to select searching within only a single volume or title.
                       # This replaces the title field in the search form.
                       # You need to configure the dictionary_selection_options variable below to define your options.''',
         'index': 18
@@ -216,55 +218,54 @@ web_config_defaults = {
     },
     'default_landing_page_browsing': {
         'value': [
-                 {"label": "Author",
-                 "group_by_field": "author",
-                 "display_count": True,
-                 "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
-                 "is_range": True,
-                 'citation': [
-                    {'field': 'author',
-                     'object_level': 'doc',
-                     'begin': '',
-                     'end': ',&nbsp;',
-                     'link': True,
-                     'style': {"font-variant": "small-caps"}
-                    }
-                 ]
-                },
-                {"label": "Title",
-                 "group_by_field": "title",
-                 "display_count": False,
-                 "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
-                 "is_range": True,
-                 'citation': [
-                    {
-                        'field': 'author',
-                        'object_level': 'doc',
-                        'begin': '',
-                        'end': ',&nbsp;',
-                		'link': False,
-                        'style': {"font-variant": "small-caps"}
-                	},
-                	{
-                        'field': 'title',
-                        'object_level': 'doc',
-                        'begin': '',
-                        'end': '',
-                		'link': True,
-                        'style': {"font-variant": "small-caps",
-                                  "font-style": "italic",
-                                  "font-weight": 700}
-                	},
-                	{
-                        'field': 'year',
-                        'object_level': 'doc',
-                        'begin': '&nbsp;&nbsp;[',
-                        'end': ']',
-                		'link': False,
-                        'style': {}
-                	}
-                ],
-                }],
+            {"label": "Author",
+             "group_by_field": "author",
+             "display_count": True,
+             "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
+             "is_range": True,
+             'citation': [
+                 {'field': 'author',
+                  'object_level': 'doc',
+                  'prefix': '',
+                  'suffix': ',&nbsp;',
+                  'separator': '&gt;',
+                  'link': True,
+                  'style': {"font-variant": "small-caps"}}
+             ]}, {"label": "Title",
+                  "group_by_field": "title",
+                  "display_count": False,
+                  "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
+                  "is_range": True,
+                  'citation': [
+                      {
+                          'field': 'author',
+                          'object_level': 'doc',
+                          'prefix': '',
+                          'suffix': ',&nbsp;',
+                          'separator': '&gt;',
+                          'link': False,
+                          'style': {"font-variant": "small-caps"}
+                      }, {
+                          'field': 'title',
+                          'object_level': 'doc',
+                          'prefix': '',
+                          'suffix': '',
+                          'separator': '&gt;',
+                          'link': True,
+                          'style': {"font-variant": "small-caps",
+                                    "font-style": "italic",
+                                    "font-weight": 700}
+                      }, {
+                          'field': 'year',
+                          'object_level': 'doc',
+                          'prefix': '&nbsp;&nbsp;[',
+                          'suffix': ']',
+                          'separator': '&gt;',
+                          'link': False,
+                          'style': {}
+                      }
+                  ], }
+        ],
         'comment': '''
                # The landing_page_browsing variable allows for configuration of navigation by metadata within the landing page.
                # You can choose any document-level metadata (such as author, title, date, genre...) for browsing
@@ -285,53 +286,54 @@ web_config_defaults = {
         'value': [{
             'field': 'author',
             'object_level': 'doc',
-            'begin': '',
-            'end': ',&nbsp;',
+            'prefix': '',
+            'suffix': ',&nbsp;',
+            'separator': '&gt;',
             'link': False,
             'style': {"font-variant": "small-caps"}
-        },
-        {
+        }, {
             'field': 'title',
             'object_level': 'doc',
-            'begin': '',
-            'end': '',
+            'prefix': '',
+            'suffix': '',
+            'separator': '&gt;',
             'link': True,
             'style': {"font-variant": "small-caps",
                       "font-style": "italic",
                       "font-weight": 700}
-        },
-        {
+        }, {
             'field': 'year',
             'object_level': 'doc',
-            'begin': '&nbsp;&nbsp;[',
-            'end': ']',
+            'prefix': '&nbsp;&nbsp;[',
+            'suffix': ']',
+            'separator': '&gt;',
             'link': False,
             'style': {}
-        },
-        {
+        }, {
             'field': 'pub_place',
             'object_level': 'doc',
-            'begin': '',
-            'end': ',&nbsp;',
+            'prefix': '',
+            'suffix': ',&nbsp;',
+            'separator': '&gt;',
             'link': False,
             'style': {}
-    	},
-    	{
+        }, {
             'field': 'publisher',
             'object_level': 'doc',
-            'begin': '',
-            'end': ',&nbsp;',
+            'prefix': '',
+            'suffix': ',&nbsp;',
+            'separator': '&gt;',
             'link': False,
             'style': {}
-    	},
-    	{
+        }, {
             'field': 'collection',
             'object_level': 'doc',
-            'begin': '',
-            'end': ',&nbsp;',
+            'prefix': '',
+            'suffix': ',&nbsp;',
+            'separator': '&gt;',
             'link': False,
             'style': {}
-    	}],
+        }],
         'comment': '# This variable defines the citation for the simple landing page.',
         'index': 23
     },
@@ -347,69 +349,70 @@ web_config_defaults = {
         'value': [{
             'field': 'author',
             'object_level': 'doc',
-            'begin': '',
-            'end': ',&nbsp;',
+            'prefix': '',
+            'suffix': ',&nbsp;',
+            'separator': '&gt;',
             'link': False,
             'style': {"font-variant": "small-caps"}
-        },
-        {
+        }, {
             'field': 'title',
             'object_level': 'doc',
-            'begin': '',
-            'end': '',
+            'prefix': '',
+            'suffix': '',
+            'separator': '&gt;',
             'link': True,
             'style': {"font-variant": "small-caps",
                       "font-style": "italic",
                       "font-weight": 700}
-        },
-        {
+        }, {
             'field': 'year',
             'object_level': 'doc',
-            'begin': '&nbsp;&nbsp;[',
-            'end': ']',
+            'prefix': '&nbsp;&nbsp;[',
+            'suffix': ']',
+            'separator': '&gt;',
             'link': False,
             'style': {}
-        },
-        {
+        }, {
             'field': 'head',
             'object_level': 'div1',
-            'begin': '&nbsp;&nbsp;&gt;&nbsp;&nbsp;',
-            'end': '&nbsp;&nbsp;',
-    		'link': True,
+            'prefix': '&nbsp;&nbsp;&nbsp;&nbsp;',
+            'suffix': '&nbsp;&nbsp;',
+            'separator': '&gt;',
+            'link': True,
             'style': {"font-variant": "small-caps"}
-    	},
-        {
+        }, {
             'field': 'head',
             'object_level': 'div2',
-            'begin': '&gt;&nbsp;&nbsp;',
-            'end': '&nbsp;&nbsp;',
-    		'link': True,
+            'prefix': '&nbsp;&nbsp;',
+            'suffix': '&nbsp;&nbsp;',
+            'separator': '&gt;',
+            'link': True,
             'style': {"font-variant": "small-caps"}
-    	},
-        {
+        }, {
             'field': 'head',
             'object_level': 'div3',
-            'begin': '&gt;&nbsp;&nbsp;',
-            'end': '&nbsp;&nbsp;',
-    		'link': True,
+            'prefix': '&nbsp;&nbsp;',
+            'suffix': '&nbsp;&nbsp;',
+            'separator': '&gt;',
+            'link': True,
             'style': {"font-variant": "small-caps"}
-    	},
-        {
+        }, {
             'field': 'who',
             'object_level': 'para',
-            'begin': '&gt;&nbsp;&nbsp;',
-            'end': '&nbsp;&nbsp;',
-    		'link': True,
+            'prefix': '&nbsp;&nbsp;',
+            'suffix': '&nbsp;&nbsp;',
+            'separator': '&gt;',
+            'link': True,
             'style': {"font-variant": "small-caps"}
-    	},
-        {
+        }, {
             'field': 'resp',
             'object_level': 'para',
-            'begin': '&gt;&nbsp;&nbsp;',
-            'end': '&nbsp;&nbsp;',
-    		'link': True,
+            'prefix': '&nbsp;&nbsp;',
+            'suffix': '&nbsp;&nbsp;',
+            'separator': '&gt;',
+            'link': True,
             'style': {"font-variant": "small-caps"}
-    	}],
+        }],
         'comment': '''
                # The concordance_citation variable define how and in what field order citations are displayed in concordance reports.
                # You can define styling with a dictionary of valid CSS property/value such as those in the default values.
@@ -422,69 +425,70 @@ web_config_defaults = {
         'value': [{
             'field': 'author',
             'object_level': 'doc',
-            'begin': '',
-            'end': ',&nbsp;',
+            'prefix': '',
+            'suffix': ',&nbsp;',
+            'separator': '&gt;',
             'link': False,
             'style': {"font-variant": "small-caps"}
-        },
-        {
+        }, {
             'field': 'title',
             'object_level': 'doc',
-            'begin': '',
-            'end': '',
+            'prefix': '',
+            'suffix': '',
+            'separator': '&gt;',
             'link': True,
             'style': {"font-variant": "small-caps",
                       "font-style": "italic",
                       "font-weight": 700}
-        },
-        {
+        }, {
             'field': 'year',
             'object_level': 'doc',
-            'begin': '&nbsp;&nbsp;[',
-            'end': ']',
+            'prefix': '&nbsp;&nbsp;[',
+            'suffix': ']',
+            'separator': '&gt;',
             'link': False,
             'style': {}
-        },
-        {
+        }, {
             'field': 'head',
             'object_level': 'div1',
-            'begin': '&nbsp;&nbsp;&gt;&nbsp;&nbsp;',
-            'end': '&nbsp;&nbsp;',
-    		'link': True,
+            'prefix': '&nbsp;&nbsp;&nbsp;&nbsp;',
+            'suffix': '&nbsp;&nbsp;',
+            'separator': '&gt;',
+            'link': True,
             'style': {"font-variant": "small-caps"}
-    	},
-        {
+        }, {
             'field': 'head',
             'object_level': 'div2',
-            'begin': '&gt;&nbsp;&nbsp;',
-            'end': '&nbsp;&nbsp;',
-    		'link': True,
+            'prefix': '&nbsp;&nbsp;',
+            'suffix': '&nbsp;&nbsp;',
+            'separator': '&gt;',
+            'link': True,
             'style': {"font-variant": "small-caps"}
-    	},
-        {
+        }, {
             'field': 'head',
             'object_level': 'div3',
-            'begin': '&gt;&nbsp;&nbsp;',
-            'end': '&nbsp;&nbsp;',
-    		'link': True,
+            'prefix': '&nbsp;&nbsp;',
+            'suffix': '&nbsp;&nbsp;',
+            'separator': '&gt;',
+            'link': True,
             'style': {"font-variant": "small-caps"}
-    	},
-        {
+        }, {
             'field': 'who',
             'object_level': 'para',
-            'begin': '&gt;&nbsp;&nbsp;',
-            'end': '&nbsp;&nbsp;',
-    		'link': True,
+            'prefix': '&nbsp;&nbsp;',
+            'suffix': '&nbsp;&nbsp;',
+            'separator': '&gt;',
+            'link': True,
             'style': {"font-variant": "small-caps"}
-    	},
-        {
+        }, {
             'field': 'resp',
             'object_level': 'para',
-            'begin': '&gt;&nbsp;&nbsp;',
-            'end': '&nbsp;&nbsp;',
-    		'link': True,
+            'prefix': '&nbsp;&nbsp;',
+            'suffix': '&nbsp;&nbsp;',
+            'separator': '&gt;',
+            'link': True,
             'style': {"font-variant": "small-caps"}
-    	}],
+        }],
         'comment': '''
                # The bibligraphy_citation variable define how and in what field order citations are displayed in bibliography reports.
                # You can define styling with a dictionary of valid CSS property/value such as those in the default values.
@@ -497,53 +501,54 @@ web_config_defaults = {
         'value': [{
             'field': 'author',
             'object_level': 'doc',
-            'begin': '',
-            'end': ',&nbsp;',
+            'prefix': '',
+            'suffix': ',&nbsp;',
+            'separator': '&gt;',
             'link': False,
             'style': {"font-variant": "small-caps"}
-        },
-        {
+        }, {
             'field': 'title',
             'object_level': 'doc',
-            'begin': '',
-            'end': '',
+            'prefix': '',
+            'suffix': '',
+            'separator': '&gt;',
             'link': True,
             'style': {"font-variant": "small-caps",
                       "font-style": "italic",
                       "font-weight": 700}
-        },
-        {
+        }, {
             'field': 'year',
             'object_level': 'doc',
-            'begin': '&nbsp;&nbsp;[',
-            'end': ']',
+            'prefix': '&nbsp;&nbsp;[',
+            'suffix': ']',
+            'separator': '&gt;',
             'link': False,
             'style': {}
-        },
-    	{
+        }, {
             'field': 'pub_place',
             'object_level': 'doc',
-            'begin': '',
-            'end': ',&nbsp;',
+            'prefix': '',
+            'suffix': ',&nbsp;',
+            'separator': '&gt;',
             'link': False,
             'style': {}
-    	},
-    	{
+        }, {
             'field': 'publisher',
             'object_level': 'doc',
-            'begin': '',
-            'end': ',&nbsp;',
+            'prefix': '',
+            'suffix': ',&nbsp;',
+            'separator': '&gt;',
             'link': False,
             'style': {}
-    	},
-    	{
+        }, {
             'field': 'collection',
             'object_level': 'doc',
-            'begin': '',
-            'end': ',&nbsp;',
+            'prefix': '',
+            'suffix': ',&nbsp;',
+            'separator': '&gt;',
             'link': False,
             'style': {}
-    	}],
+        }],
         'comment': '''
                # The navigation_citation variable define how and in what field order citations are displayed in navigation reports.
                # You can define styling with a dictionary of valid CSS property/value such as those in the default values.
@@ -566,6 +571,7 @@ web_config_defaults = {
         'comment': '''
                 # The concordance_biblio_sorting variable allows you to pick wich metadata field can be used for sorting concordance or bibliography results.
                 # It is a list of tuples where multiple metadata fields can be used for sorting, such as [('author', 'title'), ('year', 'author', 'title')].
+                # Note that these fields must belong to the same object type, such as "doc" or "div".
                 ''',
         'index': 29
     },
@@ -633,13 +639,12 @@ web_config_defaults = {
                   # The header_in_toc variable defines whether to display a button to show the header in the table of contents
                   ''',
         'index': 37
-
     },
     'search_syntax_template': {
         'value': 'default',
         'comment': '''
-                  # You can define a custom HTML template for the search syntax pop-up window, in which case you need to supply the 
-                  # relative path to the template. Note that this path is relative to the database root. The only constraint 
+                  # You can define a custom HTML template for the search syntax pop-up window, in which case you need to supply the
+                  # relative path to the template. Note that this path is relative to the database root. The only constraint
                   # for custom templates is that the HTML must be encapsulated inside a div
                   ''',
         "index": 38
@@ -658,23 +663,17 @@ web_config_header = '''
 
 class Config(object):
     def __init__(self, filename, defaults, header=''):
-        #print >> sys.stderr, "INIT", type(self), type(filename), type(defaults)
         self.filename = filename
         abspath = os.path.abspath(filename)
         self.db_path = abspath[:abspath.index("/data/")]
-        #print >> sys.stderr, "FILENAME", type(self.filename)
         self.defaults = defaults
-        #print >> sys.stderr, "DEFAULTS", type(self.defaults)
         self.header = header
         self.data = {}
-        #print >> sys.stderr, "SELF", repr(self)
         self.sorted_defaults = sorted(self.defaults.items(), key=lambda x: x[1]['index'])
-        #print >> sys.stderr, "SORTED_DEFAULTS", repr(self.sorted_defaults)
         for key, value in self.sorted_defaults:
             self.data[key] = value['value']
 
         if self.filename and os.path.exists(self.filename):
-            fh = open(self.filename)
             execfile(self.filename, globals(), self.data)
             self.valid_config = True
 

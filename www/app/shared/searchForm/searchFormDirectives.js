@@ -114,7 +114,7 @@
                         scope.selectedDropdownValue[metadata] = 'None';
                     }
                     for (var i = 0; i < dropdownValue.length; i++) {
-                        var quotedValue = '"' + dropdownValue[i].value + '"';
+                        var quotedValue = dropdownValue[i].value;
                         if (typeof($rootScope.formData[metadata]) != 'undefined' && $rootScope.formData[metadata] == quotedValue) {
                             scope.selectedDropdownValue[metadata] = dropdownValue[i].label;
                         }

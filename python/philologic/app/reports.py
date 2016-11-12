@@ -65,11 +65,12 @@ def concordance_results(request, config):
 def bibliography_results(request, config):
     db = DB(config.db_path + '/data/')
     import sys
-    print >> sys.stderr, "REQUEST", repr(request.no_metadata), db.locals['default_object_level']
+    print >> sys.stderr, "#####\n####\nREQUEST", request.sort_order
     if request.no_metadata:
         hits = db.get_all(db.locals['default_object_level'], request["sort_order"])
     else:
-        hits = db.query(**request.metadata)
+
+        hits = db.query(sort_order=request["sort_order"], **request.metadata)
     if request.simple_bibliography == "all": # request from simple landing page report which gets all biblio in load order
         hits.finish()
         start = 1
@@ -88,24 +89,25 @@ def bibliography_results(request, config):
         "default_object": db.locals['default_object_level']
     }
     results = []
-    result_type = ''
+    doc_level = True
+    result_type = "doc"
     for hit in hits[start - 1:end]:
         citation_hrefs = citation_links(db, config, hit)
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:
             metadata_fields[metadata] = hit[metadata]
-        if not result_type:
-            result_type = hit.object_type
+        result_type = hit.object_type
         if request.simple_bibliography == "all":
             citation = citations(hit, citation_hrefs, config, report="simple_landing")
         else:
-            citation = citations(hit, citation_hrefs, config, report="bibliography")
+            citation = citations(hit, citation_hrefs, config, report="bibliography", result_type=result_type)
         if config.dictionary_bibliography is False or result_type == "doc":
             results.append({
                 'citation': citation,
                 'citation_links': citation_hrefs,
                 'philo_id': hit.philo_id,
-                "metadata_fields": metadata_fields
+                "metadata_fields": metadata_fields,
+                "object_type": result_type
             })
         else:
             context = get_text_obj(hit, config, request, db.locals["token_regex"], images=False)
@@ -114,13 +116,15 @@ def bibliography_results(request, config):
                 'citation_links': citation_hrefs,
                 'philo_id': hit.philo_id,
                 "metadata_fields": metadata_fields,
-                "context": context
+                "context": context,
+                "object_type": result_type
             })
-
+    if result_type != "doc":
+        doc_level = False
     bibliography_object["results"] = results
     bibliography_object['results_length'] = len(hits)
     bibliography_object['query_done'] = hits.done
-    bibliography_object['result_type'] = result_type
+    bibliography_object['doc_level'] = doc_level
     return bibliography_object, hits
 
 
@@ -172,12 +176,12 @@ def collocation_results(request, config):
     try:
         for hit in hits[hits_done:]:
             word_id = ' '.join([str(i) for i in hit[:6]]) + ' ' + str(hit[7])
-            query = """select philo_name, parent, rowid from words where philo_id='%s'""" % word_id
+            query = """select parent, rowid from words where philo_id='%s' limit 1""" % word_id
             cursor.execute(query)
             result = cursor.fetchone()
             parent = result['parent']
-            rowid = int(result['rowid'])
             if parent != stored_sentence_id:
+                rowid = int(result['rowid'])
                 sentence_hit_count = 1
                 stored_sentence_id = parent
                 stored_sentence_counts = defaultdict(int)
@@ -192,11 +196,13 @@ def collocation_results(request, config):
                     row_query = """select philo_name from words where parent='%s'""" % (parent, )
                 cursor.execute(row_query)
                 for i in cursor.fetchall():
-                    stored_sentence_counts[i['philo_name']] += 1
+                    collocate = i["philo_name"]
+                    if collocate not in filter_list:
+                        stored_sentence_counts[collocate] += 1
             else:
                 sentence_hit_count += 1
             for word in stored_sentence_counts:
-                if word in filter_list or stored_sentence_counts[word] < sentence_hit_count:
+                if stored_sentence_counts[word] < sentence_hit_count:
                     continue
                 all_collocates[word]['count'] += 1
             hits_done += 1
@@ -206,7 +212,7 @@ def collocation_results(request, config):
             if elapsed > int(max_time):
                 break
     except IndexError:
-        collocation['hits_done'] = len(hits)
+        collocation_object['hits_done'] = len(hits)
 
     collocation_object['collocates'] = all_collocates
     collocation_object["results_length"] = len(hits)
@@ -265,7 +271,7 @@ def frequency_results(request, config, sorted=False):
                 philo_id = tuple(list(philo_id[:6]) + [philo_id[7]])
             if metadata_type == "div":
                 key = ""
-                for div in ["div3", "div2", "div1"]:
+                for div in ["div1", "div2", "div3"]:
                     if philo_id[:obj_dict[div]] in metadata_dict:
                         key = metadata_dict[philo_id[:obj_dict[div]]]
                 while not key:
