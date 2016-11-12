@@ -14,7 +14,7 @@ description, you can refer to [our research publications](<http://http://jtei.re
 
 
 ### Support ###
-* PhiloLogic4 will only work on Unix-based systems (Linux, *BSD, MacOS)
+* PhiloLogic4 will only work on Unix-based systems (Linux, *BSD) though MacOS is not supported and guaranteed to work.
 * PhiloLogic4 will only run on the Apache Webserver
 * PhiloLogic4 needs to run on Python 2.6 or 2.7
 * The PhiloLogic4 Web App will only work on modern browsers: Chrome, Firefox, Safari, Opera, Internet Explorer 9 and up
