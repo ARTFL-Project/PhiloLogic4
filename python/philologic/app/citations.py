@@ -34,6 +34,7 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=[
         if cite["label"]:
             cite["prefix"] = citation_object["prefix"]
             cite["suffix"] = citation_object["suffix"]
+            cite["separator"] = citation_object["separator"]
             cite["href"] = cite_linker(hit, citation_object, citation_hrefs, config, report)
             cite["style"] = citation_object["style"]
             cite["object_type"] = citation_object["object_level"]

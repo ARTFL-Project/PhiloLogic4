@@ -109,7 +109,7 @@ tag_to_obj_map = {
     "div3": "div",
     "hyperdiv": "div",
     "front": "div",
-    "note": "div",
+    "note": "para",
     "p": "para",
     "sp": "para",
     "lg": "para",
@@ -131,7 +131,7 @@ tag_to_obj_map = {
 # with the exception of head which is its own tag. Below are defaults.
 metadata_to_parse = {
     "div": ["head", "type", "n", "id", "vol"],
-    "para": ["who", "resp"],
+    "para": ["who", "resp", "id"],
     "page": ["n", "id", "fac"],
     "ref": ["target", "n", "type"]
 }

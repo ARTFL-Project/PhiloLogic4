@@ -39,6 +39,11 @@ def concordance_results(request, config):
         "default_object": db.locals['default_object_level']
     }
 
+    formatting_regexes = []
+    if config.concordance_formatting_regexes:
+        for pattern, replacement in config.concordance_formatting_regexes:
+            compiled_regex = re.compile(r'%s' % pattern)
+            formatting_regexes.append((compiled_regex, replacement))
     results = []
     for hit in hits[start - 1:end]:
         citation_hrefs = citation_links(db, config, hit)
@@ -47,6 +52,9 @@ def concordance_results(request, config):
             metadata_fields[metadata] = hit[metadata]
         citation = citations(hit, citation_hrefs, config, report="concordance")
         context = get_concordance_text(db, hit, config.db_path, config.concordance_length)
+        if formatting_regexes:
+            for formatting_regex, replacement in formatting_regexes:
+                context = formatting_regex.sub(r'%s' % replacement, context)
         result_obj = {
             "philo_id": hit.philo_id,
             "citation": citation,
@@ -433,6 +441,9 @@ def generate_text_object(request, config, note=False):
     citation = citations(obj, citation_hrefs, config, report="navigation")
     text_object['citation'] = citation
     text, imgs = get_text_obj(obj, config, request, db.locals["token_regex"], note=note)
+    if config.navigation_formatting_regexes:
+        for pattern, replacement in config.navigation_formatting_regexes:
+            conc_text = re.sub(r'%s' % pattern, '%s' % replacement)
     text_object['text'] = text
     text_object['imgs'] = imgs
     return text_object
@@ -810,7 +821,10 @@ def kwic_hit_object(hit, config, db):
         import sys
         print >> sys.stderr, "KWIC ERROR:", v
         pass
-
+    
+    if config.kwic_formatting_regexes:
+        for pattern, replacement in config.kwic_formatting_regexes:
+            conc_text = re.sub(r'%s' % pattern, '%s' % replacement)
     kwic_result = {
         "philo_id": hit.philo_id,
         "context": conc_text,

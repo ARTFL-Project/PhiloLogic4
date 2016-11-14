@@ -1,23 +1,24 @@
 <div id="simple-landing-page">
     <div class="row" id="landingGroup">
-        <ol>
-            <li ng-repeat="biblioObj in ::bibliography.results">
-                <span class="landing-bullet-point"></span>
-                <span class="citation" ng-repeat="citation in biblioObj.citation">
-                    <span ng-if="citation.href">
-                        <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
-                        <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
-                        <span ng-bind-html="citation.suffix"></span>
-                        <span ng-bind-html="citation.separator" ng-if="!$last"></span>
+        <div class="col-xs-12 col-sm-offset-2 col-sm-8">
+            <ul class="list-group" style="text-align: center">
+                <li class="list-group-item" ng-repeat="biblioObj in ::bibliography.results">
+                    <span class="citation" ng-repeat="citation in biblioObj.citation">
+                        <span ng-if="citation.href">
+                            <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
+                            <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
+                            <span ng-bind-html="citation.suffix"></span>
+                            <span ng-bind-html="citation.separator" ng-if="!$last"></span>
+                        </span>
+                        <span ng-if="!citation.href">
+                            <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
+                            <span ng-style="citation.style">{{ ::citation.label }}</span>
+                            <span ng-bind-html="citation.suffix"></span>
+                            <span ng-bind-html="citation.separator" ng-if="!$last"></span>
+                        </span>
                     </span>
-                    <span ng-if="!citation.href">
-                        <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
-                        <span ng-style="citation.style">{{ ::citation.label }}</span>
-                        <span ng-bind-html="citation.suffix"></span>
-                        <span ng-bind-html="citation.separator" ng-if="!$last"></span>
-                    </span>
-                </span>
-            </li>
-        </ol>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>

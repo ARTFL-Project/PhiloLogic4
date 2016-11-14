@@ -97,3 +97,8 @@ ul {
     border-radius: 50%;
     margin-right: 5px;
 }
+
+#simple-landing-page .list-group-item {
+    min-width: 51%;
+    display: inline-block;
+}
