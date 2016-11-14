@@ -73,11 +73,6 @@ web_config_defaults = {
         'comment': "# The dbname variable is the title name in the HTML header",
         'index': 0
     },
-    'db_url': {
-        'value': 'localhost',
-        'comment': "# The db_url variable is the root URL for your database on the web",
-        'index': 1
-    },
     'access_control': {
         'value': False,
         'comment': '''
@@ -130,7 +125,7 @@ web_config_defaults = {
                # The metadata_dropdown_values variable defines what values to display in the metadata dropdown. It defaults to an empty dict.
                # If no value is provided for a metadata field which has an input type of dropdown, no value will be displayed. You should
                # provide a list of strings with labels and values for metadata.
-               # ex: {"title": [{"label": "Contrat Social", "value": "Du Contrat Social"}, {"label": "Emile", "value": "Emile, ou de l'éducation"]}}''',
+               # ex: {"title": [{"label": "Contrat Social", "value": "Du Contrat Social"}, {"label": "Emile", "value": "Emile, ou de l'éducation"}]}''',
         'index': 9
     },
     'facets': {
@@ -227,44 +222,45 @@ web_config_defaults = {
                  {'field': 'author',
                   'object_level': 'doc',
                   'prefix': '',
-                  'suffix': ',&nbsp;',
-                  'separator': '&gt;',
+                  'suffix': '',
+                  'separator': ',',
                   'link': True,
                   'style': {"font-variant": "small-caps"}}
-             ]}, {"label": "Title",
-                  "group_by_field": "title",
-                  "display_count": False,
-                  "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
-                  "is_range": True,
-                  'citation': [
-                      {
-                          'field': 'author',
-                          'object_level': 'doc',
-                          'prefix': '',
-                          'suffix': ',&nbsp;',
-                          'separator': '&gt;',
-                          'link': False,
-                          'style': {"font-variant": "small-caps"}
-                      }, {
-                          'field': 'title',
-                          'object_level': 'doc',
-                          'prefix': '',
-                          'suffix': '',
-                          'separator': '&gt;',
-                          'link': True,
-                          'style': {"font-variant": "small-caps",
-                                    "font-style": "italic",
-                                    "font-weight": 700}
-                      }, {
-                          'field': 'year',
-                          'object_level': 'doc',
-                          'prefix': '&nbsp;&nbsp;[',
-                          'suffix': ']',
-                          'separator': '&gt;',
-                          'link': False,
-                          'style': {}
-                      }
-                  ], }
+             ]},
+             {"label": "Title",
+              "group_by_field": "title",
+              "display_count": False,
+              "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
+              "is_range": True,
+              'citation': [
+                  {
+                      'field': 'author',
+                      'object_level': 'doc',
+                      'prefix': '',
+                      'suffix': ',&nbsp;',
+                      'separator': '',
+                      'link': False,
+                      'style': {"font-variant": "small-caps"}
+                  }, {
+                      'field': 'title',
+                      'object_level': 'doc',
+                      'prefix': '',
+                      'suffix': '',
+                      'separator': '&gt;',
+                      'link': True,
+                      'style': {"font-variant": "small-caps",
+                                "font-style": "italic",
+                                "font-weight": 700}
+                  }, {
+                      'field': 'year',
+                      'object_level': 'doc',
+                      'prefix': '&nbsp;&nbsp;[',
+                      'suffix': ']',
+                      'separator': '&gt;',
+                      'link': False,
+                      'style': {}
+                  }
+              ], }
         ],
         'comment': '''
                # The landing_page_browsing variable allows for configuration of navigation by metadata within the landing page.
@@ -288,7 +284,7 @@ web_config_defaults = {
             'object_level': 'doc',
             'prefix': '',
             'suffix': ',&nbsp;',
-            'separator': '&gt;',
+            'separator': ',',
             'link': False,
             'style': {"font-variant": "small-caps"}
         }, {
@@ -296,7 +292,7 @@ web_config_defaults = {
             'object_level': 'doc',
             'prefix': '',
             'suffix': '',
-            'separator': '&gt;',
+            'separator': ',',
             'link': True,
             'style': {"font-variant": "small-caps",
                       "font-style": "italic",
@@ -306,7 +302,7 @@ web_config_defaults = {
             'object_level': 'doc',
             'prefix': '&nbsp;&nbsp;[',
             'suffix': ']',
-            'separator': '&gt;',
+            'separator': '',
             'link': False,
             'style': {}
         }, {
@@ -351,7 +347,7 @@ web_config_defaults = {
             'object_level': 'doc',
             'prefix': '',
             'suffix': ',&nbsp;',
-            'separator': '&gt;',
+            'separator': ',',
             'link': False,
             'style': {"font-variant": "small-caps"}
         }, {
@@ -359,7 +355,7 @@ web_config_defaults = {
             'object_level': 'doc',
             'prefix': '',
             'suffix': '',
-            'separator': '&gt;',
+            'separator': '',
             'link': True,
             'style': {"font-variant": "small-caps",
                       "font-style": "italic",
@@ -401,7 +397,7 @@ web_config_defaults = {
             'object_level': 'para',
             'prefix': '&nbsp;&nbsp;',
             'suffix': '&nbsp;&nbsp;',
-            'separator': '&gt;',
+            'separator': '',
             'link': True,
             'style': {"font-variant": "small-caps"}
         }, {
@@ -409,7 +405,7 @@ web_config_defaults = {
             'object_level': 'para',
             'prefix': '&nbsp;&nbsp;',
             'suffix': '&nbsp;&nbsp;',
-            'separator': '&gt;',
+            'separator': '',
             'link': True,
             'style': {"font-variant": "small-caps"}
         }],
@@ -427,7 +423,7 @@ web_config_defaults = {
             'object_level': 'doc',
             'prefix': '',
             'suffix': ',&nbsp;',
-            'separator': '&gt;',
+            'separator': '',
             'link': False,
             'style': {"font-variant": "small-caps"}
         }, {
@@ -435,7 +431,7 @@ web_config_defaults = {
             'object_level': 'doc',
             'prefix': '',
             'suffix': '',
-            'separator': '&gt;',
+            'separator': '',
             'link': True,
             'style': {"font-variant": "small-caps",
                       "font-style": "italic",
@@ -477,7 +473,7 @@ web_config_defaults = {
             'object_level': 'para',
             'prefix': '&nbsp;&nbsp;',
             'suffix': '&nbsp;&nbsp;',
-            'separator': '&gt;',
+            'separator': '',
             'link': True,
             'style': {"font-variant": "small-caps"}
         }, {
@@ -485,7 +481,7 @@ web_config_defaults = {
             'object_level': 'para',
             'prefix': '&nbsp;&nbsp;',
             'suffix': '&nbsp;&nbsp;',
-            'separator': '&gt;',
+            'separator': '',
             'link': True,
             'style': {"font-variant": "small-caps"}
         }],
@@ -502,8 +498,8 @@ web_config_defaults = {
             'field': 'author',
             'object_level': 'doc',
             'prefix': '',
-            'suffix': ',&nbsp;',
-            'separator': '&gt;',
+            'suffix': '',
+            'separator': '',
             'link': False,
             'style': {"font-variant": "small-caps"}
         }, {
@@ -511,7 +507,7 @@ web_config_defaults = {
             'object_level': 'doc',
             'prefix': '',
             'suffix': '',
-            'separator': '&gt;',
+            'separator': '',
             'link': True,
             'style': {"font-variant": "small-caps",
                       "font-style": "italic",
@@ -521,31 +517,31 @@ web_config_defaults = {
             'object_level': 'doc',
             'prefix': '&nbsp;&nbsp;[',
             'suffix': ']',
-            'separator': '&gt;',
+            'separator': '',
             'link': False,
             'style': {}
         }, {
             'field': 'pub_place',
             'object_level': 'doc',
             'prefix': '',
-            'suffix': ',&nbsp;',
-            'separator': '&gt;',
+            'suffix': '',
+            'separator': '<br>',
             'link': False,
             'style': {}
         }, {
             'field': 'publisher',
             'object_level': 'doc',
             'prefix': '',
-            'suffix': ',&nbsp;',
-            'separator': '&gt;',
+            'suffix': '',
+            'separator': ',',
             'link': False,
             'style': {}
         }, {
             'field': 'collection',
             'object_level': 'doc',
             'prefix': '',
-            'suffix': ',&nbsp;',
-            'separator': '&gt;',
+            'suffix': '',
+            'separator': '',
             'link': False,
             'style': {}
         }],
@@ -648,6 +644,36 @@ web_config_defaults = {
                   # for custom templates is that the HTML must be encapsulated inside a div
                   ''',
         "index": 38
+    },
+    'concordance_formatting_regex': {
+      'value': [],
+      'comment': '''
+                # A list of pattern with replacement to be run on individual concordances before sending to browser
+                # It is constructed as a list of tuples where the first element is the pattern to be matched 
+                # and the second element is the replacement
+                # e.g.: [("<note>", "<span>"), ("</note>", "</span>")]
+                ''',
+      'index': 39
+    },
+    'kwic_formatting_regex': {
+      'value': [],
+      'comment': '''
+                # A list of pattern with replacement to be run on individual kwic concordances before sending to browser
+                # It is constructed as a list of tuples where the first element is the pattern to be matched 
+                # and the second element is the replacement
+                # e.g.: [("<note>", "<span>"), ("</note>", "</span>")]
+                ''',
+      'index': 40
+    },
+    'navigation_formatting_regex': {
+      'value': [],
+      'comment': '''
+                # A list of pattern with replacement to be run on text objects before sending to browser
+                # It is constructed as a list of tuples where the first element is the pattern to be matched 
+                # and the second element is the replacement
+                # e.g.: [("<note>", "<span>"), ("</note>", "</span>")]
+                ''',
+      'index': 41
     }
 }
 
