@@ -256,7 +256,6 @@ def normalize_unicode_columns(*columns):
                     col = col.lower()
                     smashed_col = [c for c in unicodedata.normalize("NFKD", col) if not unicodedata.combining(c)]
                     record.attrib[column + "_norm"] = ''.join(smashed_col).encode("utf-8")
-                    #record.attrib[column + "_norm"] = ''.join([c.encode("utf-8") for c in unicodedata.normalize('NFKD',record.attrib[column].decode("utf-8").lower()) if not unicodedata.combining(c)])
             print >> tmp_file, record
         tmp_file.close()
         os.remove(text["sortedtoms"])
@@ -333,7 +332,6 @@ def store_in_plain_text(*types):
 
     def inner_store_in_plain_text(loader_obj, text):
         files_path = loader_obj.destination + '/plain_text_objects/'
-        token = re.compile(r"%s" % loader_obj.token_regex, re.I)
         try:
             os.mkdir(files_path)
         except OSError:
@@ -356,7 +354,7 @@ def store_in_plain_text(*types):
                         if philo_id != old_philo_id:
                             stored_objects.append({"philo_id": old_philo_id, "words": words})
                             words = []
-                            old_phil__philo_virtualo_id = philo_id
+                            old_philo_id = philo_id
                         words.append(word)
             if words:
                 stored_objects.append({"philo_id": philo_id, "words": words})
