@@ -1,18 +1,20 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 
 import re
+
 from lxml import etree
 from philologic import shlaxtree as st
 
 
 class FragmentParser:
+    """Fragment Parser: reconstructs broken trees"""
+
     def __init__(self):
-        self.root = etree.Element("div", {"class":"philologic-fragment"})
+        self.root = etree.Element("div", {"class": "philologic-fragment"})
         self.root.text = u""
         self.root.tail = u""
         self.current_el = self.root
         self.current_tail = None
-
         self.in_tag = True
         self.stack = []
 
@@ -59,6 +61,7 @@ class FragmentParser:
         self.stack = []
         return r
 
+
 class LXMLTreeDriver:
     def __init__(self, target):
         self.target = target
@@ -77,22 +80,23 @@ class LXMLTreeDriver:
             self.target.end(name)
         if kind == "text":
             self.target.data(content.decode("utf-8", "ignore"))
+
     def close(self):
         return self.target.close()
 
 
 class FragmentStripper:
-
     def __init__(self):
         self.buffer = ''
 
     def feed(self, *event):
-        (kind,content, offset, name, attributes) = event
+        (kind, content, offset, name, attributes) = event
         if kind == "text":
             self.buffer += content
 
     def close(self):
         return self.buffer
+
 
 def parse(text):
     try:
@@ -105,7 +109,9 @@ def parse(text):
         # we use LXML's HTML parser which is more flexible and then feed the result to fragment parser
         parser = etree.HTMLParser()
         tree = etree.fromstring(text.decode('utf8', 'ignore'), parser=parser)
-        new_text = etree.tostring(tree, method="xml").replace("<html><body>", '').replace("</body></html>", '').replace("philohighlight", "philoHighlight")
+        new_text = etree.tostring(tree,
+                                  method="xml").replace("<html><body>", '').replace("</body></html>", '').replace(
+                                      "philohighlight", "philoHighlight")
         parser = FragmentParser()
         driver = LXMLTreeDriver(target=parser)
         feeder = st.ShlaxIngestor(target=driver)

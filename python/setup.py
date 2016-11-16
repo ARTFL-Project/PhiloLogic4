@@ -4,5 +4,5 @@ setup(name = "philologic",
       version = "4.1",
       author = "The ARTFL Project",
       author_email = "artfl@artfl.uchicago.edu",
-      packages = ["philologic", "philologic.app", "philologic.utils"],
+      packages = ["philologic", "philologic.app", "philologic.utils", "philologic.app.reports"],
      )

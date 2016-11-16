@@ -706,7 +706,10 @@ class Config(object):
         self.time_series_status = True
 
     def __getitem__(self, item):
-        return self.data[item]
+        try:
+            return self.data[item]
+        except KeyError:
+            return self.defaults[item]
 
     def __getattr__(self, key):
         return self[key]
