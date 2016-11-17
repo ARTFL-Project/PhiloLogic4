@@ -7,7 +7,7 @@ from cgi import FieldStorage
 from random import randint
 from wsgiref.handlers import CGIHandler
 
-from philologic.app import WebConfig, WSGIHandler
+from philologic.runtime import WebConfig, WSGIHandler
 
 import reports
 from webApp import angular

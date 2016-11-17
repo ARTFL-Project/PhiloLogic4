@@ -4,10 +4,10 @@ import os
 from wsgiref.handlers import CGIHandler
 
 import simplejson
-from philologic.app import concordance_results
+from philologic.runtime import concordance_results
 
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
+from philologic.runtime import WebConfig
+from philologic.runtime import WSGIHandler
 
 def get_frequency(environ, start_response):
     status = '200 OK'

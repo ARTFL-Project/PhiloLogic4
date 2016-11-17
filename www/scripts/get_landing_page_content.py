@@ -7,10 +7,10 @@ import unicodedata
 from wsgiref.handlers import CGIHandler
 
 import simplejson
-from philologic.app import group_by_metadata, group_by_range
+from philologic.runtime import group_by_metadata, group_by_range
 
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
+from philologic.runtime import WebConfig
+from philologic.runtime import WSGIHandler
 
 object_depth = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
 

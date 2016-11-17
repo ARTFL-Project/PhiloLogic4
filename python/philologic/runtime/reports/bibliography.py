@@ -2,9 +2,9 @@
 """Bibliography results"""
 
 
-from philologic.app.pages import page_interval
-from philologic.app.citations import citations, citation_links
-from philologic.app.get_text import get_text_obj
+from philologic.runtime.pages import page_interval
+from philologic.runtime.citations import citations, citation_links
+from philologic.runtime.get_text import get_text_obj
 from philologic.DB import DB
 
 

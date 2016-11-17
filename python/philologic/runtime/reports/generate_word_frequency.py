@@ -4,7 +4,7 @@ Currently unmaintained."""
 
 import timeit
 
-from philologic.app.link import make_absolute_query_link
+from philologic.runtime.link import make_absolute_query_link
 from philologic.DB import DB
 
 

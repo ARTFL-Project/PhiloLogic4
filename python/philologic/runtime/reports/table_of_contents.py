@@ -2,9 +2,9 @@
 """Table of contents"""
 
 from philologic.DB import DB
-from philologic.app.link import make_absolute_object_link
+from philologic.runtime.link import make_absolute_object_link
 from philologic import HitWrapper
-from philologic.app.citations import citations, citation_links
+from philologic.runtime.citations import citations, citation_links
 
 
 def generate_toc_object(request, config):

@@ -3,8 +3,8 @@
 
 import re
 
-from philologic.app.citations import citation_links, citations
-from philologic.app.get_text import get_text_obj
+from philologic.runtime.citations import citation_links, citations
+from philologic.runtime.get_text import get_text_obj
 from philologic.DB import DB
 
 

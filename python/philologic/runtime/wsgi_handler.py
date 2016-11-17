@@ -6,8 +6,8 @@ import hashlib
 import re
 import urlparse
 
-from philologic.app.find_similar_words import find_similar_words
-from philologic.app.query_parser import parse_query
+from philologic.runtime.find_similar_words import find_similar_words
+from philologic.runtime.query_parser import parse_query
 from philologic.DB import DB
 
 

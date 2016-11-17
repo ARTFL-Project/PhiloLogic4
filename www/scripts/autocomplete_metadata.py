@@ -12,8 +12,8 @@ from philologic.DB import DB
 from philologic.MetadataQuery import metadata_pattern_search
 from philologic.QuerySyntax import parse_query
 
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
+from philologic.runtime import WebConfig
+from philologic.runtime import WSGIHandler
 
 environ = os.environ
 environ["PATH"] += ":/usr/local/bin/"

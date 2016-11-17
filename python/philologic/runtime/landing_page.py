@@ -7,7 +7,7 @@ import unicodedata
 from operator import itemgetter
 
 import simplejson
-from philologic.app.citations import citation_links, citations
+from philologic.runtime.citations import citation_links, citations
 from philologic.DB import DB
 
 

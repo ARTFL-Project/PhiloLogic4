@@ -2,9 +2,9 @@
 """Filter word by property
 Currently unmaintained"""
 
-from philologic.app.citations import citation_links, citations
-from philologic.app.get_text import get_concordance_text
-from philologic.app.reports.generate_word_frequency import get_word_attrib
+from philologic.runtime.citations import citation_links, citations
+from philologic.runtime.get_text import get_concordance_text
+from philologic.runtime.reports.generate_word_frequency import get_word_attrib
 from philologic.DB import DB
 
 

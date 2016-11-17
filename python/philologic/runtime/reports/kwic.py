@@ -4,10 +4,10 @@
 
 import re
 
-from philologic.app.citations import citation_links, citations
-from philologic.app.get_text import get_text
-from philologic.app.ObjectFormatter import adjust_bytes, format_strip
-from philologic.app.pages import page_interval
+from philologic.runtime.citations import citation_links, citations
+from philologic.runtime.get_text import get_text
+from philologic.runtime.ObjectFormatter import adjust_bytes, format_strip
+from philologic.runtime.pages import page_interval
 from philologic.DB import DB
 
 
