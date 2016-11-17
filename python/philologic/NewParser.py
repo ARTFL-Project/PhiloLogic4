@@ -820,7 +820,7 @@ class XMLParser(object):
                             word = word[:self.long_word_limit]
 
                         word = self.remove_control_chars(word)
-                        word = word.strip().replace("_", "")
+                        word = word.replace("_", "").strip()
                         if len(word):
                             self.v.push("word", word, word_pos)
                             if self.current_tag == "w":
