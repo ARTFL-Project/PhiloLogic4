@@ -12,15 +12,15 @@ import custom_functions
 try:
     from custom_functions import generate_text_object
 except ImportError:
-    from philologic.app import generate_text_object
+    from philologic.runtime import generate_text_object
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.app import WebConfig
+    from philologic.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic.app import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 
 def navigation(environ, start_response):

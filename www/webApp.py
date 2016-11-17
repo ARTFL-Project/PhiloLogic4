@@ -5,8 +5,8 @@ import imp
 import os.path
 import sys
 
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
+from philologic.runtime import WebConfig
+from philologic.runtime import WSGIHandler
 
 global_config = imp.load_source("philologic4", "/etc/philologic/philologic4.cfg")
 path = os.path.abspath(os.path.dirname(__file__))

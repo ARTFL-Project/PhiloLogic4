@@ -8,7 +8,7 @@ from wsgiref.handlers import CGIHandler
 from philologic.DB import DB
 from philologic.HitWrapper import ObjectWrapper
 
-from philologic.app import WSGIHandler
+from philologic.runtime import WSGIHandler
 
 
 def resolve_cite_service(environ, start_response):

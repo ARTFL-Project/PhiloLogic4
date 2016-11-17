@@ -1,6 +1,7 @@
 #!/usr/bin/env python
+"""Citations"""
 
-from link import *
+from philologic.runtime.link import (make_absolute_object_link, make_absolute_query_link)
 
 
 def citation_links(db, config, i):
@@ -20,10 +21,10 @@ def citation_links(db, config, i):
     return links
 
 
-def citations(hit, citation_hrefs, config, report="concordance", citation_type=[], result_type="doc"):
+def citations(hit, citation_hrefs, config, report="concordance", citation_type=None, result_type="doc"):
     """ Returns a representation of a PhiloLogic object and all its ancestors
         suitable for a precise citation. """
-    if not citation_type:
+    if citation_type is None:
         citation_type = config[report + "_citation"]
     citation = []
     for pos, citation_object in enumerate(citation_type):
@@ -43,6 +44,7 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=[
 
 
 def get_label(hit, citation_object):
+    """Get metadata labels"""
     label = ""
     if citation_object["object_level"] == "doc":
         label = hit[citation_object["field"]].strip()
@@ -88,7 +90,9 @@ def get_label(hit, citation_object):
             pass
     return label
 
+
 def get_div1_name(hit):
+    """Get div1 names"""
     label = hit.div1.head
     if not label:
         if hit.div1.philo_name == "__philo_virtual":
@@ -104,6 +108,7 @@ def get_div1_name(hit):
 
 
 def cite_linker(hit, citation_object, citation_hrefs, config, report):
+    """Get links"""
     href = None
     if citation_object["link"]:
         if citation_object["object_level"] == "doc":

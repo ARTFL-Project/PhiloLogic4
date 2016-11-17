@@ -4,12 +4,12 @@ import os
 from wsgiref.handlers import CGIHandler
 
 import simplejson
-from philologic.app import generate_toc_object
+from philologic.runtime import generate_toc_object
 from philologic.DB import DB
 from philologic.HitWrapper import ObjectWrapper
 
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
+from philologic.runtime import WebConfig
+from philologic.runtime import WSGIHandler
 
 
 def get_table_of_contents(environ, start_response):

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import htmlentitydefs
 import re
 import sqlite3
 
@@ -8,6 +7,7 @@ from philologic.DB import DB
 from philologic.utils import convert_entities
 
 import FragmentParser
+import htmlentitydefs
 from link import *
 
 begin_match = re.compile(r'^[^<]*?>')
@@ -20,8 +20,8 @@ strip_start_punctuation = re.compile("^[,?;.:!']")
 # Source: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/HTML5_element_list
 valid_html_tags = set(
     ['html', 'head', 'title', 'base', 'link', 'meta', 'style', 'script', 'noscript', 'template', 'body', 'section',
-     'nav', 'article', 'aside', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'footer', 'address', 'main', 'p',
-     'hr', 'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'figure', 'figcaption', 'div', 'a', 'em', 'strong',
+     'nav', 'article', 'aside', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'footer', 'address', 'main', 'p', 'hr',
+     'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'figure', 'figcaption', 'div', 'a', 'em', 'strong',
      'small', 's', 'cite', 'q', 'dfn', 'abbr', 'data', 'time', 'code', 'var', 'samp', 'kbd', 'sub', 'sup', 'i', 'b',
      'u', 'mark', 'ruby', 'rt', 'rp', 'bdi', 'bdo', 'span', 'br', 'wbr', 'ins', 'del', 'img', 'iframe', 'embed',
      'object', 'param', 'video', 'audio', 'source', 'track', 'canvas', 'map', 'area', 'svg', 'math', 'table', 'caption',
@@ -76,7 +76,7 @@ def adjust_bytes(bytes, padding):
 
 
 def format_concordance(text, word_regex, bytes=[]):
-    word_regex = "\w+" # text is converted to unicode so we use the \w boundary to match
+    word_regex = "\w+"  # text is converted to unicode so we use the \w boundary to match
     removed_from_start = 0
     begin = begin_match.search(text)
     if begin:

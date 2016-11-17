@@ -5,11 +5,11 @@ import sys
 from wsgiref.handlers import CGIHandler
 
 import simplejson
-from philologic.app import get_concordance_text
+from philologic.runtime import get_concordance_text
 from philologic.DB import DB
 
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
+from philologic.runtime import WebConfig
+from philologic.runtime import WSGIHandler
 
 
 def get_more_context(environ, start_response):

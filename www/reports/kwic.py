@@ -12,15 +12,15 @@ import custom_functions
 try:
     from custom_functions import kwic_results
 except ImportError:
-    from philologic.app import kwic_results
+    from philologic.runtime import kwic_results
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.app import WebConfig
+    from philologic.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic.app import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 
 def kwic(environ, start_response):

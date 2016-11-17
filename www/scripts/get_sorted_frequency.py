@@ -5,11 +5,11 @@ from ast import literal_eval as eval
 from wsgiref.handlers import CGIHandler
 
 import simplejson
-from philologic.app import frequency_results
+from philologic.runtime import frequency_results
 from philologic.DB import DB
 
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
+from philologic.runtime import WebConfig
+from philologic.runtime import WSGIHandler
 
 
 def get_frequency(environ, start_response):

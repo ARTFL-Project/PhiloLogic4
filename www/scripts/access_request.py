@@ -4,10 +4,10 @@ import os
 from wsgiref.handlers import CGIHandler
 
 import simplejson
-from philologic.app import login_access
+from philologic.runtime import login_access
 
-from philologic.app import WebConfig
-from philologic.app import WSGIHandler
+from philologic.runtime import WebConfig
+from philologic.runtime import WSGIHandler
 
 default_reports = ['concordance', 'kwic', 'collocation', 'time_series',
                    'navigation']

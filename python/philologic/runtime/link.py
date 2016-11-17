@@ -10,8 +10,7 @@ def url_encode(q_params):
         if v:
             if isinstance(v, list):
                 for s in v:
-                    encoded_str.append(quote_plus(k, safe='/') +
-                                       '=' + quote_plus(s, safe='/'))
+                    encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(s, safe='/'))
             else:
                 try:
                     encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(v, safe='/'))

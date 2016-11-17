@@ -13,8 +13,8 @@ def find_similar_words(word_to_match, config, request):
     word = word_to_match.decode("utf-8", 'ignore').lower()
     word = u''.join([i for i in unicodedata.normalize("NFKD", word) if not unicodedata.combining(i)]).encode("utf-8")
     results = set([word_to_match])
-    with open(file_path) as infile:
-        for w in infile:
+    with open(file_path) as fh:
+        for w in fh:
             w = w.strip()
             try:
                 w_norm, w_orig = w.split('\t')

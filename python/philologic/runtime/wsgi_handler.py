@@ -6,9 +6,9 @@ import hashlib
 import re
 import urlparse
 
+from philologic.runtime.find_similar_words import find_similar_words
+from philologic.runtime.query_parser import parse_query
 from philologic.DB import DB
-from philologic.app.query_parser import parse_query
-from philologic.app.find_similar_words import find_similar_words
 
 
 class WSGIHandler(object):
@@ -86,8 +86,7 @@ class WSGIHandler(object):
         for field in self.metadata_fields:
             if field in self.cgi and self.cgi[field]:
                 # Hack to remove hyphens in Frantext
-                if field != "date" and isinstance(self.cgi[field][0], str or
-                                                  unicode):
+                if field != "date" and isinstance(self.cgi[field][0], str or unicode):
                     if not self.cgi[field][0].startswith('"'):
                         self.cgi[field][0] = parse_query(self.cgi[field][0])
                 # these ifs are to fix the no results you get when you do a
@@ -117,8 +116,7 @@ class WSGIHandler(object):
             if self.cgi["approximate"][0] == "yes":
                 self.approximate = True
             if "approximate_ratio" in self.cgi:
-                self.approximate_ratio = float(self.cgi["approximate_ratio"][
-                    0]) / 100
+                self.approximate_ratio = float(self.cgi["approximate_ratio"][0]) / 100
             else:
                 self.approximate_ratio = 1
 
@@ -126,12 +124,9 @@ class WSGIHandler(object):
             self.cgi['q'][0] = parse_query(self.cgi['q'][0])
             # Fuzzy matching, but only for one word
             if self.approximate:
-                query_length = len(
-                    [i for i in re.split(r'[\|| NOT | ]', self.cgi['q'][0]) if
-                     i])
+                query_length = len([i for i in re.split(r'[\|| NOT | ]', self.cgi['q'][0]) if i])
                 if query_length == 1:
-                    self.cgi['q'][0] = find_similar_words(self.cgi['q'][0],
-                                                          config, self)
+                    self.cgi['q'][0] = find_similar_words(self.cgi['q'][0], config, self)
             if self.cgi["q"][0] != "":
                 self.no_q = False
             else:
