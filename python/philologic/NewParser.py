@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""PhiloLogic4 main parser"""
 
 import os
 import re
@@ -152,7 +153,7 @@ class XMLParser(object):
                  docid,
                  filesize,
                  filtered_words=[],
-                 known_metadata=["doc", "div1", "div2", "div3", "para", "sent", "word"],
+                 known_metadata={},
                  tag_to_obj_map=DefaultTagToObjMap,
                  metadata_to_parse=DefaultMetadataToParse,
                  **parse_options):
@@ -526,7 +527,8 @@ class XMLParser(object):
             # TODO: handling of attributes
             elif page_tag.search(tag):
                 if self.open_page:
-                    self.v.pull("page", self.bytes_read_in)
+                    page_end_tag = self.bytes_read_in - len(tag)
+                    self.v.pull("page", page_end_tag)
                     self.open_page = False
                 self.v.push("page", tag_name, start_byte)
                 self.get_object_attributes(tag, tag_name, "page")
@@ -859,7 +861,7 @@ class XMLParser(object):
                             # the punctuation token.
                             if "sent" not in self.v:
                                 self.v.push("sent", word.replace('\t', ' ').strip(), current_pos)
-                            self.v["sent"].name = word.replace('\t', ' ').strip()  # TODO: correct? avoid unwanted chars such tabs in ASP
+                            self.v["sent"].name = word.replace('\t', ' ').strip()
                             self.v.pull("sent", current_pos + len(word))
 
     def close_sent(self, end_byte):

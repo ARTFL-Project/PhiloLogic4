@@ -119,12 +119,12 @@
                     duration: 200,
                     queue: false,
                     complete: function() {
-                        $location.url(URL.path(philoID)).replace();
+                        $location.url(URL.path(philoID)).replace(); // deleting current page history and replace with new page
                         $scope.$apply();
                     }
                 });
             } else {
-                $location.url(URL.path(philoID)).replace();
+                $location.url(URL.path(philoID)).replace(); // deleting current page history and replace with new page
             }
 
         }
