@@ -9,7 +9,6 @@ import sys
 import time
 from glob import glob
 
-import philologic.Parser as Parser
 from lxml import etree
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.PostFilters import make_sql_table

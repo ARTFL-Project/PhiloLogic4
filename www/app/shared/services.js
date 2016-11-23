@@ -83,14 +83,14 @@
         return {
             report: function(queryParams, extraParams) {
                 var UrlRequest = URL.report(queryParams, extraParams);
-                var promise = $http.get(UrlRequest).success(function(data) {
+                var promise = $http.get(UrlRequest).then(function(data) {
                     return data;
                 });
                 return promise;
             },
             script: function(queryParams, extraParams) {
                 var UrlRequest = URL.script(queryParams, extraParams);
-                var promise = $http.get(UrlRequest).success(function(data) {
+                var promise = $http.get(UrlRequest).then(function(data) {
                     return data;
                 });
                 return promise;

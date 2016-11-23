@@ -1,14 +1,13 @@
 #!/usr/bin/env python
+"""Text Object formatter"""
 import re
 import sqlite3
 
 from lxml import etree
 from philologic.DB import DB
+from philologic.runtime.FragmentParser import parse as FragmentParserParse
+from philologic.runtime.link import *
 from philologic.utils import convert_entities
-
-import FragmentParser
-import htmlentitydefs
-from link import *
 
 begin_match = re.compile(r'^[^<]*?>')
 start_cutoff_match = re.compile(r'^[^ <]+')
@@ -98,7 +97,7 @@ def format_concordance(text, word_regex, bytes=[]):
                 new_text += text[last_offset:b] + "<philoHighlight/>"
                 last_offset = b
         text = new_text + text[last_offset:]
-    xml = FragmentParser.parse(text)
+    xml = FragmentParserParse(text)
     allowed_tags = set(['philoHighlight', 'l', 'ab', 'ln', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx', 'br'])
     text = u''
     for el in xml.iter():
@@ -165,7 +164,7 @@ def format_strip(text, bytes=[]):
                 new_text += text[last_offset:b] + "<philoHighlight/>"
                 last_offset = b
         text = new_text + text[last_offset:]
-    xml = FragmentParser.parse(text)
+    xml = FragmentParserParse(text)
     output = clean_tags(xml)
     ## remove spaces around hyphens and apostrophes
     output = space_match.sub('\\1', output)
@@ -181,10 +180,9 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
             new_text += text[last_offset:b] + "<philoHighlight/>"
             last_offset = b
         text = new_text + text[last_offset:]
-    first_img = ''
     current_obj_img = []
     text = "<div>" + text + "</div>"
-    xml = FragmentParser.parse(text)
+    xml = FragmentParserParse(text)
     c = obj.db.dbh.cursor()
     for el in xml.iter():
         try:
@@ -333,14 +331,14 @@ def page_images(config, output, current_obj_img, philo_id):
     if first_page_object['start_byte'] and current_obj_img[0] != first_page_object['filename']:
         if first_page_object['filename']:
             page_href = config.page_images_url_root + '/' + first_page_object['filename'] + config.page_image_extension
-            output = '<p><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(
-                first_page_object["n"]) + "]</a></p>" + output
+            output = '<span class="xml-pb-image"><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(
+                first_page_object["n"]) + "]</a></span>" + output
             if current_obj_img[0] == '':
                 current_obj_img[0] = first_page_object['filename']
             else:
                 current_obj_img.insert(0, first_page_object['filename'])
         else:
-            output = '<p class="page-image-link">[page ' + str(first_page_object["n"]) + "]</p>" + output
+            output = '<span class="xml-pb-image">[page ' + str(first_page_object["n"]) + "]</span>" + output
     ## Fetch all remainging imgs in document
     all_imgs = get_all_page_images(philo_id, config, current_obj_img)
     img_obj = {'all_imgs': all_imgs, 'current_obj_img': current_obj_img}
@@ -365,15 +363,23 @@ def get_first_page(philo_id, config):
         c.execute('select * from pages where philo_id like ? limit 1', (' '.join([str(i) for i in philo_id]), ))
     page_result = c.fetchone()
     try:
-        filename = page_result['img']
+        filename = page_result['fac']
+    except IndexError:
+        filename = ""
+    if not filename:
+        try:
+            filename = page_result['id'] or ''
+        except IndexError:
+            pass
+    try:
         n = page_result['n'] or ''
         page = {'filename': filename,
                 "n": n,
                 'start_byte': page_result['start_byte'],
                 'end_byte': page_result['end_byte']}
-    except:
-        page = {'filename': '', 'start_byte': ''}
-    return page
+        return page
+    except:  # Let's play it safe
+        return {'filename': '', 'start_byte': ''}
 
 
 def get_all_page_images(philo_id, config, current_obj_imgs):
