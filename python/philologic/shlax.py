@@ -1,7 +1,10 @@
 #!/usr/bin/python
 #ShLaX-- a Shallow Lazy XML tokenizer.  Very useful for dirty, broken XML-like documents.
+from __future__ import absolute_import
+from __future__ import print_function
 import re
 import sys
+from six.moves import zip
 
 TextSE = "(?P<Text>[^<]+)"
 UntilHyphen = "[^-]*-"
@@ -153,7 +156,7 @@ if __name__ == "__main__":
 			for m in matches:
 				l2.append( (m.group(0),buffer_offset + m.start(0)))
 			buffer_offset += len(line)
-		print len(l2)
+		print(len(l2))
 		for pair in zip(l,l2):
 			if (l != l2):
-				print str(l) + str(l2)
+				print(str(l) + str(l2))

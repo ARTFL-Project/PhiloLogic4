@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Landing page reports."""
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sqlite3
 import sys
 import unicodedata
@@ -9,6 +11,8 @@ from operator import itemgetter
 import simplejson
 from philologic.runtime.citations import citation_links, citations
 from philologic.DB import DB
+import six
+from six.moves import range
 
 
 def landing_page_bibliography(request, config):
@@ -50,7 +54,7 @@ def landing_page_bibliography(request, config):
             start_head = c.fetchone()['head'].decode('utf-8')
             start_head = start_head.lower().title().encode('utf-8')
         except Exception as e:
-            print >> sys.stderr, repr(e)
+            print(repr(e), file=sys.stderr)
             start_head = ''
         try:
             c.execute(
@@ -132,7 +136,7 @@ def group_by_range(request_range, request, config):
                 "count": doc['count']
             })
     results = []
-    for result_set in sorted(content.iteritems(), key=itemgetter(0)):
+    for result_set in sorted(six.iteritems(content), key=itemgetter(0)):
         results.append({"prefix": result_set[0], "results": result_set[1]})
     return simplejson.dumps({"display_count": request.display_count,
                              "content_type": content_type,

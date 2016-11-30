@@ -1,12 +1,16 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import sys
 import struct
 import sqlite3
-import HitList
+from . import HitList
 import unicodedata
 import subprocess
-from QuerySyntax import parse_query, group_terms
-from HitList import NoHits
+from .QuerySyntax import parse_query, group_terms
+from .HitList import NoHits
+from six.moves import range
+from six.moves import zip
 
 os.environ["PATH"] += ":/usr/local/bin/"
 
@@ -14,7 +18,7 @@ os.environ["PATH"] += ":/usr/local/bin/"
 def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
     """Prepare and execute SQL metadata query."""
     if db.locals['debug']:
-        print >> sys.stderr, "METADATA_QUERY:", param_dicts
+        print("METADATA_QUERY:", param_dicts, file=sys.stderr)
     prev = None
     for d in param_dicts:
         query = query_recursive(db, d, prev, sort_order)
@@ -69,16 +73,16 @@ def query_lowlevel(db, param_dict, sort_order):
         for v in values:
             parsed = parse_query(v)
             if db.locals['debug']:
-                print >> sys.stderr, "METADATA_TOKENS:", parsed
+                print("METADATA_TOKENS:", parsed, file=sys.stderr)
             grouped = group_terms(parsed)
             if db.locals['debug']:
-                print >> sys.stderr, "METADATA_SYNTAX GROUPED:", grouped
+                print("METADATA_SYNTAX GROUPED:", grouped, file=sys.stderr)
             expanded = expand_grouped_query(grouped, norm_path)
             if db.locals['debug']:
-                print >> sys.stderr, "METADATA_SYNTAX EXPANDED:", expanded
+                print("METADATA_SYNTAX EXPANDED:", expanded, file=sys.stderr)
             sql_clause = make_grouped_sql_clause(expanded, column, db)
             if db.locals['debug']:
-                print >> sys.stderr, "SQL_SYNTAX:", sql_clause
+                print("SQL_SYNTAX:", sql_clause, file=sys.stderr)
             clauses.append(sql_clause)
     if not sort_order:
         sort_order = ["rowid"]
@@ -87,7 +91,7 @@ def query_lowlevel(db, param_dict, sort_order):
     else:
         query = "SELECT philo_id FROM toms order by %s;" % ", ".join(sort_order)
     if db.locals['debug']:
-        print >> sys.stderr, "INNER QUERY: ", "%s %% %s" % (query, vars), sort_order
+        print("INNER QUERY: ", "%s %% %s" % (query, vars), sort_order, file=sys.stderr)
     results = db.dbh.execute(query, vars)
     return results
 

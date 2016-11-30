@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Routing for PhiloLogic4."""
 
+from __future__ import absolute_import
 import datetime
 import os
 from cgi import FieldStorage

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 import os
 import time
 import struct
-from HitWrapper import HitWrapper
-from utils import smash_accents
+from .HitWrapper import HitWrapper
+from .utils import smash_accents
 
 obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
 
@@ -75,7 +76,7 @@ class HitList(object):
             while True:
                 try:
                     hit = self.readhit(iter_position)
-                except IndexError, IOError:
+                except IndexError as IOError:
                     break
                 self.sorted_hitlist.append(hit)
                 iter_position += 1
@@ -123,7 +124,7 @@ class HitList(object):
                         break
                 try:
                     hit = self.readhit(slice_position)
-                except IndexError, IOError:
+                except IndexError as IOError:
                     break
                 if self.raw:
                     yield hit
@@ -146,7 +147,7 @@ class HitList(object):
             while True:
                 try:
                     hit = self.readhit(iter_position)
-                except IndexError, IOError:
+                except IndexError as IOError:
                     break
                 if self.raw:
                     yield hit
@@ -213,7 +214,7 @@ class HitList(object):
             try:
                 hit = self.readhit(iter_position)
                 philo_ids.append(hit)
-            except IndexError, IOError:
+            except IndexError as IOError:
                 break
             iter_position += 1
         c = self.dbh.dbh.cursor()

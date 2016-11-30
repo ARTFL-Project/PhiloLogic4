@@ -1,14 +1,16 @@
+from __future__ import absolute_import
 import hashlib
 import os
 import sqlite3
-from Config import Config, db_locals_defaults, db_locals_header
+from .Config import Config, db_locals_defaults, db_locals_header
 
 from philologic import Query
 
-import HitList
-import MetadataQuery
-import QuerySyntax
-from HitWrapper import HitWrapper, PageWrapper
+from . import HitList
+from . import MetadataQuery
+from . import QuerySyntax
+from .HitWrapper import HitWrapper, PageWrapper
+from six.moves import range
 
 
 def hit_to_string(hit, width):

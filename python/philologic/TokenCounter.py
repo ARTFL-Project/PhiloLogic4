@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import re
 import sys
 from philologic.TagCensus import TagCensus
@@ -56,29 +58,29 @@ if __name__ == "__main__":
     a = sys.argv[1]
     b = sys.argv[2]
 
-    print "start"
+    print("start")
     a_tokens = TokenCounter("(\w+)|([\.\!\?])")
     a_census = TagCensus(text_target=a_tokens)
     a_census.parse(open(a).read())
-    print a, "done"
+    print(a, "done")
 #    print a,a_tokens.wordcounts
 
     b_tokens = TokenCounter("(\w+)|([\.\!\?])")
     b_census = TagCensus(text_target=b_tokens)
     b_census.parse(open(b).read())
-    print b, "done"
+    print(b, "done")
 #    print b,b_tokens.wordcounts
 
     for word in a_tokens.wordcounts.keys():
-        if word in b_tokens.wordcounts.keys():
+        if word in list(b_tokens.wordcounts.keys()):
             if a_tokens.wordcounts[word] != b_tokens.wordcounts[word]:
-                print word,a_tokens.wordcounts[word],b_tokens.wordcounts[word]
+                print(word,a_tokens.wordcounts[word],b_tokens.wordcounts[word])
         else:
-            print word,a_tokens.wordcounts[word],0
+            print(word,a_tokens.wordcounts[word],0)
     for word in b_tokens.wordcounts.keys():
-        if word not in a_tokens.wordcounts.keys():
-            print word, 0, b_tokens.wordcounts[word]
+        if word not in list(a_tokens.wordcounts.keys()):
+            print(word, 0, b_tokens.wordcounts[word])
 
     census_diff = b_census - a_census
     for tag in census_diff.keys():
-        print tag, census_diff[tag]
+        print(tag, census_diff[tag])

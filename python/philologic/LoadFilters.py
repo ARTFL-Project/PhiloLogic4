@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-import cPickle
+from __future__ import absolute_import
+from __future__ import print_function
+import six.moves.cPickle
 import os
 import re
 import sys
@@ -9,6 +11,8 @@ from subprocess import PIPE, Popen
 
 from philologic.OHCOVector import Record
 from simplejson import loads
+from six.moves import range
+from six.moves import zip
 
 
 # Default filters
@@ -22,7 +26,7 @@ def normalize_unicode_raw_words(loader_obj, text):
                 word = word.decode("utf-8").lower().encode("utf-8")
             record = Record(rec_type, word, id)
             record.attrib = loads(attrib)
-            print >> tmp_file, record
+            print(record, file=tmp_file)
     tmp_file.close()
     os.remove(text["raw"])
     os.rename(text["raw"] + ".tmp", text["raw"])
@@ -45,7 +49,7 @@ def make_word_counts(loader_obj, text, depth=5):
                 elif type == object_types[d]:
                     record.attrib['word_count'] = counts[d]
                     counts[d] = 0
-            print >> output_file, record
+            print(record, file=output_file)
     output_file.close()
     os.remove(text['raw'])
     os.rename(temp_file, text['raw'])
@@ -75,7 +79,7 @@ def make_object_ancestors(*types):
                     zeros_to_add = ['0' for i in range(7 - type_depth[type])]
                     philo_id = id[:type_depth[type]] + zeros_to_add
                     record.attrib[type + '_ancestor'] = ' '.join(philo_id)
-                print >> output_file, record
+                print(record, file=output_file)
         output_file.close()
         os.remove(text['words'])
         os.rename(temp_file, text['words'])
@@ -112,11 +116,11 @@ def prev_next_obj(*types):
                 if type in record_dict:
                     record_dict[type].attrib['next'] = ' '.join(id)
                     if type in types:
-                        print >> output_file, record_dict[type]
+                        print(record_dict[type], file=output_file)
                     else:
                         del record_dict[type].attrib['next']
                         del record_dict[type].attrib['prev']
-                        print >> output_file, record_dict[type]
+                        print(record_dict[type], file=output_file)
                     record.attrib['prev'] = ' '.join(record_dict[type].id)
                     record_dict[type] = record
                 else:
@@ -126,7 +130,7 @@ def prev_next_obj(*types):
         for obj in types:
             try:
                 record_dict[obj].attrib['next'] = ''
-                print >> output_file, record_dict[obj]
+                print(record_dict[obj], file=output_file)
             except KeyError:
                 pass
         output_file.close()
@@ -165,7 +169,7 @@ def prev_next_page(loader_obj, text):
     with open(text['pages']) as fh:
         whole_file = fh.readlines()
         last_pos = len(whole_file) - 1
-        for pos in xrange(len(whole_file)):
+        for pos in range(len(whole_file)):
             if not record:
                 record = load_record(whole_file[pos])
             if prev_record:
@@ -173,7 +177,7 @@ def prev_next_page(loader_obj, text):
             if pos != last_pos:
                 next_record = load_record(whole_file[pos+1])
                 record.attrib["next"] = " ".join(next_record.id)
-            print >> output_file, record
+            print(record, file=output_file)
             prev_record = record
             record = next_record
     output_file.close()
@@ -199,7 +203,7 @@ def make_max_id(loader_obj, text):
             id = [int(i) for i in id.split(" ")]
             max_id = [max(new, prev) for new, prev in zip(id, max_id)]
     rf = open(text["results"], "w")
-    cPickle.dump(
+    six.moves.cPickle.dump(
         max_id,
         rf)  # write the result out--really just the resulting omax vector, which the parent will merge in below.
     rf.close()
@@ -232,7 +236,7 @@ def normalize_divs(*columns):
                 for column in columns:
                     if column not in record.attrib:
                         record.attrib[column] = current_values[column]
-            print >> tmp_file, record
+            print(record, file=tmp_file)
         tmp_file.close()
         os.remove(text["sortedtoms"])
         os.rename(text["sortedtoms"] + ".tmp", text["sortedtoms"])
@@ -256,7 +260,7 @@ def normalize_unicode_columns(*columns):
                     col = col.lower()
                     smashed_col = [c for c in unicodedata.normalize("NFKD", col) if not unicodedata.combining(c)]
                     record.attrib[column + "_norm"] = ''.join(smashed_col).encode("utf-8")
-            print >> tmp_file, record
+            print(record, file=tmp_file)
         tmp_file.close()
         os.remove(text["sortedtoms"])
         os.rename(text["sortedtoms"] + ".tmp", text["sortedtoms"])
@@ -288,7 +292,7 @@ def tree_tagger(tt_path, param_file, maxlines=20000):
                     new_ttout_fh = open(text["raw"] + ".ttout", "a")
                     tt_worker = Popen(tt_args, stdin=PIPE, stdout=new_ttout_fh)
                     line_count = 0
-                print >> tt_worker.stdin, word
+                print(word, file=tt_worker.stdin)
                 line_count += 1
 
         # finish tagging
@@ -309,14 +313,14 @@ def tree_tagger(tt_path, param_file, maxlines=20000):
                 next_word, tag = tag_l.split("\t")[0:2]
                 pos, lem, prob = tag.split(" ")
                 if next_word != word.decode('utf-8', 'ignore').lower().encode('utf-8'):
-                    print >> sys.stderr, "TREETAGGER ERROR:", next_word, " != ", word, pos, lem
+                    print("TREETAGGER ERROR:", next_word, " != ", word, pos, lem, file=sys.stderr)
                     return
                 else:
                     record.attrib["pos"] = pos
                     record.attrib["lemma"] = lem
-                    print >> tmp_fh, record
+                    print(record, file=tmp_fh)
             else:
-                print >> tmp_fh, record
+                print(record, file=tmp_fh)
         os.remove(text["raw"])
         os.rename(text["raw"] + ".tmp", text["raw"])
         os.remove(text["raw"] + ".ttout")
@@ -361,8 +365,8 @@ def store_in_plain_text(*types):
             filename = files_path + philo_id[0] + '_' + obj
             output = open(filename, 'w')
             for obj in stored_objects:
-                print >> output, '\n###\t%s\t###' % ' '.join(obj["philo_id"])
-                print >> output, ' '.join(obj["words"])
+                print('\n###\t%s\t###' % ' '.join(obj["philo_id"]), file=output)
+                print(' '.join(obj["words"]), file=output)
             output.close()
 
     return inner_store_in_plain_text
@@ -380,7 +384,7 @@ def store_words_and_philo_ids(loader_obj, text):
         for line in fh:
             type, word, id, attrib = line.split('\t')
             if word != '__philo_virtual':
-                print >> output, "\t".join([word, id])
+                print("\t".join([word, id]), file=output)
     output.close()
 
 

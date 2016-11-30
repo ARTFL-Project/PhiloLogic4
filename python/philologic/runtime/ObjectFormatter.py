@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """Text Object formatter"""
+from __future__ import absolute_import
+from __future__ import print_function
 import re
 import sqlite3
 
@@ -307,7 +309,7 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                 el = xml_to_html_class(el)
         except Exception as e:
             import sys
-            print >> sys.stderr, e
+            print(e, file=sys.stderr)
             pass
     output = etree.tostring(xml)
     ## remove spaces around hyphens and apostrophes

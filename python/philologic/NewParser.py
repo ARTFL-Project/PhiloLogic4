@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """PhiloLogic4 main parser"""
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import re
 import string
@@ -8,6 +10,8 @@ import sys
 
 from philologic import OHCOVector
 from philologic.utils import convert_entities
+import six
+from six.moves import range
 
 DefaultTagToObjMap = {
     "div": "div",
@@ -294,7 +298,7 @@ class XMLParser(object):
         # if the parser was created with known_metadata,
         # we can attach it to the newly created doc object here.
         # you can attach metadata to an object at any time between push() and pull().
-        for k, v in self.known_metadata.iteritems():
+        for k, v in six.iteritems(self.known_metadata):
             self.v["doc"][k] = v
 
         # Split content into a list on newlines.
@@ -817,8 +821,8 @@ class XMLParser(object):
                         # Check to see if the word is longer than we want.  More than 235
                         # characters appear to cause problems in the indexer.
                         if len(word) > self.long_word_limit:
-                            print >> sys.stderr, "Long word: %s" % word
-                            print >> sys.stderr, "Truncating to %d characters for index..." % self.long_word_limit
+                            print("Long word: %s" % word, file=sys.stderr)
+                            print("Truncating to %d characters for index..." % self.long_word_limit, file=sys.stderr)
                             word = word[:self.long_word_limit]
 
                         word = self.remove_control_chars(word)
@@ -1260,7 +1264,7 @@ abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)',
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
 tab_newline = re.compile(r'[\n|\t]')
 control_chars = ''.join(
-    [i for i in map(lambda x: unichr(x).encode('utf8'), range(0, 32) + range(127, 160)) if not tab_newline.search(i)])
+    [i for i in [unichr(x).encode('utf8') for x in list(range(0, 32)) + list(range(127, 160))] if not tab_newline.search(i)])
 control_char_re = re.compile(r'[%s]' % re.escape(control_chars))
 
 # Entities regexes
@@ -1332,7 +1336,7 @@ entity_regex = [
 
 if __name__ == "__main__":
     for docid, fn in enumerate(sys.argv[1:], 1):
-        print >> sys.stderr, docid, fn
+        print(docid, fn, file=sys.stderr)
         size = os.path.getsize(fn)
         fh = open(fn)
         parser = XMLParser(sys.stdout,

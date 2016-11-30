@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import re
@@ -87,7 +89,7 @@ class PlainTextParser(object):
 
 if __name__ == "__main__":
     for docid, fn in enumerate(sys.argv[1:], 1):
-        print >> sys.stderr, docid, fn
+        print(docid, fn, file=sys.stderr)
         size = os.path.getsize(fn)
         fh = open(fn)
         parser = PlainTextParser(sys.stdout,

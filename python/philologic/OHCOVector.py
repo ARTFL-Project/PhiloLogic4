@@ -1,7 +1,11 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
+from __future__ import print_function
 import re
 import sys
 from simplejson import dumps
+import six
+from six.moves import zip
 
 ### CompoundStack is the class to use for all parsers.
 
@@ -56,7 +60,7 @@ class CompoundRecord(object):
         self.attrib["parent"] = " ".join(str(x) for x in parent_id)
         clean_attrib = {}
         for k, v in self.attrib.items():
-            if isinstance(v, basestring):
+            if isinstance(v, six.string_types):
                 clean_attrib[k] = " ".join(v.split())
             else:
                 clean_attrib[k] = v
@@ -166,16 +170,16 @@ class CompoundStack(object):
         if type == self.p_type:
             if self.current_p:
                 self.current_p.attrib["end_byte"] = byte
-                print >> self.out, self.current_p
+                print(self.current_p, file=self.out)
                 self.current_p = None
         elif type == self.ref:
             if self.current_ref:
                 self.current_ref.attrib["end_byte"] = byte
-                print >> self.out, self.current_ref
+                print(self.current_ref, file=self.out)
         elif type == self.line:
             if self.current_line:
                 self.current_line.attrib["end_byte"] = byte
-                print >> self.out, self.current_line
+                print(self.current_line, file=self.out)
         else:
             return self.stack.pull(type, byte)
 
@@ -273,7 +277,7 @@ class NewStack(object):
                     self.pull(d, byte)
                 # print
                 self.current_objects[i].attrib["end_byte"] = byte
-                print >> self.out, self.current_objects[i]
+                print(self.current_objects[i], file=self.out)
                 self.v_max = [max(new, prev) for new, prev in zip(self.v_max, self.current_objects[i].getid())]
                 # we know all descendants have already been pulled.  so only have to reset the next one. and increment.
                 self.v[i] += 1
@@ -302,7 +306,7 @@ class Record(object):
     def __str__(self):
         clean_attrib = {}
         for k, v in self.attrib.items():
-            if isinstance(v, basestring):
+            if isinstance(v, six.string_types):
                 clean_attrib[k] = " ".join(v.split())
             else:
                 clean_attrib[k] = v
@@ -315,7 +319,7 @@ class Record(object):
 
 
 if __name__ == "__main__":
-    print "testing OHCOVector.CompoundStack"
+    print("testing OHCOVector.CompoundStack")
     my_types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
     stack = CompoundStack(my_types, "page")
     stack.push("doc", "<doc>", 0)

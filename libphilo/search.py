@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import absolute_import
 import sys,os
 from ctypes import *
 stdlib=cdll.LoadLibrary("libc.dylib")

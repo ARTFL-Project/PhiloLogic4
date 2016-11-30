@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
 from urllib import quote_plus
+import six
 
 
 def url_encode(q_params):
@@ -39,9 +41,9 @@ def make_absolute_query_link(config, params, script_name="query", **extra_params
     """ Takes a dictionary of query parameters as produced by WSGIHandler,
     and returns an absolute URL representation of such. """
     params = dict([i for i in params])
-    for k, v in extra_params.iteritems():
+    for k, v in six.iteritems(extra_params):
         params[k] = v
-    query_string = url_encode(params.items())
+    query_string = url_encode(list(params.items()))
     href = "%s?%s" % (script_name, query_string)
     return href
 

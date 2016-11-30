@@ -1,13 +1,16 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import subprocess
 from datetime import datetime
 import struct
-import HitList
+from . import HitList
 import re
 import unicodedata
-from QuerySyntax import parse_query, group_terms
+from .QuerySyntax import parse_query, group_terms
+from six.moves import zip
 
 # Work around issue where environ PATH does not contain path to C core
 os.environ["PATH"] += ":/usr/local/bin/"
@@ -43,7 +46,7 @@ def query(db,
     err = open("/dev/null", "w")
     freq_file = db.path + "/frequencies/normalized_word_frequencies"
     if query_debug:
-        print >> sys.stderr, "FORKING"
+        print("FORKING", file=sys.stderr)
     pid = os.fork()
     if pid == 0:
         os.umask(0)
@@ -55,7 +58,7 @@ def query(db,
         else:
             #now we're detached from the parent, and can do our work.
             if query_debug:
-                print >> sys.stderr, "WORKER DETACHED at ", datetime.now() - tstart
+                print("WORKER DETACHED at ", datetime.now() - tstart, file=sys.stderr)
 #            args = ["search4", db.path,"--limit",str(limit)]
             args = ["corpus_search"]
             if corpus_file:
@@ -73,7 +76,7 @@ def query(db,
 
             query_log_fh = filename + ".terms"
             if query_debug:
-                print >> sys.stderr, "LOGGING TERMS to " + filename + ".terms"
+                print("LOGGING TERMS to " + filename + ".terms", file=sys.stderr)
             logger = subprocess.Popen(["tee", query_log_fh], stdin=subprocess.PIPE, stdout=worker.stdin)
             expand_query_not(split, freq_file, logger.stdin, db.locals["lowercase_index"])
             logger.stdin.close()
@@ -82,7 +85,7 @@ def query(db,
             returncode = worker.wait()
 
             if returncode == -11:
-                print >> sys.stderr, "SEGFAULT"
+                print("SEGFAULT", file=sys.stderr)
                 seg_flag = open(filename + ".error", "w")
                 seg_flag.close()
             #do something to mark query as finished
@@ -245,7 +248,7 @@ def invert_grep(token, in_fh, dest_fh, lowercase=True):
 
 def grep_exact(token, freq_file, dest_fh):
     grep_command = ["egrep", '-a', "[[:blank:]]%s$" % token[1:-1], freq_file]
-    print >> sys.stderr, grep_command
+    print(grep_command, file=sys.stderr)
     grep_proc = subprocess.Popen(grep_command, stdout=dest_fh)
     return grep_proc
 
@@ -253,7 +256,7 @@ def grep_exact(token, freq_file, dest_fh):
 def invert_grep_exact(token, in_fh, dest_fh):
     #don't strip accent or case, exact match only.
     grep_command = ["egrep", "-a", "-v", "[[:blank:]]%s$" % token[1:-1]]
-    print >> sys.stderr, grep_command
+    print(grep_command, file=sys.stderr)
     grep_proc = subprocess.Popen(grep_command, stdin=in_fh, stdout=dest_fh)
     #can't wait because input isn't ready yet.
     return grep_proc
@@ -263,11 +266,11 @@ if __name__ == "__main__":
     path = sys.argv[1]
     terms = sys.argv[2:]
     parsed = parse_query(" ".join(terms))
-    print >> sys.stderr, "PARSED:", parsed
+    print("PARSED:", parsed, file=sys.stderr)
     grouped = group_terms(parsed)
-    print >> sys.stderr, "GROUPED:", grouped
+    print("GROUPED:", grouped, file=sys.stderr)
     split = split_terms(grouped)
-    print >> sys.stderr, "parsed %d terms:" % len(split), split
+    print("parsed %d terms:" % len(split), split, file=sys.stderr)
 
     class Fake_DB:
         pass

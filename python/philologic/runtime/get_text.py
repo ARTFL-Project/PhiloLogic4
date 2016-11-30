@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
 import os
 import re
 
 from lxml import etree
-from ObjectFormatter import adjust_bytes, format_concordance, format_text_object
+from .ObjectFormatter import adjust_bytes, format_concordance, format_text_object
 from philologic.HitWrapper import ObjectWrapper
 from philologic.DB import DB
 

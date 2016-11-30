@@ -1,5 +1,7 @@
 #!/usr/bin env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import imp
 import os
 import sys
@@ -8,22 +10,23 @@ from optparse import OptionParser
 
 from philologic import Loader, LoadFilters, Parser, PostFilters, NewParser, PlainTextParser
 from philologic.utils import pretty_print
+import six
 
 
 # Load global config
 config_file = imp.load_source("philologic4", "/etc/philologic/philologic4.cfg")
 
 if config_file.url_root is None:
-    print >> sys.stderr, "url_root variable is not set in /etc/philologic/philologic4.cfg"
-    print >> sys.stderr, "See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md."
+    print("url_root variable is not set in /etc/philologic/philologic4.cfg", file=sys.stderr)
+    print("See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md.", file=sys.stderr)
     exit()
 elif config_file.web_app_dir is None:
-    print >> sys.stderr, "web_app_dir variable is not set in /etc/philologic/philologic4.cfg"
-    print >> sys.stderr, "See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md."
+    print("web_app_dir variable is not set in /etc/philologic/philologic4.cfg", file=sys.stderr)
+    print("See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md.", file=sys.stderr)
     exit()
 elif config_file.database_root is None:
-    print >> sys.stderr, "database_root variable is not set in /etc/philologic/philologic4.cfg"
-    print >> sys.stderr, "See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md."
+    print("database_root variable is not set in /etc/philologic/philologic4.cfg", file=sys.stderr)
+    print("See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md.", file=sys.stderr)
     exit()
 
 
@@ -137,12 +140,12 @@ class LoadOptions(object):
             else:
                 self.values["files"] = args[:]
             if len(self.values["files"]) == 0:
-                print >> sys.stderr, ("\nError: No files found in supplied path\n")
+                print(("\nError: No files found in supplied path\n"), file=sys.stderr)
                 exit()
 
         except IndexError:
-            print >> sys.stderr, ("\nError: you did not supply a database name "
-                                  "or a path for your file(s) to be loaded\n")
+            print(("\nError: you did not supply a database name "
+                                  "or a path for your file(s) to be loaded\n"), file=sys.stderr)
 
             parser.print_help()
             sys.exit()
@@ -152,7 +155,7 @@ class LoadOptions(object):
                 if a == "load_config" and value:
                     load_config = LoadConfig()
                     load_config.parse(value)
-                    for config_key, config_value in load_config.config.iteritems():
+                    for config_key, config_value in six.iteritems(load_config.config):
                         if config_value:
                             self.values[config_key] = config_value
                 elif a == "file_type":
@@ -179,7 +182,7 @@ class LoadOptions(object):
             plain_text_filter = LoadFilters.store_in_plain_text(*self.plain_text_obj)
             self.load_filters.append(plain_text_filter)
         if self.debug:
-            print self
+            print(self)
 
     def __getitem__(self, item):
         return self.values[item]

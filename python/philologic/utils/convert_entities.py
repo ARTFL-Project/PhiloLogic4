@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import htmlentitydefs
+from __future__ import absolute_import
+import six.moves.html_entities
 import re
 
 
@@ -21,7 +22,7 @@ def convert_entities(text):
         else:
             # named entity
             try:
-                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+                text = unichr(six.moves.html_entities.name2codepoint[text[1:-1]])
             except KeyError:
                 pass
         return text  # leave as is

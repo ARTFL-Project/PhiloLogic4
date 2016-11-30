@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Find similar words to query term."""
 
+from __future__ import absolute_import
 import os
 import unicodedata
 

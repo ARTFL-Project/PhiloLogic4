@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Bootstrap Web app"""
 
+from __future__ import absolute_import
+from __future__ import print_function
 import imp
 import os.path
 import sys
@@ -86,12 +88,12 @@ def angular(environ, start_response):
             if not request.authenticated:
                 token = f.check_access(environ, config)
                 if token:
-                    print >> sys.stderr, "ISSUING TOKEN"
+                    print("ISSUING TOKEN", file=sys.stderr)
                     h, ts = token
                     headers.append(("Set-Cookie", "hash=%s" % h))
                     headers.append(("Set-Cookie", "timestamp=%s" % ts))
                 else:
-                    print >> sys.stderr, "NOT AUTHENTICATED"
+                    print("NOT AUTHENTICATED", file=sys.stderr)
         html = build_html_page(config)
     start_response('200 OK', headers)
     return html

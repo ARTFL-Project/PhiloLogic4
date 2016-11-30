@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
+from __future__ import print_function
 import gzip
 import io
 import os
@@ -9,11 +11,12 @@ import unicodedata
 from collections import defaultdict
 
 from simplejson import loads
+from six.moves import range
 
 
 def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
     def inner_make_sql_table(loader_obj):
-        print "%s: Loading the %s SQLite table..." % (time.ctime(), table)
+        print("%s: Loading the %s SQLite table..." % (time.ctime(), table))
         db_destination = os.path.join(loader_obj.destination, db_file)
         conn = sqlite3.connect(db_destination)
         conn.text_factory = str
@@ -34,17 +37,17 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
                     row["philo_name"] = philo_name
                     row["philo_id"] = " ".join(fields[:depth])
                     row["philo_seq"] = sequence
-                    insert = "INSERT INTO %s (%s) values (%s);" % (table, ",".join(row.keys()), ",".join(
-                        "?" for i in xrange(len(row))))
+                    insert = "INSERT INTO %s (%s) values (%s);" % (table, ",".join(list(row.keys())), ",".join(
+                        "?" for i in range(len(row))))
                     try:
-                        c.execute(insert, row.values())
+                        c.execute(insert, list(row.values()))
                     except sqlite3.OperationalError:
                         c.execute("PRAGMA table_info(%s)" % table)
                         column_list = [i[1] for i in c.fetchall()]
                         for column in row:
                             if column not in column_list:
                                 c.execute("ALTER TABLE %s ADD COLUMN %s;" % (table, column))
-                        c.execute(insert, row.values())
+                        c.execute(insert, list(row.values()))
         conn.commit()
 
         for index in indices:
@@ -66,18 +69,18 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
 
 
 def word_frequencies(loader_obj):
-    print '%s: Generating word frequencies...' % time.ctime()
+    print('%s: Generating word frequencies...' % time.ctime())
     frequencies = loader_obj.destination + '/frequencies'
     os.system('mkdir %s' % frequencies)
     output = open(frequencies + "/word_frequencies", "w")
     for line in open(loader_obj.destination + '/WORK/all_frequencies'):
         count, word = tuple(line.split())
-        print >> output, word + '\t' + count
+        print(word + '\t' + count, file=output)
     output.close()
 
 
 def normalized_word_frequencies(loader_obj):
-    print '%s: Generating normalized word frequencies...' % time.ctime()
+    print('%s: Generating normalized word frequencies...' % time.ctime())
     frequencies = loader_obj.destination + '/frequencies'
     output = open(frequencies + "/normalized_word_frequencies", "w")
     for line in open(frequencies + '/word_frequencies'):
@@ -85,12 +88,12 @@ def normalized_word_frequencies(loader_obj):
         norm_word = word.decode('utf-8').lower()
         norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
         norm_word = ''.join(norm_word).encode('utf-8')
-        print >> output, norm_word + "\t" + word
+        print(norm_word + "\t" + word, file=output)
     output.close()
 
 
 def metadata_frequencies(loader_obj):
-    print '%s: Generating metadata frequencies...' % time.ctime()
+    print('%s: Generating metadata frequencies...' % time.ctime())
     frequencies = loader_obj.destination + '/frequencies'
     conn = sqlite3.connect(loader_obj.destination + '/toms.db')
     c = conn.cursor()
@@ -103,18 +106,18 @@ def metadata_frequencies(loader_obj):
                 if result[0] != None:
                     val = result[0].encode('utf-8', 'ignore')
                     clean_val = val.replace("\n", " ").replace("\t", "")
-                    print >> output, clean_val + '\t' + str(result[1])
+                    print(clean_val + '\t' + str(result[1]), file=output)
             output.close()
         except sqlite3.OperationalError:
             loader_obj.metadata_fields_not_found.append(field)
     if loader_obj.metadata_fields_not_found:
-        print 'The following fields were not found in the input corpus %s' % ', '.join(
-            loader_obj.metadata_fields_not_found)
+        print('The following fields were not found in the input corpus %s' % ', '.join(
+            loader_obj.metadata_fields_not_found))
     conn.close()
 
 
 def normalized_metadata_frequencies(loader_obj):
-    print '%s: Generating normalized metadata frequencies...' % time.ctime()
+    print('%s: Generating normalized metadata frequencies...' % time.ctime())
     frequencies = loader_obj.destination + '/frequencies'
     for field in loader_obj.metadata_fields:
         try:
@@ -124,7 +127,7 @@ def normalized_metadata_frequencies(loader_obj):
                 norm_word = word.decode('utf-8').lower()
                 norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
                 norm_word = ''.join(norm_word).encode('utf-8')
-                print >> output, norm_word + "\t" + word
+                print(norm_word + "\t" + word, file=output)
             output.close()
         except:
             pass
