@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-from __future__ import absolute_import
-from __future__ import print_function
-import sys
+from __future__ import absolute_import, print_function
+
 import os
 import subprocess
-from datetime import datetime
-import struct
-from . import HitList
-import re
+import sys
 import unicodedata
-from .QuerySyntax import parse_query, group_terms
+from datetime import datetime
+
 from six.moves import zip
+
+from . import HitList
+from .QuerySyntax import group_terms, parse_query
 
 # Work around issue where environ PATH does not contain path to C core
 os.environ["PATH"] += ":/usr/local/bin/"
@@ -34,9 +34,7 @@ def query(db,
     grouped = group_terms(parsed)
     split = split_terms(grouped)
 
-    #    print >> sys.stderr, "QUERY FORMATTED at ", datetime.now() - tstart
     words_per_hit = len(split)
-    #   print >> sys.stderr, "QUERY SPLIT at ", datetime.now() - tstart, repr(split)
     origpid = os.getpid()
     if not filename:
         hfile = str(origpid) + ".hitlist"
@@ -56,23 +54,18 @@ def query(db,
         if pid > 0:
             os._exit(0)
         else:
-            #now we're detached from the parent, and can do our work.
+            # now we're detached from the parent, and can do our work.
             if query_debug:
                 print("WORKER DETACHED at ", datetime.now() - tstart, file=sys.stderr)
-#            args = ["search4", db.path,"--limit",str(limit)]
             args = ["corpus_search"]
             if corpus_file:
                 args.extend(("-c", corpus_file))
-#            if corpus_file and corpus_size:
-#                args.extend(("--corpusfile", corpus_file , "--corpussize" , str(corpus_size)))
             if method and method_arg:
                 args.extend(("-m", method, "-a", str(method_arg)))
 
             args.extend(("-o", "binary", db.path, ))
 
             worker = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=hl, stderr=err, env=os.environ)
-            # if query_debug:
-            #     print >> sys.stderr, "WORKER STARTED:"," ".join(args);
 
             query_log_fh = filename + ".terms"
             if query_debug:
@@ -88,11 +81,10 @@ def query(db,
                 print("SEGFAULT", file=sys.stderr)
                 seg_flag = open(filename + ".error", "w")
                 seg_flag.close()
-            #do something to mark query as finished
+            # do something to mark query as finished
             flag = open(filename + ".done", "w")
             flag.write(" ".join(args) + "\n")
             flag.close()
-            #            print >> sys.stderr, "SUBPROC DONE at ", datetime.now() - tstart
             os._exit(0)
     else:
         hl.close()
