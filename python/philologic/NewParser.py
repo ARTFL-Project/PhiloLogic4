@@ -277,7 +277,6 @@ class XMLParser(object):
         self.context_div_level = 0
         self.current_tag = "doc"
         self.in_a_word_tag = False
-        self.in_notes_div = False
         self.current_div1_id = ""
         self.current_div_level = 0
         self.in_seg = False
@@ -713,7 +712,6 @@ class XMLParser(object):
 
                 if "type" in self.v[div_type]:
                     if self.v[div_type]["type"] == "notes":
-                        self.in_notes_div = True
                         self.no_deeper_objects = True
 
                 # TODO: unclear if we need to add EEBO hack when no subdiv objects...
@@ -910,11 +908,12 @@ class XMLParser(object):
         """Find all attributes for any given tag."""
         attribs = []
         for attrib, value in attrib_matcher.findall(tag):
-            # Replace ":" with "_" for attribute nanames since they are illegal in SQLite
+            # Replace ":" with "_" for attribute names since they are illegal in SQLite
             attrib = attrib.replace(':', "_")
             value = self.remove_control_chars(value)
             value = ending_punctuation.sub("", value.strip())
             value = convert_entities(value)
+            value = value.replace('"', '')
             attribs.append((attrib, value))
         return attribs
 
@@ -988,6 +987,7 @@ class XMLParser(object):
 
         div_head = self.remove_control_chars(div_head)
         div_head = convert_entities(div_head)
+        div_head = div_head.replace('"', '')
         return div_head
 
     def clear_char_ents(self, text):

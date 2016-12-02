@@ -2,13 +2,14 @@
 """Text Object formatter"""
 from __future__ import absolute_import
 from __future__ import print_function
+import os
 import re
 import sqlite3
 
 from lxml import etree
 from philologic.DB import DB
 from philologic.runtime.FragmentParser import parse as FragmentParserParse
-from philologic.runtime.link import *
+from philologic.runtime.link import make_absolute_query_link
 from philologic.utils import convert_entities
 
 begin_match = re.compile(r'^[^<]*?>')
@@ -77,7 +78,7 @@ def adjust_bytes(bytes, padding):
 
 
 def format_concordance(text, word_regex, bytes=[]):
-    word_regex = "\w+"  # text is converted to unicode so we use the \w boundary to match
+    word_regex = r"\w+"  # text is converted to unicode so we use the \w boundary to match
     removed_from_start = 0
     begin = begin_match.search(text)
     if begin:
@@ -141,7 +142,7 @@ def format_concordance(text, word_regex, bytes=[]):
     return output
 
 
-def format_strip(text, bytes=[]):
+def format_strip(text, byte_offsets=None):
     """Remove formatting for HTML rendering
     Called from: -kwic.py
                  -frequency.py"""
@@ -157,11 +158,11 @@ def format_strip(text, bytes=[]):
     end = end_match.search(text)
     if end:
         text = text[:end.start(0)]
-    if bytes:
-        bytes = [b - removed_from_start for b in bytes]
+    if byte_offsets is not None:
+        byte_offsets = [b - removed_from_start for b in byte_offsets]
         new_text = ""
         last_offset = 0
-        for b in bytes:
+        for b in byte_offsets:
             if b > 0 and b < len(text):
                 new_text += text[last_offset:b] + "<philoHighlight/>"
                 last_offset = b
@@ -173,12 +174,13 @@ def format_strip(text, bytes=[]):
     return output
 
 
-def format_text_object(obj, text, config, request, word_regex, bytes=[], note=False):
+def format_text_object(obj, text, config, request, word_regex, byte_offsets=None, note=False):
+    """Format text objects"""
     philo_id = obj.philo_id
-    if bytes:
+    if byte_offsets is not None:
         new_text = ""
         last_offset = 0
-        for b in bytes:
+        for b in byte_offsets:
             new_text += text[last_offset:b] + "<philoHighlight/>"
             last_offset = b
         text = new_text + text[last_offset:]
@@ -204,7 +206,7 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
             elif el.tag == "q":
                 el.tag = "span"
                 el.attrib['class'] = 'xml-q'
-            elif el.tag == "ref":
+            elif el.tag == "ref" or el.tag == "xref":
                 if el.attrib["type"] == "note" or el.attrib["type"] == "footnote":
                     target = el.attrib["target"]
                     link = make_absolute_query_link(config, request, script_name="/scripts/get_notes.py", target=target)
@@ -215,7 +217,6 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     el.tag = "span"
                     el.attrib["data-ref"] = link
                     el.attrib["id"] = target.replace('#', '') + '-link-back'
-                    el.attrib["target"]
                     # attributes for popover note
                     el.attrib['class'] = "note-ref"
                     el.attrib['tabindex'] = "0"
@@ -225,6 +226,23 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     el.attrib["data-trigger"] = "focus"
                     el.attrib["data-html"] = "true"
                     el.attrib["data-animation"] = "true"
+                elif el.attrib["type"] == "cross":
+                    c.execute("SELECT philo_id FROM toms WHERE id=? LIMIT 1", (el.attrib["target"],))
+                    try:
+                        object_id = c.fetchone()[0]
+                    except IndexError:
+                        el.tag = "span"
+                        continue
+                    el.tag = "a"
+                    el.attrib["href"] = 'navigate/%s' % '/'.join([i for i in object_id.split() if i != "0"])
+                    el.attrib["class"] = "xml-ref-cross"
+                    del el.attrib["target"]
+                elif el.attrib["type"] == "search":
+                    metadata, metadata_value = el.attrib["target"].split(':')
+                    params = {metadata: metadata_value, "report": "bibliography"}
+                    el.tag = "a"
+                    el.attrib["href"] = make_absolute_query_link(config, [], **params)
+                    del el.attrib["target"]
             elif el.tag == "note":
                 # endnotes
                 in_end_note = False
@@ -236,9 +254,9 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     el.tag = "div"
                     el.attrib['class'] = "xml-note"
                     link_back = etree.Element("a")
-                    c.execute('select parent, start_byte from refs where target=? and parent like ?',
+                    c.execute('select parent from refs where target=? and parent like ?',
                               (el.attrib['id'], str(philo_id[0]) + " %"))
-                    object_id, start_byte = c.fetchone()
+                    object_id = c.fetchone()[0]
                     link_back.attrib['href'] = 'navigate/%s%s' % ('/'.join([i for i in object_id.split() if i != "0"]),
                                                                   '#%s-link-back' % el.attrib['id'])
                     link_back.attrib['class'] = "btn btn-xs btn-default link-back"
@@ -283,21 +301,11 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
                     el[-1].text = "[page " + el.attrib["n"] + "]"
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
-            elif el.tag == "figure":
-                if el[0].tag == "graphic":
-                    img_url = el[0].attrib["url"].replace(":", "_")
-                    volume = re.match("\d+", img_url).group()
-                    url_prefix = config.page_images_url_root + '/V' + volume + "/plate_"
-                    el.tag = "span"
-                    el.attrib["href"] = url_prefix + img_url + ".jpeg"
-                    el[0].tag = "img"
-                    el[0].attrib["src"] = url_prefix + img_url + ".sm.jpeg"
-                    el[0].attrib["class"] = "inline-img"
-                    el.attrib["class"] = "inline-img-container"
-                    del el[0].attrib["url"]
-                    clear_float = etree.Element("span")
-                    clear_float.attrib['style'] = 'clear:both;'
-                    el[0].append(clear_float)
+            if el.tag == "graphic":
+                el.attrib["src"] = os.path.join(config.page_images_url_root, el.attrib["url"])
+                el.tag = "img"
+                el.attrib["class"] = "inline-img"
+                del el.attrib["url"]
             elif el.tag == "philoHighlight":
                 word_match = re.match(word_regex, el.tail, re.U)
                 if word_match:
@@ -326,6 +334,7 @@ def format_text_object(obj, text, config, request, word_regex, bytes=[], note=Fa
 
 
 def page_images(config, output, current_obj_img, philo_id):
+    """Get page images"""
     # first get first page info in case the object doesn't start with a page tag
     first_page_object = get_first_page(philo_id, config)
     if not current_obj_img:
@@ -385,6 +394,7 @@ def get_first_page(philo_id, config):
 
 
 def get_all_page_images(philo_id, config, current_obj_imgs):
+    """Get all page images"""
     if current_obj_imgs[0]:
         # We know there are images
         db = DB(config.db_path + '/data/')
@@ -402,6 +412,7 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
 
 
 def clean_tags(element):
+    """Remove all tags"""
     text = u''
     for child in element:
         text += clean_tags(child)
