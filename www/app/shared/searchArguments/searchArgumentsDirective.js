@@ -40,6 +40,11 @@
                     queryArgs.proximity = '';
                 }
             }
+            if (queryParams.approximate) {
+                queryArgs.approximate = true;
+            } else {
+                queryArgs.approximate = false;
+            }
             return queryArgs;
         }
         var buildCriteria = function(queryParams) {
@@ -79,7 +84,6 @@
             return biblio
         }
         var removeMetadata = function(metadata, queryParams, restart) {
-            console.log("calling")
             delete queryParams[metadata];
             if (!queryParams.q) {
                 queryParams.report = 'bibliography';
@@ -88,9 +92,7 @@
             queryParams.end = 0;
             var request = URL.report(queryParams);
             if (queryParams.report === "concordance" || queryParams.report === "kwic" || queryParams.report === "bibliography") {
-               // $http.get(request).success(function(data) {
-                    $location.url(URL.objectToUrlString(queryParams));
-               // })
+                $location.url(URL.objectToUrlString(queryParams));
             } else if (queryParams.report === "collocation" || queryParams.report === "time_series") {
                 $location.url(URL.objectToUrlString(queryParams));
                 $rootScope.formData = queryParams;
@@ -110,13 +112,14 @@
                 scope.formData = $rootScope.formData;
                 scope.removeMetadata = removeMetadata;
 
-                scope.termGroups = queryTermGroups.group;
 
+                scope.termGroups = queryTermGroups.group;
                 // Get parsed query group
                 request.script(scope.formData, {
                     script: 'get_term_groups.py'
                 }).then(function(response) {
-                    scope.termGroups = response.data;
+                    scope.termGroups = response.data.term_groups;
+                    scope.originalQuery = response.data.original_query;
                     queryTermGroups.group = angular.copy(scope.termGroups);
                     scope.termGroupsCopy = angular.copy(scope.termGroups);
                 });
@@ -149,6 +152,8 @@
                         scope.termGroupsCopy[groupIndex] += ' NOT ' + word.trim();
                     }
                     $rootScope.formData.q = scope.termGroupsCopy.join(' ');
+                    delete $rootScope.formData.approximate;
+                    delete $rootScope.formData.approximate_ratio;
                 }
                 scope.rerunQuery = function() {
                     var url = URL.objectToUrlString($rootScope.formData);

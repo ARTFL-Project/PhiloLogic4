@@ -2,6 +2,7 @@
 """Find similar words to query term."""
 
 from __future__ import absolute_import
+import hashlib
 import os
 import unicodedata
 
@@ -26,6 +27,18 @@ def get_all_words(db, request):
 
 def find_similar_words(db, config, request):
     """Edit distance function."""
+    # Check if lookup is cached
+    hashed_query = hashlib.sha256()
+    hashed_query.update(request['q'])
+    approximate_filename = os.path.join(config.db_path, "data/hitlists/%s.approximate_terms" % hashed_query.hexdigest())
+    if os.path.isfile(approximate_filename):
+        with open(approximate_filename) as fh:
+            approximate_terms = fh.read().strip()
+            import sys
+            print >> sys.stderr, "FOUND APPROX", approximate_terms
+            return approximate_terms
+    import sys
+    print >> sys.stderr, "NOT FOUND APPROX"
     query_groups = get_all_words(db, request)
     file_path = os.path.join(config.db_path, "data/frequencies/normalized_word_frequencies")
     new_query_groups = [set([]) for i in query_groups]
@@ -40,4 +53,7 @@ def find_similar_words(db, config, request):
                             new_query_groups[pos].add(regular_word)
             except ValueError:
                 pass
-    return ' '.join([" | ".join(group) for group in new_query_groups])
+    new_query_groups = ' '.join([" | ".join(group) for group in new_query_groups])
+    cached_file = open(approximate_filename, "w")
+    cached_file.write(new_query_groups)
+    return new_query_groups

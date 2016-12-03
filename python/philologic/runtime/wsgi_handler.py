@@ -118,6 +118,7 @@ class WSGIHandler(object):
         self.approximate = False
         if "approximate" in self.cgi:
             if self.cgi["approximate"][0] == "yes":
+                self.cgi["approximate"][0] = True
                 self.approximate = True
             if "approximate_ratio" in self.cgi:
                 self.approximate_ratio = float(self.cgi["approximate_ratio"][
@@ -127,8 +128,8 @@ class WSGIHandler(object):
 
         if 'q' in self.cgi:
             self.cgi['q'][0] = parse_query(self.cgi['q'][0])
-            # Fuzzy matching, but only for one word
             if self.approximate:
+                self.cgi["original_q"] = self.cgi['q'][:]
                 self.cgi['q'][0] = find_similar_words(db, config, self)
             if self.cgi["q"][0] != "":
                 self.no_q = False
@@ -157,6 +158,15 @@ class WSGIHandler(object):
             return self.defaults[key]
         else:
             return ""
+
+    def __setitem__(self, key, item):
+        if key not in self.cgi:
+            self.cgi[key] = []
+        if isinstance(item, list or set):
+            self.cgi[key] = item
+        else:
+            self.cgi[key][0] = item
+        import sys
 
     def __iter__(self):
         """Iterate over query args."""
