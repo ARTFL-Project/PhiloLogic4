@@ -28,7 +28,7 @@ object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
 blocksize = 2048  # index block size.  Don't alter.
 index_cutoff = 10  # index frequency cutoff.  Don't alter.
 
-DEFAULT_TABLES = ('toms', 'pages', 'refs', 'lines', 'words')
+DEFAULT_TABLES = ('toms', 'pages', 'refs', 'graphics', 'lines', 'words')
 
 DEFAULT_OBJECT_LEVEL = "doc"
 
@@ -287,6 +287,7 @@ class Loader(object):
                                "sortedtoms": self.workdir + os.path.basename(x) + ".toms.sorted",
                                "pages": self.workdir + os.path.basename(x) + ".pages",
                                "refs": self.workdir + os.path.basename(x) + ".refs",
+                               "graphics": self.workdir + os.path.basename(x) + ".graphics",
                                "lines": self.workdir + os.path.basename(x) + ".lines",
                                "results": self.workdir + os.path.basename(x) + ".results"}
                               for n, x in enumerate(self.list_files())]
@@ -304,6 +305,7 @@ class Loader(object):
                                "sortedtoms": self.workdir + os.path.basename(d["filename"]) + ".toms.sorted",
                                "pages": self.workdir + os.path.basename(d["filename"]) + ".pages",
                                "refs": self.workdir + os.path.basename(d["filename"]) + ".refs",
+                               "graphics": self.workdir + os.path.basename(d["filename"]) + ".graphics",
                                "lines": self.workdir + os.path.basename(d["filename"]) + ".lines",
                                "results": self.workdir + os.path.basename(d["filename"]) + ".results"}
                               for n, d in enumerate(data_dicts)]
@@ -457,6 +459,12 @@ class Loader(object):
             os.system("cat %s >> %s/all_refs" % (ref_file, self.workdir))
             if not self.debug:
                 os.system("rm %s" % ref_file)
+        
+        print("%s: joining graphics" % time.ctime())
+        for graphic_file in glob(self.workdir + "/*graphics"):
+            os.system("cat %s >> %s/all_graphics" % (graphic_file, self.workdir))
+            if not self.debug:
+                os.system("rm %s" % graphic_file)
 
         print("%s: joining lines" % time.ctime())
         for line_file in glob(self.workdir + "/*lines"):
@@ -600,6 +608,10 @@ class Loader(object):
             elif table == "refs":
                 file_in = self.destination + '/WORK/all_refs'
                 indices = [("parent", ), ("target", ), ("type", )]
+                depth = 9
+            elif table == "graphics":
+                file_in = self.destination + '/WORK/all_graphics'
+                indices = [("parent", ), ("philo_id", )]
                 depth = 9
             elif table == "lines":
                 file_in = self.destination + '/WORK/all_lines'

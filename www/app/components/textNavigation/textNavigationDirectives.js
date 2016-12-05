@@ -39,6 +39,7 @@
                     textNavigationValues.textObject = response.data;
                     textNavigationValues.citation = response.data.citation;
                     textNavigationValues.navBar = true;
+                    scope.textNav.graphics = response.data.imgs.graphics;
                     if (scope.byteOffset.length > 0) {
                         scope.highlight = true;
                     } else {
@@ -294,21 +295,22 @@
     }
 
     function inlineImg($window) {
-        var launchGallery = function() {
+        var launchGallery = function(scope) {
             var imageList = [];
-            angular.element('#book-page').find('img.inline-img').parent('.inline-img-container').each(function() {
-                imageList.push(angular.element(this).attr('href'));
+            angular.element('#book-page').find('img.inline-img').each(function() {
+                imageList.push(angular.element(this).attr('src'));
             });
             return imageList;
         }
         return {
-            restrict: 'C',
+            restrict: 'A',
             link: function(scope, element) {
+                var index = scope.textNav.graphics.indexOf(element.attr('src'));
                 element.click(function(e) {
                     e.preventDefault();
-                    scope.gallery = blueimp.Gallery(launchGallery(), {
+                    scope.gallery = blueimp.Gallery(scope.textNav.graphics, {
                         onopen: function() {
-                            this.index = element.index('img.inline-img');
+                            this.index = index;
                         },
                         continuous: false,
                         thumbnailIndicators: false

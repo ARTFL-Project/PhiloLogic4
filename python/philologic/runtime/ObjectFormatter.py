@@ -305,6 +305,8 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                 el.attrib["src"] = os.path.join(config.page_images_url_root, el.attrib["url"])
                 el.tag = "img"
                 el.attrib["class"] = "inline-img"
+                el.attrib['data-gallery'] = ''
+                el.attrib["inline-img"] = ""
                 del el.attrib["url"]
             elif el.tag == "philoHighlight":
                 word_match = re.match(word_regex, el.tail, re.U)
@@ -352,7 +354,8 @@ def page_images(config, output, current_obj_img, philo_id):
             output = '<span class="xml-pb-image">[page ' + str(first_page_object["n"]) + "]</span>" + output
     ## Fetch all remainging imgs in document
     all_imgs = get_all_page_images(philo_id, config, current_obj_img)
-    img_obj = {'all_imgs': all_imgs, 'current_obj_img': current_obj_img}
+    all_graphics = get_all_graphics(philo_id, config)
+    img_obj = {'all_imgs': all_imgs, 'current_obj_img': current_obj_img, "graphics": all_graphics}
     return output, img_obj
 
 
@@ -401,15 +404,25 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
         c = db.dbh.cursor()
         approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
         try:
-            c.execute('select * from pages where philo_id like ? and img is not null and img != ""', (approx_id, ))
+            c.execute('select * from pages where philo_id like ? and fac is not null and fac != ""', (approx_id, ))
             current_obj_imgs = set(current_obj_imgs)
-            all_imgs = [i['img'] for i in c.fetchall()]
+            all_imgs = [i['fac'] for i in c.fetchall()]
         except sqlite3.OperationalError:
             all_imgs = []
         return all_imgs
     else:
         return []
 
+def get_all_graphics(philo_id, config):
+    db = DB(config.db_path + '/data/')
+    c = db.dbh.cursor()
+    approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
+    try:
+        c.execute('SELECT url FROM graphics WHERE philo_id LIKE ? AND url IS NOT NULL AND url != "" ORDER BY ROWID', (approx_id, ))
+        graphics = [os.path.join(config.page_images_url_root, i["url"]) for i in c.fetchall()]
+        return graphics
+    except sqlite3.OperationalError:
+        return []
 
 def clean_tags(element):
     """Remove all tags"""

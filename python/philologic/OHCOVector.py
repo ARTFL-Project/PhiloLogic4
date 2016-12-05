@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from __future__ import absolute_import
 from __future__ import print_function
-import re
 import sys
 from simplejson import dumps
 import six
@@ -11,7 +10,7 @@ from six.moves import zip
 
 
 class ParallelRecord(object):
-    """ParallelRecord tracks page objects that are parallel to a primary record stack.  Used by CompoundStack."""
+    """ParallelRecord tracks objects that are parallel to a primary record stack.  Used by CompoundStack."""
 
     def __init__(self, type, name, id):
         self.type = type
@@ -89,12 +88,12 @@ class CompoundRecord(object):
 
 
 class CompoundStack(object):
-    """CompoundStack is the class instantiated by a parser.  It itself creates a NewStack, but also tracks parallel objects
-    The API is quite minimal. You can push and pull objects by type.
+    """CompoundStack is the class instantiated by a parser. It itself creates a NewStack,
+    but also tracks parallel objects. The API is quite minimal. You can push and pull objects by type.
     CompoundStack doesn't actually do deep object arithmetic or recursion--it handles parallel objects manually,
     and passes other calls on to the NewStack."""
 
-    def __init__(self, types, page, docid=0, out=None, ref="", line="", factory=CompoundRecord, p_factory=ParallelRecord):
+    def __init__(self, types, page, docid=0, out=None, ref="", line="", graphic="", factory=CompoundRecord, p_factory=ParallelRecord):
         self.stack = NewStack(types[:], out, factory)
         self.out = out
         self.v_max = self.stack.v_max
@@ -105,9 +104,12 @@ class CompoundStack(object):
         self.current_ref = None
         self.line = line
         self.current_line = None
+        self.graphic = graphic
+        self.current_graphic = None
         self.p = 0
         self.r = 0
         self.l = 0
+        self.g = 0
         self.p_factory = p_factory
 
     def __getitem__(self, n):
@@ -117,6 +119,8 @@ class CompoundStack(object):
             return self.current_ref
         elif n == self.line:
             return self.current_line
+        elif n == self.graphic:
+            return self.current_graphic
         else:
             return self.stack[n]
 
@@ -136,6 +140,11 @@ class CompoundStack(object):
                 return True
             else:
                 return False
+        elif n == self.graphic:
+            if self.current_graphic:
+                return True
+            else:
+                return False
         else:
             if n in self.stack:
                 return True
@@ -150,17 +159,22 @@ class CompoundStack(object):
             self.current_p.attrib["start_byte"] = byte
             return self.current_p
         elif type == self.ref:
-            self.pull(type, byte)
             self.r += 1
             self.current_ref = self.p_factory(type, name, [self.stack.v[0], self.r])
             self.current_ref.attrib["start_byte"] = byte
             return self.current_ref
         elif type == self.line:
+            # TODO: evaluate whether we treat line as a parallel object
             self.pull(type, byte)
             self.l += 1
             self.current_line = self.p_factory(type, name, [self.stack.v[0], self.l])
             self.current_line.attrib["start_byte"] = byte
             return self.current_line
+        elif type == self.graphic:
+            self.g += 1
+            self.current_graphic = self.p_factory(type, name, [self.stack.v[0], self.g])
+            self.current_graphic.attrib["start_byte"] = byte
+            return self.current_graphic
         else:
             self.stack.push(type, name, byte)
             if self.current_p:
@@ -180,6 +194,10 @@ class CompoundStack(object):
             if self.current_line:
                 self.current_line.attrib["end_byte"] = byte
                 print(self.current_line, file=self.out)
+        elif type == self.graphic:
+            if self.current_graphic:
+                self.current_graphic.attrib["end_byte"] = byte
+                print(self.current_graphic, file=self.out)
         else:
             return self.stack.pull(type, byte)
 
@@ -242,7 +260,6 @@ class NewStack(object):
         #        print [x.name for x in self.current_objects]
 
         i = self.index(type)
-        #      print "%s %d" % (type,i)
         if type in self.types:
             while len(self) < i:
                 self.push(self.types[len(self)], "__philo_virtual", byte)

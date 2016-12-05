@@ -36,6 +36,7 @@ DefaultTagToObjMap = {
     "add": "para",
     "pb": "page",
     "ref": "ref",
+    "graphic": "graphic",
     "l": "line",
     "ab": "line"
 }
@@ -45,6 +46,7 @@ DefaultMetadataToParse = {
     "para": ["who", "resp", "id"],  # for <sp> and <add> tags
     "page": ["n", "id", "fac"],
     "ref": ["target", "n", "type"],
+    "graphic": ["url"],
     "line": ["n"]
 }
 
@@ -178,7 +180,8 @@ class XMLParser(object):
                                           docid=docid,
                                           out=output,
                                           ref="ref",
-                                          line="line")
+                                          line="line",
+                                          graphic="graphic")
 
         self.filesize = filesize
         self.known_metadata = known_metadata
@@ -732,6 +735,12 @@ class XMLParser(object):
                 self.get_object_attributes(tag, tag_name, "ref")
                 self.v["ref"].attrib["parent"] = " ".join([str(i) for i in self.current_div_id])
                 self.v.pull("ref", self.bytes_read_in)
+
+            elif tag_name == "graphic":
+                self.v.push("graphic", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "graphic")
+                self.v["graphic"].attrib["parent"] = " ".join([str(i) for i in self.current_div_id])
+                self.v.pull("graphic", self.bytes_read_in)
 
     def word_handler(self, words):
         """
