@@ -5,17 +5,17 @@
         </button>
     </div>
     <div id="toc-content" scroll-to="{{ tocPosition }}">
-		<div class="toc-more before" ng-if="start !== 0">
-			<button type="button" class="btn btn-default btn-sm glyphicon glyphicon-menu-up" ng-click="loadBefore()"></button>
-		</div>
-		<div ng-repeat="element in tocElements.slice(start, end) track by element.philo_id">
+        <div class="toc-more before" ng-if="start !== 0">
+            <button type="button" class="btn btn-default btn-sm glyphicon glyphicon-menu-up" ng-click="loadBefore()"></button>
+        </div>
+        <div ng-repeat="element in tocElements.slice(start, end) track by element.philo_id">
             <div id="{{ ::element.philo_id }}" class="toc-{{ ::element.philo_type }}" ng-click="textObjectSelection(element.philo_id, $index)">
                 <span class="bullet-point-{{ ::element.philo_type }}"></span>
                 <a ng-class="{'current-obj': element.philo_id === currentPhiloId }" href="">{{ ::element.label }}</a>
             </div>
         </div>
-		<div class="toc-more after" ng-if="end < tocElements.length">
-			<button type="button" class="btn btn-default btn-sm glyphicon glyphicon-menu-down" ng-click="loadAfter()"></button>
-		</div>
-	</div>
+        <div class="toc-more after" ng-if="end < tocElements.length">
+            <button type="button" class="btn btn-default btn-sm glyphicon glyphicon-menu-down" ng-click="loadAfter()"></button>
+        </div>
+    </div>
 </div>

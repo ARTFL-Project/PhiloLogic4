@@ -106,7 +106,6 @@
                 })
                 .then(function(response) {
                     scope.tocElements = response.data.toc;
-                    scope.currentPhiloId = response.data.philo_id.join(' ');
                     scope.start = response.data.current_obj_position - 100;
                     if (scope.start < 0) {
                         scope.start = 0;
@@ -129,11 +128,10 @@
                 scope.tocPosition = '';
                 var philoId = $routeParams.pathInfo.split('/').join(' ');
                 var docId = philoId.split(' ')[0];
-
+                scope.currentPhiloId = philoId;
                 if (docId !== textNavigationValues.tocElements.docId) {
                     getTableOfContents(scope, philoId);
                 } else {
-                    scope.currentPhiloId = philoId;
                     scope.tocElements = textNavigationValues.tocElements.elements;
                     scope.start = textNavigationValues.tocElements.start;
                     scope.end = textNavigationValues.tocElements.end;
@@ -151,11 +149,11 @@
                     scope.end += 200;
                 }
                 scope.textObjectSelection = function(philoId, index) {
-                    textNavigationValues.tocElements.start = index - 100;
+                    textNavigationValues.tocElements.start = textNavigationValues.tocElements.start + index - 100;
                     if (textNavigationValues.tocElements.start < 0) {
                         textNavigationValues.tocElements.start = 0;
                     }
-                    textNavigationValues.tocElements.end = index + 100;
+                    textNavigationValues.tocElements.end = textNavigationValues.tocElements.end - index + 100;
                     scope.textNav.goToTextObject(philoId);
                 }
             }

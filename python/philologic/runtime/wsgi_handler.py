@@ -166,7 +166,6 @@ class WSGIHandler(object):
             self.cgi[key] = item
         else:
             self.cgi[key][0] = item
-        import sys
 
     def __iter__(self):
         """Iterate over query args."""

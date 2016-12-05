@@ -34,11 +34,7 @@ def find_similar_words(db, config, request):
     if os.path.isfile(approximate_filename):
         with open(approximate_filename) as fh:
             approximate_terms = fh.read().strip()
-            import sys
-            print >> sys.stderr, "FOUND APPROX", approximate_terms
             return approximate_terms
-    import sys
-    print >> sys.stderr, "NOT FOUND APPROX"
     query_groups = get_all_words(db, request)
     file_path = os.path.join(config.db_path, "data/frequencies/normalized_word_frequencies")
     new_query_groups = [set([]) for i in query_groups]

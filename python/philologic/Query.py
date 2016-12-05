@@ -26,8 +26,7 @@ def query(db,
           filename="",
           query_debug=False,
           sort_order=None,
-          raw_results=False,
-          approximate=False):
+          raw_results=False):
     sys.stdout.flush()
     tstart = datetime.now()
 
