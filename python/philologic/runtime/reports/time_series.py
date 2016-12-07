@@ -20,9 +20,8 @@ def generate_time_series(request, config):
     # Generate date ranges
     interval = int(request.year_interval)
     date_ranges = []
-    if interval == 1:  # Make sure last date gets included in for loop below
-        end_date += 1
-    for start in xrange(start_date, end_date, interval):
+    # Make sure last date gets included in for loop below by adding one to last step
+    for start in xrange(start_date, end_date+1, interval):
         end = start + interval - 1
         if end > end_date:
             end = end_date

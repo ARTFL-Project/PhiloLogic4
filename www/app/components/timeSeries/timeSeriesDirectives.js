@@ -119,7 +119,6 @@
                         dateList.push(i);
                         zeros.push(0);
                     }
-
                     // Initialize Chart
                     Chart.defaults.global.responsive = true;
                     Chart.defaults.global.animation.duration = 400;

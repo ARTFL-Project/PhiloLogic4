@@ -93,7 +93,10 @@ class HitWrapper(object):
                         # Not a word hit
                         return ""
                 else:
-                    return self.ancestors[f_type][key]
+                    try:
+                        return self.ancestors[f_type][key]
+                    except KeyError:
+                        return ""
             else:
                 if self.row is None:
                     self.row = self.db.get_id_lowlevel(self.philo_id)

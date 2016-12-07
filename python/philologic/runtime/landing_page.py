@@ -44,12 +44,12 @@ def landing_page_bibliography(request, config):
             next_doc_row = c.fetchone()[0]
         try:
             c.execute(
-                'select * from toms where rowid between %d and %d and head is not null and head !="" and type !="editorial" and type !="misc" and type !="Misc" and type != "Avertissement" and type != "Title Page" and type != "Avis" limit 1'
+                'select * from toms where rowid between %d and %d and head is not null and head !="" limit 1'
                 % (doc_row, next_doc_row))
         except sqlite3.OperationalError:  # no type field in DB
             c.execute(
-                'select * from toms where rowid between %d and %d and head is not null and head !="" limit 1'
-                % (doc_row, next_doc_row))
+                'select * from toms where rowid between ? and ? and head is not null and head !="" limit 1',
+                (doc_row, next_doc_row))
         try:
             start_head = c.fetchone()['head'].decode('utf-8')
             start_head = start_head.lower().title().encode('utf-8')
@@ -58,7 +58,7 @@ def landing_page_bibliography(request, config):
             start_head = ''
         try:
             c.execute(
-                'select head from toms where rowid between %d and %d and head is not null and head !="" and type !="notes" and type !="editorial" and type !="misc" and type !="Misc" and type != "Avertissement" and type != "Title Page" and type != "Avis" order by rowid desc limit 1'
+                'select head from toms where rowid between %d and %d and head is not null and head !="" order by rowid desc limit 1'
                 % (doc_row, next_doc_row))
         except sqlite3.OperationalError:  # no type field in DB
             c.execute(

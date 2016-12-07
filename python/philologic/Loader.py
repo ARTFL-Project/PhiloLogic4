@@ -459,7 +459,7 @@ class Loader(object):
             os.system("cat %s >> %s/all_refs" % (ref_file, self.workdir))
             if not self.debug:
                 os.system("rm %s" % ref_file)
-        
+
         print("%s: joining graphics" % time.ctime())
         for graphic_file in glob(self.workdir + "/*graphics"):
             os.system("cat %s >> %s/all_graphics" % (graphic_file, self.workdir))
@@ -652,7 +652,8 @@ class Loader(object):
     def write_db_config(self):
         """ Write local variables used by libphilo"""
         filename = self.destination + "/db.locals.py"
-        db_values = {'metadata_fields': self.metadata_fields,
+        metadata = [i for i in self.metadata_fields if i not in self.metadata_fields_not_found]
+        db_values = {'metadata_fields': metadata,
                      'metadata_hierarchy': self.metadata_hierarchy,
                      'metadata_types': self.metadata_types,
                      'normalized_fields': self.normalized_fields,
