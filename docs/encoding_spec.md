@@ -43,3 +43,4 @@ itself at the end of a text object or of the document.
 * Pointers will be displayed in the text using the contents of the n attribute, otherwise default to "note".
 * Notes should be stored at the end of the parent `<div>` element or a the end of the doc inside a `<div type="notes">`
 * Notes themselves are stored in a `<note>` tag.
+* Notes are stored as paragraph elements, therefore all `<p>`tags contained within will be ignored though still displayed.
