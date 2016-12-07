@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from load_script import *
 from philologic.Config import *
 
@@ -6,7 +8,7 @@ from philologic.Config import *
 template_dir = None
 
 if template_dir == "None":
-    print "please configure the reload_script.py with a base database before use!"
+    print("please configure the reload_script.py with a base database before use!")
     exit(1)
 
 if __name__ == "__main__":
@@ -38,9 +40,9 @@ if __name__ == "__main__":
     ## load_metadata = [{"filename":f} for f in files] 
     #load_metadata = [{"filename":f} for f in sorted(filenames)]
 
-    print >> sys.stderr, "parsing headers and sorting:"
+    print("parsing headers and sorting:", file=sys.stderr)
     load_metadata = l.sort_by_metadata("date","title","filename",whole_file=True)
-    print >> sys.stderr, "load_metadata:", load_metadata
+    print("load_metadata:", load_metadata, file=sys.stderr)
     l.parse_files(workers,load_metadata)
 
     l.merge_objects()
@@ -53,7 +55,7 @@ if __name__ == "__main__":
     db_config_path = template_dir+"/data/db.locals.py"
     new_db_config_file = open(db_destination +"/data/db.locals.py", "w")
     db_config = Config(db_config_path,db_locals_defaults,db_locals_header)
-    print >> new_db_config_file, db_config
+    print(db_config, file=new_db_config_file)
     new_db_config_file.close()
 
     web_config_path = template_dir+"/data/web_config.cfg"
@@ -62,5 +64,5 @@ if __name__ == "__main__":
     web_config = Config(web_config_path,web_config_defaults,web_config_header)
     #  web_config["dbname"] = dbname
     web_config["db_url"] = db_url  
-    print >> new_web_config_file, web_config 
+    print(web_config, file=new_web_config_file) 
     new_web_config_file.close()

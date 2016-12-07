@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from philologic import shlaxtree as st
 import sys
 
@@ -42,7 +44,7 @@ class TagCensus:
         else:
             return
         if self.debug:
-            print >> sys.stderr, kind, name, content, offset
+            print(kind, name, content, offset, file=sys.stderr)
         if name not in self.tags:
             self.tags[name] = {"start":0,"end":0,"empty":0,"malformed":0}
         self.tags[name][kind] += 1
@@ -118,12 +120,12 @@ if __name__ == "__main__":
         file_count += 1
         census = TagCensus()
         census.parse(open(fn).read())
-        print fn
-        print census
+        print(fn)
+        print(census)
         if total:
             total += census
         else:
             total = census
     if file_count > 1:
-        print "TOTAL: %d FILES" % (file_count)
-        print total
+        print("TOTAL: %d FILES" % (file_count))
+        print(total)

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """PhiloLogic4 main parser"""
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import re
 import string
@@ -8,6 +10,8 @@ import sys
 
 from philologic import OHCOVector
 from philologic.utils import convert_entities
+import six
+from six.moves import range
 
 DefaultTagToObjMap = {
     "div": "div",
@@ -32,6 +36,7 @@ DefaultTagToObjMap = {
     "add": "para",
     "pb": "page",
     "ref": "ref",
+    "graphic": "graphic",
     "l": "line",
     "ab": "line"
 }
@@ -41,6 +46,7 @@ DefaultMetadataToParse = {
     "para": ["who", "resp", "id"],  # for <sp> and <add> tags
     "page": ["n", "id", "fac"],
     "ref": ["target", "n", "type"],
+    "graphic": ["url"],
     "line": ["n"]
 }
 
@@ -174,7 +180,8 @@ class XMLParser(object):
                                           docid=docid,
                                           out=output,
                                           ref="ref",
-                                          line="line")
+                                          line="line",
+                                          graphic="graphic")
 
         self.filesize = filesize
         self.known_metadata = known_metadata
@@ -273,7 +280,6 @@ class XMLParser(object):
         self.context_div_level = 0
         self.current_tag = "doc"
         self.in_a_word_tag = False
-        self.in_notes_div = False
         self.current_div1_id = ""
         self.current_div_level = 0
         self.in_seg = False
@@ -294,7 +300,7 @@ class XMLParser(object):
         # if the parser was created with known_metadata,
         # we can attach it to the newly created doc object here.
         # you can attach metadata to an object at any time between push() and pull().
-        for k, v in self.known_metadata.iteritems():
+        for k, v in six.iteritems(self.known_metadata):
             self.v["doc"][k] = v
 
         # Split content into a list on newlines.
@@ -709,7 +715,6 @@ class XMLParser(object):
 
                 if "type" in self.v[div_type]:
                     if self.v[div_type]["type"] == "notes":
-                        self.in_notes_div = True
                         self.no_deeper_objects = True
 
                 # TODO: unclear if we need to add EEBO hack when no subdiv objects...
@@ -730,6 +735,12 @@ class XMLParser(object):
                 self.get_object_attributes(tag, tag_name, "ref")
                 self.v["ref"].attrib["parent"] = " ".join([str(i) for i in self.current_div_id])
                 self.v.pull("ref", self.bytes_read_in)
+
+            elif tag_name == "graphic":
+                self.v.push("graphic", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "graphic")
+                self.v["graphic"].attrib["parent"] = " ".join([str(i) for i in self.current_div_id])
+                self.v.pull("graphic", self.bytes_read_in)
 
     def word_handler(self, words):
         """
@@ -817,8 +828,8 @@ class XMLParser(object):
                         # Check to see if the word is longer than we want.  More than 235
                         # characters appear to cause problems in the indexer.
                         if len(word) > self.long_word_limit:
-                            print >> sys.stderr, "Long word: %s" % word
-                            print >> sys.stderr, "Truncating to %d characters for index..." % self.long_word_limit
+                            print("Long word: %s" % word, file=sys.stderr)
+                            print("Truncating to %d characters for index..." % self.long_word_limit, file=sys.stderr)
                             word = word[:self.long_word_limit]
 
                         word = self.remove_control_chars(word)
@@ -906,11 +917,12 @@ class XMLParser(object):
         """Find all attributes for any given tag."""
         attribs = []
         for attrib, value in attrib_matcher.findall(tag):
-            # Replace ":" with "_" for attribute nanames since they are illegal in SQLite
+            # Replace ":" with "_" for attribute names since they are illegal in SQLite
             attrib = attrib.replace(':', "_")
             value = self.remove_control_chars(value)
             value = ending_punctuation.sub("", value.strip())
             value = convert_entities(value)
+            value = value.replace('"', '')
             attribs.append((attrib, value))
         return attribs
 
@@ -984,6 +996,7 @@ class XMLParser(object):
 
         div_head = self.remove_control_chars(div_head)
         div_head = convert_entities(div_head)
+        div_head = div_head.replace('"', '')
         return div_head
 
     def clear_char_ents(self, text):
@@ -1260,7 +1273,7 @@ abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)',
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
 tab_newline = re.compile(r'[\n|\t]')
 control_chars = ''.join(
-    [i for i in map(lambda x: unichr(x).encode('utf8'), range(0, 32) + range(127, 160)) if not tab_newline.search(i)])
+    [i for i in [unichr(x).encode('utf8') for x in list(range(0, 32)) + list(range(127, 160))] if not tab_newline.search(i)])
 control_char_re = re.compile(r'[%s]' % re.escape(control_chars))
 
 # Entities regexes
@@ -1332,7 +1345,7 @@ entity_regex = [
 
 if __name__ == "__main__":
     for docid, fn in enumerate(sys.argv[1:], 1):
-        print >> sys.stderr, docid, fn
+        print(docid, fn, file=sys.stderr)
         size = os.path.getsize(fn)
         fh = open(fn)
         parser = XMLParser(sys.stdout,

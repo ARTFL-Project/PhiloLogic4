@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
 import os
 import re
 
 from lxml import etree
-from ObjectFormatter import adjust_bytes, format_concordance, format_text_object
+from .ObjectFormatter import adjust_bytes, format_concordance, format_text_object
 from philologic.HitWrapper import ObjectWrapper
 from philologic.DB import DB
 
@@ -18,12 +19,12 @@ def get_text(hit, start_byte, length, path):
 
 def get_concordance_text(db, hit, path, context_size):
     ## Determine length of text needed
-    bytes = sorted(hit.bytes)
-    byte_distance = bytes[-1] - bytes[0]
+    byte_offsets = sorted(hit.bytes)
+    byte_distance = byte_offsets[-1] - byte_offsets[0]
     length = context_size + byte_distance + context_size
-    bytes, start_byte = adjust_bytes(bytes, context_size)
+    byte_offsets, start_byte = adjust_bytes(byte_offsets, context_size)
     conc_text = get_text(hit, start_byte, length, path)
-    conc_text = format_concordance(conc_text, db.locals["token_regex"], bytes)
+    conc_text = format_concordance(conc_text, db.locals["token_regex"], byte_offsets)
     return conc_text
 
 
@@ -44,11 +45,11 @@ def get_text_obj(obj, config, request, word_regex, note=False, images=True):
     width = int(obj.end_byte) - start_byte
     raw_text = file.read(width)
     try:
-        bytes = sorted([int(byte) - start_byte for byte in request.byte])
+        byte_offsets = sorted([int(byte) - start_byte for byte in request.byte])
     except ValueError:  ## request.byte contains an empty string
-        bytes = []
+        byte_offsets = []
 
-    formatted_text, imgs = format_text_object(obj, raw_text, config, request, word_regex, bytes=bytes, note=note)
+    formatted_text, imgs = format_text_object(obj, raw_text, config, request, word_regex, byte_offsets=byte_offsets, note=note)
     formatted_text = formatted_text.decode("utf-8", "ignore")
     if images:
         return formatted_text, imgs

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from lxml import etree
 from xml.parsers import expat
 import sys
@@ -280,7 +282,7 @@ class Parser(object):
             #            print >> sys.stderr, repr(event)
             if name != self.stack[-1].tag:
                 #expat should die before you ever get here.  Just to be safe...
-                print "TAG MISMATCH:", repr(new_element), repr(stack)
+                print("TAG MISMATCH:", repr(new_element), repr(stack))
                 sys.exit()
             else:
                 popped = self.stack.pop()
@@ -440,7 +442,7 @@ DefaultMetadataXPaths = {
 
 if __name__ == "__main__":
     for docid, fn in enumerate(sys.argv[1:], 1):
-        print >> sys.stderr, docid, fn
+        print(docid, fn, file=sys.stderr)
         size = os.path.getsize(fn)
         fh = open(fn)
         parser = Parser(sys.stdout,

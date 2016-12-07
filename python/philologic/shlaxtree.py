@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from philologic import shlax
 
 import re 
@@ -7,7 +9,7 @@ try:
     import elementtree.ElementTree as ElementTree
 except ImportError:
     if (sys.version[0] == 2) and (sys.version[1] <= 6):
-        print >> sys.stderr, "Warning: PhiloLogic require ElementTree 1.3 or greater"
+        print("Warning: PhiloLogic require ElementTree 1.3 or greater", file=sys.stderr)
     import xml.etree.ElementTree as ElementTree
 et = ElementTree
 
@@ -67,7 +69,7 @@ class ShlaxIngestor():
                 if nm:
                     name = nm.group("EndTagName")   
                 else:
-                    print "'%s' : no name in end tag?" % content
+                    print("'%s' : no name in end tag?" % content)
                 self.target.feed(type,content,offset,name,None)
                 # have to extract the name, of course.
             elif m.group("ElemTag"):
@@ -181,7 +183,7 @@ class ShlaxTreeBuilder():
         if self.stack:
             while self.stack:
                 open_element = self.stack.pop()
-                if self.log: print >> sys.stderr, "unclosed element %s" % open_element.tag
+                if self.log: print("unclosed element %s" % open_element.tag, file=sys.stderr)
             return open_element
         else:
             return self.done # return the tree
@@ -222,7 +224,7 @@ class ShlaxTreeBuilder():
         if last_element.tag == tag:
             last_element = self.stack.pop()     
         else:
-            if self.log: print >> sys.stderr, "tag mismatch. %s != %s" % (last_element.tag,tag)
+            if self.log: print("tag mismatch. %s != %s" % (last_element.tag,tag), file=sys.stderr)
         if not self.stack:
            self.done = last_element
         return last_element
@@ -231,5 +233,5 @@ if __name__ == "__main__":
     import sys
     for file in sys.argv[1:]:
         root = parse(open(file))
-        print "parsed %s successfully." % file
+        print("parsed %s successfully." % file)
 #        print et.tostring(root,encoding="utf8")

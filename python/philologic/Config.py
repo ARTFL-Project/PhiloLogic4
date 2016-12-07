@@ -1,8 +1,11 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import json
 from philologic.utils import pretty_print
+import six
 
 db_locals_defaults = {
     'metadata_fields': {
@@ -695,12 +698,12 @@ class Config(object):
         self.defaults = defaults
         self.header = header
         self.data = {}
-        self.sorted_defaults = sorted(self.defaults.items(), key=lambda x: x[1]['index'])
+        self.sorted_defaults = sorted(list(self.defaults.items()), key=lambda x: x[1]['index'])
         for key, value in self.sorted_defaults:
             self.data[key] = value['value']
 
         if self.filename and os.path.exists(self.filename):
-            execfile(self.filename, globals(), self.data)
+            exec(compile(open(self.filename).read(), self.filename, 'exec'), globals(), self.data)
             self.valid_config = True
 
         self.time_series_status = True
@@ -751,8 +754,8 @@ class Config(object):
 def MakeWebConfig(path, **extra_values):
     web_config = Config(path, web_config_defaults, header=web_config_header)
     if extra_values:
-        for key, value in extra_values.iteritems():
-            if isinstance(key, unicode):
+        for key, value in six.iteritems(extra_values):
+            if isinstance(key, six.text_type):
                 key = str(key)
             web_config[key] = value
     return web_config
@@ -761,8 +764,8 @@ def MakeWebConfig(path, **extra_values):
 def MakeDBConfig(path, **extra_values):
     db_config = Config(path, db_locals_defaults, header=db_locals_header)
     if extra_values:
-        for key, value in extra_values.iteritems():
-            if isinstance(key, unicode):
+        for key, value in six.iteritems(extra_values):
+            if isinstance(key, six.text_type):
                 key = str(key)
             db_config[key] = value
     return db_config
@@ -773,4 +776,4 @@ if __name__ == "__main__":
         conf = Config(sys.argv[1], web_config_defaults)
     else:
         conf = Config(sys.argv[1], db_locals_defaults)
-    print >> sys.stderr, conf
+    print(conf, file=sys.stderr)

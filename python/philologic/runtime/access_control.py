@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
 import os
 import socket
 import re
@@ -24,7 +25,7 @@ def check_access(environ, config):
         return make_token(incoming_address, db)
     else:
         try:
-            execfile(access_file, globals(), access)
+            exec(compile(open(access_file).read(), access_file, 'exec'), globals(), access)
         except:
             return ()
         # We would add whatever other IPs have been defined in the access_file to blocks
@@ -128,7 +129,7 @@ def numToDottedQuad(n):
 
 def makeMask(n):
     "return a mask of n bits as a long integer"
-    return ((2L << n - 1) - 1) << (32 - n)
+    return ((2 << n - 1) - 1) << (32 - n)
 
 
 def ipToNetAndHost(ip, maskbits):

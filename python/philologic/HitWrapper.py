@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
+from six.moves import zip
 
 obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
 
@@ -90,7 +93,10 @@ class HitWrapper(object):
                         # Not a word hit
                         return ""
                 else:
-                    return self.ancestors[f_type][key]
+                    try:
+                        return self.ancestors[f_type][key]
+                    except KeyError:
+                        return ""
             else:
                 if self.row is None:
                     self.row = self.db.get_id_lowlevel(self.philo_id)
@@ -196,7 +202,7 @@ class WordWrapper(object):
         if self.row is None:
             self.row = self.db.get_word(self.philo_id)
             if self.row is None:
-                print >> sys.stderr, "WORD LOOKUP ERROR for ", repr(self.philo_id)
+                print("WORD LOOKUP ERROR for ", repr(self.philo_id), file=sys.stderr)
         return _safe_lookup(self.row, key, self.db.encoding)
 
     def __getattr__(self, name):

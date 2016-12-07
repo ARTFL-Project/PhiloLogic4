@@ -42,7 +42,7 @@ def term_group(environ, start_response):
                 term_group += ' %s ' % term
         term_group = term_group.strip()
         term_groups.append(term_group)
-    yield simplejson.dumps(term_groups)
+    yield simplejson.dumps({"term_groups": term_groups, "original_query": request.original_q})
 
 
 if __name__ == "__main__":

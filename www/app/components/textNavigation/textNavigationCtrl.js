@@ -97,6 +97,7 @@
         var closeTableOfContents = function() {
             angular.element('#toc-wrapper').removeClass('display');
             vm.tocOpen = false;
+            angular.element("#toc-content").scrollTop(0);
             $timeout(function() {
                 if (angular.element(document).height() == angular.element(window).height()) {
                     angular.element('#toc-container').css('position', 'static');

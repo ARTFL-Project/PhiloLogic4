@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import errno
@@ -32,7 +34,7 @@ url_root = "http://localhost/philologic/"
 # http://localhost/philologic/ is appropriate if you don't have a DNS hostname.
 
 if database_root is None or url_root is None:
-    print >> sys.stderr, "Please configure the loader script before use.  See INSTALLING in your PhiloLogic distribution."
+    print("Please configure the loader script before use.  See INSTALLING in your PhiloLogic distribution.", file=sys.stderr)
     exit()
 
 template_dir = "/Users/rwhaling/Documents/dev/PhiloLogic4/www/"

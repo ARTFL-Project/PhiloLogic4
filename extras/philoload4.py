@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import imp
 import os
 import sys
@@ -32,4 +34,4 @@ if __name__ == '__main__':
     l.post_processing()
     l.finish()
 
-    print "Application viewable at %s\n" % os.path.join(config_file.url_root, load_options.dbname)
+    print("Application viewable at %s\n" % os.path.join(config_file.url_root, load_options.dbname))

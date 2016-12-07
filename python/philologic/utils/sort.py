@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from unaccent import smash_accents
+from __future__ import absolute_import
+from .unaccent import smash_accents
 
 def sort_list(list_to_sort, sort_keys):
     def make_sort_key(d):

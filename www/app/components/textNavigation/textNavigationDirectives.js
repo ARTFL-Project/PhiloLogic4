@@ -39,6 +39,7 @@
                     textNavigationValues.textObject = response.data;
                     textNavigationValues.citation = response.data.citation;
                     textNavigationValues.navBar = true;
+                    scope.textNav.graphics = response.data.imgs.graphics;
                     if (scope.byteOffset.length > 0) {
                         scope.highlight = true;
                     } else {
@@ -106,7 +107,6 @@
                 })
                 .then(function(response) {
                     scope.tocElements = response.data.toc;
-                    scope.currentPhiloId = response.data.philo_id.join(' ');
                     scope.start = response.data.current_obj_position - 100;
                     if (scope.start < 0) {
                         scope.start = 0;
@@ -129,11 +129,10 @@
                 scope.tocPosition = '';
                 var philoId = $routeParams.pathInfo.split('/').join(' ');
                 var docId = philoId.split(' ')[0];
-
+                scope.currentPhiloId = philoId;
                 if (docId !== textNavigationValues.tocElements.docId) {
                     getTableOfContents(scope, philoId);
                 } else {
-                    scope.currentPhiloId = philoId;
                     scope.tocElements = textNavigationValues.tocElements.elements;
                     scope.start = textNavigationValues.tocElements.start;
                     scope.end = textNavigationValues.tocElements.end;
@@ -151,11 +150,11 @@
                     scope.end += 200;
                 }
                 scope.textObjectSelection = function(philoId, index) {
-                    textNavigationValues.tocElements.start = index - 100;
+                    textNavigationValues.tocElements.start = textNavigationValues.tocElements.start + index - 100;
                     if (textNavigationValues.tocElements.start < 0) {
                         textNavigationValues.tocElements.start = 0;
                     }
-                    textNavigationValues.tocElements.end = index + 100;
+                    textNavigationValues.tocElements.end = textNavigationValues.tocElements.end - index + 100;
                     scope.textNav.goToTextObject(philoId);
                 }
             }
@@ -296,21 +295,22 @@
     }
 
     function inlineImg($window) {
-        var launchGallery = function() {
+        var launchGallery = function(scope) {
             var imageList = [];
-            angular.element('#book-page').find('img.inline-img').parent('.inline-img-container').each(function() {
-                imageList.push(angular.element(this).attr('href'));
+            angular.element('#book-page').find('img.inline-img').each(function() {
+                imageList.push(angular.element(this).attr('src'));
             });
             return imageList;
         }
         return {
-            restrict: 'C',
+            restrict: 'A',
             link: function(scope, element) {
+                var index = scope.textNav.graphics.indexOf(element.attr('src'));
                 element.click(function(e) {
                     e.preventDefault();
-                    scope.gallery = blueimp.Gallery(launchGallery(), {
+                    scope.gallery = blueimp.Gallery(scope.textNav.graphics, {
                         onopen: function() {
-                            this.index = element.index('img.inline-img');
+                            this.index = index;
                         },
                         continuous: false,
                         thumbnailIndicators: false

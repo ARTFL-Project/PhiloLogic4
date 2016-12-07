@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """Parses queries stored in the environ object."""
 
-import Cookie
+from __future__ import absolute_import
+import six.moves.http_cookies
 import hashlib
 import re
 import urlparse
@@ -9,6 +10,7 @@ import urlparse
 from philologic.runtime.find_similar_words import find_similar_words
 from philologic.runtime.query_parser import parse_query
 from philologic.DB import DB
+import six
 
 
 class WSGIHandler(object):
@@ -24,7 +26,8 @@ class WSGIHandler(object):
         self.authenticated = False
         if "HTTP_COOKIE" in environ:
             # print >> sys.stderr, 'COOKIE', environ['HTTP_COOKIE']
-            self.cookies = Cookie.SimpleCookie(environ["HTTP_COOKIE"])
+            self.cookies = six.moves.http_cookies.SimpleCookie(environ[
+                "HTTP_COOKIE"])
             if "hash" and "timestamp" in self.cookies:
                 h = hashlib.md5()
                 secret = db.locals.secret
@@ -86,7 +89,8 @@ class WSGIHandler(object):
         for field in self.metadata_fields:
             if field in self.cgi and self.cgi[field]:
                 # Hack to remove hyphens in Frantext
-                if field != "date" and isinstance(self.cgi[field][0], str or unicode):
+                if field != "date" and isinstance(self.cgi[field][0], str or
+                                                  six.text_type):
                     if not self.cgi[field][0].startswith('"'):
                         self.cgi[field][0] = parse_query(self.cgi[field][0])
                 # these ifs are to fix the no results you get when you do a
@@ -114,19 +118,19 @@ class WSGIHandler(object):
         self.approximate = False
         if "approximate" in self.cgi:
             if self.cgi["approximate"][0] == "yes":
+                self.cgi["approximate"][0] = True
                 self.approximate = True
             if "approximate_ratio" in self.cgi:
-                self.approximate_ratio = float(self.cgi["approximate_ratio"][0]) / 100
+                self.approximate_ratio = float(self.cgi["approximate_ratio"][
+                    0]) / 100
             else:
                 self.approximate_ratio = 1
 
         if 'q' in self.cgi:
             self.cgi['q'][0] = parse_query(self.cgi['q'][0])
-            # Fuzzy matching, but only for one word
             if self.approximate:
-                query_length = len([i for i in re.split(r'[\|| NOT | ]', self.cgi['q'][0]) if i])
-                if query_length == 1:
-                    self.cgi['q'][0] = find_similar_words(self.cgi['q'][0], config, self)
+                self.cgi["original_q"] = self.cgi['q'][:]
+                self.cgi['q'][0] = find_similar_words(db, config, self)
             if self.cgi["q"][0] != "":
                 self.no_q = False
             else:
@@ -154,6 +158,14 @@ class WSGIHandler(object):
             return self.defaults[key]
         else:
             return ""
+
+    def __setitem__(self, key, item):
+        if key not in self.cgi:
+            self.cgi[key] = []
+        if isinstance(item, list or set):
+            self.cgi[key] = item
+        else:
+            self.cgi[key][0] = item
 
     def __iter__(self):
         """Iterate over query args."""

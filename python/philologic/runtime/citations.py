@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """Citations"""
 
+from __future__ import absolute_import
 from philologic.runtime.link import (make_absolute_object_link, make_absolute_query_link)
+import six
 
 
 def citation_links(db, config, i):
@@ -11,10 +13,11 @@ def citation_links(db, config, i):
     div2_href = make_absolute_object_link(config, i.philo_id[:3], i.bytes)
     div3_href = make_absolute_object_link(config, i.philo_id[:4], i.bytes)
     page_href = make_absolute_object_link(config, i.page.philo_id, i.bytes)
+    line_href = make_absolute_object_link(config, i.line.philo_id, i.bytes)
 
-    links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href, "para": "", "page": page_href}
+    links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href, "para": "", "page": page_href, "line": line_href}
 
-    for field, metadata_type in db.locals["metadata_types"].iteritems():
+    for field, metadata_type in six.iteritems(db.locals["metadata_types"]):
         if metadata_type == 'para':
             links['para'] = make_absolute_object_link(config, i.philo_id[:5], i.bytes)
             break
@@ -80,10 +83,8 @@ def get_label(hit, citation_object):
         if page_num[citation_object["field"]]:
             label = "page %s" % str(page_num)
     elif citation_object["object_level"] == "line":
-        # TODO: fix this...
-        line_obj = hit.line
         try:
-            line = citation_object["field"]
+            line = hit.line[citation_object["field"]].strip()
             if line:
                 label = "line %s" % str(line)
         except TypeError:

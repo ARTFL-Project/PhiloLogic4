@@ -124,7 +124,8 @@ tag_to_obj_map = {
     "q": "para",
     "add": "para",
     "pb": "page",
-    "ref": "ref"
+    "ref": "ref",
+    "graphic": "graphic"
 }
 
 # Defines which metadata to parse out for each object. All metadata defined here are attributes of a tag,
@@ -133,7 +134,8 @@ metadata_to_parse = {
     "div": ["head", "type", "n", "id", "vol"],
     "para": ["who", "resp", "id"],
     "page": ["n", "id", "fac"],
-    "ref": ["target", "n", "type"]
+    "ref": ["target", "n", "type"],
+    "graphic": ["url"]
 }
 
 # This regex defines how to tokenize words and punctuation

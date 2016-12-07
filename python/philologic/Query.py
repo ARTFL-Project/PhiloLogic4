@@ -1,13 +1,16 @@
 #!/usr/bin/env python
-import sys
+from __future__ import absolute_import, print_function
+
 import os
 import subprocess
-from datetime import datetime
-import struct
-import HitList
-import re
+import sys
 import unicodedata
-from QuerySyntax import parse_query, group_terms
+from datetime import datetime
+
+from six.moves import zip
+
+from . import HitList
+from .QuerySyntax import group_terms, parse_query
 
 # Work around issue where environ PATH does not contain path to C core
 os.environ["PATH"] += ":/usr/local/bin/"
@@ -31,9 +34,7 @@ def query(db,
     grouped = group_terms(parsed)
     split = split_terms(grouped)
 
-    #    print >> sys.stderr, "QUERY FORMATTED at ", datetime.now() - tstart
     words_per_hit = len(split)
-    #   print >> sys.stderr, "QUERY SPLIT at ", datetime.now() - tstart, repr(split)
     origpid = os.getpid()
     if not filename:
         hfile = str(origpid) + ".hitlist"
@@ -43,7 +44,7 @@ def query(db,
     err = open("/dev/null", "w")
     freq_file = db.path + "/frequencies/normalized_word_frequencies"
     if query_debug:
-        print >> sys.stderr, "FORKING"
+        print("FORKING", file=sys.stderr)
     pid = os.fork()
     if pid == 0:
         os.umask(0)
@@ -53,27 +54,22 @@ def query(db,
         if pid > 0:
             os._exit(0)
         else:
-            #now we're detached from the parent, and can do our work.
+            # now we're detached from the parent, and can do our work.
             if query_debug:
-                print >> sys.stderr, "WORKER DETACHED at ", datetime.now() - tstart
-#            args = ["search4", db.path,"--limit",str(limit)]
+                print("WORKER DETACHED at ", datetime.now() - tstart, file=sys.stderr)
             args = ["corpus_search"]
             if corpus_file:
                 args.extend(("-c", corpus_file))
-#            if corpus_file and corpus_size:
-#                args.extend(("--corpusfile", corpus_file , "--corpussize" , str(corpus_size)))
             if method and method_arg:
                 args.extend(("-m", method, "-a", str(method_arg)))
 
             args.extend(("-o", "binary", db.path, ))
 
             worker = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=hl, stderr=err, env=os.environ)
-            # if query_debug:
-            #     print >> sys.stderr, "WORKER STARTED:"," ".join(args);
 
             query_log_fh = filename + ".terms"
             if query_debug:
-                print >> sys.stderr, "LOGGING TERMS to " + filename + ".terms"
+                print("LOGGING TERMS to " + filename + ".terms", file=sys.stderr)
             logger = subprocess.Popen(["tee", query_log_fh], stdin=subprocess.PIPE, stdout=worker.stdin)
             expand_query_not(split, freq_file, logger.stdin, db.locals["lowercase_index"])
             logger.stdin.close()
@@ -82,14 +78,13 @@ def query(db,
             returncode = worker.wait()
 
             if returncode == -11:
-                print >> sys.stderr, "SEGFAULT"
+                print("SEGFAULT", file=sys.stderr)
                 seg_flag = open(filename + ".error", "w")
                 seg_flag.close()
-            #do something to mark query as finished
+            # do something to mark query as finished
             flag = open(filename + ".done", "w")
             flag.write(" ".join(args) + "\n")
             flag.close()
-            #            print >> sys.stderr, "SUBPROC DONE at ", datetime.now() - tstart
             os._exit(0)
     else:
         hl.close()
@@ -245,7 +240,7 @@ def invert_grep(token, in_fh, dest_fh, lowercase=True):
 
 def grep_exact(token, freq_file, dest_fh):
     grep_command = ["egrep", '-a', "[[:blank:]]%s$" % token[1:-1], freq_file]
-    print >> sys.stderr, grep_command
+    print(grep_command, file=sys.stderr)
     grep_proc = subprocess.Popen(grep_command, stdout=dest_fh)
     return grep_proc
 
@@ -253,7 +248,7 @@ def grep_exact(token, freq_file, dest_fh):
 def invert_grep_exact(token, in_fh, dest_fh):
     #don't strip accent or case, exact match only.
     grep_command = ["egrep", "-a", "-v", "[[:blank:]]%s$" % token[1:-1]]
-    print >> sys.stderr, grep_command
+    print(grep_command, file=sys.stderr)
     grep_proc = subprocess.Popen(grep_command, stdin=in_fh, stdout=dest_fh)
     #can't wait because input isn't ready yet.
     return grep_proc
@@ -263,11 +258,11 @@ if __name__ == "__main__":
     path = sys.argv[1]
     terms = sys.argv[2:]
     parsed = parse_query(" ".join(terms))
-    print >> sys.stderr, "PARSED:", parsed
+    print("PARSED:", parsed, file=sys.stderr)
     grouped = group_terms(parsed)
-    print >> sys.stderr, "GROUPED:", grouped
+    print("GROUPED:", grouped, file=sys.stderr)
     split = split_terms(grouped)
-    print >> sys.stderr, "parsed %d terms:" % len(split), split
+    print("parsed %d terms:" % len(split), split, file=sys.stderr)
 
     class Fake_DB:
         pass

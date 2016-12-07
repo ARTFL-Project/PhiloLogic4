@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-import cPickle
+from __future__ import absolute_import
+from __future__ import print_function
+import six.moves.cPickle
 import math
 import os
 import re
@@ -13,6 +15,8 @@ from lxml import etree
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.PostFilters import make_sql_table
 from philologic.utils import convert_entities, pretty_print, sort_list
+from six.moves import zip
+from six.moves import input
 
 # Flush buffer output
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
@@ -24,7 +28,7 @@ object_types = ['doc', 'div1', 'div2', 'div3', 'para', 'sent', 'word']
 blocksize = 2048  # index block size.  Don't alter.
 index_cutoff = 10  # index frequency cutoff.  Don't alter.
 
-DEFAULT_TABLES = ('toms', 'pages', 'refs', 'lines', 'words')
+DEFAULT_TABLES = ('toms', 'pages', 'refs', 'graphics', 'lines', 'words')
 
 DEFAULT_OBJECT_LEVEL = "doc"
 
@@ -66,22 +70,22 @@ class Loader(object):
         except OSError:
             self.setup_dir(loader_options["data_destination"])  # TO TEST!!!!
             with open(os.path.join(loader_options["data_destination"], "load_config.py"), "w") as l:
-                print >> l, "#!/usr/bin/env python"
-                print >> l, '"""This is a dump of the configuration used to load this database,'
-                print >> l, 'including non-configurable options. You can use this file to reload'
-                print >> l, 'the current database using the -l flag. See load documentation for more details"""\n\n'
+                print("#!/usr/bin/env python", file=l)
+                print('"""This is a dump of the configuration used to load this database,', file=l)
+                print('including non-configurable options. You can use this file to reload', file=l)
+                print('the current database using the -l flag. See load documentation for more details"""\n\n', file=l)
                 for option in ["default_object_level", "navigable_objects", "plain_text_obj", "doc_xpaths", "tag_to_obj_map",
                                "metadata_to_parse", "token_regex", "filtered_words_list", "sort_order", "suppress_tags",
                                "break_apost", "chars_not_to_index", "break_sent_in_line_group", "tag_exceptions",
                                "unicode_word_breakers", "long_word_limit", "join_hyphen_in_words", "abbrev_expand",
                                "flatten_ligatures"]:
                     if option in loader_options:
-                        print >> l, "%s = %s" % (option, repr(loader_options[option]))
+                        print("%s = %s" % (option, repr(loader_options[option])), file=l)
             self.is_new = True
 
         if "web_config" in loader_options:
             web_config_path = os.path.join(loader_options["data_destination"], "web_config.cfg")
-            print "\nSaving predefined web_config.cfg file to %s..." % web_config_path
+            print("\nSaving predefined web_config.cfg file to %s..." % web_config_path)
             with open(web_config_path, "w") as w:
                 w.write(loader_options["web_config"])
             self.predefined_web_config = True
@@ -104,14 +108,14 @@ class Loader(object):
 
     def add_files(self, files):
         """Copy files to database directory"""
-        print "\nCopying files to database directory...",
+        print("\nCopying files to database directory...", end=' ')
         self.filenames = []
         for f in files:
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
             shutil.copy(f, new_file_path)
             os.chmod(new_file_path, 775)
             self.filenames.append(f)
-        print "done.\n"
+        print("done.\n")
 
     def list_files(self):
         return os.listdir(self.textdir)
@@ -130,14 +134,14 @@ class Loader(object):
                 for pos, field in enumerate(metadata_fields):
                     file_metadata[field] = values[pos]
                 load_metadata.append(file_metadata)
-        print "Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]),
+        print("Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]), end=' ')
 
         def make_sort_key(d):
             key = [d.get(f, "") for f in sort_by_field]
             return key
 
         load_metadata.sort(key=make_sort_key, reverse=reverse_sort)
-        print "done."
+        print("done.")
         return load_metadata
 
     def parse_tei_header(self):
@@ -156,7 +160,7 @@ class Loader(object):
                 continue
             header = file_content[start_header_index:end_header_index]
             if self.debug:
-                print "parsing %s header..." % f
+                print("parsing %s header..." % f)
             parser = etree.XMLParser(recover=True)
             try:
                 tree = etree.fromstring(header, parser)
@@ -185,14 +189,14 @@ class Loader(object):
                 ]
                 data = self.create_year_field(data)
                 if self.debug:
-                    print pretty_print(data)
+                    print(pretty_print(data))
                 data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
                 load_metadata.append(data)
             except etree.XMLSyntaxError:
                 deleted_files.append(f)
         if deleted_files:
             for f in deleted_files:
-                print "%s has no valid TEI header or contains invalid data: removing from database load..." % f
+                print("%s has no valid TEI header or contains invalid data: removing from database load..." % f)
         return load_metadata
 
     def parse_dc_header(self):
@@ -223,7 +227,7 @@ class Loader(object):
             data["filename"] = filename  # place at the end in case the value was in the header
             data = self.create_year_field(data)
             if self.debug:
-                print pretty_print(data)
+                print(pretty_print(data))
             load_metadata.append(data)
         return load_metadata
 
@@ -243,15 +247,15 @@ class Loader(object):
 
     def parse_metadata(self, sort_by_field, reverse_sort=False, header="tei"):
         """Parsing metadata fields in TEI or Dublin Core headers"""
-        print "### Parsing metadata ###"
-        print "%s: Parsing metadata in %d files..." % (time.ctime(), len(self.list_files()))
+        print("### Parsing metadata ###")
+        print("%s: Parsing metadata in %d files..." % (time.ctime(), len(self.list_files())))
         if header == "tei":
             load_metadata = self.parse_tei_header()
         elif header == "dc":
             load_metadata = self.parse_dc_header()
 
-        print "%s: Sorting files by the following metadata fields: %s..." % (time.ctime(),
-                                                                             ", ".join([i for i in sort_by_field])),
+        print("%s: Sorting files by the following metadata fields: %s..." % (time.ctime(),
+                                                                             ", ".join([i for i in sort_by_field])), end=' ')
 
         self.sort_order = sort_by_field  # to be used for the sort by concordance biblio key in web config
         if sort_by_field:
@@ -266,7 +270,7 @@ class Loader(object):
             return sorted_load_metadata
 
     def parse_files(self, max_workers, data_dicts=None):
-        print "\n\n### Parsing files ###"
+        print("\n\n### Parsing files ###")
         os.chdir(self.workdir)  # questionable
 
         if not data_dicts:
@@ -283,6 +287,7 @@ class Loader(object):
                                "sortedtoms": self.workdir + os.path.basename(x) + ".toms.sorted",
                                "pages": self.workdir + os.path.basename(x) + ".pages",
                                "refs": self.workdir + os.path.basename(x) + ".refs",
+                               "graphics": self.workdir + os.path.basename(x) + ".graphics",
                                "lines": self.workdir + os.path.basename(x) + ".lines",
                                "results": self.workdir + os.path.basename(x) + ".results"}
                               for n, x in enumerate(self.list_files())]
@@ -300,6 +305,7 @@ class Loader(object):
                                "sortedtoms": self.workdir + os.path.basename(d["filename"]) + ".toms.sorted",
                                "pages": self.workdir + os.path.basename(d["filename"]) + ".pages",
                                "refs": self.workdir + os.path.basename(d["filename"]) + ".refs",
+                               "graphics": self.workdir + os.path.basename(d["filename"]) + ".graphics",
                                "lines": self.workdir + os.path.basename(d["filename"]) + ".lines",
                                "results": self.workdir + os.path.basename(d["filename"]) + ".results"}
                               for n, d in enumerate(data_dicts)]
@@ -330,7 +336,7 @@ class Loader(object):
                     else:  # we have a serious error here!  Should raise going forward.
                         pass
 
-        print "%s: parsing %d files." % (time.ctime(), len(self.filequeue))
+        print("%s: parsing %d files." % (time.ctime(), len(self.filequeue)))
         procs = {}
         workers = 0
         done = 0
@@ -358,7 +364,7 @@ class Loader(object):
 
                     i = open(text["newpath"], "r", )
                     o = open(text["raw"], "w", )  # only print out raw utf-8, so we don't need a codec layer now.
-                    print "%s: parsing %d : %s" % (time.ctime(), text["id"], text["name"])
+                    print("%s: parsing %d : %s" % (time.ctime(), text["id"], text["name"]))
 
                     if "parser_factory" not in options:
                         options["parser_factory"] = self.parser_config["parser_factory"]
@@ -390,7 +396,7 @@ class Loader(object):
                     try:
                         parser.parse(i)
                     except RuntimeError:
-                        print >> sys.stderr, "parse failure: XML stack explosion : %s" % [el.tag for el in parser.stack]
+                        print("parse failure: XML stack explosion : %s" % [el.tag for el in parser.stack], file=sys.stderr)
                         exit(1)
                     i.close()
                     o.close()
@@ -409,52 +415,58 @@ class Loader(object):
             pid, status = os.waitpid(0,
                                      0)  # this hangs until any one child finishes.  should check status for problems.
             if status:
-                print "parsing failed for %s" % procs[pid]
+                print("parsing failed for %s" % procs[pid])
                 exit()
             done += 1
             workers -= 1
             with open(procs[pid]) as proc_fh:
-                vec = cPickle.load(proc_fh)  # load in the results from the child's parsework() function.
+                vec = six.moves.cPickle.load(proc_fh)  # load in the results from the child's parsework() function.
             # print vec
             self.omax = [max(x, y) for x, y in zip(vec, self.omax)]
-        print "%s: done parsing" % time.ctime()
+        print("%s: done parsing" % time.ctime())
 
     def merge_objects(self, file_num=500):
-        print "\n### Merge parser output ###"
+        print("\n### Merge parser output ###")
 
         # Make all sorting happen in workdir rather than /tmp
         os.system('export TMPDIR=%s/' % self.workdir)
 
-        print "%s: sorting words" % time.ctime()
+        print("%s: sorting words" % time.ctime())
         words_status = self.merge_files("words")
-        print "%s: word sort returned %d" % (time.ctime(), words_status)
+        print("%s: word sort returned %d" % (time.ctime(), words_status))
 
         if "words" in self.tables:
-            print "%s: concatenating document-order words file..." % time.ctime(),
+            print("%s: concatenating document-order words file..." % time.ctime(), end=' ')
             for d in self.loaded_files:
                 os.system('gunzip -c %s | egrep -a "^word" >> all_words_ordered' % (d["raw"] + ".gz"))
-            print "done"
+            print("done")
 
-        print "%s: sorting objects" % time.ctime()
+        print("%s: sorting objects" % time.ctime())
         toms_status = self.merge_files("toms")
-        print "%s: object sort returned %d" % (time.ctime(), toms_status)
+        print("%s: object sort returned %d" % (time.ctime(), toms_status))
         if not self.debug:
             for toms_file in glob(self.workdir + "/*toms.sorted"):
                 os.system('rm %s' % toms_file)
 
-        print "%s: joining pages" % time.ctime()
+        print("%s: joining pages" % time.ctime())
         for page_file in glob(self.workdir + "/*pages"):
             os.system("cat %s >> %s/all_pages" % (page_file, self.workdir))
             if not self.debug:
                 os.system("rm %s" % page_file)
 
-        print "%s: joining references" % time.ctime()
+        print("%s: joining references" % time.ctime())
         for ref_file in glob(self.workdir + "/*refs"):
             os.system("cat %s >> %s/all_refs" % (ref_file, self.workdir))
             if not self.debug:
                 os.system("rm %s" % ref_file)
 
-        print "%s: joining lines" % time.ctime()
+        print("%s: joining graphics" % time.ctime())
+        for graphic_file in glob(self.workdir + "/*graphics"):
+            os.system("cat %s >> %s/all_graphics" % (graphic_file, self.workdir))
+            if not self.debug:
+                os.system("rm %s" % graphic_file)
+
+        print("%s: joining lines" % time.ctime())
         for line_file in glob(self.workdir + "/*lines"):
             os.system("cat %s >> %s/all_lines" % (line_file, self.workdir))
             if not self.debug:
@@ -488,7 +500,7 @@ class Loader(object):
             lists_of_files.append(files)
 
         # Then we run the merge sort on each chunk of 500 files and compress the result
-        print "%s: Merging %s in batches of %d..." % (time.ctime(), file_type, file_num)
+        print("%s: Merging %s in batches of %d..." % (time.ctime(), file_type, file_num))
         already_merged = 0
         os.system("touch %s" % self.workdir + "/sorted.init")
         last_sort_file = self.workdir + "/sorted.init"
@@ -501,13 +513,13 @@ class Loader(object):
                 args, sort_command, last_sort_file, output)
             status = os.system(command)
             if status != 0:
-                print "%s sorting failed\nInterrupting database load..." % file_type
+                print("%s sorting failed\nInterrupting database load..." % file_type)
                 sys.exit()
             already_merged += len(object_list)
             os.system("rm %s" % last_sort_file)
             last_sort_file = output
 
-            print "%s: %d files merged..." % (time.ctime(), already_merged)
+            print("%s: %d files merged..." % (time.ctime(), already_merged))
             if not self.debug:
                 os.system("rm %s" % file_list)
         status = os.system('mv %s %s' % (last_sort_file, self.workdir + all_object_file))
@@ -515,17 +527,17 @@ class Loader(object):
             os.system("gunzip -d %s" % self.workdir + all_object_file)
 
         if status != 0:
-            print "%s sorting failed\nInterrupting database load..." % file_type
+            print("%s sorting failed\nInterrupting database load..." % file_type)
             sys.exit()
         return status
 
     def analyze(self):
-        print "\n### Create inverted index ###"
-        print self.omax
+        print("\n### Create inverted index ###")
+        print(self.omax)
         vl = [max(int(math.ceil(math.log(float(x) + 1.0, 2.0))), 1) if x > 0 else 1 for x in self.omax]
-        print vl
+        print(vl)
         width = sum(x for x in vl)
-        print str(width) + " bits wide."
+        print(str(width) + " bits wide.")
 
         hits_per_block = (blocksize * 8) // width
         freq1 = index_cutoff
@@ -554,26 +566,26 @@ class Loader(object):
         freq2_l = math.ceil(math.log(float(freq2), 2.0))
         offset_l = math.ceil(math.log(float(offset), 2.0))
 
-        print "freq1: %d; %d bits" % (freq1, freq1_l)
-        print "freq2: %d; %d bits" % (freq2, freq2_l)
-        print "offst: %d; %d bits" % (offset, offset_l)
+        print("freq1: %d; %d bits" % (freq1, freq1_l))
+        print("freq2: %d; %d bits" % (freq2, freq2_l))
+        print("offst: %d; %d bits" % (offset, offset_l))
 
         # now write it out in our legacy c-header-like format.  TODO: reasonable format, or ctypes bindings for packer.
         dbs = open(self.workdir + "dbspecs4.h", "w")
-        print >> dbs, "#define FIELDS 9"
-        print >> dbs, "#define TYPE_LENGTH 1"
-        print >> dbs, "#define BLK_SIZE " + str(blocksize)
-        print >> dbs, "#define FREQ1_LENGTH " + str(freq1_l)
-        print >> dbs, "#define FREQ2_LENGTH " + str(freq2_l)
-        print >> dbs, "#define OFFST_LENGTH " + str(offset_l)
-        print >> dbs, "#define NEGATIVES {0,0,0,0,0,0,0,0,0}"
-        print >> dbs, "#define DEPENDENCIES {-1,0,1,2,3,4,5,0,0}"
-        print >> dbs, "#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl)
+        print("#define FIELDS 9", file=dbs)
+        print("#define TYPE_LENGTH 1", file=dbs)
+        print("#define BLK_SIZE " + str(blocksize), file=dbs)
+        print("#define FREQ1_LENGTH " + str(freq1_l), file=dbs)
+        print("#define FREQ2_LENGTH " + str(freq2_l), file=dbs)
+        print("#define OFFST_LENGTH " + str(offset_l), file=dbs)
+        print("#define NEGATIVES {0,0,0,0,0,0,0,0,0}", file=dbs)
+        print("#define DEPENDENCIES {-1,0,1,2,3,4,5,0,0}", file=dbs)
+        print("#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl), file=dbs)
         dbs.close()
-        print "%s: analysis done" % time.ctime()
+        print("%s: analysis done" % time.ctime())
         os.system('/bin/bash -c "gunzip -c ' + self.workdir + '/all_words_sorted.gz | pack4 ' + self.workdir +
                   'dbspecs4.h"')
-        print "%s: all indices built. moving into place." % time.ctime()
+        print("%s: all indices built. moving into place." % time.ctime())
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1")
         # if self.clean:
@@ -597,6 +609,10 @@ class Loader(object):
                 file_in = self.destination + '/WORK/all_refs'
                 indices = [("parent", ), ("target", ), ("type", )]
                 depth = 9
+            elif table == "graphics":
+                file_in = self.destination + '/WORK/all_graphics'
+                indices = [("parent", ), ("philo_id", )]
+                depth = 9
             elif table == "lines":
                 file_in = self.destination + '/WORK/all_lines'
                 indices = [("doc_id", "start_byte", "end_byte")]
@@ -606,22 +622,22 @@ class Loader(object):
 
     def post_processing(self, *extra_filters):
         """Run important post-parsing functions for frequencies and word normalization"""
-        print '\n### Post-processing filters ###'
+        print('\n### Post-processing filters ###')
         for f in self.post_filters:
             f(self)
 
         if extra_filters:
-            print 'Running the following additional filters:'
+            print('Running the following additional filters:')
             for f in extra_filters:
-                print f.__name__ + '...',
+                print(f.__name__ + '...', end=' ')
                 f(self)
 
     def finish(self):
         """Write important runtime information to the database directory"""
-        print "\n### Finishing up ###"
+        print("\n### Finishing up ###")
         os.mkdir(self.destination + "/src/")
         os.mkdir(self.destination + "/hitlists/")
-        os.chmod(self.destination + "/hitlists/", 0777)
+        os.chmod(self.destination + "/hitlists/", 0o777)
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
 
         # Make data directory inaccessible from the outside
@@ -636,7 +652,8 @@ class Loader(object):
     def write_db_config(self):
         """ Write local variables used by libphilo"""
         filename = self.destination + "/db.locals.py"
-        db_values = {'metadata_fields': self.metadata_fields,
+        metadata = [i for i in self.metadata_fields if i not in self.metadata_fields_not_found]
+        db_values = {'metadata_fields': metadata,
                      'metadata_hierarchy': self.metadata_hierarchy,
                      'metadata_types': self.metadata_types,
                      'normalized_fields': self.normalized_fields,
@@ -644,8 +661,8 @@ class Loader(object):
         db_values["token_regex"] = self.token_regex
         db_values["default_object_level"] = self.default_object_level
         db_config = MakeDBConfig(filename, **db_values)
-        print >> open(filename, 'w'), db_config
-        print "wrote database info to %s." % (filename)
+        print(db_config, file=open(filename, 'w'))
+        print("wrote database info to %s." % (filename))
 
     def write_web_config(self):
         """ Write configuration variables for the Web application"""
@@ -698,8 +715,8 @@ class Loader(object):
 
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)
-        print >> open(filename, 'w'), web_config
-        print "wrote Web application info to %s." % (filename)
+        print(web_config, file=open(filename, 'w'))
+        print("wrote Web application info to %s." % (filename))
 
 
 def shellquote(s):
@@ -714,9 +731,9 @@ def setup_db_dir(db_destination, web_app_dir, force_delete=False):
             os.system('rm -rf %s' % db_destination)
             os.mkdir(db_destination)
         else:
-            print "The database folder could not be created at %s" % db_destination
-            print "Do you want to delete this database? Yes/No"
-            choice = raw_input().lower()
+            print("The database folder could not be created at %s" % db_destination)
+            print("Do you want to delete this database? Yes/No")
+            choice = input().lower()
             if choice.startswith('y'):
                 os.system('rm -rf %s' % db_destination)
                 os.mkdir(db_destination)
