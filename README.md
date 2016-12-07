@@ -11,7 +11,7 @@ description, you can refer to [our research publications](<http://http://jtei.re
 * [**Database Loading**](docs/database_loading.md)
 * [**Configuring the Web Application**](docs/configure_web_app.md)
 * [**Query Syntax**](docs/query_syntax.md)
-* [**Encoding Spec**](docs/encoding_spec.md)
+* [**Text Encoding Spec**](docs/encoding_spec.md)
 
 
 ### IMPORTANT ###

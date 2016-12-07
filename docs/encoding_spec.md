@@ -1,4 +1,4 @@
-### A few notes on encoding ###
+### A few notes on text encoding ###
 
 * Starting from version 4.5, PhiloLogic will now parse non-valid XML since it no longer relies on an XML lib for document parsing.
 
