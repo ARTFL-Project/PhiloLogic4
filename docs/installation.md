@@ -7,7 +7,7 @@ Installing PhiloLogic consists of two steps:
 2. Set up a directory in your web server to serve databases from
 
 You can find more detailed installation instructions for specific OSes here:
-* [Mac OSX] (specific_installations/mac_installation.md)
+* [Mac OSX] (specific_installations/mac_installation.md) (no longer maintained)
 * [RedHat (and CentOS)](specific_installations/redhat_installation.md)
 * [Ubuntu](specific_installations/ubuntu_installation.md)
 
@@ -36,7 +36,7 @@ Just run the install.sh in the top level directory to install the C Core, Python
 
 ``./install.sh``
 
-### Global Configuration ###
+### <a name="global-config"></a>Global Configuration ###
 
 The installer creates a file in `/etc/philologic/philologic4.cfg` which contains several important global variables:
 
