@@ -38,9 +38,53 @@ While PhiloLogic will display inline notes, it really only properly supports not
 that are divided into the pointer to the note inside the running text, and the note
 itself at the end of a text object or of the document.
 
+#### Pointers to notes ####
 * Pointers to notes should use the `<ref>` tag
-* Pointers reference the actual note using the target attribute.
+* The `<ref>` tag should have an attribute type of type "note", such as `type="note"`
+* Pointers reference the actual note using the target attribute, such as `target="n1"`.
 * Pointers will be displayed in the text using the contents of the n attribute, otherwise default to "note".
+
+
+Example of a `<ref>` tag pointing to a `<note>` tag:
+```xml
+<ref type="note" target="n1" n="1"/>
+```
+#### Note tags ####
 * Notes should be stored at the end of the parent `<div>` element or a the end of the doc inside a `<div type="notes">`
 * Notes themselves are stored in a `<note>` tag.
+* Notes should have an attribute id with the value corresponding to the value of target in the pointer referencing the note.
 * Notes are stored as paragraph elements, therefore all `<p>` tags (or any other paragraph level tag) contained within will be ignored though still displayed.
+
+Example of notes inside a `<div1 type="notes">`
+```xml
+<div1 type="notes">
+  <note id="n1">Contents of note....</note>
+  <note id="n2">Contents of note....</note>
+</div1>
+```
+
+## Cross references ##
+* Cross-references should use the `<ref>` tag
+* The `<ref>` tag should have an attribute type of type "cross", such as `type="cross"`
+* The type "cross" of `<ref>` triggers direct navigation to the object defined in the id attribute.
+
+Example of a cross-reference:
+```xml
+<ref type="cross" target="c2">See chapter 2</ref>
+```
+which  references the following object using its id attribute:
+```xml
+<div2 type="Chapter" id="c2">
+```
+
+## Search references ##
+* Search references should use the `<ref>` tag
+* The `<ref>` tag should have an attribute type of type "search", such as `type="search"`
+* The type "search" of `<ref>` triggers a metadata search of the value defined in the target attribute
+* The target attribute value contains the metadata field and metadata value to be searched separated by a `:`,<br>
+such as `target="who:Hamlett"`
+
+Example of a search reference
+```xml
+<ref type="search" target="head:Gouverner">Gouverner</ref>
+```
