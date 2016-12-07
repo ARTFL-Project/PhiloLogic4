@@ -65,16 +65,12 @@ def frequency_results(request, config, sorted=False):
                     break
                 if not key:
                     last_hit_done += 1
-                    import sys
-                    print >> sys.stderr, "FAILED", philo_id
                     continue
             else:
                 try:
                     key = metadata_dict[philo_id[:object_level]]
                 except:
                     last_hit_done += 1
-                    import sys
-                    print >> sys.stderr, "FAILED", philo_id
                     continue
             if key not in counts:
                 counts[key] = {"count": 0, 'metadata': {request.frequency_field: key}}
