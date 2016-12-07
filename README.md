@@ -1,4 +1,4 @@
-![alt text](www/app/assets/img/philo.png) 4
+![alt text](www/app/assets/img/philo.png) 4.5
 ===========
 
 PhiloLogic is an XML database/search engine/web app that is designed 
@@ -11,10 +11,11 @@ description, you can refer to [our research publications](<http://http://jtei.re
 * [**Database Loading**](docs/database_loading.md)
 * [**Configuring the Web Application**](docs/configure_web_app.md)
 * [**Query Syntax**](docs/query_syntax.md)
+* [**Encoding Spec**](docs/encoding_spec.md)
 
 
-### Support ###
+### IMPORTANT ###
 * PhiloLogic4 will only work on Unix-based systems (Linux, *BSD) though MacOS is not supported and guaranteed to work.
 * PhiloLogic4 will only run on the Apache Webserver
 * PhiloLogic4 needs to run on Python 2.6 or 2.7
-* The PhiloLogic4 Web App will only work on modern browsers: Chrome, Firefox, Safari, Opera, Internet Explorer 9 and up
+* The PhiloLogic4 Web App will only work on modern web browsers: Chrome, Firefox, Safari, Opera, Internet Explorer 9 and up
