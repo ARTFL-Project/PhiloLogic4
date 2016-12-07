@@ -11,12 +11,9 @@ from philologic.DB import DB
 def bibliography_results(request, config):
     """Fetch bibliography results"""
     db = DB(config.db_path + '/data/')
-    import sys
-    print >> sys.stderr, "#####\n####\nREQUEST", request.sort_order
     if request.no_metadata:
         hits = db.get_all(db.locals['default_object_level'], request["sort_order"])
     else:
-
         hits = db.query(sort_order=request["sort_order"], **request.metadata)
     if request.simple_bibliography == "all": # request from simple landing page report which gets all biblio in load order
         hits.finish()
