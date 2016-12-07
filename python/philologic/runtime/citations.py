@@ -13,13 +13,9 @@ def citation_links(db, config, i):
     div2_href = make_absolute_object_link(config, i.philo_id[:3], i.bytes)
     div3_href = make_absolute_object_link(config, i.philo_id[:4], i.bytes)
     page_href = make_absolute_object_link(config, i.page.philo_id, i.bytes)
-    try:
-        line_href = make_absolute_object_link(config, i.line.philo_id, i.bytes)
-    except AttributeError:
-        line_href = ""
+    line_href = make_absolute_object_link(config, i.line.philo_id, i.bytes)
 
-    links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href,
-             "para": "", "page": page_href, "line": line_href}
+    links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href, "para": "", "page": page_href, "line": line_href}
 
     for field, metadata_type in six.iteritems(db.locals["metadata_types"]):
         if metadata_type == 'para':
