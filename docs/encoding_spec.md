@@ -1,4 +1,4 @@
-## A few notes on encoding ##
+### A few notes on encoding ###
 
 * Starting from version 4.5, PhiloLogic will now parse non-valid XML since it no longer relies on an XML lib for document parsing.
 
@@ -9,7 +9,7 @@
 * We only support double quotes for attributes, such as `<pb n="1">`.<br>
 In other words, we do **NOT** support `<pb n='1'>`.
 
-## Page tags ##
+# Page tags #
 * Pages are encoded with the `<pb>` tag.
 * Page image filenames should be stored inside the fac attribute, such as in the example below:
 ```XML
@@ -25,14 +25,14 @@ A page tag with both attributes could look like this:
 <pb n="23" fac="V23/ENC_23-1-1.jpeg"/>
 ```
 
-## Inline Images ##
+# Inline Images #
 * Inline images should use the `<graphic>` tag.
 * Linnks to images should be stored in the url attribute such as below:
 ```XML
 <graphic url="V23/plate_23_2_2.jpeg">
 ```
 
-## Notes ##
+# Notes #
 ### Important ###
 While PhiloLogic will display inline notes, it really only properly supports notes
 that are divided into the pointer to the note inside the running text, and the note
@@ -63,7 +63,7 @@ Example of notes inside a `<div1 type="notes">`
 </div1>
 ```
 
-## Cross references ##
+# Cross references #
 * Cross-references should use the `<ref>` tag
 * The `<ref>` tag should have an attribute type of type "cross", such as `type="cross"`
 * The type "cross" of `<ref>` triggers direct navigation to the object defined in the id attribute.
@@ -77,7 +77,7 @@ which  references the following object using its id attribute:
 <div2 type="Chapter" id="c2">
 ```
 
-## Search references ##
+# Search references #
 * Search references should use the `<ref>` tag
 * The `<ref>` tag should have an attribute type of type "search", such as `type="search"`
 * The type "search" of `<ref>` triggers a metadata search of the value defined in the target attribute
