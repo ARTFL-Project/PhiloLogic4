@@ -16,7 +16,7 @@ class PhiloLogicRequest(object):
     Process a PhiloLogic request and save the full result set in a text file
     in JSON or tab delimited
     """
-    
+
     def __init__(self, db_url, report, export_format="json", **args):
         self.db_url = db_url
         self.report = report
@@ -33,7 +33,7 @@ class PhiloLogicRequest(object):
             self.query_params["q"] = ''
         self.total_hits()
         print("\nTotal hits: %d" % self.total, file=sys.stderr)
-        
+
         ## Count number of queries needed to retrieve the full result set
         if report == "concordance" or report == "kwic":
             self.interval = self.query_params["results_per_page"]
@@ -44,7 +44,7 @@ class PhiloLogicRequest(object):
         if remainder:
             self.steps += 1
         print("%d queries in batches of %d hits will be performed to retrieve the full result set:" % (self.steps, self.interval), file=sys.stderr)
-            
+
     def total_hits(self):
         try:
             r = requests.get(self.db_url + "/scripts/get_total_results.py", params=self.query_params, timeout=5)
@@ -62,7 +62,7 @@ class PhiloLogicRequest(object):
             self.total = r.json()['results_length']
         else:
             self.total = int(r.json())
-    
+
     def query(self, timeout=60, params=None, **args):
         if params == None:
             params = self.query_params
@@ -71,7 +71,7 @@ class PhiloLogicRequest(object):
                 params[k] = v
         response = requests.get(self.db_url + "/query", params=params, timeout=timeout)
         return response
-    
+
     def build_result_set(self):
         if self.report == "concordance" or self.report == "kwic":
             self.concatenate_concordance()
@@ -79,7 +79,7 @@ class PhiloLogicRequest(object):
             self.concatenate_collocation()
         elif self.report == "time_series":
             self.concatenate_time_series()
-    
+
     def concatenate_concordance(self):
         params = dict(self.query_params)
         self.results = {"results": []}
@@ -100,7 +100,7 @@ class PhiloLogicRequest(object):
                 if k not in self.results:
                     self.results[k] = v
         self.results["query"]["end"] = str(self.total - 1)
-                    
+
     def concatenate_collocation(self):
         params = dict(self.query_params)
         params["start"] = 0
@@ -138,7 +138,7 @@ class PhiloLogicRequest(object):
         self.results["all_collocates"] = sorted(six.iteritems(self.results["all_collocates"]), key=lambda x: x[1], reverse=True)
         self.results["right_collocates"] = sorted(six.iteritems(self.results["right_collocates"]), key=lambda x: x[1], reverse=True)
         self.results["left_collocates"] = sorted(six.iteritems(self.results["left_collocates"]), key=lambda x: x[1], reverse=True)
-        
+
     def concatenate_time_series(self):
         params = dict(self.query_params)
         if "year_interval" not in params:
@@ -170,7 +170,7 @@ class PhiloLogicRequest(object):
                         self.results['results']["date_count"][year] = count
         self.results['results']["absolute_count"] = sorted(six.iteritems(self.results['results']['absolute_count']), key=lambda x: x[0])
         self.results['results']["date_count"] = sorted(six.iteritems(self.results['results']['date_count']), key=lambda x: x[0])
-    
+
     def save_file(self):
         if self.export_format == "json":
             filename = "%s_results.json" % self.report
@@ -186,12 +186,10 @@ class PhiloLogicRequest(object):
 class PassThroughOptionParser(OptionParser):
     """
     An unknown option pass-through implementation of OptionParser.
-
     When unknown arguments are encountered, bundle with largs and try again,
-    until rargs is depleted.  
-
+    until rargs is depleted.
     sys.exit(status) will still be called if a known argument is passed
-    incorrectly (e.g. missing arguments or bad argument types, etc.)        
+    incorrectly (e.g. missing arguments or bad argument types, etc.)
     """
     def _process_args(self, largs, rargs, values):
         while rargs:
@@ -205,34 +203,34 @@ def parse_command_line(arguments):
     parser.add_option("-r", "--report", action="store", default="", type="string", dest="report", help="select PhiloLogic search report")
     parser.add_option("-d", "--db-url", action="store", default="", type="string", dest="db_url", help="select database URL for search")
     parser.add_option("-e", "--export-format", action="store", default="", type="string", dest="export_format", help="select output format. Options are JSON or TAB.")
-    
+
     ## Parse command-line arguments
     options, args = parser.parse_args(arguments)
-    
+
     ## Parse all other options
     arg_dict = {}
     while args:
         key = args.pop(0).replace('-', '')
         val = args.pop(0)
         arg_dict[key] = val.decode('utf-8')
-        
+
     if not options.db_url:
         print("\nNo database URL provided, exiting...", file=sys.stderr)
         exit()
-        
+
     if not options.report:
         print("\nNo search report selected, defaulting to concordance...", file=sys.stderr)
         report = "concordance"
     else:
         report = options.report
-        
+
     if not options.export_format:
         print("\nNo export format selected, exporting to JSON...", file=sys.stderr)
         export_format = "json"
     else:
         export_format = options.export_format
-    
-    return options.db_url, report, export_format, arg_dict 
+
+    return options.db_url, report, export_format, arg_dict
 
 
 if __name__ == '__main__':
