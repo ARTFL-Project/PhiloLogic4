@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from philologic.runtime.access_control import check_access, login_access
 from philologic.runtime.find_similar_words import find_similar_words
 from philologic.runtime.FragmentParser import FragmentParser
-from philologic.runtime.get_text import get_concordance_text
+from philologic.runtime.get_text import get_concordance_text, get_tei_header
 from philologic.runtime.pages import page_interval
 from philologic.runtime.query_parser import parse_query
 from philologic.runtime.reports import (bibliography_results, collocation_results,
