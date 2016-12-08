@@ -11,10 +11,17 @@ In other words, we do **NOT** support `<pb n='1'>`.
 
 # Page tags #
 * Pages are encoded with the `<pb>` tag.
-* Page image filenames should be stored inside the fac attribute, such as in the example below:
+* Page image filenames should be stored inside the facs attribute, such as in the example below:
 ```XML
-<pb fac="ENC_23-1-1.jpeg"/>
+<pb facs="ENC_23-1-1.jpeg"/>
 ```
+
+* You can also specify multiple images to display such as below:
+
+```XML
+<pb facs="small:small/ENC_23-1-1.jpeg large:large/ENC_23-1-1.jpeg">
+```
+
 * Page numbers should be stored in the n attribute, such as below:
 ```XML
 <pb n="23"/>
