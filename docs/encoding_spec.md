@@ -40,6 +40,7 @@ A page tag with both attributes could look like this:
 ```XML
 <graphic url="V23/plate_23_2_2.jpeg">
 ```
+**Note**: The values specified in url must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
 
 # Notes #
 ### Important ###
