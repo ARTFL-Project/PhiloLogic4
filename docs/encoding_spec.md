@@ -16,17 +16,12 @@ In other words, we do **NOT** support `<pb n='1'>`.
 <pb facs="ENC_23-1-1.jpeg"/>
 ```
 
-* You can also specify multiple images to display such as below:
+* You can also specify multiple images separated by a space such as below:
 
 ```XML
-<pb facs="small:small/ENC_23-1-1.jpeg large:large/ENC_23-1-1.jpeg">
+<pb facs="small/ENC_23-1-1.jpeg large/ENC_23-1-1.jpeg">
 ```
-This will produce two links:
-
-```HTML
-<a href="http://some.url/small/ENC_23-1-1.jpeg">small</a>
-<a href="http://some.url/large/ENC_23-1-1.jpeg">large</a>
-```
+This will produce produce a link to the first image, the second one will be displayed if clicked on the arrow link in the page turner.
 
 **Note**: The values specified in `facs` must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
 
