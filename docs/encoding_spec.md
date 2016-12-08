@@ -29,7 +29,7 @@ In other words, we do **NOT** support `<pb n='1'>`.
 
 A page tag with both attributes could look like this:
 ```XML
-<pb n="23" fac="V23/ENC_23-1-1.jpeg"/>
+<pb n="23" facs="V23/ENC_23-1-1.jpeg"/>
 ```
 
 # Inline Images #
