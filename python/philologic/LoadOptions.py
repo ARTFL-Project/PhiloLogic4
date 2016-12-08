@@ -8,7 +8,7 @@ import sys
 from glob import glob
 from optparse import OptionParser
 
-from philologic import Loader, LoadFilters, Parser, PostFilters, NewParser, PlainTextParser
+from philologic import Loader, LoadFilters, PostFilters, NewParser, PlainTextParser
 from philologic.utils import pretty_print
 import six
 
@@ -36,6 +36,7 @@ class LoadOptions(object):
         self.values["database_root"] = config_file.database_root
         self.values["web_app_dir"] = config_file.web_app_dir
         self.values["destination"] = "./"
+        self.values["load_config"] = ""
         self.values["default_object_level"] = Loader.DEFAULT_OBJECT_LEVEL
         self.values["navigable_objects"] = Loader.NAVIGABLE_OBJECTS
         self.values["load_filters"] = LoadFilters.DefaultLoadFilters
@@ -158,6 +159,7 @@ class LoadOptions(object):
                     for config_key, config_value in six.iteritems(load_config.config):
                         if config_value:
                             self.values[config_key] = config_value
+                    self.values[a] = os.path.abspath(value)
                 elif a == "file_type":
                     if value == "plain_text":
                         self.values["parser_factory"] = PlainTextParser.PlainTextParser
@@ -234,4 +236,3 @@ class LoadConfig(object):
                             self.config["load_filters"] = LoadFilters.DefaultLoadFilters
                         self.config["load_filters"].append(LoadFilters.store_words_and_philo_ids)
                     self.config[a] = value
-                    

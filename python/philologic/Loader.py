@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from __future__ import absolute_import
-from __future__ import print_function
-import six.moves.cPickle
+from __future__ import absolute_import, print_function
+
+import imp
 import math
 import os
 import re
@@ -15,8 +15,9 @@ from lxml import etree
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.PostFilters import make_sql_table
 from philologic.utils import convert_entities, pretty_print, sort_list
-from six.moves import zip
-from six.moves import input
+
+import six.moves.cPickle
+from six.moves import input, zip
 
 # Flush buffer output
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
@@ -41,6 +42,7 @@ ParserOptions = ["parser_factory", "doc_xpaths", "token_regex", "tag_to_obj_map"
 
 
 class Loader(object):
+    """Loader class"""
     def __init__(self, **loader_options):
         self.omax = [1, 1, 1, 1, 1, 1, 1, 1, 1]
         self.parse_pool = None
@@ -69,18 +71,30 @@ class Loader(object):
             self.is_new = False
         except OSError:
             self.setup_dir(loader_options["data_destination"])  # TO TEST!!!!
-            with open(os.path.join(loader_options["data_destination"], "load_config.py"), "w") as l:
-                print("#!/usr/bin/env python", file=l)
-                print('"""This is a dump of the configuration used to load this database,', file=l)
-                print('including non-configurable options. You can use this file to reload', file=l)
-                print('the current database using the -l flag. See load documentation for more details"""\n\n', file=l)
-                for option in ["default_object_level", "navigable_objects", "plain_text_obj", "doc_xpaths", "tag_to_obj_map",
-                               "metadata_to_parse", "token_regex", "filtered_words_list", "sort_order", "suppress_tags",
-                               "break_apost", "chars_not_to_index", "break_sent_in_line_group", "tag_exceptions",
-                               "unicode_word_breakers", "long_word_limit", "join_hyphen_in_words", "abbrev_expand",
-                               "flatten_ligatures"]:
-                    if option in loader_options:
-                        print("%s = %s" % (option, repr(loader_options[option])), file=l)
+            load_config_path = os.path.join(loader_options["data_destination"], "load_config.py")
+            # Loading these from a load_config would crash the parser for a number of reasons...
+            values_to_ignore = ["load_filters", "post_filters", "parser_factory", "data_destination", "db_destination", "dbname"]
+            if loader_options["load_config"]:
+                shutil.copy(loader_options["load_config"], load_config_path)
+                config_obj = imp.load_source("external_load_config", loader_options["load_config"])
+                already_configured_values = {}
+                for attribute in dir(config_obj):
+                    if not attribute.startswith('__') and not callable(getattr(config_obj, attribute)):
+                        already_configured_values[attribute] = getattr(config_obj, attribute)
+                with open(load_config_path, "a") as load_config_copy:
+                    print("\n\n## The values below were also used for loading ##", file=load_config_copy)
+                    for option in loader_options:
+                        if option not in already_configured_values and option not in values_to_ignore and option != "web_config":
+                            print("%s = %s\n" % (option, repr(loader_options[option])), file=load_config_copy)
+            else:
+                with open(load_config_path, "w") as load_config_copy:
+                    print("#!/usr/bin/env python", file=load_config_copy)
+                    print('"""This is a dump of the default configuration used to load this database,', file=load_config_copy)
+                    print('including non-configurable options. You can use this file to reload', file=load_config_copy)
+                    print('the current database using the -l flag. See load documentation for more details"""\n\n', file=load_config_copy)
+                    for option in loader_options:
+                        if option not in values_to_ignore and option != "web_config":
+                            print("%s = %s\n" % (option, repr(loader_options[option])), file=load_config_copy)
             self.is_new = True
 
         if "web_config" in loader_options:
