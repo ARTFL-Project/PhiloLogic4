@@ -23,8 +23,10 @@ In other words, we do **NOT** support `<pb n='1'>`.
 ```
 This will produce two links:
 
-`<a href="http://some.url/small/ENC_23-1-1.jpeg">small</a>`
-`<a href="http://some.url/large/ENC_23-1-1.jpeg">large</a>`
+```HTML
+<a href="http://some.url/small/ENC_23-1-1.jpeg">small</a>
+<a href="http://some.url/large/ENC_23-1-1.jpeg">large</a>
+```
 
 **Note**: The values specified in `facs` must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
 
