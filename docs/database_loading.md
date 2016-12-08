@@ -62,9 +62,11 @@ navigable_objects = ('doc', 'div1', 'div2', 'div3', 'para')
 ## Define text objects to generate plain text files for various machine learning tasks
 ## For instance, this could be ['doc', 'div1']
 plain_text_obj = []
-</code></pre>
 
-For now, it's just important to know what options can be specified in the load script:
+## Define whether to store all words with their philo IDs. Useful for data-mining tasks
+## where keeping the index information (and byte offset) is important.
+store_words_and_ids = False
+</code></pre>
 
 `default_object_level` defines the type of object returned for the purpose of most navigation reports--for most database, this will be "doc", but you might want to use "div1" for dictionary or encyclopedia databases.
 
@@ -73,6 +75,8 @@ For now, it's just important to know what options can be specified in the load s
 `filters` and `post_filters` are lists of loader functions--their behavior and design will be documented separately, but they are basically lists of modular loader functions to be executed in order, and so shouldn't be modified carelessly.
 
 `plain_text_obj` is a very useful option that generates a flat text file representations of all objects of a given type, like "doc" or "div1", usually for data mining with Mallet or some other tool.
+
+`store_words_and_ids` defines whether you want the parser to save a representation of the text containing the individual index ID for each word in all texts indexed in the DB. This can be useful for data-mining task that need to know about word positioning such as sequence alignment.
 
 #### Configuring the XML Parser ####
 The next section of the load script is setup for the XML Parser:
@@ -208,7 +212,7 @@ tag_to_obj_map = {
     "div3": "div",
     "hyperdiv": "div",
     "front": "div",
-    "note": "div",
+    "note": "para",
     "p": "para",
     "sp": "para",
     "lg": "para",
@@ -221,17 +225,20 @@ tag_to_obj_map = {
     "castlist": "para",
     "list": "para",
     "q": "para",
+    "add": "para",
     "pb": "page",
-    "ref": "ref"
+    "ref": "ref",
+    "graphic": "graphic"
 }
 
 # Defines which metadata to parse out for each object. All metadata defined here are attributes of a tag,
 # with the exception of head which is its own tag. Below are defaults.
 metadata_to_parse = {
     "div": ["head", "type", "n", "id", "vol"],
-    "para": ["who"],
+    "para": ["who", "resp", "id"],
     "page": ["n", "id", "fac"],
-    "ref": ["target", "n", "type"]
+    "ref": ["target", "n", "type"],
+    "graphic": ["url"]
 }
 
 ## A list of tags to ignore
@@ -248,6 +255,79 @@ filtered_words_list = ""
 # results are displayed. Supply a list of metadata strings, e.g.:
 # ["date", "author", "title"]
 sort_order = ["year", "author", "title", "filename"]
+
+# --------------------- Set Apostrophe Break ------------------------
+# Set to True to break words on apostrophe.  Probably False for
+# English, True for French.  Your milage may vary.
+break_apost = True
+
+# ------------- Define Characters to Exclude from Index words -------
+# Leading to a second list, characters which can be in words
+# but you don't want to index.
+chars_not_to_index = "\[\{\]\}"
+
+# ---------------------- Treat Lines as Sentences --------------------
+# In linegroups, break sentence objects on </l> and turns off
+# automatic sentence recognition.  Normally off.
+break_sent_in_line_group = False
+
+# ------------------ Skip in word tags -------------------------------
+# Tags normally break words.  There may be exceptions.  To run the
+# exception, turn on the exception and list them as patterns.
+# Tags will not be indexed and will not break words. An empty list turns of the feature
+tag_exceptions = ['<hi[^>]*>', '<emph[^>]*>', '<\/hi>', '<\/emph>', '<orig[^>]*>', '<\/orig>', '<sic[^>]*>', '<\/sic>',
+                  '<abbr[^>]*>', '<\/abbr>', '<i>', '</i>', '<sup>', '</sup>']
+
+# ------------- UTF8 Strings to consider as word breakers -----------
+# In SGML, these are ents.  But in Unicode, these are characters
+# like any others.  Consult the table at:
+# www.utf8-chartable.de/unicode-utf8-table.pl?start=8016&utf8=dec&htmlent=1
+# to see about others. An empty list disables the feature.
+unicode_word_breakers = ['\xe2\x80\x93',  # U+2013 &ndash; EN DASH
+                         '\xe2\x80\x94',  # U+2014 &mdash; EM DASH
+                         '\xc2\xab',  # &laquo;
+                         '\xc2\xbb',  # &raquo;
+                         '\xef\xbc\x89',  # fullwidth right parenthesis
+                         '\xef\xbc\x88',  # fullwidth left parenthesis
+                         '\xe2\x80\x90',  # U+2010 hyphen for greek stuff
+                         '\xce\x87',  # U+00B7 ano teleia
+                         '\xe2\x80\xa0',  # U+2020 dagger
+                         '\xe2\x80\x98',  # U+2018 &lsquo; LEFT SINGLE QUOTATION
+                         '\xe2\x80\x99',  # U+2019 &rsquo; RIGHT SINGLE QUOTATION
+                         '\xe2\x80\x9c',  # U+201C &ldquo; LEFT DOUBLE QUOTATION
+                         '\xe2\x80\x9d',  # U+201D &rdquo; RIGHT DOUBLE QUOTATION
+                         '\xe2\x80\xb9',  # U+2039 &lsaquo; SINGLE LEFT-POINTING ANGLE QUOTATION
+                         '\xe2\x80\xba',  # U+203A &rsaquo; SINGLE RIGHT-POINTING ANGLE QUOTATION
+                         '\xe2\x80\xa6'  # U+2026 &hellip; HORIZONTAL ELLIPSIS
+                        ]
+
+#  ----------------- Set Long Word Limit  -------------------
+#  Words greater than 235 characters (bytes) cause an indexing
+#  error.  This sets a limit.  Words are then truncated to fit.
+long_word_limit = 200
+
+# ------------------ Hyphenated Word Joiner ----------------------------
+# Softhypen word joiner.  At this time, I'm trying to join
+# words broken by &shy;\n and possibly some additional
+# selected tags.  Could be extended.
+join_hyphen_in_words = True
+
+# ------------------ Abbreviation Expander for Indexing. ---------------
+# This is to handle abbreviation tags.  I have seen two types:
+#       <abbr expan="en">&emacr;</abbr>
+#       <abbr expan="Valerius Maximus">Val. Max.</abbr>
+# For now, lets's try the first.
+abbrev_expand = True
+
+# ---------------------- Flatten Ligatures for Indexing --------------
+# Convert SGML ligatures to base characters for indexing.
+# &oelig; = oe.  Leave this on.  At one point we should think
+# Unicode, but who knows if this is important.
+flatten_ligatures = True
+
+# Define a list of strings which mark the end of a sentence.
+# Note that this list will be added to the current one which is [".", "?", "!"]
+sentence_breakers = []
 </code></pre>
 
 The basic layout is this:
@@ -265,6 +345,8 @@ The basic layout is this:
 `filtered_word_list` is a file containing all words that shouldn't be indexed.
 
 `sort_order` is a list of metadata fields which defines the order in which the parser will load and store files in the database. This affects the default order in which search results are returned.
+
+The remaining options are self-explanatory given the comments...
 
 So to use a load config file as an argument, you would run the following:
 
