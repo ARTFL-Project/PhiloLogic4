@@ -22,6 +22,9 @@ In other words, we do **NOT** support `<pb n='1'>`.
 <pb facs="small:small/ENC_23-1-1.jpeg large:large/ENC_23-1-1.jpeg">
 ```
 
+## Note ##
+The values specified in facs must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
+
 * Page numbers should be stored in the n attribute, such as below:
 ```XML
 <pb n="23"/>
