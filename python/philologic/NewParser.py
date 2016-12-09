@@ -44,7 +44,7 @@ DefaultTagToObjMap = {
 DefaultMetadataToParse = {
     "div": ["head", "type", "n", "id", "vol"],
     "para": ["who", "resp", "id"],  # for <sp> and <add> tags
-    "page": ["n", "id", "fac"],
+    "page": ["n", "id", facs],
     "ref": ["target", "n", "type"],
     "graphic": ["url"],
     "line": ["n"]

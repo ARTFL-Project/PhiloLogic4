@@ -288,9 +288,9 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
             elif el.tag == "img":
                 el.attrib["onerror"] = "this.style.display='none'"
             elif el.tag == "pb" and "n" in el.attrib:
-                if "fac" in el.attrib or "id" in el.attrib:
-                    if "fac" in el.attrib:
-                        img = el.attrib["fac"]
+                if facs in el.attrib or "id" in el.attrib:
+                    if facs in el.attrib:
+                        img = el.attrib[facs]
                     else:
                         img = el.attrib["id"]
                     current_obj_img.append(img)
@@ -377,7 +377,7 @@ def get_first_page(philo_id, config):
         c.execute('select * from pages where philo_id like ? limit 1', (' '.join([str(i) for i in philo_id]), ))
     page_result = c.fetchone()
     try:
-        filename = page_result['fac']
+        filename = page_result[facs]
     except IndexError:
         filename = ""
     if not filename:
@@ -406,7 +406,7 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
         try:
             c.execute('select * from pages where philo_id like ? and fac is not null and fac != ""', (approx_id, ))
             current_obj_imgs = set(current_obj_imgs)
-            all_imgs = [i['fac'] for i in c.fetchall()]
+            all_imgs = [i[facs] for i in c.fetchall()]
         except sqlite3.OperationalError:
             all_imgs = []
         return all_imgs

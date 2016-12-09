@@ -133,7 +133,7 @@ tag_to_obj_map = {
 metadata_to_parse = {
     "div": ["head", "type", "n", "id", "vol"],
     "para": ["who", "resp", "id"],
-    "page": ["n", "id", "fac"],
+    "page": ["n", "id", "facs"],
     "ref": ["target", "n", "type"],
     "graphic": ["url"]
 }
