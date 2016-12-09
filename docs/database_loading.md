@@ -342,7 +342,7 @@ The basic layout is this:
 
 `token_regex` is a regular expression used to drive our tokenizer. 
 
-`filtered_word_list` is a file containing all words that shouldn't be indexed.
+`words_to_index` is a file containing all words that should be indexed. You'd want to define this in the event you're dealing with dirty OCR and would end up with way too many unique words, which would blow up the index, or just kill search performance. Leaving this empty means that all words will be indexed.
 
 `sort_order` is a list of metadata fields which defines the order in which the parser will load and store files in the database. This affects the default order in which search results are returned.
 
