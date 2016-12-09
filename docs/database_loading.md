@@ -247,9 +247,9 @@ suppress_tags = []
 # This regex defines how to tokenize words and punctuation
 token_regex = "([\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*)"
 
-# Define a file (with full path) containing words to filter out. Must be one word per line.
-# Useful for dirty OCR.
-filtered_words_list = ""
+# Define a file (with full path) containing words to index. Must be one word per line.
+# Useful for filtering out dirty OCR.
+words_to_index = ""
 
 # Define the order in which files are sorted. This will affect the order in which
 # results are displayed. Supply a list of metadata strings, e.g.:
@@ -342,7 +342,7 @@ The basic layout is this:
 
 `token_regex` is a regular expression used to drive our tokenizer. 
 
-`filtered_word_list` is a file containing all words that shouldn't be indexed.
+`words_to_index` is a file containing all words that should be indexed. You'd want to define this in the event you're dealing with dirty OCR and would end up with way too many unique words, which would blow up the index, or just kill search performance. Leaving this empty means that all words will be indexed.
 
 `sort_order` is a list of metadata fields which defines the order in which the parser will load and store files in the database. This affects the default order in which search results are returned.
 

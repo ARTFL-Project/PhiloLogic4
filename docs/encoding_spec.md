@@ -11,10 +11,20 @@ In other words, we do **NOT** support `<pb n='1'>`.
 
 # Page tags #
 * Pages are encoded with the `<pb>` tag.
-* Page image filenames should be stored inside the fac attribute, such as in the example below:
+* Page image filenames should be stored inside the facs attribute, such as in the example below:
 ```XML
-<pb fac="ENC_23-1-1.jpeg"/>
+<pb facs="ENC_23-1-1.jpeg"/>
 ```
+
+* You can also specify multiple images separated by a space such as below:
+
+```XML
+<pb facs="small/ENC_23-1-1.jpeg large/ENC_23-1-1.jpeg">
+```
+This will produce produce a link to the first image, the second one will be displayed if clicked on the arrow link in the page turner.
+
+**Note**: The values specified in `facs` must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
+
 * Page numbers should be stored in the n attribute, such as below:
 ```XML
 <pb n="23"/>
@@ -22,7 +32,7 @@ In other words, we do **NOT** support `<pb n='1'>`.
 
 A page tag with both attributes could look like this:
 ```XML
-<pb n="23" fac="V23/ENC_23-1-1.jpeg"/>
+<pb n="23" facs="V23/ENC_23-1-1.jpeg"/>
 ```
 
 # Inline Images #
@@ -31,6 +41,7 @@ A page tag with both attributes could look like this:
 ```XML
 <graphic url="V23/plate_23_2_2.jpeg">
 ```
+**Note**: The values specified in `url` must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
 
 # Notes #
 ### Important ###
