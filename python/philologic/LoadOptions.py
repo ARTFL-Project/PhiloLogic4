@@ -66,7 +66,7 @@ class LoadOptions(object):
         self.values["force_delete"] = False
         self.values["file_list"] = False
         self.values["bibliography"] = ""
-        self.values["filtered_words"] = set([])
+        self.values["words_to_index"] = set([])
         self.values["file_type"] = "xml"
         self.values["sentence_breakers"] = []
 
@@ -221,12 +221,12 @@ class LoadConfig(object):
             if not a.startswith('__') and not callable(getattr(config_file, a)):
                 value = getattr(config_file, a)
                 if value:
-                    if a == "filtered_words_list":
+                    if a == "words_to_index":
                         word_list = set([])
                         with open(value) as fh:
                             for line in fh:
                                 word_list.add(line.strip())
-                        self.config["filtered_words"] = word_list
+                        self.config["words_to_index"] = word_list
                     if a == "plain_text_obj":
                         if "load_filters" not in self.config:
                             self.config["load_filters"] = LoadFilters.DefaultLoadFilters

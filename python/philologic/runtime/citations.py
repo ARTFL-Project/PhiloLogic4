@@ -35,8 +35,6 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=N
         citation_type = config[report + "_citation"]
     citation = []
     for pos, citation_object in enumerate(citation_type):
-        if report == "bibliography" and result_type != citation_object["object_level"]:
-            continue
         cite = {}
         cite["label"] = get_label(hit, citation_object)
         if cite["label"]:

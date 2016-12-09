@@ -158,7 +158,7 @@ class XMLParser(object):
                  output,
                  docid,
                  filesize,
-                 filtered_words=[],
+                 words_to_index=None,
                  known_metadata={},
                  tag_to_obj_map=DefaultTagToObjMap,
                  metadata_to_parse=DefaultMetadataToParse,
@@ -186,7 +186,11 @@ class XMLParser(object):
         self.filesize = filesize
         self.known_metadata = known_metadata
 
-        self.filtered_words = []
+        if words_to_index:
+            self.words_to_index = words_to_index
+            self.defined_words_to_index = True
+        else:
+            self.defined_words_to_index = False
 
         # List of global variables used for the tag handler
         if "token_regex" in parse_options:
@@ -324,8 +328,7 @@ class XMLParser(object):
                 if self.in_the_text:
                     self.tag_handler(line)
             else:
-                if line not in self.filtered_words:
-                    self.word_handler(line)
+                self.word_handler(line)
                 self.bytes_read_in += len(line)
 
         self.v.pull("doc", self.filesize)
@@ -796,10 +799,9 @@ class XMLParser(object):
                     current_pos += word_length
 
                     # Do we have a word? At least one of these characters.
-                    if check_if_char_word.search(word.decode('utf8')):
+                    if check_if_char_word.search(word.decode('utf8').replace('_', "")):
                         last_word = word
                         word_pos = current_pos - len(word)
-
                         if "&" in word:
                             # Convert ents to utf-8
                             word = self.latin1_ents_to_utf8(word)
@@ -834,7 +836,11 @@ class XMLParser(object):
 
                         word = self.remove_control_chars(word)
                         word = word.replace("_", "").strip()
+                        word = word.replace(' ', '')
                         if len(word):
+                            if self.defined_words_to_index:
+                                if word not in self.words_to_index:
+                                    return
                             self.v.push("word", word, word_pos)
                             if self.current_tag == "w":
                                 for attrib, value in self.word_tag_attributes:
