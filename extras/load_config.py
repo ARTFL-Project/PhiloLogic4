@@ -133,19 +133,20 @@ tag_to_obj_map = {
 metadata_to_parse = {
     "div": ["head", "type", "n", "id", "vol"],
     "para": ["who", "resp", "id"],
-    "page": ["n", "id", "fac"],
+    "page": ["n", "id", "facs"],
     "ref": ["target", "n", "type"],
     "graphic": ["url"]
 }
 
+# Define a file (with full path) containing words to index. Must be one word per line.
+# Useful for filtering out dirty OCR.
+words_to_index = ""
+
 # This regex defines how to tokenize words and punctuation
 token_regex = "[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*"
 
-# Define a file (with full path) containing words to filter out. Must be one word per line.
-# Useful for dirty OCR.
-filtered_words_list = ""
 
-# Define the order in which files are sorted. This will affect the order in which
+
 # results are displayed. Supply a list of metadata strings, e.g.:
 # ["date", "author", "title"]
 sort_order = ["year", "author", "title", "filename"]
