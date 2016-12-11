@@ -283,8 +283,8 @@
                     angular.element('#full-size-image').off();
                     angular.element('#full-size-image').click(function() {
                         var imageIndex = scope.gallery.getIndex();
-                        var img = angular.element("#blueimp-gallery").find("[data-index='" + imageIndex + "'] img");
-                        $window.open(img.attr('src'));
+                        var img = angular.element("xml-pb-image").eq(imageIndex).attr('large-img');
+                        $window.open(img);
                     });
                 });
                 element.on('$destroy', function() {
