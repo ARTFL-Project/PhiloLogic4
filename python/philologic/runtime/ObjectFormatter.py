@@ -288,16 +288,19 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
             elif el.tag == "img":
                 el.attrib["onerror"] = "this.style.display='none'"
             elif el.tag == "pb" and "n" in el.attrib:
-                if "fac" in el.attrib or "id" in el.attrib:
-                    if "fac" in el.attrib:
-                        img = el.attrib["fac"]
+                if "facs" in el.attrib or "id" in el.attrib:
+                    if "facs" in el.attrib:
+                        img = el.attrib["facs"]
                     else:
                         img = el.attrib["id"]
                     current_obj_img.append(img)
                     el.tag = "span"
                     el.attrib["class"] = "xml-pb-image"
                     el.append(etree.Element("a"))
-                    el[-1].attrib["href"] = config.page_images_url_root + '/' + img + config.page_image_extension
+                    img_split = img.split()
+                    el[-1].attrib["href"] = config.page_images_url_root + '/' + img_split[0] + config.page_image_extension
+                    if len(img_split) == 2:
+                        el[-1].attrib["large-img"] = config.page_images_url_root + '/' + img_split[1] + config.page_image_extension
                     el[-1].text = "[page " + el.attrib["n"] + "]"
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
@@ -377,7 +380,7 @@ def get_first_page(philo_id, config):
         c.execute('select * from pages where philo_id like ? limit 1', (' '.join([str(i) for i in philo_id]), ))
     page_result = c.fetchone()
     try:
-        filename = page_result['fac']
+        filename = page_result["facs"]
     except IndexError:
         filename = ""
     if not filename:
@@ -404,9 +407,9 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
         c = db.dbh.cursor()
         approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
         try:
-            c.execute('select * from pages where philo_id like ? and fac is not null and fac != ""', (approx_id, ))
+            c.execute('select * from pages where philo_id like ? and facs is not null and facs != ""', (approx_id, ))
             current_obj_imgs = set(current_obj_imgs)
-            all_imgs = [i['fac'] for i in c.fetchall()]
+            all_imgs = [i["facs"] for i in c.fetchall()]
         except sqlite3.OperationalError:
             all_imgs = []
         return all_imgs

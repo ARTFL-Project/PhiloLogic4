@@ -54,7 +54,7 @@ class Loader(object):
         self.debug = loader_options["debug"]
         self.default_object_level = loader_options["default_object_level"]
         self.post_filters = loader_options["post_filters"]
-        self.filtered_words = loader_options["filtered_words"]
+        self.words_to_index = loader_options["words_to_index"]
         self.token_regex = loader_options["token_regex"]
 
         self.parser_config = {}
@@ -405,7 +405,7 @@ class Loader(object):
                                             known_metadata=metadata,
                                             tag_to_obj_map=self.parser_config["tag_to_obj_map"],
                                             metadata_to_parse=self.parser_config["metadata_to_parse"],
-                                            filtered_words=self.filtered_words,
+                                            words_to_index=self.words_to_index,
                                             **options)
                     try:
                         parser.parse(i)
@@ -566,7 +566,10 @@ class Loader(object):
         # and how large the block file will be.
         for line in open(self.workdir + "/all_frequencies"):
             f, word = line.rsplit(" ", 1)  # uniq -c pads output on the left side, so we split on the right.
-            f = int(f)
+            try:
+                f = int(f)
+            except ValueError:
+                f = int(re.sub(r"(\d+)\D+", r'\1', f.strip()))
             if f > freq2:
                 freq2 = f
             if f < index_cutoff:

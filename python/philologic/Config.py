@@ -82,16 +82,21 @@ web_config_defaults = {
                # Configure access control with True or False.
                # Note that if you want access control, you have to provide a login.txt file inside your /data directory,
                # otherwise access will remain open.''',
-        'index': 2
+        'index': 1
     },
     'access_file': {
         'value': '',
         'comment': '# Location of access file which contains authorized/unauthorized IPs and domain names',
-        'index': 3
+        'index': 2
     },
     'production': {
         'value': True,
         'comment': '# Do not set to False unless you want to make changes in the Web Client in the app/ directory',
+        'index': 3
+    },
+    'link_to_home_page': {
+        'value': '',
+        'comment': '# If set, link_to_home_page should be a string starting with "http://" pointing to a separate home page for the database',
         'index': 4
     },
     'search_reports': {
@@ -652,7 +657,7 @@ web_config_defaults = {
       'value': [],
       'comment': '''
                 # A list of pattern with replacement to be run on individual concordances before sending to browser
-                # It is constructed as a list of tuples where the first element is the pattern to be matched 
+                # It is constructed as a list of tuples where the first element is the pattern to be matched
                 # and the second element is the replacement
                 # e.g.: [("<note>", "<span>"), ("</note>", "</span>")]
                 ''',
@@ -662,7 +667,7 @@ web_config_defaults = {
       'value': [],
       'comment': '''
                 # A list of pattern with replacement to be run on individual kwic concordances before sending to browser
-                # It is constructed as a list of tuples where the first element is the pattern to be matched 
+                # It is constructed as a list of tuples where the first element is the pattern to be matched
                 # and the second element is the replacement
                 # e.g.: [("<note>", "<span>"), ("</note>", "</span>")]
                 ''',
@@ -672,7 +677,7 @@ web_config_defaults = {
       'value': [],
       'comment': '''
                 # A list of pattern with replacement to be run on text objects before sending to browser
-                # It is constructed as a list of tuples where the first element is the pattern to be matched 
+                # It is constructed as a list of tuples where the first element is the pattern to be matched
                 # and the second element is the replacement
                 # e.g.: [("<note>", "<span>"), ("</note>", "</span>")]
                 ''',

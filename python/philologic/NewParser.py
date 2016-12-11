@@ -44,7 +44,7 @@ DefaultTagToObjMap = {
 DefaultMetadataToParse = {
     "div": ["head", "type", "n", "id", "vol"],
     "para": ["who", "resp", "id"],  # for <sp> and <add> tags
-    "page": ["n", "id", "fac"],
+    "page": ["n", "id", "facs"],
     "ref": ["target", "n", "type"],
     "graphic": ["url"],
     "line": ["n"]
@@ -124,12 +124,12 @@ DefaultDocXPaths = {
     ]
 }
 
-TagExceptions = ['<hi[^>]*>', '<emph[^>]*>', '<\/hi>', '<\/emph>', '<orig[^>]*>', '<\/orig>', '<sic[^>]*>', '<\/sic>',
-                 '<abbr[^>]*>', '<\/abbr>', '<i>', '</i>', '<sup>', '</sup>']
+TagExceptions = [r'<hi[^>]*>', r'<emph[^>]*>', r'<\/hi>', r'<\/emph>', r'<orig[^>]*>', r'<\/orig>', r'<sic[^>]*>', r'<\/sic>',
+                 r'<abbr[^>]*>', r'<\/abbr>', r'<i>', r'</i>', r'<sup>', r'</sup>']
 
-TokenRegex = "[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*"
+TokenRegex = r"[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*"
 
-CharsNotToIndex = "\[\{\]\}"
+CharsNotToIndex = r"\[\{\]\}"
 
 UnicodeWordBreakers = ['\xe2\x80\x93',  # U+2013 &ndash; EN DASH
                        '\xe2\x80\x94',  # U+2014 &mdash; EM DASH
@@ -158,18 +158,17 @@ class XMLParser(object):
                  output,
                  docid,
                  filesize,
-                 filtered_words=[],
+                 words_to_index=None,
                  known_metadata={},
                  tag_to_obj_map=DefaultTagToObjMap,
                  metadata_to_parse=DefaultMetadataToParse,
                  **parse_options):
+        """Initialize class"""
         self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
         self.parallel_type = "page"
         self.output = output
         self.docid = docid
-
         self.tag_to_obj_map = tag_to_obj_map
-
         self.metadata_to_parse = {}
         for obj in metadata_to_parse:
             self.metadata_to_parse[obj] = set(metadata_to_parse[obj])
@@ -186,7 +185,11 @@ class XMLParser(object):
         self.filesize = filesize
         self.known_metadata = known_metadata
 
-        self.filtered_words = []
+        if words_to_index:
+            self.words_to_index = words_to_index
+            self.defined_words_to_index = True
+        else:
+            self.defined_words_to_index = False
 
         # List of global variables used for the tag handler
         if "token_regex" in parse_options:
@@ -259,7 +262,6 @@ class XMLParser(object):
         else:
             self.flatten_ligatures = True
 
-        self.get_multiple_div_heads = 1  # TODO: remove??
         self.in_the_text = False
         self.in_text_quote = False
         self.in_front_matter = False
@@ -324,8 +326,7 @@ class XMLParser(object):
                 if self.in_the_text:
                     self.tag_handler(line)
             else:
-                if line not in self.filtered_words:
-                    self.word_handler(line)
+                self.word_handler(line)
                 self.bytes_read_in += len(line)
 
         self.v.pull("doc", self.filesize)
@@ -796,10 +797,9 @@ class XMLParser(object):
                     current_pos += word_length
 
                     # Do we have a word? At least one of these characters.
-                    if check_if_char_word.search(word.decode('utf8')):
+                    if check_if_char_word.search(word.decode('utf8').replace('_', "")):
                         last_word = word
                         word_pos = current_pos - len(word)
-
                         if "&" in word:
                             # Convert ents to utf-8
                             word = self.latin1_ents_to_utf8(word)
@@ -834,7 +834,11 @@ class XMLParser(object):
 
                         word = self.remove_control_chars(word)
                         word = word.replace("_", "").strip()
+                        word = word.replace(' ', '')
                         if len(word):
+                            if self.defined_words_to_index:
+                                if word not in self.words_to_index:
+                                    return
                             self.v.push("word", word, word_pos)
                             if self.current_tag == "w":
                                 for attrib, value in self.word_tag_attributes:
@@ -941,7 +945,6 @@ class XMLParser(object):
 
     def get_div_head(self, tag):
         """Get div head."""
-        get_head_count = self.get_multiple_div_heads
         read_more = False
         look_ahead = self.line_count
         overflow_trap = 0
@@ -964,8 +967,6 @@ class XMLParser(object):
                     next_line = self.content[look_ahead]
                     if closed_head_tag.search(next_line):
                         read_more = False
-                        if self.get_multiple_div_heads:
-                            get_head_count -= 1
                     elif overflow_trap > 50:  # Overflow trap in case you miss </head
                         read_more = False
                     else:
@@ -992,7 +993,7 @@ class XMLParser(object):
 
         # TODO: evaluate need for below...
         if div_head == "[>]" or div_head == "[<]":
-            div_head == "[NA]"
+            div_head = "[NA]"
 
         div_head = self.remove_control_chars(div_head)
         div_head = convert_entities(div_head)
