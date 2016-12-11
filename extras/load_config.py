@@ -146,7 +146,7 @@ words_to_index = ""
 token_regex = "[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*"
 
 
-
+# Define the order in which files are sorted. This will affect the order in which
 # results are displayed. Supply a list of metadata strings, e.g.:
 # ["date", "author", "title"]
 sort_order = ["year", "author", "title", "filename"]
