@@ -10,7 +10,7 @@ import unicodedata
 from subprocess import PIPE, Popen
 
 from philologic.OHCOVector import Record
-from simplejson import loads
+from simplejson import loads, dumps
 from six.moves import range
 from six.moves import zip
 
@@ -386,8 +386,9 @@ def store_words_and_philo_ids(loader_obj, text):
     with open(text['raw']) as fh:
         for line in fh:
             type, word, id, attrib = line.split('\t')
-            if word != '__philo_virtual':
-                print("\t".join([word, id]), file=output)
+            if type == "word" and word != '__philo_virtual':
+                word_obj = dumps({"token": word, "position": id})
+                print(word_obj, file=output)
     output.close()
 
 
