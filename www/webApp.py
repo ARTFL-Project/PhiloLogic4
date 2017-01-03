@@ -6,6 +6,7 @@ from __future__ import print_function
 import imp
 import os.path
 import sys
+import shutil
 
 from philologic.runtime import WebConfig
 from philologic.runtime import WSGIHandler
@@ -15,11 +16,22 @@ path = os.path.abspath(os.path.dirname(__file__))
 dbname = path.strip().split('/')[-1]
 
 config = WebConfig(os.path.abspath(os.path.dirname(__file__)))
-theme = config.theme
+config_location = os.path.join('app/assets/css/split/', os.path.basename(config.theme))
+if config.theme == config_location:
+    theme = config.theme
+elif os.path.exists(config_location) and config.production:
+    theme = config_location
+else:
+    shutil.copy(config.theme, config_location)
+    theme = config_location
+
+
+
 
 css_files = [
     "app/assets/css/bootstrap.min.css",
-    "app/assets/css/split/style.css", "app/assets/css/split/%s" % theme,
+    "app/assets/css/split/style.css",
+    theme,
     "app/assets/css/split/searchForm.css",
     "app/assets/css/split/landingPage.css",
     "app/assets/css/split/concordanceKwic.css",

@@ -175,7 +175,7 @@ web_config_defaults = {
         'index': 14
     },
     'theme': {
-        'value': 'default_theme.css',
+        'value': 'app/assets/css/split/default_theme.css',
         'comment': '''
                # The theme variable defines the default CSS theme to be used in the WebApp. The default theme called default_theme.css
                # can be edited directly or you can define a new CSS file below. This file must be located in the app/assets/css/split/ directory for the Web App to find it.''',
