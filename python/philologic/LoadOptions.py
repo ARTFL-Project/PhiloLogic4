@@ -91,7 +91,7 @@ class LoadOptions(object):
                           default=False,
                           dest="debug",
                           help="add debugging to your load")
-        parser.add_option("-f",
+        parser.add_option("-D",
                           "--force_delete",
                           action="store_true",
                           default=False,

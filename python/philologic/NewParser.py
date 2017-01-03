@@ -797,7 +797,7 @@ class XMLParser(object):
                     current_pos += word_length
 
                     # Do we have a word? At least one of these characters.
-                    if check_if_char_word.search(word.decode('utf8').replace('_', "")):
+                    if check_if_char_word.search(word.decode('utf8', 'ignore').replace('_', "")):
                         last_word = word
                         word_pos = current_pos - len(word)
                         if "&" in word:
