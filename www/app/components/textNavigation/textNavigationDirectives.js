@@ -75,8 +75,8 @@
                 var beforeIndex = 0;
                 for (var i = 0; i < allImgs.length; i++) {
                     var img = allImgs[i];
-                    if (currentObjImgs.indexOf(img) === -1) {
-                        scope.beforeObjImgs.push(scope.philoConfig.page_images_url_root + '/' + img);
+                    if (currentObjImgs.indexOf(img[0]) === -1) {
+                        scope.beforeObjImgs.push([scope.philoConfig.page_images_url_root + '/' + img[0], scope.philoConfig.page_images_url_root + '/' + img[1]]);
                     } else {
                         beforeIndex = i;
                         break;
@@ -84,8 +84,8 @@
                 }
                 for (var i = beforeIndex; i < allImgs.length; i++) {
                     var img = allImgs[i];
-                    if (currentObjImgs.indexOf(img) === -1) {
-                        scope.afterObjImgs.push(scope.philoConfig.page_images_url_root + '/' + img);
+                    if (currentObjImgs.indexOf(img[0]) === -1) {
+                        scope.afterObjImgs.push([scope.philoConfig.page_images_url_root + '/' + img[0], scope.philoConfig.page_images_url_root + '/' + img[1]]);
                     }
                 }
             }
@@ -283,7 +283,7 @@
                     angular.element('#full-size-image').off();
                     angular.element('#full-size-image').click(function() {
                         var imageIndex = scope.gallery.getIndex();
-                        var img = angular.element("xml-pb-image").eq(imageIndex).attr('large-img');
+                        var img = angular.element("a.page-image-link").eq(imageIndex).attr('large-img');
                         $window.open(img);
                     });
                 });

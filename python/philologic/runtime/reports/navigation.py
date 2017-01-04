@@ -27,8 +27,7 @@ def generate_text_object(request, config, note=False):
         try:
             obj = db[request.philo_id]
         except ValueError:
-            philo_id = ' '.join(request.path_components)
-            obj = db[philo_id]
+            obj = db[' '.join(request.path_components)]
         philo_id = obj.philo_id
     if width != 9:
         while obj['philo_name'] == '__philo_virtual' and obj["philo_type"] != "div1":
