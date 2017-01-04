@@ -33,7 +33,6 @@ def bibliography_results(request, config):
         "default_object": db.locals['default_object_level']
     }
     results = []
-    doc_level = True
     result_type = "doc"
     for hit in hits[start - 1:end]:
         citation_hrefs = citation_links(db, config, hit)
@@ -63,10 +62,8 @@ def bibliography_results(request, config):
                 "context": context,
                 "object_type": result_type
             })
-    if result_type != "doc":
-        doc_level = False
     bibliography_object["results"] = results
     bibliography_object['results_length'] = len(hits)
     bibliography_object['query_done'] = hits.done
-    bibliography_object['doc_level'] = doc_level
+    bibliography_object['result_type'] = result_type
     return bibliography_object, hits

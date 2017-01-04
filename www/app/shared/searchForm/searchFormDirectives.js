@@ -268,26 +268,36 @@
             link: function (scope) {
                 if ("sort_order" in $rootScope.formData && $rootScope.formData.sort_order.length >= 1) {
                     var label = []
-                    for (var j = 0; j < $rootScope.formData.sort_order.length; j += 1) {
-                        if ($rootScope.formData.sort_order[j] in philoConfig.metadata_aliases) {
-                            label.push(philoConfig.metadata_aliases[$rootScope.formData.sort_order[j]]);
+                    if (typeof($rootScope.formData.sort_order) == "string") {
+                        if ($rootScope.formData.sort_order in philoConfig.metadata_aliases) {
+                            label = philoConfig.metadata_aliases[$rootScope.formData.sort_order];
                         } else {
-                            label.push($rootScope.formData.sort_order[j]);
+                            label = $rootScope.formData.sort_order;
                         }
+                    } else {
+                        for (var j = 0; j < $rootScope.formData.sort_order.length; j += 1) {
+                            if ($rootScope.formData.sort_order[j] in philoConfig.metadata_aliases) {
+                                label.push(philoConfig.metadata_aliases[$rootScope.formData.sort_order[j]]);
+                            } else {
+                                label.push($rootScope.formData.sort_order[j]);
+                            }
+                        }
+                        label = label.join(', ')
                     }
-                    scope.selectedSortValues = label.join(", ");
+                    scope.selectedSortValues = label;
                 } else {
                     scope.selectedSortValues = "None";
                 }
-                if (scope.selectedSortValues = "r,o,w,i,d") {
-                    scope.selectedSortValues = "None";
-                }
+
                 scope.sortValues = [{
                     value: [],
                     label: "None"
                 }];
                 for (var i = 0; i < philoConfig.concordance_biblio_sorting.length; i += 1) {
                     var sortValue = philoConfig.concordance_biblio_sorting[i];
+                    if (typeof(sortValue) == 'string') {
+                        sortValue = [sortValue];
+                    }
                     var label = [];
                     for (var j = 0; j < sortValue.length; j += 1) {
                         if (sortValue[j] in philoConfig.metadata_aliases) {
@@ -296,6 +306,7 @@
                             label.push(sortValue[j]);
                         }
                     }
+                    console.log(typeof(sortValue))
                     var value = {
                         label: label.join(', '),
                         value: sortValue

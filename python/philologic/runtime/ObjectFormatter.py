@@ -174,7 +174,7 @@ def format_strip(text, byte_offsets=None):
     return output
 
 
-def format_text_object(obj, text, config, request, word_regex, byte_offsets=None, note=False):
+def format_text_object(obj, text, config, request, word_regex, byte_offsets=None, note=False, images=True):
     """Format text objects"""
     philo_id = obj.philo_id
     if byte_offsets is not None:
@@ -334,11 +334,14 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
     if note:  ## Notes don't need to fetch images
         return (output, {})
 
+    if not images:
+        return (output, {})
+
     ## Page images
-    output, img_obj = page_images(config, output, current_obj_img, philo_id)
-
-    return output, img_obj
-
+    if current_obj_img:
+        return page_images(config, output, current_obj_img, philo_id)
+    else:
+        return (output, {})
 
 def page_images(config, output, current_obj_img, philo_id):
     """Get page images"""
