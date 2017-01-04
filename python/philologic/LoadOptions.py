@@ -35,6 +35,7 @@ class LoadOptions(object):
         self.values = {}
         self.values["database_root"] = config_file.database_root
         self.values["web_app_dir"] = config_file.web_app_dir
+        self.values["theme"] = config_file.theme
         self.values["destination"] = "./"
         self.values["load_config"] = ""
         self.values["default_object_level"] = Loader.DEFAULT_OBJECT_LEVEL
@@ -91,7 +92,7 @@ class LoadOptions(object):
                           default=False,
                           dest="debug",
                           help="add debugging to your load")
-        parser.add_option("-f",
+        parser.add_option("-D",
                           "--force_delete",
                           action="store_true",
                           default=False,

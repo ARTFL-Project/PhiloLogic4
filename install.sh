@@ -65,6 +65,9 @@ if [ ! -f /etc/philologic/philologic4.cfg ]
         web_app_dir="## This should be set to the location of the PhiloLogic4 www directory
         web_app_dir = '/var/lib/philologic4/web_app/'"
         echo "$web_app_dir" | sed "s/^ *//g" | sudo tee -a /etc/philologic/philologic4.cfg > /dev/null
+        theme="# Point to a default theme to use for all your PhiloLogic4 loads.\n
+        theme = '/var/lib/philologic4/web_app/app/assets/css/split/default_theme.css'"
+        echo "$theme" | sed "s/^ *//g" | sudo tee -a /etc/philologic/philologic4.cfg > /dev/null
 else
     echo "\n## WARNING ##"
     echo "/etc/philologic/philologic4.cfg already exists"
