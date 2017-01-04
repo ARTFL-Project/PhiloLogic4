@@ -106,6 +106,8 @@ class Loader(object):
         else:
             self.predefined_web_config = False
 
+        self.theme = loader_options["theme"]
+
         self.metadata_fields = []
         self.metadata_hierarchy = []
         self.metadata_types = {}
@@ -686,7 +688,8 @@ class Loader(object):
         metadata = [i for i in self.metadata_fields if i not in self.metadata_fields_not_found]
         config_values = {'dbname': os.path.basename(re.sub("/data/?$", "", self.destination)),
                          'metadata': metadata,
-                         'facets': metadata}
+                         'facets': metadata,
+                         'theme': self.theme}
         # Fetch search examples:
         search_examples = {}
         conn = sqlite3.connect(self.destination + '/toms.db')
