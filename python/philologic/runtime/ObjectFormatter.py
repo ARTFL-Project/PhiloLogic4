@@ -344,8 +344,6 @@ def page_images(config, output, current_obj_img, philo_id):
     """Get page images"""
     # first get first page info in case the object doesn't start with a page tag
     first_page_object = get_first_page(philo_id, config)
-    import sys
-    print(first_page_object, file=sys.stderr)
     if not current_obj_img:
         current_obj_img.append('')
     if first_page_object['start_byte'] and current_obj_img[0] != first_page_object['filename'][0]:
