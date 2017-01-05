@@ -12,6 +12,7 @@ description, you can refer to [our research publications](<http://http://jtei.re
 * [**Configuring the Web Application**](docs/configure_web_app.md)
 * [**Query Syntax**](docs/query_syntax.md)
 * [**Text Encoding Spec**](docs/encoding_spec.md)
+* [**Access Control**](docs/access_control.md)
 
 
 ### IMPORTANT ###
