@@ -52,6 +52,6 @@ TODO: support ranges (maybe using a - to separate values)
 The `blocked_ips` variable is a list of IPs (exact matches needed) to deny access to:
 ```Python
 blocked_ips = [
-  1.1.1.4
+  "1.1.1.4"
 ]
 ```
