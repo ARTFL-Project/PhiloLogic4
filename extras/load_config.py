@@ -135,7 +135,7 @@ metadata_to_parse = {
     "para": ["who", "resp", "id"],
     "page": ["n", "id", "facs"],
     "ref": ["target", "n", "type"],
-    "graphic": ["url"]
+    "graphic": ["facs"]
 }
 
 # Define a file (with full path) containing words to index. Must be one word per line.

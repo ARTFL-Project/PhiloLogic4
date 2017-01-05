@@ -174,7 +174,7 @@ def format_strip(text, byte_offsets=None):
     return output
 
 
-def format_text_object(obj, text, config, request, word_regex, byte_offsets=None, note=False):
+def format_text_object(obj, text, config, request, word_regex, byte_offsets=None, note=False, images=True):
     """Format text objects"""
     philo_id = obj.philo_id
     if byte_offsets is not None:
@@ -293,7 +293,7 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                         img = el.attrib["facs"]
                     else:
                         img = el.attrib["id"]
-                    current_obj_img.append(img)
+                    current_obj_img.append(img.split()[0])
                     el.tag = "span"
                     el.attrib["class"] = "xml-pb-image"
                     el.append(etree.Element("a"))
@@ -301,15 +301,22 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                     el[-1].attrib["href"] = config.page_images_url_root + '/' + img_split[0] + config.page_image_extension
                     if len(img_split) == 2:
                         el[-1].attrib["large-img"] = config.page_images_url_root + '/' + img_split[1] + config.page_image_extension
+                    else:
+                        el[-1].attrib["large-img"] = config.page_images_url_root + '/' + img_split[0] + config.page_image_extension
                     el[-1].text = "[page " + el.attrib["n"] + "]"
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
             if el.tag == "graphic":
-                el.attrib["src"] = os.path.join(config.page_images_url_root, el.attrib["url"])
+                imgs = el.attrib["facs"].split()
+                el.attrib["src"] = os.path.join(config.page_images_url_root, imgs[0])
                 el.tag = "img"
                 el.attrib["class"] = "inline-img"
                 el.attrib['data-gallery'] = ''
                 el.attrib["inline-img"] = ""
+                if len(imgs) > 1:
+                    el.attrib["large-img"] = imgs[1]
+                else:
+                    el.attrib["large-img"] = imgs[0]
                 del el.attrib["url"]
             elif el.tag == "philoHighlight":
                 word_match = re.match(word_regex, el.tail, re.U)
@@ -332,11 +339,14 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
     if note:  ## Notes don't need to fetch images
         return (output, {})
 
+    if not images:
+        return (output, {})
+
     ## Page images
-    output, img_obj = page_images(config, output, current_obj_img, philo_id)
-
-    return output, img_obj
-
+    if current_obj_img:
+        return page_images(config, output, current_obj_img, philo_id)
+    else:
+        return (output, {})
 
 def page_images(config, output, current_obj_img, philo_id):
     """Get page images"""
@@ -344,15 +354,18 @@ def page_images(config, output, current_obj_img, philo_id):
     first_page_object = get_first_page(philo_id, config)
     if not current_obj_img:
         current_obj_img.append('')
-    if first_page_object['start_byte'] and current_obj_img[0] != first_page_object['filename']:
+    if first_page_object['start_byte'] and current_obj_img[0] != first_page_object['filename'][0]:
         if first_page_object['filename']:
-            page_href = config.page_images_url_root + '/' + first_page_object['filename'] + config.page_image_extension
-            output = '<span class="xml-pb-image"><a href="' + page_href + '" class="page-image-link" data-gallery>[page ' + str(
-                first_page_object["n"]) + "]</a></span>" + output
-            if current_obj_img[0] == '':
-                current_obj_img[0] = first_page_object['filename']
+            page_href = config.page_images_url_root + '/' + first_page_object['filename'][0] + config.page_image_extension
+            if len(first_page_object['filename']) == 2:
+                large_img = config.page_images_url_root + '/' + first_page_object['filename'][1] + config.page_image_extension
             else:
-                current_obj_img.insert(0, first_page_object['filename'])
+                large_img = config.page_images_url_root + '/' + first_page_object['filename'][0] + config.page_image_extension
+            output = '<span class="xml-pb-image"><a href="%s" large-img="%s" class="page-image-link" data-gallery>[page %s]</a></span>' % (page_href, large_img, first_page_object["n"]) + output
+            if current_obj_img[0] == '':
+                current_obj_img[0] = first_page_object['filename'][0]
+            else:
+                current_obj_img.insert(0, first_page_object['filename'][0])
         else:
             output = '<span class="xml-pb-image">[page ' + str(first_page_object["n"]) + "]</span>" + output
     ## Fetch all remainging imgs in document
@@ -368,7 +381,7 @@ def get_first_page(philo_id, config):
     db = DB(config.db_path + '/data/')
     c = db.dbh.cursor()
     if len(philo_id) < 9:
-        c.execute('select start_byte, end_byte from toms where philo_id="%s"' % ' '.join([str(i) for i in philo_id]))
+        c.execute('select start_byte, end_byte from toms where philo_id=?', (' '.join([str(i) for i in philo_id]), ))
         result = c.fetchone()
         start_byte = result['start_byte']
         approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
@@ -381,16 +394,16 @@ def get_first_page(philo_id, config):
     page_result = c.fetchone()
     try:
         filename = page_result["facs"]
-    except IndexError:
+    except (IndexError, TypeError):
         filename = ""
     if not filename:
         try:
             filename = page_result['id'] or ''
-        except IndexError:
+        except (IndexError, TypeError):
             pass
     try:
         n = page_result['n'] or ''
-        page = {'filename': filename,
+        page = {'filename': filename.split(),
                 "n": n,
                 'start_byte': page_result['start_byte'],
                 'end_byte': page_result['end_byte']}
@@ -409,7 +422,7 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
         try:
             c.execute('select * from pages where philo_id like ? and facs is not null and facs != ""', (approx_id, ))
             current_obj_imgs = set(current_obj_imgs)
-            all_imgs = [i["facs"] for i in c.fetchall()]
+            all_imgs = [tuple(i["facs"].split()) for i in c.fetchall()]
         except sqlite3.OperationalError:
             all_imgs = []
         return all_imgs
@@ -421,8 +434,8 @@ def get_all_graphics(philo_id, config):
     c = db.dbh.cursor()
     approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
     try:
-        c.execute('SELECT url FROM graphics WHERE philo_id LIKE ? AND url IS NOT NULL AND url != "" ORDER BY ROWID', (approx_id, ))
-        graphics = [os.path.join(config.page_images_url_root, i["url"]) for i in c.fetchall()]
+        c.execute('SELECT facs FROM graphics WHERE philo_id LIKE ? AND facs IS NOT NULL AND facs != "" ORDER BY ROWID', (approx_id, ))
+        graphics = [i["facs"].split() for i in c.fetchall() if i["facs"]]
         return graphics
     except sqlite3.OperationalError:
         return []

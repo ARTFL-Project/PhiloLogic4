@@ -37,11 +37,12 @@ A page tag with both attributes could look like this:
 
 # Inline Images #
 * Inline images should use the `<graphic>` tag.
-* Linnks to images should be stored in the url attribute such as below:
+* Links to images should be stored in the facs attribute such as below. Image links should be separated by a space:
 ```XML
-<graphic url="V23/plate_23_2_2.jpeg">
+<graphic facs="V23/plate_23_2_2.jpeg">
+<graphic facs="V23/plate_23_2_2.jpeg V23/plate_23_2_3.jpeg">
 ```
-**Note**: The values specified in `url` must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
+**Note**: The values specified in `facs` must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
 
 # Notes #
 ### Important ###
