@@ -10,6 +10,7 @@ import shutil
 
 from philologic.runtime import WebConfig
 from philologic.runtime import WSGIHandler
+from philologic.runtime import access_control
 
 global_config = imp.load_source("philologic4", "/etc/philologic/philologic4.cfg")
 path = os.path.abspath(os.path.dirname(__file__))
@@ -98,7 +99,7 @@ def angular(environ, start_response):
         request = WSGIHandler(environ, config)
         if config.access_control:
             if not request.authenticated:
-                token = f.check_access(environ, config)
+                token = access_control.check_access(environ, config)
                 if token:
                     print("ISSUING TOKEN", file=sys.stderr)
                     h, ts = token

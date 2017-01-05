@@ -46,7 +46,7 @@ DefaultMetadataToParse = {
     "para": ["who", "resp", "id"],  # for <sp> and <add> tags
     "page": ["n", "id", "facs"],
     "ref": ["target", "n", "type"],
-    "graphic": ["url"],
+    "graphic": ["facs"],
     "line": ["n"]
 }
 

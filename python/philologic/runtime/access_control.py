@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 import os
 import socket
+import imp
 import re
 import hashlib
 import time
@@ -10,59 +11,69 @@ import struct
 from philologic.DB import DB
 
 # These should always be allowed for local access
-local_blocks = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.1/32"
-                ]
+local_blocks = ["10.0.0.", "172.16.0.", "192.168.0.", "127.0.0."]
+
+ip_ranges = [re.compile(r'^%s.*' % i) for i in local_blocks]
 
 
 def check_access(environ, config):
     db = DB(config.db_path + '/data/')
     incoming_address = environ['REMOTE_ADDR']
-    access = {}
-    access_file = config.db_path + '/data/' + config['access_file']
-    if not access_file:
-        return make_token(incoming_address, db)
-    if not os.path.isfile(access_file):
-        return make_token(incoming_address, db)
+    if config.access_file:
+        if os.path.isabs(config.access_file):
+            access_file = config.access_file
+        else:
+            access_file = os.path.join(config.db_path, "data", config.access_file)
+        if not os.path.isfile(access_file):
+            return make_token(incoming_address, db)
     else:
-        try:
-            exec(compile(open(access_file).read(), access_file, 'exec'), globals(), access)
-        except:
-            return ()
-        # We would add whatever other IPs have been defined in the access_file to blocks
-        blocks = local_blocks
-        for block in blocks:
-            if addr_in_cidr(incoming_address, block):
-                return make_token(incoming_address, db)
+        return make_token(incoming_address, db)
 
-        try:
-            domain_list = set(access["domain_list"])
-        except:
-            return ()  ## No allowed domains, so access request denied
-        try:
-            blocked_ips = set(access["blocked_ips"])
-        except:
-            blocked_ips = []
-        fq_domain_name = socket.getfqdn(incoming_address).split(',')[-1]
-        edit_domain = re.split('\.', fq_domain_name)
+    # Load access config file. If loading fails, grant access.
+    try:
+        access_config = imp.load_source("access_config", access_file)
+    except:
+        return make_token(incoming_address, db)
 
-        if re.match('edu', edit_domain[-1]):
+    # Let's first check if the IP is local and grant access if it is.
+    for range in ip_ranges:
+        if range.search(incoming_address):
+            return make_token(incoming_address, db)
+
+    try:
+        domain_list = set(access_config.domain_list)
+    except:
+        domain_list = []
+
+    try:
+        allowed_ips = set(access_config.allowed_ips)
+    except:
+        allowed_ips = []
+    try:
+        blocked_ips = set(access_config.blocked_ips)
+    except:
+        blocked_ips = []
+
+    fq_domain_name = socket.getfqdn(incoming_address).split(',')[-1]
+    edit_domain = re.split('\.', fq_domain_name)
+
+    if re.match('edu', edit_domain[-1]):
+        match_domain = '.'.join([edit_domain[-2], edit_domain[-1]])
+    else:
+        if len(edit_domain) == 2:
             match_domain = '.'.join([edit_domain[-2], edit_domain[-1]])
         else:
-            if len(edit_domain) == 2:
-                match_domain = '.'.join([edit_domain[-2], edit_domain[-1]])
-            else:
-                match_domain = fq_domain_name
+            match_domain = fq_domain_name
 
-        access_granted = True
-        if incoming_address not in blocked_ips:
-            if incoming_address in domain_list or match_domain in domain_list:
-                access_granted = True  # We disable access control
-            else:
-                access_granted = False
-        if access_granted == True:
+    if incoming_address not in blocked_ips:
+        if match_domain in domain_list:
             return make_token(incoming_address, db)
-        else:
-            return ()
+        for ip_range in allowed_ips:
+            if re.search(r'^%s.*' % ip_range, incoming_address):
+                return make_token(incoming_address, db)
+
+    # If no token returned, we block access.
+    return ()
 
 
 def login_access(environ, request, config, headers):
@@ -88,7 +99,7 @@ def check_login_info(config, request):
     try:
         password_file = open(config.db_path + "/data/logins.txt")
     except IOError:
-        return (True, default_reports)
+        return True
     access = False
     for line in password_file:
         fields = line.strip().split('\t')
@@ -112,43 +123,3 @@ def make_token(incoming_address, db):
     secret = db.locals.secret
     h.update(secret)
     return (h.hexdigest(), now)
-
-## Adapted from http://code.activestate.com/recipes/66517/
-## Fixed LOTS of bugs.
-
-
-def dottedQuadToNum(ip):
-    "convert decimal dotted quad string to long integer"
-    return struct.unpack('!I', socket.inet_aton(ip))[0]
-
-
-def numToDottedQuad(n):
-    "convert long int to dotted quad string"
-    return socket.inet_ntoa(struct.pack('!I', n))
-
-
-def makeMask(n):
-    "return a mask of n bits as a long integer"
-    return ((2 << n - 1) - 1) << (32 - n)
-
-
-def ipToNetAndHost(ip, maskbits):
-    "returns tuple (network, host) dotted-quad addresses given IP and mask size"
-    # (by Greg Jorgensen)
-
-    n = dottedQuadToNum(ip)
-    m = makeMask(maskbits)
-
-    host = n & m
-    net = n - host
-
-    return numToDottedQuad(net), numToDottedQuad(host)
-
-
-def addr_in_cidr(addr, block):
-    ip, l = block.split("/")
-    block_host, block_prefix = ipToNetAndHost(ip, int(l))
-    addr_host, addr_prefix = ipToNetAndHost(addr, int(l))
-    # print "Block:", block_host, block_prefix
-    # print "Address:", addr_host, addr_prefix
-    return block_prefix == addr_prefix

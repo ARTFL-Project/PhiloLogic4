@@ -307,11 +307,16 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
             if el.tag == "graphic":
-                el.attrib["src"] = os.path.join(config.page_images_url_root, el.attrib["url"])
+                imgs = el.attrib["facs"].split()
+                el.attrib["src"] = os.path.join(config.page_images_url_root, imgs[0])
                 el.tag = "img"
                 el.attrib["class"] = "inline-img"
                 el.attrib['data-gallery'] = ''
                 el.attrib["inline-img"] = ""
+                if len(imgs) > 1:
+                    el.attrib["large-img"] = imgs[1]
+                else:
+                    el.attrib["large-img"] = imgs[0]
                 del el.attrib["url"]
             elif el.tag == "philoHighlight":
                 word_match = re.match(word_regex, el.tail, re.U)
@@ -429,8 +434,8 @@ def get_all_graphics(philo_id, config):
     c = db.dbh.cursor()
     approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
     try:
-        c.execute('SELECT url FROM graphics WHERE philo_id LIKE ? AND url IS NOT NULL AND url != "" ORDER BY ROWID', (approx_id, ))
-        graphics = [os.path.join(config.page_images_url_root, i["url"]) for i in c.fetchall()]
+        c.execute('SELECT facs FROM graphics WHERE philo_id LIKE ? AND facs IS NOT NULL AND facs != "" ORDER BY ROWID', (approx_id, ))
+        graphics = [i["facs"].split() for i in c.fetchall() if i["facs"]]
         return graphics
     except sqlite3.OperationalError:
         return []
