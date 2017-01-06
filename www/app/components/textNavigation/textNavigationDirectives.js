@@ -39,7 +39,6 @@
                     textNavigationValues.textObject = response.data;
                     textNavigationValues.citation = response.data.citation;
                     textNavigationValues.navBar = true;
-                    scope.textNav.graphics = response.data.imgs.graphics;
                     if (scope.byteOffset.length > 0) {
                         scope.highlight = true;
                     } else {
@@ -61,6 +60,7 @@
                         });
                     }
                     insertPageLinks(scope, response.data.imgs);
+                    insertInlineImgs(scope, response.data.imgs);
                 })
                 .catch(function(response) {
                     scope.textNav.loading = false;
@@ -94,6 +94,39 @@
                             scope.afterObjImgs.push([scope.philoConfig.page_images_url_root + '/' + img[0], scope.philoConfig.page_images_url_root + '/' + img[1]]);
                         } else {
                             scope.afterObjImgs.push([scope.philoConfig.page_images_url_root + '/' + img[0], scope.philoConfig.page_images_url_root + '/' + img[0]]);
+                        }
+                    }
+                }
+            }
+        }
+        var insertInlineImgs = function(scope, imgObj) {
+            var currentObjImgs = imgObj.current_graphic_img;
+            var allImgs = imgObj.graphics;
+            scope.beforeGraphicsImgs = [];
+            scope.afterGraphicsImgs = [];
+            if (currentObjImgs.length > 0) {
+                var beforeIndex = 0;
+                for (var i = 0; i < allImgs.length; i++) {
+                    var img = allImgs[i];
+                    if (currentObjImgs.indexOf(img[0]) === -1) {
+                        if (img.length == 2) {
+                            scope.beforeGraphicsImgs.push([scope.philoConfig.page_images_url_root + '/' + img[0], scope.philoConfig.page_images_url_root + '/' + img[1]]);
+                        } else {
+                            scope.beforeGraphicsImgs.push([scope.philoConfig.page_images_url_root + '/' + img[0], scope.philoConfig.page_images_url_root + '/' + img[0]]);
+                        }
+
+                    } else {
+                        beforeIndex = i;
+                        break;
+                    }
+                }
+                for (var i = beforeIndex; i < allImgs.length; i++) {
+                    var img = allImgs[i];
+                    if (currentObjImgs.indexOf(img[0]) === -1) {
+                        if (img.length == 2) {
+                            scope.afterGraphicsImgs.push([scope.philoConfig.page_images_url_root + '/' + img[0], scope.philoConfig.page_images_url_root + '/' + img[1]]);
+                        } else {
+                            scope.afterGraphicsImgs.push([scope.philoConfig.page_images_url_root + '/' + img[0], scope.philoConfig.page_images_url_root + '/' + img[0]]);
                         }
                     }
                 }
@@ -306,20 +339,24 @@
     function inlineImg($window) {
         var launchGallery = function(scope) {
             var imageList = [];
-            angular.element('#book-page').find('img.inline-img').each(function() {
-                imageList.push(angular.element(this).attr('src'));
+            angular.element('#book-page').find('.inline-img').each(function() {
+                if (angular.element(this)[0].nodeName == "IMG") {
+                    var value = angular.element(this).attr('src');
+                } else {
+                    var value = angular.element(this).attr('href');
+                }
+                imageList.push(value);
             });
             return imageList;
         }
         return {
             restrict: 'A',
             link: function(scope, element) {
-                var index = scope.textNav.graphics.indexOf(element.attr('src'));
                 element.click(function(e) {
                     e.preventDefault();
-                    scope.gallery = blueimp.Gallery(scope.textNav.graphics, {
+                    scope.gallery = blueimp.Gallery(launchGallery(), {
                         onopen: function() {
-                            this.index = index;
+                            this.index = element.index('.inline-img');
                         },
                         continuous: false,
                         thumbnailIndicators: false
@@ -328,7 +365,7 @@
                     angular.element('#full-size-image').click(function() {
                         var imageIndex = scope.gallery.getIndex();
                         var img = angular.element("#blueimp-gallery").find("[data-index='" + imageIndex + "'] img");
-                        $window.open(img.attr('src'));
+                        $window.open(img.attr('large-img'));
                     });
                 });
                 element.on('$destroy', function() {

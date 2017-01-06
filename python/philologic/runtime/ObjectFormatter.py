@@ -185,6 +185,7 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
             last_offset = b
         text = new_text + text[last_offset:]
     current_obj_img = []
+    current_graphic_img = []
     text = "<div>" + text + "</div>"
     xml = FragmentParserParse(text)
     c = obj.db.dbh.cursor()
@@ -308,6 +309,7 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                     el[-1].attrib['data-gallery'] = ''
             if el.tag == "graphic":
                 imgs = el.attrib["facs"].split()
+                current_graphic_img.append(imgs[0])
                 el.attrib["src"] = os.path.join(config.page_images_url_root, imgs[0])
                 el.tag = "img"
                 el.attrib["class"] = "inline-img"
@@ -343,12 +345,10 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
         return (output, {})
 
     ## Page images
-    if current_obj_img:
-        return page_images(config, output, current_obj_img, philo_id)
-    else:
-        return (output, {})
+    output, images = page_images(config, output, current_obj_img, current_graphic_img, philo_id)
+    return output, images
 
-def page_images(config, output, current_obj_img, philo_id):
+def page_images(config, output, current_obj_img, current_graphic_img, philo_id):
     """Get page images"""
     # first get first page info in case the object doesn't start with a page tag
     first_page_object = get_first_page(philo_id, config)
@@ -371,7 +371,7 @@ def page_images(config, output, current_obj_img, philo_id):
     ## Fetch all remainging imgs in document
     all_imgs = get_all_page_images(philo_id, config, current_obj_img)
     all_graphics = get_all_graphics(philo_id, config)
-    img_obj = {'all_imgs': all_imgs, 'current_obj_img': current_obj_img, "graphics": all_graphics}
+    img_obj = {'all_imgs': all_imgs, 'current_obj_img': current_obj_img, "graphics": all_graphics, "current_graphic_img": current_graphic_img}
     return output, img_obj
 
 

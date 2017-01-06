@@ -7,11 +7,17 @@
 					    <a href="{{ img[0] }}" large-img="{{img[1]}}" class="page-image-link" ng-repeat="img in beforeObjImgs track by $index" data-gallery></a>
                     </span>
 				</div>
+                <div id="previous-graphics" ng-if="beforeGraphicsImgs">
+					<a href="{{ img[0] }}" large-img="{{img[1]}}" class="inline-img" ng-repeat="img in beforeGraphicsImgs track by $index" data-gallery></a>
+				</div>
                 <div id="text-obj-content" class="panel panel-default text-content-area" ng-bind-html="textObject.text | unsafe" compile-template select-word philo-id="{{ philoID }}"></div>
 				<div id="next-pages" ng-if="afterObjImgs">
                     <span class="xml-pb-image">
 					    <a href="{{ img[0] }}" large-img="{{img[1]}}" class="page-image-link" ng-repeat="img in afterObjImgs track by $index" data-gallery></a>
                     </span>
+				</div>
+                <div id="next-graphics" ng-if="afterGraphicsImgs">
+					<a href="{{ img[0] }}" large-img="{{img[1]}}" class="inline-img" ng-repeat="img in afterGraphicsImgs track by $index" data-gallery></a>
 				</div>
             </div>
         </div>
