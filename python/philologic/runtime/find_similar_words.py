@@ -30,6 +30,7 @@ def find_similar_words(db, config, request):
     # Check if lookup is cached
     hashed_query = hashlib.sha256()
     hashed_query.update(request['q'])
+    hashed_query.update(str(request.approximate_ratio))
     approximate_filename = os.path.join(config.db_path, "data/hitlists/%s.approximate_terms" % hashed_query.hexdigest())
     if os.path.isfile(approximate_filename):
         with open(approximate_filename) as fh:

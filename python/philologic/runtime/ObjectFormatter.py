@@ -352,6 +352,8 @@ def page_images(config, output, current_obj_img, current_graphic_img, philo_id):
     """Get page images"""
     # first get first page info in case the object doesn't start with a page tag
     first_page_object = get_first_page(philo_id, config)
+    if not first_page_object["filename"]:
+        return output, {}
     if not current_obj_img:
         current_obj_img.append('')
     if first_page_object['start_byte'] and current_obj_img[0] != first_page_object['filename'][0]:
@@ -380,11 +382,13 @@ def get_first_page(philo_id, config):
     starting the object"""
     db = DB(config.db_path + '/data/')
     c = db.dbh.cursor()
+    import sys
     if len(philo_id) < 9:
         c.execute('select start_byte, end_byte from toms where philo_id=?', (' '.join([str(i) for i in philo_id]), ))
         result = c.fetchone()
         start_byte = result['start_byte']
         approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
+        print("SQLITE QUERY", 'select * from pages where philo_id like "%s" and end_byte >= "%s" limit 1' % (approx_id, start_byte), file=sys.stderr)
         try:
             c.execute('select * from pages where philo_id like ? and end_byte >= ? limit 1', (approx_id, start_byte))
         except:
