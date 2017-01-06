@@ -56,3 +56,6 @@ blocked_ips = [
   "1.1.1.4"
 ]
 ```
+
+## What happens when you're granted access ##
+A cookie is saved to your browser, so that subsequent visits no longer require access check.
