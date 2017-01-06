@@ -18,7 +18,8 @@ ip_ranges = [re.compile(r'^%s.*' % i) for i in local_blocks]
 
 def check_access(environ, config):
     db = DB(config.db_path + '/data/')
-    incoming_address = environ['REMOTE_ADDR']
+    incoming_address, match_domain = get_client_info(environ)
+
     if config.access_file:
         if os.path.isabs(config.access_file):
             access_file = config.access_file
@@ -69,6 +70,24 @@ def check_access(environ, config):
     except:
         blocked_ips = []
 
+    if incoming_address not in blocked_ips:
+        if match_domain in domain_list:
+            return make_token(incoming_address, db)
+        else:
+            for domain in domain_list:
+                if domain in match_domain:
+                    return make_token(incoming_address, db)
+        for ip_range in allowed_ips:
+            if re.search(r'^%s.*' % ip_range, incoming_address):
+                return make_token(incoming_address, db)
+
+    # If no token returned, we block access.
+    import sys
+    print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)
+    return ()
+
+def get_client_info(environ):
+    incoming_address = environ['REMOTE_ADDR']
     fq_domain_name = socket.getfqdn(incoming_address).split(',')[-1]
     edit_domain = re.split('\.', fq_domain_name)
 
@@ -79,17 +98,7 @@ def check_access(environ, config):
             match_domain = '.'.join([edit_domain[-2], edit_domain[-1]])
         else:
             match_domain = fq_domain_name
-
-    if incoming_address not in blocked_ips:
-        if match_domain in domain_list:
-            return make_token(incoming_address, db)
-        for ip_range in allowed_ips:
-            if re.search(r'^%s.*' % ip_range, incoming_address):
-                return make_token(incoming_address, db)
-
-    # If no token returned, we block access.
-    return ()
-
+    return incoming_address, match_domain
 
 def login_access(environ, request, config, headers):
     db = DB(config.db_path + '/data/')

@@ -1,4 +1,4 @@
-<div id="access-control-container" ng-controller="accessControlCtrl as access" ng-if="philoConfig.access_control">
+<div id="access-control-container" ng-controller="AccessController as access" ng-if="philoConfig.access_control">
     <div class="panel panel-default">
         <div id="error-message" class="panel">
             <div class="bg-danger">
@@ -37,19 +37,19 @@
         <div id="info-panel" class="panel panel-default">
             <p>
                 Please <a href="http://artfl-project.uchicago.edu/node/24">contact ARTFL</a>
-                for more information or to have your computer enabled if your institution   
+                for more information or to have your computer enabled if your institution
                 is an <a href="http://artfl-project.uchicago.edu/node/2">ARTFL subscriber</a>
             </p>
             <p>
                 If you belong to a subscribing institution and are attempting to access
-                ARTFL from your Internet Service Provider, please note that you should    
+                ARTFL from your Internet Service Provider, please note that you should
                 use your institution's <b>proxy server</b> and should contact your
                 networking support office.  Your proxy server must be configured to
-                include <tt>{{ access.hostname }}</tt> to access this database.
+                include <tt>{{ access.domain_name }}</tt> to access this database.
             </p>
             <p>
-                Please consult   
-                <a href="http://artfl-project.uchicago.edu/node/14">Subscription Information</a> to see how your institution can   
+                Please consult
+                <a href="http://artfl-project.uchicago.edu/node/14">Subscription Information</a> to see how your institution can
                 gain access to ARTFL resources.
             </p>
             <p ng-if="access.clientIp">Requesting Computer Address: <tt>{{ access.clientIp }}</tt></p>

@@ -101,12 +101,9 @@ def angular(environ, start_response):
             if not request.authenticated:
                 token = access_control.check_access(environ, config)
                 if token:
-                    print("ISSUING TOKEN", file=sys.stderr)
                     h, ts = token
                     headers.append(("Set-Cookie", "hash=%s" % h))
                     headers.append(("Set-Cookie", "timestamp=%s" % ts))
-                else:
-                    print("NOT AUTHENTICATED", file=sys.stderr)
         html = build_html_page(config)
     start_response('200 OK', headers)
     return html

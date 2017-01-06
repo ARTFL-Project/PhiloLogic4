@@ -40,7 +40,7 @@
                     queryArgs.proximity = '';
                 }
             }
-            if (queryParams.approximate) {
+            if (queryParams.approximate == "yes") {
                 queryArgs.approximate = true;
             } else {
                 queryArgs.approximate = false;

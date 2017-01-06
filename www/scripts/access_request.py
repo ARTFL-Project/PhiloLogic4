@@ -6,6 +6,7 @@ from wsgiref.handlers import CGIHandler
 import simplejson
 from philologic.DB import DB
 from philologic.runtime import WebConfig, WSGIHandler, login_access
+from philologic.runtime import access_control
 
 
 default_reports = ['concordance', 'kwic', 'collocation', 'time_series',
@@ -24,7 +25,8 @@ def access_request(environ, start_response):
     if access:
         yield simplejson.dumps({'access': True})
     else:
-        yield simplejson.dumps({'access': False})
+        incoming_address, domain_name = access_control.get_client_info(environ)
+        yield simplejson.dumps({'access': False, "incoming_address": incoming_address, "domain_name": domain_name})
 
 
 if __name__ == "__main__":
