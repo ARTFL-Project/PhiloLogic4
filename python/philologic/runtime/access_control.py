@@ -36,8 +36,8 @@ def check_access(environ, config):
         return make_token(incoming_address, db)
 
     # Let's first check if the IP is local and grant access if it is.
-    for range in ip_ranges:
-        if range.search(incoming_address):
+    for ip_range in ip_ranges:
+        if ip_range.search(incoming_address):
             return make_token(incoming_address, db)
 
     try:
@@ -46,8 +46,23 @@ def check_access(environ, config):
         domain_list = []
 
     try:
-        allowed_ips = set(access_config.allowed_ips)
-    except:
+        allowed_ips = set([])
+        for ip in access_config.allowed_ips:
+            split_numbers = ip.split('.')
+            if len(split_numbers) == 4:
+                if re.search(r'\d+-\d+', split_numbers[3]):
+                    for last_num in range(int(split_numbers[3].split('-')[0]), int(split_numbers[3].split('-')[1])+1):
+                        allowed_ips.add(".".join(split_numbers[:3]) + "." + str(last_num))
+                elif re.search(r'\d+-\A', split_numbers[3]):
+                    for last_num in range(int(split_numbers[3].split('-')[0]), 255):
+                        allowed_ips.add(".".join(split_numbers[:3]) + "." + str(last_num))
+                else:
+                    allowed_ips.add(ip)
+            else:
+                allowed_ips.add(ip)
+    except Exception as e:
+        import sys
+        print(repr(e), file=sys.stderr)
         allowed_ips = []
     try:
         blocked_ips = set(access_config.blocked_ips)

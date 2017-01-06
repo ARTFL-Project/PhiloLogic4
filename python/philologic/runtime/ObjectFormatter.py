@@ -185,6 +185,7 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
             last_offset = b
         text = new_text + text[last_offset:]
     current_obj_img = []
+    current_graphic_img = []
     text = "<div>" + text + "</div>"
     xml = FragmentParserParse(text)
     c = obj.db.dbh.cursor()
@@ -298,25 +299,26 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                     el.attrib["class"] = "xml-pb-image"
                     el.append(etree.Element("a"))
                     img_split = img.split()
-                    el[-1].attrib["href"] = config.page_images_url_root + '/' + img_split[0] + config.page_image_extension
+                    el[-1].attrib["href"] = os.path.join(config.page_images_url_root, img_split[0], config.page_image_extension)
                     if len(img_split) == 2:
-                        el[-1].attrib["large-img"] = config.page_images_url_root + '/' + img_split[1] + config.page_image_extension
+                        el[-1].attrib["large-img"] = os.path.join(config.page_images_url_root, img_split[1], config.page_image_extension)
                     else:
-                        el[-1].attrib["large-img"] = config.page_images_url_root + '/' + img_split[0] + config.page_image_extension
+                        el[-1].attrib["large-img"] = os.path.join(config.page_images_url_root, img_split[0], config.page_image_extension)
                     el[-1].text = "[page " + el.attrib["n"] + "]"
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
             if el.tag == "graphic":
                 imgs = el.attrib["facs"].split()
+                current_graphic_img.append(imgs[0])
                 el.attrib["src"] = os.path.join(config.page_images_url_root, imgs[0])
                 el.tag = "img"
                 el.attrib["class"] = "inline-img"
                 el.attrib['data-gallery'] = ''
                 el.attrib["inline-img"] = ""
                 if len(imgs) > 1:
-                    el.attrib["large-img"] = imgs[1]
+                    el.attrib["large-img"] = os.path.join(config.page_images_url_root, imgs[1])
                 else:
-                    el.attrib["large-img"] = imgs[0]
+                    el.attrib["large-img"] = os.path.join(config.page_images_url_root, imgs[0])
                 del el.attrib["url"]
             elif el.tag == "philoHighlight":
                 word_match = re.match(word_regex, el.tail, re.U)
@@ -343,15 +345,15 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
         return (output, {})
 
     ## Page images
-    if current_obj_img:
-        return page_images(config, output, current_obj_img, philo_id)
-    else:
-        return (output, {})
+    output, images = page_images(config, output, current_obj_img, current_graphic_img, philo_id)
+    return output, images
 
-def page_images(config, output, current_obj_img, philo_id):
+def page_images(config, output, current_obj_img, current_graphic_img, philo_id):
     """Get page images"""
     # first get first page info in case the object doesn't start with a page tag
     first_page_object = get_first_page(philo_id, config)
+    if not first_page_object["filename"]:
+        return output, {}
     if not current_obj_img:
         current_obj_img.append('')
     if first_page_object['start_byte'] and current_obj_img[0] != first_page_object['filename'][0]:
@@ -371,7 +373,7 @@ def page_images(config, output, current_obj_img, philo_id):
     ## Fetch all remainging imgs in document
     all_imgs = get_all_page_images(philo_id, config, current_obj_img)
     all_graphics = get_all_graphics(philo_id, config)
-    img_obj = {'all_imgs': all_imgs, 'current_obj_img': current_obj_img, "graphics": all_graphics}
+    img_obj = {'all_imgs': all_imgs, 'current_obj_img': current_obj_img, "graphics": all_graphics, "current_graphic_img": current_graphic_img}
     return output, img_obj
 
 
@@ -380,11 +382,13 @@ def get_first_page(philo_id, config):
     starting the object"""
     db = DB(config.db_path + '/data/')
     c = db.dbh.cursor()
+    import sys
     if len(philo_id) < 9:
         c.execute('select start_byte, end_byte from toms where philo_id=?', (' '.join([str(i) for i in philo_id]), ))
         result = c.fetchone()
         start_byte = result['start_byte']
         approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
+        print("SQLITE QUERY", 'select * from pages where philo_id like "%s" and end_byte >= "%s" limit 1' % (approx_id, start_byte), file=sys.stderr)
         try:
             c.execute('select * from pages where philo_id like ? and end_byte >= ? limit 1', (approx_id, start_byte))
         except:

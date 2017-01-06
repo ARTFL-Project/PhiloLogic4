@@ -44,10 +44,11 @@ matched using a regular expression, so you can express the whole ip, or just a p
 allowed_ips = [
   "128.135.",
   "128.32",
-  "136.152"
+  "136.152",
+  "136.153.1.1-255"
 ]
 ```
-TODO: support ranges (maybe using a - to separate values)
+Note that the last IP notation expresses an IP range.
 
 The `blocked_ips` variable is a list of IPs (exact matches needed) to deny access to:
 ```Python
