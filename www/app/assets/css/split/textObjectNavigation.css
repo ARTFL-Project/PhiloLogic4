@@ -434,9 +434,9 @@ div[type="notes"] .xml-note {
 /*Inline images*/
 .inline-img {
 	max-width: 40%;
-	float: left;
+	float: right;
 	height: auto;
-	padding-right: 15px;
+	padding-left: 15px;
 	padding-top: 15px;
 }
 .inline-img:hover {

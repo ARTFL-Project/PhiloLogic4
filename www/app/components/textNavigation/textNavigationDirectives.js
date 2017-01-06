@@ -364,8 +364,8 @@
                     angular.element('#full-size-image').off();
                     angular.element('#full-size-image').click(function() {
                         var imageIndex = scope.gallery.getIndex();
-                        var img = angular.element("#blueimp-gallery").find("[data-index='" + imageIndex + "'] img");
-                        $window.open(img.attr('large-img'));
+                        var img = angular.element(".inline-img").eq(imageIndex).attr('large-img');
+                        $window.open(img);
                     });
                 });
                 element.on('$destroy', function() {

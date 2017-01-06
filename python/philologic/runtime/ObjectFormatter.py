@@ -299,11 +299,11 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                     el.attrib["class"] = "xml-pb-image"
                     el.append(etree.Element("a"))
                     img_split = img.split()
-                    el[-1].attrib["href"] = config.page_images_url_root + '/' + img_split[0] + config.page_image_extension
+                    el[-1].attrib["href"] = os.path.join(config.page_images_url_root, img_split[0], config.page_image_extension)
                     if len(img_split) == 2:
-                        el[-1].attrib["large-img"] = config.page_images_url_root + '/' + img_split[1] + config.page_image_extension
+                        el[-1].attrib["large-img"] = os.path.join(config.page_images_url_root, img_split[1], config.page_image_extension)
                     else:
-                        el[-1].attrib["large-img"] = config.page_images_url_root + '/' + img_split[0] + config.page_image_extension
+                        el[-1].attrib["large-img"] = os.path.join(config.page_images_url_root, img_split[0], config.page_image_extension)
                     el[-1].text = "[page " + el.attrib["n"] + "]"
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
@@ -316,9 +316,9 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                 el.attrib['data-gallery'] = ''
                 el.attrib["inline-img"] = ""
                 if len(imgs) > 1:
-                    el.attrib["large-img"] = imgs[1]
+                    el.attrib["large-img"] = os.path.join(config.page_images_url_root, imgs[1])
                 else:
-                    el.attrib["large-img"] = imgs[0]
+                    el.attrib["large-img"] = os.path.join(config.page_images_url_root, imgs[0])
                 del el.attrib["url"]
             elif el.tag == "philoHighlight":
                 word_match = re.match(word_regex, el.tail, re.U)
