@@ -115,11 +115,10 @@ class WSGIHandler(object):
         except:
             self.path_components = []
 
-        self.approximate = False
         if "approximate" in self.cgi:
-            if self.cgi["approximate"][0] == "yes":
-                self.cgi["approximate"][0] = True
-                self.approximate = True
+            #if self.cgi["approximate"][0] == "yes":
+             #   self.cgi["approximate"][0] = True
+              #  self.approximate = True
             if "approximate_ratio" in self.cgi:
                 self.approximate_ratio = float(self.cgi["approximate_ratio"][
                     0]) / 100
@@ -128,7 +127,7 @@ class WSGIHandler(object):
 
         if 'q' in self.cgi:
             self.cgi['q'][0] = parse_query(self.cgi['q'][0])
-            if self.approximate:
+            if self.approximate == "yes":
                 self.cgi["original_q"] = self.cgi['q'][:]
                 self.cgi['q'][0] = find_similar_words(db, config, self)
             if self.cgi["q"][0] != "":

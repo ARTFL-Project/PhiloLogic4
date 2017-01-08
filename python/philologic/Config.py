@@ -354,7 +354,7 @@ web_config_defaults = {
             'field': 'author',
             'object_level': 'doc',
             'prefix': '',
-            'suffix': ',&nbsp;',
+            'suffix': '',
             'separator': ',',
             'link': False,
             'style': {"font-variant": "small-caps"}
@@ -430,8 +430,8 @@ web_config_defaults = {
             'field': 'author',
             'object_level': 'doc',
             'prefix': '',
-            'suffix': ',&nbsp;',
-            'separator': '',
+            'suffix': '',
+            'separator': ',',
             'link': False,
             'style': {"font-variant": "small-caps"}
         }, {
@@ -598,16 +598,6 @@ web_config_defaults = {
         'value': 10,
         'comment': '# The time_series_interval variable defines the default year span used for time series.',
         'index': 32
-    },
-    'title_prefix_removal': {
-        'value': [],
-        'comment': '''
-                 # The title_prefix_removal variable is only used for displaying titles in a proper order in the landing page browsing function.
-                 # It is used to ignore predefined words at the beginning of a title for sorting purposes.
-                 # e.g: ["the ", "a "] will ignore "the " and "a " for sorting in titles such as "The First Part of King Henry the Fourth", or "A Midsummer Night's Dream".
-                 # Don't forget to add a space after your prefix or the prefix will match partial words.
-                 ''',
-        'index': 33
     },
     'page_images_url_root': {
         'value': '',

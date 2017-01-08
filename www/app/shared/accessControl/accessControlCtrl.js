@@ -12,10 +12,14 @@
     	vm.accessInput = {};
     	vm.accessDenied = false;
 
-    	vm.clientIp = false; // don't show anything before retrieval
-    	$http.get('http://api.ipify.org?format=json').then(function(response) {
-    		vm.clientIp = response.data.ip;
-    	});
+    	//vm.clientIp = false; // don't show anything before retrieval
+    	//$http.get('http://api.ipify.org?format=json').then(function(response) {
+    	//	vm.clientIp = response.data.ip;
+    	//});
+		$rootScope.accessRequest.then(function(response) {
+			vm.clientIp = response.data.incoming_address;
+			vm.domain_name = response.data.domain_name;
+		})
 
     	vm.submit = function() {
     		var username = encodeURIComponent(vm.accessInput.username);
