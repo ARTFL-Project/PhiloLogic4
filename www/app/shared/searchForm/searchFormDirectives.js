@@ -111,7 +111,7 @@
                     scope.dropdownValues[metadata] = [];
                     var dropdownValue = philoConfig.metadata_dropdown_values[metadata];
                     if (typeof($rootScope.formData[metadata]) == 'undefined' || $rootScope.formData[metadata].length == 0) {
-                        scope.selectedDropdownValue[metadata] = 'None';
+                        scope.selectedDropdownValue[metadata] = 'select';
                     }
                     for (var i = 0; i < dropdownValue.length; i++) {
                         var quotedValue = dropdownValue[i].value;
@@ -286,12 +286,12 @@
                     }
                     scope.selectedSortValues = label;
                 } else {
-                    scope.selectedSortValues = "None";
+                    scope.selectedSortValues = "select";
                 }
 
                 scope.sortValues = [{
                     value: [],
-                    label: "None"
+                    label: "select"
                 }];
                 for (var i = 0; i < philoConfig.concordance_biblio_sorting.length; i += 1) {
                     var sortValue = philoConfig.concordance_biblio_sorting[i];
@@ -306,7 +306,6 @@
                             label.push(sortValue[j]);
                         }
                     }
-                    console.log(typeof(sortValue))
                     var value = {
                         label: label.join(', '),
                         value: sortValue

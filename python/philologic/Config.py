@@ -354,7 +354,7 @@ web_config_defaults = {
             'field': 'author',
             'object_level': 'doc',
             'prefix': '',
-            'suffix': ',&nbsp;',
+            'suffix': '',
             'separator': ',',
             'link': False,
             'style': {"font-variant": "small-caps"}
@@ -430,8 +430,8 @@ web_config_defaults = {
             'field': 'author',
             'object_level': 'doc',
             'prefix': '',
-            'suffix': ',&nbsp;',
-            'separator': '',
+            'suffix': '',
+            'separator': ',',
             'link': False,
             'style': {"font-variant": "small-caps"}
         }, {
