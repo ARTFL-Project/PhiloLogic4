@@ -5,7 +5,7 @@
         .module('philoApp')
         .controller('ConcordanceKwicController', ConcordanceKwicController);
 
-    function ConcordanceKwicController($rootScope, $location, accessControl, request, URL, facetedBrowsing) {
+    function ConcordanceKwicController($rootScope, $location, accessControl, request, URL, facetedBrowsing, dictionaryLookup) {
         var vm = this;
         if ($rootScope.authorized === true) {
             vm.authorized = true;
@@ -44,6 +44,10 @@
             vm.frequencyResults = [];
             angular.element('#selected-sidebar-option').data('interrupt', true);
             vm.selectedFacet = '';
+        }
+
+        vm.dicoLookup = function(event, year) {
+            dictionaryLookup.evaluate(event, year);
         }
     }
 })();

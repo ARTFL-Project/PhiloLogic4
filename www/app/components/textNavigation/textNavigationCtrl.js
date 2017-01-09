@@ -47,7 +47,7 @@
             };
         });
 
-    function TextNavigationController($scope, $rootScope, $location, $routeParams, $timeout, accessControl, URL, textNavigationValues) {
+    function TextNavigationController($scope, $rootScope, $location, $routeParams, $timeout, accessControl, URL, textNavigationValues, dictionaryLookup) {
         var vm = this;
         if ($rootScope.authorized === true) {
             vm.authorized = true;
@@ -128,6 +128,11 @@
                 $location.url(URL.path(philoID)).replace(); // deleting current page history and replace with new page
             }
 
+        }
+
+        vm.dicoLookup = function(event, year) {
+            var philoID = $location.path().split('/')[2];
+            dictionaryLookup.evaluate(event, year);
         }
     }
 })();

@@ -112,7 +112,11 @@ def group_by_range(request_range, request, config):
             except:
                 continue
         else:
-            initial_letter = doc[metadata_queried].decode('utf-8')[0].lower()
+            try:
+                initial_letter = doc[metadata_queried].decode('utf-8')[0].lower()
+            except IndexError:
+                # we have an empty string
+                continue
             test_value = ord(initial_letter)
             normalized_test_value = ord(''.join(
                 [i

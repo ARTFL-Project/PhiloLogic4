@@ -29,7 +29,7 @@
                    </button>
                 </div>
             </div>
-           <div class='philologic_context text-content-area' select-word position="{{ position }}">
+           <div class='philologic_context text-content-area' select-word position="{{ position }}" ng-keydown="concKwic.dicoLookup($event, result.metadata_fields.year)" tabindex="0">
                <div class="default-length" ng-bind-html="result.context | unsafe"></div>
                <div class="more-length"></div>
            </div>
