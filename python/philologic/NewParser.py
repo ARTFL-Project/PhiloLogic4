@@ -282,7 +282,7 @@ class XMLParser(object):
         self.context_div_level = 0
         self.current_tag = "doc"
         self.in_a_word_tag = False
-        self.current_div1_id = ""
+        self.current_div_id = ""
         self.current_div_level = 0
         self.in_seg = False
 
@@ -609,6 +609,7 @@ class XMLParser(object):
                     self.close_div1(start_byte)
                 self.in_front_matter = True
                 self.v.push("div1", "front", start_byte)
+                self.current_div_id = self.v["div1"].id
                 self.get_object_attributes(tag, tag_name, "div1")
                 self.context_div_level = 1
                 self.open_div1 = True
@@ -621,7 +622,7 @@ class XMLParser(object):
             # These tend to carry on as FRONTMATTER. Don't have to check for lower divs, etc.
             elif body_tag.search(tag) and not self.got_a_div:
                 self.v.push("div1", tag_name, start_byte)
-                self.current_div1_id = self.v["div1"].id
+                self.current_div_id = self.v["div1"].id
                 self.context_div_level = 1
                 self.open_div1 = True
                 div_head = self.get_div_head(tag)
@@ -640,7 +641,7 @@ class XMLParser(object):
                 self.context_div_level = 1
                 self.open_div1 = True
                 self.v.push("div1", tag_name, start_byte)
-                self.current_div1_id = self.v["div1"].id
+                self.current_div_id = self.v["div1"].id
                 self.v["div1"]["head"] = "[HyperDiv]"
 
             # DIV TAGS: set division levels and print out div info. A couple of assumptions:

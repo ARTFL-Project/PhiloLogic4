@@ -8,7 +8,8 @@
         .factory("URL", URL)
         .factory("request", request)
         .factory("progressiveLoad", progressiveLoad)
-        .factory("saveToLocalStorage", saveToLocalStorage);
+        .factory("saveToLocalStorage", saveToLocalStorage)
+        .factory("dictionaryLookup", dictionaryLookup);
 
 
     function accessControl($rootScope, $cookies) {
@@ -164,5 +165,22 @@
             }
         };
         return save;
+    }
+
+    function dictionaryLookup($window, $location, philoConfig) {
+        return {
+            evaluate: function(event, year) {
+                if (event.key === "d") {
+                    var selection = $window.getSelection().toString();
+                    var century = parseInt(year.slice(0, year.length-2));
+                    var range = century.toString() + "00-" + String(century + 1) + "00";
+                    if (range == "NaN00-NaN00") {
+                        range = "";
+                    }
+                    var link = philoConfig.dictionary_lookup + "?docyear=" + range + "&strippedhw=" + selection;
+                    $window.open(link);
+                }
+            }
+        }
     }
 })();

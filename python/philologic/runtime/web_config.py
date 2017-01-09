@@ -8,7 +8,7 @@ class brokenConfig(object):
     def __init__(self, db_path, traceback):
         self.production = True
         self.db_path = db_path
-        self.theme = 'default_theme'
+        self.theme = 'default_theme.css'
         self.valid_config = False
         self.traceback = traceback
 

@@ -644,34 +644,42 @@ web_config_defaults = {
         "index": 38
     },
     'concordance_formatting_regex': {
-      'value': [],
-      'comment': '''
+        'value': [],
+        'comment': '''
                 # A list of pattern with replacement to be run on individual concordances before sending to browser
                 # It is constructed as a list of tuples where the first element is the pattern to be matched
                 # and the second element is the replacement
                 # e.g.: [("<note>", "<span>"), ("</note>", "</span>")]
                 ''',
-      'index': 39
+        'index': 39
     },
     'kwic_formatting_regex': {
-      'value': [],
-      'comment': '''
+        'value': [],
+        'comment': '''
                 # A list of pattern with replacement to be run on individual kwic concordances before sending to browser
                 # It is constructed as a list of tuples where the first element is the pattern to be matched
                 # and the second element is the replacement
                 # e.g.: [("<note>", "<span>"), ("</note>", "</span>")]
                 ''',
-      'index': 40
+        'index': 40
     },
     'navigation_formatting_regex': {
-      'value': [],
-      'comment': '''
+        'value': [],
+        'comment': '''
                 # A list of pattern with replacement to be run on text objects before sending to browser
                 # It is constructed as a list of tuples where the first element is the pattern to be matched
                 # and the second element is the replacement
                 # e.g.: [("<note>", "<span>"), ("</note>", "</span>")]
                 ''',
-      'index': 41
+        'index': 41
+    },
+    'dictionary_lookup': {
+        'value': "",
+        'comment': '''
+                # Dictionary lookup function. You select a word in running text and hit D, and it'll query an external dictionary
+                # and return definitions. This is currently hardcoded to ARTFL's dictionary model. To be made more generic at a later date
+                ''',
+        'index': 42
     }
 }
 
