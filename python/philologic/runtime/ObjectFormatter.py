@@ -430,6 +430,13 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
             all_imgs = [tuple(i["facs"].split()) for i in c.fetchall()]
         except sqlite3.OperationalError:
             all_imgs = []
+        if not all_imgs:
+            try:
+                c.execute('select * from pages where philo_id like ? and id is not null and id != ""', (approx_id, ))
+                current_obj_imgs = set(current_obj_imgs)
+                all_imgs = [tuple(i["id"].split()) for i in c.fetchall()]
+            except sqlite3.OperationalError:
+                return []
         return all_imgs
     else:
         return []
