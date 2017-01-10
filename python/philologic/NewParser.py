@@ -47,7 +47,7 @@ DefaultMetadataToParse = {
     "page": ["n", "id", "facs"],
     "ref": ["target", "n", "type"],
     "graphic": ["facs"],
-    "line": ["n"]
+    "line": ["n", "id"]
 }
 
 DefaultDocXPaths = {
@@ -505,8 +505,9 @@ class XMLParser(object):
                 self.open_para = True
                 self.v.push("para", tag_name, start_byte)
                 self.get_object_attributes(tag, tag_name, "para")
-            elif closed_stage_tag.search(tag):
+            elif closed_stage_tag.search(tag) and not self.no_deeper_objects:
                 self.close_para(self.bytes_read_in)
+                self.open_para = False
 
             # CAST LIST: treat them as para objects
             elif castlist_tag.search(tag):
@@ -576,6 +577,8 @@ class XMLParser(object):
                 self.get_object_attributes(tag, tag_name, "line")
                 self.v["line"].attrib["doc_id"] = self.docid
             elif closed_line_tag.search(tag):
+                if self.in_line_group and self.break_sent_in_line_group:
+                    self.v.pull("sent", self.bytes_read_in)
                 self.v.pull("line", self.bytes_read_in)
 
             if ab_tag.search(tag):

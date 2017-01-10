@@ -164,8 +164,6 @@ class CompoundStack(object):
             self.current_ref.attrib["start_byte"] = byte
             return self.current_ref
         elif type == self.line:
-            # TODO: evaluate whether we treat line as a parallel object
-            self.pull(type, byte)
             self.l += 1
             self.current_line = self.p_factory(type, name, [self.stack.v[0], self.l])
             self.current_line.attrib["start_byte"] = byte
