@@ -6,6 +6,7 @@ import datetime
 import os
 from cgi import FieldStorage
 from random import randint
+from glob import glob
 from wsgiref.handlers import CGIHandler
 
 from philologic.runtime import WebConfig, WSGIHandler
@@ -18,6 +19,7 @@ path = os.path.abspath(os.path.dirname(__file__))
 
 def philo_dispatcher(environ, start_response):
     """Dispatcher function."""
+    clean_up()
     config = WebConfig(path)
     request = WSGIHandler(environ, config)
     if request.content_type == "application/json" or request.format == "json":
@@ -36,13 +38,15 @@ def philo_dispatcher(environ, start_response):
     else:
         yield angular(environ, start_response)
 
-
-if __name__ == "__main__":
-    CGIHandler().run(philo_dispatcher)
-    # clean-up hitlist every now and then
-    if randint(0, 1000) == 0:
-        hit_list_path = os.path.join(path, '/data/hitlists/')
-        for filename in [os.path.join(hit_list_path, i) for i in os.listdir(hit_list_path)]:
+def clean_up():
+    """clean-up hitlist every now and then"""
+    rand = randint(0, 100)
+    if rand == 1:
+        hit_list_path = os.path.join(path, 'data/hitlists/*')
+        for filename in glob(hit_list_path):
             file_modified = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
             if datetime.datetime.now() - file_modified > datetime.timedelta(hours=1):
                 os.remove(filename)
+
+if __name__ == "__main__":
+    CGIHandler().run(philo_dispatcher)

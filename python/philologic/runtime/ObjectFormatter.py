@@ -116,7 +116,7 @@ def format_concordance(text, word_regex, bytes=[]):
         elif el.tag == "q":
             el.tag = "span"
             el.attrib['class'] = 'xml-q'
-        if "id" in el.attrib:  ## kill ids in order to avoid the risk of having duplicate ids in the HTML
+        if "id" in el.attrib and el.tag != "l":  ## kill ids in order to avoid the risk of having duplicate ids in the HTML
             del el.attrib["id"]
         if el.tag == "sc" or el.tag == "scx":
             el.tag = "span"
@@ -289,7 +289,7 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
             elif el.tag == "img":
                 el.attrib["onerror"] = "this.style.display='none'"
             elif el.tag == "pb" and "n" in el.attrib:
-                if "facs" in el.attrib or "id" in el.attrib:
+                if config.page_images_url_root and "facs" in el.attrib or "id" in el.attrib:
                     if "facs" in el.attrib:
                         img = el.attrib["facs"]
                     else:
@@ -308,18 +308,19 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
             if el.tag == "graphic":
-                imgs = el.attrib["facs"].split()
-                current_graphic_img.append(imgs[0])
-                el.attrib["src"] = os.path.join(config.page_images_url_root, imgs[0])
-                el.tag = "img"
-                el.attrib["class"] = "inline-img"
-                el.attrib['data-gallery'] = ''
-                el.attrib["inline-img"] = ""
-                if len(imgs) > 1:
-                    el.attrib["large-img"] = os.path.join(config.page_images_url_root, imgs[1])
-                else:
-                    el.attrib["large-img"] = os.path.join(config.page_images_url_root, imgs[0])
-                del el.attrib["url"]
+                if config.page_images_url_root:
+                    imgs = el.attrib["facs"].split()
+                    current_graphic_img.append(imgs[0])
+                    el.attrib["src"] = os.path.join(config.page_images_url_root, imgs[0])
+                    el.tag = "img"
+                    el.attrib["class"] = "inline-img"
+                    el.attrib['data-gallery'] = ''
+                    el.attrib["inline-img"] = ""
+                    if len(imgs) > 1:
+                        el.attrib["large-img"] = os.path.join(config.page_images_url_root, imgs[1])
+                    else:
+                        el.attrib["large-img"] = os.path.join(config.page_images_url_root, imgs[0])
+                    del el.attrib["url"]
             elif el.tag == "philoHighlight":
                 word_match = re.match(word_regex, el.tail, re.U)
                 if word_match:
@@ -351,6 +352,8 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
 def page_images(config, output, current_obj_img, current_graphic_img, philo_id):
     """Get page images"""
     # first get first page info in case the object doesn't start with a page tag
+    if not config.page_images_url_root:
+        return output, {}
     first_page_object = get_first_page(philo_id, config)
     if not first_page_object["filename"]:
         return output, {}
@@ -382,13 +385,11 @@ def get_first_page(philo_id, config):
     starting the object"""
     db = DB(config.db_path + '/data/')
     c = db.dbh.cursor()
-    import sys
     if len(philo_id) < 9:
         c.execute('select start_byte, end_byte from toms where philo_id=?', (' '.join([str(i) for i in philo_id]), ))
         result = c.fetchone()
         start_byte = result['start_byte']
         approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
-        print("SQLITE QUERY", 'select * from pages where philo_id like "%s" and end_byte >= "%s" limit 1' % (approx_id, start_byte), file=sys.stderr)
         try:
             c.execute('select * from pages where philo_id like ? and end_byte >= ? limit 1', (approx_id, start_byte))
         except:
