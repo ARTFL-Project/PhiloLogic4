@@ -207,6 +207,9 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
             elif el.tag == "q":
                 el.tag = "span"
                 el.attrib['class'] = 'xml-q'
+            elif el.tag == "table":
+                el.tag = "span"
+                el.attrib["class"] = "xml-table"
             elif el.tag == "ref" or el.tag == "xref":
                 if el.attrib["type"] == "note" or el.attrib["type"] == "footnote":
                     target = el.attrib["target"]
@@ -307,6 +310,17 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                     el[-1].text = "[page " + el.attrib["n"] + "]"
                     el[-1].attrib['class'] = "page-image-link"
                     el[-1].attrib['data-gallery'] = ''
+                grand_parent = el.getparent().getparent()
+                if grand_parent.attrib["class"] == "xml-row":
+                    # Move page outside of table row
+                    tail = etree.Element("span")
+                    tail.text = el.tail
+                    el.tail = ""
+                    great_grand_parent = grand_parent.getparent()
+                    grand_parent_index = great_grand_parent.index(grand_parent)
+                    el_index = el.getparent().index(el)
+                    great_grand_parent.insert(grand_parent_index+1, el)
+                    parent.insert(el_index, tail)
             if el.tag == "graphic":
                 if config.page_images_url_root:
                     imgs = el.attrib["facs"].split()
