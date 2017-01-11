@@ -47,6 +47,9 @@
             return wordsFacets;
         }
         var getFacet = function(scope, facetObj) {
+            delete scope.relativeFrequencies;
+            delete scope.absoluteFrequencies;
+            scope.showingRelativeFrequencies = false;
             scope.facet = facetObj;
             scope.selectedFacet = facetObj;
             var urlString = $location.url() + '&frequency_field=' + facetObj.alias;
