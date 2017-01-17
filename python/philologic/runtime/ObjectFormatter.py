@@ -251,9 +251,10 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                 # endnotes
                 in_end_note = False
                 for div in el.iterancestors(tag="div"):
-                    if div.attrib["type"] == "notes":
-                        in_end_note = True
-                        break
+                    if "type" in div.attrib:
+                        if div.attrib["type"] == "notes":
+                            in_end_note = True
+                            break
                 if in_end_note:
                     el.tag = "div"
                     el.attrib['class'] = "xml-note"
@@ -270,6 +271,7 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                 else:  ## inline notes
                     el.tag = 'span'
                     el.attrib['class'] = "note-content"
+
                     for child in el:
                         child = note_content(child)
                     # insert an anchor before this element by scanning through the parent

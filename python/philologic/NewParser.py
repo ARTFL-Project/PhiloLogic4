@@ -203,7 +203,7 @@ class XMLParser(object):
             self.sentence_breakers = []
 
         if "suppress_tags" in parse_options:
-            self.suppress_tags = set([i.replace('<', '').replace('>', '') for i in parse_options["suppress_tags"] if i])
+            self.suppress_tags = set([i for i in parse_options["suppress_tags"] if i])
         else:
             self.suppress_tags = []
         self.in_suppressed_tag = False
@@ -230,7 +230,7 @@ class XMLParser(object):
             tag_exceptions = TagExceptions
         self.tag_exceptions = []
         for tag in tag_exceptions:
-            compiled_tag = re.compile(r'(%s)(%s)(%s)' % (self.token_regex, tag, self.token_regex), re.I | re.M)
+            compiled_tag = re.compile(r'(%s)(%s)(%s)' % (parse_options["token_regex"], tag, parse_options["token_regex"]), re.I | re.M)
             self.tag_exceptions.append(compiled_tag)
 
         if "join_hyphen_in_words" in parse_options:
@@ -352,7 +352,7 @@ class XMLParser(object):
         # An experimental inword tag spanner. For selected tags between letters, this replaces the tag with "_"
         # (in order to keep the byte count).  This is to allow indexing of words broken by tags.
         def replace_tag(m):
-            return ''.join([m[0], m[2], ' ' * len(m[1])])
+            return ''.join([m[0], m[2], '_' * len(m[1])])
 
         for tag in self.tag_exceptions:
             self.content = tag.sub(lambda match: replace_tag(match.groups()), self.content)
