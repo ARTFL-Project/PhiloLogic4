@@ -152,7 +152,8 @@ token_regex = "[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*"
 # ["date", "author", "title"]
 sort_order = ["year", "author", "title", "filename"]
 
-## A list of tags to ignore: contents will not be indexed
+# A list of tags to ignore: contents will not be indexed
+# This should be a list of tag names, such as ["desc", "gap"]
 suppress_tags = []
 
 # --------------------- Set Apostrophe Break ------------------------
