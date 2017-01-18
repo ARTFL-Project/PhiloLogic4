@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 import os
 import re
 
@@ -67,14 +67,15 @@ def get_tei_header(request, config):
     header = xml_tree.find("teiHeader")
     try:
         header_text = etree.tostring(header, pretty_print=True)
-    except TypeError:  # workaround for when lxml doesn't find the header for whatever reason
+    except TypeError as e:  # workaround for when lxml doesn't find the header for whatever reason
+        start = False
         header_text = ''
-        start = 0
-        for line in open(filename):
-            if re.search(r'<teiheader|head', line, re.I):
-                start = 1
-            if start:
-                header_text += line
-            if re.search(r'</teiheader|head', line, re.I):
-                break
+        with open(filename) as file:
+            file_content = file.read()
+            try:
+                start_header_index = re.search(r'<teiheader', file_content, re.I).start()
+                end_header_index = re.search(r'</teiheader>', file_content, re.I).end()
+            except AttributeError:  # tag not found
+                return ""
+            header_text = file_content[start_header_index:end_header_index]
     return header_text.replace('<', '&lt;').replace('>', '&gt;')

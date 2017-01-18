@@ -7,6 +7,7 @@ import imp
 import os.path
 import sys
 import shutil
+import filecmp
 
 from philologic.runtime import WebConfig
 from philologic.runtime import WSGIHandler
@@ -18,12 +19,12 @@ dbname = path.strip().split('/')[-1]
 
 config = WebConfig(os.path.abspath(os.path.dirname(__file__)))
 config_location = os.path.join('app/assets/css/split/', os.path.basename(config.theme))
-if config.theme == config_location:
-    theme = config.theme
+if os.path.realpath(os.path.abspath(config.theme)) == os.path.realpath(os.path.abspath(config_location)):
+    theme = config_location
 elif os.path.exists(config_location) and config.production:
     theme = config_location
 else:
-    shutil.copy(config.theme, config_location)
+    os.system("cp %s %s" % (config.theme, config_location))
     theme = config_location
 
 
