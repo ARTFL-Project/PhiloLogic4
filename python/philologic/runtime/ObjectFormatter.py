@@ -62,7 +62,6 @@ def note_content(element):
 def adjust_bytes(bytes, padding):
     """Readjust byte offsets for concordance"""
     ### Called from every report that fetches text and needs highlighting
-    #    bytes = sorted(bytes) # bytes aren't stored in order
     start_byte = bytes[0] - padding
     first_hit = bytes[0] - start_byte
     if start_byte < 0:
@@ -311,8 +310,11 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                         else:
                             el[-1].attrib["large-img"] = os.path.join(config.page_images_url_root, img_split[0]) + config.page_image_extension
                         el[-1].text = "[page " + el.attrib["n"] + "]"
-                        el[-1].attrib['class'] = "page-image-link"
-                        el[-1].attrib['data-gallery'] = ''
+                        if config.external_page_images:
+                            el[-1].attrib["target"] = "_blank"
+                        else:
+                            el[-1].attrib['class'] = "page-image-link"
+                            el[-1].attrib['data-gallery'] = ''
                 else:
                     if el.attrib["n"]:
                         el.text = "--%s--" % el.attrib["n"]

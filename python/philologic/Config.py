@@ -599,6 +599,11 @@ web_config_defaults = {
         'comment': '# The time_series_interval variable defines the default year span used for time series.',
         'index': 32
     },
+    'external_page_images': {
+        'value': False,
+        'comment': '# This defines whether the page images should be viewed in a non-PhiloLogic instance',
+        "index": 33
+    },
     'page_images_url_root': {
         'value': '',
         'comment': '''
