@@ -7,7 +7,6 @@ import imp
 import os.path
 import sys
 import shutil
-import filecmp
 
 from philologic.runtime import WebConfig
 from philologic.runtime import WSGIHandler
