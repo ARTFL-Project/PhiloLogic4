@@ -27,8 +27,6 @@ else:
     theme = config_location
 
 
-
-
 css_files = [
     "app/assets/css/bootstrap.min.css",
     "app/assets/css/split/style.css",

@@ -385,16 +385,20 @@ def page_images(config, output, current_obj_img, current_graphic_img, philo_id):
         current_obj_img.append('')
     if first_page_object['start_byte'] and current_obj_img[0] != first_page_object['filename'][0]:
         if first_page_object['filename']:
-            page_href = config.page_images_url_root + '/' + first_page_object['filename'][0] + config.page_image_extension
-            if len(first_page_object['filename']) == 2:
-                large_img = config.page_images_url_root + '/' + first_page_object['filename'][1] + config.page_image_extension
-            else:
-                large_img = config.page_images_url_root + '/' + first_page_object['filename'][0] + config.page_image_extension
-            output = '<span class="xml-pb-image"><a href="%s" large-img="%s" class="page-image-link" data-gallery>[page %s]</a></span>' % (page_href, large_img, first_page_object["n"]) + output
-            if current_obj_img[0] == '':
-                current_obj_img[0] = first_page_object['filename'][0]
-            else:
-                current_obj_img.insert(0, first_page_object['filename'][0])
+                page_href = config.page_images_url_root + '/' + first_page_object['filename'][0] + config.page_image_extension
+                if config.external_page_images is False:
+                    if len(first_page_object['filename']) == 2:
+                        large_img = config.page_images_url_root + '/' + first_page_object['filename'][1] + config.page_image_extension
+                    else:
+                        large_img = config.page_images_url_root + '/' + first_page_object['filename'][0] + config.page_image_extension
+                    output = '<span class="xml-pb-image"><a href="%s" large-img="%s" class="page-image-link" data-gallery>[page %s]</a></span>' % (page_href, large_img, first_page_object["n"]) + output
+                    if current_obj_img[0] == '':
+                        current_obj_img[0] = first_page_object['filename'][0]
+                    else:
+                        current_obj_img.insert(0, first_page_object['filename'][0])
+                else:
+                    output = '<span class="xml-pb-image"><a href="%s" target="_blank">[page %s]</a></span>' % (page_href, first_page_object["n"]) + output
+                    return output, {}
         else:
             output = '<span class="xml-pb-image">[page ' + str(first_page_object["n"]) + "]</span>" + output
     ## Fetch all remainging imgs in document
