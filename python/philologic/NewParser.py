@@ -329,6 +329,11 @@ class XMLParser(object):
                 self.word_handler(line)
                 self.bytes_read_in += len(line)
 
+        # if we have an open page, make sure we close it so it is properly stored
+        if self.open_page:
+            self.v.pull("page", self.bytes_read_in)
+            self.open_page = False
+
         self.v.pull("doc", self.filesize)
 
     def cleanup_content(self):
@@ -532,7 +537,6 @@ class XMLParser(object):
                 self.no_deeper_objects = False
 
             # PAGE BREAKS: this updates the currentpagetag or sets it to "na" if not found.
-            # TODO: handling of attributes
             elif page_tag.search(tag):
                 if self.open_page:
                     page_end_tag = self.bytes_read_in - len(tag)
