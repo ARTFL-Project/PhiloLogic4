@@ -28,7 +28,7 @@ class WSGIHandler(object):
             # print >> sys.stderr, 'COOKIE', environ['HTTP_COOKIE']
             self.cookies = six.moves.http_cookies.SimpleCookie(environ[
                 "HTTP_COOKIE"])
-            if "hash" and "timestamp" in self.cookies:
+            if "hash" in self.cookies and "timestamp" in self.cookies:
                 h = hashlib.md5()
                 secret = db.locals.secret
                 h.update(environ['REMOTE_ADDR'])
