@@ -41,8 +41,6 @@ def generate_time_series(request, config):
         hit_len = len(hits)
         params = {"report": "concordance", "start": "0", "end": "0"}
         params[config.time_series_year_field] = date_range
-        import sys
-        print >> sys.stderr, "REQUEST", request
         url = make_absolute_query_link(config, request, **params)
         absolute_count[start_range] = {"label": start_range, "count": hit_len, "url": url}
 

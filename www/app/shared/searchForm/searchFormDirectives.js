@@ -285,9 +285,13 @@
                         label = label.join(', ')
                     }
                     scope.selectedSortValues = label;
+                    if (scope.selectedSortValues == "rowid") {
+                        scope.selectedSortValues = "select";
+                    }
                 } else {
                     scope.selectedSortValues = "select";
                 }
+
 
                 scope.sortValues = [{
                     value: [],
@@ -315,6 +319,9 @@
                 scope.sortChoice = function (value) {
                     $rootScope.formData.sort_order = value.value;
                     scope.selectedSortValues = value.label;
+                    if (scope.selectedSortValues == "rowid") {
+                        scope.selectedSortValues = "select";
+                    }
                 }
             }
         }

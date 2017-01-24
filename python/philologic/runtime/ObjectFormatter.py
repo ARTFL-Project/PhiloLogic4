@@ -249,12 +249,15 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
             elif el.tag == "note":
                 # endnotes
                 in_end_note = False
-                for div in el.iterancestors(tag="div"):
-                    if "type" in div.attrib:
-                        if div.attrib["type"] == "notes":
-                            in_end_note = True
-                            break
-                if in_end_note:
+                for ancestor in el.iterancestors():
+                    if ancestor.tag.startswith('div'):
+                        if "type" in ancestor.attrib:
+                            if ancestor.attrib["type"] == "notes":
+                                in_end_note = True
+                                break
+                if note:  # in footnote
+                    el.tag = "div"
+                elif in_end_note:  # in end note
                     el.tag = "div"
                     el.attrib['class'] = "xml-note"
                     link_back = etree.Element("a")
