@@ -217,6 +217,8 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                         el.text = el.attrib["n"]
                     else:
                         el.text = "note"
+                    if el.text == "":
+                        el.text = "note"
                     el.tag = "span"
                     el.attrib["data-ref"] = link
                     el.attrib["id"] = target.replace('#', '') + '-link-back'
