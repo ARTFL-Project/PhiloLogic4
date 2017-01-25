@@ -12,6 +12,15 @@ from philologic.DB import DB
 def generate_time_series(request, config):
     db = DB(config.db_path + '/data/')
     time_series_object = {'query': dict([i for i in request]), 'query_done': False}
+
+    # Invalid date range
+    if request.start_date == 'invalid' or request.end_date == 'invalid':
+        time_series_object['results_length'] = 0
+        time_series_object['more_results'] = False
+        time_series_object['new_start_date'] = 0
+        time_series_object['results'] = {'absolute_count': {}, 'date_count': {}}
+        return time_series_object
+
     start_date, end_date = get_start_end_date(db,
                                               config,
                                               start_date=request.start_date or None,
@@ -91,11 +100,9 @@ def get_start_end_date(db, config, start_date=None, end_date=None):
             else:
                 pass
     min_date = min(dates)
-    start_date = start_date or min_date
-    if start_date < min_date:
+    if not start_date:
         start_date = min_date
     max_date = max(dates)
-    end_date = end_date or max_date
-    if end_date > max_date:
+    if not end_date:
         end_date = max_date
     return start_date, end_date

@@ -54,9 +54,6 @@ class HitList(object):
                 metadata_types.add("div3")
             c = self.dbh.dbh.cursor()
             query = "select * from toms where "
-            # params = []
-            # for metadata_type in metadata_types:
-            #     params.append('philo_type="%s"' % metadata_type)
             if metadata_types:
                 query += "philo_type in (%s) AND " % ", ".join(['"%s"' % m for m in metadata_types])
             order_params = []
