@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 import os
 import time
 import struct
@@ -45,7 +45,6 @@ class HitList(object):
         self.position = 0
         self.done = False
         self.update()
-
         if self.sort_order:
             metadata_types = set([dbh.locals["metadata_types"][i] for i in self.sort_order])
             if "div" in metadata_types:
@@ -55,15 +54,15 @@ class HitList(object):
                 metadata_types.add("div3")
             c = self.dbh.dbh.cursor()
             query = "select * from toms where "
-            params = []
-            for metadata_type in metadata_types:
-                params.append('philo_type="%s"' % metadata_type)
-            if params:
-                query += " OR ".join(params) + " and "
+            # params = []
+            # for metadata_type in metadata_types:
+            #     params.append('philo_type="%s"' % metadata_type)
+            if metadata_types:
+                query += "philo_type in (%s) AND " % ", ".join(['"%s"' % m for m in metadata_types])
             order_params = []
             for s in self.sort_order:
                 order_params.append('%s is not null' % s)
-            query += " and ".join(order_params)
+            query += " AND ".join(order_params)
             c.execute(query)
             metadata = {}
             for i in c.fetchall():

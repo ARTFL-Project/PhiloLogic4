@@ -20,9 +20,9 @@ def get_total_results(environ, start_response):
     request = WSGIHandler(environ, config)
     if request.no_q:
         if request.no_metadata:
-            hits = db.get_all(db.locals['default_object_level'])
+            hits = db.get_all(db.locals['default_object_level'], request["sort_order"])
         else:
-            hits = db.query(**request.metadata)
+            hits = db.query(sort_order=request["sort_order"], **request.metadata)
     else:
         hits = db.query(request["q"], request["method"], request["arg"],
                         **request.metadata)
