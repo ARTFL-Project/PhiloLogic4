@@ -29,7 +29,8 @@ def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
             obj_id = [int(x) for x in corpus_obj["philo_id"].split(" ")]
             corpus_fh.write(struct.pack("=7i", *obj_id))
         corpus_fh.close()
-    except:
+    except Exception as e:
+        print(str(e), file=sys.stderr)
         # should clean up file
         flag = open(filename + ".done", "w")
         flag.write("1")

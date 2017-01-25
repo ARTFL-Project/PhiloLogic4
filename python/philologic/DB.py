@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 import hashlib
 import os
 import sqlite3
@@ -83,12 +83,12 @@ class DB:
         if not os.path.isfile(all_file):
             # write out the corpus file
             if philo_type == "div":
-                param_dicts = [{"philo_type": ['"div1"|"div2"|"div3"']}, {"philo_name": ['"div1"|"div2"|"div3"']}]
+                param_dicts = [{"philo_type": ['"div1"|"div2"|"div3"']}]
             else:
                 param_dicts = [{"philo_type": ['"%s"' % philo_type]}]
             return MetadataQuery.metadata_query(self, all_file, param_dicts, sort_order, raw_results=raw_results)
         else:
-            return HitList.HitList(all_file, 0, self, raw=raw_results)
+            return HitList.HitList(all_file, 0, self, sort_order=sort_order, raw=raw_results)
 
     def query(self, qs="", method="", method_arg="", limit="", sort_order=["rowid"], raw_results=False, **metadata):
         """query the PhiloLogic database"""
@@ -190,4 +190,4 @@ class DB:
             if corpus:
                 return corpus
             else:
-                return self.get_all("doc", sort_order)
+                return self.get_all(self.locals["default_object_level"], sort_order)
