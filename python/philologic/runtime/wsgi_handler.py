@@ -82,9 +82,15 @@ class WSGIHandler(object):
         self.end = int(self['end'])
         self.results_per_page = int(self['results_per_page'])
         if self.start_date:
-            self.start_date = int(self['start_date'])
+            try:
+                self.start_date = int(self['start_date'])
+            except ValueError:
+                self.start_date = "invalid"
         if self.end_date:
-            self.end_date = int(self['end_date'])
+            try:
+                self.end_date = int(self['end_date'])
+            except ValueError:
+                self.end_date = "invalid"
 
         for field in self.metadata_fields:
             if field in self.cgi and self.cgi[field]:
