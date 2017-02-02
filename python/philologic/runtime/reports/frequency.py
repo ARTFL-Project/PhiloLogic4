@@ -83,7 +83,7 @@ def frequency_results(request, config, sorted=False):
                                                               script='',
                                                               **{request.frequency_field: '"%s"' % key})
                 if not biblio_search:
-                    query_metadata = dict([(k, v) for k, v in request.metadata.iteritems() if v])
+                    query_metadata = dict([(k, v) for k, v in request.metadata.items() if v])
                     query_metadata[request.frequency_field] = '"%s"' % key
                     local_hits = db.query(**query_metadata)
                     counts[key]["total_word_count"] = local_hits.get_total_word_count()
@@ -99,7 +99,7 @@ def frequency_results(request, config, sorted=False):
         frequency_object['results'] = counts
         frequency_object["hits_done"] = last_hit_done
         if last_hit_done == len(hits):
-            new_metadata = dict([(k, v) for k, v in request.metadata.iteritems() if v])
+            new_metadata = dict([(k, v) for k, v in request.metadata.items() if v])
             new_metadata[request.frequency_field] = '"NULL"'
             if request.q == '' and request.no_q:
                 new_hits = db.query(sort_order=["rowid"], raw_results=True, **new_metadata)
@@ -135,7 +135,7 @@ def frequency_results(request, config, sorted=False):
     frequency_object['query'] = dict([i for i in request])
 
     if sorted:
-        frequency_object["results"] = sorted(frequency_object['results'].iteritems(),
+        frequency_object["results"] = sorted(iter(frequency_object['results'].items()),
                                              key=lambda x: x[1]['count'],
                                              reverse=True)
 

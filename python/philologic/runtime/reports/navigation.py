@@ -38,7 +38,7 @@ def generate_text_object(request, config, note=False):
         philo_id.pop()
     text_object = {"query": dict([i for i in request]), "philo_id": ' '.join([str(i) for i in philo_id])}
     text_object['prev'] = neighboring_object_id(db, obj.prev, width)
-    text_object['next'] = neighboring_object_id(db, obj.next, width)
+    text_object['next'] = neighboring_object_id(db, obj.__next__, width)
     metadata_fields = {}
     for metadata in db.locals['metadata_fields']:
         if db.locals['metadata_types'][metadata] == "doc":

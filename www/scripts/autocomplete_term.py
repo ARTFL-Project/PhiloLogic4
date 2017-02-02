@@ -79,7 +79,7 @@ def format_query(q, db, config):
 def highlighter(word, token_len):
     highlighted_section = word.decode('utf-8')[:token_len]
     end_word = word.decode('utf-8')[token_len:]
-    highlighted_word = u'<span class="highlight">' + \
+    highlighted_word = '<span class="highlight">' + \
         highlighted_section + '</span>' + end_word
     highlighted_word = highlighted_word.encode('utf-8')
     return highlighted_word

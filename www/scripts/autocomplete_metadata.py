@@ -113,7 +113,7 @@ def highlighter(words, norm_tok, substr_tok):
     for word in words:
         highlighted_section = word.decode('utf8')[:token_len]
         end_word = word.decode('utf-8')[token_len:]
-        highlighted_word = u'<span class="highlight">' + highlighted_section + '</span>' + end_word
+        highlighted_word = '<span class="highlight">' + highlighted_section + '</span>' + end_word
         new_list.append(highlighted_word.encode('utf8'))
     return new_list
 

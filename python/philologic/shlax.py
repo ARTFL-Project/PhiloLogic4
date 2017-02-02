@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #ShLaX-- a Shallow Lazy XML tokenizer.  Very useful for dirty, broken XML-like documents.
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import re
 import sys
 from six.moves import zip

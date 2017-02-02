@@ -65,7 +65,7 @@ def kwic_hit_object(hit, config, db):
             start_hit:end_hit] + "</span>&nbsp;" + end_output + '</span>'
     except ValueError as v:
         import sys
-        print >> sys.stderr, "KWIC ERROR:", v
+        print("KWIC ERROR:", v, file=sys.stderr)
 
     if config.kwic_formatting_regex:
         for pattern, replacement in config.kwic_formatting_regex:

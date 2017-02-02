@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import six.moves.cPickle
 import os
 import re
@@ -10,7 +10,7 @@ import unicodedata
 from subprocess import PIPE, Popen
 
 from philologic.OHCOVector import Record
-from simplejson import loads, dumps
+from json import loads, dumps
 from six.moves import range
 from six.moves import zip
 

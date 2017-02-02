@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, print_function
+
 
 import imp
 import math
@@ -18,6 +18,7 @@ from philologic.utils import convert_entities, pretty_print, sort_list
 
 import six.moves.cPickle
 from six.moves import input, zip
+import collections
 
 # Flush buffer output
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
@@ -79,7 +80,7 @@ class Loader(object):
                 config_obj = imp.load_source("external_load_config", loader_options["load_config"])
                 already_configured_values = {}
                 for attribute in dir(config_obj):
-                    if not attribute.startswith('__') and not callable(getattr(config_obj, attribute)):
+                    if not attribute.startswith('__') and not isinstance(getattr(config_obj, attribute), collections.Callable):
                         already_configured_values[attribute] = getattr(config_obj, attribute)
                 with open(load_config_path, "a") as load_config_copy:
                     print("\n\n## The values below were also used for loading ##", file=load_config_copy)
@@ -175,6 +176,7 @@ class Loader(object):
                 deleted_files.append(f)
                 continue
             header = file_content[start_header_index:end_header_index]
+            header = convert_entities(header)
             if self.debug:
                 print("parsing %s header..." % f)
             parser = etree.XMLParser(recover=True)
@@ -331,7 +333,7 @@ class Loader(object):
         self.metadata_hierarchy.append([])
         # Adding in doc level metadata
         for d in data_dicts:
-            for k in d.keys():
+            for k in list(d.keys()):
                 if k not in self.metadata_fields:
                     self.metadata_fields.append(k)
                     self.metadata_hierarchy[0].append(k)

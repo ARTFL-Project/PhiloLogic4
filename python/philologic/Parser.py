@@ -1,11 +1,11 @@
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 from lxml import etree
 from xml.parsers import expat
 import sys
 import os
 import re
-import StringIO
+import io
 from philologic import OHCOVector
 
 
@@ -17,7 +17,7 @@ class ExpatWrapper:
         content = buffer[:tag_end]
         name = re.sub(r"^.*?:", "", name)
         #        utf8_attrs = {}
-        for k, v in attrs.items():
+        for k, v in list(attrs.items()):
             no_ns_k = re.sub(r"^.*?:", "", k)
             if no_ns_k != k:
                 del attrs[k]
@@ -218,7 +218,7 @@ class Parser(object):
                     #                    print obj_type,repr(new_element)
                     self.v.push(obj_type, name, offset)
                     if obj_type == "doc":
-                        for key, value in self.known_metadata.items():
+                        for key, value in list(self.known_metadata.items()):
                             self.v[obj_type][key] = value
 
                     # should not attach cleanup for page and milestone objects
@@ -244,7 +244,7 @@ class Parser(object):
                     break
 
             # check for metadata on the new element.
-            for open_object in self.handlers.keys():
+            for open_object in list(self.handlers.keys()):
                 #                print >> sys.stderr, open_object, self.handlers[open_object]
                 to_remove = []
                 for handler in self.handlers[open_object]:
@@ -266,7 +266,7 @@ class Parser(object):
         if e_type == "text":
             if self.stack:
                 # check for metadata handlers:
-                for open_object in self.handlers.keys():
+                for open_object in list(self.handlers.keys()):
                     for handler in self.handlers[open_object]:
                         handler(event, self.stack[-1])
                 #check if we're in a non-indexed element:
@@ -288,7 +288,7 @@ class Parser(object):
                 popped = self.stack.pop()
 
                 # do any cleanup for the element that just ended
-                for open_object in self.handlers.keys():
+                for open_object in list(self.handlers.keys()):
                     for handler in self.handlers[open_object]:
                         #                        print >> sys.stderr, handler, [c.cell_contents for c in handler.func_closure]
                         if handler(event, popped):

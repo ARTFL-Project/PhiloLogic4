@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
+
 import re
 
 from lxml import etree
@@ -12,8 +12,8 @@ class FragmentParser:
 
     def __init__(self):
         self.root = etree.Element("div", {"class": "philologic-fragment"})
-        self.root.text = u""
-        self.root.tail = u""
+        self.root.text = ""
+        self.root.tail = ""
         self.current_el = self.root
         self.current_tail = None
         self.in_tag = True
@@ -22,14 +22,14 @@ class FragmentParser:
     def start(self, tag, attrib):
         #print >> sys.stderr, "START: " + tag + repr(attrib)
         self.stack.append(tag)
-        for k, v in attrib.items():
+        for k, v in list(attrib.items()):
             no_ns_k = re.sub(r"^.*?:", "", k)
             if no_ns_k != k:
                 del attrib[k]
                 attrib[no_ns_k] = v
         new_el = etree.SubElement(self.current_el, tag, attrib)
-        new_el.text = u""
-        new_el.tail = u""
+        new_el.text = ""
+        new_el.tail = ""
         self.current_el = new_el
         self.in_tag = True
         self.current_tail = None
@@ -71,7 +71,7 @@ class LXMLTreeDriver:
         (kind, content, offset, name, attributes) = event
         if kind == "start":
             uni_attrib = {}
-            for k, v in attributes.items():
+            for k, v in list(attributes.items()):
                 # hack to handle double quoted empty string values coming up None.  Fixed in rwhaling branch of PhiloLogic4
                 if v is None:
                     v = ""

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from urllib import quote_plus
+
+from urllib.parse import quote_plus
 import six
 
 

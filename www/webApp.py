@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Bootstrap Web app"""
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import imp
 import os.path
 import sys

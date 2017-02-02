@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, print_function
+
 
 import os
 import subprocess
@@ -221,7 +221,7 @@ def grep_word(token, freq_file, dest_fh, lowercase=True):
     if lowercase:
         norm_tok_uni = norm_tok_uni.lower()
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", norm_tok_uni) if not unicodedata.combining(i)]
-    norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
+    norm_tok = "".join(norm_tok_uni_chars).encode("utf-8")
     grep_command = ['egrep', '-a', '^%s[[:blank:]]' % norm_tok, freq_file]
     grep_proc = subprocess.Popen(grep_command, stdout=dest_fh)
     return grep_proc
@@ -232,7 +232,7 @@ def invert_grep(token, in_fh, dest_fh, lowercase=True):
     if lowercase:
         norm_tok_uni = norm_tok_uni.lower()
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", norm_tok_uni) if not unicodedata.combining(i)]
-    norm_tok = u"".join(norm_tok_uni_chars).encode("utf-8")
+    norm_tok = "".join(norm_tok_uni_chars).encode("utf-8")
     grep_command = ['egrep', '-a', '-v', '^%s[[:blank:]]' % norm_tok]
     grep_proc = subprocess.Popen(grep_command, stdin=in_fh, stdout=dest_fh)
     return grep_proc

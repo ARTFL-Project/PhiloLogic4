@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Find similar words to query term."""
 
-from __future__ import absolute_import
+
 import hashlib
 import os
 import unicodedata
@@ -20,7 +20,7 @@ def get_all_words(db, request):
     for word_group in expanded_terms:
         normalized_group = []
         for word in word_group:
-            word = u''.join([i for i in unicodedata.normalize("NFKD", word.decode('utf8')) if not unicodedata.combining(i)]).encode("utf-8")
+            word = ''.join([i for i in unicodedata.normalize("NFKD", word.decode('utf8')) if not unicodedata.combining(i)]).encode("utf-8")
             normalized_group.append(word)
         word_groups.append(normalized_group)
     return word_groups

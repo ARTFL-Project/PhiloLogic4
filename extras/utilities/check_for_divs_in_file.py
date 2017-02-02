@@ -49,7 +49,7 @@ def check_for_divs_in_file(load_metadata, text_dir, xpaths):
                         modified_files.append((f['filename'], xpath))
     
     if modified_files:
-        print >> sys.stderr, "%d files have added a new XPATH to map <body> or <text> to a div:" % len(modified_files)
+        print("%d files have added a new XPATH to map <body> or <text> to a div:" % len(modified_files), file=sys.stderr)
     for filename, xpath in modified_files: 
-        print >> sys.stderr, "%s: %s" % (filename, repr(xpath[0]))
+        print("%s: %s" % (filename, repr(xpath[0])), file=sys.stderr)
     return load_metadata

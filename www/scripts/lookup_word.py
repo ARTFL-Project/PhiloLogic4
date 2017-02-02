@@ -119,7 +119,7 @@ def lookup_word(db, cursor, token, n, start, end, filename):
                         "lemma": l,
                         "parse": all_parses[l],
                         "dictionary_lookup": "http://logeion.uchicago.edu/index.html#" + l
-                    } for l, p in all_parses.items()]  #,
+                    } for l, p in list(all_parses.items())]  #,
                     # "alt_parses": [
                     #     {
                     #         'lemma': 'x',
@@ -142,7 +142,7 @@ def lookup_word(db, cursor, token, n, start, end, filename):
 if __name__ == "__main__":
     if len(sys.argv) > 6:
         db = DB(sys.argv[1])
-        print >> sys.stderr, db.dbh
+        print(db.dbh, file=sys.stderr)
         cursor = db.dbh.cursor()
         lookup_word(cursor, sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
     else:

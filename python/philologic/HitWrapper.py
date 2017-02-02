@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import sys
 from six.moves import zip
 
@@ -15,7 +15,7 @@ def _safe_lookup(row, field, encoding="utf-8"):
     except:
         pass
     if metadata is None:
-        return u""
+        return ""
     metadata_string = ""
     try:
         metadata_string = metadata.decode(encoding, "ignore")
@@ -64,7 +64,7 @@ class HitWrapper(object):
         page_id = [self.hit[0], 0, 0, 0, 0, 0, 0, 0, page_i]
         self.page = PageWrapper(page_id, db)
         self.ancestors = {}
-        for t, n in obj_dict.items():
+        for t, n in list(obj_dict.items()):
             if t == "word":
                 self.ancestors["word"] = self.words[0]
             else:

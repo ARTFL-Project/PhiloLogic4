@@ -1,5 +1,5 @@
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import os
 import sys
 import struct
@@ -69,7 +69,7 @@ def query_recursive(db, param_dict, parent, sort_order):
 def query_lowlevel(db, param_dict, sort_order):
     vars = []
     clauses = []
-    for column, values in param_dict.items():
+    for column, values in list(param_dict.items()):
         norm_path = db.path + "/frequencies/normalized_" + column + "_frequencies"
         for v in values:
             parsed = parse_query(v)
@@ -118,7 +118,7 @@ def expand_grouped_query(grouped, norm_path):
                 except:
                     norm_term = token.lower()
                 norm_term = [c for c in unicodedata.normalize("NFKD", norm_term) if not unicodedata.combining(c)]
-                norm_term = u"".join(norm_term).encode("utf-8")
+                norm_term = "".join(norm_term).encode("utf-8")
                 expanded_terms = metadata_pattern_search(norm_term, norm_path)
                 if expanded_terms:
                     expanded_tokens = [("QUOTE", '"' + e + '"') for e in expanded_terms]

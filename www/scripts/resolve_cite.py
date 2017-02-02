@@ -35,17 +35,17 @@ def resolve_cite_service(environ, start_response):
     milestone_segments += [milestone[last_segment:]]
     milestone_prefixes += [milestone]
 
-    print >> sys.stderr, "SEGMENTS", repr(milestone_segments)
-    print >> sys.stderr, "PREFIXES", repr(milestone_prefixes)
+    print("SEGMENTS", repr(milestone_segments), file=sys.stderr)
+    print("PREFIXES", repr(milestone_prefixes), file=sys.stderr)
 
     abbrev_match = None
     for pos, v in enumerate(milestone_prefixes):
-        print >> sys.stderr, "QUERYING for abbrev = ", v
+        print("QUERYING for abbrev = ", v, file=sys.stderr)
         abbrev_q = c.execute("SELECT * FROM toms WHERE abbrev = ?;", (v, )).fetchone()
         if abbrev_q:
             abbrev_match = abbrev_q
 
-    print >> sys.stderr, "ABBREV", abbrev_match["abbrev"], abbrev_match["philo_id"]
+    print("ABBREV", abbrev_match["abbrev"], abbrev_match["philo_id"], file=sys.stderr)
     doc_obj = ObjectWrapper(abbrev_match['philo_id'].split(), db)
 
     nav = nav_query(doc_obj, db)
@@ -53,7 +53,7 @@ def resolve_cite_service(environ, start_response):
     best_match = None
     for n in nav:
         if n["head"] == request.q:
-            print >> sys.stderr, "MATCH", n["philo_id"], n["n"], n["head"]
+            print("MATCH", n["philo_id"], n["n"], n["head"], file=sys.stderr)
             best_match = n
             break
 
@@ -62,7 +62,7 @@ def resolve_cite_service(environ, start_response):
         t = best_match['philo_type']
         short_id = best_match["philo_id"].split()[:type_offsets[t]]
         best_url = f.make_absolute_object_link(config, short_id)
-        print >> sys.stderr, "BEST_URL", best_url
+        print("BEST_URL", best_url, file=sys.stderr)
 
     status = '302 Found'
     redirect = config['db_url']

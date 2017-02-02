@@ -2,7 +2,7 @@ import sys
 import re
 import os
 import unicodedata
-import htmlentitydefs
+import html.entities
 import traceback
 from BeautifulSoup import BeautifulStoneSoup as bss
 from philologic import TagCensus
@@ -16,12 +16,12 @@ from collections import defaultdict
 
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
-all_chars = (unichr(i) for i in xrange(0x110000))
-control_chars_range =  range(0,32) + range(127,160)
+all_chars = (chr(i) for i in range(0x110000))
+control_chars_range =  list(range(0,32)) + list(range(127,160))
 control_chars_range.remove(9)
 control_chars_range.remove(10)
 control_chars_range.remove(13) ## Keeping newlines, carriage returns and tabs
-control_chars = ''.join(map(unichr, control_chars_range))
+control_chars = ''.join(map(chr, control_chars_range))
 control_char_re = re.compile('[%s]' % re.escape(control_chars))
 
 
@@ -39,7 +39,7 @@ codepoint2name = {}
 # (or a character reference if the character is outside the Latin-1 range)
 entitydefs = {}
 
-for (name, codepoint) in name2codepoint.iteritems():
+for (name, codepoint) in name2codepoint.items():
 	codepoint2name[codepoint] = name
 	if codepoint <= 0xff:
 		entitydefs[name] = chr(codepoint)
@@ -48,7 +48,7 @@ for (name, codepoint) in name2codepoint.iteritems():
 
 """End of Other character entity references."""
 
-d = htmlentitydefs.name2codepoint.copy()
+d = html.entities.name2codepoint.copy()
 dother = name2codepoint.copy()
 
 ents_to_ignore = ["quot","amp","lt","gt","apos"]
@@ -73,9 +73,9 @@ http://stackoverflow.com/questions/1197981/convert-html-entities-to-ascii-in-pyt
             name = hit[2:-1]
             try:
                 entnum = int(name)
-                s = s.replace(hit, unichr(entnum))
+                s = s.replace(hit, chr(entnum))
                 if not quiet:
-                    print >> sys.stderr, "converted %s entity to '%s'" % (name, unichr(entnum).encode('utf-8'))
+                    print("converted %s entity to '%s'" % (name, chr(entnum).encode('utf-8')), file=sys.stderr)
             except ValueError:
                 pass
     matches = re.findall("&\w+;", s)
@@ -83,16 +83,16 @@ http://stackoverflow.com/questions/1197981/convert-html-entities-to-ascii-in-pyt
     for hit in hits:
         name = hit[1:-1]
         if name in d and name not in ents_to_ignore:
-            s = s.replace(hit, unichr(d[name]))
+            s = s.replace(hit, chr(d[name]))
             if not quiet:
-                print >> sys.stderr, "converted %s entity to '%s'" % (name, unichr(d[name]))
+                print("converted %s entity to '%s'" % (name, chr(d[name])), file=sys.stderr)
         elif name in dother and name not in ents_to_ignore:
-            s = s.replace(hit, unichr(dother[name]))
+            s = s.replace(hit, chr(dother[name]))
             if not quiet:
-                print >> sys.stderr, "converted %s entity to '%s'" % (name, unichr(dother[name]))
+                print("converted %s entity to '%s'" % (name, chr(dother[name])), file=sys.stderr)
         elif name not in d and name not in dother:
             s = s.replace(hit, hit.replace('&', "&amp;"))
-            print >> sys.stderr, "converted invalid entity %s to '%s'" % (name, hit.replace('&', "&amp;").encode('utf-8'))
+            print("converted invalid entity %s to '%s'" % (name, hit.replace('&', "&amp;").encode('utf-8')), file=sys.stderr)
             invalid_entities[name] += 1
 
     return (s.encode('utf-8'))
@@ -110,7 +110,7 @@ def parse_command_line(argv):
     ## Parse command-line arguments
     options, args = parser.parse_args(argv[1:])
     if len(args) == 0:
-        print >> sys.stderr, "\nError: you did not supply a filename \n"
+        print("\nError: you did not supply a filename \n", file=sys.stderr)
         parser.print_help()
         sys.exit()
     files = args[:]
@@ -152,7 +152,7 @@ if __name__ == '__main__':
     total = None
     
     for filename in files:
-        print >> sys.stderr, "Cleaning %s" % filename
+        print("Cleaning %s" % filename, file=sys.stderr)
         text = open(filename).read().decode('utf-8', 'ignore')
         text = remove_control_chars(text)
     
@@ -161,9 +161,9 @@ if __name__ == '__main__':
         
         if not quiet:
             try:
-                print >> sys.stderr, census
+                print(census, file=sys.stderr)
             except UnicodeEncodeError:
-                print >> sys.stderr, unicode(census).encode('utf-8')
+                print(str(census).encode('utf-8'), file=sys.stderr)
     
         if total:
             total += census
@@ -176,7 +176,7 @@ if __name__ == '__main__':
         #BeautifulSoup lowercases all element names; to get things closer to standard TEI, I've included a list here which I use to restore them after parsing
         fix_case = {}
     
-        for tag in census.tags.keys():    
+        for tag in list(census.tags.keys()):    
             fix_case[tag.lower()] = tag
             if census[tag]["empty"] != 0:
                 self_closing.append(tag)
@@ -202,8 +202,8 @@ if __name__ == '__main__':
             file_contents = etree.tostring(tree, pretty_print=True, encoding='utf-8')
         except Exception as e:
             traceback.print_exc()
-            print >> sys.stderr, "The clean-up script did not manage to fix all your XML issues"
-            print >> sys.stderr, 'Try running "xmllint -noout" on the output file to get a more complete error report'
+            print("The clean-up script did not manage to fix all your XML issues", file=sys.stderr)
+            print('Try running "xmllint -noout" on the output file to get a more complete error report', file=sys.stderr)
         
         if output_dir:
             filename = output_dir + '/' + os.path.basename(filename) + suffix
@@ -211,17 +211,17 @@ if __name__ == '__main__':
             filename = filename + suffix
         
         outfile = open(filename, 'w')
-        print >> outfile, file_contents
+        print(file_contents, file=outfile)
         outfile.close()
     
     try:
-        print >> sys.stderr, total
+        print(total, file=sys.stderr)
     except UnicodeEncodeError:
-        print unicode(total).encode('utf-8')
+        print(str(total).encode('utf-8'))
         
     if invalid_entities:
-        print >> sys.stderr, "##### Undeclared entities present in files.######"
-        print >> sys.stderr, "To resolve, add definitions in this script"
-        for k,v in invalid_entities.iteritems():
-            print "\t\t".join([k,str(v)])
+        print("##### Undeclared entities present in files.######", file=sys.stderr)
+        print("To resolve, add definitions in this script", file=sys.stderr)
+        for k,v in invalid_entities.items():
+            print("\t\t".join([k,str(v)]))
     

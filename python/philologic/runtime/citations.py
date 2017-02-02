@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Citations"""
 
-from __future__ import absolute_import
+
 from philologic.runtime.link import (make_absolute_object_link, make_absolute_query_link)
 import six
 

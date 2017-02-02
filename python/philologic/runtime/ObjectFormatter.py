@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Text Object formatter"""
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import os
 import re
 import sqlite3
@@ -101,7 +101,7 @@ def format_concordance(text, word_regex, bytes=[]):
         text = new_text + text[last_offset:]
     xml = FragmentParserParse(text)
     allowed_tags = set(['philoHighlight', 'l', 'ab', 'ln', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx', 'br'])
-    text = u''
+    text = ''
     for el in xml.iter():
         if el.tag.startswith("DIV"):
             el.tag = el.tag.lower()
@@ -487,7 +487,7 @@ def get_all_graphics(philo_id, config):
 
 def clean_tags(element):
     """Remove all tags"""
-    text = u''
+    text = ''
     for child in element:
         text += clean_tags(child)
     if element.tag == "philoHighlight":

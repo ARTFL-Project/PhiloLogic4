@@ -1,5 +1,5 @@
 """Runtime exports"""
-from __future__ import absolute_import
+
 from philologic.runtime.access_control import check_access, login_access
 from philologic.runtime.find_similar_words import find_similar_words
 from philologic.runtime.FragmentParser import FragmentParser

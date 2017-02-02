@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """Parses queries stored in the environ object."""
 
-from __future__ import absolute_import
+
 import six.moves.http_cookies
 import hashlib
 import re
-import urlparse
+import urllib.parse
 
 from philologic.runtime.find_similar_words import find_similar_words
 from philologic.runtime.query_parser import parse_query
@@ -37,7 +37,7 @@ class WSGIHandler(object):
                 if self.cookies["hash"].value == h.hexdigest():
                     # print >> sys.stderr, "AUTHENTICATED: ", self.cookies["hash"], " vs ", h.hexdigest()
                     self.authenticated = True
-        self.cgi = urlparse.parse_qs(self.query_string, keep_blank_values=True)
+        self.cgi = urllib.parse.parse_qs(self.query_string, keep_blank_values=True)
         self.defaults = {"results_per_page": "25", "start": "0", "end": "0"}
 
         # Check the header for JSON content_type or look for a format=json
@@ -174,5 +174,5 @@ class WSGIHandler(object):
 
     def __iter__(self):
         """Iterate over query args."""
-        for key in self.cgi.keys():
+        for key in list(self.cgi.keys()):
             yield (key, self[key])

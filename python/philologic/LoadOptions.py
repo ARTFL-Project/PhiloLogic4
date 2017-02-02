@@ -1,7 +1,7 @@
 #!/usr/bin env python
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import imp
 import os
 import sys
@@ -11,6 +11,7 @@ from optparse import OptionParser
 from philologic import Loader, LoadFilters, PostFilters, NewParser, PlainTextParser
 from philologic.utils import pretty_print
 import six
+import collections
 
 
 # Load global config
@@ -152,7 +153,7 @@ class LoadOptions(object):
             parser.print_help()
             sys.exit()
         for a in dir(options):
-            if not a.startswith('__') and not callable(getattr(options, a)):
+            if not a.startswith('__') and not isinstance(getattr(options, a), collections.Callable):
                 value = getattr(options, a)
                 if a == "load_config" and value:
                     load_config = LoadConfig()
@@ -219,7 +220,7 @@ class LoadConfig(object):
     def parse(self, load_config_file):
         config_file = imp.load_source("external_load_config", load_config_file)
         for a in dir(config_file):
-            if not a.startswith('__') and not callable(getattr(config_file, a)):
+            if not a.startswith('__') and not isinstance(getattr(config_file, a), collections.Callable):
                 value = getattr(config_file, a)
                 if value:
                     if a == "words_to_index":

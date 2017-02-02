@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import gzip
 import io
 import os
@@ -10,7 +10,7 @@ import time
 import unicodedata
 from collections import defaultdict
 
-from simplejson import loads
+from json import loads
 from six.moves import range
 
 
@@ -136,7 +136,7 @@ def normalized_metadata_frequencies(loader_obj):
 # Some post-merge cleanup for normalize_divs in LoadFilters--should always be paired and use same arguments.
 def normalize_divs_post(*columns):
     def normalize_these_columns_post(loader):
-        for k, v in loader.metadata_types.items():
+        for k, v in list(loader.metadata_types.items()):
             if k in columns:
                 loader.metadata_types[k] = "div3"
 

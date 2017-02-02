@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+
 import hashlib
 import os
 import sqlite3
@@ -113,7 +113,7 @@ class DB:
         has_metadata = False
         corpus_file = None
 
-        for key, value in metadata.items():
+        for key, value in list(metadata.items()):
             if isinstance(value, str):
                 if value == "":
                     pass
@@ -134,7 +134,7 @@ class DB:
                 # and sort them into a list of dictionaries, one for each type.
                 metadata_dicts = [{} for level in self.locals["metadata_hierarchy"]]
                 #                print >> sys.stderr, "querying %s" % repr(metadata.items())
-                for k, v in metadata.items():
+                for k, v in list(metadata.items()):
                     for i, params in enumerate(self.locals["metadata_hierarchy"]):
                         if v and (k in params):
                             metadata_dicts[i][k] = v
