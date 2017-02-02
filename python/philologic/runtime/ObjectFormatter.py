@@ -76,29 +76,31 @@ def adjust_bytes(bytes, padding):
     return new_bytes, start_byte
 
 
-def format_concordance(text, word_regex, bytes=[]):
-    word_regex = r"\w+"  # text is converted to unicode so we use the \w boundary to match
+def format_concordance(text, word_regex, byte_offsets=[]):
+    # word_regex = r"\w+"  # text is converted to unicode so we use the \w boundary to match
+    text_in_utf8 = text.encode('utf8')
     removed_from_start = 0
-    begin = begin_match.search(text)
+    begin = begin_match.search(text_in_utf8)
     if begin:
         removed_from_start = len(begin.group(0))
-        text = text[begin.end(0):]
-    start_cutoff = start_cutoff_match.search(text)
+        text_in_utf8 = text_in_utf8[begin.end(0):]
+    start_cutoff = start_cutoff_match.search(text_in_utf8)
     if start_cutoff:
         removed_from_start += len(start_cutoff.group(0))
-        text = text[start_cutoff.end(0):]
-    end = end_match.search(text)
+        text_in_utf8 = text_in_utf8[start_cutoff.end(0):]
+    end = end_match.search(text_in_utf8)
     if end:
-        text = text[:end.start(0)]
-    if bytes:
-        bytes = [b - removed_from_start for b in bytes]
+        text_in_utf8 = text_in_utf8[:end.start(0)]
+    if byte_offsets:
+        byte_offsets = [b - removed_from_start for b in byte_offsets]
         new_text = ""
         last_offset = 0
-        for b in bytes:
-            if b > 0 and b < len(text):
-                new_text += text[last_offset:b] + "<philoHighlight/>"
+        for b in byte_offsets:
+            if b > 0 and b < len(text_in_utf8):
+                new_text += text_in_utf8[last_offset:b] + "<philoHighlight/>"
                 last_offset = b
-        text = new_text + text[last_offset:]
+        text_in_utf8 = new_text + text_in_utf8[last_offset:]
+    text = text_in_utf8.decode('utf8')
     xml = FragmentParserParse(text)
     allowed_tags = set(['philoHighlight', 'l', 'ab', 'ln', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx', 'br'])
     text = ''
@@ -359,14 +361,14 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                 el.attrib["class"] = "highlight"
             if el.tag not in valid_html_tags:
                 el = xml_to_html_class(el)
-        except Exception as e:
+        except Exception as exception:
             import sys
-            print(e, file=sys.stderr)
+            print(exception, file=sys.stderr)
             pass
     output = etree.tostring(xml)
     ## remove spaces around hyphens and apostrophes
     output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
-    output = convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
+    output = convert_entities(output)
 
     if note:  ## Notes don't need to fetch images
         return (output, {})
@@ -390,20 +392,20 @@ def page_images(config, output, current_obj_img, current_graphic_img, philo_id):
         current_obj_img.append('')
     if first_page_object['start_byte'] and current_obj_img[0] != first_page_object['filename'][0]:
         if first_page_object['filename']:
-                page_href = config.page_images_url_root + '/' + first_page_object['filename'][0] + config.page_image_extension
-                if config.external_page_images is False:
-                    if len(first_page_object['filename']) == 2:
-                        large_img = config.page_images_url_root + '/' + first_page_object['filename'][1] + config.page_image_extension
-                    else:
-                        large_img = config.page_images_url_root + '/' + first_page_object['filename'][0] + config.page_image_extension
-                    output = '<span class="xml-pb-image"><a href="%s" large-img="%s" class="page-image-link" data-gallery>[page %s]</a></span>' % (page_href, large_img, first_page_object["n"]) + output
-                    if current_obj_img[0] == '':
-                        current_obj_img[0] = first_page_object['filename'][0]
-                    else:
-                        current_obj_img.insert(0, first_page_object['filename'][0])
+            page_href = config.page_images_url_root + '/' + first_page_object['filename'][0] + config.page_image_extension
+            if config.external_page_images is False:
+                if len(first_page_object['filename']) == 2:
+                    large_img = config.page_images_url_root + '/' + first_page_object['filename'][1] + config.page_image_extension
                 else:
-                    output = '<span class="xml-pb-image"><a href="%s" target="_blank">[page %s]</a></span>' % (page_href, first_page_object["n"]) + output
-                    return output, {}
+                    large_img = config.page_images_url_root + '/' + first_page_object['filename'][0] + config.page_image_extension
+                output = '<span class="xml-pb-image"><a href="%s" large-img="%s" class="page-image-link" data-gallery>[page %s]</a></span>' % (page_href, large_img, first_page_object["n"]) + output
+                if current_obj_img[0] == '':
+                    current_obj_img[0] = first_page_object['filename'][0]
+                else:
+                    current_obj_img.insert(0, first_page_object['filename'][0])
+            else:
+                output = '<span class="xml-pb-image"><a href="%s" target="_blank">[page %s]</a></span>' % (page_href, first_page_object["n"]) + output
+                return output, {}
         else:
             output = '<span class="xml-pb-image">[page ' + str(first_page_object["n"]) + "]</span>" + output
     ## Fetch all remainging imgs in document

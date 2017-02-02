@@ -113,12 +113,9 @@ def expand_grouped_query(grouped, norm_path):
         expanded_group = []
         for kind, token in group:
             if kind == "TERM":
-                try:
-                    norm_term = token.decode("utf-8").lower()
-                except:
-                    norm_term = token.lower()
+                norm_term = token.lower()
                 norm_term = [c for c in unicodedata.normalize("NFKD", norm_term) if not unicodedata.combining(c)]
-                norm_term = "".join(norm_term).encode("utf-8")
+                norm_term = "".join(norm_term)
                 expanded_terms = metadata_pattern_search(norm_term, norm_path)
                 if expanded_terms:
                     expanded_tokens = [("QUOTE", '"' + e + '"') for e in expanded_terms]
@@ -187,7 +184,7 @@ def make_grouped_sql_clause(expanded, column, db):
                     try:
                         clauses += "AND %s" % clause
                     except UnicodeDecodeError:
-                        clauses += "AND %s" % clause.encode('utf8')
+                        clauses += "AND %s" % clause
                 continue
             clause += "%s IN (" % column
         # if we don't have a range, we have something that we can evaluate
@@ -208,7 +205,7 @@ def make_grouped_sql_clause(expanded, column, db):
                 try:
                     clause += esc(token[1:-1])
                 except:
-                    clause += esc(token.decode('utf-8')[1:-1])
+                    clause += esc(token[1:-1])
                 # but harmless, as well was its own clause below.  Fix later, if possible.
         clause += ")"
         if has_null:

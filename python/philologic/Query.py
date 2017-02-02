@@ -7,8 +7,6 @@ import sys
 import unicodedata
 from datetime import datetime
 
-from six.moves import zip
-
 from . import HitList
 from .QuerySyntax import group_terms, parse_query
 
@@ -215,24 +213,20 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
 
 
 def grep_word(token, freq_file, dest_fh, lowercase=True):
-    #print >> sys.stderr, "GREP_WORD_TOKEN", repr(token)
-    #    norm_tok_uni = token.decode("utf-8").lower()
-    norm_tok_uni = token.decode("utf-8")
     if lowercase:
-        norm_tok_uni = norm_tok_uni.lower()
-    norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", norm_tok_uni) if not unicodedata.combining(i)]
-    norm_tok = "".join(norm_tok_uni_chars).encode("utf-8")
+        token = token.lower()
+    norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", token) if not unicodedata.combining(i)]
+    norm_tok = "".join(norm_tok_uni_chars)
     grep_command = ['egrep', '-a', '^%s[[:blank:]]' % norm_tok, freq_file]
     grep_proc = subprocess.Popen(grep_command, stdout=dest_fh)
     return grep_proc
 
 
 def invert_grep(token, in_fh, dest_fh, lowercase=True):
-    norm_tok_uni = token.decode("utf-8")
     if lowercase:
-        norm_tok_uni = norm_tok_uni.lower()
-    norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", norm_tok_uni) if not unicodedata.combining(i)]
-    norm_tok = "".join(norm_tok_uni_chars).encode("utf-8")
+        token = token.lower()
+    norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", token) if not unicodedata.combining(i)]
+    norm_tok = "".join(norm_tok_uni_chars)
     grep_command = ['egrep', '-a', '-v', '^%s[[:blank:]]' % norm_tok]
     grep_proc = subprocess.Popen(grep_command, stdin=in_fh, stdout=dest_fh)
     return grep_proc

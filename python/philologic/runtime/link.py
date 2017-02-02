@@ -14,10 +14,7 @@ def url_encode(q_params):
                 for s in v:
                     encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(s, safe='/'))
             else:
-                try:
-                    encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(v, safe='/'))
-                except KeyError:
-                    encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(v.encode('utf8'), safe='/'))
+                encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(v, safe='/'))
         else:  # Value is None
             encoded_str.append(quote_plus(k, safe='/') + '=' + '')
     return '&'.join(encoded_str)

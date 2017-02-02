@@ -2,15 +2,13 @@
 """Parses queries stored in the environ object."""
 
 
-import six.moves.http_cookies
+from http.cookies import SimpleCookie
 import hashlib
-import re
 import urllib.parse
 
 from philologic.runtime.find_similar_words import find_similar_words
 from philologic.runtime.query_parser import parse_query
 from philologic.DB import DB
-import six
 
 
 class WSGIHandler(object):
@@ -25,9 +23,7 @@ class WSGIHandler(object):
         self.script_filename = environ["SCRIPT_FILENAME"]
         self.authenticated = False
         if "HTTP_COOKIE" in environ:
-            # print >> sys.stderr, 'COOKIE', environ['HTTP_COOKIE']
-            self.cookies = six.moves.http_cookies.SimpleCookie(environ[
-                "HTTP_COOKIE"])
+            self.cookies = SimpleCookie(environ["HTTP_COOKIE"])
             if "hash" in self.cookies and "timestamp" in self.cookies:
                 h = hashlib.md5()
                 secret = db.locals.secret
@@ -35,7 +31,6 @@ class WSGIHandler(object):
                 h.update(self.cookies["timestamp"].value)
                 h.update(secret)
                 if self.cookies["hash"].value == h.hexdigest():
-                    # print >> sys.stderr, "AUTHENTICATED: ", self.cookies["hash"], " vs ", h.hexdigest()
                     self.authenticated = True
         self.cgi = urllib.parse.parse_qs(self.query_string, keep_blank_values=True)
         self.defaults = {"results_per_page": "25", "start": "0", "end": "0"}
@@ -95,8 +90,7 @@ class WSGIHandler(object):
         for field in self.metadata_fields:
             if field in self.cgi and self.cgi[field]:
                 # Hack to remove hyphens in Frantext
-                if field != "date" and isinstance(self.cgi[field][0], str or
-                                                  six.text_type):
+                if field != "date" and isinstance(self.cgi[field][0], str):
                     if not self.cgi[field][0].startswith('"'):
                         self.cgi[field][0] = parse_query(self.cgi[field][0])
                 # these ifs are to fix the no results you get when you do a

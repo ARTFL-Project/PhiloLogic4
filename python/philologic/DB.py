@@ -29,13 +29,12 @@ def hit_to_string(hit, width):
 
 
 class DB:
-    def __init__(self, dbpath, width=7, encoding="utf-8"):
+    def __init__(self, dbpath, width=7):
         self.path = dbpath
         self.dbh = sqlite3.connect(dbpath + "/toms.db", width)
         self.dbh.text_factory = str
         self.dbh.row_factory = sqlite3.Row
         self.width = width
-        self.encoding = "utf-8"
         self.locals = Config(dbpath + "/db.locals.py", db_locals_defaults, db_locals_header)
 
     def __getitem__(self, item):

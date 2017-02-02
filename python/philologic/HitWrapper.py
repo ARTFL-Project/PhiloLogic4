@@ -8,7 +8,7 @@ from six.moves import zip
 obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
 
 
-def _safe_lookup(row, field, encoding="utf-8"):
+def _safe_lookup(row, field):
     metadata = ""
     try:
         metadata = row[field]
@@ -16,19 +16,14 @@ def _safe_lookup(row, field, encoding="utf-8"):
         pass
     if metadata is None:
         return ""
-    metadata_string = ""
-    try:
-        metadata_string = metadata.decode(encoding, "ignore")
-    except AttributeError:
-        metadata_string = str(metadata).decode(encoding, "ignore")
-    return metadata_string
+    return metadata
 
 
 shared_cache = {}
 
 
 class HitWrapper(object):
-    def __init__(self, hit, db, obj_type=False, encoding=None):
+    def __init__(self, hit, db, obj_type=False):
         self.db = db
         self.hit = hit
         if obj_type:
@@ -100,7 +95,7 @@ class HitWrapper(object):
             else:
                 if self.row is None:
                     self.row = self.db.get_id_lowlevel(self.philo_id)
-                return _safe_lookup(self.row, key, self.db.encoding)
+                return _safe_lookup(self.row, key)
 
     def __getattr__(self, name):
         return self[name]
@@ -138,7 +133,7 @@ class ObjectWrapper(object):
             if self.row is None:
                 self.row = self.db.get_id_lowlevel(self.philo_id)
                 shared_cache[self.object_type] = (self.philo_id, self.row)
-            return _safe_lookup(self.row, key, self.db.encoding)
+            return _safe_lookup(self.row, key)
 
     def __getattr__(self, name):
         return self[name]
@@ -155,7 +150,7 @@ class PageWrapper(object):
     def __getitem__(self, key):
         if self.row is None:
             self.row = self.db.get_page(self.philo_id)
-        return _safe_lookup(self.row, key, self.db.encoding)
+        return _safe_lookup(self.row, key)
 
     def __getattr__(self, name):
         if name in obj_dict:
@@ -179,7 +174,7 @@ class LineWrapper(object):
     def __getitem__(self, key):
         if self.row is None:
             self.row = self.db.get_line(self.hit_offset, self.doc_id)
-        return _safe_lookup(self.row, key, self.db.encoding)
+        return _safe_lookup(self.row, key)
 
     def __getattr__(self, name):
         if name in obj_dict:
@@ -203,7 +198,7 @@ class WordWrapper(object):
             self.row = self.db.get_word(self.philo_id)
             if self.row is None:
                 print("WORD LOOKUP ERROR for ", repr(self.philo_id), file=sys.stderr)
-        return _safe_lookup(self.row, key, self.db.encoding)
+        return _safe_lookup(self.row, key)
 
     def __getattr__(self, name):
         return self[name]

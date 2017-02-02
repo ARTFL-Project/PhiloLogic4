@@ -14,7 +14,6 @@ class HitList(object):
                  filename,
                  words,
                  dbh,
-                 encoding=None,
                  doc=0,
                  byte=6,
                  method="proxy",
@@ -30,7 +29,6 @@ class HitList(object):
             self.sort_order = None
         self.raw = raw  # if true, this return the raw hitlist consisting of a list of philo_ids
         self.dbh = dbh
-        self.encoding = encoding or dbh.encoding
         if method is not "cooc":
             self.has_word_id = 1
             self.length = 7 + 2 * (words)
