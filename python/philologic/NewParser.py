@@ -1,7 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """PhiloLogic4 main parser"""
-
-
 
 import os
 import re
@@ -11,7 +9,7 @@ import sys
 from philologic import OHCOVector
 from philologic.utils import convert_entities
 
-DefaultTagToObjMap = {
+DEFAULT_TAG_TO_OBJ_MAP = {
     "div": "div",
     "div1": "div",
     "div2": "div",
@@ -39,7 +37,7 @@ DefaultTagToObjMap = {
     "ab": "line"
 }
 
-DefaultMetadataToParse = {
+DEFAULT_METADATA_TO_PARSE = {
     "div": ["head", "type", "n", "id", "vol"],
     "para": ["who", "resp", "id"],  # for <sp> and <add> tags
     "page": ["n", "id", "facs"],
@@ -48,7 +46,7 @@ DefaultMetadataToParse = {
     "line": ["n", "id"]
 }
 
-DefaultDocXPaths = {
+DEFAULT_DOC_XPATHS = {
     "author": [
         ".//sourceDesc/bibl/author[@type='marc100']", ".//sourceDesc/bibl/author[@type='artfl']",
         ".//sourceDesc/bibl/author", ".//titleStmt/author", ".//sourceDesc/biblStruct/monogr/author/name",
@@ -122,29 +120,31 @@ DefaultDocXPaths = {
     ]
 }
 
-TagExceptions = [r'<hi[^>]*>', r'<emph[^>]*>', r'<\/hi>', r'<\/emph>', r'<orig[^>]*>', r'<\/orig>', r'<sic[^>]*>', r'<\/sic>',
+TAG_EXCEPTIONS = [r'<hi[^>]*>', r'<emph[^>]*>', r'<\/hi>', r'<\/emph>', r'<orig[^>]*>', r'<\/orig>', r'<sic[^>]*>', r'<\/sic>',
                  r'<abbr[^>]*>', r'<\/abbr>', r'<i>', r'</i>', r'<sup>', r'</sup>']
 
-TokenRegex = r"\w*"
+TOKEN_REGEX = r"\w*"
 
-CharsNotToIndex = r"\[\{\]\}"
+CHARS_NOT_TO_INDEX = r"\[\{\]\}"
 
-UnicodeWordBreakers = ['\xe2\x80\x93',  # U+2013 &ndash; EN DASH
-                       '\xe2\x80\x94',  # U+2014 &mdash; EM DASH
-                       '\xc2\xab',  # &laquo;
-                       '\xc2\xbb',  # &raquo;
-                       '\xef\xbc\x89',  # fullwidth right parenthesis
-                       '\xef\xbc\x88',  # fullwidth left parenthesis
-                       '\xe2\x80\x90',  # U+2010 hyphen for greek stuff
-                       '\xce\x87',  # U+00B7 ano teleia
-                       '\xe2\x80\xa0',  # U+2020 dagger
-                       '\xe2\x80\x98',  # U+2018 &lsquo; LEFT SINGLE QUOTATION
-                       '\xe2\x80\x99',  # U+2019 &rsquo; RIGHT SINGLE QUOTATION
-                       '\xe2\x80\x9c',  # U+201C &ldquo; LEFT DOUBLE QUOTATION
-                       '\xe2\x80\x9d',  # U+201D &rdquo; RIGHT DOUBLE QUOTATION
-                       '\xe2\x80\xb9',  # U+2039 &lsaquo; SINGLE LEFT-POINTING ANGLE QUOTATION
-                       '\xe2\x80\xba',  # U+203A &rsaquo; SINGLE RIGHT-POINTING ANGLE QUOTATION
-                       '\xe2\x80\xa6']  # U+2026 &hellip; HORIZONTAL ELLIPSIS
+UNICODE_WORD_BREAKERS = [
+    b'\xe2\x80\x93',  # U+2013 &ndash; EN DASH
+    b'\xe2\x80\x94',  # U+2014 &mdash; EM DASH
+    b'\xc2\xab',  # &laquo;
+    b'\xc2\xbb',  # &raquo;
+    b'\xef\xbc\x89',  # fullwidth right parenthesis
+    b'\xef\xbc\x88',  # fullwidth left parenthesis
+    b'\xe2\x80\x90',  # U+2010 hyphen for greek stuff
+    b'\xce\x87',  # U+00B7 ano teleia
+    b'\xe2\x80\xa0',  # U+2020 dagger
+    b'\xe2\x80\x98',  # U+2018 &lsquo; LEFT SINGLE QUOTATION
+    b'\xe2\x80\x99',  # U+2019 &rsquo; RIGHT SINGLE QUOTATION
+    b'\xe2\x80\x9c',  # U+201C &ldquo; LEFT DOUBLE QUOTATION
+    b'\xe2\x80\x9d',  # U+201D &rdquo; RIGHT DOUBLE QUOTATION
+    b'\xe2\x80\xb9',  # U+2039 &lsaquo; SINGLE LEFT-POINTING ANGLE QUOTATION
+    b'\xe2\x80\xba',  # U+203A &rsaquo; SINGLE RIGHT-POINTING ANGLE QUOTATION
+    b'\xe2\x80\xa6'  # U+2026 &hellip; HORIZONTAL ELLIPSIS
+]
 
 
 class XMLParser(object):
@@ -158,8 +158,8 @@ class XMLParser(object):
                  filesize,
                  words_to_index=None,
                  known_metadata={},
-                 tag_to_obj_map=DefaultTagToObjMap,
-                 metadata_to_parse=DefaultMetadataToParse,
+                 tag_to_obj_map=DEFAULT_TAG_TO_OBJ_MAP,
+                 metadata_to_parse=DEFAULT_METADATA_TO_PARSE,
                  **parse_options):
         """Initialize class"""
         self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
@@ -193,7 +193,7 @@ class XMLParser(object):
         if "token_regex" in parse_options:
             self.token_regex = re.compile(r"(%s)" % parse_options["token_regex"], re.I)
         else:
-            self.token_regex = re.compile(r"(%s)" % TokenRegex, re.I)
+            self.token_regex = re.compile(r"(%s)" % TOKEN_REGEX, re.I)
 
         if "sentence_breakers" in parse_options:
             self.sentence_breakers = parse_options["sentence_breakers"]
@@ -215,7 +215,7 @@ class XMLParser(object):
         if "chars_not_to_index" in parse_options:
             self.chars_not_to_index = re.compile(r'%s' % parse_options["chars_not_to_index"], re.I)
         else:
-            self.chars_not_to_index = re.compile(r"%s" % CharsNotToIndex, re.I)
+            self.chars_not_to_index = re.compile(r"%s" % CHARS_NOT_TO_INDEX, re.I)
 
         if "break_sent_in_line_group" in parse_options:
             self.break_sent_in_line_group = parse_options["break_sent_in_line_group"]
@@ -225,13 +225,13 @@ class XMLParser(object):
         if "tag_exceptions" in parse_options:
             tag_exceptions = parse_options["tag_exceptions"]
         else:
-            tag_exceptions = TagExceptions
+            tag_exceptions = TAG_EXCEPTIONS
         self.tag_exceptions = []
         for tag in tag_exceptions:
             try:
                 compiled_tag = re.compile(r'(%s)(%s)(%s)' % (parse_options["token_regex"], tag, parse_options["token_regex"]), re.I | re.M)
             except KeyError:
-                compiled_tag = re.compile(r'(%s)(%s)(%s)' % (TokenRegex, tag, TokenRegex), re.I | re.M)
+                compiled_tag = re.compile(r'(%s)(%s)(%s)' % (TOKEN_REGEX, tag, TOKEN_REGEX), re.I | re.M)
             self.tag_exceptions.append(compiled_tag)
 
         if "join_hyphen_in_words" in parse_options:
@@ -242,7 +242,7 @@ class XMLParser(object):
         if "unicode_word_breakers" in parse_options:
             unicode_word_breakers = parse_options["unicode_word_breakers"]
         else:
-            unicode_word_breakers = UnicodeWordBreakers
+            unicode_word_breakers = UNICODE_WORD_BREAKERS
         self.unicode_word_breakers = []
         for char in unicode_word_breakers:
             compiled_char = re.compile(r'(%s)' % char, re.I)
@@ -287,10 +287,10 @@ class XMLParser(object):
         self.current_div_level = 0
         self.in_seg = False
 
-    def parse(self, input):
+    def parse(self, text_input):
         """Top level function for reading a file and printing out the output."""
-        self.input = input
-        self.content = input.read()
+        self.input = text_input
+        self.content = text_input.read()
         if div_tag.search(self.content):
             self.got_a_div = True
         if para_tag.search(self.content):
@@ -1363,6 +1363,6 @@ if __name__ == "__main__":
                            docid,
                            size,
                            known_metadata={"filename": fn},
-                           tag_to_obj_map=DefaultTagToObjMap,
-                           metadata_to_parse=DefaultMetadataToParse)
+                           tag_to_obj_map=DEFAULT_TAG_TO_OBJ_MAP,
+                           metadata_to_parse=DEFAULT_METADATA_TO_PARSE)
         parser.parse(fh)

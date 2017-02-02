@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 import imp
@@ -16,12 +16,11 @@ from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.PostFilters import make_sql_table
 from philologic.utils import convert_entities, pretty_print, sort_list
 
-import six.moves.cPickle
-from six.moves import input, zip
+import pickle
 import collections
 
 # Flush buffer output
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+# sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 
 sort_by_word = "-k 2,2"
 sort_by_id = "-k 3,3n -k 4,4n -k 5,5n -k 6,6n -k 7,7n -k 8,8n -k 9,9n"
@@ -89,7 +88,7 @@ class Loader(object):
                             print("%s = %s\n" % (option, repr(loader_options[option])), file=load_config_copy)
             else:
                 with open(load_config_path, "w") as load_config_copy:
-                    print("#!/usr/bin/env python", file=load_config_copy)
+                    print("#!/usr/bin/env python3", file=load_config_copy)
                     print('"""This is a dump of the default configuration used to load this database,', file=load_config_copy)
                     print('including non-configurable options. You can use this file to reload', file=load_config_copy)
                     print('the current database using the -l flag. See load documentation for more details"""\n\n', file=load_config_copy)
@@ -192,12 +191,12 @@ class Loader(object):
                             elements = tree.findall(xp_prefix)
                             for el in elements:
                                 if el is not None and el.get(attr_name, ""):
-                                    data[field] = el.get(attr_name, "").encode("utf-8")
+                                    data[field] = el.get(attr_name, "")
                                     break
                         else:
                             el = tree.find(xpath)
                             if el is not None and el.text is not None:
-                                data[field] = el.text.encode("utf-8")
+                                data[field] = el.text
                                 break
                 trimmed_metadata_xpaths = [
                     (metadata_type, xpath, field)
@@ -239,7 +238,7 @@ class Loader(object):
                 matches = re.findall('<dc:([^>]+)>([^>]+)>', header)
             for metadata_name, metadata_value in matches:
                 metadata_value = metadata_value
-                metadata_value = convert_entities(metadata_value.decode('utf-8')).encode('utf-8')
+                metadata_value = convert_entities(metadata_value)
                 metadata_name = metadata_name.lower()
                 data[metadata_name] = metadata_value
             data["filename"] = filename  # place at the end in case the value was in the header
@@ -381,7 +380,7 @@ class Loader(object):
                 if not pid:  # the child process parses then exits.
 
                     i = open(text["newpath"], "r", )
-                    o = open(text["raw"], "w", )  # only print out raw utf-8, so we don't need a codec layer now.
+                    o = open(text["raw"], "w", )
                     print("%s: parsing %d : %s" % (time.ctime(), text["id"], text["name"]))
 
                     if "parser_factory" not in options:
@@ -437,8 +436,8 @@ class Loader(object):
                 exit()
             done += 1
             workers -= 1
-            with open(procs[pid]) as proc_fh:
-                vec = six.moves.cPickle.load(proc_fh)  # load in the results from the child's parsework() function.
+            with open(procs[pid], 'rb') as proc_fh:
+                vec = pickle.load(proc_fh)  # load in the results from the child's parsework() function.
             # print vec
             self.omax = [max(x, y) for x, y in zip(vec, self.omax)]
         print("%s: done parsing" % time.ctime())
@@ -711,7 +710,7 @@ class Loader(object):
             except sqlite3.OperationalError:
                 continue
             try:
-                search_examples[field] = c.fetchone()[0].decode('utf-8', 'ignore')
+                search_examples[field] = c.fetchone()[0]
             except (TypeError, AttributeError):
                 continue
         config_values['search_examples'] = search_examples

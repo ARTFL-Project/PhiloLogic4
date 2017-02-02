@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 import gzip
@@ -85,9 +85,9 @@ def normalized_word_frequencies(loader_obj):
     output = open(frequencies + "/normalized_word_frequencies", "w")
     for line in open(frequencies + '/word_frequencies'):
         word, count = line.split("\t")
-        norm_word = word.decode('utf-8').lower()
+        norm_word = word.lower()
         norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
-        norm_word = ''.join(norm_word).encode('utf-8')
+        norm_word = ''.join(norm_word)
         print(norm_word + "\t" + word, file=output)
     output.close()
 
@@ -104,7 +104,7 @@ def metadata_frequencies(loader_obj):
             output = open(frequencies + "/%s_frequencies" % field, "w")
             for result in c.fetchall():
                 if result[0] != None:
-                    val = result[0].encode('utf-8', 'ignore')
+                    val = result[0]
                     clean_val = val.replace("\n", " ").replace("\t", "")
                     print(clean_val + '\t' + str(result[1]), file=output)
             output.close()
@@ -124,9 +124,9 @@ def normalized_metadata_frequencies(loader_obj):
             output = open(frequencies + "/normalized_" + field + "_frequencies", "w")
             for line in open(frequencies + "/" + field + "_frequencies"):
                 word, count = line.split("\t")
-                norm_word = word.decode('utf-8').lower()
+                norm_word = word.lower()
                 norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
-                norm_word = ''.join(norm_word).encode('utf-8')
+                norm_word = ''.join(norm_word)
                 print(norm_word + "\t" + word, file=output)
             output.close()
         except:

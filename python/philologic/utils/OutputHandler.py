@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 import sys
@@ -9,7 +9,7 @@ class OutputHandler(object):
     - unbuffers sys.stdout
     - adds ability to print to file and console with one print statement
     - adds ability to disable logging or printing to console"""
-    
+
     def __init__(self, console=True, log=False):
         self.stream = sys.stdout
         self.console = console
@@ -17,13 +17,13 @@ class OutputHandler(object):
             self.log = open(log, 'w')
         else:
             self.log = False
-       
+
     def write(self, data):
         if self.console:
             self.stream.write(data)
             self.stream.flush()
         if self.log:
             self.log.write(data)
-        
+
     def __getattr__(self, attr):
         return getattr(self.stream, attr)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 def pretty_print(value, htchar='\t', lfchar='\n', indent=0):
