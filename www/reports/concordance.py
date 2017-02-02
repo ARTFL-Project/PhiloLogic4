@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 
 import sys
 sys.path.append("..")
@@ -30,7 +30,7 @@ def concordance(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response('200 OK', headers)
-    yield simplejson.dumps(concordance_object)
+    yield json.dumps(concordance_object)
 
 
 if __name__ == "__main__":

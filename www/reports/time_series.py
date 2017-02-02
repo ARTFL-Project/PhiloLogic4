@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 
 import sys
 sys.path.append("..")
@@ -29,7 +29,7 @@ def time_series(environ, start_response):
     time_series_object = generate_time_series(request, config)
     headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
     start_response('200 OK', headers)
-    yield simplejson.dumps(time_series_object)
+    yield json.dumps(time_series_object)
 
 
 
