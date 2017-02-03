@@ -1,181 +1,231 @@
 .dico-margin {
-	margin-top: 200px !important;
+    margin-top: 210px !important;
 }
+
 #initial-form {
-	position: absolute;
-	left: 30px;
-	right: 30px;
+    position: absolute;
+    left: 30px;
+    right: 30px;
     z-index: 95;
-	box-shadow: 0px .2em 8px .04em rgba(0,0,0,0.2);
+    box-shadow: 0px .2em 8px .04em rgba(0, 0, 0, 0.2);
     background: #fff;
 }
+
 #search-elements {
-	position: absolute;
-	left: 30px;
-	right: 30px;
+    position: absolute;
+    left: 30px;
+    right: 30px;
     z-index: 90;
-	box-shadow: 0px .2em 8px .04em rgba(0,0,0,0.2);
+    box-shadow: 0px .2em 8px .04em rgba(0, 0, 0, 0.2);
     background: #fff;
-	margin-top: 98px;
+    margin-top: 98px;
     padding: 10px 10px 10px 20px;
     overflow: visible;
-	width: inherit;
+    width: inherit;
 }
+
 #search-elements.dico {
-	margin-top: 168px;
+    margin-top: 168px;
 }
-#search-elements > h5 {
-	margin-top: 15px;
-	margin-bottom: 15px;
+
+#search-elements>h5 {
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
+
 #report label {
-	font-size: 1.1em;
-	font-variant: small-caps;
-	text-transform: capitalize;
+    font-size: 1.1em;
+    font-variant: small-caps;
+    text-transform: capitalize;
 }
+
 .search_box {
     width: 250px;
     vertical-align: middle;
 }
+
 #search_field {
     font-weight: 400;
 }
+
 #more_options {
     width: 200px;
 }
+
 #more_options:hover {
     cursor: pointer;
 }
+
 #search_terms_container {
     padding-top: 15px;
-	padding-bottom: 15px;
+    padding-bottom: 15px;
 }
-#search_terms, #head-search-container {
+
+#search_terms,
+#head-search-container {
     text-align: center;
 }
+
 #head-search-container {
-	margin-top: -10px;
-	padding-bottom: 15px;
+    margin-top: -10px;
+    padding-bottom: 15px;
 }
+
 .no-example {
-	display: none;
+    display: none;
 }
-#method, .metadata_fields, #collocation-options > div, #time-series-options > div {
-	margin-top: 10px;
+
+#method,
+.metadata_fields,
+#collocation-options>div,
+#time-series-options>div {
+    margin-top: 10px;
 }
-#method, .metadata_fields.row, #time_series_num.row, #date_range.row, #results_per_page.row, #collocation-options > div, #time-series-options > div {
-	padding-top: 10px;
-	padding-bottom: 10px;
+
+#method,
+.metadata_fields.row,
+#time_series_num.row,
+#date_range.row,
+#results_per_page.row,
+#collocation-options>div,
+#time-series-options>div {
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
+
 #initial-form .btn-primary.active {
-	box-shadow: 0px 0px;
-	border-top: 0px;
+    box-shadow: 0px 0px;
+    border-top: 0px;
 }
+
 #tip-text {
-	display: none;
+    display: none;
 }
+
 #tip-btn:hover #tip-text {
-	display: inline;
+    display: inline;
 }
+
 #tip-btn:hover #tip {
-	display: none;
+    display: none;
 }
+
 #search_terms .row {
-	text-align: left;
-	padding-left: 20px;
-	padding-right: 20px;
+    text-align: left;
+    padding-left: 20px;
+    padding-right: 20px;
 }
+
 @media (max-width: 768px) {
-	#collocation-options .row {
-		margin-left: -15px;
-	}
+    #collocation-options .row {
+        margin-left: -15px;
+    }
 }
+
 
 /*Dico layout changes*/
+
 #search_elements {
-	border-top-width: 0px;
+    border-top-width: 0px;
 }
 
+
 /*Responsiveness*/
+
 @media (min-width: 1201px) {
-	#initial-form, #search-elements {
-		left: 100px;
-		right: 100px;
-	}
+    #initial-form,
+    #search-elements {
+        left: 100px;
+        right: 100px;
+    }
 }
+
 @media (max-width: 1200px) {
-	#initial-form, #search-elements {
-		left: 70px;
-		right: 70px;
-	}
+    #initial-form,
+    #search-elements {
+        left: 70px;
+        right: 70px;
+    }
 }
+
 @media (max-width: 992px) {
-	#search-buttons {
-		padding-top: 15px;
-	}
-	#search_terms > div:nth-of-type(2), #head-search-container .metadata_fields div:nth-of-type(2) {
-		padding-right: 20px;
-		padding-left: 20px;
-	}
-	#head-search-container #metadata-fields
-	#initial-form, #search-elements {
-		left: 40px;
-		right: 40px;
-	}
-	#philologic_response {
-		margin-top: 170px;
-	}
-	#search-elements {
-		margin-top: 148px;
-	}
-	#search-elements.dico {
-		margin-top: 217px;
-	}
+    #search-buttons {
+        padding-top: 15px;
+    }
+    #search_terms>div:nth-of-type(2),
+    #head-search-container .metadata_fields div:nth-of-type(2) {
+        padding-right: 20px;
+        padding-left: 20px;
+    }
+    #head-search-container #metadata-fields #initial-form,
+    #search-elements {
+        left: 40px;
+        right: 40px;
+    }
+    #philologic_response {
+        margin-top: 170px;
+    }
+    #search-elements {
+        margin-top: 148px;
+    }
+    #search-elements.dico {
+        margin-top: 217px;
+    }
+    .dico-margin {
+        margin-top: 245px !important;
+    }
 }
+
 @media (max-width: 768px) {
-	#right-act-on-report .btn-group {
-		float:left !important;
-	}
-	#search-elements {
-		padding-right: 20px;
-		margin-top: 160px;
-	}
-	#search-elements.dico {
-		margin-top: 248px;
-	}
-	#philologic_response {
-		margin-top: 180px;
-	}
-	#initial-form, #search-elements {
-		left: 0px;
-		right: 0px;
-	}
-	#kwic, #time_series {
-		display: none;
-	}
+    #right-act-on-report .btn-group {
+        float: left !important;
+    }
+    #search-elements {
+        padding-right: 20px;
+        margin-top: 160px;
+    }
+    #search-elements.dico {
+        margin-top: 248px;
+    }
+    #philologic_response {
+        margin-top: 180px;
+    }
+    #initial-form,
+    #search-elements {
+        left: 0px;
+        right: 0px;
+    }
+    #kwic,
+    #time_series {
+        display: none;
+    }
+    .dico-margin {
+        margin-top: 270px !important;
+    }
 }
 
 .select {
-  font-size: inherit;
-  position: relative;
-  display: inline-block;
-  width: 100%;
-  text-align: center;
+    font-size: inherit;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
 }
+
 .select select {
-  outline: none;
-  -webkit-appearance: none;
-  display: block;
-  padding: 6px 12px;
-  margin: 0;
-  transition: border-color 0.2s;
-  border: 1px solid #ccc;
-  border-radius: 0px;
-  background: #fff;
-  color: #555;
-  line-height: normal;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  width: 100%;
+    outline: none;
+    -webkit-appearance: none;
+    display: block;
+    padding: 6px 12px;
+    margin: 0;
+    transition: border-color 0.2s;
+    border: 1px solid #ccc;
+    border-radius: 0px;
+    background: #fff;
+    color: #555;
+    line-height: normal;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    width: 100%;
 }
