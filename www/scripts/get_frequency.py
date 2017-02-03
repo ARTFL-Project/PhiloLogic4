@@ -3,7 +3,7 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.runtime import frequency_results
 
 from philologic.runtime import WebConfig
@@ -21,7 +21,7 @@ def get_frequency(environ, start_response):
     request = WSGIHandler(environ, config)
 
     results = frequency_results(request, config)
-    yield simplejson.dumps(results)
+    yield json.dumps(results)
 
 if __name__ == "__main__":
     CGIHandler().run(get_frequency)

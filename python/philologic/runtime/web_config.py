@@ -16,6 +16,5 @@ class brokenConfig(object):
 def WebConfig(db_path):
     try:
         return MakeWebConfig(db_path + '/data/web_config.cfg')
-    except Exception as exception:
-        traceback = str(exception)
-        return brokenConfig(db_path, traceback)
+    except Exception as traceback:
+        return brokenConfig(db_path, str(traceback))

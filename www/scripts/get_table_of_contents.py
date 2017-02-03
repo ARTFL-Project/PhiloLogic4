@@ -3,7 +3,7 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.runtime import generate_toc_object
 from philologic.DB import DB
 from philologic.HitWrapper import ObjectWrapper
@@ -32,7 +32,7 @@ def get_table_of_contents(environ, start_response):
             current_obj_position = pos
             break
     toc_object['current_obj_position'] = current_obj_position
-    yield simplejson.dumps(toc_object)
+    yield json.dumps(toc_object)
 
 
 if __name__ == "__main__":

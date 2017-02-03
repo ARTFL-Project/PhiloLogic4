@@ -6,7 +6,7 @@ import sys
 import timeit
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.DB import DB
 
 from philologic.runtime import kwic_hit_object
@@ -86,7 +86,7 @@ def get_neighboring_words(environ, start_response):
         if elapsed > max_time:  # avoid timeouts by splitting the query if more than 10 seconds has been spent in the loop
             break
 
-    yield simplejson.dumps({"results": kwic_words, "hits_done": index})
+    yield json.dumps({"results": kwic_words, "hits_done": index})
 
 
 if __name__ == "__main__":

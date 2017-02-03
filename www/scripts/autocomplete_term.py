@@ -2,10 +2,9 @@
 
 import os
 import subprocess
-import sys
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.DB import DB
 from philologic.Query import grep_exact, grep_word, split_terms
 from philologic.QuerySyntax import group_terms, parse_query
@@ -26,7 +25,7 @@ def term_list(environ, start_response):
     if isinstance(term, list):
         term = term[-1]
     all_words = format_query(term, db, config)[:100]
-    yield simplejson.dumps(all_words)
+    yield json.dumps(all_words).encode('utf8')
 
 
 def format_query(q, db, config):
@@ -60,9 +59,9 @@ def format_query(q, db, config):
         return []
 
     matches = []
-    len_token = len(token.decode('utf-8'))
+    len_token = len(token)
     for line in grep_proc.stdout:
-        word = line.split('\t')[1].strip()
+        word = line.split(b'\t')[1].strip().decode('utf8')
         highlighted_word = highlighter(word, len_token)
         matches.append(highlighted_word)
 
@@ -77,11 +76,11 @@ def format_query(q, db, config):
 
 
 def highlighter(word, token_len):
-    highlighted_section = word.decode('utf-8')[:token_len]
-    end_word = word.decode('utf-8')[token_len:]
+    highlighted_section = word[:token_len]
+    end_word = word[token_len:]
     highlighted_word = '<span class="highlight">' + \
         highlighted_section + '</span>' + end_word
-    highlighted_word = highlighted_word.encode('utf-8')
+    highlighted_word = highlighted_word
     return highlighted_word
 
 

@@ -6,7 +6,7 @@ import sys
 import unicodedata
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.runtime import group_by_metadata, group_by_range
 
 from philologic.runtime import WebConfig

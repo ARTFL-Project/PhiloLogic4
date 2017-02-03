@@ -108,7 +108,7 @@ class DB:
                 limit = 10000000
 
         hash = hashlib.sha1()
-        hash.update(self.path)
+        hash.update(self.path.encode('utf8'))
         has_metadata = False
         corpus_file = None
 
@@ -122,7 +122,8 @@ class DB:
             value = [v for v in value if v]
             if value:
                 has_metadata = True
-                hash.update("%s=%s" % (key, "|".join(value)))
+                key_value = "%s=%s" % (key, "|".join(value))
+                hash.update(key_value.encode('utf8'))
 
         if has_metadata:
             corpus_hash = hash.hexdigest()
@@ -160,10 +161,10 @@ class DB:
         else:
             corpus = None
         if qs:
-            hash.update(qs)
-            hash.update(method)
-            hash.update(str(method_arg))
-            hash.update(str(limit))
+            hash.update(qs.encode('utf8'))
+            hash.update(method.encode('utf8'))
+            hash.update(str(method_arg).encode('utf8'))
+            hash.update(str(limit).encode('utf8'))
             search_hash = hash.hexdigest()
             search_file = self.path + "/hitlists/" + search_hash + ".hitlist"
             if sort_order == ["rowid"]:

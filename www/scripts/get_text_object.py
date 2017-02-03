@@ -3,7 +3,7 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.runtime import generate_text_object
 from philologic.DB import DB
 from philologic.HitWrapper import ObjectWrapper
@@ -26,7 +26,7 @@ def get_text_object(environ, start_response):
         request.philo_id += zeros * " 0"
     obj = ObjectWrapper(request['philo_id'].split(), db)
     text_object = generate_text_object(request, config)
-    yield simplejson.dumps(text_object)
+    yield json.dumps(text_object)
 
 
 if __name__ == "__main__":

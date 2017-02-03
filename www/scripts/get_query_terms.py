@@ -3,7 +3,7 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.DB import DB
 from philologic.Query import get_expanded_query
 
@@ -23,7 +23,7 @@ def term_list(environ, start_response):
                     **request.metadata)
     hits.finish()
     expanded_terms = get_expanded_query(hits)
-    yield simplejson.dumps(expanded_terms[0])
+    yield json.dumps(expanded_terms[0])
 
 
 if __name__ == "__main__":

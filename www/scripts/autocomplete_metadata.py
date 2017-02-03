@@ -7,7 +7,7 @@ import sys
 import unicodedata
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.DB import DB
 from philologic.MetadataQuery import metadata_pattern_search
 from philologic.QuerySyntax import parse_query
@@ -43,7 +43,7 @@ def autocomplete_metadata(metadata, field, db):
         field = field[-1]
 
     words = format_query(metadata, field, db)[:100]
-    return simplejson.dumps(words)
+    return json.dumps(words)
 
 
 def format_query(q, field, db):

@@ -5,7 +5,7 @@ import sqlite3
 import sys
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.runtime import adjust_bytes
 from philologic.DB import DB
 
@@ -134,10 +134,10 @@ def lookup_word(db, cursor, token, n, start, end, filename):
                     #     }
                     # ]
                 }
-                return simplejson.dumps(result_object)
+                return json.dumps(result_object)
             else:
                 i += 1
-    return simplejson.dumps({})
+    return json.dumps({})
 
 if __name__ == "__main__":
     if len(sys.argv) > 6:

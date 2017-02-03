@@ -3,7 +3,7 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.DB import DB
 
 from philologic.runtime import WebConfig
@@ -30,7 +30,7 @@ def get_total_results(environ, start_response):
     hits.finish()
     total_results = len(hits)
 
-    yield simplejson.dumps(total_results)
+    yield json.dumps(total_results)
 
 
 if __name__ == "__main__":
