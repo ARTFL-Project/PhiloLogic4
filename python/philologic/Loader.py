@@ -175,6 +175,7 @@ class Loader(object):
                 deleted_files.append(f)
                 continue
             header = file_content[start_header_index:end_header_index]
+            header = convert_entities(header)
             if self.debug:
                 print("parsing %s header..." % f)
             parser = etree.XMLParser(recover=True)
