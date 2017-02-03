@@ -12,16 +12,16 @@
                 <div class="row hidden-xs" id="act-on-report" ng-if="report !=='word_property_filter'">
                     <concordance-kwic-switch report="{{ report }}" ng-if="report !== 'bibliography'"></concordance-kwic-switch>
                 </div>
-                <button type="button" class="btn btn-primary pull-right hidden-xs" style="margin-top: -33px; margin-right: 15px;" ng-if="!concKwic.showFacetedBrowsing" ng-click="concKwic.showFacets()">Show Facets</button>
+                <button type="button" class="btn btn-primary pull-right hidden-xs" style="margin-top: -33px; margin-right: 15px;" ng-if="!concKwic.showFacetedBrowsing" ng-hide="philoConfig.facets.length < 1" ng-click=" concKwic.showFacets() ">Show Facets</button>
             </div>
-            <div class="row" loading="concKwic.loading">
-                <concordance ng-if="report === 'concordance' || report === 'word_property_filter'"></concordance>
-                <kwic ng-if="report === 'kwic'"></kwic>
-                <bibliography ng-if="report === 'bibliography'"></bibliography>
-                <facets ng-if="concKwic.showFacetedBrowsing"></facets>
+            <div class="row " loading="concKwic.loading ">
+                <concordance ng-if="report==='concordance' || report==='word_property_filter' "></concordance>
+                <kwic ng-if="report==='kwic' "></kwic>
+                <bibliography ng-if="report==='bibliography' "></bibliography>
+                <facets ng-if="concKwic.showFacetedBrowsing " ng-hide="philoConfig.facets.length < 1"></facets>
             </div>
         </div>
-        <div class="more" ng-if="concKwic.description.resultsLength > 0">
+        <div class="more " ng-if="concKwic.description.resultsLength> 0">
             <pages></pages>
             <div style='clear:both;'></div>
         </div>
