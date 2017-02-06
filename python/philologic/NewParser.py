@@ -230,7 +230,10 @@ class XMLParser(object):
             tag_exceptions = TagExceptions
         self.tag_exceptions = []
         for tag in tag_exceptions:
-            compiled_tag = re.compile(r'(%s)(%s)(%s)' % (parse_options["token_regex"], tag, parse_options["token_regex"]), re.I | re.M)
+            try:
+                compiled_tag = re.compile(r'(%s)(%s)(%s)' % (parse_options["token_regex"], tag, parse_options["token_regex"]), re.I | re.M)
+            except KeyError:
+                compiled_tag = re.compile(r'(%s)(%s)(%s)' % (TokenRegex, tag, TokenRegex), re.I | re.M)
             self.tag_exceptions.append(compiled_tag)
 
         if "join_hyphen_in_words" in parse_options:
@@ -1005,7 +1008,9 @@ class XMLParser(object):
 
         div_head = self.remove_control_chars(div_head)
         div_head = convert_entities(div_head)
+
         div_head = div_head.replace('"', '')
+
         return div_head
 
     def clear_char_ents(self, text):
@@ -1280,10 +1285,10 @@ abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)',
 
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
-tab_newline = re.compile(r'[\n|\t]')
+tab_newline = re.compile(r'[\n|\t]', re.U)
 control_chars = ''.join(
-    [i for i in [unichr(x).encode('utf8') for x in list(range(0, 32)) + list(range(127, 160))] if not tab_newline.search(i)])
-control_char_re = re.compile(r'[%s]' % re.escape(control_chars))
+    [i for i in [unichr(x) for x in list(range(0, 32)) + list(range(127, 160))] if not tab_newline.search(i)])
+control_char_re = re.compile(r'[%s]' % re.escape(control_chars), re.U)
 
 # Entities regexes
 entity_regex = [
