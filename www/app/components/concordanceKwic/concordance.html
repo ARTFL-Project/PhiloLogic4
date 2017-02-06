@@ -1,38 +1,38 @@
-<div id="results_container" class="col-xs-12" ng-class="{'col-sm-8': concKwic.showFacetedBrowsing}">
+<div id="results_container" class="col-xs-12 col-sm-12" ng-class="concKwic.evaluateWidth()">
     <ol id="philologic_concordance">
         <li class="philologic-occurrence panel panel-default" ng-repeat="result in ::results.results" ng-init="position = $index + results.description.start">
             <div class="citation-container row">
                 <div class="col-xs-12 col-sm-10 col-md-11">
-                   <span class="cite" data-id="{{ ::result.philo_id.join(' ') }}">
+                    <span class="cite" data-id="{{ ::result.philo_id.join(' ') }}">
                         <span class="result-number">{{ ::position }}</span>
-                        <span class="philologic_cite">
+                    <span class="philologic_cite">
                             <span class="citation" ng-repeat="citation in result.citation">
                                 <span ng-if="citation.href">
                                     <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
-                                    <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
-                                    <span ng-bind-html="citation.suffix"></span>
-                                    <span ng-bind-html="citation.separator" ng-if="!$last"></span>
-                                </span>
-                                <span ng-if="!citation.href">
+                    <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
+                    <span ng-bind-html="citation.suffix"></span>
+                    <span ng-bind-html="citation.separator" ng-if="!$last"></span>
+                    </span>
+                    <span ng-if="!citation.href">
                                     <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
-                                    <span ng-style="citation.style">{{ ::citation.label }}</span>
-                                    <span ng-bind-html="citation.suffix"></span>
-                                    <span ng-bind-html="citation.separator" ng-if="!$last"></span>
-                                </span>
-                            </span>
-                        </span>
-                   </span>
+                    <span ng-style="citation.style">{{ ::citation.label }}</span>
+                    <span ng-bind-html="citation.suffix"></span>
+                    <span ng-bind-html="citation.separator" ng-if="!$last"></span>
+                    </span>
+                    </span>
+                    </span>
+                    </span>
                 </div>
                 <div class="hidden-xs col-sm-2 col-md-1" ng-if="report !=='word_property_filter'">
-                   <button class="btn btn-primary more_context pull-right" ng-click="moreContext($event, position - 1)">
+                    <button class="btn btn-primary more_context pull-right" ng-click="moreContext($event, position - 1)">
                        More
                    </button>
                 </div>
             </div>
-           <div class='philologic_context text-content-area' select-word position="{{ position }}" ng-keydown="concKwic.dicoLookup($event, result.metadata_fields.year)" tabindex="0">
-               <div class="default-length" ng-bind-html="result.context | unsafe"></div>
-               <div class="more-length"></div>
-           </div>
+            <div class='philologic_context text-content-area' select-word position="{{ position }}" ng-keydown="concKwic.dicoLookup($event, result.metadata_fields.year)" tabindex="0">
+                <div class="default-length" ng-bind-html="result.context | unsafe"></div>
+                <div class="more-length"></div>
+            </div>
         </li>
     </ol>
 </div>

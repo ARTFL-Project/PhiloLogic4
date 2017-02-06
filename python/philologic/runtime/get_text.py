@@ -12,7 +12,7 @@ from philologic.DB import DB
 
 def get_text(hit, start_byte, length, path):
     file_path = path + '/data/TEXT/' + hit.doc.filename
-    text_file = open(file_path)
+    text_file = open(file_path, "rb")
     text_file.seek(start_byte)
     return text_file.read(length)
 
@@ -39,7 +39,7 @@ def get_text_obj(obj, config, request, word_regex, note=False, images=True):
         c = obj.db.dbh.cursor()
         c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id, ))
         path += "/data/TEXT/" + c.fetchone()["filename"]
-    file = open(path)
+    file = open(path, 'rb')
     start_byte = int(obj.start_byte)
     file.seek(start_byte)
     width = int(obj.end_byte) - start_byte

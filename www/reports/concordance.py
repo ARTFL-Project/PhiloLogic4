@@ -30,7 +30,7 @@ def concordance(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response('200 OK', headers)
-    yield json.dumps(concordance_object)
+    yield json.dumps(concordance_object).encode('utf8')
 
 
 if __name__ == "__main__":

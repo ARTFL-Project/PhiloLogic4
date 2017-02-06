@@ -12,12 +12,12 @@ from philologic.runtime.FragmentParser import parse as FragmentParserParse
 from philologic.runtime.link import make_absolute_query_link
 from philologic.utils import convert_entities
 
-begin_match = re.compile(r'^[^<]*?>')
-start_cutoff_match = re.compile(r'^[^ <]+')
-end_match = re.compile(r'<[^>]*?\Z')
-space_match = re.compile(r" ?([-'])+ ")
-term_match = re.compile(r"\w+", re.U)
-strip_start_punctuation = re.compile("^[,?;.:!']")
+BEGIN_MATCH = re.compile(rb'^[^<]*?>')
+START_CUTOFF_MATCH = re.compile(rb'^[^ <]+')
+END_MATCH = re.compile(rb'<[^>]*?\Z')
+SPACE_MATCH = re.compile(r" ?([-'])+ ")
+TERM_MATCH = re.compile(r"\w+", re.U)
+STRIP_START_PUNCTUATION = re.compile(r"^[,?;.:!']")
 
 # Source: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/HTML5_element_list
 valid_html_tags = set(
@@ -76,34 +76,32 @@ def adjust_bytes(bytes, padding):
     return new_bytes, start_byte
 
 
-def format_concordance(text, word_regex, byte_offsets=[]):
+def format_concordance(text_in_utf8, word_regex, byte_offsets=[]):
     # word_regex = r"\w+"  # text is converted to unicode so we use the \w boundary to match
-    text_in_utf8 = text.encode('utf8')
     removed_from_start = 0
-    begin = begin_match.search(text_in_utf8)
+    begin = BEGIN_MATCH.search(text_in_utf8)
     if begin:
         removed_from_start = len(begin.group(0))
         text_in_utf8 = text_in_utf8[begin.end(0):]
-    start_cutoff = start_cutoff_match.search(text_in_utf8)
+    start_cutoff = START_CUTOFF_MATCH.search(text_in_utf8)
     if start_cutoff:
         removed_from_start += len(start_cutoff.group(0))
         text_in_utf8 = text_in_utf8[start_cutoff.end(0):]
-    end = end_match.search(text_in_utf8)
+    end = END_MATCH.search(text_in_utf8)
     if end:
         text_in_utf8 = text_in_utf8[:end.start(0)]
     if byte_offsets:
         byte_offsets = [b - removed_from_start for b in byte_offsets]
-        new_text = ""
+        new_text = b""
         last_offset = 0
         for b in byte_offsets:
             if b > 0 and b < len(text_in_utf8):
-                new_text += text_in_utf8[last_offset:b] + "<philoHighlight/>"
+                new_text += text_in_utf8[last_offset:b] + b"<philoHighlight/>"
                 last_offset = b
         text_in_utf8 = new_text + text_in_utf8[last_offset:]
-    text = text_in_utf8.decode('utf8')
+    text = text_in_utf8.decode('utf8', 'ignore')
     xml = FragmentParserParse(text)
     allowed_tags = set(['philoHighlight', 'l', 'ab', 'ln', 'w', 'sp', 'speaker', 'stage', 'i', 'sc', 'scx', 'br'])
-    text = ''
     for el in xml.iter():
         if el.tag.startswith("DIV"):
             el.tag = el.tag.lower()
@@ -133,13 +131,13 @@ def format_concordance(text, word_regex, byte_offsets=[]):
             el.attrib["class"] = "highlight"
         if el.tag not in valid_html_tags:
             el = xml_to_html_class(el)
-    output = etree.tostring(xml)
+    output = etree.tostring(xml).decode('utf8', 'ignore')
     output = re.sub(r'\A<div class="philologic-fragment">', '', output)
     output = re.sub(r'</div>\Z', '', output)
     ## remove spaces around hyphens and apostrophes
-    output = space_match.sub('\\1', output)
+    output = SPACE_MATCH.sub('\\1', output)
     output = convert_entities(output)
-    output = strip_start_punctuation.sub("", output)
+    output = STRIP_START_PUNCTUATION.sub("", output)
     return output
 
 
@@ -148,30 +146,30 @@ def format_strip(text, byte_offsets=None):
     Called from: -kwic.py
                  -frequency.py"""
     removed_from_start = 0
-    begin = begin_match.search(text)
+    begin = BEGIN_MATCH.search(text)
     if begin:
         removed_from_start = len(begin.group(0))
         text = text[begin.end(0):]
-    start_cutoff = start_cutoff_match.search(text)
+    start_cutoff = START_CUTOFF_MATCH.search(text)
     if start_cutoff:
         removed_from_start += len(start_cutoff.group(0))
         text = text[start_cutoff.end(0):]
-    end = end_match.search(text)
+    end = END_MATCH.search(text)
     if end:
         text = text[:end.start(0)]
     if byte_offsets is not None:
         byte_offsets = [b - removed_from_start for b in byte_offsets]
-        new_text = ""
+        new_text = b""
         last_offset = 0
         for b in byte_offsets:
             if b > 0 and b < len(text):
-                new_text += text[last_offset:b] + "<philoHighlight/>"
+                new_text += text[last_offset:b] + b"<philoHighlight/>"
                 last_offset = b
         text = new_text + text[last_offset:]
-    xml = FragmentParserParse(text)
+    xml = FragmentParserParse(text.decode('utf8', 'ignore'))
     output = clean_tags(xml)
     ## remove spaces around hyphens and apostrophes
-    output = space_match.sub('\\1', output)
+    output = SPACE_MATCH.sub('\\1', output)
     return output
 
 
@@ -182,12 +180,12 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
         new_text = ""
         last_offset = 0
         for b in byte_offsets:
-            new_text += text[last_offset:b] + "<philoHighlight/>"
+            new_text += text[last_offset:b] + b"<philoHighlight/>"
             last_offset = b
         text = new_text + text[last_offset:]
     current_obj_img = []
     current_graphic_img = []
-    text = "<div>" + text + "</div>"
+    text = "<div>" + text.decode('utf8') + "</div>"
     xml = FragmentParserParse(text)
     c = obj.db.dbh.cursor()
     for el in xml.iter():
@@ -493,7 +491,7 @@ def clean_tags(element):
     for child in element:
         text += clean_tags(child)
     if element.tag == "philoHighlight":
-        word_match = term_match.match(convert_entities(element.tail))
+        word_match = TERM_MATCH.match(convert_entities(element.tail))
         if word_match:
             return '<span class="highlight">' + element.text + text + element.tail[:word_match.end(
             )] + "</span>" + element.tail[word_match.end():]

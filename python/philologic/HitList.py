@@ -35,7 +35,7 @@ class HitList(object):
         else:
             self.has_word_id = 0  # unfortunately.  fix this next time I have 3 months to spare.
             self.length = methodarg + 1 + (words)
-        self.fh = open(self.filename)  # need a full path here.
+        self.fh = open(self.filename, "rb")  # need a full path here.
         self.format = "=%dI" % self.length  # short for object id's, int for byte offset.
         self.hitsize = struct.calcsize(self.format)
         self.doc = doc
@@ -174,7 +174,7 @@ class HitList(object):
             except OSError:
                 pass
             self.size = os.stat(self.filename).st_size  # in bytes
-            self.count = self.size / self.hitsize
+            self.count = int(self.size / self.hitsize)
 
     def finish(self):
         while not self.done:

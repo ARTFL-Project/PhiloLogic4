@@ -30,7 +30,7 @@ def kwic(environ, start_response):
     headers = [('Content-type', 'application/json; charset=UTF-8'),
                ("Access-Control-Allow-Origin", "*")]
     start_response('200 OK', headers)
-    yield json.dumps(kwic_object)
+    yield json.dumps(kwic_object).encode('utf8')
 
 if __name__ == "__main__":
     CGIHandler().run(kwic)

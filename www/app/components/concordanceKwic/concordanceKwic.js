@@ -5,7 +5,7 @@
         .module('philoApp')
         .controller('ConcordanceKwicController', ConcordanceKwicController);
 
-    function ConcordanceKwicController($rootScope, $location, accessControl, request, URL, facetedBrowsing, dictionaryLookup) {
+    function ConcordanceKwicController($rootScope, $location, accessControl, request, URL, facetedBrowsing, dictionaryLookup, philoConfig) {
         var vm = this;
         if ($rootScope.authorized === true) {
             vm.authorized = true;
@@ -48,6 +48,16 @@
 
         vm.dicoLookup = function(event, year) {
             dictionaryLookup.evaluate(event, year);
+        }
+        vm.evaluateWidth = function() {
+            var returnValue = 'col-sm-12';
+            if (philoConfig.facets.length > 0) {
+                if (vm.showFacetedBrowsing == true) {
+                    returnValue = 'col-sm-8'
+                }
+            }
+            console.log(returnValue)
+            return returnValue
         }
     }
 })();

@@ -75,12 +75,12 @@ class LXMLTreeDriver:
                 # hack to handle double quoted empty string values coming up None.  Fixed in rwhaling branch of PhiloLogic4
                 if v is None:
                     v = ""
-                uni_attrib[k.decode("utf-8", "ignore")] = v.decode("utf-8", "ignore")
+                uni_attrib[k] = v
             self.target.start(name, uni_attrib)
         if kind == "end":
             self.target.end(name)
         if kind == "text":
-            self.target.data(content.decode("utf-8", "ignore"))
+            self.target.data(content)
 
     def close(self):
         return self.target.close()
@@ -109,7 +109,7 @@ def parse(text):
     except ValueError:
         # we use LXML's HTML parser which is more flexible and then feed the result to fragment parser
         parser = etree.HTMLParser()
-        tree = etree.fromstring(text.decode('utf8', 'ignore'), parser=parser)
+        tree = etree.fromstring(text, parser=parser)
         new_text = etree.tostring(tree,
                                   method="xml").replace("<html><body>", '').replace("</body></html>", '').replace(
                                       "philohighlight", "philoHighlight")

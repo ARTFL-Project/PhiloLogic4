@@ -30,7 +30,7 @@ def bibliography(environ, start_response):
                ("Access-Control-Allow-Origin", "*")]
     start_response('200 OK', headers)
     bibliography_object, hits = bibliography_results(request, config)
-    yield json.dumps(bibliography_object)
+    yield json.dumps(bibliography_object).encode('utf8')
 
 
 if __name__ == "__main__":
