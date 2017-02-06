@@ -3,7 +3,6 @@
 
 
 from philologic.runtime.link import (make_absolute_object_link, make_absolute_query_link)
-import six
 
 
 def citation_links(db, config, i):
@@ -21,7 +20,7 @@ def citation_links(db, config, i):
     links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href,
              "para": "", "page": page_href, "line": line_href}
 
-    for field, metadata_type in six.iteritems(db.locals["metadata_types"]):
+    for field, metadata_type in db.locals["metadata_types"].items():
         if metadata_type == 'para':
             links['para'] = make_absolute_object_link(config, i.philo_id[:5], i.bytes)
             break

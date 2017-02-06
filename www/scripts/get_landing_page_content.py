@@ -23,13 +23,13 @@ def landing_page_content(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     request = WSGIHandler(environ, config)
     if request.is_range == 'true':
-        if type(request.query) == str:
+        if isinstance(request.query, bytes):
             request_range = request.query.decode("utf8")
-        request_range = request_range.lower().split('-')
+        request_range = request.query.lower().split('-')
         results = group_by_range(request_range, request, config)
     else:
         results = group_by_metadata(request, config)
-    yield results
+    yield results.encode('utf8')
 
 
 if __name__ == "__main__":

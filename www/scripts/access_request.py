@@ -26,7 +26,7 @@ def access_request(environ, start_response):
         yield json.dumps({'access': True})
     else:
         incoming_address, domain_name = access_control.get_client_info(environ)
-        yield json.dumps({'access': False, "incoming_address": incoming_address, "domain_name": domain_name})
+        yield json.dumps({'access': False, "incoming_address": incoming_address, "domain_name": domain_name}).encode('utf8')
 
 
 if __name__ == "__main__":

@@ -177,7 +177,7 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
     """Format text objects"""
     philo_id = obj.philo_id
     if byte_offsets is not None:
-        new_text = ""
+        new_text = b""
         last_offset = 0
         for b in byte_offsets:
             new_text += text[last_offset:b] + b"<philoHighlight/>"
@@ -185,7 +185,7 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
         text = new_text + text[last_offset:]
     current_obj_img = []
     current_graphic_img = []
-    text = "<div>" + text.decode('utf8') + "</div>"
+    text = "<div>" + text.decode('utf8', 'ignore') + "</div>"
     xml = FragmentParserParse(text)
     c = obj.db.dbh.cursor()
     for el in xml.iter():
@@ -363,7 +363,7 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
             import sys
             print(exception, file=sys.stderr)
             pass
-    output = etree.tostring(xml)
+    output = etree.tostring(xml).decode('utf8', 'ignore')
     ## remove spaces around hyphens and apostrophes
     output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
     output = convert_entities(output)

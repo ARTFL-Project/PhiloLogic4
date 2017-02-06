@@ -2,7 +2,6 @@
 
 
 from urllib.parse import quote_plus
-import six
 
 
 def url_encode(q_params):
@@ -26,11 +25,11 @@ def make_object_link(philo_id, hit_bytes):
     return href
 
 
-def make_absolute_object_link(config, philo_id, bytes=None):
+def make_absolute_object_link(config, philo_id, byte_offsets=None):
     """ Takes a valid PhiloLogic object, and returns an absolute URL representation of such. """
     href = 'navigate/' + "/".join(str(x) for x in philo_id)
-    if bytes is not None:
-        href += byte_query(bytes)
+    if byte_offsets is not None:
+        href += byte_query(byte_offsets)
     return href
 
 
@@ -38,7 +37,7 @@ def make_absolute_query_link(config, params, script_name="query", **extra_params
     """ Takes a dictionary of query parameters as produced by WSGIHandler,
     and returns an absolute URL representation of such. """
     params = dict([i for i in params])
-    for k, v in six.iteritems(extra_params):
+    for k, v in extra_params.items():
         params[k] = v
     query_string = url_encode(list(params.items()))
     href = "%s?%s" % (script_name, query_string)

@@ -26,7 +26,7 @@ def get_text_object(environ, start_response):
         request.philo_id += zeros * " 0"
     obj = ObjectWrapper(request['philo_id'].split(), db)
     text_object = generate_text_object(request, config)
-    yield json.dumps(text_object)
+    yield json.dumps(text_object).encode('utf8')
 
 
 if __name__ == "__main__":

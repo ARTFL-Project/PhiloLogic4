@@ -20,10 +20,6 @@ def get_table_of_contents(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     request = WSGIHandler(environ, config)
     philo_id = request['philo_id'].split()
-    # obj = ObjectWrapper(philo_id, db)
-    # while obj.philo_name == '__philo_virtual' and obj.philo_type != "div1":
-    #     philo_id.pop()
-    #     obj = ObjectWrapper(philo_id, db)
     toc_object = generate_toc_object(request, config)
     current_obj_position = 0
     philo_id = ' '.join(philo_id)
@@ -32,7 +28,7 @@ def get_table_of_contents(environ, start_response):
             current_obj_position = pos
             break
     toc_object['current_obj_position'] = current_obj_position
-    yield json.dumps(toc_object)
+    yield json.dumps(toc_object).encode('utf8')
 
 
 if __name__ == "__main__":

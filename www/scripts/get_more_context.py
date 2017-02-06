@@ -26,7 +26,7 @@ def get_more_context(environ, start_response):
     context_size = config['concordance_length'] * 3
     hit_context = get_concordance_text(db, hits[hit_num], config.db_path,
                                        context_size)
-    yield json.dumps(hit_context)
+    yield json.dumps(hit_context).encode('utf8')
 
 
 if __name__ == "__main__":

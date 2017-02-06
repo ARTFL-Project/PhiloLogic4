@@ -21,7 +21,7 @@ def get_notes(environ, start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(environ, config)
     text_object = generate_text_object(request, config, note=True)
-    yield json.dumps(text_object)
+    yield json.dumps(text_object).encode('utf8')
 
 
 if __name__ == "__main__":

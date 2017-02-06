@@ -20,7 +20,7 @@ def get_bibliography(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     request = WSGIHandler(environ, config)
     results = landing_page_bibliography(request, config)
-    yield json.dumps(results)
+    yield json.dumps(results).encode('utf8')
 
 
 if __name__ == "__main__":

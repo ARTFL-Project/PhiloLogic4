@@ -45,7 +45,7 @@ def lookup_word_service(environ, start_response):
         pass
 #    print >> sys.stderr, "TOKEN", token, "BYTES: ", start_byte, end_byte, "FILENAME: ", filename, "POSITION", request.position
     token_n = 0
-    yield lookup_word(db, cursor, token, token_n, start_byte, end_byte, filename)
+    yield lookup_word(db, cursor, token, token_n, start_byte, end_byte, filename).encode('utf8')
 
 
 def lookup_word(db, cursor, token, n, start, end, filename):

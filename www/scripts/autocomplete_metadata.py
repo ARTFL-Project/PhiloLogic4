@@ -30,7 +30,7 @@ def metadata_list(environ, start_response):
     request = WSGIHandler(environ, config)
     metadata = request.term
     field = request.field
-    yield autocomplete_metadata(metadata, field, db)
+    yield autocomplete_metadata(metadata, field, db).encode('utf8')
 
 def autocomplete_metadata(metadata, field, db):
     path = os.environ['SCRIPT_FILENAME'].replace('scripts/metadata_list.py',

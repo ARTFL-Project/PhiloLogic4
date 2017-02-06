@@ -21,7 +21,7 @@ def get_frequency(environ, start_response):
     request = WSGIHandler(environ, config)
 
     results = frequency_results(request, config)
-    yield json.dumps(results)
+    yield json.dumps(results).encode('utf8')
 
 if __name__ == "__main__":
     CGIHandler().run(get_frequency)

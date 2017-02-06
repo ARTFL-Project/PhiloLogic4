@@ -24,7 +24,7 @@ def get_sorted_kwic(environ, start_response):
     request = WSGIHandler(environ, config)
     sorted_hits = get_sorted_hits(all_results, sort_keys, request, config, db, input_object['start'],
                                   input_object['end'])
-    yield json.dumps(sorted_hits)
+    yield json.dumps(sorted_hits).encode('utf8')
 
 
 def get_sorted_hits(all_results, sort_keys, request, config, db, start, end):

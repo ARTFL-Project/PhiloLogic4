@@ -23,7 +23,7 @@ def term_list(environ, start_response):
                     **request.metadata)
     hits.finish()
     expanded_terms = get_expanded_query(hits)
-    yield json.dumps(expanded_terms[0])
+    yield json.dumps(expanded_terms[0]).encode('utf8')
 
 
 if __name__ == "__main__":

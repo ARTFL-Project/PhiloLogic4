@@ -86,7 +86,7 @@ def get_neighboring_words(environ, start_response):
         if elapsed > max_time:  # avoid timeouts by splitting the query if more than 10 seconds has been spent in the loop
             break
 
-    yield json.dumps({"results": kwic_words, "hits_done": index})
+    yield json.dumps({"results": kwic_words, "hits_done": index}).encode('utf8')
 
 
 if __name__ == "__main__":
