@@ -109,23 +109,24 @@ def build_filter_list(request, config):
     """set up filtering with stopwords or most frequent terms."""
     if config.stopwords and request.colloc_filter_choice == "stopwords":
         if os.path.isabs(config.stopwords):
-            filter_file = open(config.stopwords)
+            filter_file = config.stopwords
         else:
             return ["stopwords list not found"]
         filter_num = float("inf")
     else:
-        filter_file = open(config.db_path + '/data/frequencies/word_frequencies')
+        filter_file = config.db_path + '/data/frequencies/word_frequencies'
         if request.filter_frequency:
             filter_num = int(request.filter_frequency)
         else:
             filter_num = 100  # default value in case it's not defined
     filter_list = [request['q']]
-    for line_count, line in enumerate(filter_file):
-        if line_count == filter_num:
-            break
-        try:
-            word = line.split()[0]
-        except IndexError:
-            continue
-        filter_list.append(word)
+    with open(filter_file, encoding='utf8') as filehandle:
+        for line_count, line in enumerate(filehandle):
+            if line_count == filter_num:
+                break
+            try:
+                word = line.split()[0]
+            except IndexError:
+                continue
+            filter_list.append(word)
     return filter_list

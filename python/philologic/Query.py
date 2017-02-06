@@ -168,7 +168,7 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
         if first == True:
             first = False
         else:  # bare newline starts a new group, except the first
-            dest_fh.write("\n")
+            dest_fh.write(b"\n")
 
         #find all the NOT terms and separate them out by type
         exclude = []

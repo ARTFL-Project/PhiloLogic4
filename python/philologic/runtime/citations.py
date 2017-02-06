@@ -104,8 +104,9 @@ def get_div1_name(hit):
                 label = hit.div1['type'] + " " + hit.div1["n"]
             else:
                 label = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
-    label = label[0].upper() + label[1:]
-    label = label.strip()
+    if label:
+        label = label[0].upper() + label[1:]
+        label = label.strip()
     return label
 
 
