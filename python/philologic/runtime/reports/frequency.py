@@ -7,7 +7,7 @@ from philologic.runtime.link import make_absolute_query_link
 from philologic.DB import DB
 
 
-def frequency_results(request, config, sorted=False):
+def frequency_results(request, config, sorted_results=False):
     """reads through a hitlist. looks up request.frequency_field in each hit, and builds up a list of
        unique values and their frequencies."""
     db = DB(config.db_path + '/data/')
@@ -21,7 +21,7 @@ def frequency_results(request, config, sorted=False):
     else:
         hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
 
-    if sorted:
+    if sorted_results:
         hits.finish()
 
     c = db.dbh.cursor()
@@ -93,7 +93,7 @@ def frequency_results(request, config, sorted=False):
             # request.max_time (in seconds) has been spent in the loop
             elapsed = timeit.default_timer() - start_time
             last_hit_done += 1
-            if elapsed > 5:
+            if elapsed > 5 and sorted_results is False:
                 break
 
         frequency_object['results'] = counts
@@ -134,7 +134,7 @@ def frequency_results(request, config, sorted=False):
     frequency_object['results_length'] = len(hits)
     frequency_object['query'] = dict([i for i in request])
 
-    if sorted:
+    if sorted_results:
         frequency_object["results"] = sorted(frequency_object['results'].iteritems(),
                                              key=lambda x: x[1]['count'],
                                              reverse=True)
