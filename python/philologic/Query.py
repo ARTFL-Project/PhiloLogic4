@@ -196,17 +196,19 @@ def invert_grep(token, in_fh, dest_fh, lowercase=True):
 
 
 def grep_exact(token, freq_file, dest_fh):
-    grep_command = ["egrep", '-a', "[[:blank:]]%s$" % token[1:-1], freq_file]
-    print(grep_command, file=sys.stderr)
-    grep_proc = subprocess.Popen(grep_command, stdout=dest_fh)
+    try:
+        grep_proc = subprocess.Popen(["egrep", '-a', b"[[:blank:]]%s$" % token[1:-1], freq_file], stdout=dest_fh)
+    except (UnicodeEncodeError, TypeError):
+        grep_proc = subprocess.Popen(["egrep", '-a', b"[[:blank:]]%s$" % token[1:-1].encode('utf8'), freq_file], stdout=dest_fh)
     return grep_proc
 
 
 def invert_grep_exact(token, in_fh, dest_fh):
     #don't strip accent or case, exact match only.
-    grep_command = ["egrep", "-a", "-v", "[[:blank:]]%s$" % token[1:-1]]
-    print(grep_command, file=sys.stderr)
-    grep_proc = subprocess.Popen(grep_command, stdin=in_fh, stdout=dest_fh)
+    try:
+        grep_proc = subprocess.Popen(["egrep", "-a", "-v", b"[[:blank:]]%s$" % token[1:-1]], stdin=in_fh, stdout=dest_fh)
+    except (UnicodeEncodeError, TypeError):
+        grep_proc = subprocess.Popen(["egrep", "-a", "-v", b"[[:blank:]]%s$" % token[1:-1].encode('utf8')], stdin=in_fh, stdout=dest_fh)
     #can't wait because input isn't ready yet.
     return grep_proc
 
