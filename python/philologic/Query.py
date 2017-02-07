@@ -38,7 +38,7 @@ def query(db,
         hfile = str(origpid) + ".hitlist"
     dir = db.path + "/hitlists/"
     filename = filename or (dir + hfile)
-    hl = open(filename, "w")
+    hl = open(filename, "w", encoding='utf8')
     err = open("/dev/null", "w")
     freq_file = db.path + "/frequencies/normalized_word_frequencies"
     if query_debug:
@@ -85,7 +85,6 @@ def query(db,
             flag.close()
             os._exit(0)
     else:
-        print("closing", pid, file=sys.stderr)
         hl.close()
         return HitList.HitList(filename, words_per_hit, db, sort_order=sort_order, raw=raw_results)
 
@@ -126,12 +125,8 @@ def split_terms(grouped):
     return split
 
 def expand_query_not(split, freq_file, dest_fh, lowercase=True):
-    import sys
-    print("Running in here", file=sys.stderr)
     first = True
-    first_iter = True
     grep_proc = None
-    import sys
     for group in split:
         if first == True:
             first = False
@@ -140,7 +135,7 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
                 dest_fh.write("\n")
             except TypeError:
                 dest_fh.write(b'\n')
-        print(dest_fh.name, file=sys.stderr)
+            dest_fh.flush()
 
         #find all the NOT terms and separate them out by type
         exclude = []
@@ -153,7 +148,6 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
                 exclude = group[i + 1:]
                 group = group[:i]
                 break
-
         cut_proc = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE, stdout=dest_fh, shell=True)
         filter_inputs = [cut_proc.stdin]
         filter_procs = [cut_proc]
@@ -179,7 +173,6 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
         for pipe, proc in zip(filter_inputs, filter_procs):
             pipe.close()
             proc.wait()
-        first_iter = False
 
 
 def grep_word(token, freq_file, dest_fh, lowercase=True):
@@ -237,7 +230,7 @@ if __name__ == "__main__":
     fake_db.locals = Config(fake_db.path + "/db.locals.py", db_locals_defaults, db_locals_header)
     fake_db.encoding = "utf-8"
     freq_file = path + "/data/frequencies/normalized_word_frequencies"
-    expand_query_not(split, freq_file, sys.stdout)
+    # expand_query_not(split, freq_file, sys.stdout)
     hits = query(fake_db, " ".join(terms), query_debug=True, raw_results=True)
     hits.finish()
     for hit in hits:
