@@ -63,7 +63,7 @@ def get_neighboring_words(environ, start_response):
                   (left_rowid, results['rowid']-1))
         result_obj["left"] = []
         for i in c.fetchall():
-            result_obj["left"].append(i['philo_name'].decode('utf-8'))
+            result_obj["left"].append(i['philo_name'])
         result_obj["left"].reverse()
         result_obj["left"] = ' '.join(result_obj["left"])
 
@@ -71,7 +71,7 @@ def get_neighboring_words(environ, start_response):
                   (results['rowid']+1, right_rowid))
         result_obj["right"] = []
         for i in c.fetchall():
-            result_obj["right"].append(i['philo_name'].decode('utf-8'))
+            result_obj["right"].append(i['philo_name'])
         result_obj["right"] = ' '.join(result_obj["right"])
 
         metadata_fields = {}

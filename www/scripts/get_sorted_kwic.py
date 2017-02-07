@@ -16,11 +16,11 @@ def get_sorted_kwic(environ, start_response):
     start_response(status, headers)
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     db = DB(config.db_path + '/data/')
-    input_object = json.loads(environ['wsgi.input'].read())
+    input_object = json.loads(environ['wsgi.input'].read().decode('utf8', 'ignore'))
     all_results = input_object['results']
     query_string = input_object['query_string']
     sort_keys = [i for i in input_object["sort_keys"] if i]
-    environ['QUERY_STRING'] = query_string.encode('utf8')
+    environ['QUERY_STRING'] = query_string
     request = WSGIHandler(environ, config)
     sorted_hits = get_sorted_hits(all_results, sort_keys, request, config, db, input_object['start'],
                                   input_object['end'])

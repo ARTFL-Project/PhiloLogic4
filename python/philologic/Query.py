@@ -7,8 +7,8 @@ import sys
 import unicodedata
 from datetime import datetime
 
-from . import HitList
-from .QuerySyntax import group_terms, parse_query
+from philologic import HitList
+from philologic.QuerySyntax import group_terms, parse_query
 
 # Work around issue where environ PATH does not contain path to C core
 os.environ["PATH"] += ":/usr/local/bin/"
@@ -85,6 +85,7 @@ def query(db,
             flag.close()
             os._exit(0)
     else:
+        print("closing", pid, file=sys.stderr)
         hl.close()
         return HitList.HitList(filename, words_per_hit, db, sort_order=sort_order, raw=raw_results)
 
@@ -94,7 +95,7 @@ def get_expanded_query(hitlist):
     query = []
     term = []
     try:
-        grep_results = open(fn, "r")
+        grep_results = open(fn, "r", encoding="utf8")
     except:
         return []
     for line in grep_results:
@@ -109,7 +110,6 @@ def get_expanded_query(hitlist):
 
 
 def split_terms(grouped):
-    #print >> sys.stderr, repr(grouped)
     split = []
     for group in grouped:
         if len(group) == 1:
@@ -119,65 +119,35 @@ def split_terms(grouped):
                     split.append((("QUOTE", '"' + split_tok + '"'), ))
             elif kind == "RANGE":
                 split.append((("TERM", token), ))
-#                split_group = []
-#                for split_tok in token.split("-"):
-#                    split_group.append( ( ("TERM",split_tok), ) )
-#                split.append(split_group)
             else:
                 split.append(group)
         else:
             split.append(group)
-    #print >> sys.stderr, repr(split)
     return split
 
-
-def expand_query(split, freq_file, dest_fh):
-    # DEPRECATED
-    first = True
-    grep_proc = None
-    #print >> sys.stderr, "EXPANDING", repr(split)
-    for group in split:
-        if first == True:
-            first = False
-        else:  # bare newline starts a new group, except the first
-            dest_fh.write("\n")
-        # if we have multiple terms in the group, should check to make sure they don't repeat
-        # if it's a single term, we can skip that
-        if len(group) == 1:  # if we have a one-token group, don't need to sort and uniq
-            filters = subprocess.Popen("cut -f 2", stdin=subprocess.PIPE, stdout=dest_fh, shell=True)
-        else:  # otherwise we need to merge the egrep results and remove duplicates.
-            filters = subprocess.Popen("cut -f 2 | sort | uniq", stdin=subprocess.PIPE, stdout=dest_fh, shell=True)
-
-        for kind, token in group:  # or, splits, and ranges should have been taken care of by now.
-            if kind == "TERM" or kind == "RANGE":
-                grep_word(token, freq_file, filters.stdin)
-            elif kind == "QUOTE":
-                filters.stdin.write(token[1:-1] + "\n")
-            # what to do about NOT?
-        filters.stdin.close()
-        filters.wait()
-#    dest_fh.close()
-    return filters
-
-
 def expand_query_not(split, freq_file, dest_fh, lowercase=True):
+    import sys
+    print("Running in here", file=sys.stderr)
     first = True
+    first_iter = True
     grep_proc = None
-    #print >> sys.stderr, "SPLIT", repr(split)
+    import sys
     for group in split:
         if first == True:
             first = False
         else:  # bare newline starts a new group, except the first
-            dest_fh.write(b"\n")
+            try:
+                dest_fh.write("\n")
+            except TypeError:
+                dest_fh.write(b'\n')
+        print(dest_fh.name, file=sys.stderr)
 
         #find all the NOT terms and separate them out by type
         exclude = []
         term_exclude = []
         quote_exclude = []
 
-        #print >> sys.stderr, "GROUP", repr(group)
         for i, g in enumerate(group):
-            #print >> sys.stderr, i,"G", repr(g)
             kind, token = g
             if kind == "NOT":
                 exclude = group[i + 1:]
@@ -203,13 +173,13 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
                 grep_proc = grep_word(token, freq_file, filter_inputs[0], lowercase)
                 grep_proc.wait()
             elif kind == "QUOTE":
-                #                filter_inputs[0].write(token[1:-1] + "\t" + token[1:-1] + "\n")
                 grep_proc = grep_exact(token, freq_file, filter_inputs[0])
                 grep_proc.wait()
         # close all the pipes and wait for procs to finish.
         for pipe, proc in zip(filter_inputs, filter_procs):
             pipe.close()
             proc.wait()
+        first_iter = False
 
 
 def grep_word(token, freq_file, dest_fh, lowercase=True):
@@ -262,10 +232,13 @@ if __name__ == "__main__":
         pass
 
     fake_db = Fake_DB()
-    fake_db.locals = {"db_path": path + "/data/"}
+    from philologic.Config import Config, db_locals_defaults, db_locals_header
     fake_db.path = path + "/data/"
+    fake_db.locals = Config(fake_db.path + "/db.locals.py", db_locals_defaults, db_locals_header)
     fake_db.encoding = "utf-8"
     freq_file = path + "/data/frequencies/normalized_word_frequencies"
-    #    freq_file = "/Library/WebServer/Documents/philologic/plain_text_test/data/frequencies/normalized_word_frequencies"
     expand_query_not(split, freq_file, sys.stdout)
-    hits = query(fake_db, " ".join(terms), query_debug=True)
+    hits = query(fake_db, " ".join(terms), query_debug=True, raw_results=True)
+    hits.finish()
+    for hit in hits:
+        print(hit)

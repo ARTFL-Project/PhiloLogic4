@@ -40,6 +40,8 @@ def concordance_results(request, config):
             formatting_regexes.append((compiled_regex, replacement))
     results = []
     for hit in hits[start - 1:end]:
+        import sys
+        print("FILE", hit.hit, hit.filename, file=sys.stderr)
         citation_hrefs = citation_links(db, config, hit)
         metadata_fields = {}
         for metadata in db.locals['metadata_fields']:

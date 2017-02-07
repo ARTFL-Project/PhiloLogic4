@@ -75,8 +75,8 @@ class DB:
     def get_all(self, philo_type="doc", sort_order=["rowid"], raw_results=False):
         """ get all objects of type philo_type """
         hash = hashlib.sha1()
-        hash.update(self.path)
-        hash.update(philo_type)
+        hash.update(self.path.encode('utf8'))
+        hash.update(philo_type.encode('utf8'))
         all_hash = hash.hexdigest()
         all_file = self.path + "/hitlists/" + all_hash + ".hitlist"
         if not os.path.isfile(all_file):

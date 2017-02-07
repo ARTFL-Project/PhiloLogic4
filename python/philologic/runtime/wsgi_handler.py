@@ -116,9 +116,6 @@ class WSGIHandler(object):
             self.path_components = []
 
         if "approximate" in self.cgi:
-            #if self.cgi["approximate"][0] == "yes":
-             #   self.cgi["approximate"][0] = True
-              #  self.approximate = True
             if "approximate_ratio" in self.cgi:
                 self.approximate_ratio = float(self.cgi["approximate_ratio"][
                     0]) / 100
@@ -134,6 +131,7 @@ class WSGIHandler(object):
                 self.no_q = False
             else:
                 self.no_q = True
+            # self.cgi['q'][0] = self.cgi['q'][0].encode('utf8')
         else:
             self.no_q = True
 
