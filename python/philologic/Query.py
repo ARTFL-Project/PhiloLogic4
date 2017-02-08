@@ -9,8 +9,8 @@ from datetime import datetime
 
 from six.moves import zip
 
-from . import HitList
-from .QuerySyntax import group_terms, parse_query
+from philologic import HitList
+from philologic.QuerySyntax import group_terms, parse_query
 
 # Work around issue where environ PATH does not contain path to C core
 os.environ["PATH"] += ":/usr/local/bin/"
@@ -268,10 +268,13 @@ if __name__ == "__main__":
         pass
 
     fake_db = Fake_DB()
-    fake_db.locals = {"db_path": path + "/data/"}
+    from philologic.Config import Config, db_locals_defaults, db_locals_header
     fake_db.path = path + "/data/"
+    fake_db.locals = Config(fake_db.path + "/db.locals.py", db_locals_defaults, db_locals_header)
     fake_db.encoding = "utf-8"
     freq_file = path + "/data/frequencies/normalized_word_frequencies"
-    #    freq_file = "/Library/WebServer/Documents/philologic/plain_text_test/data/frequencies/normalized_word_frequencies"
-    expand_query_not(split, freq_file, sys.stdout)
-    hits = query(fake_db, " ".join(terms), query_debug=True)
+    # expand_query_not(split, freq_file, sys.stdout)
+    hits = query(fake_db, " ".join(terms), query_debug=True, raw_results=True)
+    hits.finish()
+    for hit in hits:
+        print(hit)
