@@ -227,7 +227,7 @@ def metadata_pattern_search(term, path):
                            stdin=grep.stdout,
                            stdout=subprocess.PIPE)
     match, stderr = cut.communicate()
-    matches = [i for i in match.split('\n') if i]
+    matches = [i for i in match.decode('utf8', 'ignore').split('\n') if i]
     return matches
 
 

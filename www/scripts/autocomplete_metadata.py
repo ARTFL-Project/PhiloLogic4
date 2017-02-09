@@ -70,7 +70,7 @@ def format_query(q, field, db):
         prefix = prefix + " CUTHERE "
     expanded = []
     if label == "QUOTE_S" or label == "TERM":
-        norm_tok = token.decode("utf-8").lower()
+        norm_tok = token.lower()
         norm_tok = [i
                     for i in unicodedata.normalize("NFKD", norm_tok)
                     if not unicodedata.combining(i)]

@@ -32,9 +32,6 @@ class DB:
         """Disabling cache allows to use multiple DB objects in the same script
         without running into collisions"""
         self.path = dbpath
-        self.dbh = sqlite3.connect(dbpath + "/toms.db", width)
-        self.dbh.text_factory = str
-        self.dbh.row_factory = sqlite3.Row
         self.width = width
         self.locals = Config(dbpath + "/db.locals.py", db_locals_defaults, db_locals_header)
         self.cached = cached
@@ -47,6 +44,16 @@ class DB:
         else:
             hit = [int(x) for x in hit_to_string(item, 9).split(" ")]
             return PageWrapper(hit, self)
+
+    def __getattr__(self, attr):
+        # We need to open DB only when accessed
+        # Useful when using a single instance of the DB class accross multiple processors
+        if attr == "dbh":
+            dbh = sqlite3.connect(self.path + "/toms.db", self.width)
+            dbh.text_factory = str
+            dbh.row_factory = sqlite3.Row
+            setattr(self, "dbh", dbh)
+            return self.dbh
 
     def get_id_lowlevel(self, item):
         hit_s = hit_to_string(item, self.width)
