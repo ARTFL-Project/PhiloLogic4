@@ -3,8 +3,6 @@
 
 import sys
 from json import dumps
-import six
-from six.moves import zip
 
 ### CompoundStack is the class to use for all parsers.
 
@@ -59,7 +57,7 @@ class CompoundRecord(object):
         self.attrib["parent"] = " ".join(str(x) for x in parent_id)
         clean_attrib = {}
         for k, v in list(self.attrib.items()):
-            if isinstance(v, six.string_types):
+            if isinstance(v, str):
                 clean_attrib[k] = " ".join(v.split())
             else:
                 clean_attrib[k] = v
@@ -321,7 +319,7 @@ class Record(object):
     def __str__(self):
         clean_attrib = {}
         for k, v in list(self.attrib.items()):
-            if isinstance(v, six.string_types):
+            if isinstance(v, str):
                 clean_attrib[k] = " ".join(v.split())
             else:
                 clean_attrib[k] = v

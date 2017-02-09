@@ -10,7 +10,6 @@ from optparse import OptionParser
 
 from philologic import Loader, LoadFilters, PostFilters, NewParser, PlainTextParser
 from philologic.utils import pretty_print
-import six
 import collections
 
 
@@ -147,9 +146,7 @@ class LoadOptions(object):
                 exit()
 
         except IndexError:
-            print(("\nError: you did not supply a database name "
-                                  "or a path for your file(s) to be loaded\n"), file=sys.stderr)
-
+            print(("\nError: you did not supply a database name or a path for your file(s) to be loaded\n"), file=sys.stderr)
             parser.print_help()
             sys.exit()
         for a in dir(options):
@@ -158,7 +155,7 @@ class LoadOptions(object):
                 if a == "load_config" and value:
                     load_config = LoadConfig()
                     load_config.parse(value)
-                    for config_key, config_value in six.iteritems(load_config.config):
+                    for config_key, config_value in load_config.config.items():
                         if config_value:
                             self.values[config_key] = config_value
                     self.values[a] = os.path.abspath(value)

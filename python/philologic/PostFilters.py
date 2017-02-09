@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
 
 
-import gzip
-import io
 import os
 import sqlite3
-import sys
 import time
 import unicodedata
-from collections import defaultdict
 
 from json import loads
-from six.moves import range
 
 
 def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):

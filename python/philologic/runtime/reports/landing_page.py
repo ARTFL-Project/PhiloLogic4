@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
 """Landing page reports."""
 
-
-
+import json
 import sqlite3
 import sys
 import unicodedata
 from operator import itemgetter
 
-import json
-import six
 from philologic.DB import DB
 from philologic.runtime.citations import citation_links, citations
-
-from six.moves import range
 
 
 def landing_page_bibliography(request, config):

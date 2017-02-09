@@ -1,16 +1,15 @@
 
 
 import os
-import sys
-import struct
 import sqlite3
-from . import HitList
-import unicodedata
+import struct
 import subprocess
-from .QuerySyntax import parse_query, group_terms
+import sys
+import unicodedata
+
+from . import HitList
 from .HitList import NoHits
-from six.moves import range
-from six.moves import zip
+from .QuerySyntax import group_terms, parse_query
 
 os.environ["PATH"] += ":/usr/local/bin/"
 
