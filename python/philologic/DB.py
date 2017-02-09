@@ -10,7 +10,6 @@ from . import HitList
 from . import MetadataQuery
 from . import QuerySyntax
 from .HitWrapper import HitWrapper, PageWrapper
-from six.moves import range
 
 
 def hit_to_string(hit, width):
@@ -29,13 +28,16 @@ def hit_to_string(hit, width):
 
 
 class DB:
-    def __init__(self, dbpath, width=7):
+    def __init__(self, dbpath, width=7, cached=True):
+        """Disabling cache allows to use multiple DB objects in the same script
+        without running into collisions"""
         self.path = dbpath
         self.dbh = sqlite3.connect(dbpath + "/toms.db", width)
         self.dbh.text_factory = str
         self.dbh.row_factory = sqlite3.Row
         self.width = width
         self.locals = Config(dbpath + "/db.locals.py", db_locals_defaults, db_locals_header)
+        self.cached = cached
 
     def __getitem__(self, item):
         if self.width != 9:  # verify this isn't a page id

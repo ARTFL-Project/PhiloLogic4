@@ -180,8 +180,12 @@ def grep_word(token, freq_file, dest_fh, lowercase=True):
         token = token.lower()
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", token) if not unicodedata.combining(i)]
     norm_tok = "".join(norm_tok_uni_chars)
-    grep_command = ['egrep', '-a', '^%s[[:blank:]]' % norm_tok, freq_file]
-    grep_proc = subprocess.Popen(grep_command, stdout=dest_fh)
+    try:
+        grep_command = ['egrep', '-a', '^%s[[:blank:]]' % norm_tok, freq_file]
+        grep_proc = subprocess.Popen(grep_command, stdout=dest_fh)
+    except (UnicodeEncodeError, TypeError):
+        grep_command = ['egrep', '-a', b'^%s[[:blank:]]' % norm_tok.encode('utf8'), freq_file]
+        grep_proc = subprocess.Popen(grep_command, stdout=dest_fh)
     return grep_proc
 
 
@@ -190,8 +194,12 @@ def invert_grep(token, in_fh, dest_fh, lowercase=True):
         token = token.lower()
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", token) if not unicodedata.combining(i)]
     norm_tok = "".join(norm_tok_uni_chars)
-    grep_command = ['egrep', '-a', '-v', '^%s[[:blank:]]' % norm_tok]
-    grep_proc = subprocess.Popen(grep_command, stdin=in_fh, stdout=dest_fh)
+    try:
+        grep_command = ['egrep', '-a', '-v', '^%s[[:blank:]]' % norm_tok]
+        grep_proc = subprocess.Popen(grep_command, stdin=in_fh, stdout=dest_fh)
+    except (UnicodeEncodeError, TypeError):
+        grep_command = ['egrep', '-a', '-v', b'^%s[[:blank:]]' % norm_tok.encode('utf8')]
+        grep_proc = subprocess.Popen(grep_command, stdin=in_fh, stdout=dest_fh)
     return grep_proc
 
 

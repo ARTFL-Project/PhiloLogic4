@@ -3,7 +3,6 @@
 
 
 import sys
-from six.moves import zip
 
 obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
 
@@ -132,7 +131,8 @@ class ObjectWrapper(object):
                     self.row = row
             if self.row is None:
                 self.row = self.db.get_id_lowlevel(self.philo_id)
-                shared_cache[self.object_type] = (self.philo_id, self.row)
+                if self.db.cached:
+                    shared_cache[self.object_type] = (self.philo_id, self.row)
             return _safe_lookup(self.row, key)
 
     def __getattr__(self, name):
