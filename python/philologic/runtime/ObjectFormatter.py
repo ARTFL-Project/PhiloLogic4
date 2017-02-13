@@ -175,6 +175,7 @@ def format_strip(text, byte_offsets=None):
 
 def format_text_object(obj, text, config, request, word_regex, byte_offsets=None, note=False, images=True):
     """Format text objects"""
+    word_regex = r"\w+"
     philo_id = obj.philo_id
     if byte_offsets is not None:
         new_text = b""

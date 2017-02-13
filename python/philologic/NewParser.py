@@ -1006,7 +1006,9 @@ class XMLParser(object):
 
         div_head = self.remove_control_chars(div_head)
         div_head = convert_entities(div_head)
+
         div_head = div_head.replace('"', '')
+
         return div_head
 
     def clear_char_ents(self, text):
@@ -1282,10 +1284,11 @@ abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)',
 
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
-tab_newline = re.compile(r'[\n|\t]')
+tab_newline = re.compile(r'[\n|\t]', re.U)
 control_chars = ''.join(
     [i for i in [chr(x) for x in list(range(0, 32)) + list(range(127, 160))] if not tab_newline.search(i)])
 control_char_re = re.compile(r'[%s]' % re.escape(control_chars))
+
 
 # Entities regexes
 entity_regex = [
