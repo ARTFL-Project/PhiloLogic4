@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from __future__ import absolute_import
-from __future__ import print_function
-import six.moves.cPickle
+
+
+import pickle
 import os
 import re
 import sys
@@ -10,9 +10,7 @@ import unicodedata
 from subprocess import PIPE, Popen
 
 from philologic.OHCOVector import Record
-from simplejson import loads, dumps
-from six.moves import range
-from six.moves import zip
+from json import loads, dumps
 
 
 # Default filters
@@ -23,7 +21,7 @@ def normalize_unicode_raw_words(loader_obj, text):
             rec_type, word, id, attrib = line.split('\t')
             id = id.split()
             if rec_type == "word":
-                word = word.decode("utf-8").lower().encode("utf-8")
+                word = word.lower()
             record = Record(rec_type, word, id)
             record.attrib = loads(attrib)
             print(record, file=tmp_file)
@@ -205,8 +203,8 @@ def make_max_id(loader_obj, text):
             (key, type, id, attr) = line.split("\t")
             id = [int(i) for i in id.split(" ")]
             max_id = [max(new, prev) for new, prev in zip(id, max_id)]
-    rf = open(text["results"], "w")
-    six.moves.cPickle.dump(
+    rf = open(text["results"], "wb")
+    pickle.dump(
         max_id,
         rf)  # write the result out--really just the resulting omax vector, which the parent will merge in below.
     rf.close()
@@ -259,10 +257,10 @@ def normalize_unicode_columns(*columns):
             for column in columns:
                 if column in record.attrib:
                     #                    print >> sys.stderr, repr(record.attrib)
-                    col = record.attrib[column].decode("utf-8")
+                    col = record.attrib[column]
                     col = col.lower()
                     smashed_col = [c for c in unicodedata.normalize("NFKD", col) if not unicodedata.combining(c)]
-                    record.attrib[column + "_norm"] = ''.join(smashed_col).encode("utf-8")
+                    record.attrib[column + "_norm"] = ''.join(smashed_col)
             print(record, file=tmp_file)
         tmp_file.close()
         os.remove(text["sortedtoms"])
@@ -286,7 +284,7 @@ def tree_tagger(tt_path, param_file, maxlines=20000):
             type, word, id, attrib = line.split('\t')
             id = id.split()
             if type == "word":
-                word = word.decode('utf-8', 'ignore').lower().encode('utf-8')
+                word = word.lower()
                 # close and re-open the treetagger process to prevent garbage
                 # output.
                 if line_count > maxlines:
@@ -315,7 +313,7 @@ def tree_tagger(tt_path, param_file, maxlines=20000):
                 tag_l = tag_fh.readline()
                 next_word, tag = tag_l.split("\t")[0:2]
                 pos, lem, prob = tag.split(" ")
-                if next_word != word.decode('utf-8', 'ignore').lower().encode('utf-8'):
+                if next_word != word.lower():
                     print("TREETAGGER ERROR:", next_word, " != ", word, pos, lem, file=sys.stderr)
                     return
                 else:

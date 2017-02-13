@@ -15,7 +15,7 @@ def walk(root,depth=-1):
 
 for file in sys.argv[1:]:
     fd = open(file)
-    print >> sys.stderr, "opening ",file
+    print("opening ",file, file=sys.stderr)
     text_string = fd.read()
     text_string = re.sub("<\?xml[^>]*\?>",'<?xml version="1.0" encoding="utf-8"?>',text_string)
 
@@ -45,7 +45,7 @@ for file in sys.argv[1:]:
                                 break
                         break
             elif "sp" in [a.tag for a in el.iterancestors()]:
-                print >> sys.stderr, "  ERROR: Stage deeply nested within sp"
+                print("  ERROR: Stage deeply nested within sp", file=sys.stderr)
     new_file = file + ".fixed"
     new_file = open(new_file,"w")
     new_file.write("<?xml version='1.0' encoding='utf-8'?>")

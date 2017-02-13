@@ -1,34 +1,26 @@
 #!/usr/bin/python
+"""All different types of hit objects"""
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys
-from six.moves import zip
 
-obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
+TEXT_OBJECT_LEVELS = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
+SHARED_CACHE = {}
 
-
-def _safe_lookup(row, field, encoding="utf-8"):
+def _safe_lookup(row, field):
     metadata = ""
     try:
         metadata = row[field]
     except:
         pass
     if metadata is None:
-        return u""
-    metadata_string = ""
-    try:
-        metadata_string = metadata.decode(encoding, "ignore")
-    except AttributeError:
-        metadata_string = str(metadata).decode(encoding, "ignore")
-    return metadata_string
+        return ""
+    return metadata
 
 
-shared_cache = {}
+class HitWrapper:
+    """Class representing an individual hit with all its ancestors"""
 
-
-class HitWrapper(object):
-    def __init__(self, hit, db, obj_type=False, encoding=None):
+    def __init__(self, hit, db, obj_type=False):
         self.db = db
         self.hit = hit
         if obj_type:
@@ -40,7 +32,7 @@ class HitWrapper(object):
                 length = len(hit)
             if length >= 7:
                 length = 7
-            self.object_type = [k for k in obj_dict if obj_dict[k] == length][0]
+            self.object_type = [k for k in TEXT_OBJECT_LEVELS if TEXT_OBJECT_LEVELS[k] == length][0]
         self.row = None
         self.bytes = []
         self.words = []
@@ -64,18 +56,18 @@ class HitWrapper(object):
         page_id = [self.hit[0], 0, 0, 0, 0, 0, 0, 0, page_i]
         self.page = PageWrapper(page_id, db)
         self.ancestors = {}
-        for t, n in obj_dict.items():
-            if t == "word":
+        for object_type in TEXT_OBJECT_LEVELS:
+            if object_type == "word":
                 self.ancestors["word"] = self.words[0]
             else:
-                self.ancestors[t] = ObjectWrapper(self.hit, self.db, t)
+                self.ancestors[object_type] = ObjectWrapper(self.hit, self.db, object_type)
         try:
             self.line = LineWrapper(self.philo_id, self.bytes[0], db)
         except IndexError:
             self.line = ""
 
     def __getitem__(self, key):
-        if key in obj_dict:
+        if key in TEXT_OBJECT_LEVELS:
             return self.ancestors[key]
         else:
             if key in self.db.locals["metadata_fields"]:
@@ -100,18 +92,20 @@ class HitWrapper(object):
             else:
                 if self.row is None:
                     self.row = self.db.get_id_lowlevel(self.philo_id)
-                return _safe_lookup(self.row, key, self.db.encoding)
+                return _safe_lookup(self.row, key)
 
     def __getattr__(self, name):
         return self[name]
 
 
-class ObjectWrapper(object):
+class ObjectWrapper:
+    """Class representing doc, div1, div2, div3, para, sent objects"""
+
     def __init__(self, hit, db, obj_type=False, row=None):
         self.db = db
         self.hit = hit
         if obj_type:
-            self.philo_id = hit[:obj_dict[obj_type]]
+            self.philo_id = hit[:TEXT_OBJECT_LEVELS[obj_type]]
             self.object_type = obj_type
         else:
             self.philo_id = hit
@@ -119,7 +113,7 @@ class ObjectWrapper(object):
                 length = len(hit[:hit.index(0)])
             except ValueError:
                 length = len(hit)
-            self.object_type = [k for k in obj_dict if obj_dict[k] == length][0]
+            self.object_type = [k for k in TEXT_OBJECT_LEVELS if TEXT_OBJECT_LEVELS[k] == length][0]
         self.bytes = []
         self.row = row
         self.words = []
@@ -128,23 +122,26 @@ class ObjectWrapper(object):
         self.page = PageWrapper(page_id, db)
 
     def __getitem__(self, key):
-        if key in obj_dict:
+        if key in TEXT_OBJECT_LEVELS:
             return ObjectWrapper(self.hit, self.db, key)
         else:
-            if self.object_type in shared_cache:
-                philo_id, row = shared_cache[self.object_type]
+            if self.object_type in SHARED_CACHE:
+                philo_id, row = SHARED_CACHE[self.object_type]
                 if philo_id == self.philo_id:
                     self.row = row
             if self.row is None:
                 self.row = self.db.get_id_lowlevel(self.philo_id)
-                shared_cache[self.object_type] = (self.philo_id, self.row)
-            return _safe_lookup(self.row, key, self.db.encoding)
+                if self.db.cached:
+                    SHARED_CACHE[self.object_type] = (self.philo_id, self.row)
+            return _safe_lookup(self.row, key)
 
     def __getattr__(self, name):
         return self[name]
 
 
-class PageWrapper(object):
+class PageWrapper:
+    """Class representing page objects"""
+
     def __init__(self, id, db):
         self.db = db
         self.philo_id = id
@@ -155,10 +152,10 @@ class PageWrapper(object):
     def __getitem__(self, key):
         if self.row is None:
             self.row = self.db.get_page(self.philo_id)
-        return _safe_lookup(self.row, key, self.db.encoding)
+        return _safe_lookup(self.row, key)
 
     def __getattr__(self, name):
-        if name in obj_dict:
+        if name in TEXT_OBJECT_LEVELS:
             return ObjectWrapper(self.philo_id, self.db)
         elif name == "page":
             return self
@@ -166,7 +163,9 @@ class PageWrapper(object):
             return self[name]
 
 
-class LineWrapper(object):
+class LineWrapper:
+    """Class representing line objects"""
+
     def __init__(self, philo_id, byte_offset, db):
         self.db = db
         self.philo_id = philo_id
@@ -179,10 +178,10 @@ class LineWrapper(object):
     def __getitem__(self, key):
         if self.row is None:
             self.row = self.db.get_line(self.hit_offset, self.doc_id)
-        return _safe_lookup(self.row, key, self.db.encoding)
+        return _safe_lookup(self.row, key)
 
     def __getattr__(self, name):
-        if name in obj_dict:
+        if name in TEXT_OBJECT_LEVELS:
             return ObjectWrapper(self.philo_id, self.db)
         elif name == "line":
             return self
@@ -190,7 +189,9 @@ class LineWrapper(object):
             return self[name]
 
 
-class WordWrapper(object):
+class WordWrapper:
+    """Class representing word objects"""
+
     def __init__(self, id, db, byte):
         self.db = db
         self.philo_id = id
@@ -203,7 +204,7 @@ class WordWrapper(object):
             self.row = self.db.get_word(self.philo_id)
             if self.row is None:
                 print("WORD LOOKUP ERROR for ", repr(self.philo_id), file=sys.stderr)
-        return _safe_lookup(self.row, key, self.db.encoding)
+        return _safe_lookup(self.row, key)
 
     def __getattr__(self, name):
         return self[name]

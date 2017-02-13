@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.runtime import get_start_end_date as start_end_date
 from philologic.DB import DB
 
@@ -19,7 +19,7 @@ def get_start_end_date(environ, start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(environ, config)
     start_date, end_date = start_end_date(db, config, start_date=request.start_date, end_date=request.end_date)
-    yield simplejson.dumps({"start_date": start_date, "end_date": end_date})
+    yield json.dumps({"start_date": start_date, "end_date": end_date}).encode('utf8')
 
 
 if __name__ == "__main__":

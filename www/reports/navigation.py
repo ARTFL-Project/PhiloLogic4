@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 
 import sys
 sys.path.append("..")
@@ -30,7 +30,7 @@ def navigation(environ, start_response):
                ("Access-Control-Allow-Origin", "*")]
     start_response('200 OK', headers)
     text_object = generate_text_object(request, config)
-    yield simplejson.dumps(text_object)
+    yield json.dumps(text_object).encode('utf8')
 
 
 if __name__ == "__main__":

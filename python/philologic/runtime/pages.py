@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Page intervals"""
 
 def page_interval(num, results, start, end):

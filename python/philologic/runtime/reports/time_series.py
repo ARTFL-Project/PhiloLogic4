@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Time series"""
 
 import re
@@ -30,7 +30,7 @@ def generate_time_series(request, config):
     interval = int(request.year_interval)
     date_ranges = []
     # Make sure last date gets included in for loop below by adding one to last step
-    for start in xrange(start_date, end_date+1, interval):
+    for start in range(start_date, end_date+1, interval):
         end = start + interval - 1
         if end > end_date:
             end = end_date

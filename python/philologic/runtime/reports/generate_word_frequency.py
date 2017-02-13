@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Generate word frequency
 Currently unmaintained."""
 
@@ -34,7 +34,7 @@ def generate_word_frequency(request, config):
                 break
 
         table = {}
-        for k, v in counts.iteritems():
+        for k, v in counts.items():
             url = make_absolute_query_link(config,
                                            request,
                                            start="0",
@@ -79,6 +79,6 @@ def get_word_attrib(n, field, db):
         else:
             val += "NULL"
 
-    if isinstance(val, unicode):
+    if isinstance(val, str):
         return val.encode("utf-8")
     return val

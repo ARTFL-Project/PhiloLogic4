@@ -1,9 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Citations"""
 
-from __future__ import absolute_import
+
 from philologic.runtime.link import (make_absolute_object_link, make_absolute_query_link)
-import six
 
 
 def citation_links(db, config, i):
@@ -21,7 +20,7 @@ def citation_links(db, config, i):
     links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href,
              "para": "", "page": page_href, "line": line_href}
 
-    for field, metadata_type in six.iteritems(db.locals["metadata_types"]):
+    for field, metadata_type in db.locals["metadata_types"].items():
         if metadata_type == 'para':
             links['para'] = make_absolute_object_link(config, i.philo_id[:5], i.bytes)
             break
@@ -105,8 +104,9 @@ def get_div1_name(hit):
                 label = hit.div1['type'] + " " + hit.div1["n"]
             else:
                 label = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
-    label = label[0].upper() + label[1:]
-    label = label.strip()
+    if label:
+        label = label[0].upper() + label[1:]
+        label = label.strip()
     return label
 
 

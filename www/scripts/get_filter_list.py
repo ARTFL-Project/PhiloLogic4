@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.runtime import build_filter_list
 from philologic.DB import DB
 
@@ -19,7 +19,7 @@ def get_filter_list(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     request = WSGIHandler(environ, config)
     filter_list = build_filter_list(request, config)
-    yield simplejson.dumps(filter_list)
+    yield json.dumps(filter_list).encode('utf8')
 
 
 if __name__ == "__main__":

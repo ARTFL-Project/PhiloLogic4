@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Routing for PhiloLogic4."""
 
-from __future__ import absolute_import
+
 import datetime
 import os
 from cgi import FieldStorage
@@ -22,6 +22,7 @@ def philo_dispatcher(environ, start_response):
     clean_up()
     config = WebConfig(path)
     request = WSGIHandler(environ, config)
+    response = ""
     if request.content_type == "application/json" or request.format == "json":
         try:
             path_components = [c for c in environ["PATH_INFO"].split("/") if c]
@@ -29,14 +30,15 @@ def philo_dispatcher(environ, start_response):
             path_components = []
         if path_components:
             if path_components[-1] == "table-of-contents":
-                yield ''.join([i for i in reports.table_of_contents(environ, start_response)])
+                response = ''.join([i for i in reports.table_of_contents(environ, start_response)])
             else:
-                yield ''.join([i for i in reports.navigation(environ, start_response)])
+                response = ''.join([i for i in reports.navigation(environ, start_response)])
         else:
             report = getattr(reports, FieldStorage().getvalue('report'))
-            yield ''.join([i for i in report(environ, start_response)])
+            response = ''.join([i for i in report(environ, start_response)])
     else:
-        yield angular(environ, start_response)
+        response = angular(environ, start_response)
+    yield response.encode('utf8')
 
 def clean_up():
     """clean-up hitlist every now and then"""

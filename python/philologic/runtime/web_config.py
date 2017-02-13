@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from __future__ import absolute_import
+
 from philologic.Config import MakeWebConfig
 
 
@@ -16,6 +16,5 @@ class brokenConfig(object):
 def WebConfig(db_path):
     try:
         return MakeWebConfig(db_path + '/data/web_config.cfg')
-    except Exception as e:
-        traceback = str(e)
-        return brokenConfig(db_path, traceback)
+    except Exception as traceback:
+        return brokenConfig(db_path, str(traceback))

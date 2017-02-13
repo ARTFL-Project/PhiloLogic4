@@ -1,16 +1,15 @@
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import os
-import sys
-import struct
 import sqlite3
-from . import HitList
-import unicodedata
+import struct
 import subprocess
-from .QuerySyntax import parse_query, group_terms
+import sys
+import unicodedata
+
+from . import HitList
 from .HitList import NoHits
-from six.moves import range
-from six.moves import zip
+from .QuerySyntax import group_terms, parse_query
 
 os.environ["PATH"] += ":/usr/local/bin/"
 
@@ -69,7 +68,7 @@ def query_recursive(db, param_dict, parent, sort_order):
 def query_lowlevel(db, param_dict, sort_order):
     vars = []
     clauses = []
-    for column, values in param_dict.items():
+    for column, values in list(param_dict.items()):
         norm_path = db.path + "/frequencies/normalized_" + column + "_frequencies"
         for v in values:
             parsed = parse_query(v)
@@ -113,12 +112,9 @@ def expand_grouped_query(grouped, norm_path):
         expanded_group = []
         for kind, token in group:
             if kind == "TERM":
-                try:
-                    norm_term = token.decode("utf-8").lower()
-                except:
-                    norm_term = token.lower()
+                norm_term = token.lower()
                 norm_term = [c for c in unicodedata.normalize("NFKD", norm_term) if not unicodedata.combining(c)]
-                norm_term = u"".join(norm_term).encode("utf-8")
+                norm_term = "".join(norm_term)
                 expanded_terms = metadata_pattern_search(norm_term, norm_path)
                 if expanded_terms:
                     expanded_tokens = [("QUOTE", '"' + e + '"') for e in expanded_terms]
@@ -187,7 +183,7 @@ def make_grouped_sql_clause(expanded, column, db):
                     try:
                         clauses += "AND %s" % clause
                     except UnicodeDecodeError:
-                        clauses += "AND %s" % clause.encode('utf8')
+                        clauses += "AND %s" % clause
                 continue
             clause += "%s IN (" % column
         # if we don't have a range, we have something that we can evaluate
@@ -208,7 +204,7 @@ def make_grouped_sql_clause(expanded, column, db):
                 try:
                     clause += esc(token[1:-1])
                 except:
-                    clause += esc(token.decode('utf-8')[1:-1])
+                    clause += esc(token[1:-1])
                 # but harmless, as well was its own clause below.  Fix later, if possible.
         clause += ")"
         if has_null:
@@ -231,7 +227,7 @@ def metadata_pattern_search(term, path):
                            stdin=grep.stdout,
                            stdout=subprocess.PIPE)
     match, stderr = cut.communicate()
-    matches = [i for i in match.split('\n') if i]
+    matches = [i for i in match.decode('utf8', 'ignore').split('\n') if i]
     return matches
 
 

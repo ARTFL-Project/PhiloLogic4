@@ -1,8 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """PhiloLogic4 main parser"""
 
-from __future__ import absolute_import
-from __future__ import print_function
 import os
 import re
 import string
@@ -10,10 +8,8 @@ import sys
 
 from philologic import OHCOVector
 from philologic.utils import convert_entities
-import six
-from six.moves import range
 
-DefaultTagToObjMap = {
+DEFAULT_TAG_TO_OBJ_MAP = {
     "div": "div",
     "div1": "div",
     "div2": "div",
@@ -41,7 +37,7 @@ DefaultTagToObjMap = {
     "ab": "line"
 }
 
-DefaultMetadataToParse = {
+DEFAULT_METADATA_TO_PARSE = {
     "div": ["head", "type", "n", "id", "vol"],
     "para": ["who", "resp", "id"],  # for <sp> and <add> tags
     "page": ["n", "id", "facs"],
@@ -50,7 +46,7 @@ DefaultMetadataToParse = {
     "line": ["n", "id"]
 }
 
-DefaultDocXPaths = {
+DEFAULT_DOC_XPATHS = {
     "author": [
         ".//sourceDesc/bibl/author[@type='marc100']", ".//sourceDesc/bibl/author[@type='artfl']",
         ".//sourceDesc/bibl/author", ".//titleStmt/author", ".//sourceDesc/biblStruct/monogr/author/name",
@@ -124,29 +120,31 @@ DefaultDocXPaths = {
     ]
 }
 
-TagExceptions = [r'<hi[^>]*>', r'<emph[^>]*>', r'<\/hi>', r'<\/emph>', r'<orig[^>]*>', r'<\/orig>', r'<sic[^>]*>', r'<\/sic>',
+TAG_EXCEPTIONS = [r'<hi[^>]*>', r'<emph[^>]*>', r'<\/hi>', r'<\/emph>', r'<orig[^>]*>', r'<\/orig>', r'<sic[^>]*>', r'<\/sic>',
                  r'<abbr[^>]*>', r'<\/abbr>', r'<i>', r'</i>', r'<sup>', r'</sup>']
 
-TokenRegex = r"[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*"
+TOKEN_REGEX = r"\w*"
 
-CharsNotToIndex = r"\[\{\]\}"
+CHARS_NOT_TO_INDEX = r"\[\{\]\}"
 
-UnicodeWordBreakers = ['\xe2\x80\x93',  # U+2013 &ndash; EN DASH
-                       '\xe2\x80\x94',  # U+2014 &mdash; EM DASH
-                       '\xc2\xab',  # &laquo;
-                       '\xc2\xbb',  # &raquo;
-                       '\xef\xbc\x89',  # fullwidth right parenthesis
-                       '\xef\xbc\x88',  # fullwidth left parenthesis
-                       '\xe2\x80\x90',  # U+2010 hyphen for greek stuff
-                       '\xce\x87',  # U+00B7 ano teleia
-                       '\xe2\x80\xa0',  # U+2020 dagger
-                       '\xe2\x80\x98',  # U+2018 &lsquo; LEFT SINGLE QUOTATION
-                       '\xe2\x80\x99',  # U+2019 &rsquo; RIGHT SINGLE QUOTATION
-                       '\xe2\x80\x9c',  # U+201C &ldquo; LEFT DOUBLE QUOTATION
-                       '\xe2\x80\x9d',  # U+201D &rdquo; RIGHT DOUBLE QUOTATION
-                       '\xe2\x80\xb9',  # U+2039 &lsaquo; SINGLE LEFT-POINTING ANGLE QUOTATION
-                       '\xe2\x80\xba',  # U+203A &rsaquo; SINGLE RIGHT-POINTING ANGLE QUOTATION
-                       '\xe2\x80\xa6']  # U+2026 &hellip; HORIZONTAL ELLIPSIS
+UNICODE_WORD_BREAKERS = [
+    b'\xe2\x80\x93',  # U+2013 &ndash; EN DASH
+    b'\xe2\x80\x94',  # U+2014 &mdash; EM DASH
+    b'\xc2\xab',  # &laquo;
+    b'\xc2\xbb',  # &raquo;
+    b'\xef\xbc\x89',  # fullwidth right parenthesis
+    b'\xef\xbc\x88',  # fullwidth left parenthesis
+    b'\xe2\x80\x90',  # U+2010 hyphen for greek stuff
+    b'\xce\x87',  # U+00B7 ano teleia
+    b'\xe2\x80\xa0',  # U+2020 dagger
+    b'\xe2\x80\x98',  # U+2018 &lsquo; LEFT SINGLE QUOTATION
+    b'\xe2\x80\x99',  # U+2019 &rsquo; RIGHT SINGLE QUOTATION
+    b'\xe2\x80\x9c',  # U+201C &ldquo; LEFT DOUBLE QUOTATION
+    b'\xe2\x80\x9d',  # U+201D &rdquo; RIGHT DOUBLE QUOTATION
+    b'\xe2\x80\xb9',  # U+2039 &lsaquo; SINGLE LEFT-POINTING ANGLE QUOTATION
+    b'\xe2\x80\xba',  # U+203A &rsaquo; SINGLE RIGHT-POINTING ANGLE QUOTATION
+    b'\xe2\x80\xa6'  # U+2026 &hellip; HORIZONTAL ELLIPSIS
+]
 
 
 class XMLParser(object):
@@ -160,8 +158,8 @@ class XMLParser(object):
                  filesize,
                  words_to_index=None,
                  known_metadata={},
-                 tag_to_obj_map=DefaultTagToObjMap,
-                 metadata_to_parse=DefaultMetadataToParse,
+                 tag_to_obj_map=DEFAULT_TAG_TO_OBJ_MAP,
+                 metadata_to_parse=DEFAULT_METADATA_TO_PARSE,
                  **parse_options):
         """Initialize class"""
         self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
@@ -195,7 +193,7 @@ class XMLParser(object):
         if "token_regex" in parse_options:
             self.token_regex = re.compile(r"(%s)" % parse_options["token_regex"], re.I)
         else:
-            self.token_regex = re.compile(r"(%s)" % TokenRegex, re.I)
+            self.token_regex = re.compile(r"(%s)" % TOKEN_REGEX, re.I)
 
         if "sentence_breakers" in parse_options:
             self.sentence_breakers = parse_options["sentence_breakers"]
@@ -217,7 +215,7 @@ class XMLParser(object):
         if "chars_not_to_index" in parse_options:
             self.chars_not_to_index = re.compile(r'%s' % parse_options["chars_not_to_index"], re.I)
         else:
-            self.chars_not_to_index = re.compile(r"%s" % CharsNotToIndex, re.I)
+            self.chars_not_to_index = re.compile(r"%s" % CHARS_NOT_TO_INDEX, re.I)
 
         if "break_sent_in_line_group" in parse_options:
             self.break_sent_in_line_group = parse_options["break_sent_in_line_group"]
@@ -227,13 +225,13 @@ class XMLParser(object):
         if "tag_exceptions" in parse_options:
             tag_exceptions = parse_options["tag_exceptions"]
         else:
-            tag_exceptions = TagExceptions
+            tag_exceptions = TAG_EXCEPTIONS
         self.tag_exceptions = []
         for tag in tag_exceptions:
             try:
                 compiled_tag = re.compile(r'(%s)(%s)(%s)' % (parse_options["token_regex"], tag, parse_options["token_regex"]), re.I | re.M)
             except KeyError:
-                compiled_tag = re.compile(r'(%s)(%s)(%s)' % (TokenRegex, tag, TokenRegex), re.I | re.M)
+                compiled_tag = re.compile(r'(%s)(%s)(%s)' % (TOKEN_REGEX, tag, TOKEN_REGEX), re.I | re.M)
             self.tag_exceptions.append(compiled_tag)
 
         if "join_hyphen_in_words" in parse_options:
@@ -244,7 +242,7 @@ class XMLParser(object):
         if "unicode_word_breakers" in parse_options:
             unicode_word_breakers = parse_options["unicode_word_breakers"]
         else:
-            unicode_word_breakers = UnicodeWordBreakers
+            unicode_word_breakers = UNICODE_WORD_BREAKERS
         self.unicode_word_breakers = []
         for char in unicode_word_breakers:
             compiled_char = re.compile(r'(%s)' % char, re.I)
@@ -289,10 +287,10 @@ class XMLParser(object):
         self.current_div_level = 0
         self.in_seg = False
 
-    def parse(self, input):
+    def parse(self, text_input):
         """Top level function for reading a file and printing out the output."""
-        self.input = input
-        self.content = input.read()
+        self.input = text_input
+        self.content = text_input.read()
         if div_tag.search(self.content):
             self.got_a_div = True
         if para_tag.search(self.content):
@@ -305,7 +303,7 @@ class XMLParser(object):
         # if the parser was created with known_metadata,
         # we can attach it to the newly created doc object here.
         # you can attach metadata to an object at any time between push() and pull().
-        for k, v in six.iteritems(self.known_metadata):
+        for k, v in self.known_metadata.items():
             self.v["doc"][k] = v
 
         # Split content into a list on newlines.
@@ -324,13 +322,13 @@ class XMLParser(object):
             self.line_count += 1
 
             if line.startswith('<'):
-                self.bytes_read_in += len(line)
+                self.bytes_read_in += len(line.encode('utf8'))
                 # TODO : implement DUMPXPATHS?
                 if self.in_the_text:
                     self.tag_handler(line)
             else:
                 self.word_handler(line)
-                self.bytes_read_in += len(line)
+                self.bytes_read_in += len(line.encode('utf8'))
 
         # if we have an open page, make sure we close it so it is properly stored
         if self.open_page:
@@ -370,7 +368,7 @@ class XMLParser(object):
 
     def tag_handler(self, tag):
         '''Tag handler for parser.'''
-        start_byte = self.bytes_read_in - len(tag)
+        start_byte = self.bytes_read_in - len(tag.encode('utf8'))
         try:
             tag_name = tag_matcher.findall(tag)[0]
         except IndexError:
@@ -409,7 +407,7 @@ class XMLParser(object):
                     do_this_para = False
                 if do_this_para:
                     if self.open_para:  # account for unclosed paragraph tags
-                        para_end_byte = self.bytes_read_in - len(tag)
+                        para_end_byte = self.bytes_read_in - len(tag.encode('utf8'))
                         self.close_para(para_end_byte)
                     self.v.push("para", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "para")
@@ -418,7 +416,7 @@ class XMLParser(object):
             # Notes: treat as para objects and set flag to not set paras in notes.
             elif note_tag.search(tag):
                 if self.open_para:  # account for unclosed paragraph tags
-                    para_end_byte = self.bytes_read_in - len(tag)
+                    para_end_byte = self.bytes_read_in - len(tag.encode('utf8'))
                     self.close_para(para_end_byte)
                 self.open_para = True
                 self.v.push("para", tag_name, start_byte)
@@ -428,7 +426,7 @@ class XMLParser(object):
             # Epigraph: treat as paragraph objects
             elif epigraph_tag.search(tag):
                 if self.open_para:  # account for unclosed paragraph tags
-                    para_end_byte = self.bytes_read_in - len(tag)
+                    para_end_byte = self.bytes_read_in - len(tag.encode('utf8'))
                     self.close_para(para_end_byte)
                 self.open_para = True
                 self.v.push("para", tag_name, start_byte)
@@ -442,7 +440,7 @@ class XMLParser(object):
             # LIST: treat as para objects
             elif list_tag.search(tag) and not self.no_deeper_objects:
                 if self.open_para:  # account for unclosed paragraph tags
-                    para_end_byte = self.bytes_read_in - len(tag)
+                    para_end_byte = self.bytes_read_in - len(tag.encode('utf8'))
                     self.close_para(para_end_byte)
                 self.open_para = True
                 self.v.push("para", tag_name, start_byte)
@@ -451,7 +449,7 @@ class XMLParser(object):
             # SPEECH BREAKS: treat them as para objects
             elif speaker_tag.search(tag):
                 if self.open_para:  # account for unclosed paragraph tags
-                    para_end_byte = self.bytes_read_in - len(tag)
+                    para_end_byte = self.bytes_read_in - len(tag.encode('utf8'))
                     self.close_para(para_end_byte)
                 self.open_para = True
                 self.v.push("para", tag_name, start_byte)
@@ -465,7 +463,7 @@ class XMLParser(object):
             # ARGUMENT BREAKS: treat them as para objects
             elif argument_tag.search(tag):
                 if self.open_para:  # account for unclosed paragraph tags
-                    para_end_byte = self.bytes_read_in - len(tag)
+                    para_end_byte = self.bytes_read_in - len(tag.encode('utf8'))
                     self.close_para(para_end_byte)
                 self.open_para = True
                 self.v.push("para", tag_name, start_byte)
@@ -479,7 +477,7 @@ class XMLParser(object):
             # OPENER BREAKS: treat them as para objects
             elif opener_tag.search(tag):
                 if self.open_para:  # account for unclosed paragraph tags
-                    para_end_byte = self.bytes_read_in - len(tag)
+                    para_end_byte = self.bytes_read_in - len(tag.encode('utf8'))
                     self.close_para(para_end_byte)
                 self.open_para = True
                 self.v.push("para", tag_name, start_byte)
@@ -493,7 +491,7 @@ class XMLParser(object):
             # CLOSER BREAKS: treat them as para objects
             elif closer_tag.search(tag):
                 if self.open_para:  # account for unclosed paragraph tags
-                    para_end_byte = self.bytes_read_in - len(tag)
+                    para_end_byte = self.bytes_read_in - len(tag.encode('utf8'))
                     self.close_para(para_end_byte)
                 self.open_para = True
                 self.v.push("para", tag_name, start_byte)
@@ -508,7 +506,7 @@ class XMLParser(object):
             # TODO: what to do with stage direction??? deactivated to avoid clashing with <sp> tags
             elif stage_tag.search(tag) and not self.no_deeper_objects:
                 if self.open_para:  # account for unclosed paragraph tags
-                    para_end_byte = self.bytes_read_in - len(tag)
+                    para_end_byte = self.bytes_read_in - len(tag.encode('utf8'))
                     self.close_para(para_end_byte)
                 self.open_para = True
                 self.v.push("para", tag_name, start_byte)
@@ -520,7 +518,7 @@ class XMLParser(object):
             # CAST LIST: treat them as para objects
             elif castlist_tag.search(tag):
                 if self.open_para:  # account for unclosed paragraph tags
-                    para_end_byte = self.bytes_read_in - len(tag)
+                    para_end_byte = self.bytes_read_in - len(tag.encode('utf8'))
                     self.close_para(para_end_byte)
                 self.open_para = True
                 self.v.push("para", tag_name, start_byte)
@@ -529,7 +527,7 @@ class XMLParser(object):
             # Handle <add> tags as a para.
             elif add_tag.search(tag):
                 if self.open_para:  # account for unclosed paragraph tags
-                    para_end_byte = self.bytes_read_in - len(tag)
+                    para_end_byte = self.bytes_read_in - len(tag.encode('utf8'))
                     self.close_para(para_end_byte)
                 self.open_para = True
                 self.v.push("para", tag_name, start_byte)
@@ -542,7 +540,7 @@ class XMLParser(object):
             # PAGE BREAKS: this updates the currentpagetag or sets it to "na" if not found.
             elif page_tag.search(tag):
                 if self.open_page:
-                    page_end_tag = self.bytes_read_in - len(tag)
+                    page_end_tag = self.bytes_read_in - len(tag.encode('utf8'))
                     self.v.pull("page", page_end_tag)
                     self.open_page = False
                 self.v.push("page", tag_name, start_byte)
@@ -563,7 +561,7 @@ class XMLParser(object):
                 if self.break_sent_in_line_group:
                     self.in_line_group = True
                 if self.open_para:  # account for unclosed paragraph tags
-                    para_end_byte = self.bytes_read_in - len(tag)
+                    para_end_byte = self.bytes_read_in - len(tag.encode('utf8'))
                     self.close_para(para_end_byte)
                 self.open_para = True
                 self.v.push("para", tag_name, start_byte)
@@ -796,7 +794,7 @@ class XMLParser(object):
             if self.in_the_text:
                 for word in word_list:
                     # print word, current_pos - len(word)
-                    word_length = len(word)
+                    word_length = len(word.encode('utf8'))
                     try:
                         next_word = word_list[count + 1]
                     except IndexError:
@@ -808,9 +806,9 @@ class XMLParser(object):
                     current_pos += word_length
 
                     # Do we have a word? At least one of these characters.
-                    if check_if_char_word.search(word.decode('utf8', 'ignore').replace('_', "")):
+                    if check_if_char_word.search(word.replace('_', "")):
                         last_word = word
-                        word_pos = current_pos - len(word)
+                        word_pos = current_pos - len(word.encode('utf8'))
                         if "&" in word:
                             # Convert ents to utf-8
                             word = self.latin1_ents_to_utf8(word)
@@ -834,7 +832,7 @@ class XMLParser(object):
                         # names tagged.
 
                         # Switch everything to lower case
-                        word = word.decode('utf8', 'ignore').lower().encode('utf8')
+                        word = word.lower()
 
                         # Check to see if the word is longer than we want.  More than 235
                         # characters appear to cause problems in the indexer.
@@ -869,7 +867,7 @@ class XMLParser(object):
                         # capital letters to avoid hitting abbreviations.
                         elif '.' in word:
                             is_sent = True
-                            if len(last_word.decode('utf8', 'ignore')) < 3:
+                            if len(last_word) < 3:
                                 if cap_char_or_num.search(last_word):
                                     is_sent = False
 
@@ -1033,172 +1031,173 @@ class XMLParser(object):
         """Converts ISO-LATIN-1 character entities in index words to UTF-8
         for standard word index search consistency. This is for SGML data sets
         and XML that have character ents rather than UTF-8 characters."""
+        text_in_bytes = text.encode('utf8')
         if self.flatten_ligatures:
-            text = text.replace('&AElig;', '\xc3\x86')
-            text = text.replace('&szlig;', '\xc3\x9F')
-            text = text.replace('&aelig;', '\xc3\xA6')
-        text = text.replace('&Agrave;', '\xc3\x80')
-        text = text.replace('&Aacute;', '\xc3\x81')
-        text = text.replace('&Acirc;', '\xc3\x82')
-        text = text.replace('&Atilde;', '\xc3\x83')
-        text = text.replace('&Auml;', '\xc3\x84')
-        text = text.replace('&Aring;', '\xc3\x85')
-        text = text.replace('&Ccedil;', '\xc3\x87')
-        text = text.replace('&Egrave;', '\xc3\x88')
-        text = text.replace('&Eacute;', '\xc3\x89')
-        text = text.replace('&Ecirc;', '\xc3\x8A')
-        text = text.replace('&Euml;', '\xc3\x8B')
-        text = text.replace('&Igrave;', '\xc3\x8C')
-        text = text.replace('&Iacute;', '\xc3\x8D')
-        text = text.replace('&Icirc;', '\xc3\x8E')
-        text = text.replace('&Iuml;', '\xc3\x8F')
-        text = text.replace('&ETH;', '\xc3\x90')
-        text = text.replace('&Ntilde;', '\xc3\x91')
-        text = text.replace('&Ograve;', '\xc3\x92')
-        text = text.replace('&Oacute;', '\xc3\x93')
-        text = text.replace('&Ocirc;', '\xc3\x94')
-        text = text.replace('&Otilde;', '\xc3\x95')
-        text = text.replace('&Ouml;', '\xc3\x96')
-        text = text.replace('&#215;', '\xc3\x97')  # MULTIPLICATION SIGN
-        text = text.replace('&Oslash;', '\xc3\x98')
-        text = text.replace('&Ugrave;', '\xc3\x99')
-        text = text.replace('&Uacute;', '\xc3\x9A')
-        text = text.replace('&Ucirc;', '\xc3\x9B')
-        text = text.replace('&Uuml;', '\xc3\x9C')
-        text = text.replace('&Yacute;', '\xc3\x9D')
-        text = text.replace('&THORN;', '\xc3\x9E')
-        text = text.replace('&agrave;', '\xc3\xA0')
-        text = text.replace('&aacute;', '\xc3\xA1')
-        text = text.replace('&acirc;', '\xc3\xA2')
-        text = text.replace('&atilde;', '\xc3\xA3')
-        text = text.replace('&auml;', '\xc3\xA4')
-        text = text.replace('&aring;', '\xc3\xA5')
-        text = text.replace('&ccedil;', '\xc3\xA7')
-        text = text.replace('&egrave;', '\xc3\xA8')
-        text = text.replace('&eacute;', '\xc3\xA9')
-        text = text.replace('&ecirc;', '\xc3\xAA')
-        text = text.replace('&euml;', '\xc3\xAB')
-        text = text.replace('&igrave;', '\xc3\xAC')
-        text = text.replace('&iacute;', '\xc3\xAD')
-        text = text.replace('&icirc;', '\xc3\xAE')
-        text = text.replace('&iuml;', '\xc3\xAF')
-        text = text.replace('&eth;', '\xc3\xB0')
-        text = text.replace('&ntilde;', '\xc3\xB1')
-        text = text.replace('&ograve;', '\xc3\xB2')
-        text = text.replace('&oacute;', '\xc3\xB3')
-        text = text.replace('&ocirc;', '\xc3\xB4')
-        text = text.replace('&otilde;', '\xc3\xB5')
-        text = text.replace('&ouml;', '\xc3\xB6')
-        text = text.replace('&#247;', '\xc3\xB7')  # DIVISION SIGN
-        text = text.replace('&oslash;', '\xc3\xB8')
-        text = text.replace('&ugrave;', '\xc3\xB9')
-        text = text.replace('&uacute;', '\xc3\xBA')
-        text = text.replace('&ucirc;', '\xc3\xBB')
-        text = text.replace('&uuml;', '\xc3\xBC')
-        text = text.replace('&yacute;', '\xc3\xBD')
-        text = text.replace('&thorn;', '\xc3\xBE')
-        text = text.replace('&yuml;', '\xc3\xBF')
+            text_in_bytes = text_in_bytes.replace(b'&AElig;', b'\xc3\x86')
+            text_in_bytes = text_in_bytes.replace(b'&szlig;', b'\xc3\x9F')
+            text_in_bytes = text_in_bytes.replace(b'&aelig;', b'\xc3\xA6')
+        text_in_bytes = text_in_bytes.replace(b'&Agrave;', b'\xc3\x80')
+        text_in_bytes = text_in_bytes.replace(b'&Aacute;', b'\xc3\x81')
+        text_in_bytes = text_in_bytes.replace(b'&Acirc;', b'\xc3\x82')
+        text_in_bytes = text_in_bytes.replace(b'&Atilde;', b'\xc3\x83')
+        text_in_bytes = text_in_bytes.replace(b'&Auml;', b'\xc3\x84')
+        text_in_bytes = text_in_bytes.replace(b'&Aring;', b'\xc3\x85')
+        text_in_bytes = text_in_bytes.replace(b'&Ccedil;', b'\xc3\x87')
+        text_in_bytes = text_in_bytes.replace(b'&Egrave;', b'\xc3\x88')
+        text_in_bytes = text_in_bytes.replace(b'&Eacute;', b'\xc3\x89')
+        text_in_bytes = text_in_bytes.replace(b'&Ecirc;', b'\xc3\x8A')
+        text_in_bytes = text_in_bytes.replace(b'&Euml;', b'\xc3\x8B')
+        text_in_bytes = text_in_bytes.replace(b'&Igrave;', b'\xc3\x8C')
+        text_in_bytes = text_in_bytes.replace(b'&Iacute;', b'\xc3\x8D')
+        text_in_bytes = text_in_bytes.replace(b'&Icirc;', b'\xc3\x8E')
+        text_in_bytes = text_in_bytes.replace(b'&Iuml;', b'\xc3\x8F')
+        text_in_bytes = text_in_bytes.replace(b'&ETH;', b'\xc3\x90')
+        text_in_bytes = text_in_bytes.replace(b'&Ntilde;', b'\xc3\x91')
+        text_in_bytes = text_in_bytes.replace(b'&Ograve;', b'\xc3\x92')
+        text_in_bytes = text_in_bytes.replace(b'&Oacute;', b'\xc3\x93')
+        text_in_bytes = text_in_bytes.replace(b'&Ocirc;', b'\xc3\x94')
+        text_in_bytes = text_in_bytes.replace(b'&Otilde;', b'\xc3\x95')
+        text_in_bytes = text_in_bytes.replace(b'&Ouml;', b'\xc3\x96')
+        text_in_bytes = text_in_bytes.replace(b'&#215;', b'\xc3\x97')  # MULTIPLICATION SIGN
+        text_in_bytes = text_in_bytes.replace(b'&Oslash;', b'\xc3\x98')
+        text_in_bytes = text_in_bytes.replace(b'&Ugrave;', b'\xc3\x99')
+        text_in_bytes = text_in_bytes.replace(b'&Uacute;', b'\xc3\x9A')
+        text_in_bytes = text_in_bytes.replace(b'&Ucirc;', b'\xc3\x9B')
+        text_in_bytes = text_in_bytes.replace(b'&Uuml;', b'\xc3\x9C')
+        text_in_bytes = text_in_bytes.replace(b'&Yacute;', b'\xc3\x9D')
+        text_in_bytes = text_in_bytes.replace(b'&THORN;', b'\xc3\x9E')
+        text_in_bytes = text_in_bytes.replace(b'&agrave;', b'\xc3\xA0')
+        text_in_bytes = text_in_bytes.replace(b'&aacute;', b'\xc3\xA1')
+        text_in_bytes = text_in_bytes.replace(b'&acirc;', b'\xc3\xA2')
+        text_in_bytes = text_in_bytes.replace(b'&atilde;', b'\xc3\xA3')
+        text_in_bytes = text_in_bytes.replace(b'&auml;', b'\xc3\xA4')
+        text_in_bytes = text_in_bytes.replace(b'&aring;', b'\xc3\xA5')
+        text_in_bytes = text_in_bytes.replace(b'&ccedil;', b'\xc3\xA7')
+        text_in_bytes = text_in_bytes.replace(b'&egrave;', b'\xc3\xA8')
+        text_in_bytes = text_in_bytes.replace(b'&eacute;', b'\xc3\xA9')
+        text_in_bytes = text_in_bytes.replace(b'&ecirc;', b'\xc3\xAA')
+        text_in_bytes = text_in_bytes.replace(b'&euml;', b'\xc3\xAB')
+        text_in_bytes = text_in_bytes.replace(b'&igrave;', b'\xc3\xAC')
+        text_in_bytes = text_in_bytes.replace(b'&iacute;', b'\xc3\xAD')
+        text_in_bytes = text_in_bytes.replace(b'&icirc;', b'\xc3\xAE')
+        text_in_bytes = text_in_bytes.replace(b'&iuml;', b'\xc3\xAF')
+        text_in_bytes = text_in_bytes.replace(b'&eth;', b'\xc3\xB0')
+        text_in_bytes = text_in_bytes.replace(b'&ntilde;', b'\xc3\xB1')
+        text_in_bytes = text_in_bytes.replace(b'&ograve;', b'\xc3\xB2')
+        text_in_bytes = text_in_bytes.replace(b'&oacute;', b'\xc3\xB3')
+        text_in_bytes = text_in_bytes.replace(b'&ocirc;', b'\xc3\xB4')
+        text_in_bytes = text_in_bytes.replace(b'&otilde;', b'\xc3\xB5')
+        text_in_bytes = text_in_bytes.replace(b'&ouml;', b'\xc3\xB6')
+        text_in_bytes = text_in_bytes.replace(b'&#247;', b'\xc3\xB7')  # DIVISION SIGN
+        text_in_bytes = text_in_bytes.replace(b'&oslash;', b'\xc3\xB8')
+        text_in_bytes = text_in_bytes.replace(b'&ugrave;', b'\xc3\xB9')
+        text_in_bytes = text_in_bytes.replace(b'&uacute;', b'\xc3\xBA')
+        text_in_bytes = text_in_bytes.replace(b'&ucirc;', b'\xc3\xBB')
+        text_in_bytes = text_in_bytes.replace(b'&uuml;', b'\xc3\xBC')
+        text_in_bytes = text_in_bytes.replace(b'&yacute;', b'\xc3\xBD')
+        text_in_bytes = text_in_bytes.replace(b'&thorn;', b'\xc3\xBE')
+        text_in_bytes = text_in_bytes.replace(b'&yuml;', b'\xc3\xBF')
 
         # Greek Entities for HTML4 and Chadwock Healey -- Charles Cooney
-        text = text.replace('&agr;', '\xce\xb1')
-        text = text.replace('&alpha;', '\xce\xb1')
-        text = text.replace('&bgr;', '\xce\xb2')
-        text = text.replace('&beta;', '\xce\xb2')
-        text = text.replace('&ggr;', '\xce\xb3')
-        text = text.replace('&gamma;', '\xce\xb3')
-        text = text.replace('&dgr;', '\xce\xb4')
-        text = text.replace('&delta;', '\xce\xb4')
-        text = text.replace('&egr;', '\xce\xb5')
-        text = text.replace('&epsilon;', '\xce\xb5')
-        text = text.replace('&zgr;', '\xce\xb6')
-        text = text.replace('&zeta;', '\xce\xb6')
-        text = text.replace('&eegr;', '\xce\xb7')
-        text = text.replace('&eta;', '\xce\xb7')
-        text = text.replace('&thgr;', '\xce\xb8')
-        text = text.replace('&theta;', '\xce\xb8')
-        text = text.replace('&igr;', '\xce\xb9')
-        text = text.replace('&iota;', '\xce\xb9')
-        text = text.replace('&kgr;', '\xce\xba')
-        text = text.replace('&kappa;', '\xce\xba')
-        text = text.replace('&lgr;', '\xce\xbb')
-        text = text.replace('&lambda;', '\xce\xbb')
-        text = text.replace('&mgr;', '\xce\xbc')
-        text = text.replace('&mu;', '\xce\xbc')
-        text = text.replace('&ngr;', '\xce\xbd')
-        text = text.replace('&nu;', '\xce\xbd')
-        text = text.replace('&xgr;', '\xce\xbe')
-        text = text.replace('&xi;', '\xce\xbe')
-        text = text.replace('&ogr;', '\xce\xbf')
-        text = text.replace('&omicron;', '\xce\xbf')
-        text = text.replace('&pgr;', '\xcf\x80')
-        text = text.replace('&pi;', '\xcf\x80')
-        text = text.replace('&rgr;', '\xcf\x81')
-        text = text.replace('&rho;', '\xcf\x81')
-        text = text.replace('&sfgr;', '\xcf\x82')
-        text = text.replace('&sigmaf;', '\xcf\x82')
-        text = text.replace('&sgr;', '\xcf\x83')
-        text = text.replace('&sigma;', '\xcf\x83')
-        text = text.replace('&tgr;', '\xcf\x84')
-        text = text.replace('&tau;', '\xcf\x84')
-        text = text.replace('&ugr;', '\xcf\x85')
-        text = text.replace('&upsilon;', '\xcf\x85')
-        text = text.replace('&phgr;', '\xcf\x86')
-        text = text.replace('&phi;', '\xcf\x86')
-        text = text.replace('&khgr;', '\xcf\x87')
-        text = text.replace('&chi;', '\xcf\x87')
-        text = text.replace('&psgr;', '\xcf\x88')
-        text = text.replace('&psi;', '\xcf\x88')
-        text = text.replace('&ohgr;', '\xcf\x89')
-        text = text.replace('&omega;', '\xcf\x89')
-        text = text.replace('&Agr;', '\xce\x91')
-        text = text.replace('&Alpha;', '\xce\x91')
-        text = text.replace('&Bgr;', '\xce\x92')
-        text = text.replace('&Beta;', '\xce\x92')
-        text = text.replace('&Ggr;', '\xce\x93')
-        text = text.replace('&Gamma;', '\xce\x93')
-        text = text.replace('&Dgr;', '\xce\x94')
-        text = text.replace('&Delta;', '\xce\x94')
-        text = text.replace('&Egr;', '\xce\x95')
-        text = text.replace('&Epsilon;', '\xce\x95')
-        text = text.replace('&Zgr;', '\xce\x96')
-        text = text.replace('&Zeta;', '\xce\x96')
-        text = text.replace('&EEgr;', '\xce\x97')
-        text = text.replace('&Eta;', '\xce\x97')
-        text = text.replace('&THgr;', '\xce\x98')
-        text = text.replace('&Theta;', '\xce\x98')
-        text = text.replace('&Igr;', '\xce\x99')
-        text = text.replace('&Iota;', '\xce\x99')
-        text = text.replace('&Kgr;', '\xce\x9a')
-        text = text.replace('&Kappa;', '\xce\x9a')
-        text = text.replace('&Lgr;', '\xce\x9b')
-        text = text.replace('&Lambda;', '\xce\x9b')
-        text = text.replace('&Mgr;', '\xce\x9c')
-        text = text.replace('&Mu;', '\xce\x9c')
-        text = text.replace('&Ngr;', '\xce\x9d')
-        text = text.replace('&Nu;', '\xce\x9d')
-        text = text.replace('&Xgr;', '\xce\x9e')
-        text = text.replace('&Xi;', '\xce\x9e')
-        text = text.replace('&Ogr;', '\xce\x9f')
-        text = text.replace('&Omicron;', '\xce\x9f')
-        text = text.replace('&Pgr;', '\xce\xa0')
-        text = text.replace('&Pi;', '\xce\xa0')
-        text = text.replace('&Rgr;', '\xce\xa1')
-        text = text.replace('&Rho;', '\xce\xa1')
-        text = text.replace('&Sgr;', '\xce\xa3')
-        text = text.replace('&Sigma;', '\xce\xa3')
-        text = text.replace('&Tgr;', '\xce\xa4')
-        text = text.replace('&Tau;', '\xce\xa4')
-        text = text.replace('&Ugr;', '\xce\xa5')
-        text = text.replace('&Upsilon;', '\xce\xa5')
-        text = text.replace('&PHgr;', '\xce\xa6')
-        text = text.replace('&Phi;', '\xce\xa6')
-        text = text.replace('&KHgr;', '\xce\xa7')
-        text = text.replace('&Chi;', '\xce\xa7')
-        text = text.replace('&PSgr;', '\xce\xa8')
-        text = text.replace('&Psi;', '\xce\xa8')
-        text = text.replace('&OHgr;', '\xce\xa9')
-        text = text.replace('&Omega;', '\xce\xa9')
-        return text
+        text_in_bytes = text_in_bytes.replace(b'&agr;', b'\xce\xb1')
+        text_in_bytes = text_in_bytes.replace(b'&alpha;', b'\xce\xb1')
+        text_in_bytes = text_in_bytes.replace(b'&bgr;', b'\xce\xb2')
+        text_in_bytes = text_in_bytes.replace(b'&beta;', b'\xce\xb2')
+        text_in_bytes = text_in_bytes.replace(b'&ggr;', b'\xce\xb3')
+        text_in_bytes = text_in_bytes.replace(b'&gamma;', b'\xce\xb3')
+        text_in_bytes = text_in_bytes.replace(b'&dgr;', b'\xce\xb4')
+        text_in_bytes = text_in_bytes.replace(b'&delta;', b'\xce\xb4')
+        text_in_bytes = text_in_bytes.replace(b'&egr;', b'\xce\xb5')
+        text_in_bytes = text_in_bytes.replace(b'&epsilon;', b'\xce\xb5')
+        text_in_bytes = text_in_bytes.replace(b'&zgr;', b'\xce\xb6')
+        text_in_bytes = text_in_bytes.replace(b'&zeta;', b'\xce\xb6')
+        text_in_bytes = text_in_bytes.replace(b'&eegr;', b'\xce\xb7')
+        text_in_bytes = text_in_bytes.replace(b'&eta;', b'\xce\xb7')
+        text_in_bytes = text_in_bytes.replace(b'&thgr;', b'\xce\xb8')
+        text_in_bytes = text_in_bytes.replace(b'&theta;', b'\xce\xb8')
+        text_in_bytes = text_in_bytes.replace(b'&igr;', b'\xce\xb9')
+        text_in_bytes = text_in_bytes.replace(b'&iota;', b'\xce\xb9')
+        text_in_bytes = text_in_bytes.replace(b'&kgr;', b'\xce\xba')
+        text_in_bytes = text_in_bytes.replace(b'&kappa;', b'\xce\xba')
+        text_in_bytes = text_in_bytes.replace(b'&lgr;', b'\xce\xbb')
+        text_in_bytes = text_in_bytes.replace(b'&lambda;', b'\xce\xbb')
+        text_in_bytes = text_in_bytes.replace(b'&mgr;', b'\xce\xbc')
+        text_in_bytes = text_in_bytes.replace(b'&mu;', b'\xce\xbc')
+        text_in_bytes = text_in_bytes.replace(b'&ngr;', b'\xce\xbd')
+        text_in_bytes = text_in_bytes.replace(b'&nu;', b'\xce\xbd')
+        text_in_bytes = text_in_bytes.replace(b'&xgr;', b'\xce\xbe')
+        text_in_bytes = text_in_bytes.replace(b'&xi;', b'\xce\xbe')
+        text_in_bytes = text_in_bytes.replace(b'&ogr;', b'\xce\xbf')
+        text_in_bytes = text_in_bytes.replace(b'&omicron;', b'\xce\xbf')
+        text_in_bytes = text_in_bytes.replace(b'&pgr;', b'\xcf\x80')
+        text_in_bytes = text_in_bytes.replace(b'&pi;', b'\xcf\x80')
+        text_in_bytes = text_in_bytes.replace(b'&rgr;', b'\xcf\x81')
+        text_in_bytes = text_in_bytes.replace(b'&rho;', b'\xcf\x81')
+        text_in_bytes = text_in_bytes.replace(b'&sfgr;', b'\xcf\x82')
+        text_in_bytes = text_in_bytes.replace(b'&sigmaf;', b'\xcf\x82')
+        text_in_bytes = text_in_bytes.replace(b'&sgr;', b'\xcf\x83')
+        text_in_bytes = text_in_bytes.replace(b'&sigma;', b'\xcf\x83')
+        text_in_bytes = text_in_bytes.replace(b'&tgr;', b'\xcf\x84')
+        text_in_bytes = text_in_bytes.replace(b'&tau;', b'\xcf\x84')
+        text_in_bytes = text_in_bytes.replace(b'&ugr;', b'\xcf\x85')
+        text_in_bytes = text_in_bytes.replace(b'&upsilon;', b'\xcf\x85')
+        text_in_bytes = text_in_bytes.replace(b'&phgr;', b'\xcf\x86')
+        text_in_bytes = text_in_bytes.replace(b'&phi;', b'\xcf\x86')
+        text_in_bytes = text_in_bytes.replace(b'&khgr;', b'\xcf\x87')
+        text_in_bytes = text_in_bytes.replace(b'&chi;', b'\xcf\x87')
+        text_in_bytes = text_in_bytes.replace(b'&psgr;', b'\xcf\x88')
+        text_in_bytes = text_in_bytes.replace(b'&psi;', b'\xcf\x88')
+        text_in_bytes = text_in_bytes.replace(b'&ohgr;', b'\xcf\x89')
+        text_in_bytes = text_in_bytes.replace(b'&omega;', b'\xcf\x89')
+        text_in_bytes = text_in_bytes.replace(b'&Agr;', b'\xce\x91')
+        text_in_bytes = text_in_bytes.replace(b'&Alpha;', b'\xce\x91')
+        text_in_bytes = text_in_bytes.replace(b'&Bgr;', b'\xce\x92')
+        text_in_bytes = text_in_bytes.replace(b'&Beta;', b'\xce\x92')
+        text_in_bytes = text_in_bytes.replace(b'&Ggr;', b'\xce\x93')
+        text_in_bytes = text_in_bytes.replace(b'&Gamma;', b'\xce\x93')
+        text_in_bytes = text_in_bytes.replace(b'&Dgr;', b'\xce\x94')
+        text_in_bytes = text_in_bytes.replace(b'&Delta;', b'\xce\x94')
+        text_in_bytes = text_in_bytes.replace(b'&Egr;', b'\xce\x95')
+        text_in_bytes = text_in_bytes.replace(b'&Epsilon;', b'\xce\x95')
+        text_in_bytes = text_in_bytes.replace(b'&Zgr;', b'\xce\x96')
+        text_in_bytes = text_in_bytes.replace(b'&Zeta;', b'\xce\x96')
+        text_in_bytes = text_in_bytes.replace(b'&EEgr;', b'\xce\x97')
+        text_in_bytes = text_in_bytes.replace(b'&Eta;', b'\xce\x97')
+        text_in_bytes = text_in_bytes.replace(b'&THgr;', b'\xce\x98')
+        text_in_bytes = text_in_bytes.replace(b'&Theta;', b'\xce\x98')
+        text_in_bytes = text_in_bytes.replace(b'&Igr;', b'\xce\x99')
+        text_in_bytes = text_in_bytes.replace(b'&Iota;', b'\xce\x99')
+        text_in_bytes = text_in_bytes.replace(b'&Kgr;', b'\xce\x9a')
+        text_in_bytes = text_in_bytes.replace(b'&Kappa;', b'\xce\x9a')
+        text_in_bytes = text_in_bytes.replace(b'&Lgr;', b'\xce\x9b')
+        text_in_bytes = text_in_bytes.replace(b'&Lambda;', b'\xce\x9b')
+        text_in_bytes = text_in_bytes.replace(b'&Mgr;', b'\xce\x9c')
+        text_in_bytes = text_in_bytes.replace(b'&Mu;', b'\xce\x9c')
+        text_in_bytes = text_in_bytes.replace(b'&Ngr;', b'\xce\x9d')
+        text_in_bytes = text_in_bytes.replace(b'&Nu;', b'\xce\x9d')
+        text_in_bytes = text_in_bytes.replace(b'&Xgr;', b'\xce\x9e')
+        text_in_bytes = text_in_bytes.replace(b'&Xi;', b'\xce\x9e')
+        text_in_bytes = text_in_bytes.replace(b'&Ogr;', b'\xce\x9f')
+        text_in_bytes = text_in_bytes.replace(b'&Omicron;', b'\xce\x9f')
+        text_in_bytes = text_in_bytes.replace(b'&Pgr;', b'\xce\xa0')
+        text_in_bytes = text_in_bytes.replace(b'&Pi;', b'\xce\xa0')
+        text_in_bytes = text_in_bytes.replace(b'&Rgr;', b'\xce\xa1')
+        text_in_bytes = text_in_bytes.replace(b'&Rho;', b'\xce\xa1')
+        text_in_bytes = text_in_bytes.replace(b'&Sgr;', b'\xce\xa3')
+        text_in_bytes = text_in_bytes.replace(b'&Sigma;', b'\xce\xa3')
+        text_in_bytes = text_in_bytes.replace(b'&Tgr;', b'\xce\xa4')
+        text_in_bytes = text_in_bytes.replace(b'&Tau;', b'\xce\xa4')
+        text_in_bytes = text_in_bytes.replace(b'&Ugr;', b'\xce\xa5')
+        text_in_bytes = text_in_bytes.replace(b'&Upsilon;', b'\xce\xa5')
+        text_in_bytes = text_in_bytes.replace(b'&PHgr;', b'\xce\xa6')
+        text_in_bytes = text_in_bytes.replace(b'&Phi;', b'\xce\xa6')
+        text_in_bytes = text_in_bytes.replace(b'&KHgr;', b'\xce\xa7')
+        text_in_bytes = text_in_bytes.replace(b'&Chi;', b'\xce\xa7')
+        text_in_bytes = text_in_bytes.replace(b'&PSgr;', b'\xce\xa8')
+        text_in_bytes = text_in_bytes.replace(b'&Psi;', b'\xce\xa8')
+        text_in_bytes = text_in_bytes.replace(b'&OHgr;', b'\xce\xa9')
+        text_in_bytes = text_in_bytes.replace(b'&Omega;', b'\xce\xa9')
+        return text_in_bytes.decode('utf8')
 
     def convert_other_ents(self, text):
         """ handles character entities in index words.
@@ -1213,7 +1212,7 @@ class XMLParser(object):
         return text
 
     def remove_control_chars(self, text):
-        return control_char_re.sub('', text.decode('utf8', 'ignore')).encode('utf8')
+        return control_char_re.sub('', text)
 
 # Pre-compiled regexes used for parsing
 join_hyphen_with_lb = re.compile(r'(\&shy;[\n \t]*<lb\/>)', re.I | re.M)
@@ -1287,8 +1286,9 @@ abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)',
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
 tab_newline = re.compile(r'[\n|\t]', re.U)
 control_chars = ''.join(
-    [i for i in [unichr(x) for x in list(range(0, 32)) + list(range(127, 160))] if not tab_newline.search(i)])
-control_char_re = re.compile(r'[%s]' % re.escape(control_chars), re.U)
+    [i for i in [chr(x) for x in list(range(0, 32)) + list(range(127, 160))] if not tab_newline.search(i)])
+control_char_re = re.compile(r'[%s]' % re.escape(control_chars))
+
 
 # Entities regexes
 entity_regex = [
@@ -1366,6 +1366,6 @@ if __name__ == "__main__":
                            docid,
                            size,
                            known_metadata={"filename": fn},
-                           tag_to_obj_map=DefaultTagToObjMap,
-                           metadata_to_parse=DefaultMetadataToParse)
+                           tag_to_obj_map=DEFAULT_TAG_TO_OBJ_MAP,
+                           metadata_to_parse=DEFAULT_METADATA_TO_PARSE)
         parser.parse(fh)

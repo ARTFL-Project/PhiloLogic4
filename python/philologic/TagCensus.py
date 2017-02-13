@@ -1,5 +1,5 @@
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 from philologic import shlaxtree as st
 import sys
 
@@ -50,7 +50,7 @@ class TagCensus:
         self.tags[name][kind] += 1
 
     def __iadd__(self,other):
-        for tag in other.tags.keys():
+        for tag in list(other.tags.keys()):
             if tag not in self.tags:
                 self[tag] = {"start":0,"end":0,"empty":0,"malformed":0}
             self[tag]["start"] += other.tags[tag]["start"]
@@ -61,14 +61,14 @@ class TagCensus:
         
     def __sub__(self,other):
         res = {}
-        for tag in self.tags.keys():
+        for tag in list(self.tags.keys()):
             if tag not in res:
                 res[tag] = {"start":0,"end":0,"empty":0,"malformed":0}
             res[tag]["start"] += self.tags[tag]["start"]
             res[tag]["end"] += self.tags[tag]["end"]
             res[tag]["empty"] += self.tags[tag]["empty"]
             res[tag]["malformed"] += self.tags[tag]["malformed"]
-        for tag in other.tags.keys():
+        for tag in list(other.tags.keys()):
             if tag not in res:
                 res[tag] = {"start":0,"end":0,"empty":0,"malformed":0}
             res[tag]["start"] -= other.tags[tag]["start"]
@@ -76,14 +76,14 @@ class TagCensus:
             res[tag]["empty"] -= other.tags[tag]["empty"]
             res[tag]["malformed"] -= other.tags[tag]["malformed"]
 
-        for tag in res.keys():
+        for tag in list(res.keys()):
             if res[tag] == {"start":0,"end":0,"empty":0,"malformed":0}:
                 del res[tag]
 
         return res
 
     def __str__(self):
-        longest = max(len(k) for k in self.tags.keys()) + 4 # 3 possible flags + space
+        longest = max(len(k) for k in list(self.tags.keys())) + 4 # 3 possible flags + space
         res = "    tag%s\tstart\tend\tempty\tmalformed\n" % (" " * (longest - len("tag")))
         for tag in sorted(self.tags.keys()):
             status = ""

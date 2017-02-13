@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import re
@@ -7,7 +7,7 @@ import sys
 import unicodedata
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.DB import DB
 from philologic.MetadataQuery import metadata_pattern_search
 from philologic.QuerySyntax import parse_query
@@ -30,7 +30,7 @@ def metadata_list(environ, start_response):
     request = WSGIHandler(environ, config)
     metadata = request.term
     field = request.field
-    yield autocomplete_metadata(metadata, field, db)
+    yield autocomplete_metadata(metadata, field, db).encode('utf8')
 
 def autocomplete_metadata(metadata, field, db):
     path = os.environ['SCRIPT_FILENAME'].replace('scripts/metadata_list.py',
@@ -43,7 +43,7 @@ def autocomplete_metadata(metadata, field, db):
         field = field[-1]
 
     words = format_query(metadata, field, db)[:100]
-    return simplejson.dumps(words)
+    return json.dumps(words)
 
 
 def format_query(q, field, db):
@@ -70,7 +70,7 @@ def format_query(q, field, db):
         prefix = prefix + " CUTHERE "
     expanded = []
     if label == "QUOTE_S" or label == "TERM":
-        norm_tok = token.decode("utf-8").lower()
+        norm_tok = token.lower()
         norm_tok = [i
                     for i in unicodedata.normalize("NFKD", norm_tok)
                     if not unicodedata.combining(i)]
@@ -113,7 +113,7 @@ def highlighter(words, norm_tok, substr_tok):
     for word in words:
         highlighted_section = word.decode('utf8')[:token_len]
         end_word = word.decode('utf-8')[token_len:]
-        highlighted_word = u'<span class="highlight">' + highlighted_section + '</span>' + end_word
+        highlighted_word = '<span class="highlight">' + highlighted_section + '</span>' + end_word
         new_list.append(highlighted_word.encode('utf8'))
     return new_list
 

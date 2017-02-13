@@ -6,23 +6,23 @@ from philologic.OHCOVector import Record
 
 
 abbreviations = set([
-    u"Mr",
-    u"Mrs",
-    u"Ms",
-    u"Mme",
-    u"Mlle",
-    u"pp",
-    u"vol"
+    "Mr",
+    "Mrs",
+    "Ms",
+    "Mme",
+    "Mlle",
+    "pp",
+    "vol"
 ])
 
 exceptions = set([
-    u"que",
-    u"qui",
-    u"quoi",
-    u"où",
-    u"what",
-    u"which",
-    u"where"
+    "que",
+    "qui",
+    "quoi",
+    "où",
+    "what",
+    "which",
+    "where"
 ])
 
 
@@ -74,7 +74,7 @@ def fix_sentence_boundary(loader_obj, text):
         else:
             change_philo_id = False
         records.append(record)
-    print >> tmp_file, '\n'.join([str(i) for i in records])
+    print('\n'.join([str(i) for i in records]), file=tmp_file)
     os.rename(text["raw"] + ".tmp",text["raw"])
     
 def return_record(line):

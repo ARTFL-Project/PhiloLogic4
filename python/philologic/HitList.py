@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-from __future__ import absolute_import, print_function
+#!/usr/bin/env python3
+
 import os
 import time
 import struct
@@ -14,7 +14,6 @@ class HitList(object):
                  filename,
                  words,
                  dbh,
-                 encoding=None,
                  doc=0,
                  byte=6,
                  method="proxy",
@@ -30,14 +29,13 @@ class HitList(object):
             self.sort_order = None
         self.raw = raw  # if true, this return the raw hitlist consisting of a list of philo_ids
         self.dbh = dbh
-        self.encoding = encoding or dbh.encoding
         if method is not "cooc":
             self.has_word_id = 1
             self.length = 7 + 2 * (words)
         else:
             self.has_word_id = 0  # unfortunately.  fix this next time I have 3 months to spare.
             self.length = methodarg + 1 + (words)
-        self.fh = open(self.filename)  # need a full path here.
+        self.fh = open(self.filename, "rb")  # need a full path here.
         self.format = "=%dI" % self.length  # short for object id's, int for byte offset.
         self.hitsize = struct.calcsize(self.format)
         self.doc = doc
@@ -176,7 +174,7 @@ class HitList(object):
             except OSError:
                 pass
             self.size = os.stat(self.filename).st_size  # in bytes
-            self.count = self.size / self.hitsize
+            self.count = int(self.size / self.hitsize)
 
     def finish(self):
         while not self.done:

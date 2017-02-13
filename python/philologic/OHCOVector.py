@@ -1,10 +1,8 @@
-#!/usr/bin/env python
-from __future__ import absolute_import
-from __future__ import print_function
+#!/usr/bin/env python3
+
+
 import sys
-from simplejson import dumps
-import six
-from six.moves import zip
+from json import dumps
 
 ### CompoundStack is the class to use for all parsers.
 
@@ -58,8 +56,8 @@ class CompoundRecord(object):
         print_id.append(self.attrib.get("page", 0))
         self.attrib["parent"] = " ".join(str(x) for x in parent_id)
         clean_attrib = {}
-        for k, v in self.attrib.items():
-            if isinstance(v, six.string_types):
+        for k, v in list(self.attrib.items()):
+            if isinstance(v, str):
                 clean_attrib[k] = " ".join(v.split())
             else:
                 clean_attrib[k] = v
@@ -320,13 +318,13 @@ class Record(object):
 
     def __str__(self):
         clean_attrib = {}
-        for k, v in self.attrib.items():
-            if isinstance(v, six.string_types):
+        for k, v in list(self.attrib.items()):
+            if isinstance(v, str):
                 clean_attrib[k] = " ".join(v.split())
             else:
                 clean_attrib[k] = v
 
-        # Using simplejson.dumps to write dict as it is much faster to read from a json string
+        # Using json.dumps to write dict as it is much faster to read from a json string
         return "%s\t%s\t%s\t%s" % (self.type, self.name, " ".join(str(i) for i in self.id), dumps(clean_attrib))
 
     def __repr__(self):

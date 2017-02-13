@@ -1,8 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from __future__ import absolute_import
-from urllib import quote_plus
-import six
+
+from urllib.parse import quote_plus
 
 
 def url_encode(q_params):
@@ -14,10 +13,7 @@ def url_encode(q_params):
                 for s in v:
                     encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(s, safe='/'))
             else:
-                try:
-                    encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(v, safe='/'))
-                except KeyError:
-                    encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(v.encode('utf8'), safe='/'))
+                encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(v, safe='/'))
         else:  # Value is None
             encoded_str.append(quote_plus(k, safe='/') + '=' + '')
     return '&'.join(encoded_str)
@@ -29,11 +25,11 @@ def make_object_link(philo_id, hit_bytes):
     return href
 
 
-def make_absolute_object_link(config, philo_id, bytes=None):
+def make_absolute_object_link(config, philo_id, byte_offsets=None):
     """ Takes a valid PhiloLogic object, and returns an absolute URL representation of such. """
     href = 'navigate/' + "/".join(str(x) for x in philo_id)
-    if bytes is not None:
-        href += byte_query(bytes)
+    if byte_offsets is not None:
+        href += byte_query(byte_offsets)
     return href
 
 
@@ -41,7 +37,7 @@ def make_absolute_query_link(config, params, script_name="query", **extra_params
     """ Takes a dictionary of query parameters as produced by WSGIHandler,
     and returns an absolute URL representation of such. """
     params = dict([i for i in params])
-    for k, v in six.iteritems(extra_params):
+    for k, v in extra_params.items():
         params[k] = v
     query_string = url_encode(list(params.items()))
     href = "%s?%s" % (script_name, query_string)

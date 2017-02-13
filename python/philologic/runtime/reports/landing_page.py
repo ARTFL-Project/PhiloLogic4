@@ -1,19 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Landing page reports."""
 
-from __future__ import absolute_import, print_function
-
+import json
 import sqlite3
 import sys
 import unicodedata
 from operator import itemgetter
 
-import simplejson
-import six
 from philologic.DB import DB
 from philologic.runtime.citations import citation_links, citations
-
-from six.moves import range
 
 
 def landing_page_bibliography(request, config):
@@ -80,7 +75,7 @@ def landing_page_bibliography(request, config):
 def group_by_range(request_range, request, config):
     db = DB(config.db_path + '/data/')
     metadata_queried = request.group_by_field
-    citation_types = simplejson.loads(request.citation)
+    citation_types = json.loads(request.citation)
     is_date = False
     try:
         int(request_range[0])
@@ -97,9 +92,14 @@ def group_by_range(request_range, request, config):
             ord(request_range[0]),
             ord(request_range[1]) + 1))  # Ordinal avoids unicode issues...
     c = db.dbh.cursor()
-    c.execute(
-        'select *, count(*) as count from toms where philo_type="doc" group by %s'
-        % metadata_queried)
+    try:
+        c.execute('select *, count(*) as count from toms where philo_type="doc" group by %s' % metadata_queried)
+    except sqlite3.OperationalError:
+        return json.dumps({
+            "display_count": request.display_count,
+            "content_type": content_type,
+            "content": []
+        })
     content = {}
     for doc in c.fetchall():
         normalized_test_value = ''
@@ -113,7 +113,7 @@ def group_by_range(request_range, request, config):
                 continue
         else:
             try:
-                initial_letter = doc[metadata_queried].decode('utf-8')[0].lower()
+                initial_letter = doc[metadata_queried][0].lower()
             except IndexError:
                 # we have an empty string
                 continue
@@ -122,14 +122,14 @@ def group_by_range(request_range, request, config):
                 [i
                  for i in unicodedata.normalize("NFKD", initial_letter)
                  if not unicodedata.combining(i)]))
-            initial = initial_letter.upper().encode("utf8")
+            initial = initial_letter.upper()
         # Are we within the range?
         if test_value in query_range or normalized_test_value in query_range:
             if normalized_test_value in query_range:
                 initial = ''.join(
                     [i
                      for i in unicodedata.normalize("NFKD", initial_letter)
-                     if not unicodedata.combining(i)]).upper().encode('utf8')
+                     if not unicodedata.combining(i)]).upper()
             obj = db[doc["philo_id"]]
             links = citation_links(db, config, obj)
             citation = citations(obj, links, config, report="landing_page", citation_type=citation_types)
@@ -141,15 +141,15 @@ def group_by_range(request_range, request, config):
                 "count": doc['count']
             })
     results = []
-    for result_set in sorted(six.iteritems(content), key=itemgetter(0)):
+    for result_set in sorted(content.items(), key=itemgetter(0)):
         results.append({"prefix": result_set[0], "results": result_set[1]})
-    return simplejson.dumps({"display_count": request.display_count,
-                             "content_type": content_type,
-                             "content": results})
+    return json.dumps({"display_count": request.display_count,
+                       "content_type": content_type,
+                       "content": results})
 
 
 def group_by_metadata(request, config):
-    citation_types = simplejson.loads(request.citation)
+    citation_types = json.loads(request.citation)
     db = DB(config.db_path + '/data/')
     c = db.dbh.cursor()
     query = '''select * from toms where philo_type="doc" and %s=?''' % request.group_by_field
@@ -163,7 +163,7 @@ def group_by_metadata(request, config):
             "metadata": get_all_metadata(db, doc),
             "citation": citation
         })
-    return simplejson.dumps({
+    return json.dumps({
         "display_count": request.display_count,
         "content_type": request.group_by_field,
         "content": [{

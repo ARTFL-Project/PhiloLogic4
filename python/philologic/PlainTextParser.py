@@ -1,9 +1,9 @@
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import sys
 import os
 import re
-import StringIO
+import io
 from philologic import OHCOVector
 
 
@@ -49,7 +49,7 @@ class PlainTextParser(object):
 
         # Begin by creating a document level object, just call it "text" for now.
         self.v.push("doc", "text", 0)
-        for k, v in self.known_metadata.items():
+        for k, v in list(self.known_metadata.items()):
             # if the parser was created with known_metadata,
             # we can attach it to the newly created doc object here.
             # you can attach metadata to an object at any time between push() and pull().

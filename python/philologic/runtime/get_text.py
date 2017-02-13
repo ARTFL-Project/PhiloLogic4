@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from __future__ import absolute_import, print_function
+
 import os
 import re
 
@@ -12,7 +12,7 @@ from philologic.DB import DB
 
 def get_text(hit, start_byte, length, path):
     file_path = path + '/data/TEXT/' + hit.doc.filename
-    text_file = open(file_path)
+    text_file = open(file_path, "rb")
     text_file.seek(start_byte)
     return text_file.read(length)
 
@@ -39,7 +39,7 @@ def get_text_obj(obj, config, request, word_regex, note=False, images=True):
         c = obj.db.dbh.cursor()
         c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id, ))
         path += "/data/TEXT/" + c.fetchone()["filename"]
-    file = open(path)
+    file = open(path, 'rb')
     start_byte = int(obj.start_byte)
     file.seek(start_byte)
     width = int(obj.end_byte) - start_byte
@@ -50,7 +50,6 @@ def get_text_obj(obj, config, request, word_regex, note=False, images=True):
         byte_offsets = []
 
     formatted_text, imgs = format_text_object(obj, raw_text, config, request, word_regex, byte_offsets=byte_offsets, note=note, images=images)
-    formatted_text = formatted_text.decode("utf-8", "ignore")
     if images:
         return formatted_text, imgs
     else:

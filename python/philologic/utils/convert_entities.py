@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from __future__ import absolute_import
-import six.moves.html_entities
+
+from html.entities import name2codepoint
 import re
 
 
-entities_match = re.compile("&#?\w+;")
+entities_match = re.compile(r"&#?\w+;")
 
 def convert_entities(text):
     def fixup(m):
@@ -14,19 +14,16 @@ def convert_entities(text):
             # character reference
             try:
                 if text[:3] == "&#x":
-                    return unichr(int(text[3:-1], 16))
+                    return chr(int(text[3:-1], 16))
                 else:
-                    return unichr(int(text[2:-1]))
+                    return chr(int(text[2:-1]))
             except ValueError:
                 pass
         else:
             # named entity
             try:
-                text = unichr(six.moves.html_entities.name2codepoint[text[1:-1]])
+                text = chr(name2codepoint[text[1:-1]])
             except KeyError:
                 pass
         return text  # leave as is
-    try:
-        return entities_match.sub(fixup, text)
-    except UnicodeDecodeError:
-        return entities_match.sub(fixup, text.decode('utf8'))
+    return entities_match.sub(fixup, text)

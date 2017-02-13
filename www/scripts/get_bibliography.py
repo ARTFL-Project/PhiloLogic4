@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import sqlite3
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.DB import DB
 
 from philologic.runtime import landing_page_bibliography
@@ -20,7 +20,7 @@ def get_bibliography(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     request = WSGIHandler(environ, config)
     results = landing_page_bibliography(request, config)
-    yield simplejson.dumps(results)
+    yield json.dumps(results).encode('utf8')
 
 
 if __name__ == "__main__":

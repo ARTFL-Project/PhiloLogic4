@@ -16,12 +16,12 @@ fi
 
 cd ..;
 echo "Installing Python dependencies"
-sudo -H pip install -r requirements.txt
+sudo -H pip3 install -r requirements.txt
 
 PYTHON_INSTALL="\n## INSTALLING PYTHON LIBRARY ##"
 echo "$PYTHON_INSTALL"
 cd python;
-sudo -H pip install --upgrade .
+sudo -H pip3 install --upgrade .
 sudo mkdir -p /etc/philologic/
 
 cd ..;

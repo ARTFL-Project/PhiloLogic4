@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.DB import DB
 from philologic.Query import split_terms
 from philologic.QuerySyntax import group_terms, parse_query
@@ -21,7 +21,7 @@ def term_group(environ, start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(environ, config)
     if not request["q"]:
-        dump = simplejson.dumps({"original_query": "", "term_groups": []})
+        dump = json.dumps({"original_query": "", "term_groups": []})
     else:
         hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata)
         parsed = parse_query(request.q)
@@ -44,8 +44,8 @@ def term_group(environ, start_response):
                     term_group += ' %s ' % term
             term_group = term_group.strip()
             term_groups.append(term_group)
-        dump = simplejson.dumps({"term_groups": term_groups, "original_query": request.original_q})
-    yield dump
+        dump = json.dumps({"term_groups": term_groups, "original_query": request.original_q})
+    yield dump.encode('utf8')
 
 
 if __name__ == "__main__":

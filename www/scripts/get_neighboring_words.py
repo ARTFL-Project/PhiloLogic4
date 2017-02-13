@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import string
@@ -6,7 +6,7 @@ import sys
 import timeit
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.DB import DB
 
 from philologic.runtime import kwic_hit_object
@@ -63,7 +63,7 @@ def get_neighboring_words(environ, start_response):
                   (left_rowid, results['rowid']-1))
         result_obj["left"] = []
         for i in c.fetchall():
-            result_obj["left"].append(i['philo_name'].decode('utf-8'))
+            result_obj["left"].append(i['philo_name'])
         result_obj["left"].reverse()
         result_obj["left"] = ' '.join(result_obj["left"])
 
@@ -71,7 +71,7 @@ def get_neighboring_words(environ, start_response):
                   (results['rowid']+1, right_rowid))
         result_obj["right"] = []
         for i in c.fetchall():
-            result_obj["right"].append(i['philo_name'].decode('utf-8'))
+            result_obj["right"].append(i['philo_name'])
         result_obj["right"] = ' '.join(result_obj["right"])
 
         metadata_fields = {}
@@ -86,7 +86,7 @@ def get_neighboring_words(environ, start_response):
         if elapsed > max_time:  # avoid timeouts by splitting the query if more than 10 seconds has been spent in the loop
             break
 
-    yield simplejson.dumps({"results": kwic_words, "hits_done": index})
+    yield json.dumps({"results": kwic_words, "hits_done": index}).encode('utf8')
 
 
 if __name__ == "__main__":

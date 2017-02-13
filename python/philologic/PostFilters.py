@@ -1,17 +1,12 @@
-#!/usr/bin/env python
-from __future__ import absolute_import
-from __future__ import print_function
-import gzip
-import io
+#!/usr/bin/env python3
+
+
 import os
 import sqlite3
-import sys
 import time
 import unicodedata
-from collections import defaultdict
 
-from simplejson import loads
-from six.moves import range
+from json import loads
 
 
 def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
@@ -85,9 +80,9 @@ def normalized_word_frequencies(loader_obj):
     output = open(frequencies + "/normalized_word_frequencies", "w")
     for line in open(frequencies + '/word_frequencies'):
         word, count = line.split("\t")
-        norm_word = word.decode('utf-8').lower()
+        norm_word = word.lower()
         norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
-        norm_word = ''.join(norm_word).encode('utf-8')
+        norm_word = ''.join(norm_word)
         print(norm_word + "\t" + word, file=output)
     output.close()
 
@@ -104,7 +99,7 @@ def metadata_frequencies(loader_obj):
             output = open(frequencies + "/%s_frequencies" % field, "w")
             for result in c.fetchall():
                 if result[0] != None:
-                    val = result[0].encode('utf-8', 'ignore')
+                    val = result[0]
                     clean_val = val.replace("\n", " ").replace("\t", "")
                     print(clean_val + '\t' + str(result[1]), file=output)
             output.close()
@@ -124,9 +119,9 @@ def normalized_metadata_frequencies(loader_obj):
             output = open(frequencies + "/normalized_" + field + "_frequencies", "w")
             for line in open(frequencies + "/" + field + "_frequencies"):
                 word, count = line.split("\t")
-                norm_word = word.decode('utf-8').lower()
+                norm_word = word.lower()
                 norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
-                norm_word = ''.join(norm_word).encode('utf-8')
+                norm_word = ''.join(norm_word)
                 print(norm_word + "\t" + word, file=output)
             output.close()
         except:
@@ -136,7 +131,7 @@ def normalized_metadata_frequencies(loader_obj):
 # Some post-merge cleanup for normalize_divs in LoadFilters--should always be paired and use same arguments.
 def normalize_divs_post(*columns):
     def normalize_these_columns_post(loader):
-        for k, v in loader.metadata_types.items():
+        for k, v in list(loader.metadata_types.items()):
             if k in columns:
                 loader.metadata_types[k] = "div3"
 

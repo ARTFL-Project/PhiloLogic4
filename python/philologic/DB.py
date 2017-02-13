@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+
 import hashlib
 import os
 import sqlite3
@@ -10,7 +10,6 @@ from . import HitList
 from . import MetadataQuery
 from . import QuerySyntax
 from .HitWrapper import HitWrapper, PageWrapper
-from six.moves import range
 
 
 def hit_to_string(hit, width):
@@ -29,14 +28,13 @@ def hit_to_string(hit, width):
 
 
 class DB:
-    def __init__(self, dbpath, width=7, encoding="utf-8"):
+    def __init__(self, dbpath, width=7, cached=True):
+        """Disabling cache allows to use multiple DB objects in the same script
+        without running into collisions"""
         self.path = dbpath
-        self.dbh = sqlite3.connect(dbpath + "/toms.db", width)
-        self.dbh.text_factory = str
-        self.dbh.row_factory = sqlite3.Row
         self.width = width
-        self.encoding = "utf-8"
         self.locals = Config(dbpath + "/db.locals.py", db_locals_defaults, db_locals_header)
+        self.cached = cached
 
     def __getitem__(self, item):
         if self.width != 9:  # verify this isn't a page id
@@ -46,6 +44,16 @@ class DB:
         else:
             hit = [int(x) for x in hit_to_string(item, 9).split(" ")]
             return PageWrapper(hit, self)
+
+    def __getattr__(self, attr):
+        # We need to open DB only when accessed
+        # Useful when using a single instance of the DB class accross multiple processors
+        if attr == "dbh":
+            dbh = sqlite3.connect(self.path + "/toms.db", self.width)
+            dbh.text_factory = str
+            dbh.row_factory = sqlite3.Row
+            setattr(self, "dbh", dbh)
+            return self.dbh
 
     def get_id_lowlevel(self, item):
         hit_s = hit_to_string(item, self.width)
@@ -76,8 +84,8 @@ class DB:
     def get_all(self, philo_type="doc", sort_order=["rowid"], raw_results=False):
         """ get all objects of type philo_type """
         hash = hashlib.sha1()
-        hash.update(self.path)
-        hash.update(philo_type)
+        hash.update(self.path.encode('utf8'))
+        hash.update(philo_type.encode('utf8'))
         all_hash = hash.hexdigest()
         all_file = self.path + "/hitlists/" + all_hash + ".hitlist"
         if not os.path.isfile(all_file):
@@ -109,11 +117,11 @@ class DB:
                 limit = 10000000
 
         hash = hashlib.sha1()
-        hash.update(self.path)
+        hash.update(self.path.encode('utf8'))
         has_metadata = False
         corpus_file = None
 
-        for key, value in metadata.items():
+        for key, value in list(metadata.items()):
             if isinstance(value, str):
                 if value == "":
                     pass
@@ -123,7 +131,8 @@ class DB:
             value = [v for v in value if v]
             if value:
                 has_metadata = True
-                hash.update("%s=%s" % (key, "|".join(value)))
+                key_value = "%s=%s" % (key, "|".join(value))
+                hash.update(key_value.encode('utf8'))
 
         if has_metadata:
             corpus_hash = hash.hexdigest()
@@ -134,7 +143,7 @@ class DB:
                 # and sort them into a list of dictionaries, one for each type.
                 metadata_dicts = [{} for level in self.locals["metadata_hierarchy"]]
                 #                print >> sys.stderr, "querying %s" % repr(metadata.items())
-                for k, v in metadata.items():
+                for k, v in list(metadata.items()):
                     for i, params in enumerate(self.locals["metadata_hierarchy"]):
                         if v and (k in params):
                             metadata_dicts[i][k] = v
@@ -161,10 +170,10 @@ class DB:
         else:
             corpus = None
         if qs:
-            hash.update(qs)
-            hash.update(method)
-            hash.update(str(method_arg))
-            hash.update(str(limit))
+            hash.update(qs.encode('utf8'))
+            hash.update(method.encode('utf8'))
+            hash.update(str(method_arg).encode('utf8'))
+            hash.update(str(limit).encode('utf8'))
             search_hash = hash.hexdigest()
             search_file = self.path + "/hitlists/" + search_hash + ".hitlist"
             if sort_order == ["rowid"]:

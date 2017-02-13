@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import sqlite3
@@ -14,7 +14,7 @@ def get_web_config(environ, start_response):
     start_response(status, headers)
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     config.time_series_status = time_series_tester(config)
-    yield config.to_json()
+    yield config.to_json().encode('utf8')
 
 
 def time_series_tester(config):

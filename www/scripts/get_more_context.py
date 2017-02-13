@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import sys
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 from philologic.runtime import get_concordance_text
 from philologic.DB import DB
 
@@ -26,7 +26,7 @@ def get_more_context(environ, start_response):
     context_size = config['concordance_length'] * 3
     hit_context = get_concordance_text(db, hits[hit_num], config.db_path,
                                        context_size)
-    yield simplejson.dumps(hit_context)
+    yield json.dumps(hit_context).encode('utf8')
 
 
 if __name__ == "__main__":

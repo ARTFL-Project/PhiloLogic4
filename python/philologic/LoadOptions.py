@@ -1,7 +1,7 @@
 #!/usr/bin env python
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import imp
 import os
 import sys
@@ -10,7 +10,7 @@ from optparse import OptionParser
 
 from philologic import Loader, LoadFilters, PostFilters, NewParser, PlainTextParser
 from philologic.utils import pretty_print
-import six
+import collections
 
 
 # Load global config
@@ -44,16 +44,16 @@ class LoadOptions(object):
         self.values["post_filters"] = PostFilters.DefaultPostFilters
         self.values["plain_text_obj"] = []
         self.values["parser_factory"] = NewParser.XMLParser
-        self.values["token_regex"] = NewParser.TokenRegex
-        self.values["doc_xpaths"] = NewParser.DefaultDocXPaths
-        self.values["tag_to_obj_map"] = NewParser.DefaultTagToObjMap
-        self.values["metadata_to_parse"] = NewParser.DefaultMetadataToParse
+        self.values["token_regex"] = NewParser.TOKEN_REGEX
+        self.values["doc_xpaths"] = NewParser.DEFAULT_DOC_XPATHS
+        self.values["tag_to_obj_map"] = NewParser.DEFAULT_TAG_TO_OBJ_MAP
+        self.values["metadata_to_parse"] = NewParser.DEFAULT_METADATA_TO_PARSE
         self.values["pseudo_empty_tags"] = []
         self.values["suppress_tags"] = []
         self.values["break_apost"] = True
-        self.values["chars_not_to_index"] = NewParser.CharsNotToIndex
+        self.values["chars_not_to_index"] = NewParser.CHARS_NOT_TO_INDEX
         self.values["break_sent_in_line_group"] = False
-        self.values["tag_exceptions"] = NewParser.TagExceptions
+        self.values["tag_exceptions"] = NewParser.TAG_EXCEPTIONS
         self.values["join_hyphen_in_words"] = True
         self.values["abbrev_expand"] = True
         self.values["long_word_limit"] = 200
@@ -146,18 +146,16 @@ class LoadOptions(object):
                 exit()
 
         except IndexError:
-            print(("\nError: you did not supply a database name "
-                                  "or a path for your file(s) to be loaded\n"), file=sys.stderr)
-
+            print(("\nError: you did not supply a database name or a path for your file(s) to be loaded\n"), file=sys.stderr)
             parser.print_help()
             sys.exit()
         for a in dir(options):
-            if not a.startswith('__') and not callable(getattr(options, a)):
+            if not a.startswith('__') and not isinstance(getattr(options, a), collections.Callable):
                 value = getattr(options, a)
                 if a == "load_config" and value:
                     load_config = LoadConfig()
                     load_config.parse(value)
-                    for config_key, config_value in six.iteritems(load_config.config):
+                    for config_key, config_value in load_config.config.items():
                         if config_value:
                             self.values[config_key] = config_value
                     self.values[a] = os.path.abspath(value)
@@ -219,7 +217,7 @@ class LoadConfig(object):
     def parse(self, load_config_file):
         config_file = imp.load_source("external_load_config", load_config_file)
         for a in dir(config_file):
-            if not a.startswith('__') and not callable(getattr(config_file, a)):
+            if not a.startswith('__') and not isinstance(getattr(config_file, a), collections.Callable):
                 value = getattr(config_file, a)
                 if value:
                     if a == "words_to_index":
