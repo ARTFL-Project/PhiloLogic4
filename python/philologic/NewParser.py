@@ -572,7 +572,6 @@ class XMLParser(object):
 
             # END LINE TAG: use this to break "sentences" if self.in_line_group.  This is
             # if to set searching in line groups to lines rather than sentences.
-            # TODO: not sure I got this right...
             elif line_tag.search(tag):
                 if self.in_line_group and self.break_sent_in_line_group:
                     self.v.push("sent", tag_name, start_byte)
@@ -1006,9 +1005,7 @@ class XMLParser(object):
 
         div_head = self.remove_control_chars(div_head)
         div_head = convert_entities(div_head)
-
         div_head = div_head.replace('"', '')
-
         return div_head
 
     def clear_char_ents(self, text):
@@ -1285,11 +1282,10 @@ semi_colon_strip = re.compile(r'\A;?(\w+);?\Z')
 
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
-tab_newline = re.compile(r'[\n|\t]', re.U)
+tab_newline = re.compile(r'[\n|\t]')
 control_chars = ''.join(
     [i for i in [chr(x) for x in list(range(0, 32)) + list(range(127, 160))] if not tab_newline.search(i)])
 control_char_re = re.compile(r'[%s]' % re.escape(control_chars))
-
 
 # Entities regexes
 entity_regex = [

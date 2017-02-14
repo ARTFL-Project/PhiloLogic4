@@ -20,7 +20,7 @@ TERM_MATCH = re.compile(r"\w+")
 STRIP_START_PUNCTUATION = re.compile(r"^[,?;.:!']")
 
 # Source: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/HTML5_element_list
-valid_html_tags = set(
+VALID_HTML_TAGS = set(
     ['html', 'head', 'title', 'base', 'link', 'meta', 'style', 'script', 'noscript', 'template', 'body', 'section',
      'nav', 'article', 'aside', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'footer', 'address', 'main', 'p', 'hr',
      'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'figure', 'figcaption', 'div', 'a', 'em', 'strong',
@@ -33,6 +33,7 @@ valid_html_tags = set(
 
 
 def get_all_text(element):
+    """Get all text"""
     text = ""
     text += element.text
     for child in element:
@@ -42,6 +43,7 @@ def get_all_text(element):
 
 
 def xml_to_html_class(element):
+    """Convert XML elements to HTML"""
     old_tag = element.tag[:]
     if element.tag == "div1" or element.tag == "div2" or element.tag == "div3":
         element.tag = "div"
@@ -52,6 +54,7 @@ def xml_to_html_class(element):
 
 
 def note_content(element):
+    """Handle note content"""
     if element.tag != "philoHighlight":
         element = xml_to_html_class(element)
     for child in element:
@@ -128,7 +131,7 @@ def format_concordance(text_in_utf8, word_regex, byte_offsets=[]):
                 el.tail = el.tail[word_match.end():]
             el.tag = "span"
             el.attrib["class"] = "highlight"
-        if el.tag not in valid_html_tags:
+        if el.tag not in VALID_HTML_TAGS:
             el = xml_to_html_class(el)
     output = etree.tostring(xml).decode('utf8', 'ignore')
     output = re.sub(r'\A<div class="philologic-fragment">', '', output)
@@ -355,12 +358,11 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                     el.tail = el.tail[word_match.end():]
                 el.tag = "span"
                 el.attrib["class"] = "highlight"
-            if el.tag not in valid_html_tags:
+            if el.tag not in VALID_HTML_TAGS:
                 el = xml_to_html_class(el)
         except Exception as exception:
             import sys
             print(exception, file=sys.stderr)
-            pass
     output = etree.tostring(xml).decode('utf8', 'ignore')
     ## remove spaces around hyphens and apostrophes
     output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
