@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 
+import json
 import os
-import sqlite3
 from wsgiref.handlers import CGIHandler
 
-import json
-from philologic.DB import DB
-
-from philologic.runtime import landing_page_bibliography
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+from philologic.runtime import (WebConfig, WSGIHandler,
+                                landing_page_bibliography)
 
 
 def get_bibliography(environ, start_response):

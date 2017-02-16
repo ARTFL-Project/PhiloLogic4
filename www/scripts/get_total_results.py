@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
+import json
 import os
 from wsgiref.handlers import CGIHandler
 
-import json
 from philologic.DB import DB
-
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+from philologic.runtime import WebConfig, WSGIHandler
 
 
 def get_total_results(environ, start_response):

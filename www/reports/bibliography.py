@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
+import json
 import os
+import sys
 from wsgiref.handlers import CGIHandler
 
-import json
-
-import sys
 sys.path.append("..")
 import custom_functions
 

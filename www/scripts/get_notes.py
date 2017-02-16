@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 
+import json
 import os
 from wsgiref.handlers import CGIHandler
 
-import json
-from philologic.runtime import generate_text_object
 from philologic.DB import DB
-from philologic.HitWrapper import ObjectWrapper
-
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+from philologic.runtime import WebConfig, WSGIHandler, generate_text_object
 
 
 def get_notes(environ, start_response):

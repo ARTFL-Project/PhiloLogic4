@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
+import json
 import os
 from wsgiref.handlers import CGIHandler
 
-import json
-from philologic.runtime import frequency_results
-
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+from philologic.runtime import WebConfig, WSGIHandler, frequency_results
 
 
 def get_frequency(environ, start_response):

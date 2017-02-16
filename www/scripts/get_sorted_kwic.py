@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
+import json
 import os
 from wsgiref.handlers import CGIHandler
 
-import json
-from philologic.runtime import (WebConfig, WSGIHandler, kwic_hit_object,
-                            page_interval)
 from philologic.DB import DB
+from philologic.runtime import (WebConfig, WSGIHandler, kwic_hit_object,
+                                page_interval)
 from philologic.utils import sort_list
 
 

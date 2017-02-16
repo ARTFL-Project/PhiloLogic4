@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
 
+import json
 import os
 import sqlite3
 import sys
 from wsgiref.handlers import CGIHandler
 
-import json
-from philologic.runtime import adjust_bytes
 from philologic.DB import DB
-
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+from philologic.runtime import WebConfig, WSGIHandler, adjust_bytes
 
 
 def lookup_word_service(environ, start_response):

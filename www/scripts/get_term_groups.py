@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 
+import json
 import os
 from wsgiref.handlers import CGIHandler
 
-import json
 from philologic.DB import DB
 from philologic.Query import split_terms
 from philologic.QuerySyntax import group_terms, parse_query
-
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+from philologic.runtime import WebConfig, WSGIHandler
 
 
 def term_group(environ, start_response):

@@ -3,10 +3,7 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-from philologic.runtime import get_tei_header
-
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+from philologic.runtime import WebConfig, WSGIHandler, get_tei_header
 
 
 def get_header(environ, start_response):
