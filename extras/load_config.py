@@ -144,7 +144,7 @@ metadata_to_parse = {
 words_to_index = ""
 
 # This regex defines how to tokenize words and punctuation
-token_regex = "[\&A-Za-z0-9\177-\377][\&A-Za-z0-9\177-\377\_\';]*"
+token_regex = r"\w+|[&\w;]+"
 
 
 # Define the order in which files are sorted. This will affect the order in which
@@ -164,7 +164,7 @@ break_apost = True
 # ------------- Define Characters to Exclude from Index words -------
 # Leading to a second list, characters which can be in words
 # but you don't want to index.
-chars_not_to_index = "\[\{\]\}"
+chars_not_to_index = r"\[\{\]\}"
 
 # ---------------------- Treat Lines as Sentences --------------------
 # In linegroups, break sentence objects on </l> and turns off
@@ -183,23 +183,25 @@ tag_exceptions = ['<hi[^>]*>', '<emph[^>]*>', '<\/hi>', '<\/emph>', '<orig[^>]*>
 # like any others.  Consult the table at:
 # www.utf8-chartable.de/unicode-utf8-table.pl?start=8016&utf8=dec&htmlent=1
 # to see about others. An empty list disables the feature.
-unicode_word_breakers = ['\xe2\x80\x93',  # U+2013 &ndash; EN DASH
-                         '\xe2\x80\x94',  # U+2014 &mdash; EM DASH
-                         '\xc2\xab',  # &laquo;
-                         '\xc2\xbb',  # &raquo;
-                         '\xef\xbc\x89',  # fullwidth right parenthesis
-                         '\xef\xbc\x88',  # fullwidth left parenthesis
-                         '\xe2\x80\x90',  # U+2010 hyphen for greek stuff
-                         '\xce\x87',  # U+00B7 ano teleia
-                         '\xe2\x80\xa0',  # U+2020 dagger
-                         '\xe2\x80\x98',  # U+2018 &lsquo; LEFT SINGLE QUOTATION
-                         '\xe2\x80\x99',  # U+2019 &rsquo; RIGHT SINGLE QUOTATION
-                         '\xe2\x80\x9c',  # U+201C &ldquo; LEFT DOUBLE QUOTATION
-                         '\xe2\x80\x9d',  # U+201D &rdquo; RIGHT DOUBLE QUOTATION
-                         '\xe2\x80\xb9',  # U+2039 &lsaquo; SINGLE LEFT-POINTING ANGLE QUOTATION
-                         '\xe2\x80\xba',  # U+203A &rsaquo; SINGLE RIGHT-POINTING ANGLE QUOTATION
-                         '\xe2\x80\xa6'  # U+2026 &hellip; HORIZONTAL ELLIPSIS
-                        ]
+# Note that these strings must be marked as binary as they are UTF8 strings
+unicode_word_breakers = [
+    b'\xe2\x80\x93',  # U+2013 &ndash; EN DASH
+    b'\xe2\x80\x94',  # U+2014 &mdash; EM DASH
+    b'\xc2\xab',  # &laquo;
+    b'\xc2\xbb',  # &raquo;
+    b'\xef\xbc\x89',  # fullwidth right parenthesis
+    b'\xef\xbc\x88',  # fullwidth left parenthesis
+    b'\xe2\x80\x90',  # U+2010 hyphen for greek stuff
+    b'\xce\x87',  # U+00B7 ano teleia
+    b'\xe2\x80\xa0',  # U+2020 dagger
+    b'\xe2\x80\x98',  # U+2018 &lsquo; LEFT SINGLE QUOTATION
+    b'\xe2\x80\x99',  # U+2019 &rsquo; RIGHT SINGLE QUOTATION
+    b'\xe2\x80\x9c',  # U+201C &ldquo; LEFT DOUBLE QUOTATION
+    b'\xe2\x80\x9d',  # U+201D &rdquo; RIGHT DOUBLE QUOTATION
+    b'\xe2\x80\xb9',  # U+2039 &lsaquo; SINGLE LEFT-POINTING ANGLE QUOTATION
+    b'\xe2\x80\xba',  # U+203A &rsaquo; SINGLE RIGHT-POINTING ANGLE QUOTATION
+    b'\xe2\x80\xa6'  # U+2026 &hellip; HORIZONTAL ELLIPSIS
+]
 
 #  ----------------- Set Long Word Limit  -------------------
 #  Words greater than 235 characters (bytes) cause an indexing

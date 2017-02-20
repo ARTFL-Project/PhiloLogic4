@@ -7,7 +7,6 @@ from wsgiref.handlers import CGIHandler
 
 from philologic.DB import DB
 from philologic.HitWrapper import ObjectWrapper
-
 from philologic.runtime import WSGIHandler
 
 

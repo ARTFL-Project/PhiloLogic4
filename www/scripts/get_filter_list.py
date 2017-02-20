@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 
+import json
 import os
 from wsgiref.handlers import CGIHandler
 
-import json
-from philologic.runtime import build_filter_list
-from philologic.DB import DB
-
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+from philologic.runtime import WebConfig, WSGIHandler, build_filter_list
 
 
 def get_filter_list(environ, start_response):

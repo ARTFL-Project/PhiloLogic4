@@ -51,7 +51,7 @@ def kwic_hit_object(hit, config, db):
     # Get concordance and align it
     byte_offsets, start_byte = adjust_bytes(hit.bytes, config.concordance_length)
     conc_text = get_text(hit, start_byte, length, config.db_path)
-    conc_text = format_strip(conc_text, byte_offsets)
+    conc_text = format_strip(conc_text, db.locals["token_regex"], byte_offsets)
     conc_text = conc_text.replace('\n', ' ')
     conc_text = conc_text.replace('\r', '')
     conc_text = conc_text.replace('\t', ' ')

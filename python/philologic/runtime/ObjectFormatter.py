@@ -16,11 +16,11 @@ BEGIN_MATCH = re.compile(rb'^[^<]*?>')
 START_CUTOFF_MATCH = re.compile(rb'^[^ <]+')
 END_MATCH = re.compile(rb'<[^>]*?\Z')
 SPACE_MATCH = re.compile(r" ?([-'])+ ")
-TERM_MATCH = re.compile(r"\w+", re.U)
+TERM_MATCH = re.compile(r"\w+")
 STRIP_START_PUNCTUATION = re.compile(r"^[,?;.:!']")
 
 # Source: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/HTML5_element_list
-valid_html_tags = set(
+VALID_HTML_TAGS = set(
     ['html', 'head', 'title', 'base', 'link', 'meta', 'style', 'script', 'noscript', 'template', 'body', 'section',
      'nav', 'article', 'aside', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'footer', 'address', 'main', 'p', 'hr',
      'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'figure', 'figcaption', 'div', 'a', 'em', 'strong',
@@ -33,6 +33,7 @@ valid_html_tags = set(
 
 
 def get_all_text(element):
+    """Get all text"""
     text = ""
     text += element.text
     for child in element:
@@ -42,6 +43,7 @@ def get_all_text(element):
 
 
 def xml_to_html_class(element):
+    """Convert XML elements to HTML"""
     old_tag = element.tag[:]
     if element.tag == "div1" or element.tag == "div2" or element.tag == "div3":
         element.tag = "div"
@@ -52,6 +54,7 @@ def xml_to_html_class(element):
 
 
 def note_content(element):
+    """Handle note content"""
     if element.tag != "philoHighlight":
         element = xml_to_html_class(element)
     for child in element:
@@ -77,7 +80,6 @@ def adjust_bytes(bytes, padding):
 
 
 def format_concordance(text_in_utf8, word_regex, byte_offsets=[]):
-    # word_regex = r"\w+"  # text is converted to unicode so we use the \w boundary to match
     removed_from_start = 0
     begin = BEGIN_MATCH.search(text_in_utf8)
     if begin:
@@ -123,13 +125,13 @@ def format_concordance(text_in_utf8, word_regex, byte_offsets=[]):
         elif el.tag == "img":  # Remove img elements from parent in concordances
             el.getparent().remove(el)
         if el.tag == "philoHighlight":
-            word_match = re.match(word_regex, el.tail, re.U)
+            word_match = re.match(word_regex, el.tail)
             if word_match:
                 el.text = el.tail[:word_match.end()]
                 el.tail = el.tail[word_match.end():]
             el.tag = "span"
             el.attrib["class"] = "highlight"
-        if el.tag not in valid_html_tags:
+        if el.tag not in VALID_HTML_TAGS:
             el = xml_to_html_class(el)
     output = etree.tostring(xml).decode('utf8', 'ignore')
     output = re.sub(r'\A<div class="philologic-fragment">', '', output)
@@ -141,10 +143,9 @@ def format_concordance(text_in_utf8, word_regex, byte_offsets=[]):
     return output
 
 
-def format_strip(text, byte_offsets=None):
+def format_strip(text, word_regex, byte_offsets=None):
     """Remove formatting for HTML rendering
-    Called from: -kwic.py
-                 -frequency.py"""
+    Called from KWIC only"""
     removed_from_start = 0
     begin = BEGIN_MATCH.search(text)
     if begin:
@@ -167,7 +168,7 @@ def format_strip(text, byte_offsets=None):
                 last_offset = b
         text = new_text + text[last_offset:]
     xml = FragmentParserParse(text.decode('utf8', 'ignore'))
-    output = clean_tags(xml)
+    output = clean_tags(xml, word_regex)
     ## remove spaces around hyphens and apostrophes
     output = SPACE_MATCH.sub('\\1', output)
     return output
@@ -175,7 +176,6 @@ def format_strip(text, byte_offsets=None):
 
 def format_text_object(obj, text, config, request, word_regex, byte_offsets=None, note=False, images=True):
     """Format text objects"""
-    word_regex = r"\w+"
     philo_id = obj.philo_id
     if byte_offsets is not None:
         new_text = b""
@@ -358,12 +358,11 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                     el.tail = el.tail[word_match.end():]
                 el.tag = "span"
                 el.attrib["class"] = "highlight"
-            if el.tag not in valid_html_tags:
+            if el.tag not in VALID_HTML_TAGS:
                 el = xml_to_html_class(el)
         except Exception as exception:
             import sys
             print(exception, file=sys.stderr)
-            pass
     output = etree.tostring(xml).decode('utf8', 'ignore')
     ## remove spaces around hyphens and apostrophes
     output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
@@ -371,7 +370,6 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
 
     if note:  ## Notes don't need to fetch images
         return (output, {})
-
     if not images:
         return (output, {})
 
@@ -486,13 +484,13 @@ def get_all_graphics(philo_id, config):
     except sqlite3.OperationalError:
         return []
 
-def clean_tags(element):
+def clean_tags(element, word_regex):
     """Remove all tags"""
     text = ''
     for child in element:
-        text += clean_tags(child)
+        text += clean_tags(child, word_regex)
     if element.tag == "philoHighlight":
-        word_match = TERM_MATCH.match(convert_entities(element.tail))
+        word_match = re.search(word_regex, element.tail)
         if word_match:
             return '<span class="highlight">' + element.text + text + element.tail[:word_match.end(
             )] + "</span>" + element.tail[word_match.end():]

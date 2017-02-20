@@ -1,18 +1,10 @@
 #!/usr/bin/env python3
 
 import os
-import re
-import sys
-import unicodedata
 from wsgiref.handlers import CGIHandler
 
-import json
-from philologic.runtime import group_by_metadata, group_by_range
-
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
-
-object_depth = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
+from philologic.runtime import (WebConfig, WSGIHandler, group_by_metadata,
+                                group_by_range)
 
 
 def landing_page_content(environ, start_response):

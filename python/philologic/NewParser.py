@@ -123,7 +123,7 @@ DEFAULT_DOC_XPATHS = {
 TAG_EXCEPTIONS = [r'<hi[^>]*>', r'<emph[^>]*>', r'<\/hi>', r'<\/emph>', r'<orig[^>]*>', r'<\/orig>', r'<sic[^>]*>', r'<\/sic>',
                  r'<abbr[^>]*>', r'<\/abbr>', r'<i>', r'</i>', r'<sup>', r'</sup>']
 
-TOKEN_REGEX = r"\w*"
+TOKEN_REGEX = r"\w+|[&\w;]+"
 
 CHARS_NOT_TO_INDEX = r"\[\{\]\}"
 
@@ -245,7 +245,7 @@ class XMLParser(object):
             unicode_word_breakers = UNICODE_WORD_BREAKERS
         self.unicode_word_breakers = []
         for char in unicode_word_breakers:
-            compiled_char = re.compile(r'(%s)' % char, re.I)
+            compiled_char = re.compile(rb'(%s)' % char, re.I)
             self.unicode_word_breakers.append(compiled_char)
 
         if "abbrev_expand" in parse_options:
@@ -572,7 +572,6 @@ class XMLParser(object):
 
             # END LINE TAG: use this to break "sentences" if self.in_line_group.  This is
             # if to set searching in line groups to lines rather than sentences.
-            # TODO: not sure I got this right...
             elif line_tag.search(tag):
                 if self.in_line_group and self.break_sent_in_line_group:
                     self.v.push("sent", tag_name, start_byte)
@@ -770,7 +769,7 @@ class XMLParser(object):
 
             if self.unicode_word_breakers:
                 for word_breaker in self.unicode_word_breakers:
-                    words = word_breaker.sub(lambda match: ' ' * len(match.group(1)), words)
+                    words = word_breaker.sub(lambda match: b' ' * len(match.group(1)), words.encode('utf8')).decode('utf8')
 
             # TODO: Now, here's something you did not think of: Brown WWP: M&sup-r;
             # You are going to split words, on hyphens just below.  That would
@@ -816,11 +815,11 @@ class XMLParser(object):
                             word = self.convert_other_ents(word)
 
                         # You may have some semi-colons...
-                        if word[-1] == ";":
+                        if ";" in word:
                             if "&" in word:
                                 pass  # TODO
                             else:
-                                word = word[:-1]
+                                word = semi_colon_strip.sub(r'\1', word)  # strip on both ends
 
                         # Get rid of certain characters that don't break words, but don't index.
                         # These are defined in a compiled regex below: chars_not_to_index
@@ -1006,9 +1005,7 @@ class XMLParser(object):
 
         div_head = self.remove_control_chars(div_head)
         div_head = convert_entities(div_head)
-
         div_head = div_head.replace('"', '')
-
         return div_head
 
     def clear_char_ents(self, text):
@@ -1281,14 +1278,14 @@ ending_punctuation = re.compile(r'[%s]$' % string.punctuation)
 add_tag = re.compile(r'<add\W', re.I)
 seg_attrib = re.compile(r'<seg \w+=', re.I)
 abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)', re.I | re.M)
+semi_colon_strip = re.compile(r'\A;?(\w+);?\Z')
 
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
-tab_newline = re.compile(r'[\n|\t]', re.U)
+tab_newline = re.compile(r'[\n|\t]')
 control_chars = ''.join(
     [i for i in [chr(x) for x in list(range(0, 32)) + list(range(127, 160))] if not tab_newline.search(i)])
 control_char_re = re.compile(r'[%s]' % re.escape(control_chars))
-
 
 # Entities regexes
 entity_regex = [

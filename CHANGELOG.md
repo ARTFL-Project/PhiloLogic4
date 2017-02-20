@@ -1,3 +1,6 @@
+#### 4.5 => 4.6 ####
+- This release is straight forward port to Python3. The code will ONLY run under Python3.
+
 #### 4.0 => 4.5 ####
 - Completely rewritten parser: can now parse broken XML
 - Massive lib reorg

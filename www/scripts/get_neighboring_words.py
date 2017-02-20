@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
 
+import json
 import os
 import string
-import sys
 import timeit
 from wsgiref.handlers import CGIHandler
 
-import json
 from philologic.DB import DB
-
-from philologic.runtime import kwic_hit_object
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
-
+from philologic.runtime import WebConfig, WSGIHandler, kwic_hit_object
 
 remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
 

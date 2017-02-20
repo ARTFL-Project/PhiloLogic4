@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
+import json
 import os
 from wsgiref.handlers import CGIHandler
 
-import json
-from philologic.runtime import get_start_end_date as start_end_date
 from philologic.DB import DB
-
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+from philologic.runtime import get_start_end_date as start_end_date
+from philologic.runtime import WebConfig, WSGIHandler
 
 
 def get_start_end_date(environ, start_response):
