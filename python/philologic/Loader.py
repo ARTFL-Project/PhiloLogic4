@@ -668,6 +668,8 @@ class Loader(object):
         self.write_db_config()
         if self.predefined_web_config is False:
             self.write_web_config()
+        if self.debug is False:
+            os.system("rm -f %s/*" % self.workdir)
 
     def write_db_config(self):
         """ Write local variables used by libphilo"""

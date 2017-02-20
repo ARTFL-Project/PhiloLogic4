@@ -230,8 +230,4 @@ class LoadConfig(object):
                         if "load_filters" not in self.config:
                             self.config["load_filters"] = LoadFilters.DefaultLoadFilters
                         self.config["load_filters"].append(LoadFilters.store_in_plain_text(*value))
-                    if a == "store_words_and_ids":
-                        if "load_filters" not in self.config:
-                            self.config["load_filters"] = LoadFilters.DefaultLoadFilters
-                        self.config["load_filters"].append(LoadFilters.store_words_and_philo_ids)
                     self.config[a] = value
