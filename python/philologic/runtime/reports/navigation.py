@@ -41,8 +41,7 @@ def generate_text_object(request, config, note=False):
     text_object['next'] = neighboring_object_id(db, obj.__next__, width)
     metadata_fields = {}
     for metadata in db.locals['metadata_fields']:
-        if db.locals['metadata_types'][metadata] == "doc":
-            metadata_fields[metadata] = obj[metadata]
+        metadata_fields[metadata] = obj[metadata]
     text_object['metadata_fields'] = metadata_fields
     if width != 9:
         citation_hrefs = citation_links(db, config, obj)

@@ -380,8 +380,11 @@ def store_words_and_philo_ids(loader_obj, text):
         with open(text['raw']) as filehandle:
             for line in filehandle:
                 philo_type, word, philo_id, attrib = line.split('\t')
+                attrib = loads(attrib)
                 if philo_type == "word" and word != '__philo_virtual':
-                    word_obj = dumps({"token": word, "position": philo_id})
+                    word_obj = dumps(
+                        {"token": word, "philo_id": philo_id, "start_byte": attrib["start_byte"], "end_byte": attrib["end_byte"]}
+                        )
                     print(word_obj, file=output)
 
 
