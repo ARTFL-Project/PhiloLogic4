@@ -167,7 +167,12 @@ class Loader(object):
         for f in self.list_files():
             data = {"filename": f}
             header = ""
-            file_content = "".join(open(self.textdir + f).readlines())
+            with open(os.path.join(self.textdir, f), encoding="utf8") as text_file:
+                try:
+                    file_content = "".join(text_file.readlines())
+                except UnicodeDecodeError:
+                    deleted_files.append(f)
+                    continue
             try:
                 start_header_index = re.search(r'<teiheader', file_content, re.I).start()
                 end_header_index = re.search(r'</teiheader', file_content, re.I).start()
@@ -668,6 +673,8 @@ class Loader(object):
         self.write_db_config()
         if self.predefined_web_config is False:
             self.write_web_config()
+        if self.debug is False:
+            os.system("rm -f %s/*" % self.workdir)
 
     def write_db_config(self):
         """ Write local variables used by libphilo"""
