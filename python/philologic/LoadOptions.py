@@ -226,6 +226,7 @@ class LoadConfig(object):
                             for line in fh:
                                 word_list.add(line.strip())
                         self.config["words_to_index"] = word_list
+                        continue
                     if a == "plain_text_obj":
                         if "load_filters" not in self.config:
                             self.config["load_filters"] = LoadFilters.DefaultLoadFilters

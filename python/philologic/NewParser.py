@@ -796,7 +796,6 @@ class XMLParser(object):
             next_word = ""
             if self.in_the_text:
                 for word in word_list:
-                    # print word, current_pos - len(word)
                     word_length = len(word.encode('utf8'))
                     try:
                         next_word = word_list[count + 1]
@@ -812,6 +811,9 @@ class XMLParser(object):
                     if check_if_char_word.search(word.replace('_', "")):
                         last_word = word
                         word_pos = current_pos - len(word.encode('utf8'))
+                        if self.defined_words_to_index:
+                            if word not in self.words_to_index:
+                                return
                         if "&" in word:
                             # Convert ents to utf-8
                             word = self.latin1_ents_to_utf8(word)
@@ -848,9 +850,6 @@ class XMLParser(object):
                         word = word.replace("_", "").strip()
                         word = word.replace(' ', '')
                         if len(word):
-                            if self.defined_words_to_index:
-                                if word not in self.words_to_index:
-                                    return
                             self.v.push("word", word, word_pos)
                             if self.current_tag == "w":
                                 for attrib, value in self.word_tag_attributes:

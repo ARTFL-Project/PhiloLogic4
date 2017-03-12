@@ -14,7 +14,7 @@ plain_text_obj = []
 
 ## Define whether to store all words with their philo IDs. Useful for data-mining tasks
 ## where keeping the index information (and byte offset) is important.
-store_words_and_ids = False
+store_words_and_ids = True
 
 #####################
 ## Parsing Options ##
