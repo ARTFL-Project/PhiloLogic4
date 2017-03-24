@@ -46,11 +46,6 @@ sudo cp www/.htaccess  /var/lib/philologic4/web_app/
 # sudo cp -R www/app/assets/css/split/style.css /var/lib/philologic4/web_loader/
 # sudo cp -R www/app/assets/css/split/default_theme.css /var/lib/philologic4/web_loader/
 
-if [ -f /usr/local/bin/philoload4 ]; then
-	sudo rm /usr/local/bin/philoload4;
-fi
-sudo cp extras/philoload4.py /usr/local/bin/philoload4
-
 if [ ! -f /etc/philologic/philologic4.cfg ]
     then
         db_url="# Set the filesytem path to the root web directory for your PhiloLogic install.
