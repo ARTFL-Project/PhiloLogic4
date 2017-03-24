@@ -2,15 +2,11 @@
 
 
 
-import imp
 import os
 import sys
 
-from philologic.LoadOptions import LoadOptions
+from philologic.LoadOptions import LoadOptions, config_file
 from philologic.Loader import Loader, setup_db_dir
-
-# Load global config
-config_file = imp.load_source("philologic4", "/etc/philologic/philologic4.cfg")
 
 os.environ["LC_ALL"] = "C"  # Exceedingly important to get uniform sort order.
 os.environ["PYTHONIOENCODING"] = "utf-8"
