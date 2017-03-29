@@ -736,11 +736,15 @@ class XMLParser(object):
             elif tag_name == "index" and self.context_div_level != 0:
                 attrib = dict(self.get_attributes(tag))
                 div = "div%d" % self.context_div_level
-                if attrib["type"] in self.metadata_to_parse["div"]:
-                    try:
-                        self.v[div].attrib[attrib["type"]] = attrib["value"]
-                    except KeyError:
-                        pass
+                if "type" in attrib:
+                    if attrib["type"] in self.metadata_to_parse["div"]:
+                        try:
+                            self.v[div].attrib[attrib["type"]] = attrib["value"]
+                        except KeyError:
+                            pass
+                else:
+                    for metadata_name, metadata_value in attrib.iteritems():
+                        self.v[div].attrib[metadata_name] = metadata_value
 
             elif tag_name == "ref":
                 self.v.push("ref", tag_name, start_byte)

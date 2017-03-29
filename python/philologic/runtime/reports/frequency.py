@@ -24,11 +24,11 @@ def frequency_results(request, config, sorted_results=False):
     if sorted_results:
         hits.finish()
 
-    c = db.dbh.cursor()
+    cursor = db.dbh.cursor()
 
-    c.execute('select philo_id, %s from toms where %s is not null' % (request.frequency_field, request.frequency_field))
+    cursor.execute('select philo_id, %s from toms where %s is not null' % (request.frequency_field, request.frequency_field))
     metadata_dict = {}
-    for i in c.fetchall():
+    for i in cursor:
         philo_id, field = i
         philo_id = tuple(int(s) for s in philo_id.split() if int(s))
         metadata_dict[philo_id] = field
