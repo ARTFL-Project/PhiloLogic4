@@ -45,7 +45,7 @@ A page tag with both attributes could look like this:
 **Note**: The values specified in `facs` must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
 
 # External Images #
-External image are images that should not be rendered alongside the text like inline images, but only provide a link to the external image with accompanying text.
+External image are images that should not be rendered alongside the text like inline images. Instead, it should be rendered as an HTML anchor tag with accompanying text.
 * External Images should use the `<ptr>`tag.
 * Links to the image should be stored in the facs attribute such as below. Only one link should be available.
 * The text accompanying the image should be stored in the rendition attribute.
