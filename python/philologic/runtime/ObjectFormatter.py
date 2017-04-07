@@ -351,6 +351,15 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                     else:
                         el.attrib["large-img"] = os.path.join(config.page_images_url_root, imgs[0])
                     del el.attrib["url"]
+            elif el.tag == "ptr":
+                if "facs" in el.attrib and config.page_images_url_root:
+                    el.tag = "a"
+                    el.attrib["href"] = os.path.join(config.page_images_url_root, el.attrib["facs"])
+                    el.text = el.attrib["rendition"]
+                    el.attrib["external-img"] = ""
+                    del el.attrib["rendition"]
+                    del el.attrib["facs"]
+                    el.attrib['data-gallery'] = ''
             elif el.tag == "philoHighlight":
                 word_match = re.match(word_regex, el.tail, re.U)
                 if word_match:

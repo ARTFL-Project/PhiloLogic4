@@ -11,6 +11,7 @@
         .directive('compileTemplate', compileTemplate)
         .directive('pageImageLink', pageImageLink)
         .directive('inlineImg', inlineImg)
+        .directive('externalImg', externalImg)
         .directive('noteRef', noteRef)
         .directive('note', note);
 
@@ -370,6 +371,24 @@
                 });
                 element.on('$destroy', function() {
                     angular.element('#full-size-image').off();
+                });
+            }
+        }
+    }
+
+    function externalImg($window) {
+        return {
+            restrict: 'A',
+            link: function(scope, element, attrib) {
+                element.click(function(e) {
+                    e.preventDefault();
+                    scope.gallery = blueimp.Gallery([attrib["href"]], {
+                        continuous: false,
+                        thumbnailIndicators: false
+                    });
+                });
+                element.on('$destroy', function() {
+                    angular.element(element).off();
                 });
             }
         }
