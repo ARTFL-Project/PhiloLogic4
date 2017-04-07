@@ -16,10 +16,10 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
         conn = sqlite3.connect(db_destination)
         conn.text_factory = str
         conn.row_factory = sqlite3.Row
-        c = conn.cursor()
+        cursor = conn.cursor()
         columns = 'philo_type,philo_name,philo_id,philo_seq'
         query = 'create table if not exists %s (%s)' % (table, columns)
-        c.execute(query)
+        cursor.execute(query)
         alter_command = "ALTER TABLE %s ADD COLUMN ?" % table
         file_in_handle = open(file_in)
         with file_in_handle:
@@ -35,14 +35,14 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
                     insert = "INSERT INTO %s (%s) values (%s);" % (table, ",".join(list(row.keys())), ",".join(
                         "?" for i in range(len(row))))
                     try:
-                        c.execute(insert, list(row.values()))
+                        cursor.execute(insert, list(row.values()))
                     except sqlite3.OperationalError:
-                        c.execute("PRAGMA table_info(%s)" % table)
-                        column_list = [i[1] for i in c.fetchall()]
+                        cursor.execute("PRAGMA table_info(%s)" % table)
+                        column_list = [i[1] for i in cursor]
                         for column in row:
                             if column not in column_list:
-                                c.execute("ALTER TABLE %s ADD COLUMN %s;" % (table, column))
-                        c.execute(insert, list(row.values()))
+                                cursor.execute("ALTER TABLE %s ADD COLUMN %s;" % (table, column))
+                        cursor.execute(insert, list(row.values()))
         conn.commit()
 
         for index in indices:
@@ -51,7 +51,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
                     index = (index, )
                 index_name = '%s_%s_index' % (table, '_'.join(index))
                 index = ','.join(index)
-                c.execute('create index if not exists %s on %s (%s)' % (index_name, table, index))
+                cursor.execute('create index if not exists %s on %s (%s)' % (index_name, table, index))
             except sqlite3.OperationalError:
                 pass
         conn.commit()
@@ -91,13 +91,13 @@ def metadata_frequencies(loader_obj):
     print('%s: Generating metadata frequencies...' % time.ctime())
     frequencies = loader_obj.destination + '/frequencies'
     conn = sqlite3.connect(loader_obj.destination + '/toms.db')
-    c = conn.cursor()
+    cursor = conn.cursor()
     for field in loader_obj.metadata_fields:
         query = 'select %s, count(*) from toms group by %s order by count(%s) desc' % (field, field, field)
         try:
-            c.execute(query)
+            cursor.execute(query)
             output = open(frequencies + "/%s_frequencies" % field, "w")
-            for result in c.fetchall():
+            for result in cursor:
                 if result[0] != None:
                     val = result[0]
                     clean_val = val.replace("\n", " ").replace("\t", "")

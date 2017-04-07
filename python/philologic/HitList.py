@@ -50,7 +50,7 @@ class HitList(object):
                 metadata_types.add("div1")
                 metadata_types.add("div2")
                 metadata_types.add("div3")
-            c = self.dbh.dbh.cursor()
+            cursor = self.dbh.dbh.cursor()
             query = "select * from toms where "
             if metadata_types:
                 query += "philo_type in (%s) AND " % ", ".join(['"%s"' % m for m in metadata_types])
@@ -58,9 +58,9 @@ class HitList(object):
             for s in self.sort_order:
                 order_params.append('%s is not null' % s)
             query += " AND ".join(order_params)
-            c.execute(query)
+            cursor.execute(query)
             metadata = {}
-            for i in c.fetchall():
+            for i in cursor:
                 sql_row = dict(i)
                 philo_id = tuple(int(s) for s in sql_row["philo_id"].split() if int(s))
                 metadata[philo_id] = [smash_accents(sql_row[m] or "ZZZZZ") for m in sort_order]

@@ -91,9 +91,9 @@ def group_by_range(request_range, request, config):
         query_range = set(range(
             ord(request_range[0]),
             ord(request_range[1]) + 1))  # Ordinal avoids unicode issues...
-    c = db.dbh.cursor()
+    cursor = db.dbh.cursor()
     try:
-        c.execute('select *, count(*) as count from toms where philo_type="doc" group by %s' % metadata_queried)
+        cursor.execute('select *, count(*) as count from toms where philo_type="doc" group by %s' % metadata_queried)
     except sqlite3.OperationalError:
         return json.dumps({
             "display_count": request.display_count,
@@ -101,7 +101,7 @@ def group_by_range(request_range, request, config):
             "content": []
         })
     content = {}
-    for doc in c.fetchall():
+    for doc in cursor:
         normalized_test_value = ''
         if doc[metadata_queried] is None:
             continue
@@ -151,11 +151,11 @@ def group_by_range(request_range, request, config):
 def group_by_metadata(request, config):
     citation_types = json.loads(request.citation)
     db = DB(config.db_path + '/data/')
-    c = db.dbh.cursor()
+    cursor = db.dbh.cursor()
     query = '''select * from toms where philo_type="doc" and %s=?''' % request.group_by_field
-    c.execute(query, (request.query, ))
+    cursor.execute(query, (request.query, ))
     result_group = []
-    for doc in c.fetchall():
+    for doc in cursor:
         obj = db[doc["philo_id"]]
         links = citation_links(db, config, obj)
         citation = citations(obj, links, config, report="landing_page", citation_type=citation_types)

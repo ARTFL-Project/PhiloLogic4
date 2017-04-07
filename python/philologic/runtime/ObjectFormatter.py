@@ -351,6 +351,15 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                     else:
                         el.attrib["large-img"] = os.path.join(config.page_images_url_root, imgs[0])
                     del el.attrib["url"]
+            elif el.tag == "ptr":
+                if "facs" in el.attrib and config.page_images_url_root:
+                    el.tag = "a"
+                    el.attrib["href"] = os.path.join(config.page_images_url_root, el.attrib["facs"])
+                    el.text = el.attrib["rendition"]
+                    el.attrib["external-img"] = ""
+                    del el.attrib["rendition"]
+                    del el.attrib["facs"]
+                    el.attrib['data-gallery'] = ''
             elif el.tag == "philoHighlight":
                 word_match = re.match(word_regex, el.tail, re.U)
                 if word_match:
@@ -454,19 +463,19 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
     if current_obj_imgs[0]:
         # We know there are images
         db = DB(config.db_path + '/data/')
-        c = db.dbh.cursor()
+        cursor = db.dbh.cursor()
         approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
         try:
-            c.execute('select * from pages where philo_id like ? and facs is not null and facs != ""', (approx_id, ))
+            cursor.execute('select * from pages where philo_id like ? and facs is not null and facs != ""', (approx_id, ))
             current_obj_imgs = set(current_obj_imgs)
-            all_imgs = [tuple(i["facs"].split()) for i in c.fetchall()]
+            all_imgs = [tuple(i["facs"].split()) for i in cursor]
         except sqlite3.OperationalError:
             all_imgs = []
         if not all_imgs:
             try:
-                c.execute('select * from pages where philo_id like ? and id is not null and id != ""', (approx_id, ))
+                cursor.execute('select * from pages where philo_id like ? and id is not null and id != ""', (approx_id, ))
                 current_obj_imgs = set(current_obj_imgs)
-                all_imgs = [tuple(i["id"].split()) for i in c.fetchall()]
+                all_imgs = [tuple(i["id"].split()) for i in cursor]
             except sqlite3.OperationalError:
                 return []
         return all_imgs
@@ -475,11 +484,11 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
 
 def get_all_graphics(philo_id, config):
     db = DB(config.db_path + '/data/')
-    c = db.dbh.cursor()
+    cursor = db.dbh.cursor()
     approx_id = str(philo_id[0]) + ' 0 0 0 0 0 0 %'
     try:
-        c.execute('SELECT facs FROM graphics WHERE philo_id LIKE ? AND facs IS NOT NULL AND facs != "" ORDER BY ROWID', (approx_id, ))
-        graphics = [i["facs"].split() for i in c.fetchall() if i["facs"]]
+        cursor.execute('SELECT facs FROM graphics WHERE philo_id LIKE ? AND facs IS NOT NULL AND facs != "" ORDER BY ROWID', (approx_id, ))
+        graphics = [i["facs"].split() for i in cursor if i["facs"]]
         return graphics
     except sqlite3.OperationalError:
         return []
