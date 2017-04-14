@@ -193,9 +193,14 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
         try:
             if el.tag.startswith("DIV"):
                 el.tag = el.tag.lower()
+            if el.tag == "h1" or el.tag == "h2":
+                el.tag = "b"
+                el.attrib["class"] = "headword"
             if el.tag == "sc" or el.tag == "scx":
                 el.tag = "span"
                 el.attrib["class"] = "small-caps"
+            if el.tag == "page":
+                el.tag = "pb"
             elif el.tag == "head":
                 el.tag = "b"
                 el.attrib["class"] = "headword"
@@ -355,9 +360,9 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                 if "facs" in el.attrib and config.page_images_url_root:
                     el.tag = "a"
                     el.attrib["href"] = os.path.join(config.page_images_url_root, el.attrib["facs"])
-                    el.text = el.attrib["rendition"]
+                    el.text = el.attrib["rend"]
                     el.attrib["external-img"] = ""
-                    del el.attrib["rendition"]
+                    del el.attrib["rend"]
                     del el.attrib["facs"]
                     el.attrib['data-gallery'] = ''
             elif el.tag == "philoHighlight":
