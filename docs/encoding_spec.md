@@ -50,7 +50,7 @@ External image are images that should not be rendered alongside the text like in
 * Links to the image should be stored in the facs attribute such as below. Only one link should be available.
 * The text accompanying the image should be stored in the rendition attribute.
 ```XML
-<ptr facs="0000c.jpg" rendition="[000c]"/>
+<ptr facs="0000c.jpg" rend="[000c]"/>
 ```
 # Notes #
 ### Important ###
