@@ -48,7 +48,7 @@ A page tag with both attributes could look like this:
 External image are images that should not be rendered alongside the text like inline images. Instead, it should be rendered as an HTML anchor tag with accompanying text.
 * External Images should use the `<ptr>`tag.
 * Links to the image should be stored in the facs attribute such as below. Only one link should be available.
-* The text accompanying the image should be stored in the rendition attribute.
+* The text accompanying the image should be stored in the rend attribute.
 ```XML
 <ptr facs="0000c.jpg" rend="[000c]"/>
 ```
