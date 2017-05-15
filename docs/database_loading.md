@@ -12,7 +12,7 @@ A few important notes:
 
 In order for PhiloLogic to index your files, you need to execute the `philoload4` command. The basic command is run as so:
 
-`philoload4 [database_name] [path_to_files]``
+`philoload4 [database_name] [path_to_files]`
 
 The `philoload4` command requires the following required arguments::
 
