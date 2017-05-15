@@ -3,7 +3,6 @@
 * The following dependencies need to be installed:
   * libxml2-dev
   * libxslt-dev
-  * python-pip
   * zlib1g-dev
   * apache2
   * libgdbm-dev
@@ -11,7 +10,7 @@
 
   Run the following command:
 
-  `sudo apt-get install libxml2-dev libxslt-dev python-pip zlib1g-dev apache2 libgdbm-dev python3-pip`
+  `sudo apt-get install libxml2-dev libxslt-dev zlib1g-dev apache2 libgdbm-dev python3-pip`
   
 * Run install script inside the PhiloLogic4 directory
 
