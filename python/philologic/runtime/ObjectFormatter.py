@@ -109,8 +109,6 @@ def format_concordance(text_in_utf8, word_regex, byte_offsets=[]):
             el.tag = el.tag.lower()
         if el.tag not in allowed_tags:
             el.tag = 'span'
-        elif el.tag == "ab" or el.tag == "ln":
-            el.tag = "l"
         elif el.tag == "title":
             el.tag = "span"
             el.attrib['class'] = "xml-title"
@@ -299,33 +297,30 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                             new_anchor.text = "note"
             elif el.tag == "item":
                 el.tag = "li"
-            elif el.tag == "ab" or el.tag == "ln":
-                el.tag = "l"
             elif el.tag == "img":
                 el.attrib["onerror"] = "this.style.display='none'"
             elif el.tag == "pb" and "n" in el.attrib:
                 el.tag = "span"
                 el.attrib["class"] = "xml-pb-image"
-                if config.page_images_url_root:
-                    if "facs" in el.attrib or "id" in el.attrib:
-                        if "facs" in el.attrib:
-                            img = el.attrib["facs"]
-                        else:
-                            img = el.attrib["id"]
-                        current_obj_img.append(img.split()[0])
-                        el.append(etree.Element("a"))
-                        img_split = img.split()
-                        el[-1].attrib["href"] = os.path.join(config.page_images_url_root, img_split[0]) + config.page_image_extension
-                        if len(img_split) == 2:
-                            el[-1].attrib["large-img"] = os.path.join(config.page_images_url_root, img_split[1]) + config.page_image_extension
-                        else:
-                            el[-1].attrib["large-img"] = os.path.join(config.page_images_url_root, img_split[0]) + config.page_image_extension
-                        el[-1].text = "[page " + el.attrib["n"] + "]"
-                        if config.external_page_images:
-                            el[-1].attrib["target"] = "_blank"
-                        else:
-                            el[-1].attrib['class'] = "page-image-link"
-                            el[-1].attrib['data-gallery'] = ''
+                if config.page_images_url_root and "facs" in el.attrib or "id" in el.attrib:
+                    if "facs" in el.attrib:
+                        img = el.attrib["facs"]
+                    else:
+                        img = el.attrib["id"]
+                    current_obj_img.append(img.split()[0])
+                    el.append(etree.Element("a"))
+                    img_split = img.split()
+                    el[-1].attrib["href"] = os.path.join(config.page_images_url_root, img_split[0]) + config.page_image_extension
+                    if len(img_split) == 2:
+                        el[-1].attrib["large-img"] = os.path.join(config.page_images_url_root, img_split[1]) + config.page_image_extension
+                    else:
+                        el[-1].attrib["large-img"] = os.path.join(config.page_images_url_root, img_split[0]) + config.page_image_extension
+                    el[-1].text = "[page " + el.attrib["n"] + "]"
+                    if config.external_page_images:
+                        el[-1].attrib["target"] = "_blank"
+                    else:
+                        el[-1].attrib['class'] = "page-image-link"
+                        el[-1].attrib['data-gallery'] = ''
                 else:
                     if el.attrib["n"]:
                         el.text = "--%s--" % el.attrib["n"]
