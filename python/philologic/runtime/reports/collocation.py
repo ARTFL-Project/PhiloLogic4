@@ -75,7 +75,7 @@ def collocation_results(request, config):
                 else:
                     row_query = """select philo_name from words where parent='%s'""" % (parent, )
                 cursor.execute(row_query)
-                for i in cursor.fetchall():
+                for i in cursor:
                     collocate = i["philo_name"]
                     if collocate not in filter_list:
                         stored_sentence_counts[collocate] += 1

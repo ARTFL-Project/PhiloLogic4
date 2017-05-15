@@ -61,9 +61,9 @@ def generate_time_series(request, config):
         else:
             query = "select sum(word_count) from toms where %s='%s'" % (config.time_series_year_field, start_range)
 
-        c = db.dbh.cursor()
-        c.execute(query)
-        date_counts[start_range] = c.fetchone()[0] or 0
+        cursor = db.dbh.cursor()
+        cursor.execute(query)
+        date_counts[start_range] = cursor.fetchone()[0] or 0
         total_hits += hit_len
         elapsed = timeit.default_timer() - start_time
         last_date_done = start_range
@@ -86,11 +86,11 @@ def generate_time_series(request, config):
 def get_start_end_date(db, config, start_date=None, end_date=None):
     """Get start and end date of dataset"""
     date_finder = re.compile(r'^.*?(\d{1,}).*')
-    c = db.dbh.cursor()
-    c.execute('select %s from toms where %s is not null' %
-              (config.time_series_year_field, config.time_series_year_field))
+    cursor = db.dbh.cursor()
+    cursor.execute('select %s from toms where %s is not null' %
+                   (config.time_series_year_field, config.time_series_year_field))
     dates = []
-    for i in c.fetchall():
+    for i in cursor:
         try:
             dates.append(int(i[0]))
         except:

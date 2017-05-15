@@ -11,7 +11,7 @@ def generate_toc_object(request, config):
     """This function fetches all philo_ids for div elements within a doc"""
     db = DB(config.db_path + '/data/')
     conn = db.dbh
-    c = conn.cursor()
+    cursor = conn.cursor()
     try:
         obj = db[request.philo_id]
     except ValueError:
@@ -20,22 +20,22 @@ def generate_toc_object(request, config):
     doc_id = int(obj.philo_id[0])
     next_doc_id = doc_id + 1
     # find the starting rowid for this doc
-    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % doc_id)
-    start_rowid = c.fetchone()[0]
+    cursor.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % doc_id)
+    start_rowid = cursor.fetchone()[0]
     # find the starting rowid for the next doc
-    c.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % next_doc_id)
+    cursor.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % next_doc_id)
     try:
-        end_rowid = c.fetchone()[0]
+        end_rowid = cursor.fetchone()[0]
     except TypeError:  # if this is the last doc, just get the last rowid in the table.
-        c.execute('select max(rowid) from toms;')
-        end_rowid = c.fetchone()[0]
+        cursor.execute('select max(rowid) from toms;')
+        end_rowid = cursor.fetchone()[0]
 
     # use start_rowid and end_rowid to fetch every div in the document.
     philo_slices = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
     text_hierarchy = []
-    c.execute("select * from toms where rowid >= ? and rowid <=? and philo_type>='div' and philo_type<='div3'",
-              (start_rowid, end_rowid))
-    for row in c.fetchall():
+    cursor.execute("select * from toms where rowid >= ? and rowid <=? and philo_type>='div' and philo_type<='div3'",
+                   (start_rowid, end_rowid))
+    for row in cursor:
         philo_id = [int(n) for n in row["philo_id"].split(" ")]
         text = HitWrapper.ObjectWrapper(philo_id, db, row=row)
         if text['philo_name'] == '__philo_virtual' and text["philo_type"] != "div1":

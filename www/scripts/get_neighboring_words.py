@@ -30,15 +30,13 @@ def get_neighboring_words(environ, start_response):
     kwic_words = []
     start_time = timeit.default_timer()
     hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
-    c = db.dbh.cursor()
+    cursor = db.dbh.cursor()
 
     for hit in hits[index:]:
         word_id = ' '.join([str(i) for i in hit.philo_id])
         query = 'select rowid, philo_name, parent from words where philo_id="%s" limit 1' % word_id
-        c.execute(query)
-        results = c.fetchone()
-
-        parent_sentence = results['parent']
+        cursor.execute(query)
+        results = cursor.fetchone()
 
         highlighted_text = kwic_hit_object(hit, config, db)["highlighted_text"]
         highlighted_text = highlighted_text.translate(remove_punctuation_map)
@@ -54,22 +52,21 @@ def get_neighboring_words(environ, start_response):
         left_rowid = results["rowid"] - 10
         right_rowid = results["rowid"] + 10
 
-        c.execute('select philo_name, philo_id from words where rowid between ? and ?',
-                  (left_rowid, results['rowid']-1))
+        cursor.execute('select philo_name, philo_id from words where rowid between ? and ?',
+                       (left_rowid, results['rowid']-1))
         result_obj["left"] = []
-        for i in c.fetchall():
+        for i in cursor:
             result_obj["left"].append(i['philo_name'])
         result_obj["left"].reverse()
         result_obj["left"] = ' '.join(result_obj["left"])
 
-        c.execute('select philo_name, philo_id from words where rowid between ? and ?',
-                  (results['rowid']+1, right_rowid))
+        cursor.execute('select philo_name, philo_id from words where rowid between ? and ?',
+                       (results['rowid']+1, right_rowid))
         result_obj["right"] = []
-        for i in c.fetchall():
+        for i in cursor:
             result_obj["right"].append(i['philo_name'])
         result_obj["right"] = ' '.join(result_obj["right"])
 
-        metadata_fields = {}
         for metadata in config.kwic_metadata_sorting_fields:
             result_obj[metadata] = hit[metadata].lower()
 

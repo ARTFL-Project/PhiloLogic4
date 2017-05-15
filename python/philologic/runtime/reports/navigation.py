@@ -19,9 +19,9 @@ def generate_text_object(request, config, note=False):
     if note:
         target = request.target.replace('#', '')
         doc_id = request.philo_id.split()[0] + ' %'
-        c = db.dbh.cursor()
-        c.execute('select philo_id from toms where id=? and philo_id like ? limit 1', (target, doc_id))
-        philo_id = c.fetchall()[0]['philo_id'].split()[:7]
+        cursor = db.dbh.cursor()
+        cursor.execute('select philo_id from toms where id=? and philo_id like ? limit 1', (target, doc_id))
+        philo_id = cursor.fetchall()[0]['philo_id'].split()[:7]
         obj = db[philo_id]
     else:
         try:

@@ -651,6 +651,53 @@ class XMLParser(object):
                 self.current_div_id = self.v["div1"].id
                 self.v["div1"]["head"] = "[HyperDiv]"
 
+            # h1, h2, h3 tags should be considered markers for divs in HTML files
+            # what follows the h tags are the content for that div, so we use implied close
+            if h_tag.search(tag):
+                self.context_div_level = int(h_tag.search(tag).groups()[0])
+                if self.context_div_level > 3:
+                    self.content_div_level = 3
+                if self.context_div_level == 1:
+                    if self.open_div1:
+                        self.close_div1(start_byte)
+                    self.open_div1 = True
+                elif self.context_div_level == 2:
+                    if self.open_div2:
+                        self.close_div2(start_byte)
+                    self.open_div2 = True
+                elif self.context_div_level == 3:
+                    if self.open_div3:
+                        self.close_div3(start_byte)
+                    self.open_div3 = True
+                current_div = "div%d" % self.context_div_level
+                self.v.push(current_div, tag_name, start_byte)
+                look_ahead = self.line_count
+                read_more = True
+                div_head = ""
+                while read_more:
+                    try:
+                        next_line = self.content[look_ahead]
+                    except IndexError:
+                        break
+                    if re.search(r"</h1|h2|h3>", next_line, re.I):
+                        break
+                    div_head += next_line
+                    look_ahead += 1
+                div_head = self.clear_char_ents(div_head)
+                div_head = self.latin1_ents_to_utf8(div_head)
+                div_head = self.convert_other_ents(div_head)
+                div_head = re.sub(r'\n?<[^>]*>\n?', '', div_head)
+                div_head = div_head.replace('_', '')
+                div_head = div_head.replace('\t', '')
+                div_head = ' '.join(div_head.split())  # remove double or more spaces
+                div_head = div_head.replace('[', '').replace(']', '')
+                div_head = div_head.replace('"', '')
+                div_head = div_head.strip()
+                div_head = self.remove_control_chars(div_head)
+                div_head = convert_entities(div_head)
+                div_head = div_head.replace('"', '')
+                self.v[current_div]['head'] = div_head
+
             # DIV TAGS: set division levels and print out div info. A couple of assumptions:
             # - I assume divs are numbered 1,2,3.
             # - I output <head> info where I find it.  This could also be modified to output
