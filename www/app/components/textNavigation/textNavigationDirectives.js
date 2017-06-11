@@ -386,6 +386,12 @@
                         continuous: false,
                         thumbnailIndicators: false
                     });
+                    angular.element('#full-size-image').off();
+                    angular.element('#full-size-image').click(function() {
+                        var imageIndex = scope.gallery.getIndex();
+                        var img = element.attr('large-img');
+                        $window.open(img);
+                    });
                 });
                 element.on('$destroy', function() {
                     angular.element(element).off();
