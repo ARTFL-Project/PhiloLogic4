@@ -357,6 +357,8 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                     el.attrib["href"] = os.path.join(config.page_images_url_root, el.attrib["facs"])
                     el.text = el.attrib["rend"]
                     el.attrib["external-img"] = ""
+                    el.attrib["class"] = "external-img"
+                    el.attrib["large-img"] = el.attrib["href"]
                     del el.attrib["rend"]
                     del el.attrib["facs"]
                     el.attrib['data-gallery'] = ''
