@@ -269,27 +269,27 @@ class Loader(object):
 
     def parse_metadata(self, sort_by_field, reverse_sort=False, header="tei"):
         """Parsing metadata fields in TEI or Dublin Core headers"""
-        print("### Parsing metadata ###")
-        print("%s: Parsing metadata in %d files..." % (time.ctime(), len(self.list_files())))
+        print("### Parsing metadata ###", flush=True)
+        print("%s: Parsing metadata in %d files..." % (time.ctime(), len(self.list_files())), flush=True)
         if header == "tei":
             load_metadata = self.parse_tei_header()
         elif header == "dc":
             load_metadata = self.parse_dc_header()
 
         print("%s: Sorting files by the following metadata fields: %s..." % (time.ctime(),
-                                                                             ", ".join([i for i in sort_by_field])), end=' ')
+                                                                             ", ".join([i for i in sort_by_field])), end=' ', flush=True)
 
         self.sort_order = sort_by_field  # to be used for the sort by concordance biblio key in web config
         if sort_by_field:
             return sort_list(load_metadata, sort_by_field)
         else:
-            sorted_load_metadata = []
-            for filename in self.filenames:
-                for m in load_metadata:
-                    if m["filename"] == filename:
-                        sorted_load_metadata.append(m)
-                        break
-            return sorted_load_metadata
+            # sorted_load_metadata = []
+            # for filename in self.filenames:
+            #     for m in load_metadata:
+            #         if m["filename"] == filename:
+            #             sorted_load_metadata.append(m)
+            #             break  # TODO: break really justified???
+            return load_metadata
 
     def parse_files(self, max_workers, data_dicts=None):
         print("\n\n### Parsing files ###")
@@ -345,7 +345,7 @@ class Loader(object):
                     self.metadata_types[k] = "doc"
                     # don't need to check for conflicts, since doc is first.
 
-                    # Adding non-doc level metadata
+        # Adding non-doc level metadata
         for element_type in self.parser_config["metadata_to_parse"]:
             if element_type != "page" and element_type != "ref" and element_type != "line":
                 self.metadata_hierarchy.append([])
