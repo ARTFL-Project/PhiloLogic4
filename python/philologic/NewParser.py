@@ -1329,6 +1329,7 @@ add_tag = re.compile(r'<add\W', re.I)
 seg_attrib = re.compile(r'<seg \w+=', re.I)
 abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)', re.I | re.M)
 semi_colon_strip = re.compile(r'\A;?(\w+);?\Z')
+h_tag = re.compile(r"<h(\d)>", re.I)
 
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029

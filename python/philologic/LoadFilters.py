@@ -359,13 +359,10 @@ def store_in_plain_text(*philo_types):
                         words.append(word)
             if words:
                 stored_objects.append({"philo_id": philo_id, "words": words})
-            filename = files_path + philo_id[0] + '_' + obj
-            output = open(filename, 'w')
             for obj in stored_objects:
-                print('\n###\t%s\t###' % ' '.join(obj["philo_id"]), file=output)
-                print(' '.join(obj["words"]), file=output)
-            output.close()
-
+                path = os.path.join(files_path, "_".join(obj["philo_id"]))
+                with open(path, "w") as output:
+                    output.write(' '.join(obj["words"]))
     return inner_store_in_plain_text
 
 
