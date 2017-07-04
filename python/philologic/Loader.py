@@ -133,12 +133,9 @@ class Loader(object):
             self.filenames.append(f)
         print("done.\n")
 
-    def list_files(self):
-        return os.listdir(self.textdir)
-
     def parse_bibliography_file(self, bibliography_file, sort_by_field, reverse_sort=True):
         load_metadata = []
-        files = set(self.list_files())
+        files = set(os.listdir(self.textdir))
         with open(bibliography_file) as input_file:
             metadata_fields = input_file.readline().strip().split("\t")
             filename_index = metadata_fields.index("filename")
@@ -164,10 +161,10 @@ class Loader(object):
         load_metadata = []
         metadata_xpaths = self.parser_config["doc_xpaths"]
         deleted_files = []
-        for f in self.list_files():
-            data = {"filename": f}
+        for file in os.scandir(self.textdir):
+            data = {"filename": file.name}
             header = ""
-            with open(os.path.join(self.textdir, f), encoding="utf8") as text_file:
+            with open(file.path) as text_file:
                 try:
                     file_content = "".join(text_file.readlines())
                 except UnicodeDecodeError:
@@ -223,11 +220,10 @@ class Loader(object):
 
     def parse_dc_header(self):
         load_metadata = []
-        for filename in self.list_files():
+        for file in os.scandir(self.textdir):
             data = {}
-            fn = self.textdir + filename
             header = ""
-            with open(fn) as fh:
+            with open(file.path) as fh:
                 for line in fh:
                     start_scan = re.search("<teiheader>|<temphead>|<head>", line, re.IGNORECASE)
                     end_scan = re.search("</teiheader>|<\/?temphead>|</head>", line, re.IGNORECASE)
@@ -246,7 +242,7 @@ class Loader(object):
                 metadata_value = convert_entities(metadata_value)
                 metadata_name = metadata_name.lower()
                 data[metadata_name] = metadata_value
-            data["filename"] = filename  # place at the end in case the value was in the header
+            data["filename"] = filename.name  # place at the end in case the value was in the header
             data = self.create_year_field(data)
             if self.debug:
                 print(pretty_print(data))
@@ -254,7 +250,7 @@ class Loader(object):
         return load_metadata
 
     def create_year_field(self, metadata):
-        year_finder = re.compile(r'^.*?(\d{4}).*')
+        year_finder = re.compile(r'^.*?(\d{4}).*')  # we are assuming dates from 1000 AC
         earliest_year = 2500
         for field in ["date", "create_date", "pub_date", "period"]:
             if field in metadata:
@@ -270,7 +266,7 @@ class Loader(object):
     def parse_metadata(self, sort_by_field, reverse_sort=False, header="tei"):
         """Parsing metadata fields in TEI or Dublin Core headers"""
         print("### Parsing metadata ###", flush=True)
-        print("%s: Parsing metadata in %d files..." % (time.ctime(), len(self.list_files())), flush=True)
+        print("%s: Parsing metadata in %d files..." % (time.ctime(), len(os.listdir(self.textdir))), flush=True)
         if header == "tei":
             load_metadata = self.parse_tei_header()
         elif header == "dc":
@@ -283,54 +279,29 @@ class Loader(object):
         if sort_by_field:
             return sort_list(load_metadata, sort_by_field)
         else:
-            # sorted_load_metadata = []
-            # for filename in self.filenames:
-            #     for m in load_metadata:
-            #         if m["filename"] == filename:
-            #             sorted_load_metadata.append(m)
-            #             break  # TODO: break really justified???
             return load_metadata
 
     def parse_files(self, max_workers, data_dicts=None):
         print("\n\n### Parsing files ###")
         os.chdir(self.workdir)  # questionable
 
-        if not data_dicts:
-            data_dicts = [{"filename": self.textdir + fn} for fn in self.list_files()]
-            self.filequeue = [{"orig": os.path.abspath(x),
-                               "name": os.path.basename(x),
-                               "size": os.path.getsize(x),
-                               "id": n + 1,
-                               "options": {},
-                               "newpath": self.textdir + os.path.basename(x),
-                               "raw": self.workdir + os.path.basename(x) + ".raw",
-                               "words": self.workdir + os.path.basename(x) + ".words.sorted",
-                               "toms": self.workdir + os.path.basename(x) + ".toms",
-                               "sortedtoms": self.workdir + os.path.basename(x) + ".toms.sorted",
-                               "pages": self.workdir + os.path.basename(x) + ".pages",
-                               "refs": self.workdir + os.path.basename(x) + ".refs",
-                               "graphics": self.workdir + os.path.basename(x) + ".graphics",
-                               "lines": self.workdir + os.path.basename(x) + ".lines",
-                               "results": self.workdir + os.path.basename(x) + ".results"}
-                              for n, x in enumerate(self.list_files())]
-
-        else:
-            self.filequeue = [{"orig": os.path.abspath(d["filename"]),
-                               "name": os.path.basename(d["filename"]),
-                               "size": os.path.getsize(self.textdir + (d["filename"])),
-                               "id": n + 1,
-                               "options": d["options"] if "options" in d else {},
-                               "newpath": self.textdir + os.path.basename(d["filename"]),
-                               "raw": self.workdir + os.path.basename(d["filename"]) + ".raw",
-                               "words": self.workdir + os.path.basename(d["filename"]) + ".words.sorted",
-                               "toms": self.workdir + os.path.basename(d["filename"]) + ".toms",
-                               "sortedtoms": self.workdir + os.path.basename(d["filename"]) + ".toms.sorted",
-                               "pages": self.workdir + os.path.basename(d["filename"]) + ".pages",
-                               "refs": self.workdir + os.path.basename(d["filename"]) + ".refs",
-                               "graphics": self.workdir + os.path.basename(d["filename"]) + ".graphics",
-                               "lines": self.workdir + os.path.basename(d["filename"]) + ".lines",
-                               "results": self.workdir + os.path.basename(d["filename"]) + ".results"}
-                              for n, d in enumerate(data_dicts)]
+        if data_dicts is None:
+            data_dicts = [{"filename": fn.name} for fn in os.scandir(self.textdir)]
+        self.filequeue = [{"name": d["filename"],
+                           "size": os.path.getsize(self.textdir + (d["filename"])),
+                           "id": n + 1,
+                           "options": d["options"] if "options" in d else {},
+                           "newpath": self.textdir + d["filename"],
+                           "raw": self.workdir + d["filename"] + ".raw",
+                           "words": self.workdir + d["filename"] + ".words.sorted",
+                           "toms": self.workdir + d["filename"] + ".toms",
+                           "sortedtoms": self.workdir + d["filename"] + ".toms.sorted",
+                           "pages": self.workdir + d["filename"] + ".pages",
+                           "refs": self.workdir + d["filename"] + ".refs",
+                           "graphics": self.workdir + d["filename"] + ".graphics",
+                           "lines": self.workdir + d["filename"] + ".lines",
+                           "results": self.workdir + d["filename"] + ".results"}
+                          for n, d in enumerate(data_dicts)]
 
         self.loaded_files = self.filequeue[:]
 
