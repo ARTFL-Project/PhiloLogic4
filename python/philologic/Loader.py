@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-
+"""Standard PhiloLogic4 loader.
+Calls all parsing functions and store data in index"""
 
 import imp
 import math
@@ -168,18 +169,18 @@ class Loader(object):
                 try:
                     file_content = "".join(text_file.readlines())
                 except UnicodeDecodeError:
-                    deleted_files.append(f)
+                    deleted_files.append(file.name)
                     continue
             try:
                 start_header_index = re.search(r'<teiheader', file_content, re.I).start()
                 end_header_index = re.search(r'</teiheader', file_content, re.I).start()
             except AttributeError:  # tag not found
-                deleted_files.append(f)
+                deleted_files.append(file.name)
                 continue
             header = file_content[start_header_index:end_header_index]
             header = convert_entities(header)
             if self.debug:
-                print("parsing %s header..." % f)
+                print("parsing %s header..." % file.name)
             parser = etree.XMLParser(recover=True)
             try:
                 tree = etree.fromstring(header, parser)
@@ -225,8 +226,8 @@ class Loader(object):
             header = ""
             with open(file.path) as fh:
                 for line in fh:
-                    start_scan = re.search("<teiheader>|<temphead>|<head>", line, re.IGNORECASE)
-                    end_scan = re.search("</teiheader>|<\/?temphead>|</head>", line, re.IGNORECASE)
+                    start_scan = re.search(r"<teiheader>|<temphead>|<head>", line, re.IGNORECASE)
+                    end_scan = re.search(r"</teiheader>|<\/?temphead>|</head>", line, re.IGNORECASE)
                     if start_scan:
                         header += line[start_scan.start():]
                     elif end_scan:
@@ -234,15 +235,15 @@ class Loader(object):
                         break
                     else:
                         header += line
-            matches = re.findall('<meta name="DC\.([^"]+)" content="([^"]+)"', header)
+            matches = re.findall(r'<meta name="DC\.([^"]+)" content="([^"]+)"', header)
             if not matches:
-                matches = re.findall('<dc:([^>]+)>([^>]+)>', header)
+                matches = re.findall(r'<dc:([^>]+)>([^>]+)>', header)
             for metadata_name, metadata_value in matches:
                 metadata_value = metadata_value
                 metadata_value = convert_entities(metadata_value)
                 metadata_name = metadata_name.lower()
                 data[metadata_name] = metadata_value
-            data["filename"] = filename.name  # place at the end in case the value was in the header
+            data["filename"] = file.name  # place at the end in case the value was in the header
             data = self.create_year_field(data)
             if self.debug:
                 print(pretty_print(data))
@@ -288,7 +289,7 @@ class Loader(object):
         if data_dicts is None:
             data_dicts = [{"filename": fn.name} for fn in os.scandir(self.textdir)]
         self.filequeue = [{"name": d["filename"],
-                           "size": os.path.getsize(self.textdir + (d["filename"])),
+                           "size": os.path.getsize(self.textdir + d["filename"]),
                            "id": n + 1,
                            "options": d["options"] if "options" in d else {},
                            "newpath": self.textdir + d["filename"],
@@ -467,7 +468,7 @@ class Loader(object):
 
     def merge_files(self, file_type, file_num=500):
         """This function runs a multi-stage merge sort on words
-        Since PhilLogic can potentially merge thousands of files, we need to split
+        Since PhiloLogic can potentially merge thousands of files, we need to split
         the sorting stage into multiple steps to avoid running out of file descriptors"""
         lists_of_files = []
         files = []
@@ -693,7 +694,7 @@ class Loader(object):
                 continue
         config_values['search_examples'] = search_examples
 
-        config_values["metadata_input_style"] = dict([(f, "text") for f in metadata])
+        config_values["metadata_input_style"] = {f: "text" for f in metadata}
 
         # Populate kwic metadata sorting and kwic biblio fields variables with metadata
         # Check if title and author are empty, if so, default to filename
