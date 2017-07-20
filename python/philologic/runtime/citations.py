@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Citations"""
 
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 from philologic.runtime.link import (make_absolute_object_link, make_absolute_query_link)
 import six
 
@@ -82,8 +82,8 @@ def get_label(hit, citation_object):
         label = hit[citation_object["field"]].strip().title()
     elif citation_object["object_level"] == "page":
         page_num = hit.page[citation_object["field"]]
-        if page_num[citation_object["field"]]:
-            label = "page %s" % str(page_num)
+        if page_num:
+            label = str(page_num)
     elif citation_object["object_level"] == "line":
         try:
             line = hit.line[citation_object["field"]].strip()
@@ -105,8 +105,11 @@ def get_div1_name(hit):
                 label = hit.div1['type'] + " " + hit.div1["n"]
             else:
                 label = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
-    label = label[0].upper() + label[1:]
-    label = label.strip()
+    try:
+        label = label[0].upper() + label[1:]
+        label = label.strip()
+    except IndexError:
+        pass
     return label
 
 
