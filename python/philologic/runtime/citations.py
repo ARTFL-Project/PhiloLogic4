@@ -81,7 +81,7 @@ def get_label(hit, citation_object):
         label = hit[citation_object["field"]].strip().title()
     elif citation_object["object_level"] == "page":
         page_num = hit.page[citation_object["field"]]
-        if page_num[citation_object["field"]]:
+        if page_num:
             label = "page %s" % str(page_num)
     elif citation_object["object_level"] == "line":
         try:
@@ -105,8 +105,11 @@ def get_div1_name(hit):
             else:
                 label = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
     if label:
-        label = label[0].upper() + label[1:]
-        label = label.strip()
+        try:
+            label = label[0].upper() + label[1:]
+            label = label.strip()
+        except IndexError:
+            pass
     return label
 
 

@@ -45,10 +45,12 @@ def generate_text_object(request, config, note=False):
     text_object['metadata_fields'] = metadata_fields
     if width != 9:
         citation_hrefs = citation_links(db, config, obj)
+        citation = citations(obj, citation_hrefs, config, report="navigation")
     else:
+        db = DB(config.db_path + '/data/', width=7)
         doc_obj = db[obj.philo_id[0]]
         citation_hrefs = citation_links(db, config, doc_obj)
-    citation = citations(obj, citation_hrefs, config, report="navigation")
+        citation = citations(doc_obj, citation_hrefs, config, report="navigation")
     text_object['citation'] = citation
     text, imgs = get_text_obj(obj, config, request, db.locals["token_regex"], note=note)
     if config.navigation_formatting_regex:

@@ -54,7 +54,7 @@ def make_word_counts(loader_obj, text, depth=5):
 
 def generate_words_sorted(loader_obj, text):
     # -a in grep to avoid issues with NULL chars in file
-    wordcommand = "cat %s | egrep -a \"^word\" | sort %s %s > %s" % (text["raw"], loader_obj.sort_by_word,
+    wordcommand = "cat %s | egrep -a \"^word\" | LANG=C sort %s %s > %s" % (text["raw"], loader_obj.sort_by_word,
                                                                      loader_obj.sort_by_id, text["words"])
     os.system(wordcommand)
 
@@ -87,7 +87,7 @@ def make_object_ancestors(*philo_types):
 def make_sorted_toms(*philo_types):
     def sorted_toms(loader_obj, text):
         philo_type_pattern = "|".join("^%s" % t for t in philo_types)
-        tomscommand = "cat %s | egrep \"%s\" | sort %s > %s" % (text["raw"], philo_type_pattern, loader_obj.sort_by_id,
+        tomscommand = "cat %s | egrep \"%s\" | LANG=C sort %s > %s" % (text["raw"], philo_type_pattern, loader_obj.sort_by_id,
                                                                 text["sortedtoms"])
         os.system(tomscommand)
 
@@ -133,7 +133,7 @@ def prev_next_obj(*philo_types):
         output_file.close()
         os.remove(text['sortedtoms'])
         philo_type_pattern = "|".join("^%s" % t for t in loader_obj.types)
-        tomscommand = "cat %s | egrep \"%s\" | sort %s > %s" % (temp_file, philo_type_pattern, loader_obj.sort_by_id,
+        tomscommand = "cat %s | egrep \"%s\" | LANG=C sort %s > %s" % (temp_file, philo_type_pattern, loader_obj.sort_by_id,
                                                                 text["sortedtoms"])
         os.system(tomscommand)
         os.remove(temp_file)

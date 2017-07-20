@@ -189,6 +189,11 @@ class XMLParser(object):
         else:
             self.defined_words_to_index = False
 
+        if "file_type" in parse_options:
+            self.file_type = parse_options["file_type"]
+        else:
+            self.file_type = "xml"
+
         # List of global variables used for the tag handler
         if "token_regex" in parse_options:
             self.token_regex = re.compile(r"(%s)" % parse_options["token_regex"], re.I)
@@ -653,7 +658,7 @@ class XMLParser(object):
 
             # h1, h2, h3 tags should be considered markers for divs in HTML files
             # what follows the h tags are the content for that div, so we use implied close
-            if h_tag.search(tag):
+            if self.file_type == "html" and h_tag.search(tag):
                 self.context_div_level = int(h_tag.search(tag).groups()[0])
                 if self.context_div_level > 3:
                     self.content_div_level = 3
