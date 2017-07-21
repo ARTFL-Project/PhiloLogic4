@@ -1,6 +1,9 @@
 ![alt text](www/app/assets/img/philo.png) 4.5
 ===========
 
+# THIS IS THE PHILOGIC 4 REPOSITORY FOR PYTHON2 ONLY #
+## For the new Python3 branch, see [the PhiloLogic5 repository](https://github.com/ARTFL-Project/PhiloLogic5) ##
+
 PhiloLogic is an XML database/search engine/web app that is designed 
 for the particular difficulties of TEI XML.  For a more theoretical 
 description, you can refer to [our research publications](<http://http://jtei.revues.org/817) or [our blog](<http://artfl.blogspot.com>).
