@@ -389,6 +389,7 @@ span.note {
     content: attr(n);
     color: #bababa;
 }
+
 .xml-l[id]::before {
     content: attr(id);
     color: #bababa;
