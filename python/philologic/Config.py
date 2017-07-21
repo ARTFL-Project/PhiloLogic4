@@ -416,8 +416,7 @@ web_config_defaults = {
             'separator': '',
             'link': True,
             'style': {"font-variant": "small-caps"}
-        },
-        {
+        }, {
             'style': {},
             'suffix': ']',
             'object_level': 'page',
@@ -425,8 +424,7 @@ web_config_defaults = {
             'prefix': '&nbsp;[ page',
             'link': True,
             'separator': ''
-       }
-        ],
+        }],
         'comment': '''
                # The concordance_citation variable define how and in what field order citations are displayed in concordance reports.
                # You can define styling with a dictionary of valid CSS property/value such as those in the default values.
