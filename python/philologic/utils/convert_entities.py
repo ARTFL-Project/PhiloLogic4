@@ -29,4 +29,4 @@ def convert_entities(text):
     try:
         return entities_match.sub(fixup, text)
     except UnicodeDecodeError:
-        return entities_match.sub(fixup, text.decode('utf8'))
+        return entities_match.sub(fixup, text.decode('utf8', 'ignore'))
