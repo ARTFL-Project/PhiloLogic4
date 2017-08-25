@@ -38,7 +38,7 @@ NAVIGABLE_OBJECTS = ('doc', 'div1', 'div2', 'div3', 'para')
 ParserOptions = ["parser_factory", "doc_xpaths", "token_regex", "tag_to_obj_map", "metadata_to_parse", "suppress_tags",
                  "load_filters", "break_apost", "chars_not_to_index", "break_sent_in_line_group", "tag_exceptions",
                  "join_hyphen_in_words", "unicode_word_breakers", "abbrev_expand", "long_word_limit",
-                 "flatten_ligatures", "sentence_breakers"]
+                 "flatten_ligatures", "sentence_breakers", "file_type"]
 
 
 class Loader(object):
@@ -409,6 +409,7 @@ class Loader(object):
                                             tag_to_obj_map=self.parser_config["tag_to_obj_map"],
                                             metadata_to_parse=self.parser_config["metadata_to_parse"],
                                             words_to_index=self.words_to_index,
+                                            file_type=self.parser_config["file_type"],
                                             **options)
                     try:
                         parser.parse(i)

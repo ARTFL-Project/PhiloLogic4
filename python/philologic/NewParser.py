@@ -162,6 +162,7 @@ class XMLParser(object):
                  known_metadata={},
                  tag_to_obj_map=DefaultTagToObjMap,
                  metadata_to_parse=DefaultMetadataToParse,
+                 file_type="xml",
                  **parse_options):
         """Initialize class"""
         self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
@@ -169,6 +170,7 @@ class XMLParser(object):
         self.output = output
         self.docid = docid
         self.tag_to_obj_map = tag_to_obj_map
+        self.file_type = "xml"
         self.metadata_to_parse = {}
         for obj in metadata_to_parse:
             self.metadata_to_parse[obj] = set(metadata_to_parse[obj])
@@ -656,7 +658,7 @@ class XMLParser(object):
 
             # h1, h2, h3 tags should be considered markers for divs in HTML files
             # what follows the h tags are the content for that div, so we use implied close
-            if h_tag.search(tag):
+            if self.file_type == "html" and h_tag.search(tag):
                 self.context_div_level = int(h_tag.search(tag).groups()[0])
                 if self.context_div_level > 3:
                     self.content_div_level = 3

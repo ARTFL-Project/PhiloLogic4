@@ -118,7 +118,7 @@ class LoadOptions(object):
                           "--file-type",
                           type="string",
                           dest="file_type",
-                          help="Define file type for parsing: plain_text or xml")
+                          help="Define file type for parsing: plain_text, xml, or html")
         parser.add_option("-w",
                           "--use-webconfig",
                           type="string",
