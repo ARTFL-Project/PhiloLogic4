@@ -37,6 +37,14 @@
     margin-left: -10px !important;
 }
 
+#header-report-error {
+    position: absolute;
+    bottom: -5px;
+    right: 0;
+    font-size: 120%;
+    font-weight: 700;
+}
+
 body {
     font-family: 'Roboto', sans-serif;
 }

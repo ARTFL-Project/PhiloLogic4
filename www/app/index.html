@@ -36,6 +36,9 @@
                 </div>
                 <div class="navbar-header">
                     <a href="" class="navbar-brand" title="$DBNAME" ng-click="PhiloMain.backToHome()">$DBNAME</a>
+                    <div style="position: relative" ng-if="philoConfig.report_error_link != ''">
+                        <a id="header-report-error" target="_blank" ng-href="{{ philoConfig.report_error_link }}">Report Error</a>
+                    </div>
                 </div>
             </div>
         </div>

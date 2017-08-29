@@ -693,6 +693,11 @@ web_config_defaults = {
                 # and return definitions. This is currently hardcoded to ARTFL's dictionary model. To be made more generic at a later date
                 ''',
         'index': 42
+    },
+    'report_error_link': {
+        'value': "",
+        'comment': '# The link should start with http:// or https://. This will display an error report link in the header and in document navigation',
+        'index': 43
     }
 }
 

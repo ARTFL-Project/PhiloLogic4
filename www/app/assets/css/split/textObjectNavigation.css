@@ -151,7 +151,16 @@
     transition: opacity 200ms;
 }
 
-#nav-buttons.ui-scrollfix #back-to-top {
+#report-error {
+    display: none;
+    position: absolute;
+    right: 15px;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 200ms;
+}
+
+#nav-buttons.ui-scrollfix #back-to-top,  #nav-buttons.ui-scrollfix #report-error {
     display: inline;
     opacity: 1;
 }
