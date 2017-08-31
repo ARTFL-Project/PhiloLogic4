@@ -83,7 +83,10 @@ def get_label(hit, citation_object):
     elif citation_object["object_level"] == "page":
         page_num = hit.page[citation_object["field"]]
         if page_num:
-            label = str(page_num)
+            try:
+                label = str(page_num)
+            except UnicodeEncodeError:
+                label = page_num.encode('utf-8', 'ignore')  # page number is a unicode char
     elif citation_object["object_level"] == "line":
         try:
             line = hit.line[citation_object["field"]].strip()
