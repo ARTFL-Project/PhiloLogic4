@@ -56,6 +56,7 @@ class Loader(object):
         self.post_filters = loader_options["post_filters"]
         self.words_to_index = loader_options["words_to_index"]
         self.token_regex = loader_options["token_regex"]
+        self.deleted_files = []  # files which are removed from the load due to an error
 
         self.parser_config = {}
         for option in ParserOptions:
@@ -163,7 +164,6 @@ class Loader(object):
     def parse_tei_header(self):
         load_metadata = []
         metadata_xpaths = self.parser_config["doc_xpaths"]
-        deleted_files = []
         for f in self.list_files():
             data = {"filename": f}
             header = ""
@@ -172,7 +172,7 @@ class Loader(object):
                 start_header_index = re.search(r'<teiheader', file_content, re.I).start()
                 end_header_index = re.search(r'</teiheader', file_content, re.I).start()
             except AttributeError:  # tag not found
-                deleted_files.append(f)
+                self.deleted_files.append(f)
                 continue
             header = file_content[start_header_index:end_header_index]
             header = convert_entities(header)
@@ -210,9 +210,9 @@ class Loader(object):
                 data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
                 load_metadata.append(data)
             except etree.XMLSyntaxError:
-                deleted_files.append(f)
-        if deleted_files:
-            for f in deleted_files:
+                self.deleted_files.append(f)
+        if self.deleted_files:
+            for f in self.deleted_files:
                 print("%s has no valid TEI header or contains invalid data: removing from database load..." % f)
         return load_metadata
 

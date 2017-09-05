@@ -33,5 +33,7 @@ if __name__ == '__main__':
     l.setup_sql_load()
     l.post_processing()
     l.finish()
+    if l.deleted_files:
+        print("The following files where not loaded due to invalid data in the header:\n{}".format("\n".join(l.deleted_files)))
 
     print("Application viewable at %s\n" % os.path.join(config_file.url_root, load_options.dbname))
