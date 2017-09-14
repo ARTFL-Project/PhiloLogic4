@@ -1332,7 +1332,7 @@ char_ents = re.compile(r'\&[a-zA-Z0-9\#][a-zA-Z0-9]*;', re.I)
 newline_shortener = re.compile(r'\n\n*')
 check_if_char_word = re.compile(r'\w', re.I | re.U)
 cap_char_or_num = re.compile(r'[A-Z0-9]')  # Capitals
-ending_punctuation = re.compile(r'[%s]$' % string.punctuation)
+ending_punctuation = re.compile(r'[%s]$' % string.punctuation.replace(")", "").replace("]", ""))
 add_tag = re.compile(r'<add\W', re.I)
 seg_attrib = re.compile(r'<seg \w+=', re.I)
 abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)', re.I | re.M)

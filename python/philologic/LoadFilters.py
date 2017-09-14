@@ -382,19 +382,22 @@ def store_words_and_philo_ids(loader_obj, text):
     except OSError:
         # Path was already created
         pass
-    output = open(os.path.join(files_path, str(text["id"])), "w")
-    with open(text['raw']) as fh:
-        for line in fh:
-            type, word, id, attrib = line.split('\t')
-            if type == "word" and word != '__philo_virtual':
-                word_obj = dumps({"token": word, "position": id})
-                print(word_obj, file=output)
-    output.close()
+    with open(os.path.join(files_path, str(text["id"])), "w") as output:
+        with open(text['raw']) as filehandle:
+            for line in filehandle:
+                philo_type, word, philo_id, attrib = line.split('\t')
+                attrib = loads(attrib)
+                if philo_type == "word" and word != '__philo_virtual':
+                    word_obj = dumps(
+                        {"token": word, "philo_id": philo_id, "start_byte": attrib["start_byte"], "end_byte": attrib["end_byte"]}
+                        )
+                    print(word_obj, file=output)
 
 
 DefaultNavigableObjects = ("div1", "div2", "div3", "para")
 DefaultLoadFilters = [normalize_unicode_raw_words, make_word_counts, generate_words_sorted, make_object_ancestors,
-                      make_sorted_toms, prev_next_obj, generate_pages, prev_next_page, generate_refs, generate_graphics, generate_lines, make_max_id]
+                      make_sorted_toms, prev_next_obj, generate_pages, prev_next_page, generate_refs, generate_graphics,
+                      generate_lines, make_max_id, store_words_and_philo_ids]
 
 
 def set_load_filters(load_filters=DefaultLoadFilters, navigable_objects=DefaultNavigableObjects):

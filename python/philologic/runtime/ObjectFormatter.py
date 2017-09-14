@@ -133,7 +133,6 @@ def format_concordance(text, word_regex, bytes=[]):
     output = re.sub(r'\A<div class="philologic-fragment">', '', output)
     output = re.sub(r'</div>\Z', '', output)
     ## remove spaces around hyphens and apostrophes
-    output = space_match.sub('\\1', output)
     output = convert_entities(output)
     output = strip_start_punctuation.sub("", output)
     return output
@@ -376,8 +375,6 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
             print(e, file=sys.stderr)
             pass
     output = etree.tostring(xml)
-    ## remove spaces around hyphens and apostrophes
-    output = re.sub(r" ?([-';.])+ ", '\\1 ', output)
     output = convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
 
     if note:  ## Notes don't need to fetch images

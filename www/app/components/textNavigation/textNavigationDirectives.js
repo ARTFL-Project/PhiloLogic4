@@ -332,6 +332,7 @@
                 });
                 element.on('$destroy', function() {
                     angular.element('#full-size-image').off();
+                    angular.element('body').css("overflow", "auto");
                 });
             }
         }
@@ -371,6 +372,7 @@
                 });
                 element.on('$destroy', function() {
                     angular.element('#full-size-image').off();
+                    angular.element('body').css("overflow", "auto");
                 });
             }
         }
@@ -395,6 +397,7 @@
                 });
                 element.on('$destroy', function() {
                     angular.element(element).off();
+                    angular.element('body').css("overflow", "auto");
                 });
             }
         }

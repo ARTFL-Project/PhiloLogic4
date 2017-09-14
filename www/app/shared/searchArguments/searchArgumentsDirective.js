@@ -70,7 +70,7 @@
                 }
             }
             for (var k in queryArgs) {
-                if (config.metadata.indexOf(k) >= 0 || facets.indexOf(k) >= 0) {
+                if (config.available_metadata.indexOf(k) >= 0) {
                     var v = queryArgs[k];
                     var alias = k;
                     if (v) {
