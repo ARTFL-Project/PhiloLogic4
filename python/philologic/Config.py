@@ -509,6 +509,66 @@ web_config_defaults = {
                # and to a regular query for all other metadata fields.''',
         'index': 26
     },
+    'table_of_contents_citation': {
+        'value': [{
+            'field': 'author',
+            'object_level': 'doc',
+            'prefix': '',
+            'suffix': '',
+            'separator': '',
+            'link': False,
+            'style': {"font-variant": "small-caps"}
+        }, {
+            'field': 'title',
+            'object_level': 'doc',
+            'prefix': '',
+            'suffix': '',
+            'separator': '',
+            'link': True,
+            'style': {"font-variant": "small-caps",
+                      "font-style": "italic",
+                      "font-weight": 700}
+        }, {
+            'field': 'year',
+            'object_level': 'doc',
+            'prefix': '&nbsp;&nbsp;[',
+            'suffix': ']',
+            'separator': '',
+            'link': False,
+            'style': {}
+        }, {
+            'field': 'pub_place',
+            'object_level': 'doc',
+            'prefix': '',
+            'suffix': '',
+            'separator': '<br>',
+            'link': False,
+            'style': {}
+        }, {
+            'field': 'publisher',
+            'object_level': 'doc',
+            'prefix': '',
+            'suffix': '',
+            'separator': ',',
+            'link': False,
+            'style': {}
+        }, {
+            'field': 'collection',
+            'object_level': 'doc',
+            'prefix': '',
+            'suffix': '',
+            'separator': '',
+            'link': False,
+            'style': {}
+        }],
+        'comment': '''
+               # The navigation_citation variable define how and in what field order citations are displayed in navigation reports.
+               # You can define styling with a dictionary of valid CSS property/value such as those in the default values.
+               # begin and end keywords define what precedes and follows each field. You can use HTML for these strings.
+               # The link key enables linking for that metadata field. It links to the table of contents for title and filename,
+               # and to a metadata query for all other metadata fields.''',
+        'index': 27
+    },
     'navigation_citation': {
         'value': [{
             'field': 'author',
