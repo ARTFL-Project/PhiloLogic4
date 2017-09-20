@@ -562,7 +562,7 @@ web_config_defaults = {
             'style': {}
         }],
         'comment': '''
-               # The navigation_citation variable define how and in what field order citations are displayed in navigation reports.
+               # The table_of_contents_citation variable define how and in what field order citations are displayed in navigation reports.
                # You can define styling with a dictionary of valid CSS property/value such as those in the default values.
                # begin and end keywords define what precedes and follows each field. You can use HTML for these strings.
                # The link key enables linking for that metadata field. It links to the table of contents for title and filename,

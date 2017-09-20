@@ -8,6 +8,7 @@ import re
 import hashlib
 import time
 import struct
+import sys
 from philologic.DB import DB
 
 # These should always be allowed for local access
@@ -33,7 +34,8 @@ def check_access(environ, config):
     # Load access config file. If loading fails, grant access.
     try:
         access_config = imp.load_source("access_config", access_file)
-    except:
+    except Exception as e:
+        print("ACCESS ERROR", repr(e), file=sys.stderr)
         return make_token(incoming_address, db)
 
     # Let's first check if the IP is local and grant access if it is.
@@ -62,7 +64,6 @@ def check_access(environ, config):
             else:
                 allowed_ips.add(ip)
     except Exception as e:
-        import sys
         print(repr(e), file=sys.stderr)
         allowed_ips = []
     try:
@@ -82,7 +83,6 @@ def check_access(environ, config):
                 return make_token(incoming_address, db)
 
     # If no token returned, we block access.
-    import sys
     print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)
     return ()
 
