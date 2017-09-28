@@ -7,6 +7,7 @@ import sqlite3
 import sys
 import unicodedata
 from operator import itemgetter
+from collections import defaultdict
 
 import simplejson
 import six
@@ -82,6 +83,7 @@ def group_by_range(request_range, request, config):
     metadata_queried = request.group_by_field
     citation_types = simplejson.loads(request.citation)
     is_date = False
+    cursor = db.dbh.cursor()
     try:
         int(request_range[0])
         int(request_range[1])
@@ -91,17 +93,16 @@ def group_by_range(request_range, request, config):
     if is_date:
         content_type = "date"
         query_range = set(range(int(request_range[0]), int(request_range[1])))
+        cursor.execute('select * from toms where philo_type="doc"')
     else:
         content_type = metadata_queried
+        cursor.execute('select *, count(*) as count from toms where philo_type="doc" group by %s' % metadata_queried)
         query_range = set(range(
             ord(request_range[0]),
             ord(request_range[1]) + 1))  # Ordinal avoids unicode issues...
-    c = db.dbh.cursor()
-    c.execute(
-        'select *, count(*) as count from toms where philo_type="doc" group by %s'
-        % metadata_queried)
     content = {}
-    for doc in c.fetchall():
+    date_count = defaultdict(int)
+    for doc in cursor:
         normalized_test_value = ''
         if doc[metadata_queried] is None:
             continue
@@ -109,6 +110,7 @@ def group_by_range(request_range, request, config):
             try:
                 initial = int(doc[metadata_queried])
                 test_value = initial
+                date_count[initial] += 1
             except:
                 continue
         else:
@@ -135,11 +137,18 @@ def group_by_range(request_range, request, config):
             citation = citations(obj, links, config, report="landing_page", citation_type=citation_types)
             if initial not in content:
                 content[initial] = []
-            content[initial].append({
-                "metadata": get_all_metadata(db, doc),
-                "citation": citation,
-                "count": doc['count']
-            })
+            if is_date:
+                content[initial].append({
+                    "metadata": get_all_metadata(db, doc),
+                    "citation": citation,
+                    "count": date_count[initial]
+                })
+            else:
+                content[initial].append({
+                    "metadata": get_all_metadata(db, doc),
+                    "citation": citation,
+                    "count": doc['count']
+                })
     results = []
     for result_set in sorted(six.iteritems(content), key=itemgetter(0)):
         results.append({"prefix": result_set[0], "results": result_set[1]})
