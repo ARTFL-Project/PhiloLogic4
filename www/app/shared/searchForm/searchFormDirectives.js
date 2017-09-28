@@ -36,6 +36,12 @@
         var reportChange = function (report) {
             if (report === 'landing_page') {
                 report = $rootScope.philoConfig.search_reports[0];
+            } else if (report === "collocation") {
+                if ($rootScope.philoConfig.stopwords.length > 0) {
+                    $rootScope.formData.colloc_filter_choice = "stopwords"
+                } else {
+                    $rootScope.formData.colloc_filter_choice = "frequency"
+                }
             }
             $rootScope.formData.report = report;
             var reports = [];
@@ -164,11 +170,17 @@
             replace: true,
             link: function (scope, element, attrs) {
                 scope.stopwords = $rootScope.philoConfig.stopwords;
-                if (!'colloc_filter_choice' in $rootScope.formData || typeof ($rootScope.formData.colloc_filter_choice) === 'undefined') {
-                    $rootScope.formData.colloc_filter_choice = "frequency";
-                }
-                if (!'filter_frequency' in $rootScope.formData || typeof ($rootScope.formData.filter_frequency) === 'undefined') {
-                    $rootScope.formData.filter_frequency = 100;
+                if (scope.stopwords.length > 0) {  // Make stopwords the default if defined
+                    if (!'colloc_filter_choice' in $rootScope.formData || typeof ($rootScope.formData.colloc_filter_choice) === 'undefined') {
+                        $rootScope.formData.colloc_filter_choice = "stopwords";
+                    }
+                } else {
+                    if (!'colloc_filter_choice' in $rootScope.formData || typeof ($rootScope.formData.colloc_filter_choice) === 'undefined') {
+                        $rootScope.formData.colloc_filter_choice = "frequency";
+                    }
+                    if (!'filter_frequency' in $rootScope.formData || typeof ($rootScope.formData.filter_frequency) === 'undefined') {
+                        $rootScope.formData.filter_frequency = 100;
+                    }
                 }
             }
         }

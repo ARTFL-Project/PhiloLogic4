@@ -29,6 +29,7 @@
     font-size: .75em;
     font-variant: small-caps;
     margin-right: -10px !important;
+    white-space: nowrap;
 }
 
 .navbar-left {

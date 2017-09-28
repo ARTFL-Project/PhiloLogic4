@@ -71,7 +71,7 @@ def byte_range_to_link(db_path, doc_id, start_byte, end_byte, obj_level='div1', 
     db = DB(db_path+'/data')
     config = MakeWebConfig(db_path+'/data/web_config.cfg')
     if global_config_path is None:
-        global_config_path = os.getenv("PHILOLOGIC_CONFIG", "/etc/philologic/philologic5.cfg")
+        global_config_path = os.getenv("PHILOLOGIC_CONFIG", config.global_config_location)
     global_config = imp.load_source("", global_config_path)
     url_root = os.path.join(global_config.url_root, [i for i in db_path.split("/") if i][-1])
     cursor = db.dbh.cursor()

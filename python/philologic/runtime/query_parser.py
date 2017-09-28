@@ -2,23 +2,10 @@
 # -*- coding: utf-8 -*-
 """Parse term query before passing it to the PhiloLogic4 library."""
 
+import re
 
-def parse_query(query_terms):
+def parse_query(query_terms, config):
     """Parse query function."""
-    # Allow use of OR as a boolean operator
-    query_terms = query_terms.replace(' OR ', ' | ')
-
-    # Remove typical punctuation
-    query_terms = query_terms.replace("'", " ")
-    query_terms = query_terms.replace(';', '')
-    query_terms = query_terms.replace(',', '')
-    query_terms = query_terms.replace('!', '')
-
-    # Japanese special case
-    query_terms = query_terms.replace('　', ' ')
-    query_terms = query_terms.replace('｜', '|')
-    query_terms = query_terms.replace('”', '"')
-    query_terms = query_terms.replace('－', '-')
-    query_terms = query_terms.replace('＊', '*')
-
+    for pattern, replacement in config.query_parser_regex:
+        query_terms = re.sub(r"{}".format(pattern), replacement, query_terms, re.U)
     return query_terms

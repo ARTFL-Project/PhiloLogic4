@@ -12,11 +12,12 @@ from philologic.runtime import WebConfig
 from philologic.runtime import WSGIHandler
 from philologic.runtime import access_control
 
-global_config = imp.load_source("philologic4", "/etc/philologic/philologic4.cfg")
+
+config = WebConfig(os.path.abspath(os.path.dirname(__file__)))
+global_config = imp.load_source("philologic4", config.global_config_location)
 path = os.path.abspath(os.path.dirname(__file__))
 dbname = path.strip().split('/')[-1]
 
-config = WebConfig(os.path.abspath(os.path.dirname(__file__)))
 config_location = os.path.join('app/assets/css/split/', os.path.basename(config.theme))
 if os.path.realpath(os.path.abspath(config.theme)) == os.path.realpath(os.path.abspath(config_location)):
     theme = config_location

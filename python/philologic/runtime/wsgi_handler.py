@@ -98,7 +98,7 @@ class WSGIHandler(object):
                 if field != "date" and isinstance(self.cgi[field][0], str or
                                                   six.text_type):
                     if not self.cgi[field][0].startswith('"'):
-                        self.cgi[field][0] = parse_query(self.cgi[field][0])
+                        self.cgi[field][0] = parse_query(self.cgi[field][0], config)
                 # these ifs are to fix the no results you get when you do a
                 # metadata query
                 if self["q"] != '':
@@ -132,7 +132,7 @@ class WSGIHandler(object):
                 self.approximate_ratio = 1
 
         if 'q' in self.cgi:
-            self.cgi['q'][0] = parse_query(self.cgi['q'][0])
+            self.cgi['q'][0] = parse_query(self.cgi['q'][0], config)
             if self.approximate == "yes":
                 self.cgi["original_q"] = self.cgi['q'][:]
                 self.cgi['q'][0] = find_similar_words(db, config, self)

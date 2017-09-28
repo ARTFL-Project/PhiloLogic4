@@ -2,7 +2,7 @@
     <span ng-if="collocationParams.collocFilterChoice === 'stopwords'">
         <a id="filter-list-trigger" tooltip tooltip-title="Click to display filtered words" ng-click="collocation.toggleFilterList()">Common function words</a> are being filtered from this report.
     </span>
-    <span ng-if="collocationParams.collocFilterChoice === 'frequency'"">
+    <span ng-if="collocationParams.collocFilterChoice === 'frequency'">
         <a id="filter-list-trigger" tooltip tooltip-title="Click to display filtered words" ng-click="collocation.toggleFilterList()">The {{ ::collocationParams.filterFrequency }} most common words</a> are being filtered from this report.
     </span>
     <div id="filter-list" class="panel panel-default velocity-opposites-transition-fadeIn" data-velocity-opts="{duration: 200}" ng-if="collocation.showFilter">

@@ -14,7 +14,8 @@ import six
 
 
 # Load global config
-config_file = imp.load_source("philologic4", "/etc/philologic/philologic4.cfg")
+config_path = os.getenv("PHILOLOGIC_CONFIG", "/etc/philologic/philologic4.cfg")
+config_file = imp.load_source("philologic4", config_path)
 
 if config_file.url_root is None:
     print("url_root variable is not set in /etc/philologic/philologic4.cfg", file=sys.stderr)

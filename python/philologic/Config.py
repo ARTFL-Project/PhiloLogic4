@@ -76,6 +76,13 @@ web_config_defaults = {
         'comment': "# The dbname variable is the title name in the HTML header",
         'index': 0
     },
+    'global_config_location': {
+        'value': '/etc/philologic/philologic4.cfg',
+        'comment': '''
+               # The global_config_location variable points to the global config file for philologic instances.
+               # Point to a different location if you intend to have several global config options for databases on a single server''',
+        'index': 0
+    },
     'access_control': {
         'value': False,
         'comment': '''
@@ -746,6 +753,16 @@ web_config_defaults = {
                 ''',
         'index': 41
     },
+    'query_parser_regex': {
+        'value': [(' OR ', ' | '), ("'", " "), (';', ''), (',', ''), ('!', ''), ('　', ' '), ('｜', '|'), ('”', '"'), ('－', '-'), ('＊', '*')],
+        'comment': '''
+                # A list of pattern with replacement to be run on all incoming queries
+                # It is constructed as a list of tuples where the first element is the regex pattern to be matched
+                # and the second element is the replacement
+                # e.g.: [(" OR ", " | "), ("-", " ")]
+                ''',
+        'index': 41
+    },
     'dictionary_lookup': {
         'value': "",
         'comment': '''
@@ -827,6 +844,7 @@ class Config(object):
             if key not in written:
                 out_obj[key] = self.data[key]
                 written.append(key)
+        del out_obj["global_config_location"]
         if self.time_series_status is False:
             out_obj["search_reports"].remove("time_series")
         return json.dumps(out_obj)
