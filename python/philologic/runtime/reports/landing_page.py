@@ -13,6 +13,7 @@ import simplejson
 import six
 from philologic.DB import DB
 from philologic.runtime.citations import citation_links, citations
+from philologic.utils import unaccent
 
 from six.moves import range
 
@@ -141,17 +142,19 @@ def group_by_range(request_range, request, config):
                 content[initial].append({
                     "metadata": get_all_metadata(db, doc),
                     "citation": citation,
-                    "count": date_count[initial]
+                    "count": date_count[initial],
+                    "normalized": unaccent.smash_accents(doc[metadata_queried]).lower()
                 })
             else:
                 content[initial].append({
                     "metadata": get_all_metadata(db, doc),
                     "citation": citation,
-                    "count": doc['count']
+                    "count": doc['count'],
+                    "normalized": unaccent.smash_accents(doc[metadata_queried]).lower()
                 })
     results = []
-    for result_set in sorted(six.iteritems(content), key=itemgetter(0)):
-        results.append({"prefix": result_set[0], "results": result_set[1]})
+    for prefix, result_set in sorted(content.items(), key=lambda x: x[0]):
+        results.append({"prefix": prefix, "results": sorted(result_set, key=lambda x: x["normalized"])})
     return simplejson.dumps({"display_count": request.display_count,
                              "content_type": content_type,
                              "content": results})
@@ -164,7 +167,7 @@ def group_by_metadata(request, config):
     query = '''select * from toms where philo_type="doc" and %s=?''' % request.group_by_field
     c.execute(query, (request.query, ))
     result_group = []
-    for doc in c.fetchall():
+    for doc in c:
         obj = db[doc["philo_id"]]
         links = citation_links(db, config, obj)
         citation = citations(obj, links, config, report="landing_page", citation_type=citation_types)
