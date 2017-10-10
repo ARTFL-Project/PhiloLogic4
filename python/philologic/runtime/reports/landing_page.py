@@ -139,11 +139,15 @@ def group_by_range(request_range, request, config):
             if initial not in content:
                 content[initial] = []
             if is_date:
+                try:
+                    normalized_field = unaccent.smash_accents(doc["title"]).lower()
+                except:
+                    normalized_field = None
                 content[initial].append({
                     "metadata": get_all_metadata(db, doc),
                     "citation": citation,
                     "count": date_count[initial],
-                    "normalized": unaccent.smash_accents(doc[metadata_queried]).lower()
+                    "normalized": normalized_field
                 })
             else:
                 content[initial].append({

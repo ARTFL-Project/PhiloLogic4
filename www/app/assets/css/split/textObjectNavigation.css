@@ -490,11 +490,13 @@ body {
 /*Methodique styling*/
 
 div[type="article"] .headword {
-    display: inline;
+    display: inline-block;
+    margin-bottom: 10px;
 }
 
 .headword+p {
-    display: inline;
+    display: inline-block;
+    margin-bottom: 10px;
 }
 
 
