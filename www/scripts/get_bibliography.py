@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import sqlite3
 from wsgiref.handlers import CGIHandler
 
 import simplejson

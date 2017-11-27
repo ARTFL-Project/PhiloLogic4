@@ -31,13 +31,13 @@ else:
 css_files = [
     "app/assets/css/bootstrap.min.css",
     "app/assets/css/split/style.css",
-    theme,
     "app/assets/css/split/searchForm.css",
     "app/assets/css/split/landingPage.css",
     "app/assets/css/split/concordanceKwic.css",
     "app/assets/css/split/timeSeries.css",
     "app/assets/css/image_gallery/blueimp-gallery.min.css",
-    "app/assets/css/split/textObjectNavigation.css"
+    "app/assets/css/split/textObjectNavigation.css",
+    theme
 ]
 
 # External JavaScript assets

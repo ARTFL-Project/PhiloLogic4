@@ -66,24 +66,12 @@ def make_byte_range_link(config, philo_id, start_byte, end_byte):
     return href
 
 
-def byte_range_to_link(db_path, doc_id, start_byte, end_byte, obj_level='div1', global_config_path=None):
+def byte_range_to_link(db, config, request, obj_level='div1'):
     """Find container objects for given byte range and doc id and return links"""
-    db = DB(db_path+'/data')
-    config = MakeWebConfig(db_path+'/data/web_config.cfg')
-    if global_config_path is None:
-        global_config_path = os.getenv("PHILOLOGIC_CONFIG", config.global_config_location)
-    global_config = imp.load_source("", global_config_path)
-    url_root = os.path.join(global_config.url_root, [i for i in db_path.split("/") if i][-1])
     cursor = db.dbh.cursor()
-    doc_id = "{} %".format(doc_id)
+    doc_id = "{} %".format(request.doc_id.replace('_', " "))
     cursor.execute("SELECT rowid, philo_id FROM toms WHERE philo_type='{}' \
-                    AND philo_id LIKE '{}' AND start_byte <= {} ORDER BY rowid desc".format(obj_level, doc_id, start_byte))
+                    AND philo_id LIKE '{}' AND start_byte <= {} ORDER BY rowid desc".format(obj_level, doc_id, request.start_byte))
     rowid, first_id = cursor.fetchone()
-    parent_links = [os.path.join(url_root, make_byte_range_link(config, first_id, start_byte, end_byte))]
-    cursor.execute("SELECT philo_id, start_byte FROM toms WHERE philo_type='{}' \
-                    AND philo_id LIKE '{}' AND rowid > {}".format(obj_level, doc_id, rowid))
-    for obj_id, obj_id_start in cursor:
-        if obj_id_start > end_byte:
-            break
-        parent_links.append(os.path.join(url_root, make_byte_range_link(config, obj_id, start_byte, end_byte)))
-    return parent_links
+    link = make_byte_range_link(config, first_id, request.start_byte, request.end_byte)
+    return link

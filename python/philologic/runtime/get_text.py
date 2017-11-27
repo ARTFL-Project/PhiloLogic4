@@ -48,8 +48,12 @@ def get_text_obj(obj, config, request, word_regex, note=False, images=True):
         byte_offsets = sorted([int(byte) - start_byte for byte in request.byte])
     except ValueError:  ## request.byte contains an empty string
         byte_offsets = []
-
-    formatted_text, imgs = format_text_object(obj, raw_text, config, request, word_regex, byte_offsets=byte_offsets, note=note, images=images)
+    if request.start_byte:
+        request.start_byte = request.start_byte - obj_start_byte
+        request.end_byte = request.end_byte - obj_start_byte
+    formatted_text, imgs = format_text_object(obj, raw_text, config, request, word_regex,
+                                              byte_offsets=byte_offsets, note=note, images=images,
+                                              start_byte=request.start_byte, end_byte=request.end_byte)
     formatted_text = formatted_text.decode("utf-8", "ignore")
     if images:
         return formatted_text, imgs

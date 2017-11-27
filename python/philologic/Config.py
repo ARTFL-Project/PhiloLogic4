@@ -846,7 +846,10 @@ class Config(object):
                 written.append(key)
         del out_obj["global_config_location"]
         if self.time_series_status is False:
-            out_obj["search_reports"].remove("time_series")
+            try:
+                out_obj["search_reports"].remove("time_series")
+            except ValueError:
+                pass
         return json.dumps(out_obj)
 
 

@@ -495,8 +495,11 @@ div[type="article"] .headword {
 }
 
 .headword+p {
-    display: inline-block;
-    margin-bottom: 10px;
+    display: inline;
+}
+
+.headword+p+p {
+    margin-top: 10px;
 }
 
 

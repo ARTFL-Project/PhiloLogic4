@@ -170,7 +170,7 @@ def format_strip(text, byte_offsets=None):
     return output
 
 
-def format_text_object(obj, text, config, request, word_regex, byte_offsets=None, note=False, images=True):
+def format_text_object(obj, text, config, request, word_regex, byte_offsets=None, note=False, images=True, start_byte="", end_byte=""):
     """Format text objects"""
     word_regex = r"\w+"
     philo_id = obj.philo_id
@@ -181,6 +181,8 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
             new_text += text[last_offset:b] + "<philoHighlight/>"
             last_offset = b
         text = new_text + text[last_offset:]
+    if start_byte and end_byte:
+        text = text[:start_byte] + b'<start-highlight/>' + text[start_byte:end_byte] + b'<end-highlight/>' + text[end_byte:]
     current_obj_img = []
     current_graphic_img = []
     text = "<div>" + text + "</div>"
@@ -376,6 +378,10 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
             pass
     output = etree.tostring(xml)
     output = convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
+
+    # if start_byte and end_byte:  # for highlight whole passages
+    output = output.replace('<start-highlight></start-highlight>', '<div class="passage-highlight">')
+    output = output.replace('<end-highlight></end-highlight>', '</div>')
 
     if note:  ## Notes don't need to fetch images
         return (output, {})

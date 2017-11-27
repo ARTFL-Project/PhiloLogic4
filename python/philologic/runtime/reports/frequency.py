@@ -84,6 +84,8 @@ def frequency_results(request, config, sorted_results=False):
                                                               **{request.frequency_field: '"%s"' % key})
                 if not biblio_search:
                     query_metadata = dict([(k, v) for k, v in request.metadata.iteritems() if v])
+                    import sys
+                    print >> sys.stderr, "KEY", repr(key)
                     query_metadata[request.frequency_field] = '"%s"' % key
                     local_hits = db.query(**query_metadata)
                     counts[key]["total_word_count"] = local_hits.get_total_word_count()

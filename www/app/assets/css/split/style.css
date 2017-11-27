@@ -300,6 +300,11 @@ s {
     font-weight: 400;
 }
 
+.passage-highlight {
+    display: inline-block;
+    color: royalblue;
+}
+
 #book-page .highlight {
     margin: 0px 1px;
     padding: 0px 1px;

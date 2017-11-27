@@ -318,10 +318,11 @@ class XMLParser(object):
         for line in self.content:
             # Let's start indexing words and objects at either the <text
             # of the <docbody tag.  We can add more.
-
-            if text_tag.search(line) or doc_body_tag.search(line) or body_tag.search(line) or closed_head_tag.search(
-                    line):
-                self.in_the_text = True
+            if self.in_the_text is False:
+                if text_tag.search(line) or doc_body_tag.search(line) or body_tag.search(line):
+                    self.in_the_text = True
+                elif self.file_type == "html" and closed_head_tag.search(line):
+                    self.in_the_text = True
 
             self.line_count += 1
 
@@ -795,6 +796,14 @@ class XMLParser(object):
                 else:
                     for metadata_name, metadata_value in attrib.iteritems():
                         self.v[div].attrib[metadata_name] = metadata_value
+
+            elif tag_name == "date":
+                div = "div%d" % self.context_div_level
+                for attrib_name, attrib_value in self.get_attributes(tag):
+                    if attrib_name == "value" or attrib_name == "when":
+                        self.v[div].attrib["div_date"] = attrib_value
+                    else:
+                        self.v[div].attrib["div_{}".format(attrib_name)] = attrib_value
 
             elif tag_name == "ref":
                 self.v.push("ref", tag_name, start_byte)

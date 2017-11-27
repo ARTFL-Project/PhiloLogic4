@@ -229,12 +229,13 @@ class LoadConfig(object):
                             for line in fh:
                                 word_list.add(line.strip())
                         self.config["words_to_index"] = word_list
-                    if a == "plain_text_obj":
+                    elif a == "plain_text_obj":
                         if "load_filters" not in self.config:
                             self.config["load_filters"] = LoadFilters.DefaultLoadFilters
                         self.config["load_filters"].append(LoadFilters.store_in_plain_text(*value))
-                    if a == "store_words_and_ids":
+                    elif a == "store_words_and_ids":
                         if "load_filters" not in self.config:
                             self.config["load_filters"] = LoadFilters.DefaultLoadFilters
                         self.config["load_filters"].append(LoadFilters.store_words_and_philo_ids)
-                    self.config[a] = value
+                    else:
+                        self.config[a] = value
