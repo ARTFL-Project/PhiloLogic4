@@ -11,6 +11,7 @@ class brokenConfig(object):
         self.theme = 'default_theme.css'
         self.valid_config = False
         self.traceback = traceback
+        self.global_config_location = "/etc/philologic/philologic4.cfg"
 
 
 def WebConfig(db_path):

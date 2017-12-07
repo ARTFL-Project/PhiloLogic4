@@ -82,6 +82,7 @@ def get_label(hit, citation_object):
         label = hit[citation_object["field"]].strip().title()
     elif citation_object["object_level"] == "page":
         page_num = hit.page[citation_object["field"]]
+
         if page_num:
             try:
                 label = str(page_num)

@@ -912,7 +912,7 @@ class XMLParser(object):
                         if len(word):
                             if self.defined_words_to_index:
                                 if word not in self.words_to_index:
-                                    return
+                                    continue
                             self.v.push("word", word, word_pos)
                             if self.current_tag == "w":
                                 for attrib, value in self.word_tag_attributes:

@@ -399,12 +399,13 @@ span.note {
     display: inline-block;
 }
 
-.xml-l[n]::before {
-    content: attr(n);
-    color: #bababa;
-}
 .xml-l[id]::before {
     content: attr(id);
+    color: #bababa;
+}
+
+.xml-l[n]::before {
+    content: attr(n);
     color: #bababa;
 }
 
@@ -445,6 +446,9 @@ span.note {
     margin: 0;
     padding: 0;
     float: left;
+}
+.xml-speaker {
+    display: block;
 }
 
 
