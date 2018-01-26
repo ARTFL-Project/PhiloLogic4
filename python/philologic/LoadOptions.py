@@ -239,3 +239,6 @@ class LoadConfig(object):
                         self.config["load_filters"].append(LoadFilters.store_words_and_philo_ids)
                     else:
                         self.config[a] = value
+            elif a == "parser_factory":
+                value = getattr(config_file, a)
+                self.config["parser_factory"] = value

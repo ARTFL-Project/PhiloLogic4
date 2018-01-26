@@ -6,8 +6,18 @@ from wsgiref.handlers import CGIHandler
 import simplejson
 from philologic.runtime import concordance_results
 
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+import sys
+sys.path.append("..")
+import custom_functions
+try:
+     from custom_functions import WebConfig
+except ImportError:
+     from philologic.runtime import WebConfig
+try:
+     from custom_functions import WSGIHandler
+except ImportError:
+     from philologic.runtime import WSGIHandler
+
 
 def get_frequency(environ, start_response):
     status = '200 OK'

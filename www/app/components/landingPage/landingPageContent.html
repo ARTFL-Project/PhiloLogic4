@@ -5,17 +5,17 @@
             <li class="{{ ::contentClass }}" ng-repeat="result in ::group.results">
                 <span class="citation" ng-repeat="citation in result.citation">
                     <span ng-if="citation.href">
-                        <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
-                <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
-                <span ng-bind-html="citation.suffix"></span>
-                <span ng-bind-html="citation.separator" ng-if="!$last"></span>
-                </span>
-                <span ng-if="!citation.href">
-                        <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
-                <span ng-style="citation.style">{{ ::citation.label }}</span>
-                <span ng-bind-html="citation.suffix"></span>
-                <span ng-bind-html="citation.separator" ng-if="!$last"></span>
-                </span>
+                        <span ng-bind-html="citation.prefix"></span>
+                        <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
+                        <span ng-bind-html="citation.suffix"></span>
+                        <span ng-bind-html="citation.separator" ng-if="!$last"></span>
+                    </span>
+                    <span ng-if="!citation.href">
+                        <span ng-bind-html="citation.prefix"></span>
+                        <span ng-style="citation.style">{{ ::citation.label }}</span>
+                        <span ng-bind-html="citation.suffix"></span>
+                        <span ng-bind-html="citation.separator" ng-if="!$last"></span>
+                    </span>
                 </span>
                 <span ng-if="displayCount == 'true'">
                     &nbsp;({{ ::result.count }})

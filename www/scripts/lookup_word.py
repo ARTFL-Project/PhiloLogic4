@@ -9,8 +9,17 @@ import simplejson
 from philologic.runtime import adjust_bytes
 from philologic.DB import DB
 
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+import sys
+sys.path.append("..")
+import custom_functions
+try:
+     from custom_functions import WebConfig
+except ImportError:
+     from philologic.runtime import WebConfig
+try:
+     from custom_functions import WSGIHandler
+except ImportError:
+     from philologic.runtime import WSGIHandler
 
 
 def lookup_word_service(environ, start_response):

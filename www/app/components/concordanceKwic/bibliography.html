@@ -3,21 +3,21 @@
         <li class="biblio-occurrence panel panel-default" ng-repeat="result in ::results.results" ng-init="position = $index + results.description.start">
             <span class="cite">
                 <span class="result-number">{{ ::position }}</span>
-            <input type="checkbox" style="margin-left:10px; margin-right: 10px;" ng-click="addToSearch(result.metadata_fields.title)" ng-if="results.doc_level && philoConfig.metadata.indexOf('title') !== -1">
-            <span class="citation" ng-repeat="citation in result.citation">
+                <input type="checkbox" style="margin-left:10px; margin-right: 10px;" ng-click="addToSearch(result.metadata_fields.title)" ng-if="results.doc_level && philoConfig.metadata.indexOf('title') !== -1">
+                <span class="citation" ng-repeat="citation in result.citation">
                     <span ng-if="citation.href">
-                        <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
-            <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
-            <span ng-bind-html="citation.suffix"></span>
-            <span ng-bind-html="citation.separator" ng-if="!$last"></span>
-            </span>
-            <span ng-if="!citation.href">
-                        <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
-            <span ng-style="citation.style">{{ ::citation.label }}</span>
-            <span ng-bind-html="citation.suffix"></span>
-            <span ng-bind-html="citation.separator" ng-if="!$last"></span>
-            </span>
-            </span>
+                        <span ng-bind-html="citation.prefix"></span>
+                        <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
+                        <span ng-bind-html="citation.suffix"></span>
+                        <span ng-bind-html="citation.separator" ng-if="!$last"></span>
+                    </span>
+                    <span ng-if="!citation.href">
+                        <span ng-bind-html="citation.prefix"></span>
+                        <span ng-style="citation.style">{{ ::citation.label }}</span>
+                        <span ng-bind-html="citation.suffix"></span>
+                        <span ng-bind-html="citation.separator" ng-if="!$last"></span>
+                    </span>
+                </span>
             </span>
         </li>
     </ol>
@@ -33,18 +33,18 @@
                     <span class="philologic_cite">
                         <span class="citation" ng-repeat="citation in result.citation">
                             <span ng-if="citation.href">
-                                <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
-                    <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
-                    <span ng-bind-html="citation.suffix"></span>
-                    <span ng-bind-html="citation.separator" ng-if="!$last"></span>
-                    </span>
-                    <span ng-if="!citation.href">
-                                <span ng-bind-html="citation.prefix" ng-if="!$first"></span>
-                    <span ng-style="citation.style">{{ ::citation.label }}</span>
-                    <span ng-bind-html="citation.suffix"></span>
-                    <span ng-bind-html="citation.separator" ng-if="!$last"></span>
-                    </span>
-                    </span>
+                                <span ng-bind-html="citation.prefix"></span>
+                                <a ng-href="{{ ::citation.href }}" ng-style="citation.style">{{ ::citation.label }}</a>
+                                <span ng-bind-html="citation.suffix"></span>
+                                <span ng-bind-html="citation.separator" ng-if="!$last"></span>
+                            </span>
+                            <span ng-if="!citation.href">
+                                <span ng-bind-html="citation.prefix"></span>
+                                <span ng-style="citation.style">{{ ::citation.label }}</span>
+                                <span ng-bind-html="citation.suffix"></span>
+                                <span ng-bind-html="citation.separator" ng-if="!$last"></span>
+                            </span>
+                        </span>
                     </span>
                     <div class='philologic_context text-content-area' select-word position="{{ result.position }}">
                         <div style="padding: 0px 15px 0px 30px;" ng-bind-html="result.context | unsafe"></div>

@@ -4,7 +4,14 @@ import os
 import sqlite3
 from wsgiref.handlers import CGIHandler
 
-from philologic.runtime import WebConfig
+import sys
+sys.path.append("..")
+import custom_functions
+try:
+     from custom_functions import WebConfig
+except ImportError:
+     from philologic.runtime import WebConfig
+
 from philologic.Config import MakeDBConfig
 from philologic.DB import DB
 

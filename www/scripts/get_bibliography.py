@@ -7,8 +7,17 @@ import simplejson
 from philologic.DB import DB
 
 from philologic.runtime import landing_page_bibliography
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+import sys
+sys.path.append("..")
+import custom_functions
+try:
+     from custom_functions import WebConfig
+except ImportError:
+     from philologic.runtime import WebConfig
+try:
+     from custom_functions import WSGIHandler
+except ImportError:
+     from philologic.runtime import WSGIHandler
 
 
 def get_bibliography(environ, start_response):

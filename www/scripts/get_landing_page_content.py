@@ -9,8 +9,18 @@ from wsgiref.handlers import CGIHandler
 import simplejson
 from philologic.runtime import group_by_metadata, group_by_range
 
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+import sys
+sys.path.append("..")
+import custom_functions
+try:
+     from custom_functions import WebConfig
+except ImportError:
+     from philologic.runtime import WebConfig
+try:
+     from custom_functions import WSGIHandler
+except ImportError:
+     from philologic.runtime import WSGIHandler
+
 
 object_depth = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
 

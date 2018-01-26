@@ -5,8 +5,19 @@ from wsgiref.handlers import CGIHandler
 
 import simplejson
 from philologic.DB import DB
-from philologic.runtime import WebConfig, WSGIHandler, login_access
-from philologic.runtime import access_control
+from philologic.runtime import access_control, login_access
+
+import sys
+sys.path.append("..")
+import custom_functions
+try:
+     from custom_functions import WebConfig
+except ImportError:
+     from philologic.runtime import WebConfig
+try:
+     from custom_functions import WSGIHandler
+except ImportError:
+     from philologic.runtime import WSGIHandler
 
 
 default_reports = ['concordance', 'kwic', 'collocation', 'time_series',

@@ -14,7 +14,7 @@ plain_text_obj = []
 
 ## Define whether to store all words with their philo IDs. Useful for data-mining tasks
 ## where keeping the index information (and byte offset) is important.
-store_words_and_ids = True
+store_words_and_ids = False
 
 #####################
 ## Parsing Options ##
@@ -228,3 +228,12 @@ flatten_ligatures = True
 # Define a list of strings which mark the end of a sentence.
 # Note that this list will be added to the current one which is [".", "?", "!"]
 sentence_breakers = []
+
+
+###########################################
+####### ADVANCED CUSTOMIZATIONS ###########
+###########################################
+
+# This is where you define your own parser which needs to have the same signature
+# as the one located in python/philologic/NewParser.py
+parser_factory =

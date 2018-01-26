@@ -7,8 +7,18 @@ import simplejson
 from philologic.DB import DB
 
 from philologic.runtime.link import byte_range_to_link
-from philologic.runtime import WebConfig
-from philologic.runtime import WSGIHandler
+
+import sys
+sys.path.append("..")
+import custom_functions
+try:
+     from custom_functions import WebConfig
+except ImportError:
+     from philologic.runtime import WebConfig
+try:
+     from custom_functions import WSGIHandler
+except ImportError:
+     from philologic.runtime import WSGIHandler
 
 
 def alignment_to_text(environ, start_response):

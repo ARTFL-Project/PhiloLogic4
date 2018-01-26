@@ -30,7 +30,8 @@ def check_access(environ, config):
             print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)
             return ()
     else:
-        return make_token(incoming_address, db)
+        print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)
+        return ()
 
     # Load access config file. If loading fails, grant access.
     try:
