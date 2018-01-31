@@ -1038,7 +1038,10 @@ class XMLParser(object):
                 while read_more:
                     look_ahead += 1
                     overflow_trap += 1
-                    next_line = self.content[look_ahead]
+                    try:
+                        next_line = self.content[look_ahead]
+                    except IndexError:
+                        break
                     if closed_head_tag.search(next_line):
                         read_more = False
                     elif overflow_trap > 50:  # Overflow trap in case you miss </head
