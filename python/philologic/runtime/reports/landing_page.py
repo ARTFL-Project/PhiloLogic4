@@ -117,14 +117,19 @@ def group_by_range(request_range, request, config):
         else:
             try:
                 initial_letter = doc[metadata_queried].decode('utf-8')[0].lower()
+                import sys
+                print("INITIAL LETTER", repr(initial_letter), file=sys.stderr)
             except IndexError:
                 # we have an empty string
                 continue
-            test_value = ord(initial_letter)
-            normalized_test_value = ord(''.join(
-                [i
-                 for i in unicodedata.normalize("NFKD", initial_letter)
-                 if not unicodedata.combining(i)]))
+            try:
+                test_value = ord(initial_letter)
+                normalized_test_value = ord(''.join(
+                    [i
+                    for i in unicodedata.normalize("NFKD", initial_letter)
+                    if not unicodedata.combining(i)]))
+            except TypeError:
+                continue
             initial = initial_letter.upper().encode("utf8")
         # Are we within the range?
         if test_value in query_range or normalized_test_value in query_range:
