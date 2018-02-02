@@ -117,8 +117,6 @@ def group_by_range(request_range, request, config):
         else:
             try:
                 initial_letter = doc[metadata_queried].decode('utf-8')[0].lower()
-                import sys
-                print("INITIAL LETTER", repr(initial_letter), file=sys.stderr)
             except IndexError:
                 # we have an empty string
                 continue
