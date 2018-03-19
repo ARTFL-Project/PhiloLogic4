@@ -36,6 +36,8 @@ def landing_page_content(environ, start_response):
         if type(request.query) == str:
             request_range = request.query.decode("utf8")
         request_range = request_range.lower().split('-')
+        if len(request_range) == 1:
+            request_range.append(request_range[0])
         results = group_by_range(request_range, request, config)
     else:
         results = group_by_metadata(request, config)
