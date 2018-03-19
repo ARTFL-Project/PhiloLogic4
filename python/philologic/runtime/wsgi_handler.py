@@ -151,6 +151,16 @@ class WSGIHandler(object):
         else:
             self.cgi["sort_order"] = [["rowid"]]
 
+        if "start_byte" in self.cgi:
+            try:
+                self.start_byte = int(self["start_byte"])
+            except ValueError, TypeError:
+                self.start_byte = ""
+            try:
+                self.end_byte = int(self["end_byte"])
+            except ValueError, TypeError:
+                self.end_byte = ""
+
     def __getattr__(self, key):
         """Return query arg as attribute of class."""
         return self[key]
@@ -176,3 +186,6 @@ class WSGIHandler(object):
         """Iterate over query args."""
         for key in self.cgi.keys():
             yield (key, self[key])
+
+    def __str__(self):
+        return " ".join(["{}: {}".format(i, j) for i, j in self])

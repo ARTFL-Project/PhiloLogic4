@@ -29,7 +29,7 @@ valid_html_tags = set(
      'object', 'param', 'video', 'audio', 'source', 'track', 'canvas', 'map', 'area', 'svg', 'math', 'table', 'caption',
      'colgroup', 'col', 'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'form', 'fieldset', 'legend', 'label', 'input',
      'button', 'select', 'datalist', 'optgroup', 'option', 'textarea', 'keygen', 'output', 'progress', 'meter',
-     'details', 'summary', 'menuitem', 'menu'])
+     'details', 'summary', 'menuitem', 'menu', 'start-highlight', 'end-highlight'])
 
 
 def get_all_text(element):
@@ -374,7 +374,7 @@ def format_text_object(obj, text, config, request, word_regex, byte_offsets=None
                 el = xml_to_html_class(el)
         except Exception as e:
             import sys
-            print(e, file=sys.stderr)
+            # print(e, file=sys.stderr)
             pass
     output = etree.tostring(xml)
     output = convert_entities(output.decode('utf-8', 'ignore')).encode('utf-8')
