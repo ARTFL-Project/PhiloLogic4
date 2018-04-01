@@ -8,6 +8,7 @@
         .directive('scrollTo', scrollTo)
         .directive('navigationBar', navigationBar)
         .directive('highlight', highlight)
+        .directive('passageHighlight', passageHiglight)
         .directive('compileTemplate', compileTemplate)
         .directive('pageImageLink', pageImageLink)
         .directive('inlineImg', inlineImg)
@@ -29,12 +30,14 @@
             scope.textObject = {
                 citation: textNavigationValues.citation
             }; // Make sure we don't change citation if it has been already filled
+            var queryParams = $location.search();
             scope.$broadcast('domloaded');
-            request.report({
-                    report: "navigation",
-                    philo_id: scope.philoID,
-                    byte: scope.byteOffset
-                })
+            var navigationParams = { report: "navigation", philo_id: scope.philoID, byte: scope.byteOffset };
+            if (typeof(queryParams.start_byte) !== 'undefined') {
+                navigationParams.start_byte = queryParams.start_byte;
+                navigationParams.end_byte = queryParams.end_byte;
+            }
+            request.report(navigationParams)
                 .then(function(response) {
                     scope.textObject = response.data;
                     textNavigationValues.textObject = response.data;
@@ -279,6 +282,44 @@
             restrict: 'C',
             link: function(scope, element) {
                 if (element.is(angular.element('#book-page .highlight').eq(0))) {
+                    scroll(element);
+                }
+            }
+        }
+    }
+
+    function passageHiglight($timeout) {
+        var scroll = function(element) {
+            $timeout(function() {
+                var wordOffset = element.eq(0).offset().top;
+                if (wordOffset == 0) {
+                    var note = element.parents('.note-content');
+                    note.show(); // The highlight is in a hidden note
+                    wordOffset = element.offset().top;
+                    element.parents('.note-content').hide();
+                }
+                if (element.eq(0).parents('.note-content').length) {
+                    angular.element("body").velocity('scroll', {
+                        duration: 800,
+                        easing: 'easeOutQuad',
+                        offset: wordOffset - 60,
+                        complete: function() {
+                            element.parents('.note-content').prev('.note').trigger('focus');
+                        }
+                    });
+                } else {
+                    angular.element("body").velocity('scroll', {
+                        duration: 800,
+                        easing: 'easeOutQuad',
+                        offset: wordOffset - 100
+                    });
+                }
+            }, 200);
+        }
+        return {
+            restrict: 'C',
+            link: function(scope, element) {
+                if (element.is(angular.element('#book-page .passage-highlight').eq(0))) {
                     scroll(element);
                 }
             }

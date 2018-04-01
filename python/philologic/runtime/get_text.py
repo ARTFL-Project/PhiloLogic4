@@ -49,8 +49,8 @@ def get_text_obj(obj, config, request, word_regex, note=False, images=True):
     except ValueError:  ## request.byte contains an empty string
         byte_offsets = []
     if request.start_byte:
-        request.start_byte = request.start_byte - obj_start_byte
-        request.end_byte = request.end_byte - obj_start_byte
+        request.start_byte = request.start_byte - start_byte
+        request.end_byte = request.end_byte - start_byte
     formatted_text, imgs = format_text_object(obj, raw_text, config, request, word_regex,
                                               byte_offsets=byte_offsets, note=note, images=images,
                                               start_byte=request.start_byte, end_byte=request.end_byte)
