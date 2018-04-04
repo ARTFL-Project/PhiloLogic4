@@ -1,45 +1,64 @@
+
+/* Font color for body */
 body {
 	color: rgb(61, 61, 61);
 }
 
 /* Navbar colors */
-.navbar-inverse, .panel-default > .panel-heading {
-    background:rgb(21, 67, 95) !important;
+.navbar-inverse {
+    background:rgb(255, 255, 255) !important;
 }
-.navbar-brand:hover, .navbar-inverse .navbar-nav>li>a:hover, .panel-default > .panel-heading {
-    color: #fff !important;
+.panel-default > .panel-heading {
+    background: rgb(255, 219, 157);
+}
+.navbar-brand:hover, .navbar-inverse .navbar-nav>li>a:hover, .navbar-inverse a:hover {
+    color: rgba(143, 57, 49, .6) !important;
 }
 .navbar {
     box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
 }
 .navbar-brand, .navbar-inverse a {
-    color: rgb(236,237,238) !important;
+    color: rgb(143, 57, 49) !important;
+    margin-right: 5px;
+}
+#header .navbar {
+    border: 1px solid rgb(143, 57, 49);
+}
+.navbar-brand {
+    font-weight: 700;
 }
 
 /* Button colors */
 .btn-primary {
-    background: rgb(21, 95, 131);
+    background: rgba(143, 57, 49, .8);
     transition: background-color 200ms;
 	border-color: transparent;
 }
 .btn-primary:hover, .btn-primary:focus {
-    background: rgba(21, 95, 131, .8);
+    background: rgb(143, 57, 49) !important;
 	border-color: transparent;
 	outline: 0;
 }
 .btn-primary.active, .open>.dropdown-toggle.btn-primary, #collocation_table th {
-    background: rgb(21, 67, 95);
+    background: rgb(143, 57, 49);
 	border-color: transparent;
 	color: #fff;
 }
 .btn-primary[disabled] {
-	background-color: rgb(91, 150, 173);
+	background-color: rgba(143, 57, 49, .5);
 	border-color: transparent;
+}
+.panel-default>.panel-heading {
+    color: rgb(143, 57, 49);
+}
+.btn-danger {
+    background: rgb(143, 57, 49);
+    border-color: transparent;
 }
 
 /* Links */
 a {
-    color: rgb(21, 95, 131);
+    color: rgb(143, 57, 49);
 	font-weight: 400;
 	transition: all 200ms;
 }
@@ -49,18 +68,18 @@ a:hover {
 }
 
 #dico-landing-volume li, #dico-landing-alpha td {
-	color: rgb(21, 95, 131);
+	color: rgb(143, 57, 49);
 	transition: all 0ms;
 }
 #dico-landing-volume li:hover, #dico-landing-alpha td:hover {
-	background: rgb(21, 95, 131) !important;
+	background: rgb(143, 57, 49) !important;
 	border-color: transparent !important;
 	color: #fff !important;
 	transition: all 100ms;
 }
 
 /*Metadata criteria in results*/
-.biblio-criteria, .btn-danger {
+.biblio-criteria {
     color: #fff;
     background: rgb(143,57,49);
     border: solid 1px rgb(109,50,39);
@@ -69,17 +88,6 @@ a:hover {
 /*Concordance Kwic styling*/
 .more_context, .citation-container {
     border-color: #eee !important;
-}
-.citation-overflow {
-    background: -moz-linear-gradient(left, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 86%, rgba(255,255,255,1) 94%, rgba(255,255,255,1) 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,0)), color-stop(86%,rgba(255,255,255,0)), color-stop(94%,rgba(255,255,255,1)), color-stop(100%,rgba(255,255,255,1))); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* IE10+ */
-	background: linear-gradient(to right, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 86%,rgba(255,255,255,1) 94%,rgba(255,255,255,1) 100%); /* W3C */
-}
-.collocate {
-    color:#1E90FF;
 }
 
 /*Search form*/
@@ -94,16 +102,16 @@ a:hover {
     background-color: #eee;
 }
 #nav-buttons.ui-scrollfix {
-    background: rgba(21, 67, 95, .7);
+    background: rgba(143, 57, 49, .7);
 }
 
 /*Text object navigation*/
 #toc-container {
-    background: rgba(21, 67, 95, .9);
+    background: rgba(143, 57, 49, .8);
 }
 a.current-obj, #toc-container a:hover {
     background: rgba(256, 256, 256, .9);
-    color: rgb(21, 67, 95) !important;
+    color: rgb(143, 57, 49) !important;
 }
 .bullet-point-div1 {
     background: #fff;
@@ -115,7 +123,7 @@ a.current-obj, #toc-container a:hover {
 /*TOC report styling*/
 .toc-div1 > a:hover, .toc-div2 > a:hover, .toc-div3 > a:hover {
     text-decoration: none;
-    background: rgb(21, 67, 95);
+    background: rgb(143, 57, 49);
     color: rgb(256, 256, 256) !important;
 }
 #toc-report .bullet-point-div1 {
@@ -132,16 +140,12 @@ a.current-obj, #toc-container a:hover {
 }
 
 /*Time series*/
-.graph-bar {
-    background-color: rgb(91, 150, 173); /* fallback color if gradients are not supported */
-}
-
 .progress-bar {
-	background-color: rgb(21, 95, 131);
+	background-color: rgb(143, 57, 49);
 }
 
 .full_biblio.show {
-	background: rgba(21, 95, 131, .9);
+	background: rgba(143, 57, 49, .9);
 	color: #fff;
 }
 
@@ -149,6 +153,8 @@ a.current-obj, #toc-container a:hover {
 	color: rgb(174, 89, 80);
 }
 
+
+/* Spinner colors */
 #waiting, #waiting-inner, #waiting-inner-inner {
 	border-color: rgba(174, 89, 80, .5) rgba(143, 57, 49, .7) rgba(174, 89, 80, .5) rgba(174, 89, 80, .5);
 }
@@ -158,6 +164,8 @@ a.current-obj, #toc-container a:hover {
 	font-weight: 400;
 }
 
-.navbar-right a:hover {
-	color: #fff !important;
+/* Result nunber box */
+.result-number {
+    background-color: rgb(143, 57, 49) !important;
+    color: rgb(256, 256, 256) !important;
 }
