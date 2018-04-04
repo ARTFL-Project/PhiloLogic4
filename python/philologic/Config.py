@@ -775,6 +775,11 @@ web_config_defaults = {
         'value': "",
         'comment': '# The link should start with http:// or https://. This will display an error report link in the header and in document navigation',
         'index': 43
+    },
+    'skip_table_of_contents' : {
+        'value': False,
+        'comment': """If set to True, disable display of table of contents and go straight to the text. Useful when texts have no internal structure.""",
+        'index': 44
     }
 }
 

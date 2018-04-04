@@ -8,7 +8,10 @@ import six
 
 def citation_links(db, config, i):
     """ Returns links to a PhiloLogic object and all its ancestors."""
-    doc_href = make_absolute_object_link(config, i.philo_id[:1]) + '/table-of-contents'
+    if config.skip_table_of_contents is False:
+        doc_href = make_absolute_object_link(config, i.philo_id[:1]) + '/table-of-contents'
+    else:
+        doc_href = make_absolute_object_link(config, i.philo_id[:1], i.bytes)
     div1_href = make_absolute_object_link(config, i.philo_id[:2], i.bytes)
     div2_href = make_absolute_object_link(config, i.philo_id[:3], i.bytes)
     div3_href = make_absolute_object_link(config, i.philo_id[:4], i.bytes)
