@@ -8,57 +8,62 @@ body {
 .navbar-inverse {
     background:rgb(255, 255, 255) !important;
 }
-.panel-default > .panel-heading {
-    background: rgb(255, 219, 157);
-}
 .navbar-brand:hover, .navbar-inverse .navbar-nav>li>a:hover, .navbar-inverse a:hover {
-    color: rgba(143, 57, 49, .6) !important;
+    color: rgba(103, 10, 10, .6) !important;
 }
 .navbar {
     box-shadow: 0px .2em 8px .01em rgba(0,0,0,0.2);
 }
 .navbar-brand, .navbar-inverse a {
-    color: rgb(143, 57, 49) !important;
+    color: rgb(103, 10, 10) !important;
     margin-right: 5px;
 }
 #header .navbar {
-    border: 1px solid rgb(143, 57, 49);
+    border: 1px solid rgb(103, 10, 10);
 }
 .navbar-brand {
     font-weight: 700;
 }
 
 /* Button colors */
-.btn-primary {
-    background: rgba(143, 57, 49, .8);
+.btn-primary, .btn-primary:focus {
+    background: rgb(103, 10, 10);
     transition: background-color 200ms;
 	border-color: transparent;
+    color: #fff;
 }
-.btn-primary:hover, .btn-primary:focus {
-    background: rgb(143, 57, 49) !important;
-	border-color: transparent;
+.btn-primary:hover {
+    background: #B1746F !important;
+	border-color: transparent !important;
 	outline: 0;
+	color: #fff;
 }
 .btn-primary.active, .open>.dropdown-toggle.btn-primary, #collocation_table th {
-    background: rgb(143, 57, 49);
-	border-color: transparent;
-	color: #fff;
+    background: #fff;
+	border-color: #eee;
+	color: rgb(103, 10, 10);
+	-webkit-box-shadow: initial;
+	box-shadow: initial;
 }
 .btn-primary[disabled] {
 	background-color: rgba(143, 57, 49, .5);
 	border-color: transparent;
 }
 .panel-default>.panel-heading {
-    color: rgb(143, 57, 49);
+    background-color: rgb(103, 10, 10);
+    color: #fff;
 }
 .btn-danger {
     background: rgb(143, 57, 49);
     border-color: transparent;
 }
+#initial-form .btn-primary.active {
+	border-bottom-width: 0px;
+}
 
 /* Links */
 a {
-    color: rgb(143, 57, 49);
+    color: rgb(103, 10, 10);
 	font-weight: 400;
 	transition: all 200ms;
 }
@@ -68,11 +73,11 @@ a:hover {
 }
 
 #dico-landing-volume li, #dico-landing-alpha td {
-	color: rgb(143, 57, 49);
+	color: rgb(103, 10, 10);
 	transition: all 0ms;
 }
 #dico-landing-volume li:hover, #dico-landing-alpha td:hover {
-	background: rgb(143, 57, 49) !important;
+	background: rgb(103, 10, 10) !important;
 	border-color: transparent !important;
 	color: #fff !important;
 	transition: all 100ms;
@@ -81,7 +86,7 @@ a:hover {
 /*Metadata criteria in results*/
 .biblio-criteria {
     color: #fff;
-    background: rgb(143,57,49);
+    background: rgb(103, 10, 10);
     border: solid 1px rgb(109,50,39);
 }
 
@@ -102,16 +107,16 @@ a:hover {
     background-color: #eee;
 }
 #nav-buttons.ui-scrollfix {
-    background: rgba(143, 57, 49, .7);
+    background: rgba(103, 10, 10, .7);
 }
 
 /*Text object navigation*/
 #toc-container {
-    background: rgba(143, 57, 49, .8);
+    background: rgba(103, 10, 10, .8);
 }
 a.current-obj, #toc-container a:hover {
     background: rgba(256, 256, 256, .9);
-    color: rgb(143, 57, 49) !important;
+    color: rgb(103, 10, 10) !important;
 }
 .bullet-point-div1 {
     background: #fff;
@@ -123,7 +128,7 @@ a.current-obj, #toc-container a:hover {
 /*TOC report styling*/
 .toc-div1 > a:hover, .toc-div2 > a:hover, .toc-div3 > a:hover {
     text-decoration: none;
-    background: rgb(143, 57, 49);
+    background: rgb(103, 10, 10);
     color: rgb(256, 256, 256) !important;
 }
 #toc-report .bullet-point-div1 {
@@ -141,11 +146,11 @@ a.current-obj, #toc-container a:hover {
 
 /*Time series*/
 .progress-bar {
-	background-color: rgb(143, 57, 49);
+	background-color: rgb(103, 10, 10);
 }
 
 .full_biblio.show {
-	background: rgba(143, 57, 49, .9);
+	background: rgba(103, 10, 10, .9);
 	color: #fff;
 }
 
@@ -166,6 +171,6 @@ a.current-obj, #toc-container a:hover {
 
 /* Result nunber box */
 .result-number {
-    background-color: rgb(143, 57, 49) !important;
+    background-color: rgb(103, 10, 10) !important;
     color: rgb(256, 256, 256) !important;
 }
