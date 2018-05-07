@@ -385,13 +385,13 @@ def store_words_and_philo_ids(loader_obj, text):
     with open(os.path.join(files_path, str(text["id"])), "w") as output:
         with open(text['raw']) as filehandle:
             for line in filehandle:
-                philo_type, word, philo_id, attrib = line.split('\t')
+                philo_type, token, philo_id, attrib = line.split('\t')
                 attrib = loads(attrib)
-                if philo_type == "word" and word != '__philo_virtual':
-                    word_obj = dumps(
-                        {"token": word, "position": philo_id, "start_byte": attrib["start_byte"], "end_byte": attrib["end_byte"]}
+                if philo_type == "word" or philo_type == "sent" and token != '__philo_virtual':
+                    token_obj = dumps(
+                        {"token": token, "position": philo_id, "start_byte": attrib["start_byte"], "end_byte": attrib["end_byte"]}
                         )
-                    print(word_obj, file=output)
+                    print(token_obj, file=output)
 
 
 DefaultNavigableObjects = ("div1", "div2", "div3", "para")

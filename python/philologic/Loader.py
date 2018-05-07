@@ -249,7 +249,7 @@ class Loader(object):
         return load_metadata
 
     def create_year_field(self, metadata):
-        year_finder = re.compile(r'^.*?(\d{4}).*')
+        year_finder = re.compile(r'^.*?(\-?\d{1,}).*')
         earliest_year = 2500
         for field in ["date", "create_date", "pub_date", "period"]:
             if field in metadata:
