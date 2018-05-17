@@ -180,7 +180,11 @@ class WSGIHandler(object):
         if isinstance(item, list or set):
             self.cgi[key] = item
         else:
-            self.cgi[key][0] = item
+            try:
+                self.cgi[key][0] = item
+            except IndexError:
+                self.cgi[key] = [""]
+
 
     def __iter__(self):
         """Iterate over query args."""

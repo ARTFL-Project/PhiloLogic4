@@ -20,6 +20,8 @@
                 for (var date in timeSeriesResults.results.date_count) { // Update date counts
                     scope.dateCounts[date] = timeSeriesResults.results.date_count[date];
                 }
+                scope.percent = Math.floor(scope.resultsLength / scope.totalResults * 100);
+                console.log(scope.percent)
                 sortAndRenderTimeSeries(scope, formData, fullResults, timeSeriesResults)
             }).catch(function(response) {
                 scope.timeSeries.loading = false;
@@ -96,15 +98,17 @@
             link: function(scope, element, attrs) {
                 scope.height = angular.element(window).height() - angular.element('#footer').height() - angular.element('#initial_report').height() - angular.element('#header').height() - 150;
                 var formData = angular.copy(scope.formData);
+                var formData2 = angular.copy(scope.formData); // used only for getting total hits
                 scope.resultsLength = 0
                 scope.frequencyType = "absolute_time";
                 angular.element(".progress").show();
                 request.script(formData, {
                     script: 'get_start_end_date.py'
-                }).then(function(dates) { // if no dates supplied or if invalid dates
-                    scope.startDate = parseInt(dates.data.start_date);
-                    scope.endDate = parseInt(dates.data.end_date);
+                }).then(function(response) { // if no dates supplied or if invalid dates
+                    scope.startDate = parseInt(response.data.start_date);
+                    scope.endDate = parseInt(response.data.end_date);
                     scope.interval = parseInt(formData.year_interval);
+                    scope.totalResults = response.data.total_results
 
                     // Store the current query as a local and global variable in order to make sure they are equal later on...
                     $rootScope.globalQuery = URL.mergeParams(angular.copy(formData), {

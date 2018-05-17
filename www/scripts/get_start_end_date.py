@@ -28,7 +28,14 @@ def get_start_end_date(environ, start_response):
     db = DB(config.db_path + '/data/')
     request = WSGIHandler(environ, config)
     start_date, end_date = start_end_date(db, config, start_date=request.start_date, end_date=request.end_date)
-    yield simplejson.dumps({"start_date": start_date, "end_date": end_date})
+    request.metadata["year"] = "{}-{}".format(start_date, end_date)
+    request["start_date"] = ""
+    request["end_date"] = ""
+    hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+    total_results = 0
+    hits.finish()
+    total_results = len(hits)
+    yield simplejson.dumps({"start_date": start_date, "end_date": end_date, "total_results": total_results})
 
 
 if __name__ == "__main__":
