@@ -174,8 +174,6 @@ class LoadOptions(object):
                 else:
                     if value is not None:
                         self.values[a] = value
-        if options.file_list:  # Make sure we cancel any sort order
-            self.values["sort_order"] = []
         self.update()
 
     def update(self):

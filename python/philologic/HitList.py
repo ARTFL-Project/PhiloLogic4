@@ -297,3 +297,6 @@ class NoHits(object):
 
     def update(self):
         return
+
+    def get_total_word_count(self):
+        return 0

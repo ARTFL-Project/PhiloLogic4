@@ -69,9 +69,13 @@ def make_byte_range_link(config, philo_id, start_byte, end_byte):
 def byte_range_to_link(db, config, request, obj_level='div1'):
     """Find container objects for given byte range and doc id and return links"""
     cursor = db.dbh.cursor()
-    doc_id = "{} %".format(request.doc_id.replace('_', " "))
+    cursor.execute("SELECT philo_id FROM toms WHERE filename=?", (request.filename,))
+    doc_id = cursor.fetchone()[0].split()[0]
     cursor.execute("SELECT rowid, philo_id FROM toms WHERE philo_type='{}' \
-                    AND philo_id LIKE '{}' AND start_byte <= {} ORDER BY rowid desc".format(obj_level, doc_id, request.start_byte))
-    rowid, first_id = cursor.fetchone()
-    link = make_byte_range_link(config, first_id, request.start_byte, request.end_byte)
+                    AND philo_id like '{} %' AND start_byte <= {} ORDER BY rowid desc".format(obj_level, doc_id, request.start_byte))
+    rowid, philo_id = cursor.fetchone()
+    philo_id = philo_id.split()
+    while int(philo_id[-1]) == 0:
+        philo_id.pop()
+    link = make_byte_range_link(config, " ".join(philo_id), request.start_byte, request.end_byte)
     return link

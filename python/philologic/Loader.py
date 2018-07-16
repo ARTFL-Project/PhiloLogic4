@@ -127,10 +127,11 @@ class Loader(object):
         """Copy files to database directory"""
         print("\nCopying files to database directory...", end=' ')
         self.filenames = []
+        os.system("")
         for f in files:
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
-            shutil.copy(f, new_file_path)
-            os.chmod(new_file_path, 775)
+            shutil.copy2(f, new_file_path)
+            os.system("chmod 775 %s" % new_file_path)
             self.filenames.append(f)
         print("done.\n")
 
@@ -256,6 +257,9 @@ class Loader(object):
                 year_match = year_finder.search(metadata[field])
                 if year_match:
                     year = int(year_match.groups()[0])
+                    if field == "create_date": # this should be the canonical date
+                        earliest_year = year
+                        break
                     if year < earliest_year:
                         earliest_year = year
         if earliest_year != 2500:
@@ -276,12 +280,13 @@ class Loader(object):
 
         self.sort_order = sort_by_field  # to be used for the sort by concordance biblio key in web config
         if sort_by_field:
+            print("sorting by field")
             return sort_list(load_metadata, sort_by_field)
         else:
             sorted_load_metadata = []
             for filename in self.filenames:
                 for m in load_metadata:
-                    if m["filename"] == filename:
+                    if m["filename"] == os.path.basename(filename):
                         sorted_load_metadata.append(m)
                         break
             return sorted_load_metadata
@@ -291,6 +296,7 @@ class Loader(object):
         os.chdir(self.workdir)  # questionable
 
         if not data_dicts:
+            print("NO METADATA passed")
             data_dicts = [{"filename": self.textdir + fn} for fn in self.list_files()]
             self.filequeue = [{"orig": os.path.abspath(x),
                                "name": os.path.basename(x),
