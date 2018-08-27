@@ -9,6 +9,7 @@ import hashlib
 import time
 import struct
 import sys
+import urllib
 from philologic.DB import DB
 
 # These should always be allowed for local access
@@ -124,6 +125,7 @@ def login_access(environ, request, config, headers):
 
 def check_login_info(config, request):
     login_file_path = os.path.join(config.db_path, "data/logins.txt")
+    password = urllib.unquote(request.password)
     if os.path.exists(login_file_path):
         with open(login_file_path) as password_file:
             for line in password_file:
@@ -133,7 +135,7 @@ def check_login_info(config, request):
                 fields = line.split('\t')
                 user = fields[0]
                 passwd = fields[1]
-                if user == request.username and passwd == request.password:
+                if user == request.username and passwd == password:
                     return True
             return False
     else:
