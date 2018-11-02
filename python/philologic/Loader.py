@@ -145,6 +145,7 @@ class Loader(object):
             metadata_fields = input_file.readline().strip().split("\t")
             filename_index = metadata_fields.index("filename")
             for line in input_file:
+                line = line.strip()
                 file_metadata = {}
                 values = line.split("\t")
                 if values[filename_index] not in files:
