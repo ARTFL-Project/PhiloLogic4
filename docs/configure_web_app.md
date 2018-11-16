@@ -58,3 +58,10 @@ Once access control has been turned on, PhiloLogic will check the `access_file` 
 
 ### Fixing default dates for time series ###
 If you need to set default start and end dates to time series requests (e.g. you have errors in the data such as 176 for the earliest date in an 18th century corpus, or 9999 as the latest date and you know this isn't the 100th century), you need to edit the script `get_start_end_date.py` in the `scripts/` directory of your database. After the `request` variable has been set, override the `request.start_date` or `request.end_date` (depending on your use case) if their values are empty. For example:
+```python
+request = WSGIHandler(environ, config)
+if request.start_date == "":
+    request.start_date = 1772
+if request.end_date == "":
+    request.end_date = 2004
+```
