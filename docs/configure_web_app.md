@@ -4,7 +4,7 @@ Configuring the Web Application
 * [Layout of the Web Application](#layout)
 * [UI configuration](#ui)
 * [Access control](#access)
-* [Setting default start/end dates for Time Series](#)
+* [Setting default start/end dates for Time Series](#fixing-default-dates-for-time-series)
 
 #### <a name="layout"></a>Layout of a PhiloLogic Web Application Instance ####
 
