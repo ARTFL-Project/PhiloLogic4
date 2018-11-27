@@ -1,26 +1,16 @@
-#!/usr/bin/env python
-from __future__ import absolute_import, print_function
+#!/usr/bin/env python3
+
 import os
 import time
 import struct
 from .HitWrapper import HitWrapper
 from .utils import smash_accents
 
-obj_dict = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5, 'sent': 6, 'word': 7}
+obj_dict = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
 
 
 class HitList(object):
-    def __init__(self,
-                 filename,
-                 words,
-                 dbh,
-                 encoding=None,
-                 doc=0,
-                 byte=6,
-                 method="proxy",
-                 methodarg=3,
-                 sort_order=None,
-                 raw=False):
+    def __init__(self, filename, words, dbh, doc=0, byte=6, method="proxy", methodarg=3, sort_order=None, raw=False):
         self.filename = filename
         self.words = words
         self.method = method
@@ -30,14 +20,13 @@ class HitList(object):
             self.sort_order = None
         self.raw = raw  # if true, this return the raw hitlist consisting of a list of philo_ids
         self.dbh = dbh
-        self.encoding = encoding or dbh.encoding
-        if method is not "cooc":
+        if method != "cooc":
             self.has_word_id = 1
             self.length = 7 + 2 * (words)
         else:
             self.has_word_id = 0  # unfortunately.  fix this next time I have 3 months to spare.
-            self.length = methodarg + 1 + (words)
-        self.fh = open(self.filename)  # need a full path here.
+            self.length = 7 + (words)
+        self.fh = open(self.filename, "rb")  # need a full path here.
         self.format = "=%dI" % self.length  # short for object id's, int for byte offset.
         self.hitsize = struct.calcsize(self.format)
         self.doc = doc
@@ -52,17 +41,17 @@ class HitList(object):
                 metadata_types.add("div1")
                 metadata_types.add("div2")
                 metadata_types.add("div3")
-            c = self.dbh.dbh.cursor()
+            cursor = self.dbh.dbh.cursor()
             query = "select * from toms where "
             if metadata_types:
                 query += "philo_type in (%s) AND " % ", ".join(['"%s"' % m for m in metadata_types])
             order_params = []
             for s in self.sort_order:
-                order_params.append('%s is not null' % s)
+                order_params.append("%s is not null" % s)
             query += " AND ".join(order_params)
-            c.execute(query)
+            cursor.execute(query)
             metadata = {}
-            for i in c.fetchall():
+            for i in cursor:
                 sql_row = dict(i)
                 philo_id = tuple(int(s) for s in sql_row["philo_id"].split() if int(s))
                 metadata[philo_id] = [smash_accents(sql_row[m] or "ZZZZZ") for m in sort_order]
@@ -76,6 +65,7 @@ class HitList(object):
                     break
                 self.sorted_hitlist.append(hit)
                 iter_position += 1
+
             def sort_by_metadata(philo_id):
                 while philo_id:
                     try:
@@ -85,8 +75,8 @@ class HitList(object):
                             break
                         philo_id = philo_id[:-1]
                 return "ZZZZZ"
-            self.sorted_hitlist.sort(key=sort_by_metadata, reverse=False)
 
+            self.sorted_hitlist.sort(key=sort_by_metadata, reverse=False)
 
     def __getitem__(self, n):
         if self.sort_order:
@@ -100,13 +90,13 @@ class HitList(object):
                     return self.readhit(n)
                 else:
                     self.readhit(n)
-                    return HitWrapper(self.readhit(n), self.dbh)
+                    return HitWrapper(self.readhit(n), self.dbh, method=self.method)
 
     def get_slice(self, n):
         if self.sort_order:
             try:
                 for hit in self.sorted_hitlist[n]:
-                    yield HitWrapper(hit, self.dbh)
+                    yield HitWrapper(hit, self.dbh, method=self.method)
             except IndexError:
                 pass
         else:
@@ -125,7 +115,7 @@ class HitList(object):
                 if self.raw:
                     yield hit
                 else:
-                    yield HitWrapper(hit, self.dbh)
+                    yield HitWrapper(hit, self.dbh, method=self.method)
                 slice_position += 1
 
     def __len__(self):
@@ -135,7 +125,7 @@ class HitList(object):
     def __iter__(self):
         if self.sort_order:
             for hit in self.sorted_hitlist:
-                yield HitWrapper(hit, self.dbh)
+                yield HitWrapper(hit, self.dbh, method=self.method)
         else:
             self.update()
             iter_position = 0
@@ -148,7 +138,7 @@ class HitList(object):
                 if self.raw:
                     yield hit
                 else:
-                    yield HitWrapper(hit, self.dbh)
+                    yield HitWrapper(hit, self.dbh, method=self.method)
                 iter_position += 1
 
     def seek(self, n):
@@ -176,7 +166,7 @@ class HitList(object):
             except OSError:
                 pass
             self.size = os.stat(self.filename).st_size  # in bytes
-            self.count = self.size / self.hitsize
+            self.count = int(self.size / self.hitsize)
 
     def finish(self):
         while not self.done:
@@ -199,7 +189,7 @@ class HitList(object):
             self.position = n
         buffer = self.fh.read(self.hitsize)
         self.position += 1
-        return (struct.unpack(self.format, buffer))
+        return struct.unpack(self.format, buffer)
 
     def get_total_word_count(self):
         philo_ids = []
@@ -243,6 +233,7 @@ class CombinedHitlist(object):
         #         self.combined_hitlist.append(hit)
         #         sentence_ids.add(sentence_id)
         from collections import defaultdict
+
         sentence_counts = defaultdict(int)
         for pos, hitlist in enumerate(hitlists):
             max_sent_count = 2
@@ -287,16 +278,13 @@ class NoHits(object):
         return 0
 
     def __getitem__(self, item):
-        return ''
+        return ""
 
     def __iter__(self):
-        return ''
+        return ""
 
     def finish(self):
         return
 
     def update(self):
         return
-
-    def get_total_word_count(self):
-        return 0

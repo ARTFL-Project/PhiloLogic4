@@ -1,8 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Parse term query before passing it to the PhiloLogic4 library."""
+#!/usr/bin/env python3
+"""Parse term query before passing it to the PhiloLogic5 library."""
 
 import re
+
 
 def parse_query(query_terms, config):
     """Parse query function."""

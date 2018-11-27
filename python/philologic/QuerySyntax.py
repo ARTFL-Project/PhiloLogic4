@@ -1,16 +1,18 @@
-#!/usr/bin/env python
-from __future__ import absolute_import
+#!/usr/bin/env python3
+
 import re
 
-patterns = [("QUOTE", r'".+?"'),
-            ("QUOTE", r'".+'),
-            ("NOT", "NOT"),
-            ('OR', r'\|'),
-            ('RANGE', r'[^|\s]+?\-[^|\s]+'),
-            ('RANGE', r'\d+\-\Z'),
-            ('RANGE', r'\-\d+\Z'),
-            ('NULL', r'NULL'),
-            ('TERM', r'[^\-|\s"]+')]
+patterns = [
+    ("QUOTE", r'".+?"'),
+    ("QUOTE", r'".+'),
+    ("NOT", "NOT"),
+    ("OR", r"\|"),
+    ("RANGE", r"[^|\s]+?\-[^|\s]+"),
+    ("RANGE", r"\d+\-\Z"),
+    ("RANGE", r"\-\d+\Z"),
+    ("NULL", r"NULL"),
+    ("TERM", r'[^\-|\s"]+'),
+]
 
 
 def parse_query(qstring):
@@ -21,7 +23,7 @@ def parse_query(qstring):
             m = re.match(pattern, buf)
             if m:
                 parsed.append((label, m.group()))
-                buf = buf[m.end():]
+                buf = buf[m.end() :]
                 break
         else:
             buf = buf[1:]

@@ -1,15 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Citations"""
 
-from __future__ import absolute_import, print_function
-from philologic.runtime.link import (make_absolute_object_link, make_absolute_query_link)
-import six
+
+from philologic.runtime.link import make_absolute_object_link, make_absolute_query_link
 
 
 def citation_links(db, config, i):
     """ Returns links to a PhiloLogic object and all its ancestors."""
     if config.skip_table_of_contents is False:
-        doc_href = make_absolute_object_link(config, i.philo_id[:1]) + '/table-of-contents'
+        doc_href = make_absolute_object_link(config, i.philo_id[:1]) + "/table-of-contents"
     else:
         doc_href = make_absolute_object_link(config, i.philo_id[:1], i.bytes)
     div1_href = make_absolute_object_link(config, i.philo_id[:2], i.bytes)
@@ -21,12 +20,19 @@ def citation_links(db, config, i):
     except AttributeError:
         line_href = ""
 
-    links = {"doc": doc_href, "div1": div1_href, "div2": div2_href, "div3": div3_href,
-             "para": "", "page": page_href, "line": line_href}
+    links = {
+        "doc": doc_href,
+        "div1": div1_href,
+        "div2": div2_href,
+        "div3": div3_href,
+        "para": "",
+        "page": page_href,
+        "line": line_href,
+    }
 
-    for field, metadata_type in six.iteritems(db.locals["metadata_types"]):
-        if metadata_type == 'para':
-            links['para'] = make_absolute_object_link(config, i.philo_id[:5], i.bytes)
+    for field, metadata_type in db.locals["metadata_types"].items():
+        if metadata_type == "para":
+            links["para"] = make_absolute_object_link(config, i.philo_id[:5], i.bytes)
             break
     return links
 
@@ -67,9 +73,9 @@ def get_label(hit, citation_object):
                 div2_name = hit.div2.head.strip()
                 div3_name = hit.div3.head.strip()
                 if div3_name == div2_name and hit.div3.philo_id[-1] == 0:
-                    div3_name = ''
+                    div3_name = ""
                 if div2_name == div1_name and hit.div2.philo_id[-1] == 0:
-                    div2_name = ''
+                    div2_name = ""
                 if citation_object["object_level"] == "div2":
                     label = div2_name
                 else:
@@ -85,12 +91,12 @@ def get_label(hit, citation_object):
         label = hit[citation_object["field"]].strip().title()
     elif citation_object["object_level"] == "page":
         page_num = hit.page[citation_object["field"]]
-
         if page_num:
             try:
                 label = str(page_num)
             except UnicodeEncodeError:
-                label = page_num.encode('utf-8', 'ignore')  # page number is a unicode char
+                label = page_num.encode("utf-8", "ignore")  # page number is a unicode char
+            label = "page {}".format(label)
     elif citation_object["object_level"] == "line":
         try:
             line = hit.line[citation_object["field"]].strip()
@@ -109,14 +115,15 @@ def get_div1_name(hit):
             label = "Section"
         else:
             if hit.div1["type"] and hit.div1["n"]:
-                label = hit.div1['type'] + " " + hit.div1["n"]
+                label = hit.div1["type"] + " " + hit.div1["n"]
             else:
-                label = hit.div1["head"] or hit.div1['type'] or hit.div1['philo_name'] or hit.div1['philo_type']
-    try:
-        label = label[0].upper() + label[1:]
-        label = label.strip()
-    except IndexError:
-        pass
+                label = hit.div1["head"] or hit.div1["type"] or hit.div1["philo_name"] or hit.div1["philo_type"]
+    if label:
+        try:
+            label = label[0].upper() + label[1:]
+            label = label.strip()
+        except IndexError:
+            pass
     return label
 
 
@@ -126,12 +133,14 @@ def cite_linker(hit, citation_object, citation_hrefs, config, report):
     if citation_object["link"]:
         if citation_object["object_level"] == "doc":
             if citation_object["field"] == "title" or citation_object["field"] == "filename":
-                href = citation_hrefs['doc']
+                href = citation_hrefs["doc"]
             elif report == "bibliography" and citation_object["field"] == "head":
                 href = make_absolute_object_link(config, hit.philo_id)
             else:
-                params = [("report", "bibliography"),
-                          (citation_object["field"], '"%s"' % hit[citation_object["field"]])]
+                params = [
+                    ("report", "bibliography"),
+                    (citation_object["field"], '"%s"' % hit[citation_object["field"]]),
+                ]
                 href = make_absolute_query_link(config, params)
         else:
             href = citation_hrefs[citation_object["object_level"]]

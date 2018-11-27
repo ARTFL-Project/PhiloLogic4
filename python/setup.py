@@ -1,9 +1,13 @@
-from __future__ import absolute_import
+#!/usr/bin/env python3
 from distutils.core import setup
 
 setup(name = "philologic",
-      version = "4.5",
+      version = "5.0alpha",
       author = "The ARTFL Project",
       author_email = "artfl@artfl.uchicago.edu",
       packages = ["philologic", "philologic.runtime", "philologic.utils", "philologic.runtime.reports"],
+      scripts=["scripts/philoload5"],
+      install_requires=[
+            "lxml", "python-levenshtein", "natsort", "multiprocess"
+      ]
      )

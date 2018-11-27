@@ -1,25 +1,25 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from __future__ import absolute_import, print_function
-import os
-import socket
-import imp
-import re
+
 import hashlib
-import time
-import struct
+import imp
+import os
+import re
+import socket
 import sys
-import urllib
+import time
+from urllib.parse import unquote
+
 from philologic.DB import DB
 
 # These should always be allowed for local access
 local_blocks = ["10.0.0.", "172.16.0.", "192.168.0.", "127.0.0."]
 
-ip_ranges = [re.compile(r'^%s.*' % i) for i in local_blocks]
+ip_ranges = [re.compile(r"^%s.*" % i) for i in local_blocks]
 
 
 def check_access(environ, config):
-    db = DB(config.db_path + '/data/')
+    db = DB(config.db_path + "/data/")
     incoming_address, match_domain = get_client_info(environ)
 
     if config.access_file:
@@ -55,19 +55,21 @@ def check_access(environ, config):
     try:
         allowed_ips = set([])
         for ip in access_config.allowed_ips:
-            split_numbers = ip.split('.')
+            split_numbers = ip.split(".")
             if len(split_numbers) == 4:
-                if re.search(r'\d+-\d+', split_numbers[3]):
-                    for last_num in range(int(split_numbers[3].split('-')[0]), int(split_numbers[3].split('-')[1])+1):
+                if re.search(r"\d+-\d+", split_numbers[3]):
+                    for last_num in range(int(split_numbers[3].split("-")[0]), int(split_numbers[3].split("-")[1]) + 1):
                         allowed_ips.add(".".join(split_numbers[:3]) + "." + str(last_num))
-                elif re.search(r'\d+-\A', split_numbers[3]):
-                    for last_num in range(int(split_numbers[3].split('-')[0]), 255):
+                elif re.search(r"\d+-\A", split_numbers[3]):
+                    for last_num in range(int(split_numbers[3].split("-")[0]), 255):
                         allowed_ips.add(".".join(split_numbers[:3]) + "." + str(last_num))
                 else:
                     allowed_ips.add(ip)
             else:
                 allowed_ips.add(ip)
     except Exception as e:
+        import sys
+
         print(repr(e), file=sys.stderr)
         allowed_ips = []
     try:
@@ -83,36 +85,40 @@ def check_access(environ, config):
                 if domain in match_domain:
                     return make_token(incoming_address, db)
         for ip_range in allowed_ips:
-            if re.search(r'^%s.*' % ip_range, incoming_address):
+            if re.search(r"^%s.*" % ip_range, incoming_address):
                 return make_token(incoming_address, db)
 
     # If no token returned, we block access.
+    import sys
+
     print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)
     return ()
 
-def get_client_info(environ):
-    incoming_address = environ['REMOTE_ADDR']
-    fq_domain_name = socket.getfqdn(incoming_address).split(',')[-1]
-    edit_domain = re.split('\.', fq_domain_name)
 
-    if re.match('edu', edit_domain[-1]):
-        match_domain = '.'.join([edit_domain[-2], edit_domain[-1]])
+def get_client_info(environ):
+    incoming_address = environ["REMOTE_ADDR"]
+    fq_domain_name = socket.getfqdn(incoming_address).split(",")[-1]
+    edit_domain = re.split("\.", fq_domain_name)
+
+    if re.match("edu", edit_domain[-1]):
+        match_domain = ".".join([edit_domain[-2], edit_domain[-1]])
     else:
         if len(edit_domain) == 2:
-            match_domain = '.'.join([edit_domain[-2], edit_domain[-1]])
+            match_domain = ".".join([edit_domain[-2], edit_domain[-1]])
         else:
             match_domain = fq_domain_name
     return incoming_address, match_domain
 
+
 def login_access(environ, request, config, headers):
-    db = DB(config.db_path + '/data/')
+    db = DB(config.db_path + "/data/")
     if request.authenticated:
         access = True
     else:
         if request.username and request.password:
             access = check_login_info(config, request)
             if access:
-                incoming_address = environ['REMOTE_ADDR']
+                incoming_address = environ["REMOTE_ADDR"]
                 token = make_token(incoming_address, db)
                 if token:
                     h, ts = token
@@ -125,17 +131,17 @@ def login_access(environ, request, config, headers):
 
 def check_login_info(config, request):
     login_file_path = os.path.join(config.db_path, "data/logins.txt")
-    password = urllib.unquote(request.password)
+    unquoted_password = unquote(request.password)
     if os.path.exists(login_file_path):
         with open(login_file_path) as password_file:
             for line in password_file:
                 line = line.strip()
-                if not line: # empty line
+                if not line:  # empty line
                     continue
-                fields = line.split('\t')
+                fields = line.split("\t")
                 user = fields[0]
                 passwd = fields[1]
-                if user == request.username and passwd == password:
+                if user == request.username and passwd == unquoted_password:
                     return True
             return False
     else:

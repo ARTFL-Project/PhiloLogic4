@@ -1,13 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+import json
 import os
 import sqlite3
 import sys
 from wsgiref.handlers import CGIHandler
 
-import simplejson
-from philologic.runtime import adjust_bytes
 from philologic.DB import DB
+from philologic.runtime import adjust_bytes
 
 import sys
 sys.path.append("..")
@@ -54,7 +54,7 @@ def lookup_word_service(environ, start_response):
         pass
 #    print >> sys.stderr, "TOKEN", token, "BYTES: ", start_byte, end_byte, "FILENAME: ", filename, "POSITION", request.position
     token_n = 0
-    yield lookup_word(db, cursor, token, token_n, start_byte, end_byte, filename)
+    yield lookup_word(db, cursor, token, token_n, start_byte, end_byte, filename).encode('utf8')
 
 
 def lookup_word(db, cursor, token, n, start, end, filename):
@@ -128,7 +128,7 @@ def lookup_word(db, cursor, token, n, start, end, filename):
                         "lemma": l,
                         "parse": all_parses[l],
                         "dictionary_lookup": "http://logeion.uchicago.edu/index.html#" + l
-                    } for l, p in all_parses.items()]  #,
+                    } for l, p in list(all_parses.items())]  #,
                     # "alt_parses": [
                     #     {
                     #         'lemma': 'x',
@@ -143,15 +143,15 @@ def lookup_word(db, cursor, token, n, start, end, filename):
                     #     }
                     # ]
                 }
-                return simplejson.dumps(result_object)
+                return json.dumps(result_object)
             else:
                 i += 1
-    return simplejson.dumps({})
+    return json.dumps({})
 
 if __name__ == "__main__":
     if len(sys.argv) > 6:
         db = DB(sys.argv[1])
-        print >> sys.stderr, db.dbh
+        print(db.dbh, file=sys.stderr)
         cursor = db.dbh.cursor()
         lookup_word(cursor, sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
     else:
