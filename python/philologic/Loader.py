@@ -155,7 +155,7 @@ class Loader(object):
         self.filenames = []
         for f in files:
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
-            shutil.copy(f, new_file_path)
+            shutil.copy2(f, new_file_path)
             os.chmod(new_file_path, 775)
             self.filenames.append(f)
         print("done.\n")
@@ -284,13 +284,16 @@ class Loader(object):
 
     def create_year_field(self, metadata):
         """Create year field from date fields in header"""
-        year_finder = re.compile(r"^.*?(\d{4}).*")  # we are assuming dates from 1000 AC
+        year_finder = re.compile(r"^.*?(\-?\d{1,}).*")  # we are assuming dates from 1000 AC
         earliest_year = 2500
         for field in ["date", "create_date", "pub_date", "period"]:
             if field in metadata:
                 year_match = year_finder.search(metadata[field])
                 if year_match:
                     year = int(year_match.groups()[0])
+                    if field == "create_date":  # this should be the canonical date
+                        earliest_year = year
+                        break
                     if year < earliest_year:
                         earliest_year = year
         if earliest_year != 2500:

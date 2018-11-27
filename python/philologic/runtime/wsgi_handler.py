@@ -143,11 +143,14 @@ class WSGIHandler(object):
             self.cgi["sort_order"] = [["rowid"]]
 
         if "start_byte" in self.cgi:
-            if self.cgi["start_byte"][0].isdigit():
-                self.cgi["start_byte"][0] = int(self.cgi["start_byte"][0])
-        if "end_byte" in self.cgi:
-            if self.cgi["end_byte"][0].isdigit():
-                self.cgi["end_byte"][0] = int(self.cgi["end_byte"][0])
+            try:
+                self.start_byte = int(self["start_byte"])
+            except (ValueError, TypeError) as e:
+                self.start_byte = ""
+            try:
+                self.end_byte = int(self["end_byte"])
+            except (ValueError, TypeError) as e:
+                self.end_byte = ""
 
     def __getattr__(self, key):
         """Return query arg as attribute of class."""
@@ -168,7 +171,10 @@ class WSGIHandler(object):
         if isinstance(item, list or set):
             self.cgi[key] = item
         else:
-            self.cgi[key][0] = item
+            try:
+                self.cgi[key][0] = item
+            except IndexError:
+                self.cgi[key] = [""]
 
     def __iter__(self):
         """Iterate over query args."""
@@ -177,3 +183,6 @@ class WSGIHandler(object):
 
     def __repr__(self):
         return repr(self.cgi)
+
+    def __str__(self):
+        return " ".join(["{}: {}".format(i, j) for i, j in self])

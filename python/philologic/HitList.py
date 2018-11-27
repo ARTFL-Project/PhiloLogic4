@@ -149,7 +149,7 @@ class HitList(object):
                 if self.done:
                     raise IndexError
                 else:
-                    time.sleep(.05)
+                    time.sleep(0.05)
                     self.update()
             offset = self.hitsize * n
             self.fh.seek(offset)
@@ -181,7 +181,7 @@ class HitList(object):
             if self.done:
                 raise IndexError
             else:
-                time.sleep(.05)
+                time.sleep(0.05)
                 self.update()
         if n != self.position:
             offset = self.hitsize * n
@@ -288,3 +288,6 @@ class NoHits(object):
 
     def update(self):
         return
+
+    def get_total_word_count(self):
+        return 0
