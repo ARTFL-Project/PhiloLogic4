@@ -91,7 +91,7 @@ int set_corpus( Search s, Z8 *corpuspath, Z32 corpusarg){
   }
   s->map = new_Gmap ( corpusstat.st_size/(sizeof(Z32)*corpussize), corpussize );
   
-  if ( ( s->map->gm_l = hit_crp_args ( s->hit_def, s->map->gm_h, &s->map->gm_f, corpussize, corpuspath ) ) <= 0 ) {
+  if ( ( s->map->gm_l = hit_crp_args ( s->hit_def, s->map->gm_h, &(s->map->gm_f), corpussize, corpuspath ) ) <= 0 ) {
     strcpy ( s->errstr, BAD_CORPUS_ARGZ );
     //Should't return an int here.
     return BAD_ARGZ;
@@ -113,6 +113,7 @@ int set_search_method( Search s, Z8 *methodstring, Z8* argstring)
   for ( j = 0; j < s->depth; j++ ) {
     s->hit_def->searchmethods[method].sp->build_search_level ( s->hit_def->levels, argstring, j );
   }
+  return 0;
 }
 
 void assign_boolean_op ( Search s, Z32 level, Z32 op )
@@ -238,6 +239,7 @@ Z32 resmap_sort_func ( const void *a1, const void *a2)
     /* return s->hit_def->levels[s->bn].m2m_cmp_func ((Z32 *)a1, (Z32 *)a2, s->hit_def, s->bn); */
     return h.m2m_cmp_func ((Z32 *)a1, (Z32 *)a2, s->hit_def, s->bn);
   }
+  return 0;
 }
 
 void sort_result_map ( Search s, Gmap m )

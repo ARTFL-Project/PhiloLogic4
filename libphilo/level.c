@@ -129,7 +129,7 @@ Z32 process_batch ( Search s, FILE *f, N32 bn )
 /*reads words from input, line by line, and adds them to the word vector for the current batch object.*/
 {
   Batch b = s->batches + bn; 
-  Z32   n_blocks = 0; 
+  N32   n_blocks = 0; 
 
   Z8  word[W_LENGTH_MAX]; 
   Z8  lmsg[W_LENGTH_MAX];
@@ -144,7 +144,7 @@ Z32 process_batch ( Search s, FILE *f, N32 bn )
       b->w_list = (Word) realloc ( b->w_list, sizeof(Word_) * ( b->malloced + INITWORDS ) ); 
       b->malloced += INITWORDS; 
     }
-    if ( n = init_wordObject (s, word, b->w_list + b->howmany, &n_blocks )) { //we do an initial lookup to get word frequency.
+    if ( (n = init_wordObject (s, word, b->w_list + b->howmany, &n_blocks )) ) { //we do an initial lookup to get word frequency.
       s_logf ( s->debug, L_INFO, "(word object initialized with %d occurencees)", n ); 
       b->total += n;
       b->howmany++; 
@@ -227,6 +227,7 @@ int delete_batch(Batch b) {
   free(b->blockmap);
   free(b->w_list);
   free(b);
+  return 0;
 }
 
 

@@ -4,6 +4,10 @@
 #include <string.h>
 #include <math.h>
 
+void printUsage(){
+	fprintf(stderr, "Usage: pack4 [dbspecs4 file] < all_words_sorted\n");
+}
+
 int main(int argc, char **argv) {
 // main() should probably be in a separate file, and pack.c should get linked into libphilo.  
 
@@ -17,7 +21,7 @@ int main(int argc, char **argv) {
 	N64 uniq_words = 0;
 	char word[512];
 	char page[512];
-	char line[2048];
+	char line[512];
 	int state;
 	Z32 hit[10];
 
@@ -25,6 +29,7 @@ int main(int argc, char **argv) {
 	hit[8] = 0;
 
 	if (argc < 2) {
+		printUsage();
 		exit(1);
 	}
 	
@@ -46,7 +51,7 @@ int main(int argc, char **argv) {
 
 	//scanning
 	while(1) {
-		if (fgets(line,2048,stdin) == NULL) {
+		if (fgets(line,511,stdin) == NULL) {
 			hitbuffer_finish(hb);
 			break;		
 		}
@@ -66,7 +71,7 @@ int main(int argc, char **argv) {
 			totalhits += 1LLU;
 		}
 		else {
-		  fprintf(stderr, "Couldn't understand hit:\n%s",line);
+			fprintf(stderr, "Couldn't understand hit.\n");
 		}
 	}
 

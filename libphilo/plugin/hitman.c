@@ -33,8 +33,8 @@ Z32 hit_put ( Z32 *hit, Z32 *mi, Z32 *mo, hitdef *hit_def, N32 bn )
   hitcmp *h = hit_def->levels+bn;
 
   Z32 context = 0;
-//  Z32 need_wn = h->type > HIT_CMP_COOC ? 1 : 0;
-  Z32 need_wn = 1;
+  Z32 need_wn = h->type > HIT_CMP_COOC ? 1 : 0;
+
   N32 i = 0;
 
   context = h->r_context;

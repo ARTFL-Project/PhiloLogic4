@@ -75,7 +75,7 @@ Z32 m2m_cmp_sentence ( Z32 *a, Z32 *b, hitdef *hit_def, Z32 level )
      BYTE OFFSET -- by which we actually want to sort the map:
    */
 
-  i = INDEX_DEF_SENTENCE - 1;
+  i = INDEX_DEF_WORD + 1;
 
   if ( a[i] != b[i] )
     return a[i] < b[i] ? -1 : 1;
@@ -129,10 +129,13 @@ Z32 h2m_cmp_sentence ( Z32 *a, Z32 *b, hitdef *hit_def, Z32 level )
 {
   hitcmp *h = hit_def->levels+level;
   Z32 res = 0;
-  N32 real_levels = 0;
-  N32 i, j, r, d;
+
+  N32 real_levels = 0; 
+
+  N32 i, j, r;
+  Z32 d;
   N32 index;
-  if (r = h2h_cmp_sentence_lowlevel(a,b,INDEX_DEF_PARAGRAPH)) {
+  if ((r = h2h_cmp_sentence_lowlevel(a,b,INDEX_DEF_PARAGRAPH))) {
   	return r;
   }
   index = INDEX_DEF_SENTENCE - 1;
@@ -144,7 +147,7 @@ Z32 h2m_cmp_sentence ( Z32 *a, Z32 *b, hitdef *hit_def, Z32 level )
   if (d > h[level].distance) {
   	return 1;
   }
-  return 0;
+  return 0;  
 }
 
 

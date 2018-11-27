@@ -1,4 +1,4 @@
-// $Id: hitcmp_proxy.h,v 2.11 2004/05/28 19:22:08 o Exp $
+// $Id: unpack.h,v 2.10 2004/05/28 19:22:04 o Exp $
 // philologic 2.8 -- TEI XML/SGML Full-text database engine
 // Copyright (C) 2004 University of Chicago
 // 
@@ -16,8 +16,21 @@
 // along with this program; if not, write to Affero, Inc.,
 // 510 Third Street, Suite 225, San Francisco, CA 94107 USA.
 
+#include "../../pack/dbspecs2.h"
 
-  extern Z8 *get_method_info_proxy    (void);
-  extern Z32 build_search_level_proxy (hitcmp *, Z8 *, Z32);
-  extern Z32 h2h_cmp_proxy_lowlevel ( Z32 *a, Z32 *b, Z32 depth );
+struct   hit_st
+         {
+           Z32 obj[FIELDS];
+         };
+
+typedef  struct hit_st hit;
+
+
+extern hit* lookup ();
+extern hit* gethits ();
+
+extern hit* unpack ();
+extern hit* directory ();
+extern hit* decompress ();
+
 

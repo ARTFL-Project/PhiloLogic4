@@ -141,7 +141,7 @@ Z32 h2m_cmp_proxy ( Z32 *a, Z32 *b, hitdef *hit_def, Z32 level )
     if the 2 words are not even in the same sentence, then
     they are surely not in the same phrase: 
    */
-  if ( res = h2h_cmp_proxy_sent ( a, b, hit_def, level ) )
+  if ( (res = h2h_cmp_proxy_sent ( a, b, hit_def, level )) )
     return res; 
 
   if ( hit_def->depth_r && ( level >= hit_def->depth_r ) )
@@ -157,7 +157,7 @@ Z32 h2m_cmp_proxy ( Z32 *a, Z32 *b, hitdef *hit_def, Z32 level )
 
       i = h->r_context + j * 2 + 1; 
 
-      if ( res = h2m_wn_proxy_check ( a[i], b[INDEX_DEF_SENTENCE], hit_def, j, level ) )
+      if ( (res = h2m_wn_proxy_check ( a[i], b[INDEX_DEF_SENTENCE], hit_def, j, level )) )
 	return res; 
     }
 

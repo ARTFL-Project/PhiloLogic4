@@ -27,3 +27,8 @@ int delete_hb(hitbuffer *hb);
 int hitbuffer_init(hitbuffer *hb, Z8 *word);
 int hitbuffer_inc(hitbuffer *hb, Z32 *hit);
 int hitbuffer_finish(hitbuffer *hb);
+int add_to_block(hitbuffer *hb, Z32 *data, N32 count);
+int compress(char *bytebuffer, int byte, int bit, N64 data, int size);
+int add_to_dir(hitbuffer *hb, Z32 *data, N32 count);
+int write_dir(hitbuffer *hb);
+int write_blk(hitbuffer *hb);

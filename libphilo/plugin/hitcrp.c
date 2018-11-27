@@ -58,7 +58,7 @@ Z32 hit_crp_buffer( hitdef *h, Z32 *m, Z32 *f, int arg) {
     return 0;
   }
 
-Z32 hit_crp_args ( hitdef *h, Z32 *m, Z32 *f, int arg, Z8 *crpfile )
+Z32 hit_crp_args ( hitdef *h, Z32 *m, N32 *f, int arg, Z8 *crpfile )
 {
   Z8  *c;
   FILE *cfp;
@@ -75,7 +75,7 @@ Z32 hit_crp_args ( hitdef *h, Z32 *m, Z32 *f, int arg, Z8 *crpfile )
   (void) stat( (char *)crpfile, &cstat);
 
 
-  if ( cfp = fopen( (char *)crpfile, "r") )
+  if ( (cfp = fopen( (char *)crpfile, "r")) )
     {
       ret = cstat.st_size / (sizeof(Z32)*(*f)); 
       success = fread (m, sizeof(Z32), ret*(*f), cfp);

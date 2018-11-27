@@ -34,11 +34,11 @@ Z32 hit_out_ascii (Z32 *m, hitdef *hit_def, Z32 bn, Z32 real_levels)
   hitcmp* h = hit_def->levels+bn;
 
   context = h->r_context;
-//  wn_skip = h->type > HIT_CMP_COOC ? 1 : 0;
-  wn_skip = 1;
+  wn_skip = h->type > HIT_CMP_COOC ? 1 : 0;
+
   n = context;
   n = n == INDEX_DEF_SENTENCE ? n - 1 : n;
-  n = h->hitsize_func(hit_def,(Z8)real_levels);
+  n = h->hitsize_func(hit_def,(Z8)real_levels); 
   n = ( context + bn * (wn_skip + 1) + wn_skip );
   /* "normal" objects: */
  
@@ -76,8 +76,8 @@ Z32 hit_out_bin (Z32 *m, hitdef *hit_def, Z32 bn, Z32 real_levels)
   hitcmp* h = hit_def->levels+bn;
 
   context = h->r_context;
-//  wn_skip = h->type > HIT_CMP_COOC ? 1 : 0;
-  wn_skip = 1;
+  wn_skip = h->type > HIT_CMP_COOC ? 1 : 0;
+
   n = context;
   n = n == INDEX_DEF_SENTENCE ? n - 1 : n;
   n = ( context + bn * (wn_skip + 1) + wn_skip ); 
@@ -110,12 +110,14 @@ Z32 hit_out_bin (Z32 *m, hitdef *hit_def, Z32 bn, Z32 real_levels)
   return 1;
 }
 
+
 Z32 hit_out (Z32 *m, hitdef *h, Z32 bn, Z32 real_levels)
 {
   if ( h->output == HIT_OUT_ASCII )
     return hit_out_ascii (m, h, bn, real_levels);
 
   return hit_out_bin (m, h, bn, real_levels);
+
 }
 
 Z32 hit_out_args (hitdef *h, Z8 *arg)
