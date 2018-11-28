@@ -70,7 +70,7 @@ web_config_defaults = OrderedDict(
         (
             "global_config_location",
             {
-                "value": "/etc/philologic/philologic4.cfg",
+                "value": "/etc/philologic/philologic5.cfg",
                 "comment": """
                # The global_config_location variable points to the global config file for philologic instances.
                # Point to a different location if you intend to have several global config options for databases on a single server""",

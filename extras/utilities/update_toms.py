@@ -9,7 +9,7 @@ from philologic.PostFilters import metadata_frequencies, normalized_metadata_fre
 def change_metadata(metadata_field):
     """ This is an example of a modification you could make to your metadata field
     Modify at will"""
-    updated_metadata = re.sub('.*(\d{4}).*', '\\1', metadata_field)
+    updated_metadata = re.sub(".*(\d{4}).*", "\\1", metadata_field)
     return updated_metadata
 
 
@@ -17,7 +17,7 @@ def update_function(c, field, db_location):
     query = 'select philo_id, %s from toms where philo_type="doc"' % field
     c.execute(query)
     updated_value = {}
-    for i in c.fetchall():
+    for i in c:
         philo_id, metadata_field = i
         updated_value[philo_id] = change_metadata(metadata_field)
 
@@ -46,7 +46,7 @@ def parse_command_line(args):
 
 
 def connect_to_db(db_location):
-    conn = sqlite3.connect(db_location + '/data/toms.db')
+    conn = sqlite3.connect(db_location + "/data/toms.db")
     cursor = conn.cursor()
     return conn, cursor
 
@@ -54,11 +54,11 @@ def connect_to_db(db_location):
 ## Build a loader class with the attributes needed to update the frequency files
 class LoaderObj(object):
     def __init__(self, db_location, field):
-        self.destination = db_location + '/data'
+        self.destination = db_location + "/data"
         self.metadata_fields = [field]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     db_location, field = parse_command_line(sys.argv)
     conn, c = connect_to_db(db_location)
     update_function(c, field, db_location)

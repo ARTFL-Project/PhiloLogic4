@@ -271,7 +271,6 @@ class Loader(object):
             if not matches:
                 matches = re.findall(r"<dc:([^>]+)>([^>]+)>", header)
             for metadata_name, metadata_value in matches:
-                metadata_value = metadata_value
                 metadata_value = convert_entities(metadata_value)
                 metadata_name = metadata_name.lower()
                 data[metadata_name] = metadata_value
