@@ -6,7 +6,7 @@
 default_object_level = "doc"
 
 # Define navigable objects: doc, div1, div2, div3, para.
-navigable_objects = ('doc', 'div1', 'div2', 'div3', 'para')
+navigable_objects = ("doc", "div1", "div2", "div3", "para")
 
 ## Define text objects to generate plain text files for various machine learning tasks
 ## For instance, this could be ['doc', 'div1']
@@ -14,7 +14,7 @@ plain_text_obj = []
 
 ## Define whether to store all words with their philo IDs. Useful for data-mining tasks
 ## where keeping the index information (and byte offset) is important.
-store_words_and_ids = True
+store_words_and_ids = False
 
 #####################
 ## Parsing Options ##
@@ -25,79 +25,80 @@ store_words_and_ids = True
 # Only useful if you parse a TEI header.
 doc_xpaths = {
     "author": [
-        ".//sourceDesc/bibl/author[@type='marc100']", ".//sourceDesc/bibl/author[@type='artfl']",
-        ".//sourceDesc/bibl/author", ".//titleStmt/author", ".//sourceDesc/biblStruct/monogr/author/name",
-        ".//sourceDesc/biblFull/titleStmt/author", ".//sourceDesc/biblFull/titleStmt/respStmt/name",
-        ".//sourceDesc/biblFull/titleStmt/author", ".//sourceDesc/bibl/titleStmt/author"
+        ".//sourceDesc/bibl/author[@type='marc100']",
+        ".//sourceDesc/bibl/author[@type='artfl']",
+        ".//sourceDesc/bibl/author",
+        ".//titleStmt/author",
+        ".//sourceDesc/biblStruct/monogr/author/name",
+        ".//sourceDesc/biblFull/titleStmt/author",
+        ".//sourceDesc/biblFull/titleStmt/respStmt/name",
+        ".//sourceDesc/biblFull/titleStmt/author",
+        ".//sourceDesc/bibl/titleStmt/author",
     ],
     "title": [
-        ".//sourceDesc/bibl/title[@type='marc245']", ".//sourceDesc/bibl/title[@type='artfl']",
-        ".//sourceDesc/bibl/title", ".//titleStmt/title", ".//sourceDesc/bibl/titleStmt/title",
-        ".//sourceDesc/biblStruct/monogr/title", ".//sourceDesc/biblFull/titleStmt/title"
+        ".//sourceDesc/bibl/title[@type='marc245']",
+        ".//sourceDesc/bibl/title[@type='artfl']",
+        ".//sourceDesc/bibl/title",
+        ".//titleStmt/title",
+        ".//sourceDesc/bibl/titleStmt/title",
+        ".//sourceDesc/biblStruct/monogr/title",
+        ".//sourceDesc/biblFull/titleStmt/title",
     ],
-    "author_dates": [
-        ".//sourceDesc/bibl/author/date", ".//titlestmt/author/date"
-    ],
+    "author_dates": [".//sourceDesc/bibl/author/date", ".//titlestmt/author/date"],
     "create_date": [
-        ".//profileDesc/creation/date", ".//fileDesc/sourceDesc/bibl/imprint/date",
-        ".//sourceDesc/biblFull/publicationStmt/date", ".//profileDesc/dummy/creation/date",
-        ".//fileDesc/sourceDesc/bibl/creation/date"
+        ".//profileDesc/creation/date",
+        ".//fileDesc/sourceDesc/bibl/imprint/date",
+        ".//sourceDesc/biblFull/publicationStmt/date",
+        ".//profileDesc/dummy/creation/date",
+        ".//fileDesc/sourceDesc/bibl/creation/date",
     ],
     "publisher": [
-        ".//sourceDesc/bibl/imprint[@type='artfl']", ".//sourceDesc/bibl/imprint[@type='marc534']",
-        ".//sourceDesc/bibl/imprint/publisher", ".//sourceDesc/biblStruct/monogr/imprint/publisher/name",
-        ".//sourceDesc/biblFull/publicationStmt/publisher", ".//sourceDesc/bibl/publicationStmt/publisher",
-        ".//sourceDesc/bibl/publisher", ".//publicationStmt/publisher", ".//publicationStmp"
+        ".//sourceDesc/bibl/imprint[@type='artfl']",
+        ".//sourceDesc/bibl/imprint[@type='marc534']",
+        ".//sourceDesc/bibl/imprint/publisher",
+        ".//sourceDesc/biblStruct/monogr/imprint/publisher/name",
+        ".//sourceDesc/biblFull/publicationStmt/publisher",
+        ".//sourceDesc/bibl/publicationStmt/publisher",
+        ".//sourceDesc/bibl/publisher",
+        ".//publicationStmt/publisher",
+        ".//publicationStmp",
     ],
     "pub_place": [
-        ".//sourceDesc/bibl/imprint/pubPlace", ".//sourceDesc/biblFull/publicationStmt/pubPlace",
-        ".//sourceDesc/biblStruct/monog/imprint/pubPlace", ".//sourceDesc/bibl/pubPlace",
-        ".//sourceDesc/bibl/publicationStmt/pubPlace"
+        ".//sourceDesc/bibl/imprint/pubPlace",
+        ".//sourceDesc/biblFull/publicationStmt/pubPlace",
+        ".//sourceDesc/biblStruct/monog/imprint/pubPlace",
+        ".//sourceDesc/bibl/pubPlace",
+        ".//sourceDesc/bibl/publicationStmt/pubPlace",
     ],
     "pub_date": [
-        ".//sourceDesc/bibl/imprint/date", ".//sourceDesc/biblStruct/monog/imprint/date",
-        ".//sourceDesc/biblFull/publicationStmt/date", ".//sourceDesc/bibFull/imprint/date", ".//sourceDesc/bibl/date",
-        ".//text/front/docImprint/acheveImprime"
+        ".//sourceDesc/bibl/imprint/date",
+        ".//sourceDesc/biblStruct/monog/imprint/date",
+        ".//sourceDesc/biblFull/publicationStmt/date",
+        ".//sourceDesc/bibFull/imprint/date",
+        ".//sourceDesc/bibl/date",
+        ".//text/front/docImprint/acheveImprime",
     ],
-    "extent": [
-        ".//sourceDesc/bibl/extent", ".//sourceDesc/biblStruct/monog//extent", ".//sourceDesc/biblFull/extent"
-    ],
+    "extent": [".//sourceDesc/bibl/extent", ".//sourceDesc/biblStruct/monog//extent", ".//sourceDesc/biblFull/extent"],
     "editor": [
-        ".//sourceDesc/bibl/editor", ".//sourceDesc/biblFull/titleStmt/editor", ".//sourceDesc/bibl/title/Stmt/editor"
+        ".//sourceDesc/bibl/editor",
+        ".//sourceDesc/biblFull/titleStmt/editor",
+        ".//sourceDesc/bibl/title/Stmt/editor",
     ],
-    "identifiers": [
-        ".//publicationStmt/idno"
-    ],
-    "text_genre": [
-        ".//profileDesc/textClass/keywords[@scheme='genre']/term", ".//SourceDesc/genre"
-    ],
-    "keywords": [
-        ".//profileDesc/textClass/keywords/list/item"
-    ],
-    "language": [
-        ".//profileDesc/language/language"
-    ],
-    "notes": [
-        ".//fileDesc/notesStmt/note", ".//publicationStmt/notesStmt/note"
-    ],
-    "auth_gender": [
-        ".//publicationStmt/notesStmt/note"
-    ],
-    "collection": [
-        ".//seriesStmt/title"
-    ],
+    "identifiers": [".//publicationStmt/idno"],
+    "text_genre": [".//profileDesc/textClass/keywords[@scheme='genre']/term", ".//SourceDesc/genre"],
+    "keywords": [".//profileDesc/textClass/keywords/list/item"],
+    "language": [".//profileDesc/language/language"],
+    "notes": [".//fileDesc/notesStmt/note", ".//publicationStmt/notesStmt/note"],
+    "auth_gender": [".//publicationStmt/notesStmt/note"],
+    "collection": [".//seriesStmt/title"],
     "period": [
-        ".//profileDesc/textClass/keywords[@scheme='period']/list/item", ".//SourceDesc/period", ".//sourceDesc/period"
+        ".//profileDesc/textClass/keywords[@scheme='period']/list/item",
+        ".//SourceDesc/period",
+        ".//sourceDesc/period",
     ],
-    "text_form": [
-        ".//profileDesc/textClass/keywords[@scheme='form']/term"
-    ],
-    "structure": [
-        ".//SourceDesc/structure", ".//sourceDesc/structure"
-    ],
-    "idno": [
-        ".//fileDesc/publicationStmt/idno/"
-    ]
+    "text_form": [".//profileDesc/textClass/keywords[@scheme='form']/term"],
+    "structure": [".//SourceDesc/structure", ".//sourceDesc/structure"],
+    "idno": [".//fileDesc/publicationStmt/idno/"],
 }
 
 # Maps any given tag to one of PhiloLogic's types. Available types are div, para, page, and ref.
@@ -125,7 +126,7 @@ tag_to_obj_map = {
     "add": "para",
     "pb": "page",
     "ref": "ref",
-    "graphic": "graphic"
+    "graphic": "graphic",
 }
 
 # Defines which metadata to parse out for each object. All metadata defined here are attributes of a tag,
@@ -136,7 +137,7 @@ metadata_to_parse = {
     "page": ["n", "id", "facs"],
     "ref": ["target", "n", "type"],
     "graphic": ["facs"],
-    "line": ["n", "id"]
+    "line": ["n", "id"],
 }
 
 # Define a file (with full path) containing words to index. Must be one word per line.
@@ -175,8 +176,22 @@ break_sent_in_line_group = False
 # Tags normally break words.  There may be exceptions.  To run the
 # exception, turn on the exception and list them as patterns.
 # Tags will not be indexed and will not break words. An empty list turns of the feature
-tag_exceptions = ['<hi[^>]*>', '<emph[^>]*>', '<\/hi>', '<\/emph>', '<orig[^>]*>', '<\/orig>', '<sic[^>]*>', '<\/sic>',
-                  '<abbr[^>]*>', '<\/abbr>', '<i>', '</i>', '<sup>', '</sup>']
+tag_exceptions = [
+    "<hi[^>]*>",
+    "<emph[^>]*>",
+    "<\/hi>",
+    "<\/emph>",
+    "<orig[^>]*>",
+    "<\/orig>",
+    "<sic[^>]*>",
+    "<\/sic>",
+    "<abbr[^>]*>",
+    "<\/abbr>",
+    "<i>",
+    "</i>",
+    "<sup>",
+    "</sup>",
+]
 
 # ------------- UTF8 Strings to consider as word breakers -----------
 # In SGML, these are ents.  But in Unicode, these are characters
@@ -185,22 +200,22 @@ tag_exceptions = ['<hi[^>]*>', '<emph[^>]*>', '<\/hi>', '<\/emph>', '<orig[^>]*>
 # to see about others. An empty list disables the feature.
 # Note that these strings must be marked as binary as they are UTF8 strings
 unicode_word_breakers = [
-    b'\xe2\x80\x93',  # U+2013 &ndash; EN DASH
-    b'\xe2\x80\x94',  # U+2014 &mdash; EM DASH
-    b'\xc2\xab',  # &laquo;
-    b'\xc2\xbb',  # &raquo;
-    b'\xef\xbc\x89',  # fullwidth right parenthesis
-    b'\xef\xbc\x88',  # fullwidth left parenthesis
-    b'\xe2\x80\x90',  # U+2010 hyphen for greek stuff
-    b'\xce\x87',  # U+00B7 ano teleia
-    b'\xe2\x80\xa0',  # U+2020 dagger
-    b'\xe2\x80\x98',  # U+2018 &lsquo; LEFT SINGLE QUOTATION
-    b'\xe2\x80\x99',  # U+2019 &rsquo; RIGHT SINGLE QUOTATION
-    b'\xe2\x80\x9c',  # U+201C &ldquo; LEFT DOUBLE QUOTATION
-    b'\xe2\x80\x9d',  # U+201D &rdquo; RIGHT DOUBLE QUOTATION
-    b'\xe2\x80\xb9',  # U+2039 &lsaquo; SINGLE LEFT-POINTING ANGLE QUOTATION
-    b'\xe2\x80\xba',  # U+203A &rsaquo; SINGLE RIGHT-POINTING ANGLE QUOTATION
-    b'\xe2\x80\xa6'  # U+2026 &hellip; HORIZONTAL ELLIPSIS
+    b"\xe2\x80\x93",  # U+2013 &ndash; EN DASH
+    b"\xe2\x80\x94",  # U+2014 &mdash; EM DASH
+    b"\xc2\xab",  # &laquo;
+    b"\xc2\xbb",  # &raquo;
+    b"\xef\xbc\x89",  # fullwidth right parenthesis
+    b"\xef\xbc\x88",  # fullwidth left parenthesis
+    b"\xe2\x80\x90",  # U+2010 hyphen for greek stuff
+    b"\xce\x87",  # U+00B7 ano teleia
+    b"\xe2\x80\xa0",  # U+2020 dagger
+    b"\xe2\x80\x98",  # U+2018 &lsquo; LEFT SINGLE QUOTATION
+    b"\xe2\x80\x99",  # U+2019 &rsquo; RIGHT SINGLE QUOTATION
+    b"\xe2\x80\x9c",  # U+201C &ldquo; LEFT DOUBLE QUOTATION
+    b"\xe2\x80\x9d",  # U+201D &rdquo; RIGHT DOUBLE QUOTATION
+    b"\xe2\x80\xb9",  # U+2039 &lsaquo; SINGLE LEFT-POINTING ANGLE QUOTATION
+    b"\xe2\x80\xba",  # U+203A &rsaquo; SINGLE RIGHT-POINTING ANGLE QUOTATION
+    b"\xe2\x80\xa6",  # U+2026 &hellip; HORIZONTAL ELLIPSIS
 ]
 
 #  ----------------- Set Long Word Limit  -------------------
@@ -239,4 +254,5 @@ sentence_breakers = []
 # This is where you define your own parser which needs to have the same signature
 # as the one located in python/philologic/Parser.py
 from philologic import Parser
+
 parser_factory = Parser.XMLParser

@@ -68,8 +68,6 @@ def check_access(environ, config):
             else:
                 allowed_ips.add(ip)
     except Exception as e:
-        import sys
-
         print(repr(e), file=sys.stderr)
         allowed_ips = []
     try:
@@ -89,8 +87,6 @@ def check_access(environ, config):
                 return make_token(incoming_address, db)
 
     # If no token returned, we block access.
-    import sys
-
     print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)
     return ()
 

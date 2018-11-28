@@ -82,7 +82,7 @@ web_config_defaults = OrderedDict(
                 "value": False,
                 "comment": """
                # Configure access control with True or False.
-               # Note that if you want access control, you have to provide a login.txt file inside your /data directory,
+               # Note that if you want access control, you have to provide a logins.txt file inside your /data directory,
                # otherwise access will remain open.""",
             },
         ),
