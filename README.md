@@ -1,7 +1,5 @@
 # ![alt text](www/app/assets/img/philo.png) 4.5
 
-## THIS IS THE PHILOGIC 4 REPOSITORY FOR PYTHON2 ONLY
-
 ### For the in development Python3 version, see [the PhiloLogic5 branch](https://github.com/ARTFL-Project/PhiloLogic4/tree/PhiloLogic5)
 
 PhiloLogic is an XML database/search engine/web app that is designed
