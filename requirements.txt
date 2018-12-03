@@ -1,5 +1,0 @@
-#### Dependencies for PhiloLogic4 ####
-lxml
-simplejson
-python-levenshtein
-six
