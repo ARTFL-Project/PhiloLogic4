@@ -20,6 +20,7 @@ def get_all_words(db, request):
     for word_group in expanded_terms:
         normalized_group = []
         for word in word_group:
+            word = word.replace('"', "")
             word = "".join([i for i in unicodedata.normalize("NFKD", word) if not unicodedata.combining(i)])
             normalized_group.append(word)
         word_groups.append(normalized_group)
@@ -48,7 +49,7 @@ def find_similar_words(db, config, request):
                 for pos, query_group in enumerate(query_groups):
                     for query_word in query_group:
                         if ratio(query_word, normalized_word) >= float(request.approximate_ratio):
-                            new_query_groups[pos].add(regular_word)
+                            new_query_groups[pos].add(f'"{regular_word}"')
             except ValueError:
                 pass
     new_query_groups = " ".join([" | ".join(group) for group in new_query_groups])
