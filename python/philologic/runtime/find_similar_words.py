@@ -12,7 +12,7 @@ from Levenshtein import ratio
 
 def get_all_words(db, request):
     """Expand query to all search terms."""
-    words = request["q"].replace('"', '')
+    words = request["q"].replace('"', "")
     hits = db.query(words)
     hits.finish()
     expanded_terms = get_expanded_query(hits)
@@ -20,16 +20,20 @@ def get_all_words(db, request):
     for word_group in expanded_terms:
         normalized_group = []
         for word in word_group:
-            word = u''.join([i for i in unicodedata.normalize("NFKD", word.decode('utf8')) if not unicodedata.combining(i)]).encode("utf-8")
+            word = word.replace('"', "")
+            word = u"".join(
+                [i for i in unicodedata.normalize("NFKD", word.decode("utf8")) if not unicodedata.combining(i)]
+            ).encode("utf-8")
             normalized_group.append(word)
         word_groups.append(normalized_group)
     return word_groups
+
 
 def find_similar_words(db, config, request):
     """Edit distance function."""
     # Check if lookup is cached
     hashed_query = hashlib.sha256()
-    hashed_query.update(request['q'])
+    hashed_query.update(request["q"])
     hashed_query.update(str(request.approximate_ratio))
     approximate_filename = os.path.join(config.db_path, "data/hitlists/%s.approximate_terms" % hashed_query.hexdigest())
     if os.path.isfile(approximate_filename):
@@ -43,14 +47,14 @@ def find_similar_words(db, config, request):
         for line in fh:
             line = line.strip()
             try:
-                normalized_word, regular_word = line.split('\t')
+                normalized_word, regular_word = line.split("\t")
                 for pos, query_group in enumerate(query_groups):
-                    for query_word in query_group:
-                        if ratio(query_word, normalized_word) >= float(request.approximate_ratio):
-                            new_query_groups[pos].add(regular_word)
+                    for norm_query_word in query_group:
+                        if ratio(norm_query_word, normalized_word) >= float(request.approximate_ratio):
+                            new_query_groups[pos].add('"{}"'.format(regular_word))
             except ValueError:
                 pass
-    new_query_groups = ' '.join([" | ".join(group) for group in new_query_groups])
+    new_query_groups = " ".join([" | ".join(group) for group in new_query_groups])
     cached_file = open(approximate_filename, "w")
     cached_file.write(new_query_groups)
     return new_query_groups

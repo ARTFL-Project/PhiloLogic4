@@ -13,7 +13,7 @@ from philologic.runtime.link import make_absolute_query_link
 from philologic.utils import convert_entities
 
 begin_match = re.compile(r'^[^<]*?>')
-start_cutoff_match = re.compile(r'^[^ <]+')
+start_cutoff_match = re.compile(r'^[^ |\n<]+')
 end_match = re.compile(r'<[^>]*?\Z')
 space_match = re.compile(r" ?([-'])+ ")
 term_match = re.compile(r"\w+", re.U)
@@ -90,6 +90,7 @@ def format_concordance(text, word_regex, bytes=[]):
     end = end_match.search(text)
     if end:
         text = text[:end.start(0)]
+
     if bytes:
         bytes = [b - removed_from_start for b in bytes]
         new_text = ""
