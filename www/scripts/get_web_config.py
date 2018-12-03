@@ -13,7 +13,7 @@ except ImportError:
      from philologic.runtime import WebConfig
 
 from philologic.Config import MakeDBConfig
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 
 
 def get_web_config(environ, start_response):

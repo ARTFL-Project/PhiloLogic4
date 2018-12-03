@@ -7,8 +7,8 @@ import hashlib
 import urllib.parse
 
 from philologic.runtime.find_similar_words import find_similar_words
-from philologic.runtime.query_parser import parse_query
-from philologic.DB import DB
+from philologic.runtime.Query import query_parse
+from philologic.runtime.DB import DB
 
 
 class WSGIHandler(object):
@@ -122,7 +122,7 @@ class WSGIHandler(object):
                 self.approximate_ratio = 1
 
         if "q" in self.cgi:
-            self.cgi["q"][0] = parse_query(self.cgi["q"][0], config)
+            self.cgi["q"][0] = query_parse(self.cgi["q"][0], config)
             if self.approximate == "yes":
                 self.cgi["original_q"] = self.cgi["q"][:]
                 self.cgi["q"][0] = find_similar_words(db, config, self)

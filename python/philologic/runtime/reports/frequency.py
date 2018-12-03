@@ -4,7 +4,7 @@
 import timeit
 
 from philologic.runtime.link import make_absolute_query_link
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 
 
 def frequency_results(request, config, sorted_results=False):

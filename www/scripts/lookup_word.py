@@ -6,7 +6,7 @@ import sqlite3
 import sys
 from wsgiref.handlers import CGIHandler
 
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 from philologic.runtime import adjust_bytes
 
 import sys

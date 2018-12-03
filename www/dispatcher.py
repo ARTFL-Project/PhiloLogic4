@@ -4,6 +4,7 @@
 
 import datetime
 import os
+from asyncio import get_event_loop
 from cgi import FieldStorage
 from random import randint
 from glob import glob
@@ -19,7 +20,8 @@ path = os.path.abspath(os.path.dirname(__file__))
 
 def philo_dispatcher(environ, start_response):
     """Dispatcher function."""
-    clean_up()
+    loop = get_event_loop()
+    clean_task = loop.create_task(clean_up())
     config = WebConfig(path)
     request = WSGIHandler(environ, config)
     response = ""
@@ -39,6 +41,7 @@ def philo_dispatcher(environ, start_response):
     else:
         response = angular(environ, start_response)
     yield response.encode("utf8")
+    loop.run_until_complete(clean_task)
 
 
 async def clean_up():

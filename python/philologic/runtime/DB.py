@@ -1,10 +1,9 @@
-
 import hashlib
 import os
 import sqlite3
-from .Config import Config, db_locals_defaults, db_locals_header
+from philologic.Config import Config, db_locals_defaults, db_locals_header
 
-from philologic import Query
+from philologic.runtime import Query
 
 from . import HitList
 from . import MetadataQuery

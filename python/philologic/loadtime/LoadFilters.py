@@ -8,7 +8,7 @@ import unicodedata
 from json import dumps, loads
 from subprocess import PIPE, Popen
 
-from philologic.OHCOVector import Record
+from philologic.loadtime.OHCOVector import Record
 
 
 # Default filters

@@ -6,7 +6,7 @@ import hashlib
 import os
 import unicodedata
 
-from philologic.Query import get_expanded_query
+from philologic.runtime.Query import get_expanded_query
 from Levenshtein import ratio
 
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Table of contents"""
 
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 from philologic.runtime.link import make_absolute_object_link
-from philologic import HitWrapper
+from philologic.runtime import HitWrapper
 from philologic.runtime.citations import citations, citation_links
 
 

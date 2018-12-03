@@ -4,7 +4,7 @@ import imp
 import os
 from urllib.parse import quote_plus
 
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 from philologic.Config import MakeWebConfig
 
 

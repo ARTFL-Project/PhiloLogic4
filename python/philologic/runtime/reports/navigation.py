@@ -5,7 +5,7 @@ import re
 
 from philologic.runtime.citations import citation_links, citations
 from philologic.runtime.get_text import get_text_obj
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 
 
 def generate_text_object(request, config, note=False):

@@ -5,8 +5,8 @@ import os
 import re
 
 from lxml import etree
-from philologic.DB import DB
-from philologic.HitWrapper import ObjectWrapper
+from philologic.runtime.DB import DB
+from philologic.runtime.HitWrapper import ObjectWrapper
 
 from .ObjectFormatter import adjust_bytes, format_concordance, format_text_object
 

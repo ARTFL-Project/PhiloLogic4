@@ -4,7 +4,7 @@ import json
 import os
 from wsgiref.handlers import CGIHandler
 
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 
 import sys
 sys.path.append("..")

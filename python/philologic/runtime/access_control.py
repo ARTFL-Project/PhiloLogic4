@@ -10,7 +10,7 @@ import sys
 import time
 from urllib.parse import unquote
 
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 
 # These should always be allowed for local access
 local_blocks = ["10.0.0.", "172.16.0.", "192.168.0.", "127.0.0."]

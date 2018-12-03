@@ -4,7 +4,7 @@ import os
 from wsgiref.handlers import CGIHandler
 
 import json
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 from philologic.runtime import access_control, login_access
 
 import sys

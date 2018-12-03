@@ -6,7 +6,7 @@ import re
 import string
 import sys
 
-from philologic import OHCOVector
+from philologic.loadtime import OHCOVector
 from philologic.utils import convert_entities
 
 DEFAULT_TAG_TO_OBJ_MAP = {

@@ -5,7 +5,7 @@ Currently unmaintained."""
 import timeit
 
 from philologic.runtime.link import make_absolute_query_link
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 
 
 def generate_word_frequency(request, config):

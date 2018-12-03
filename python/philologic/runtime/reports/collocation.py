@@ -4,8 +4,8 @@
 import os
 from collections import defaultdict
 import timeit
-from philologic.DB import DB
-from philologic.Query import get_expanded_query
+from philologic.runtime.DB import DB
+from philologic.runtime.Query import get_expanded_query
 
 
 def collocation_results(request, config):

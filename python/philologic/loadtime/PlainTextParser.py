@@ -1,10 +1,8 @@
-
-
 import sys
 import os
 import re
 import io
-from philologic import OHCOVector
+from philologic.loadtime import OHCOVector
 
 
 class PlainTextParser(object):
@@ -42,7 +40,6 @@ class PlainTextParser(object):
 
     def parse(self, input):
         """Top level function for reading a file and printing out the output."""
-        # print >> sys.stderr, "SingleParser parsing"
         self.input = input
         content = input.read().decode("utf-8")
         buffer_pos = 0

@@ -16,7 +16,7 @@ from glob import glob
 
 from lxml import etree
 from philologic.Config import MakeDBConfig, MakeWebConfig
-from philologic.PostFilters import make_sql_table
+from philologic.loadtime.PostFilters import make_sql_table
 from philologic.utils import convert_entities, pretty_print, sort_list
 from multiprocess import Pool
 

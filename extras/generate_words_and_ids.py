@@ -5,7 +5,7 @@ import json
 import os
 import sys
 
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 
 
 def main(db_path):

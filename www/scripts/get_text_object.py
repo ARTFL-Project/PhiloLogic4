@@ -4,38 +4,39 @@ import json
 import os
 from wsgiref.handlers import CGIHandler
 
-from philologic.DB import DB
-from philologic.HitWrapper import ObjectWrapper
+from philologic.runtime.DB import DB
+from philologic.runtime.HitWrapper import ObjectWrapper
 from philologic.runtime import generate_text_object
 
 import sys
+
 sys.path.append("..")
 import custom_functions
+
 try:
-     from custom_functions import WebConfig
+    from custom_functions import WebConfig
 except ImportError:
-     from philologic.runtime import WebConfig
+    from philologic.runtime import WebConfig
 try:
-     from custom_functions import WSGIHandler
+    from custom_functions import WSGIHandler
 except ImportError:
-     from philologic.runtime import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 
 def get_text_object(environ, start_response):
-    status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),
-               ("Access-Control-Allow-Origin", "*")]
+    status = "200 OK"
+    headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
-    db = DB(config.db_path + '/data/')
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("scripts", ""))
+    db = DB(config.db_path + "/data/")
     request = WSGIHandler(environ, config)
     path = config.db_path
     zeros = 7 - len(request.philo_id)
     if zeros:
         request.philo_id += zeros * " 0"
-    obj = ObjectWrapper(request['philo_id'].split(), db)
+    obj = ObjectWrapper(request["philo_id"].split(), db)
     text_object = generate_text_object(request, config)
-    yield json.dumps(text_object).encode('utf8')
+    yield json.dumps(text_object).encode("utf8")
 
 
 if __name__ == "__main__":

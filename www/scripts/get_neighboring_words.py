@@ -6,7 +6,7 @@ import string
 import timeit
 from wsgiref.handlers import CGIHandler
 
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 from philologic.runtime import kwic_hit_object
 
 import sys

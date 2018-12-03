@@ -3,12 +3,13 @@
 
 import os
 import subprocess
+import re
 import sys
 import unicodedata
 from datetime import datetime
 
-from philologic import HitList
-from philologic.QuerySyntax import group_terms, parse_query
+from philologic.runtime import HitList
+from philologic.runtime.QuerySyntax import group_terms, parse_query
 
 # Work around issue where environ PATH does not contain path to C core
 os.environ["PATH"] += ":/usr/local/bin/"
@@ -231,6 +232,13 @@ def invert_grep_exact(token, in_fh, dest_fh):
         )
     # can't wait because input isn't ready yet.
     return grep_proc
+
+
+def query_parse(query_terms, config):
+    """Parse query function."""
+    for pattern, replacement in config.query_parser_regex:
+        query_terms = re.sub(r"{}".format(pattern), replacement, query_terms, re.U)
+    return query_terms
 
 
 if __name__ == "__main__":

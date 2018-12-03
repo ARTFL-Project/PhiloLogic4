@@ -6,8 +6,8 @@ import re
 from philologic.runtime.pages import page_interval
 from philologic.runtime.citations import citations, citation_links
 from philologic.runtime.get_text import get_concordance_text
-from philologic.DB import DB
-from philologic.HitList import CombinedHitlist
+from philologic.runtime.DB import DB
+from philologic.runtime.HitList import CombinedHitlist
 
 
 def concordance_results(request, config):

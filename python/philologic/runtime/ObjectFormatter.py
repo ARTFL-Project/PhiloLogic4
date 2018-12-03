@@ -7,7 +7,7 @@ import re
 import sqlite3
 
 from lxml import etree
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 from philologic.runtime.FragmentParser import parse as FragmentParserParse
 from philologic.runtime.link import make_absolute_query_link
 from philologic.utils import convert_entities

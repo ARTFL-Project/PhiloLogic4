@@ -7,7 +7,7 @@ import sys
 from glob import glob
 from optparse import OptionParser
 
-from philologic import Loader, LoadFilters, PostFilters, Parser, PlainTextParser
+from philologic.loadtime import Loader, LoadFilters, PostFilters, Parser, PlainTextParser
 from philologic.utils import pretty_print
 import collections
 

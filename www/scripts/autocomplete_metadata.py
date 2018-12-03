@@ -8,22 +8,22 @@ import sys
 import unicodedata
 from wsgiref.handlers import CGIHandler
 
-from philologic.DB import DB
-from philologic.MetadataQuery import metadata_pattern_search
-from philologic.QuerySyntax import parse_query
+from philologic.runtime.DB import DB
+from philologic.runtime.MetadataQuery import metadata_pattern_search
+from philologic.runtime.QuerySyntax import parse_query
 from philologic.runtime import access_control, login_access
 
 import custom_functions
 
 sys.path.append("..")
 try:
-     from custom_functions import WebConfig
+    from custom_functions import WebConfig
 except ImportError:
-     from philologic.runtime import WebConfig
+    from philologic.runtime import WebConfig
 try:
-     from custom_functions import WSGIHandler
+    from custom_functions import WSGIHandler
 except ImportError:
-     from philologic.runtime import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 environ = os.environ
 environ["PATH"] += ":/usr/local/bin/"
@@ -31,21 +31,20 @@ environ["LANG"] = "C"
 
 
 def metadata_list(environ, start_response):
-    status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'),
-               ("Access-Control-Allow-Origin", "*")]
+    status = "200 OK"
+    headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
-    db = DB(config.db_path + '/data/')
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("scripts", ""))
+    db = DB(config.db_path + "/data/")
     request = WSGIHandler(environ, config)
     metadata = request.term
     field = request.field
-    yield autocomplete_metadata(metadata, field, db).encode('utf8')
+    yield autocomplete_metadata(metadata, field, db).encode("utf8")
+
 
 def autocomplete_metadata(metadata, field, db):
-    path = os.environ['SCRIPT_FILENAME'].replace('scripts/metadata_list.py',
-                                                 '')
-    path += 'data/frequencies/%s_frequencies' % field
+    path = os.environ["SCRIPT_FILENAME"].replace("scripts/metadata_list.py", "")
+    path += "data/frequencies/%s_frequencies" % field
 
     ## Workaround for when jquery sends a list of words: this happens when using the back button
     if isinstance(metadata, list):
@@ -66,32 +65,28 @@ def format_query(q, field, db):
             if t[-1] != '"':
                 t += '"'
             subtokens = t[1:-1].split("|")
-            parsed_split += [("QUOTE_S", sub_t) for sub_t in subtokens
-                             if sub_t]
+            parsed_split += [("QUOTE_S", sub_t) for sub_t in subtokens if sub_t]
         elif l == "RANGE":
             parsed_split += [("TERM", t)]
         else:
             parsed_split += [(l, t)]
     output_string = []
     label, token = parsed_split[-1]
-    prefix = " ".join('"' + t[1] + '"' if t[0] == "QUOTE_S" else t[1]
-                      for t in parsed_split[:-1])
+    prefix = " ".join('"' + t[1] + '"' if t[0] == "QUOTE_S" else t[1] for t in parsed_split[:-1])
     if prefix:
         prefix = prefix + " CUTHERE "
     expanded = []
     if label == "QUOTE_S" or label == "TERM":
         norm_tok = token.lower()
-        norm_tok = [i
-                    for i in unicodedata.normalize("NFKD", norm_tok)
-                    if not unicodedata.combining(i)]
+        norm_tok = [i for i in unicodedata.normalize("NFKD", norm_tok) if not unicodedata.combining(i)]
         norm_tok = "".join(norm_tok).encode("utf-8")
         matches = metadata_pattern_search(
-            norm_tok, db.locals.db_path +
-            "/data/frequencies/normalized_%s_frequencies" % field)
+            norm_tok, db.locals.db_path + "/data/frequencies/normalized_%s_frequencies" % field
+        )
         substr_token = token.lower()
         exact_matches = exact_word_pattern_search(
-            substr_token + '.*',
-            db.locals.db_path + "/data/frequencies/%s_frequencies" % field)
+            substr_token + ".*", db.locals.db_path + "/data/frequencies/%s_frequencies" % field
+        )
         for m in exact_matches:
             if m not in matches:
                 matches.append(m)
@@ -100,20 +95,18 @@ def format_query(q, field, db):
             if label == "QUOTE_S":
                 output_string.append(prefix + '"%s"' % m)
             else:
-                if re.search('\|', m):
+                if re.search("\|", m):
                     m = '"' + m + '"'
                 output_string.append(prefix + m)
     return output_string
 
 
 def exact_word_pattern_search(term, path):
-    command = ['egrep', '-awie', "[[:blank:]]?" + term, path]
+    command = ["egrep", "-awie", "[[:blank:]]?" + term, path]
     grep = subprocess.Popen(command, stdout=subprocess.PIPE, env=environ)
-    cut = subprocess.Popen(["cut", "-f", "1"],
-                           stdin=grep.stdout,
-                           stdout=subprocess.PIPE)
+    cut = subprocess.Popen(["cut", "-f", "1"], stdin=grep.stdout, stdout=subprocess.PIPE)
     match, _ = cut.communicate()
-    matches = [i.decode('utf8') for i in match.split(b'\n') if i]
+    matches = [i.decode("utf8") for i in match.split(b"\n") if i]
     return matches
 
 
@@ -123,7 +116,7 @@ def highlighter(words, norm_tok, substr_tok):
     for word in words:
         highlighted_section = word[:token_len]
         end_word = word[token_len:]
-        highlighted_word = '<span class="highlight">' + highlighted_section + '</span>' + end_word
+        highlighted_word = '<span class="highlight">' + highlighted_section + "</span>" + end_word
         new_list.append(highlighted_word)
     return new_list
 

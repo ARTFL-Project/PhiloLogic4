@@ -5,7 +5,7 @@ from philologic.runtime.find_similar_words import find_similar_words
 from philologic.runtime.FragmentParser import FragmentParser
 from philologic.runtime.get_text import get_concordance_text, get_tei_header
 from philologic.runtime.pages import page_interval
-from philologic.runtime.query_parser import parse_query
+from philologic.runtime.Query import parse_query
 from philologic.runtime.reports import (
     bibliography_results,
     collocation_results,
@@ -24,4 +24,4 @@ from philologic.runtime.reports import (
     landing_page_bibliography,
 )
 from philologic.runtime.web_config import WebConfig
-from philologic.runtime.wsgi_handler import WSGIHandler
+from philologic.runtime.WSGIHandler import WSGIHandler
