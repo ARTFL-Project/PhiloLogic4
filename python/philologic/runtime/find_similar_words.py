@@ -16,17 +16,19 @@ def get_all_words(db, request):
     hits = db.query(words)
     hits.finish()
     expanded_terms = get_expanded_query(hits)
-    word_groups = []
-    for word_group in expanded_terms:
-        normalized_group = []
-        for word in word_group:
-            word = word.replace('"', "")
-            word = u"".join(
-                [i for i in unicodedata.normalize("NFKD", word.decode("utf8")) if not unicodedata.combining(i)]
-            ).encode("utf-8")
-            normalized_group.append(word)
-        word_groups.append(normalized_group)
-    return word_groups
+    if expanded_terms:
+        word_groups = []
+        for word_group in expanded_terms:
+            normalized_group = []
+            for word in word_group:
+                word = word.replace('"', "")
+                word = u"".join([i for i in unicodedata.normalize("NFKD", word.decode("utf8")) if not unicodedata.combining(i)]).encode(
+                    "utf-8"
+                )
+                normalized_group.append(word)
+            word_groups.append(normalized_group)
+        return word_groups
+    return [words.split()]
 
 
 def find_similar_words(db, config, request):
