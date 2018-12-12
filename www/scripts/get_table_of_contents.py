@@ -4,13 +4,16 @@ import os
 from wsgiref.handlers import CGIHandler
 
 import simplejson
-from philologic.runtime import generate_toc_object
 from philologic.DB import DB
 from philologic.HitWrapper import ObjectWrapper
 
 import sys
 sys.path.append("..")
 import custom_functions
+try:
+    from custom_functions import generate_toc_object
+except ImportError:
+    from philologic.runtime import generate_toc_object
 try:
      from custom_functions import WebConfig
 except ImportError:
@@ -29,10 +32,6 @@ def get_table_of_contents(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     request = WSGIHandler(environ, config)
     philo_id = request['philo_id'].split()
-    # obj = ObjectWrapper(philo_id, db)
-    # while obj.philo_name == '__philo_virtual' and obj.philo_type != "div1":
-    #     philo_id.pop()
-    #     obj = ObjectWrapper(philo_id, db)
     toc_object = generate_toc_object(request, config)
     current_obj_position = 0
     philo_id = ' '.join(philo_id)
