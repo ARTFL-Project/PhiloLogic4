@@ -19,6 +19,7 @@ SPACE_MATCH = re.compile(r" ?([-'])+ ")
 TERM_MATCH = re.compile(r"\w+")
 STRIP_START_PUNCTUATION = re.compile(r"^[,?;.:!']")
 
+
 # Source: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/HTML5_element_list
 VALID_HTML_TAGS = set(
     [
