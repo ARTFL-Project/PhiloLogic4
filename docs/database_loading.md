@@ -1,10 +1,10 @@
 Database Loading
 ================
 
-Loading PhiloLogic databases is very straight forward, and most of the time, you shouldn't need to specify any specialized load option. 
+Loading PhiloLogic databases is very straight forward, and most of the time, you shouldn't need to specify any specialized load option.
 
 A few important notes:
-* Before loading any databases, you should first make sure the global configuration file located in `/etc/philologic/philologic4.cfg has been edited appropriately. For more info, see [here](installation.md#global-config)
+* Before loading any databases, you should first make sure the global configuration file located in `/etc/philologic/philologic5.cfg` has been edited appropriately. For more info, see [here](installation.md#global-config)
 * The PhiloLogic4 Parser's behavior is configurable from an external load config file, though only to a certain extent. You can also supply a replacement Parser class if you need to.
 * The loading process is designed to be short, and easy to understand and configure.
 
@@ -12,7 +12,7 @@ A few important notes:
 
 In order for PhiloLogic to index your files, you need to execute the `philoload4` command. The basic command is run as so:
 
-`philoload4 [database_name] [path_to_files]``
+`philoload4 [database_name] [path_to_files]`
 
 The `philoload4` command requires the following required arguments::
 
@@ -24,23 +24,23 @@ The `philoload4` command requires the following required arguments::
 `philoload4` also accepts a number of optional command line arguments::
 
   `-h`, `--help`        show this help message and exit
-  
+
   `-a WEB_APP_DIR`, `--app_dir=WEB_APP_DIR`     Define custom location for the web app directory
-                        
+
   `-b BIBLIOGRAPHY`, `--bibliography=BIBLIOGRAPHY`      Defines a file containing the document-level bibliography of the texts
-                        
+
   `-c CORES`, `--cores=CORES`       define the number of cores used for parsing
-                        
+
   `-d`, `--debug`           add debugging at parse time
-  
+
   `-f`, `--force_delete`    overwrite database without confirmation
-  
+
   `-F`, `--file-list`       Defines whether the file argument is a file containing fullpaths to the files to load
-                        
+
   `-H HEADER`, `--header=HEADER`        define header type (tei or dc) of files to parse
-                        
+
   `-l LOAD_CONFIG`, `--load_config=LOAD_CONFIG`     load external config for specialized load
-                        
+
   `-t FILE_TYPE`, `--file-type=FILE_TYPE`       Define file type for parsing: plain_text or xml
 
 So our command for loading texts could be::
@@ -340,7 +340,7 @@ The basic layout is this:
 
 `suppress_tags` is a list of tags in which you do not want to perform tokenization at all--that is, no words in them will be searchable via full-text search.  It does not prohibit extracting metadata from the content of those tags.
 
-`token_regex` is a regular expression used to drive our tokenizer. 
+`token_regex` is a regular expression used to drive our tokenizer.
 
 `words_to_index` is a file containing all words that should be indexed. You'd want to define this in the event you're dealing with dirty OCR and would end up with way too many unique words, which would blow up the index, or just kill search performance. Leaving this empty means that all words will be indexed.
 

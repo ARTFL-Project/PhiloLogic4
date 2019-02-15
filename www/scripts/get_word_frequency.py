@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+import json
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
 from philologic.runtime import concordance_results
 
 import sys
@@ -27,7 +27,7 @@ def get_frequency(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     request = WSGIHandler(environ, config)
     word_frequency_object = generate_word_frequency(request, config)
-    yield simplesimplejson.dumps(word_frequency_object)
+    yield json.dumps(word_frequency_object).encode('utf8')
 
 
 if __name__ == "__main__":

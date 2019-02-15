@@ -1,14 +1,11 @@
-#!/usr/bin/env python
-
-from __future__ import absolute_import
+#!/usr/bin/env python3
 
 import imp
 import os
-from urllib import quote_plus
+from urllib.parse import quote_plus
 
-import six
+from philologic.runtime.DB import DB
 from philologic.Config import MakeWebConfig
-from philologic.DB import DB
 
 
 def url_encode(q_params):
@@ -18,15 +15,12 @@ def url_encode(q_params):
         if v:
             if isinstance(v, list):
                 for s in v:
-                    encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(s, safe='/'))
+                    encoded_str.append(quote_plus(k, safe="/") + "=" + quote_plus(s, safe="/"))
             else:
-                try:
-                    encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(v, safe='/'))
-                except KeyError:
-                    encoded_str.append(quote_plus(k, safe='/') + '=' + quote_plus(v.encode('utf8'), safe='/'))
+                encoded_str.append(quote_plus(k, safe="/") + "=" + quote_plus(v, safe="/"))
         else:  # Value is None
-            encoded_str.append(quote_plus(k, safe='/') + '=' + '')
-    return '&'.join(encoded_str)
+            encoded_str.append(quote_plus(k, safe="/") + "=" + "")
+    return "&".join(encoded_str)
 
 
 def make_object_link(philo_id, hit_bytes):
@@ -35,11 +29,11 @@ def make_object_link(philo_id, hit_bytes):
     return href
 
 
-def make_absolute_object_link(config, philo_id, bytes=None):
+def make_absolute_object_link(config, philo_id, byte_offsets=None):
     """ Takes a valid PhiloLogic object, and returns an absolute URL representation of such. """
-    href = 'navigate/' + "/".join(str(x) for x in philo_id)
-    if bytes is not None:
-        href += byte_query(bytes)
+    href = "navigate/" + "/".join(str(x) for x in philo_id)
+    if byte_offsets is not None:
+        href += byte_query(byte_offsets)
     return href
 
 
@@ -47,7 +41,7 @@ def make_absolute_query_link(config, params, script_name="query", **extra_params
     """ Takes a dictionary of query parameters as produced by WSGIHandler,
     and returns an absolute URL representation of such. """
     params = dict([i for i in params])
-    for k, v in six.iteritems(extra_params):
+    for k, v in extra_params.items():
         params[k] = v
     query_string = url_encode(list(params.items()))
     href = "%s?%s" % (script_name, query_string)
@@ -56,7 +50,7 @@ def make_absolute_query_link(config, params, script_name="query", **extra_params
 
 def byte_query(hit_bytes):
     """This is used for navigating concordance results and highlighting hits"""
-    return '?' + '&'.join(['byte=%d' % int(byte) for byte in hit_bytes])
+    return "?" + "&".join(["byte=%d" % int(byte) for byte in hit_bytes])
 
 
 def make_byte_range_link(config, philo_id, start_byte, end_byte):
@@ -66,13 +60,14 @@ def make_byte_range_link(config, philo_id, start_byte, end_byte):
     return href
 
 
-def byte_range_to_link(db, config, request, obj_level='div1'):
+def byte_range_to_link(db, config, request, obj_level="div1"):
     """Find container objects for given byte range and doc id and return links"""
     cursor = db.dbh.cursor()
     cursor.execute("SELECT philo_id FROM toms WHERE filename=?", (request.filename,))
     doc_id = cursor.fetchone()[0].split()[0]
-    cursor.execute("SELECT rowid, philo_id FROM toms WHERE philo_type='{}' \
-                    AND philo_id like '{} %' AND start_byte <= {} ORDER BY rowid desc".format(obj_level, doc_id, request.start_byte))
+    cursor.execute(
+        f"SELECT rowid, philo_id FROM toms WHERE philo_type='{obj_level}' AND philo_id like '{doc_id} %' AND start_byte <= {request.start_byte} ORDER BY rowid desc"
+    )
     rowid, philo_id = cursor.fetchone()
     philo_id = philo_id.split()
     while int(philo_id[-1]) == 0:

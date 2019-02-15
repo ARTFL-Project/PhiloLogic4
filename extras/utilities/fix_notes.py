@@ -14,7 +14,7 @@ for file in sys.argv[1:]:
     if isdir(file):
         continue
     fd = open(file)
-    print >> sys.stderr, "reading ", file
+    print("reading ", file, file=sys.stderr)
     text_string = fd.read()
     root = etree.fromstring(text_string)    
     for el in root.getiterator():
@@ -59,8 +59,8 @@ for file in sys.argv[1:]:
         root[-1].append(note_div)
     os.system('mkdir -p %s/fixed_notes' % dirname(file))
     new_file = '%s/fixed_notes/%s' % (dirname(file), basename(file))
-    print note_count + notes_skipped, "notes found...", notes_skipped, "skipped..."
-    print >> sys.stderr, "writing ", new_file, '\n'
+    print(note_count + notes_skipped, "notes found...", notes_skipped, "skipped...")
+    print("writing ", new_file, '\n', file=sys.stderr)
     new_fd = open(new_file,"w")
     new_fd.write("<?xml version='1.0' encoding='utf-8'?>")
     tree = etree.ElementTree(root)

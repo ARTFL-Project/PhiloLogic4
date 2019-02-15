@@ -1,23 +1,20 @@
 # $Id: Makefile.in,v 2.11 2004/05/28 19:22:06 o Exp $
-LDFLAGS= 
+LDFLAGS=
 CFLAGS= -O3
-CPPFLAGS= 
-LDFLAGS= 
-PH_CFLAGS= -I./unpack -D_REENTRANT -fomit-frame-pointer -funroll-all-loops -finline-functions
+CPPFLAGS=
+LDFLAGS=
+PH_CFLAGS= -I./unpack -D_REENTRANT -fomit-frame-pointer -finline-functions
 CC= gcc
-PH_BUILDENV = 
-PH_LDSEARCHFLAGS = 
+PH_BUILDENV =
+PH_LDSEARCHFLAGS =
 
-all: 	db/corpus_search db/pack4
+all: 	search5 db/pack5
 
-db/pack4: db/pack.c db/pack.h db/db.c db/db.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o db/pack4 db/pack.c db/db.c -lgdbm
+db/pack5: db/pack.c db/pack.h db/db.c db/db.h
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o db/pack5 db/pack.c db/db.c -lgdbm
 
-db/corpus_search: db/corpus_search.c db/db.o db/unpack.o db/bitsvector.o
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o db/corpus_search db/corpus_search.c db/db.o db/unpack.o db/bitsvector.o -lgdbm -lm
-
-search4: search4.c search.o retreive.o gmap.o word.o blockmap.o level.o out.o plugin/libindex.a db/db.o db/bitsvector.o db/unpack.o
-	$(PH_BUILDENV) $(CC) $(CFLAGS) $(CPPFLAGS) $(PH_CFLAGS) $(LDFLAGS) $(PH_LDSEARCHFLAGS) search4.c search.o retreive.o gmap.o word.o blockmap.o level.o out.o db/db.o db/bitsvector.o db/unpack.o plugin/libindex.a -lgdbm -o search4
+search5: search4.c search.o retreive.o gmap.o word.o blockmap.o level.o out.o plugin/libindex.a db/db.o db/bitsvector.o db/unpack.o
+	$(PH_BUILDENV) $(CC) $(CFLAGS) $(CPPFLAGS) $(PH_CFLAGS) $(LDFLAGS) $(PH_LDSEARCHFLAGS) search4.c search.o retreive.o gmap.o word.o blockmap.o level.o out.o db/db.o db/bitsvector.o db/unpack.o plugin/libindex.a -lgdbm -o search5
 
 libphilo.dylib: search.o word.o retreive.o level.o gmap.o blockmap.o log.h out.o plugin/libindex.a db/db.o db/bitsvector.o db/unpack.o
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -dynamiclib -std=gnu99 search.o word.o retreive.o level.o gmap.o blockmap.o out.o plugin/libindex.a db/db.o db/bitsvector.o db/unpack.o -lgdbm -o libphilo.dylib
@@ -80,9 +77,9 @@ out.o:		out.h out.c
 log.o:		log.h log.c
 
 install:	all
-	/usr/bin/install -c db/corpus_search ${exec_prefix}/bin
-	/usr/bin/install -c db/pack4 ${exec_prefix}/bin
-clean: 
-	rm -f *.o *~ db/search4 db/pack4
+	/usr/bin/install -c search5 ${exec_prefix}/bin
+	/usr/bin/install -c db/pack5 ${exec_prefix}/bin
+clean:
+	rm -f *.o *~ search5 db/pack5
 	(cd plugin; make clean)
 	(cd db; make clean)

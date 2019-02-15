@@ -129,7 +129,7 @@ Z32 h2m_cmp_phrase ( Z32 *a, Z32 *b, hitdef *hit_def, Z32 level )
     if the 2 words are not even in the same sentence, then
     they are surely not in the same phrase: 
    */
-  if ( res = h2h_cmp_phrase_sent ( a, b, hit_def, level ) )
+  if ( (res = h2h_cmp_phrase_sent ( a, b, hit_def, level )) )
     return res; 
 
   /* let's figure out the location of the word on the map: */

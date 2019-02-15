@@ -1,0 +1,298 @@
+// $Id: unpack.c,v 2.10 2004/05/28 19:22:04 o Exp $
+// philologic 2.8 -- TEI XML/SGML Full-text database engine
+// Copyright (C) 2004 University of Chicago
+// 
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the Affero General Public License as published by
+// Affero, Inc.; either version 1 of the License, or (at your option)
+// any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// Affero General Public License for more details.
+// 
+// You should have received a copy of the Affero General Public License
+// along with this program; if not, write to Affero, Inc.,
+// 510 Third Street, Suite 225, San Francisco, CA 94107 USA.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <gdbm.h>
+#include <fcntl.h>
+
+#include "../c.h"
+#include "unpack.h"
+#include "getresource.h"
+#include "bitsvector.h"
+
+
+#define  HIT_SIZE 	sizeof (hit)
+
+
+N8 bitlens[] = BITLENGTHS;
+N8 negs[] = NEGATIVES;
+
+/*******************************GLOBALS***************************************/
+
+#define TYP2FILE  "index.1"	         /* Concordance file */   
+#define GDBMINDEX "index"                /* main gdbm index  */
+
+static FILE *fp1, *fp2;
+ 
+static FILE *indir_fp, *stops_fp;        /* cached FPs for TYP2FILE */
+ 
+static    int    initialized=0;          /* 1->gdbm file is already opened */
+                                         /* used for building trees */
+static int debug = 0;                    /* debugging mode flag */
+
+
+static GDBM_FILE gdbmfile;
+static datum  key,val;
+ 
+Bitsvector v;
+
+void gdb_initial() {   /* opens gdbm file */
+	if((gdbmfile = gdbm_open (getresource(resourcetype_filename, GDBMINDEX),
+							  0,
+							  GDBM_READER, 
+							  0, 
+							  0
+							 )) == NULL ) {
+		fprintf(stderr,"Can't open dbm file!\n");
+        exit(1);
+    }
+}
+
+
+hit  *lookup ( key_word, type_num, freq, blkcount, offset )
+
+Z8    *key_word;
+Z32   *type_num;    
+Z32   *freq;            /* Total frequency */
+Z32   *blkcount;        /* Total number of blocks of info for this word */
+N64   *offset;          /* Offset in the first block; naturally, we have */
+ {                      /* offset zero in all consequent blocks. */
+
+
+/* 
+   since any access to this software must begin with a call to lookup,
+   I'll put some initialization here that applies to other modules 
+ */
+
+	if (!initialized) {
+		gdb_initial();
+		indir_fp = fopen( getresource(resourcetype_filename, TYP2FILE), "r" );
+ 	    if (indir_fp == NULL) {
+			fprintf (stderr, "problem opening TYP2FILE\n");
+		}
+        initialized=1;
+	    if ( NULL != getresource(resourcetype_variable,"INDEX_DEBUG") ) {
+		  debug = 1;
+        }
+	}
+    key.dptr=key_word;
+    key.dsize=strlen(key_word);    
+
+    *freq=0;
+    *offset=0;
+    *blkcount=0;
+
+    val = gdbm_fetch(gdbmfile,key);
+           
+    if(val.dptr==NULL){
+	    if (debug) fprintf (stderr, "NOTHING FOUND!\n");
+        return(NULL);
+    }
+
+    if (debug) fprintf (stderr, "dsize=%d\n", val.dsize);
+         
+    v = bitsvectorNew ((N8 *) val.dptr);
+
+    *type_num = bitsvectorGet (v, TYPE_LENGTH); 
+
+    if ( *type_num == 0 ) {
+        if (debug) fprintf (stderr, "this is a word of type 1 \n");
+        *freq = bitsvectorGet (v, FREQ1_LENGTH);
+		if (debug) fprintf (stderr, "frequency is %d\n", *freq);
+        return (unpack (v, *freq));
+    }
+    else if ( *type_num == 1 ){
+        if (debug) fprintf (stderr, "this is a word of type 2 \n");
+		return (directory (v, blkcount, freq, offset));
+    }
+    else return(NULL);
+
+}
+          
+
+
+hit   *directory ( v, blkcount, freq, offset )
+
+Bitsvector   v;
+Z32         *blkcount;
+Z32         *freq;
+N64         *offset;
+        
+  {
+
+     hit 	frst;
+     Z32	l;
+     N32	fixed_length=0;
+     
+
+     for ( l = 0; l < FIELDS; l++ ) fixed_length += bitlens[l];
+
+     *freq = bitsvectorGet (v, FREQ2_LENGTH);
+     if (debug) fprintf (stderr, "freq=%d\n", *freq);
+
+     *offset = bitsvectorGet (v, OFFST_LENGTH);	
+     if (debug) fprintf (stderr,"offset=%Lu\n", *offset);
+
+     *blkcount = (( val.dsize << 3 ) - bitsvectorTell (v) ) / fixed_length; 
+     if (debug) fprintf (stderr,"blkcount=%d\n", *blkcount);
+
+     return ( unpack (v, *blkcount));
+                      
+  }  
+
+
+hit *unpack ( v, count )
+
+Bitsvector	v;
+Z32		count;
+
+  {
+     hit *ret;
+     Z32 i,j;
+
+     ret = (hit  *) malloc ( count * HIT_SIZE );
+
+     for ( i = 0; i < count; i++ )
+       {
+         for ( j = 0; j < FIELDS; j++ ) 
+	   {
+	     ret [i].obj[j] = bitsvectorGet (v, bitlens[j]) - negs[j];
+	     if (debug) fprintf (stderr,"%d ", ret[i].obj[j]);
+           }
+
+	 if (debug) fprintf (stderr,"*\n");
+       }     
+
+     bitsvectorOld (v);
+
+     return (ret);
+  }
+
+
+
+hit   *gethits(type, first, offset,tablesize)
+     int type;
+     hit first;
+     N64 offset;
+     int *tablesize;
+{
+  N8   *buffer;
+  Bitsvector v;
+
+
+  fp2 = indir_fp;
+
+  buffer = (N8 *) malloc ( BLK_SIZE );
+
+  if ( fseeko (fp2, offset, 0) ) 
+    fprintf(stderr,"improper seek!\n");
+
+  fread (buffer, sizeof(N8), BLK_SIZE, fp2);
+
+  v = bitsvectorNew ( buffer );
+
+  return (decompress ( tablesize, first, v ));
+}
+
+
+
+hit   *decompress( cnt, first, v )
+     int  	      *cnt;
+     hit            first;
+     Bitsvector     v;
+{
+  
+  
+  hit       *retarray;
+  
+  Z32  index[FIELDS];
+  Z32  block_end_flag=0;
+  Z32  conc_counter;
+  
+
+  Z32  i, j;
+ 
+  Z32 p;
+               
+
+  p = 0;
+  conc_counter=0;
+  
+  retarray = (hit  *) malloc ( BLK_SIZE * HIT_SIZE );
+ 
+
+  for (i = 0; i < FIELDS; i++) 
+    {
+      retarray[0].obj[i] = first.obj[i];
+    }
+
+  conc_counter++;
+
+
+  while ( !block_end_flag )
+    {
+      for ( j = 0; j < FIELDS; j++ ) 
+	{
+	  index[j] = bitsvectorGet (v, bitlens[j]);
+	  if (debug) printf("mag=%d:val=%d ", bitlens[j], index[j]);
+	}
+
+      if (debug) fprintf (stderr,"\n");
+
+
+      block_end_flag++;
+
+      /*      if ( v->o <= BLK_SIZE ) */
+      if ( bitsvectorTell ( v ) <= BLK_SIZE << 3 )
+	{
+	  for ( j = 0; j < FIELDS; j++ )
+	    {
+	      if ( index[j] != (( 1 << bitlens[j] ) - 1 ))
+		block_end_flag = 0; 
+	    }
+	  
+	  if ( ! block_end_flag )
+	    {
+	      for ( j = 0; j < FIELDS; j++ )
+		retarray[conc_counter].obj[j] = index[j] - negs[j];
+	      conc_counter++;	  
+	    }
+	}
+
+
+    } /* while */
+
+ 
+  *cnt=conc_counter;
+
+  bitsvectorOld (v);
+
+  return( (hit *) realloc ( retarray, conc_counter * HIT_SIZE ));
+
+}                      
+       
+
+
+
+
+
+
+
+

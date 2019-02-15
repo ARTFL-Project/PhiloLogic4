@@ -19,4 +19,5 @@
 
   extern Z8 *get_method_info_proxy    (void);
   extern Z32 build_search_level_proxy (hitcmp *, Z8 *, Z32);
+  extern Z32 h2h_cmp_proxy_lowlevel ( Z32 *a, Z32 *b, Z32 depth );
 

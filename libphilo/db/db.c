@@ -42,7 +42,6 @@ dbh *init_dbh_folder(char *db_path) {
 dbspec *init_dbspec_file(FILE *dbspecs4) {
 	char buffer[256];
 	dbspec *dbs;
-	int res;
     int fields;
     int type_l;
     int blk_size;
@@ -57,39 +56,39 @@ dbspec *init_dbspec_file(FILE *dbspecs4) {
     }
 
     while (fgets(buffer,256,dbspecs4) != NULL) {
-        if (res = sscanf(buffer,"#define FIELDS %d", &fields)) {
+        if (sscanf(buffer,"#define FIELDS %d", &fields)) {
             break;
         }
         return NULL;
     }
     while (fgets(buffer,256,dbspecs4) != NULL) {
-        if (res = sscanf(buffer, "#define TYPE_LENGTH %d", &type_l)) {
+        if (sscanf(buffer, "#define TYPE_LENGTH %d", &type_l)) {
             break;
         }
         return NULL;
     }
     while (fgets(buffer,256,dbspecs4) != NULL) {
-        if (res = sscanf(buffer,"#define BLK_SIZE %d", &blk_size)) {
-            break;
-        }
-        return NULL;
-    }
-  
-    while (fgets(buffer,256,dbspecs4) != NULL) {
-        if (res = sscanf(buffer, "#define FREQ1_LENGTH %d", &freq1_l)) {
+        if (sscanf(buffer,"#define BLK_SIZE %d", &blk_size)) {
             break;
         }
         return NULL;
     }
   
     while (fgets(buffer,256,dbspecs4) != NULL) {
-        if (res = sscanf(buffer, "#define FREQ2_LENGTH %d", &freq2_l)) {
+        if (sscanf(buffer, "#define FREQ1_LENGTH %d", &freq1_l)) {
+            break;
+        }
+        return NULL;
+    }
+  
+    while (fgets(buffer,256,dbspecs4) != NULL) {
+        if (sscanf(buffer, "#define FREQ2_LENGTH %d", &freq2_l)) {
             break;
         }
         return NULL;
     }
     while (fgets(buffer,256,dbspecs4) != NULL) {
-        if (res = sscanf(buffer, "#define OFFST_LENGTH %d", &offst_l)) {
+        if (sscanf(buffer, "#define OFFST_LENGTH %d", &offst_l)) {
             break;
         }
         return NULL;
@@ -97,21 +96,21 @@ dbspec *init_dbspec_file(FILE *dbspecs4) {
   
     int negs[fields];
     while (fgets(buffer,256,dbspecs4) != NULL) {
-        if (res = sscanf(buffer, "#define NEGATIVES {%d,%d,%d,%d,%d,%d,%d,%d,%d", &negs[0],&negs[1],&negs[2],&negs[3],&negs[4],&negs[5],&negs[6],&negs[7],&negs[8])) {
+        if (sscanf(buffer, "#define NEGATIVES {%d,%d,%d,%d,%d,%d,%d,%d,%d", &negs[0],&negs[1],&negs[2],&negs[3],&negs[4],&negs[5],&negs[6],&negs[7],&negs[8])) {
             break;
         }
         return NULL;
     }
     int deps[fields];
     while (fgets(buffer,256,dbspecs4) != NULL) {
-        if (res = sscanf(buffer, "#define DEPENDENCIES {%d,%d,%d,%d,%d,%d,%d,%d,%d", &deps[0],&deps[1],&deps[2],&deps[3],&deps[4],&deps[5],&deps[6],&deps[7],&deps[8])) {
+        if (sscanf(buffer, "#define DEPENDENCIES {%d,%d,%d,%d,%d,%d,%d,%d,%d", &deps[0],&deps[1],&deps[2],&deps[3],&deps[4],&deps[5],&deps[6],&deps[7],&deps[8])) {
             break;
         }
         return NULL;
     }
     int bits[fields];
     while (fgets(buffer,256,dbspecs4) != NULL) {
-        if (res = sscanf(buffer, "#define BITLENGTHS {%d,%d,%d,%d,%d,%d,%d,%d,%d", &bits[0],&bits[1],&bits[2],&bits[3],&bits[4],&bits[5],&bits[6],&bits[7],&bits[8])) {
+        if (sscanf(buffer, "#define BITLENGTHS {%d,%d,%d,%d,%d,%d,%d,%d,%d", &bits[0],&bits[1],&bits[2],&bits[3],&bits[4],&bits[5],&bits[6],&bits[7],&bits[8])) {
             break;
         }
         return NULL;
@@ -178,6 +177,7 @@ int delete_dbspec(dbspec *dbs) {
   free(dbs->dependencies);
   free(dbs->bitlengths);
   free(dbs);
+  return 0;
 }
 
 int delete_dbh(dbh *db) {
@@ -195,13 +195,13 @@ dbh *new_dbh(char *gdbm_f, char *block_f, dbspec *dbs) {
 	dbh_ptr->hash_file = gdbm_open(gdbm_f,0,GDBM_READER, 0, 0);
 	if (dbh_ptr->hash_file == NULL) {
 		printf("error opening hash table at %s.\n", gdbm_f);
-		exit;
+		exit(1);
 	}
 
 	dbh_ptr->block_file = fopen(block_f,"r");
 	if (dbh_ptr->block_file == NULL) {
 		printf("error opening block file at %s.\n", block_f);
-		exit;
+		exit(1);
 	}
 
 	dbh_ptr->dbspec = dbs;

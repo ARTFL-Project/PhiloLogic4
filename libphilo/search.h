@@ -59,6 +59,10 @@
     #include "log.h"
   #endif
 
+  #ifndef HITCRP_H
+    #include "plugin/hitcrp.h"
+  #endif
+
   struct Search
   {
   	dbh *db;
@@ -93,6 +97,14 @@
   extern Search new_searchObject ();
 Search new_search( dbh *db, Z8 *method, Z8 *arg, int ascii, int limit, int corpussize, char * corpusfile);
 int set_search_method( Search s, Z8 *methodstring, Z8 *argstring);
+int delete_search( Search s);
+N32 search_pass ( Search s, N32 bn );
+int set_corpus( Search s, Z8 *corpuspath, Z32 corpusarg);
+
+Z32 build_blockMap( Search s, Z32 bn);
+Z32 blockmap_resort ( Search s, Z32 bn );
+Z32 init_wordObject ( Search s, Z8 *word, Word w, N32 *block_n );
+
 #endif
 
 

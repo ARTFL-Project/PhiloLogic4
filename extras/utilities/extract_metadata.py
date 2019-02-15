@@ -65,8 +65,8 @@ if __name__ == '__main__':
     load_metadata = sort_by_metadata(sys.argv[1:], metadata_xpaths)
     
     for file in load_metadata:
-        print "## Metadata found for %s ##" % file['filename']
+        print("## Metadata found for %s ##" % file['filename'])
         for metadata in file:
             if metadata != "filename":
-                print "%s: %s" % (metadata, file[metadata])
-        print
+                print("%s: %s" % (metadata, file[metadata]))
+        print()

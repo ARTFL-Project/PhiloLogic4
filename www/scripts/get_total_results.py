@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+import json
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 
 import sys
 sys.path.append("..")
@@ -39,7 +39,7 @@ def get_total_results(environ, start_response):
     hits.finish()
     total_results = len(hits)
 
-    yield simplejson.dumps(total_results)
+    yield json.dumps(total_results).encode('utf8')
 
 
 if __name__ == "__main__":

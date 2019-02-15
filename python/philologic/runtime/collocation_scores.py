@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Compute collocation scores"""
 
-from __future__ import absolute_import
+
 from math import log
+
 
 def pointwise_mutual_information(total_word_count, collocate_count, collocate, cursor):
     """Calculate Pointwise Mutual Information."""

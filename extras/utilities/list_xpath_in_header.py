@@ -53,13 +53,13 @@ def pre_parse_whole_file(fn):
 def retrieve_xpaths(filelist):
     metadata_xpaths = {}
     for fn in filelist:
-        print "## XPATHS for %s" % fn
+        print("## XPATHS for %s" % fn)
         tree = pre_parse_header(fn)
         root = tree.getroottree()
         for el in tree.iter():
             if el.getchildren() == [] and el.text != None:
-                print root.getpath(el)
-        print
+                print(root.getpath(el))
+        print()
 
 if __name__ == '__main__':
     xpaths = retrieve_xpaths(sys.argv[1:])

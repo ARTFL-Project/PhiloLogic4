@@ -29,7 +29,7 @@
   #define  HIT_BIN_ASCII    1
 
 
-  extern Z32 hit_crp_args(hitdef *, Z32 *, Z32 *, Z32, Z8 *);
+  extern Z32 hit_crp_args(hitdef *, Z32 *, N32 *, Z32, Z8 *);
   Z32 h2h_cmp_crp ( Z32 *a, Z32 *b, hitdef *hit_def, Z32 level );
 #endif
 

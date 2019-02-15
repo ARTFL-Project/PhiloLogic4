@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import sqlite3
@@ -13,19 +13,16 @@ except ImportError:
      from philologic.runtime import WebConfig
 
 from philologic.Config import MakeDBConfig
-from philologic.DB import DB
+from philologic.runtime.DB import DB
 
 
 def get_web_config(environ, start_response):
     status = '200 OK'
     headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    db_path = os.path.abspath(os.path.dirname(__file__)).replace('scripts', '')
-    config = WebConfig(db_path)
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     config.time_series_status = time_series_tester(config)
-    db_locals = MakeDBConfig(os.path.join(db_path, "data/db.locals.py"))
-    config.data["available_metadata"] = db_locals.metadata_fields
-    yield config.to_json()
+    yield config.to_json().encode('utf8')
 
 
 def time_series_tester(config):
