@@ -58,12 +58,12 @@ def query(
             # now we're detached from the parent, and can do our work.
             if query_debug:
                 print("WORKER DETACHED at ", datetime.now() - tstart, file=sys.stderr)
-            args = ["search5"]
+            args = ["corpus_search"]
             if corpus_file:
-                args.extend(("--corpusfile", corpus_file))
-            args.append(db.path)
+                args.extend(("-c", corpus_file))
             if method and method_arg:
-                args.extend((method, str(method_arg)))
+                args.extend(("-m", method, "-a", str(method_arg)))
+            args.extend(("-o", "binary", db.path))
 
             worker = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=hl, stderr=err, env=os.environ)
             # worker2 = subprocess.Popen("head -c 1", stdin=subprocess.PIPE, stdout=worker.stdin, stderr=err)
@@ -89,7 +89,7 @@ def query(
             os._exit(0)
     else:
         hl.close()
-        return HitList.HitList(filename, words_per_hit, db, method=method, sort_order=sort_order, raw=raw_results)
+        return HitList.HitList(filename, words_per_hit, db, sort_order=sort_order, raw=raw_results)
 
 
 def get_expanded_query(hitlist):

@@ -45,15 +45,10 @@ class HitWrapper:
             self.philo_id = hit[:6] + (self.hit[7],)
             parent_id = self.hit[:6]
             remaining = list(self.hit[7:])
-            if method == "cooc":  # TODO: temp fix for old core...
-                for start_byte in remaining:
-                    self.words += [parent_id + (start_byte,)]
-                    self.bytes.append(start_byte)
-            else:
-                while remaining:
-                    self.words += [parent_id + (remaining.pop(0),)]
-                    if remaining:
-                        self.bytes.append(remaining.pop(0))
+            while remaining:
+                self.words += [parent_id + (remaining.pop(0),)]
+                if remaining:
+                    self.bytes.append(remaining.pop(0))
             self.bytes.sort()
             self.words.sort(key=lambda x: x[-1])  # assumes words in same sent, as does search4
             self.words = [WordWrapper(word, db, byte) for word, byte in zip(self.words, self.bytes)]

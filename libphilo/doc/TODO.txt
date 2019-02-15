@@ -1,3 +1,0 @@
-
-1) "batch" should finally be renamed "level"
-

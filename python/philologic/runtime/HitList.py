@@ -10,7 +10,19 @@ obj_dict = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "wo
 
 
 class HitList(object):
-    def __init__(self, filename, words, dbh, doc=0, byte=6, method="proxy", methodarg=3, sort_order=None, raw=False):
+    def __init__(
+        self,
+        filename,
+        words,
+        dbh,
+        encoding=None,
+        doc=0,
+        byte=6,
+        method="proxy",
+        methodarg=3,
+        sort_order=None,
+        raw=False,
+    ):
         self.filename = filename
         self.words = words
         self.method = method
@@ -20,12 +32,13 @@ class HitList(object):
             self.sort_order = None
         self.raw = raw  # if true, this return the raw hitlist consisting of a list of philo_ids
         self.dbh = dbh
+        self.encoding = encoding or dbh.encoding
         if method != "cooc":
             self.has_word_id = 1
             self.length = 7 + 2 * (words)
         else:
             self.has_word_id = 0  # unfortunately.  fix this next time I have 3 months to spare.
-            self.length = 7 + (words)
+            self.length = methodarg + 1 + (words)
         self.fh = open(self.filename, "rb")  # need a full path here.
         self.format = "=%dI" % self.length  # short for object id's, int for byte offset.
         self.hitsize = struct.calcsize(self.format)
@@ -90,13 +103,13 @@ class HitList(object):
                     return self.readhit(n)
                 else:
                     self.readhit(n)
-                    return HitWrapper(self.readhit(n), self.dbh, method=self.method)
+                    return HitWrapper(self.readhit(n), self.dbh)
 
     def get_slice(self, n):
         if self.sort_order:
             try:
                 for hit in self.sorted_hitlist[n]:
-                    yield HitWrapper(hit, self.dbh, method=self.method)
+                    yield HitWrapper(hit, self.dbh)
             except IndexError:
                 pass
         else:
@@ -115,7 +128,7 @@ class HitList(object):
                 if self.raw:
                     yield hit
                 else:
-                    yield HitWrapper(hit, self.dbh, method=self.method)
+                    yield HitWrapper(hit, self.dbh)
                 slice_position += 1
 
     def __len__(self):
@@ -125,7 +138,7 @@ class HitList(object):
     def __iter__(self):
         if self.sort_order:
             for hit in self.sorted_hitlist:
-                yield HitWrapper(hit, self.dbh, method=self.method)
+                yield HitWrapper(hit, self.dbh)
         else:
             self.update()
             iter_position = 0
@@ -138,7 +151,7 @@ class HitList(object):
                 if self.raw:
                     yield hit
                 else:
-                    yield HitWrapper(hit, self.dbh, method=self.method)
+                    yield HitWrapper(hit, self.dbh)
                 iter_position += 1
 
     def seek(self, n):

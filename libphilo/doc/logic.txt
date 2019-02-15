@@ -1,4 +1,0 @@
-
-The main logic of the search engine design: 
-
-The upper-level search engine 
