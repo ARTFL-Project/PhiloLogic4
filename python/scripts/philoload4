@@ -29,7 +29,9 @@ if __name__ == "__main__":
     l.finish()
     if l.deleted_files:
         print(
-            f"The following files where not loaded due to invalid data in the header:\n{'\n'.join(l.deleted_files)}"
+            "The following files where not loaded due to invalid data in the header:\n{}".format(
+                "\n".join(l.deleted_files)
+            )
         )
 
     print(f"Application viewable at {os.path.join(config_file.url_root, load_options.dbname)}\n")

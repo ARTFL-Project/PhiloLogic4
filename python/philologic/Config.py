@@ -25,10 +25,7 @@ db_locals_defaults = OrderedDict(
             },
         ),
         ("normalized_fields", {"value": [], "comment": ""}),
-        (
-            "default_object_level",
-            {"value": "doc", "comment": "# This defines the default navigation element in your database"},
-        ),
+        ("default_object_level", {"value": "doc", "comment": "# This defines the default navigation element in your database"}),
         (
             "lowercase_index",
             {
@@ -38,10 +35,7 @@ db_locals_defaults = OrderedDict(
         ),
         (
             "debug",
-            {
-                "value": False,
-                "comment": "# If set to True, this enabled debugging messages to be printed out to the Apache error log",
-            },
+            {"value": False, "comment": "# If set to True, this enabled debugging messages to be printed out to the Apache error log"},
         ),
         (
             "secret",
@@ -55,7 +49,7 @@ db_locals_defaults = OrderedDict(
 db_locals_header = """
    # -*- coding: utf-8 -*-\n
    #########################################################\n
-   #### Database configuration options for PhiloLogic5 #####\n
+   #### Database configuration options for PhiloLogic4 #####\n
    #########################################################\n
    #### All variables must be in valid Python syntax #######\n
    #########################################################\n
@@ -70,7 +64,7 @@ web_config_defaults = OrderedDict(
         (
             "global_config_location",
             {
-                "value": "/etc/philologic/philologic5.cfg",
+                "value": "/etc/philologic/philologic4.cfg",
                 "comment": """
                # The global_config_location variable points to the global config file for philologic instances.
                # Point to a different location if you intend to have several global config options for databases on a single server""",
@@ -86,19 +80,10 @@ web_config_defaults = OrderedDict(
                # otherwise access will remain open.""",
             },
         ),
-        (
-            "access_file",
-            {
-                "value": "",
-                "comment": "# Location of access file which contains authorized/unauthorized IPs and domain names",
-            },
-        ),
+        ("access_file", {"value": "", "comment": "# Location of access file which contains authorized/unauthorized IPs and domain names"}),
         (
             "production",
-            {
-                "value": True,
-                "comment": "# Do not set to False unless you want to make changes in the Web Client in the app/ directory",
-            },
+            {"value": True, "comment": "# Do not set to False unless you want to make changes in the Web Client in the app/ directory"},
         ),
         (
             "link_to_home_page",
@@ -116,13 +101,7 @@ web_config_defaults = OrderedDict(
                # Available reports are concordance, kwic, collocation, and time_series""",
             },
         ),
-        (
-            "metadata",
-            {
-                "value": [],
-                "comment": "# The metadata variable sets which metadata field is viewable in the search form",
-            },
-        ),
+        ("metadata", {"value": [], "comment": "# The metadata variable sets which metadata field is viewable in the search form"}),
         (
             "metadata_aliases",
             {
@@ -183,10 +162,7 @@ web_config_defaults = OrderedDict(
         ),
         (
             "concordance_length",
-            {
-                "value": 300,
-                "comment": "# The concordance_length variable sets the length in bytes of each concordance result",
-            },
+            {"value": 300, "comment": "# The concordance_length variable sets the length in bytes of each concordance result"},
         ),
         (
             "search_examples",
@@ -658,24 +634,8 @@ web_config_defaults = OrderedDict(
                         "link": False,
                         "style": {},
                     },
-                    {
-                        "field": "publisher",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": ",",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "collection",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
+                    {"field": "publisher", "object_level": "doc", "prefix": "", "suffix": "", "separator": ",", "link": False, "style": {}},
+                    {"field": "collection", "object_level": "doc", "prefix": "", "suffix": "", "separator": "", "link": False, "style": {}},
                 ],
                 "comment": """
                # The table_of_contents_citation variable define how and in what field order citations are displayed in navigation reports.
@@ -725,24 +685,8 @@ web_config_defaults = OrderedDict(
                         "link": False,
                         "style": {},
                     },
-                    {
-                        "field": "publisher",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": ",",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "collection",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
+                    {"field": "publisher", "object_level": "doc", "prefix": "", "suffix": "", "separator": ",", "link": False, "style": {}},
+                    {"field": "collection", "object_level": "doc", "prefix": "", "suffix": "", "separator": "", "link": False, "style": {}},
                 ],
                 "comment": """
                # The navigation_citation variable define how and in what field order citations are displayed in navigation reports.
@@ -795,17 +739,11 @@ web_config_defaults = OrderedDict(
         ),
         (
             "time_series_interval",
-            {
-                "value": 10,
-                "comment": "# The time_series_interval variable defines the default year span used for time series.",
-            },
+            {"value": 10, "comment": "# The time_series_interval variable defines the default year span used for time series."},
         ),
         (
             "external_page_images",
-            {
-                "value": False,
-                "comment": "# This defines whether the page images should be viewed in a non-PhiloLogic instance",
-            },
+            {"value": False, "comment": "# This defines whether the page images should be viewed in a non-PhiloLogic instance"},
         ),
         (
             "page_images_url_root",
@@ -943,7 +881,7 @@ web_config_defaults = OrderedDict(
 web_config_header = """
    # -*- coding: utf-8 -*-"
    ####################################################\n
-   #### Web configuration options for PhiloLogic5 #####\n
+   #### Web configuration options for PhiloLogic4 #####\n
    ####################################################\n
    ### All variables must be in valid Python syntax ###\n
    ####################################################\n\n\n

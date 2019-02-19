@@ -3,10 +3,10 @@ from distutils.core import setup
 
 setup(
     name="philologic",
-    version="5.0alpha",
+    version="4.6",
     author="The ARTFL Project",
     author_email="artfl@artfl.uchicago.edu",
-    packages=["philologic", "philologic.runtime", "philologic.utils", "philologic.runtime.reports"],
-    scripts=["scripts/philoload5"],
+    packages=["philologic", "philologic.runtime", "philologic.utils", "philologic.runtime.reports", "philologic.loadtime"],
+    scripts=["scripts/philoload4"],
     install_requires=["lxml", "python-levenshtein", "natsort", "multiprocess"],
 )

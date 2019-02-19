@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PhiloLogic5 main parser"""
+"""PhiloLogic4 main parser"""
 
 import os
 import re

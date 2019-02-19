@@ -13,20 +13,20 @@ import collections
 
 
 # Load global config
-config_path = os.getenv("PHILOLOGIC_CONFIG", "/etc/philologic/philologic5.cfg")
-config_file = imp.load_source("philologic5", config_path)
+config_path = os.getenv("PHILOLOGIC_CONFIG", "/etc/philologic/philologic4.cfg")
+config_file = imp.load_source("philologic4", config_path)
 
 if config_file.url_root is None:
-    print("url_root variable is not set in /etc/philologic/philologic5.cfg", file=sys.stderr)
-    print("See https://github.com/ARTFL-Project/PhiloLogic5/blob/master/docs/installation.md.", file=sys.stderr)
+    print("url_root variable is not set in /etc/philologic/philologic4.cfg", file=sys.stderr)
+    print("See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md.", file=sys.stderr)
     exit()
 elif config_file.web_app_dir is None:
-    print("web_app_dir variable is not set in /etc/philologic/philologic5.cfg", file=sys.stderr)
-    print("See https://github.com/ARTFL-Project/PhiloLogic5/blob/master/docs/installation.md.", file=sys.stderr)
+    print("web_app_dir variable is not set in /etc/philologic/philologic4.cfg", file=sys.stderr)
+    print("See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md.", file=sys.stderr)
     exit()
 elif config_file.database_root is None:
-    print("database_root variable is not set in /etc/philologic/philologic5.cfg", file=sys.stderr)
-    print("See https://github.com/ARTFL-Project/PhiloLogic5/blob/master/docs/installation.md.", file=sys.stderr)
+    print("database_root variable is not set in /etc/philologic/philologic4.cfg", file=sys.stderr)
+    print("See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md.", file=sys.stderr)
     exit()
 
 
@@ -74,13 +74,7 @@ class LoadOptions(object):
     def setup_parser(self):
         usage = "usage: %prog [options] database_name files"
         parser = OptionParser(usage=usage)
-        parser.add_option(
-            "-a",
-            "--app_dir",
-            type="string",
-            dest="web_app_dir",
-            help="Define custom location for the web app directory",
-        )
+        parser.add_option("-a", "--app_dir", type="string", dest="web_app_dir", help="Define custom location for the web app directory")
         parser.add_option(
             "-b",
             "--bibliography",
@@ -89,22 +83,10 @@ class LoadOptions(object):
             help="Defines a file containing the document-level bibliography of the texts",
         )
         parser.add_option("-c", "--cores", type="int", dest="cores", help="define the number of cores used for parsing")
+        parser.add_option("--custom_functions", type="string", dest="custom_functions", help="copy contents of path for custom functions")
+        parser.add_option("-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load")
         parser.add_option(
-            "--custom_functions",
-            type="string",
-            dest="custom_functions",
-            help="copy contents of path for custom functions",
-        )
-        parser.add_option(
-            "-d", "--debug", action="store_true", default=False, dest="debug", help="add debugging to your load"
-        )
-        parser.add_option(
-            "-D",
-            "--force_delete",
-            action="store_true",
-            default=False,
-            dest="force_delete",
-            help="overwrite database without confirmation",
+            "-D", "--force_delete", action="store_true", default=False, dest="force_delete", help="overwrite database without confirmation"
         )
         parser.add_option(
             "-F",
@@ -114,22 +96,12 @@ class LoadOptions(object):
             dest="file_list",
             help="Defines whether the file argument is a file containing fullpaths to the files to load",
         )
+        parser.add_option("-H", "--header", type="string", dest="header", help="define header type (tei or dc) of files to parse")
+        parser.add_option("-l", "--load_config", type="string", dest="load_config", help="load external config for specialized load")
         parser.add_option(
-            "-H", "--header", type="string", dest="header", help="define header type (tei or dc) of files to parse"
+            "-t", "--file-type", type="string", dest="file_type", help="Define file type for parsing: plain_text, xml, or html"
         )
-        parser.add_option(
-            "-l", "--load_config", type="string", dest="load_config", help="load external config for specialized load"
-        )
-        parser.add_option(
-            "-t",
-            "--file-type",
-            type="string",
-            dest="file_type",
-            help="Define file type for parsing: plain_text, xml, or html",
-        )
-        parser.add_option(
-            "-w", "--use-webconfig", type="string", dest="web_config", help="use predefined web_config.cfg file"
-        )
+        parser.add_option("-w", "--use-webconfig", type="string", dest="web_config", help="use predefined web_config.cfg file")
         return parser
 
     def parse(self, argv):
@@ -152,10 +124,7 @@ class LoadOptions(object):
                 exit()
 
         except IndexError:
-            print(
-                ("\nError: you did not supply a database name or a path for your file(s) to be loaded\n"),
-                file=sys.stderr,
-            )
+            print(("\nError: you did not supply a database name or a path for your file(s) to be loaded\n"), file=sys.stderr)
             parser.print_help()
             sys.exit()
         for a in dir(options):

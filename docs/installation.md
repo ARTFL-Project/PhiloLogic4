@@ -39,7 +39,7 @@ Just run the install.sh in the top level directory to install the C Core, Python
 
 ### <a name="global-config"></a>Global Configuration ###
 
-The installer creates a file in `/etc/philologic/philologic5.cfg` which contains several important global variables:
+The installer creates a file in `/etc/philologic/philologic4.cfg` which contains several important global variables:
 
 * `database_root` defines the filesytem path to the root web directory for your PhiloLogic install such as `/var/www/html/philologic`. Make sure your user or group has full write permissions to that directory.
 * `url_root` defines the URL path to the same root directory for your philologic install, such as http://localhost/philologic/

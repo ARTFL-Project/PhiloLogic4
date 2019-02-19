@@ -4,7 +4,7 @@ Database Loading
 Loading PhiloLogic databases is very straight forward, and most of the time, you shouldn't need to specify any specialized load option.
 
 A few important notes:
-* Before loading any databases, you should first make sure the global configuration file located in `/etc/philologic/philologic5.cfg` has been edited appropriately. For more info, see [here](installation.md#global-config)
+* Before loading any databases, you should first make sure the global configuration file located in `/etc/philologic/philologic4.cfg` has been edited appropriately. For more info, see [here](installation.md#global-config)
 * The PhiloLogic4 Parser's behavior is configurable from an external load config file, though only to a certain extent. You can also supply a replacement Parser class if you need to.
 * The loading process is designed to be short, and easy to understand and configure.
 
