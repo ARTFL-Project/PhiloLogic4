@@ -15,17 +15,18 @@ You can find more detailed installation instructions for specific OSes here:
 
 IMPORTANT: Do not install from the master branch on github: this is a the development branch and in no way garanteed to be stable
 
-You can find a copy of the latest version of PhiloLogic4 [here](../../../releases/).
+You can find a copy of the latest version of PhiloLogic5 [here](../../../releases/).
 
-For the rest of this document, we will assume the PhiloLogic source code is installed in 
-your home directory at ~/PhiloLogic4/
+For the rest of this document, we will assume the PhiloLogic source code is installed in
+your home directory at ~/PhiloLogic5/
 
 ### Prerequisites ###
 
-* Python 2.6 or 2.7
+* Python 3.5 and up
 * GCC
 * Make
 * [gdbm](http://www.gnu.org.ua/software/gdbm/)
+* LZ4
 
 ### Installing ###
 
@@ -53,10 +54,10 @@ accessible via an HTTP server configured to run Python CGI scripts.
 
 In Mac OS X systems, you will probably want to create a directory at
 ``/Library/WebServer/Documents/philologic`` to serve up PhiloLogic databases
-with the URL prefix: ``http://<your_server's_name>/philologic/``; for Linux systems, 
+with the URL prefix: ``http://<your_server's_name>/philologic/``; for Linux systems,
 the proper directory may vary, but ``/var/www/philologic/`` or ``/var/www/html/philologic/``
 
 Configuring your web server is outside of the scope of this document; but the web install
 does come with a preconfigured .htaccess file that allows you to run the Web App.
 Therefore, you need to make sure your server is configured to allow htaccess files.
-if in doubt, ask a friendly sysadmin.. 
+if in doubt, ask a friendly sysadmin..

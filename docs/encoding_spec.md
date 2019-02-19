@@ -6,8 +6,8 @@
 
 * We mostly support the TEI spec, though we only index a small reasonable subset of the spec.
 
-* We only support double quotes for attributes, such as `<pb n="1">`.<br>
-In other words, we do **NOT** support `<pb n='1'>`.
+* We only support double quotes for attributes, such as `<pb n="1"/>`.<br>
+In other words, we do **NOT** support `<pb n='1'/>`.
 
 # Page tags #
 * Pages are encoded with the `<pb>` tag.
@@ -19,7 +19,7 @@ In other words, we do **NOT** support `<pb n='1'>`.
 * You can also specify multiple images separated by a space such as below:
 
 ```XML
-<pb facs="small/ENC_23-1-1.jpeg large/ENC_23-1-1.jpeg">
+<pb facs="small/ENC_23-1-1.jpeg large/ENC_23-1-1.jpeg"/>
 ```
 This will produce produce a link to the first image, the second one will be displayed if clicked on the arrow link in the page turner.
 
@@ -39,11 +39,19 @@ A page tag with both attributes could look like this:
 * Inline images should use the `<graphic>` tag.
 * Links to images should be stored in the facs attribute such as below. Image links should be separated by a space:
 ```XML
-<graphic facs="V23/plate_23_2_2.jpeg">
-<graphic facs="V23/plate_23_2_2.jpeg V23/plate_23_2_3.jpeg">
+<graphic facs="V23/plate_23_2_2.jpeg"/>
+<graphic facs="V23/plate_23_2_2-sm.jpeg V23/plate_23_2_2-lg.jpeg"/>
 ```
 **Note**: The values specified in `facs` must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
 
+# External Images #
+External image are images that should not be rendered alongside the text like inline images. Instead, it should be rendered as an HTML anchor tag with accompanying text.
+* External Images should use the `<ptr>`tag.
+* Links to the image should be stored in the facs attribute such as below. Only one link should be available.
+* The text accompanying the image should be stored in the rend attribute.
+```XML
+<ptr facs="0000c.jpg" rend="[000c]"/>
+```
 # Notes #
 ### Important ###
 While PhiloLogic will display inline notes, it really only properly supports notes

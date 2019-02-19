@@ -3,8 +3,8 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
-from philologic.DB import DB
+import json
+from philologic.runtime.DB import DB
 from philologic.runtime import access_control, login_access
 
 import sys
@@ -34,10 +34,10 @@ def access_request(environ, start_response):
     access, headers = login_access(environ, request, config, headers)
     start_response(status, headers)
     if access:
-        yield simplejson.dumps({'access': True})
+        yield json.dumps({'access': True})
     else:
         incoming_address, domain_name = access_control.get_client_info(environ)
-        yield simplejson.dumps({'access': False, "incoming_address": incoming_address, "domain_name": domain_name})
+        yield json.dumps({'access': False, "incoming_address": incoming_address, "domain_name": domain_name}).encode('utf8')
 
 
 if __name__ == "__main__":

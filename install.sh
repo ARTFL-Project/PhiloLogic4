@@ -15,13 +15,10 @@ else
 fi
 
 cd ..;
-echo "Installing Python dependencies"
-sudo -H pip2 install -r requirements.txt
-
 PYTHON_INSTALL="\n## INSTALLING PYTHON LIBRARY ##"
 echo "$PYTHON_INSTALL"
 cd python;
-sudo -H pip2 install --upgrade .
+sudo -H pip3 install --upgrade .
 sudo mkdir -p /etc/philologic/
 
 cd ..;
@@ -29,27 +26,6 @@ sudo mkdir -p /var/lib/philologic4/web_app/
 sudo rm -rf /var/lib/philologic4/web_app/*
 sudo cp -R www/* /var/lib/philologic4/web_app/
 sudo cp www/.htaccess  /var/lib/philologic4/web_app/
-
-# WEB_LOADER_CONFIG="\nAlias /philoload /var/lib/philologic4/web_loader
-# <Directory /var/lib/philologic4/web_loader>
-# Order allow,deny
-# Allow from all
-# AllowOverride All
-# Require all granted
-# </Directory>"
-# echo "Copying web loader to /var/lib/philologic4/web_loader"
-# echo "If you wish to enable that functionality,"
-# echo "you will need to paste the following in your Apache config:"
-# echo "$WEB_LOADER_CONFIG"
-# sudo rm -rf /var/lib/philologic4/web_loader
-# sudo cp -R extras/web_loader /var/lib/philologic4/web_loader
-# sudo cp -R www/app/assets/css/split/style.css /var/lib/philologic4/web_loader/
-# sudo cp -R www/app/assets/css/split/default_theme.css /var/lib/philologic4/web_loader/
-
-if [ -f /usr/local/bin/philoload4 ]; then
-	sudo rm /usr/local/bin/philoload4;
-fi
-sudo cp extras/philoload4.py /usr/local/bin/philoload4
 
 if [ ! -f /etc/philologic/philologic4.cfg ]
     then

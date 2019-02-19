@@ -1,8 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Bootstrap Web app"""
 
-from __future__ import absolute_import
-from __future__ import print_function
+
 import imp
 import os.path
 import sys
@@ -12,13 +11,13 @@ from philologic.runtime import WebConfig
 from philologic.runtime import WSGIHandler
 from philologic.runtime import access_control
 
-
 config = WebConfig(os.path.abspath(os.path.dirname(__file__)))
 global_config = imp.load_source("philologic4", config.global_config_location)
 path = os.path.abspath(os.path.dirname(__file__))
-dbname = path.strip().split('/')[-1]
+dbname = path.strip().split("/")[-1]
 
-config_location = os.path.join('app/assets/css/split/', os.path.basename(config.theme))
+config = WebConfig(os.path.abspath(os.path.dirname(__file__)))
+config_location = os.path.join("app/assets/css/split/", os.path.basename(config.theme))
 if os.path.realpath(os.path.abspath(config.theme)) == os.path.realpath(os.path.abspath(config_location)):
     theme = config_location
 elif os.path.exists(config_location) and config.production:
@@ -37,7 +36,7 @@ css_files = [
     "app/assets/css/split/timeSeries.css",
     "app/assets/css/image_gallery/blueimp-gallery.min.css",
     "app/assets/css/split/textObjectNavigation.css",
-    theme
+    theme,
 ]
 
 # External JavaScript assets
@@ -52,14 +51,19 @@ js_plugins = [
     "app/assets/js/plugins/bootstrap.min.js",
     "app/assets/js/plugins/velocity.min.js",
     "app/assets/js/plugins/velocity.ui.min.js",
-    "app/assets/js/plugins/angular-velocity.min.js"
+    "app/assets/js/plugins/angular-velocity.min.js",
 ]
 
 # Full List of all AngularJS specific JavaScript
 js_files = [
-    "app/bootstrapApp.js", "app/philoLogicMain.js", "app/routes.js",
-    "app/shared/directives.js", "app/shared/services.js",
-    "app/shared/config.js", "app/shared/filters.js", "app/shared/values.js",
+    "app/bootstrapApp.js",
+    "app/philoLogicMain.js",
+    "app/routes.js",
+    "app/shared/directives.js",
+    "app/shared/services.js",
+    "app/shared/config.js",
+    "app/shared/filters.js",
+    "app/shared/values.js",
     "app/shared/searchArguments/searchArgumentsDirective.js",
     "app/shared/exportResults/exportResults.js",
     "app/components/landingPage/landingPageDirectives.js",
@@ -84,15 +88,14 @@ js_files = [
     "app/components/timeSeries/timeSeriesDirectives.js",
     "app/components/timeSeries/timeSeries.js",
     "app/shared/accessControl/accessControlDirective.js",
-    "app/shared/accessControl/accessControlCtrl.js"
+    "app/shared/accessControl/accessControlCtrl.js",
 ]
 
 
 def angular(environ, start_response):
-    headers = [('Content-type', 'text/html; charset=UTF-8'),
-               ("Access-Control-Allow-Origin", "*")]
+    headers = [("Content-type", "text/html; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     if not config.valid_config:  # This means we have an error in the webconfig file
-        html = build_misconfig_page(config.traceback, 'webconfig.cfg')
+        html = build_misconfig_page(config.traceback, "webconfig.cfg")
     # TODO handle errors in db.locals.py
     else:
         request = WSGIHandler(environ, config)
@@ -104,24 +107,24 @@ def angular(environ, start_response):
                     headers.append(("Set-Cookie", "hash=%s" % h))
                     headers.append(("Set-Cookie", "timestamp=%s" % ts))
         html = build_html_page(config)
-    start_response('200 OK', headers)
+    start_response("200 OK", headers)
     return html
 
 
 def build_html_page(config):
-    html_page = open('%s/app/index.html' % config.db_path).read()
-    html_page = html_page.replace('$DBNAME', config.dbname)
-    html_page = html_page.replace('$DBURL', os.path.join(global_config.url_root, dbname))
-    html_page = html_page.replace('$CSS', load_CSS())
-    html_page = html_page.replace('$JS', load_JS())
+    html_page = open("%s/app/index.html" % config.db_path).read()
+    html_page = html_page.replace("$DBNAME", config.dbname)
+    html_page = html_page.replace("$DBURL", os.path.join(global_config.url_root, dbname))
+    html_page = html_page.replace("$CSS", load_CSS())
+    html_page = html_page.replace("$JS", load_JS())
     return html_page
 
 
 def build_misconfig_page(traceback, config_file):
-    html_page = open('%s/app/misconfiguration.html' % path).read()
-    html_page = html_page.replace('$CSS', load_CSS())
-    html_page = html_page.replace('$TRACEBACK', traceback)
-    html_page = html_page.replace('$CONFIG_FILE', config_file)
+    html_page = open("%s/app/misconfiguration.html" % path).read()
+    html_page = html_page.replace("$CSS", load_CSS())
+    html_page = html_page.replace("$TRACEBACK", traceback)
+    html_page = html_page.replace("$CONFIG_FILE", config_file)
     return html_page
 
 
@@ -135,12 +138,12 @@ def load_CSS():
     if config.production:
         return '<link rel="stylesheet" href="app/assets/css/philoLogic.css">'
     else:
-        return '\n'.join(css_links)
+        return "\n".join(css_links)
 
 
 def concat_CSS():
-    css_string, css_links = concatenate_files(css_files, 'css')
-    output = open(os.path.join(path, 'app/assets/css/philoLogic.css'), 'w')
+    css_string, css_links = concatenate_files(css_files, "css")
+    output = open(os.path.join(path, "app/assets/css/philoLogic.css"), "w")
     output.write(css_string)
     return css_links
 
@@ -157,16 +160,15 @@ def load_JS():
         scripts += '<script src="app/assets/js/philoLogic.js"></script>'
         return scripts
     else:
-        return '\n'.join(js_plugins_links + js_links)
+        return "\n".join(js_plugins_links + js_links)
 
 
 def concat_JS():
-    js_plugins_string, js_plugins_links = concatenate_files(js_plugins, 'js')
-    plugin_output = open(os.path.join(
-        path, 'app/assets/js/plugins/philoLogicPlugins.js'), 'w')
+    js_plugins_string, js_plugins_links = concatenate_files(js_plugins, "js")
+    plugin_output = open(os.path.join(path, "app/assets/js/plugins/philoLogicPlugins.js"), "w")
     plugin_output.write(js_plugins_string)
     js_string, js_links = concatenate_files(js_files, "js")
-    output = open(os.path.join(path, 'app/assets/js/philoLogic.js'), 'w')
+    output = open(os.path.join(path, "app/assets/js/philoLogic.js"), "w")
     output.write(js_string)
     return js_links, js_plugins_links
 
@@ -179,11 +181,10 @@ def concatenate_files(file_list, file_type):
             string.append(open(os.path.join(path, file_path)).read())
             if not config.production:
                 if file_type == "css":
-                    links.append(
-                        '<link rel="stylesheet" href="%s">' % file_path)
+                    links.append('<link rel="stylesheet" href="%s">' % file_path)
                 else:
                     links.append('<script src="%s"></script>' % file_path)
         except IOError:
             pass
-    string = '\n'.join(string)
+    string = "\n".join(string)
     return string, links

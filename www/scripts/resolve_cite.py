@@ -1,34 +1,36 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import re
 import sys
 from wsgiref.handlers import CGIHandler
 
-from philologic.DB import DB
-from philologic.HitWrapper import ObjectWrapper
+from philologic.runtime.DB import DB
+from philologic.runtime.HitWrapper import ObjectWrapper
 
 import sys
+
 sys.path.append("..")
 import custom_functions
+
 try:
-     from custom_functions import WebConfig
+    from custom_functions import WebConfig
 except ImportError:
-     from philologic.runtime import WebConfig
+    from philologic.runtime import WebConfig
 try:
-     from custom_functions import WSGIHandler
+    from custom_functions import WSGIHandler
 except ImportError:
-     from philologic.runtime import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 
 def resolve_cite_service(environ, start_response):
-    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
-    db = DB(config.db_path + '/data/')
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("scripts", ""))
+    db = DB(config.db_path + "/data/")
     request = WSGIHandler(environ, config)
     c = db.dbh.cursor()
     q = request.q
 
-    best_url = config['db_url']
+    best_url = config["db_url"]
 
     if " - " in q:
         milestone = q.split(" - ")[0]
@@ -38,51 +40,51 @@ def resolve_cite_service(environ, start_response):
     milestone_segments = []
     last_segment = 0
     milestone_prefixes = []
-    for separator in re.finditer(r' (?!\.)|\.(?! )', milestone):
-        milestone_prefixes += [milestone[:separator.start()]]
-        milestone_segments += [milestone[last_segment:separator.start()]]
+    for separator in re.finditer(r" (?!\.)|\.(?! )", milestone):
+        milestone_prefixes += [milestone[: separator.start()]]
+        milestone_segments += [milestone[last_segment : separator.start()]]
         last_segment = separator.end()
     milestone_segments += [milestone[last_segment:]]
     milestone_prefixes += [milestone]
 
-    print >> sys.stderr, "SEGMENTS", repr(milestone_segments)
-    print >> sys.stderr, "PREFIXES", repr(milestone_prefixes)
+    print("SEGMENTS", repr(milestone_segments), file=sys.stderr)
+    print("PREFIXES", repr(milestone_prefixes), file=sys.stderr)
 
     abbrev_match = None
     for pos, v in enumerate(milestone_prefixes):
-        print >> sys.stderr, "QUERYING for abbrev = ", v
-        abbrev_q = c.execute("SELECT * FROM toms WHERE abbrev = ?;", (v, )).fetchone()
+        print("QUERYING for abbrev = ", v, file=sys.stderr)
+        abbrev_q = c.execute("SELECT * FROM toms WHERE abbrev = ?;", (v,)).fetchone()
         if abbrev_q:
             abbrev_match = abbrev_q
 
-    print >> sys.stderr, "ABBREV", abbrev_match["abbrev"], abbrev_match["philo_id"]
-    doc_obj = ObjectWrapper(abbrev_match['philo_id'].split(), db)
+    print("ABBREV", abbrev_match["abbrev"], abbrev_match["philo_id"], file=sys.stderr)
+    doc_obj = ObjectWrapper(abbrev_match["philo_id"].split(), db)
 
     nav = nav_query(doc_obj, db)
 
     best_match = None
     for n in nav:
         if n["head"] == request.q:
-            print >> sys.stderr, "MATCH", n["philo_id"], n["n"], n["head"]
+            print("MATCH", n["philo_id"], n["n"], n["head"], file=sys.stderr)
             best_match = n
             break
 
     if best_match:
         type_offsets = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
-        t = best_match['philo_type']
-        short_id = best_match["philo_id"].split()[:type_offsets[t]]
+        t = best_match["philo_type"]
+        short_id = best_match["philo_id"].split()[: type_offsets[t]]
         best_url = f.make_absolute_object_link(config, short_id)
-        print >> sys.stderr, "BEST_URL", best_url
+        print("BEST_URL", best_url, file=sys.stderr)
 
-    status = '302 Found'
-    redirect = config['db_url']
-    headers = [('Location', best_url)]
+    status = "302 Found"
+    redirect = config["db_url"]
+    headers = [("Location", best_url)]
     start_response(status, headers)
 
     return ""
 
 
-#TODO: same functionality exists in philologic.reports in the toc code: consolidate
+# TODO: same functionality exists in philologic.reports in the toc code: consolidate
 def nav_query(obj, db):
     conn = db.dbh
     c = conn.cursor()
@@ -96,12 +98,14 @@ def nav_query(obj, db):
     try:
         end_rowid = c.fetchone()[0]
     except TypeError:  # if this is the last doc, just get the last rowid in the table.
-        c.execute('select max(rowid) from toms;')
+        c.execute("select max(rowid) from toms;")
         end_rowid = c.fetchone()[0]
 
     # use start_rowid and end_rowid to fetch every div in the document.
-    c.execute("select * from toms where rowid >= ? and rowid <=? and philo_type>='div' and philo_type<='div3'",
-              (start_rowid, end_rowid))
+    c.execute(
+        "select * from toms where rowid >= ? and rowid <=? and philo_type>='div' and philo_type<='div3'",
+        (start_rowid, end_rowid),
+    )
     for o in c.fetchall():
         philo_id = [int(n) for n in o["philo_id"].split(" ")]
         i = HitWrapper.ObjectWrapper(philo_id, db, row=o)

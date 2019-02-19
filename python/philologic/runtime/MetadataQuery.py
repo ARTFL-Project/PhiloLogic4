@@ -1,23 +1,22 @@
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import os
-import sys
-import struct
 import sqlite3
-from . import HitList
-import unicodedata
+import struct
 import subprocess
-from .QuerySyntax import parse_query, group_terms
+import sys
+import unicodedata
+
+from . import HitList
 from .HitList import NoHits
-from six.moves import range
-from six.moves import zip
+from .QuerySyntax import group_terms, parse_query
 
 os.environ["PATH"] += ":/usr/local/bin/"
 
 
 def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
     """Prepare and execute SQL metadata query."""
-    if db.locals['debug']:
+    if db.locals["debug"]:
         print("METADATA_QUERY:", param_dicts, file=sys.stderr)
     prev = None
     for d in param_dicts:
@@ -69,29 +68,33 @@ def query_recursive(db, param_dict, parent, sort_order):
 def query_lowlevel(db, param_dict, sort_order):
     vars = []
     clauses = []
-    for column, values in param_dict.items():
+    for column, values in list(param_dict.items()):
         norm_path = db.path + "/frequencies/normalized_" + column + "_frequencies"
         for v in values:
             parsed = parse_query(v)
-            if db.locals['debug']:
+            if db.locals["debug"]:
                 print("METADATA_TOKENS:", parsed, file=sys.stderr)
             grouped = group_terms(parsed)
-            if db.locals['debug']:
+            if db.locals["debug"]:
                 print("METADATA_SYNTAX GROUPED:", grouped, file=sys.stderr)
             expanded = expand_grouped_query(grouped, norm_path)
-            if db.locals['debug']:
+            if db.locals["debug"]:
                 print("METADATA_SYNTAX EXPANDED:", expanded, file=sys.stderr)
             sql_clause = make_grouped_sql_clause(expanded, column, db)
-            if db.locals['debug']:
+            if db.locals["debug"]:
                 print("SQL_SYNTAX:", sql_clause, file=sys.stderr)
             clauses.append(sql_clause)
     if not sort_order:
         sort_order = ["rowid"]
     if clauses:
-        query = "SELECT philo_id FROM toms WHERE " + " AND ".join("(%s)" % c for c in clauses) + " order by %s;" % ", ".join(sort_order)
+        query = (
+            "SELECT philo_id FROM toms WHERE "
+            + " AND ".join("(%s)" % c for c in clauses)
+            + " order by %s;" % ", ".join(sort_order)
+        )
     else:
         query = "SELECT philo_id FROM toms order by %s;" % ", ".join(sort_order)
-    if db.locals['debug']:
+    if db.locals["debug"]:
         print("INNER QUERY: ", "%s %% %s" % (query, vars), sort_order, file=sys.stderr)
     results = db.dbh.execute(query, vars)
     return results
@@ -113,12 +116,9 @@ def expand_grouped_query(grouped, norm_path):
         expanded_group = []
         for kind, token in group:
             if kind == "TERM":
-                try:
-                    norm_term = token.decode("utf-8").lower()
-                except:
-                    norm_term = token.lower()
+                norm_term = token.lower()
                 norm_term = [c for c in unicodedata.normalize("NFKD", norm_term) if not unicodedata.combining(c)]
-                norm_term = u"".join(norm_term).encode("utf-8")
+                norm_term = "".join(norm_term)
                 expanded_terms = metadata_pattern_search(norm_term, norm_path)
                 if expanded_terms:
                     expanded_tokens = [("QUOTE", '"' + e + '"') for e in expanded_terms]
@@ -173,11 +173,11 @@ def make_grouped_sql_clause(expanded, column, db):
                 lower, upper = first_value.split("-")
                 if not lower:
                     c = db.dbh.cursor()
-                    c.execute('select min(%s) from toms' % column)
+                    c.execute("select min(%s) from toms" % column)
                     lower = str(c.fetchone()[0])
                 if not upper:
                     c = db.dbh.cursor()
-                    c.execute('select max(%s) from toms' % column)
+                    c.execute("select max(%s) from toms" % column)
                     upper = str(c.fetchone()[0])
                 clause += "(%s >= %s AND %s <= %s)" % (column, esc(lower), column, esc(upper))
                 if first_group:
@@ -187,7 +187,7 @@ def make_grouped_sql_clause(expanded, column, db):
                     try:
                         clauses += "AND %s" % clause
                     except UnicodeDecodeError:
-                        clauses += "AND %s" % clause.encode('utf8')
+                        clauses += "AND %s" % clause
                 continue
             clause += "%s IN (" % column
         # if we don't have a range, we have something that we can evaluate
@@ -208,7 +208,7 @@ def make_grouped_sql_clause(expanded, column, db):
                 try:
                     clause += esc(token[1:-1])
                 except:
-                    clause += esc(token.decode('utf-8')[1:-1])
+                    clause += esc(token[1:-1])
                 # but harmless, as well was its own clause below.  Fix later, if possible.
         clause += ")"
         if has_null:
@@ -225,13 +225,11 @@ def make_grouped_sql_clause(expanded, column, db):
 
 
 def metadata_pattern_search(term, path):
-    command = ['egrep', '-awie', "[[:blank:]]?%s" % term, '%s' % path]
+    command = ["egrep", "-awie", "[[:blank:]]?%s" % term, "%s" % path]
     grep = subprocess.Popen(command, stdout=subprocess.PIPE, env=os.environ)
-    cut = subprocess.Popen(["cut", "-f", "2"],
-                           stdin=grep.stdout,
-                           stdout=subprocess.PIPE)
+    cut = subprocess.Popen(["cut", "-f", "2"], stdin=grep.stdout, stdout=subprocess.PIPE)
     match, stderr = cut.communicate()
-    matches = [i for i in match.split('\n') if i]
+    matches = [i for i in match.decode("utf8", "ignore").split("\n") if i]
     return matches
 
 

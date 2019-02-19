@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 from wsgiref.handlers import CGIHandler
@@ -26,7 +26,7 @@ def get_header(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
     request = WSGIHandler(environ, config)
     header = get_tei_header(request, config)
-    yield header
+    yield header.encode('utf8')
 
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 from wsgiref.handlers import CGIHandler
 
-import simplejson
+import json
 
 import sys
 sys.path.append("..")
@@ -31,7 +31,7 @@ def word_property_filter(environ, start_response):
     start_response('200 OK', headers)
     filter_results = filter_words_by_property(hits, config.db_path, request,
                                               db, config)
-    yield json.dumps(filter_results)
+    yield json.dumps(filter_results).encode('utf8')
 
 
 if __name__ == "__main__":

@@ -11,12 +11,12 @@ def cleanup(infile,outfile):
     # text = re.sub(r"<\->",r"<gap reason='omitted' unit='bracket' />",text)
     # text = re.sub(r"<MVO_PIM=\"(.*?)\">",r'<figure><graphic url="\g<1>"></graphic></figure>',text)
     # text = re.sub(r"<omit=(.*?)>",r"<gap reason='omitted' unit='\g<1>' />",text)
-    print len(text)
+    print(len(text))
     soup = bss(text,selfClosingTags=self_closing)
     for tag in soup.findAll():
         if tag.name in fix_case:
             tag.name = fix_case[tag.name]
-    print >> outfile,soup
+    print(soup, file=outfile)
     outfile.close()
 
 #Annoyingly, BeautifulSoup requires you to declare ALL self-closing tags yourself; it will badly mangle your text if you miss one, so get this right.
@@ -456,7 +456,7 @@ for el in capitalized_elements:
     fix_case[el.lower()] = el
 
 for filename in sys.argv[1:]:
-    print >> sys.stderr, "Cleaning %s" % filename
+    print("Cleaning %s" % filename, file=sys.stderr)
     filenameout = filename + ".xml"
     infile = open(filename)
     outfile = open(filenameout,"w")

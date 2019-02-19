@@ -1,3 +1,8 @@
+### 4.6 ###
+- Port PhiloLogic4 codebase to Python3
+- Switch load time compression from Gzip to LZ4: big speed-up in loading large databases
+- Lib reorganization
+
 #### 4.0 => 4.5 ####
 - Completely rewritten parser: can now parse broken XML
 - Massive lib reorg

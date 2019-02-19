@@ -160,7 +160,8 @@
     transition: opacity 200ms;
 }
 
-#nav-buttons.ui-scrollfix #back-to-top,  #nav-buttons.ui-scrollfix #report-error {
+#nav-buttons.ui-scrollfix #back-to-top,
+#nav-buttons.ui-scrollfix #report-error {
     display: inline;
     opacity: 1;
 }
