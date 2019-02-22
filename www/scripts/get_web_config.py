@@ -5,28 +5,33 @@ import sqlite3
 from wsgiref.handlers import CGIHandler
 
 import sys
+
 sys.path.append("..")
 import custom_functions
+
 try:
-     from custom_functions import WebConfig
+    from custom_functions import WebConfig
 except ImportError:
-     from philologic.runtime import WebConfig
+    from philologic.runtime import WebConfig
 
 from philologic.Config import MakeDBConfig
 from philologic.runtime.DB import DB
 
 
-def get_web_config(environ, start_response):
-    status = '200 OK'
-    headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
+def get_web_config(_, start_response):
+    status = "200 OK"
+    headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
-    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('scripts', ''))
+    db_path = os.path.abspath(os.path.dirname(__file__)).replace("scripts", "")
+    config = WebConfig(db_path)
     config.time_series_status = time_series_tester(config)
-    yield config.to_json().encode('utf8')
+    db_locals = MakeDBConfig(os.path.join(db_path, "data/db.locals.py"))
+    config.data["available_metadata"] = db_locals.metadata_fields
+    yield config.to_json().encode("utf8")
 
 
 def time_series_tester(config):
-    db = DB(config.db_path + '/data/')
+    db = DB(config.db_path + "/data/")
     c = db.dbh.cursor()
     try:
         c.execute("SELECT COUNT(*) FROM toms WHERE %s IS NOT NULL" % config.time_series_year_field)

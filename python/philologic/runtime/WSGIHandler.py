@@ -92,7 +92,7 @@ class WSGIHandler(object):
                 # Hack to remove hyphens in Frantext
                 if field != "date" and isinstance(self.cgi[field][0], str):
                     if not self.cgi[field][0].startswith('"'):
-                        self.cgi[field][0] = parse_query(self.cgi[field][0], config)
+                        self.cgi[field][0] = query_parse(self.cgi[field][0], config)
                 # these ifs are to fix the no results you get when you do a
                 # metadata query
                 if self["q"] != "":

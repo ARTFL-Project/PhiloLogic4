@@ -146,9 +146,9 @@ def check_login_info(config, request):
 
 def make_token(incoming_address, db):
     h = hashlib.md5()
-    h.update(incoming_address)
-    now = str(time.time())
+    h.update(incoming_address.encode("utf8"))
+    now = str(time.time()).encode("utf8")
     h.update(now)
-    secret = db.locals.secret
+    secret = db.locals.secret.encode("utf8")
     h.update(secret)
     return (h.hexdigest(), now)

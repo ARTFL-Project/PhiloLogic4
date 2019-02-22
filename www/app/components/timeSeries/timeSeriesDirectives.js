@@ -21,7 +21,6 @@
                     scope.dateCounts[date] = timeSeriesResults.results.date_count[date];
                 }
                 scope.percent = Math.floor(scope.resultsLength / scope.totalResults * 100);
-                console.log(scope.percent)
                 sortAndRenderTimeSeries(scope, formData, fullResults, timeSeriesResults)
             }).catch(function(response) {
                 scope.timeSeries.loading = false;
@@ -41,7 +40,7 @@
             };
             scope.myBarChart.data.datasets[0].data = scope.absoluteCounts;
             scope.myBarChart.update();
-            $timeout(function () {
+            $timeout(function() {
                 chartLinker(scope);
             });
             // scope.data[1] = scope.relativeCounts;
