@@ -42,10 +42,12 @@ A page tag with both attributes could look like this:
 ## Inline Images ##
 * Inline images should use the `<graphic>` tag.
 * Links to images should be stored in the facs attribute such as below. Image links should be separated by a space:
+
 ```xml
 <graphic facs="V23/plate_23_2_2.jpeg"/>
 <graphic facs="V23/plate_23_2_2-sm.jpeg V23/plate_23_2_2-lg.jpeg"/>
 ```
+
 **Note**: The values specified in `facs` must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
 
 ## External Images ##
@@ -53,9 +55,11 @@ External image are images that should not be rendered alongside the text like in
 * External Images should use the `<ptr>`tag.
 * Links to the image should be stored in the facs attribute such as below. Only one link should be available.
 * The text accompanying the image should be stored in the rend attribute.
+
 ```xml
 <ptr facs="0000c.jpg" rend="[000c]"/>
 ```
+
 ## Notes ##
 ### Important ###
 While PhiloLogic will display inline notes, it really only properly supports notes
@@ -70,9 +74,11 @@ itself at the end of a text object or of the document.
 
 
 Example of a `<ref>` tag pointing to a `<note>` tag:
+
 ```xml
 <ref type="note" target="n1" n="1"/>
 ```
+
 #### Note tags ####
 * Notes should be stored at the end of the parent `<div>` element or a the end of the doc inside a `<div type="notes">`
 * Notes themselves are stored in a `<note>` tag.
