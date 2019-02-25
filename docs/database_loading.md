@@ -52,7 +52,7 @@ So our command for loading texts could be::
 
 In the event you need to customize the behavior of the parser, you can pass the `-l` option along with a `load_config.py` file to be found in `PhiloLogic4/extras/` directory. In this file, you can configure a number of different parameters:
 
-<pre><code>
+```python
 # Define default object level
 default_object_level = 'doc'
 
@@ -66,7 +66,7 @@ plain_text_obj = []
 ## Define whether to store all words with their philo IDs. Useful for data-mining tasks
 ## where keeping the index information (and byte offset) is important.
 store_words_and_ids = False
-</code></pre>
+```
 
 `default_object_level` defines the type of object returned for the purpose of most navigation reports--for most database, this will be "doc", but you might want to use "div1" for dictionary or encyclopedia databases.
 
@@ -81,7 +81,7 @@ store_words_and_ids = False
 #### Configuring the XML Parser ####
 The next section of the load script is setup for the XML Parser:
 
-<pre><code>
+```python
 ## Set-up database load ###
 ###########################
 
@@ -328,7 +328,7 @@ flatten_ligatures = True
 # Define a list of strings which mark the end of a sentence.
 # Note that this list will be added to the current one which is [".", "?", "!"]
 sentence_breakers = []
-</code></pre>
+```
 
 The basic layout is this:
 
