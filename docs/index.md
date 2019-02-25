@@ -1,8 +1,3 @@
----
-# layout: default
-title: Home
----
-
 # ![alt text](../www/app/assets/img/philo.png) 4.6
 
 PhiloLogic is an XML database/search engine/web app that is designed
