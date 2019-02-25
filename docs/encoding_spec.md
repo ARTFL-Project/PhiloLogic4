@@ -22,16 +22,19 @@ In other words, we do **NOT** support `<pb n='1'/>`.
 ```xml
 <pb facs="small/ENC_23-1-1.jpeg large/ENC_23-1-1.jpeg"/>
 ```
+
 This will produce produce a link to the first image, the second one will be displayed if clicked on the arrow link in the page turner.
 
 **Note**: The values specified in `facs` must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
 
 * Page numbers should be stored in the n attribute, such as below:
+
 ```xml
 <pb n="23"/>
 ```
 
 A page tag with both attributes could look like this:
+
 ```xml
 <pb n="23" facs="V23/ENC_23-1-1.jpeg"/>
 ```
