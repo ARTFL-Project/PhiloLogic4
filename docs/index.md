@@ -1,3 +1,8 @@
+---
+layout: default
+title: Home
+---
+
 ![alt text](../www/app/assets/img/philo.png) 4.6
 ===========
 
