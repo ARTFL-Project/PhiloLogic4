@@ -8,11 +8,11 @@ description, you can refer to [our research publications](<http://http://jtei.re
 ### Documentation
 
 -   [**Installation**](installation.md)
--   [**Database Loading**](docs/database_loading.md)
--   [**Configuring the Web Application**](docs/configure_web_app.md)
--   [**Query Syntax**](docs/query_syntax.md)
--   [**Text Encoding Spec**](docs/encoding_spec.md)
--   [**Access Control**](docs/access_control.md)
+-   [**Database Loading**](database_loading.md)
+-   [**Configuring the Web Application**](configure_web_app.md)
+-   [**Query Syntax**](query_syntax.md)
+-   [**Text Encoding Spec**](encoding_spec.md)
+-   [**Access Control**](access_control.md)
 
 ### IMPORTANT ###
 * PhiloLogic4.6 will only work on Unix-based systems (Linux, *BSD) though MacOS is not supported and guaranteed to work.
