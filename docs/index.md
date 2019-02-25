@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Home
+include: head.html
 ---
 
 ![alt text](../www/app/assets/img/philo.png) 4.6
@@ -24,3 +25,7 @@ description, you can refer to [our research publications](<http://http://jtei.re
 * PhiloLogic4.6 will only run on the Apache Webserver
 * PhiloLogic4.6 needs to run on Python 3.6 and up. For a Python 2 version, use the latest PhiloLogic 4.5 release.
 * The PhiloLogic4.6 Web App will only work on recent versions of web browsers: Chrome, Firefox, Safari, Opera, Edge. No support for Internet Explorer.
+
+---
+include: footer.html
+---
