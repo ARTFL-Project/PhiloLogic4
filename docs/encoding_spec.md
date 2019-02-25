@@ -12,7 +12,8 @@ In other words, we do **NOT** support `<pb n='1'/>`.
 # Page tags #
 * Pages are encoded with the `<pb>` tag.
 * Page image filenames should be stored inside the facs attribute, such as in the example below:
-```XML
+
+```HTML
 <pb facs="ENC_23-1-1.jpeg"/>
 ```
 
