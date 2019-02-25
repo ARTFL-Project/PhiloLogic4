@@ -1,4 +1,4 @@
-## Text Encoding Specification ###
+# Text Encoding Specification #
 
 * Starting from version 4.5, PhiloLogic will now parse non-valid XML since it no longer relies on an XML lib for document parsing.
 
