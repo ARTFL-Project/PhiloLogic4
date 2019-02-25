@@ -13,13 +13,13 @@ In other words, we do **NOT** support `<pb n='1'/>`.
 * Pages are encoded with the `<pb>` tag.
 * Page image filenames should be stored inside the facs attribute, such as in the example below:
 
-```HTML
+```xml
 <pb facs="ENC_23-1-1.jpeg"/>
 ```
 
 * You can also specify multiple images separated by a space such as below:
 
-```XML
+```xml
 <pb facs="small/ENC_23-1-1.jpeg large/ENC_23-1-1.jpeg"/>
 ```
 This will produce produce a link to the first image, the second one will be displayed if clicked on the arrow link in the page turner.
@@ -27,19 +27,19 @@ This will produce produce a link to the first image, the second one will be disp
 **Note**: The values specified in `facs` must be the complete relative link of the image(s). These are then appended to the url defined in web_config.cfg under `pages_images_url_root`
 
 * Page numbers should be stored in the n attribute, such as below:
-```XML
+```xml
 <pb n="23"/>
 ```
 
 A page tag with both attributes could look like this:
-```XML
+```xml
 <pb n="23" facs="V23/ENC_23-1-1.jpeg"/>
 ```
 
 ## Inline Images ##
 * Inline images should use the `<graphic>` tag.
 * Links to images should be stored in the facs attribute such as below. Image links should be separated by a space:
-```XML
+```xml
 <graphic facs="V23/plate_23_2_2.jpeg"/>
 <graphic facs="V23/plate_23_2_2-sm.jpeg V23/plate_23_2_2-lg.jpeg"/>
 ```
@@ -50,7 +50,7 @@ External image are images that should not be rendered alongside the text like in
 * External Images should use the `<ptr>`tag.
 * Links to the image should be stored in the facs attribute such as below. Only one link should be available.
 * The text accompanying the image should be stored in the rend attribute.
-```XML
+```xml
 <ptr facs="0000c.jpg" rend="[000c]"/>
 ```
 ## Notes ##
