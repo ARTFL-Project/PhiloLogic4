@@ -79,11 +79,7 @@ doc_xpaths = {
         ".//text/front/docImprint/acheveImprime",
     ],
     "extent": [".//sourceDesc/bibl/extent", ".//sourceDesc/biblStruct/monog//extent", ".//sourceDesc/biblFull/extent"],
-    "editor": [
-        ".//sourceDesc/bibl/editor",
-        ".//sourceDesc/biblFull/titleStmt/editor",
-        ".//sourceDesc/bibl/title/Stmt/editor",
-    ],
+    "editor": [".//sourceDesc/bibl/editor", ".//sourceDesc/biblFull/titleStmt/editor", ".//sourceDesc/bibl/title/Stmt/editor"],
     "identifiers": [".//publicationStmt/idno"],
     "text_genre": [".//profileDesc/textClass/keywords[@scheme='genre']/term", ".//SourceDesc/genre"],
     "keywords": [".//profileDesc/textClass/keywords/list/item"],
@@ -91,11 +87,7 @@ doc_xpaths = {
     "notes": [".//fileDesc/notesStmt/note", ".//publicationStmt/notesStmt/note"],
     "auth_gender": [".//publicationStmt/notesStmt/note"],
     "collection": [".//seriesStmt/title"],
-    "period": [
-        ".//profileDesc/textClass/keywords[@scheme='period']/list/item",
-        ".//SourceDesc/period",
-        ".//sourceDesc/period",
-    ],
+    "period": [".//profileDesc/textClass/keywords[@scheme='period']/list/item", ".//SourceDesc/period", ".//sourceDesc/period"],
     "text_form": [".//profileDesc/textClass/keywords[@scheme='form']/term"],
     "structure": [".//SourceDesc/structure", ".//sourceDesc/structure"],
     "idno": [".//fileDesc/publicationStmt/idno/"],
@@ -177,20 +169,20 @@ break_sent_in_line_group = False
 # exception, turn on the exception and list them as patterns.
 # Tags will not be indexed and will not break words. An empty list turns of the feature
 tag_exceptions = [
-    "<hi[^>]*>",
-    "<emph[^>]*>",
-    "<\/hi>",
-    "<\/emph>",
-    "<orig[^>]*>",
-    "<\/orig>",
-    "<sic[^>]*>",
-    "<\/sic>",
-    "<abbr[^>]*>",
-    "<\/abbr>",
-    "<i>",
-    "</i>",
-    "<sup>",
-    "</sup>",
+    r"<hi[^>]*>",
+    r"<emph[^>]*>",
+    r"<\/hi>",
+    r"<\/emph>",
+    r"<orig[^>]*>",
+    r"<\/orig>",
+    r"<sic[^>]*>",
+    r"<\/sic>",
+    r"<abbr[^>]*>",
+    r"<\/abbr>",
+    r"<i>",
+    r"</i>",
+    r"<sup>",
+    r"</sup>",
 ]
 
 # ------------- UTF8 Strings to consider as word breakers -----------
@@ -253,6 +245,7 @@ sentence_breakers = []
 
 # This is where you define your own parser which needs to have the same signature
 # as the one located in python/philologic/Parser.py
-from philologic import Parser
+from philologic.loadtime import XMLParser
 
-parser_factory = Parser.XMLParser
+parser_factory = XMLParser
+

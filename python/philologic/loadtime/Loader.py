@@ -3,7 +3,6 @@
 Calls all parsing functions and stores data in index"""
 
 import collections
-import imp
 import math
 import os
 import pickle
@@ -15,11 +14,10 @@ import time
 from glob import glob
 
 from lxml import etree
+from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.loadtime.PostFilters import make_sql_table
-from philologic.utils import convert_entities, pretty_print, sort_list
-from multiprocess import Pool
-
+from philologic.utils import convert_entities, load_module, pretty_print, sort_list
 
 SORT_BY_WORD = "-k 2,2"
 SORT_BY_ID = "-k 3,3n -k 4,4n -k 5,5n -k 6,6n -k 7,7n -k 8,8n -k 9,9n"
@@ -85,7 +83,7 @@ class Loader(object):
         values_to_ignore = ["load_filters", "post_filters", "parser_factory", "data_destination", "db_destination", "dbname"]
         if loader_options["load_config"]:
             shutil.copy(loader_options["load_config"], load_config_path)
-            config_obj = imp.load_source("external_load_config", loader_options["load_config"])
+            config_obj = load_module("external_load_config", loader_options["load_config"])
             already_configured_values = {}
             for attribute in dir(config_obj):
                 if not attribute.startswith("__") and not isinstance(getattr(config_obj, attribute), collections.Callable):

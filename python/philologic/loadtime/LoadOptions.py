@@ -1,30 +1,28 @@
 #!/usr/bin env python3
 
 
-import imp
+import collections
 import os
 import sys
 from glob import glob
 from optparse import OptionParser
 
-from philologic.loadtime import Loader, LoadFilters, PostFilters, Parser, PlainTextParser
-from philologic.utils import pretty_print
-import collections
-
+from philologic.loadtime import Loader, LoadFilters, Parser, PlainTextParser, PostFilters
+from philologic.utils import pretty_print, load_module
 
 # Load global config
-config_path = os.getenv("PHILOLOGIC_CONFIG", "/etc/philologic/philologic4.cfg")
-config_file = imp.load_source("philologic4", config_path)
+CONFIG_PATH = os.getenv("PHILOLOGIC_CONFIG", "/etc/philologic/philologic4.cfg")
+CONFIG_FILE = load_module("philologic4", CONFIG_PATH)
 
-if config_file.url_root is None:
+if CONFIG_FILE.url_root is None:
     print("url_root variable is not set in /etc/philologic/philologic4.cfg", file=sys.stderr)
     print("See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md.", file=sys.stderr)
     exit()
-elif config_file.web_app_dir is None:
+elif CONFIG_FILE.web_app_dir is None:
     print("web_app_dir variable is not set in /etc/philologic/philologic4.cfg", file=sys.stderr)
     print("See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md.", file=sys.stderr)
     exit()
-elif config_file.database_root is None:
+elif CONFIG_FILE.database_root is None:
     print("database_root variable is not set in /etc/philologic/philologic4.cfg", file=sys.stderr)
     print("See https://github.com/ARTFL-Project/PhiloLogic4/blob/master/docs/installation.md.", file=sys.stderr)
     exit()
@@ -33,9 +31,9 @@ elif config_file.database_root is None:
 class LoadOptions(object):
     def __init__(self):
         self.values = {}
-        self.values["database_root"] = config_file.database_root
-        self.values["web_app_dir"] = config_file.web_app_dir
-        self.values["theme"] = config_file.theme
+        self.values["database_root"] = CONFIG_FILE.database_root
+        self.values["web_app_dir"] = CONFIG_FILE.web_app_dir
+        self.values["theme"] = CONFIG_FILE.theme
         self.values["destination"] = "./"
         self.values["load_config"] = ""
         self.values["default_object_level"] = Loader.DEFAULT_OBJECT_LEVEL
@@ -193,10 +191,13 @@ class LoadConfig(object):
         self.config = {}
 
     def parse(self, load_config_file_path):
-        load_config_file = imp.load_source("external_load_config", load_config_file_path)
+        load_config_file = load_module("external_load_config", load_config_file_path)
         for a in dir(load_config_file):
-            if not a.startswith("__") and not isinstance(getattr(load_config_file, a), collections.Callable):
-                value = getattr(config_file, a)
+            if a == "parser_factory":
+                value = getattr(load_config_file, a)
+                self.config["parser_factory"] = value
+            elif not a.startswith("__") and not isinstance(getattr(load_config_file, a), collections.Callable):
+                value = getattr(load_config_file, a)
                 if value:
                     if a == "words_to_index":
                         word_list = set([])
@@ -214,6 +215,3 @@ class LoadConfig(object):
                         self.config["load_filters"].append(LoadFilters.store_words_and_philo_ids)
                     else:
                         self.config[a] = value
-            elif a == "parser_factory":
-                value = getattr(load_config_file, a)
-                self.config["parser_factory"] = value

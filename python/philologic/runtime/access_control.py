@@ -2,7 +2,6 @@
 
 
 import hashlib
-import imp
 import os
 import re
 import socket
@@ -11,6 +10,7 @@ import time
 from urllib.parse import unquote
 
 from philologic.runtime.DB import DB
+from philologic.utils import load_module
 
 # These should always be allowed for local access
 local_blocks = ["10.0.0.", "172.16.0.", "192.168.0.", "127.0.0."]
@@ -36,7 +36,7 @@ def check_access(environ, config):
 
     # Load access config file. If loading fails, grant access.
     try:
-        access_config = imp.load_source("access_config", access_file)
+        access_config = load_module("access_config", access_file)
     except Exception as e:
         print("ACCESS ERROR", repr(e), file=sys.stderr)
         print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)

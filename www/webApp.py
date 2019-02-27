@@ -2,17 +2,15 @@
 """Bootstrap Web app"""
 
 
-import imp
 import os.path
-import sys
-import shutil
 
 from philologic.runtime import WebConfig
 from philologic.runtime import WSGIHandler
 from philologic.runtime import access_control
+from philologic.utils import load_module
 
 config = WebConfig(os.path.abspath(os.path.dirname(__file__)))
-global_config = imp.load_source("philologic4", config.global_config_location)
+global_config = load_module("philologic4", config.global_config_location)
 path = os.path.abspath(os.path.dirname(__file__))
 dbname = path.strip().split("/")[-1]
 

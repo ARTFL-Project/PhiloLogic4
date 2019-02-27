@@ -932,7 +932,7 @@ class Config(object):
     def to_json(self):
         out_obj = {}
         written = []
-        for key, value in self.defaults.items():
+        for key in self.defaults.keys():
             out_obj[key] = self.data[key]
             written.append(key)
         for key in self.data:
