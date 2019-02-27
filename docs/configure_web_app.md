@@ -36,6 +36,15 @@ database/
 │       ├── searchForm
 │       └── searchSyntax
 ├── data
+│   ├── db.locals.py
+│   ├── frequencies
+│   ├── index
+│   ├── index.1
+│   ├── load_config.py
+│   ├── src
+│   ├── TEXT
+│   ├── toms.db
+│   └── web_config.cfg
 ├── reports
 └── scripts
 </code></pre>
