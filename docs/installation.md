@@ -15,12 +15,9 @@ You can find more detailed installation instructions for specific OSes here:
 
 ### Downloading
 
-IMPORTANT: Do not install from the master branch on github: this is a the development branch and in no way garanteed to be stable
+IMPORTANT: Do not install from the master branch on github: this is the development branch and is in no way garanteed to be stable
 
 You can find a copy of the latest version of PhiloLogic4 [here](../../../releases/).
-
-For the rest of this document, we will assume the PhiloLogic source code is installed in
-your home directory at ~/PhiloLogic4/
 
 ### Prerequisites
 
@@ -35,7 +32,7 @@ your home directory at ~/PhiloLogic4/
 Installing PhiloLogic's libraries requires administrator privileges.
 The C library depends on `gdbm`\_, which _must_ be installed first, to compile correctly.
 
-Just run the install.sh in the top level directory to install the C Core, Python dependencies, and the Python PhiloLogic library:
+Just run the install.sh in the top level directory of the PhiloLogic4 you downloaded to install PhiloLogic and its dependencies:
 
 `./install.sh`
 
@@ -62,4 +59,3 @@ the proper directory may vary, but `/var/www/philologic/` or `/var/www/html/phil
 Configuring your web server is outside of the scope of this document; but the web install
 does come with a preconfigured .htaccess file that allows you to run the Web App.
 Therefore, you need to make sure your server is configured to allow htaccess files.
-if in doubt, ask a friendly sysadmin..
