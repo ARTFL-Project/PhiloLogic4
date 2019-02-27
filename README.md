@@ -5,7 +5,7 @@ PhiloLogic is an XML database/search engine/web app that is designed
 for the particular difficulties of TEI XML.  For a more theoretical
 description, you can refer to [our research publications](<http://http://jtei.revues.org/817) or [our blog](<http://artfl.blogspot.com>).
 
-### [See documentation](https://artfl-project.github.io/PhiloLogic4/)
+### See [documentation](https://artfl-project.github.io/PhiloLogic4/)
 
 ### IMPORTANT ###
 * PhiloLogic4.6 will only work on Unix-based systems (Linux, *BSD) though MacOS is not supported and guaranteed to work.
