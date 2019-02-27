@@ -14,7 +14,7 @@ This database directory contains:
 -   The indexes and other data strutures
 -   The web application, which includes server-side Python runtime functions and the AngularJS client application
 
-Here is what the database directory looks like after a load::
+Here is what the database directory looks like after a load:
 
 <pre><code>
 database/
