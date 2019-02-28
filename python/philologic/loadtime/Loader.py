@@ -13,7 +13,7 @@ import sys
 import time
 from glob import glob
 
-from lxml import etree
+import lxml
 from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.loadtime.PostFilters import make_sql_table
@@ -191,26 +191,30 @@ class Loader(object):
             header = convert_entities(header)
             if self.debug:
                 print("parsing %s header..." % file.name)
-            parser = etree.XMLParser(recover=True)
+            parser = lxml.etree.XMLParser(recover=True)
             try:
-                tree = etree.fromstring(header, parser)
+                tree = lxml.etree.fromstring(header, parser)
                 trimmed_metadata_xpaths = []
                 for field in metadata_xpaths:
                     for xpath in metadata_xpaths[field]:
-                        attr_pattern_match = re.search(r"@([^\/\[\]]+)$", xpath)
-                        if attr_pattern_match:
-                            xp_prefix = xpath[: attr_pattern_match.start(0)]
-                            attr_name = attr_pattern_match.group(1)
-                            elements = tree.findall(xp_prefix)
-                            for el in elements:
-                                if el is not None and el.get(attr_name, ""):
-                                    data[field] = el.get(attr_name, "")
+                        xpath = xpath.rstrip("/") # make sure there are no trailing slashes which make lxml die
+                        try:
+                            elements = tree.xpath(xpath)
+                        except lxml.etree.XPathEvalError:
+                            continue
+                        for element in elements:
+                            if element is not None:
+                                value = ""
+                                if isinstance(element, lxml.etree._Element) and element.text is not None:
+                                    value = element.text.strip()
+                                elif isinstance(element, lxml.etree._ElementUnicodeResult):
+                                    value = str(element).strip()
+                                if value:
+                                    data[field] = value
                                     break
-                        else:
-                            el = tree.find(xpath)
-                            if el is not None and el.text is not None:
-                                data[field] = el.text
-                                break
+                        else: # only continue looping over xpaths if no break in inner loop
+                            continue
+                        break
                 trimmed_metadata_xpaths = [
                     (metadata_type, xpath, field)
                     for metadata_type in ["div", "para", "sent", "word", "page"]
@@ -223,7 +227,7 @@ class Loader(object):
                     print(pretty_print(data))
                 data["options"] = {"metadata_xpaths": trimmed_metadata_xpaths}
                 load_metadata.append(data)
-            except etree.XMLSyntaxError:
+            except lxml.etree.XMLSyntaxError:
                 self.deleted_files.append(file.name)
         if self.deleted_files:
             for f in self.deleted_files:
