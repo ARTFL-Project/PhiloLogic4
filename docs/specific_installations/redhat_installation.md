@@ -1,5 +1,6 @@
-Installing PhiloLogic on RedHat (and CentOS)
-============================================
+---
+title: Installing PhiloLogic on RedHat (and CentOS)
+---
 
 * Install gdbm
 
