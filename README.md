@@ -6,7 +6,7 @@ for the particular difficulties of TEI XML.  For a more theoretical
 description, you can refer to [our research publications](<http://http://jtei.revues.org/817) or [our blog](<http://artfl.blogspot.com>).
 
 **_The master branch refers to the new Python3 version of PhiloLogic. For the old Python2 version, refer to here:_**
-https://github.com/ARTFL-Project/PhiloLogic4/tree/PhiloLogic4.5
+_https://github.com/ARTFL-Project/PhiloLogic4/tree/PhiloLogic4.5_
 
 ### See [documentation](https://artfl-project.github.io/PhiloLogic4/)
 
