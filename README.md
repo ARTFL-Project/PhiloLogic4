@@ -5,7 +5,7 @@ PhiloLogic is an XML database/search engine/web app that is designed
 for the particular difficulties of TEI XML.  For a more theoretical
 description, you can refer to [our research publications](<http://http://jtei.revues.org/817) or [our blog](<http://artfl.blogspot.com>).
 
-**__The master branch refers to the new Python3 version of PhiloLogic. For the old Python2 version, refer to here:__**
+**_The master branch refers to the new Python3 version of PhiloLogic. For the old Python2 version, refer to here:_**
 https://github.com/ARTFL-Project/PhiloLogic4/tree/PhiloLogic4.5
 
 ### See [documentation](https://artfl-project.github.io/PhiloLogic4/)
