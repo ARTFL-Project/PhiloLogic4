@@ -1,4 +1,6 @@
-## Installing PhiloLogic4 on Ubuntu
+---
+title: Installing PhiloLogic4 on Ubuntu
+---
 
 -   The following dependencies need to be installed:
 
