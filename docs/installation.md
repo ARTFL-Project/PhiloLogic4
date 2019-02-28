@@ -30,7 +30,7 @@ You can find a copy of the latest version of PhiloLogic4 [here](../../../release
 ### Installing
 
 Installing PhiloLogic's libraries requires administrator privileges.
-The C library depends on `gdbm`\_, which _must_ be installed first, to compile correctly.
+The C library depends on `gdbm`, which _must_ be installed first, to compile correctly.
 
 Just run the install.sh in the top level directory of the PhiloLogic4 you downloaded to install PhiloLogic and its dependencies:
 
