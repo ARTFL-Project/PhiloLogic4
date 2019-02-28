@@ -1,5 +1,6 @@
-Installing PhiloLogic on Mac OSX
-================================
+---
+title: Installing PhiloLogic on Mac OSX
+---
 
 Note: these instructions were only tested on Mac OSX Yosemite.
 
