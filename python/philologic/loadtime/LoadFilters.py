@@ -3,10 +3,7 @@
 
 import os
 import pickle
-import sys
-import unicodedata
 from json import dumps, loads
-from subprocess import PIPE, Popen
 
 from philologic.loadtime.OHCOVector import Record
 

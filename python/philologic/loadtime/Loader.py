@@ -513,14 +513,13 @@ class Loader(object):
             if len(files) == file_num:
                 lists_of_files.append(files)
                 files = []
-        if len(files) > 0:
+        if files:
             lists_of_files.append(files)
 
         # Then we run the merge sort on each chunk of 500 files and compress the result
         print("%s: Merging %s in batches of %d..." % (time.ctime(), file_type, file_num))
         already_merged = 0
         os.system("touch %s" % self.workdir + "/sorted.init")
-        last_sort_file = self.workdir + "/sorted.init"
         for pos, object_list in enumerate(lists_of_files):
             command_list = " ".join([i[0] for i in object_list])
             file_list = " ".join([i[1] for i in object_list])
@@ -532,7 +531,6 @@ class Loader(object):
                 print("%s sorting failed\nInterrupting database load..." % file_type)
                 sys.exit()
             already_merged += len(object_list)
-            last_sort_file = output
             print("%s: %d files sorted..." % (time.ctime(), already_merged))
             if not self.debug:
                 os.system("rm %s" % file_list)
