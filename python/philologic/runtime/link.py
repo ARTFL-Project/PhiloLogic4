@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
+"""Build PhiloLogic links"""
 
-import imp
-import os
 from urllib.parse import quote_plus
-
-from philologic.runtime.DB import DB
-from philologic.Config import MakeWebConfig
 
 
 def url_encode(q_params):
@@ -66,9 +62,9 @@ def byte_range_to_link(db, config, request, obj_level="div1"):
     cursor.execute("SELECT philo_id FROM toms WHERE filename=?", (request.filename,))
     doc_id = cursor.fetchone()[0].split()[0]
     cursor.execute(
-        f"SELECT rowid, philo_id FROM toms WHERE philo_type='{obj_level}' AND philo_id like '{doc_id} %' AND start_byte <= {request.start_byte} ORDER BY rowid desc"
+        f"SELECT philo_id FROM toms WHERE philo_type='{obj_level}' AND philo_id like '{doc_id} %' AND start_byte <= {request.start_byte} ORDER BY rowid desc"
     )
-    rowid, philo_id = cursor.fetchone()
+    philo_id = cursor.fetchone()[0]
     philo_id = philo_id.split()
     while int(philo_id[-1]) == 0:
         philo_id.pop()

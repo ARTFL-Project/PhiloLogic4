@@ -30,7 +30,7 @@ def citation_links(db, config, i):
         "line": line_href,
     }
 
-    for field, metadata_type in db.locals["metadata_types"].items():
+    for metadata_type in db.locals["metadata_types"].values():
         if metadata_type == "para":
             links["para"] = make_absolute_object_link(config, i.philo_id[:5], i.bytes)
             break
@@ -43,7 +43,7 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=N
     if citation_type is None:
         citation_type = config[report + "_citation"]
     citation = []
-    for pos, citation_object in enumerate(citation_type):
+    for citation_object in citation_type:
         cite = {}
         cite["label"] = get_label(hit, citation_object)
         if cite["label"]:

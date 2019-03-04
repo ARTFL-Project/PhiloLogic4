@@ -80,7 +80,7 @@ def normalized_word_frequencies(loader_obj):
     frequencies = loader_obj.destination + "/frequencies"
     output = open(frequencies + "/normalized_word_frequencies", "w")
     for line in open(frequencies + "/word_frequencies"):
-        word, count = line.split("\t")
+        word, _ = line.split("\t")
         norm_word = word.lower()
         norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
         norm_word = "".join(norm_word)
@@ -99,7 +99,7 @@ def metadata_frequencies(loader_obj):
             cursor.execute(query)
             output = open(frequencies + "/%s_frequencies" % field, "w")
             for result in cursor:
-                if result[0] != None:
+                if result[0] is not None:
                     val = result[0]
                     clean_val = val.replace("\n", " ").replace("\t", "")
                     print(clean_val + "\t" + str(result[1]), file=output)
@@ -121,7 +121,7 @@ def normalized_metadata_frequencies(loader_obj):
         try:
             output = open(frequencies + "/normalized_" + field + "_frequencies", "w")
             for line in open(frequencies + "/" + field + "_frequencies"):
-                word, count = line.split("\t")
+                word, _ = line.split("\t")
                 norm_word = word.lower()
                 norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
                 norm_word = "".join(norm_word)
@@ -129,16 +129,6 @@ def normalized_metadata_frequencies(loader_obj):
             output.close()
         except:
             pass
-
-
-# Some post-merge cleanup for normalize_divs in LoadFilters--should always be paired and use same arguments.
-def normalize_divs_post(*columns):
-    def normalize_these_columns_post(loader):
-        for k, v in list(loader.metadata_types.items()):
-            if k in columns:
-                loader.metadata_types[k] = "div3"
-
-    return normalize_these_columns_post
 
 
 DefaultPostFilters = [

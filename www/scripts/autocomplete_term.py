@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
+import json
 import os
 import subprocess
+import sys
 from wsgiref.handlers import CGIHandler
 
-import json
 from philologic.runtime.DB import DB
 from philologic.runtime.Query import grep_exact, grep_word, split_terms
 from philologic.runtime.QuerySyntax import group_terms, parse_query
 
-import sys
 
 sys.path.append("..")
 import custom_functions

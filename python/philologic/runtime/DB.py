@@ -1,3 +1,5 @@
+"""DB class containing many niceties to retrieve data from SQL"""
+
 import hashlib
 import os
 import sqlite3
@@ -12,6 +14,7 @@ from .HitWrapper import HitWrapper, PageWrapper
 
 
 def hit_to_string(hit, width):
+    """Convert Philo hit to a string"""
     if isinstance(hit, sqlite3.Row):
         hit = hit["philo_id"]
     if isinstance(hit, str):
@@ -27,6 +30,8 @@ def hit_to_string(hit, width):
 
 
 class DB:
+    """Main class to access SQL data"""
+
     def __init__(self, dbpath, width=7, cached=True):
         """Disabling cache allows to use multiple DB objects in the same script
         without running into collisions"""
@@ -40,9 +45,8 @@ class DB:
             hit = self.get_id_lowlevel(item)
             hit = [int(x) for x in hit["philo_id"].split(" ")]
             return HitWrapper(hit, self)
-        else:
-            hit = [int(x) for x in hit_to_string(item, 9).split(" ")]
-            return PageWrapper(hit, self)
+        hit = [int(x) for x in hit_to_string(item, 9).split(" ")]
+        return PageWrapper(hit, self)
 
     def __getattr__(self, attr):
         # We need to open DB only when accessed
@@ -55,24 +59,28 @@ class DB:
             return self.dbh
 
     def get_id_lowlevel(self, item):
+        """Retrieve text object metadata"""
         hit_s = hit_to_string(item, self.width)
         c = self.dbh.cursor()
         c.execute("SELECT * FROM toms WHERE philo_id=? LIMIT 1;", (hit_s,))
         return c.fetchone()
 
     def get_word(self, item):
+        """Retrieve word from words table"""
         word_s = hit_to_string(item, self.width)
         c = self.dbh.cursor()
         c.execute("SELECT * FROM words WHERE philo_id=? LIMIT 1;", (word_s,))
         return c.fetchone()
 
     def get_page(self, item):
+        """Retrieve page data"""
         page_id_s = " ".join(str(s) for s in item)
         c = self.dbh.cursor()
         c.execute("SELECT * FROM pages WHERE philo_id=? LIMIT 1;", (page_id_s,))
         return c.fetchone()
 
     def get_line(self, byte_offset, doc_id):
+        """Retrieve line data"""
         c = self.dbh.cursor()
         try:
             c.execute(
@@ -106,7 +114,7 @@ class DB:
         if isinstance(method_arg, str):
             try:
                 method_arg = int(method_arg)
-            except:
+            except (TypeError, ValueError):
                 if method == "cooc" or method == "sentence":
                     method_arg = 6
                 else:
@@ -115,7 +123,7 @@ class DB:
         if isinstance(limit, str):
             try:
                 limit = int(limit)
-            except:
+            except (TypeError, ValueError):
                 limit = 10000000
 
         hash = hashlib.sha1()
@@ -123,7 +131,7 @@ class DB:
         has_metadata = False
         corpus_file = None
 
-        for key, value in list(metadata.items()):
+        for key, value in metadata.items():
             if isinstance(value, str):
                 if value == "":
                     pass
@@ -144,7 +152,6 @@ class DB:
                 # before we query, we need to figure out what type each parameter belongs to,
                 # and sort them into a list of dictionaries, one for each type.
                 metadata_dicts = [{} for level in self.locals["metadata_hierarchy"]]
-                #                print >> sys.stderr, "querying %s" % repr(metadata.items())
                 for k, v in list(metadata.items()):
                     for i, params in enumerate(self.locals["metadata_hierarchy"]):
                         if v and (k in params):
@@ -193,16 +200,13 @@ class DB:
                     sort_order=sort_order,
                     raw_results=raw_results,
                 )
-            else:
-                parsed = QuerySyntax.parse_query(qs)
-                grouped = QuerySyntax.group_terms(parsed)
-                split = Query.split_terms(grouped)
-                words_per_hit = len(split)
-                return HitList.HitList(
-                    search_file, words_per_hit, self, method=method, sort_order=sort_order, raw=raw_results
-                )
-        else:
-            if corpus:
-                return corpus
-            else:
-                return self.get_all(self.locals["default_object_level"], sort_order)
+            parsed = QuerySyntax.parse_query(qs)
+            grouped = QuerySyntax.group_terms(parsed)
+            split = Query.split_terms(grouped)
+            words_per_hit = len(split)
+            return HitList.HitList(
+                search_file, words_per_hit, self, method=method, sort_order=sort_order, raw=raw_results
+            )
+        if corpus:
+            return corpus
+        return self.get_all(self.locals["default_object_level"], sort_order)

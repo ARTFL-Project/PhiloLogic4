@@ -13,9 +13,9 @@ from philologic.runtime.MetadataQuery import metadata_pattern_search
 from philologic.runtime.QuerySyntax import parse_query
 from philologic.runtime import access_control, login_access
 
-import custom_functions
 
 sys.path.append("..")
+import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
