@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 """All different types of hit objects"""
 
 import sys

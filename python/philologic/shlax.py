@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # ShLaX-- a Shallow Lazy XML tokenizer.  Very useful for dirty, broken XML-like documents.
 
 
