@@ -28,13 +28,12 @@ def check_access(environ, config):
         else:
             access_file = os.path.join(config.db_path, "data", config.access_file)
         if not os.path.isfile(access_file):
-            print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)
             return ()
     else:
         print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)
         return ()
 
-    # Load access config file. If loading fails, grant access.
+    # Load access config file. If loading fails, don't grant access.
     try:
         access_config = load_module("access_config", access_file)
     except Exception as e:
@@ -129,9 +128,6 @@ def check_login_info(config, request):
     login_file_path = os.path.join(config.db_path, "data/logins.txt")
     unquoted_password = unquote(request.password)
     if os.path.exists(login_file_path):
-        import sys
-
-        print(login_file_path, file=sys.stderr)
         with open(login_file_path, "rb") as password_file:
             for line in password_file:
                 try:
@@ -155,8 +151,7 @@ def check_login_info(config, request):
 def make_token(incoming_address, db):
     h = hashlib.md5()
     h.update(incoming_address.encode("utf8"))
-    now = str(time.time()).encode("utf8")
-    h.update(now)
-    secret = db.locals.secret.encode("utf8")
-    h.update(secret)
+    now = str(time.time())
+    h.update(now.encode("utf8"))
+    h.update(db.locals.secret.encode("utf8"))
     return (h.hexdigest(), now)

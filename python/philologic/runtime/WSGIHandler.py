@@ -26,10 +26,9 @@ class WSGIHandler(object):
             self.cookies = SimpleCookie(environ["HTTP_COOKIE"])
             if "hash" in self.cookies and "timestamp" in self.cookies:
                 h = hashlib.md5()
-                secret = db.locals.secret
-                h.update(environ["REMOTE_ADDR"])
-                h.update(self.cookies["timestamp"].value)
-                h.update(secret)
+                h.update(environ["REMOTE_ADDR"].encode("utf8"))
+                h.update(self.cookies["timestamp"].value.encode("utf8"))
+                h.update(db.locals.secret.encode("utf8"))
                 if self.cookies["hash"].value == h.hexdigest():
                     self.authenticated = True
         self.cgi = urllib.parse.parse_qs(self.query_string, keep_blank_values=True)
