@@ -129,8 +129,16 @@ def check_login_info(config, request):
     login_file_path = os.path.join(config.db_path, "data/logins.txt")
     unquoted_password = unquote(request.password)
     if os.path.exists(login_file_path):
-        with open(login_file_path) as password_file:
+        import sys
+
+        print(login_file_path, file=sys.stderr)
+        with open(login_file_path, "rb") as password_file:
             for line in password_file:
+                try:
+                    line = line.decode("utf8", "ignore")
+                except UnicodeDecodeError as e:
+                    print(repr(line), file=sys.stderr)
+                    continue
                 line = line.strip()
                 if not line:  # empty line
                     continue
