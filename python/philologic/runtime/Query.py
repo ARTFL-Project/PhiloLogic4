@@ -41,7 +41,7 @@ def query(
         hfile = str(origpid) + ".hitlist"
     dir = db.path + "/hitlists/"
     filename = filename or (dir + hfile)
-    hl = open(filename, "w", encoding="utf8")
+    hl = open(filename, "wb")
     err = open("/dev/null", "w")
     freq_file = db.path + "/frequencies/normalized_word_frequencies"
     if query_debug:
@@ -184,9 +184,6 @@ def grep_word(token, freq_file, dest_fh, lowercase=True):
         token = token.lower()
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", token) if not unicodedata.combining(i)]
     norm_tok = "".join(norm_tok_uni_chars)
-    import sys
-
-    print("NORM TOK", norm_tok, file=sys.stderr)
     try:
         grep_command = ["egrep", "-a", "^%s[[:blank:]]" % norm_tok, freq_file]
         grep_proc = subprocess.Popen(grep_command, stdout=dest_fh)

@@ -204,9 +204,7 @@ class DB:
             grouped = QuerySyntax.group_terms(parsed)
             split = Query.split_terms(grouped)
             words_per_hit = len(split)
-            return HitList.HitList(
-                search_file, words_per_hit, self, method=method, sort_order=sort_order, raw=raw_results
-            )
+            return HitList.HitList(search_file, words_per_hit, self, sort_order=sort_order, raw=raw_results)
         if corpus:
             return corpus
         return self.get_all(self.locals["default_object_level"], sort_order)
