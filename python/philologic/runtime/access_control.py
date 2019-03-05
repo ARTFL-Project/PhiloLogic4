@@ -87,6 +87,7 @@ def check_access(environ, config):
                     return make_token(incoming_address, db)
         for ip_range in allowed_ips:
             if re.search(r"^%s.*" % ip_range, incoming_address):
+                print("PASS", file=sys.stderr)
                 return make_token(incoming_address, db)
 
     # If no token returned, we block access.
@@ -154,8 +155,10 @@ def check_login_info(config, request):
 
 def make_token(incoming_address, db):
     h = hashlib.md5()
+    print("BEFORE", file=sys.stderr)
     h.update(incoming_address.encode("utf8"))
     now = str(time.time())
     h.update(now.encode("utf8"))
     h.update(db.locals.secret.encode("utf8"))
+    print(repr(incoming_address), repr(now), repr(db.locals.secret), file=sys.stderr)
     return (h.hexdigest(), now)

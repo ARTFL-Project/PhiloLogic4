@@ -29,6 +29,14 @@ class WSGIHandler(object):
                 h.update(environ["REMOTE_ADDR"].encode("utf8"))
                 h.update(self.cookies["timestamp"].value.encode("utf8"))
                 h.update(db.locals.secret.encode("utf8"))
+                import sys
+
+                print(
+                    repr(environ["REMOTE_ADDR"]),
+                    repr(self.cookies["timestamp"].value),
+                    repr(db.locals.secret),
+                    file=sys.stderr,
+                )
                 if self.cookies["hash"].value == h.hexdigest():
                     self.authenticated = True
         self.cgi = urllib.parse.parse_qs(self.query_string, keep_blank_values=True)
