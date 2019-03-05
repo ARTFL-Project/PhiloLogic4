@@ -28,6 +28,10 @@ def check_access(environ, config):
         else:
             access_file = os.path.join(config.db_path, "data", config.access_file)
         if not os.path.isfile(access_file):
+            print(
+                f"ACCESS FILE DOES NOT EXIST. UNAUTHORIZED ACCESS TO: {incoming_address} from domain {match_domain}",
+                file=sys.stderr,
+            )
             return ()
     else:
         print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)
