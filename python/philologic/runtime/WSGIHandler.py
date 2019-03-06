@@ -5,15 +5,10 @@
 from http.cookies import SimpleCookie
 import hashlib
 import urllib.parse
-import re
 
 from philologic.runtime.find_similar_words import find_similar_words
 from philologic.runtime.Query import query_parse
 from philologic.runtime.DB import DB
-
-
-COOKIE_HASH = re.compile(r"(hash=[^;]+)")
-COOKIE_TIMESTAMP = re.compile(r"(timestamp=[^;]+)")
 
 
 class WSGIHandler(object):
@@ -28,27 +23,15 @@ class WSGIHandler(object):
         self.script_filename = environ["SCRIPT_FILENAME"]
         self.authenticated = False
         if "HTTP_COOKIE" in environ:
-            self.cookies = SimpleCookie(environ["HTTP_COOKIE"])
-            # import sys
-
-            # print(environ["HTTP_COOKIE"], file=sys.stderr)
-            # if "hash" in self.cookies and "timestamp" in self.cookies:
-            if "hash" in environ["HTTP_COOKIE"] and "timestamp" in environ["HTTP_COOKIE"]:
-                hash_value = COOKIE_HASH.search(environ["HTTP_COOKIE"]).groups()[0]
-                timestamp_value = COOKIE_TIMESTAMP.search(environ["HTTP_COOKIE"]).groups()[0]
+            self.cookies = SimpleCookie(
+                "".join(environ["HTTP_COOKIE"].split())
+            )  # remove all whitespace in Cookie since it breaks parsing in Python 3.6
+            if "hash" in self.cookies and "timestamp" in self.cookies:
                 h = hashlib.md5()
                 h.update(environ["REMOTE_ADDR"].encode("utf8"))
-                h.update(timestamp_value.encode("utf8"))
+                h.update(self.cookies["timestamp"].value.encode("utf8"))
                 h.update(db.locals.secret.encode("utf8"))
-                # import sys
-
-                # print(
-                #     repr(environ["REMOTE_ADDR"]),
-                #     repr(self.cookies["timestamp"].value),
-                #     repr(db.locals.secret),
-                #     file=sys.stderr,
-                # )
-                if hash_value == h.hexdigest():
+                if self.cookies["hash"].value == h.hexdigest():
                     self.authenticated = True
         self.cgi = urllib.parse.parse_qs(self.query_string, keep_blank_values=True)
         self.defaults = {"results_per_page": "25", "start": "0", "end": "0"}
