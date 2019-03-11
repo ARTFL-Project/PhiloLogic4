@@ -8,7 +8,7 @@ import sys
 import os
 
 PHILOLOGIC_INSTALL = "/var/lib/philologic4/web_app/"
-TWO_TO_THREE_EXEC = "2to3-2.7"
+TWO_TO_THREE_EXEC = "2to3-3.6"
 FORMAT_CODE = False
 UPDATE_WEB_APP = False
 
@@ -25,6 +25,13 @@ def main():
     database_to_convert = sys.argv[1]
     convert_config(database_to_convert, "web_config.cfg")
     convert_config(database_to_convert, "db.locals.py")
+    with open(os.path.join(database_to_convert, "data/db.locals.py")) as file:
+        whole_file = file.read()
+    whole_file = whole_file.replace(
+        r'''token_regex = "[\\&A-Za-z0-9\x7f-\xff][\\&A-Za-z0-9\x7f-\xff\\_';]*"''', r'''token_regex = "\w+|[&\w;]+"'''
+    )
+    with open(os.path.join(database_to_convert, "data/db.locals.py"), "w") as output:
+        output.write(whole_file)
     # convert_config(database_to_convert, "load_config.py")
 
     os.system(f"cp -f {PHILOLOGIC_INSTALL}/*py {database_to_convert}")
