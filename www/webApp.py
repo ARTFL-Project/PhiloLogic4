@@ -110,7 +110,7 @@ def angular(environ, start_response):
 
 
 def build_html_page(config):
-    html_page = open("%s/app/index.html" % config.db_path).read()
+    html_page = open("%s/app/index.html" % config.db_path, encoding="utf8", errors="ignore").read()
     html_page = html_page.replace("$DBNAME", config.dbname)
     html_page = html_page.replace("$DBURL", os.path.join(global_config.url_root, dbname))
     html_page = html_page.replace("$CSS", load_CSS())
@@ -119,7 +119,7 @@ def build_html_page(config):
 
 
 def build_misconfig_page(traceback, config_file):
-    html_page = open("%s/app/misconfiguration.html" % path).read()
+    html_page = open("%s/app/misconfiguration.html" % path, encoding="utf8", errors="ignore").read()
     html_page = html_page.replace("$CSS", load_CSS())
     html_page = html_page.replace("$TRACEBACK", traceback)
     html_page = html_page.replace("$CONFIG_FILE", config_file)
