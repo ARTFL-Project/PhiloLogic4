@@ -110,9 +110,11 @@ def parse(text):
         # we use LXML's HTML parser which is more flexible and then feed the result to fragment parser
         parser = etree.HTMLParser()
         tree = etree.fromstring(text, parser=parser)
+        new_text = etree.tostring(tree, method="xml")
+        if isinstance(new_text, bytes):
+            new_text = new_text.decode("utf8", "ignore")
         new_text = (
-            etree.tostring(tree, method="xml")
-            .replace("<html><body>", "")
+            new_text.replace("<html><body>", "")
             .replace("</body></html>", "")
             .replace("philohighlight", "philoHighlight")
         )
