@@ -1,6 +1,6 @@
 # ![alt text](www/app/assets/img/philo.png) 4.5
 
-### For the in development Python3 version, see [the PhiloLogic5 branch](https://github.com/ARTFL-Project/PhiloLogic4/tree/PhiloLogic5)
+### This version is no longer supported. 
 
 PhiloLogic is an XML database/search engine/web app that is designed
 for the particular difficulties of TEI XML. For a more theoretical
