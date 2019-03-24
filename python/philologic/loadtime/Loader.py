@@ -612,7 +612,7 @@ class Loader(object):
         print("#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl), file=dbs)
         dbs.close()
         print("%s: analysis done" % time.ctime())
-        os.system('/bin/bash -c "lz4cat ' + self.workdir + "/all_words_sorted.lz4 | pack5 " + self.workdir + 'dbspecs4.h"')
+        os.system('/bin/bash -c "lz4cat ' + self.workdir + "/all_words_sorted.lz4 | pack4 " + self.workdir + 'dbspecs4.h"')
         print("%s: all indices built. moving into place." % time.ctime())
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1")

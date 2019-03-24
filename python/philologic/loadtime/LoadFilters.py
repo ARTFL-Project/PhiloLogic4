@@ -264,6 +264,10 @@ def store_words_and_philo_ids(loader_obj, text):
                 philo_type, word, philo_id, attrib = line.split("\t")
                 attrib = loads(attrib)
                 if philo_type == "word" or philo_type == "sent" and word != "__philo_virtual":
+                    if philo_type == "sent":
+                        attrib["start_byte"] = attrib["end_byte"] - len(
+                            word.encode("utf8")
+                        )  # Parser uses beginning of sent as start_byte
                     word_obj = dumps(
                         {
                             "token": word,
