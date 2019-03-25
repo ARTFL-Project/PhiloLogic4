@@ -79,7 +79,7 @@ def get_tei_header(request, config):
     xml_tree = etree.parse(filename, parser)
     header = xml_tree.find("teiHeader")
     try:
-        header_text = etree.tostring(header, pretty_print=True)
+        header_text = etree.tostring(header, pretty_print=True).decode("utf8")
     except TypeError as e:  # workaround for when lxml doesn't find the header for whatever reason
         start = False
         header_text = ""

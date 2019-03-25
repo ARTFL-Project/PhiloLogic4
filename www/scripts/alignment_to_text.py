@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
 import os
+import sys
+from json import dumps
 from wsgiref.handlers import CGIHandler
 
 from philologic.runtime.DB import DB
-
 from philologic.runtime.link import byte_range_to_link
 
-import sys
+import custom_functions
 
 sys.path.append("..")
-import custom_functions
 
 try:
     from custom_functions import WebConfig
@@ -30,7 +30,7 @@ def alignment_to_text(environ, start_response):
     db = DB(config.db_path + "/data/")
     request = WSGIHandler(environ, config)
     link = byte_range_to_link(db, config, request)
-    yield simplejson.dumps({"link": link})
+    yield dumps({"link": link})
 
 
 if __name__ == "__main__":
