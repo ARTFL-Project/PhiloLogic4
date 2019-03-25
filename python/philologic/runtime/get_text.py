@@ -83,7 +83,7 @@ def get_tei_header(request, config):
     except TypeError as e:  # workaround for when lxml doesn't find the header for whatever reason
         start = False
         header_text = ""
-        with open(filename) as file:
+        with open(filename, encoding="utf8") as file:
             file_content = file.read()
             try:
                 start_header_index = re.search(r"<teiheader", file_content, re.I).start()
