@@ -51,7 +51,7 @@ def make_object_ancestors(*philo_types):
     # We should add support for a 'div' philo_type in the future
     philo_type_depth = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7, "page": 9}
 
-    def inner_make_object_ancestors(loader_obj, text):
+    def inner_make_object_ancestors(_, text):
         temp_file = text["words"] + ".tmp"
         output_file = open(temp_file, "w")
         with open(text["words"]) as filehandle:
@@ -252,6 +252,7 @@ def store_in_plain_text(*philo_types):
 
 
 def store_words_and_philo_ids(loader_obj, text):
+    """Store words and philo ids file for data-mining"""
     files_path = loader_obj.destination + "/words_and_philo_ids/"
     try:
         os.mkdir(files_path)
@@ -263,7 +264,7 @@ def store_words_and_philo_ids(loader_obj, text):
             for line in filehandle:
                 philo_type, word, philo_id, attrib = line.split("\t")
                 attrib = loads(attrib)
-                if philo_type == "word" or philo_type == "sent" and word != "__philo_virtual":
+                if philo_type == "word" or philo_type == "sent" or philo_type == "punct" and word != "__philo_virtual":
                     if philo_type == "sent":
                         attrib["start_byte"] = attrib["end_byte"] - len(
                             word.encode("utf8")
@@ -277,6 +278,44 @@ def store_words_and_philo_ids(loader_obj, text):
                         }
                     )
                     print(word_obj, file=output)
+
+
+def pos_tagger(language):
+    """POS Tagger using Spacy"""
+    try:
+        import spacy
+    except ImportError:
+        raise ImportError
+
+    nlp = spacy.load(language, disable=["parser", "ner", "textcat"])
+
+    def inner_pos_tagger(_, text):
+        with open(text["words"] + ".tmp", "w") as tmp_file:
+            with open(text["words"], encoding="utf8") as fh:
+                sentence = []
+                current_sent_id = None
+                for line in fh:
+                    philo_type, word, philo_id, attrib = line.split("\t")
+                    sent_id = " ".join(philo_id.split()[:6])
+                    record = Record(philo_type, word, philo_id.split())
+                    record.attrib = loads(attrib)
+                    if current_sent_id is not None and sent_id != current_sent_id:
+                        parsed_sentence = nlp.tagger(spacy.tokens.Doc(nlp.vocab, [r.name for r in sentence]))
+                        for saved_record, parsed_word in zip(sentence, parsed_sentence):
+                            saved_record.attrib["pos"] = parsed_word.pos_
+                            print(saved_record, file=tmp_file)
+                        sentence = []
+                    sentence.append(record)
+                    current_sent_id = sent_id
+            if sentence:
+                parsed_sentence = nlp.tagger(spacy.tokens.Doc(nlp.vocab, [r.name for r in sentence]))
+                for saved_record, parsed_word in zip(sentence, parsed_sentence):
+                    saved_record.attrib["pos"] = parsed_word.pos_
+                    print(saved_record, file=tmp_file)
+        os.remove(text["words"])
+        os.rename(text["words"] + ".tmp", text["words"])
+
+    return inner_pos_tagger
 
 
 DefaultNavigableObjects = ("div1", "div2", "div3", "para")

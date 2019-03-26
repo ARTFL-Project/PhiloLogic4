@@ -40,7 +40,7 @@ class LoadOptions:
         self.values["load_config"] = ""
         self.values["default_object_level"] = Loader.DEFAULT_OBJECT_LEVEL
         self.values["navigable_objects"] = Loader.NAVIGABLE_OBJECTS
-        self.values["load_filters"] = LoadFilters.DefaultLoadFilters
+        self.values["load_filters"] = LoadFilters.set_load_filters()
         self.values["post_filters"] = PostFilters.DefaultPostFilters
         self.values["plain_text_obj"] = []
         self.values["parser_factory"] = Parser.XMLParser
@@ -70,6 +70,8 @@ class LoadOptions:
         self.values["words_to_index"] = set([])
         self.values["file_type"] = "xml"
         self.values["sentence_breakers"] = []
+        self.values["punctuation"] = Parser.PUNCTUATION
+        self.values["pos"] = ""
 
     def setup_parser(self):
         """Set up parser options"""
@@ -173,7 +175,6 @@ class LoadOptions:
                 self.values["web_config"] = f.read()
         self.values["db_destination"] = os.path.join(self.database_root, self.dbname)
         self.values["data_destination"] = os.path.join(self.db_destination, "data")
-        self.values["load_filters"] = LoadFilters.set_load_filters(navigable_objects=self.navigable_objects)
         if self.plain_text_obj:
             plain_text_filter = LoadFilters.store_in_plain_text(*self.plain_text_obj)
             self.load_filters.append(plain_text_filter)
@@ -221,6 +222,8 @@ class LoadConfig:
             elif not a.startswith("__") and not isinstance(getattr(load_config_file, a), collections.Callable):
                 value = getattr(load_config_file, a)
                 if value:
+                    if a == "navigable_objects":
+                        self.config["load_filters"] = LoadFilters.set_load_filters(navigable_objects=value)
                     if a == "words_to_index":
                         word_list = set([])
                         with open(value) as fh:
@@ -235,5 +238,9 @@ class LoadConfig:
                         if "load_filters" not in self.config:
                             self.config["load_filters"] = LoadFilters.DefaultLoadFilters
                         self.config["load_filters"].append(LoadFilters.store_words_and_philo_ids)
+                    elif a == "pos_tagger":
+                        if "load_filters" not in self.config:
+                            self.config["load_filters"] = LoadFilters.DefaultLoadFilters
+                        self.config["load_filters"].append(LoadFilters.pos_tagger(value))
                     else:
                         self.config[a] = value

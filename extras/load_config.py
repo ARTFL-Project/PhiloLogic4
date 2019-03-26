@@ -79,7 +79,11 @@ doc_xpaths = {
         ".//text/front/docImprint/acheveImprime",
     ],
     "extent": [".//sourceDesc/bibl/extent", ".//sourceDesc/biblStruct/monog//extent", ".//sourceDesc/biblFull/extent"],
-    "editor": [".//sourceDesc/bibl/editor", ".//sourceDesc/biblFull/titleStmt/editor", ".//sourceDesc/bibl/title/Stmt/editor"],
+    "editor": [
+        ".//sourceDesc/bibl/editor",
+        ".//sourceDesc/biblFull/titleStmt/editor",
+        ".//sourceDesc/bibl/title/Stmt/editor",
+    ],
     "identifiers": [".//publicationStmt/idno"],
     "text_genre": [".//profileDesc/textClass/keywords[@scheme='genre']/term", ".//SourceDesc/genre"],
     "keywords": [".//profileDesc/textClass/keywords/list/item"],
@@ -87,7 +91,11 @@ doc_xpaths = {
     "notes": [".//fileDesc/notesStmt/note", ".//publicationStmt/notesStmt/note"],
     "auth_gender": [".//publicationStmt/notesStmt/note"],
     "collection": [".//seriesStmt/title"],
-    "period": [".//profileDesc/textClass/keywords[@scheme='period']/list/item", ".//SourceDesc/period", ".//sourceDesc/period"],
+    "period": [
+        ".//profileDesc/textClass/keywords[@scheme='period']/list/item",
+        ".//SourceDesc/period",
+        ".//sourceDesc/period",
+    ],
     "text_form": [".//profileDesc/textClass/keywords[@scheme='form']/term"],
     "structure": [".//SourceDesc/structure", ".//sourceDesc/structure"],
     "idno": [".//fileDesc/publicationStmt/idno/"],
@@ -237,6 +245,16 @@ flatten_ligatures = True
 # Define a list of strings which mark the end of a sentence.
 # Note that this list will be added to the current one which is [".", "?", "!"]
 sentence_breakers = []
+
+# Define which punctuation should be flagged as such. This should NOT include
+# any punctuation which mark sentence breaks. Use regex to match characters.
+punctuation = ""
+
+# Define a language for the POS tagger. For language available, see Spacy documentation.
+# You will need to install the relevant language and use the proper language code in the value
+# below. If empty string, no tagger is run.
+# Note that the tagger has an non-trival impact on parse time.
+pos_tagger = ""
 
 
 ###########################################

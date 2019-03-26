@@ -100,6 +100,7 @@ class CompoundStack(object):
         ref="",
         line="",
         graphic="",
+        punctuation="punct",
         factory=CompoundRecord,
         p_factory=ParallelRecord,
     ):
@@ -115,6 +116,9 @@ class CompoundStack(object):
         self.current_line = None
         self.graphic = graphic
         self.current_graphic = None
+        self.punctuation = punctuation
+        self.current_punctuation = None
+        self.punctuation_count = 0
         self.p = 0
         self.r = 0
         self.l = 0
@@ -182,6 +186,12 @@ class CompoundStack(object):
             self.current_graphic = self.p_factory(type, name, [self.stack.v[0], self.g])
             self.current_graphic.attrib["start_byte"] = byte
             return self.current_graphic
+        elif type == self.punctuation:
+            self.punctuation_count += 1
+            self.current_punctuation = Record(
+                "punct", name, f"{self.stack.v[0]} 0 0 0 0 0 0 0 {self.punctuation_count}"
+            )
+            self.current_punctuation.attrib["start_byte"] = byte
         else:
             self.stack.push(type, name, byte)
             if self.current_p:
@@ -205,6 +215,9 @@ class CompoundStack(object):
             if self.current_graphic:
                 self.current_graphic.attrib["end_byte"] = byte
                 print(self.current_graphic, file=self.out)
+        elif type == self.punctuation:
+            self.current_punctuation.attrib["end_byte"] = byte
+            print(self.current_punctuation, file=self.out)
         else:
             return self.stack.pull(type, byte)
 

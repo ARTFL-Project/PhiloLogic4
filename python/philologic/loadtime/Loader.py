@@ -363,11 +363,11 @@ class Loader(object):
                         pass
 
         print("%s: parsing %d files." % (time.ctime(), len(filequeue)))
-        pool = Pool(workers)
-        for results in pool.imap_unordered(self.__parse_file, zip(filequeue, data_dicts)):
-            with open(results, "rb") as proc_fh:
-                vec = pickle.load(proc_fh)  # load in the results from the child's parsework() function.
-            self.omax = [max(x, y) for x, y in zip(vec, self.omax)]
+        with Pool(workers) as pool:
+            for results in pool.imap_unordered(self.__parse_file, zip(filequeue, data_dicts)):
+                with open(results, "rb") as proc_fh:
+                    vec = pickle.load(proc_fh)  # load in the results from the child's parsework() function.
+                self.omax = [max(x, y) for x, y in zip(vec, self.omax)]
         print("%s: done parsing" % time.ctime())
 
     def __parse_file(self, file):

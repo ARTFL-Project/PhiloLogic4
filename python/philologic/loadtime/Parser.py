@@ -142,6 +142,8 @@ TAG_EXCEPTIONS = [
 
 TOKEN_REGEX = r"\w+|[&\w;]+"
 
+PUNCTUATION = r"""[;,:=+()"]"""
+
 CHARS_NOT_TO_INDEX = r"\[\{\]\}"
 
 UNICODE_WORD_BREAKERS = [
@@ -193,7 +195,7 @@ class XMLParser(object):
 
         # Initialize an OHCOVector Stack. operations on this stack produce all parser output.
         self.v = OHCOVector.CompoundStack(
-            self.types, self.parallel_type, docid=docid, out=output, ref="ref", line="line", graphic="graphic"
+            self.types, self.parallel_type, docid=docid, out=output, ref="ref", line="line", graphic="graphic", punctuation="punct"
         )
 
         self.filesize = filesize
@@ -220,6 +222,11 @@ class XMLParser(object):
             self.sentence_breakers = parse_options["sentence_breakers"]
         else:
             self.sentence_breakers = []
+
+        if "punctuation" in parse_options:
+            self.punct_regex = re.compile(fr"""{parse_options["punctuation"]}""")
+        else:
+            self.punct_regex = re.compile(fr"{PUNCTUATION}")
 
         if "suppress_tags" in parse_options:
             self.suppress_tags = set([i for i in parse_options["suppress_tags"] if i])
@@ -927,7 +934,7 @@ class XMLParser(object):
                         word = self.remove_control_chars(word)
                         word = word.replace("_", "").strip()
                         word = word.replace(" ", "")
-                        if len(word) > 0:
+                        if word:
                             if self.defined_words_to_index:
                                 if word not in self.words_to_index:
                                     continue
@@ -969,7 +976,13 @@ class XMLParser(object):
                             if "sent" not in self.v:
                                 self.v.push("sent", word.replace("\t", " ").strip(), current_pos)
                             self.v["sent"].name = word.replace("\t", " ").strip()
-                            self.v.pull("sent", current_pos + len(word))
+                            self.v.pull("sent", current_pos + len(word.encode("utf8")))
+                        elif self.punct_regex.search(word):
+                            punc_pos = current_pos - len(word.encode("utf8"))
+                            punct = word.strip()
+                            self.v.push("punct", punct, punc_pos)
+                            self.v.pull("punct", punc_pos+len(punct.encode("utf8")))
+
 
     def close_sent(self, end_byte):
         """Close sentence objects."""
