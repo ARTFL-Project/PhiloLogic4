@@ -401,6 +401,7 @@ class Loader(object):
             "long_word_limit",
             "flatten_ligatures",
             "sentence_breakers",
+            "punctuation"
         ]:
             try:
                 options[option] = self.parser_config[option]

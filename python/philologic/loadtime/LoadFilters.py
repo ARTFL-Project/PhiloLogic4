@@ -229,7 +229,7 @@ def store_in_plain_text(*philo_types):
             stored_objects = []
             with open(text["raw"]) as filehandle:
                 for line in filehandle:
-                    philo_type, word, philo_id, attrib = line.split("\t")
+                    philo_type, word, philo_id, _ = line.split("\t")
                     if word == "__philo_virtual":
                         continue
                     if philo_type == "word" or philo_type == "sent":
@@ -318,7 +318,7 @@ def pos_tagger(language):
     return inner_pos_tagger
 
 
-DefaultNavigableObjects = ("div1", "div2", "div3", "para")
+DefaultNavigableObjects = ("doc", "div1", "div2", "div3", "para")
 DefaultLoadFilters = [
     get_word_counts,
     generate_words_sorted,

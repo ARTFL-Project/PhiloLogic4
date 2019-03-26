@@ -188,8 +188,12 @@ class CompoundStack(object):
             return self.current_graphic
         elif type == self.punctuation:
             self.punctuation_count += 1
+            try:
+                current_sent_id = self.stack["sent"].id[:6]
+            except IndexError:
+                current_sent_id = self.stack["para"].id[:5] + [1]
             self.current_punctuation = Record(
-                "punct", name, f"{self.stack.v[0]} 0 0 0 0 0 0 0 {self.punctuation_count}"
+                "punct", name, f"{' '.join(str(i) for i in current_sent_id)} 0 0 {self.punctuation_count}"
             )
             self.current_punctuation.attrib["start_byte"] = byte
         else:
