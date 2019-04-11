@@ -263,8 +263,10 @@ def store_words_and_philo_ids(loader_obj, text):
         with open(text["raw"]) as filehandle:
             for line in filehandle:
                 philo_type, word, philo_id, attrib = line.split("\t")
+                if word == "__philo_virtual":
+                    continue
                 attrib = loads(attrib)
-                if philo_type == "word" or philo_type == "sent" or philo_type == "punct" and word != "__philo_virtual":
+                if philo_type == "word" or philo_type == "sent" or philo_type == "punct":
                     if philo_type == "sent":
                         attrib["start_byte"] = attrib["end_byte"] - len(
                             word.encode("utf8")

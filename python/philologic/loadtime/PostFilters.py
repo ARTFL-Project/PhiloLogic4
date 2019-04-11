@@ -8,11 +8,14 @@ import unicodedata
 
 from json import loads
 
+from tqdm import tqdm
+
 
 def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
     def inner_make_sql_table(loader_obj):
-        print("%s: Loading the %s SQLite table..." % (time.ctime(), table))
+        print(f"{time.ctime()}: Loading the {table} SQLite table...")
         db_destination = os.path.join(loader_obj.destination, db_file)
+        line_count = sum(1 for _ in open(file_in, "rbU"))
         conn = sqlite3.connect(db_destination)
         conn.text_factory = str
         conn.row_factory = sqlite3.Row
@@ -20,30 +23,32 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
         columns = "philo_type,philo_name,philo_id,philo_seq"
         query = "create table if not exists %s (%s)" % (table, columns)
         cursor.execute(query)
-        with open(file_in) as input_file:
-            for sequence, line in enumerate(input_file):
-                philo_type, philo_name, id, attrib = line.split("\t", 3)
-                fields = id.split(None, 8)
-                if len(fields) == 9:
-                    row = loads(attrib)
-                    row["philo_type"] = philo_type
-                    row["philo_name"] = philo_name
-                    row["philo_id"] = " ".join(fields[:depth])
-                    row["philo_seq"] = sequence
-                    insert = "INSERT INTO %s (%s) values (%s);" % (
-                        table,
-                        ",".join(list(row.keys())),
-                        ",".join("?" for i in range(len(row))),
-                    )
-                    try:
-                        cursor.execute(insert, list(row.values()))
-                    except sqlite3.OperationalError:
-                        cursor.execute("PRAGMA table_info(%s)" % table)
-                        column_list = [i[1] for i in cursor]
-                        for column in row:
-                            if column not in column_list:
-                                cursor.execute("ALTER TABLE %s ADD COLUMN %s;" % (table, column))
-                        cursor.execute(insert, list(row.values()))
+        with tqdm(total=line_count, leave=False) as pbar:
+            with open(file_in) as input_file:
+                for sequence, line in enumerate(input_file):
+                    philo_type, philo_name, id, attrib = line.split("\t", 3)
+                    fields = id.split(None, 8)
+                    if len(fields) == 9:
+                        row = loads(attrib)
+                        row["philo_type"] = philo_type
+                        row["philo_name"] = philo_name
+                        row["philo_id"] = " ".join(fields[:depth])
+                        row["philo_seq"] = sequence
+                        insert = "INSERT INTO %s (%s) values (%s);" % (
+                            table,
+                            ",".join(list(row.keys())),
+                            ",".join("?" for i in range(len(row))),
+                        )
+                        try:
+                            cursor.execute(insert, list(row.values()))
+                        except sqlite3.OperationalError:
+                            cursor.execute("PRAGMA table_info(%s)" % table)
+                            column_list = [i[1] for i in cursor]
+                            for column in row:
+                                if column not in column_list:
+                                    cursor.execute("ALTER TABLE %s ADD COLUMN %s;" % (table, column))
+                            cursor.execute(insert, list(row.values()))
+                    pbar.update()
         conn.commit()
 
         for index in indices:

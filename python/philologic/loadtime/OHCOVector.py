@@ -192,9 +192,7 @@ class CompoundStack(object):
                 current_sent_id = self.stack["sent"].id[:6]
             except IndexError:
                 current_sent_id = self.stack["para"].id[:5] + [1]
-            self.current_punctuation = Record(
-                "punct", name, f"{' '.join(str(i) for i in current_sent_id)} 0 0 {self.punctuation_count}"
-            )
+            self.current_punctuation = Record("punct", name, current_sent_id + [0, 0, self.punctuation_count])
             self.current_punctuation.attrib["start_byte"] = byte
         else:
             self.stack.push(type, name, byte)

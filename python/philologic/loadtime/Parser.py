@@ -770,8 +770,6 @@ class XMLParser(object):
                     div_level = self.context_div_level
                 self.context_div_level = div_level
 
-                # TODO what to do with div0? See philo3???
-
                 # TODO: ignore divs inside of internal text tags.  Setable
                 # from configuration.  But we will bump the para and sent args
                 div_type = "div%d" % div_level
@@ -803,8 +801,6 @@ class XMLParser(object):
                 if "type" in self.v[div_type]:
                     if self.v[div_type]["type"] == "notes":
                         self.no_deeper_objects = True
-
-                # TODO: unclear if we need to add EEBO hack when no subdiv objects...
 
                 # We are handling the case of index tags containing attributes which describe the parent div
                 # the type attrib has its value in the value attrib
@@ -862,11 +858,6 @@ class XMLParser(object):
                     words = word_breaker.sub(lambda match: b" " * len(match.group(1)), words.encode("utf8")).decode(
                         "utf8"
                     )
-
-            # TODO: Now, here's something you did not think of: Brown WWP: M&sup-r;
-            # You are going to split words, on hyphens just below.  That would
-            # be a mess.  So a little exception handler which we will convert
-            # to the supp(.) for indexing.
 
             # we're splitting the line of words into distinct words
             # separated by "\n"

@@ -891,8 +891,7 @@ web_config_header = """
 class Config(object):
     def __init__(self, filename, defaults, header=""):
         self.filename = filename
-        abspath = os.path.abspath(filename)
-        self.db_path = abspath[: abspath.index("/data/")]
+        self.db_path = os.path.dirname(os.path.dirname(self.filename))
         self.defaults = defaults
         self.header = header
         self.data = {}

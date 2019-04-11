@@ -72,6 +72,7 @@ c
 ça
 car
 ce
+ceci
 cela
 celà
 celle
@@ -92,6 +93,7 @@ chez
 ci
 cinq
 cinquante
+combien
 comme
 comment
 conséquent
@@ -410,6 +412,7 @@ sur
 sus
 t
 ta
+tandis
 tant
 te
 tel

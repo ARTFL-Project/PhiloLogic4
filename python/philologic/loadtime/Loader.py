@@ -14,6 +14,7 @@ import time
 from glob import glob
 
 import lxml
+from tqdm import tqdm
 from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.loadtime.PostFilters import make_sql_table
@@ -363,11 +364,13 @@ class Loader(object):
                         pass
 
         print("%s: parsing %d files." % (time.ctime(), len(filequeue)))
-        with Pool(workers) as pool:
-            for results in pool.imap_unordered(self.__parse_file, zip(filequeue, data_dicts)):
-                with open(results, "rb") as proc_fh:
-                    vec = pickle.load(proc_fh)  # load in the results from the child's parsework() function.
-                self.omax = [max(x, y) for x, y in zip(vec, self.omax)]
+        with tqdm(total=len(filequeue), leave=False) as pbar:
+            with Pool(workers) as pool:
+                for results in pool.imap_unordered(self.__parse_file, zip(filequeue, data_dicts)):
+                    with open(results, "rb") as proc_fh:
+                        vec = pickle.load(proc_fh)  # load in the results from the child's parsework() function.
+                    self.omax = [max(x, y) for x, y in zip(vec, self.omax)]
+                    pbar.update()
         print("%s: done parsing" % time.ctime())
 
     def __parse_file(self, file):
@@ -375,8 +378,6 @@ class Loader(object):
         options = text["options"]
         if "options" in metadata:  # cleanup, should do above.
             del metadata["options"]
-
-        print("%s: parsing %d : %s" % (time.ctime(), text["id"], text["name"]), flush=True)
 
         if "parser_factory" not in options:
             options["parser_factory"] = self.parser_config["parser_factory"]
