@@ -191,7 +191,19 @@ class CompoundStack(object):
             try:
                 current_sent_id = self.stack["sent"].id[:6]
             except IndexError:
-                current_sent_id = self.stack["para"].id[:5] + [1]
+                try:
+                    current_sent_id = self.stack["para"].id[:5] + [1]
+                except IndexError:
+                    try:
+                        current_sent_id = self.stack["div3"].id[:4] + [1, 1]
+                    except IndexError:
+                        try:
+                            current_sent_id = self.stack["div2"].id[:3] + [1, 1, 1]
+                        except IndexError:
+                            try:
+                                current_sent_id = self.stack["div1"].id[:2] + [1, 1, 1, 1]
+                            except IndexError:
+                                current_sent_id = self.stack["doc"].id[:1] + [1, 1, 1, 1, 1]
             self.current_punctuation = Record("punct", name, current_sent_id + [0, 0, self.punctuation_count])
             self.current_punctuation.attrib["start_byte"] = byte
         else:
