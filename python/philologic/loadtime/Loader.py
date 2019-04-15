@@ -11,14 +11,16 @@ import shutil
 import sqlite3
 import sys
 import time
+import traceback
 from glob import glob
 
 import lxml
-from tqdm import tqdm
 from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.loadtime.PostFilters import make_sql_table
-from philologic.utils import convert_entities, load_module, pretty_print, sort_list
+from philologic.utils import (convert_entities, load_module, pretty_print,
+                              sort_list)
+from tqdm import tqdm
 
 SORT_BY_WORD = "-k 2,2"
 SORT_BY_ID = "-k 3,3n -k 4,4n -k 5,5n -k 6,6n -k 7,7n -k 8,8n -k 9,9n"
@@ -54,6 +56,11 @@ PARSER_OPTIONS = [
     "file_type",
 ]
 
+
+class ParserError(Exception):
+    """Parser exception"""
+    def __init___(self, *error_args, **kwargs):
+        super().__init__(error_args)
 
 class Loader(object):
     """Loader class"""
@@ -429,7 +436,10 @@ class Loader(object):
                     exit(1)
 
         for f in filters:
-            f(self, text)
+            try:
+                f(self, text)
+            except Exception:
+                raise ParserError(f"{text['name']} has caused parser to die.")
 
         os.system("lz4 -q %s > %s" % (text["raw"], text["raw"] + ".lz4"))
         os.system("rm %s" % text["raw"])

@@ -17,7 +17,11 @@ def get_word_counts(_, text):
         counts = [0 for i in range(5)]
         with open(text["raw"], encoding="utf8") as fh:
             for line in fh:
-                philo_type, word, id, attrib = line.split("\t")
+                try:
+                    philo_type, word, id, attrib = line.split("\t")
+                except:
+                    print(repr(line))
+                    raise IndexError
                 id = id.split()
                 record = Record(philo_type, word, id)
                 record.attrib = loads(attrib)

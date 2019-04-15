@@ -971,8 +971,14 @@ class XMLParser(object):
                         elif self.punct_regex.search(word):
                             punc_pos = current_pos - len(word.encode("utf8"))
                             punct = word.strip()
-                            self.v.push("punct", punct, punc_pos)
-                            self.v.pull("punct", punc_pos+len(punct.encode("utf8")))
+                            punct = punct.replace("\t", " ")
+                            punct = self.remove_control_chars(punct)
+                            for single_punct in punct:
+                                end_pos = len(single_punct.encode("utf8"))
+                                if single_punct != " ":
+                                    self.v.push("punct", single_punct, punc_pos)
+                                    self.v.pull("punct", punc_pos+len(single_punct.encode("utf8")))
+                                punc_pos = end_pos
 
 
     def close_sent(self, end_byte):
