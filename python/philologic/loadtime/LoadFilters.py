@@ -17,13 +17,9 @@ def get_word_counts(_, text):
         counts = [0 for i in range(5)]
         with open(text["raw"], encoding="utf8") as fh:
             for line in fh:
-                try:
-                    philo_type, word, id, attrib = line.split("\t")
-                except:
-                    print(repr(line))
-                    raise IndexError
-                id = id.split()
-                record = Record(philo_type, word, id)
+                philo_type, word, philo_id, attrib = line.split("\t")
+                philo_id = philo_id.split()
+                record = Record(philo_type, word, philo_id)
                 record.attrib = loads(attrib)
                 if philo_type == "word":
                     word = word.lower()
@@ -41,6 +37,7 @@ def get_word_counts(_, text):
 
 
 def generate_words_sorted(loader_obj, text):
+    """Generate sorted words for storing in index"""
     # -a in grep to avoid issues with NULL chars in file
     wordcommand = 'cat %s | egrep -a "^word" | LANG=C sort %s %s > %s' % (
         text["raw"],
@@ -52,6 +49,7 @@ def generate_words_sorted(loader_obj, text):
 
 
 def make_object_ancestors(*philo_types):
+    """Find object ancestors for all stored object types"""
     # We should add support for a 'div' philo_type in the future
     philo_type_depth = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7, "page": 9}
 
@@ -77,6 +75,8 @@ def make_object_ancestors(*philo_types):
 
 
 def make_sorted_toms(*philo_types):
+    """Sort metadata before insertion"""
+
     def sorted_toms(loader_obj, text):
         philo_type_pattern = "|".join("^%s" % t for t in philo_types)
         tomscommand = 'cat %s | egrep "%s" | LANG=C sort %s > %s' % (
@@ -146,12 +146,14 @@ def prev_next_obj(*philo_types):
 
 
 def generate_pages(_, text):
+    """Generate separate page file"""
     pagescommand = 'cat %s | egrep "^page" > %s' % (text["raw"], text["pages"])
     os.system(pagescommand)
 
 
 def prev_next_page(_, text):
-    # Inner function
+    """Generate previous and next page"""
+
     def load_record(line):
         philo_type, word, philo_id, attrib = line.split("\t")
         philo_id = philo_id.split()
@@ -161,7 +163,6 @@ def prev_next_page(_, text):
         record.attrib["next"] = ""
         return record
 
-    record_dict = {}
     temp_file = text["pages"] + ".tmp"
     output_file = open(temp_file, "w")
     prev_record = None
@@ -170,9 +171,9 @@ def prev_next_page(_, text):
     with open(text["pages"]) as filehandle:
         whole_file = filehandle.readlines()
         last_pos = len(whole_file) - 1
-        for pos in range(len(whole_file)):
+        for pos, line in enumerate(whole_file):
             if not record:
-                record = load_record(whole_file[pos])
+                record = load_record(line)
             if prev_record:
                 record.attrib["prev"] = " ".join(prev_record.id)
             if pos != last_pos:
@@ -187,25 +188,29 @@ def prev_next_page(_, text):
 
 
 def generate_refs(_, text):
+    """Generate ref file"""
     refscommand = 'cat %s | egrep "^ref" > %s' % (text["raw"], text["refs"])
     os.system(refscommand)
 
 
 def generate_graphics(_, text):
+    """Generate graphics file"""
     refscommand = 'cat %s | egrep "^graphic" > %s' % (text["raw"], text["graphics"])
     os.system(refscommand)
 
 
 def generate_lines(_, text):
+    """Generate lines file"""
     lines_command = 'cat %s | egrep "^line" > %s' % (text["raw"], text["lines"])
     os.system(lines_command)
 
 
 def make_max_id(_, text):
+    """Define max id"""
     max_id = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     with open(text["words"]) as filehandle:
         for line in filehandle:
-            (key, philo_type, philo_id, attr) = line.split("\t")
+            _, _, philo_id, _ = line.split("\t")
             philo_id = [int(i) for i in philo_id.split(" ")]
             max_id = [max(new, prev) for new, prev in zip(philo_id, max_id)]
     with open(text["results"], "wb") as rf:
@@ -214,10 +219,11 @@ def make_max_id(_, text):
 
 
 def store_in_plain_text(*philo_types):
+    """Store indexed words in plain text"""
     object_types = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
     obj_to_track = []
     for obj in philo_types:
-        obj_to_track.append((obj, object_types[obj]))
+        obj_to_track.append(object_types[obj])
 
     def inner_store_in_plain_text(loader_obj, text):
         files_path = loader_obj.destination + "/plain_text_objects/"
@@ -226,7 +232,7 @@ def store_in_plain_text(*philo_types):
         except OSError:
             # Path was already created
             pass
-        for obj, obj_depth in obj_to_track:
+        for obj_depth in obj_to_track:
             old_philo_id = []
             philo_id = []
             words = []
@@ -247,10 +253,10 @@ def store_in_plain_text(*philo_types):
                         words.append(word)
             if words:
                 stored_objects.append({"philo_id": philo_id, "words": words})
-            for obj in stored_objects:
-                path = os.path.join(files_path, "_".join(obj["philo_id"]))
+            for stored_obj in stored_objects:
+                path = os.path.join(files_path, "_".join(stored_obj["philo_id"]))
                 with open(path, "w") as output:
-                    output.write(" ".join(obj["words"]))
+                    output.write(" ".join(stored_obj["words"]))
 
     return inner_store_in_plain_text
 
@@ -270,7 +276,7 @@ def store_words_and_philo_ids(loader_obj, text):
                 if word == "__philo_virtual":
                     continue
                 attrib = loads(attrib)
-                if philo_type == "word" or philo_type == "sent" or philo_type == "punct":
+                if philo_type in ("word", "sent", "punct"):
                     if philo_type == "sent":
                         attrib["start_byte"] = attrib["end_byte"] - len(
                             word.encode("utf8")
@@ -342,6 +348,7 @@ DefaultLoadFilters = [
 
 
 def set_load_filters(load_filters=DefaultLoadFilters, navigable_objects=DefaultNavigableObjects):
+    """Set default filters to run"""
     filters = []
     for load_filter in load_filters:
         if (

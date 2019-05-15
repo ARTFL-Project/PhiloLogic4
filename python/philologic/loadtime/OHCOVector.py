@@ -203,8 +203,8 @@ class CompoundStack(object):
                             try:
                                 current_sent_id = self.stack["div1"].id[:2] + [1, 1, 1, 1]
                             except IndexError:
-                                current_sent_id = self.stack["doc"].id[:1] + [1, 1, 1, 1, 1]
             self.current_punctuation = Record("punct", name, current_sent_id + [0, 0, self.punctuation_count])
+                                current_sent_id = self.stack["doc"].id[:1] + [1, 1, 1, 1, 1]
             self.current_punctuation.attrib["start_byte"] = byte
         else:
             self.stack.push(type, name, byte)

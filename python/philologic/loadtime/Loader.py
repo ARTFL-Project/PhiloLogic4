@@ -11,7 +11,6 @@ import shutil
 import sqlite3
 import sys
 import time
-import traceback
 from glob import glob
 
 import lxml
@@ -59,7 +58,7 @@ PARSER_OPTIONS = [
 
 class ParserError(Exception):
     """Parser exception"""
-    def __init___(self, *error_args, **kwargs):
+    def __init___(self, *error_args):
         super().__init__(error_args)
 
 class Loader(object):
@@ -122,11 +121,15 @@ class Loader(object):
 
         self.theme = loader_options["theme"]
 
+        self.filenames = []
+        self.raw_files = []
+        self.deleted_files = []
         self.metadata_fields = []
         self.metadata_hierarchy = []
         self.metadata_types = {}
         self.normalized_fields = []
         self.metadata_fields_not_found = []
+        self.sort_order = ""
 
     def setup_dir(self, path):
         """Setup database directory"""
@@ -140,7 +143,6 @@ class Loader(object):
     def add_files(self, files):
         """Copy files to database directory"""
         print("\nCopying files to database directory...", end=" ")
-        self.filenames = []
         for f in files:
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
             shutil.copy2(f, new_file_path)
@@ -179,7 +181,6 @@ class Loader(object):
         """Parse header in TEI files"""
         load_metadata = []
         metadata_xpaths = self.parser_config["doc_xpaths"]
-        self.deleted_files = []
         for file in os.scandir(self.textdir):
             data = {"filename": file.name}
             header = ""
@@ -317,8 +318,10 @@ class Loader(object):
                     break
         return sorted_load_metadata
 
-    def parse_files(self, workers, data_dicts=None):
-        """Parse all files"""
+    def parse_files(self, workers, data_dicts=None, chunksize=None):
+        """Parse all files
+        chunksize is setable from the philoload script and can be helpful when loading
+        many small files"""
         print("\n\n### Parsing files ###")
         os.chdir(self.workdir)  # questionable
 
@@ -371,9 +374,11 @@ class Loader(object):
                         pass
 
         print("%s: parsing %d files." % (time.ctime(), len(filequeue)))
-        with tqdm(total=len(filequeue), leave=False) as pbar:
+        if chunksize is None:
+            chunksize = 1
+        with tqdm(total=len(filequeue), smoothing=0, leave=False) as pbar:
             with Pool(workers) as pool:
-                for results in pool.imap_unordered(self.__parse_file, zip(filequeue, data_dicts)):
+                for results in pool.imap_unordered(self.__parse_file, zip(filequeue, data_dicts), chunksize=chunksize):
                     with open(results, "rb") as proc_fh:
                         vec = pickle.load(proc_fh)  # load in the results from the child's parsework() function.
                     self.omax = [max(x, y) for x, y in zip(vec, self.omax)]
@@ -454,9 +459,9 @@ class Loader(object):
         self.merge_files("words")
 
         if "words" in self.tables:
-            print("%s: concatenating document-order words file..." % time.ctime(), end=" ")
+            print("%s: concatenating document-order words file..." % time.ctime(), end=" ", flush=True)
             for d in self.raw_files:
-                os.system('lz4cat {} | egrep -a "^word" >> all_words_ordered'.format(d))
+                os.system(f'lz4cat {d} | egrep -a "^word" >> all_words_ordered')
             print("done")
 
         print("%s: sorting objects" % time.ctime())
@@ -543,9 +548,10 @@ class Loader(object):
                 print("%s sorting failed\nInterrupting database load..." % file_type)
                 sys.exit()
             already_merged += len(object_list)
-            print("%s: %d files sorted..." % (time.ctime(), already_merged))
+            print("\r%s: %d files sorted..." % (time.ctime(), already_merged), end="")
             if not self.debug:
                 os.system("rm %s" % file_list)
+        print()
 
         sorted_files = " ".join(["<(lz4cat -q {})".format(i) for i in glob(f"{self.workdir}/*.split")])
         if file_type == "words":

@@ -166,6 +166,151 @@ UNICODE_WORD_BREAKERS = [
 ]
 
 
+# Pre-compiled regexes used for parsing
+join_hyphen_with_lb = re.compile(r"(\&shy;[\n \t]*<lb\/>)", re.I | re.M)
+join_hyphen = re.compile(r"(\&shy;[\n \t]*)", re.I | re.M)
+text_tag = re.compile(r"<text\W", re.I)
+closed_text_tag = re.compile(r"</text\W", re.I)
+doc_body_tag = re.compile(r"<docbody", re.I)
+body_tag = re.compile(r"<body\W", re.I)
+div_tag = re.compile(r"<div", re.I)
+closed_div_tag = re.compile(r"<\/div", re.I)
+para_tag = re.compile(r"<p\W", re.I)
+quote_tag = re.compile(r"<q[ >]", re.I)
+closed_quote_tag = re.compile(r"</q>", re.I)
+parag_tag = re.compile(r"<p>", re.I)
+parag_with_attrib_tag = re.compile(r"<p ", re.I)
+closed_para_tag = re.compile(r"</p>", re.I)
+note_tag = re.compile(r"<note\W", re.I)
+closed_note_tag = re.compile(r"</note>", re.I)
+epigraph_tag = re.compile(r"<epigraph\W", re.I)
+closed_epigraph_tag = re.compile(r"</epigraph>", re.I)
+list_tag = re.compile(r"<list\W", re.I)
+closed_list_tag = re.compile(r"</list>", re.I)
+speaker_tag = re.compile(r"<sp\W", re.I)
+closed_speaker_tag = re.compile(r"</sp>", re.I)
+argument_tag = re.compile(r"<argument\W", re.I)
+closed_argument_tag = re.compile(r"</argument>", re.I)
+opener_tag = re.compile(r"<opener\W", re.I)
+closed_opener_tag = re.compile(r"</opener\W", re.I)
+closer_tag = re.compile(r"<closer\W", re.I)
+closed_closer_tag = re.compile(r"</closer\W", re.I)
+stage_tag = re.compile(r"<stage\W", re.I)
+closed_stage_tag = re.compile(r"</stage\W", re.I)
+castlist_tag = re.compile(r"<castlist\W", re.I)
+closed_castlist_tag = re.compile(r"</castlist\W", re.I)
+page_tag = re.compile(r"<pb\W", re.I)
+n_attribute = re.compile(r'n="([^"]*)', re.I)
+line_group_tag = re.compile(r"<lg\W", re.I)
+closed_line_group = re.compile(r"</lg\W", re.I)
+line_tag = re.compile(r"<l\W", re.I)
+ab_tag = re.compile(r"<ab\W", re.I)
+closed_line_tag = re.compile(r"</l\W", re.I)
+closed_ab_tag = re.compile(r"</ab\W", re.I)
+sentence_tag = re.compile(r"<s\W", re.I)
+closed_sentence_tag = re.compile(r"</s\W", re.I)
+front_tag = re.compile(r"<front\W", re.I)
+closed_front_tag = re.compile(r"</front\W", re.I)
+attrib_matcher = re.compile(r"""(\S+)="?((?:.(?!"?\s+(?:\S+)=|[>"]))+.)"?""", re.I)
+tag_matcher = re.compile(r"<(\/?\w+)[^>]*>?", re.I)
+head_self_close_tag = re.compile(r"<head\/>", re.I)
+closed_div_tag = re.compile(r"<\/div", re.I)
+head_tag = re.compile(r"<head", re.I)
+closed_head_tag = re.compile(r"<\/head>", re.I)
+apost_ent = re.compile(r"\&apos;", re.I)
+macr_ent = re.compile(r"\&([A-Za-z])macr;", re.I)
+inverted_ent = re.compile(r"\&inverted([a-zA-Z0-9]);", re.I)
+supp_ent = re.compile(r"&supp([a-z0-9]);", re.I)
+ligatures_ent = re.compile(r"\&([A-Za-z][A-Za-z])lig;", re.I)
+type_attrib = re.compile(r'type="([^"]*)"', re.I)
+hyper_div_tag = re.compile(r"<hyperdiv\W", re.I)
+div_num_tag = re.compile(r"<div(.)", re.I)
+char_ents = re.compile(r"\&[a-zA-Z0-9\#][a-zA-Z0-9]*;", re.I)
+newline_shortener = re.compile(r"\n\n*")
+check_if_char_word = re.compile(r"\w", re.I | re.U)
+cap_char_or_num = re.compile(r"[A-Z0-9]")  # Capitals
+ending_punctuation = re.compile(r"[%s]$" % string.punctuation.replace(")", "").replace("]", ""))
+add_tag = re.compile(r"<add\W", re.I)
+seg_attrib = re.compile(r"<seg \w+=", re.I)
+abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)', re.I | re.M)
+semi_colon_strip = re.compile(r"\A;?(\w+);?\Z")
+h_tag = re.compile(r"<h(\d)>", re.I)
+
+## Build a list of control characters to remove
+## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
+tab_newline = re.compile(r"[\n|\t]")
+control_chars = "".join(
+    [i for i in [chr(x) for x in list(range(0, 32)) + list(range(127, 160))] if not tab_newline.search(i)]
+)
+control_char_re = re.compile(r"[%s]" % re.escape(control_chars))
+
+# Entities regexes
+entity_regex = [
+    re.compile(r"(\&space;)", re.I),
+    re.compile(r"(\&mdash;)", re.I),
+    re.compile(r"(\&nbsp;)", re.I),
+    re.compile(r"(\&para;)", re.I),
+    re.compile(r"(\&sect;)", re.I),
+    re.compile(r"(\&ast;)", re.I),
+    re.compile(r"(\&commat;)", re.I),
+    re.compile(r"(\&ldquo;)", re.I),
+    re.compile(r"(\&laquo;)", re.I),
+    re.compile(r"(\&rdquo;)", re.I),
+    re.compile(r"(\&raquo;)", re.I),
+    re.compile(r"(\&lsquo;)", re.I),
+    re.compile(r"(\&rsquo;)", re.I),
+    re.compile(r"(\&quot;)", re.I),
+    re.compile(r"(\&sup[0-9]*;)", re.I),
+    re.compile(r"(\&mdash;)", re.I),
+    re.compile(r"(\&amp;)", re.I),
+    re.compile(r"(\&deg;)", re.I),
+    re.compile(r"(\&ndash;)", re.I),
+    re.compile(r"(\&copy;)", re.I),
+    re.compile(r"(\&gt;)", re.I),
+    re.compile(r"(\&lt;)", re.I),
+    re.compile(r"(\&frac[0-9]*;)", re.I),
+    re.compile(r"(\&pound;)", re.I),
+    re.compile(r"(\&colon;)", re.I),
+    re.compile(r"(\&hyphen;)", re.I),
+    re.compile(r"(\&dash;)", re.I),
+    re.compile(r"(\&excl;)", re.I),
+    re.compile(r"(\&dagger;)", re.I),
+    re.compile(r"(\&ddagger;)", re.I),
+    re.compile(r"(\&times;)", re.I),
+    re.compile(r"(\&blank;)", re.I),
+    re.compile(r"(\&dollar;)", re.I),
+    re.compile(r"(\&cent;)", re.I),
+    re.compile(r"(\&verbar;)", re.I),
+    re.compile(r"(\&quest;)", re.I),
+    re.compile(r"(\&hellip;)", re.I),
+    re.compile(r"(\&percnt;)", re.I),
+    re.compile(r"(\&middot;)", re.I),
+    re.compile(r"(\&plusmn;)", re.I),
+    re.compile(r"(\&sqrt;)", re.I),
+    re.compile(r"(\&sol;)", re.I),
+    re.compile(r"(\&sdash;)", re.I),
+    re.compile(r"(\&equals;)", re.I),
+    re.compile(r"(\&ornament;)", re.I),
+    re.compile(r"(\&rule;)", re.I),
+    re.compile(r"(\&prime;)", re.I),
+    re.compile(r"(\&rsqb;)", re.I),
+    re.compile(r"(\&lsqb;)", re.I),
+    re.compile(r"(\&punc;)", re.I),
+    re.compile(r"(\&cross;)", re.I),
+    re.compile(r"(\&diamond;)", re.I),
+    re.compile(r"(\&lpunctel;)", re.I),
+    re.compile(r"(\&lsemicol;)", re.I),
+    re.compile(r"(\&plus;)", re.I),
+    re.compile(r"(\&minus;)", re.I),
+    re.compile(r"(\&ounce;)", re.I),
+    re.compile(r"(\&rindx;)", re.I),
+    re.compile(r"(\&lindx;)", re.I),
+    re.compile(r"(\&leaf;)", re.I),
+    re.compile(r"(\&radic;)", re.I),
+    re.compile(r"(\&dram;)", re.I),
+    re.compile(r"(\&sun;)", re.I),
+]
+
 class XMLParser(object):
     """Parses clean or dirty XML.
     This is a port of the PhiloLogic3 parser originally written by Mark Olsen in Perl.
@@ -1309,150 +1454,6 @@ class XMLParser(object):
         return control_char_re.sub("", text)
 
 
-# Pre-compiled regexes used for parsing
-join_hyphen_with_lb = re.compile(r"(\&shy;[\n \t]*<lb\/>)", re.I | re.M)
-join_hyphen = re.compile(r"(\&shy;[\n \t]*)", re.I | re.M)
-text_tag = re.compile(r"<text\W", re.I)
-closed_text_tag = re.compile(r"</text\W", re.I)
-doc_body_tag = re.compile(r"<docbody", re.I)
-body_tag = re.compile(r"<body\W", re.I)
-div_tag = re.compile(r"<div", re.I)
-closed_div_tag = re.compile(r"<\/div", re.I)
-para_tag = re.compile(r"<p\W", re.I)
-quote_tag = re.compile(r"<q[ >]", re.I)
-closed_quote_tag = re.compile(r"</q>", re.I)
-parag_tag = re.compile(r"<p>", re.I)
-parag_with_attrib_tag = re.compile(r"<p ", re.I)
-closed_para_tag = re.compile(r"</p>", re.I)
-note_tag = re.compile(r"<note\W", re.I)
-closed_note_tag = re.compile(r"</note>", re.I)
-epigraph_tag = re.compile(r"<epigraph\W", re.I)
-closed_epigraph_tag = re.compile(r"</epigraph>", re.I)
-list_tag = re.compile(r"<list\W", re.I)
-closed_list_tag = re.compile(r"</list>", re.I)
-speaker_tag = re.compile(r"<sp\W", re.I)
-closed_speaker_tag = re.compile(r"</sp>", re.I)
-argument_tag = re.compile(r"<argument\W", re.I)
-closed_argument_tag = re.compile(r"</argument>", re.I)
-opener_tag = re.compile(r"<opener\W", re.I)
-closed_opener_tag = re.compile(r"</opener\W", re.I)
-closer_tag = re.compile(r"<closer\W", re.I)
-closed_closer_tag = re.compile(r"</closer\W", re.I)
-stage_tag = re.compile(r"<stage\W", re.I)
-closed_stage_tag = re.compile(r"</stage\W", re.I)
-castlist_tag = re.compile(r"<castlist\W", re.I)
-closed_castlist_tag = re.compile(r"</castlist\W", re.I)
-page_tag = re.compile(r"<pb\W", re.I)
-n_attribute = re.compile(r'n="([^"]*)', re.I)
-line_group_tag = re.compile(r"<lg\W", re.I)
-closed_line_group = re.compile(r"</lg\W", re.I)
-line_tag = re.compile(r"<l\W", re.I)
-ab_tag = re.compile(r"<ab\W", re.I)
-closed_line_tag = re.compile(r"</l\W", re.I)
-closed_ab_tag = re.compile(r"</ab\W", re.I)
-sentence_tag = re.compile(r"<s\W", re.I)
-closed_sentence_tag = re.compile(r"</s\W", re.I)
-front_tag = re.compile(r"<front\W", re.I)
-closed_front_tag = re.compile(r"</front\W", re.I)
-attrib_matcher = re.compile(r"""(\S+)="?((?:.(?!"?\s+(?:\S+)=|[>"]))+.)"?""", re.I)
-tag_matcher = re.compile(r"<(\/?\w+)[^>]*>?", re.I)
-head_self_close_tag = re.compile(r"<head\/>", re.I)
-closed_div_tag = re.compile(r"<\/div", re.I)
-head_tag = re.compile(r"<head", re.I)
-closed_head_tag = re.compile(r"<\/head>", re.I)
-apost_ent = re.compile(r"\&apos;", re.I)
-macr_ent = re.compile(r"\&([A-Za-z])macr;", re.I)
-inverted_ent = re.compile(r"\&inverted([a-zA-Z0-9]);", re.I)
-supp_ent = re.compile(r"&supp([a-z0-9]);", re.I)
-ligatures_ent = re.compile(r"\&([A-Za-z][A-Za-z])lig;", re.I)
-type_attrib = re.compile(r'type="([^"]*)"', re.I)
-hyper_div_tag = re.compile(r"<hyperdiv\W", re.I)
-div_num_tag = re.compile(r"<div(.)", re.I)
-char_ents = re.compile(r"\&[a-zA-Z0-9\#][a-zA-Z0-9]*;", re.I)
-newline_shortener = re.compile(r"\n\n*")
-check_if_char_word = re.compile(r"\w", re.I | re.U)
-cap_char_or_num = re.compile(r"[A-Z0-9]")  # Capitals
-ending_punctuation = re.compile(r"[%s]$" % string.punctuation.replace(")", "").replace("]", ""))
-add_tag = re.compile(r"<add\W", re.I)
-seg_attrib = re.compile(r"<seg \w+=", re.I)
-abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)', re.I | re.M)
-semi_colon_strip = re.compile(r"\A;?(\w+);?\Z")
-h_tag = re.compile(r"<h(\d)>", re.I)
-
-## Build a list of control characters to remove
-## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
-tab_newline = re.compile(r"[\n|\t]")
-control_chars = "".join(
-    [i for i in [chr(x) for x in list(range(0, 32)) + list(range(127, 160))] if not tab_newline.search(i)]
-)
-control_char_re = re.compile(r"[%s]" % re.escape(control_chars))
-
-# Entities regexes
-entity_regex = [
-    re.compile(r"(\&space;)", re.I),
-    re.compile(r"(\&mdash;)", re.I),
-    re.compile(r"(\&nbsp;)", re.I),
-    re.compile(r"(\&para;)", re.I),
-    re.compile(r"(\&sect;)", re.I),
-    re.compile(r"(\&ast;)", re.I),
-    re.compile(r"(\&commat;)", re.I),
-    re.compile(r"(\&ldquo;)", re.I),
-    re.compile(r"(\&laquo;)", re.I),
-    re.compile(r"(\&rdquo;)", re.I),
-    re.compile(r"(\&raquo;)", re.I),
-    re.compile(r"(\&lsquo;)", re.I),
-    re.compile(r"(\&rsquo;)", re.I),
-    re.compile(r"(\&quot;)", re.I),
-    re.compile(r"(\&sup[0-9]*;)", re.I),
-    re.compile(r"(\&mdash;)", re.I),
-    re.compile(r"(\&amp;)", re.I),
-    re.compile(r"(\&deg;)", re.I),
-    re.compile(r"(\&ndash;)", re.I),
-    re.compile(r"(\&copy;)", re.I),
-    re.compile(r"(\&gt;)", re.I),
-    re.compile(r"(\&lt;)", re.I),
-    re.compile(r"(\&frac[0-9]*;)", re.I),
-    re.compile(r"(\&pound;)", re.I),
-    re.compile(r"(\&colon;)", re.I),
-    re.compile(r"(\&hyphen;)", re.I),
-    re.compile(r"(\&dash;)", re.I),
-    re.compile(r"(\&excl;)", re.I),
-    re.compile(r"(\&dagger;)", re.I),
-    re.compile(r"(\&ddagger;)", re.I),
-    re.compile(r"(\&times;)", re.I),
-    re.compile(r"(\&blank;)", re.I),
-    re.compile(r"(\&dollar;)", re.I),
-    re.compile(r"(\&cent;)", re.I),
-    re.compile(r"(\&verbar;)", re.I),
-    re.compile(r"(\&quest;)", re.I),
-    re.compile(r"(\&hellip;)", re.I),
-    re.compile(r"(\&percnt;)", re.I),
-    re.compile(r"(\&middot;)", re.I),
-    re.compile(r"(\&plusmn;)", re.I),
-    re.compile(r"(\&sqrt;)", re.I),
-    re.compile(r"(\&sol;)", re.I),
-    re.compile(r"(\&sdash;)", re.I),
-    re.compile(r"(\&equals;)", re.I),
-    re.compile(r"(\&ornament;)", re.I),
-    re.compile(r"(\&rule;)", re.I),
-    re.compile(r"(\&prime;)", re.I),
-    re.compile(r"(\&rsqb;)", re.I),
-    re.compile(r"(\&lsqb;)", re.I),
-    re.compile(r"(\&punc;)", re.I),
-    re.compile(r"(\&cross;)", re.I),
-    re.compile(r"(\&diamond;)", re.I),
-    re.compile(r"(\&lpunctel;)", re.I),
-    re.compile(r"(\&lsemicol;)", re.I),
-    re.compile(r"(\&plus;)", re.I),
-    re.compile(r"(\&minus;)", re.I),
-    re.compile(r"(\&ounce;)", re.I),
-    re.compile(r"(\&rindx;)", re.I),
-    re.compile(r"(\&lindx;)", re.I),
-    re.compile(r"(\&leaf;)", re.I),
-    re.compile(r"(\&radic;)", re.I),
-    re.compile(r"(\&dram;)", re.I),
-    re.compile(r"(\&sun;)", re.I),
-]
 
 if __name__ == "__main__":
     for docid, fn in enumerate(sys.argv[1:], 1):
