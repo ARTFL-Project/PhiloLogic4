@@ -1,0 +1,183 @@
+<template>
+    <div>
+        <conckwic :results="results"></conckwic>
+        <b-row>
+            <b-col cols="12">
+                <b-card
+                    no-body
+                    class="philologic-occurrence m-4 shadow-sm"
+                    v-for="(result, index) in results.results"
+                    :key="index"
+                >
+                    <b-row class="citation-container">
+                        <b-col cols="12" sm="10" md="11">
+                            <span class="cite" :data-id="result.philo_id.join(' ')">
+                                <span class="result-number">{{ results.description.start + index }}</span>
+                                <span class="philologic_cite">
+                                    <span
+                                        class="citation"
+                                        v-for="(citation, citeIndex) in result.citation"
+                                        :key="citeIndex"
+                                    >
+                                        <span v-if="citation.href">
+                                            <span v-html="citation.prefix"></span>
+                                            <a
+                                                :href="citation.href"
+                                                :style="citation.style"
+                                            >{{ citation.label }}</a>
+                                            <span v-html="citation.suffix"></span>
+                                            <span
+                                                class="separator"
+                                                v-if="index != result.citation.length - 1"
+                                            >&#9679;</span>
+                                        </span>
+                                        <span v-if="!citation.href">
+                                            <span v-html="citation.prefix"></span>
+                                            <span :style="citation.style">{{ citation.label }}</span>
+                                            <span v-html="citation.suffix"></span>
+                                            <span
+                                                class="separator"
+                                                v-if="index != result.citation.length - 1"
+                                            >&#9679;</span>
+                                        </span>
+                                    </span>
+                                </span>
+                            </span>
+                        </b-col>
+                        <b-col sm="2" md="1" class="hidden-xs">
+                            <button
+                                class="btn btn-primary more-context"
+                                @click="moreContext(index)"
+                            >More</button>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col
+                            class="m-2 mt-3"
+                            select-word
+                            :position="results.description.start + index"
+                            @keyup="dicoLookup($event, result.metadata_fields.year)"
+                            tabindex="0"
+                        >
+                            <div class="default-length" v-html="result.context"></div>
+                            <div class="more-length"></div>
+                        </b-col>
+                    </b-row>
+                </b-card>
+            </b-col>
+        </b-row>
+    </div>
+</template>
+
+<script>
+import conckwic from "./ConcordanceKwic"
+
+export default {
+    name: "concordance",
+    components: {
+        conckwic
+    },
+    data() {
+        return {
+            philoConfig: this.$philoConfig,
+            results: {},
+            searchParams: { ...this.$route.query }
+        };
+    },
+    created() {
+        this.fetchResults()
+    },
+    methods: {
+        fetchResults() {
+            this.$http
+                .get(`http://anomander.uchicago.edu/philologic/test/reports/concordance.py?${this.paramsToUrl(this.searchParams)}`)
+                .then(response => {
+                    this.results = response.data;
+                })
+                .catch(error => {
+                    this.loading = false;
+                    this.error = error.toString();
+                    console.log(error);
+                });
+        },
+        moreContext(index) {
+            let parentNode = event.srcElement.parentNode.parentNode
+            let defaultNode = parentNode.querySelector(".default-length")
+            let moreNode = parentNode.querySelector(".more-length")
+            console.log(moreNode)
+            let resultNumber = this.results.description.start + index - 1
+            let localParams = { hit_num: resultNumber, ...this.searchParams }
+            this.$http(`http://anomander.uchicago.edu/philologic/test/scripts/get_more_context.py?${this.paramsToUrl(localParams)}`)
+                .then(response => {
+                    let moreText = response.data;
+                    moreNode.innerHTML = moreText
+                    defaultNode.style.display = "none"
+                    moreNode.style.display = "block"
+                })
+                .catch(error => {
+                    this.loading = false;
+                    this.error = error.toString();
+                    console.log(error);
+                });
+            console.log(parentNode)
+        },
+        dicoLookup() { }
+    }
+};
+</script>
+
+<style>
+.philologic-occurrence {
+    left: 0;
+    position: relative;
+}
+.separator {
+    padding: 5px;
+    font-size: 60%;
+    display: inline-block;
+    vertical-align: middle;
+}
+.more-context {
+    position: absolute;
+    right: 15px;
+}
+.more_context,
+.citation-container {
+    border-bottom: solid 1px #eee !important;
+}
+.result-number {
+    background-color: rgb(78, 93, 108);
+    color: #fff;
+    padding: 7px;
+    display: inline-block;
+    margin-left: -10px;
+    margin-top: -10px;
+    margin-right: 5px;
+}
+.hit_n {
+    vertical-align: 5px;
+    /*align numbers*/
+}
+.cite {
+    padding-left: 0.6em;
+    padding-top: 7px;
+    display: inline-block;
+}
+.philologic-doc {
+    font-variant: small-caps;
+    font-weight: 700;
+}
+.citation-separator {
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: double 3px darkgray;
+}
+.page-display {
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: double 3px darkgray;
+}
+.citation-small-caps {
+    font-variant: small-caps;
+}
+</style>

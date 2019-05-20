@@ -3,7 +3,7 @@
         <b-row>
             <b-col md="8" offset-md="2">
                 <b-card no-body>
-                    <form id="search" role="form">
+                    <b-form @submit="onSubmit" @reset="onReset">
                         <div id="form_body">
                             <div id="initial-form">
                                 <b-button-group size="lg" id="report" style="width: 100%">
@@ -28,6 +28,7 @@
                                                     <b-button
                                                         variant="outline-secondary"
                                                         id="button-search"
+                                                        type="submit"
                                                     >Search</b-button>
                                                 </b-input-group-append>
                                             </b-input-group>
@@ -38,12 +39,12 @@
                                             v-if="!philoConfig.dictionary"
                                             id="search-buttons"
                                         >
-                                            <button
+                                            <b-button
                                                 type="reset"
                                                 id="reset_form"
                                                 class="btn btn-danger"
-                                                @click="clearFormData()"
-                                            >Clear</button>
+                                                @click="onReset()"
+                                            >Clear</b-button>
                                             <button
                                                 type="button"
                                                 id="show-search-form"
@@ -128,17 +129,21 @@
                                         </b-row>
                                     </b-col>
                                 </b-row>
-                                <b-row v-for="metadata in metadataDisplay" :key="metadata.value">
+                                <b-row
+                                    v-for="localField in metadataDisplay"
+                                    :key="localField.value"
+                                >
                                     <b-col cols="12" class="pb-2">
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text">{{metadata.label}}</span>
+                                                <span class="input-group-text">{{localField.label}}</span>
                                             </div>
                                             <input
                                                 type="text"
                                                 class="form-control"
-                                                :placeholder="metadata.example"
-                                                v-model="metadata.value"
+                                                :name="localField.value"
+                                                :placeholder="localField.example"
+                                                v-model="metadataValues[localField.value]"
                                             >
                                         </div>
                                     </b-col>
@@ -204,20 +209,49 @@
                                         >&nbsp;years
                                     </b-col>
                                 </b-row>
+                                <b-row
+                                    id="sort-options"
+                                    v-if="report === 'concordance' || report === 'bibliography'"
+                                >
+                                    <b-col cols="12" style="margin-top: 10px;">
+                                        <b-row>
+                                            <b-col cols="3" sm="2">Sort results by</b-col>
+                                            <b-col cols="6" sm="4">
+                                                <b-form-select
+                                                    v-model="sort_by"
+                                                    :options="sortValues"
+                                                    class="mb-3"
+                                                >
+                                                    <option>Sort results by</option>
+                                                </b-form-select>
+                                            </b-col>
+                                        </b-row>
+                                    </b-col>
+                                </b-row>
+                                <b-row
+                                    id="results_per_page"
+                                    v-if="report != 'collocation' && report != 'time_series'"
+                                >
+                                    <b-col cols="12" sm="2">Results per page:</b-col>
+                                    <b-col cols="12" sm="10">
+                                        <b-form-group>
+                                            <b-form-radio-group
+                                                id="btn-radios-3"
+                                                v-model="results_per_page"
+                                                :options="resultsPerPageOptions"
+                                                buttons
+                                                size="sm"
+                                                name="radio-btn"
+                                            ></b-form-radio-group>
+                                        </b-form-group>
+                                    </b-col>
+                                </b-row>
                             </div>
                         </div>
-                    </form>
+                    </b-form>
                 </b-card>
             </b-col>
         </b-row>
-        <!--
-                        <time-series-options v-if="formData.report == 'time_series'"></time-series-options>
-                        <sort-results
-                            v-if="formData.report === 'concordance' || formData.report === 'bibliography'"
-                        ></sort-results>
-                        <results-per-page
-                            v-if="formData.report != 'collocation' && formData.report != 'time_series'"
-        ></results-per-page>-->
     </div>
 </template>
 
@@ -243,13 +277,48 @@ export default {
             "formData.metadataFields",
             "formData.start_date",
             "formData.end_date",
-            "formData.year_interval"
-        ])
+            "formData.year_interval",
+            'formData.sort_by',
+            "formData.results_per_page"
+        ]),
+        formData() {
+            return this.$store.state.formData
+        },
+        // metadataValues: {
+        //     get(key, val) {
+        //         if (key in this.$store.state.formData) {
+        //             return this.$store.state.formData.metadataFields[key]
+        //         } else {
+        //             return ""
+        //         }
+        //     },
+        //     set(value) {
+        //         this.$store.state.formData.metadataFields[key] = value
+        //     },
+        // },
+        sortValues() {
+            let sortValues = [{
+                value: "rowid",
+                text: "select"
+            }]
+            for (let fields of this.philoConfig.concordance_biblio_sorting) {
+                let label = []
+                for (let field of fields) {
+                    if (field in this.philoConfig.metadata_aliases) {
+                        label.push(this.philoConfig.metadata_aliases[field])
+                    } else {
+                        label.push(field)
+                    }
+                }
+                sortValues.push({ text: label.join(", "), value: fields })
+            }
+            return sortValues
+        }
     },
     data() {
         return {
             philoConfig: this.$philoConfig,
-            formOpen: true,
+            formOpen: false,
             searchOptionsButton: "Show search options",
             approximateValues: [50, 60, 70, 80, 90],
             methodOptions: [
@@ -258,11 +327,14 @@ export default {
                 { text: "In the same sentence", value: "cooc" }
             ],
             metadataDisplay: [],
+            metadataValues: {},
             collocationOptions: [
                 { text: "Most Frequent Terms", value: "frequency" },
                 { text: "Stopwords", value: "stopwords" },
                 { text: "No Filtering", value: "nofilter" }
-            ]
+            ],
+            selectedSortValues: "rowid",
+            resultsPerPageOptions: [25, 100, 500, 1000]
         };
     },
     created() {
@@ -274,7 +346,6 @@ export default {
                 label: label
             });
         }
-        console.log(reports);
         this.reports = reports;
         for (let metadataField of this.philoConfig.metadata) {
             let metadataObj = {
@@ -287,14 +358,72 @@ export default {
                     metadataField
                 ];
             }
+            this.metadataValues[metadataField] = ""
             this.metadataFields[metadataField] = "";
             this.metadataDisplay.push(metadataObj);
-            console.log(metadataObj);
         }
-        console.log(this.metadataFields);
     },
     methods: {
-        submit() {},
+        generateSortValues() {
+            let sortValues = [{
+                value: ["rowid"],
+                label: "select"
+            }]
+            for (let fields of this.philoConfig.concordance_biblio_sorting) {
+                let label = []
+                for (let field of fields) {
+                    if (field in this.philoConfig.metadata_aliases) {
+                        label.push(this.philoConfig.metadata_aliases[field])
+                    } else {
+                        label.push(field)
+                    }
+                }
+                sortValues.push({ label: label.join(", "), value: fields })
+            }
+            return sortValues
+        },
+        onSubmit(evt) {
+            evt.preventDefault()
+            let localFormData = {}
+            for (const metadataField in this.metadataValues) {
+                if (this.metadataValues[metadataField].length > 0) {
+                    this.$store.state.formData.metadataFields[metadataField] = this.metadataValues[metadataField]
+                }
+            }
+            for (const field in this.$store.state.formData) {
+                let value = this.$store.state.formData[field]
+                if (field === "metadataFields") {
+                    for (let metadataField in value) {
+                        if (value[metadataField].length > 0) {
+                            localFormData[metadataField] = value[metadataField]
+                        }
+                    }
+                }
+                else if (value.length > 0 || field === "results_per_page") {
+                    if (field === "method" && value === "proxy" || field === "approximate" && value == "no" || field === "sort_by" && value === "rowid") {
+                        continue
+                    } else {
+                        localFormData[field] = value
+                    }
+                }
+            }
+            let newRoute = `/${this.report}?${this.paramsToUrl(localFormData)}`
+            this.toggleForm()
+            this.$router.push(newRoute)
+        },
+        onReset(evt) {
+            evt.preventDefault()
+            // Reset our form values
+            this.form.email = ''
+            this.form.name = ''
+            this.form.food = null
+            this.form.checked = []
+            // Trick to reset/clear native browser form validation state
+            this.show = false
+            this.$nextTick(() => {
+                this.show = true
+            })
+        },
         reportChange(report) {
             if (report === "landing_page") {
                 this.report = this.philoConfig.search_reports[0];
@@ -316,13 +445,220 @@ export default {
                 this.searchOptionsButton = "Show search options";
             }
         },
-        clearFormData() {},
-        selectApproximat(value) {
-            this.approximate_ratio = value;
+        clearFormData() { },
+        selectApproximate(approximateValue) {
+            this.approximate_ratio = approximateValue;
         }
     }
 };
 </script>
 
 <style>
+.dico-margin {
+    margin-top: 210px !important;
+}
+
+#search-elements.dico {
+    margin-top: 168px;
+}
+
+#search-elements > h5 {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+#report label {
+    font-size: 1.1em;
+    font-variant: small-caps;
+    text-transform: capitalize;
+}
+
+.search_box {
+    width: 250px;
+    vertical-align: middle;
+}
+
+#search_field {
+    font-weight: 400;
+}
+
+#more_options {
+    width: 200px;
+}
+
+#more_options:hover {
+    cursor: pointer;
+}
+
+#search_terms_container {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+#search_terms,
+#head-search-container {
+    text-align: center;
+}
+
+#head-search-container {
+    margin-top: -10px;
+    padding-bottom: 15px;
+}
+
+.no-example {
+    display: none;
+}
+
+#method,
+.metadata_fields,
+#collocation-options > div,
+#time-series-options > div {
+    margin-top: 10px;
+}
+
+#method,
+.metadata_fields.row,
+#time_series_num.row,
+#date_range.row,
+#results_per_page.row,
+#collocation-options > div,
+#time-series-options > div {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#initial-form .btn-primary.active {
+    box-shadow: 0px 0px;
+    border-top: 0px;
+}
+
+#tip-text {
+    display: none;
+}
+
+#tip-btn:hover #tip-text {
+    display: inline;
+}
+
+#tip-btn:hover #tip {
+    display: none;
+}
+
+#search_terms .row {
+    text-align: left;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+@media (max-width: 768px) {
+    #collocation-options .row {
+        margin-left: -15px;
+    }
+}
+
+/*Dico layout changes*/
+
+#search_elements {
+    border-top-width: 0px;
+}
+
+/*Responsiveness*/
+
+@media (min-width: 1201px) {
+    #initial-form,
+    #search-elements {
+        left: 100px;
+        right: 100px;
+    }
+}
+
+@media (max-width: 1200px) {
+    #initial-form,
+    #search-elements {
+        left: 70px;
+        right: 70px;
+    }
+}
+
+@media (max-width: 992px) {
+    #search-buttons {
+        padding-top: 15px;
+    }
+    #search_terms > div:nth-of-type(2),
+    #head-search-container .metadata_fields div:nth-of-type(2) {
+        padding-right: 20px;
+        padding-left: 20px;
+    }
+    #head-search-container #metadata-fields #initial-form,
+    #search-elements {
+        left: 40px;
+        right: 40px;
+    }
+    #philologic_response {
+        margin-top: 170px;
+    }
+    #search-elements {
+        margin-top: 148px;
+    }
+    #search-elements.dico {
+        margin-top: 217px;
+    }
+    .dico-margin {
+        margin-top: 245px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #right-act-on-report .btn-group {
+        float: left !important;
+    }
+    #search-elements {
+        padding-right: 20px;
+        margin-top: 160px;
+    }
+    #search-elements.dico {
+        margin-top: 248px;
+    }
+    #philologic_response {
+        margin-top: 180px;
+    }
+    #initial-form,
+    #search-elements {
+        left: 0px;
+        right: 0px;
+    }
+    #kwic,
+    #time_series {
+        display: none;
+    }
+    .dico-margin {
+        margin-top: 270px !important;
+    }
+}
+
+.select {
+    font-size: inherit;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+}
+
+.select select {
+    outline: none;
+    -webkit-appearance: none;
+    display: block;
+    padding: 6px 12px;
+    margin: 0;
+    transition: border-color 0.2s;
+    border: 1px solid #ccc;
+    border-radius: 0px;
+    background: #fff;
+    color: #555;
+    line-height: normal;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    width: 100%;
+}
 </style>

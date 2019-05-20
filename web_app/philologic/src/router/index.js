@@ -1,19 +1,18 @@
 import Vue from "vue";
 import Router from "vue-router";
 
-// import globalConfig from "../../appConfig.json";
+import concordance from "../components/Concordance"
 
 Vue.use(Router);
 
 export default new Router({
     mode: "history",
     // base: globalConfig.appPath,
-    routes: [
-        // {
-        //     path: "/concordance",
-        //     name: "concordance",
-        //     component: concordance
-        // },
+    routes: [{
+            path: "/concordance",
+            name: "concordance",
+            component: concordance
+        }
         // {
         //     path: "/kwic",
         //     name: "/kwic",
@@ -39,7 +38,10 @@ export default new Router({
         if (savedPosition) {
             return savedPosition;
         } else {
-            return { x: 0, y: 0 };
+            return {
+                x: 0,
+                y: 0
+            };
         }
     }
 });
