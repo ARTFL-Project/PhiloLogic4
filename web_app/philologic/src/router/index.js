@@ -2,6 +2,7 @@ import Vue from "vue";
 import Router from "vue-router";
 
 import concordance from "../components/Concordance"
+import kwic from "../components/Kwic"
 
 Vue.use(Router);
 
@@ -12,12 +13,12 @@ export default new Router({
             path: "/concordance",
             name: "concordance",
             component: concordance
+        },
+        {
+            path: "/kwic",
+            name: "kwic",
+            component: kwic
         }
-        // {
-        //     path: "/kwic",
-        //     name: "/kwic",
-        //     component: kwic
-        // },
         // {
         //     path: "/collocation",
         //     name: "collocation",

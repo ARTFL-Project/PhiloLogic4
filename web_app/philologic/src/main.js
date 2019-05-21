@@ -10,14 +10,44 @@ import axios from 'axios'
 Vue.config.productionTip = false
 Vue.prototype.$http = axios
 
+export const EventBus = new Vue(); // To pass messages between components
+
 Vue.mixin({
     methods: {
-        paramsToUrl: function(formValues) {
-            var queryParams = []
-            for (var param in formValues) {
-                queryParams.push(`${param}=${encodeURIComponent(formValues[param])}`)
+        paramsFilter: function(formValues) {
+            let localFormData = {}
+            for (const field in formValues) {
+                let value = formValues[field]
+                if (field === "report") {
+                    continue
+                }
+                if (field === "metadataFields") {
+                    for (let metadataField in value) {
+                        if (value[metadataField].length > 0) {
+                            localFormData[metadataField] = value[metadataField]
+                        }
+                    }
+                } else if (value.length > 0 || field === "results_per_page") {
+                    if (field === "method" && value === "proxy" || field === "approximate" && value == "no" || field === "sort_by" && value === "rowid") {
+                        continue
+                    } else {
+                        localFormData[field] = value
+                    }
+                }
             }
-            return queryParams.join('&')
+            return localFormData
+        },
+        paramsToRoute: function(formValues) {
+            let report = formValues.report
+            let localFormData = this.paramsFilter(formValues)
+            let routeObject = {
+                path: report,
+                query: localFormData
+            }
+            return routeObject
+        },
+        copyObject: function(objectToCopy) {
+            return JSON.parse(JSON.stringify(objectToCopy))
         }
     }
 })

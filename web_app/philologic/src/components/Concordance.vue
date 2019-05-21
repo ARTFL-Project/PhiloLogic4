@@ -1,6 +1,6 @@
 <template>
     <div>
-        <conckwic :results="results"></conckwic>
+        <conckwic :results="results" v-if="Object.keys(results).length"></conckwic>
         <b-row>
             <b-col cols="12">
                 <b-card
@@ -46,6 +46,7 @@
                         </b-col>
                         <b-col sm="2" md="1" class="hidden-xs">
                             <button
+                                id="more-context"
                                 class="btn btn-primary more-context"
                                 @click="moreContext(index)"
                             >More</button>
@@ -71,6 +72,7 @@
 
 <script>
 import conckwic from "./ConcordanceKwic"
+import { EventBus } from "../main.js";
 
 export default {
     name: "concordance",
@@ -81,16 +83,26 @@ export default {
         return {
             philoConfig: this.$philoConfig,
             results: {},
-            searchParams: { ...this.$route.query }
+            searchParams: {}
         };
     },
     created() {
         this.fetchResults()
+        var vm = this
+        EventBus.$on("urlUpdate", function () {
+            vm.fetchResults()
+        })
+    },
+    watch: {
+        // call again the method if the route changes
+        $route: "fetchResults"
     },
     methods: {
         fetchResults() {
+            this.results = {}
+            this.searchParams = { ...this.$route.query }
             this.$http
-                .get(`http://anomander.uchicago.edu/philologic/test/reports/concordance.py?${this.paramsToUrl(this.searchParams)}`)
+                .get("http://anomander.uchicago.edu/philologic/test/reports/concordance.py", { params: this.paramsFilter(this.searchParams) })
                 .then(response => {
                     this.results = response.data;
                 })
@@ -101,10 +113,9 @@ export default {
                 });
         },
         moreContext(index) {
-            let parentNode = event.srcElement.parentNode.parentNode
+            let parentNode = event.srcElement.parentNode.parentNode.parentNode
             let defaultNode = parentNode.querySelector(".default-length")
             let moreNode = parentNode.querySelector(".more-length")
-            console.log(moreNode)
             let resultNumber = this.results.description.start + index - 1
             let localParams = { hit_num: resultNumber, ...this.searchParams }
             this.$http(`http://anomander.uchicago.edu/philologic/test/scripts/get_more_context.py?${this.paramsToUrl(localParams)}`)

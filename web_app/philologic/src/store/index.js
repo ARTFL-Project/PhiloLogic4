@@ -30,6 +30,9 @@ export default new Vuex.Store({
             end_date: '',
             year_interval: '',
             sort_by: "rowid",
+            first_kwic_sorting_option: "",
+            second_kwic_sorting_option: "",
+            third_kwic_sorting_option: ""
         }
     },
     getters: {
@@ -37,9 +40,8 @@ export default new Vuex.Store({
     },
     mutations: {
         updateField,
-        updateMetadataFields(state, item) {
-            console.log(state, item)
-            // const itemInState = findItemInState(state, item)
+        replaceStore(state, payload) {
+            state.formData = payload
         }
     }
 })

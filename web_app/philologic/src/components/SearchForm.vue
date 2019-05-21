@@ -284,18 +284,6 @@ export default {
         formData() {
             return this.$store.state.formData
         },
-        // metadataValues: {
-        //     get(key, val) {
-        //         if (key in this.$store.state.formData) {
-        //             return this.$store.state.formData.metadataFields[key]
-        //         } else {
-        //             return ""
-        //         }
-        //     },
-        //     set(value) {
-        //         this.$store.state.formData.metadataFields[key] = value
-        //     },
-        // },
         sortValues() {
             let sortValues = [{
                 value: "rowid",
@@ -338,6 +326,15 @@ export default {
         };
     },
     created() {
+        if (Object.keys(this.$route.query).length > 0) {
+            console.log("BEFORE", this.$store.state.formData)
+            let localStore = { ...this.copyObject(this.$store.state.formData), report: this.$route.name }
+            for (let field in this.$route.query) {
+                localStore[field] = this.$route.query[field]
+            }
+            this.$store.commit("replaceStore", localStore)
+            console.log("AFTER", this.$store.state.formData)
+        }
         let reports = [];
         for (let value of this.philoConfig.search_reports) {
             let label = value.replace("_", " ");
@@ -382,34 +379,17 @@ export default {
             }
             return sortValues
         },
-        onSubmit(evt) {
-            evt.preventDefault()
+        onSubmit(event) {
+            event.preventDefault()
             let localFormData = {}
             for (const metadataField in this.metadataValues) {
                 if (this.metadataValues[metadataField].length > 0) {
                     this.$store.state.formData.metadataFields[metadataField] = this.metadataValues[metadataField]
                 }
             }
-            for (const field in this.$store.state.formData) {
-                let value = this.$store.state.formData[field]
-                if (field === "metadataFields") {
-                    for (let metadataField in value) {
-                        if (value[metadataField].length > 0) {
-                            localFormData[metadataField] = value[metadataField]
-                        }
-                    }
-                }
-                else if (value.length > 0 || field === "results_per_page") {
-                    if (field === "method" && value === "proxy" || field === "approximate" && value == "no" || field === "sort_by" && value === "rowid") {
-                        continue
-                    } else {
-                        localFormData[field] = value
-                    }
-                }
-            }
-            let newRoute = `/${this.report}?${this.paramsToUrl(localFormData)}`
-            this.toggleForm()
-            this.$router.push(newRoute)
+            // let newRoute = `/${this.report}?${this.paramsToUrl(this.$store.state.formData)}`
+            this.formOpen = false
+            this.$router.push(this.paramsToRoute(this.$store.state.formData))
         },
         onReset(evt) {
             evt.preventDefault()
