@@ -20,7 +20,7 @@
                 :key="index"
             >
                 <a href @click.prevent="getQueryTerms(group, index)">{{ group }}</a>
-                <span style="position: absolute; right: 3px; top: 5px" @click="removeTerm(index)">X</span>
+                <span class="close-pill" @click="removeTerm(index)">X</span>
             </b-button>
             {{ queryArgs.proximity }}
             <b-card no-body variant="outline-secondary" id="query-terms" style="display: none;">
@@ -56,17 +56,13 @@
         <div style="margin-top: 5px;">
             Bibliography criteria:
             <span
-                class="biblio-criteria"
+                class="metadata-args rounded-pill"
                 v-for="metadata in queryArgs.biblio"
                 :key="metadata.key"
-                style="margin: 1px"
             >
-                {{ metadata.alias }} :
-                <b>{{ metadata.value }}</b>
-                <span
-                    class="glyphicon glyphicon-remove-circle"
-                    @click="removeMetadata(metadata.key, formData, restart)"
-                ></span>
+                <span class="metadata-label">{{ metadata.alias }}</span>
+                <span class="remove-metadata" @click="removeMetadata(metadata.key, restart)">X</span>
+                <span class="metadata-value">{{ metadata.value }}</span>
             </span>
             <b v-if="queryArgs.biblio.length === 0">None</b>
         </div>
@@ -78,14 +74,14 @@
                 <b>{{ startDate }}</b>
                 <span
                     class="glyphicon glyphicon-remove-circle"
-                    @click="removeMetadata('start_date', formData, restart)"
+                    @click="removeMetadata('start_date', restart)"
                 ></span>
             </span>&nbsp; and
             <span class="biblio-criteria">
                 <b>{{ endDate }}</b>
                 <span
                     class="glyphicon glyphicon-remove-circle"
-                    @click="removeMetadata('end_date', formData, restart)"
+                    @click="removeMetadata('end_date', restart)"
                 ></span>
             </span>
         </div>
@@ -105,8 +101,12 @@ export default {
         ...mapFields([
             "formData.report",
             "formData.q",
+            "formData.start",
+            "formData.end",
             "formData.approximate",
-            "formData.approximate_ratio"])
+            "formData.approximate_ratio",
+            "formData.metadataFields"
+        ])
     },
     data() {
         return {
@@ -116,48 +116,59 @@ export default {
             termGroups: [],
             words: [],
             wordListChanged: false,
-        }
+            restart: false
+        };
     },
     created() {
-        this.fetchSearchArgs()
-        var vm = this
+        this.fetchSearchArgs();
+        var vm = this;
         EventBus.$on("urlUpdate", function () {
-            vm.fetchSearchArgs()
-        })
+            vm.fetchSearchArgs();
+        });
     },
     methods: {
         fetchSearchArgs() {
-            let queryParams = { ...this.$route.query }
-            if ('q' in queryParams) {
+            let queryParams = { ...this.$store.state.formData };
+            if ("q" in queryParams) {
                 this.queryArgs.queryTerm = queryParams.q;
             } else {
-                this.queryArgs.queryTerm = '';
+                this.queryArgs.queryTerm = "";
             }
-            this.queryArgs.biblio = this.buildCriteria(queryParams);
+            this.queryArgs.biblio = this.buildCriteria(queryParams.metadataFields);
 
-            if ('q' in queryParams) {
+            if ("q" in queryParams) {
                 let method = queryParams.method;
-                if (typeof (method) === 'undefined') {
-                    method = 'proxy';
+                if (typeof method === "undefined") {
+                    method = "proxy";
                 }
-                if (queryParams.q.split(' ').length > 1) {
+                if (queryParams.q.split(" ").length > 1) {
                     if (method === "proxy") {
-                        if (typeof (queryParams.arg_proxy) !== 'undefined' || queryParams.arg_proxy) {
-                            this.queryArgs.proximity = 'within ' + queryParams.arg_proxy + ' words';
+                        if (
+                            typeof queryParams.arg_proxy !== "undefined" ||
+                            queryParams.arg_proxy
+                        ) {
+                            this.queryArgs.proximity =
+                                "within " + queryParams.arg_proxy + " words";
                         } else {
-                            this.queryArgs.proximity = '';
+                            this.queryArgs.proximity = "";
                         }
-                    } else if (method === 'phrase') {
-                        if (typeof (queryParams.arg_proxy) !== 'undefined' || queryParams.arg_phrase) {
-                            this.queryArgs.proximity = 'within exactly ' + queryParams.arg_phrase + ' words';
+                    } else if (method === "phrase") {
+                        if (
+                            typeof queryParams.arg_proxy !== "undefined" ||
+                            queryParams.arg_phrase
+                        ) {
+                            this.queryArgs.proximity =
+                                "within exactly " +
+                                queryParams.arg_phrase +
+                                " words";
                         } else {
-                            this.queryArgs.proximity = ''
+                            this.queryArgs.proximity = "";
                         }
-                    } else if (method === 'cooc') {
-                        this.queryArgs.proximity = 'in the same sentence';
+                    } else if (method === "cooc") {
+                        this.queryArgs.proximity = "in the same sentence";
                     }
                 } else {
-                    this.queryArgs.proximity = '';
+                    this.queryArgs.proximity = "";
                 }
             }
             if (queryParams.approximate == "yes") {
@@ -166,13 +177,18 @@ export default {
                 this.queryArgs.approximate = false;
             }
 
-
-            this.$http.get("http://anomander.uchicago.edu/philologic/test/scripts/get_term_groups.py", { params: this.paramsFilter({ ...this.$route.query }) })
+            this.$http
+                .get(
+                    "http://anomander.uchicago.edu/philologic/test/scripts/get_term_groups.py",
+                    { params: this.paramsFilter({ ...this.$route.query }) }
+                )
                 .then(response => {
-                    this.termGroups = response.data.term_groups
-                    this.originalQuery = response.data.original_query
-                    this.queryTermGroups.group = this.copyObject(this.termGroups)
-                    this.termGroupsCopy = this.copyObject(this.termGroups)
+                    this.termGroups = response.data.term_groups;
+                    this.originalQuery = response.data.original_query;
+                    this.queryTermGroups.group = this.copyObject(
+                        this.termGroups
+                    );
+                    this.termGroupsCopy = this.copyObject(this.termGroups);
                 })
                 .catch(error => {
                     this.loading = false;
@@ -181,8 +197,8 @@ export default {
                 });
         },
         buildCriteria(queryParams) {
-            let queryArgs = this.copyObject(queryParams)
-            let biblio = []
+            let queryArgs = this.copyObject(queryParams);
+            let biblio = [];
             if (queryArgs.report === "time_series") {
                 delete queryParams[this.philoConfig.time_series_year_field];
             }
@@ -191,7 +207,7 @@ export default {
             for (let i = 0; i < config.facets.length; i++) {
                 let alias = Object.keys(config.facets[i])[0];
                 let facet = config.facets[i][alias];
-                if (typeof (facet) == "string") {
+                if (typeof facet == "string") {
                     facets.push(facet);
                 } else {
                     //facets.push(facet)
@@ -214,71 +230,90 @@ export default {
                     }
                 }
             }
-            return biblio
+            return biblio;
         },
-        removeMetadata(metadata, queryParams, restart) {
-            delete queryParams[metadata];
-            if (!queryParams.q) {
-                queryParams.report = 'bibliography';
+        removeMetadata(metadata, restart) {
+            this.$store.commit("removeMetadata", metadata)
+            if (!this.q) {
+                this.report = "bibliography";
             }
-            queryParams.start = 0;
-            queryParams.end = 0;
-            if (this.report === "concordance" || this.report === "kwic" || this.report === "bibliography") {
-                this.$router.push(`http://anomander.uchicago.edu/philologic/test/${this.paramsToUrl(queryParams)}`);
-            } else if (queryParams.report === "collocation" || queryParams.report === "time_series") {
-                this.$router.push(`http://anomander.uchicago.edu/philologic/test/${this.paramsToUrl(queryParams)}`);
-                // $rootthis.formData = queryParams;
-                restart = true;
+            this.start = "";
+            this.end = "";
+            if (
+                this.report === "concordance" ||
+                this.report === "kwic" ||
+                this.report === "bibliography"
+            ) {
+                this.$router.push(
+                    this.paramsToRoute(this.$store.state.formData)
+                );
+            } else if (
+                this.report === "collocation" ||
+                this.report === "time_series"
+            ) {
+                this.$router.push(
+                    this.paramsToRoute(this.$store.state.formData)
+                );
+                this.restart = true;
             }
         },
         getQueryTerms(group, index) {
-            console.log("haaa")
-            var vm = this
-            this.groupIndexSelected = index
-            this.$http.get("http://anomander.uchicago.edu/philologic/test/scripts/get_query_terms.py", { params: { q: group, approximate: 0, ...this.paramsFilter(this.$route.query) } })
+            var vm = this;
+            this.groupIndexSelected = index;
+            this.$http
+                .get(
+                    "http://anomander.uchicago.edu/philologic/test/scripts/get_query_terms.py",
+                    {
+                        params: {
+                            q: group,
+                            approximate: 0,
+                            ...this.paramsFilter(this.$route.query)
+                        }
+                    }
+                )
                 .then(function (response) {
                     vm.words = response.data;
-                    document.querySelector('#query-terms').style.display = "block"
-                }).catch(error => {
+                    document.querySelector("#query-terms").style.display =
+                        "block";
+                })
+                .catch(error => {
                     this.error = error.toString();
                     console.log(error);
                 });
         },
         closeTermsList() {
-            document.querySelector('#query-terms').style.display = "none"
+            document.querySelector("#query-terms").style.display = "none";
         },
         removeFromTermsList(word, groupIndex) {
             var index = this.words.indexOf(word);
             this.words.splice(index, 1);
             this.wordListChanged = true;
-            if (this.termGroupsCopy[groupIndex].indexOf(' NOT ') !== -1) { // if there's already a NOT in the clause add an OR
-                this.termGroupsCopy[groupIndex] += ' | ' + word.trim();
+            if (this.termGroupsCopy[groupIndex].indexOf(" NOT ") !== -1) {
+                // if there's already a NOT in the clause add an OR
+                this.termGroupsCopy[groupIndex] += " | " + word.trim();
             } else {
-                this.termGroupsCopy[groupIndex] += ' NOT ' + word.trim();
+                this.termGroupsCopy[groupIndex] += " NOT " + word.trim();
             }
-            this.q = this.termGroupsCopy.join(' ');
+            this.q = this.termGroupsCopy.join(" ");
             this.approximate = "no";
             this.approximate_ratio = "";
         },
         rerunQuery() {
-            this.$router.push(this.paramsToRoute(this.$store.state.formData))
-            EventBus.$emit("urlUpdate")
+            this.$router.push(this.paramsToRoute(this.$store.state.formData));
         },
         removeTerm(index) {
-            this.termGroups.splice(index, 1)
-            this.queryTermGroups.group = this.copyObject(this.termGroups)
-            this.$store.state.formData.q = this.termGroups.join(' ')
+            this.termGroups.splice(index, 1);
+            this.queryTermGroups.group = this.copyObject(this.termGroups);
+            this.$store.state.formData.q = this.termGroups.join(" ");
             if (this.termGroups.length === 0) {
-                this.$store.state.formData.report = "bibliography"
+                this.$store.state.formData.report = "bibliography";
             }
-            this.$store.state.formData.start = 0
-            this.$store.state.formData.end = 0
-            this.$router.push(this.paramsToRoute(this.$store.state.formData))
-            EventBus.$emit("urlUpdate")
+            this.$store.state.formData.start = 0;
+            this.$store.state.formData.end = 0;
+            this.$router.push(this.paramsToRoute(this.$store.state.formData));
         }
     }
-
-}
+};
 </script>
 <style thisd>
 #search-arguments {
@@ -315,8 +350,54 @@ export default {
 .term-groups {
     display: inline-block;
     position: relative;
-    padding: 3px 20px 3px 3px;
+    padding: 3px 20px 3px 10px;
     margin: 5px 5px 5px 0px;
     white-space: inherit;
+}
+.term-groups:hover {
+    background-color: #e9ecef;
+    color: initial;
+}
+.close-pill {
+    position: absolute;
+    right: 5px;
+    top: 4px;
+}
+.close-pill:hover {
+    color: #000;
+}
+.metadata-args {
+    border: 1px solid #ddd;
+    display: inline-block !important;
+    margin-top: 20px;
+    margin-right: 5px;
+}
+.metadata-label {
+    background-color: #e9ecef;
+    border: solid #ddd;
+    border-width: 0 1px 0 0;
+    border-top-left-radius: 50rem;
+    border-bottom-left-radius: 50rem;
+    float: left;
+    line-height: 29px;
+    padding: 0 5px 0 10px;
+}
+.metadata-value {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    line-height: 29px;
+    padding: 6px 10px 10px;
+}
+.remove-metadata {
+    float: right;
+    padding-right: 5px;
+    padding-left: 5px;
+    border-left: #ddd solid 1px;
+}
+.remove-metadata:hover {
+    background-color: #e9ecef;
+    cursor: pointer;
+    border-top-right-radius: 50rem;
+    border-bottom-right-radius: 50rem;
 }
 </style>

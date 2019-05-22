@@ -44,5 +44,5 @@ export default new Router({
                 y: 0
             };
         }
-    }
+    },
 });

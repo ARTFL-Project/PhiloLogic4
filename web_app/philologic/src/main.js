@@ -30,9 +30,13 @@ Vue.mixin({
                 } else if (value.length > 0 || field === "results_per_page") {
                     if (field === "method" && value === "proxy" || field === "approximate" && value == "no" || field === "sort_by" && value === "rowid") {
                         continue
+                    } else if (field == "start" && value == 0 || field == "end" && value == 0) {
+                        continue
                     } else {
                         localFormData[field] = value
                     }
+                } else if (field == "hit_num") {
+                    localFormData[field] = value
                 }
             }
             return localFormData
@@ -45,6 +49,16 @@ Vue.mixin({
                 query: localFormData
             }
             return routeObject
+        },
+        paramsToUrlString: function(params) {
+            let filteredParams = this.paramsFilter(params)
+            let queryParams = [];
+            for (let param in filteredParams) {
+                queryParams.push(
+                    `${param}=${encodeURIComponent(filteredParams[param])}`
+                );
+            }
+            return queryParams.join("&");
         },
         copyObject: function(objectToCopy) {
             return JSON.parse(JSON.stringify(objectToCopy))

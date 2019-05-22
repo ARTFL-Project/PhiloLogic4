@@ -93,14 +93,10 @@ export default {
             vm.fetchResults()
         })
     },
-    watch: {
-        // call again the method if the route changes
-        $route: "fetchResults"
-    },
     methods: {
         fetchResults() {
             this.results = {}
-            this.searchParams = { ...this.$route.query }
+            this.searchParams = { ...this.$store.state.formData }
             this.$http
                 .get("http://anomander.uchicago.edu/philologic/test/reports/concordance.py", { params: this.paramsFilter(this.searchParams) })
                 .then(response => {
@@ -118,7 +114,7 @@ export default {
             let moreNode = parentNode.querySelector(".more-length")
             let resultNumber = this.results.description.start + index - 1
             let localParams = { hit_num: resultNumber, ...this.searchParams }
-            this.$http(`http://anomander.uchicago.edu/philologic/test/scripts/get_more_context.py?${this.paramsToUrl(localParams)}`)
+            this.$http("http://anomander.uchicago.edu/philologic/test/scripts/get_more_context.py", { params: this.paramsFilter(localParams) })
                 .then(response => {
                     let moreText = response.data;
                     moreNode.innerHTML = moreText

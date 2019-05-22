@@ -81,7 +81,8 @@ export default {
             "formData.results_per_page",
             "formData.first_kwic_sorting_option",
             "formData.second_kwic_sorting_option",
-            "formData.third_kwic_sorting_option"
+            "formData.third_kwic_sorting_option",
+            "resultsLength"
         ]),
         sortingSelection() {
             let sortingSelection = []
@@ -233,6 +234,7 @@ export default {
                     .get("http://anomander.uchicago.edu/philologic/test/reports/kwic.py", { params: this.paramsFilter(this.searchParams) })
                     .then(response => {
                         this.results = response.data;
+                        this.resultsLength = this.results.results_length
                     })
                     .catch(error => {
                         this.loading = false;
@@ -267,37 +269,38 @@ export default {
                     if (vm.sortedResults.length === 0) {
                         vm.sortedResults = response.data.results;
                     } else {
-                        vm.sortedResults = this.mergeLists(vm.sortedResults, response.data.results)
+                        vm.sortedResults = vm.mergeLists(vm.sortedResults, response.data.results)
                     }
-                    if (hitsDone < descriptionValues.resultsLength) {
-                        this.recursiveLookup(hitsDone);
+                    if (hitsDone < vm.resultsLength) {
+                        vm.recursiveLookup(hitsDone);
                     } else {
                         vm.start = '0'
                         vm.end = '0'
-                        this.getKwicResults(hitsDone);
+                        vm.getKwicResults(vm, hitsDone);
                         vm.loading = false;
                     }
                 });
         },
-        getKwicResults(hitsDone) {
-            let start = parseInt(this.start);
-            if (this.results_per_page === '') {
-                let end = start + 25;
+        getKwicResults(vm, hitsDone) {
+            let start = parseInt(vm.start);
+            let end = 0
+            if (vm.results_per_page === '') {
+                end = start + 25;
             } else {
-                let end = start + parseInt(this.results_per_page);
+                end = start + parseInt(vm.results_per_page);
             }
-            this.$http.post('http://anomander.uchicago.edu/philologic/test/scripts/get_sorted_kwic.py',
+            vm.$http.post('http://anomander.uchicago.edu/philologic/test/scripts/get_sorted_kwic.py',
                 JSON.stringify({
-                    results: this.sortedResults,
+                    results: vm.sortedResults,
                     hits_done: hitsDone,
-                    // query_string: URL.objectToString($location.search()),
+                    query_string: this.paramsToUrlString(this.$store.state.formData),
                     start: start,
                     end: end,
-                    sort_keys: [this.first_kwic_sorting_option, this.second_kwic_sorting_option, this.third_kwic_sorting_option]
+                    sort_keys: [vm.first_kwic_sorting_option, vm.second_kwic_sorting_option, vm.third_kwic_sorting_option]
                 })
             )
                 .then(function (response) {
-                    this.results = response.data;
+                    vm.results = response.data;
                 });
         },
         initializePos(index) {
@@ -310,8 +313,9 @@ export default {
             return currentPos + '.' + Array(spaces).join('&nbsp');
         },
         sortResults() {
-            console.log(this.report)
-            if (this.results.results_length < 50000) {
+            console.log(this.report, this.$store.state.formData)
+            if (this.resultsLength < 50000) {
+                this.results = {}
                 this.$router.push(this.paramsToRoute(this.$store.state.formData))
                 EventBus.$emit("urlUpdate")
             } else {

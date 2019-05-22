@@ -33,15 +33,49 @@ export default new Vuex.Store({
             first_kwic_sorting_option: "",
             second_kwic_sorting_option: "",
             third_kwic_sorting_option: ""
-        }
+        },
+        resultsLength: 0
     },
     getters: {
         getField
     },
     mutations: {
         updateField,
+        updateStore(state, payload) {
+            let metadataFields = {}
+            for (let field of payload.metadata) {
+                if (field in payload.routeQuery) {
+                    metadataFields[field] = payload.routeQuery[field];
+                    delete payload.routeQuery[field]
+                } else {
+                    metadataFields[field] = "";
+                }
+            }
+            state.formData.metadataFields = {
+                ...state.formData.metadataFields,
+                ...metadataFields
+            }
+            let localStore = JSON.parse(JSON.stringify(state.formData))
+            if (Object.keys(payload.routeQuery).length > 0) {
+                for (let field in payload.routeQuery) {
+                    localStore[field] = payload.routeQuery[field];
+                }
+                state.formData = localStore
+            }
+            console.log("STORE", state.formData);
+            console.log("METADATA", state.formData.metadataFields)
+        },
         replaceStore(state, payload) {
             state.formData = payload
+        },
+        updateMetadata(state, payload) {
+            state.formData.metadataFields = {
+                ...state.formData.metadataFields,
+                ...payload
+            }
+        },
+        removeMetadata(state, payload) {
+            state.formData.metadataFields[payload] = ""
         }
     }
 })

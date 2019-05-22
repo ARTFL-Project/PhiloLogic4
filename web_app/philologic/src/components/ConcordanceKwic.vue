@@ -75,7 +75,12 @@ export default {
     ],
     computed: {
         ...mapFields([
-            "formData.report"])
+            "formData.report",
+            "formData.results_per_page",
+            "formData.first_kwic_sorting_option",
+            "formData.second_kwic_sorting_option",
+            "formData.third_kwic_sorting_option"
+        ])
     },
     data() {
         return {
@@ -127,6 +132,10 @@ export default {
         },
         switchReport(reportName) {
             this.report = reportName
+            this.first_kwic_sorting_option = ""
+            this.second_kwic_sorting_option = ""
+            this.third_kwic_sorting_option = ""
+            this.results_per_page = 25
             this.$router.push(this.paramsToRoute(this.$store.state.formData))
             EventBus.$emit("urlUpdate")
         },

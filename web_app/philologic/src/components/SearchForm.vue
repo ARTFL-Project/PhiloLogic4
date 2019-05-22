@@ -9,10 +9,11 @@
                                 <b-button-group size="lg" id="report" style="width: 100%">
                                     <b-button
                                         :id="report"
-                                        v-for="report in reports"
-                                        @click="reportChange(report.value)"
-                                        :key="report.value"
-                                    >{{ report.label }}</b-button>
+                                        v-for="searchReport in reports"
+                                        @click="reportChange(searchReport.value)"
+                                        :key="searchReport.value"
+                                        :class="{'active':  report == searchReport.value}"
+                                    >{{ searchReport.label }}</b-button>
                                 </b-button-group>
                                 <div id="search_terms_container" class="p-2 pt-4">
                                     <b-row id="search_terms">
@@ -278,29 +279,31 @@ export default {
             "formData.start_date",
             "formData.end_date",
             "formData.year_interval",
-            'formData.sort_by',
+            "formData.sort_by",
             "formData.results_per_page"
         ]),
         formData() {
-            return this.$store.state.formData
+            return this.$store.state.formData;
         },
         sortValues() {
-            let sortValues = [{
-                value: "rowid",
-                text: "select"
-            }]
+            let sortValues = [
+                {
+                    value: "rowid",
+                    text: "select"
+                }
+            ];
             for (let fields of this.philoConfig.concordance_biblio_sorting) {
-                let label = []
+                let label = [];
                 for (let field of fields) {
                     if (field in this.philoConfig.metadata_aliases) {
-                        label.push(this.philoConfig.metadata_aliases[field])
+                        label.push(this.philoConfig.metadata_aliases[field]);
                     } else {
-                        label.push(field)
+                        label.push(field);
                     }
                 }
-                sortValues.push({ text: label.join(", "), value: fields })
+                sortValues.push({ text: label.join(", "), value: fields });
             }
-            return sortValues
+            return sortValues;
         }
     },
     data() {
@@ -326,24 +329,7 @@ export default {
         };
     },
     created() {
-        if (Object.keys(this.$route.query).length > 0) {
-            console.log("BEFORE", this.$store.state.formData)
-            let localStore = { ...this.copyObject(this.$store.state.formData), report: this.$route.name }
-            for (let field in this.$route.query) {
-                localStore[field] = this.$route.query[field]
-            }
-            this.$store.commit("replaceStore", localStore)
-            console.log("AFTER", this.$store.state.formData)
-        }
-        let reports = [];
-        for (let value of this.philoConfig.search_reports) {
-            let label = value.replace("_", " ");
-            reports.push({
-                value: value,
-                label: label
-            });
-        }
-        this.reports = reports;
+        this.reports = this.buildReports();
         for (let metadataField of this.philoConfig.metadata) {
             let metadataObj = {
                 label: metadataField[0].toUpperCase() + metadataField.slice(1),
@@ -355,54 +341,79 @@ export default {
                     metadataField
                 ];
             }
-            this.metadataValues[metadataField] = ""
-            this.metadataFields[metadataField] = "";
             this.metadataDisplay.push(metadataObj);
+            if (metadataField in this.metadataFields) {
+                this.metadataValues[metadataField] = this.metadataFields[metadataField];
+            }
         }
     },
     methods: {
+        buildReports() {
+            let reports = [];
+            for (let value of this.philoConfig.search_reports) {
+                let label = value.replace("_", " ");
+                reports.push({
+                    value: value,
+                    label: label
+                });
+            }
+            return reports
+        },
+        buildMetadataFieldDisplay() {
+            for (let metadataField of this.philoConfig.metadata) {
+                let metadataObj = {
+                    label: metadataField[0].toUpperCase() + metadataField.slice(1),
+                    value: metadataField,
+                    example: this.philoConfig.search_examples[metadataField]
+                };
+                if (metadataField in this.philoConfig.metadata_aliases) {
+                    metadataObj.label = this.philoConfig.metadata_aliases[
+                        metadataField
+                    ];
+                }
+                this.metadataValues[metadataField] = "";
+                this.metadataDisplay.push(metadataObj);
+            }
+        },
         generateSortValues() {
-            let sortValues = [{
-                value: ["rowid"],
-                label: "select"
-            }]
+            let sortValues = [
+                {
+                    value: ["rowid"],
+                    label: "select"
+                }
+            ];
             for (let fields of this.philoConfig.concordance_biblio_sorting) {
-                let label = []
+                let label = [];
                 for (let field of fields) {
                     if (field in this.philoConfig.metadata_aliases) {
-                        label.push(this.philoConfig.metadata_aliases[field])
+                        label.push(this.philoConfig.metadata_aliases[field]);
                     } else {
-                        label.push(field)
+                        label.push(field);
                     }
                 }
-                sortValues.push({ label: label.join(", "), value: fields })
+                sortValues.push({ label: label.join(", "), value: fields });
             }
-            return sortValues
+            return sortValues;
         },
         onSubmit(event) {
-            event.preventDefault()
-            let localFormData = {}
-            for (const metadataField in this.metadataValues) {
-                if (this.metadataValues[metadataField].length > 0) {
-                    this.$store.state.formData.metadataFields[metadataField] = this.metadataValues[metadataField]
-                }
-            }
-            // let newRoute = `/${this.report}?${this.paramsToUrl(this.$store.state.formData)}`
-            this.formOpen = false
-            this.$router.push(this.paramsToRoute(this.$store.state.formData))
+            event.preventDefault();
+            this.$store.commit("updateMetadata", this.metadataValues)
+            console.log("SUBMIT", this.$store.state.formData);
+            this.formOpen = false;
+            this.$router.push(this.paramsToRoute(this.$store.state.formData));
         },
         onReset(evt) {
-            evt.preventDefault()
+            evt.preventDefault();
             // Reset our form values
-            this.form.email = ''
-            this.form.name = ''
-            this.form.food = null
-            this.form.checked = []
+            this.form.email = "";
+            this.form.name = "";
+            this.form.food = null;
+            this.form.checked = [];
             // Trick to reset/clear native browser form validation state
-            this.show = false
+            this.show = false;
             this.$nextTick(() => {
-                this.show = true
-            })
+                this.show = true;
+            });
         },
         reportChange(report) {
             if (report === "landing_page") {
