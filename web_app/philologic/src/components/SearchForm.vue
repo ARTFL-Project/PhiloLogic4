@@ -2,11 +2,11 @@
     <div>
         <b-row>
             <b-col md="8" offset-md="2">
-                <b-card no-body>
+                <b-card no-body class="shadow">
                     <b-form @submit="onSubmit" @reset="onReset">
                         <div id="form_body">
                             <div id="initial-form">
-                                <b-button-group size="lg" id="report" style="width: 100%">
+                                <b-button-group id="report" style="width: 100%">
                                     <b-button
                                         :id="report"
                                         v-for="searchReport in reports"
@@ -351,7 +351,8 @@ export default {
         buildReports() {
             let reports = [];
             for (let value of this.philoConfig.search_reports) {
-                let label = value.replace("_", " ");
+                let label = value.replace("_s", "-s");
+                label = label.charAt(0).toUpperCase() + label.slice(1)
                 reports.push({
                     value: value,
                     label: label
@@ -445,6 +446,9 @@ export default {
 </script>
 
 <style>
+#report .btn {
+    font-variant: small-caps;
+}
 .dico-margin {
     margin-top: 210px !important;
 }

@@ -1,7 +1,7 @@
 <template>
     <div id="concordanceKwic-container" class="mt-4 ml-4 mr-4">
         <div id="philo-view" v-if="authorized">
-            <b-card no-body>
+            <b-card no-body class="shadow-sm">
                 <div id="initial_report">
                     <div
                         id="description"
@@ -17,43 +17,43 @@
                         <search-arguments></search-arguments>
                         <div id="search-hits" class="pl-3">{{ hits }}</div>
                     </div>
-                    <b-row class="hidden-xs" id="act-on-report">
-                        <b-col sm="7" lg="8" v-if="report !== 'bibliography'">
-                            <b-button-group id="report_switch">
-                                <b-button
-                                    :class="{'active':  report === 'concordance'}"
-                                    @click="switchReport('concordance')"
-                                >
-                                    <span
-                                        class="d-xs-none d-sm-none d-md-inline"
-                                    >{{ reportSwitch.concordance.labelBig }}</span>
-                                    <span
-                                        class="d-xs-inline d-sm-inline d-md-none"
-                                    >{{ reportSwitch.concordance.labelSmall }}</span>
-                                </b-button>
-                                <b-button
-                                    :class="{'active':  report === 'kwic'}"
-                                    @click="switchReport('kwic')"
-                                >
-                                    <span
-                                        class="d-xs-none d-sm-none d-md-inline"
-                                    >{{ reportSwitch.kwic.labelBig }}</span>
-                                    <span
-                                        class="d-xs-inline d-sm-inline d-md-none"
-                                    >{{ reportSwitch.kwic.labelSmall }}</span>
-                                </b-button>
-                            </b-button-group>
-                        </b-col>
-                    </b-row>
                     <button
                         type="button"
                         class="btn btn-primary pull-right hidden-xs"
                         style="margin-top: -33px; margin-right: 15px;"
                         v-if="!showFacetedBrowsing && philoConfig.facets.length < 1"
-                        @click=" showFacets() "
+                        @click="showFacets() "
                     >Show Facets</button>
                 </div>
             </b-card>
+            <b-row class="d-xs-none mt-4" id="act-on-report">
+                <b-col sm="7" lg="8" v-if="report !== 'bibliography'">
+                    <b-button-group id="report_switch">
+                        <b-button
+                            :class="{'active':  report === 'concordance'}"
+                            @click="switchReport('concordance')"
+                        >
+                            <span
+                                class="d-xs-none d-sm-none d-md-inline"
+                            >{{ reportSwitch.concordance.labelBig }}</span>
+                            <span
+                                class="d-xs-inline d-sm-inline d-md-none"
+                            >{{ reportSwitch.concordance.labelSmall }}</span>
+                        </b-button>
+                        <b-button
+                            :class="{'active':  report === 'kwic'}"
+                            @click="switchReport('kwic')"
+                        >
+                            <span
+                                class="d-xs-none d-sm-none d-md-inline"
+                            >{{ reportSwitch.kwic.labelBig }}</span>
+                            <span
+                                class="d-xs-inline d-sm-inline d-md-none"
+                            >{{ reportSwitch.kwic.labelSmall }}</span>
+                        </b-button>
+                    </b-button-group>
+                </b-col>
+            </b-row>
         </div>
         <access-control v-if="!authorized"></access-control>
     </div>

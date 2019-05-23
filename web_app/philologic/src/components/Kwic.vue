@@ -1,73 +1,76 @@
 <template>
     <div>
         <conckwic :results="results" v-if="Object.keys(results).length"></conckwic>
-        <b-card no-body class="m-4 p-2">
-            <b-row>
-                <b-col cols="12">
-                    <div id="results_container" class="col-xs-12 col-sm-12">
-                        <div class="p-2 mb-1">
-                            Resort results by
-                            <div
-                                class="btn-group"
-                                style="margin-left: 3px;"
-                                v-for="(fields, index) in sortingFields"
-                                :key="index"
-                            >
-                                <b-dropdown size="sm">
-                                    <template slot="button-content">{{ sortingSelection[index] }}</template>
-                                    <b-dropdown-item
-                                        v-for="(selection, fieldIndex) in fields"
-                                        :key="fieldIndex"
-                                        @click="updateSortingSelection(index, selection)"
-                                    >{{ selection.label }}</b-dropdown-item>
-                                </b-dropdown>
-                            </div>
-                            <b-button
-                                variant="primary"
-                                type="button"
-                                class="ml-1"
-                                size="sm"
-                                @click="sortResults()"
-                            >Sort</b-button>
+        <b-row class="ml-2 mr-2 mb-2">
+            <b-col cols="12" md="7" xl="8">
+                <b-card no-body class="p-2 shadow-sm">
+                    <div class="p-2 mb-1">
+                        Resort results by
+                        <div
+                            class="btn-group"
+                            style="margin-left: 3px;"
+                            v-for="(fields, index) in sortingFields"
+                            :key="index"
+                        >
+                            <b-dropdown size="sm">
+                                <template slot="button-content">{{ sortingSelection[index] }}</template>
+                                <b-dropdown-item
+                                    v-for="(selection, fieldIndex) in fields"
+                                    :key="fieldIndex"
+                                    @click="updateSortingSelection(index, selection)"
+                                >{{ selection.label }}</b-dropdown-item>
+                            </b-dropdown>
                         </div>
-                        <div id="kwic-concordance" v-if="Object.keys(results).length">
-                            <div
-                                class="kwic_line"
-                                v-for="(result, kwicIndex) in filteredKwic(results.results)"
-                                :key="kwicIndex"
+                        <b-button
+                            variant="primary"
+                            type="button"
+                            class="ml-1"
+                            size="sm"
+                            @click="sortResults()"
+                        >Sort</b-button>
+                    </div>
+                    <div id="kwic-concordance" v-if="Object.keys(results).length">
+                        <div
+                            class="kwic_line"
+                            v-for="(result, kwicIndex) in filteredKwic(results.results)"
+                            :key="kwicIndex"
+                        >
+                            <span v-html="initializePos(kwicIndex)"></span>
+                            <a
+                                :href="result.citation_links.div1"
+                                class="kwic_biblio"
+                                @mouseover="showFullBiblio()"
+                                @mouseleave="hideFullBiblio()"
                             >
-                                <span v-html="initializePos(kwicIndex)"></span>
-                                <a
-                                    :href="result.citation_links.div1"
-                                    class="kwic_biblio"
-                                    @mouseover="showFullBiblio()"
-                                    @mouseleave="hideFullBiblio()"
-                                >
-                                    <span
-                                        class="full_biblio"
-                                        style="display:none;"
-                                    >{{ result.fullBiblio }}</span>
-                                    <span class="short_biblio" v-html="result.shortBiblio"></span>
-                                </a>
-                                <span v-html="result.context"></span>
-                            </div>
+                                <span
+                                    class="full_biblio"
+                                    style="display:none;"
+                                >{{ result.fullBiblio }}</span>
+                                <span class="short_biblio" v-html="result.shortBiblio"></span>
+                            </a>
+                            <span v-html="result.context"></span>
                         </div>
                     </div>
-                </b-col>
-            </b-row>
-        </b-card>
+                </b-card>
+            </b-col>
+            <b-col md="5" xl="4">
+                <facets></facets>
+            </b-col>
+        </b-row>
     </div>
 </template>
 
 <script>
 import { mapFields } from "vuex-map-fields";
-import conckwic from "./ConcordanceKwic"
+import conckwic from "./ConcordanceKwic";
+import facets from "./Facets";
 import { EventBus } from "../main.js";
 
 export default {
     name: "kwic",
     components: {
-        conckwic
+        conckwic,
+        facets
     },
     computed: {
         // When using nested data structures, the string
@@ -85,25 +88,31 @@ export default {
             "resultsLength"
         ]),
         sortingSelection() {
-            let sortingSelection = []
-            if (this.first_kwic_sorting_option !== '') {
-                sortingSelection.push(this.sortKeys[this.first_kwic_sorting_option])
+            let sortingSelection = [];
+            if (this.first_kwic_sorting_option !== "") {
+                sortingSelection.push(
+                    this.sortKeys[this.first_kwic_sorting_option]
+                );
             }
-            if (this.second_kwic_sorting_option !== '') {
-                sortingSelection.push(this.sortKeys[this.second_kwic_sorting_option])
+            if (this.second_kwic_sorting_option !== "") {
+                sortingSelection.push(
+                    this.sortKeys[this.second_kwic_sorting_option]
+                );
             }
-            if (this.third_kwic_sorting_option !== '') {
-                sortingSelection.push(this.sortKeys[this.third_kwic_sorting_option])
+            if (this.third_kwic_sorting_option !== "") {
+                sortingSelection.push(
+                    this.sortKeys[this.third_kwic_sorting_option]
+                );
             }
             if (sortingSelection.length === 0) {
-                sortingSelection = ["None", "None", "None"]
+                sortingSelection = ["None", "None", "None"];
             } else if (sortingSelection.length === 1) {
-                sortingSelection.push('None');
+                sortingSelection.push("None");
                 sortingSelection.push("None");
             } else if (sortingSelection.length === 2) {
                 sortingSelection.push("None");
             }
-            return sortingSelection
+            return sortingSelection;
         }
     },
     data() {
@@ -113,21 +122,21 @@ export default {
             searchParams: {},
             sortingFields: [],
             sortKeys: {
-                "q": "searched term(s)",
-                "left": 'words to the left',
-                "right": 'words to the right'
+                q: "searched term(s)",
+                left: "words to the left",
+                right: "words to the right"
             },
             sortedResults: [],
             loading: false
         };
     },
     created() {
-        this.initializeKwic()
-        this.fetchResults()
-        var vm = this
-        EventBus.$on("urlUpdate", function () {
-            vm.fetchResults()
-        })
+        this.initializeKwic();
+        this.fetchResults();
+        var vm = this;
+        EventBus.$on("urlUpdate", function() {
+            vm.fetchResults();
+        });
     },
     watch: {
         // call again the method if the route changes
@@ -136,19 +145,24 @@ export default {
     methods: {
         initializeKwic() {
             // Sorting fields
-            let sortingFields = [{
-                label: 'None',
-                field: ''
-            }, {
-                label: 'searched term(s)',
-                field: 'q'
-            }, {
-                label: 'words to the left',
-                field: 'left'
-            }, {
-                label: 'words to the right',
-                field: 'right'
-            }];
+            let sortingFields = [
+                {
+                    label: "None",
+                    field: ""
+                },
+                {
+                    label: "searched term(s)",
+                    field: "q"
+                },
+                {
+                    label: "words to the left",
+                    field: "left"
+                },
+                {
+                    label: "words to the right",
+                    field: "right"
+                }
+            ];
             for (let field of this.philoConfig.kwic_metadata_sorting_fields) {
                 if (field in this.philoConfig.metadata_aliases) {
                     let label = this.philoConfig.metadata_aliases[field];
@@ -162,79 +176,92 @@ export default {
                         label: field[0].toUpperCase() + field.slice(1),
                         field: field
                     });
-                    this.sortKeys[field] = field[0].toUpperCase() + field.slice(1);
+                    this.sortKeys[field] =
+                        field[0].toUpperCase() + field.slice(1);
                 }
             }
             this.sortingFields = [sortingFields, sortingFields, sortingFields];
         },
         buildFullCitation(metadataField) {
-            let citationList = []
-            let biblioFields = this.philoConfig.kwic_bibliography_fields
-            if (typeof (biblioFields) === 'undefined' || biblioFields.length === 0) {
+            let citationList = [];
+            let biblioFields = this.philoConfig.kwic_bibliography_fields;
+            if (
+                typeof biblioFields === "undefined" ||
+                biblioFields.length === 0
+            ) {
                 biblioFields = this.philoConfig.metadata.slice(0, 2);
-                biblioFields.push('head');
+                biblioFields.push("head");
             }
             for (var i = 0; i < biblioFields.length; i++) {
                 if (biblioFields[i] in metadataField) {
-                    var biblioField = metadataField[biblioFields[i]] || '';
+                    var biblioField = metadataField[biblioFields[i]] || "";
                     if (biblioField.length > 0) {
                         citationList.push(biblioField);
                     }
                 }
             }
             if (citationList.length > 0) {
-                return citationList.join(', ');
+                return citationList.join(", ");
             } else {
-                return 'NA';
+                return "NA";
             }
         },
         filteredKwic(results) {
             let filteredResults = [];
             for (let resultObject of results) {
-                resultObject.fullBiblio = this.buildFullCitation(resultObject.metadata_fields);
+                resultObject.fullBiblio = this.buildFullCitation(
+                    resultObject.metadata_fields
+                );
                 resultObject.shortBiblio = resultObject.fullBiblio.slice(0, 30);
                 filteredResults.push(resultObject);
             }
-            return filteredResults
+            return filteredResults;
         },
         showFullBiblio() {
-            let target = event.srcElement.parentNode.querySelector('.full_biblio')
-            target.classList.add('show');
+            let target = event.srcElement.parentNode.querySelector(
+                ".full_biblio"
+            );
+            target.classList.add("show");
         },
         hideFullBiblio() {
-            let target = event.srcElement.parentNode.querySelector('.full_biblio')
-            target.classList.remove('show');
+            let target = event.srcElement.parentNode.querySelector(
+                ".full_biblio"
+            );
+            target.classList.remove("show");
         },
         updateSortingSelection(index, selection) {
             if (index === 0) {
                 if (selection.label == "None") {
-                    this.first_kwic_sorting_option = ""
+                    this.first_kwic_sorting_option = "";
                 } else {
                     this.first_kwic_sorting_option = selection.field;
                 }
             } else if (index == 1) {
                 if (selection.label == "None") {
-                    this.second_kwic_sorting_option = ""
+                    this.second_kwic_sorting_option = "";
                 } else {
                     this.second_kwic_sorting_option = selection.field;
                 }
             } else {
                 if (selection.label == "None") {
-                    this.third_kwic_sorting_option = ""
+                    this.third_kwic_sorting_option = "";
                 } else {
                     this.third_kwic_sorting_option = selection.field;
                 }
             }
         },
         fetchResults() {
-            this.results = {}
-            this.searchParams = { ...this.$route.query }
+            this.results = {};
+            this.searchParams = { ...this.$store.state.formData };
             if (this.first_kwic_sorting_option === "") {
                 this.$http
-                    .get("http://anomander.uchicago.edu/philologic/test/reports/kwic.py", { params: this.paramsFilter(this.searchParams) })
+                    .get(
+                        "http://anomander.uchicago.edu/philologic/test/reports/kwic.py",
+                        { params: this.paramsFilter(this.searchParams) }
+                    )
                     .then(response => {
                         this.results = response.data;
-                        this.resultsLength = this.results.results_length
+                        this.resultsLength = this.results.results_length;
                     })
                     .catch(error => {
                         this.loading = false;
@@ -242,9 +269,9 @@ export default {
                         console.log(error);
                     });
             } else {
-                this.start = "0"
-                this.end = "0"
-                this.recursiveLookup(0)
+                this.start = "0";
+                this.end = "0";
+                this.recursiveLookup(0);
             }
         },
         mergeLists(list1, list2) {
@@ -254,28 +281,33 @@ export default {
             return list1;
         },
         recursiveLookup(hitsDone) {
-            var vm = this
-            this.$http.get("http://anomander.uchicago.edu/philologic/test/scripts/get_neighboring_words.py",
-                {
-                    params:
+            var vm = this;
+            this.$http
+                .get(
+                    "http://anomander.uchicago.edu/philologic/test/scripts/get_neighboring_words.py",
                     {
-                        ...this.paramsFilter(this.$store.state.formData),
-                        hits_done: hitsDone,
-                        max_time: 10
+                        params: {
+                            ...this.paramsFilter(this.$store.state.formData),
+                            hits_done: hitsDone,
+                            max_time: 10
+                        }
                     }
-                })
-                .then(function (response) {
+                )
+                .then(function(response) {
                     hitsDone = response.data.hits_done;
                     if (vm.sortedResults.length === 0) {
                         vm.sortedResults = response.data.results;
                     } else {
-                        vm.sortedResults = vm.mergeLists(vm.sortedResults, response.data.results)
+                        vm.sortedResults = vm.mergeLists(
+                            vm.sortedResults,
+                            response.data.results
+                        );
                     }
                     if (hitsDone < vm.resultsLength) {
                         vm.recursiveLookup(hitsDone);
                     } else {
-                        vm.start = '0'
-                        vm.end = '0'
+                        vm.start = "0";
+                        vm.end = "0";
                         vm.getKwicResults(vm, hitsDone);
                         vm.loading = false;
                     }
@@ -283,23 +315,31 @@ export default {
         },
         getKwicResults(vm, hitsDone) {
             let start = parseInt(vm.start);
-            let end = 0
-            if (vm.results_per_page === '') {
+            let end = 0;
+            if (vm.results_per_page === "") {
                 end = start + 25;
             } else {
                 end = start + parseInt(vm.results_per_page);
             }
-            vm.$http.post('http://anomander.uchicago.edu/philologic/test/scripts/get_sorted_kwic.py',
-                JSON.stringify({
-                    results: vm.sortedResults,
-                    hits_done: hitsDone,
-                    query_string: this.paramsToUrlString(this.$store.state.formData),
-                    start: start,
-                    end: end,
-                    sort_keys: [vm.first_kwic_sorting_option, vm.second_kwic_sorting_option, vm.third_kwic_sorting_option]
-                })
-            )
-                .then(function (response) {
+            vm.$http
+                .post(
+                    "http://anomander.uchicago.edu/philologic/test/scripts/get_sorted_kwic.py",
+                    JSON.stringify({
+                        results: vm.sortedResults,
+                        hits_done: hitsDone,
+                        query_string: this.paramsToUrlString(
+                            this.$store.state.formData
+                        ),
+                        start: start,
+                        end: end,
+                        sort_keys: [
+                            vm.first_kwic_sorting_option,
+                            vm.second_kwic_sorting_option,
+                            vm.third_kwic_sorting_option
+                        ]
+                    })
+                )
+                .then(function(response) {
                     vm.results = response.data;
                 });
         },
@@ -310,21 +350,25 @@ export default {
             var endPos = start + parseInt(this.results.results_per_page || 25);
             var endPosLength = endPos.toString().length;
             var spaces = endPosLength - currentPosLength + 1;
-            return currentPos + '.' + Array(spaces).join('&nbsp');
+            return currentPos + "." + Array(spaces).join("&nbsp");
         },
         sortResults() {
-            console.log(this.report, this.$store.state.formData)
+            console.log(this.report, this.$store.state.formData);
             if (this.resultsLength < 50000) {
-                this.results = {}
-                this.$router.push(this.paramsToRoute(this.$store.state.formData))
-                EventBus.$emit("urlUpdate")
+                this.results = {};
+                this.$router.push(
+                    this.paramsToRoute(this.$store.state.formData)
+                );
+                EventBus.$emit("urlUpdate");
             } else {
-                alert("For performance reasons, you cannot sort KWIC reports of more than 50,000 results. Please narrow your query to filter results.")
+                alert(
+                    "For performance reasons, you cannot sort KWIC reports of more than 50,000 results. Please narrow your query to filter results."
+                );
             }
         },
-        dicoLookup() { }
+        dicoLookup() {}
     }
-}
+};
 </script>
 
 <style scoped>

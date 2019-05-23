@@ -24,15 +24,20 @@ export default {
         };
     },
     created() {
-        this.$store.commit("updateStore", { routeQuery: this.$route.query, metadata: this.metadata })
+        this.$store.commit("updateStore", {
+            routeQuery: this.$route.query,
+            metadata: this.metadata
+        });
         this.$router.beforeEach((to, from, next) => {
-            this.$store.commit("updateStore", { routeQuery: to.query, metadata: this.metadata })
-            next()
-            EventBus.$emit("urlUpdate")
-        })
+            this.$store.commit("updateStore", {
+                routeQuery: to.query,
+                metadata: this.metadata
+            });
+            next();
+            EventBus.$emit("urlUpdate");
+        });
     },
-    methods: {
-    }
+    methods: {}
 };
 </script>
 
@@ -47,5 +52,9 @@ export default {
 }
 li {
     list-style-type: none;
+}
+body {
+    font-size: 0.95rem;
+    font-family: "Open-Sans", sans-serif;
 }
 </style>

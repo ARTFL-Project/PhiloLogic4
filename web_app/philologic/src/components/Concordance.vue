@@ -1,11 +1,11 @@
 <template>
     <div>
         <conckwic :results="results" v-if="Object.keys(results).length"></conckwic>
-        <b-row>
-            <b-col cols="12">
+        <b-row class="mr-2">
+            <b-col cols="12" md="7" xl="8">
                 <b-card
                     no-body
-                    class="philologic-occurrence m-4 shadow-sm"
+                    class="philologic-occurrence ml-4 mr-4 mb-4 shadow-sm"
                     v-for="(result, index) in results.results"
                     :key="index"
                 >
@@ -66,18 +66,23 @@
                     </b-row>
                 </b-card>
             </b-col>
+            <b-col md="5" xl="4">
+                <facets></facets>
+            </b-col>
         </b-row>
     </div>
 </template>
 
 <script>
-import conckwic from "./ConcordanceKwic"
+import conckwic from "./ConcordanceKwic";
+import facets from "./Facets";
 import { EventBus } from "../main.js";
 
 export default {
     name: "concordance",
     components: {
-        conckwic
+        conckwic,
+        facets
     },
     data() {
         return {
@@ -87,18 +92,21 @@ export default {
         };
     },
     created() {
-        this.fetchResults()
-        var vm = this
-        EventBus.$on("urlUpdate", function () {
-            vm.fetchResults()
-        })
+        this.fetchResults();
+        var vm = this;
+        EventBus.$on("urlUpdate", function() {
+            vm.fetchResults();
+        });
     },
     methods: {
         fetchResults() {
-            this.results = {}
-            this.searchParams = { ...this.$store.state.formData }
+            this.results = {};
+            this.searchParams = { ...this.$store.state.formData };
             this.$http
-                .get("http://anomander.uchicago.edu/philologic/test/reports/concordance.py", { params: this.paramsFilter(this.searchParams) })
+                .get(
+                    "http://anomander.uchicago.edu/philologic/test/reports/concordance.py",
+                    { params: this.paramsFilter(this.searchParams) }
+                )
                 .then(response => {
                     this.results = response.data;
                 })
@@ -109,26 +117,29 @@ export default {
                 });
         },
         moreContext(index) {
-            let parentNode = event.srcElement.parentNode.parentNode.parentNode
-            let defaultNode = parentNode.querySelector(".default-length")
-            let moreNode = parentNode.querySelector(".more-length")
-            let resultNumber = this.results.description.start + index - 1
-            let localParams = { hit_num: resultNumber, ...this.searchParams }
-            this.$http("http://anomander.uchicago.edu/philologic/test/scripts/get_more_context.py", { params: this.paramsFilter(localParams) })
+            let parentNode = event.srcElement.parentNode.parentNode.parentNode;
+            let defaultNode = parentNode.querySelector(".default-length");
+            let moreNode = parentNode.querySelector(".more-length");
+            let resultNumber = this.results.description.start + index - 1;
+            let localParams = { hit_num: resultNumber, ...this.searchParams };
+            this.$http(
+                "http://anomander.uchicago.edu/philologic/test/scripts/get_more_context.py",
+                { params: this.paramsFilter(localParams) }
+            )
                 .then(response => {
                     let moreText = response.data;
-                    moreNode.innerHTML = moreText
-                    defaultNode.style.display = "none"
-                    moreNode.style.display = "block"
+                    moreNode.innerHTML = moreText;
+                    defaultNode.style.display = "none";
+                    moreNode.style.display = "block";
                 })
                 .catch(error => {
                     this.loading = false;
                     this.error = error.toString();
                     console.log(error);
                 });
-            console.log(parentNode)
+            console.log(parentNode);
         },
-        dicoLookup() { }
+        dicoLookup() {}
     }
 };
 </script>
