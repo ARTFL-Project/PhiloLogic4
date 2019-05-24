@@ -28,7 +28,7 @@
                                             <span v-html="citation.suffix"></span>
                                             <span
                                                 class="separator"
-                                                v-if="index != result.citation.length - 1"
+                                                v-if="citeIndex != result.citation.length - 1"
                                             >&#9679;</span>
                                         </span>
                                         <span v-if="!citation.href">
@@ -37,7 +37,7 @@
                                             <span v-html="citation.suffix"></span>
                                             <span
                                                 class="separator"
-                                                v-if="index != result.citation.length - 1"
+                                                v-if="citeIndex != result.citation.length - 1"
                                             >&#9679;</span>
                                         </span>
                                     </span>
@@ -74,6 +74,7 @@
 </template>
 
 <script>
+import { mapFields } from "vuex-map-fields";
 import conckwic from "./ConcordanceKwic";
 import facets from "./Facets";
 import { EventBus } from "../main.js";
@@ -84,6 +85,9 @@ export default {
         conckwic,
         facets
     },
+    computed: {
+        ...mapFields(["formData.report"])
+    },
     data() {
         return {
             philoConfig: this.$philoConfig,
@@ -92,10 +96,13 @@ export default {
         };
     },
     created() {
+        this.report = "concordance";
         this.fetchResults();
         var vm = this;
         EventBus.$on("urlUpdate", function() {
-            vm.fetchResults();
+            if (vm.report == "concordance") {
+                vm.fetchResults();
+            }
         });
     },
     methods: {

@@ -131,11 +131,14 @@ export default {
         };
     },
     created() {
+        this.report = "kwic";
         this.initializeKwic();
         this.fetchResults();
         var vm = this;
         EventBus.$on("urlUpdate", function() {
-            vm.fetchResults();
+            if (vm.report == "kwic") {
+                vm.fetchResults();
+            }
         });
     },
     watch: {

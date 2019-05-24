@@ -258,6 +258,7 @@
 
 <script>
 import { mapFields } from "vuex-map-fields";
+import { EventBus } from "../main.js";
 
 export default {
     name: "SearchForm",
@@ -343,27 +344,36 @@ export default {
             }
             this.metadataDisplay.push(metadataObj);
             if (metadataField in this.metadataFields) {
-                this.metadataValues[metadataField] = this.metadataFields[metadataField];
+                this.metadataValues[metadataField] = this.metadataFields[
+                    metadataField
+                ];
             }
         }
+        var vm = this;
+        EventBus.$on("metadataUpdate", function(metadata) {
+            for (let field in metadata) {
+                vm.metadataValues[field] = metadata[field];
+            }
+        });
     },
     methods: {
         buildReports() {
             let reports = [];
             for (let value of this.philoConfig.search_reports) {
                 let label = value.replace("_s", "-s");
-                label = label.charAt(0).toUpperCase() + label.slice(1)
+                label = label.charAt(0).toUpperCase() + label.slice(1);
                 reports.push({
                     value: value,
                     label: label
                 });
             }
-            return reports
+            return reports;
         },
         buildMetadataFieldDisplay() {
             for (let metadataField of this.philoConfig.metadata) {
                 let metadataObj = {
-                    label: metadataField[0].toUpperCase() + metadataField.slice(1),
+                    label:
+                        metadataField[0].toUpperCase() + metadataField.slice(1),
                     value: metadataField,
                     example: this.philoConfig.search_examples[metadataField]
                 };
@@ -398,8 +408,11 @@ export default {
         },
         onSubmit(event) {
             event.preventDefault();
-            this.$store.commit("updateMetadata", this.metadataValues)
-            console.log("SUBMIT", this.$store.state.formData);
+            this.$store.commit("updateMetadata", this.metadataValues);
+            this.q = this.q.trim();
+            if (this.q.length == 0) {
+                this.report = "bibliography";
+            }
             this.formOpen = false;
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         },
@@ -437,7 +450,7 @@ export default {
                 this.searchOptionsButton = "Show search options";
             }
         },
-        clearFormData() { },
+        clearFormData() {},
         selectApproximate(approximateValue) {
             this.approximate_ratio = approximateValue;
         }

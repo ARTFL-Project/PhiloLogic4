@@ -20,8 +20,8 @@
                     class="facet-selection"
                 >{{ facet.alias }}</b-list-group-item>
             </b-list-group>
-            <hr v-if="showFacetSelection">
-            <b-list-group flush v-if="showFacetSelection">
+            <hr v-if="showFacetSelection && report != 'bibliography'">
+            <b-list-group flush v-if="showFacetSelection && report != 'bibliography'">
                 <span class="dropdown-header text-center">Collocates of query term(s)</span>
                 <b-list-group-item
                     @click="getFacet(collocationFacet)"
@@ -71,26 +71,20 @@
                 data-velocity-opts="{duration:400}"
             ></progress-bar>-->
             <b-list-group flush>
-                <b-list-group-item
-                    v-for="result in facetResults"
-                    :key="result.label"
-                    @click="facetClick(result)"
-                >
+                <b-list-group-item v-for="result in facetResults" :key="result.label">
                     <b-row>
                         <b-col cols="8">
                             <span
                                 class="sidebar-text text-content-area"
-                                href
-                                @click="facetClick(result.metadata)"
                                 v-if="facet.facet !== 'all_collocates'"
+                                @click="facetClick(result.metadata)"
                             >
                                 <span>{{ result.label }}</span>
                             </span>
                             <span
                                 class="sidebar-text text-content-area"
-                                href
-                                @click="collocationToConcordance(result.label)"
                                 v-if="facet.facet === 'all_collocates'"
+                                @click="collocationToConcordance(result.label)"
                             >
                                 <span>{{ result.label }}</span>
                             </span>
@@ -123,6 +117,7 @@ export default {
         ...mapFields([
             "formData.report",
             "formData.q",
+            "fornData.method",
             "formData.start",
             "formData.end",
             "formData.metadataFields"
@@ -237,9 +232,9 @@ export default {
                     );
                 } else {
                     var promise = vm.$http.get(
-                        "http://anomander.uchicago.edu/philologic/test/",
+                        "http://anomander.uchicago.edu/philologic/test/reports/collocation.py",
                         {
-                            params: vm.paramsToRoute(queryParams)
+                            params: vm.paramsFilter(queryParams)
                         }
                     );
                 }
@@ -348,6 +343,7 @@ export default {
         },
         collocationToConcordance(word) {
             this.q = `${this.q} "${word}"`;
+            this.$store.commit("updateMethod", "cooc");
             this.start = "";
             this.end = "";
             this.report = "concordance";
@@ -368,9 +364,7 @@ export default {
             }
         },
         facetClick(metadata) {
-            this.$store.commit("updateMetadata", {
-                metadata
-            });
+            this.$store.commit("updateMetadata", metadata);
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         }
     }

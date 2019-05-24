@@ -101,6 +101,9 @@ export default {
         ...mapFields([
             "formData.report",
             "formData.q",
+            "formData.arg_proxy",
+            "formData.arg_phrase",
+            "formData.method",
             "formData.start",
             "formData.end",
             "formData.approximate",
@@ -122,7 +125,7 @@ export default {
     created() {
         this.fetchSearchArgs();
         var vm = this;
-        EventBus.$on("urlUpdate", function () {
+        EventBus.$on("urlUpdate", function() {
             vm.fetchSearchArgs();
         });
     },
@@ -134,7 +137,9 @@ export default {
             } else {
                 this.queryArgs.queryTerm = "";
             }
-            this.queryArgs.biblio = this.buildCriteria(queryParams.metadataFields);
+            this.queryArgs.biblio = this.buildCriteria(
+                queryParams.metadataFields
+            );
 
             if ("q" in queryParams) {
                 let method = queryParams.method;
@@ -233,8 +238,8 @@ export default {
             return biblio;
         },
         removeMetadata(metadata, restart) {
-            this.$store.commit("removeMetadata", metadata)
-            if (!this.q) {
+            this.$store.commit("removeMetadata", metadata);
+            if (this.q.length == 0) {
                 this.report = "bibliography";
             }
             this.start = "";
@@ -247,6 +252,7 @@ export default {
                 this.$router.push(
                     this.paramsToRoute(this.$store.state.formData)
                 );
+                EventBus.$emit("urlUpdate");
             } else if (
                 this.report === "collocation" ||
                 this.report === "time_series"
@@ -271,7 +277,7 @@ export default {
                         }
                     }
                 )
-                .then(function (response) {
+                .then(function(response) {
                     vm.words = response.data;
                     document.querySelector("#query-terms").style.display =
                         "block";
@@ -304,12 +310,17 @@ export default {
         removeTerm(index) {
             this.termGroups.splice(index, 1);
             this.queryTermGroups.group = this.copyObject(this.termGroups);
-            this.$store.state.formData.q = this.termGroups.join(" ");
+            this.q = this.termGroups.join(" ");
             if (this.termGroups.length === 0) {
-                this.$store.state.formData.report = "bibliography";
+                this.report = "bibliography";
             }
-            this.$store.state.formData.start = 0;
-            this.$store.state.formData.end = 0;
+            this.start = 0;
+            this.end = 0;
+            if (this.termGroups.length == 1) {
+                this.method = "proxy";
+                this.arg_proxy = "";
+                this.arg_phrase = "";
+            }
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         }
     }

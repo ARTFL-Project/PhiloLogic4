@@ -27,7 +27,7 @@
                 </div>
             </b-card>
             <b-row class="d-xs-none mt-4" id="act-on-report">
-                <b-col sm="7" lg="8" v-if="report !== 'bibliography'">
+                <b-col sm="7" lg="8" v-if="report != 'bibliography'">
                     <b-button-group id="report_switch">
                         <b-button
                             :class="{'active':  report === 'concordance'}"
@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import searchArguments from "./SearchArguments"
+import searchArguments from "./SearchArguments";
 import { EventBus } from "../main.js";
 
 import { mapFields } from "vuex-map-fields";
@@ -70,9 +70,7 @@ export default {
     components: {
         searchArguments
     },
-    props: [
-        "results"
-    ],
+    props: ["results"],
     computed: {
         ...mapFields([
             "formData.report",
@@ -95,53 +93,63 @@ export default {
             reportSwitch: {
                 concordance: {
                     labelBig: "View occurrences with context",
-                    labelSmall: "Concordance",
+                    labelSmall: "Concordance"
                 },
                 kwic: {
                     labelBig: "View occurrences line by line (KWIC)",
-                    labelSmall: "Keyword in context",
+                    labelSmall: "Keyword in context"
                 }
             }
         };
     },
     created() {
-        this.hits = this.buildDescription()
-        var vm = this
-        EventBus.$on("urlUpdate", function () {
-            vm.buildDescription()
-        })
+        this.hits = this.buildDescription();
+        var vm = this;
+        EventBus.$on("urlUpdate", function() {
+            vm.buildDescription();
+        });
     },
     methods: {
         buildDescription() {
-            let resultsLength = this.results.results_length
-            let start = this.results.description.start
-            let end = this.results.description.end
-            let resultsPerPage = this.results.description.results_per_page
-            if (resultsLength && end <= resultsPerPage && end <= resultsLength) {
-                var description = 'Hits ' + start + ' - ' + end + ' of ' + resultsLength
+            let resultsLength = this.results.results_length;
+            let start = this.results.description.start;
+            let end = this.results.description.end;
+            let resultsPerPage = this.results.description.results_per_page;
+            if (
+                resultsLength &&
+                end <= resultsPerPage &&
+                end <= resultsLength
+            ) {
+                var description =
+                    "Hits " + start + " - " + end + " of " + resultsLength;
             } else if (resultsLength) {
                 if (resultsPerPage > resultsLength) {
-                    var description = 'Hits ' + start + ' - ' + resultsLength + ' of ' + resultsLength
+                    var description =
+                        "Hits " +
+                        start +
+                        " - " +
+                        resultsLength +
+                        " of " +
+                        resultsLength;
                 } else {
-                    var description = 'Hits ' + start + ' - ' + end + ' of ' + resultsLength
+                    var description =
+                        "Hits " + start + " - " + end + " of " + resultsLength;
                 }
             } else {
-                var description = 'No results for your query.'
+                var description = "No results for your query.";
             }
-            return description
+            return description;
         },
         switchReport(reportName) {
-            this.report = reportName
-            this.first_kwic_sorting_option = ""
-            this.second_kwic_sorting_option = ""
-            this.third_kwic_sorting_option = ""
-            this.results_per_page = 25
-            this.$router.push(this.paramsToRoute(this.$store.state.formData))
-            EventBus.$emit("urlUpdate")
+            this.report = reportName;
+            this.first_kwic_sorting_option = "";
+            this.second_kwic_sorting_option = "";
+            this.third_kwic_sorting_option = "";
+            this.results_per_page = 25;
+            this.$router.push(this.paramsToRoute(this.$store.state.formData));
+            EventBus.$emit("urlUpdate");
         },
-        showFacets() {
-
-        }
+        showFacets() {}
     }
 };
 </script>

@@ -10,12 +10,16 @@
 import Header from "./components/Header.vue";
 import SearchForm from "./components/SearchForm.vue";
 import { EventBus } from "./main.js";
+import { mapFields } from "vuex-map-fields";
 
 export default {
     name: "app",
     components: {
         Header,
         SearchForm
+    },
+    computed: {
+        ...mapFields(["formData.report", "formData.q"])
     },
     data() {
         return {
@@ -24,20 +28,55 @@ export default {
         };
     },
     created() {
-        this.$store.commit("updateStore", {
-            routeQuery: this.$route.query,
-            metadata: this.metadata
-        });
+        this.evaluateRoute();
         this.$router.beforeEach((to, from, next) => {
-            this.$store.commit("updateStore", {
-                routeQuery: to.query,
-                metadata: this.metadata
-            });
+            if (typeof this.$router.query.q == "undefined") {
+                this.report = "bibliography";
+            } else {
+                this.$store.commit("updateStore", {
+                    routeQuery: to.query,
+                    metadata: this.metadata
+                });
+            }
             next();
             EventBus.$emit("urlUpdate");
         });
     },
-    methods: {}
+    methods: {
+        evaluateRoute() {
+            if (this.$route.name != "home") {
+                let queryParams = this.copyObject(this.$route.query);
+                if (typeof queryParams.q == "undefined") {
+                    queryParams.report = "bibliography";
+                    this.$store.commit("updateStore", {
+                        routeQuery: queryParams,
+                        metadata: this.metadata
+                    });
+                    this.$router.push(
+                        this.paramsToRoute(this.$store.state.formData)
+                    );
+                } else if (
+                    this.$route.query.q.length > 0 &&
+                    this.$route.name == "bibliography"
+                ) {
+                    let queryParams = this.copyObject(this.$route.query);
+                    queryParams.report == "concordance";
+                    this.$store.commit("updateStore", {
+                        routeQuery: queryParams,
+                        metadata: this.metadata
+                    });
+                    this.$router.push(
+                        this.paramsToRoute(this.$store.state.formData)
+                    );
+                } else {
+                    this.$store.commit("updateStore", {
+                        routeQuery: this.$route.query,
+                        metadata: this.metadata
+                    });
+                }
+            }
+        }
+    }
 };
 </script>
 
