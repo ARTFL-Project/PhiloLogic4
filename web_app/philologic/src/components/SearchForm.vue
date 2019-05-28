@@ -1,7 +1,7 @@
 <template>
     <div>
         <b-row>
-            <b-col md="8" offset-md="2">
+            <b-col sm="10" offset-sm="1" xl="8" offset-xl="2">
                 <b-card no-body class="shadow">
                     <b-form @submit="onSubmit" @reset="onReset">
                         <div id="form_body">

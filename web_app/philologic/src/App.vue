@@ -30,7 +30,7 @@ export default {
     created() {
         this.evaluateRoute();
         this.$router.beforeEach((to, from, next) => {
-            if (typeof this.$router.query.q == "undefined") {
+            if (typeof this.$route.query.q == "undefined") {
                 this.report = "bibliography";
             } else {
                 this.$store.commit("updateStore", {
