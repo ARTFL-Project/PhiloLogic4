@@ -205,4 +205,16 @@ export default {
 .citation-small-caps {
     font-variant: small-caps;
 }
+
+/* Concordance styling for theater */
+.xml-speaker {
+    font-weight: 700;
+}
+.xml-sp + .xml-l,
+.xml-sp + .xml-ab {
+    display: inline;
+}
+.xml-stage {
+    font-style: italic;
+}
 </style>

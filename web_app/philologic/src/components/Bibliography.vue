@@ -62,7 +62,7 @@
                 cols="12"
                 md="7"
                 xl="8"
-                v-if="philoConfig.dictionary_bibliography || results.result_type != 'doc'"
+                v-if="philoConfig.dictionary_bibliography || results.result_type != 'doc'"
             ></b-col>
             <b-col md="5" xl="4">
                 <facets></facets>

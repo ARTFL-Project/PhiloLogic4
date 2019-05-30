@@ -6,6 +6,7 @@ import kwic from '../components/Kwic'
 import bibliography from '../components/Bibliography'
 import collocation from '../components/Collocation'
 import timeSeries from '../components/TimeSeries'
+import textNavigation from '../components/TextNavigation'
 
 Vue.use(Router)
 
@@ -40,6 +41,11 @@ export default new Router({
             path: "/time_series",
             name: "timeSeries",
             component: timeSeries
+        },
+        {
+            path: "/navigate/:pathInfo*\/",
+            name: "textNavigation",
+            component: textNavigation
         }
     ],
     scrollBehavior(to, from, savedPosition) {

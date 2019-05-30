@@ -85,7 +85,7 @@ Vue.mixin({
             if (typeof fullResults === 'undefined' || Object.keys(fullResults).length === 0) {
                 fullResults = newData
             } else {
-                for (key in newData) {
+                for (let key in newData) {
                     let value = newData[key]
                     if (typeof value.count !== 'undefined') {
                         if (key in fullResults) {
@@ -128,7 +128,7 @@ Vue.mixin({
                 ty = typeof y;
             return x && y && tx === 'object' && tx === ty ? (
                 ok(x).length === ok(y).length &&
-                ok(x).every(key => deepEqual(x[key], y[key]))
+                ok(x).every(key => this.deepEqual(x[key], y[key]))
             ) : (x === y);
         }
     }

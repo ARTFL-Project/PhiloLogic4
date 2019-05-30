@@ -30,7 +30,10 @@ export default {
     created() {
         this.evaluateRoute();
         this.$router.beforeEach((to, from, next) => {
-            if (typeof this.$route.query.q == "undefined") {
+            if (
+                typeof this.$route.query.q == "undefined" &&
+                this.$route.name != "navigate"
+            ) {
                 this.report = "bibliography";
             } else {
                 this.$store.commit("updateStore", {
@@ -44,7 +47,11 @@ export default {
     },
     methods: {
         evaluateRoute() {
-            if (this.$route.name != "home") {
+            console.log(this.$route.name);
+            if (
+                this.$route.name != "home" &&
+                this.$route.name != "textNavigation"
+            ) {
                 let queryParams = this.copyObject(this.$route.query);
                 if (typeof queryParams.q == "undefined") {
                     queryParams.report = "bibliography";

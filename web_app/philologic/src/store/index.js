@@ -32,9 +32,14 @@ export default new Vuex.Store({
             sort_by: 'rowid',
             first_kwic_sorting_option: '',
             second_kwic_sorting_option: '',
-            third_kwic_sorting_option: ''
+            third_kwic_sorting_option: '',
+            start_byte: "",
+            end_byte: ""
         },
-        resultsLength: 0
+        resultsLength: 0,
+        textNavigationCitation: {},
+        textObject: "",
+        navBar: ""
     },
     getters: {
         getField
@@ -81,6 +86,9 @@ export default new Vuex.Store({
         },
         removeMetadata(state, payload) {
             state.formData.metadataFields[payload] = ''
+        },
+        updateCitation(state, payload) {
+            Vue.set(state, "textNavigationCitation", payload)
         }
     }
 })
