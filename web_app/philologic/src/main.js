@@ -130,6 +130,18 @@ Vue.mixin({
                 ok(x).length === ok(y).length &&
                 ok(x).every(key => this.deepEqual(x[key], y[key]))
             ) : (x === y);
+        },
+        dictionaryLookup(event, year) {
+            if (event.key === "d") {
+                var selection = $window.getSelection().toString();
+                var century = parseInt(year.slice(0, year.length - 2));
+                var range = century.toString() + "00-" + String(century + 1) + "00";
+                if (range == "NaN00-NaN00") {
+                    range = "";
+                }
+                var link = this.$philoConfig.dictionary_lookup + "?docyear=" + range + "&strippedhw=" + selection;
+                window.open(link);
+            }
         }
     }
 })

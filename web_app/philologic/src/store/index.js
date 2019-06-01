@@ -33,13 +33,15 @@ export default new Vuex.Store({
             first_kwic_sorting_option: '',
             second_kwic_sorting_option: '',
             third_kwic_sorting_option: '',
-            start_byte: "",
-            end_byte: ""
+            start_byte: '',
+            end_byte: ''
         },
         resultsLength: 0,
         textNavigationCitation: {},
-        textObject: "",
-        navBar: ""
+        textObject: '',
+        navBar: '',
+        tocElements: {},
+        byte: ''
     },
     getters: {
         getField
@@ -88,7 +90,7 @@ export default new Vuex.Store({
             state.formData.metadataFields[payload] = ''
         },
         updateCitation(state, payload) {
-            Vue.set(state, "textNavigationCitation", payload)
+            Vue.set(state, 'textNavigationCitation', payload)
         }
     }
 })

@@ -1,205 +1,192 @@
 <template>
-    <div class="text-object m-4">
-        <div id="philo-view" v-if="authorized">
-            <b-row>
-                <b-col cols="8" offset="2">
-                    <div id="object-title" class="text-center pt-4">
-                        <span
-                            class="citation"
-                            v-for="(citation, citeIndex) in textNavigationCitation"
-                            :key="citeIndex"
-                        >
-                            <span v-if="citation.href">
-                                <span v-html="citation.prefix"></span>
-                                <a
-                                    :href="citation.href"
-                                    :style="citation.style"
-                                >{{ citation.label }}</a>
-                                <span v-html="citation.suffix"></span>
-                                <span
-                                    class="separator"
-                                    v-if="citeIndex != textNavigationCitation.length - 1"
-                                >&#9679;</span>
-                            </span>
-                            <span v-if="!citation.href">
-                                <span v-html="citation.prefix"></span>
-                                <span :style="citation.style">{{ citation.label }}</span>
-                                <span v-html="citation.suffix"></span>
-                                <span
-                                    class="separator"
-                                    v-if="citeIndex != textNavigationCitation.length - 1"
-                                >&#9679;</span>
-                            </span>
+    <div class="container-fluid mt-4" v-if="authorized">
+        <b-row>
+            <b-col cols="8" offset="2">
+                <div id="object-title" class="text-center pt-4">
+                    <span
+                        class="citation"
+                        v-for="(citation, citeIndex) in textNavigationCitation"
+                        :key="citeIndex"
+                    >
+                        <span v-if="citation.href">
+                            <span v-html="citation.prefix"></span>
+                            <a :href="citation.href" :style="citation.style">{{ citation.label }}</a>
+                            <span v-html="citation.suffix"></span>
+                            <span
+                                class="separator"
+                                v-if="citeIndex != textNavigationCitation.length - 1"
+                            >&#9679;</span>
                         </span>
-                    </div>
-                </b-col>
-            </b-row>
-            <b-row
-                id="toc-top-bar"
-                class="text-center mt-4 mb-4"
-                v-if="navBar === true || loading === false"
-            >
-                <b-col cols="12" id="nav-buttons" ui-scrollfix>
-                    <b-button id="back-to-top" class="d-none" size="sm" @click="backToTop()">
-                        <span class="d-xs-none d-sm-inline-block">Back to top</span>
-                        <span class="d-xs-inline-block d-sm-none">Top</span>
-                    </b-button>
-                    <b-button-group size="sm">
+                        <span v-if="!citation.href">
+                            <span v-html="citation.prefix"></span>
+                            <span :style="citation.style">{{ citation.label }}</span>
+                            <span v-html="citation.suffix"></span>
+                            <span
+                                class="separator"
+                                v-if="citeIndex != textNavigationCitation.length - 1"
+                            >&#9679;</span>
+                        </span>
+                    </span>
+                </div>
+            </b-col>
+        </b-row>
+        <b-row
+            id="toc-top-bar"
+            class="text-center mt-4 mb-4"
+            v-if="navBar === true || loading === false"
+        >
+            <b-col cols="12" id="nav-buttons" ui-scrollfix>
+                <b-button id="back-to-top" class="d-none" size="sm" @click="backToTop()">
+                    <span class="d-xs-none d-sm-inline-block">Back to top</span>
+                    <span class="d-xs-inline-block d-sm-none">Top</span>
+                </b-button>
+                <b-button-group size="sm">
+                    <b-button
+                        disabled="disabled"
+                        id="prev-obj"
+                        @click="goToTextObject(textObject.prev)"
+                    >&lt;</b-button>
+                    <b-button
+                        id="show-toc"
+                        disabled="disabled"
+                        @click="toggleTableOfContents()"
+                    >Table of contents</b-button>
+                    <b-button
+                        disabled="disabled"
+                        id="next-obj"
+                        @click="goToTextObject(textObject.next)"
+                    >&gt;</b-button>
+                </b-button-group>
+                <div id="toc-wrapper">
+                    <div id="toc-titlebar" class="d-none">
                         <b-button
-                            disabled="disabled"
-                            id="prev-obj"
-                            @click="goToTextObject(textObject.prev)"
-                        >&lt;</b-button>
-                        <b-button
-                            id="show-toc"
-                            disabled="disabled"
+                            class="btn btn-primary btn-xs pull-right"
+                            id="hide-toc"
                             @click="toggleTableOfContents()"
-                        >Table of contents</b-button>
-                        <b-button
-                            disabled="disabled"
-                            id="next-obj"
-                            @click="goToTextObject(textObject.next)"
-                        >&gt;</b-button>
-                    </b-button-group>
-                </b-col>
-                <b-col
-                    cols="12"
-                    sm="8"
-                    offset-sm="2"
-                    id="toc-wrapper"
-                    class="toc-slide"
-                    v-if="tocOpen"
-                >
-                    <b-card no-body id="toc-container">
-                        <div id="toc-titlebar">
+                        >X</b-button>
+                    </div>
+                    <b-card
+                        no-body
+                        id="toc-content"
+                        class="p-3 shadow"
+                        :style="tocHeight"
+                        :scroll-to="tocPosition"
+                        v-if="tocOpen"
+                    >
+                        <div class="toc-more before" v-if="start !== 0">
                             <b-button
-                                class="btn btn-primary btn-xs pull-right"
-                                id="hide-toc"
-                                @click="toggleTableOfContents()"
-                            >
-                                <span class="glyphicon glyphicon-remove"></span>
-                            </b-button>
+                                type="button"
+                                class="btn btn-default btn-sm glyphicon glyphicon-menu-up"
+                                @click="loadBefore()"
+                            ></b-button>
                         </div>
-                        <div id="toc-content" :scroll-to="tocPosition">
-                            <div class="toc-more before" v-if="start !== 0">
-                                <b-button
-                                    type="button"
-                                    class="btn btn-default btn-sm glyphicon glyphicon-menu-up"
-                                    @click="loadBefore()"
-                                ></b-button>
-                            </div>
+                        <div v-for="(element, tocIndex) in tocElementsToDisplay" :key="tocIndex">
                             <div
-                                v-for="element in tocElements.slice(start, end)"
-                                :key="element.philo_id"
+                                :id="element.philo_id"
+                                :class="'toc-' + element.philo_type"
+                                @click="textObjectSelection(element.philo_id, tocIndex)"
                             >
-                                <div
-                                    :id="element.philo_id"
-                                    :class="'toc-' + element.philo_type"
-                                    @click="textObjectSelection(element.philo_id, $index)"
-                                >
-                                    <span :class="'bullet-point-' + element.philo_type"></span>
-                                    <a
-                                        :class="{'current-obj': element.philo_id === currentPhiloId }"
-                                        href
-                                    >{{ element.label }}</a>
-                                </div>
-                            </div>
-                            <div class="toc-more after" v-if="end < tocElements.length">
-                                <b-button
-                                    type="button"
-                                    class="btn btn-default btn-sm glyphicon glyphicon-menu-down"
-                                    @click="loadAfter()"
-                                ></b-button>
+                                <span :class="'bullet-point-' + element.philo_type"></span>
+                                <a
+                                    :class="{'current-obj': element.philo_id === currentPhiloId }"
+                                    href
+                                >{{ element.label }}</a>
                             </div>
                         </div>
+                        <div class="toc-more after" v-if="end < tocElements.length">
+                            <b-button
+                                type="button"
+                                class="btn btn-default btn-sm glyphicon glyphicon-menu-down"
+                                @click="loadAfter()"
+                            ></b-button>
+                        </div>
+                        <a
+                            id="report-error"
+                            class="btn btn-primary btn-sm"
+                            target="_blank "
+                            :href="philoConfig.report_error_link"
+                            v-if="philoConfig.report_error_link !='' "
+                        >Report Error</a>
                     </b-card>
-                </b-col>
-                <a
-                    id="report-error"
-                    class="btn btn-primary btn-sm"
-                    target="_blank "
-                    :href="philoConfig.report_error_link"
-                    v-if="philoConfig.report_error_link !='' "
-                >Report Error</a>
-            </b-row>
-            <b-row id="all-content" loading="loading">
-                <b-col
-                    cols="12"
-                    sm="10"
-                    offset-sm="1"
-                    lg="8"
-                    offset-lg="2"
-                    id="center-content"
-                    v-if="textObject.text"
-                >
-                    <b-card no-body class="mt-3 p-4 shadow">
+                </div>
+            </b-col>
+        </b-row>
+        <b-row id="all-content" loading="loading">
+            <b-col
+                cols="12"
+                sm="10"
+                offset-sm="1"
+                lg="8"
+                offset-lg="2"
+                id="center-content"
+                v-if="textObject.text"
+            >
+                <b-card no-body class="mt-3 mb-4 p-4 shadow">
+                    <div
+                        style="font-size: 80%; text-align: center;"
+                        v-if="philoConfig.dictionary_lookup != ''"
+                    >To look up a word in a dictionary, select the word with your mouse and press 'd' on your keyboard.</div>
+                    <div id="book-page">
+                        <div id="previous-pages" v-if="beforeObjImgs">
+                            <span class="xml-pb-image">
+                                <a
+                                    :href="img[0]"
+                                    :large-img="img[1]"
+                                    class="page-image-link"
+                                    v-for="(img, imageIndex) in beforeObjImgs"
+                                    :key="imageIndex"
+                                    data-gallery
+                                ></a>
+                            </span>
+                        </div>
+                        <div id="previous-graphics" v-if="beforeGraphicsImgs">
+                            <a
+                                :href="img[0]"
+                                :large-img="img[1]"
+                                class="inline-img"
+                                v-for="(img, beforeIndex) in beforeGraphicsImgs"
+                                :key="beforeIndex"
+                                data-gallery
+                            ></a>
+                        </div>
                         <div
-                            style="font-size: 80%; text-align: center;"
-                            v-if="philoConfig.dictionary_lookup != ''"
-                        >To look up a word in a dictionary, select the word with your mouse and press 'd' on your keyboard.</div>
-                        <div id="book-page">
-                            <div id="previous-pages" v-if="beforeObjImgs">
-                                <span class="xml-pb-image">
-                                    <a
-                                        :href="img[0]"
-                                        :large-img="img[1]"
-                                        class="page-image-link"
-                                        v-for="(img, imageIndex) in beforeObjImgs"
-                                        :key="imageIndex"
-                                        data-gallery
-                                    ></a>
-                                </span>
-                            </div>
-                            <div id="previous-graphics" v-if="beforeGraphicsImgs">
+                            id="text-obj-content"
+                            class="text-content-area"
+                            v-html="textObject.text"
+                            compile-template
+                            select-word
+                            :philo-id="philoID"
+                            @keydown="dicoLookup($event, textObject.metadata_fields.year)"
+                            tabindex="0"
+                        ></div>
+                        <div id="next-pages" v-if="afterObjImgs">
+                            <span class="xml-pb-image">
                                 <a
                                     :href="img[0]"
                                     :large-img="img[1]"
-                                    class="inline-img"
-                                    v-for="(img, beforeIndex) in beforeGraphicsImgs"
-                                    :key="beforeIndex"
+                                    class="page-image-link"
+                                    v-for="(img, afterIndex) in afterObjImgs"
+                                    :key="afterIndex"
                                     data-gallery
                                 ></a>
-                            </div>
-                            <div
-                                id="text-obj-content"
-                                class="panel panel-default text-content-area"
-                                v-html="textObject.text"
-                                compile-template
-                                select-word
-                                :philo-id="philoID"
-                                @keydown="dicoLookup($event, textObject.metadata_fields.year)"
-                                tabindex="0"
-                            ></div>
-                            <div id="next-pages" v-if="afterObjImgs">
-                                <span class="xml-pb-image">
-                                    <a
-                                        :href="img[0]"
-                                        :large-img="img[1]"
-                                        class="page-image-link"
-                                        v-for="(img, afterIndex) in afterObjImgs"
-                                        :key="afterIndex"
-                                        data-gallery
-                                    ></a>
-                                </span>
-                            </div>
-                            <div id="next-graphics" v-if="afterGraphicsImgs">
-                                <a
-                                    :href="img[0]"
-                                    :large-img="img[1]"
-                                    class="inline-img"
-                                    v-for="(img , afterGraphIndex) in afterGraphicsImgs"
-                                    :key="afterGraphIndex"
-                                    data-gallery
-                                ></a>
-                            </div>
+                            </span>
                         </div>
-                    </b-card>
-                </b-col>
-            </b-row>
-        </div>
+                        <div id="next-graphics" v-if="afterGraphicsImgs">
+                            <a
+                                :href="img[0]"
+                                :large-img="img[1]"
+                                class="inline-img"
+                                v-for="(img , afterGraphIndex) in afterGraphicsImgs"
+                                :key="afterGraphIndex"
+                                data-gallery
+                            ></a>
+                        </div>
+                    </div>
+                </b-card>
+            </b-col>
+        </b-row>
         <!-- <access-control v-if="!authorized"></access-control> -->
-    </div>
-    <!-- <div
+        <!-- <div
         id="blueimp-gallery"
         class="blueimp-gallery blueimp-gallery-controls"
         data-full-screen="true"
@@ -221,7 +208,8 @@
         ></a>
         <a class="close">&#10005;</a>
         <ol class="indicator"></ol>
-    </div>-->
+        </div>-->
+    </div>
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
@@ -239,14 +227,21 @@ export default {
             start_byte: "formData.start_byte",
             end_byte: "formData.end_byte",
             textNavigationCitation: "textNavigationCitation",
-            navBar: "navBar"
-        })
+            navBar: "navBar",
+            tocElements: "tocElements",
+            byte: "byte"
+        }),
+        tocElementsToDisplay: function() {
+            return this.tocElements.elements.slice(this.start, this.end);
+        },
+        tocHeight() {
+            return `max-height: ${window.innerHeight - 200}`;
+        }
     },
     data() {
         return {
             philoConfig: this.$philoConfig,
             textObject: {},
-            tocElements: [],
             beforeObjImgs: [],
             afterObjImgs: [],
             beforeGraphicsImgs: [],
@@ -259,28 +254,36 @@ export default {
             textRendered: false,
             textObjectURL: "",
             philoID: "",
-            byteOffset: "",
-            highlight: false
+            highlight: false,
+            start: 0,
+            end: 0,
+            tocPosition: 0
         };
     },
     created() {
         this.report = "textNavigation";
         this.fetchText();
+        this.fetchToC();
+        var vm = this;
+        EventBus.$on("navChange", function() {
+            vm.fetchText();
+            vm.currentPhiloId = vm.$route.params.pathInfo.split("/").join(" ");
+        });
     },
     methods: {
         fetchText() {
             this.textRendered = false;
             this.textObjectURL = this.$route.params;
             this.philoID = this.textObjectURL.pathInfo.split("/").join(" ");
-            if ("byte" in this.textObjectURL) {
-                this.byteOffset = this.textObjectURL.byte;
+            if ("byte" in this.$route.query) {
+                this.byte = this.$route.query.byte;
             } else {
-                this.byteOffset = "";
+                this.byte = "";
             }
             let navigationParams = {
                 report: "navigation",
                 philo_id: this.philoID,
-                byte: this.byteOffset
+                byte: this.byte
             };
             if (this.start_byte !== "") {
                 navigationParams.start_byte = this.start_byte;
@@ -297,7 +300,7 @@ export default {
                     // textNavigationValues.textObject = response.data;
                     vm.textNavigationCitation = response.data.citation;
                     vm.navBar = true;
-                    if (vm.byteOffset.length > 0) {
+                    if (vm.byte.length > 0) {
                         vm.highlight = true;
                     } else {
                         vm.highlight = false;
@@ -323,6 +326,7 @@ export default {
                         vm.insertPageLinks(vm, response.data.imgs);
                         vm.insertInlineImgs(vm, response.data.imgs);
                     }
+                    vm.setUpNavBar();
                 })
                 .catch(function(response) {
                     console.log(response);
@@ -448,6 +452,158 @@ export default {
                     }
                 }
             }
+        },
+        fetchToC() {
+            this.tocPosition = "";
+            var philoId = this.$route.params.pathInfo.split("/").join(" ");
+            let docId = philoId.split(" ")[0];
+            this.currentPhiloId = philoId;
+            var vm = this;
+            if (docId !== this.tocElements.docId) {
+                this.$http
+                    .get(
+                        "http://anomander.uchicago.edu/philologic/test/scripts/get_table_of_contents.py",
+                        {
+                            params: {
+                                philo_id: this.currentPhiloId
+                            }
+                        }
+                    )
+                    .then(function(response) {
+                        let tocElements = response.data.toc;
+                        vm.start = response.data.current_obj_position - 100;
+                        if (vm.start < 0) {
+                            vm.start = 0;
+                        }
+                        vm.end = response.data.current_obj_position + 100;
+
+                        vm.tocElements = {
+                            docId: philoId.split(" ")[0],
+                            elements: tocElements,
+                            start: vm.start,
+                            end: vm.end
+                        };
+                        let tocButton = document.querySelector("#show-toc");
+                        tocButton.removeAttribute("disabled");
+                        tocButton.classList.remove("disabled");
+                    });
+            } else {
+                // this.tocElements = this.tocElements;
+                this.start = this.tocElements.start;
+                this.end = this.tocElements.end;
+                let tocButton = document.querySelector("#show-toc");
+                tocButton.removeAttribute("disabled");
+                tocButton.classList.remove("disabled");
+            }
+        },
+        loadBefore() {
+            var firstElement = this.tocElements[this.start - 2].philo_id;
+            this.start -= 200;
+            if (this.start < 0) {
+                this.start = 0;
+            }
+            this.tocPosition = firstElement;
+        },
+        loadAfter() {
+            this.end += 200;
+        },
+        textObjectSelection(philoId, index) {
+            textNavigationValues.tocElements.start =
+                textNavigationValues.tocElements.start + index - 100;
+            if (textNavigationValues.tocElements.start < 0) {
+                textNavigationValues.tocElements.start = 0;
+            }
+            textNavigationValues.tocElements.end =
+                textNavigationValues.tocElements.end - index + 100;
+            this.textNav.goToTextObject(philoId);
+        },
+        toggleTableOfContents() {
+            if (this.tocOpen) {
+                this.closeTableOfContents();
+            } else {
+                this.openTableOfContents();
+            }
+        },
+        openTableOfContents() {
+            // angular.element('#toc-wrapper').addClass('display');
+            this.tocOpen = true;
+            this.$nextTick(function() {
+                document.querySelector(
+                    "#toc-content"
+                ).style.maxHeight = `${window.innerHeight - 450}px`;
+            });
+            // $timeout(function() {
+            //     angular.element('.current-obj').velocity("scroll", {
+            //         duration: 500,
+            //         container: angular.element("#toc-content"),
+            //         offset: -50
+            //     });
+            // }, 300);
+        },
+        closeTableOfContents() {
+            // angular.element('#toc-wrapper').removeClass('display');
+            this.tocOpen = false;
+            // angular.element("#toc-content").scrollTop(0);
+            // $timeout(function() {
+            //     if (angular.element(document).height() == angular.element(window).height()) {
+            //         angular.element('#toc-container').css('position', 'static');
+            //     }
+            // });
+        },
+        backToTop() {
+            // angular.element("body").velocity('scroll', {
+            //     duration: 800,
+            //     easing: 'easeOutCirc',
+            //     offset: 0
+            // });
+        },
+        goToTextObject(philoID) {
+            philoID = philoID.split(/[- ]/).join("/");
+            if (this.tocOpen) {
+                this.closeTableOfContents();
+            }
+            // $location.url(URL.path(philoID)).replace(); // deleting current page history and replace with new page
+            this.$router.push({ path: `/navigate/${philoID}` });
+            EventBus.$emit("navChange");
+        },
+        textObjectSelection(philoId, index) {
+            event.preventDefault();
+            let newStart = this.tocElements.start + index - 100;
+            if (newStart < 0) {
+                newStart = 0;
+            }
+            this.tocElements = {
+                ...this.tocElements,
+                start: newStart,
+                end: this.tocElements.end - index + 100
+            };
+            this.goToTextObject(philoId);
+        },
+        setUpNavBar() {
+            let prevButton = document.querySelector("#prev-obj");
+            let nextButton = document.querySelector("#next-obj");
+            if (
+                this.textObject.next === "" ||
+                typeof this.textObject.next === "undefined"
+            ) {
+                nextButton.classList.add("disabled");
+            } else {
+                nextButton.removeAttribute("disabled");
+                nextButton.classList.remove("disabled");
+            }
+            if (
+                this.textObject.prev === "" ||
+                typeof this.textObject.prev === "undefined"
+            ) {
+                prevButton.classList.add("disabled");
+            } else {
+                prevButton.removeAttribute("disabled");
+                prevButton.classList.remove("disabled");
+            }
+        },
+        dicoLookup(event, year) {
+            var philoId = this.$route.params.pathInfo.split("/").join(" ");
+            dictionaryLookup.evaluate(event, year);
         }
     }
 };
@@ -459,22 +615,91 @@ export default {
     display: inline-block;
     vertical-align: middle;
 }
-
-#toc-top-bar {
+#toc-content {
+    display: inline-block;
     position: relative;
+    overflow: scroll;
+    text-align: justify;
+    line-height: 180%;
+    z-index: 101;
+    background: #fff;
+}
+#toc-top-bar {
+    opacity: 0.95;
+    position: relative;
+    z-index: 100;
 }
 
 #nav-buttons {
-    margin-left: -15px;
-    margin-right: -15px;
     position: absolute;
-    width: 100%;
-    z-index: 80;
-    transition: background 200ms;
+}
+
+a.current-obj,
+#toc-container a:hover {
+    background: #e8e8e8;
+    /* color: #fff !important; */
+}
+
+.toc-div1 > a,
+.toc-div2 > a,
+.toc-div3 > a {
+    padding: 5px 5px 5px 0px;
+}
+
+.bullet-point-div1,
+.bullet-point-div2,
+.bullet-point-div3 {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.bullet-point-div1 {
+    border: solid 1px;
+}
+
+.bullet-point-div2 {
+    border: solid 2px;
+}
+
+.bullet-point-div3 {
+    border: solid 1px;
+}
+
+.toc-div1,
+.toc-div2,
+.toc-div3 {
+    text-indent: -0.9em;
+    /*Account for the bullet point*/
+    margin-bottom: 5px;
+}
+
+.toc-div1 {
+    padding-left: 0.9em;
+}
+
+.toc-div2 {
+    padding-left: 1.9em;
+}
+
+.toc-div3 {
+    padding-left: 2.9em;
+}
+
+.toc-div1:hover,
+.toc-div2:hover,
+.toc-div3:hover {
+    cursor: pointer;
 }
 
 p {
     margin-bottom: 0.5rem;
+}
+/deep/ .highlight {
+    background-color: red;
+    color: #fff;
 }
 /* Styling for theater */
 

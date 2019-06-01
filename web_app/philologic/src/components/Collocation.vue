@@ -200,7 +200,7 @@ export default {
                 fullResults = {};
                 vm.filterList = data.filter_list;
             }
-            var collocates = this.mergeResults(fullResults, data["collocates"]);
+            var collocates = vm.mergeResults(fullResults, data["collocates"]);
             let sortedList = [];
             for (let word of collocates.sorted.slice(0, 100)) {
                 sortedList.push({ collocate: word.label, count: word.count });
@@ -213,10 +213,10 @@ export default {
                 var runningQuery = $location.search();
                 if (
                     vm.report === "collocation" &&
-                    this.deepEqual(runningQuery, vm.localFormData)
+                    vm.deepEqual(runningQuery, vm.localFormData)
                 ) {
                     // make sure we're still running the same query
-                    updateCollocation(vm, tempFullResults, start);
+                    vm.updateCollocation(vm, tempFullResults, start);
                 }
             } else {
                 vm.percent = 100;
