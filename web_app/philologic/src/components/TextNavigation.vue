@@ -322,6 +322,17 @@ export default {
                     //             });
                     //     });
                     // }
+                    if (vm.byte != "") {
+                        vm.$nextTick(function() {
+                            vm.scrollToHighlight(".highlight");
+                        });
+                    }
+                    if (vm.start_byte != "") {
+                        vm.$nextTick(function() {
+                            vm.scrollToHighlight(".start-highlight");
+                        });
+                    }
+
                     if (!vm.deepEqual(response.data.imgs, {})) {
                         vm.insertPageLinks(vm, response.data.imgs);
                         vm.insertInlineImgs(vm, response.data.imgs);
@@ -332,6 +343,15 @@ export default {
                     console.log(response);
                     vm.loading = false;
                 });
+        },
+        scrollToHighlight(elementClass) {
+            let offsetTop =
+                document.querySelector(elementClass).getBoundingClientRect()
+                    .top - 50;
+            window.scrollBy({
+                top: offsetTop,
+                behavior: "smooth"
+            });
         },
         insertPageLinks(vm, imgObj) {
             let currentObjImgs = imgObj.current_obj_img;
