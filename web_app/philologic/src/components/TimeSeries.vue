@@ -313,7 +313,7 @@ export default {
             ) {
                 // are we running a different query?
                 if (vm.moreResults) {
-                    updateTimeSeries(vm, fullResults);
+                    vm.updateTimeSeries(vm, fullResults);
                 } else {
                     vm.percent = 100;
                     vm.done = true;

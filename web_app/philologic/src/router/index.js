@@ -7,6 +7,7 @@ import bibliography from '../components/Bibliography'
 import collocation from '../components/Collocation'
 import timeSeries from '../components/TimeSeries'
 import textNavigation from '../components/TextNavigation'
+import tableOfContents from '../components/TableOfContents'
 
 Vue.use(Router)
 
@@ -43,9 +44,14 @@ export default new Router({
             component: timeSeries
         },
         {
-            path: "/navigate/:pathInfo*\/",
+            path: "/navigate/:pathInfo([\\d\/]+)",
             name: "textNavigation",
             component: textNavigation
+        },
+        {
+            path: "/navigate/:pathInfo(\\d+)/table-of-contents",
+            name: "tableOfContents",
+            component: tableOfContents
         }
     ],
     scrollBehavior(to, from, savedPosition) {

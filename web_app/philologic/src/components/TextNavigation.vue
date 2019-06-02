@@ -528,14 +528,12 @@ export default {
             this.end += 200;
         },
         textObjectSelection(philoId, index) {
-            textNavigationValues.tocElements.start =
-                textNavigationValues.tocElements.start + index - 100;
-            if (textNavigationValues.tocElements.start < 0) {
-                textNavigationValues.tocElements.start = 0;
+            this.start = this.start + index - 100;
+            if (this.start < 0) {
+                this.start = 0;
             }
-            textNavigationValues.tocElements.end =
-                textNavigationValues.tocElements.end - index + 100;
-            this.textNav.goToTextObject(philoId);
+            this.end = this.end - index + 100;
+            this.goToTextObject(philoId);
         },
         toggleTableOfContents() {
             if (this.tocOpen) {
@@ -658,60 +656,6 @@ a.current-obj,
 #toc-container a:hover {
     background: #e8e8e8;
     /* color: #fff !important; */
-}
-
-.toc-div1 > a,
-.toc-div2 > a,
-.toc-div3 > a {
-    padding: 5px 5px 5px 0px;
-}
-
-.bullet-point-div1,
-.bullet-point-div2,
-.bullet-point-div3 {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-right: 5px;
-}
-
-.bullet-point-div1 {
-    border: solid 1px;
-}
-
-.bullet-point-div2 {
-    border: solid 2px;
-}
-
-.bullet-point-div3 {
-    border: solid 1px;
-}
-
-.toc-div1,
-.toc-div2,
-.toc-div3 {
-    text-indent: -0.9em;
-    /*Account for the bullet point*/
-    margin-bottom: 5px;
-}
-
-.toc-div1 {
-    padding-left: 0.9em;
-}
-
-.toc-div2 {
-    padding-left: 1.9em;
-}
-
-.toc-div3 {
-    padding-left: 2.9em;
-}
-
-.toc-div1:hover,
-.toc-div2:hover,
-.toc-div3:hover {
-    cursor: pointer;
 }
 
 p {

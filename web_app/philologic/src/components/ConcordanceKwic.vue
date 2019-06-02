@@ -115,16 +115,17 @@ export default {
             let start = this.results.description.start;
             let end = this.results.description.end;
             let resultsPerPage = this.results.description.results_per_page;
+            var description;
             if (
                 resultsLength &&
                 end <= resultsPerPage &&
                 end <= resultsLength
             ) {
-                var description =
+                description =
                     "Hits " + start + " - " + end + " of " + resultsLength;
             } else if (resultsLength) {
                 if (resultsPerPage > resultsLength) {
-                    var description =
+                    description =
                         "Hits " +
                         start +
                         " - " +
@@ -132,11 +133,11 @@ export default {
                         " of " +
                         resultsLength;
                 } else {
-                    var description =
+                    description =
                         "Hits " + start + " - " + end + " of " + resultsLength;
                 }
             } else {
-                var description = "No results for your query.";
+                description = "No results for your query.";
             }
             return description;
         },

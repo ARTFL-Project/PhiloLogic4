@@ -237,7 +237,7 @@ export default {
             }
             return biblio;
         },
-        removeMetadata(metadata, restart) {
+        removeMetadata(metadata) {
             this.$store.commit("removeMetadata", metadata);
             if (this.q.length == 0) {
                 this.report = "bibliography";
