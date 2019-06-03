@@ -3,40 +3,46 @@
         <b-row>
             <b-col cols="8" offset="2">
                 <div id="object-title" class="text-center pt-4">
-                    <span
-                        class="citation"
-                        v-for="(citation, citeIndex) in textNavigationCitation"
-                        :key="citeIndex"
-                    >
-                        <span v-if="citation.href">
-                            <span v-html="citation.prefix"></span>
-                            <a :href="citation.href" :style="citation.style">{{ citation.label }}</a>
-                            <span v-html="citation.suffix"></span>
-                            <span
-                                class="separator"
-                                v-if="citeIndex != textNavigationCitation.length - 1"
-                            >&#9679;</span>
+                    <h5>
+                        <span
+                            class="citation"
+                            v-for="(citation, citeIndex) in textNavigationCitation"
+                            :key="citeIndex"
+                        >
+                            <span v-if="citation.href">
+                                <span v-html="citation.prefix"></span>
+                                <router-link
+                                    :to="'/' + citation.href"
+                                    :style="citation.style"
+                                >{{ citation.label }}</router-link>
+                                <span v-html="citation.suffix"></span>
+                                <span
+                                    class="separator"
+                                    v-if="citeIndex != textNavigationCitation.length - 1"
+                                >&#9679;</span>
+                            </span>
+                            <span v-if="!citation.href">
+                                <span v-html="citation.prefix"></span>
+                                <span :style="citation.style">{{ citation.label }}</span>
+                                <span v-html="citation.suffix"></span>
+                                <span
+                                    class="separator"
+                                    v-if="citeIndex != textNavigationCitation.length - 1"
+                                >&#9679;</span>
+                            </span>
                         </span>
-                        <span v-if="!citation.href">
-                            <span v-html="citation.prefix"></span>
-                            <span :style="citation.style">{{ citation.label }}</span>
-                            <span v-html="citation.suffix"></span>
-                            <span
-                                class="separator"
-                                v-if="citeIndex != textNavigationCitation.length - 1"
-                            >&#9679;</span>
-                        </span>
-                    </span>
+                    </h5>
                 </div>
             </b-col>
         </b-row>
         <b-row
-            id="toc-top-bar"
-            class="text-center mt-4 mb-4"
+            id="toc-wrapper"
+            class="text-center mt-4"
             v-if="navBar === true || loading === false"
         >
-            <b-col cols="12" id="nav-buttons" ui-scrollfix>
-                <b-button id="back-to-top" class="d-none" size="sm" @click="backToTop()">
+            <div id="toc-top-bar" class="shadow"></div>
+            <b-col cols="12" id="nav-buttons" v-scroll="handleScroll">
+                <b-button id="back-to-top" size="sm" @click="backToTop()">
                     <span class="d-xs-none d-sm-inline-block">Back to top</span>
                     <span class="d-xs-inline-block d-sm-none">Top</span>
                 </b-button>
@@ -257,7 +263,9 @@ export default {
             highlight: false,
             start: 0,
             end: 0,
-            tocPosition: 0
+            tocPosition: 0,
+            navButtonPosition: 0,
+            navBarVisible: false
         };
     },
     created() {
@@ -347,7 +355,7 @@ export default {
         scrollToHighlight(elementClass) {
             let offsetTop =
                 document.querySelector(elementClass).getBoundingClientRect()
-                    .top - 50;
+                    .top - 100;
             window.scrollBy({
                 top: offsetTop,
                 behavior: "smooth"
@@ -503,17 +511,22 @@ export default {
                             start: vm.start,
                             end: vm.end
                         };
-                        let tocButton = document.querySelector("#show-toc");
-                        tocButton.removeAttribute("disabled");
-                        tocButton.classList.remove("disabled");
+                        vm.$nextTick(function() {
+                            let tocButton = document.querySelector("#show-toc");
+                            tocButton.removeAttribute("disabled");
+                            tocButton.classList.remove("disabled");
+                            vm.navButtonPosition = tocButton.getBoundingClientRect().top;
+                            console.log(vm.navButtonPosition);
+                        });
                     });
             } else {
-                // this.tocElements = this.tocElements;
                 this.start = this.tocElements.start;
                 this.end = this.tocElements.end;
-                let tocButton = document.querySelector("#show-toc");
-                tocButton.removeAttribute("disabled");
-                tocButton.classList.remove("disabled");
+                this.$nextTick(function() {
+                    let tocButton = document.querySelector("#show-toc");
+                    tocButton.removeAttribute("disabled");
+                    tocButton.classList.remove("disabled");
+                });
             }
         },
         loadBefore() {
@@ -546,9 +559,16 @@ export default {
             // angular.element('#toc-wrapper').addClass('display');
             this.tocOpen = true;
             this.$nextTick(function() {
-                document.querySelector(
-                    "#toc-content"
-                ).style.maxHeight = `${window.innerHeight - 450}px`;
+                let tocContent = document.querySelector("#toc-content");
+                tocContent.style.maxHeight = `${window.innerHeight - 450}px`;
+                let offsetTop =
+                    tocContent
+                        .querySelector(".current-obj")
+                        .getBoundingClientRect().top - 335;
+                tocContent.scrollBy({
+                    top: offsetTop,
+                    behavior: "smooth"
+                });
             });
             // $timeout(function() {
             //     angular.element('.current-obj').velocity("scroll", {
@@ -569,18 +589,13 @@ export default {
             // });
         },
         backToTop() {
-            // angular.element("body").velocity('scroll', {
-            //     duration: 800,
-            //     easing: 'easeOutCirc',
-            //     offset: 0
-            // });
+            window.scrollTo({ top: 0, behavior: "smooth" });
         },
         goToTextObject(philoID) {
             philoID = philoID.split(/[- ]/).join("/");
             if (this.tocOpen) {
                 this.closeTableOfContents();
             }
-            // $location.url(URL.path(philoID)).replace(); // deleting current page history and replace with new page
             this.$router.push({ path: `/navigate/${philoID}` });
             EventBus.$emit("navChange");
         },
@@ -619,6 +634,32 @@ export default {
                 prevButton.classList.remove("disabled");
             }
         },
+        handleScroll(evt, el) {
+            if (!this.navBarVisible) {
+                if (window.scrollY > this.navButtonPosition) {
+                    this.navBarVisible = true;
+                    let topBar = document.querySelector("#toc-top-bar");
+                    topBar.style.top = 0;
+                    topBar.classList.add("visible");
+                    let navButtons = document.querySelector("#nav-buttons");
+                    navButtons.style.top = 0;
+                    navButtons.classList.add("fixed");
+                    let backToTop = document.querySelector("#back-to-top");
+                    backToTop.classList.add("visible");
+                    console.log("passed buttons");
+                }
+            } else if (window.scrollY < this.navButtonPosition) {
+                this.navBarVisible = false;
+                let topBar = document.querySelector("#toc-top-bar");
+                topBar.style.top = "initial";
+                topBar.classList.remove("visible");
+                let navButtons = document.querySelector("#nav-buttons");
+                navButtons.style.top = "initial";
+                navButtons.classList.remove("fixed");
+                let backToTop = document.querySelector("#back-to-top");
+                backToTop.classList.remove("visible");
+            }
+        },
         dicoLookup(event, year) {
             var philoId = this.$route.params.pathInfo.split("/").join(" ");
             dictionaryLookup.evaluate(event, year);
@@ -642,10 +683,39 @@ export default {
     z-index: 101;
     background: #fff;
 }
-#toc-top-bar {
-    opacity: 0.95;
+#toc-wrapper {
     position: relative;
     z-index: 100;
+}
+#toc-top-bar {
+    height: 31px;
+    background: #d8d8d8;
+    opacity: 0;
+    transition: opacity 0.25s;
+    width: 100%;
+    pointer-events: none;
+}
+#toc-top-bar::before {
+    filter: blur(20px);
+}
+#toc-top-bar.visible {
+    opacity: 0.95;
+    position: fixed;
+}
+#nav-buttons.fixed {
+    position: fixed;
+    opacity: 0.95;
+}
+#back-to-top {
+    position: absolute;
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+}
+#back-to-top.visible {
+    pointer-events: initial;
+    opacity: 0.95;
 }
 
 #nav-buttons {

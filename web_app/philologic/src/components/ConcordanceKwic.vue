@@ -77,7 +77,8 @@ export default {
             "formData.results_per_page",
             "formData.first_kwic_sorting_option",
             "formData.second_kwic_sorting_option",
-            "formData.third_kwic_sorting_option"
+            "formData.third_kwic_sorting_option",
+            "resultsLength"
         ])
     },
     data() {
@@ -86,7 +87,6 @@ export default {
             showFacetedBrowsing: false,
             authorized: true,
             hits: 0,
-            resultsLength: 0,
             start: 0,
             end: 0,
             resultsPerPage: 0,
@@ -103,43 +103,67 @@ export default {
         };
     },
     created() {
+        this.resultsLength = this.results.results_length;
         this.hits = this.buildDescription();
+        this.updateTotalResults();
         var vm = this;
         EventBus.$on("urlUpdate", function() {
-            vm.buildDescription();
+            vm.hits = vm.buildDescription();
         });
     },
     methods: {
         buildDescription() {
-            let resultsLength = this.results.results_length;
             let start = this.results.description.start;
             let end = this.results.description.end;
             let resultsPerPage = this.results.description.results_per_page;
             var description;
             if (
-                resultsLength &&
+                this.resultsLength &&
                 end <= resultsPerPage &&
-                end <= resultsLength
+                end <= this.resultsLength
             ) {
                 description =
-                    "Hits " + start + " - " + end + " of " + resultsLength;
-            } else if (resultsLength) {
-                if (resultsPerPage > resultsLength) {
+                    "Hits " + start + " - " + end + " of " + this.resultsLength;
+            } else if (this.resultsLength) {
+                if (resultsPerPage > this.resultsLength) {
                     description =
                         "Hits " +
                         start +
                         " - " +
-                        resultsLength +
+                        this.resultsLength +
                         " of " +
-                        resultsLength;
+                        this.resultsLength;
                 } else {
                     description =
-                        "Hits " + start + " - " + end + " of " + resultsLength;
+                        "Hits " +
+                        start +
+                        " - " +
+                        end +
+                        " of " +
+                        this.resultsLength;
                 }
             } else {
                 description = "No results for your query.";
             }
             return description;
+        },
+        updateTotalResults() {
+            var vm = this;
+            this.$http
+                .get(
+                    "http://anomander.uchicago.edu/philologic/test/scripts/get_total_results.py",
+                    {
+                        params: this.paramsFilter(this.$store.state.formData)
+                    }
+                )
+                .then(function(response) {
+                    vm.resultsLength = response.data;
+                    vm.hits = vm.buildDescription();
+                    EventBus.$emit("totalResultsDone");
+                })
+                .catch(function(error) {
+                    console.log(error);
+                });
         },
         switchReport(reportName) {
             this.report = reportName;

@@ -32,10 +32,10 @@
                                     >
                                         <span v-if="citation.href">
                                             <span v-html="citation.prefix"></span>
-                                            <a
-                                                :href="citation.href"
+                                            <router-link
+                                                :to="'/' + citation.href"
                                                 :style="citation.style"
-                                            >{{ citation.label }}</a>
+                                            >{{ citation.label }}</router-link>
                                             <span v-html="citation.suffix"></span>
                                             <span
                                                 class="separator"

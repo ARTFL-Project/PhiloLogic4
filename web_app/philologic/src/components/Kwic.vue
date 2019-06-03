@@ -36,8 +36,8 @@
                             :key="kwicIndex"
                         >
                             <span v-html="initializePos(kwicIndex)"></span>
-                            <a
-                                :href="result.citation_links.div1"
+                            <router-link
+                                :to="'/' + result.citation_links.div1"
                                 class="kwic_biblio"
                                 @mouseover="showFullBiblio()"
                                 @mouseleave="hideFullBiblio()"
@@ -47,7 +47,7 @@
                                     style="display:none;"
                                 >{{ result.fullBiblio }}</span>
                                 <span class="short_biblio" v-html="result.shortBiblio"></span>
-                            </a>
+                            </router-link>
                             <span v-html="result.context"></span>
                         </div>
                     </div>

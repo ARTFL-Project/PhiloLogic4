@@ -15,6 +15,7 @@ export const EventBus = new Vue() // To pass messages between components
 Vue.mixin({
     methods: {
         paramsFilter: function(formValues) {
+            console.log(formValues)
             let localFormData = {}
             for (const field in formValues) {
                 let value = formValues[field]
@@ -43,6 +44,7 @@ Vue.mixin({
                     localFormData[field] = value
                 }
             }
+            console.log(localFormData)
             return localFormData
         },
         paramsToRoute: function(formValues) {
@@ -143,6 +145,17 @@ Vue.mixin({
                 window.open(link);
             }
         }
+    }
+})
+
+Vue.directive('scroll', {
+    inserted: function(el, binding) {
+        let f = function(evt) {
+            if (binding.value(evt, el)) {
+                window.removeEventListener('scroll', f)
+            }
+        }
+        window.addEventListener('scroll', f)
     }
 })
 

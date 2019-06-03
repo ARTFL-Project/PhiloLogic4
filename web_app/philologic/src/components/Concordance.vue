@@ -21,10 +21,10 @@
                                     >
                                         <span v-if="citation.href">
                                             <span v-html="citation.prefix"></span>
-                                            <a
-                                                :href="citation.href"
+                                            <router-link
+                                                :to="'/' + citation.href"
                                                 :style="citation.style"
-                                            >{{ citation.label }}</a>
+                                            >{{ citation.label }}</router-link>
                                             <span v-html="citation.suffix"></span>
                                             <span
                                                 class="separator"
@@ -70,6 +70,7 @@
                 <facets></facets>
             </b-col>
         </b-row>
+        <pages v-if="resultsLength > 0"></pages>
     </div>
 </template>
 
@@ -77,16 +78,18 @@
 import { mapFields } from "vuex-map-fields";
 import conckwic from "./ConcordanceKwic";
 import facets from "./Facets";
+import pages from "./Pages";
 import { EventBus } from "../main.js";
 
 export default {
     name: "concordance",
     components: {
         conckwic,
-        facets
+        facets,
+        pages
     },
     computed: {
-        ...mapFields(["formData.report"])
+        ...mapFields(["formData.report", "resultsLength"])
     },
     data() {
         return {
