@@ -66,28 +66,26 @@
             </span>
             <b v-if="queryArgs.biblio.length === 0">None</b>
         </div>
-        <div v-if="queryArgs.report === 'time_series'">
-            {{ timeSeries.resultsLength || '...' }} occurrences of the term(s) between
+        <div v-if="report === 'time_series'">
+            {{ resultsLength || '...' }} occurrences of the term(s) between
             <span
                 class="biblio-criteria"
             >
-                <b>{{ startDate }}</b>
-                <span
-                    class="glyphicon glyphicon-remove-circle"
-                    @click="removeMetadata('start_date', restart)"
-                ></span>
+                <span class="metadata-args rounded-pill">
+                    <span class="remove-metadata" @click="removeMetadata('start_date', restart)">X</span>
+                    <span class="metadata-value">{{ start_date }}</span>
+                </span>
             </span>&nbsp; and
             <span class="biblio-criteria">
-                <b>{{ endDate }}</b>
-                <span
-                    class="glyphicon glyphicon-remove-circle"
-                    @click="removeMetadata('end_date', restart)"
-                ></span>
+                <span class="metadata-args rounded-pill">
+                    <span class="remove-metadata" @click="removeMetadata('end_date', restart)">X</span>
+                    <span class="metadata-value">{{ end_date }}</span>
+                </span>
             </span>
         </div>
         <div
             style="margin-top: 10px;"
-            v-if="queryArgs.report === 'collocation'"
+            v-if="report === 'collocation'"
         >Displaying the top 100 collocates for {{ resultsLength || '...' }} occurrences</div>
     </div>
 </template>
@@ -108,9 +106,12 @@ export default {
             "formData.end",
             "formData.approximate",
             "formData.approximate_ratio",
-            "formData.metadataFields"
+            "formData.metadataFields",
+            "formData.start_date",
+            "formData.end_date"
         ])
     },
+    props: ["resultsLength"],
     data() {
         return {
             philoConfig: this.$philoConfig,

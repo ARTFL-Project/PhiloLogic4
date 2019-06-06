@@ -9,7 +9,7 @@
                         id="export-results"
                         data-target="#export-dialog"
                     >Export results</b-button>
-                    <search-arguments></search-arguments>
+                    <search-arguments :results-length="resultsLength"></search-arguments>
                 </div>
                 <!-- <progress-bar
                             progress="{{ percent }}"
