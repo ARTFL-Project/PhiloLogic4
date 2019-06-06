@@ -49,8 +49,6 @@ export default {
     computed: {
         ...mapFields({
             report: "formData.report",
-            startDate: "formData.start_date",
-            endDate: "formData.end_date",
             interval: "formData.year_interval"
         })
     },
@@ -68,7 +66,9 @@ export default {
             moreResults: false,
             percent: 0,
             done: false,
-            authorized: true
+            authorized: true,
+            startDate: "",
+            endDate: ""
         };
     },
     created() {
@@ -97,17 +97,17 @@ export default {
                     // if no dates supplied or if invalid dates
                     this.startDate = parseInt(response.data.start_date);
                     this.endDate = parseInt(response.data.end_date);
+                    this.$store.dispatch("updateStartEndDate", {
+                        startDate: this.startDate,
+                        endDate: this.endDate
+                    });
                     this.interval = parseInt(this.interval);
                     this.totalResults = response.data.total_results;
                     // Store the current query as a local and global variable in order to make sure they are equal later on...
-                    this.startDate = 1719;
-                    this.endDate = 1890;
-                    console.log(this.startDate, this.$store.state.formData);
-                    this.globalQuery = {
-                        ...this.$store.state.formData,
-                        start_date: this.startDate,
-                        end_date: this.endDate
-                    };
+                    console.log(this.$store.state.formData);
+                    this.globalQuery = this.copyObject(
+                        this.$store.state.formData
+                    );
                     this.localQuery = this.copyObject(this.globalQuery);
 
                     var dateList = [];

@@ -77,7 +77,7 @@ export default new Vuex.Store({
             Vue.set(state.formData, 'method', payload)
         },
         replaceStore(state, payload) {
-            state.formData = payload
+            // state.formData = payload
             Vue.set(state, 'formData', payload)
         },
         updateMetadata(state, payload) {
@@ -86,11 +86,22 @@ export default new Vuex.Store({
                 ...payload
             }
         },
+
         removeMetadata(state, payload) {
             state.formData.metadataFields[payload] = ''
         },
         updateCitation(state, payload) {
             Vue.set(state, 'textNavigationCitation', payload)
         }
+    },
+    actions: {
+        updateStartEndDate(context, payload) {
+            context.commit("replaceStore", {
+                ...context.state.formData,
+                start_date: payload.startDate,
+                end_date: payload.endDate
+            })
+            console.log("UP", context.state.formData)
+        },
     }
 })
