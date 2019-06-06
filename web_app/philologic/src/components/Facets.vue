@@ -152,12 +152,11 @@ export default {
     },
     created() {
         this.facets = this.populateFacets();
-        var vm = this;
-        EventBus.$on("urlUpdate", function() {
-            vm.facetResults = [];
-            vm.fullResults = {};
-            vm.showFacetSelection = true;
-            vm.showFacetResults = false;
+        EventBus.$on("urlUpdate", () => {
+            this.facetResults = [];
+            this.fullResults = {};
+            this.showFacetSelection = true;
+            this.showFacetResults = false;
         });
     },
     methods: {
@@ -217,80 +216,78 @@ export default {
                 } else if (facetObj.type === "collocationFacet") {
                     queryParams.report = "collocation";
                 }
-                var vm = this;
-                this.populateSidebar(vm, facetObj, fullResults, 0, queryParams);
+                this.populateSidebar(facetObj, fullResults, 0, queryParams);
             }
         },
-        populateSidebar(vm, facet, fullResults, start, queryParams) {
-            if (vm.moreResults) {
+        populateSidebar(facet, fullResults, start, queryParams) {
+            if (this.moreResults) {
                 if (facet.type !== "collocationFacet") {
-                    var promise = vm.$http.get(
+                    var promise = this.$http.get(
                         "http://anomander.uchicago.edu/philologic/test/scripts/get_frequency.py",
                         {
-                            params: vm.paramsFilter(queryParams)
+                            params: this.paramsFilter(queryParams)
                         }
                     );
                 } else {
-                    var promise = vm.$http.get(
+                    var promise = this.$http.get(
                         "http://anomander.uchicago.edu/philologic/test/reports/collocation.py",
                         {
-                            params: vm.paramsFilter(queryParams)
+                            params: this.paramsFilter(queryParams)
                         }
                     );
                 }
-                vm.showFacetSelection = false;
+                this.showFacetSelection = false;
                 promise
                     .then(response => {
                         var results = response.data.results;
-                        vm.moreResults = response.data.more_results;
-                        vm.resultsLength = response.data.results_length;
-                        if (!vm.interrupt && vm.selected == facet.alias) {
+                        this.moreResults = response.data.more_results;
+                        this.resultsLength = response.data.results_length;
+                        if (!this.interrupt && this.selected == facet.alias) {
                             if (facet.type === "collocationFacet") {
-                                var merge = vm.mergeResults(
+                                var merge = this.mergeResults(
                                     fullResults.unsorted,
                                     response.data.collocates
                                 );
                             } else {
-                                var merge = vm.mergeResults(
+                                var merge = this.mergeResults(
                                     fullResults.unsorted,
                                     results
                                 );
                             }
-                            vm.facetResults = merge.sorted.slice(0, 500);
-                            vm.loading = false;
-                            vm.showFacetResults = true;
+                            this.facetResults = merge.sorted.slice(0, 500);
+                            this.loading = false;
+                            this.showFacetResults = true;
                             fullResults = merge;
-                            if (response.data.hits_done < vm.resultsLength) {
-                                vm.percentComplete =
+                            if (response.data.hits_done < this.resultsLength) {
+                                this.percentComplete =
                                     (response.data.hits_done /
-                                        vm.resultsLength) *
+                                        this.resultsLength) *
                                     100;
-                                vm.percent = Math.floor(vm.percentComplete);
+                                this.percent = Math.floor(this.percentComplete);
                             }
                             start = response.data.hits_done;
-                            vm.populateSidebar(
-                                vm,
+                            this.populateSidebar(
                                 facet,
                                 fullResults,
                                 start,
                                 queryParams
                             );
                         } else {
-                            // vm won't affect the full collocation report which can't be interrupted when on the page
-                            vm.interrupt = false;
+                            // this won't affect the full collocation report which can't be interrupted when on the page
+                            this.interrupt = false;
                         }
                     })
                     .catch(response => {
-                        vm.loading = false;
+                        this.loading = false;
                     });
             } else {
-                vm.percent = 100;
-                vm.fullResults = fullResults;
-                let urlString = vm.paramsToUrlString({
+                this.percent = 100;
+                this.fullResults = fullResults;
+                let urlString = this.paramsToUrlString({
                     ...queryParams,
-                    frequency_field: vm.selectedFacet.alias
+                    frequency_field: this.selectedFacet.alias
                 });
-                vm.saveToLocalStorage(urlString, fullResults);
+                this.saveToLocalStorage(urlString, fullResults);
             }
         },
         roundToTwo(num) {

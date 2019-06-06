@@ -101,10 +101,9 @@ export default {
     created() {
         this.report = "concordance";
         this.fetchResults();
-        var vm = this;
-        EventBus.$on("urlUpdate", function() {
-            if (vm.report == "concordance") {
-                vm.fetchResults();
+        EventBus.$on("urlUpdate", () => {
+            if (this.report == "concordance") {
+                this.fetchResults();
             }
         });
     },

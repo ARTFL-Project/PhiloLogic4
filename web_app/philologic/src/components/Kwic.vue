@@ -57,6 +57,7 @@
                 <facets></facets>
             </b-col>
         </b-row>
+        <pages></pages>
     </div>
 </template>
 
@@ -64,13 +65,15 @@
 import { mapFields } from "vuex-map-fields";
 import conckwic from "./ConcordanceKwic";
 import facets from "./Facets";
+import pages from "./Pages";
 import { EventBus } from "../main.js";
 
 export default {
     name: "kwic",
     components: {
         conckwic,
-        facets
+        facets,
+        pages
     },
     computed: {
         // When using nested data structures, the string

@@ -148,10 +148,9 @@ export default {
         this.report = "collocation";
         this.filter_frequency = 100;
         this.fetchResults();
-        var vm = this;
-        EventBus.$on("urlUpdate", function() {
-            if (vm.report == "collocation") {
-                vm.fetchResults();
+        EventBus.$on("urlUpdate", () => {
+            if (this.report == "collocation") {
+                this.fetchResults();
             }
         });
     },
@@ -162,67 +161,70 @@ export default {
             //     duration: 200
             // });
             // angular.element(".progress").show();
+            this.localFormData = this.copyObject(this.$store.state.formData);
             this.loading = false;
             var collocObject = {};
-            var vm = this;
-            this.updateCollocation(vm, collocObject, 0);
+            this.updateCollocation(collocObject, 0);
             // } else {
             //     this.retrieveFromStorage();
             // }
         },
-        updateCollocation(vm, fullResults, start) {
-            let params = { ...this.$store.state.formData, start: start };
-            vm.$http
+        updateCollocation(fullResults, start) {
+            let params = {
+                ...this.$store.state.formData,
+                start: start.toString()
+            };
+            this.$http
                 .get(
                     "http://anomander.uchicago.edu/philologic/test/reports/collocation.py",
                     { params: this.paramsFilter(params) }
                 )
-                .then(function(response) {
+                .then(response => {
                     var data = response.data;
-                    vm.resultsLength = data.results_length;
-                    vm.moreResults = data.more_results;
+                    this.resultsLength = data.results_length;
+                    this.moreResults = data.more_results;
                     start = data.hits_done;
-                    vm.sortAndRenderCollocation(vm, fullResults, data, start);
+                    this.sortAndRenderCollocation(fullResults, data, start);
                 })
-                .catch(function(response) {
-                    vm.loading = false;
+                .catch(response => {
+                    this.loading = false;
                     console.log(response);
                 });
         },
-        sortAndRenderCollocation(vm, fullResults, data, start) {
-            if (start <= vm.resultsLength) {
-                vm.percent = Math.floor((start / vm.resultsLength) * 100);
+        sortAndRenderCollocation(fullResults, data, start) {
+            if (start <= this.resultsLength) {
+                this.percent = Math.floor((start / this.resultsLength) * 100);
             }
             if (
                 typeof fullResults === "undefined" ||
                 Object.keys(fullResults).length === 0
             ) {
                 fullResults = {};
-                vm.filterList = data.filter_list;
+                this.filterList = data.filter_list;
             }
-            var collocates = vm.mergeResults(fullResults, data["collocates"]);
+            var collocates = this.mergeResults(fullResults, data["collocates"]);
             let sortedList = [];
             for (let word of collocates.sorted.slice(0, 100)) {
                 sortedList.push({ collocate: word.label, count: word.count });
             }
-            vm.sortedList = sortedList;
-            vm.buildWordCloud(vm);
-            vm.loading = false;
-            if (vm.moreResults) {
+            this.sortedList = sortedList;
+            this.buildWordCloud();
+            this.loading = false;
+            if (this.moreResults) {
                 var tempFullResults = collocates.unsorted;
-                var runningQuery = $location.search();
+                var runningQuery = this.$store.state.formData;
                 if (
-                    vm.report === "collocation" &&
-                    vm.deepEqual(runningQuery, vm.localFormData)
+                    this.report === "collocation" &&
+                    this.deepEqual(runningQuery, this.localFormData)
                 ) {
                     // make sure we're still running the same query
-                    vm.updateCollocation(vm, tempFullResults, start);
+                    this.updateCollocation(tempFullResults, start);
                 }
             } else {
-                vm.percent = 100;
-                vm.done = true;
+                this.percent = 100;
+                this.done = true;
                 // Collocation cloud not showing when loading cached searches one after the other
-                //saveToLocalStorage({results: vm.sortedList, resultsLength: vm.resultsLength, filterList: vm.filterList});
+                //saveToLocalStorage({results: this.sortedList, resultsLength: this.resultsLength, filterList: this.filterList});
             }
         },
         retrieveFromStorage() {
@@ -248,9 +250,9 @@ export default {
                 })
             );
         },
-        buildWordCloud(vm) {
-            let lowestValue = vm.sortedList[vm.sortedList.length - 1].count;
-            let higestValue = vm.sortedList[0].count;
+        buildWordCloud() {
+            let lowestValue = this.sortedList[this.sortedList.length - 1].count;
+            let higestValue = this.sortedList[0].count;
             let diff = higestValue - lowestValue;
             let coeff = diff / 20;
 
@@ -262,19 +264,19 @@ export default {
             };
 
             let weightedWordList = [];
-            for (let wordObject of vm.sortedList) {
+            for (let wordObject of this.sortedList) {
                 let adjustedWeight = adjustWeight(wordObject.count);
                 // console.log(adjustedWeight);
                 weightedWordList.push({
                     collocate: wordObject.collocate,
                     weight: 1 + adjustedWeight / 10,
-                    color: vm.colorCodes[adjustedWeight]
+                    color: this.colorCodes[adjustedWeight]
                 });
             }
             weightedWordList.sort(function(a, b) {
                 return a.collocate.localeCompare(b.collocate);
             });
-            vm.collocCloudWords = weightedWordList;
+            this.collocCloudWords = weightedWordList;
         },
         getWordCloudStyle(word) {
             // console.log(word.color, word.word);

@@ -68,6 +68,7 @@
                 <facets></facets>
             </b-col>
         </b-row>
+        <pages></pages>
     </div>
     <!-- <ol
         id="bibliographic-results"
@@ -126,12 +127,14 @@ import { mapFields } from "vuex-map-fields";
 import { EventBus } from "../main.js";
 import conckwic from "./ConcordanceKwic";
 import facets from "./Facets";
+import pages from "./Pages";
 
 export default {
     name: "bibliography",
     components: {
         conckwic,
-        facets
+        facets,
+        pages
     },
     computed: {
         ...mapFields([

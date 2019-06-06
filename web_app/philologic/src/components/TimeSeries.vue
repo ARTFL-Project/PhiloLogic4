@@ -74,6 +74,10 @@ export default {
     created() {
         this.report = "time_series";
         this.fetchResults();
+        console.log(this.startDate);
+        EventBus.$on("urlUpdate", () => {
+            this.fetchResults();
+        });
     },
     methods: {
         fetchResults() {
@@ -82,35 +86,36 @@ export default {
             }
             this.resultsLength = 0;
             this.frequencyType = "absolute_time";
-            var vm = this;
             this.$http
                 .get(
                     "http://anomander.uchicago.edu/philologic/test/scripts/get_start_end_date.py",
                     {
-                        params: vm.paramsFilter(vm.$store.state.formData)
+                        params: this.paramsFilter(this.$store.state.formData)
                     }
                 )
-                .then(function(response) {
+                .then(response => {
                     // if no dates supplied or if invalid dates
-                    vm.startDate = parseInt(response.data.start_date);
-                    vm.endDate = parseInt(response.data.end_date);
-                    vm.interval = parseInt(vm.interval);
-                    vm.totalResults = response.data.total_results;
-
+                    this.startDate = parseInt(response.data.start_date);
+                    this.endDate = parseInt(response.data.end_date);
+                    this.interval = parseInt(this.interval);
+                    this.totalResults = response.data.total_results;
                     // Store the current query as a local and global variable in order to make sure they are equal later on...
-                    vm.globalQuery = {
-                        ...vm.$store.state.formData,
-                        start_date: vm.startDate,
-                        end_date: vm.endDate
+                    this.startDate = 1719;
+                    this.endDate = 1890;
+                    console.log(this.startDate, this.$store.state.formData);
+                    this.globalQuery = {
+                        ...this.$store.state.formData,
+                        start_date: this.startDate,
+                        end_date: this.endDate
                     };
-                    vm.localQuery = vm.copyObject(vm.globalQuery);
+                    this.localQuery = this.copyObject(this.globalQuery);
 
                     var dateList = [];
                     var zeros = [];
                     for (
-                        let i = vm.startDate;
-                        i <= vm.endDate;
-                        i += vm.interval
+                        let i = this.startDate;
+                        i <= this.endDate;
+                        i += this.interval
                     ) {
                         dateList.push(i);
                         zeros.push(0);
@@ -121,8 +126,8 @@ export default {
                     Chart.defaults.global.tooltipCornerRadius = 0;
                     Chart.defaults.global.maintainAspectRatio = false;
                     Chart.defaults.bar.scales.xAxes[0].gridLines.display = false;
-                    if (vm.myBarChart != null) {
-                        vm.myBarChart.destroy();
+                    if (this.myBarChart != null) {
+                        this.myBarChart.destroy();
                     }
                     var chart = document.querySelector("#bar");
                     // var font = chart.css("font-family");
@@ -130,6 +135,7 @@ export default {
                     // var backgroundColor = angular
                     //     .element(".btn-primary")
                     //     .css("background-color");
+                    var vm = this;
                     vm.myBarChart = new Chart(chart, {
                         type: "bar",
                         data: {
@@ -222,7 +228,9 @@ export default {
                             } else {
                                 year = `${startDate}-${endDate}`;
                             }
-                            vm.$store.commit("updateMetadata", { year: year });
+                            vm.$store.commit("updateMetadata", {
+                                year: year
+                            });
                             vm.$router.push(
                                 vm.paramsToRoute({
                                     ...vm.$store.state.formData,
@@ -235,56 +243,55 @@ export default {
                         }
                     };
 
-                    vm.absoluteCounts = vm.copyObject(zeros);
-                    vm.relativeCounts = vm.copyObject(zeros);
-                    vm.dateCounts = {};
+                    this.absoluteCounts = this.copyObject(zeros);
+                    this.relativeCounts = this.copyObject(zeros);
+                    this.dateCounts = {};
                     var fullResults;
-                    vm.updateTimeSeries(vm, fullResults);
+                    this.updateTimeSeries(fullResults);
                 })
                 .catch(function(response) {
                     console.log(response);
                 });
         },
-        updateTimeSeries(vm, fullResults) {
-            vm.$http
+        updateTimeSeries(fullResults) {
+            this.$http
                 .get(
                     "http://anomander.uchicago.edu/philologic/test/reports/time_series.py",
                     {
                         params: {
-                            ...vm.paramsFilter(vm.$store.state.formData),
-                            start_date: vm.startDate,
+                            ...this.paramsFilter(this.$store.state.formData),
+                            start_date: this.startDate,
                             max_time: 5,
-                            year_interval: vm.interval
+                            year_interval: this.interval
                         }
                     }
                 )
-                .then(function(results) {
-                    vm.loading = false;
+                .then(results => {
+                    this.loading = false;
                     var timeSeriesResults = results.data;
-                    vm.resultsLength += timeSeriesResults.results_length;
-                    vm.resultsLength = vm.resultsLength;
-                    vm.moreResults = timeSeriesResults.more_results;
-                    vm.startDate = timeSeriesResults.new_start_date;
+                    this.resultsLength += timeSeriesResults.results_length;
+                    this.resultsLength = this.resultsLength;
+                    this.moreResults = timeSeriesResults.more_results;
+                    this.startDate = timeSeriesResults.new_start_date;
                     for (let date in timeSeriesResults.results.date_count) {
                         // Update date counts
-                        vm.dateCounts[date] =
+                        this.dateCounts[date] =
                             timeSeriesResults.results.date_count[date];
                     }
-                    vm.percent = Math.floor(
-                        (vm.resultsLength / vm.totalResults) * 100
+                    this.percent = Math.floor(
+                        (this.resultsLength / this.totalResults) * 100
                     );
-                    vm.sortAndRenderTimeSeries(
-                        vm,
+                    this.sortAndRenderTimeSeries(
                         fullResults,
                         timeSeriesResults
                     );
                 })
-                .catch(function(response) {
+                .catch(response => {
                     console.log(response);
-                    vm.loading = false;
+                    this.loading = false;
                 });
         },
-        sortAndRenderTimeSeries(vm, fullResults, timeSeriesResults) {
+        sortAndRenderTimeSeries(fullResults, timeSeriesResults) {
             var allResults = this.mergeResults(
                 fullResults,
                 timeSeriesResults.results["absolute_count"],
@@ -294,29 +301,29 @@ export default {
             for (let i = 0; i < allResults.sorted.length; i += 1) {
                 var date = allResults.sorted[i].label;
                 var value = allResults.sorted[i].count;
-                vm.absoluteCounts[i] = value;
-                vm.relativeCounts[i] =
-                    Math.round((value / vm.dateCounts[date]) * 10000 * 100) /
+                this.absoluteCounts[i] = value;
+                this.relativeCounts[i] =
+                    Math.round((value / this.dateCounts[date]) * 10000 * 100) /
                     100;
-                if (isNaN(vm.relativeCounts[i])) {
-                    vm.relativeCounts[i] = 0;
+                if (isNaN(this.relativeCounts[i])) {
+                    this.relativeCounts[i] = 0;
                 }
             }
-            vm.myBarChart.data.datasets[0].data = vm.absoluteCounts;
-            vm.myBarChart.update();
+            this.myBarChart.data.datasets[0].data = this.absoluteCounts;
+            this.myBarChart.update();
             // this.$nextTick(function() {
-            //     vm.chartLinker(vm);
+            //     this.chartLinker(this);
             // });
             if (
-                vm.report === "time_series" &&
-                vm.deepEqual(vm.globalQuery, vm.localQuery)
+                this.report === "time_series" &&
+                this.deepEqual(this.globalQuery, this.localQuery)
             ) {
                 // are we running a different query?
-                if (vm.moreResults) {
-                    vm.updateTimeSeries(vm, fullResults);
+                if (this.moreResults) {
+                    this.updateTimeSeries(fullResults);
                 } else {
-                    vm.percent = 100;
-                    vm.done = true;
+                    this.percent = 100;
+                    this.done = true;
                     // angular.element("#relative_time").removeAttr("disabled");
                     // angular
                     //     .element(".progress")

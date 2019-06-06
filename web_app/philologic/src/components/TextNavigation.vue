@@ -272,10 +272,11 @@ export default {
         this.report = "textNavigation";
         this.fetchText();
         this.fetchToC();
-        var vm = this;
-        EventBus.$on("navChange", function() {
-            vm.fetchText();
-            vm.currentPhiloId = vm.$route.params.pathInfo.split("/").join(" ");
+        EventBus.$on("navChange", () => {
+            this.fetchText();
+            this.currentPhiloId = this.$route.params.pathInfo
+                .split("/")
+                .join(" ");
         });
     },
     methods: {
@@ -297,25 +298,24 @@ export default {
                 navigationParams.start_byte = this.start_byte;
                 navigationParams.end_byte = this.end_byte;
             }
-            var vm = this;
-            vm.$http
+            this.$http
                 .get(
                     "http://anomander.uchicago.edu/philologic/test/reports/navigation.py",
                     { params: navigationParams }
                 )
-                .then(function(response) {
-                    vm.textObject = response.data;
+                .then(response => {
+                    this.textObject = response.data;
                     // textNavigationValues.textObject = response.data;
-                    vm.textNavigationCitation = response.data.citation;
-                    vm.navBar = true;
-                    if (vm.byte.length > 0) {
-                        vm.highlight = true;
+                    this.textNavigationCitation = response.data.citation;
+                    this.navBar = true;
+                    if (this.byte.length > 0) {
+                        this.highlight = true;
                     } else {
-                        vm.highlight = false;
+                        this.highlight = false;
                     }
-                    vm.loading = false;
+                    this.loading = false;
 
-                    let hash = vm.$route.hash; // For note link back
+                    let hash = this.$route.hash; // For note link back
                     // if (hash) {
                     //     $timeout(function() {
                     //         angular
@@ -330,26 +330,26 @@ export default {
                     //             });
                     //     });
                     // }
-                    if (vm.byte != "") {
-                        vm.$nextTick(function() {
-                            vm.scrollToHighlight(".highlight");
+                    if (this.byte != "") {
+                        this.$nextTick(function() {
+                            this.scrollToHighlight(".highlight");
                         });
                     }
-                    if (vm.start_byte != "") {
-                        vm.$nextTick(function() {
-                            vm.scrollToHighlight(".start-highlight");
+                    if (this.start_byte != "") {
+                        this.$nextTick(function() {
+                            this.scrollToHighlight(".start-highlight");
                         });
                     }
 
-                    if (!vm.deepEqual(response.data.imgs, {})) {
-                        vm.insertPageLinks(vm, response.data.imgs);
-                        vm.insertInlineImgs(vm, response.data.imgs);
+                    if (!this.deepEqual(response.data.imgs, {})) {
+                        this.insertPageLinks(response.data.imgs);
+                        this.insertInlineImgs(response.data.imgs);
                     }
-                    vm.setUpNavBar();
+                    this.setUpNavBar();
                 })
-                .catch(function(response) {
+                .catch(response => {
                     console.log(response);
-                    vm.loading = false;
+                    this.loading = false;
                 });
         },
         scrollToHighlight(elementClass) {
@@ -361,31 +361,31 @@ export default {
                 behavior: "smooth"
             });
         },
-        insertPageLinks(vm, imgObj) {
+        insertPageLinks(imgObj) {
             let currentObjImgs = imgObj.current_obj_img;
             let allImgs = imgObj.all_imgs;
-            vm.beforeObjImgs = [];
-            vm.afterObjImgs = [];
+            this.beforeObjImgs = [];
+            this.afterObjImgs = [];
             if (currentObjImgs.length > 0) {
                 let beforeIndex = 0;
                 for (let i = 0; i < allImgs.length; i++) {
                     let img = allImgs[i];
                     if (currentObjImgs.indexOf(img[0]) === -1) {
                         if (img.length == 2) {
-                            vm.beforeObjImgs.push([
-                                vm.philoConfig.page_images_url_root +
+                            this.beforeObjImgs.push([
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[0],
-                                vm.philoConfig.page_images_url_root +
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[1]
                             ]);
                         } else {
-                            vm.beforeObjImgs.push([
-                                vm.philoConfig.page_images_url_root +
+                            this.beforeObjImgs.push([
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[0],
-                                vm.philoConfig.page_images_url_root +
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[0]
                             ]);
@@ -399,20 +399,20 @@ export default {
                     let img = allImgs[i];
                     if (currentObjImgs.indexOf(img[0]) === -1) {
                         if (img.length == 2) {
-                            vm.afterObjImgs.push([
-                                vm.philoConfig.page_images_url_root +
+                            this.afterObjImgs.push([
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[0],
-                                vm.philoConfig.page_images_url_root +
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[1]
                             ]);
                         } else {
-                            vm.afterObjImgs.push([
-                                vm.philoConfig.page_images_url_root +
+                            this.afterObjImgs.push([
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[0],
-                                vm.philoConfig.page_images_url_root +
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[0]
                             ]);
@@ -421,31 +421,31 @@ export default {
                 }
             }
         },
-        insertInlineImgs(vm, imgObj) {
+        insertInlineImgs(imgObj) {
             var currentObjImgs = imgObj.current_graphic_img;
             var allImgs = imgObj.graphics;
-            vm.beforeGraphicsImgs = [];
-            vm.afterGraphicsImgs = [];
+            this.beforeGraphicsImgs = [];
+            this.afterGraphicsImgs = [];
             if (currentObjImgs.length > 0) {
                 var beforeIndex = 0;
                 for (var i = 0; i < allImgs.length; i++) {
                     var img = allImgs[i];
                     if (currentObjImgs.indexOf(img[0]) === -1) {
                         if (img.length == 2) {
-                            vm.beforeGraphicsImgs.push([
-                                vm.philoConfig.page_images_url_root +
+                            this.beforeGraphicsImgs.push([
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[0],
-                                vm.philoConfig.page_images_url_root +
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[1]
                             ]);
                         } else {
-                            vm.beforeGraphicsImgs.push([
-                                vm.philoConfig.page_images_url_root +
+                            this.beforeGraphicsImgs.push([
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[0],
-                                vm.philoConfig.page_images_url_root +
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[0]
                             ]);
@@ -459,20 +459,20 @@ export default {
                     var img = allImgs[i];
                     if (currentObjImgs.indexOf(img[0]) === -1) {
                         if (img.length == 2) {
-                            vm.afterGraphicsImgs.push([
-                                vm.philoConfig.page_images_url_root +
+                            this.afterGraphicsImgs.push([
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[0],
-                                vm.philoConfig.page_images_url_root +
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[1]
                             ]);
                         } else {
-                            vm.afterGraphicsImgs.push([
-                                vm.philoConfig.page_images_url_root +
+                            this.afterGraphicsImgs.push([
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[0],
-                                vm.philoConfig.page_images_url_root +
+                                this.philoConfig.page_images_url_root +
                                     "/" +
                                     img[0]
                             ]);
@@ -486,7 +486,6 @@ export default {
             var philoId = this.$route.params.pathInfo.split("/").join(" ");
             let docId = philoId.split(" ")[0];
             this.currentPhiloId = philoId;
-            var vm = this;
             if (docId !== this.tocElements.docId) {
                 this.$http
                     .get(
@@ -497,27 +496,30 @@ export default {
                             }
                         }
                     )
-                    .then(function(response) {
+                    .then(response => {
                         let tocElements = response.data.toc;
-                        vm.start = response.data.current_obj_position - 100;
-                        if (vm.start < 0) {
-                            vm.start = 0;
+                        this.start = response.data.current_obj_position - 100;
+                        if (this.start < 0) {
+                            this.start = 0;
                         }
-                        vm.end = response.data.current_obj_position + 100;
+                        this.end = response.data.current_obj_position + 100;
 
-                        vm.tocElements = {
+                        this.tocElements = {
                             docId: philoId.split(" ")[0],
                             elements: tocElements,
-                            start: vm.start,
-                            end: vm.end
+                            start: this.start,
+                            end: this.end
                         };
-                        vm.$nextTick(function() {
+                        this.$nextTick(function() {
                             let tocButton = document.querySelector("#show-toc");
                             tocButton.removeAttribute("disabled");
                             tocButton.classList.remove("disabled");
-                            vm.navButtonPosition = tocButton.getBoundingClientRect().top;
-                            console.log(vm.navButtonPosition);
+                            this.navButtonPosition = tocButton.getBoundingClientRect().top;
+                            console.log(this.navButtonPosition);
                         });
+                    })
+                    .catch(error => {
+                        console.log(error);
                     });
             } else {
                 this.start = this.tocElements.start;

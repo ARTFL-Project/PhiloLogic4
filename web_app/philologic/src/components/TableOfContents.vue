@@ -119,37 +119,36 @@ export default {
     methods: {
         fetchToC() {
             this.loading = true;
-            var vm = this;
             this.$http
                 .get(
                     "http://anomander.uchicago.edu/philologic/test/reports/table_of_contents.py",
-                    { params: { philo_id: vm.$route.params.pathInfo } }
+                    { params: { philo_id: this.$route.params.pathInfo } }
                 )
-                .then(function(response) {
-                    vm.loading = false;
-                    vm.tocObject = response.data;
-                    vm.textNavigationCitation = response.data.citation;
+                .then(response => {
+                    this.loading = false;
+                    this.tocObject = response.data;
+                    this.textNavigationCitation = response.data.citation;
                 })
-                .catch(function(response) {
-                    vm.loading = false;
+                .catch(response => {
+                    this.loading = false;
                     console.log(response);
                 });
 
-            vm.headerButton = "Show Header";
-            vm.teiHeader = false;
+            this.headerButton = "Show Header";
+            this.teiHeader = false;
         },
         showHeader() {
-            if (angular.isString(vm.teiHeader)) {
-                vm.teiHeader = false;
-                vm.headerButton = "Show Header";
+            if (angular.isString(this.teiHeader)) {
+                this.teiHeader = false;
+                this.headerButton = "Show Header";
             } else {
                 var UrlString = {
                     script: "get_header.py",
-                    philo_id: vm.philoID
+                    philo_id: this.philoID
                 };
                 request.script(UrlString).then(function(response) {
-                    vm.teiHeader = response.data;
-                    vm.headerButton = "Hide Header";
+                    this.teiHeader = response.data;
+                    this.headerButton = "Hide Header";
                 });
             }
         },
