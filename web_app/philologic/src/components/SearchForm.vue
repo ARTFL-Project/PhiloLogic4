@@ -3,7 +3,7 @@
         <b-row>
             <b-col sm="10" offset-sm="1" xl="8" offset-xl="2">
                 <b-card no-body class="shadow">
-                    <b-form @submit="onSubmit" @reset="onReset">
+                    <b-form @submit="onSubmit" @reset="onReset" @keyup.enter="onSubmit()">
                         <div id="form_body">
                             <div id="initial-form">
                                 <b-button-group id="report" style="width: 100%">
@@ -18,12 +18,36 @@
                                 <div id="search_terms_container" class="p-2 pt-4">
                                     <b-row id="search_terms">
                                         <b-col cols="12" md="8">
-                                            <b-input-group prepend="Search Terms">
+                                            <b-input-group id="q-group" prepend="Search Terms">
                                                 <b-input-group-prepend>
                                                     <b-button variant="outline-info">Tips</b-button>
                                                 </b-input-group-prepend>
 
-                                                <b-form-input type="text" v-model="q"></b-form-input>
+                                                <b-form-input
+                                                    autocomplete="off"
+                                                    type="text"
+                                                    v-model="q"
+                                                    @input="onChange('q')"
+                                                    @keyup.down.native="onArrowDown('q')"
+                                                    @keyup.up.native="onArrowUp('q')"
+                                                    @keyup.enter.native="onEnter('q')"
+                                                ></b-form-input>
+                                                <ul
+                                                    id="autocomplete-q"
+                                                    class="autocomplete-results shadow"
+                                                    :style="autoCompletePosition('q')"
+                                                    v-if="autoCompleteResults.q.length > 0"
+                                                >
+                                                    <li
+                                                        tabindex="-1"
+                                                        v-for="(result, i) in autoCompleteResults.q"
+                                                        :key="result"
+                                                        @click="setResult(result, 'q')"
+                                                        class="autocomplete-result"
+                                                        :class="{ 'is-active': i === arrowCounters.q+1 }"
+                                                        v-html="result"
+                                                    ></li>
+                                                </ul>
 
                                                 <b-input-group-append>
                                                     <b-button
@@ -135,17 +159,38 @@
                                     :key="localField.value"
                                 >
                                     <b-col cols="12" class="pb-2">
-                                        <div class="input-group">
+                                        <div class="input-group" :id="localField.value + '-group'">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text">{{localField.label}}</span>
                                             </div>
                                             <input
                                                 type="text"
                                                 class="form-control"
+                                                autocomplete="off"
                                                 :name="localField.value"
                                                 :placeholder="localField.example"
                                                 v-model="metadataValues[localField.value]"
+                                                @input="onChange(localField.value)"
+                                                @keyup.down.native="onArrowDown(localField.value)"
+                                                @keyup.up.native="onArrowUp(localField.value)"
+                                                @keyup.enter.native="onEnter(localField.value)"
                                             >
+                                            <ul
+                                                :id="'autocomplete-' + localField.value"
+                                                class="autocomplete-results shadow"
+                                                :style="autoCompletePosition(localField.value)"
+                                                v-if="autoCompleteResults[localField.value].length > 0"
+                                            >
+                                                <li
+                                                    tabindex="-1"
+                                                    v-for="(result, i) in autoCompleteResults[localField.value]"
+                                                    :key="result"
+                                                    @click="setResult(result, localField.value)"
+                                                    class="autocomplete-result"
+                                                    :class="{ 'is-active': i === arrowCounters.q+1 }"
+                                                    v-html="result"
+                                                ></li>
+                                            </ul>
                                         </div>
                                     </b-col>
                                 </b-row>
@@ -326,7 +371,10 @@ export default {
                 { text: "No Filtering", value: "nofilter" }
             ],
             selectedSortValues: "rowid",
-            resultsPerPageOptions: [25, 100, 500, 1000]
+            resultsPerPageOptions: [25, 100, 500, 1000],
+            autoCompleteResults: { q: [] },
+            arrowCounters: { q: -1 },
+            isOpen: false
         };
     },
     created() {
@@ -348,6 +396,9 @@ export default {
                     metadataField
                 ];
             }
+            // this.autoCompleteResults[metadataField] = [];
+            this.$set(this.autoCompleteResults, metadataField, []);
+            this.arrowCounters[metadataField] = 0;
         }
         var vm = this;
         EventBus.$on("metadataUpdate", function(metadata) {
@@ -453,6 +504,102 @@ export default {
         clearFormData() {},
         selectApproximate(approximateValue) {
             this.approximate_ratio = approximateValue;
+        },
+        onChange(field) {
+            // Let's warn the parent that a change was made
+            if (field == "q") {
+                let currentQueryTerm = this.$route.query.q;
+                if (this.q.length > 1 && this.q != currentQueryTerm) {
+                    this.$http
+                        .get(
+                            "http://anomander.uchicago.edu/philologic/test/scripts/autocomplete_term.py",
+                            {
+                                params: { term: this.q }
+                            }
+                        )
+                        .then(response => {
+                            this.autoCompleteResults.q = response.data;
+                            this.isLoading = false;
+                        });
+                }
+            } else {
+                let currentFieldValue = this.$route.query[field];
+                if (
+                    this.metadataValues[field].length > 1 &&
+                    this.metadataValues[field] != currentFieldValue
+                ) {
+                    this.$http
+                        .get(
+                            "http://anomander.uchicago.edu/philologic/test/scripts/autocomplete_metadata.py",
+                            {
+                                params: {
+                                    term: this.metadataValues[field],
+                                    field: field
+                                }
+                            }
+                        )
+                        .then(response => {
+                            this.autoCompleteResults[field] = response.data;
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+                }
+            }
+        },
+        onArrowDown(field) {
+            if (this.arrowCounters[field] < this.autoCompleteResults.length) {
+                this.arrowCounters[field] = this.arrowCounters[field] + 1;
+            }
+            let container = document.getElementById(`autocomplete-${field}`);
+            let topOffset = container.scrollTop;
+            container.scrollTop = topOffset + 36;
+        },
+        onArrowUp(field) {
+            if (this.arrowCounters[field] > 0) {
+                this.arrowCounters[field] = this.arrowCounters[field] - 1;
+            }
+            let container = document.getElementById(`autocomplete-${field}`);
+            let topOffset = container.scrollTop;
+            container.scrollTop = topOffset - 36;
+        },
+        onEnter(field) {
+            this.queryTerm = this.autoCompleteResults[
+                this.arrowCounter
+            ].headword.replace(/<[^>]+>/g, "");
+            this.arrowCounters[field] = -1;
+            this.isOpen = false;
+            this.autoCompleteResults = [];
+        },
+        handleClickOutside(evt) {
+            if (!this.$el.contains(evt.target)) {
+                this.isOpen = false;
+                this.arrowCounters[field] = -1;
+            }
+        },
+        setResult(result, field) {
+            let update = {};
+            update[field] = result.replace(/<[^>]+>/g, "");
+            if (field == "q") {
+                this.$store.commit("replaceStore", {
+                    ...this.$store.state.formData,
+                    ...update
+                });
+            } else {
+                this.$store.commit("updateMetadata", {
+                    ...this.metadataFields,
+                    ...update
+                });
+                this.metadataValues[field] = result.replace(/<[^>]+>/g, "");
+            }
+            this.autoCompleteResults[field] = [];
+            this.arrowCounters[field] = -1;
+        },
+        autoCompletePosition(field) {
+            let parent = document.getElementById(`${field}-group`);
+            let input = parent.querySelector("input");
+            let childOffset = input.offsetLeft - parent.offsetLeft;
+            return `left: ${childOffset}px; width: ${input.offsetWidth}px`;
         }
     }
 };
@@ -668,5 +815,36 @@ export default {
     font-size: inherit;
     line-height: inherit;
     width: 100%;
+}
+
+.autocomplete {
+    position: relative;
+}
+.autocomplete-results {
+    padding: 0;
+    margin: 3px 0 0 15px;
+    border: 1px solid #eeeeee;
+    border-top-width: 0px;
+    max-height: 216px;
+    overflow-y: scroll;
+    width: 267px;
+    position: absolute;
+    left: 0;
+    background-color: #fff;
+    z-index: 100;
+    top: 34px;
+    font-size: 1.2rem;
+}
+.autocomplete-result {
+    list-style: none;
+    text-align: left;
+    padding: 4px 12px;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+.autocomplete-result:hover,
+.is-active {
+    background-color: #ddd;
+    color: black;
 }
 </style>
