@@ -185,7 +185,7 @@ export default {
 
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/test/scripts/get_term_groups.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_term_groups.py",
                     { params: this.paramsFilter({ ...this.$route.query }) }
                 )
                 .then(response => {
@@ -268,7 +268,7 @@ export default {
             this.groupIndexSelected = index;
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/test/scripts/get_query_terms.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_query_terms.py",
                     {
                         params: {
                             q: group,

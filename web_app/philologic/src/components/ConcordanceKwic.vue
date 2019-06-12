@@ -151,7 +151,7 @@ export default {
             var vm = this;
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/test/scripts/get_total_results.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_total_results.py",
                     {
                         params: this.paramsFilter(this.$store.state.formData)
                     }

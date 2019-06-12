@@ -512,7 +512,7 @@ export default {
                 if (this.q.length > 1 && this.q != currentQueryTerm) {
                     this.$http
                         .get(
-                            "http://anomander.uchicago.edu/philologic/test/scripts/autocomplete_term.py",
+                            "http://anomander.uchicago.edu/philologic/frantext0917/scripts/autocomplete_term.py",
                             {
                                 params: { term: this.q }
                             }
@@ -530,7 +530,7 @@ export default {
                 ) {
                     this.$http
                         .get(
-                            "http://anomander.uchicago.edu/philologic/test/scripts/autocomplete_metadata.py",
+                            "http://anomander.uchicago.edu/philologic/frantext0917/scripts/autocomplete_metadata.py",
                             {
                                 params: {
                                     term: this.metadataValues[field],

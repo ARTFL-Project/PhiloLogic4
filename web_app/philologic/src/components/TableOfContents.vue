@@ -121,7 +121,7 @@ export default {
             this.loading = true;
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/test/reports/table_of_contents.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/reports/table_of_contents.py",
                     { params: { philo_id: this.$route.params.pathInfo } }
                 )
                 .then(response => {

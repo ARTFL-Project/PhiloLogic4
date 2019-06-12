@@ -113,11 +113,12 @@ export default {
             this.searchParams = { ...this.$store.state.formData };
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/test/reports/concordance.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/reports/concordance.py",
                     { params: this.paramsFilter(this.searchParams) }
                 )
                 .then(response => {
                     this.results = response.data;
+                    this.resultsLength = response.data.results_length;
                 })
                 .catch(error => {
                     this.loading = false;
@@ -132,7 +133,7 @@ export default {
             let resultNumber = this.results.description.start + index - 1;
             let localParams = { hit_num: resultNumber, ...this.searchParams };
             this.$http(
-                "http://anomander.uchicago.edu/philologic/test/scripts/get_more_context.py",
+                "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_more_context.py",
                 { params: this.paramsFilter(localParams) }
             )
                 .then(response => {

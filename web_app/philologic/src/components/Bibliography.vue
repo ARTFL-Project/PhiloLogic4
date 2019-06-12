@@ -172,7 +172,7 @@ export default {
             this.searchParams = { ...this.$store.state.formData };
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/test/reports/bibliography.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/reports/bibliography.py",
                     { params: this.paramsFilter(this.searchParams) }
                 )
                 .then(response => {

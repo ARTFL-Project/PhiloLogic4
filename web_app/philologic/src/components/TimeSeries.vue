@@ -11,10 +11,18 @@
                     >Export results</b-button>
                     <search-arguments :results-length="resultsLength"></search-arguments>
                 </div>
-                <!-- <progress-bar
-                            progress="{{ percent }}"
-                            style="margin-left: 15px; margin-right: 15px; margin-top: -10px;"
-                ></progress-bar>-->
+                <b-progress
+                    :max="totalResults"
+                    show-progress
+                    variant="secondary"
+                    class="ml-3 mr-3 mb-3"
+                    v-if="resultsLength != totalResults"
+                >
+                    <b-progress-bar
+                        :value="resultsLength"
+                        :label="`${((resultsLength / totalResults) * 100).toFixed(2)}%`"
+                    ></b-progress-bar>
+                </b-progress>
             </b-card>
             <b-card no-body id="time-series" class="m-4">
                 <b-button-group class="d-inline-block">
@@ -49,14 +57,15 @@ export default {
     computed: {
         ...mapFields({
             report: "formData.report",
-            interval: "formData.year_interval"
+            interval: "formData.year_interval",
+            totalResults: "resultsLength"
         })
     },
     data() {
         return {
             frequencyType: "absolute_time",
             resultsLength: 0,
-            totalResults: 0,
+            totalResults: 100,
             globalQuery: "",
             localQuery: "",
             myBarChart: null,
@@ -64,7 +73,6 @@ export default {
             dateCounter: [],
             relativeCounts: [],
             moreResults: false,
-            percent: 0,
             done: false,
             authorized: true,
             startDate: "",
@@ -104,7 +112,6 @@ export default {
                     this.interval = parseInt(this.interval);
                     this.totalResults = response.data.total_results;
                     // Store the current query as a local and global variable in order to make sure they are equal later on...
-                    console.log(this.$store.state.formData);
                     this.globalQuery = this.copyObject(
                         this.$store.state.formData
                     );

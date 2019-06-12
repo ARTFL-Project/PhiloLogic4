@@ -65,11 +65,18 @@
                 class="m-2 text-center"
                 style="opacity: 0.5"
             >Top 500 results for {{ selectedFacet.alias }}</div>
-            <!-- <progress-bar
-                progress="{{ percent }}"
-                class="velocity-opposites-transition-slideDownIn"
-                data-velocity-opts="{duration:400}"
-            ></progress-bar>-->
+            <b-progress
+                :max="resultsLength"
+                show-progress
+                variant="secondary"
+                class="ml-3 mr-3 mb-3"
+                v-if="runningTotal != resultsLength"
+            >
+                <b-progress-bar
+                    :value="runningTotal"
+                    :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
+                ></b-progress-bar>
+            </b-progress>
             <b-list-group flush>
                 <b-list-group-item v-for="result in facetResults" :key="result.label">
                     <b-row>
@@ -120,7 +127,8 @@ export default {
             "fornData.method",
             "formData.start",
             "formData.end",
-            "formData.metadataFields"
+            "formData.metadataFields",
+            "resultsLength"
         ])
     },
     data() {
@@ -135,8 +143,6 @@ export default {
                 alias: "in the same sentence",
                 type: "collocationFacet"
             },
-            percent: 0,
-            percentComplete: 0,
             loading: false,
             moreResults: false,
             done: true,
@@ -147,7 +153,8 @@ export default {
             relativeFrequencies: [],
             absoluteFrequencies: [],
             interrupt: false,
-            selected: ""
+            selected: "",
+            runningTotal: 0
         };
     },
     created() {
@@ -223,16 +230,22 @@ export default {
             if (this.moreResults) {
                 if (facet.type !== "collocationFacet") {
                     var promise = this.$http.get(
-                        "http://anomander.uchicago.edu/philologic/test/scripts/get_frequency.py",
+                        "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_frequency.py",
                         {
-                            params: this.paramsFilter(queryParams)
+                            params: this.paramsFilter({
+                                ...queryParams,
+                                start: start.toString()
+                            })
                         }
                     );
                 } else {
                     var promise = this.$http.get(
-                        "http://anomander.uchicago.edu/philologic/test/reports/collocation.py",
+                        "http://anomander.uchicago.edu/philologic/frantext0917/reports/collocation.py",
                         {
-                            params: this.paramsFilter(queryParams)
+                            params: this.paramsFilter({
+                                ...queryParams,
+                                start: start.toString()
+                            })
                         }
                     );
                 }
@@ -241,7 +254,6 @@ export default {
                     .then(response => {
                         var results = response.data.results;
                         this.moreResults = response.data.more_results;
-                        this.resultsLength = response.data.results_length;
                         if (!this.interrupt && this.selected == facet.alias) {
                             if (facet.type === "collocationFacet") {
                                 var merge = this.mergeResults(
@@ -258,13 +270,7 @@ export default {
                             this.loading = false;
                             this.showFacetResults = true;
                             fullResults = merge;
-                            if (response.data.hits_done < this.resultsLength) {
-                                this.percentComplete =
-                                    (response.data.hits_done /
-                                        this.resultsLength) *
-                                    100;
-                                this.percent = Math.floor(this.percentComplete);
-                            }
+                            this.runningTotal = response.data.hits_done;
                             start = response.data.hits_done;
                             this.populateSidebar(
                                 facet,
@@ -281,7 +287,7 @@ export default {
                         this.loading = false;
                     });
             } else {
-                this.percent = 100;
+                this.runningTotal = this.resultsLength;
                 this.fullResults = fullResults;
                 let urlString = this.paramsToUrlString({
                     ...queryParams,

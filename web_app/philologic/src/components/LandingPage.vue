@@ -171,7 +171,7 @@ export default {
             };
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/test/scripts/get_landing_page_content.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_landing_page_content.py",
                     {
                         params: {
                             group_by_field: browseType.group_by_field,

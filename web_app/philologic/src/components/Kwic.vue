@@ -262,7 +262,7 @@ export default {
             if (this.first_kwic_sorting_option === "") {
                 this.$http
                     .get(
-                        "http://anomander.uchicago.edu/philologic/test/reports/kwic.py",
+                        "http://anomander.uchicago.edu/philologic/frantext0917/reports/kwic.py",
                         { params: this.paramsFilter(this.searchParams) }
                     )
                     .then(response => {
@@ -290,7 +290,7 @@ export default {
             var vm = this;
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/test/scripts/get_neighboring_words.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_neighboring_words.py",
                     {
                         params: {
                             ...this.paramsFilter(this.$store.state.formData),
@@ -329,7 +329,7 @@ export default {
             }
             vm.$http
                 .post(
-                    "http://anomander.uchicago.edu/philologic/test/scripts/get_sorted_kwic.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_sorted_kwic.py",
                     JSON.stringify({
                         results: vm.sortedResults,
                         hits_done: hitsDone,

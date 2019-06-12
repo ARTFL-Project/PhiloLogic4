@@ -300,7 +300,7 @@ export default {
             }
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/test/reports/navigation.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/reports/navigation.py",
                     { params: navigationParams }
                 )
                 .then(response => {
@@ -489,7 +489,7 @@ export default {
             if (docId !== this.tocElements.docId) {
                 this.$http
                     .get(
-                        "http://anomander.uchicago.edu/philologic/test/scripts/get_table_of_contents.py",
+                        "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_table_of_contents.py",
                         {
                             params: {
                                 philo_id: this.currentPhiloId

@@ -163,7 +163,7 @@ Vue.directive('scroll', {
 Vue.use(BootstrapVue)
 
 axios
-    .get('http://anomander.uchicago.edu/philologic/test/scripts/get_web_config.py')
+    .get('http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_web_config.py')
     .then((response) => {
         Vue.prototype.$philoConfig = response.data
         new Vue({

@@ -10,12 +10,18 @@
                 >Export results</b-button>
                 <search-arguments :results-length="resultsLength"></search-arguments>
             </div>
-            <!-- <progress-bar
-                    progress="{{ collocation.percent }}"
-                    class="velocity-opposites-transition-slideDownIn"
-                    data-velocity-opts="{ duration: 400 }"
-                    v-if="collocation.done === false"
-            ></progress-bar>-->
+            <b-progress
+                :max="resultsLength"
+                show-progress
+                variant="secondary"
+                class="ml-3 mr-3 mb-3"
+                v-if="runningTotal != resultsLength"
+            >
+                <b-progress-bar
+                    :value="runningTotal"
+                    :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
+                ></b-progress-bar>
+            </b-progress>
             <div class="pl-3">
                 <span>
                     <span tooltip tooltip-title="Click to display filtered words">
@@ -134,12 +140,12 @@ export default {
             filterList: [],
             searchParams: {},
             authorized: true,
-            resultsLength: 0,
+            resultsLength: 100,
             moreResults: false,
             loading: false,
             sortedList: [],
             showFilteredWords: false,
-            percent: 0,
+            runningTotal: 0,
             loading: false,
             collocCloudWords: []
         };
@@ -157,10 +163,6 @@ export default {
     methods: {
         fetchResults() {
             let urlString = this.paramsToUrlString(this.$store.state.formData);
-            // angular.element("#philologic_collocation").velocity("fadeIn", {
-            //     duration: 200
-            // });
-            // angular.element(".progress").show();
             this.localFormData = this.copyObject(this.$store.state.formData);
             this.loading = false;
             var collocObject = {};
@@ -176,13 +178,14 @@ export default {
             };
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/test/reports/collocation.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/reports/collocation.py",
                     { params: this.paramsFilter(params) }
                 )
                 .then(response => {
                     var data = response.data;
                     this.resultsLength = data.results_length;
                     this.moreResults = data.more_results;
+                    this.runningTotal = data.hits_done;
                     start = data.hits_done;
                     this.sortAndRenderCollocation(fullResults, data, start);
                 })
@@ -192,9 +195,6 @@ export default {
                 });
         },
         sortAndRenderCollocation(fullResults, data, start) {
-            if (start <= this.resultsLength) {
-                this.percent = Math.floor((start / this.resultsLength) * 100);
-            }
             if (
                 typeof fullResults === "undefined" ||
                 Object.keys(fullResults).length === 0
@@ -221,7 +221,6 @@ export default {
                     this.updateCollocation(tempFullResults, start);
                 }
             } else {
-                this.percent = 100;
                 this.done = true;
                 // Collocation cloud not showing when loading cached searches one after the other
                 //saveToLocalStorage({results: this.sortedList, resultsLength: this.resultsLength, filterList: this.filterList});
@@ -233,7 +232,7 @@ export default {
             this.sortedList = savedObject.results;
             this.resultsLength = savedObject.resultsLength;
             this.filterList = savedObject.filterList;
-            this.percent = 100;
+            // this.percent = 100;
             this.done = true;
             this.loading = false;
             angular.element("#philologic_collocation").velocity("fadeIn", {
