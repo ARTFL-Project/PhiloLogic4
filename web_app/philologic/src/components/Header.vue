@@ -1,7 +1,7 @@
 <template>
     <div>
-        <b-navbar toggleable="lg" type="dark" variant="info">
-            <b-navbar-brand href="#">{{ philoConfig.dbname }}</b-navbar-brand>
+        <b-navbar toggleable="lg" type="light" variant="light" class="shadow">
+            <b-navbar-brand to="/">{{ philoConfig.dbname }}</b-navbar-brand>
 
             <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
@@ -23,7 +23,7 @@ export default {
             philoConfig: this.$philoConfig
         };
     },
-    created() { }
+    created() {}
 };
 </script>
 

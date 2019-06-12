@@ -8,6 +8,7 @@ import collocation from '../components/Collocation'
 import timeSeries from '../components/TimeSeries'
 import textNavigation from '../components/TextNavigation'
 import tableOfContents from '../components/TableOfContents'
+import landingPage from '../components/LandingPage'
 
 Vue.use(Router)
 
@@ -16,7 +17,8 @@ export default new Router({
     // base: globalConfig.appPath,
     routes: [{
             path: '/',
-            name: 'home'
+            name: 'home',
+            component: landingPage
         },
         {
             path: '/concordance',

@@ -265,7 +265,6 @@ export default {
             }
         },
         getQueryTerms(group, index) {
-            var vm = this;
             this.groupIndexSelected = index;
             this.$http
                 .get(
@@ -278,8 +277,8 @@ export default {
                         }
                     }
                 )
-                .then(function(response) {
-                    vm.words = response.data;
+                .then(response => {
+                    this.words = response.data;
                     document.querySelector("#query-terms").style.display =
                         "block";
                 })

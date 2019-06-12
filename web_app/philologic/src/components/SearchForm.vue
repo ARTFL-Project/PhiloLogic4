@@ -546,6 +546,14 @@ export default {
                         });
                 }
             }
+            let popup = document.querySelector(`#autocomplete-${field}`);
+            window.onclick = e => {
+                if (e.target !== popup) {
+                    this.autoCompleteResults[field] = [];
+                    window.removeEventListener("click");
+                    // popup.style.display = "none";
+                }
+            };
         },
         onArrowDown(field) {
             if (this.arrowCounters[field] < this.autoCompleteResults.length) {
@@ -568,7 +576,6 @@ export default {
                 this.arrowCounter
             ].headword.replace(/<[^>]+>/g, "");
             this.arrowCounters[field] = -1;
-            this.isOpen = false;
             this.autoCompleteResults = [];
         },
         handleClickOutside(evt) {
