@@ -58,7 +58,7 @@ export default {
         ...mapFields({
             report: "formData.report",
             interval: "formData.year_interval",
-            totalResults: "resultsLength"
+            currentReport: "currentReport"
         })
     },
     data() {
@@ -81,8 +81,8 @@ export default {
     },
     created() {
         this.report = "time_series";
+        this.currentReport = "time_series";
         this.fetchResults();
-        console.log(this.startDate);
         EventBus.$on("urlUpdate", () => {
             this.fetchResults();
         });
@@ -96,15 +96,48 @@ export default {
             this.frequencyType = "absolute_time";
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/test/scripts/get_start_end_date.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_start_end_date.py",
                     {
                         params: this.paramsFilter(this.$store.state.formData)
                     }
                 )
                 .then(response => {
                     // if no dates supplied or if invalid dates
-                    this.startDate = parseInt(response.data.start_date);
-                    this.endDate = parseInt(response.data.end_date);
+                    if (
+                        this.$store.state.formData.metadataFields.year.length >
+                        0
+                    ) {
+                        let yearSplit = this.$store.state.formData.metadataFields.year.split(
+                            "-"
+                        );
+                        if (
+                            yearSplit[0].length > 0 &&
+                            yearSplit[1].length > 0
+                        ) {
+                            // year is a range
+                            this.startDate = parseInt(yearSplit[0]);
+                            this.endDate = parseInt(yearSplit[1]);
+                        } else if (
+                            yearSplit[0].length > 0 &&
+                            yearSplit[1].length < 1
+                        ) {
+                            // year is a range with just the start year provided
+                            this.startDate = parseInt(yearSplit[0]);
+                            this.endDate = parseInt(response.data.end_date);
+                        } else if (
+                            yearSplit[0].length < 1 &&
+                            yearSplit[1].length > 0
+                        ) {
+                            // year is a range with just the end year provided
+                            this.startDate = parseInt(response.data.start_date);
+                            this.endDate = parseInt(yearSplit[1]);
+                        } else {
+                            // no year provided
+                            this.startDate = parseInt(response.data.start_date);
+                            this.endDate = parseInt(response.data.end_date);
+                        }
+                    }
+                    console.log(this.startDate, this.endDate);
                     this.$store.dispatch("updateStartEndDate", {
                         startDate: this.startDate,
                         endDate: this.endDate
@@ -263,7 +296,7 @@ export default {
         updateTimeSeries(fullResults) {
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/test/reports/time_series.py",
+                    "http://anomander.uchicago.edu/philologic/frantext0917/reports/time_series.py",
                     {
                         params: {
                             ...this.paramsFilter(this.$store.state.formData),
@@ -318,9 +351,6 @@ export default {
             }
             this.myBarChart.data.datasets[0].data = this.absoluteCounts;
             this.myBarChart.update();
-            // this.$nextTick(function() {
-            //     this.chartLinker(this);
-            // });
             if (
                 this.report === "time_series" &&
                 this.deepEqual(this.globalQuery, this.localQuery)
@@ -350,6 +380,10 @@ export default {
                 this.frequencyType = frequencyType;
             }
             this.myBarChart.update();
+        },
+        afterDestroy: () => {
+            console.log("destroying chart");
+            this.myBarChart.destroy();
         }
     }
 };

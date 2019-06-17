@@ -30,6 +30,7 @@ export default {
     created() {
         this.evaluateRoute();
         this.$router.beforeEach((to, from, next) => {
+            console.log("TO:", to, "FROM:", from);
             if (
                 typeof this.$route.query.q == "undefined" &&
                 this.$route.name != "navigate"

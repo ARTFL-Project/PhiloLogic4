@@ -3,7 +3,7 @@
         <b-row>
             <b-col sm="10" offset-sm="1" xl="8" offset-xl="2">
                 <b-card no-body class="shadow">
-                    <b-form @submit="onSubmit" @reset="onReset" @keyup.enter="onSubmit()">
+                    <b-form @submit.prevent @reset="onReset" @keyup.enter="onSubmit()">
                         <div id="form_body">
                             <div id="initial-form">
                                 <b-button-group id="report" style="width: 100%">
@@ -15,7 +15,7 @@
                                         :class="{'active':  report == searchReport.value}"
                                     >{{ searchReport.label }}</b-button>
                                 </b-button-group>
-                                <div id="search_terms_container" class="p-2 pt-4">
+                                <div id="search_terms_container" class="p-3">
                                     <b-row id="search_terms">
                                         <b-col cols="12" md="8">
                                             <b-input-group id="q-group" prepend="Search Terms">
@@ -44,16 +44,15 @@
                                                         :key="result"
                                                         @click="setResult(result, 'q')"
                                                         class="autocomplete-result"
-                                                        :class="{ 'is-active': i === arrowCounters.q+1 }"
+                                                        :class="{ 'is-active': i === arrowCounters.q }"
                                                         v-html="result"
                                                     ></li>
                                                 </ul>
-
                                                 <b-input-group-append>
                                                     <b-button
                                                         variant="outline-secondary"
                                                         id="button-search"
-                                                        type="submit"
+                                                        @click="onSubmit()"
                                                     >Search</b-button>
                                                 </b-input-group-append>
                                             </b-input-group>
@@ -64,240 +63,263 @@
                                             v-if="!philoConfig.dictionary"
                                             id="search-buttons"
                                         >
-                                            <b-button
-                                                type="reset"
-                                                id="reset_form"
-                                                class="btn btn-danger"
-                                                @click="onReset()"
-                                            >Clear</b-button>
-                                            <button
-                                                type="button"
-                                                id="show-search-form"
-                                                class="btn btn-primary"
-                                                data-display="none"
-                                                @click="toggleForm()"
-                                            >{{ searchOptionsButton }}</button>
+                                            <b-button-group>
+                                                <b-button
+                                                    type="reset"
+                                                    id="reset_form"
+                                                    variant="outline-danger"
+                                                    @click="onReset()"
+                                                >Clear</b-button>
+                                                <b-button
+                                                    type="button"
+                                                    id="show-search-form"
+                                                    variant="outline-info"
+                                                    @click="toggleForm()"
+                                                >{{ searchOptionsButton }}</b-button>
+                                            </b-button-group>
                                         </b-col>
                                     </b-row>
                                 </div>
                             </div>
-                            <div
-                                id="search-elements"
-                                v-if="formOpen"
-                                class="p-2 velocity-opposites-transition-slideDownBigIn"
-                                data-velocity-opts="{ duration: 400 }"
+                            <transition
+                                enter-active-class="animated fadeInDown"
+                                leave-active-class="animated fadeOutUp"
                             >
-                                <h5>Refine your search with the following options and fields:</h5>
-                                <b-row>
-                                    <b-col cols="12" sm="2">Search Terms</b-col>
-                                    <b-col cols="12" sm="10">
-                                        <b-row>
-                                            <b-col cols="12" sm="2">
-                                                <b-form-checkbox
-                                                    id="checkbox-1"
-                                                    v-model="approximate"
-                                                    name="checkbox-1"
-                                                    value="yes"
-                                                    unchecked-value="no"
-                                                >Approximate match</b-form-checkbox>
-                                            </b-col>
-                                            <b-col cols="12" sm="9" v-if="approximate === 'yes'">
-                                                <b-dropdown
-                                                    id="dropdown-1"
-                                                    text="100%"
-                                                    class="m-md-2"
-                                                >
-                                                    <b-dropdown-item
-                                                        v-for="value in approximateValues"
-                                                        @click="selectApproximate(value)"
-                                                        :key="value"
-                                                    >{{ value }}%</b-dropdown-item>
-                                                </b-dropdown>or more
-                                            </b-col>
-                                        </b-row>
-                                    </b-col>
-                                </b-row>
-                                <b-row id="method" class="p-2" v-if="report != 'collocation'">
-                                    <b-col cols="12" sm="2">Search Terms</b-col>
-                                    <b-col cols="12" sm="3" lg="2" id="method-buttons">
-                                        <b-form-group>
-                                            <b-form-radio-group
-                                                id="btn-radios-3"
-                                                v-model="method"
-                                                :options="methodOptions"
-                                                buttons
-                                                stacked
-                                                size="sm"
-                                                name="radio-btn-stacked"
-                                            ></b-form-radio-group>
-                                        </b-form-group>
-                                    </b-col>
-                                    <b-col cols="12" sm="7" lg="8">
-                                        <b-row>
-                                            <b-col sm="8" md="5">
-                                                <b-input-group
-                                                    size="sm"
-                                                    append="words in the same sentence"
-                                                >
-                                                    <b-form-input v-model="arg_proxy"></b-form-input>
-                                                </b-input-group>
-                                            </b-col>
-                                            <b-col sm="4" md="7"></b-col>
-                                            <b-col sm="8" md="5">
-                                                <b-input-group
-                                                    size="sm"
-                                                    append="words in the same sentence"
-                                                >
-                                                    <b-form-input v-model="arg_phrase"></b-form-input>
-                                                </b-input-group>
-                                            </b-col>
-                                        </b-row>
-                                    </b-col>
-                                </b-row>
-                                <b-row
-                                    v-for="localField in metadataDisplay"
-                                    :key="localField.value"
+                                s
+                                <div
+                                    id="search-elements"
+                                    v-if="formOpen"
+                                    class="pl-3 pr-3 shadow"
+                                    style="position: absolute; z-index: 10; background-color: #fff; width: 100%; left:0"
                                 >
-                                    <b-col cols="12" class="pb-2">
-                                        <div class="input-group" :id="localField.value + '-group'">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">{{localField.label}}</span>
+                                    <h5>Refine your search with the following options and fields:</h5>
+                                    <b-row>
+                                        <b-col cols="12" sm="2">Search Terms</b-col>
+                                        <b-col cols="12" sm="10">
+                                            <b-row>
+                                                <b-col cols="12" sm="3">
+                                                    <b-form-checkbox
+                                                        id="checkbox-1"
+                                                        v-model="approximate"
+                                                        name="checkbox-1"
+                                                        value="yes"
+                                                        unchecked-value="no"
+                                                    >Approximate match</b-form-checkbox>
+                                                </b-col>
+                                                <b-col
+                                                    cols="12"
+                                                    sm="9"
+                                                    style="margin-top: -.5rem !important"
+                                                    v-if="approximate === 'yes'"
+                                                >
+                                                    <b-dropdown
+                                                        id="dropdown-1"
+                                                        text="100%"
+                                                        class="mr-1"
+                                                    >
+                                                        <b-dropdown-item
+                                                            v-for="value in approximateValues"
+                                                            @click="selectApproximate(value)"
+                                                            :key="value"
+                                                        >{{ value }}%</b-dropdown-item>
+                                                    </b-dropdown>or more
+                                                </b-col>
+                                            </b-row>
+                                        </b-col>
+                                    </b-row>
+                                    <b-row id="method" v-if="report != 'collocation'">
+                                        <b-col cols="12" sm="2">Search Terms</b-col>
+                                        <b-col cols="12" sm="3" lg="2" id="method-buttons">
+                                            <b-form-group>
+                                                <b-form-radio-group
+                                                    id="btn-radios-3"
+                                                    v-model="method"
+                                                    :options="methodOptions"
+                                                    buttons
+                                                    stacked
+                                                    size="sm"
+                                                    name="radio-btn-stacked"
+                                                ></b-form-radio-group>
+                                            </b-form-group>
+                                        </b-col>
+                                        <b-col cols="12" sm="7" lg="8">
+                                            <b-row>
+                                                <b-col sm="8" md="5">
+                                                    <b-input-group
+                                                        size="sm"
+                                                        append="words in the same sentence"
+                                                    >
+                                                        <b-form-input v-model="arg_proxy"></b-form-input>
+                                                    </b-input-group>
+                                                </b-col>
+                                                <b-col sm="4" md="7"></b-col>
+                                                <b-col sm="8" md="5">
+                                                    <b-input-group
+                                                        size="sm"
+                                                        append="words in the same sentence"
+                                                    >
+                                                        <b-form-input v-model="arg_phrase"></b-form-input>
+                                                    </b-input-group>
+                                                </b-col>
+                                            </b-row>
+                                        </b-col>
+                                    </b-row>
+                                    <b-row
+                                        v-for="localField in metadataDisplay"
+                                        :key="localField.value"
+                                    >
+                                        <b-col cols="12" class="pb-2">
+                                            <div
+                                                class="input-group"
+                                                :id="localField.value + '-group'"
+                                            >
+                                                <div class="input-group-prepend">
+                                                    <span
+                                                        class="input-group-text"
+                                                    >{{localField.label}}</span>
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    autocomplete="off"
+                                                    :name="localField.value"
+                                                    :placeholder="localField.example"
+                                                    v-model="metadataValues[localField.value]"
+                                                    @input="onChange(localField.value)"
+                                                    @keyup.down.native="onArrowDown(localField.value)"
+                                                    @keyup.up.native="onArrowUp(localField.value)"
+                                                    @keyup.enter.native="onEnter(localField.value)"
+                                                >
+                                                <ul
+                                                    :id="'autocomplete-' + localField.value"
+                                                    class="autocomplete-results shadow"
+                                                    :style="autoCompletePosition(localField.value)"
+                                                    v-if="autoCompleteResults[localField.value].length > 0"
+                                                >
+                                                    <li
+                                                        tabindex="-1"
+                                                        v-for="(result, i) in autoCompleteResults[localField.value]"
+                                                        :key="result"
+                                                        @click="setResult(result, localField.value)"
+                                                        class="autocomplete-result"
+                                                        :class="{ 'is-active': i === arrowCounters[localField.value] }"
+                                                        v-html="result"
+                                                    ></li>
+                                                </ul>
                                             </div>
+                                        </b-col>
+                                    </b-row>
+                                    <b-row id="collocation-options" v-if="report === 'collocation'">
+                                        <b-col cols="12">
+                                            <b-row>
+                                                <b-col cols="3" sm="2">Word Filtering</b-col>
+                                                <b-col cols="3" sm="1">
+                                                    <b-form-input
+                                                        name="filter_frequency"
+                                                        placeholder="100"
+                                                        v-model="filter_frequency"
+                                                    ></b-form-input>
+                                                </b-col>
+                                                <b-col cols="6" sm="2">
+                                                    <b-form-group>
+                                                        <b-form-radio-group
+                                                            id="btn-radios-3"
+                                                            v-model="colloc_filter_choice"
+                                                            :options="collocationOptions"
+                                                            buttons
+                                                            stacked
+                                                            size="sm"
+                                                            name="radio-btn-stacked"
+                                                        ></b-form-radio-group>
+                                                    </b-form-group>
+                                                </b-col>
+                                            </b-row>
+                                        </b-col>
+                                    </b-row>
+                                    <b-row id="time-series-options" v-if="report === 'time_series'">
+                                        <b-col cols="12" sm="2">Date range:</b-col>
+                                        <b-col cols="12" sm="10">
+                                            from
                                             <input
                                                 type="text"
-                                                class="form-control"
-                                                autocomplete="off"
-                                                :name="localField.value"
-                                                :placeholder="localField.example"
-                                                v-model="metadataValues[localField.value]"
-                                                @input="onChange(localField.value)"
-                                                @keyup.down.native="onArrowDown(localField.value)"
-                                                @keyup.up.native="onArrowUp(localField.value)"
-                                                @keyup.enter.native="onEnter(localField.value)"
+                                                name="start_date"
+                                                id="start_date"
+                                                style="width:35px;"
+                                                v-model="start_date"
                                             >
-                                            <ul
-                                                :id="'autocomplete-' + localField.value"
-                                                class="autocomplete-results shadow"
-                                                :style="autoCompletePosition(localField.value)"
-                                                v-if="autoCompleteResults[localField.value].length > 0"
+                                            to
+                                            <input
+                                                type="text"
+                                                name="end_date"
+                                                id="end_date"
+                                                style="width:35px;"
+                                                v-model="end_date"
                                             >
-                                                <li
-                                                    tabindex="-1"
-                                                    v-for="(result, i) in autoCompleteResults[localField.value]"
-                                                    :key="result"
-                                                    @click="setResult(result, localField.value)"
-                                                    class="autocomplete-result"
-                                                    :class="{ 'is-active': i === arrowCounters.q+1 }"
-                                                    v-html="result"
-                                                ></li>
-                                            </ul>
-                                        </div>
-                                    </b-col>
-                                </b-row>
-                                <b-row id="collocation-options" v-if="report === 'collocation'">
-                                    <b-col cols="12">
-                                        <b-row>
-                                            <b-col cols="3" sm="2">Word Filtering</b-col>
-                                            <b-col cols="3" sm="1">
-                                                <b-form-input
-                                                    name="filter_frequency"
-                                                    placeholder="100"
-                                                    v-model="filter_frequency"
-                                                ></b-form-input>
-                                            </b-col>
-                                            <b-col cols="6" sm="2">
-                                                <b-form-group>
-                                                    <b-form-radio-group
-                                                        id="btn-radios-3"
-                                                        v-model="colloc_filter_choice"
-                                                        :options="collocationOptions"
-                                                        buttons
-                                                        stacked
-                                                        size="sm"
-                                                        name="radio-btn-stacked"
-                                                    ></b-form-radio-group>
-                                                </b-form-group>
-                                            </b-col>
-                                        </b-row>
-                                    </b-col>
-                                </b-row>
-                                <b-row id="time-series-options" v-if="report === 'time_series'">
-                                    <b-col cols="12" sm="2">Date range:</b-col>
-                                    <b-col cols="12" sm="10">
-                                        from
-                                        <input
-                                            type="text"
-                                            name="start_date"
-                                            id="start_date"
-                                            style="width:35px;"
-                                            v-model="start_date"
-                                        >
-                                        to
-                                        <input
-                                            type="text"
-                                            name="end_date"
-                                            id="end_date"
-                                            style="width:35px;"
-                                            v-model="end_date"
-                                        >
-                                    </b-col>
-                                </b-row>
-                                <b-row id="date_range" v-if="report == 'time_series'">
-                                    <b-col cols="12" sm="2">Year interval:</b-col>
-                                    <b-col cols="12" sm="10">
-                                        every
-                                        <input
-                                            type="text"
-                                            name="year_interval"
-                                            id="year_interval"
-                                            style="width:35px; text-align: center;"
-                                            v-model="year_interval"
-                                        >&nbsp;years
-                                    </b-col>
-                                </b-row>
-                                <b-row
-                                    id="sort-options"
-                                    v-if="report === 'concordance' || report === 'bibliography'"
-                                >
-                                    <b-col cols="12" style="margin-top: 10px;">
-                                        <b-row>
-                                            <b-col cols="3" sm="2">Sort results by</b-col>
-                                            <b-col cols="6" sm="4">
-                                                <b-form-select
-                                                    v-model="sort_by"
-                                                    :options="sortValues"
-                                                    class="mb-3"
-                                                >
-                                                    <option>Sort results by</option>
-                                                </b-form-select>
-                                            </b-col>
-                                        </b-row>
-                                    </b-col>
-                                </b-row>
-                                <b-row
-                                    id="results_per_page"
-                                    v-if="report != 'collocation' && report != 'time_series'"
-                                >
-                                    <b-col cols="12" sm="2">Results per page:</b-col>
-                                    <b-col cols="12" sm="10">
-                                        <b-form-group>
-                                            <b-form-radio-group
-                                                id="btn-radios-3"
-                                                v-model="results_per_page"
-                                                :options="resultsPerPageOptions"
-                                                buttons
-                                                size="sm"
-                                                name="radio-btn"
-                                            ></b-form-radio-group>
-                                        </b-form-group>
-                                    </b-col>
-                                </b-row>
-                            </div>
+                                        </b-col>
+                                    </b-row>
+                                    <b-row id="date_range" v-if="report == 'time_series'">
+                                        <b-col cols="12" sm="2">Year interval:</b-col>
+                                        <b-col cols="12" sm="10">
+                                            every
+                                            <input
+                                                type="text"
+                                                name="year_interval"
+                                                id="year_interval"
+                                                style="width:35px; text-align: center;"
+                                                v-model="year_interval"
+                                            >&nbsp;years
+                                        </b-col>
+                                    </b-row>
+                                    <b-row
+                                        id="sort-options"
+                                        v-if="report === 'concordance' || report === 'bibliography'"
+                                    >
+                                        <b-col cols="12" style="margin-top: 10px;">
+                                            <b-row>
+                                                <b-col cols="3" sm="2">Sort results by</b-col>
+                                                <b-col cols="6" sm="4">
+                                                    <b-form-select
+                                                        v-model="sort_by"
+                                                        :options="sortValues"
+                                                        class="mb-3"
+                                                    >
+                                                        <option>Sort results by</option>
+                                                    </b-form-select>
+                                                </b-col>
+                                            </b-row>
+                                        </b-col>
+                                    </b-row>
+                                    <b-row
+                                        id="results_per_page"
+                                        v-if="report != 'collocation' && report != 'time_series'"
+                                    >
+                                        <b-col cols="12" sm="2">Results per page:</b-col>
+                                        <b-col cols="12" sm="10">
+                                            <b-form-group>
+                                                <b-form-radio-group
+                                                    id="btn-radios-3"
+                                                    v-model="results_per_page"
+                                                    :options="resultsPerPageOptions"
+                                                    buttons
+                                                    size="sm"
+                                                    name="radio-btn"
+                                                ></b-form-radio-group>
+                                            </b-form-group>
+                                        </b-col>
+                                    </b-row>
+                                </div>
+                            </transition>
                         </div>
                     </b-form>
                 </b-card>
             </b-col>
         </b-row>
+        <div class="d-flex justify-content-center" v-if="searching">
+            <b-spinner
+                variant="secondary"
+                style="width: 5rem; height: 5rem; position: absolute; z-index: 50"
+            ></b-spinner>
+        </div>
     </div>
 </template>
 
@@ -326,7 +348,8 @@ export default {
             "formData.end_date",
             "formData.year_interval",
             "formData.sort_by",
-            "formData.results_per_page"
+            "formData.results_per_page",
+            "searching"
         ]),
         formData() {
             return this.$store.state.formData;
@@ -373,7 +396,7 @@ export default {
             selectedSortValues: "rowid",
             resultsPerPageOptions: [25, 100, 500, 1000],
             autoCompleteResults: { q: [] },
-            arrowCounters: { q: -1 },
+            arrowCounters: { q: 0 },
             isOpen: false
         };
     },
@@ -396,9 +419,9 @@ export default {
                     metadataField
                 ];
             }
-            // this.autoCompleteResults[metadataField] = [];
             this.$set(this.autoCompleteResults, metadataField, []);
-            this.arrowCounters[metadataField] = 0;
+            this.$set(this.arrowCounters, metadataField, 0);
+            // this.arrowCounters[metadataField] = 0;
         }
         var vm = this;
         EventBus.$on("metadataUpdate", function(metadata) {
@@ -457,12 +480,17 @@ export default {
             }
             return sortValues;
         },
-        onSubmit(event) {
-            event.preventDefault();
+        onSubmit() {
             this.$store.commit("updateMetadata", this.metadataValues);
             this.q = this.q.trim();
             if (this.q.length == 0) {
                 this.report = "bibliography";
+            }
+            if (
+                this.report == "textNavigation" ||
+                this.report == "tableOfContents"
+            ) {
+                this.report = "concordance";
             }
             this.formOpen = false;
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
@@ -547,18 +575,22 @@ export default {
                 }
             }
             let popup = document.querySelector(`#autocomplete-${field}`);
-            window.onclick = e => {
+            const clearAutocomplete = e => {
                 if (e.target !== popup) {
                     this.autoCompleteResults[field] = [];
-                    window.removeEventListener("click");
-                    // popup.style.display = "none";
                 }
+                window.removeEventListener("click", clearAutocomplete);
             };
+            window.addEventListener("click", clearAutocomplete);
         },
         onArrowDown(field) {
-            if (this.arrowCounters[field] < this.autoCompleteResults.length) {
+            if (
+                this.arrowCounters[field] <
+                this.autoCompleteResults[field].length
+            ) {
                 this.arrowCounters[field] = this.arrowCounters[field] + 1;
             }
+
             let container = document.getElementById(`autocomplete-${field}`);
             let topOffset = container.scrollTop;
             container.scrollTop = topOffset + 36;
@@ -572,21 +604,21 @@ export default {
             container.scrollTop = topOffset - 36;
         },
         onEnter(field) {
-            this.queryTerm = this.autoCompleteResults[
-                this.arrowCounter
-            ].headword.replace(/<[^>]+>/g, "");
-            this.arrowCounters[field] = -1;
-            this.autoCompleteResults = [];
+            let result = this.autoCompleteResults[field][
+                this.arrowCounters[field]
+            ];
+            this.setResult(result, field);
         },
         handleClickOutside(evt) {
             if (!this.$el.contains(evt.target)) {
                 this.isOpen = false;
-                this.arrowCounters[field] = -1;
+                this.arrowCounters[field] = 0;
             }
         },
         setResult(result, field) {
             let update = {};
-            update[field] = result.replace(/<[^>]+>/g, "");
+            let selected = `"${result.replace(/<[^>]+>/g, "")}"`;
+            update[field] = selected;
             if (field == "q") {
                 this.$store.commit("replaceStore", {
                     ...this.$store.state.formData,
@@ -597,10 +629,10 @@ export default {
                     ...this.metadataFields,
                     ...update
                 });
-                this.metadataValues[field] = result.replace(/<[^>]+>/g, "");
+                this.metadataValues[field] = selected;
             }
             this.autoCompleteResults[field] = [];
-            this.arrowCounters[field] = -1;
+            this.arrowCounters[field] = 0;
         },
         autoCompletePosition(field) {
             let parent = document.getElementById(`${field}-group`);
@@ -612,7 +644,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 #report .btn {
     font-variant: small-caps;
 }

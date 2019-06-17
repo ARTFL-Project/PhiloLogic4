@@ -89,7 +89,12 @@ export default {
         pages
     },
     computed: {
-        ...mapFields(["formData.report", "resultsLength"])
+        ...mapFields([
+            "formData.report",
+            "resultsLength",
+            "searching",
+            "currentReport"
+        ])
     },
     data() {
         return {
@@ -100,6 +105,7 @@ export default {
     },
     created() {
         this.report = "concordance";
+        this.currentReport = "concordance";
         this.fetchResults();
         EventBus.$on("urlUpdate", () => {
             if (this.report == "concordance") {
@@ -111,6 +117,7 @@ export default {
         fetchResults() {
             this.results = {};
             this.searchParams = { ...this.$store.state.formData };
+            this.searching = true;
             this.$http
                 .get(
                     "http://anomander.uchicago.edu/philologic/frantext0917/reports/concordance.py",
@@ -119,9 +126,10 @@ export default {
                 .then(response => {
                     this.results = response.data;
                     this.resultsLength = response.data.results_length;
+                    this.searching = false;
                 })
                 .catch(error => {
-                    this.loading = false;
+                    this.searching = false;
                     this.error = error.toString();
                     console.log(error);
                 });

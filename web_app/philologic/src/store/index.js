@@ -41,7 +41,9 @@ export default new Vuex.Store({
         textObject: '',
         navBar: '',
         tocElements: {},
-        byte: ''
+        byte: '',
+        searching: false,
+        currentReport: "concordance"
     },
     getters: {
         getField

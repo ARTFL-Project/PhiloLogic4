@@ -66,7 +66,7 @@
             </span>
             <b v-if="queryArgs.biblio.length === 0">None</b>
         </div>
-        <div v-if="report === 'time_series'">
+        <div v-if="currentReport === 'time_series'">
             {{ resultsLength || '...' }} occurrences of the term(s) between
             <span
                 class="biblio-criteria"
@@ -85,7 +85,7 @@
         </div>
         <div
             style="margin-top: 10px;"
-            v-if="report === 'collocation'"
+            v-if="currentReport === 'collocation'"
         >Displaying the top 100 collocates for {{ resultsLength || '...' }} occurrences</div>
     </div>
 </template>
@@ -108,7 +108,8 @@ export default {
             "formData.approximate_ratio",
             "formData.metadataFields",
             "formData.start_date",
-            "formData.end_date"
+            "formData.end_date",
+            "currentReport"
         ])
     },
     props: ["resultsLength"],
@@ -138,6 +139,7 @@ export default {
             } else {
                 this.queryArgs.queryTerm = "";
             }
+            console.log(this.$store.state.formData.metadataFields);
             this.queryArgs.biblio = this.buildCriteria(
                 queryParams.metadataFields
             );
@@ -226,6 +228,9 @@ export default {
             }
             for (let k in queryArgs) {
                 if (config.available_metadata.indexOf(k) >= 0) {
+                    if (this.report == "time_series" && k == "year") {
+                        continue;
+                    }
                     let v = queryArgs[k];
                     let alias = k;
                     if (v) {
@@ -239,6 +244,7 @@ export default {
             return biblio;
         },
         removeMetadata(metadata) {
+            console.log("remove", metadata);
             this.$store.commit("removeMetadata", metadata);
             if (this.q.length == 0) {
                 this.report = "bibliography";
@@ -253,7 +259,6 @@ export default {
                 this.$router.push(
                     this.paramsToRoute(this.$store.state.formData)
                 );
-                EventBus.$emit("urlUpdate");
             } else if (
                 this.report === "collocation" ||
                 this.report === "time_series"
@@ -263,6 +268,7 @@ export default {
                 );
                 this.restart = true;
             }
+            EventBus.$emit("urlUpdate");
         },
         getQueryTerms(group, index) {
             this.groupIndexSelected = index;

@@ -104,7 +104,8 @@ export default {
             "formData.report",
             "formData.colloc_filter_choice",
             "formData.q",
-            "formData.filter_frequency"
+            "formData.filter_frequency",
+            "currentReport"
         ]),
         colorCodes: function() {
             let colorCodes = {};
@@ -152,6 +153,7 @@ export default {
     },
     created() {
         this.report = "collocation";
+        this.currentReport = "collocation";
         this.filter_frequency = 100;
         this.fetchResults();
         EventBus.$on("urlUpdate", () => {

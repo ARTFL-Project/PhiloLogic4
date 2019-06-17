@@ -2,6 +2,7 @@ import Vue from 'vue'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import "animate.css/animate.min.css"
 import App from './App.vue'
 import router from './router'
 import store from './store'
@@ -52,7 +53,7 @@ Vue.mixin({
             let report = formValues.report
             let localFormData = this.paramsFilter(formValues)
             let routeObject = {
-                path: report,
+                path: `/${report}`,
                 query: localFormData
             }
             return routeObject

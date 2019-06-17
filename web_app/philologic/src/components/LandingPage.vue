@@ -13,6 +13,7 @@
                     <b-col
                         cols="12"
                         sm="6"
+                        class="mb-4"
                         :class="{'col-sm-offset-3': defaultLandingPageBrowsing.length == 1}"
                         v-for="browseType in defaultLandingPageBrowsing"
                         :key="browseType.label"
@@ -99,13 +100,13 @@
                         class="text-content-area"
                     >
                         <b-card
-                            :header="group.prefix"
+                            :header="group.prefix.toString()"
                             v-for="group in resultGroups"
                             :key="group.prefix"
                             class="mb-4 shadow-sm"
                         >
                             <li
-                                class="contentClass"
+                                class="contentClass p-2"
                                 v-for="(result, resultIndex) in group.results"
                                 :key="resultIndex"
                             >

@@ -88,7 +88,9 @@ export default {
             "formData.first_kwic_sorting_option",
             "formData.second_kwic_sorting_option",
             "formData.third_kwic_sorting_option",
-            "resultsLength"
+            "resultsLength",
+            "searching",
+            "currentReport"
         ]),
         sortingSelection() {
             let sortingSelection = [];
@@ -135,6 +137,7 @@ export default {
     },
     created() {
         this.report = "kwic";
+        this.currentReport = "kwic";
         this.initializeKwic();
         this.fetchResults();
         var vm = this;
@@ -258,6 +261,7 @@ export default {
         },
         fetchResults() {
             this.results = {};
+            this.searching = true;
             this.searchParams = { ...this.$store.state.formData };
             if (this.first_kwic_sorting_option === "") {
                 this.$http
@@ -268,9 +272,10 @@ export default {
                     .then(response => {
                         this.results = response.data;
                         this.resultsLength = this.results.results_length;
+                        this.searching = false;
                     })
                     .catch(error => {
-                        this.loading = false;
+                        this.searching = false;
                         this.error = error.toString();
                         console.log(error);
                     });

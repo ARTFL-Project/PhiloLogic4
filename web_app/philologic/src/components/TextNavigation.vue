@@ -664,9 +664,25 @@ export default {
         },
         dicoLookup(event, year) {
             var philoId = this.$route.params.pathInfo.split("/").join(" ");
-            dictionaryLookup.evaluate(event, year);
+            if (event.key === "d") {
+                var selection = window.getSelection().toString();
+                var century = parseInt(year.slice(0, year.length - 2));
+                var range =
+                    century.toString() + "00-" + String(century + 1) + "00";
+                if (range == "NaN00-NaN00") {
+                    range = "";
+                }
+                var link =
+                    this.philoConfig.dictionary_lookup +
+                    "?docyear=" +
+                    range +
+                    "&strippedhw=" +
+                    selection;
+                window.open(link);
+            }
         }
-    }
+    },
+    beforeDestroy: () => {}
 };
 </script>
 <style scoped>
@@ -682,12 +698,12 @@ export default {
     overflow: scroll;
     text-align: justify;
     line-height: 180%;
-    z-index: 101;
+    z-index: 50;
     background: #fff;
 }
 #toc-wrapper {
     position: relative;
-    z-index: 100;
+    z-index: 49;
 }
 #toc-top-bar {
     height: 31px;
@@ -728,6 +744,17 @@ a.current-obj,
 #toc-container a:hover {
     background: #e8e8e8;
     /* color: #fff !important; */
+}
+
+.xml-pb {
+    display: block;
+    text-align: center;
+    margin: 10px;
+}
+
+.xml-pb::before {
+    content: "-" attr(n) "-";
+    white-space: pre;
 }
 
 p {
