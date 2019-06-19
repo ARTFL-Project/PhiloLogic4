@@ -162,6 +162,9 @@ export default {
             }
         });
     },
+    beforeDestroy() {
+        EventBus.$off("urlUpdate");
+    },
     methods: {
         fetchResults() {
             let urlString = this.paramsToUrlString(this.$store.state.formData);

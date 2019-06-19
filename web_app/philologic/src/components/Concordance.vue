@@ -1,6 +1,6 @@
 <template>
     <div>
-        <conckwic :results="results" v-if="Object.keys(results).length"></conckwic>
+        <conckwic v-if="description.end != 0"></conckwic>
         <b-row class="mr-2">
             <b-col cols="12" md="7" xl="8">
                 <b-card
@@ -93,7 +93,8 @@ export default {
             "formData.report",
             "resultsLength",
             "searching",
-            "currentReport"
+            "currentReport",
+            "description"
         ])
     },
     data() {
@@ -113,6 +114,9 @@ export default {
             }
         });
     },
+    beforeDestroy() {
+        EventBus.$off("urlUpdate");
+    },
     methods: {
         fetchResults() {
             this.results = {};
@@ -126,7 +130,15 @@ export default {
                 .then(response => {
                     this.results = response.data;
                     this.resultsLength = response.data.results_length;
+                    this.$store.commit("updateDescription", {
+                        ...this.description,
+                        start: this.results.description.start,
+                        end: this.results.description.end,
+                        results_per_page: this.results.description
+                            .results_per_page
+                    });
                     this.searching = false;
+                    EventBus.$emit("resultsDone");
                 })
                 .catch(error => {
                     this.searching = false;
@@ -135,27 +147,40 @@ export default {
                 });
         },
         moreContext(index) {
-            let parentNode = event.srcElement.parentNode.parentNode.parentNode;
+            let button = event.srcElement;
+            let parentNode = button.parentNode.parentNode.parentNode;
             let defaultNode = parentNode.querySelector(".default-length");
             let moreNode = parentNode.querySelector(".more-length");
             let resultNumber = this.results.description.start + index - 1;
             let localParams = { hit_num: resultNumber, ...this.searchParams };
-            this.$http(
-                "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_more_context.py",
-                { params: this.paramsFilter(localParams) }
-            )
-                .then(response => {
-                    let moreText = response.data;
-                    moreNode.innerHTML = moreText;
+            if (button.innerHTML == "More") {
+                if (moreNode.innerHTML.length == 0) {
+                    this.$http(
+                        "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_more_context.py",
+                        { params: this.paramsFilter(localParams) }
+                    )
+                        .then(response => {
+                            let moreText = response.data;
+                            moreNode.innerHTML = moreText;
+                            defaultNode.style.display = "none";
+                            moreNode.style.display = "block";
+                            button.innerHTML = "Less";
+                        })
+                        .catch(error => {
+                            this.loading = false;
+                            this.error = error.toString();
+                            console.log(error);
+                        });
+                } else {
                     defaultNode.style.display = "none";
                     moreNode.style.display = "block";
-                })
-                .catch(error => {
-                    this.loading = false;
-                    this.error = error.toString();
-                    console.log(error);
-                });
-            console.log(parentNode);
+                    button.innerHTML = "Less";
+                }
+            } else {
+                defaultNode.style.display = "block";
+                moreNode.style.display = "none";
+                button.innerHTML = "More";
+            }
         },
         dicoLookup() {}
     }

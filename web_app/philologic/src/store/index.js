@@ -43,7 +43,13 @@ export default new Vuex.Store({
         tocElements: {},
         byte: '',
         searching: false,
-        currentReport: "concordance"
+        currentReport: "concordance",
+        description: {
+            start: 0,
+            end: 0,
+            results_per_page: 25,
+            termGroups: []
+        }
     },
     getters: {
         getField
@@ -92,6 +98,9 @@ export default new Vuex.Store({
         },
         updateCitation(state, payload) {
             Vue.set(state, 'textNavigationCitation', payload)
+        },
+        updateDescription(state, payload) {
+            Vue.set(state, "description", payload)
         }
     },
     actions: {

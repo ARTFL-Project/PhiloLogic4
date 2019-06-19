@@ -284,24 +284,31 @@ export default {
             this.textRendered = false;
             this.textObjectURL = this.$route.params;
             this.philoID = this.textObjectURL.pathInfo.split("/").join(" ");
+            let byteString = "";
             if ("byte" in this.$route.query) {
                 this.byte = this.$route.query.byte;
+                if (typeof this.$route.query.byte == "object") {
+                    byteString = `byte=${this.byte.join("&byte=")}`;
+                } else {
+                    byteString = `byte=${this.byte}`;
+                }
             } else {
                 this.byte = "";
             }
             let navigationParams = {
                 report: "navigation",
-                philo_id: this.philoID,
-                byte: this.byte
+                philo_id: this.philoID
             };
             if (this.start_byte !== "") {
                 navigationParams.start_byte = this.start_byte;
                 navigationParams.end_byte = this.end_byte;
             }
+            let urlQuery = `${byteString}&${this.paramsToUrlString(
+                navigationParams
+            )}`;
             this.$http
                 .get(
-                    "http://anomander.uchicago.edu/philologic/frantext0917/reports/navigation.py",
-                    { params: navigationParams }
+                    `http://anomander.uchicago.edu/philologic/frantext0917/reports/navigation.py?${urlQuery}`
                 )
                 .then(response => {
                     this.textObject = response.data;
@@ -354,8 +361,9 @@ export default {
         },
         scrollToHighlight(elementClass) {
             let offsetTop =
-                document.querySelector(elementClass).getBoundingClientRect()
-                    .top - 100;
+                document
+                    .querySelectorAll(elementClass)[0]
+                    .getBoundingClientRect().top - 100;
             window.scrollBy({
                 top: offsetTop,
                 behavior: "smooth"
@@ -746,18 +754,18 @@ a.current-obj,
     /* color: #fff !important; */
 }
 
-.xml-pb {
+/deep/ .xml-pb {
     display: block;
     text-align: center;
     margin: 10px;
 }
 
-.xml-pb::before {
+/deep/ .xml-pb::before {
     content: "-" attr(n) "-";
     white-space: pre;
 }
 
-p {
+/deep/ p {
     margin-bottom: 0.5rem;
 }
 /deep/ .highlight {
@@ -766,17 +774,17 @@ p {
 }
 /* Styling for theater */
 
-.xml-castitem::after {
+/deep/ .xml-castitem::after {
     content: "\A";
     white-space: pre;
 }
 
-.xml-castlist > .xml-castitem:first-of-type::before {
+/deep/ .xml-castlist > .xml-castitem:first-of-type::before {
     content: "\A";
     white-space: pre;
 }
 
-.xml-castgroup::before {
+/deep/ .xml-castgroup::before {
     content: "\A";
     white-space: pre;
 }
@@ -788,22 +796,22 @@ b.headword {
     margin-top: 20px;
 }
 
-#bibliographic-results b.headword {
+/deep/ #bibliographic-results b.headword {
     font-weight: 400 !important;
     font-size: 100%;
     display: inline;
 }
 
-.xml-lb {
+/deep/ .xml-lb {
     display: block;
 }
 
-.xml-sp .xml-lb:first-of-type {
+/deep/ .xml-sp .xml-lb:first-of-type {
     content: "";
     white-space: normal;
 }
 
-.xml-lb[type="hyphenInWord"] {
+/deep/ .xml-lb[type="hyphenInWord"] {
     display: inline;
 }
 
@@ -811,110 +819,110 @@ b.headword {
     display: block;
 }
 
-.xml-sp::before {
+/deep/ .xml-sp::before {
     content: "\A";
     white-space: pre;
 }
 
-.xml-stage + .xml-sp:nth-of-type(n + 2)::before {
+/deep/ .xml-stage + .xml-sp:nth-of-type(n + 2)::before {
     content: "";
 }
 
-.xml-fw,
-.xml-join {
+/deep/ .xml-fw,
+/deep/ .xml-join {
     display: none;
 }
 
-.xml-speaker + .xml-stage::before {
+/deep/ .xml-speaker + .xml-stage::before {
     content: "";
     white-space: normal;
 }
 
-.xml-stage {
+/deep/ .xml-stage {
     font-style: italic;
 }
 
-.xml-stage::after {
+/deep/ .xml-stage::after {
     content: "\A";
     white-space: pre;
 }
 
-div1 div2::before {
+/deep/ div1 div2::before {
     content: "\A";
     white-space: pre;
 }
 
-.xml-speaker {
+/deep/ .xml-speaker {
     font-weight: 700;
 }
 
-.xml-pb {
+/deep/ .xml-pb {
     display: block;
     text-align: center;
     margin: 10px;
 }
 
-.xml-pb::before {
+/deep/ .xml-pb::before {
     content: "-" attr(n) "-";
     white-space: pre;
 }
 
-.xml-lg {
+/deep/ .xml-lg {
     display: block;
 }
 
-.xml-lg::after {
+/deep/ .xml-lg::after {
     content: "\A";
     white-space: pre;
 }
 
-.xml-lg:first-of-type::before {
+/deep/ .xml-lg:first-of-type::before {
     content: "\A";
     white-space: pre;
 }
 
-.xml-castList,
-.xml-front,
-.xml-castItem,
-.xml-docTitle,
-.xml-docImprint,
-.xml-performance,
-.xml-docAuthor,
-.xml-docDate,
-.xml-premiere,
-.xml-casting,
-.xml-recette,
-.xml-nombre {
+/deep/ .xml-castList,
+/deep/ .xml-front,
+/deep/ .xml-castItem,
+/deep/ .xml-docTitle,
+/deep/ .xml-docImprint,
+/deep/ .xml-performance,
+/deep/ .xml-docAuthor,
+/deep/ .xml-docDate,
+/deep/ .xml-premiere,
+/deep/ .xml-casting,
+/deep/ .xml-recette,
+/deep/ .xml-nombre {
     display: block;
 }
 
-.xml-docTitle {
+/deep/ .xml-docTitle {
     font-style: italic;
     font-weight: bold;
 }
 
-.xml-docTitle,
-.xml-docAuthor,
-.xml-docDate {
+/deep/ .xml-docTitle,
+/deep/ .xml-docAuthor,
+/deep/ .xml-docDate {
     text-align: center;
 }
 
-.xml-docTitle span[type="main"] {
+/deep/ .xml-docTitle span[type="main"] {
     font-size: 150%;
     display: block;
 }
 
-.xml-docTitle span[type="sub"] {
+/deep/ .xml-docTitle span[type="sub"] {
     font-size: 120%;
     display: block;
 }
 
-.xml-performance,
-.xml-docImprint {
+/deep/ .xml-performance,
+/deep/ .xml-docImprint {
     margin-top: 10px;
 }
 
-.xml-set {
+/deep/ .xml-set {
     display: block;
     font-style: italic;
     margin-top: 10px;
@@ -927,152 +935,152 @@ body {
     /* Set the section counter to 0 */
 }
 
-.xml-prononciation::before {
+/deep/ .xml-prononciation::before {
     content: "(";
 }
 
-.xml-prononciation::after {
+/deep/ .xml-prononciation::after {
     content: ")\A";
 }
 
-.xml-nature {
+/deep/ .xml-nature {
     font-style: italic;
 }
 
-.xml-indent,
-.xml-variante {
+/deep/ .xml-indent,
+/deep/ .xml-variante {
     display: block;
 }
 
-.xml-variante {
+/deep/ .xml-variante {
     padding-top: 10px;
     padding-bottom: 10px;
     text-indent: -1.3em;
     padding-left: 1.3em;
 }
 
-.xml-variante::before {
+/deep/ .xml-variante::before {
     counter-increment: section;
     content: counter(section) ")\00a0";
     font-weight: 700;
 }
 
-:not(.xml-rubrique) + .xml-indent {
+/deep/ :not(.xml-rubrique) + .xml-indent {
     padding-top: 10px;
 }
 
-.xml-indent {
+/deep/ .xml-indent {
     padding-left: 1.3em;
 }
 
-.xml-cit {
+/deep/ .xml-cit {
     padding-left: 2.3em;
     display: block;
     text-indent: -1.3em;
 }
 
-.xml-indent > .xml-cit {
+/deep/ .xml-indent > .xml-cit {
     padding-left: 1em;
 }
 
-.xml-cit::before {
+/deep/ .xml-cit::before {
     content: "\2012\00a0\00ab\00a0";
 }
 
-.xml-cit::after {
+/deep/ .xml-cit::after {
     content: "\00a0\00bb\00a0("attr(aut) "\00a0"attr(ref) ")";
     font-variant: small-caps;
 }
 
-.xml-rubrique {
+/deep/ .xml-rubrique {
     display: block;
     margin-top: 20px;
 }
 
-.xml-rubrique::before {
+/deep/ .xml-rubrique::before {
     content: attr(nom);
     font-variant: small-caps;
     font-weight: 700;
 }
 
-.xml-corps + .xml-rubrique {
+/deep/ .xml-corps + .xml-rubrique {
     margin-top: 10px;
 }
 
 /*Methodique styling*/
 
-div[type="article"] .headword {
+/deep/ div[type="article"] .headword {
     display: inline-block;
     margin-bottom: 10px;
 }
 
-.headword + p {
+/deep/ .headword + p {
     display: inline;
 }
 
-.headword + p + p {
+/deep/ .headword + p + p {
     margin-top: 10px;
 }
 
 /*Note handling*/
 
-.popover {
+/deep/ .popover {
     max-width: 350px;
     overflow: scroll;
 }
 
-.popover-content {
+/deep/ .popover-content {
     text-align: justify;
 }
 
-.popover-content .xml-p:not(:first-of-type) {
+/deep/ .popover-content .xml-p:not(:first-of-type) {
     display: block;
     margin-top: 1em;
     margin-bottom: 1em;
 }
 
-.note-content {
+/deep/ .note-content {
     display: none;
 }
 
-.note,
-.note-ref {
+/deep/ .note,
+/deep/ .note-ref {
     vertical-align: 0.3em;
     font-size: 0.7em;
 }
 
-.note:hover,
-.note-ref:hover {
+/deep/ .note:hover,
+/deep/ .note-ref:hover {
     cursor: pointer;
     text-decoration: none;
 }
 
-div[type="notes"] .xml-note {
+/deep/ div[type="notes"] .xml-note {
     margin: 15px 0px;
     display: block;
 }
 
-.xml-note::before {
+/deep/ .xml-note::before {
     content: "note\00a0"attr(n) "\00a0:\00a0";
     font-weight: 700;
 }
 
 /*Page images*/
 
-.xml-pb-image {
+/deep/ .xml-pb-image {
     display: block;
     text-align: center;
     margin: 10px;
 }
 
-.page-image-link {
+/deep/ .page-image-link {
     margin-top: 10px;
     /*display: block;*/
     text-align: center;
 }
 
 /*Inline images*/
-.inline-img {
+/deep/ .inline-img {
     max-width: 40%;
     float: right;
     height: auto;
@@ -1080,44 +1088,44 @@ div[type="notes"] .xml-note {
     padding-top: 15px;
 }
 
-.inline-img:hover {
+/deep/ .inline-img:hover {
     cursor: pointer;
 }
 
-.link-back {
+/deep/ .link-back {
     margin-left: 10px;
     line-height: initial;
 }
 
-.xml-add {
+/deep/ .xml-add {
     color: #ef4500;
 }
 
-.xml-seg {
+/deep/ .xml-seg {
     display: block;
 }
 
 /*Table display*/
 
-b.headword[rend="center"] {
+/deep/ b.headword[rend="center"] {
     margin-bottom: 30px;
     text-align: center;
 }
 
-.xml-table {
+/deep/ .xml-table {
     display: table;
     position: relative;
     text-align: center;
     border-collapse: collapse;
 }
 
-.xml-table .xml-pb-image {
+/deep/ .xml-table .xml-pb-image {
     position: absolute;
     width: 100%;
     margin-top: 15px;
 }
 
-.xml-row {
+/deep/ .xml-row {
     display: table-row;
     font-weight: 700;
     text-align: left;
@@ -1129,19 +1137,19 @@ b.headword[rend="center"] {
     border-bottom: #ddd 1px solid;
 }
 
-.xml-row ~ .xml-row {
+/deep/ .xml-row ~ .xml-row {
     font-weight: inherit;
     text-align: justify;
     font-variant: inherit;
 }
 
-.xml-pb-image + .xml-row {
+/deep/ .xml-pb-image + .xml-row {
     padding-top: 50px;
     padding-bottom: 10px;
     border-top-width: 0px;
 }
 
-.xml-cell {
+/deep/ .xml-cell {
     display: table-cell;
     padding-top: inherit; /*inherit padding when image is above */
     padding-bottom: inherit;

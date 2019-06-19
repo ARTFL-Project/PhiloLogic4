@@ -349,6 +349,8 @@ export default {
             "formData.year_interval",
             "formData.sort_by",
             "formData.results_per_page",
+            "formData.start",
+            "formData.end",
             "searching"
         ]),
         formData() {
@@ -492,6 +494,9 @@ export default {
             ) {
                 this.report = "concordance";
             }
+            this.start = "";
+            this.end = "";
+            console.log();
             this.formOpen = false;
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         },

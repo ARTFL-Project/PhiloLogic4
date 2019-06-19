@@ -33,13 +33,12 @@ export default {
         return { pages: [] };
     },
     created() {
-        var vm = this;
-        EventBus.$on("totalResultsDone", function() {
-            vm.pages = vm.buildPages();
+        EventBus.$on("totalResultsDone", () => {
+            this.pages = this.buildPages();
         });
-        EventBus.$on("urlUpdate", function() {
-            vm.pages = [];
-            vm.pages = vm.buildPages();
+        EventBus.$on("urlUpdate", () => {
+            this.pages = [];
+            this.pages = this.buildPages();
         });
     },
     methods: {
@@ -92,6 +91,7 @@ export default {
 
             // now we construct the actual links from the page numbers
             var pageObject = [];
+            let lastPageName = "";
             for (var i = 0; i < pages.length; i++) {
                 var page = pages[i];
                 var pageStart = page * resultsPerPage - resultsPerPage + 1;
@@ -112,6 +112,10 @@ export default {
                 if (page === totalPages) {
                     page = "Last";
                 }
+                if (page == lastPageName) {
+                    continue;
+                }
+                lastPageName = page;
                 var route = this.paramsToRoute({
                     ...this.$store.state.formData,
                     start: pageStart.toString(),

@@ -48,22 +48,23 @@
                 >
                     <b-card
                         no-body
-                        class="mt-4 p-4 d-inline-block text-justify shadow"
+                        class="mt-4 mb-4 p-4 d-inline-block text-justify shadow"
                         style="width: 100%"
                     >
-                        <button
+                        <b-button
                             id="show-header"
-                            class="btn btn-primary"
+                            class="mb-2"
+                            variant="outline-secondary"
                             v-if="philoConfig.header_in_toc"
-                            @click="showHeader()"
-                        >{{ headerButton }}</button>
-                        <div
+                            @click="toggleHeader()"
+                        >{{ headerButton }}</b-button>
+                        <b-card
+                            no-body
                             id="tei-header"
-                            class="panel panel-default tei-header velocity-opposites-transition-slideDownIn"
-                            data-velocity-opts="{duration: 200}"
-                            v-if="teiHeader"
-                            v-html="teiHeader | unsafe"
-                        ></div>
+                            class="shadow-sm"
+                            v-if="showHeader"
+                            v-html="teiHeader"
+                        ></b-card>
                         <div id="toc-report" class="text-content-area" loading="loading">
                             <div
                                 id="toc-content"
@@ -110,7 +111,10 @@ export default {
             authorized: true,
             displayLimit: 50,
             loading: true,
-            tocObject: {}
+            teiHeader: "",
+            tocObject: {},
+            showHeader: false,
+            headerButton: "Show Header"
         };
     },
     created() {
@@ -133,23 +137,34 @@ export default {
                     this.loading = false;
                     console.log(response);
                 });
-
-            this.headerButton = "Show Header";
-            this.teiHeader = false;
         },
-        showHeader() {
-            if (angular.isString(this.teiHeader)) {
-                this.teiHeader = false;
-                this.headerButton = "Show Header";
-            } else {
-                var UrlString = {
-                    script: "get_header.py",
-                    philo_id: this.philoID
-                };
-                request.script(UrlString).then(function(response) {
-                    this.teiHeader = response.data;
+        toggleHeader() {
+            if (!this.showHeader) {
+                if (this.teiHeader.length == 0) {
+                    this.$http
+                        .get(
+                            "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_header.py",
+                            {
+                                params: {
+                                    philo_id: this.$route.params.pathInfo
+                                }
+                            }
+                        )
+                        .then(response => {
+                            this.teiHeader = response.data;
+                            this.headerButton = "Hide Header";
+                            this.showHeader = true;
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+                } else {
                     this.headerButton = "Hide Header";
-                });
+                    this.showHeader = true;
+                }
+            } else {
+                this.headerButton = "Show Header";
+                this.showHeader = false;
             }
         },
         getMoreItems() {
@@ -167,5 +182,14 @@ export default {
 }
 .toc-section {
     font-size: 1.05rem;
+}
+#tei-header {
+    white-space: pre;
+    font-family: monospace;
+    font-size: 120%;
+    overflow-x: scroll;
+    padding: 10px;
+    background-color: rgb(253, 253, 253);
+    margin: 10px;
 }
 </style>

@@ -43,6 +43,7 @@ export default {
                 });
             }
             next();
+            console.log("emiting update");
             EventBus.$emit("urlUpdate");
         });
     },

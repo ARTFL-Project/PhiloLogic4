@@ -87,6 +87,10 @@ export default {
             this.fetchResults();
         });
     },
+    beforeDestroy() {
+        EventBus.$off("urlUpdate");
+        this.myBarChart.destroy();
+    },
     methods: {
         fetchResults() {
             if (this.interval == "") {
@@ -380,10 +384,6 @@ export default {
                 this.frequencyType = frequencyType;
             }
             this.myBarChart.update();
-        },
-        afterDestroy: () => {
-            console.log("destroying chart");
-            this.myBarChart.destroy();
         }
     }
 };

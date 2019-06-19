@@ -1,22 +1,17 @@
 <template>
     <div id="search-arguments" class="p-3">
-        <div v-if="queryArgs.queryTerm !== ''">
-            <span v-if="queryArgs.approximate">
-                Searching database for
-                <b>{{ originalQuery }}</b> and the following similar terms:
+        <div v-if="q !== ''">
+            Searching database for
+            <span v-if="approximate == 'yes'">
+                <b>{{ q }}</b> and the following similar terms:
             </span>
-            <span v-if="!queryArgs.approximate">
-                Searching database for
-                <span
-                    v-if="typeof(termGroups) === 'undefined'"
-                >{{ queryArgs.queryTerm }}</span>
-            </span>
+            <span v-if="approximate.length == 0 || approximate == 'no'"></span>
             <b-button
                 variant="outline-secondary"
                 pill
                 size="sm"
                 class="term-groups"
-                v-for="(group, index) in termGroups"
+                v-for="(group, index) in description.termGroups"
                 :key="index"
             >
                 <a href @click.prevent="getQueryTerms(group, index)">{{ group }}</a>
@@ -109,16 +104,15 @@ export default {
             "formData.metadataFields",
             "formData.start_date",
             "formData.end_date",
-            "currentReport"
+            "currentReport",
+            "resultsLength",
+            "description"
         ])
     },
-    props: ["resultsLength"],
     data() {
         return {
             philoConfig: this.$philoConfig,
             queryArgs: {},
-            queryTermGroups: [],
-            termGroups: [],
             words: [],
             wordListChanged: false,
             restart: false
@@ -126,10 +120,6 @@ export default {
     },
     created() {
         this.fetchSearchArgs();
-        var vm = this;
-        EventBus.$on("urlUpdate", function() {
-            vm.fetchSearchArgs();
-        });
     },
     methods: {
         fetchSearchArgs() {
@@ -139,7 +129,6 @@ export default {
             } else {
                 this.queryArgs.queryTerm = "";
             }
-            console.log(this.$store.state.formData.metadataFields);
             this.queryArgs.biblio = this.buildCriteria(
                 queryParams.metadataFields
             );
@@ -191,12 +180,11 @@ export default {
                     { params: this.paramsFilter({ ...this.$route.query }) }
                 )
                 .then(response => {
-                    this.termGroups = response.data.term_groups;
+                    this.$store.commit("updateDescription", {
+                        ...this.description,
+                        termGroups: response.data.term_groups
+                    });
                     this.originalQuery = response.data.original_query;
-                    this.queryTermGroups.group = this.copyObject(
-                        this.termGroups
-                    );
-                    this.termGroupsCopy = this.copyObject(this.termGroups);
                 })
                 .catch(error => {
                     this.loading = false;
@@ -244,7 +232,6 @@ export default {
             return biblio;
         },
         removeMetadata(metadata) {
-            console.log("remove", metadata);
             this.$store.commit("removeMetadata", metadata);
             if (this.q.length == 0) {
                 this.report = "bibliography";
@@ -268,7 +255,7 @@ export default {
                 );
                 this.restart = true;
             }
-            EventBus.$emit("urlUpdate");
+            // EventBus.$emit("urlUpdate");
         },
         getQueryTerms(group, index) {
             this.groupIndexSelected = index;
@@ -314,15 +301,15 @@ export default {
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         },
         removeTerm(index) {
-            this.termGroups.splice(index, 1);
-            this.queryTermGroups.group = this.copyObject(this.termGroups);
-            this.q = this.termGroups.join(" ");
-            if (this.termGroups.length === 0) {
+            let queryTermGroup = this.description.termGroups;
+            queryTermGroup.splice(index, 1);
+            this.q = queryTermGroup.join(" ");
+            if (queryTermGroup.length === 0) {
                 this.report = "bibliography";
             }
             this.start = 0;
             this.end = 0;
-            if (this.termGroups.length == 1) {
+            if (queryTermGroup.length == 1) {
                 this.method = "proxy";
                 this.arg_proxy = "";
                 this.arg_phrase = "";

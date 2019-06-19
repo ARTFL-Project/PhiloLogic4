@@ -1,13 +1,9 @@
 <template>
     <div id="concordanceKwic-container" class="mt-4 ml-4 mr-4">
-        <div id="philo-view" v-if="authorized">
+        <div v-if="authorized">
             <b-card no-body class="shadow-sm">
                 <div id="initial_report">
-                    <div
-                        id="description"
-                        v-if="typeof(results) != 'undefined'"
-                        class="pb-3 velocity-opposites-transition-fadeIn"
-                    >
+                    <div id="description" class="pb-3">
                         <b-button
                             variant="outline-primary"
                             size="sm"
@@ -17,13 +13,11 @@
                         <search-arguments></search-arguments>
                         <div id="search-hits" class="pl-3">{{ hits }}</div>
                     </div>
-                    <button
-                        type="button"
-                        class="btn btn-primary pull-right hidden-xs"
-                        style="margin-top: -33px; margin-right: 15px;"
+                    <b-button
+                        variant="outline-secondary"
                         v-if="!showFacetedBrowsing && philoConfig.facets.length < 1"
                         @click="showFacets() "
-                    >Show Facets</button>
+                    >Show Facets</b-button>
                 </div>
             </b-card>
             <b-row class="d-xs-none mt-4" id="act-on-report">
@@ -70,7 +64,6 @@ export default {
     components: {
         searchArguments
     },
-    props: ["results"],
     computed: {
         ...mapFields([
             "formData.report",
@@ -78,7 +71,8 @@ export default {
             "formData.first_kwic_sorting_option",
             "formData.second_kwic_sorting_option",
             "formData.third_kwic_sorting_option",
-            "resultsLength"
+            "resultsLength",
+            "description"
         ])
     },
     data() {
@@ -87,8 +81,6 @@ export default {
             showFacetedBrowsing: false,
             authorized: true,
             hits: 0,
-            start: 0,
-            end: 0,
             resultsPerPage: 0,
             reportSwitch: {
                 concordance: {
@@ -103,19 +95,23 @@ export default {
         };
     },
     created() {
-        this.resultsLength = this.results.results_length;
         this.hits = this.buildDescription();
         this.updateTotalResults();
-        var vm = this;
-        EventBus.$on("urlUpdate", function() {
-            vm.hits = vm.buildDescription();
+        console.log("create concKWIC");
+        EventBus.$on("resultsDone", () => {
+            console.log("update concKWIC", this.report);
+            this.hits = this.buildDescription();
+            this.updateTotalResults();
         });
+    },
+    beforeDestroy() {
+        EventBus.$off("resultsDone");
     },
     methods: {
         buildDescription() {
-            let start = this.results.description.start;
-            let end = this.results.description.end;
-            let resultsPerPage = this.results.description.results_per_page;
+            let start = this.description.start;
+            let end = this.description.end;
+            let resultsPerPage = this.description.results_per_page;
             var description;
             if (
                 this.resultsLength &&
@@ -148,7 +144,6 @@ export default {
             return description;
         },
         updateTotalResults() {
-            var vm = this;
             this.$http
                 .get(
                     "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_total_results.py",
@@ -156,12 +151,12 @@ export default {
                         params: this.paramsFilter(this.$store.state.formData)
                     }
                 )
-                .then(function(response) {
-                    vm.resultsLength = response.data;
-                    vm.hits = vm.buildDescription();
+                .then(response => {
+                    this.resultsLength = response.data;
+                    this.hits = this.buildDescription();
                     EventBus.$emit("totalResultsDone");
                 })
-                .catch(function(error) {
+                .catch(error => {
                     console.log(error);
                 });
         },
@@ -172,7 +167,6 @@ export default {
             this.third_kwic_sorting_option = "";
             this.results_per_page = 25;
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
-            EventBus.$emit("urlUpdate");
         },
         showFacets() {}
     }

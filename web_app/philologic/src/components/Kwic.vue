@@ -1,6 +1,6 @@
 <template>
     <div>
-        <conckwic :results="results" v-if="Object.keys(results).length"></conckwic>
+        <conckwic></conckwic>
         <b-row class="ml-2 mr-2 mb-2">
             <b-col cols="12" md="7" xl="8">
                 <b-card no-body class="p-2 shadow-sm">
@@ -90,7 +90,8 @@ export default {
             "formData.third_kwic_sorting_option",
             "resultsLength",
             "searching",
-            "currentReport"
+            "currentReport",
+            "description"
         ]),
         sortingSelection() {
             let sortingSelection = [];
@@ -140,16 +141,15 @@ export default {
         this.currentReport = "kwic";
         this.initializeKwic();
         this.fetchResults();
-        var vm = this;
-        EventBus.$on("urlUpdate", function() {
-            if (vm.report == "kwic") {
-                vm.fetchResults();
+        EventBus.$on("urlUpdate", () => {
+            if (this.report == "kwic") {
+                this.fetchResults();
+                console.log("updated");
             }
         });
     },
-    watch: {
-        // call again the method if the route changes
-        $route: "fetchResults"
+    beforeDestroy() {
+        EventBus.$off("urlUpdate");
     },
     methods: {
         initializeKwic() {
@@ -264,6 +264,7 @@ export default {
             this.searching = true;
             this.searchParams = { ...this.$store.state.formData };
             if (this.first_kwic_sorting_option === "") {
+                console.log("fetching KWIC");
                 this.$http
                     .get(
                         "http://anomander.uchicago.edu/philologic/frantext0917/reports/kwic.py",
@@ -272,7 +273,16 @@ export default {
                     .then(response => {
                         this.results = response.data;
                         this.resultsLength = this.results.results_length;
+                        this.$store.commit("updateDescription", {
+                            ...this.description,
+                            start: this.results.description.start,
+                            end: this.results.description.end,
+                            results_per_page: this.results.description
+                                .results_per_page
+                        });
                         this.searching = false;
+                        console.log("emitting done");
+                        EventBus.$emit("resultsDone");
                     })
                     .catch(error => {
                         this.searching = false;
@@ -364,13 +374,11 @@ export default {
             return currentPos + "." + Array(spaces).join("&nbsp");
         },
         sortResults() {
-            console.log(this.report, this.$store.state.formData);
             if (this.resultsLength < 50000) {
                 this.results = {};
                 this.$router.push(
                     this.paramsToRoute(this.$store.state.formData)
                 );
-                EventBus.$emit("urlUpdate");
             } else {
                 alert(
                     "For performance reasons, you cannot sort KWIC reports of more than 50,000 results. Please narrow your query to filter results."
