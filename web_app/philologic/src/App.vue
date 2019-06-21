@@ -2,7 +2,7 @@
     <div id="app">
         <Header/>
         <SearchForm/>
-        <router-view></router-view>
+        <router-view :key="$route.fullPath"></router-view>
     </div>
 </template>
 
@@ -28,6 +28,7 @@ export default {
         };
     },
     created() {
+        document.title = this.$philoConfig.dbname;
         this.evaluateRoute();
         this.$router.beforeEach((to, from, next) => {
             console.log("TO:", to, "FROM:", from);
@@ -43,13 +44,11 @@ export default {
                 });
             }
             next();
-            console.log("emiting update");
             EventBus.$emit("urlUpdate");
         });
     },
     methods: {
         evaluateRoute() {
-            console.log(this.$route.name);
             if (
                 this.$route.name != "home" &&
                 this.$route.name != "textNavigation" &&
@@ -80,7 +79,7 @@ export default {
                     );
                 } else {
                     this.$store.commit("updateStore", {
-                        routeQuery: this.$route.query,
+                        routeQuery: queryParams,
                         metadata: this.metadata
                     });
                 }

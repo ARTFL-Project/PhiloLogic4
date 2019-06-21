@@ -3,33 +3,7 @@
         <b-row id="toc-report-title" class="text-center pt-4">
             <b-col offset="2" cols="8">
                 <h5>
-                    <span
-                        class="citation"
-                        v-for="(citation, citeIndex) in textNavigationCitation"
-                        :key="citeIndex"
-                    >
-                        <span v-if="citation.href">
-                            <span v-html="citation.prefix"></span>
-                            <router-link
-                                :to="'/' + citation.href"
-                                :style="citation.style"
-                            >{{ citation.label }}</router-link>
-                            <span v-html="citation.suffix"></span>
-                            <span
-                                class="separator"
-                                v-if="citeIndex != textNavigationCitation.length - 1"
-                            >&#9679;</span>
-                        </span>
-                        <span v-if="!citation.href">
-                            <span v-html="citation.prefix"></span>
-                            <span :style="citation.style">{{ citation.label }}</span>
-                            <span v-html="citation.suffix"></span>
-                            <span
-                                class="separator"
-                                v-if="citeIndex != textNavigationCitation.length - 1"
-                            >&#9679;</span>
-                        </span>
-                    </span>
+                    <citations :citation="textNavigationCitation"></citations>
                 </h5>
             </b-col>
         </b-row>
@@ -91,12 +65,14 @@
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
+import citations from "./Citations";
 import searchArguments from "./SearchArguments";
 import { EventBus } from "../main.js";
 
 export default {
     name: "tableOfContents",
     components: {
+        citations,
         searchArguments
     },
     computed: {

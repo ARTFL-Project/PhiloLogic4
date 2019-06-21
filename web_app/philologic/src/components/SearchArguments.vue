@@ -120,6 +120,10 @@ export default {
     },
     created() {
         this.fetchSearchArgs();
+        console.log(this.$route.query);
+        EventBus.$on("resultsDone", () => {
+            this.fetchSearchArgs();
+        });
     },
     methods: {
         fetchSearchArgs() {
@@ -233,6 +237,7 @@ export default {
         },
         removeMetadata(metadata) {
             this.$store.commit("removeMetadata", metadata);
+            // console.log("B", this.$route);
             if (this.q.length == 0) {
                 this.report = "bibliography";
             }
@@ -253,9 +258,7 @@ export default {
                 this.$router.push(
                     this.paramsToRoute(this.$store.state.formData)
                 );
-                this.restart = true;
             }
-            // EventBus.$emit("urlUpdate");
         },
         getQueryTerms(group, index) {
             this.groupIndexSelected = index;

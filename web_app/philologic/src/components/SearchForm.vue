@@ -20,7 +20,15 @@
                                         <b-col cols="12" md="8">
                                             <b-input-group id="q-group" prepend="Search Terms">
                                                 <b-input-group-prepend>
-                                                    <b-button variant="outline-info">Tips</b-button>
+                                                    <b-button
+                                                        v-b-modal.search-tips
+                                                        variant="outline-info"
+                                                        @mouseover="showTips = true"
+                                                        @mouseleave="showTips = false"
+                                                    >
+                                                        <span v-if="!showTips">?</span>
+                                                        <span v-if="showTips">Tips</span>
+                                                    </b-button>
                                                 </b-input-group-prepend>
 
                                                 <b-form-input
@@ -314,12 +322,131 @@
                 </b-card>
             </b-col>
         </b-row>
-        <div class="d-flex justify-content-center" v-if="searching">
+        <div class="d-flex justify-content-center position-relative" v-if="searching">
             <b-spinner
                 variant="secondary"
-                style="width: 5rem; height: 5rem; position: absolute; z-index: 50"
+                style="width: 8rem; height: 8rem; position: absolute; z-index: 50; top: 30px;"
             ></b-spinner>
         </div>
+        <b-modal
+            id="search-tips"
+            size="lg"
+            scrollable
+            title="Search Syntax"
+            hide-header-close
+            ok-only
+        >
+            <div class="p-2">
+                PhiloLogic4's query syntax has 5 basic operators:
+                <ul class="mt-2">
+                    <li>
+                        the plain token, essentially, any word at all, split on space, e.g.
+                        <span
+                            class="code-block"
+                        >token</span>
+                    </li>
+                    <li>
+                        the quoted token--a string in double quotes, which may contain a space, e.g.
+                        <span
+                            class="code-block"
+                        >"token"</span>
+                    </li>
+                    <li>
+                        the range--two tokens separated by a dash, e.g.
+                        <span class="code-block">a-f</span>
+                    </li>
+                    <li>
+                        boolean OR, represented grep-style as
+                        <span class="code-block">|</span>, e.g.
+                        <span class="code-block">token | word</span>
+                    </li>
+                    <li>
+                        boolean NOT, represented SQL-style as
+                        <span class="code-block">NOT</span>, e.g.
+                        <span class="code-block">token.* NOT tokens</span>
+                    </li>
+                </ul>This syntax is the same, but interpreted slightly differently, for the two different types of text query fields: word search
+                and metadata search.
+                <h5 style="margin-top: 20px;">Word Searches</h5>Full-text word search is unique in having the concept of a "term", which is either a single plain/quoted term, or a group
+                of plain/quoted terms joined by
+                <span
+                    class="code-block"
+                >|</span>, optionally followed by
+                <span class="code-block">NOT</span> and another term-like filter expression:
+                <ol class="mt-2">
+                    <li>
+                        plain terms are evaluated without regard to accent. They are currently sensitive to case, to allow for named entity search--this
+                        is currently implemented only for Greek, however. Regexes are permitted.
+                    </li>
+                    <li>quoted terms are case and accent sensitive. Regexes are permitted.</li>
+                    <li>the range is not operational. In the future, stub this out to make hyphenated search terms less of a pain to escape.</li>
+                    <li>
+                        <span class="code-block">OR</span> can conjoin plain and quoted tokens, and precedes evaluation of phrase distance.
+                    </li>
+                    <li>
+                        <span class="code-block">NOT</span> is a filter on a preceding term, but cannot stand alone:
+                        <span
+                            class="code-block"
+                        >a.* NOT abalone</span> is legal,
+                        <span class="code-block">NOT a.*</span> is illegal
+                    </li>
+                </ol>
+
+                <h5 style="margin-top: 20px;">Metadata Searches</h5>Metadata search does not support phrases, but supports more sophisticated Boolean searching:
+                <ol class="mt-2">
+                    <li>plain tokens separated by spaces have an implied AND between them, but are treated as position-independent tokens.</li>Regexes are permitted, but will not span over the bounds of a token.
+                    <li>quoted tokens must now match against the ENTIRE metadata string value in the database, including spaces and punctuations.</li>It will not match a single term within a larger string, no matter how precise. Regexes are permitted
+                    <li>range allows for numeric and string ranges on all metadata fields.</li>
+                    <li>
+                        <span class="code-block">OR</span> can still be used to conjoin plain tokens, preceding the implied Boolean AND, as well
+                        as quoted tokens.
+                    </li>
+                    <li>
+                        <span class="code-block">NOT</span> is still available as both a filter, or a stand-alone negation:
+                        <span
+                            class="code-block"
+                        >contrat NOT social</span> is legal, so is
+                        <span class="code-block">NOT rousseau</span>
+                    </li>
+                </ol>
+
+                <h5 style="margin-top: 20px;">Regexp syntax</h5>Basic regexp syntax, adapted from the
+                <a
+                    href="http://www.gnu.org/software/findutils/manual/html_node/find_html/egrep-regular-expression-syntax.html#egrep-regular-expression-syntax"
+                >egrep regular expression syntax</a>:
+                <ol class="mt-2">
+                    <li>
+                        The character
+                        <span class="code-block">.</span> matches any single character except newline.
+                    </li>
+                    <li>
+                        Bracket expressions can match sets or ranges of characters:
+                        <span
+                            class="code-block"
+                        >[aeiou]</span> or
+                        <span class="code-block">[a-z]</span>,
+                        but will only match a single character unless followed by one of the quantifiers below.
+                    </li>
+                    <li>
+                        <span class="code-block">*</span> indicates that the regular expression should match zero or more occurrences of the previous
+                        character or bracketed group.
+                    </li>
+                    <li>
+                        <span class="code-block">+</span> indicates that the regular expression should match one or more occurrences of the previous
+                        character or bracketed group.
+                    </li>
+                    <li>
+                        <span class="code-block">?</span> indicates that the regular expression should match zero or one occurrence of the previous
+                        character or bracketed group.
+                    </li>
+                </ol>Thus,
+                <span class="code-block">.*</span> is an approximate "match anything" wildcard operator, rather than the more traditional
+                (but less precise)
+                <span
+                    class="code-block"
+                >*</span> in many other search engines.
+            </div>
+        </b-modal>
     </div>
 </template>
 
@@ -351,6 +478,7 @@ export default {
             "formData.results_per_page",
             "formData.start",
             "formData.end",
+            "formData.byte",
             "searching"
         ]),
         formData() {
@@ -399,7 +527,8 @@ export default {
             resultsPerPageOptions: [25, 100, 500, 1000],
             autoCompleteResults: { q: [] },
             arrowCounters: { q: 0 },
-            isOpen: false
+            isOpen: false,
+            showTips: false
         };
     },
     created() {
@@ -496,6 +625,7 @@ export default {
             }
             this.start = "";
             this.end = "";
+            this.byte = "";
             console.log();
             this.formOpen = false;
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
@@ -890,5 +1020,42 @@ export default {
 .is-active {
     background-color: #ddd;
     color: black;
+}
+::placeholder {
+    /* Chrome, Firefox, Opera, Safari 10.1+ */
+    opacity: 0.4; /* Firefox */
+}
+
+:-ms-input-placeholder {
+    /* Internet Explorer 10-11 */
+    opacity: 0.4;
+}
+
+::-ms-input-placeholder {
+    /* Microsoft Edge */
+    opacity: 0.4;
+}
+input:focus::placeholder {
+    /* Chrome, Firefox, Opera, Safari 10.1+ */
+    opacity: 0; /* Firefox */
+}
+
+input:focus:-ms-input-placeholder {
+    /* Internet Explorer 10-11 */
+    opacity: 0;
+}
+
+input:focus::-ms-input-placeholder {
+    /* Microsoft Edge */
+    opacity: 0;
+}
+li {
+    list-style-type: disc;
+}
+.code-block {
+    font-family: monospace;
+    font-size: 120%;
+    background-color: #ededed;
+    padding: 0px 4px;
 }
 </style>

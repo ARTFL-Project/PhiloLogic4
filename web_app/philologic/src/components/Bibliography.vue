@@ -10,7 +10,7 @@
             >
                 <b-card
                     no-body
-                    class="philologic-occurrence ml-4 mr-4 mb-4 shadow-sm"
+                    class="philologic-occurrence ml-4 mr-4 mb-4 shadow-sm p-1"
                     v-for="(result, index) in results.results"
                     :key="index"
                 >
@@ -20,39 +20,11 @@
                                 <span class="result-number">{{ results.description.start + index }}</span>
                                 <input
                                     type="checkbox"
-                                    style="margin-left:10px; margin-right: 10px;"
+                                    class="ml-3 mr-2"
                                     @click="addToSearch(result.metadata_fields.title)"
                                     v-if="resultType == 'doc' && philoConfig.metadata.indexOf('title') !== -1"
                                 >
-                                <span class="philologic_cite">
-                                    <span
-                                        class="citation"
-                                        v-for="(citation, citeIndex) in result.citation"
-                                        :key="citeIndex"
-                                    >
-                                        <span v-if="citation.href">
-                                            <span v-html="citation.prefix"></span>
-                                            <router-link
-                                                :to="'/' + citation.href"
-                                                :style="citation.style"
-                                            >{{ citation.label }}</router-link>
-                                            <span v-html="citation.suffix"></span>
-                                            <span
-                                                class="separator"
-                                                v-if="citeIndex != result.citation.length - 1"
-                                            >&#9679;</span>
-                                        </span>
-                                        <span v-if="!citation.href">
-                                            <span v-html="citation.prefix"></span>
-                                            <span :style="citation.style">{{ citation.label }}</span>
-                                            <span v-html="citation.suffix"></span>
-                                            <span
-                                                class="separator"
-                                                v-if="citeIndex != result.citation.length - 1"
-                                            >&#9679;</span>
-                                        </span>
-                                    </span>
-                                </span>
+                                <citations :citation="result.citation"></citations>
                             </span>
                         </b-col>
                     </b-row>
@@ -125,6 +97,7 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import { EventBus } from "../main.js";
+import citations from "./Citations";
 import conckwic from "./ConcordanceKwic";
 import facets from "./Facets";
 import pages from "./Pages";
@@ -132,6 +105,7 @@ import pages from "./Pages";
 export default {
     name: "bibliography",
     components: {
+        citations,
         conckwic,
         facets,
         pages
@@ -203,5 +177,8 @@ export default {
 };
 </script>
 <style scoped>
+.citation-container {
+    border-width: 0 !important;
+}
 </style>
 

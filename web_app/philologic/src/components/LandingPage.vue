@@ -45,33 +45,7 @@
                                     v-for="(biblioObj, bibIndex) in bibliography.results"
                                     :key="bibIndex"
                                 >
-                                    <span
-                                        class="citation"
-                                        v-for="(citation, citeIndex) in biblioObj.citation"
-                                        :key="citeIndex"
-                                    >
-                                        <span v-if="citation.href">
-                                            <span v-html="citation.prefix"></span>
-                                            <router-link
-                                                :to="'/' + citation.href"
-                                                :style="citation.style"
-                                            >{{ citation.label }}</router-link>
-                                            <span v-html="citation.suffix"></span>
-                                            <span
-                                                class="separator"
-                                                v-if="citeIndex != biblioObj.citation.length - 1"
-                                            >&#9679;</span>
-                                        </span>
-                                        <span v-if="!citation.href">
-                                            <span v-html="citation.prefix"></span>
-                                            <span :style="citation.style">{{ citation.label }}</span>
-                                            <span v-html="citation.suffix"></span>
-                                            <span
-                                                class="separator"
-                                                v-if="citeIndex != biblioObj.citation.length - 1"
-                                            >&#9679;</span>
-                                        </span>
-                                    </span>
+                                    <citations :citation="biblioObj.citation"></citations>
                                 </b-list-group-item>
                             </b-list-group>
                         </b-card>
@@ -110,33 +84,7 @@
                                 v-for="(result, resultIndex) in group.results"
                                 :key="resultIndex"
                             >
-                                <span
-                                    class="citation"
-                                    v-for="(citation, citeIndex) in result.citation"
-                                    :key="citeIndex"
-                                >
-                                    <span v-if="citation.href">
-                                        <span v-html="citation.prefix"></span>
-                                        <router-link
-                                            :to="'/' + citation.href"
-                                            :style="citation.style"
-                                        >{{ citation.label }}</router-link>
-                                        <span v-html="citation.suffix"></span>
-                                        <span
-                                            class="separator"
-                                            v-if="citeIndex != result.citation.length - 1"
-                                        >&#9679;</span>
-                                    </span>
-                                    <span v-if="!citation.href">
-                                        <span v-html="citation.prefix"></span>
-                                        <span :style="citation.style">{{ citation.label }}</span>
-                                        <span v-html="citation.suffix"></span>
-                                        <span
-                                            class="separator"
-                                            v-if="citeIndex != result.citation.length - 1"
-                                        >&#9679;</span>
-                                    </span>
-                                </span>
+                                <citations :citation="result.citation"></citations>
                                 <span v-if="displayCount == 'true'">&nbsp;({{ result.count }})</span>
                             </li>
                         </b-card>
@@ -148,8 +96,13 @@
     </div>
 </template>
 <script>
+import citations from "./Citations";
+
 export default {
     name: "landingPage",
+    components: {
+        citations
+    },
     computed: {},
     data() {
         return {
@@ -161,11 +114,13 @@ export default {
             displayCount: true,
             resultGroups: [],
             contentType: "",
-            loadingContent: false
+            loadingContent: false,
+            selectedField: ""
         };
     },
     methods: {
         getContent(browseType, range) {
+            this.selectedField = browseType.group_by_field;
             let query = {
                 browseType: browseType,
                 query: range
@@ -184,7 +139,13 @@ export default {
                     }
                 )
                 .then(response => {
-                    this.resultGroups = response.data.content;
+                    if (browseType.group_by_field == "author") {
+                        this.resultGroups = this.groupByAuthor(
+                            response.data.content
+                        );
+                    } else {
+                        this.resultGroups = response.data.content;
+                    }
                     this.displayCount = response.data.display_count;
                     this.contentType = response.data.content_type;
                     this.loadingContent = false;
@@ -192,6 +153,37 @@ export default {
                 .catch(response => {
                     this.loadingContent = false;
                 });
+        },
+        groupByAuthor(letterGroups) {
+            var groupedResults = [];
+            for (let group of letterGroups) {
+                // console.log(group.results);
+                var localGroup = [];
+                for (let i = 0; i < group.results.length; i += 1) {
+                    const innerGroup = group.results[i];
+                    const citations = innerGroup.citation;
+                    let authorName = innerGroup.metadata.author;
+                    let savedCitation = "";
+                    for (let c = 0; c < citations.length; c += 1) {
+                        let citation = citations[c];
+                        if (citation.label == authorName) {
+                            savedCitation = citation;
+                            break;
+                        }
+                    }
+                    localGroup.push({
+                        metadata: innerGroup.metadata,
+                        citation: [savedCitation],
+                        count: innerGroup.count,
+                        normalized: innerGroup.normalized
+                    });
+                }
+                groupedResults.push({
+                    prefix: group.prefix,
+                    results: localGroup
+                });
+            }
+            return groupedResults;
         }
     }
 };

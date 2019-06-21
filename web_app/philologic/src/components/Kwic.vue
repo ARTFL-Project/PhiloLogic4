@@ -142,6 +142,7 @@ export default {
         this.initializeKwic();
         this.fetchResults();
         EventBus.$on("urlUpdate", () => {
+            console.log("update KWIC");
             if (this.report == "kwic") {
                 this.fetchResults();
                 console.log("updated");

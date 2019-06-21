@@ -7,10 +7,7 @@
             id="facet-panel-wrapper"
             class="shadow-sm"
         >
-            <h6 slot="header" class="mb-0 text-center">
-                Browse by facet
-                <!-- <b-button class="close-box" @click="hideFacets()">x</b-button> -->
-            </h6>
+            <h6 slot="header" class="mb-0 text-center">Browse by facet</h6>
             <b-list-group flush id="select-facets" v-if="showFacetSelection">
                 <span class="dropdown-header text-center">Frequency by</span>
                 <b-list-group-item
@@ -20,8 +17,7 @@
                     class="facet-selection"
                 >{{ facet.alias }}</b-list-group-item>
             </b-list-group>
-            <hr v-if="showFacetSelection && report != 'bibliography'">
-            <b-list-group flush v-if="showFacetSelection && report != 'bibliography'">
+            <b-list-group flush v-if="showFacetSelection && report != 'bibliography'" class="mt-2">
                 <span class="dropdown-header text-center">Collocates of query term(s)</span>
                 <b-list-group-item
                     @click="getFacet(collocationFacet)"
@@ -36,6 +32,12 @@
                 @click="showFacetOptions()"
             >Show Options</div>
         </b-card>
+        <div class="d-flex justify-content-center position-relative" v-if="loading">
+            <b-spinner
+                variant="secondary"
+                style="width: 4rem; height: 4rem; position: absolute; z-index: 50; top: 10px;"
+            ></b-spinner>
+        </div>
         <b-card no-body id="facet-results" class="mt-3 shadow-sm" v-if="showFacetResults">
             <h6 slot="header" class="mb-0 text-center">
                 <span>Frequency by {{selectedFacet.alias}}</span>
@@ -287,6 +289,7 @@ export default {
                         this.loading = false;
                     });
             } else {
+                this.loading = false;
                 this.runningTotal = this.resultsLength;
                 this.fullResults = fullResults;
                 let urlString = this.paramsToUrlString({
@@ -367,6 +370,9 @@ export default {
             }
         },
         facetClick(metadata) {
+            metadata[this.selectedFacet.facet] = `"${
+                metadata[this.selectedFacet.facet]
+            }"`;
             this.$store.commit("updateMetadata", metadata);
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         }

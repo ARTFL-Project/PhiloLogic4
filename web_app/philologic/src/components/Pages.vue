@@ -1,5 +1,5 @@
 <template>
-    <div id="page-links" class="mt-2 pb-4 text-center" v-if="pages.length > 0">
+    <div id="page-links" class="mt-4 pb-4 text-center" v-if="pages.length > 0">
         <b-row>
             <b-col cols="12" sm="10" offset-sm="1" md="8" offset-md="2">
                 <b-button-group class="shadow">
@@ -8,9 +8,11 @@
                         :key="page.display"
                         :class="page.active"
                         variant="outline-secondary"
-                        size="lg"
                         :to="page.route"
-                    >{{ page.display }}</b-button>
+                    >
+                        <span class="page-number">{{ page.display }}</span>
+                        <span class="page-range">{{ page.range }}</span>
+                    </b-button>
                 </b-button-group>
             </b-col>
         </b-row>
@@ -34,11 +36,11 @@ export default {
     },
     created() {
         EventBus.$on("totalResultsDone", () => {
-            this.pages = this.buildPages();
+            this.buildPages();
         });
         EventBus.$on("urlUpdate", () => {
             this.pages = [];
-            this.pages = this.buildPages();
+            this.buildPages();
         });
     },
     methods: {
@@ -124,11 +126,29 @@ export default {
                 pageObject.push({
                     display: page,
                     route: route,
-                    active: active
+                    active: active,
+                    range: `${pageStart}-${pageEnd}`
                 });
             }
-            return pageObject;
+            this.pages = pageObject;
         }
     }
 };
 </script>
+<style scoped>
+.page {
+    transition: width 0.4s ease !important;
+    /* overflow: hidden; */
+}
+.btn {
+    line-height: initial !important;
+}
+.page-number {
+    display: block;
+}
+.page-range {
+    font-size: 70%;
+    opacity: 0.7;
+}
+</style>
+

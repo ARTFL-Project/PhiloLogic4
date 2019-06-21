@@ -11,37 +11,9 @@
                 >
                     <b-row class="citation-container">
                         <b-col cols="12" sm="10" md="11">
-                            <span class="cite" :data-id="result.philo_id.join(' ')">
-                                <span class="result-number">{{ results.description.start + index }}</span>
-                                <span class="philologic_cite">
-                                    <span
-                                        class="citation"
-                                        v-for="(citation, citeIndex) in result.citation"
-                                        :key="citeIndex"
-                                    >
-                                        <span v-if="citation.href">
-                                            <span v-html="citation.prefix"></span>
-                                            <router-link
-                                                :to="'/' + citation.href"
-                                                :style="citation.style"
-                                            >{{ citation.label }}</router-link>
-                                            <span v-html="citation.suffix"></span>
-                                            <span
-                                                class="separator"
-                                                v-if="citeIndex != result.citation.length - 1"
-                                            >&#9679;</span>
-                                        </span>
-                                        <span v-if="!citation.href">
-                                            <span v-html="citation.prefix"></span>
-                                            <span :style="citation.style">{{ citation.label }}</span>
-                                            <span v-html="citation.suffix"></span>
-                                            <span
-                                                class="separator"
-                                                v-if="citeIndex != result.citation.length - 1"
-                                            >&#9679;</span>
-                                        </span>
-                                    </span>
-                                </span>
+                            <span class="cite">
+                                <span class="number">{{ description.start + index }}</span>
+                                <citations :citation="result.citation"></citations>
                             </span>
                         </b-col>
                         <b-col sm="2" md="1" class="hidden-xs">
@@ -76,6 +48,7 @@
 
 <script>
 import { mapFields } from "vuex-map-fields";
+import citations from "./Citations";
 import conckwic from "./ConcordanceKwic";
 import facets from "./Facets";
 import pages from "./Pages";
@@ -84,6 +57,7 @@ import { EventBus } from "../main.js";
 export default {
     name: "concordance",
     components: {
+        citations,
         conckwic,
         facets,
         pages
@@ -206,7 +180,7 @@ export default {
 .citation-container {
     border-bottom: solid 1px #eee !important;
 }
-.result-number {
+.number {
     background-color: rgb(78, 93, 108);
     color: #fff;
     padding: 7px;
