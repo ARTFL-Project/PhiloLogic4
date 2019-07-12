@@ -6,7 +6,14 @@
                 :class="{'dictionary': philoConfig.dictionary}"
                 v-if="philoConfig.logo"
             >
-                <img style="max-height: 300px; width: auto;" :src="philoConfig.logo">
+                <img style="max-height: 300px; width: auto;" :src="philoConfig.logo" />
+            </div>
+            <div class="d-flex justify-content-center position-relative">
+                <b-spinner
+                    v-if="loading"
+                    variant="secondary"
+                    style="width: 4rem; height: 4rem; position: absolute; z-index: 50; top: 10px;"
+                ></b-spinner>
             </div>
             <div id="default-landing-page" v-if="landingPageBrowsing === 'default'">
                 <b-row id="landingGroup">
@@ -114,8 +121,8 @@ export default {
             displayCount: true,
             resultGroups: [],
             contentType: "",
-            loadingContent: false,
-            selectedField: ""
+            selectedField: "",
+            loading: false
         };
     },
     methods: {
@@ -125,6 +132,7 @@ export default {
                 browseType: browseType,
                 query: range
             };
+            this.loading = true;
             this.$http
                 .get(
                     "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_landing_page_content.py",
@@ -148,16 +156,15 @@ export default {
                     }
                     this.displayCount = response.data.display_count;
                     this.contentType = response.data.content_type;
-                    this.loadingContent = false;
+                    this.loading = false;
                 })
                 .catch(response => {
-                    this.loadingContent = false;
+                    this.loading = false;
                 });
         },
         groupByAuthor(letterGroups) {
             var groupedResults = [];
             for (let group of letterGroups) {
-                // console.log(group.results);
                 var localGroup = [];
                 for (let i = 0; i < group.results.length; i += 1) {
                     const innerGroup = group.results[i];

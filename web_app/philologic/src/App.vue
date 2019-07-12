@@ -158,4 +158,8 @@ body {
 .toc-div3:hover {
     cursor: pointer;
 }
+br {
+    content: " ";
+    display: block;
+}
 </style>

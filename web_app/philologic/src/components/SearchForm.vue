@@ -194,10 +194,10 @@
                                                     :placeholder="localField.example"
                                                     v-model="metadataValues[localField.value]"
                                                     @input="onChange(localField.value)"
-                                                    @keyup.down.native="onArrowDown(localField.value)"
-                                                    @keyup.up.native="onArrowUp(localField.value)"
+                                                    @keydown.down.native="onArrowDown(localField.value)"
+                                                    @keydown.up.native="onArrowUp(localField.value)"
                                                     @keyup.enter.native="onEnter(localField.value)"
-                                                >
+                                                />
                                                 <ul
                                                     :id="'autocomplete-' + localField.value"
                                                     class="autocomplete-results shadow"
@@ -254,7 +254,7 @@
                                                 id="start_date"
                                                 style="width:35px;"
                                                 v-model="start_date"
-                                            >
+                                            />
                                             to
                                             <input
                                                 type="text"
@@ -262,7 +262,7 @@
                                                 id="end_date"
                                                 style="width:35px;"
                                                 v-model="end_date"
-                                            >
+                                            />
                                         </b-col>
                                     </b-row>
                                     <b-row id="date_range" v-if="report == 'time_series'">
@@ -275,7 +275,7 @@
                                                 id="year_interval"
                                                 style="width:35px; text-align: center;"
                                                 v-model="year_interval"
-                                            >&nbsp;years
+                                            />&nbsp;years
                                         </b-col>
                                     </b-row>
                                     <b-row
@@ -526,7 +526,7 @@ export default {
             selectedSortValues: "rowid",
             resultsPerPageOptions: [25, 100, 500, 1000],
             autoCompleteResults: { q: [] },
-            arrowCounters: { q: 0 },
+            arrowCounters: { q: -1 },
             isOpen: false,
             showTips: false
         };
@@ -551,13 +551,15 @@ export default {
                 ];
             }
             this.$set(this.autoCompleteResults, metadataField, []);
-            this.$set(this.arrowCounters, metadataField, 0);
-            // this.arrowCounters[metadataField] = 0;
+            this.$set(this.arrowCounters, metadataField, -1);
         }
-        var vm = this;
-        EventBus.$on("metadataUpdate", function(metadata) {
+        EventBus.$on("metadataUpdate", metadata => {
             for (let field in metadata) {
-                vm.metadataValues[field] = metadata[field];
+                this.metadataValues[field] = metadata[field];
+            }
+            for (let metadataField of this.philoConfig.metadata) {
+                this.$set(this.autoCompleteResults, metadataField, []);
+                this.$set(this.arrowCounters, metadataField, -1);
             }
         });
     },
@@ -719,16 +721,22 @@ export default {
             window.addEventListener("click", clearAutocomplete);
         },
         onArrowDown(field) {
+            // if (this.arrowCounters[field] == -1) {
+            //     this.arrowCounters[field] = 0;
+            // }
             if (
                 this.arrowCounters[field] <
                 this.autoCompleteResults[field].length
             ) {
                 this.arrowCounters[field] = this.arrowCounters[field] + 1;
             }
-
-            let container = document.getElementById(`autocomplete-${field}`);
-            let topOffset = container.scrollTop;
-            container.scrollTop = topOffset + 36;
+            if (this.arrowCounters[field] > 5) {
+                let container = document.getElementById(
+                    `autocomplete-${field}`
+                );
+                let topOffset = container.scrollTop;
+                container.scrollTop = topOffset + 36;
+            }
         },
         onArrowUp(field) {
             if (this.arrowCounters[field] > 0) {
@@ -752,6 +760,12 @@ export default {
         },
         setResult(result, field) {
             let update = {};
+            if (result.startsWith('"')) {
+                result = result.slice(1);
+            }
+            if (result.endsWith('"')) {
+                result = result.slice(0, result.length - 1);
+            }
             let selected = `"${result.replace(/<[^>]+>/g, "")}"`;
             update[field] = selected;
             if (field == "q") {

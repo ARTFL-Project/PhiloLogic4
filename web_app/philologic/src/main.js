@@ -2,6 +2,7 @@ import Vue from 'vue'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import vueScrollTo from 'vue-scrollto'
 import "animate.css/animate.min.css"
 import App from './App.vue'
 import router from './router'
@@ -10,6 +11,7 @@ import axios from 'axios'
 
 Vue.config.productionTip = false
 Vue.prototype.$http = axios
+Vue.prototype.$scrollTo = vueScrollTo.scrollTo
 
 export const EventBus = new Vue() // To pass messages between components
 

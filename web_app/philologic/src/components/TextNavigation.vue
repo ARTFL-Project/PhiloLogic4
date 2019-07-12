@@ -37,6 +37,13 @@
                         @click="goToTextObject(textObject.next)"
                     >&gt;</b-button>
                 </b-button-group>
+                <a
+                    id="report-error"
+                    class="btn btn-secondary btn-sm position-absolute"
+                    target="_blank "
+                    :href="philoConfig.report_error_link"
+                    v-if="philoConfig.report_error_link !='' "
+                >Report Error</a>
                 <div id="toc-wrapper">
                     <div id="toc-titlebar" class="d-none">
                         <b-button
@@ -80,13 +87,6 @@
                                 @click="loadAfter()"
                             ></b-button>
                         </div>
-                        <a
-                            id="report-error"
-                            class="btn btn-primary btn-sm"
-                            target="_blank "
-                            :href="philoConfig.report_error_link"
-                            v-if="philoConfig.report_error_link !='' "
-                        >Report Error</a>
                     </b-card>
                 </div>
             </b-col>
@@ -314,14 +314,24 @@ export default {
                     //     });
                     // }
                     if (this.byte != "") {
-                        this.$nextTick(function() {
-                            this.scrollToHighlight(".highlight");
-                        });
+                        this.$nextTick(() => {
+                            this.$scrollTo(
+                                document.querySelectorAll(".highlight")[0],
+                                1000,
+                                { easing: "ease-out", offset: -100 }
+                            );
+                        }, 1000);
                     }
                     if (this.start_byte != "") {
-                        this.$nextTick(function() {
-                            this.scrollToHighlight(".start-highlight");
-                        });
+                        this.$nextTick(() => {
+                            this.$scrollTo(
+                                document.querySelectorAll(
+                                    ".start-highlight"
+                                )[0],
+                                1000,
+                                { easing: "ease-out", offset: -100 }
+                            );
+                        }, 1000);
                     }
 
                     if (!this.deepEqual(response.data.imgs, {})) {
@@ -334,16 +344,6 @@ export default {
                     console.log(response);
                     this.loading = false;
                 });
-        },
-        scrollToHighlight(elementClass) {
-            let offsetTop =
-                document
-                    .querySelectorAll(elementClass)[0]
-                    .getBoundingClientRect().top - 100;
-            window.scrollBy({
-                top: offsetTop,
-                behavior: "smooth"
-            });
         },
         insertPageLinks(imgObj) {
             let currentObjImgs = imgObj.current_obj_img;
@@ -542,37 +542,15 @@ export default {
             }
         },
         openTableOfContents() {
-            // angular.element('#toc-wrapper').addClass('display');
             this.tocOpen = true;
-            this.$nextTick(function() {
-                let tocContent = document.querySelector("#toc-content");
-                tocContent.style.maxHeight = `${window.innerHeight - 450}px`;
-                let offsetTop =
-                    tocContent
-                        .querySelector(".current-obj")
-                        .getBoundingClientRect().top - 335;
-                tocContent.scrollBy({
-                    top: offsetTop,
-                    behavior: "smooth"
+            this.$nextTick(() => {
+                this.$scrollTo(document.querySelector(".current-obj"), 500, {
+                    container: document.querySelector("#toc-content")
                 });
             });
-            // $timeout(function() {
-            //     angular.element('.current-obj').velocity("scroll", {
-            //         duration: 500,
-            //         container: angular.element("#toc-content"),
-            //         offset: -50
-            //     });
-            // }, 300);
         },
         closeTableOfContents() {
-            // angular.element('#toc-wrapper').removeClass('display');
             this.tocOpen = false;
-            // angular.element("#toc-content").scrollTop(0);
-            // $timeout(function() {
-            //     if (angular.element(document).height() == angular.element(window).height()) {
-            //         angular.element('#toc-container').css('position', 'static');
-            //     }
-            // });
         },
         backToTop() {
             window.scrollTo({ top: 0, behavior: "smooth" });
@@ -632,6 +610,8 @@ export default {
                     navButtons.classList.add("fixed");
                     let backToTop = document.querySelector("#back-to-top");
                     backToTop.classList.add("visible");
+                    let reportError = document.querySelector("#report-error");
+                    reportError.classList.add("visible");
                     console.log("passed buttons");
                 }
             } else if (window.scrollY < this.navButtonPosition) {
@@ -644,6 +624,8 @@ export default {
                 navButtons.classList.remove("fixed");
                 let backToTop = document.querySelector("#back-to-top");
                 backToTop.classList.remove("visible");
+                let reportError = document.querySelector("#report-error");
+                reportError.classList.remove("visible");
             }
         },
         dicoLookup(event, year) {
@@ -715,7 +697,14 @@ export default {
     transition: opacity 0.25s;
     pointer-events: none;
 }
-#back-to-top.visible {
+#report-error {
+    right: 0;
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+}
+#back-to-top.visible,
+#report-error.visible {
     pointer-events: initial;
     opacity: 0.95;
 }
