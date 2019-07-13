@@ -8,29 +8,37 @@
             class="shadow-sm"
         >
             <h6 slot="header" class="mb-0 text-center">Browse by facet</h6>
-            <b-list-group flush id="select-facets" v-if="showFacetSelection">
-                <span class="dropdown-header text-center">Frequency by</span>
-                <b-list-group-item
-                    v-for="facet in facets"
-                    :key="facet.alias"
-                    @click="getFacet(facet)"
-                    class="facet-selection"
-                >{{ facet.alias }}</b-list-group-item>
-            </b-list-group>
-            <b-list-group flush v-if="showFacetSelection && report != 'bibliography'" class="mt-2">
-                <span class="dropdown-header text-center">Collocates of query term(s)</span>
-                <b-list-group-item
-                    @click="getFacet(collocationFacet)"
-                    v-if="report !== 'bibliography'"
-                    class="facet-selection"
-                >{{ collocationFacet.alias }}</b-list-group-item>
-            </b-list-group>
-            <div
-                class="m-2 text-center"
-                style="width: 100%; font-size: 90%; opacity: 0.8; cursor: pointer"
-                v-if="!showFacetSelection"
-                @click="showFacetOptions()"
-            >Show Options</div>
+            <transition name="slide-fade">
+                <b-list-group flush id="select-facets" v-if="showFacetSelection">
+                    <span class="dropdown-header text-center">Frequency by</span>
+                    <b-list-group-item
+                        v-for="facet in facets"
+                        :key="facet.alias"
+                        @click="getFacet(facet)"
+                        class="facet-selection"
+                    >{{ facet.alias }}</b-list-group-item>
+                </b-list-group>
+                <b-list-group
+                    flush
+                    v-if="showFacetSelection && report != 'bibliography'"
+                    class="mt-2"
+                >
+                    <span class="dropdown-header text-center">Collocates of query term(s)</span>
+                    <b-list-group-item
+                        @click="getFacet(collocationFacet)"
+                        v-if="report !== 'bibliography'"
+                        class="facet-selection"
+                    >{{ collocationFacet.alias }}</b-list-group-item>
+                </b-list-group>
+            </transition>
+            <transition name="options-slide">
+                <div
+                    class="m-2 text-center"
+                    style="width: 100%; font-size: 90%; opacity: 0.8; cursor: pointer;"
+                    v-if="!showFacetSelection"
+                    @click="showFacetOptions()"
+                >Show Options</div>
+            </transition>
         </b-card>
         <div class="d-flex justify-content-center position-relative" v-if="loading">
             <b-spinner
@@ -403,6 +411,28 @@ export default {
 }
 .facet-selection:hover {
     font-weight: 700;
+}
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+.slide-fade-leave-active {
+    transition: all 0.3s ease-out;
+}
+.slide-fade-enter,
+.slide-fade-leave-to {
+    transform: translateY(-10px);
+    height: 0;
+    opacity: 0;
+}
+.options-slide-fade-enter-active {
+    transition: all 0.3s ease-in;
+}
+.options-slide-fade-leave-active {
+    transition: all 0.3s ease-in;
+}
+.options-slide-fade-enter,
+.options-slide-fade-leave-to {
+    opacity: 0;
 }
 </style>
 

@@ -52,42 +52,47 @@
                             @click="toggleTableOfContents()"
                         >X</b-button>
                     </div>
-                    <b-card
-                        no-body
-                        id="toc-content"
-                        class="p-3 shadow"
-                        :style="tocHeight"
-                        :scroll-to="tocPosition"
-                        v-if="tocOpen"
-                    >
-                        <div class="toc-more before" v-if="start !== 0">
-                            <b-button
-                                type="button"
-                                class="btn btn-default btn-sm glyphicon glyphicon-menu-up"
-                                @click="loadBefore()"
-                            ></b-button>
-                        </div>
-                        <div v-for="(element, tocIndex) in tocElementsToDisplay" :key="tocIndex">
-                            <div
-                                :id="element.philo_id"
-                                :class="'toc-' + element.philo_type"
-                                @click="textObjectSelection(element.philo_id, tocIndex)"
-                            >
-                                <span :class="'bullet-point-' + element.philo_type"></span>
-                                <a
-                                    :class="{'current-obj': element.philo_id === currentPhiloId }"
-                                    href
-                                >{{ element.label }}</a>
+                    <transition name="slide-fade">
+                        <b-card
+                            no-body
+                            id="toc-content"
+                            class="p-3 shadow"
+                            :style="tocHeight"
+                            :scroll-to="tocPosition"
+                            v-if="tocOpen"
+                        >
+                            <div class="toc-more before" v-if="start !== 0">
+                                <b-button
+                                    type="button"
+                                    class="btn btn-default btn-sm glyphicon glyphicon-menu-up"
+                                    @click="loadBefore()"
+                                ></b-button>
                             </div>
-                        </div>
-                        <div class="toc-more after" v-if="end < tocElements.length">
-                            <b-button
-                                type="button"
-                                class="btn btn-default btn-sm glyphicon glyphicon-menu-down"
-                                @click="loadAfter()"
-                            ></b-button>
-                        </div>
-                    </b-card>
+                            <div
+                                v-for="(element, tocIndex) in tocElementsToDisplay"
+                                :key="tocIndex"
+                            >
+                                <div
+                                    :id="element.philo_id"
+                                    :class="'toc-' + element.philo_type"
+                                    @click="textObjectSelection(element.philo_id, tocIndex)"
+                                >
+                                    <span :class="'bullet-point-' + element.philo_type"></span>
+                                    <a
+                                        :class="{'current-obj': element.philo_id === currentPhiloId }"
+                                        href
+                                    >{{ element.label }}</a>
+                                </div>
+                            </div>
+                            <div class="toc-more after" v-if="end < tocElements.length">
+                                <b-button
+                                    type="button"
+                                    class="btn btn-default btn-sm glyphicon glyphicon-menu-down"
+                                    @click="loadAfter()"
+                                ></b-button>
+                            </div>
+                        </b-card>
+                    </transition>
                 </div>
             </b-col>
         </b-row>
@@ -648,7 +653,10 @@ export default {
             }
         }
     },
-    beforeDestroy: () => {}
+    beforeDestroy: () => {
+        console.log("destroy");
+        // window.removeEventListener("scroll");
+    }
 };
 </script>
 <style scoped>
@@ -1118,6 +1126,17 @@ body {
     display: table-cell;
     padding-top: inherit; /*inherit padding when image is above */
     padding-bottom: inherit;
+}
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+.slide-fade-leave-active {
+    transition: all 0.3s ease-out;
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active below version 2.1.8 */ {
+    transform: translateY(-30px);
+    opacity: 0;
 }
 </style>
 

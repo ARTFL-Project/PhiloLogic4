@@ -304,7 +304,7 @@ export default {
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         },
         removeTerm(index) {
-            let queryTermGroup = this.description.termGroups;
+            let queryTermGroup = this.copyObject(this.description.termGroups);
             queryTermGroup.splice(index, 1);
             this.q = queryTermGroup.join(" ");
             if (queryTermGroup.length === 0) {
@@ -317,6 +317,10 @@ export default {
                 this.arg_proxy = "";
                 this.arg_phrase = "";
             }
+            this.$store.commit("updateDescription", {
+                ...this.description,
+                termGroups: queryTermGroup
+            });
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         }
     }

@@ -3,7 +3,6 @@ import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import vueScrollTo from 'vue-scrollto'
-import "animate.css/animate.min.css"
 import App from './App.vue'
 import router from './router'
 import store from './store'
@@ -154,12 +153,15 @@ Vue.mixin({
 
 Vue.directive('scroll', {
     inserted: function(el, binding) {
-        let f = function(evt) {
+        el.scrollHandler = function(evt) {
             if (binding.value(evt, el)) {
-                window.removeEventListener('scroll', f)
+                window.removeEventListener('scroll', el.scrollHandler)
             }
         }
-        window.addEventListener('scroll', f)
+        window.addEventListener('scroll', el.scrollHandler)
+    },
+    unbind: function(el, binding) {
+        window.removeEventListener("scroll", el.scrollHandler)
     }
 })
 

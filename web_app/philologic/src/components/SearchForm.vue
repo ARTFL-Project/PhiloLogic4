@@ -89,10 +89,7 @@
                                     </b-row>
                                 </div>
                             </div>
-                            <transition
-                                enter-active-class="animated fadeInDown"
-                                leave-active-class="animated fadeOutUp"
-                            >
+                            <transition name="slide-fade">
                                 s
                                 <div
                                     id="search-elements"
@@ -453,6 +450,9 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import { EventBus } from "../main.js";
+import Velocity from "velocity-animate";
+import SlideDownIn from "velocity-animate/velocity.ui.min.js";
+import "velocity-animate/velocity.ui.min.js";
 
 export default {
     name: "SearchForm",
@@ -628,8 +628,8 @@ export default {
             this.start = "";
             this.end = "";
             this.byte = "";
-            console.log();
             this.formOpen = false;
+            console.log(this.$store.state.formData);
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         },
         onReset(evt) {
@@ -789,6 +789,34 @@ export default {
             let childOffset = input.offsetLeft - parent.offsetLeft;
             return `left: ${childOffset}px; width: ${input.offsetWidth}px`;
         }
+        // beforeEnter(el) {
+        //     el.style.transform = "translateY(-100%)";
+        //     el.style.opacity = 0;
+        //     el.style.transition = "all .5s ease-in-out";
+        // },
+        // enter: function(el, done) {
+        //     el.style.transform = "translateY(0)";
+        //     el.style.opacity = 1;
+        //     done();
+        //     // Velocity(
+        //     //     el,
+        //     //     { transform: "translateY(0)" },
+        //     //     { duration: 800 },
+        //     //     { complete: done }
+        //     // );
+        // },
+        // leave: function(el, done) {
+        //     console.log("leave");
+        //     el.style.transform = "translateY(-100%)";
+        //     el.style.opacity = 0;
+        //     done();
+        //     // Velocity(
+        //     //     el,
+        //     //     { transform: "translateY(-100%)" },
+        //     //     { duration: 800 },
+        //     //     { complete: done }
+        //     // );
+        // }
     }
 };
 </script>
@@ -800,7 +828,6 @@ export default {
 .dico-margin {
     margin-top: 210px !important;
 }
-
 #search-elements.dico {
     margin-top: 168px;
 }
@@ -1071,5 +1098,16 @@ li {
     font-size: 120%;
     background-color: #ededed;
     padding: 0px 4px;
+}
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+.slide-fade-leave-active {
+    transition: all 0.3s ease-out;
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active below version 2.1.8 */ {
+    transform: translateY(-30px);
+    opacity: 0;
 }
 </style>
