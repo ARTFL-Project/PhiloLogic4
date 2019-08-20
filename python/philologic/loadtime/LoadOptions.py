@@ -149,8 +149,9 @@ class LoadOptions:
         args = parser.parse_args(argv[1:])
         self.values["dbname"] = args.dbname
         if args.file_list is True:
-            with open(args.files) as fh:
-                self.values["files"].append([line.strip() for line in fh])
+            with open(args.files[-1]) as fh:
+                for file_path in fh:
+                    self.values["files"].append(file_path.strip())
         elif len(args.files) == 1 and os.path.isdir(args.files[0]):
             self.values["files"] = glob(os.path.join(args.files[0], "*"))
         else:
