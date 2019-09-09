@@ -783,7 +783,7 @@ def setup_db_dir(db_destination, web_app_dir, force_delete=False):
     try:
         os.mkdir(db_destination)
     except OSError:
-        if force_delete:  # useful to run db loads with nohup
+        if force_delete is True:  # useful to run db loads with nohup
             os.system("rm -rf %s" % db_destination)
             os.mkdir(db_destination)
         else:

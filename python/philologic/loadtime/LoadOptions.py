@@ -158,6 +158,7 @@ class LoadOptions:
             self.values["files"] = args.files
         if args.bibliography is not None:
             self.values["bibliography"] = args.bibliography
+        self.values["force_delete"] = args.force_delete
         self.values["cores"] = args.cores
         self.values["debug"] = args.debug
         self.values["header"] = args.header
@@ -165,8 +166,7 @@ class LoadOptions:
             load_config = LoadConfig()
             load_config.parse(args.load_config)
             for config_key, config_value in load_config.config.items():
-                if config_value:
-                    self.values[config_key] = config_value
+                self.values[config_key] = config_value
             self.values["load_config"] = os.path.abspath(args.load_config)
         self.values["file_type"] = args.file_type
         if args.file_type == "plain_text":
@@ -245,3 +245,5 @@ class LoadConfig:
                         self.config["load_filters"].append(LoadFilters.pos_tagger(value))
                     else:
                         self.config[a] = value
+                elif a == "sort_order":
+                    self.config[a] = value
