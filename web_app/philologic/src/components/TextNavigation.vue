@@ -345,8 +345,8 @@ export default {
                     }
                     this.setUpNavBar();
                 })
-                .catch(response => {
-                    console.log(response);
+                .catch(error => {
+                    this.debug(this, error);
                     this.loading = false;
                 });
         },
@@ -413,30 +413,31 @@ export default {
         insertInlineImgs(imgObj) {
             var currentObjImgs = imgObj.current_graphic_img;
             var allImgs = imgObj.graphics;
+            var img;
             this.beforeGraphicsImgs = [];
             this.afterGraphicsImgs = [];
             if (currentObjImgs.length > 0) {
                 var beforeIndex = 0;
                 for (let i = 0; i < allImgs.length; i++) {
-                    var img = allImgs[i];
+                    img = allImgs[i];
                     if (currentObjImgs.indexOf(img[0]) === -1) {
                         if (img.length == 2) {
                             this.beforeGraphicsImgs.push([
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
-                                    img[0],
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
+                                `${this.philoConfig.page_images_url_root}/${
+                                    img[0]
+                                }`,
+                                `${this.philoConfig.page_images_url_root}/${
                                     img[1]
+                                }`
                             ]);
                         } else {
                             this.beforeGraphicsImgs.push([
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
-                                    img[0],
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
+                                `${this.philoConfig.page_images_url_root}/${
                                     img[0]
+                                }`,
+                                `${this.philoConfig.page_images_url_root}/${
+                                    img[0]
+                                }`
                             ]);
                         }
                     } else {
@@ -445,25 +446,25 @@ export default {
                     }
                 }
                 for (let i = beforeIndex; i < allImgs.length; i++) {
-                    var img = allImgs[i];
+                    img = allImgs[i];
                     if (currentObjImgs.indexOf(img[0]) === -1) {
                         if (img.length == 2) {
                             this.afterGraphicsImgs.push([
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
-                                    img[0],
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
+                                `${this.philoConfig.page_images_url_root}/${
+                                    img[0]
+                                }`,
+                                `${this.philoConfig.page_images_url_root}/${
                                     img[1]
+                                }`
                             ]);
                         } else {
                             this.afterGraphicsImgs.push([
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
-                                    img[0],
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
+                                `${this.philoConfig.page_images_url_root}/${
                                     img[0]
+                                }`,
+                                `${this.philoConfig.page_images_url_root}/${
+                                    img[0]
+                                }`
                             ]);
                         }
                     }
@@ -504,11 +505,10 @@ export default {
                             tocButton.removeAttribute("disabled");
                             tocButton.classList.remove("disabled");
                             this.navButtonPosition = tocButton.getBoundingClientRect().top;
-                            console.log(this.navButtonPosition);
                         });
                     })
                     .catch(error => {
-                        console.log(error);
+                        this.debug(this, error);
                     });
             } else {
                 this.start = this.tocElements.start;
@@ -530,14 +530,6 @@ export default {
         },
         loadAfter() {
             this.end += 200;
-        },
-        textObjectSelection(philoId, index) {
-            this.start = this.start + index - 100;
-            if (this.start < 0) {
-                this.start = 0;
-            }
-            this.end = this.end - index + 100;
-            this.goToTextObject(philoId);
         },
         toggleTableOfContents() {
             if (this.tocOpen) {
@@ -603,7 +595,7 @@ export default {
                 prevButton.classList.remove("disabled");
             }
         },
-        handleScroll(evt) {
+        handleScroll() {
             if (!this.navBarVisible) {
                 if (window.scrollY > this.navButtonPosition) {
                     this.navBarVisible = true;
@@ -617,7 +609,6 @@ export default {
                     backToTop.classList.add("visible");
                     let reportError = document.querySelector("#report-error");
                     reportError.classList.add("visible");
-                    console.log("passed buttons");
                 }
             } else if (window.scrollY < this.navButtonPosition) {
                 this.navBarVisible = false;
@@ -634,21 +625,14 @@ export default {
             }
         },
         dicoLookup(event, year) {
-            var philoId = this.$route.params.pathInfo.split("/").join(" ");
             if (event.key === "d") {
-                var selection = window.getSelection().toString();
-                var century = parseInt(year.slice(0, year.length - 2));
-                var range =
-                    century.toString() + "00-" + String(century + 1) + "00";
+                let selection = window.getSelection().toString();
+                let century = parseInt(year.slice(0, year.length - 2));
+                let range = `${century.toString()}00-${String(century + 1)}00`;
                 if (range == "NaN00-NaN00") {
                     range = "";
                 }
-                var link =
-                    this.philoConfig.dictionary_lookup +
-                    "?docyear=" +
-                    range +
-                    "&strippedhw=" +
-                    selection;
+                let link = `${this.philoConfig.dictionary_lookup}?docyear=${range}&strippedhw=${selection}`;
                 window.open(link);
             }
         }

@@ -160,7 +160,7 @@ export default {
                 .catch(error => {
                     this.loading = false;
                     this.error = error.toString();
-                    console.log(error);
+                    this.debug(this, error);
                 });
         },
         addToSearch(titleValue) {

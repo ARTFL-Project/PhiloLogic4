@@ -19,7 +19,7 @@ Vue.mixin({
         paramsFilter: function(formValues) {
             let localFormData = {}
             let validFields = []
-            if ("report" in formValues) {
+            if ("report" in formValues && formValues.report in this.$store.state.reportValues) {
                 validFields = this.$store.state.reportValues[formValues.report]
             } else {
                 validFields = new Set(Object.keys(formValues))

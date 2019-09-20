@@ -155,7 +155,7 @@ export default {
                     EventBus.$emit("totalResultsDone");
                 })
                 .catch(error => {
-                    console.log(error);
+                    this.debug(this, error);
                 });
         },
         switchReport(reportName) {

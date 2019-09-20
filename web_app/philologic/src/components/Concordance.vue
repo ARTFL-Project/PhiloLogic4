@@ -121,7 +121,7 @@ export default {
                 .catch(error => {
                     this.searching = false;
                     this.error = error.toString();
-                    console.log(error);
+                    this.debug(this, error);
                 });
         },
         moreContext(index) {
@@ -147,7 +147,7 @@ export default {
                         .catch(error => {
                             this.loading = false;
                             this.error = error.toString();
-                            console.log(error);
+                            this.debug(this, error);
                         });
                 } else {
                     defaultNode.style.display = "none";
@@ -165,7 +165,7 @@ export default {
             el.style.opacity = 0;
         },
         enter: function(el, done) {
-            var delay = el.dataset.index * 100;
+            var delay = el.dataset.index * 50;
             setTimeout(function() {
                 Velocity(el, { opacity: 1 }, { complete: done });
             }, delay);

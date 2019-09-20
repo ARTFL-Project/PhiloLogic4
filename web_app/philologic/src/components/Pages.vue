@@ -94,17 +94,18 @@ export default {
             // now we construct the actual links from the page numbers
             var pageObject = [];
             let lastPageName = "";
+            var pageEnd, pageStart, active;
             for (var i = 0; i < pages.length; i++) {
                 var page = pages[i];
-                var pageStart = page * resultsPerPage - resultsPerPage + 1;
-                var pageEnd = page * resultsPerPage;
+                pageStart = page * resultsPerPage - resultsPerPage + 1;
+                pageEnd = page * resultsPerPage;
                 if (page === currentPage) {
-                    var active = "active";
+                    active = "active";
                 } else {
-                    var active = "";
+                    active = "";
                 }
-                var pageStart = resultsPerPage * (page - 1) + 1;
-                var pageEnd = pageStart + resultsPerPage - 1;
+                pageStart = resultsPerPage * (page - 1) + 1;
+                pageEnd = pageStart + resultsPerPage - 1;
                 if (pageEnd > resultsLength) {
                     pageEnd = resultsLength;
                 }
@@ -118,7 +119,7 @@ export default {
                     continue;
                 }
                 lastPageName = page;
-                var route = this.paramsToRoute({
+                let route = this.paramsToRoute({
                     ...this.$store.state.formData,
                     start: pageStart.toString(),
                     end: pageEnd.toString()

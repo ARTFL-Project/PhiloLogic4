@@ -44,7 +44,7 @@
     </div>
 </template>
 <script>
-import Chart from "chart.js/dist/Chart.js";
+import Chart from "chart.js/dist/Chart.min.js";
 import { mapFields } from "vuex-map-fields";
 import searchArguments from "./SearchArguments";
 import { EventBus } from "../main.js";
@@ -285,7 +285,7 @@ export default {
                     this.updateTimeSeries(fullResults);
                 })
                 .catch(function(response) {
-                    console.log(response);
+                    this.debug(this, response);
                 });
         },
         updateTimeSeries(fullResults) {
@@ -322,7 +322,7 @@ export default {
                     );
                 })
                 .catch(response => {
-                    console.log(response);
+                    this.debug(this, response);
                     this.loading = false;
                 });
         },

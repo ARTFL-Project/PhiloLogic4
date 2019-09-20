@@ -67,7 +67,6 @@
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import searchArguments from "./SearchArguments";
-import { EventBus } from "../main.js";
 
 export default {
     name: "tableOfContents",
@@ -109,9 +108,9 @@ export default {
                     this.tocObject = response.data;
                     this.textNavigationCitation = response.data.citation;
                 })
-                .catch(response => {
+                .catch(error => {
                     this.loading = false;
-                    console.log(response);
+                    this.debug(this, error);
                 });
         },
         toggleHeader() {
@@ -132,7 +131,7 @@ export default {
                             this.showHeader = true;
                         })
                         .catch(error => {
-                            console.log(error);
+                            this.debug(this, error);
                         });
                 } else {
                     this.headerButton = "Hide Header";

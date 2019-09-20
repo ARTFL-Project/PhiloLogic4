@@ -147,7 +147,6 @@ export default {
             sortedList: [],
             showFilteredWords: false,
             runningTotal: 0,
-            loading: false,
             collocCloudWords: []
         };
     },
@@ -167,7 +166,6 @@ export default {
     },
     methods: {
         fetchResults() {
-            let urlString = this.paramsToUrlString(this.$store.state.formData);
             this.localFormData = this.copyObject(this.$store.state.formData);
             this.loading = false;
             var collocObject = {};
@@ -194,9 +192,9 @@ export default {
                     start = data.hits_done;
                     this.sortAndRenderCollocation(fullResults, data, start);
                 })
-                .catch(response => {
+                .catch(error => {
                     this.loading = false;
-                    console.log(response);
+                    this.debug(this, error);
                 });
         },
         sortAndRenderCollocation(fullResults, data, start) {
@@ -240,9 +238,6 @@ export default {
             // this.percent = 100;
             this.done = true;
             this.loading = false;
-            angular.element("#philologic_collocation").velocity("fadeIn", {
-                duration: 200
-            });
         },
         collocTableClick(item) {
             this.$router.push(

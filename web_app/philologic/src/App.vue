@@ -63,7 +63,8 @@ export default {
             reportValues.concordance = new Set([
                 ...commonFields,
                 "results_per_page",
-                "sort_by"
+                "sort_by",
+                "hit_num"
             ]);
             reportValues.kwic = new Set([
                 ...commonFields,
@@ -74,6 +75,7 @@ export default {
             ]);
             reportValues.collocation = new Set([
                 ...commonFields,
+                "start",
                 "colloc_filter_choice",
                 "filter_frequency"
             ]);
@@ -81,7 +83,8 @@ export default {
                 ...commonFields,
                 "start_date",
                 "end_date",
-                "year_interval"
+                "year_interval",
+                "max_time"
             ]);
             return reportValues;
         }

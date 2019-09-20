@@ -128,10 +128,6 @@ export default {
     methods: {
         getContent(browseType, range) {
             this.selectedField = browseType.group_by_field;
-            let query = {
-                browseType: browseType,
-                query: range
-            };
             this.loading = true;
             this.$http
                 .get(
@@ -158,7 +154,8 @@ export default {
                     this.contentType = response.data.content_type;
                     this.loading = false;
                 })
-                .catch(response => {
+                .catch(error => {
+                    this.debug(this, error);
                     this.loading = false;
                 });
         },

@@ -297,7 +297,7 @@ export default {
                     .catch(error => {
                         this.searching = false;
                         this.error = error.toString();
-                        console.log(error);
+                        this.debug(this, error);
                     });
             } else {
                 this.start = "0";

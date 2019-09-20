@@ -196,7 +196,7 @@ export default {
                 .catch(error => {
                     this.loading = false;
                     this.error = error.toString();
-                    console.log(error);
+                    this.debug(this, error);
                 });
         },
         buildCriteria() {
@@ -211,7 +211,7 @@ export default {
             }
             let biblio = [];
             if (queryArgs.report === "time_series") {
-                delete queryParams[this.$philoConfig.time_series_year_field];
+                delete queryArgs[this.$philoConfig.time_series_year_field];
             }
             let config = this.$philoConfig;
             let facets = [];
@@ -287,7 +287,7 @@ export default {
                 })
                 .catch(error => {
                     this.error = error.toString();
-                    console.log(error);
+                    this.debug(this, error);
                 });
         },
         closeTermsList() {

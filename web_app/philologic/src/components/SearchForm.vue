@@ -450,8 +450,6 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import { EventBus } from "../main.js";
-import Velocity from "velocity-animate";
-import "velocity-animate/velocity.ui.min.js";
 
 export default {
     name: "SearchForm",
@@ -709,7 +707,7 @@ export default {
                             this.autoCompleteResults[field] = response.data;
                         })
                         .catch(error => {
-                            console.log(error);
+                            this.debug(this, error);
                         });
                 }
             }
@@ -723,9 +721,6 @@ export default {
             window.addEventListener("click", clearAutocomplete);
         },
         onArrowDown(field) {
-            // if (this.arrowCounters[field] == -1) {
-            //     this.arrowCounters[field] = 0;
-            // }
             if (
                 this.arrowCounters[field] <
                 this.autoCompleteResults[field].length
@@ -757,7 +752,9 @@ export default {
         handleClickOutside(evt) {
             if (!this.$el.contains(evt.target)) {
                 this.isOpen = false;
-                this.arrowCounters[field] = 0;
+                for (let field in this.arrowCounters) {
+                    this.arrowCounters[field] = 0;
+                }
             }
         },
         setResult(result, field) {

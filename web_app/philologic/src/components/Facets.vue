@@ -240,9 +240,10 @@ export default {
             }
         },
         populateSidebar(facet, fullResults, start, queryParams) {
+            var promise;
             if (this.moreResults) {
                 if (facet.type !== "collocationFacet") {
-                    var promise = this.$http.get(
+                    promise = this.$http.get(
                         "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_frequency.py",
                         {
                             params: this.paramsFilter({
@@ -252,7 +253,7 @@ export default {
                         }
                     );
                 } else {
-                    var promise = this.$http.get(
+                    promise = this.$http.get(
                         "http://anomander.uchicago.edu/philologic/frantext0917/reports/collocation.py",
                         {
                             params: this.paramsFilter({
@@ -267,14 +268,15 @@ export default {
                     .then(response => {
                         var results = response.data.results;
                         this.moreResults = response.data.more_results;
+                        var merge;
                         if (!this.interrupt && this.selected == facet.alias) {
                             if (facet.type === "collocationFacet") {
-                                var merge = this.mergeResults(
+                                merge = this.mergeResults(
                                     fullResults.unsorted,
                                     response.data.collocates
                                 );
                             } else {
-                                var merge = this.mergeResults(
+                                merge = this.mergeResults(
                                     fullResults.unsorted,
                                     results
                                 );
@@ -296,7 +298,8 @@ export default {
                             this.interrupt = false;
                         }
                     })
-                    .catch(response => {
+                    .catch(error => {
+                        this.debug(this, error);
                         this.loading = false;
                     });
             } else {
@@ -313,7 +316,7 @@ export default {
         roundToTwo(num) {
             return +(Math.round(num + "e+2") + "e-2");
         },
-        getRelativeFrequencies(hitsDone) {
+        getRelativeFrequencies() {
             var relativeResults = {};
             for (var label in this.fullResults.unsorted) {
                 var resultObj = this.fullResults.unsorted[label];
@@ -343,7 +346,7 @@ export default {
                 this.absoluteFrequencies = this.copyObject(this.facetResults);
                 this.percent = 0;
                 this.fullRelativeFrequencies = {};
-                this.getRelativeFrequencies(this, 0);
+                this.getRelativeFrequencies();
             } else {
                 this.absoluteFrequencies = this.copyObject(this.facetResults);
                 this.facetResults = this.relativeFrequencies;
@@ -364,7 +367,6 @@ export default {
                 key: "method",
                 value: "cooc"
             });
-            console.log(this.$store.state.formData);
             this.start = "";
             this.end = "";
             this.report = "concordance";
