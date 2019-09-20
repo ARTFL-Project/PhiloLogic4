@@ -15,7 +15,7 @@
                     </div>
                     <b-button
                         variant="outline-secondary"
-                        v-if="!showFacetedBrowsing && philoConfig.facets.length < 1"
+                        v-if="!showFacetedBrowsing && facets.length < 1"
                         @click="showFacets() "
                     >Show Facets</b-button>
                 </div>
@@ -77,7 +77,7 @@ export default {
     },
     data() {
         return {
-            philoConfig: this.$philoConfig,
+            facets: this.$philoConfig.facets,
             showFacetedBrowsing: false,
             authorized: true,
             hits: 0,
@@ -97,9 +97,7 @@ export default {
     created() {
         this.hits = this.buildDescription();
         this.updateTotalResults();
-        console.log("create concKWIC");
         EventBus.$on("resultsDone", () => {
-            console.log("update concKWIC", this.report);
             this.hits = this.buildDescription();
             this.updateTotalResults();
         });

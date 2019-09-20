@@ -18,21 +18,21 @@ Vue.mixin({
     methods: {
         paramsFilter: function(formValues) {
             let localFormData = {}
+            let validFields = []
+            if ("report" in formValues) {
+                validFields = this.$store.state.reportValues[formValues.report]
+            } else {
+                validFields = new Set(Object.keys(formValues))
+            }
             for (const field in formValues) {
                 let value = formValues[field]
-                if (typeof value == "undefined") {
-                    console.log(field)
-                }
                 if (field === 'report') {
                     continue
                 }
-                if (field === 'metadataFields') {
-                    for (let metadataField in value) {
-                        if (value[metadataField].length > 0 || Number.isInteger(value[metadataField])) {
-                            localFormData[metadataField] = value[metadataField]
-                        }
-                    }
-                } else if (value.length > 0 || field === 'results_per_page') {
+                if (!validFields.has(field)) {
+                    continue
+                }
+                if (value.length > 0 || field === 'results_per_page') {
                     if (
                         (field === 'method' && value === 'proxy') ||
                         (field === 'approximate' && value == 'no') ||

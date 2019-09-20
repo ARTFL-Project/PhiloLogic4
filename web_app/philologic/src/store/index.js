@@ -11,31 +11,8 @@ Vue.use(Vuex)
 export default new Vuex.Store({
     strict: true,
     state: {
-        formData: {
-            report: 'concordance',
-            q: '',
-            method: 'proxy',
-            arg_proxy: '',
-            arg_phrase: '',
-            results_per_page: '25',
-            method: 'proxy',
-            start: '',
-            end: '',
-            colloc_filter_choice: '',
-            filter_frequency: 100,
-            approximate: 'no',
-            approximate_ratio: 100,
-            // metadataFields: {},
-            start_date: '',
-            end_date: '',
-            year_interval: '',
-            sort_by: 'rowid',
-            first_kwic_sorting_option: '',
-            second_kwic_sorting_option: '',
-            third_kwic_sorting_option: '',
-            start_byte: '',
-            end_byte: ''
-        },
+        formData: {},
+        reportValues: {},
         resultsLength: 0,
         textNavigationCitation: {},
         textObject: '',
@@ -56,31 +33,19 @@ export default new Vuex.Store({
     },
     mutations: {
         updateField,
-        updateStore(state, payload) {
-            let localStore = JSON.parse(JSON.stringify(state.formData))
-            if (Object.keys(payload.routeQuery).length > 0) {
-                for (let field in payload.routeQuery) {
-                    localStore[field] = payload.routeQuery[field]
-                }
-                Vue.set(state, 'formData', localStore)
-            }
-            // console.log('STORE', state.formData)
-            // console.log('METADATA', state.formData.metadataFields)
+        updateFormData(state, payload) {
+            Vue.set(state, 'formData', payload)
         },
-        addMetadataFields(state, payload) {
-            for (let field of payload) {
-                Vue.set(state.formData, field, "")
+        setDefaultFields(state, payload) {
+            for (let field in payload) {
+                Vue.set(state.formData, field, payload[field])
             }
         },
-        updateMetadataField(state, payload) {
+        updateFormDataField(state, payload) {
             Vue.set(state.formData, payload.key, payload.value)
         },
-        updateMethod(state, payload) {
-            // method must be reserved, so we create our custom handler
-            Vue.set(state.formData, 'method', payload)
-        },
-        replaceStore(state, payload) {
-            Vue.set(state, 'formData', payload)
+        setReportValues(state, payload) {
+            Vue.set(state, "reportValues", payload)
         },
         updateCitation(state, payload) {
             Vue.set(state, 'textNavigationCitation', payload)
@@ -91,7 +56,7 @@ export default new Vuex.Store({
     },
     actions: {
         updateStartEndDate(context, payload) {
-            context.commit("replaceStore", {
+            context.commit("updateFormData", {
                 ...context.state.formData,
                 start_date: payload.startDate,
                 end_date: payload.endDate

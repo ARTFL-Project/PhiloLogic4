@@ -19,72 +19,119 @@ export default {
         SearchForm
     },
     computed: {
-        ...mapFields(["formData.report", "formData.q"])
-    },
-    data() {
-        return {
-            globalConfig: this.$globalConfig,
-            metadata: this.$philoConfig.metadata
-        };
+        ...mapFields(["formData.report", "formData.q"]),
+        defaultFieldValues() {
+            let localFields = {
+                report: "concordance",
+                q: "",
+                method: "proxy",
+                arg_proxy: "",
+                arg_phrase: "",
+                results_per_page: "25",
+                start: "",
+                end: "",
+                colloc_filter_choice: "",
+                filter_frequency: 100,
+                approximate: "no",
+                approximate_ratio: 100,
+                start_date: "",
+                end_date: "",
+                year_interval: "",
+                sort_by: "rowid",
+                first_kwic_sorting_option: "",
+                second_kwic_sorting_option: "",
+                third_kwic_sorting_option: "",
+                start_byte: "",
+                end_byte: ""
+            };
+            for (let field of this.$philoConfig.metadata) {
+                localFields[field] = "";
+            }
+            return localFields;
+        },
+        reportValues() {
+            let reportValues = {};
+            let commonFields = [
+                "q",
+                "method",
+                "arg_proxy",
+                "arg_phrase",
+                "approximate",
+                "approximate_ratio",
+                ...this.$philoConfig.metadata
+            ];
+            reportValues.concordance = new Set([
+                ...commonFields,
+                "results_per_page",
+                "sort_by"
+            ]);
+            reportValues.kwic = new Set([
+                ...commonFields,
+                "results_per_page",
+                "first_kwic_sorting_option",
+                "second_kwic_sorting_option",
+                "third_kwic_sorting_option"
+            ]);
+            reportValues.collocation = new Set([
+                ...commonFields,
+                "colloc_filter_choice",
+                "filter_frequency"
+            ]);
+            reportValues.time_series = new Set([
+                ...commonFields,
+                "start_date",
+                "end_date",
+                "year_interval"
+            ]);
+            return reportValues;
+        }
     },
     created() {
         document.title = this.$philoConfig.dbname;
-        this.$store.commit("addMetadataFields", this.metadata);
-        // console.log("START", this.$store.state.formData);
-        this.evaluateRoute();
-        this.$router.beforeEach((to, from, next) => {
-            this.debug(this, to);
-            if (
-                typeof this.$route.query.q == "undefined" &&
-                this.$route.name != "navigate"
-            ) {
-                this.report = "bibliography";
-            } else {
-                this.$store.commit("updateStore", {
-                    routeQuery: to.query
-                    // metadata: this.metadata
-                });
-            }
-            next();
-            EventBus.$emit("urlUpdate");
-        });
+        this.$store.commit("setDefaultFields", this.defaultFieldValues);
+        this.$store.commit("setReportValues", this.reportValues);
+        this.formDataUpdate();
+    },
+    watch: {
+        // call again the method if the route changes
+        $route: "formDataUpdate"
     },
     methods: {
+        formDataUpdate() {
+            this.debug(this, this.$route.query);
+            let localParams = this.copyObject(this.defaultFieldValues);
+            this.debug(this, { ...localParams, ...this.$route.query });
+            this.$store.commit("updateFormData", {
+                ...localParams,
+                ...this.$route.query
+            });
+            this.evaluateRoute();
+            EventBus.$emit("urlUpdate");
+            this.debug(this, this.$store.state.formData);
+        },
         evaluateRoute() {
-            this.debug(this, this.$route.name);
             if (
                 this.$route.name != "home" &&
                 this.$route.name != "textNavigation" &&
                 this.$route.name != "tableOfContents"
             ) {
-                let queryParams = this.copyObject(this.$route.query);
-                if (typeof queryParams.q == "undefined") {
-                    queryParams.report = "bibliography";
-                    this.$store.commit("updateStore", {
-                        routeQuery: queryParams,
-                        metadata: this.metadata
-                    });
+                if (this.q.length == 0 && this.report != "bibliography") {
+                    this.report = "bibliography";
                     this.$router.push(
                         this.paramsToRoute(this.$store.state.formData)
                     );
                 } else if (
-                    this.$route.query.q.length > 0 &&
+                    this.q.length > 0 &&
                     this.$route.name == "bibliography"
                 ) {
-                    let queryParams = this.copyObject(this.$route.query);
-                    queryParams.report == "concordance";
-                    this.$store.commit("updateStore", {
-                        routeQuery: queryParams,
-                        metadata: this.metadata
+                    this.$store.commit("updateFormDataField", {
+                        key: "report",
+                        value: "concordance"
                     });
+                    this.debug(this, this.report);
                     this.$router.push(
                         this.paramsToRoute(this.$store.state.formData)
                     );
-                } else {
-                    this.$store.commit("updateStore", {
-                        routeQuery: queryParams,
-                        metadata: this.metadata
-                    });
                 }
             }
         }

@@ -205,6 +205,7 @@ export default {
             this.facet = facetObj;
             this.selectedFacet = facetObj;
             this.selected = facetObj.alias;
+            this.debug(this, this.$store.state.formData);
             let urlString = this.paramsToUrlString({
                 ...this.$store.state.formData,
                 frequency_field: facetObj.alias
@@ -359,7 +360,11 @@ export default {
         },
         collocationToConcordance(word) {
             this.q = `${this.q} "${word}"`;
-            this.$store.commit("updateMethod", "cooc");
+            this.$store.commit("updateFormDataField", {
+                key: "method",
+                value: "cooc"
+            });
+            console.log(this.$store.state.formData);
             this.start = "";
             this.end = "";
             this.report = "concordance";
@@ -380,7 +385,7 @@ export default {
             }
         },
         facetClick(metadata) {
-            this.$store.commit("updateMetadataField", {
+            this.$store.commit("updateFormDataField", {
                 key: this.selectedFacet.facet,
                 value: `"${metadata[this.selectedFacet.facet]}"`
             });

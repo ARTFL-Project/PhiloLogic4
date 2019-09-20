@@ -544,7 +544,6 @@ export default {
                 ];
             }
             this.metadataDisplay.push(metadataObj);
-            console.log("TEST", this.$store.state.formData[metadataField]);
             if (this.formData[metadataField] != "") {
                 this.metadataValues[metadataField] = this.formData[
                     metadataField
@@ -614,7 +613,6 @@ export default {
             return sortValues;
         },
         onSubmit() {
-            // this.$store.commit("updateMetadataField", this.metadataValues);
             this.q = this.q.trim();
             if (this.q.length == 0) {
                 this.report = "bibliography";
@@ -688,7 +686,7 @@ export default {
                         });
                 }
             } else {
-                this.$store.commit("updateMetadataField", {
+                this.$store.commit("updateFormDataField", {
                     key: field,
                     value: this.metadataValues[field]
                 });
@@ -763,23 +761,25 @@ export default {
             }
         },
         setResult(result, field) {
-            let update = {};
-            if (result.startsWith('"')) {
-                result = result.slice(1);
-            }
-            if (result.endsWith('"')) {
-                result = result.slice(0, result.length - 1);
-            }
-            let selected = `"${result.replace(/<[^>]+>/g, "")}"`;
-            update[field] = selected;
-            if (field == "q") {
-                this.q = selected;
-            } else {
-                this.metadataValues[field] = selected;
-                this.$store.commit("updateMetadataField", {
-                    key: field,
-                    value: selected
-                });
+            if (typeof result != "undefined") {
+                let update = {};
+                if (result.startsWith('"')) {
+                    result = result.slice(1);
+                }
+                if (result.endsWith('"')) {
+                    result = result.slice(0, result.length - 1);
+                }
+                let selected = `"${result.replace(/<[^>]+>/g, "")}"`;
+                update[field] = selected;
+                if (field == "q") {
+                    this.q = selected;
+                } else {
+                    this.metadataValues[field] = selected;
+                    this.$store.commit("updateFormDataField", {
+                        key: field,
+                        value: selected
+                    });
+                }
             }
             this.autoCompleteResults[field] = [];
             this.arrowCounters[field] = 0;

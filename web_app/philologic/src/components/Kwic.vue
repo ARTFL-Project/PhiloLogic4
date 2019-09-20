@@ -150,10 +150,8 @@ export default {
         this.initializeKwic();
         this.fetchResults();
         EventBus.$on("urlUpdate", () => {
-            console.log("update KWIC");
             if (this.report == "kwic") {
                 this.fetchResults();
-                console.log("updated");
             }
         });
     },
@@ -278,7 +276,6 @@ export default {
             this.searching = true;
             this.searchParams = { ...this.$store.state.formData };
             if (this.first_kwic_sorting_option === "") {
-                console.log("fetching KWIC");
                 this.$http
                     .get(
                         "http://anomander.uchicago.edu/philologic/frantext0917/reports/kwic.py",
@@ -295,7 +292,6 @@ export default {
                                 .results_per_page
                         });
                         this.searching = false;
-                        console.log("emitting done");
                         EventBus.$emit("resultsDone");
                     })
                     .catch(error => {
@@ -316,7 +312,6 @@ export default {
             return list1;
         },
         recursiveLookup(hitsDone) {
-            var vm = this;
             this.$http
                 .get(
                     "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_neighboring_words.py",
@@ -328,39 +323,40 @@ export default {
                         }
                     }
                 )
-                .then(function(response) {
+                .then(response => {
                     hitsDone = response.data.hits_done;
-                    if (vm.sortedResults.length === 0) {
-                        vm.sortedResults = response.data.results;
+                    if (this.sortedResults.length === 0) {
+                        this.sortedResults = response.data.results;
                     } else {
-                        vm.sortedResults = vm.mergeLists(
-                            vm.sortedResults,
+                        this.sortedResults = this.mergeLists(
+                            this.sortedResults,
                             response.data.results
                         );
                     }
-                    if (hitsDone < vm.resultsLength) {
-                        vm.recursiveLookup(hitsDone);
+                    if (hitsDone < this.resultsLength) {
+                        this.recursiveLookup(hitsDone);
                     } else {
-                        vm.start = "0";
-                        vm.end = "0";
-                        vm.getKwicResults(vm, hitsDone);
-                        vm.loading = false;
+                        this.start = "0";
+                        this.end = "0";
+                        this.getKwicResults(hitsDone);
+                        this.loading = false;
+                        EventBus.$emit("resultsDone");
                     }
                 });
         },
-        getKwicResults(vm, hitsDone) {
-            let start = parseInt(vm.start);
+        getKwicResults(hitsDone) {
+            let start = parseInt(this.start);
             let end = 0;
-            if (vm.results_per_page === "") {
+            if (this.results_per_page === "") {
                 end = start + 25;
             } else {
-                end = start + parseInt(vm.results_per_page);
+                end = start + parseInt(this.results_per_page);
             }
-            vm.$http
+            this.$http
                 .post(
                     "http://anomander.uchicago.edu/philologic/frantext0917/scripts/get_sorted_kwic.py",
                     JSON.stringify({
-                        results: vm.sortedResults,
+                        results: this.sortedResults,
                         hits_done: hitsDone,
                         query_string: this.paramsToUrlString(
                             this.$store.state.formData
@@ -368,14 +364,14 @@ export default {
                         start: start,
                         end: end,
                         sort_keys: [
-                            vm.first_kwic_sorting_option,
-                            vm.second_kwic_sorting_option,
-                            vm.third_kwic_sorting_option
+                            this.first_kwic_sorting_option,
+                            this.second_kwic_sorting_option,
+                            this.third_kwic_sorting_option
                         ]
                     })
                 )
-                .then(function(response) {
-                    vm.results = response.data;
+                .then(response => {
+                    this.results = response.data;
                 });
         },
         initializePos(index) {

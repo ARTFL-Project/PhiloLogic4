@@ -126,6 +126,10 @@ export default {
             this.fetchSearchArgs();
         });
     },
+    watch: {
+        // call again the method if the route changes
+        $route: "fetchSearchArgs"
+    },
     methods: {
         fetchSearchArgs() {
             let queryParams = { ...this.$store.state.formData };
@@ -198,7 +202,10 @@ export default {
         buildCriteria() {
             let queryArgs = {};
             for (let field of this.$philoConfig.metadata) {
-                if (this.formData[field].length > 0) {
+                if (
+                    field in this.$route.query &&
+                    this.formData[field].length > 0
+                ) {
                     queryArgs[field] = this.formData[field];
                 }
             }
@@ -240,30 +247,24 @@ export default {
             return biblio;
         },
         removeMetadata(metadata) {
-            this.$store.commit("updateMetadataField", {
-                key: metadata,
-                value: ""
-            });
             if (this.q.length == 0) {
                 this.report = "bibliography";
             }
             this.start = "";
             this.end = "";
+            let localParams = this.copyObject(this.formData);
+            localParams[metadata] = "";
             if (
                 this.report === "concordance" ||
                 this.report === "kwic" ||
                 this.report === "bibliography"
             ) {
-                this.$router.push(
-                    this.paramsToRoute(this.$store.state.formData)
-                );
+                this.$router.push(this.paramsToRoute(localParams));
             } else if (
                 this.report === "collocation" ||
                 this.report === "time_series"
             ) {
-                this.$router.push(
-                    this.paramsToRoute(this.$store.state.formData)
-                );
+                this.$router.push(this.paramsToRoute(localParams));
             }
         },
         getQueryTerms(group, index) {
@@ -377,11 +378,16 @@ export default {
 }
 .close-pill {
     position: absolute;
-    right: 5px;
-    top: 4px;
+    right: 0;
+    top: 0;
+    width: 1.6rem;
+    border-radius: 50rem !important;
+    display: inline-block;
+    padding: 0.2rem;
 }
 .close-pill:hover {
-    color: #000;
+    color: #fff;
+    background: #545b62;
 }
 .metadata-args {
     border: 1px solid #ddd;
@@ -416,5 +422,8 @@ export default {
     cursor: pointer;
     border-top-right-radius: 50rem;
     border-bottom-right-radius: 50rem;
+}
+.rounded-pill a {
+    margin-right: 0.5rem;
 }
 </style>
