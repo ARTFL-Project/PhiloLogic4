@@ -68,7 +68,7 @@
                                         <b-col
                                             cols="12"
                                             md="4"
-                                            v-if="!philoConfig.dictionary"
+                                            v-if="!dictionary"
                                             id="search-buttons"
                                         >
                                             <b-button-group>
@@ -451,7 +451,6 @@
 import { mapFields } from "vuex-map-fields";
 import { EventBus } from "../main.js";
 import Velocity from "velocity-animate";
-import SlideDownIn from "velocity-animate/velocity.ui.min.js";
 import "velocity-animate/velocity.ui.min.js";
 
 export default {
@@ -470,7 +469,7 @@ export default {
             "formData.method",
             "formData.arg_proxy",
             "formData.arg_phrase",
-            "formData.metadataFields",
+            // "formData.metadataFields",
             "formData.start_date",
             "formData.end_date",
             "formData.year_interval",
@@ -491,11 +490,11 @@ export default {
                     text: "select"
                 }
             ];
-            for (let fields of this.philoConfig.concordance_biblio_sorting) {
+            for (let fields of this.$philoConfig.concordance_biblio_sorting) {
                 let label = [];
                 for (let field of fields) {
-                    if (field in this.philoConfig.metadata_aliases) {
-                        label.push(this.philoConfig.metadata_aliases[field]);
+                    if (field in this.$philoConfig.metadata_aliases) {
+                        label.push(this.$philoConfig.metadata_aliases[field]);
                     } else {
                         label.push(field);
                     }
@@ -507,7 +506,7 @@ export default {
     },
     data() {
         return {
-            philoConfig: this.$philoConfig,
+            dictionary: this.$philoConfig.dictionary,
             formOpen: false,
             searchOptionsButton: "Show search options",
             approximateValues: [50, 60, 70, 80, 90],
@@ -533,20 +532,21 @@ export default {
     },
     created() {
         this.reports = this.buildReports();
-        for (let metadataField of this.philoConfig.metadata) {
+        for (let metadataField of this.$philoConfig.metadata) {
             let metadataObj = {
                 label: metadataField[0].toUpperCase() + metadataField.slice(1),
                 value: metadataField,
-                example: this.philoConfig.search_examples[metadataField]
+                example: this.$philoConfig.search_examples[metadataField]
             };
-            if (metadataField in this.philoConfig.metadata_aliases) {
-                metadataObj.label = this.philoConfig.metadata_aliases[
+            if (metadataField in this.$philoConfig.metadata_aliases) {
+                metadataObj.label = this.$philoConfig.metadata_aliases[
                     metadataField
                 ];
             }
             this.metadataDisplay.push(metadataObj);
-            if (metadataField in this.metadataFields) {
-                this.metadataValues[metadataField] = this.metadataFields[
+            console.log("TEST", this.$store.state.formData[metadataField]);
+            if (this.formData[metadataField] != "") {
+                this.metadataValues[metadataField] = this.formData[
                     metadataField
                 ];
             }
@@ -557,7 +557,7 @@ export default {
             for (let field in metadata) {
                 this.metadataValues[field] = metadata[field];
             }
-            for (let metadataField of this.philoConfig.metadata) {
+            for (let metadataField of this.$philoConfig.metadata) {
                 this.$set(this.autoCompleteResults, metadataField, []);
                 this.$set(this.arrowCounters, metadataField, -1);
             }
@@ -566,7 +566,7 @@ export default {
     methods: {
         buildReports() {
             let reports = [];
-            for (let value of this.philoConfig.search_reports) {
+            for (let value of this.$philoConfig.search_reports) {
                 let label = value.replace("_s", "-s");
                 label = label.charAt(0).toUpperCase() + label.slice(1);
                 reports.push({
@@ -577,15 +577,15 @@ export default {
             return reports;
         },
         buildMetadataFieldDisplay() {
-            for (let metadataField of this.philoConfig.metadata) {
+            for (let metadataField of this.$philoConfig.metadata) {
                 let metadataObj = {
                     label:
                         metadataField[0].toUpperCase() + metadataField.slice(1),
                     value: metadataField,
-                    example: this.philoConfig.search_examples[metadataField]
+                    example: this.$philoConfig.search_examples[metadataField]
                 };
-                if (metadataField in this.philoConfig.metadata_aliases) {
-                    metadataObj.label = this.philoConfig.metadata_aliases[
+                if (metadataField in this.$philoConfig.metadata_aliases) {
+                    metadataObj.label = this.$philoConfig.metadata_aliases[
                         metadataField
                     ];
                 }
@@ -600,11 +600,11 @@ export default {
                     label: "select"
                 }
             ];
-            for (let fields of this.philoConfig.concordance_biblio_sorting) {
+            for (let fields of this.$philoConfig.concordance_biblio_sorting) {
                 let label = [];
                 for (let field of fields) {
-                    if (field in this.philoConfig.metadata_aliases) {
-                        label.push(this.philoConfig.metadata_aliases[field]);
+                    if (field in this.$philoConfig.metadata_aliases) {
+                        label.push(this.$philoConfig.metadata_aliases[field]);
                     } else {
                         label.push(field);
                     }
@@ -614,7 +614,7 @@ export default {
             return sortValues;
         },
         onSubmit() {
-            this.$store.commit("updateMetadata", this.metadataValues);
+            // this.$store.commit("updateMetadataField", this.metadataValues);
             this.q = this.q.trim();
             if (this.q.length == 0) {
                 this.report = "bibliography";
@@ -629,7 +629,7 @@ export default {
             this.end = "";
             this.byte = "";
             this.formOpen = false;
-            console.log(this.$store.state.formData);
+            this.debug(this, this.$store.state.formData);
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         },
         onReset(evt) {
@@ -647,9 +647,9 @@ export default {
         },
         reportChange(report) {
             if (report === "landing_page") {
-                this.report = this.philoConfig.search_reports[0];
+                this.report = this.$philoConfig.search_reports[0];
             } else if (report === "collocation") {
-                if (this.philoConfig.stopwords.length > 0) {
+                if (this.$philoConfig.stopwords.length > 0) {
                     this.colloc_filter_choice = "stopwords";
                 } else {
                     this.colloc_filter_choice = "frequency";
@@ -688,6 +688,10 @@ export default {
                         });
                 }
             } else {
+                this.$store.commit("updateMetadataField", {
+                    key: field,
+                    value: this.metadataValues[field]
+                });
                 let currentFieldValue = this.$route.query[field];
                 if (
                     this.metadataValues[field].length > 1 &&
@@ -769,16 +773,13 @@ export default {
             let selected = `"${result.replace(/<[^>]+>/g, "")}"`;
             update[field] = selected;
             if (field == "q") {
-                this.$store.commit("replaceStore", {
-                    ...this.$store.state.formData,
-                    ...update
-                });
+                this.q = selected;
             } else {
-                this.$store.commit("updateMetadata", {
-                    ...this.metadataFields,
-                    ...update
-                });
                 this.metadataValues[field] = selected;
+                this.$store.commit("updateMetadataField", {
+                    key: field,
+                    value: selected
+                });
             }
             this.autoCompleteResults[field] = [];
             this.arrowCounters[field] = 0;
@@ -789,34 +790,6 @@ export default {
             let childOffset = input.offsetLeft - parent.offsetLeft;
             return `left: ${childOffset}px; width: ${input.offsetWidth}px`;
         }
-        // beforeEnter(el) {
-        //     el.style.transform = "translateY(-100%)";
-        //     el.style.opacity = 0;
-        //     el.style.transition = "all .5s ease-in-out";
-        // },
-        // enter: function(el, done) {
-        //     el.style.transform = "translateY(0)";
-        //     el.style.opacity = 1;
-        //     done();
-        //     // Velocity(
-        //     //     el,
-        //     //     { transform: "translateY(0)" },
-        //     //     { duration: 800 },
-        //     //     { complete: done }
-        //     // );
-        // },
-        // leave: function(el, done) {
-        //     console.log("leave");
-        //     el.style.transform = "translateY(-100%)";
-        //     el.style.opacity = 0;
-        //     done();
-        //     // Velocity(
-        //     //     el,
-        //     //     { transform: "translateY(-100%)" },
-        //     //     { duration: 800 },
-        //     //     { complete: done }
-        //     // );
-        // }
     }
 };
 </script>

@@ -96,6 +96,10 @@
                 </div>
             </b-col>
         </b-row>
+        <div
+            style="font-size: 80%; text-align: center;"
+            v-if="philoConfig.dictionary_lookup != ''"
+        >To look up a word in a dictionary, select the word with your mouse and press 'd' on your keyboard.</div>
         <b-row id="all-content" loading="loading">
             <b-col
                 cols="12"
@@ -106,11 +110,7 @@
                 id="center-content"
                 v-if="textObject.text"
             >
-                <b-card no-body class="mt-3 mb-4 p-4 shadow">
-                    <div
-                        style="font-size: 80%; text-align: center;"
-                        v-if="philoConfig.dictionary_lookup != ''"
-                    >To look up a word in a dictionary, select the word with your mouse and press 'd' on your keyboard.</div>
+                <b-card no-body class="mb-4 p-4 shadow">
                     <div id="book-page">
                         <div id="previous-pages" v-if="beforeObjImgs">
                             <span class="xml-pb-image">
@@ -417,7 +417,7 @@ export default {
             this.afterGraphicsImgs = [];
             if (currentObjImgs.length > 0) {
                 var beforeIndex = 0;
-                for (var i = 0; i < allImgs.length; i++) {
+                for (let i = 0; i < allImgs.length; i++) {
                     var img = allImgs[i];
                     if (currentObjImgs.indexOf(img[0]) === -1) {
                         if (img.length == 2) {
@@ -444,7 +444,7 @@ export default {
                         break;
                     }
                 }
-                for (var i = beforeIndex; i < allImgs.length; i++) {
+                for (let i = beforeIndex; i < allImgs.length; i++) {
                     var img = allImgs[i];
                     if (currentObjImgs.indexOf(img[0]) === -1) {
                         if (img.length == 2) {
@@ -603,7 +603,7 @@ export default {
                 prevButton.classList.remove("disabled");
             }
         },
-        handleScroll(evt, el) {
+        handleScroll(evt) {
             if (!this.navBarVisible) {
                 if (window.scrollY > this.navButtonPosition) {
                     this.navBarVisible = true;
@@ -652,10 +652,6 @@ export default {
                 window.open(link);
             }
         }
-    },
-    beforeDestroy: () => {
-        console.log("destroy");
-        // window.removeEventListener("scroll");
     }
 };
 </script>
@@ -724,7 +720,10 @@ export default {
 a.current-obj,
 #toc-container a:hover {
     background: #e8e8e8;
-    /* color: #fff !important; */
+}
+
+#book-page {
+    text-align: justify;
 }
 
 /deep/ .xml-pb {

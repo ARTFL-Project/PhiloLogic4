@@ -6,29 +6,33 @@
                 cols="12"
                 md="7"
                 xl="8"
-                v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'"
+                v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'"
             >
-                <b-card
-                    no-body
-                    class="philologic-occurrence ml-4 mr-4 mb-4 shadow-sm p-1"
-                    v-for="(result, index) in results.results"
-                    :key="index"
-                >
-                    <b-row class="citation-container">
-                        <b-col cols="12" sm="10" md="11">
-                            <span class="cite" :data-id="result.philo_id.join(' ')">
-                                <span class="result-number">{{ results.description.start + index }}</span>
-                                <input
-                                    type="checkbox"
-                                    class="ml-3 mr-2"
-                                    @click="addToSearch(result.metadata_fields.title)"
-                                    v-if="resultType == 'doc' && philoConfig.metadata.indexOf('title') !== -1"
-                                >
-                                <citations :citation="result.citation"></citations>
-                            </span>
-                        </b-col>
-                    </b-row>
-                </b-card>
+                <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
+                    <b-card
+                        no-body
+                        class="philologic-occurrence ml-4 mr-4 mb-4 shadow-sm p-1"
+                        v-for="(result, index) in results.results"
+                        :key="result.philo_id.join('-')"
+                    >
+                        <b-row class="citation-container">
+                            <b-col cols="12" sm="10" md="11">
+                                <span class="cite" :data-id="result.philo_id.join(' ')">
+                                    <span
+                                        class="result-number"
+                                    >{{ results.description.start + index }}</span>
+                                    <input
+                                        type="checkbox"
+                                        class="ml-3 mr-2"
+                                        @click="addToSearch(result.metadata_fields.title)"
+                                        v-if="resultType == 'doc' && philoConfig.metadata.indexOf('title') !== -1"
+                                    />
+                                    <citations :citation="result.citation"></citations>
+                                </span>
+                            </b-col>
+                        </b-row>
+                    </b-card>
+                </transition-group>
             </b-col>
             <b-col
                 cols="12"
@@ -101,6 +105,7 @@ import citations from "./Citations";
 import conckwic from "./ConcordanceKwic";
 import facets from "./Facets";
 import pages from "./Pages";
+import Velocity from "velocity-animate";
 
 export default {
     name: "bibliography",
@@ -135,9 +140,8 @@ export default {
     created() {
         this.report = "bibliography";
         this.fetchResults();
-        var vm = this;
-        EventBus.$on("urlUpdate", function() {
-            vm.fetchResults();
+        EventBus.$on("urlUpdate", () => {
+            this.fetchResults();
         });
     },
     methods: {
@@ -172,6 +176,15 @@ export default {
                 title: newTitleValue
             });
             EventBus.$emit("metadataUpdate", { title: newTitleValue });
+        },
+        beforeEnter: function(el) {
+            el.style.opacity = 0;
+        },
+        enter: function(el, done) {
+            var delay = el.dataset.index * 100;
+            setTimeout(function() {
+                Velocity(el, { opacity: 1 }, { complete: done });
+            }, delay);
         }
     }
 };

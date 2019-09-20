@@ -1,7 +1,7 @@
 <template>
     <div id="app">
-        <Header/>
-        <SearchForm/>
+        <Header />
+        <SearchForm />
         <router-view :key="$route.fullPath"></router-view>
     </div>
 </template>
@@ -29,9 +29,11 @@ export default {
     },
     created() {
         document.title = this.$philoConfig.dbname;
+        this.$store.commit("addMetadataFields", this.metadata);
+        // console.log("START", this.$store.state.formData);
         this.evaluateRoute();
         this.$router.beforeEach((to, from, next) => {
-            console.log("TO:", to, "FROM:", from);
+            this.debug(this, to);
             if (
                 typeof this.$route.query.q == "undefined" &&
                 this.$route.name != "navigate"
@@ -39,8 +41,8 @@ export default {
                 this.report = "bibliography";
             } else {
                 this.$store.commit("updateStore", {
-                    routeQuery: to.query,
-                    metadata: this.metadata
+                    routeQuery: to.query
+                    // metadata: this.metadata
                 });
             }
             next();
@@ -49,6 +51,7 @@ export default {
     },
     methods: {
         evaluateRoute() {
+            this.debug(this, this.$route.name);
             if (
                 this.$route.name != "home" &&
                 this.$route.name != "textNavigation" &&

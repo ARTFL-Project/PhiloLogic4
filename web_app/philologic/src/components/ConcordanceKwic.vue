@@ -20,7 +20,7 @@
                     >Show Facets</b-button>
                 </div>
             </b-card>
-            <b-row class="d-xs-none mt-4" id="act-on-report">
+            <b-row class="d-xs-none mt-4 mb-3" id="act-on-report">
                 <b-col sm="7" lg="8" v-if="report != 'bibliography'">
                     <b-button-group id="report_switch">
                         <b-button

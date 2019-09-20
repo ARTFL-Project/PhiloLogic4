@@ -3,40 +3,43 @@
         <conckwic v-if="description.end != 0"></conckwic>
         <b-row class="mr-2">
             <b-col cols="12" md="7" xl="8">
-                <b-card
-                    no-body
-                    class="philologic-occurrence ml-4 mr-4 mb-4 shadow-sm"
-                    v-for="(result, index) in results.results"
-                    :key="index"
-                >
-                    <b-row class="citation-container">
-                        <b-col cols="12" sm="10" md="11">
-                            <span class="cite">
-                                <span class="number">{{ description.start + index }}</span>
-                                <citations :citation="result.citation"></citations>
-                            </span>
-                        </b-col>
-                        <b-col sm="2" md="1" class="hidden-xs">
-                            <button
-                                id="more-context"
-                                class="btn btn-primary more-context"
-                                @click="moreContext(index)"
-                            >More</button>
-                        </b-col>
-                    </b-row>
-                    <b-row>
-                        <b-col
-                            class="m-2 mt-3"
-                            select-word
-                            :position="results.description.start + index"
-                            @keyup="dicoLookup($event, result.metadata_fields.year)"
-                            tabindex="0"
-                        >
-                            <div class="default-length" v-html="result.context"></div>
-                            <div class="more-length"></div>
-                        </b-col>
-                    </b-row>
-                </b-card>
+                <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
+                    <b-card
+                        no-body
+                        class="philologic-occurrence ml-4 mr-4 mb-4 shadow-sm"
+                        v-for="(result, index) in results.results"
+                        :key="result.philo_id.join('-')"
+                        :data-index="index"
+                    >
+                        <b-row class="citation-container">
+                            <b-col cols="12" sm="10" md="11">
+                                <span class="cite">
+                                    <span class="number">{{ description.start + index }}</span>
+                                    <citations :citation="result.citation"></citations>
+                                </span>
+                            </b-col>
+                            <b-col sm="2" md="1" class="hidden-xs">
+                                <button
+                                    id="more-context"
+                                    class="btn btn-primary more-context"
+                                    @click="moreContext(index)"
+                                >More</button>
+                            </b-col>
+                        </b-row>
+                        <b-row>
+                            <b-col
+                                class="m-2 mt-3"
+                                select-word
+                                :position="results.description.start + index"
+                                @keyup="dicoLookup($event, result.metadata_fields.year)"
+                                tabindex="0"
+                            >
+                                <div class="default-length" v-html="result.context"></div>
+                                <div class="more-length"></div>
+                            </b-col>
+                        </b-row>
+                    </b-card>
+                </transition-group>
             </b-col>
             <b-col md="5" xl="4">
                 <facets></facets>
@@ -53,6 +56,7 @@ import conckwic from "./ConcordanceKwic";
 import facets from "./Facets";
 import pages from "./Pages";
 import { EventBus } from "../main.js";
+import Velocity from "velocity-animate";
 
 export default {
     name: "concordance",
@@ -156,7 +160,16 @@ export default {
                 button.innerHTML = "More";
             }
         },
-        dicoLookup() {}
+        dicoLookup() {},
+        beforeEnter: function(el) {
+            el.style.opacity = 0;
+        },
+        enter: function(el, done) {
+            var delay = el.dataset.index * 100;
+            setTimeout(function() {
+                Velocity(el, { opacity: 1 }, { complete: done });
+            }, delay);
+        }
     }
 };
 </script>

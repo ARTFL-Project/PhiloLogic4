@@ -107,11 +107,13 @@ export default {
             "currentReport",
             "resultsLength",
             "description"
-        ])
+        ]),
+        formData() {
+            return this.$store.state.formData;
+        }
     },
     data() {
         return {
-            philoConfig: this.$philoConfig,
             queryArgs: {},
             words: [],
             wordListChanged: false,
@@ -120,7 +122,6 @@ export default {
     },
     created() {
         this.fetchSearchArgs();
-        console.log(this.$route.query);
         EventBus.$on("resultsDone", () => {
             this.fetchSearchArgs();
         });
@@ -133,9 +134,7 @@ export default {
             } else {
                 this.queryArgs.queryTerm = "";
             }
-            this.queryArgs.biblio = this.buildCriteria(
-                queryParams.metadataFields
-            );
+            this.queryArgs.biblio = this.buildCriteria();
 
             if ("q" in queryParams) {
                 let method = queryParams.method;
@@ -196,13 +195,18 @@ export default {
                     console.log(error);
                 });
         },
-        buildCriteria(queryParams) {
-            let queryArgs = this.copyObject(queryParams);
+        buildCriteria() {
+            let queryArgs = {};
+            for (let field of this.$philoConfig.metadata) {
+                if (this.formData[field].length > 0) {
+                    queryArgs[field] = this.formData[field];
+                }
+            }
             let biblio = [];
             if (queryArgs.report === "time_series") {
-                delete queryParams[this.philoConfig.time_series_year_field];
+                delete queryParams[this.$philoConfig.time_series_year_field];
             }
-            let config = this.philoConfig;
+            let config = this.$philoConfig;
             let facets = [];
             for (let i = 0; i < config.facets.length; i++) {
                 let alias = Object.keys(config.facets[i])[0];
@@ -236,8 +240,10 @@ export default {
             return biblio;
         },
         removeMetadata(metadata) {
-            this.$store.commit("removeMetadata", metadata);
-            // console.log("B", this.$route);
+            this.$store.commit("updateMetadataField", {
+                key: metadata,
+                value: ""
+            });
             if (this.q.length == 0) {
                 this.report = "bibliography";
             }

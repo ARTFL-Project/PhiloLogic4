@@ -18,6 +18,8 @@
                         class="facet-selection"
                     >{{ facet.alias }}</b-list-group-item>
                 </b-list-group>
+            </transition>
+            <transition name="slide-fade">
                 <b-list-group
                     flush
                     v-if="showFacetSelection && report != 'bibliography'"
@@ -378,10 +380,10 @@ export default {
             }
         },
         facetClick(metadata) {
-            metadata[this.selectedFacet.facet] = `"${
-                metadata[this.selectedFacet.facet]
-            }"`;
-            this.$store.commit("updateMetadata", metadata);
+            this.$store.commit("updateMetadataField", {
+                key: this.selectedFacet.facet,
+                value: `"${metadata[this.selectedFacet.facet]}"`
+            });
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         }
     }

@@ -29,27 +29,34 @@
                             @click="sortResults()"
                         >Sort</b-button>
                     </div>
-                    <div id="kwic-concordance" v-if="Object.keys(results).length">
-                        <div
-                            class="kwic_line"
-                            v-for="(result, kwicIndex) in filteredKwic(results.results)"
-                            :key="kwicIndex"
+                    <div id="kwic-concordance">
+                        <transition-group
+                            tag="div"
+                            v-on:before-enter="beforeEnter"
+                            v-on:enter="enter"
                         >
-                            <span v-html="initializePos(kwicIndex)"></span>
-                            <router-link
-                                :to="'/' + result.citation_links.div1"
-                                class="kwic_biblio"
-                                @mouseover="showFullBiblio()"
-                                @mouseleave="hideFullBiblio()"
+                            <div
+                                class="kwic_line"
+                                v-for="(result, kwicIndex) in filteredKwic(results.results)"
+                                :key="result.philo_id.join('-')"
+                                :data-index="kwicIndex"
                             >
-                                <span
-                                    class="full_biblio"
-                                    style="display:none;"
-                                >{{ result.fullBiblio }}</span>
-                                <span class="short_biblio" v-html="result.shortBiblio"></span>
-                            </router-link>
-                            <span v-html="result.context"></span>
-                        </div>
+                                <span v-html="initializePos(kwicIndex)"></span>
+                                <router-link
+                                    :to="'/' + result.citation_links.div1"
+                                    class="kwic_biblio"
+                                    @mouseover="showFullBiblio()"
+                                    @mouseleave="hideFullBiblio()"
+                                >
+                                    <span
+                                        class="full_biblio"
+                                        style="display:none;"
+                                    >{{ result.fullBiblio }}</span>
+                                    <span class="short_biblio" v-html="result.shortBiblio"></span>
+                                </router-link>
+                                <span v-html="result.context"></span>
+                            </div>
+                        </transition-group>
                     </div>
                 </b-card>
             </b-col>
@@ -67,6 +74,7 @@ import conckwic from "./ConcordanceKwic";
 import facets from "./Facets";
 import pages from "./Pages";
 import { EventBus } from "../main.js";
+import Velocity from "velocity-animate";
 
 export default {
     name: "kwic",
@@ -218,12 +226,17 @@ export default {
         },
         filteredKwic(results) {
             let filteredResults = [];
-            for (let resultObject of results) {
-                resultObject.fullBiblio = this.buildFullCitation(
-                    resultObject.metadata_fields
-                );
-                resultObject.shortBiblio = resultObject.fullBiblio.slice(0, 30);
-                filteredResults.push(resultObject);
+            if (typeof results != "undefined" && Object.keys(results).length) {
+                for (let resultObject of results) {
+                    resultObject.fullBiblio = this.buildFullCitation(
+                        resultObject.metadata_fields
+                    );
+                    resultObject.shortBiblio = resultObject.fullBiblio.slice(
+                        0,
+                        30
+                    );
+                    filteredResults.push(resultObject);
+                }
             }
             return filteredResults;
         },
@@ -386,7 +399,16 @@ export default {
                 );
             }
         },
-        dicoLookup() {}
+        dicoLookup() {},
+        beforeEnter: function(el) {
+            el.style.opacity = 0;
+        },
+        enter: function(el, done) {
+            var delay = el.dataset.index * 10;
+            setTimeout(function() {
+                Velocity(el, { opacity: 1 }, { complete: done });
+            }, delay);
+        }
     }
 };
 </script>

@@ -107,11 +107,8 @@ export default {
                 )
                 .then(response => {
                     // if no dates supplied or if invalid dates
-                    if (
-                        this.$store.state.formData.metadataFields.year.length >
-                        0
-                    ) {
-                        let yearSplit = this.$store.state.formData.metadataFields.year.split(
+                    if (this.$store.state.formData.year.length > 0) {
+                        let yearSplit = this.$store.state.formData.year.split(
                             "-"
                         );
                         if (
@@ -135,13 +132,12 @@ export default {
                             // year is a range with just the end year provided
                             this.startDate = parseInt(response.data.start_date);
                             this.endDate = parseInt(yearSplit[1]);
-                        } else {
-                            // no year provided
-                            this.startDate = parseInt(response.data.start_date);
-                            this.endDate = parseInt(response.data.end_date);
                         }
+                    } else {
+                        // no year provided
+                        this.startDate = parseInt(response.data.start_date);
+                        this.endDate = parseInt(response.data.end_date);
                     }
-                    console.log(this.startDate, this.endDate);
                     this.$store.dispatch("updateStartEndDate", {
                         startDate: this.startDate,
                         endDate: this.endDate
@@ -174,11 +170,6 @@ export default {
                         this.myBarChart.destroy();
                     }
                     var chart = document.querySelector("#bar");
-                    // var font = chart.css("font-family");
-                    // Chart.defaults.global.fontFamily = font;
-                    // var backgroundColor = angular
-                    //     .element(".btn-primary")
-                    //     .css("background-color");
                     var vm = this;
                     vm.myBarChart = new Chart(chart, {
                         type: "bar",

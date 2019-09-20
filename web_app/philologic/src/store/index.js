@@ -25,7 +25,7 @@ export default new Vuex.Store({
             filter_frequency: 100,
             approximate: 'no',
             approximate_ratio: 100,
-            metadataFields: {},
+            // metadataFields: {},
             start_date: '',
             end_date: '',
             year_interval: '',
@@ -57,19 +57,6 @@ export default new Vuex.Store({
     mutations: {
         updateField,
         updateStore(state, payload) {
-            let metadataFields = {}
-            for (let field of payload.metadata) {
-                if (field in payload.routeQuery) {
-                    metadataFields[field] = payload.routeQuery[field]
-                    delete payload.routeQuery[field]
-                } else {
-                    metadataFields[field] = ''
-                }
-            }
-            state.formData.metadataFields = {
-                ...state.formData.metadataFields,
-                ...metadataFields
-            }
             let localStore = JSON.parse(JSON.stringify(state.formData))
             if (Object.keys(payload.routeQuery).length > 0) {
                 for (let field in payload.routeQuery) {
@@ -77,8 +64,16 @@ export default new Vuex.Store({
                 }
                 Vue.set(state, 'formData', localStore)
             }
-            console.log('STORE', state.formData)
-            console.log('METADATA', state.formData.metadataFields)
+            // console.log('STORE', state.formData)
+            // console.log('METADATA', state.formData.metadataFields)
+        },
+        addMetadataFields(state, payload) {
+            for (let field of payload) {
+                Vue.set(state.formData, field, "")
+            }
+        },
+        updateMetadataField(state, payload) {
+            Vue.set(state.formData, payload.key, payload.value)
         },
         updateMethod(state, payload) {
             // method must be reserved, so we create our custom handler
@@ -86,15 +81,6 @@ export default new Vuex.Store({
         },
         replaceStore(state, payload) {
             Vue.set(state, 'formData', payload)
-        },
-        updateMetadata(state, payload) {
-            state.formData.metadataFields = {
-                ...state.formData.metadataFields,
-                ...payload
-            }
-        },
-        removeMetadata(state, payload) {
-            state.formData.metadataFields[payload] = ''
         },
         updateCitation(state, payload) {
             Vue.set(state, 'textNavigationCitation', payload)

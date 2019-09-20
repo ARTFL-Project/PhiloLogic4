@@ -147,6 +147,9 @@ Vue.mixin({
                 var link = this.$philoConfig.dictionary_lookup + "?docyear=" + range + "&strippedhw=" + selection;
                 window.open(link);
             }
+        },
+        debug(component, message) {
+            console.log(`MESSAGE FROM ${component.$options.name}:`, message)
         }
     }
 })
