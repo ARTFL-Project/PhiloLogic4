@@ -3,6 +3,7 @@
 Calls all parsing functions and stores data in index"""
 
 import collections
+import json
 import math
 import os
 import pickle
@@ -16,9 +17,9 @@ from glob import glob
 import lxml
 from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
+from philologic.loadtime.LoadOptions import CONFIG_FILE
 from philologic.loadtime.PostFilters import make_sql_table
-from philologic.utils import (convert_entities, load_module, pretty_print,
-                              sort_list)
+from philologic.utils import convert_entities, load_module, pretty_print, sort_list
 from tqdm import tqdm
 
 SORT_BY_WORD = "-k 2,2"
@@ -58,8 +59,10 @@ PARSER_OPTIONS = [
 
 class ParserError(Exception):
     """Parser exception"""
+
     def __init___(self, *error_args):
         super().__init__(error_args)
+
 
 class Loader(object):
     """Loader class"""
@@ -87,25 +90,43 @@ class Loader(object):
         self.setup_dir(loader_options["data_destination"])
         load_config_path = os.path.join(loader_options["data_destination"], "load_config.py")
         # Loading these from a load_config would crash the parser for a number of reasons...
-        values_to_ignore = ["load_filters", "post_filters", "parser_factory", "data_destination", "db_destination", "dbname"]
+        values_to_ignore = [
+            "load_filters",
+            "post_filters",
+            "parser_factory",
+            "data_destination",
+            "db_destination",
+            "dbname",
+        ]
         if loader_options["load_config"]:
             shutil.copy(loader_options["load_config"], load_config_path)
             config_obj = load_module("external_load_config", loader_options["load_config"])
             already_configured_values = {}
             for attribute in dir(config_obj):
-                if not attribute.startswith("__") and not isinstance(getattr(config_obj, attribute), collections.Callable):
+                if not attribute.startswith("__") and not isinstance(
+                    getattr(config_obj, attribute), collections.Callable
+                ):
                     already_configured_values[attribute] = getattr(config_obj, attribute)
             with open(load_config_path, "a") as load_config_copy:
                 print("\n\n## The values below were also used for loading ##", file=load_config_copy)
                 for option in loader_options:
-                    if option not in already_configured_values and option not in values_to_ignore and option != "web_config":
+                    if (
+                        option not in already_configured_values
+                        and option not in values_to_ignore
+                        and option != "web_config"
+                    ):
                         print("%s = %s\n" % (option, repr(loader_options[option])), file=load_config_copy)
         else:
             with open(load_config_path, "w") as load_config_copy:
                 print("#!/usr/bin/env python3", file=load_config_copy)
-                print('"""This is a dump of the default configuration used to load this database,', file=load_config_copy)
+                print(
+                    '"""This is a dump of the default configuration used to load this database,', file=load_config_copy
+                )
                 print("including non-configurable options. You can use this file to reload", file=load_config_copy)
-                print('the current database using the -l flag. See load documentation for more details"""\n\n', file=load_config_copy)
+                print(
+                    'the current database using the -l flag. See load documentation for more details"""\n\n',
+                    file=load_config_copy,
+                )
                 for option in loader_options:
                     if option not in values_to_ignore and option != "web_config":
                         print("%s = %s\n" % (option, repr(loader_options[option])), file=load_config_copy)
@@ -206,7 +227,7 @@ class Loader(object):
                 trimmed_metadata_xpaths = []
                 for field in metadata_xpaths:
                     for xpath in metadata_xpaths[field]:
-                        xpath = xpath.rstrip("/") # make sure there are no trailing slashes which make lxml die
+                        xpath = xpath.rstrip("/")  # make sure there are no trailing slashes which make lxml die
                         try:
                             elements = tree.xpath(xpath)
                         except lxml.etree.XPathEvalError:
@@ -221,7 +242,7 @@ class Loader(object):
                                 if value:
                                     data[field] = value
                                     break
-                        else: # only continue looping over xpaths if no break in inner loop
+                        else:  # only continue looping over xpaths if no break in inner loop
                             continue
                         break
                 trimmed_metadata_xpaths = [
@@ -302,7 +323,8 @@ class Loader(object):
             load_metadata = self.parse_dc_header()
 
         print(
-            "%s: Sorting files by the following metadata fields: %s..." % (time.ctime(), ", ".join([i for i in sort_by_field])),
+            "%s: Sorting files by the following metadata fields: %s..."
+            % (time.ctime(), ", ".join([i for i in sort_by_field])),
             end=" ",
             flush=True,
         )
@@ -414,7 +436,7 @@ class Loader(object):
             "long_word_limit",
             "flatten_ligatures",
             "sentence_breakers",
-            "punctuation"
+            "punctuation",
         ]:
             try:
                 options[option] = self.parser_config[option]
@@ -473,16 +495,30 @@ class Loader(object):
         print("%s: joining pages" % time.ctime())
         if self.debug is False:
             os.system(
-                'for i in $(find {} -type f -name "*pages"); do cat $i >> {}/all_pages; rm $i; done'.format(self.workdir, self.workdir)
+                'for i in $(find {} -type f -name "*pages"); do cat $i >> {}/all_pages; rm $i; done'.format(
+                    self.workdir, self.workdir
+                )
             )
         else:
-            os.system('for i in $(find {} -type f -name "*pages"); do cat $i >> {}/all_pages; done'.format(self.workdir, self.workdir))
+            os.system(
+                'for i in $(find {} -type f -name "*pages"); do cat $i >> {}/all_pages; done'.format(
+                    self.workdir, self.workdir
+                )
+            )
 
         print("%s: joining references" % time.ctime())
         if self.debug is False:
-            os.system('for i in $(find {} -type f -name "*refs"); do cat $i >> {}/all_refs; rm $i; done'.format(self.workdir, self.workdir))
+            os.system(
+                'for i in $(find {} -type f -name "*refs"); do cat $i >> {}/all_refs; rm $i; done'.format(
+                    self.workdir, self.workdir
+                )
+            )
         else:
-            os.system('for i in $(find {} -type f -name "*refs"); do cat $i >> {}/all_refs; done'.format(self.workdir, self.workdir))
+            os.system(
+                'for i in $(find {} -type f -name "*refs"); do cat $i >> {}/all_refs; done'.format(
+                    self.workdir, self.workdir
+                )
+            )
 
         print("%s: joining graphics" % time.ctime())
         if self.debug is False:
@@ -493,16 +529,24 @@ class Loader(object):
             )
         else:
             os.system(
-                'for i in $(find {} -type f -name "*graphics"); do cat $i >> {}/all_graphics; done'.format(self.workdir, self.workdir)
+                'for i in $(find {} -type f -name "*graphics"); do cat $i >> {}/all_graphics; done'.format(
+                    self.workdir, self.workdir
+                )
             )
 
         print("%s: joining lines" % time.ctime())
         if self.debug is False:
             os.system(
-                'for i in $(find {} -type f -name "*lines"); do cat $i >> {}/all_lines; rm $i; done'.format(self.workdir, self.workdir)
+                'for i in $(find {} -type f -name "*lines"); do cat $i >> {}/all_lines; rm $i; done'.format(
+                    self.workdir, self.workdir
+                )
             )
         else:
-            os.system('for i in $(find {} -type f -name "*lines"); do cat $i >> {}/all_lines; done'.format(self.workdir, self.workdir))
+            os.system(
+                'for i in $(find {} -type f -name "*lines"); do cat $i >> {}/all_lines; done'.format(
+                    self.workdir, self.workdir
+                )
+            )
 
     def merge_files(self, file_type, file_num=1000):
         """This function runs a multi-stage merge sort on words
@@ -630,7 +674,9 @@ class Loader(object):
         print("#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl), file=dbs)
         dbs.close()
         print("%s: analysis done" % time.ctime())
-        os.system('/bin/bash -c "lz4cat ' + self.workdir + "/all_words_sorted.lz4 | pack4 " + self.workdir + 'dbspecs4.h"')
+        os.system(
+            '/bin/bash -c "lz4cat ' + self.workdir + "/all_words_sorted.lz4 | pack4 " + self.workdir + 'dbspecs4.h"'
+        )
         print("%s: all indices built. moving into place." % time.ctime())
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1")
@@ -717,13 +763,10 @@ class Loader(object):
 
     def write_web_config(self):
         """ Write configuration variables for the Web application"""
+        dbname = os.path.basename(os.path.dirname(self.destination.rstrip("/")))
         metadata = [i for i in self.metadata_fields if i not in self.metadata_fields_not_found]
-        config_values = {
-            "dbname": os.path.basename(re.sub("/data/?$", "", self.destination)),
-            "metadata": metadata,
-            "facets": metadata,
-            "theme": self.theme,
-        }
+        config_values = {"dbname": dbname, "metadata": metadata, "facets": metadata, "theme": self.theme}
+
         # Fetch search examples:
         search_examples = {}
         conn = sqlite3.connect(self.destination + "/toms.db")
@@ -734,7 +777,9 @@ class Loader(object):
             object_type = self.metadata_types[field]
             try:
                 if object_type != "div":
-                    c.execute('select %s from toms where philo_type="%s" and %s!="" limit 1' % (field, object_type, field))
+                    c.execute(
+                        'select %s from toms where philo_type="%s" and %s!="" limit 1' % (field, object_type, field)
+                    )
                 else:
                     c.execute(
                         'select %s from toms where philo_type="div1" or philo_type="div2" or philo_type="div3" and %s!="" limit 1'
@@ -769,8 +814,15 @@ class Loader(object):
 
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)
-        print(web_config, file=open(filename, "w"))
-        print("wrote Web application info to %s." % (filename))
+        with open(os.path.join(filename, "w")) as output_file:
+            print(web_config, file=output_file)
+        print(f"wrote Web application info to {filename}")
+
+        dbname = os.path.basename(os.path.dirname(self.destination.rstrip("/")))
+        with open(os.path.join(self.destination, "../appConfig.json")) as appConfig:
+            json.dump({"dbUrl": os.path.join(CONFIG_FILE.url_root, f"{dbname}/app")}, appConfig)
+
+        os.system(f"cd {os.path.join(self.destination, '../app')}; npm install && npm run build")
 
 
 def shellquote(s):
@@ -801,8 +853,5 @@ def setup_db_dir(db_destination, web_app_dir, force_delete=False):
             if f != "data":
                 cp_command = "cp -r %s %s" % (web_app_dir + f, db_destination + "/" + f)
                 os.system(cp_command)
-
-        os.system("chmod -R 777 %s/app/assets/css" % db_destination)
-        os.system("chmod -R 777 %s/app/assets/js" % db_destination)
         os.system("mkdir -p %s/custom_functions" % db_destination)
         os.system("touch %s/custom_functions/__init__.py" % db_destination)

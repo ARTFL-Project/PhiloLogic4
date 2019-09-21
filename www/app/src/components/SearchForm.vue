@@ -91,12 +91,7 @@
                             </div>
                             <transition name="slide-fade">
                                 s
-                                <div
-                                    id="search-elements"
-                                    v-if="formOpen"
-                                    class="pl-3 pr-3 shadow"
-                                    style="position: absolute; z-index: 10; background-color: #fff; width: 100%; left:0"
-                                >
+                                <div id="search-elements" v-if="formOpen" class="pl-3 pr-3 shadow">
                                     <h5>Refine your search with the following options and fields:</h5>
                                     <b-row>
                                         <b-col cols="12" sm="2">Search Terms</b-col>
@@ -795,6 +790,13 @@ export default {
 .dico-margin {
     margin-top: 210px !important;
 }
+#search-elements {
+    position: absolute;
+    z-index: 50;
+    background-color: #fff;
+    width: 100%;
+    left: 0;
+}
 #search-elements.dico {
     margin-top: 168px;
 }
@@ -904,7 +906,7 @@ export default {
 @media (min-width: 1201px) {
     #initial-form,
     #search-elements {
-        left: 100px;
+        /* left: 100px; */
         right: 100px;
     }
 }
@@ -912,7 +914,7 @@ export default {
 @media (max-width: 1200px) {
     #initial-form,
     #search-elements {
-        left: 70px;
+        /* left: 70px; */
         right: 70px;
     }
 }
@@ -928,7 +930,7 @@ export default {
     }
     #head-search-container #metadata-fields #initial-form,
     #search-elements {
-        left: 40px;
+        /* left: 40px; */
         right: 40px;
     }
     #philologic_response {

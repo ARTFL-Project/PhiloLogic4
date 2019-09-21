@@ -109,8 +109,9 @@
                 offset-lg="2"
                 id="center-content"
                 v-if="textObject.text"
+                style="text-align: center"
             >
-                <b-card no-body class="mb-4 p-4 shadow">
+                <b-card no-body class="mt-2 mb-4 p-4 shadow d-inline-block">
                     <div id="book-page">
                         <div id="previous-pages" v-if="beforeObjImgs">
                             <span class="xml-pb-image">
@@ -753,7 +754,9 @@ b.headword {
     display: inline;
 }
 
-/deep/ .xml-lb {
+/deep/ .xml-lb,
+/deep/ .xml-l {
+    text-align: justify;
     display: block;
 }
 
