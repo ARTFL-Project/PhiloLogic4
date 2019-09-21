@@ -623,15 +623,14 @@ export default {
             this.debug(this, this.$store.state.formData);
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         },
-        onReset(evt) {
-            evt.preventDefault();
-            // Reset our form values
-            this.form.email = "";
-            this.form.name = "";
-            this.form.food = null;
-            this.form.checked = [];
-            // Trick to reset/clear native browser form validation state
-            this.show = false;
+        onReset() {
+            this.$store.commit(
+                "setDefaultFields",
+                this.$parent.defaultFieldValues
+            );
+            for (let field in this.metadataValues) {
+                this.metadataValues[field] = "";
+            }
             this.$nextTick(() => {
                 this.show = true;
             });
