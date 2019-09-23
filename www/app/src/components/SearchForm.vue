@@ -65,12 +65,7 @@
                                                 </b-input-group-append>
                                             </b-input-group>
                                         </b-col>
-                                        <b-col
-                                            cols="12"
-                                            md="4"
-                                            v-if="!dictionary"
-                                            id="search-buttons"
-                                        >
+                                        <b-col cols="12" md="4" id="search-buttons">
                                             <b-button-group>
                                                 <b-button
                                                     type="reset"
@@ -88,6 +83,45 @@
                                         </b-col>
                                     </b-row>
                                 </div>
+                                <b-row id="head-search-container" class="p-3" v-if="dictionary">
+                                    <b-col cols="12" md="8">
+                                        <div class="input-group" id="head-group">
+                                            <div class="input-group-prepend">
+                                                <span
+                                                    class="input-group-text"
+                                                >{{metadataDisplay[headIndex].label}}</span>
+                                            </div>
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                autocomplete="off"
+                                                :name="metadataDisplay[headIndex].value"
+                                                :placeholder="metadataDisplay[headIndex].example"
+                                                v-model="metadataValues.head"
+                                                @input="onChange(metadataDisplay[headIndex].value)"
+                                                @keydown.down="onArrowDown(metadataDisplay[headIndex].value)"
+                                                @keydown.up="onArrowUp(metadataDisplay[headIndex].value)"
+                                                @keyup.enter="onEnter(metadataDisplay[headIndex].value)"
+                                            />
+                                            <ul
+                                                :id="'autocomplete-' + metadataDisplay[headIndex].value"
+                                                class="autocomplete-results shadow"
+                                                :style="autoCompletePosition(metadataDisplay[headIndex].value)"
+                                                v-if="autoCompleteResults[metadataDisplay[headIndex].value].length > 0"
+                                            >
+                                                <li
+                                                    tabindex="-1"
+                                                    v-for="(result, i) in autoCompleteResults[metadataDisplay[headIndex].value]"
+                                                    :key="result"
+                                                    @click="setResult(result, metadataDisplay[headIndex].value)"
+                                                    class="autocomplete-result"
+                                                    :class="{ 'is-active': i === arrowCounters[metadataDisplay[headIndex].value] }"
+                                                    v-html="result"
+                                                ></li>
+                                            </ul>
+                                        </div>
+                                    </b-col>
+                                </b-row>
                             </div>
                             <transition name="slide-fade">
                                 s
@@ -165,7 +199,7 @@
                                         </b-col>
                                     </b-row>
                                     <b-row
-                                        v-for="localField in metadataDisplay"
+                                        v-for="localField in metadataDisplayFiltered"
                                         :key="localField.value"
                                     >
                                         <b-col cols="12" class="pb-2">
@@ -186,9 +220,9 @@
                                                     :placeholder="localField.example"
                                                     v-model="metadataValues[localField.value]"
                                                     @input="onChange(localField.value)"
-                                                    @keydown.down.native="onArrowDown(localField.value)"
-                                                    @keydown.up.native="onArrowUp(localField.value)"
-                                                    @keyup.enter.native="onEnter(localField.value)"
+                                                    @keydown.down="onArrowDown(localField.value)"
+                                                    @keydown.up="onArrowUp(localField.value)"
+                                                    @keyup.enter="onEnter(localField.value)"
                                                 />
                                                 <ul
                                                     :id="'autocomplete-' + localField.value"
@@ -495,11 +529,23 @@ export default {
                 sortValues.push({ text: label.join(", "), value: fields });
             }
             return sortValues;
+        },
+        metadataDisplayFiltered() {
+            if (!this.dictionary) {
+                return this.metadataDisplay;
+            } else {
+                let localMetadataDisplay = this.copyObject(
+                    this.metadataDisplay
+                );
+                localMetadataDisplay.splice(this.headIndex, 1);
+                return localMetadataDisplay;
+            }
         }
     },
     data() {
         return {
             dictionary: this.$philoConfig.dictionary,
+            headIndex: 0,
             formOpen: false,
             searchOptionsButton: "Show search options",
             approximateValues: [50, 60, 70, 80, 90],
@@ -544,6 +590,9 @@ export default {
             }
             this.$set(this.autoCompleteResults, metadataField, []);
             this.$set(this.arrowCounters, metadataField, -1);
+            if (metadataField == "head") {
+                this.headIndex = this.metadataDisplay.length - 1;
+            }
         }
         EventBus.$on("metadataUpdate", metadata => {
             for (let field in metadata) {
@@ -712,6 +761,7 @@ export default {
             window.addEventListener("click", clearAutocomplete);
         },
         onArrowDown(field) {
+            console.log(field);
             if (
                 this.arrowCounters[field] <
                 this.autoCompleteResults[field].length

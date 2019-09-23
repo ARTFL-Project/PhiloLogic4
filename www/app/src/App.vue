@@ -9,6 +9,18 @@
             :authorized="authorized"
             v-if="!authorized"
         />
+        <b-container fluid v-if="authorized">
+            <div class="text-center">
+                <hr width="20%" />Powered by
+                <br />
+                <a
+                    href="https://artfl-project.uchicago.edu/"
+                    title="Philologic 4: Open Source ARTFL Search and Retrieval Engine"
+                >
+                    <img src="./assets/philo.png" height="40" width="110" />
+                </a>PhiloLogic4
+            </div>
+        </b-container>
     </div>
 </template>
 
@@ -28,7 +40,7 @@ export default {
     },
     data() {
         return {
-            authorized: false,
+            authorized: true,
             clientIp: "",
             domainName: ""
         };
@@ -105,7 +117,7 @@ export default {
         }
     },
     created() {
-        document.title = this.$philoConfig.dbname;
+        document.title = this.$philoConfig.dbname.replace(/<[^>]+>/, "");
         if (this.$philoConfig.access_control) {
             let promise = this.checkAccessAuthorization();
             promise.then(response => {

@@ -9,9 +9,10 @@
                 </b-navbar-nav>
             </b-collapse>
             <b-navbar-brand
-                style="font-weight: 700; font-size: 1.6rem; font-variant: small-caps; position: absolute; left: 50%; transform: translateX(-50%);"
+                style="font-weight: 700; font-size: 1.6rem; font-variant: small-caps; position: absolute; left: 50%; transform: translateX(-50%); line-height: 80%"
                 to="/"
-            >{{ philoConfig.dbname }}</b-navbar-brand>
+                v-html="philoConfig.dbname"
+            ></b-navbar-brand>
             <b-navbar-nav class="ml-auto">
                 <b-nav-item
                     :href="philoConfig.report_error_link"
@@ -36,4 +37,10 @@ export default {
 </script>
 
 <style>
+#nav-collapse {
+    margin-left: -1rem;
+    font-size: 75%;
+    margin-top: -2rem;
+    font-variant: small-caps;
+}
 </style>

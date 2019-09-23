@@ -4,6 +4,7 @@
             <b-card
                 class="text-center mt-4 shadow"
                 title="Access Restricted to ARTFL subscribing institutions"
+                title-tag="h3"
                 sub-title="Please read the following below"
             >
                 <b-form
@@ -24,14 +25,14 @@
                     >Your username or password don't match. Please try again.</h5>
                     <b-row class="mb-3">
                         <b-col cols="12" sm="6" md="5" lg="4">
-                            <b-input-group size="lg" prepend="Username">
+                            <b-input-group prepend="Username">
                                 <b-form-input v-model="accessInput.username"></b-form-input>
                             </b-input-group>
                         </b-col>
                     </b-row>
                     <b-row class="mb-3">
                         <b-col cols="12" sm="6" md="5" lg="4">
-                            <b-input-group size="lg" prepend="Password">
+                            <b-input-group prepend="Password">
                                 <b-form-input v-model="accessInput.password"></b-form-input>
                             </b-input-group>
                         </b-col>
