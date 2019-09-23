@@ -76,7 +76,7 @@
                                     <router-link
                                         :to="`/navigate/${volume.philo_id}/table-of-contents`"
                                     >
-                                        <i>{{ volume.title }}</i>
+                                        <i style="font-variant: small-caps">{{ volume.title }}</i>
                                         <span
                                             style="font-weight: 300"
                                             v-if="volume.start_head"

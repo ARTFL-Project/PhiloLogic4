@@ -1,55 +1,59 @@
 <template>
     <div id="concordanceKwic-container" class="mt-4 ml-4 mr-4">
-        <div v-if="authorized">
-            <b-card no-body class="shadow-sm">
-                <div id="initial_report">
-                    <div id="description" class="pb-3">
-                        <b-button
-                            variant="outline-primary"
-                            size="sm"
-                            id="export-results"
-                            data-target="#export-dialog"
-                        >Export results</b-button>
-                        <search-arguments></search-arguments>
-                        <div id="search-hits" class="pl-3">{{ hits }}</div>
-                    </div>
+        <b-card no-body class="shadow-sm">
+            <div id="initial_report">
+                <div id="description" class="pb-3">
                     <b-button
-                        variant="outline-secondary"
-                        v-if="!showFacetedBrowsing && facets.length < 1"
-                        @click="showFacets() "
-                    >Show Facets</b-button>
+                        variant="outline-primary"
+                        size="sm"
+                        id="export-results"
+                        data-target="#export-dialog"
+                    >Export results</b-button>
+                    <search-arguments></search-arguments>
+                    <div id="result-stats" class="pl-3 pb-3">
+                        {{ resultsLength }} total occurrences spread across
+                        <span
+                            v-for="(stat, statIndex) in statsDescription"
+                            :key="stat.field"
+                        >
+                            <router-link to="/statistics/">{{stat.count}} {{stat.label}}(s)</router-link>
+                            <span v-if="statIndex != statsDescription.length-1">&nbsp;and&nbsp;</span>
+                        </span>
+                    </div>
+                    <div id="search-hits" class="pl-3">{{ hits }}</div>
                 </div>
-            </b-card>
-            <b-row class="d-xs-none mt-4 mb-3" id="act-on-report">
-                <b-col sm="7" lg="8" v-if="report != 'bibliography'">
-                    <b-button-group id="report_switch">
-                        <b-button
-                            :class="{'active':  report === 'concordance'}"
-                            @click="switchReport('concordance')"
-                        >
-                            <span
-                                class="d-xs-none d-sm-none d-md-inline"
-                            >{{ reportSwitch.concordance.labelBig }}</span>
-                            <span
-                                class="d-xs-inline d-sm-inline d-md-none"
-                            >{{ reportSwitch.concordance.labelSmall }}</span>
-                        </b-button>
-                        <b-button
-                            :class="{'active':  report === 'kwic'}"
-                            @click="switchReport('kwic')"
-                        >
-                            <span
-                                class="d-xs-none d-sm-none d-md-inline"
-                            >{{ reportSwitch.kwic.labelBig }}</span>
-                            <span
-                                class="d-xs-inline d-sm-inline d-md-none"
-                            >{{ reportSwitch.kwic.labelSmall }}</span>
-                        </b-button>
-                    </b-button-group>
-                </b-col>
-            </b-row>
-        </div>
-        <access-control v-if="!authorized"></access-control>
+                <b-button
+                    variant="outline-secondary"
+                    v-if="!showFacetedBrowsing && facets.length < 1"
+                    @click="showFacets() "
+                >Show Facets</b-button>
+            </div>
+        </b-card>
+        <b-row class="d-xs-none mt-4 mb-3" id="act-on-report">
+            <b-col sm="7" lg="8" v-if="report != 'bibliography'">
+                <b-button-group id="report_switch">
+                    <b-button
+                        :class="{'active':  report === 'concordance'}"
+                        @click="switchReport('concordance')"
+                    >
+                        <span
+                            class="d-xs-none d-sm-none d-md-inline"
+                        >{{ reportSwitch.concordance.labelBig }}</span>
+                        <span
+                            class="d-xs-inline d-sm-inline d-md-none"
+                        >{{ reportSwitch.concordance.labelSmall }}</span>
+                    </b-button>
+                    <b-button :class="{'active':  report === 'kwic'}" @click="switchReport('kwic')">
+                        <span
+                            class="d-xs-none d-sm-none d-md-inline"
+                        >{{ reportSwitch.kwic.labelBig }}</span>
+                        <span
+                            class="d-xs-inline d-sm-inline d-md-none"
+                        >{{ reportSwitch.kwic.labelSmall }}</span>
+                    </b-button>
+                </b-button-group>
+            </b-col>
+        </b-row>
     </div>
 </template>
 
@@ -79,8 +83,8 @@ export default {
         return {
             facets: this.$philoConfig.facets,
             showFacetedBrowsing: false,
-            authorized: true,
-            hits: 0,
+            hits: "",
+            statsDescription: "",
             resultsPerPage: 0,
             reportSwitch: {
                 concordance: {
@@ -110,7 +114,7 @@ export default {
             let start = this.description.start;
             let end = this.description.end;
             let resultsPerPage = this.description.results_per_page;
-            var description;
+            let description;
             if (
                 this.resultsLength &&
                 end <= resultsPerPage &&
@@ -141,15 +145,30 @@ export default {
             }
             return description;
         },
+        buildStatsDescription(stats) {
+            let statsDescription = [];
+            for (let stat of stats) {
+                statsDescription.push({
+                    label: this.$philoConfig.metadata_aliases[
+                        stat.field
+                    ].toLowerCase(),
+                    field: stat.field,
+                    count: stat.count
+                });
+            }
+            return statsDescription;
+        },
         updateTotalResults() {
             this.$http
-                .get(`${this.$dbUrl}/scripts/get_total_results.py`, {
+                .get(`${this.$dbUrl}/scripts/get_hitlist_stats.py`, {
                     params: this.paramsFilter(this.$store.state.formData)
                 })
                 .then(response => {
-                    this.resultsLength = response.data;
+                    this.resultsLength = response.data.total_results;
+                    this.statsDescription = this.buildStatsDescription(
+                        response.data.stats
+                    );
                     this.hits = this.buildDescription();
-                    EventBus.$emit("totalResultsDone");
                 })
                 .catch(error => {
                     this.debug(this, error);

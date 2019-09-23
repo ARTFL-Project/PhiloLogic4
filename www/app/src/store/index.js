@@ -26,7 +26,7 @@ export default new Vuex.Store({
             end: 0,
             results_per_page: 25,
             termGroups: []
-        }
+        },
     },
     getters: {
         getField

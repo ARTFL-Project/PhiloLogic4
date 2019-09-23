@@ -10,7 +10,7 @@
             v-if="!authorized"
         />
         <b-container fluid v-if="authorized">
-            <div class="text-center">
+            <div class="text-center mb-4">
                 <hr width="20%" />Powered by
                 <br />
                 <a
@@ -18,7 +18,7 @@
                     title="Philologic 4: Open Source ARTFL Search and Retrieval Engine"
                 >
                     <img src="./assets/philo.png" height="40" width="110" />
-                </a>PhiloLogic4
+                </a>
             </div>
         </b-container>
     </div>
