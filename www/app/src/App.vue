@@ -1,14 +1,21 @@
 <template>
     <div id="app">
         <Header />
-        <SearchForm />
-        <router-view :key="$route.fullPath"></router-view>
+        <SearchForm v-if="authorized" />
+        <router-view :key="$route.fullPath" v-if="authorized"></router-view>
+        <access-control
+            :client-ip="clientIp"
+            :domain-name="domainName"
+            :authorized="authorized"
+            v-if="!authorized"
+        />
     </div>
 </template>
 
 <script>
 import Header from "./components/Header.vue";
 import SearchForm from "./components/SearchForm.vue";
+import AccessControl from "./components/AccessControl.vue";
 import { EventBus } from "./main.js";
 import { mapFields } from "vuex-map-fields";
 
@@ -16,7 +23,15 @@ export default {
     name: "app",
     components: {
         Header,
-        SearchForm
+        SearchForm,
+        AccessControl
+    },
+    data() {
+        return {
+            authorized: false,
+            clientIp: "",
+            domainName: ""
+        };
     },
     computed: {
         ...mapFields(["formData.report", "formData.q"]),
@@ -91,15 +106,41 @@ export default {
     },
     created() {
         document.title = this.$philoConfig.dbname;
-        this.$store.commit("setDefaultFields", this.defaultFieldValues);
-        this.$store.commit("setReportValues", this.reportValues);
-        this.formDataUpdate();
+        if (this.$philoConfig.access_control) {
+            let promise = this.checkAccessAuthorization();
+            promise.then(response => {
+                this.authorized = response.data.access;
+                if (this.authorized) {
+                    this.setupApp();
+                } else {
+                    this.clientIp = response.data.incoming_address;
+                    this.domainName = response.data.domain_name;
+                }
+            });
+        } else {
+            this.setupApp();
+        }
+        EventBus.$on("accessAuthorized", () => {
+            this.setupApp();
+            this.authorized = true;
+        });
     },
     watch: {
         // call again the method if the route changes
         $route: "formDataUpdate"
     },
     methods: {
+        setupApp() {
+            this.$store.commit("setDefaultFields", this.defaultFieldValues);
+            this.$store.commit("setReportValues", this.reportValues);
+            this.formDataUpdate();
+        },
+        checkAccessAuthorization() {
+            let promise = this.$http.get(
+                `${this.$dbUrl}/scripts/access_request.py`
+            );
+            return promise;
+        },
         formDataUpdate() {
             let localParams = this.copyObject(this.defaultFieldValues);
             this.$store.commit("updateFormData", {
@@ -110,7 +151,6 @@ export default {
             EventBus.$emit("urlUpdate");
         },
         evaluateRoute() {
-            console.log(this.$route);
             if (this.$route.name == null) {
                 this.$router.push("./");
             } else if (
