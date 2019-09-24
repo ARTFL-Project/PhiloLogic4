@@ -91,14 +91,18 @@ export default {
                 ...commonFields,
                 "results_per_page",
                 "sort_by",
-                "hit_num"
+                "hit_num",
+                "start",
+                "end"
             ]);
             reportValues.kwic = new Set([
                 ...commonFields,
                 "results_per_page",
                 "first_kwic_sorting_option",
                 "second_kwic_sorting_option",
-                "third_kwic_sorting_option"
+                "third_kwic_sorting_option",
+                "start",
+                "end"
             ]);
             reportValues.collocation = new Set([
                 ...commonFields,

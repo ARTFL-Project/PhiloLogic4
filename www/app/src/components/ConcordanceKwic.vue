@@ -7,8 +7,11 @@
                         variant="outline-primary"
                         size="sm"
                         id="export-results"
-                        data-target="#export-dialog"
+                        v-b-modal.export-modal
                     >Export results</b-button>
+                    <b-modal id="export-modal" title="Export Results" hide-footer>
+                        <export-results></export-results>
+                    </b-modal>
                     <search-arguments></search-arguments>
                     <div id="result-stats" class="pl-3 pb-3">
                         {{ resultsLength }} total occurrences spread across
@@ -71,6 +74,7 @@
 <script>
 import searchArguments from "./SearchArguments";
 import ResultsBibliography from "./ResultsBibliography";
+import ExportResults from "./ExportResults";
 import { EventBus } from "../main.js";
 
 import { mapFields } from "vuex-map-fields";
@@ -79,7 +83,8 @@ export default {
     name: "conckwic",
     components: {
         searchArguments,
-        ResultsBibliography
+        ResultsBibliography,
+        ExportResults
     },
     props: ["results"],
     computed: {
@@ -189,6 +194,7 @@ export default {
                         response.data.stats
                     );
                     this.hits = this.buildDescription();
+                    EventBus.$emit("totalResultsDone");
                 })
                 .catch(error => {
                     this.debug(this, error);
