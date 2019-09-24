@@ -388,7 +388,6 @@ export default {
 .metadata-args {
     border: 1px solid #ddd;
     display: inline-block !important;
-    margin-top: 20px;
     margin-right: 5px;
 }
 .metadata-label {

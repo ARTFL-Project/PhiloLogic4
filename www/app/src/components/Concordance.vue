@@ -1,6 +1,6 @@
 <template>
     <div>
-        <conckwic v-if="description.end != 0"></conckwic>
+        <conckwic v-if="description.end != 0" :results="results.results"></conckwic>
         <b-row class="mr-2">
             <b-col cols="12" md="7" xl="8">
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
@@ -19,11 +19,7 @@
                                 </span>
                             </b-col>
                             <b-col sm="2" md="1" class="hidden-xs">
-                                <button
-                                    id="more-context"
-                                    class="btn btn-primary more-context"
-                                    @click="moreContext(index)"
-                                >More</button>
+                                <b-button class="more-context" @click="moreContext(index)">More</b-button>
                             </b-col>
                         </b-row>
                         <b-row>

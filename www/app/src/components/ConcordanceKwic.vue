@@ -1,8 +1,8 @@
 <template>
     <div id="concordanceKwic-container" class="mt-4 ml-4 mr-4">
-        <b-card no-body class="shadow-sm">
+        <b-card no-body class="shadow-sm pb-3">
             <div id="initial_report">
-                <div id="description" class="pb-3">
+                <div id="description">
                     <b-button
                         variant="outline-primary"
                         size="sm"
@@ -20,7 +20,17 @@
                             <span v-if="statIndex != statsDescription.length-1">&nbsp;and&nbsp;</span>
                         </span>
                     </div>
-                    <div id="search-hits" class="pl-3">{{ hits }}</div>
+                    <div id="search-hits" class="pl-3">
+                        <b>{{ hits }}</b>
+                        from these
+                        <b-button
+                            pill
+                            size="sm"
+                            variant="outline-secondary"
+                            style="padding: .25rem; line-height: 1;"
+                            @click="showResultsBiblio"
+                        >works</b-button>
+                    </div>
                 </div>
                 <b-button
                     variant="outline-secondary"
@@ -28,6 +38,7 @@
                     @click="showFacets() "
                 >Show Facets</b-button>
             </div>
+            <results-bibliography :results="results" v-if="showBiblio && resultsLength > 0"></results-bibliography>
         </b-card>
         <b-row class="d-xs-none mt-4 mb-3" id="act-on-report">
             <b-col sm="7" lg="8" v-if="report != 'bibliography'">
@@ -59,6 +70,7 @@
 
 <script>
 import searchArguments from "./SearchArguments";
+import ResultsBibliography from "./ResultsBibliography";
 import { EventBus } from "../main.js";
 
 import { mapFields } from "vuex-map-fields";
@@ -66,8 +78,10 @@ import { mapFields } from "vuex-map-fields";
 export default {
     name: "conckwic",
     components: {
-        searchArguments
+        searchArguments,
+        ResultsBibliography
     },
+    props: ["results"],
     computed: {
         ...mapFields([
             "formData.report",
@@ -95,7 +109,8 @@ export default {
                     labelBig: "View occurrences line by line (KWIC)",
                     labelSmall: "Keyword in context"
                 }
-            }
+            },
+            showBiblio: false
         };
     },
     created() {
@@ -121,11 +136,16 @@ export default {
                 end <= this.resultsLength
             ) {
                 description =
-                    "Hits " + start + " - " + end + " of " + this.resultsLength;
+                    "Displaying hits " +
+                    start +
+                    " - " +
+                    end +
+                    " of " +
+                    this.resultsLength;
             } else if (this.resultsLength) {
                 if (resultsPerPage > this.resultsLength) {
                     description =
-                        "Hits " +
+                        "Displaying hits " +
                         start +
                         " - " +
                         this.resultsLength +
@@ -133,7 +153,7 @@ export default {
                         this.resultsLength;
                 } else {
                     description =
-                        "Hits " +
+                        "Displaying hits " +
                         start +
                         " - " +
                         end +
@@ -182,7 +202,14 @@ export default {
             this.results_per_page = 25;
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
         },
-        showFacets() {}
+        showFacets() {},
+        showResultsBiblio() {
+            if (!this.showBiblio) {
+                this.showBiblio = true;
+            } else {
+                this.showBiblio = false;
+            }
+        }
     }
 };
 </script>
