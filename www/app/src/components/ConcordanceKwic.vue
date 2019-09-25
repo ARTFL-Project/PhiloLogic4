@@ -25,14 +25,16 @@
                     </div>
                     <div id="search-hits" class="pl-3">
                         <b>{{ hits }}</b>
-                        from these
-                        <b-button
-                            pill
-                            size="sm"
-                            variant="outline-secondary"
-                            style="padding: .25rem; line-height: 1;"
-                            @click="showResultsBiblio"
-                        >works</b-button>
+                        <span v-if="report != 'bibliography'">
+                            from these
+                            <b-button
+                                pill
+                                size="sm"
+                                variant="outline-secondary"
+                                style="margin-top: -.05rem;"
+                                @click="showResultsBiblio"
+                            >titles</b-button>
+                        </span>
                     </div>
                 </div>
                 <b-button

@@ -31,7 +31,16 @@ def get_total_doc_count(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("scripts", ""))
     db = DB(config.db_path + "/data/")
     request = WSGIHandler(environ, config)
-    hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
+    if request.no_q:
+        if request.no_metadata:
+            hits = db.get_all(db.locals["default_object_level"], request["sort_order"], raw_results=True)
+
+        else:
+            hits = db.query(sort_order=request["sort_order"], raw_results=True, **request.metadata)
+        if "title" in config["hitlist_stats"]["fields"]:
+            config["hitlist_stats"]["fields"].remove("title")
+    else:
+        hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
     docs = set()
     hits.finish()
     total_results = 0
@@ -43,8 +52,11 @@ def get_total_doc_count(environ, start_response):
     citations = []
     cursor = db.dbh.cursor()
     for field in config["hitlist_stats"]["fields"]:
-        cursor.execute(f"SELECT COUNT(DISTINCT {field}) FROM toms WHERE philo_id IN ({', '.join(docs)})")
-        count = cursor.fetchone()[0]
+        if field == "title":
+            count = len(docs)
+        else:
+            cursor.execute(f"SELECT COUNT(DISTINCT {field}) FROM toms WHERE philo_id IN ({', '.join(docs)})")
+            count = cursor.fetchone()[0]
         stats.append({"field": field, "count": count})
     yield json.dumps({"total_results": total_results, "stats": stats}).encode("utf8")
 

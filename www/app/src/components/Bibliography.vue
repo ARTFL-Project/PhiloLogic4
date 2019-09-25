@@ -1,6 +1,6 @@
 <template>
     <div>
-        <conckwic :results="results" v-if="Object.keys(results).length"></conckwic>
+        <conckwic :results="results.results" v-if="Object.keys(results).length"></conckwic>
         <b-row class="mr-2">
             <b-col
                 cols="12"
@@ -171,8 +171,9 @@ export default {
                 this.metadataAddition.splice(itemIndex, 1);
             }
             let newTitleValue = this.metadataAddition.join(" | ");
-            this.$store.commit("updateMetadata", {
-                title: newTitleValue
+            this.$store.commit("updateFormDataField", {
+                key: "title",
+                value: newTitleValue
             });
             EventBus.$emit("metadataUpdate", { title: newTitleValue });
         },

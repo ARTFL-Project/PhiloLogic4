@@ -4,17 +4,14 @@
             style="list-style-type: disc;"
             v-for="(result, resultIndex) in uniquedResults"
             :key="resultIndex"
-            @mouseover="showConcordanceLink(resultIndex)"
-            @mouseleave="hideConcordanceLink(resultIndex)"
         >
             <span class="cite">
                 <citations :citation="result.citation"></citations>
-            </span>
+            </span>&nbsp;:
             <router-link
-                class="bib pl-2"
-                style="display: none"
+                class="ml-2"
                 :to="`/${report}?${buildLink(result.metadata_fields.title)}`"
-            >See results in this work</router-link>
+            >{{ result.count }} occurrence(s)</router-link>
         </li>
     </ul>
 </template>
@@ -33,6 +30,7 @@ export default {
             let previousFilename = "";
             for (let result of this.results) {
                 if (result.metadata_fields.filename == previousFilename) {
+                    uniqueResults[uniqueResults.length - 1].count++;
                     continue;
                 }
                 result = this.copyObject(result);
@@ -43,6 +41,7 @@ export default {
                     }
                 }
                 result.citation = citation;
+                result.count = 1;
                 uniqueResults.push(result);
                 previousFilename = result.metadata_fields.filename;
             }
@@ -50,22 +49,6 @@ export default {
         }
     },
     methods: {
-        showConcordanceLink(index) {
-            let element = document.querySelector(
-                `#results-bibliography > li:nth-child(${index + 1}) > .bib`
-            );
-            if (element != null) {
-                element.style.display = "";
-            }
-        },
-        hideConcordanceLink(index) {
-            let element = document.querySelector(
-                `#results-bibliography > li:nth-child(${index + 1}) > .bib`
-            );
-            if (element != null) {
-                element.style.display = "none";
-            }
-        },
         buildLink(title) {
             return this.paramsToUrlString({
                 ...this.$store.state.formData,

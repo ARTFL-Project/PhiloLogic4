@@ -1,6 +1,6 @@
 <template>
     <div>
-        <conckwic></conckwic>
+        <conckwic :results="results.results"></conckwic>
         <b-row class="ml-2 mr-2 mb-2">
             <b-col cols="12" md="7" xl="8">
                 <b-card no-body class="p-2 shadow-sm">
