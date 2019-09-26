@@ -725,6 +725,23 @@ class Loader(object):
                 print(f.__name__ + "...", end=" ")
                 f(self)
 
+        # Get IDF weighting of every word in corpus
+        print("Storing Inverse Document Frequency of all words in corpus...")
+        all_words = []
+        with open(os.path.join(self.destination, "frequencies/word_frequencies")) as input_file:
+            for line in input_file:
+                all_words.append(line.split()[0].strip())
+        idf_per_word = {}
+        with sqlite3.connect(os.path.join(self.destination, "data/toms.db")) as conn:
+            cursor = conn.cursor()
+            for word in tqdm(all_words, leave=False, total=len(all_words), desc="Calculatig IDF for all words"):
+                cursor.execute("SELECT philo_id FROM word WHERE philo_name=?", (word,))
+                total_docs = len({row[0].split()[0] for row in cursor})
+                idf_per_word[word] = math.log(len(self.filenames) / total_docs)
+        with open(os.path.join(self.destination, "frequencies/words_idf"), "w") as idf_output:
+            for word, idf in sorted(idf_per_word.items(), key=lambda x: x[1], reverse=True):
+                print(f"{word}\t{idf}", file=idf_output)
+
     def finish(self):
         """Write important runtime information to the database directory"""
         print("\n### Finishing up ###")

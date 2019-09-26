@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <b-container fluid>
         <b-row>
             <b-col sm="10" offset-sm="1" xl="8" offset-xl="2">
                 <b-card no-body class="shadow">
@@ -247,14 +247,14 @@
                                         <b-col cols="12">
                                             <b-row>
                                                 <b-col cols="3" sm="2">Word Filtering</b-col>
-                                                <b-col cols="3" sm="1">
+                                                <b-col cols="3" sm="2">
                                                     <b-form-input
                                                         name="filter_frequency"
                                                         placeholder="100"
                                                         v-model="filter_frequency"
                                                     ></b-form-input>
                                                 </b-col>
-                                                <b-col cols="6" sm="2">
+                                                <b-col cols="6">
                                                     <b-form-group>
                                                         <b-form-radio-group
                                                             id="btn-radios-3"
@@ -473,7 +473,7 @@
                 >*</span> in many other search engines.
             </div>
         </b-modal>
-    </div>
+    </b-container>
 </template>
 
 <script>
@@ -557,6 +557,7 @@ export default {
             metadataDisplay: [],
             metadataValues: {},
             collocationOptions: [
+                { text: "Average TF-IDF", value: "tfidf" },
                 { text: "Most Frequent Terms", value: "frequency" },
                 { text: "Stopwords", value: "stopwords" },
                 { text: "No Filtering", value: "nofilter" }

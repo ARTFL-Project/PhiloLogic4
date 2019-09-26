@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 
 
+import math
 import os
 import sqlite3
 import time
 import unicodedata
-
 from json import loads
 
+import numpy as np
+from multiprocess import Pool
+from sklearn.feature_extraction.text import TfidfVectorizer
 from tqdm import tqdm
 
 
@@ -136,11 +139,39 @@ def normalized_metadata_frequencies(loader_obj):
             pass
 
 
+def tfidf_per_word(loader_obj):
+    """Get IDF weighting of every word in corpus"""
+    print(f"{time.ctime()}: Storing Inverse Document Frequency of all words in corpus...")
+
+    def get_text(doc):
+        with open(doc) as text:
+            return text.read()
+
+    path = os.path.join(loader_obj.destination, "words_and_philo_ids")
+    pool = Pool(loader_obj.workers)
+    vectorizer = TfidfVectorizer(sublinear_tf=True)
+    texts = pool.imap_unordered(
+        get_text,
+        (i.path for i in os.scandir(path)),
+        leave=True,
+        total=len(os.listdir(path)),
+        desc="Vectorizing words...",
+    )
+    corpus = vectorizer.fit_transform(texts)
+    mean_tf_idf = np.mean(corpus.toarray(), axis=0)
+    weighted_words = {word: mean_tf_idf[vectorizer.vocabulary_[word]] for word in vectorizer.vocabulary_}
+    idf_per_word = {}
+    with open(os.path.join(loader_obj.destination, "frequencies/words_mean_tfidf"), "w") as idf_output:
+        for word, idf in sorted(idf_per_word.items(), key=lambda x: x[1], reverse=True):
+            print(f"{word}\t{idf}", file=idf_output)
+
+
 DefaultPostFilters = [
     word_frequencies,
     normalized_word_frequencies,
     metadata_frequencies,
     normalized_metadata_frequencies,
+    tfidf_per_word,
 ]
 
 

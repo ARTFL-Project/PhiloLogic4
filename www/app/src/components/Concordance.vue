@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <b-container fluid>
         <conckwic v-if="description.end != 0" :results="results.results"></conckwic>
         <b-row class="mr-2">
             <b-col cols="12" md="7" xl="8">
@@ -42,7 +42,7 @@
             </b-col>
         </b-row>
         <pages v-if="resultsLength > 0"></pages>
-    </div>
+    </b-container>
 </template>
 
 <script>

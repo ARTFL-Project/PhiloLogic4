@@ -343,6 +343,7 @@ DefaultLoadFilters = [
     generate_graphics,
     generate_lines,
     make_max_id,
+    store_in_plain_text,
     store_words_and_philo_ids,
 ]
 
