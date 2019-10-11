@@ -21,6 +21,7 @@ You can find a copy of the latest version of PhiloLogic4 [here](../../../release
 
 ### Prerequisites
 
+-   Apache Webserver
 -   Python 3.6 and up
 -   GCC
 -   Make
