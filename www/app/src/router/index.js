@@ -9,6 +9,7 @@ import timeSeries from '../components/TimeSeries'
 import textNavigation from '../components/TextNavigation'
 import tableOfContents from '../components/TableOfContents'
 import landingPage from '../components/LandingPage'
+import statistics from "../components/Statistics"
 import appConfig from '../../appConfig.json'
 
 
@@ -56,6 +57,11 @@ export default new Router({
             path: "/navigate/:pathInfo(\\d+)/table-of-contents",
             name: "tableOfContents",
             component: tableOfContents
+        },
+        {
+            path: "/statistics",
+            name: 'statistics',
+            component: statistics
         }
     ],
     scrollBehavior(to, from, savedPosition) {

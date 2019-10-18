@@ -8,7 +8,7 @@
                     id="export-results"
                     data-target="#export-dialog"
                 >Export results</b-button>
-                <search-arguments :results-length="resultsLength"></search-arguments>
+                <search-arguments></search-arguments>
             </div>
             <b-progress
                 :max="resultsLength"
@@ -35,7 +35,12 @@
                             href
                             @click="toggleFilterList()"
                             v-if="colloc_filter_choice === 'stopwords'"
-                        >{{ filter_frequency }} most common words</a>
+                        >Common function words</a>
+                        <a
+                            href
+                            @click="toggleFilterList()"
+                            v-if="colloc_filter_choice === 'tfidf'"
+                        >{{ filter_frequency }} most highly weighted terms across the corpus</a>
                         are being filtered from this report.
                     </span>
                 </span>
@@ -105,7 +110,8 @@ export default {
             "formData.colloc_filter_choice",
             "formData.q",
             "formData.filter_frequency",
-            "currentReport"
+            "currentReport",
+            "resultsLength"
         ]),
         colorCodes: function() {
             let colorCodes = {};
@@ -141,7 +147,6 @@ export default {
             filterList: [],
             searchParams: {},
             authorized: true,
-            resultsLength: 100,
             moreResults: false,
             loading: false,
             sortedList: [],
@@ -153,7 +158,6 @@ export default {
     created() {
         this.report = "collocation";
         this.currentReport = "collocation";
-        this.filter_frequency = 100;
         this.fetchResults();
         EventBus.$on("urlUpdate", () => {
             if (this.report == "collocation") {

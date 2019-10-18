@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name="philologic",
-    version="4.6",
+    version="4.7",
     author="The ARTFL Project",
     author_email="artfl@artfl.uchicago.edu",
     packages=[
@@ -14,5 +14,5 @@ setup(
         "philologic.loadtime",
     ],
     scripts=["scripts/philoload4"],
-    install_requires=["lxml", "python-levenshtein", "natsort", "multiprocess", "tqdm"],
+    install_requires=["lxml", "python-levenshtein", "natsort", "multiprocess", "tqdm", "sklearn", "numpy"],
 )

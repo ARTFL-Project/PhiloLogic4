@@ -19,7 +19,9 @@
                             v-for="(stat, statIndex) in statsDescription"
                             :key="stat.field"
                         >
-                            <router-link to="/statistics/">{{stat.count}} {{stat.label}}(s)</router-link>
+                            <router-link
+                                :to="`/statistics?${stat.link}&group_by=${stat.field}`"
+                            >{{stat.count}} {{stat.label}}(s)</router-link>
                             <span v-if="statIndex != statsDescription.length-1">&nbsp;and&nbsp;</span>
                         </span>
                     </div>
@@ -180,7 +182,11 @@ export default {
                         stat.field
                     ].toLowerCase(),
                     field: stat.field,
-                    count: stat.count
+                    count: stat.count,
+                    link: this.paramsToUrlString({
+                        ...this.$store.state.formData,
+                        report: "statistics"
+                    })
                 });
             }
             return statsDescription;

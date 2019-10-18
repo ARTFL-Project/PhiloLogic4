@@ -26,9 +26,7 @@ def frequency_results(request, config, sorted_results=False):
 
     cursor = db.dbh.cursor()
 
-    cursor.execute(
-        "select philo_id, %s from toms where %s is not null" % (request.frequency_field, request.frequency_field)
-    )
+    cursor.execute(f"select philo_id, {request.frequency_field} from toms where {request.frequency_field} is not null")
     metadata_dict = {}
     for i in cursor:
         philo_id, field = i
@@ -84,7 +82,7 @@ def frequency_results(request, config, sorted_results=False):
                     end="0",
                     report=request.report,
                     script="",
-                    **{request.frequency_field: '"%s"' % key}
+                    **{request.frequency_field: '"%s"' % key},
                 )
                 if not biblio_search:
                     query_metadata = dict([(k, v) for k, v in request.metadata.items() if v])
@@ -119,7 +117,7 @@ def frequency_results(request, config, sorted_results=False):
                     end="0",
                     report=request.report,
                     script="",
-                    **{request.frequency_field: '"NULL"'}
+                    **{request.frequency_field: '"NULL"'},
                 )
                 local_hits = db.query(**new_metadata)
                 if not biblio_search:

@@ -140,29 +140,37 @@ def normalized_metadata_frequencies(loader_obj):
 
 
 def tfidf_per_word(loader_obj):
-    """Get IDF weighting of every word in corpus"""
+    """Get the mean TF-IDF weighting of every word in corpus"""
     print(f"{time.ctime()}: Storing Inverse Document Frequency of all words in corpus...")
 
     def get_text(doc):
+        words = []
         with open(doc) as text:
-            return text.read()
+            for line in text:
+                try:
+                    words.append(loads(line.strip())["token"])
+                except:
+                    pass
+        return " ".join(words)
+
+    def get_all_words():
+        path = os.path.join(loader_obj.destination, "words_and_philo_ids")
+        pool = Pool(32)
+        return tqdm(
+            pool.imap_unordered(get_text, (i.path for i in os.scandir(path))),
+            leave=True,
+            total=len(os.listdir(path)),
+            desc="Vectorizing words...",
+        )
 
     path = os.path.join(loader_obj.destination, "words_and_philo_ids")
-    pool = Pool(loader_obj.workers)
-    vectorizer = TfidfVectorizer(sublinear_tf=True)
-    texts = pool.imap_unordered(
-        get_text,
-        (i.path for i in os.scandir(path)),
-        leave=True,
-        total=len(os.listdir(path)),
-        desc="Vectorizing words...",
-    )
-    corpus = vectorizer.fit_transform(texts)
+    pool = Pool(loader_obj.cores)
+    vectorizer = TfidfVectorizer(sublinear_tf=True, token_pattern=r"(?u)\b\w+\b")
+    corpus = vectorizer.fit_transform((get_all_words()))
     mean_tf_idf = np.mean(corpus.toarray(), axis=0)
     weighted_words = {word: mean_tf_idf[vectorizer.vocabulary_[word]] for word in vectorizer.vocabulary_}
-    idf_per_word = {}
     with open(os.path.join(loader_obj.destination, "frequencies/words_mean_tfidf"), "w") as idf_output:
-        for word, idf in sorted(idf_per_word.items(), key=lambda x: x[1], reverse=True):
+        for word, idf in sorted(weighted_words.items(), key=lambda x: x[1], reverse=True):
             print(f"{word}\t{idf}", file=idf_output)
 
 

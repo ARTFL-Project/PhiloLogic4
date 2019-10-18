@@ -69,7 +69,8 @@ export default {
                 second_kwic_sorting_option: "",
                 third_kwic_sorting_option: "",
                 start_byte: "",
-                end_byte: ""
+                end_byte: "",
+                group_by: ""
             };
             for (let field of this.$philoConfig.metadata) {
                 localFields[field] = "";
@@ -93,7 +94,8 @@ export default {
                 "sort_by",
                 "hit_num",
                 "start",
-                "end"
+                "end",
+                "frequency_field"
             ]);
             reportValues.kwic = new Set([
                 ...commonFields,
@@ -102,7 +104,8 @@ export default {
                 "second_kwic_sorting_option",
                 "third_kwic_sorting_option",
                 "start",
-                "end"
+                "end",
+                "frequency_field"
             ]);
             reportValues.collocation = new Set([
                 ...commonFields,
@@ -117,6 +120,7 @@ export default {
                 "year_interval",
                 "max_time"
             ]);
+            reportValues.statistics = new Set([...commonFields, "group_by"]);
             return reportValues;
         }
     },

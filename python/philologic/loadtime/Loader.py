@@ -17,7 +17,6 @@ from glob import glob
 import lxml
 from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
-from philologic.loadtime.LoadOptions import CONFIG_FILE
 from philologic.loadtime.PostFilters import make_sql_table
 from philologic.utils import convert_entities, load_module, pretty_print, sort_list
 from tqdm import tqdm
@@ -79,6 +78,8 @@ class Loader(object):
         self.post_filters = loader_options["post_filters"]
         self.words_to_index = loader_options["words_to_index"]
         self.token_regex = loader_options["token_regex"]
+        self.url_root = loader_options["url_root"]
+        self.cores = loader_options["cores"]
 
         self.parser_config = {}
         for option in PARSER_OPTIONS:
@@ -725,23 +726,6 @@ class Loader(object):
                 print(f.__name__ + "...", end=" ")
                 f(self)
 
-        # Get IDF weighting of every word in corpus
-        print("Storing Inverse Document Frequency of all words in corpus...")
-        all_words = []
-        with open(os.path.join(self.destination, "frequencies/word_frequencies")) as input_file:
-            for line in input_file:
-                all_words.append(line.split()[0].strip())
-        idf_per_word = {}
-        with sqlite3.connect(os.path.join(self.destination, "data/toms.db")) as conn:
-            cursor = conn.cursor()
-            for word in tqdm(all_words, leave=False, total=len(all_words), desc="Calculatig IDF for all words"):
-                cursor.execute("SELECT philo_id FROM word WHERE philo_name=?", (word,))
-                total_docs = len({row[0].split()[0] for row in cursor})
-                idf_per_word[word] = math.log(len(self.filenames) / total_docs)
-        with open(os.path.join(self.destination, "frequencies/words_idf"), "w") as idf_output:
-            for word, idf in sorted(idf_per_word.items(), key=lambda x: x[1], reverse=True):
-                print(f"{word}\t{idf}", file=idf_output)
-
     def finish(self):
         """Write important runtime information to the database directory"""
         print("\n### Finishing up ###")
@@ -831,13 +815,13 @@ class Loader(object):
 
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)
-        with open(os.path.join(filename, "w")) as output_file:
+        with open(os.path.join(filename), "w") as output_file:
             print(web_config, file=output_file)
         print(f"wrote Web application info to {filename}")
 
         dbname = os.path.basename(os.path.dirname(self.destination.rstrip("/")))
-        with open(os.path.join(self.destination, "../appConfig.json")) as appConfig:
-            json.dump({"dbUrl": os.path.join(CONFIG_FILE.url_root, f"{dbname}/app")}, appConfig)
+        with open(os.path.join(self.destination, "../app/appConfig.json"), "w") as appConfig:
+            json.dump({"dbUrl": os.path.join(self.url_root, f"{dbname}/app")}, appConfig)
 
         os.system(f"cd {os.path.join(self.destination, '../app')}; npm install && npm run build")
 

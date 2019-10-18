@@ -22,6 +22,7 @@ from philologic.runtime.reports import (
     group_by_metadata,
     group_by_range,
     landing_page_bibliography,
+    statistics_by_field,
 )
 from philologic.runtime.web_config import WebConfig
 from philologic.runtime.WSGIHandler import WSGIHandler
