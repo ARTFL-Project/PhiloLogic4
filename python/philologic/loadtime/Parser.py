@@ -1063,7 +1063,7 @@ class XMLParser(object):
                         # Check to see if the word is longer than we want.  More than 235
                         # characters appear to cause problems in the indexer.
                         if len(word) > self.long_word_limit:
-                            print("Long word: %s" % word, file=sys.stderr)
+                            print("Long word in {}: {}".format(self.input.name, word), file=sys.stderr)
                             print("Truncating to %d characters for index..." % self.long_word_limit, file=sys.stderr)
                             word = word[: self.long_word_limit]
 
