@@ -466,9 +466,9 @@ class Loader(object):
             except Exception:
                 raise ParserError(f"{text['name']} has caused parser to die.")
 
-        os.system("lz4 -q %s > %s" % (text["raw"], text["raw"] + ".lz4"))
+        os.system("lz4 -c -q %s > %s" % (text["raw"], text["raw"] + ".lz4"))
         os.system("rm %s" % text["raw"])
-        os.system("lz4 -q %s > %s" % (text["words"], text["words"] + ".lz4"))
+        os.system("lz4 -c -q %s > %s" % (text["words"], text["words"] + ".lz4"))
         os.system("rm %s" % text["words"])
         return text["results"]
 
