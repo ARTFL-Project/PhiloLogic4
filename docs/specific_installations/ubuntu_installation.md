@@ -11,7 +11,7 @@ title: Installing PhiloLogic4 on Ubuntu
     -   libgdbm-dev
     -   python3-pip
     -   libgdbm-dev
-    -   lz4
+    -   liblz4-tool
 
     Run the following command:
 
