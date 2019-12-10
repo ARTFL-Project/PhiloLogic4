@@ -393,6 +393,12 @@ class Loader(object):
                     else:  # we have a serious error here!  Should raise going forward.
                         pass
 
+        # Add unique philo ids for top level text objects
+        self.metadata_fields.extend(["philo_doc_id", "philo_div1_id", "philo_div2_id", "philo_div3_id"])
+        for pos, object_level in enumerate(["doc", "div1", "div2", "div3"]):
+            self.metadata_hierarchy[pos].append(f"philo_{object_level}_id")
+            self.metadata_types[f"philo_{object_level}_id"] = object_level
+
         print("%s: parsing %d files." % (time.ctime(), len(filequeue)))
         if chunksize is None:
             chunksize = 1
