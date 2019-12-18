@@ -23,7 +23,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
         conn.text_factory = str
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        columns = "philo_type,philo_name,philo_id,philo_seq"
+        columns = "philo_type, philo_name, philo_id, philo_seq"
         query = "create table if not exists %s (%s)" % (table, columns)
         cursor.execute(query)
         with tqdm(total=line_count, leave=False) as pbar:

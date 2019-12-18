@@ -11,11 +11,11 @@ title: Installing PhiloLogic4 on Ubuntu
     -   libgdbm-dev
     -   python3-pip
     -   libgdbm-dev
-    -   lz4
+    -   liblz4-tool
 
     Run the following command:
 
-    `sudo apt-get install libxml2-dev libxslt-dev zlib1g-dev apache2 libgdbm-dev python3-pip lz4`
+    `sudo apt-get install libxml2-dev libxslt-dev zlib1g-dev apache2 libgdbm-dev python3-pip liblz4-tool`
 
 -   Run install script inside the PhiloLogic4 directory
 

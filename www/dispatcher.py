@@ -36,7 +36,7 @@ def philo_dispatcher(environ, start_response):
                 response = "".join([i for i in reports.navigation(environ, start_response)])
         else:
             report = getattr(reports, FieldStorage().getvalue("report"))
-            response = "".join([i for i in report(environ, start_response)])
+            response = b"".join([i for i in report(environ, start_response)]).decode("utf8", "ignore")
     else:
         response = start_web_app(environ, start_response)
     yield response.encode("utf8")

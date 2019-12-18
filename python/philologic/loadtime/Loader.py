@@ -396,6 +396,12 @@ class Loader(object):
                     else:  # we have a serious error here!  Should raise going forward.
                         pass
 
+        # Add unique philo ids for top level text objects
+        self.metadata_fields.extend(["philo_doc_id", "philo_div1_id", "philo_div2_id", "philo_div3_id"])
+        for pos, object_level in enumerate(["doc", "div1", "div2", "div3"]):
+            self.metadata_hierarchy[pos].append(f"philo_{object_level}_id")
+            self.metadata_types[f"philo_{object_level}_id"] = object_level
+
         print("%s: parsing %d files." % (time.ctime(), len(filequeue)))
         if chunksize is None:
             chunksize = 1
@@ -469,9 +475,9 @@ class Loader(object):
             except Exception:
                 raise ParserError(f"{text['name']} has caused parser to die.")
 
-        os.system("lz4 -q %s > %s" % (text["raw"], text["raw"] + ".lz4"))
+        os.system("lz4 -c -q %s > %s" % (text["raw"], text["raw"] + ".lz4"))
         os.system("rm %s" % text["raw"])
-        os.system("lz4 -q %s > %s" % (text["words"], text["words"] + ".lz4"))
+        os.system("lz4 -c -q %s > %s" % (text["words"], text["words"] + ".lz4"))
         os.system("rm %s" % text["words"])
         return text["results"]
 
@@ -716,7 +722,7 @@ class Loader(object):
 
     def post_processing(self, *extra_filters):
         """Run important post-parsing functions for frequencies and word normalization"""
-        print("\n### Post-processing filters ###")
+        print("\n### Storing in database ###")
         for f in self.post_filters:
             f(self)
 
@@ -836,7 +842,7 @@ def setup_db_dir(db_destination, web_app_dir, force_delete=False):
     try:
         os.mkdir(db_destination)
     except OSError:
-        if force_delete:  # useful to run db loads with nohup
+        if force_delete is True:  # useful to run db loads with nohup
             os.system("rm -rf %s" % db_destination)
             os.mkdir(db_destination)
         else:
