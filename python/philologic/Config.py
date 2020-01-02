@@ -189,6 +189,13 @@ web_config_defaults = OrderedDict(
             },
         ),
         (
+            "hitlist_stats",
+            {
+                "value": {"object_level": "doc", "fields": ["author", "title"]},
+                "comment": "Get spread of hits across predefined metadata",
+            },
+        ),
+        (
             "search_examples",
             {
                 "value": {},
@@ -520,7 +527,7 @@ web_config_defaults = OrderedDict(
                         "suffix": "]",
                         "object_level": "page",
                         "field": "n",
-                        "prefix": "&nbsp;[ page",
+                        "prefix": "&nbsp;[",
                         "link": True,
                         "separator": "",
                     },

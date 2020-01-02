@@ -1,6 +1,22 @@
 <template>
     <b-container fluid class="mt-4">
-        <b-card no-body class="shadow">
+        <b-card no-body class="shadow-sm pb-3">
+            <div id="initial_report">
+                <div id="description">
+                    <b-button
+                        variant="outline-primary"
+                        size="sm"
+                        id="export-results"
+                        v-b-modal.export-modal
+                    >Export results</b-button>
+                    <b-modal id="export-modal" title="Export Results" hide-footer>
+                        <export-results></export-results>
+                    </b-modal>
+                    <search-arguments></search-arguments>
+                </div>
+            </div>
+        </b-card>
+        <b-card no-body class="shadow mt-4">
             <b-list-group flush>
                 <b-list-group-item v-for="result in results" :key="result.group_by_field">
                     <citations :citation="result.citation"></citations>
@@ -13,10 +29,11 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
+import searchArguments from "./SearchArguments";
 
 export default {
     name: "statistics",
-    components: { citations },
+    components: { citations, searchArguments },
     computed: {
         ...mapFields(["formData.report", "formData.q"])
     },
@@ -33,10 +50,6 @@ export default {
     methods: {
         fetchData() {
             this.loading = true;
-            console.log(
-                this.$store.state.formData,
-                this.paramsFilter({ ...this.$store.state.formData })
-            );
             this.$http
                 .get(`${this.$dbUrl}/reports/statistics.py`, {
                     params: this.paramsFilter({ ...this.$store.state.formData })

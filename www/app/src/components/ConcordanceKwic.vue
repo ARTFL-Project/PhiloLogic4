@@ -107,7 +107,7 @@ export default {
             facets: this.$philoConfig.facets,
             showFacetedBrowsing: false,
             hits: "",
-            statsDescription: "",
+            statsDescription: [],
             resultsPerPage: 0,
             reportSwitch: {
                 concordance: {
@@ -177,10 +177,16 @@ export default {
         buildStatsDescription(stats) {
             let statsDescription = [];
             for (let stat of stats) {
-                statsDescription.push({
-                    label: this.$philoConfig.metadata_aliases[
+                let label = "";
+                if (stat.field in this.$philoConfig.metadata_aliases) {
+                    label = this.$philoConfig.metadata_aliases[
                         stat.field
-                    ].toLowerCase(),
+                    ].toLowerCase();
+                } else {
+                    label = stat.field;
+                }
+                statsDescription.push({
+                    label: label,
                     field: stat.field,
                     count: stat.count,
                     link: this.paramsToUrlString({

@@ -827,7 +827,7 @@ class Loader(object):
 
         dbname = os.path.basename(os.path.dirname(self.destination.rstrip("/")))
         with open(os.path.join(self.destination, "../app/appConfig.json"), "w") as appConfig:
-            json.dump({"dbUrl": os.path.join(self.url_root, f"{dbname}/app")}, appConfig)
+            json.dump({"dbUrl": os.path.join(self.url_root, f"{dbname}/")}, appConfig)
 
         os.system(f"cd {os.path.join(self.destination, '../app')}; npm install && npm run build")
 
