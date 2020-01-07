@@ -158,7 +158,7 @@ def tfidf_per_word(loader_obj):
         pool = Pool(32)
         return tqdm(
             pool.imap_unordered(get_text, (i.path for i in os.scandir(path))),
-            leave=True,
+            leave=False,
             total=len(os.listdir(path)),
             desc="Vectorizing words...",
         )
