@@ -98,6 +98,7 @@
                 scope.height = angular.element(window).height() - angular.element('#footer').height() - angular.element('#initial_report').height() - angular.element('#header').height() - 150;
                 var formData = angular.copy(scope.formData);
                 var formData2 = angular.copy(scope.formData); // used only for getting total hits
+                scope.q = formData.q
                 scope.resultsLength = 0
                 scope.frequencyType = "absolute_time";
                 angular.element(".progress").show();
@@ -173,10 +174,19 @@
                                         return tooltipItem[0].xLabel + "-" + (parseInt(tooltipItem[0].xLabel) + parseInt(formData.year_interval) - 1);
                                     },
                                     label: function(tooltipItem) {
-                                        if (scope.frequencyType == "absolute_time") {
-                                            return tooltipItem.yLabel + " occurrences";
+                                        if (scope.q) {
+                                            if (scope.frequencyType == "absolute_time") {
+                                                return tooltipItem.yLabel + " occurrences";
+                                            } else {
+                                                return tooltipItem.yLabel + " occurrences per 10,000 words";
+                                            }
                                         } else {
-                                            return tooltipItem.yLabel + " occurrences per 10,000 words";
+                                            if (scope.frequencyType == "absolute_time") {
+                                                return tooltipItem.yLabel + " documents match search parameters"
+                                            } else {
+                                                return tooltipItem.yLabel + " matching documents per 10,000 documents"
+                                            }
+
                                         }
                                     }
                                 }

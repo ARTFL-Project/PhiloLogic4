@@ -37,9 +37,17 @@
 
         vm.submit = function() {
             angular.element('.ui-autocomplete').hide();
-            var extraParams = {start: '0', end: '0'};
+            var extraParams = {
+                start: '0',
+                end: '0'
+            };
             if (typeof($rootScope.formData.q) === "undefined" || $rootScope.formData.q === '') {
-                extraParams.report = "bibliography";
+                if ($rootScope.formData.report != "time_series") {
+                    extraParams.report = "bibliography";
+
+                } else {
+                    extraParams.report = "time_series";
+                }
             } else if ($rootScope.formData.report === "bibliography" && typeof($rootScope.formData.q) !== "undefined") {
                 if (angular.element("#report label.active").length === 0) {
                     extraParams.report = "concordance";
@@ -54,9 +62,9 @@
             $location.url(URL.objectToUrlString($rootScope.formData, extraParams));
         }
 
-    	$scope.$on('backToHome', function() {
-    		vm.formOpen = false;
+        $scope.$on('backToHome', function() {
+            vm.formOpen = false;
             vm.searchOptionsButton = "Show search options";
-    	})
+        })
     }
 })();

@@ -16,11 +16,6 @@
             });
         }
         $rootScope.formData = angular.copy($location.search());
-        if ($rootScope.formData.q === "" && $rootScope.report !== "bibliography") {
-            $location.url(URL.objectToUrlString($rootScope.formData, {
-                report: "bibliography"
-            }));
-        }
         if (typeof($rootScope.formData.year_interval) === "undefined") {
             var urlString = URL.objectToUrlString($rootScope.formData, {
                 year_interval: philoConfig.time_series_interval
