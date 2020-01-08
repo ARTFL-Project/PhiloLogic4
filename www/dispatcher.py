@@ -45,12 +45,12 @@ def philo_dispatcher(environ, start_response):
 
 async def clean_up():
     """clean-up hitlist every now and then"""
-    rand = randint(0, 100)
+    rand = randint(0, 10)
     if rand == 1:
         hit_list_path = os.path.join(path, "data/hitlists/*")
         for filename in glob(hit_list_path):
             file_modified = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
-            if datetime.datetime.now() - file_modified > datetime.timedelta(hours=1):
+            if datetime.datetime.now() - file_modified > datetime.timedelta(minutes=10):
                 os.remove(filename)
 
 

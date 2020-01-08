@@ -42,6 +42,7 @@ def generate_time_series(request, config):
     last_date_done = start_date
     start_time = timeit.default_timer()
     max_time = request.max_time or 10
+    cursor = db.dbh.cursor()
     for start_range, date_range in date_ranges:
         request.metadata[config.time_series_year_field] = date_range
         hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
@@ -53,17 +54,21 @@ def generate_time_series(request, config):
         absolute_count[start_range] = {"label": start_range, "count": hit_len, "url": url}
 
         # Get date total count
-        if interval != "1":
+        if interval != 1:
             end_range = start_range + (int(request["year_interval"]) - 1)
-            query = 'select sum(word_count) from toms where %s between "%d" and "%d"' % (
-                config.time_series_year_field,
-                start_range,
-                end_range,
-            )
+            if request.q:
+                query = 'select sum(word_count) from toms where %s between "%d" and "%d"' % (
+                    config.time_series_year_field,
+                    start_range,
+                    end_range,
+                )
+            else:
+                query = f"SELECT COUNT(*) FROM toms WHERE philo_type='{db.locals.default_object_level}' AND {config.time_series_year_field} BETWEEN {start_range} AND {end_range}"
         else:
-            query = "select sum(word_count) from toms where %s='%s'" % (config.time_series_year_field, start_range)
-
-        cursor = db.dbh.cursor()
+            if request.q:
+                query = "select sum(word_count) from toms where %s='%s'" % (config.time_series_year_field, start_range)
+            else:
+                query = f"SELECT COUNT(*) FROM toms WHERE philo_type='{db.locals.default_object_level}' AND {config.time_series_year_field}='{start_range}'"
         cursor.execute(query)
         date_counts[start_range] = cursor.fetchone()[0] or 0
         total_hits += hit_len
