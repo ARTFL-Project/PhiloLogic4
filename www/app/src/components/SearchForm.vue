@@ -137,7 +137,7 @@
                                             <b-row>
                                                 <b-col cols="12" sm="3">
                                                     <b-form-checkbox
-                                                        id="checkbox-1"
+                                                        id="approximate"
                                                         v-model="approximate"
                                                         name="checkbox-1"
                                                         value="yes"
@@ -151,7 +151,7 @@
                                                     v-if="approximate === 'yes'"
                                                 >
                                                     <b-dropdown
-                                                        id="dropdown-1"
+                                                        id="approximate-values"
                                                         text="100%"
                                                         class="mr-1"
                                                     >
@@ -170,7 +170,6 @@
                                         <b-col cols="12" sm="3" lg="2" id="method-buttons">
                                             <b-form-group>
                                                 <b-form-radio-group
-                                                    id="btn-radios-3"
                                                     v-model="method"
                                                     :options="methodOptions"
                                                     buttons

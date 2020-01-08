@@ -49,7 +49,7 @@ export default new Router({
             component: timeSeries
         },
         {
-            path: "/navigate/:pathInfo([\\d\/]+)",
+            path: "/navigate/:pathInfo([\\d/]+)",
             name: "textNavigation",
             component: textNavigation
         },
@@ -62,6 +62,17 @@ export default new Router({
             path: "/statistics",
             name: 'statistics',
             component: statistics
+        },
+        // for compatibility with old Philo links: still used in landing page
+        {
+            path: "/query",
+            redirect: to => {
+                console.log(to)
+                return {
+                    name: to.query.report,
+                    params: to.params
+                }
+            }
         }
     ],
     scrollBehavior(to, from, savedPosition) {

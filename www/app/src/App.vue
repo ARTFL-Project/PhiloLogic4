@@ -154,6 +154,9 @@ export default {
             EventBus.$emit("urlUpdate")
         },
         evaluateRoute() {
+            if (this.$route.name == "bibliography") {
+                this.report = "bibliography"
+            }
             if (this.$route.name == null) {
                 this.$router.push("./")
             } else if (

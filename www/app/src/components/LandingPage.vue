@@ -252,7 +252,6 @@ export default {
                     results: localGroup
                 })
             }
-            console.log(groupedResults)
             return groupedResults
         },
         goToLetter(letter) {
