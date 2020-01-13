@@ -80,10 +80,14 @@ class Loader:
     metadata_fields = []
     metadata_types = {}
     metadata_hierarchy = []
+    metadata_fields_not_found = []
+    debug = False
 
     @classmethod
     def set_class_attributes(cls, loader_options):
         """Set initial class attributes and return Loader object"""
+        cls.post_filters = loader_options["post_filters"]
+        cls.debug = loader_options["debug"]
         cls.words_to_index = loader_options["words_to_index"]
         cls.destination = loader_options["data_destination"]
         cls.workdir = os.path.join(loader_options["data_destination"], "WORK/")
@@ -97,9 +101,7 @@ class Loader:
 
     def __init__(self, **loader_options):
         self.parse_pool = None
-        self.debug = loader_options["debug"]
         self.default_object_level = loader_options["default_object_level"]
-        self.post_filters = loader_options["post_filters"]
         self.token_regex = loader_options["token_regex"]
 
         os.system(f"mkdir -p {self.destination}")
@@ -172,13 +174,13 @@ class Loader:
 
     def add_files(self, files):
         """Copy files to database directory"""
-        print("\nCopying files to database directory...", end=" ")
+        print("\nCopying files to database directory...", end=" ", flush=True)
         for f in files:
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
             shutil.copy2(f, new_file_path)
             os.chmod(new_file_path, 775)
             self.filenames.append(f)
-        print("done.\n")
+        print("done.\n", flush=True)
 
     def parse_bibliography_file(self, bibliography_file, sort_by_field, reverse_sort=True):
         """Parse tab delimited bibliography file"""
@@ -387,15 +389,6 @@ class Loader:
             }
             for n, d in enumerate(cls.data_dicts)
         ]
-
-    @classmethod
-    def parse_files(cls, workers):
-        """Parse all files
-        chunksize is setable from the philoload script and can be helpful when loading
-        many small files"""
-        print("\n\n### Parsing files ###")
-        os.chdir(cls.workdir)  # questionable
-
         cls.metadata_hierarchy.append([])
         # Adding in doc level metadata
         for d in cls.data_dicts:
@@ -426,6 +419,13 @@ class Loader:
             cls.metadata_hierarchy[pos].append(f"philo_{object_level}_id")
             cls.metadata_types[f"philo_{object_level}_id"] = object_level
 
+    @classmethod
+    def parse_files(cls, workers):
+        """Parse all files
+        chunksize is setable from the philoload script and can be helpful when loading
+        many small files"""
+        print("\n\n### Parsing files ###")
+        os.chdir(cls.workdir)  # questionable
         print("%s: parsing %d files." % (time.ctime(), len(cls.filequeue)))
         with tqdm(total=len(cls.filequeue), smoothing=0, leave=False) as pbar:
             with Pool(workers) as pool:
@@ -517,13 +517,13 @@ class Loader:
                 os.system(f'lz4cat {f["raw"]}.lz4 | egrep -a "^word" >> all_words_ordered')
             print("done")
 
-        print("%s: sorting objects" % time.ctime())
+        print("%s: sorting objects" % time.ctime(), flush=True)
         self.merge_files("toms")
         if not self.debug:
             for toms_file in glob(self.workdir + "/*toms.sorted"):
                 os.system("rm %s" % toms_file)
 
-        print("%s: joining pages" % time.ctime())
+        print("%s: joining pages" % time.ctime(), flush=True)
         if self.debug is False:
             os.system(
                 'for i in $(find {} -type f -name "*pages"); do cat $i >> {}/all_pages; rm $i; done'.format(
@@ -537,7 +537,7 @@ class Loader:
                 )
             )
 
-        print("%s: joining references" % time.ctime())
+        print("%s: joining references" % time.ctime(), flush=True)
         if self.debug is False:
             os.system(
                 'for i in $(find {} -type f -name "*refs"); do cat $i >> {}/all_refs; rm $i; done'.format(
@@ -551,7 +551,7 @@ class Loader:
                 )
             )
 
-        print("%s: joining graphics" % time.ctime())
+        print("%s: joining graphics" % time.ctime(), flush=True)
         if self.debug is False:
             os.system(
                 'for i in $(find {} -type f -name "*graphics"); do cat $i >> {}/all_graphics; rm $i; done'.format(
@@ -565,7 +565,7 @@ class Loader:
                 )
             )
 
-        print("%s: joining lines" % time.ctime())
+        print("%s: joining lines" % time.ctime(), flush=True)
         if self.debug is False:
             os.system(
                 'for i in $(find {} -type f -name "*lines"); do cat $i >> {}/all_lines; rm $i; done'.format(
@@ -609,7 +609,7 @@ class Loader:
             lists_of_files.append(files)
 
         # Then we run the merge sort on each chunk of 500 files and compress the result
-        print("%s: Merging %s in batches of %d..." % (time.ctime(), file_type, file_num))
+        print("%s: Merging %s in batches of %d..." % (time.ctime(), file_type, file_num), flush=True)
         already_merged = 0
         os.system("touch %s" % self.workdir + "/sorted.init")
         for pos, object_list in enumerate(lists_of_files):
@@ -623,10 +623,10 @@ class Loader:
                 print("%s sorting failed\nInterrupting database load..." % file_type)
                 sys.exit()
             already_merged += len(object_list)
-            print("\r%s: %d files sorted..." % (time.ctime(), already_merged), end="")
+            print("\r%s: %d files sorted..." % (time.ctime(), already_merged), end="", flush=True)
             if not self.debug:
                 os.system("rm %s" % file_list)
-        print()
+        print(flush=True)
 
         sorted_files = " ".join(["<(lz4cat -q {})".format(i) for i in glob(f"{self.workdir}/*.split")])
         if file_type == "words":
@@ -641,19 +641,19 @@ class Loader:
         if status != 0:
             print("%s sorting failed\nInterrupting database load..." % file_type)
             sys.exit()
-        print("done.")
+        print("done.", flush=True)
 
         for sorted_file in glob("{}/*.split".format(self.workdir)):
             os.system("rm {}".format(sorted_file))
 
     def analyze(self):
         """Create inverted index"""
-        print("\n### Create inverted index ###")
-        print(self.omax)
+        print("\n### Create inverted index ###", flush=True)
+        print(self.omax, flush=True)
         vl = [max(int(math.ceil(math.log(float(x) + 1.0, 2.0))), 1) if x > 0 else 1 for x in self.omax]
-        print(vl)
+        print(vl, flush=True)
         width = sum(x for x in vl)
-        print(str(width) + " bits wide.")
+        print(str(width) + " bits wide.", flush=True)
 
         hits_per_block = (BLOCKSIZE * 8) // width
         freq1 = INDEX_CUTOFF
@@ -744,17 +744,17 @@ class Loader:
             post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)
 
-    def post_processing(self, *extra_filters):
+    @classmethod
+    def post_processing(cls, *extra_filters):
         """Run important post-parsing functions for frequencies and word normalization"""
         print("\n### Storing in database ###")
-        for f in self.post_filters:
-            f(self)
-
+        for f in cls.post_filters:
+            f(cls)
         if extra_filters:
             print("Running the following additional filters:")
             for f in extra_filters:
                 print(f.__name__ + "...", end=" ")
-                f(self)
+                f(cls)
 
     def finish(self):
         """Write important runtime information to the database directory"""
@@ -778,11 +778,11 @@ class Loader:
     def write_db_config(self):
         """ Write local variables used by libphilo"""
         filename = self.destination + "/db.locals.py"
-        metadata = [i for i in self.metadata_fields if i not in self.metadata_fields_not_found]
+        metadata = [i for i in Loader.metadata_fields if i not in self.metadata_fields_not_found]
         db_values = {
             "metadata_fields": metadata,
-            "metadata_hierarchy": self.metadata_hierarchy,
-            "metadata_types": self.metadata_types,
+            "metadata_hierarchy": Loader.metadata_hierarchy,
+            "metadata_types": Loader.metadata_types,
             "normalized_fields": self.normalized_fields,
             "debug": self.debug,
         }
@@ -794,7 +794,7 @@ class Loader:
 
     def write_web_config(self):
         """ Write configuration variables for the Web application"""
-        metadata = [i for i in self.metadata_fields if i not in self.metadata_fields_not_found]
+        metadata = [i for i in Loader.metadata_fields if i not in self.metadata_fields_not_found]
         config_values = {
             "dbname": os.path.basename(re.sub("/data/?$", "", self.destination)),
             "metadata": metadata,
@@ -808,7 +808,7 @@ class Loader:
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
         for field in metadata:
-            object_type = self.metadata_types[field]
+            object_type = Loader.metadata_types[field]
             try:
                 if object_type != "div":
                     c.execute(
