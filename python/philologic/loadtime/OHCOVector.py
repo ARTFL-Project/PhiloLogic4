@@ -85,7 +85,7 @@ class CompoundRecord(object):
         return self.id + [self.attrib.get("start_byte", 0)] + [self.attrib.get("page", 0)]
 
 
-class CompoundStack(object):
+class CompoundStack:
     """CompoundStack is the class instantiated by a parser. It itself creates a NewStack,
     but also tracks parallel objects. The API is quite minimal. You can push and pull objects by type.
     CompoundStack doesn't actually do deep object arithmetic or recursion--it handles parallel objects manually,
@@ -211,32 +211,32 @@ class CompoundStack(object):
             if self.current_p:
                 self.stack[type]["page"] = self.current_p.id[1]
 
-    def pull(self, type, byte):
-        if type == self.p_type:
+    def pull(self, text_obj_type, byte):
+        if text_obj_type == self.p_type:
             if self.current_p:
                 self.current_p.attrib["end_byte"] = byte
                 print(self.current_p, file=self.out)
                 self.current_p = None
-        elif type == self.ref:
+        elif text_obj_type == self.ref:
             if self.current_ref:
                 self.current_ref.attrib["end_byte"] = byte
                 print(self.current_ref, file=self.out)
-        elif type == self.line:
+        elif text_obj_type == self.line:
             if self.current_line:
                 self.current_line.attrib["end_byte"] = byte
                 print(self.current_line, file=self.out)
-        elif type == self.graphic:
+        elif text_obj_type == self.graphic:
             if self.current_graphic:
                 self.current_graphic.attrib["end_byte"] = byte
                 print(self.current_graphic, file=self.out)
-        elif type == self.punctuation:
+        elif text_obj_type == self.punctuation:
             self.current_punctuation.attrib["end_byte"] = byte
             print(self.current_punctuation, file=self.out)
         else:
-            return self.stack.pull(type, byte)
+            return self.stack.pull(text_obj_type, byte)
 
 
-class NewStack(object):
+class NewStack:
     """ NewStack is where the low-level object arithmetic and instantiation happens.  Pretty wonky,
     so there's inline documentation where needed"""
 
