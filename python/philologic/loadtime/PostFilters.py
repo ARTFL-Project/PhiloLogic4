@@ -114,6 +114,8 @@ def metadata_frequencies(loader_obj):
             output.close()
         except sqlite3.OperationalError:
             loader_obj.metadata_fields_not_found.append(field)
+            if os.path.exists(f"{frequencies}/{field}_frequencies"):
+                os.remove(f"{frequencies}/{field}_frequencies")
     if loader_obj.metadata_fields_not_found:
         print(
             "The following fields were not found in the input corpus %s"
@@ -136,6 +138,8 @@ def normalized_metadata_frequencies(loader_obj):
                 print(norm_word + "\t" + word, file=output)
             output.close()
         except:
+            if os.path.exists(f"{frequencies}/normalized_{field}_frequencies"):
+                os.remove(f"{frequencies}/normalized_{field}_frequencies")
             pass
 
 

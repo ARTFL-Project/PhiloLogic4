@@ -63,32 +63,54 @@ class ParserError(Exception):
         super().__init__(error_args)
 
 
-class Loader(object):
+class Loader:
     """Loader class"""
 
+    sort_by_word = SORT_BY_WORD
+    sort_by_id = SORT_BY_ID
+    types = OBJECT_TYPES
+    tables = DEFAULT_TABLES
+    omax = [1, 1, 1, 1, 1, 1, 1, 1, 1]
+    parser_config = {}
+    words_to_index = set()
+    data_dicts = []
+    filequeue = []
+    raw_files = []
+    textdir = ""
+    workdir = ""
+    metadata_fields = []
+    metadata_types = {}
+    metadata_hierarchy = []
+    metadata_fields_not_found = []
+    debug = False
+
+    @classmethod
+    def set_class_attributes(cls, loader_options):
+        """Set initial class attributes and return Loader object"""
+        cls.post_filters = loader_options["post_filters"]
+        cls.debug = loader_options["debug"]
+        cls.words_to_index = loader_options["words_to_index"]
+        cls.destination = loader_options["data_destination"]
+        cls.workdir = os.path.join(loader_options["data_destination"], "WORK/")
+        cls.textdir = os.path.join(loader_options["data_destination"], "TEXT/")
+        for option in PARSER_OPTIONS:
+            try:
+                cls.parser_config[option] = loader_options[option]
+            except KeyError:  # option hasn't been set
+                pass
+        return cls(**loader_options)
+
     def __init__(self, **loader_options):
-        self.omax = [1, 1, 1, 1, 1, 1, 1, 1, 1]
         self.parse_pool = None
-        self.types = OBJECT_TYPES
-        self.tables = DEFAULT_TABLES
-        self.sort_by_word = SORT_BY_WORD
-        self.sort_by_id = SORT_BY_ID
-        self.debug = loader_options["debug"]
         self.default_object_level = loader_options["default_object_level"]
-        self.post_filters = loader_options["post_filters"]
-        self.words_to_index = loader_options["words_to_index"]
         self.token_regex = loader_options["token_regex"]
         self.url_root = loader_options["url_root"]
         self.cores = loader_options["cores"]
 
-        self.parser_config = {}
-        for option in PARSER_OPTIONS:
-            try:
-                self.parser_config[option] = loader_options[option]
-            except KeyError:  # option hasn't been set
-                pass
+        os.system(f"mkdir -p {self.destination}")
+        os.mkdir(self.workdir)
+        os.mkdir(self.textdir)
 
-        self.setup_dir(loader_options["data_destination"])
         load_config_path = os.path.join(loader_options["data_destination"], "load_config.py")
         # Loading these from a load_config would crash the parser for a number of reasons...
         values_to_ignore = [
@@ -153,24 +175,15 @@ class Loader(object):
         self.metadata_fields_not_found = []
         self.sort_order = ""
 
-    def setup_dir(self, path):
-        """Setup database directory"""
-        os.system("mkdir -p %s" % path)
-        self.workdir = path + "/WORK/"
-        self.textdir = path + "/TEXT/"
-        os.mkdir(self.workdir)
-        os.mkdir(self.textdir)
-        self.destination = path
-
     def add_files(self, files):
         """Copy files to database directory"""
-        print("\nCopying files to database directory...", end=" ")
+        print("\nCopying files to database directory...", end=" ", flush=True)
         for f in files:
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
             shutil.copy2(f, new_file_path)
             os.chmod(new_file_path, 775)
             self.filenames.append(f)
-        print("done.\n")
+        print("done.\n", flush=True)
 
     def parse_bibliography_file(self, bibliography_file, sort_by_field, reverse_sort=True):
         """Parse tab delimited bibliography file"""
@@ -203,7 +216,8 @@ class Loader(object):
         """Parse header in TEI files"""
         load_metadata = []
         metadata_xpaths = self.parser_config["doc_xpaths"]
-        for file in os.scandir(self.textdir):
+        doc_count = len(os.listdir(self.textdir))
+        for pos, file in enumerate(os.scandir(self.textdir)):
             data = {"filename": file.name}
             header = ""
             with open(file.path) as text_file:
@@ -260,6 +274,7 @@ class Loader(object):
                 load_metadata.append(data)
             except lxml.etree.XMLSyntaxError:
                 self.deleted_files.append(file.name)
+            print(f"\r{time.ctime()}: Parsing document level metadata: {pos+1}/{doc_count} done...", flush=True, end="")
         if self.deleted_files:
             for f in self.deleted_files:
                 print("%s has no valid TEI header or contains invalid data: removing from database load..." % f)
@@ -268,7 +283,8 @@ class Loader(object):
     def parse_dc_header(self):
         """Parse Dublin Core header"""
         load_metadata = []
-        for file in os.scandir(self.textdir):
+        doc_count = len(os.listdir(self.textdir))
+        for pos, file in enumerate(os.scandir(self.textdir)):
             data = {}
             header = ""
             with open(file.path) as fh:
@@ -294,6 +310,7 @@ class Loader(object):
             if self.debug:
                 print(pretty_print(data))
             load_metadata.append(data)
+            print(f"\r{time.ctime()}: Parsing document level metadata: {pos+1}/{doc_count} done...", flush=True, end="")
         return load_metadata
 
     def create_year_field(self, metadata):
@@ -317,11 +334,20 @@ class Loader(object):
     def parse_metadata(self, sort_by_field, header="tei"):
         """Parsing metadata fields in TEI or Dublin Core headers"""
         print("### Parsing metadata ###", flush=True)
-        print("%s: Parsing metadata in %d files..." % (time.ctime(), len(os.listdir(self.textdir))), flush=True)
+        print(
+            f"{time.ctime()}: Parsing document level metadata: 0/{len(os.listdir(self.textdir))} done...",
+            flush=True,
+            end="",
+        )
         if header == "tei":
             load_metadata = self.parse_tei_header()
         elif header == "dc":
             load_metadata = self.parse_dc_header()
+
+        print(
+            f"\r{time.ctime()}: Parsing document level metadata: {len(os.listdir(self.textdir))}/{len(os.listdir(self.textdir))} done...",
+            flush=True,
+        )
 
         print(
             "%s: Sorting files by the following metadata fields: %s..."
@@ -341,92 +367,93 @@ class Loader(object):
                     break
         return sorted_load_metadata
 
-    def parse_files(self, workers, data_dicts=None, chunksize=None):
-        """Parse all files
-        chunksize is setable from the philoload script and can be helpful when loading
-        many small files"""
-        print("\n\n### Parsing files ###")
-        os.chdir(self.workdir)  # questionable
-
-        if data_dicts is None:
-            data_dicts = [{"filename": fn.name} for fn in os.scandir(self.textdir)]
-        filequeue = [
+    @classmethod
+    def set_file_data(cls, load_metadata, textdir, workdir):
+        if load_metadata is None:
+            cls.data_dicts = [{"filename": fn.name} for fn in os.scandir(textdir)]
+        else:
+            cls.data_dicts = load_metadata
+        cls.filequeue = [
             {
                 "name": d["filename"],
-                "size": os.path.getsize(self.textdir + d["filename"]),
+                "size": os.path.getsize(textdir + d["filename"]),
                 "id": n + 1,
                 "options": d["options"] if "options" in d else {},
-                "newpath": self.textdir + d["filename"],
-                "raw": self.workdir + d["filename"] + ".raw",
-                "words": self.workdir + d["filename"] + ".words.sorted",
-                "toms": self.workdir + d["filename"] + ".toms",
-                "sortedtoms": self.workdir + d["filename"] + ".toms.sorted",
-                "pages": self.workdir + d["filename"] + ".pages",
-                "refs": self.workdir + d["filename"] + ".refs",
-                "graphics": self.workdir + d["filename"] + ".graphics",
-                "lines": self.workdir + d["filename"] + ".lines",
-                "results": self.workdir + d["filename"] + ".results",
+                "newpath": textdir + d["filename"],
+                "raw": workdir + d["filename"] + ".raw",
+                "words": workdir + d["filename"] + ".words.sorted",
+                "toms": workdir + d["filename"] + ".toms",
+                "sortedtoms": workdir + d["filename"] + ".toms.sorted",
+                "pages": workdir + d["filename"] + ".pages",
+                "refs": workdir + d["filename"] + ".refs",
+                "graphics": workdir + d["filename"] + ".graphics",
+                "lines": workdir + d["filename"] + ".lines",
+                "results": workdir + d["filename"] + ".results",
             }
-            for n, d in enumerate(data_dicts)
+            for n, d in enumerate(cls.data_dicts)
         ]
-
-        self.raw_files = [f["raw"] + ".lz4" for f in filequeue]
-
-        self.metadata_hierarchy.append([])
+        cls.metadata_hierarchy.append([])
         # Adding in doc level metadata
-        for d in data_dicts:
+        for d in cls.data_dicts:
             for k in list(d.keys()):
-                if k not in self.metadata_fields:
-                    self.metadata_fields.append(k)
-                    self.metadata_hierarchy[0].append(k)
-                if k not in self.metadata_types:
-                    self.metadata_types[k] = "doc"
+                if k not in cls.metadata_fields:
+                    cls.metadata_fields.append(k)
+                    cls.metadata_hierarchy[0].append(k)
+                if k not in cls.metadata_types:
+                    cls.metadata_types[k] = "doc"
                     # don't need to check for conflicts, since doc is first.
 
         # Adding non-doc level metadata
-        for element_type in self.parser_config["metadata_to_parse"]:
+        for element_type in cls.parser_config["metadata_to_parse"]:
             if element_type != "page" and element_type != "ref" and element_type != "line":
-                self.metadata_hierarchy.append([])
-                for param in self.parser_config["metadata_to_parse"][element_type]:
-                    if param not in self.metadata_fields:
-                        self.metadata_fields.append(param)
-                        self.metadata_hierarchy[-1].append(param)
-                    if param not in self.metadata_types:
-                        self.metadata_types[param] = element_type
+                cls.metadata_hierarchy.append([])
+                for param in cls.parser_config["metadata_to_parse"][element_type]:
+                    if param not in cls.metadata_fields:
+                        cls.metadata_fields.append(param)
+                        cls.metadata_hierarchy[-1].append(param)
+                    if param not in cls.metadata_types:
+                        cls.metadata_types[param] = element_type
                     else:  # we have a serious error here!  Should raise going forward.
                         pass
 
         # Add unique philo ids for top level text objects
-        self.metadata_fields.extend(["philo_doc_id", "philo_div1_id", "philo_div2_id", "philo_div3_id"])
+        cls.metadata_fields.extend(["philo_doc_id", "philo_div1_id", "philo_div2_id", "philo_div3_id"])
         for pos, object_level in enumerate(["doc", "div1", "div2", "div3"]):
-            self.metadata_hierarchy[pos].append(f"philo_{object_level}_id")
-            self.metadata_types[f"philo_{object_level}_id"] = object_level
+            cls.metadata_hierarchy[pos].append(f"philo_{object_level}_id")
+            cls.metadata_types[f"philo_{object_level}_id"] = object_level
 
-        print("%s: parsing %d files." % (time.ctime(), len(filequeue)))
-        if chunksize is None:
-            chunksize = 1
-        with tqdm(total=len(filequeue), smoothing=0, leave=False) as pbar:
+    @classmethod
+    def parse_files(cls, workers):
+        """Parse all files
+        chunksize is setable from the philoload script and can be helpful when loading
+        many small files"""
+        print("\n\n### Parsing files ###")
+        os.chdir(cls.workdir)  # questionable
+        print("%s: parsing %d files." % (time.ctime(), len(cls.filequeue)))
+        with tqdm(total=len(cls.filequeue), smoothing=0, leave=False) as pbar:
             with Pool(workers) as pool:
-                for results in pool.imap_unordered(self.__parse_file, zip(filequeue, data_dicts), chunksize=chunksize):
+                for results in pool.imap_unordered(cls.__parse_file, range(len(cls.data_dicts))):
                     with open(results, "rb") as proc_fh:
                         vec = pickle.load(proc_fh)  # load in the results from the child's parsework() function.
-                    self.omax = [max(x, y) for x, y in zip(vec, self.omax)]
+                    cls.omax = [max(x, y) for x, y in zip(vec, cls.omax)]
                     pbar.update()
         print("%s: done parsing" % time.ctime())
 
-    def __parse_file(self, file):
-        text, metadata = file
+    @classmethod
+    def __parse_file(cls, file_pos):
+        text = cls.filequeue[file_pos]
+        metadata = cls.data_dicts[file_pos]
         options = text["options"]
         if "options" in metadata:  # cleanup, should do above.
             del metadata["options"]
 
         if "parser_factory" not in options:
-            options["parser_factory"] = self.parser_config["parser_factory"]
+            options["parser_factory"] = cls.parser_config["parser_factory"]
         parser_factory = options["parser_factory"]
         del options["parser_factory"]
 
         if "load_filters" not in options:
-            options["load_filters"] = self.parser_config["load_filters"]
+            options["load_filters"] = cls.parser_config["load_filters"]
         filters = options["load_filters"]
         del options["load_filters"]
 
@@ -446,7 +473,7 @@ class Loader(object):
             "punctuation",
         ]:
             try:
-                options[option] = self.parser_config[option]
+                options[option] = cls.parser_config[option]
             except KeyError:  # option hasn't been set
                 pass
 
@@ -456,10 +483,10 @@ class Loader(object):
                 text["id"],
                 text["size"],
                 known_metadata=metadata,
-                tag_to_obj_map=self.parser_config["tag_to_obj_map"],
-                metadata_to_parse=self.parser_config["metadata_to_parse"],
-                words_to_index=self.words_to_index,
-                file_type=self.parser_config["file_type"],
+                tag_to_obj_map=cls.parser_config["tag_to_obj_map"],
+                metadata_to_parse=cls.parser_config["metadata_to_parse"],
+                words_to_index=cls.words_to_index,
+                file_type=cls.parser_config["file_type"],
                 **options,
             )
             with open(text["newpath"], "r", newline="") as input_file:
@@ -471,7 +498,7 @@ class Loader(object):
 
         for f in filters:
             try:
-                f(self, text)
+                f(cls, text)
             except Exception:
                 raise ParserError(f"{text['name']} has caused parser to die.")
 
@@ -489,17 +516,17 @@ class Loader(object):
 
         if "words" in self.tables:
             print("%s: concatenating document-order words file..." % time.ctime(), end=" ", flush=True)
-            for d in self.raw_files:
-                os.system(f'lz4cat {d} | egrep -a "^word" >> all_words_ordered')
+            for f in self.filequeue:
+                os.system(f'lz4cat {f["raw"]}.lz4 | egrep -a "^word" >> all_words_ordered')
             print("done")
 
-        print("%s: sorting objects" % time.ctime())
+        print("%s: sorting objects" % time.ctime(), flush=True)
         self.merge_files("toms")
         if not self.debug:
             for toms_file in glob(self.workdir + "/*toms.sorted"):
                 os.system("rm %s" % toms_file)
 
-        print("%s: joining pages" % time.ctime())
+        print("%s: joining pages" % time.ctime(), flush=True)
         if self.debug is False:
             os.system(
                 'for i in $(find {} -type f -name "*pages"); do cat $i >> {}/all_pages; rm $i; done'.format(
@@ -513,7 +540,7 @@ class Loader(object):
                 )
             )
 
-        print("%s: joining references" % time.ctime())
+        print("%s: joining references" % time.ctime(), flush=True)
         if self.debug is False:
             os.system(
                 'for i in $(find {} -type f -name "*refs"); do cat $i >> {}/all_refs; rm $i; done'.format(
@@ -527,7 +554,7 @@ class Loader(object):
                 )
             )
 
-        print("%s: joining graphics" % time.ctime())
+        print("%s: joining graphics" % time.ctime(), flush=True)
         if self.debug is False:
             os.system(
                 'for i in $(find {} -type f -name "*graphics"); do cat $i >> {}/all_graphics; rm $i; done'.format(
@@ -541,7 +568,7 @@ class Loader(object):
                 )
             )
 
-        print("%s: joining lines" % time.ctime())
+        print("%s: joining lines" % time.ctime(), flush=True)
         if self.debug is False:
             os.system(
                 'for i in $(find {} -type f -name "*lines"); do cat $i >> {}/all_lines; rm $i; done'.format(
@@ -566,12 +593,12 @@ class Loader(object):
         if file_type == "words":
             suffix = "/*words.sorted.lz4"
             open_file_command = "lz4cat"
-            sort_command = f"LANG=C sort -S 10% -m -T {self.workdir} {self.sort_by_word} {self.sort_by_id} "
+            sort_command = f"LANG=C sort -S 25% -m -T {self.workdir} {self.sort_by_word} {self.sort_by_id} "
             all_object_file = "all_words_sorted.lz4"
         elif file_type == "toms":
             suffix = "/*.toms.sorted"
             open_file_command = "cat"
-            sort_command = f"LANG=C sort -S 10% -m -T {self.workdir} {self.sort_by_id} "
+            sort_command = f"LANG=C sort -S 25% -m -T {self.workdir} {self.sort_by_id} "
             all_object_file = "all_toms_sorted.lz4"
 
         # First we split the sort workload into chunks of 100 (default defined in the file_num keyword)
@@ -585,7 +612,7 @@ class Loader(object):
             lists_of_files.append(files)
 
         # Then we run the merge sort on each chunk of 500 files and compress the result
-        print(f"{time.ctime()}: Merging {file_type} in batches of {file_num}...")
+        print(f"{time.ctime()}: Merging {file_type} in batches of {file_num}...", flush=True)
         already_merged = 0
         os.system(f"touch {self.workdir}/sorted.init")
         for pos, object_list in enumerate(lists_of_files):
@@ -599,10 +626,10 @@ class Loader(object):
                 print(f"{file_type} sorting failed\nInterrupting database load...")
                 sys.exit()
             already_merged += len(object_list)
-            print(f"\r{time.ctime()}: {already_merged} files sorted...", end="")
+            print(f"\r{time.ctime()}: {already_merged} files sorted...", end="", flush=True)
             if not self.debug:
                 os.system(f"rm {file_list}")
-        print()
+        print(flush=True)
 
         sorted_files = " ".join([f"<(lz4cat -q {i})" for i in glob(f"{self.workdir}/*.split")])
         if file_type == "words":
@@ -617,19 +644,19 @@ class Loader(object):
         if status != 0:
             print(f"{file_type} sorting failed\nInterrupting database load...")
             sys.exit()
-        print("done.")
+        print("done.", flush=True)
 
         for sorted_file in glob(f"{self.workdir}/*.split"):
             os.system(f"rm {sorted_file}")
 
     def analyze(self):
         """Create inverted index"""
-        print("\n### Create inverted index ###")
-        print(self.omax)
+        print("\n### Create inverted index ###", flush=True)
+        print(self.omax, flush=True)
         vl = [max(int(math.ceil(math.log(float(x) + 1.0, 2.0))), 1) if x > 0 else 1 for x in self.omax]
-        print(vl)
+        print(vl, flush=True)
         width = sum(x for x in vl)
-        print(str(width) + " bits wide.")
+        print(str(width) + " bits wide.", flush=True)
 
         hits_per_block = (BLOCKSIZE * 8) // width
         freq1 = INDEX_CUTOFF
@@ -718,17 +745,17 @@ class Loader(object):
             post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)
 
-    def post_processing(self, *extra_filters):
+    @classmethod
+    def post_processing(cls, *extra_filters):
         """Run important post-parsing functions for frequencies and word normalization"""
         print("\n### Storing in database ###")
-        for f in self.post_filters:
-            f(self)
-
+        for f in cls.post_filters:
+            f(cls)
         if extra_filters:
             print("Running the following additional filters:")
             for f in extra_filters:
                 print(f.__name__ + "...", end=" ")
-                f(self)
+                f(cls)
 
     def finish(self):
         """Write important runtime information to the database directory"""
@@ -752,11 +779,11 @@ class Loader(object):
     def write_db_config(self):
         """ Write local variables used by libphilo"""
         filename = self.destination + "/db.locals.py"
-        metadata = [i for i in self.metadata_fields if i not in self.metadata_fields_not_found]
+        metadata = [i for i in Loader.metadata_fields if i not in self.metadata_fields_not_found]
         db_values = {
             "metadata_fields": metadata,
-            "metadata_hierarchy": self.metadata_hierarchy,
-            "metadata_types": self.metadata_types,
+            "metadata_hierarchy": Loader.metadata_hierarchy,
+            "metadata_types": Loader.metadata_types,
             "normalized_fields": self.normalized_fields,
             "debug": self.debug,
         }
@@ -768,8 +795,8 @@ class Loader(object):
 
     def write_web_config(self):
         """ Write configuration variables for the Web application"""
+        metadata = [i for i in Loader.metadata_fields if i not in self.metadata_fields_not_found]
         dbname = os.path.basename(os.path.dirname(self.destination.rstrip("/")))
-        metadata = [i for i in self.metadata_fields if i not in self.metadata_fields_not_found]
         config_values = {"dbname": dbname, "metadata": metadata, "facets": metadata, "theme": self.theme}
 
         # Fetch search examples:
@@ -779,7 +806,7 @@ class Loader(object):
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
         for field in metadata:
-            object_type = self.metadata_types[field]
+            object_type = Loader.metadata_types[field]
             try:
                 if object_type != "div":
                     c.execute(

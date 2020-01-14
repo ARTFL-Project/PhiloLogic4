@@ -8,6 +8,7 @@ import sys
 
 from philologic.loadtime import OHCOVector
 from philologic.utils import convert_entities
+from collections import deque
 
 DEFAULT_TAG_TO_OBJ_MAP = {
     "div": "div",
@@ -311,7 +312,41 @@ entity_regex = [
     re.compile(r"(\&sun;)", re.I),
 ]
 
-class XMLParser(object):
+LINE_SPLITTER = re.compile(r"([^\n]+)")
+
+class DocumentContent:
+    """Content of document: a generator functionning like a list"""
+
+    def __init__(self, content):
+        self.lines = LINE_SPLITTER.finditer(content)
+        self.read_ahead = deque()
+        self.read_ahead_count = 0
+        self.line_count = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.line_count += 1
+        if self.read_ahead_count != 0:
+            self.read_ahead_count -= 1
+            line = self.read_ahead_count.popleft()
+            return line
+        try:
+            line = next(self.lines)
+            return line.groups()[0]
+        except StopIteration:
+            raise StopIteration
+
+    def __getitem__(self, item):
+        self.read_ahead_count += 1
+        line = next(self.lines)
+        self.read_ahead.append(line)
+        return line
+
+
+
+class XMLParser:
     """Parses clean or dirty XML.
     This is a port of the PhiloLogic3 parser originally written by Mark Olsen in Perl.
     """
