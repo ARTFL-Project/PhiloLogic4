@@ -13,7 +13,7 @@ from wsgiref.handlers import CGIHandler
 from philologic.runtime import WebConfig, WSGIHandler
 
 import reports
-from webApp import angular
+from webApp import start_web_app
 
 path = os.path.abspath(os.path.dirname(__file__))
 
@@ -24,7 +24,6 @@ def philo_dispatcher(environ, start_response):
     clean_task = loop.create_task(clean_up())
     config = WebConfig(path)
     request = WSGIHandler(environ, config)
-    response = ""
     if request.content_type == "application/json" or request.format == "json":
         try:
             path_components = [c for c in environ["PATH_INFO"].split("/") if c]
@@ -39,7 +38,7 @@ def philo_dispatcher(environ, start_response):
             report = getattr(reports, FieldStorage().getvalue("report"))
             response = b"".join([i for i in report(environ, start_response)]).decode("utf8", "ignore")
     else:
-        response = angular(environ, start_response)
+        response = start_web_app(environ, start_response)
     yield response.encode("utf8")
     loop.run_until_complete(clean_task)
 

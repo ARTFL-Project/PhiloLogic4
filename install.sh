@@ -24,6 +24,10 @@ sudo mkdir -p /etc/philologic/
 cd ..;
 sudo mkdir -p /var/lib/philologic4/web_app/
 sudo rm -rf /var/lib/philologic4/web_app/*
+if [ -d www/app/node_modules ]
+    then
+        sudo rm -rf www/app/node_modules
+fi
 sudo cp -R www/* /var/lib/philologic4/web_app/
 sudo cp www/.htaccess  /var/lib/philologic4/web_app/
 

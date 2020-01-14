@@ -503,9 +503,7 @@ def format_text_object(
             if el.tag not in VALID_HTML_TAGS:
                 el = xml_to_html_class(el)
         except Exception as exception:
-            import sys
-
-            print(exception, file=sys.stderr)
+            pass
     output = etree.tostring(xml).decode("utf8", "ignore")
     output = convert_entities(output)
 

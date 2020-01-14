@@ -40,8 +40,9 @@ def make_absolute_query_link(config, params, script_name="query", **extra_params
     for k, v in extra_params.items():
         params[k] = v
     query_string = url_encode(list(params.items()))
-    href = "%s?%s" % (script_name, query_string)
-    return href
+    if script_name:
+        return f"{script_name}?{query_string}"
+    return query_string
 
 
 def byte_query(hit_bytes):

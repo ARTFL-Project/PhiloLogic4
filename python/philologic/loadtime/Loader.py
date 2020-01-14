@@ -3,6 +3,7 @@
 Calls all parsing functions and stores data in index"""
 
 import collections
+import json
 import math
 import os
 import pickle
@@ -103,6 +104,8 @@ class Loader:
         self.parse_pool = None
         self.default_object_level = loader_options["default_object_level"]
         self.token_regex = loader_options["token_regex"]
+        self.url_root = loader_options["url_root"]
+        self.cores = loader_options["cores"]
 
         os.system(f"mkdir -p {self.destination}")
         os.mkdir(self.workdir)
@@ -584,24 +587,24 @@ class Loader:
         Since PhiloLogic can potentially merge thousands of files, we need to split
         the sorting stage into multiple steps to avoid running out of file descriptors"""
         if sys.platform == "darwin":
-            file_num = 500
+            file_num = 250
         lists_of_files = []
         files = []
         if file_type == "words":
             suffix = "/*words.sorted.lz4"
             open_file_command = "lz4cat"
-            sort_command = "LANG=C sort -S 25% -m -T {} {} {} ".format(self.workdir, self.sort_by_word, self.sort_by_id)
+            sort_command = f"LANG=C sort -S 25% -m -T {self.workdir} {self.sort_by_word} {self.sort_by_id} "
             all_object_file = "all_words_sorted.lz4"
         elif file_type == "toms":
             suffix = "/*.toms.sorted"
             open_file_command = "cat"
-            sort_command = "LANG=C sort -S 25% -m -T {} {} ".format(self.workdir, self.sort_by_id)
+            sort_command = f"LANG=C sort -S 25% -m -T {self.workdir} {self.sort_by_id} "
             all_object_file = "all_toms_sorted.lz4"
 
         # First we split the sort workload into chunks of 100 (default defined in the file_num keyword)
         for f in glob(self.workdir + suffix):
             f = os.path.basename(f)
-            files.append(("<(%s %s)" % (open_file_command, f), self.workdir + "/" + f))
+            files.append((f"<({open_file_command} {f})", self.workdir + "/" + f))
             if len(files) == file_num:
                 lists_of_files.append(files)
                 files = []
@@ -609,26 +612,26 @@ class Loader:
             lists_of_files.append(files)
 
         # Then we run the merge sort on each chunk of 500 files and compress the result
-        print("%s: Merging %s in batches of %d..." % (time.ctime(), file_type, file_num), flush=True)
+        print(f"{time.ctime()}: Merging {file_type} in batches of {file_num}...", flush=True)
         already_merged = 0
-        os.system("touch %s" % self.workdir + "/sorted.init")
+        os.system(f"touch {self.workdir}/sorted.init")
         for pos, object_list in enumerate(lists_of_files):
             command_list = " ".join([i[0] for i in object_list])
             file_list = " ".join([i[1] for i in object_list])
             output = self.workdir + "sorted.%d.split" % pos
             args = sort_command + command_list
-            command = '/bin/bash -c "%s | lz4 -q > %s"' % (args, output)
+            command = f'/bin/bash -c "{args} | lz4 -q >{output}"'
             status = os.system(command)
             if status != 0:
-                print("%s sorting failed\nInterrupting database load..." % file_type)
+                print(f"{file_type} sorting failed\nInterrupting database load...")
                 sys.exit()
             already_merged += len(object_list)
-            print("\r%s: %d files sorted..." % (time.ctime(), already_merged), end="", flush=True)
+            print(f"\r{time.ctime()}: {already_merged} files sorted...", end="", flush=True)
             if not self.debug:
-                os.system("rm %s" % file_list)
+                os.system(f"rm {file_list}")
         print(flush=True)
 
-        sorted_files = " ".join(["<(lz4cat -q {})".format(i) for i in glob(f"{self.workdir}/*.split")])
+        sorted_files = " ".join([f"<(lz4cat -q {i})" for i in glob(f"{self.workdir}/*.split")])
         if file_type == "words":
             output_file = os.path.join(self.workdir, all_object_file)
             command = f'/bin/bash -c "{sort_command} {sorted_files} | lz4 -q > {output_file}"'
@@ -639,12 +642,12 @@ class Loader:
 
         status = os.system(command)
         if status != 0:
-            print("%s sorting failed\nInterrupting database load..." % file_type)
+            print(f"{file_type} sorting failed\nInterrupting database load...")
             sys.exit()
         print("done.", flush=True)
 
-        for sorted_file in glob("{}/*.split".format(self.workdir)):
-            os.system("rm {}".format(sorted_file))
+        for sorted_file in glob(f"{self.workdir}/*.split"):
+            os.system(f"rm {sorted_file}")
 
     def analyze(self):
         """Create inverted index"""
@@ -662,9 +665,7 @@ class Loader:
 
         # unix one-liner for a frequency table
         os.system(
-            '/bin/bash -c "cut -f 2 <(lz4cat {}) | uniq -c | LANG=C sort -S 10% -rn -k 1,1> {}"'.format(
-                self.workdir + "/all_words_sorted.lz4", self.workdir + "/all_frequencies"
-            )
+            f'/bin/bash -c "cut -f 2 <(lz4cat {self.workdir}/all_words_sorted.lz4) | uniq -c | LANG=C sort -S 10% -rn -k 1,1> {self.workdir}/all_frequencies"'
         )
 
         # now scan over the frequency table to figure out how wide (in bits) the frequency fields are,
@@ -795,12 +796,9 @@ class Loader:
     def write_web_config(self):
         """ Write configuration variables for the Web application"""
         metadata = [i for i in Loader.metadata_fields if i not in self.metadata_fields_not_found]
-        config_values = {
-            "dbname": os.path.basename(re.sub("/data/?$", "", self.destination)),
-            "metadata": metadata,
-            "facets": metadata,
-            "theme": self.theme,
-        }
+        dbname = os.path.basename(os.path.dirname(self.destination.rstrip("/")))
+        config_values = {"dbname": dbname, "metadata": metadata, "facets": metadata, "theme": self.theme}
+
         # Fetch search examples:
         search_examples = {}
         conn = sqlite3.connect(self.destination + "/toms.db")
@@ -848,8 +846,15 @@ class Loader:
 
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)
-        print(web_config, file=open(filename, "w"))
-        print("wrote Web application info to %s." % (filename))
+        with open(os.path.join(filename), "w") as output_file:
+            print(web_config, file=output_file)
+        print(f"wrote Web application info to {filename}")
+
+        dbname = os.path.basename(os.path.dirname(self.destination.rstrip("/")))
+        with open(os.path.join(self.destination, "../app/appConfig.json"), "w") as appConfig:
+            json.dump({"dbUrl": os.path.join(self.url_root, f"{dbname}/")}, appConfig)
+
+        os.system(f"cd {os.path.join(self.destination, '../app')}; npm install && npm run build")
 
 
 def shellquote(s):
@@ -880,8 +885,5 @@ def setup_db_dir(db_destination, web_app_dir, force_delete=False):
             if f != "data":
                 cp_command = "cp -r %s %s" % (web_app_dir + f, db_destination + "/" + f)
                 os.system(cp_command)
-
-        os.system("chmod -R 777 %s/app/assets/css" % db_destination)
-        os.system("chmod -R 777 %s/app/assets/js" % db_destination)
         os.system("mkdir -p %s/custom_functions" % db_destination)
         os.system("touch %s/custom_functions/__init__.py" % db_destination)

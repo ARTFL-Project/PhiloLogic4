@@ -343,6 +343,7 @@ DefaultLoadFilters = [
     generate_graphics,
     generate_lines,
     make_max_id,
+    store_in_plain_text,
     store_words_and_philo_ids,
 ]
 
@@ -355,6 +356,7 @@ def set_load_filters(load_filters=DefaultLoadFilters, navigable_objects=DefaultN
             load_filter.__name__ == "make_object_ancestors"
             or load_filter.__name__ == "make_sorted_toms"
             or load_filter.__name__ == "prev_next_obj"
+            or load_filter.__name__ == "store_in_plain_text"
         ):
             filters.append(load_filter(*navigable_objects))
         else:

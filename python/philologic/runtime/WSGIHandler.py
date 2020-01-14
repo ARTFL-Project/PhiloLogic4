@@ -177,6 +177,14 @@ class WSGIHandler(object):
             except IndexError:
                 self.cgi[key] = [""]
 
+    def __delattr__(self, name):
+        if name in self.cgi:
+            del self.cgi[name]
+        elif name in self.defaults:
+            self.defaults[key] = ""
+        else:
+            pass
+
     def __iter__(self):
         """Iterate over query args."""
         for key in list(self.cgi.keys()):

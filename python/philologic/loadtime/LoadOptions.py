@@ -35,6 +35,7 @@ class LoadOptions:
         self.values = {}
         self.values["database_root"] = CONFIG_FILE.database_root
         self.values["web_app_dir"] = CONFIG_FILE.web_app_dir
+        self.values["url_root"] = CONFIG_FILE.url_root
         self.values["theme"] = CONFIG_FILE.theme
         self.values["destination"] = "./"
         self.values["load_config"] = ""
