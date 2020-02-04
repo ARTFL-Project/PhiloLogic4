@@ -643,7 +643,7 @@ class Loader:
             sys.exit()
         print("done.", flush=True)
 
-        for sorted_file in scandir(self.workdi):
+        for sorted_file in scandir(self.workdir):
             if file.name.endswith(".split"):
                 os.system(f"rm {file.name}"
 
