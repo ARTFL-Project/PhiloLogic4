@@ -698,7 +698,7 @@ class Loader:
         print("offst: %d; %d bits" % (offset, offset_l))
 
         # now write it out in our legacy c-header-like format.  TODO: reasonable format, or ctypes bindings for packer.
-         with open(self.workdir + "dbspecs4.h", "w") as dbs:
+        with open(self.workdir + "dbspecs4.h", "w") as dbs:
             print("#define FIELDS 9", file=dbs)
             print("#define TYPE_LENGTH 1", file=dbs)
             print("#define BLK_SIZE " + str(BLOCKSIZE), file=dbs)
