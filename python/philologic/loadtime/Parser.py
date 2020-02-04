@@ -6,8 +6,9 @@ import re
 import string
 import sys
 
-from philologic.loadtime import OHCOVector
+from OHCOVector import CompoundStack
 from philologic.utils import convert_entities
+from collections import deque
 
 DEFAULT_TAG_TO_OBJ_MAP = {
     "div": "div",
@@ -311,7 +312,41 @@ entity_regex = [
     re.compile(r"(\&sun;)", re.I),
 ]
 
-class XMLParser(object):
+LINE_SPLITTER = re.compile(r"([^\n]+)")
+
+class DocumentContent:
+    """Content of document: a generator functionning like a list"""
+
+    def __init__(self, content):
+        self.lines = LINE_SPLITTER.finditer(content)
+        self.read_ahead = deque()
+        self.read_ahead_count = 0
+        self.line_count = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.line_count += 1
+        if self.read_ahead_count != 0:
+            self.read_ahead_count -= 1
+            line = self.read_ahead.popleft()
+            return line
+        try:
+            line = next(self.lines)
+            return line.groups()[0]
+        except StopIteration:
+            raise StopIteration
+
+    def __getitem__(self, item):
+        self.read_ahead_count += 1
+        line = next(self.lines).groups()[0]
+        self.read_ahead.append(line)
+        return line
+
+
+
+class XMLParser:
     """Parses clean or dirty XML.
     This is a port of the PhiloLogic3 parser originally written by Mark Olsen in Perl.
     """
@@ -339,7 +374,7 @@ class XMLParser(object):
             self.metadata_to_parse[obj] = set(metadata_to_parse[obj])
 
         # Initialize an OHCOVector Stack. operations on this stack produce all parser output.
-        self.v = OHCOVector.CompoundStack(
+        self.v = CompoundStack(
             self.types, self.parallel_type, docid=docid, out=output, ref="ref", line="line", graphic="graphic", punctuation="punct"
         )
 
@@ -399,15 +434,17 @@ class XMLParser(object):
             tag_exceptions = parse_options["tag_exceptions"]
         else:
             tag_exceptions = TAG_EXCEPTIONS
-        self.tag_exceptions = []
-        for tag in tag_exceptions:
-            try:
-                compiled_tag = re.compile(
-                    r"(%s)(%s)(%s)" % (parse_options["token_regex"], tag, parse_options["token_regex"]), re.I | re.M
-                )
-            except KeyError:
-                compiled_tag = re.compile(r"(%s)(%s)(%s)" % (TOKEN_REGEX, tag, TOKEN_REGEX), re.I | re.M)
-            self.tag_exceptions.append(compiled_tag)
+
+        tag_exceptions = "|".join(tag_exceptions)
+        try:
+            compiled_tag = re.compile(
+                rf'({parse_options["token_regex"]})({tag_exceptions})({parse_options["token_regex"]})({tag_exceptions})({parse_options["token_regex"]})?', re.I | re.M
+            )
+        except:
+            compiled_tag = re.compile(
+                rf'({TOKEN_REGEX})({tag_exceptions})({TOKEN_REGEX})({tag_exceptions})({TOKEN_REGEX})?', re.I | re.M
+            )
+        self.tag_exceptions = compiled_tag
 
         if "join_hyphen_in_words" in parse_options:
             self.join_hyphen_in_words = parse_options["join_hyphen_in_words"]
@@ -483,6 +520,7 @@ class XMLParser(object):
 
         # Split content into a list on newlines.
         self.content = self.content.split("\n")
+        # self.content = DocumentContent(self.content)
 
         self.bytes_read_in = 0
         self.line_count = 0
@@ -536,10 +574,12 @@ class XMLParser(object):
         # An experimental inword tag spanner. For selected tags between letters, this replaces the tag with "_"
         # (in order to keep the byte count).  This is to allow indexing of words broken by tags.
         def replace_tag(m):
-            return "".join([m[0], m[2], "_" * len(m[1])])
+            if m[-1] is not None:
+                return f"""{m[0]}{m[2]}{m[4]}{"_" * len(m[1])}{"_" * len(m[3])}"""
+            else:
+                return f"""{m[0]}{m[2]}{"_" * len(m[1])}"""
 
-        for tag in self.tag_exceptions:
-            self.content = tag.sub(lambda match: replace_tag(match.groups()), self.content)
+        self.content = self.tag_exceptions.sub(lambda match: replace_tag(match.groups()), self.content)
 
         # Add newlines to the beginning and end of all tags
         self.content = self.content.replace("<", "\n<").replace(">", ">\n")
@@ -1025,7 +1065,8 @@ class XMLParser(object):
             next_word = ""
             if self.in_the_text:
                 for word in word_list:
-                    word_length = len(word.encode("utf8"))
+                    word_in_utf8 = word.encode("utf8")
+                    word_length = len(word_in_utf8)
                     try:
                         next_word = word_list[count + 1]
                     except IndexError:
@@ -1039,7 +1080,7 @@ class XMLParser(object):
                     # Do we have a word? At least one of these characters.
                     if check_if_char_word.search(word.replace("_", "")):
                         last_word = word
-                        word_pos = current_pos - len(word.encode("utf8"))
+                        word_pos = current_pos - len(word_in_utf8)
                         if "&" in word:
                             # Convert ents to utf-8
                             word = self.latin1_ents_to_utf8(word)
