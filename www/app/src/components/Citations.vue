@@ -1,16 +1,12 @@
 <template>
     <span class="philologic-cite pl-2">
-        <span class="citation" v-for="(citation, citeIndex) in citation" :key="citeIndex">
-            <span v-html="citation.prefix"></span>
-            <router-link :to="'/' + citation.href" :style="citation.style" v-if="citation.href">{{
-                citation.label
-            }}</router-link>
-            <span :style="citation.style" v-else>{{ citation.label }}</span>
-            <span v-html="citation.suffix"></span>
-            <span v-html="citation.separator" v-if="citation.separator.length > 0 && citeIndex != maxIndex"></span>
-            <span class="separator" v-if="citation.separator.length == 0 && citeIndex != maxIndex"
-                >&nbsp;&#9679;&nbsp;</span
-            >
+        <span class="citation" v-for="(cite, citeIndex) in citation" :key="citeIndex">
+            <span v-html="cite.prefix"></span>
+            <router-link :to="'/' + cite.href" :style="cite.style" v-if="cite.href">{{ cite.label }}</router-link>
+            <span :style="cite.style" v-else>{{ cite.label }}</span>
+            <span v-html="cite.suffix"></span>
+            <span v-html="cite.separator" v-if="cite.separator.length > 0 && citeIndex != maxIndex"></span>
+            <span class="separator" v-if="cite.separator.length == 0 && citeIndex != maxIndex">&#9679;</span>
         </span>
     </span>
 </template>
@@ -25,4 +21,8 @@ export default {
     }
 }
 </script>
-<style scoped></style>
+<style scoped>
+.separator {
+    padding: 0 0.5rem;
+}
+</style>
