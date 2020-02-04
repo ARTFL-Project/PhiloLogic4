@@ -649,8 +649,9 @@ class Loader:
             sys.exit()
         print("done.", flush=True)
 
-        for sorted_file in glob(f"{self.workdir}/*.split"):
-            os.system(f"rm {sorted_file}")
+        for sorted_file in scandir(self.workdir):
+            if file.name.endswith(".split"):
+                os.system(f"rm {file.name}"
 
     def analyze(self):
         """Create inverted index"""
@@ -697,20 +698,19 @@ class Loader:
         print("offst: %d; %d bits" % (offset, offset_l))
 
         # now write it out in our legacy c-header-like format.  TODO: reasonable format, or ctypes bindings for packer.
-        dbs = open(self.workdir + "dbspecs4.h", "w")
-        print("#define FIELDS 9", file=dbs)
-        print("#define TYPE_LENGTH 1", file=dbs)
-        print("#define BLK_SIZE " + str(BLOCKSIZE), file=dbs)
-        print("#define FREQ1_LENGTH " + str(freq1_l), file=dbs)
-        print("#define FREQ2_LENGTH " + str(freq2_l), file=dbs)
-        print("#define OFFST_LENGTH " + str(offset_l), file=dbs)
-        print("#define NEGATIVES {0,0,0,0,0,0,0,0,0}", file=dbs)
-        print("#define DEPENDENCIES {-1,0,1,2,3,4,5,0,0}", file=dbs)
-        print("#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl), file=dbs)
-        dbs.close()
+         with open(self.workdir + "dbspecs4.h", "w") as dbs:
+            print("#define FIELDS 9", file=dbs)
+            print("#define TYPE_LENGTH 1", file=dbs)
+            print("#define BLK_SIZE " + str(BLOCKSIZE), file=dbs)
+            print("#define FREQ1_LENGTH " + str(freq1_l), file=dbs)
+            print("#define FREQ2_LENGTH " + str(freq2_l), file=dbs)
+            print("#define OFFST_LENGTH " + str(offset_l), file=dbs)
+            print("#define NEGATIVES {0,0,0,0,0,0,0,0,0}", file=dbs)
+            print("#define DEPENDENCIES {-1,0,1,2,3,4,5,0,0}", file=dbs)
+            print("#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl), file=dbs)
         print("%s: analysis done" % time.ctime())
         os.system(
-            '/bin/bash -c "lz4cat ' + self.workdir + "/all_words_sorted.lz4 | pack4 " + self.workdir + 'dbspecs4.h"'
+            f'/bin/bash -c "lz4cat {self.workdir}/all_words_sorted.lz4 | pack4 {self.workdir)/dbspecs4.h'
         )
         print("%s: all indices built. moving into place." % time.ctime())
         os.system("mv index " + self.destination + "/index")
@@ -767,6 +767,7 @@ class Loader:
         os.mkdir(self.destination + "/src/")
         os.mkdir(self.destination + "/hitlists/")
         os.chmod(self.destination + "/hitlists/", 0o777)
+        os.chmod(os.path.join(self.destination, "TEXT"), 0o775)
         os.system("mv dbspecs4.h ../src/dbspecs4.h")
 
         # Make data directory inaccessible from the outside
@@ -778,7 +779,7 @@ class Loader:
         if self.predefined_web_config is False:
             self.write_web_config()
         if self.debug is False:
-            os.system("rm -f %s/*" % self.workdir)
+            os.system(f"rm -rf {self.workdir}")
 
     def write_db_config(self):
         """ Write local variables used by libphilo"""
