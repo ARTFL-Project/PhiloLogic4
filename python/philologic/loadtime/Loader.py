@@ -643,9 +643,9 @@ class Loader:
             sys.exit()
         print("done.", flush=True)
 
-        for sorted_file in scandir(self.workdi):
-            if file.name.endswith(".split"):
-                os.system(f"rm {file.name}"
+        for sorted_file in os.scandir(self.workdir):
+            if sorted_file.name.endswith(".split"):
+                os.system(f"rm {sorted_file.name}")
 
     def analyze(self):
         """Create inverted index"""
@@ -706,7 +706,7 @@ class Loader:
             print("#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl), file=dbs)
         print("%s: analysis done" % time.ctime())
         os.system(
-            f'/bin/bash -c "lz4cat {self.workdir}/all_words_sorted.lz4 | pack4 {self.workdir)/dbspecs4.h'
+            f'/bin/bash -c "lz4cat {self.workdir}/all_words_sorted.lz4 | pack4 {self.workdir}/dbspecs4.h"'
         )
         print("%s: all indices built. moving into place." % time.ctime())
         os.system("mv index " + self.destination + "/index")
