@@ -83,6 +83,11 @@ class Loader:
     metadata_hierarchy = []
     metadata_fields_not_found = []
     debug = False
+    default_object_level = "doc"
+    post_filters = []
+    token_regex = ""
+    url_root = ""
+    cores = 2
 
     @classmethod
     def set_class_attributes(cls, loader_options):
@@ -93,6 +98,12 @@ class Loader:
         cls.destination = loader_options["data_destination"]
         cls.workdir = os.path.join(loader_options["data_destination"], "WORK/")
         cls.textdir = os.path.join(loader_options["data_destination"], "TEXT/")
+        cls.debug = loader_options["debug"]
+        cls.default_object_level = loader_options["default_object_level"]
+        cls.post_filters = loader_options["post_filters"]
+        cls.token_regex = loader_options["token_regex"]
+        cls.url_root = loader_options["url_root"]
+        cls.cores = loader_options["cores"]
         for option in PARSER_OPTIONS:
             try:
                 cls.parser_config[option] = loader_options[option]
@@ -101,14 +112,6 @@ class Loader:
         return cls(**loader_options)
 
     def __init__(self, **loader_options):
-        self.parse_pool = None
-        self.debug = loader_options["debug"]
-        self.default_object_level = loader_options["default_object_level"]
-        self.post_filters = loader_options["post_filters"]
-        self.token_regex = loader_options["token_regex"]
-        self.url_root = loader_options["url_root"]
-        self.cores = loader_options["cores"]
-
         os.system(f"mkdir -p {self.destination}")
         os.mkdir(self.workdir)
         os.mkdir(self.textdir)
@@ -523,7 +526,7 @@ class Loader:
                 os.system(f'lz4cat {f["raw"]}.lz4 | egrep -a "^word" >> all_words_ordered')
             print("done")
 
-        print("%s: sorting objects" % time.ctime(), , flush=True)
+        print("%s: sorting objects" % time.ctime(), flush=True)
         self.merge_files("toms")
         if not self.debug:
             for toms_file in glob(self.workdir + "/*toms.sorted"):
@@ -632,7 +635,7 @@ class Loader:
             print(f"\r{time.ctime()}: {already_merged} files sorted...", end="")
             if not self.debug:
                 os.system(f"rm {file_list}")
-        print(, flush=True)
+        print(flush=True)
 
         sorted_files = " ".join([f"<(lz4cat -q {i})" for i in glob(f"{self.workdir}/*.split")])
         if file_type == "words":
@@ -649,9 +652,9 @@ class Loader:
             sys.exit()
         print("done.", flush=True)
 
-        for sorted_file in scandir(self.workdir):
-            if file.name.endswith(".split"):
-                os.system(f"rm {file.name}"
+        for sorted_file in os.scandir(self.workdir):
+            if sorted_file.name.endswith(".split"):
+                os.system(f"rm {sorted_file.name}")
 
     def analyze(self):
         """Create inverted index"""
@@ -710,7 +713,7 @@ class Loader:
             print("#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl), file=dbs)
         print("%s: analysis done" % time.ctime())
         os.system(
-            f'/bin/bash -c "lz4cat {self.workdir}/all_words_sorted.lz4 | pack4 {self.workdir)/dbspecs4.h'
+            f'/bin/bash -c "lz4cat {self.workdir}/all_words_sorted.lz4 | pack4 {self.workdir}/dbspecs4.h"',
         )
         print("%s: all indices built. moving into place." % time.ctime())
         os.system("mv index " + self.destination + "/index")
