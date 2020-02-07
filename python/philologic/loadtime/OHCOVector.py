@@ -353,15 +353,8 @@ class Record(object):
         self.attrib = {}
 
     def __str__(self):
-        clean_attrib = {}
-        for k, v in self.attrib.items():
-            try:
-                clean_attrib[k] = " ".join(v.split())
-            except AttributeError:
-                clean_attrib[k] = v
-
         # Using json.dumps to write dict as it is much faster to read from a json string
-        return f"{self.type}\t{self.name}\t{' '.join(map(str, self.id))}\t{dumps(clean_attrib)}"
+        return f"{self.type}\t{self.name}\t{' '.join(map(str, self.id))}\t{dumps(self.attrib)}"
 
     def __repr__(self):
         return "Record('%s','%s',%s)" % (self.type, self.name, self.id)

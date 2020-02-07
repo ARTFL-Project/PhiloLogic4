@@ -862,8 +862,10 @@ class Loader:
         with open(os.path.join(self.destination, "../app/appConfig.json"), "w") as appConfig:
             json.dump({"dbUrl": os.path.join(self.url_root, f"{dbname}/")}, appConfig)
 
+        print("Building Web Client Application...", end=" ", flush=True)
         web_app_path = os.path.join(self.destination, '../app')
         os.system(f"cd {web_app_path}; npm install > {web_app_path}/web_app_build.log 2>&1 && npm run build >> {web_app_path}/web_app_build.log 2>&1")
+        print("done.")
 
 
 def shellquote(s):

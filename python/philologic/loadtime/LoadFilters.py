@@ -3,7 +3,7 @@
 
 import os
 import pickle
-from json import dumps, loads
+from rapidjson import dumps, loads
 
 from philologic.loadtime.OHCOVector import Record
 
@@ -211,7 +211,7 @@ def make_max_id(_, text):
     with open(text["words"]) as filehandle:
         for line in filehandle:
             _, _, philo_id, _ = line.split("\t")
-            philo_id = [int(i) for i in philo_id.split(" ")]
+            philo_id = map(int, philo_id.split(" "))
             max_id = [max(new, prev) for new, prev in zip(philo_id, max_id)]
     with open(text["results"], "wb") as rf:
         # write the result out--really just the resulting omax vector, which the parent will merge in below.
