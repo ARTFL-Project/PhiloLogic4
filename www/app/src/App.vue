@@ -150,8 +150,11 @@ export default {
                 ...localParams,
                 ...this.$route.query
             })
-            this.evaluateRoute()
-            EventBus.$emit("urlUpdate")
+            console.log(this.$route.name)
+            if (!["textNavigation", "tableOfContents"].includes(this.$route.name) ) {
+                this.evaluateRoute()
+                EventBus.$emit("urlUpdate")
+            }
         },
         evaluateRoute() {
             if (this.$route.name == "bibliography") {
@@ -174,7 +177,7 @@ export default {
                     })
                     this.debug(this, this.report)
                     this.$router.push(this.paramsToRoute(this.$store.state.formData))
-                }
+                } 
             }
         }
     }

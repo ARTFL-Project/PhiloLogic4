@@ -36,7 +36,7 @@
                             v-on:enter="enter"
                         >
                             <div
-                                class="kwic_line"
+                                class="kwic-line"
                                 v-for="(result, kwicIndex) in filteredKwic(results.results)"
                                 :key="result.philo_id.join('-')"
                                 :data-index="kwicIndex"
@@ -44,15 +44,15 @@
                                 <span v-html="initializePos(kwicIndex)"></span>
                                 <router-link
                                     :to="'/' + result.citation_links.div1"
-                                    class="kwic_biblio"
-                                    @mouseover="showFullBiblio()"
-                                    @mouseleave="hideFullBiblio()"
+                                    class="kwic-biblio"
+                                    @mouseover.native="showFullBiblio()"
+                                    @mouseleave.native="hideFullBiblio()"
                                 >
                                     <span
-                                        class="full_biblio"
+                                        class="full-biblio"
                                         style="display:none;"
                                     >{{ result.fullBiblio }}</span>
-                                    <span class="short_biblio" v-html="result.shortBiblio"></span>
+                                    <span class="short-biblio" v-html="result.shortBiblio"></span>
                                 </router-link>
                                 <span v-html="result.context"></span>
                             </div>
@@ -240,13 +240,13 @@ export default {
         },
         showFullBiblio() {
             let target = event.srcElement.parentNode.querySelector(
-                ".full_biblio"
+                ".full-biblio"
             );
             target.classList.add("show");
         },
         hideFullBiblio() {
             let target = event.srcElement.parentNode.querySelector(
-                ".full_biblio"
+                ".full-biblio"
             );
             target.classList.remove("show");
         },
@@ -409,16 +409,17 @@ export default {
 #kwic-concordance {
     font-family: monospace;
 }
-.kwic_line {
+.kwic-line {
     line-height: 180%;
     white-space: nowrap;
     overflow: hidden;
 }
-.kwic_biblio {
+.kwic-biblio {
     font-weight: 400 !important;
     z-index: 10;
+    padding-right: .5rem;
 }
-.short_biblio {
+.short-biblio {
     width: 200px;
     white-space: nowrap;
     overflow: hidden;
@@ -428,12 +429,12 @@ export default {
     margin-left: -5px;
     padding-left: 5px;
 }
-.full_biblio {
+.full-biblio {
     z-index: 10;
     display: none;
     opacity: 0;
 }
-.full_biblio.show {
+.full-biblio.show {
     position: absolute;
     background-color: #fff;
     box-shadow: 5px 5px 15px #c0c0c0;
@@ -486,7 +487,7 @@ export default {
     /deep/ .kwic-before {
         width: 120px;
     }
-    /deep/ .kwic_line {
+    /deep/ .kwic-line {
         font-size: 12px;
     }
 }
@@ -497,7 +498,7 @@ export default {
     /deep/ .kwic-before {
         width: 200px;
     }
-    /deep/ .kwic_line {
+    /deep/ .kwic-line {
         font-size: 12px;
     }
 }

@@ -1,7 +1,7 @@
 <template>
     <ul class="ml-1" id="results-bibliography" style>
-        <li style="list-style-type: circle;" v-for="(result, resultIndex) in uniquedResults" :key="resultIndex">
-            <span class="d-inline-block" style="margin-left: -.5rem">
+        <li style="list-style-type: circle; padding-bottom: .25rem" v-for="(result, resultIndex) in uniquedResults" :key="resultIndex">
+            <span class="d-inline-block" style="margin-left: -.25rem">
                 <citations :citation="result.citation"></citations> </span
             >&nbsp;:
             <router-link class="ml-2" :to="`/${report}?${buildLink(result.metadata_fields.title)}`"
