@@ -6,7 +6,7 @@ import os
 import sqlite3
 import time
 import unicodedata
-from json import loads
+from rapidjson import loads
 
 import numpy as np
 from multiprocess import Pool

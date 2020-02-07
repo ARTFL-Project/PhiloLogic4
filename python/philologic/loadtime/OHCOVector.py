@@ -2,7 +2,7 @@
 
 
 import sys
-from json import dumps
+from rapidjson import dumps
 
 ### CompoundStack is the class to use for all parsers.
 
@@ -18,7 +18,7 @@ class ParallelRecord(object):
 
     def __str__(self):
         print_id = [self.id[0], 0, 0, 0, 0, 0, 0, 0, self.id[1]]
-        return "%s\t%s\t%s\t%s" % (self.type, self.name, " ".join(str(i) for i in print_id), dumps(self.attrib))
+        return f"{self.type}\t{self.name}\t{' '.join(str(i) for i in print_id)}\t{dumps(self.attrib)}"
 
     def __getitem__(self, n):
         return self.attrib[n]
@@ -54,14 +54,14 @@ class CompoundRecord(object):
         parent_id = [x if i < parent_index else 0 for i, x in enumerate(self.id)]
         print_id.append(self.attrib.get("start_byte", 0))
         print_id.append(self.attrib.get("page", 0))
-        self.attrib["parent"] = " ".join(str(x) for x in parent_id)
+        self.attrib["parent"] = " ".join(map(str, parent_id))
         clean_attrib = {}
-        for k, v in list(self.attrib.items()):
-            if isinstance(v, str):
+        for k, v in self.attrib.items():
+            try:
                 clean_attrib[k] = " ".join(v.split())
-            else:
+            except AttributeError:
                 clean_attrib[k] = v
-        return "%s\t%s\t%s\t%s" % (self.type, self.name, " ".join(str(i) for i in print_id), dumps(clean_attrib))
+        return f"{self.type}\t{self.name}\t{' '.join(map(str, print_id))}\t{dumps(clean_attrib)}"
 
     def __getitem__(self, n):
         return self.attrib[n]
@@ -106,7 +106,7 @@ class CompoundStack:
     ):
         self.stack = NewStack(types[:], out, factory)
         self.out = out
-        self.v_max = self.stack.v_max
+        # self.v_max = self.stack.v_max
         self.stack.v[0] = docid
         self.p_type = page
         self.current_p = None
@@ -242,7 +242,7 @@ class NewStack:
 
     def __init__(self, types, out=None, factory=None):
         self.v = []
-        self.v_max = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        # self.v_max = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.types = types
         self.v_types = {}
         self.current_objects = []
@@ -251,7 +251,7 @@ class NewStack:
 
         for type in self.types:
             self.v.append(0)
-            self.v_max.append(0)
+            # self.v_max.append(0)
             if type[-1].isdigit():
                 v_type = type[:-1]
                 if v_type not in self.v_types:
@@ -270,11 +270,9 @@ class NewStack:
         return len(self.current_objects)
 
     def __contains__(self, n):
-        i = self.index(n)
-        if len(self) > i:
+        if len(self) > self.index(n):
             return True
-        else:
-            return False
+        return False
 
     def index(self, type):
         if type in self.types:
@@ -329,7 +327,7 @@ class NewStack:
                 # print
                 self.current_objects[i].attrib["end_byte"] = byte
                 print(self.current_objects[i], file=self.out)
-                self.v_max = [max(new, prev) for new, prev in zip(self.v_max, self.current_objects[i].getid())]
+                # self.v_max = [max(new, prev) for new, prev in zip(self.v_max, self.current_objects[i].getid())]
                 # we know all descendants have already been pulled.  so only have to reset the next one. and increment.
                 self.v[i] += 1
                 if (i + 1) < len(self.v):  # check to see we're not in a leaf node
@@ -356,14 +354,14 @@ class Record(object):
 
     def __str__(self):
         clean_attrib = {}
-        for k, v in list(self.attrib.items()):
-            if isinstance(v, str):
+        for k, v in self.attrib.items():
+            try:
                 clean_attrib[k] = " ".join(v.split())
-            else:
+            except AttributeError:
                 clean_attrib[k] = v
 
         # Using json.dumps to write dict as it is much faster to read from a json string
-        return "%s\t%s\t%s\t%s" % (self.type, self.name, " ".join(str(i) for i in self.id), dumps(clean_attrib))
+        return f"{self.type}\t{self.name}\t{' '.join(map(str, self.id))}\t{dumps(clean_attrib)}"
 
     def __repr__(self):
         return "Record('%s','%s',%s)" % (self.type, self.name, self.id)

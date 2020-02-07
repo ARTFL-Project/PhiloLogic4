@@ -6,7 +6,7 @@ import re
 import string
 import sys
 
-from philologic.loadtime.OHCOVector import CompoundStack
+from OHCOVector import CompoundStack
 from philologic.utils import convert_entities
 from collections import deque
 
