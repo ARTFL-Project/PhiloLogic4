@@ -1,14 +1,123 @@
 #!/usr/bin/env python3
 """Configuration module"""
 
-import imp
-import json
 import os
 import sys
 from collections import OrderedDict
 
+import rapidjson as json
 from philologic.utils import pretty_print
 
+CITATIONS = {
+    "author": {
+        "field": "author",
+        "object_level": "doc",
+        "prefix": "",
+        "suffix": "",
+        "separator": "",
+        "link": True,
+        "style": {"font-variant": "small-caps"},
+    },
+    "title": {
+        "field": "title",
+        "object_level": "doc",
+        "prefix": "",
+        "suffix": "",
+        "separator": "",
+        "link": True,
+        "style": {"font-variant": "small-caps", "font-style": "italic", "font-weight": 700},
+    },
+    "year": {
+        "field": "year",
+        "object_level": "doc",
+        "prefix": "[",
+        "suffix": "]",
+        "separator": "",
+        "link": False,
+        "style": {},
+    },
+    "pub_place": {
+        "field": "pub_place",
+        "object_level": "doc",
+        "prefix": "",
+        "suffix": ",&nbsp;",
+        "separator": "",
+        "link": False,
+        "style": {},
+    },
+    "publisher": {
+        "field": "publisher",
+        "object_level": "doc",
+        "prefix": "",
+        "suffix": ",&nbsp;",
+        "separator": "",
+        "link": False,
+        "style": {},
+    },
+    "collection": {
+        "field": "collection",
+        "object_level": "doc",
+        "prefix": "",
+        "suffix": ",&nbsp;",
+        "separator": "",
+        "link": False,
+        "style": {},
+    },
+    "div1_head": {
+        "field": "head",
+        "object_level": "div1",
+        "prefix": "",
+        "suffix": "",
+        "separator": "",
+        "link": True,
+        "style": {"font-variant": "small-caps"},
+    },
+    "div2_head": {
+        "field": "head",
+        "object_level": "div2",
+        "prefix": "",
+        "suffix": "",
+        "separator": "",
+        "link": True,
+        "style": {"font-variant": "small-caps"},
+    },
+    "div3_head": {
+        "field": "head",
+        "object_level": "div3",
+        "prefix": "",
+        "suffix": "",
+        "separator": "",
+        "link": True,
+        "style": {"font-variant": "small-caps"},
+    },
+    "who": {
+        "field": "who",
+        "object_level": "para",
+        "prefix": "",
+        "suffix": "",
+        "separator": "",
+        "link": True,
+        "style": {"font-variant": "small-caps"},
+    },
+    "resp": {
+        "field": "resp",
+        "object_level": "para",
+        "prefix": "",
+        "suffix": "",
+        "separator": "",
+        "link": True,
+        "style": {"font-variant": "small-caps"},
+    },
+    "page": {
+        "style": {},
+        "suffix": "]",
+        "object_level": "page",
+        "field": "n",
+        "prefix": "&nbsp;[",
+        "link": True,
+        "separator": "",
+    },
+}
 
 db_locals_defaults = OrderedDict(
     [
@@ -217,6 +326,13 @@ web_config_defaults = OrderedDict(
             },
         ),
         (
+            "citations",
+            {
+                "value": CITATIONS,
+                "comment": "# Define how individual metadata is displayed. The citations variable is reused by default for citations in individual reports.",
+            },
+        ),
+        (
             "theme",
             {
                 "value": "app/assets/css/split/default_theme.css",
@@ -230,7 +346,7 @@ web_config_defaults = OrderedDict(
             "dictionary",
             {
                 "value": False,
-                "comment": "# The dictionary variable enables a different search interface with the headword as its starting point. It is turned off by default",
+                "comment": "# The dictionary variable enables a different search interface with the headword as a starting point. It is turned off by default",
             },
         ),
         (
@@ -281,17 +397,7 @@ web_config_defaults = OrderedDict(
                         "display_count": True,
                         "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
                         "is_range": True,
-                        "citation": [
-                            {
-                                "field": "author",
-                                "object_level": "doc",
-                                "prefix": "",
-                                "suffix": "",
-                                "separator": "",
-                                "link": True,
-                                "style": {"font-variant": "small-caps"},
-                            }
-                        ],
+                        "citation": [CITATIONS["author"]],
                     },
                     {
                         "label": "Title",
@@ -299,35 +405,7 @@ web_config_defaults = OrderedDict(
                         "display_count": False,
                         "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"],
                         "is_range": True,
-                        "citation": [
-                            {
-                                "field": "author",
-                                "object_level": "doc",
-                                "prefix": "",
-                                "suffix": ",&nbsp;",
-                                "separator": "",
-                                "link": False,
-                                "style": {"font-variant": "small-caps"},
-                            },
-                            {
-                                "field": "title",
-                                "object_level": "doc",
-                                "prefix": "",
-                                "suffix": "",
-                                "separator": "",
-                                "link": True,
-                                "style": {"font-variant": "small-caps", "font-style": "italic", "font-weight": 700},
-                            },
-                            {
-                                "field": "year",
-                                "object_level": "doc",
-                                "prefix": "[",
-                                "suffix": "]",
-                                "separator": "",
-                                "link": False,
-                                "style": {},
-                            },
-                        ],
+                        "citation": [CITATIONS["author"], CITATIONS["title"], CITATIONS["year"]],
                     },
                 ],
                 "comment": """
@@ -352,60 +430,12 @@ web_config_defaults = OrderedDict(
             "simple_landing_citation",
             {
                 "value": [
-                    {
-                        "field": "author",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": ",&nbsp;",
-                        "separator": "",
-                        "link": False,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "title",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps", "font-style": "italic", "font-weight": 700},
-                    },
-                    {
-                        "field": "year",
-                        "object_level": "doc",
-                        "prefix": "[",
-                        "suffix": "]",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "pub_place",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": ",&nbsp;",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "publisher",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": ",&nbsp;",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "collection",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": ",&nbsp;",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
+                    CITATIONS["author"],
+                    CITATIONS["title"],
+                    CITATIONS["year"],
+                    CITATIONS["pub_place"],
+                    CITATIONS["publisher"],
+                    CITATIONS["collection"],
                 ],
                 "comment": "# This variable defines the citation for the simple landing page.",
             },
@@ -450,87 +480,15 @@ web_config_defaults = OrderedDict(
             "concordance_citation",
             {
                 "value": [
-                    {
-                        "field": "author",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": False,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "title",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps", "font-style": "italic", "font-weight": 700},
-                    },
-                    {
-                        "field": "year",
-                        "object_level": "doc",
-                        "prefix": "[",
-                        "suffix": "]",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "head",
-                        "object_level": "div1",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "head",
-                        "object_level": "div2",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "head",
-                        "object_level": "div3",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "who",
-                        "object_level": "para",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "resp",
-                        "object_level": "para",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "style": {},
-                        "suffix": "]",
-                        "object_level": "page",
-                        "field": "n",
-                        "prefix": "&nbsp;[",
-                        "link": True,
-                        "separator": "",
-                    },
+                    CITATIONS["author"],
+                    CITATIONS["title"],
+                    CITATIONS["year"],
+                    CITATIONS["div1_head"],
+                    CITATIONS["div2_head"],
+                    CITATIONS["div3_head"],
+                    CITATIONS["who"],
+                    CITATIONS["resp"],
+                    CITATIONS["page"],
                 ],
                 "comment": """
                # The concordance_citation variable define how and in what field order citations are displayed in concordance reports.
@@ -544,78 +502,15 @@ web_config_defaults = OrderedDict(
             "bibliography_citation",
             {
                 "value": [
-                    {
-                        "field": "author",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": False,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "title",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps", "font-style": "italic", "font-weight": 700},
-                    },
-                    {
-                        "field": "year",
-                        "object_level": "doc",
-                        "prefix": "[",
-                        "suffix": "]",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "head",
-                        "object_level": "div1",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "head",
-                        "object_level": "div2",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "head",
-                        "object_level": "div3",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "who",
-                        "object_level": "para",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "resp",
-                        "object_level": "para",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps"},
-                    },
+                    CITATIONS["author"],
+                    CITATIONS["title"],
+                    CITATIONS["year"],
+                    CITATIONS["div1_head"],
+                    CITATIONS["div2_head"],
+                    CITATIONS["div3_head"],
+                    CITATIONS["who"],
+                    CITATIONS["resp"],
+                    CITATIONS["page"],
                 ],
                 "comment": """
                # The bibligraphy_citation variable define how and in what field order citations are displayed in bibliography reports.
@@ -629,60 +524,12 @@ web_config_defaults = OrderedDict(
             "table_of_contents_citation",
             {
                 "value": [
-                    {
-                        "field": "author",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": False,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "title",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps", "font-style": "italic", "font-weight": 700},
-                    },
-                    {
-                        "field": "year",
-                        "object_level": "doc",
-                        "prefix": "[",
-                        "suffix": "]",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "pub_place",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "<br>",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "publisher",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "collection",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
+                    CITATIONS["author"],
+                    CITATIONS["title"],
+                    CITATIONS["year"],
+                    CITATIONS["pub_place"],
+                    CITATIONS["publisher"],
+                    CITATIONS["collection"],
                 ],
                 "comment": """
                # The table_of_contents_citation variable define how and in what field order citations are displayed in navigation reports.
@@ -696,60 +543,12 @@ web_config_defaults = OrderedDict(
             "navigation_citation",
             {
                 "value": [
-                    {
-                        "field": "author",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": False,
-                        "style": {"font-variant": "small-caps"},
-                    },
-                    {
-                        "field": "title",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": True,
-                        "style": {"font-variant": "small-caps", "font-style": "italic", "font-weight": 700},
-                    },
-                    {
-                        "field": "year",
-                        "object_level": "doc",
-                        "prefix": "[",
-                        "suffix": "]",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "pub_place",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "<br>",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "publisher",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": ",",
-                        "link": False,
-                        "style": {},
-                    },
-                    {
-                        "field": "collection",
-                        "object_level": "doc",
-                        "prefix": "",
-                        "suffix": "",
-                        "separator": "",
-                        "link": False,
-                        "style": {},
-                    },
+                    CITATIONS["author"],
+                    CITATIONS["title"],
+                    CITATIONS["year"],
+                    CITATIONS["pub_place"],
+                    CITATIONS["publisher"],
+                    CITATIONS["collection"],
                 ],
                 "comment": """
                # The navigation_citation variable define how and in what field order citations are displayed in navigation reports.
@@ -989,7 +788,25 @@ class Config(object):
         for key, value in self.defaults.items():
             if value["comment"]:
                 string += "\n" + "\n".join(line.strip() for line in value["comment"].splitlines() if line.strip())
-            string += "\n%s = %s\n" % (key, pretty_print(self.data[key]))
+            if key == "default_landing_page_browsing":
+                string += """\ndefault_landing_page_browsing = [{"label": "Author", "group_by_field": "author", 
+                "display_count": True, "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"], "is_range": True,
+                "citation": [citations["author"]],}, {"label": "Title", "group_by_field": "title",
+                "display_count": False, "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"], "is_range": True,
+                "citation": [citations["author"], citations["title"], citations["year"]]}]"""
+            elif key in ("concordance_citation", "bibliography_citation"):
+                string += f"""\n{key} = [
+                    citations["author"], citations["title"], citations["year"],
+                    citations["div1_head"], citations["div2_head"], citations["div3_head"],
+                    citations["who"], citations["resp"], citations["page"],
+                ]"""
+            elif key in ("table_of_contents_citation", "navigation_citation", "simple_landing_citation"):
+                string += f"""\n{key} = [
+                    citations["author"], citations["title"], citations["year"],
+                    citations["pub_place"], citations["publisher"], citations["collections"],
+                ]"""
+            else:
+                string += "\n%s = %s\n" % (key, pretty_print(self.data[key]))
             written_keys.append(key)
         for key in self.data:
             if key not in written_keys:
@@ -998,6 +815,7 @@ class Config(object):
         return string
 
     def to_json(self):
+        """Convert Config to JSON representation"""
         out_obj = {}
         written = []
         for key in self.defaults.keys():

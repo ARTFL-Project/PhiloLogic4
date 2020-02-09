@@ -15,10 +15,12 @@ import time
 from glob import glob
 
 import lxml
+from black import FileMode, format_str
 from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.loadtime.PostFilters import make_sql_table
-from philologic.utils import convert_entities, load_module, pretty_print, sort_list
+from philologic.utils import (convert_entities, load_module, pretty_print,
+                              sort_list)
 from tqdm import tqdm
 
 SORT_BY_WORD = "-k 2,2"
@@ -798,7 +800,7 @@ class Loader:
         db_values["token_regex"] = self.token_regex
         db_values["default_object_level"] = self.default_object_level
         db_config = MakeDBConfig(filename, **db_values)
-        print(db_config, file=open(filename, "w"))
+        print(format_str(str(db_config), mode=FileMode()), file=open(filename, "w"))
         print("wrote database info to %s." % (filename))
 
     def write_web_config(self):
@@ -855,7 +857,7 @@ class Loader:
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)
         with open(os.path.join(filename), "w") as output_file:
-            print(web_config, file=output_file)
+            print(format_str(str(web_config), mode=FileMode()), file=output_file)
         print(f"wrote Web application info to {filename}")
 
         dbname = os.path.basename(os.path.dirname(self.destination.rstrip("/")))

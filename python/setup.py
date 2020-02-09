@@ -14,5 +14,15 @@ setup(
         "philologic.loadtime",
     ],
     scripts=["scripts/philoload4"],
-    install_requires=["lxml", "python-levenshtein", "natsort", "multiprocess", "tqdm", "sklearn", "numpy", "python-rapidjson"],
+    install_requires=[
+        "lxml",
+        "python-levenshtein",
+        "natsort",
+        "multiprocess",
+        "tqdm",
+        "sklearn",
+        "numpy",
+        "python-rapidjson",
+        "black",
+    ],
 )
