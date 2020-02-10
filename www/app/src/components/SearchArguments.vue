@@ -328,7 +328,7 @@ export default {
     }
 };
 </script>
-<style thisd>
+<style scoped>
 #search-arguments {
     line-height: 180%;
 }

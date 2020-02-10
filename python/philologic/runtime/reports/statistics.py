@@ -1,4 +1,5 @@
 # /usr/bin/env python3
+"""Report designed to group results by metadata with additional breakdown optional"""
 
 from philologic.runtime.DB import DB
 from philologic.runtime.link import make_absolute_query_link
@@ -9,10 +10,9 @@ OBJ_ZEROS = {"doc": 6, "div1": 5, "div2": 4, "div3": 3, "para": 2, "sent": 1, "w
 
 
 def statistics_by_field(request, config):
+    """Group hitlist by metadata field"""
     db = DB(config.db_path + "/data/")
-    biblio_search = False
     if request.q == "" and request.no_q:
-        biblio_search = True
         if request.no_metadata:
             hits = db.get_all(db.locals["default_object_level"], sort_order=["rowid"], raw_results=True)
         else:
@@ -35,37 +35,54 @@ def statistics_by_field(request, config):
         metadata_dict[row["philo_id"]] = {field: row[field] for field in db.locals["metadata_fields"]}
 
     counts_by_field = {}
+    field_obj = __get_field_config(request, config)
+    break_up_field_name = field_obj["break_up_field"]
     for philo_id in philo_ids:
         field_name = metadata_dict[philo_id][request.group_by]
+        break_up_field = metadata_dict[philo_id][break_up_field_name]
         if field_name not in counts_by_field:
-            counts_by_field[field_name] = {"count": 1, "metadata_fields": metadata_dict[philo_id]}
+            counts_by_field[field_name] = {
+                "count": 1,
+                "metadata_fields": metadata_dict[philo_id],
+                "break_up_field": {break_up_field: {"count": 1, "philo_id": philo_id}},
+            }
         else:
             counts_by_field[field_name]["count"] += 1
+            if break_up_field not in counts_by_field[field_name]["break_up_field"]:
+                counts_by_field[field_name]["break_up_field"][break_up_field] = {"count": 1, "philo_id": philo_id}
+            else:
+                counts_by_field[field_name]["break_up_field"][break_up_field]["count"] += 1
 
     counts_by_field = sorted(counts_by_field.items(), key=lambda x: x[1]["count"], reverse=True)
-    citations = config["bibliography_citation"]
-    citation_pos = __get_field_pos(citations, request.group_by)
-    if citation_pos is not None:
-        field_citation = citations.pop(citation_pos)
-        field_citation["link"] = True
-    else:
-        field_citation = {
-            "style": {"font-variant": "small-caps"},
-            "suffix": "",
-            "object_level": "doc",
-            "field": "author",
-            "prefix": "",
-            "link": True,
-            "separator": ",",
-        }
     results = []
     group_by_field = request.group_by
     del request.group_by
     for field_name, values in counts_by_field:
-        quoted_field = f'"{field_name}"'
-        link = f"""concordance?{make_absolute_query_link(config, request, script_name="", **{group_by_field :quoted_field})}"""
-        result_citation = [{**field_citation, "href": link, "label": field_name}, *__build_citation(values, citations)]
-        results.append({"citation": result_citation, "count": values["count"]})
+        result_citation = __build_citation(
+            values["metadata_fields"], field_obj["field_citation"], group_by_field, config, request
+        )
+
+        results.append(
+            {
+                "citation": result_citation,
+                "count": values["count"],
+                "break_up_field": [
+                    {
+                        "count": v["count"],
+                        "citation": __build_citation(
+                            metadata_dict[v["philo_id"]],
+                            field_obj["break_up_field_citation"],
+                            break_up_field_name,
+                            config,
+                            request,
+                        ),
+                    }
+                    for k, v in sorted(
+                        values["break_up_field"].items(), key=lambda item: item[1]["count"], reverse=True
+                    )
+                ],
+            }
+        )
 
     return {"results": results, "query": dict([i for i in request])}
 
@@ -88,19 +105,25 @@ def __expand_hits(hits, metadata_type):
     return expanded_hits
 
 
-def __get_field_pos(citations, field):
-    for pos, citation in enumerate(citations):
-        if citation["field"] == field:
-            return pos
-    return None
+def __get_field_config(request, config):
+    for field_obj in config["stats_report_config"]["fields"]:
+        if field_obj["field"] == request.group_by:
+            return field_obj
 
 
-def __build_citation(values, citation_object):
+def __build_citation(metadata_fields, citation_object, field_to_link, config, request):
     citations = []
     for citation in citation_object:
         try:
-            label = values["metadata_fields"][citation["field"]]
+            label = metadata_fields[citation["field"]]
         except KeyError:
             continue
-        citations.append({"label": label, "href": "", **citation})
+        if not label:
+            continue
+        if citation["field"] == field_to_link:
+            quoted_field = f'"{label}"'
+            link = f"""concordance?{make_absolute_query_link(config, request, script_name="", **{field_to_link :quoted_field})}"""
+            citations.append({"label": label, "href": link, **citation})
+        else:
+            citations.append({"label": label, "href": "", **citation})
     return citations

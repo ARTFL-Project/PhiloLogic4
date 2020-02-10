@@ -19,61 +19,60 @@ export default new Router({
     mode: 'history',
     base: appConfig.dbUrl.replace(/https?:\/\/[^/]+\//, ""),
     routes: [{
-            path: '/',
-            name: 'home',
-            component: landingPage
-        },
-        {
-            path: '/concordance',
-            name: 'concordance',
-            component: concordance
-        },
-        {
-            path: '/kwic',
-            name: 'kwic',
-            component: kwic
-        },
-        {
-            path: '/bibliography',
-            name: 'bibliography',
-            component: bibliography
-        },
-        {
-            path: "/collocation",
-            name: "collocation",
-            component: collocation
-        },
-        {
-            path: "/time_series",
-            name: "timeSeries",
-            component: timeSeries
-        },
-        {
-            path: "/navigate/:pathInfo([\\d/]+)",
-            name: "textNavigation",
-            component: textNavigation
-        },
-        {
-            path: "/navigate/:pathInfo(\\d+)/table-of-contents",
-            name: "tableOfContents",
-            component: tableOfContents
-        },
-        {
-            path: "/statistics",
-            name: 'statistics',
-            component: statistics
-        },
-        // for compatibility with old Philo links: still used in landing page
-        {
-            path: "/query",
-            redirect: to => {
-                console.log(to)
-                return {
-                    name: to.query.report,
-                    params: to.params
-                }
+        path: '/',
+        name: 'home',
+        component: landingPage
+    },
+    {
+        path: '/concordance',
+        name: 'concordance',
+        component: concordance
+    },
+    {
+        path: '/kwic',
+        name: 'kwic',
+        component: kwic
+    },
+    {
+        path: '/bibliography',
+        name: 'bibliography',
+        component: bibliography
+    },
+    {
+        path: "/collocation",
+        name: "collocation",
+        component: collocation
+    },
+    {
+        path: "/time_series",
+        name: "timeSeries",
+        component: timeSeries
+    },
+    {
+        path: "/navigate/:pathInfo([\\d/]+)",
+        name: "textNavigation",
+        component: textNavigation
+    },
+    {
+        path: "/navigate/:pathInfo(\\d+)/table-of-contents",
+        name: "tableOfContents",
+        component: tableOfContents
+    },
+    {
+        path: "/statistics",
+        name: 'statistics',
+        component: statistics
+    },
+    // for compatibility with old Philo links: still used in landing page
+    {
+        path: "/query",
+        redirect: to => {
+            return {
+                name: to.query.report,
+                params: to.params
             }
         }
+    }
     ],
     scrollBehavior(to, from, savedPosition) {
         if (savedPosition) {

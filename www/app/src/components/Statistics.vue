@@ -18,9 +18,27 @@
         </b-card>
         <b-card no-body class="shadow mt-4">
             <b-list-group flush>
-                <b-list-group-item v-for="result in results" :key="result.group_by_field">
+                <b-list-group-item v-for="(result, resultIndex) in results" :key="resultIndex">
+                    <b-button
+                        variant="outline-secondary"
+                        size="sm"
+                        class="d-inline-block"
+                        v-b-toggle="`break-up-${resultIndex}`"
+                        v-if="result.break_up_field"
+                    >+</b-button>
                     <citations :citation="result.citation"></citations>
-                    : {{result.count}} occurrences
+                    : {{result.count}} occurrence(s)
+                    <b-collapse :id="`break-up-${resultIndex}`">
+                        <b-list-group class="ml-4" v-if="result.break_up_field">
+                            <b-list-group-item
+                                v-for="(value, key) in result.break_up_field"
+                                :key="key"
+                            >
+                                {{ value.count }}:
+                                <citations :citation="value.citation"></citations>
+                            </b-list-group-item>
+                        </b-list-group>
+                    </b-collapse>
                 </b-list-group-item>
             </b-list-group>
         </b-card>
@@ -40,7 +58,8 @@ export default {
     data() {
         return {
             results: [],
-            loading: false
+            loading: false,
+            philoConfig: this.$philoConfig
         };
     },
     created() {

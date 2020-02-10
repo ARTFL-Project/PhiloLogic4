@@ -1,16 +1,14 @@
 <template>
     <div>
         <p>
-            Results from the current page will be generated.
-            <br />
-            <br />Choose between the following options:
+            Results from the current page ONLY will be generated.
         </p>
-        <b-button-group size="sm" vertical>
-            <b-button @click="getResults('json', false)">JSON (with HTML)</b-button>
-            <b-button @click="getResults('json', true)">JSON (with no HTML)</b-button>
-            <b-button @click="getResults('csv', false)">CSV (with HTML)</b-button>
-            <b-button @click="getResults('csv', true)">CSV (with no HTML)</b-button>
-        </b-button-group>
+        <h6>With text in HTML:</h6>
+        <b-button @click="getResults('json', false)">JSON</b-button>&nbsp;
+        <b-button @click="getResults('csv', false)">CSV</b-button>
+        <h6 class="mt-2">With plain text:</h6>
+        <b-button @click="getResults('json', true)">JSON</b-button>&nbsp;
+        <b-button @click="getResults('csv', true)">CSV</b-button>
     </div>
 </template>
 <script>

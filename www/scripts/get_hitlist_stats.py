@@ -44,20 +44,21 @@ def get_total_doc_count(environ, start_response):
     docs = set()
     hits.finish()
     total_results = 0
-    zeros_to_append = " ".join("0" for _ in range(OBJECT_LEVEL[config["hitlist_stats"]["object_level"]]))
+    zeros_to_append = " ".join("0" for _ in range(OBJECT_LEVEL[config["stats_report_config"]["object_level"]]))
     for hit in hits:
         docs.add(f'''"{hit[0]} {zeros_to_append}"''')
         total_results += 1
     stats = []
-    citations = []
     cursor = db.dbh.cursor()
-    for field in config["hitlist_stats"]["fields"]:
-        if field == "title":
+    for field_obj in config["stats_report_config"]["fields"]:
+        if field_obj["field"] == "title":
             count = len(docs)
         else:
-            cursor.execute(f"SELECT COUNT(DISTINCT {field}) FROM toms WHERE philo_id IN ({', '.join(docs)})")
+            cursor.execute(
+                f"SELECT COUNT(DISTINCT {field_obj['field']}) FROM toms WHERE philo_id IN ({', '.join(docs)})"
+            )
             count = cursor.fetchone()[0]
-        stats.append({"field": field, "count": count})
+        stats.append({"field": field_obj["field"], "count": count})
     yield json.dumps({"total_results": total_results, "stats": stats}).encode("utf8")
 
 
