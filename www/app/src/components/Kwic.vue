@@ -99,7 +99,8 @@ export default {
             "resultsLength",
             "searching",
             "currentReport",
-            "description"
+            "description",
+            "sortedKwicCache"
         ]),
         sortingSelection() {
             let sortingSelection = [];
@@ -299,9 +300,20 @@ export default {
                         this.debug(this, error);
                     });
             } else {
-                this.start = "0";
-                this.end = "0";
-                this.recursiveLookup(0);
+                if (
+                    JSON.stringify({
+                        ...this.$store.state.formData,
+                        start: "0",
+                        end: "0"
+                    }) == JSON.stringify(this.sortedKwicCache.queryParams)
+                ) {
+                    this.sortedResults = this.sortedKwicCache.results;
+                    this.getKwicResults(this.results.hits_done);
+                } else {
+                    this.start = "0";
+                    this.end = "0";
+                    this.recursiveLookup(0);
+                }
             }
         },
         mergeLists(list1, list2) {
@@ -334,9 +346,15 @@ export default {
                     } else {
                         this.start = "0";
                         this.end = "0";
+                        this.sortedKwicCache = {
+                            results: this.sortedResults,
+                            queryParams: {
+                                ...this.$store.state.formData,
+                                start: "0",
+                                end: "0"
+                            }
+                        };
                         this.getKwicResults(hitsDone);
-                        this.loading = false;
-                        EventBus.$emit("resultsDone");
                     }
                 });
         },
@@ -350,7 +368,7 @@ export default {
             }
             this.$http
                 .post(
-                    `{this.$dbUrl}/scripts/get_sorted_kwic.py`,
+                    `${this.$dbUrl}/scripts/get_sorted_kwic.py`,
                     JSON.stringify({
                         results: this.sortedResults,
                         hits_done: hitsDone,
@@ -368,6 +386,8 @@ export default {
                 )
                 .then(response => {
                     this.results = response.data;
+                    this.searching = false;
+                    EventBus.$emit("resultsDone");
                 });
         },
         initializePos(index) {
@@ -417,7 +437,7 @@ export default {
 .kwic-biblio {
     font-weight: 400 !important;
     z-index: 10;
-    padding-right: .5rem;
+    padding-right: 0.5rem;
 }
 .short-biblio {
     width: 200px;

@@ -27,6 +27,11 @@ export default new Vuex.Store({
             results_per_page: 25,
             termGroups: []
         },
+        statisticsResults: [],
+        sortedKwicCache: {
+            queryParams: {},
+            results: []
+        }
     },
     getters: {
         getField
