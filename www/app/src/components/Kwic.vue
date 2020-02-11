@@ -73,7 +73,6 @@ import { mapFields } from "vuex-map-fields";
 import conckwic from "./ConcordanceKwic";
 import facets from "./Facets";
 import pages from "./Pages";
-import { EventBus } from "../main.js";
 import Velocity from "velocity-animate";
 
 export default {
@@ -150,15 +149,19 @@ export default {
         this.currentReport = "kwic";
         this.initializeKwic();
         this.fetchResults();
-        EventBus.$on("urlUpdate", () => {
-            if (this.report == "kwic") {
-                this.fetchResults();
-            }
-        });
+        // EventBus.$on("urlUpdate", () => {
+        //     if (this.report == "kwic") {
+        //         this.fetchResults();
+        //     }
+        // });
     },
-    beforeDestroy() {
-        EventBus.$off("urlUpdate");
+    watch: {
+        // call again the method if the route changes
+        $route: "fetchResults"
     },
+    // beforeDestroy() {
+    //     EventBus.$off("urlUpdate");
+    // },
     methods: {
         initializeKwic() {
             // Sorting fields
@@ -292,7 +295,6 @@ export default {
                                 .results_per_page
                         });
                         this.searching = false;
-                        EventBus.$emit("resultsDone");
                     })
                     .catch(error => {
                         this.searching = false;
@@ -387,7 +389,6 @@ export default {
                 .then(response => {
                     this.results = response.data;
                     this.searching = false;
-                    EventBus.$emit("resultsDone");
                 });
         },
         initializePos(index) {

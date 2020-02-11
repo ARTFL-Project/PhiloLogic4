@@ -19,117 +19,125 @@
     </div>
 </template>
 <script>
-import { EventBus } from "../main.js"
-import { mapFields } from "vuex-map-fields"
+import { EventBus } from "../main.js";
+import { mapFields } from "vuex-map-fields";
 
 export default {
     name: "pages",
     computed: {
-        ...mapFields(["formData.start", "formData.results_per_page", "resultsLength"])
+        ...mapFields([
+            "formData.start",
+            "formData.results_per_page",
+            "resultsLength"
+        ])
     },
     data() {
-        return { pages: [] }
+        return { pages: [] };
     },
     created() {
         EventBus.$on("totalResultsDone", () => {
-            this.buildPages()
-        })
-        EventBus.$on("urlUpdate", () => {
-            this.pages = []
-            this.buildPages()
-        })
+            this.buildPages();
+        });
+        // EventBus.$on("urlUpdate", () => {
+        //     this.pages = [];
+        //     this.buildPages();
+        // });
+    },
+    watch: {
+        // call again the method if the route changes
+        $route: "buildPages"
     },
     methods: {
         buildPages() {
-            var start = this.start
-            var resultsPerPage = parseInt(this.results_per_page) || 25
-            var resultsLength = this.resultsLength
+            var start = this.start;
+            var resultsPerPage = parseInt(this.results_per_page) || 25;
+            var resultsLength = this.resultsLength;
 
             // first find out what page we are on currently.
-            var currentPage = Math.floor(start / resultsPerPage) + 1 || 1
+            var currentPage = Math.floor(start / resultsPerPage) + 1 || 1;
 
             // then how many total pages the query has
-            var totalPages = Math.floor(resultsLength / resultsPerPage)
-            var remainder = resultsLength % resultsPerPage
+            var totalPages = Math.floor(resultsLength / resultsPerPage);
+            var remainder = resultsLength % resultsPerPage;
             if (remainder !== 0) {
-                totalPages += 1
+                totalPages += 1;
             }
-            totalPages = totalPages || 1
+            totalPages = totalPages || 1;
 
             // construct the list of page numbers we will output.
-            var pages = []
+            var pages = [];
             // up to four previous pages
-            var prev = currentPage - 4
+            var prev = currentPage - 4;
             while (prev < currentPage) {
                 if (prev > 0) {
-                    pages.push(prev)
+                    pages.push(prev);
                 }
-                prev += 1
+                prev += 1;
             }
             // the current page
-            pages.push(currentPage)
+            pages.push(currentPage);
             // up to five following pages
-            var next = currentPage + 5
+            var next = currentPage + 5;
             while (next > currentPage) {
                 if (next < totalPages) {
-                    pages.push(next)
+                    pages.push(next);
                 }
-                next -= 1
+                next -= 1;
             }
             // first and last if not already there
             if (pages[0] !== 1) {
-                pages.unshift(1)
+                pages.unshift(1);
             }
             if (pages[-1] !== totalPages) {
-                pages.push(totalPages)
+                pages.push(totalPages);
             }
             pages.sort(function(a, b) {
-                return a - b
-            })
+                return a - b;
+            });
 
             // now we construct the actual links from the page numbers
-            var pageObject = []
-            let lastPageName = ""
-            var pageEnd, pageStart, active
+            var pageObject = [];
+            let lastPageName = "";
+            var pageEnd, pageStart, active;
             for (let page of pages) {
-                pageStart = page * resultsPerPage - resultsPerPage + 1
-                pageEnd = page * resultsPerPage
+                pageStart = page * resultsPerPage - resultsPerPage + 1;
+                pageEnd = page * resultsPerPage;
                 if (page === currentPage) {
-                    active = "active"
+                    active = "active";
                 } else {
-                    active = ""
+                    active = "";
                 }
-                pageStart = resultsPerPage * (page - 1) + 1
-                pageEnd = pageStart + resultsPerPage - 1
+                pageStart = resultsPerPage * (page - 1) + 1;
+                pageEnd = pageStart + resultsPerPage - 1;
                 if (pageEnd > resultsLength) {
-                    pageEnd = resultsLength
+                    pageEnd = resultsLength;
                 }
                 if (page === 1 && pages.length > 1) {
-                    page = "First"
+                    page = "First";
                 }
                 if (page === totalPages) {
-                    page = "Last"
+                    page = "Last";
                 }
                 if (page == lastPageName) {
-                    continue
+                    continue;
                 }
-                lastPageName = page
+                lastPageName = page;
                 let route = this.paramsToRoute({
                     ...this.$store.state.formData,
                     start: pageStart.toString(),
                     end: pageEnd.toString()
-                })
+                });
                 pageObject.push({
                     display: page,
                     route: route,
                     active: active,
                     range: `${pageStart}-${pageEnd}`
-                })
+                });
             }
-            this.pages = pageObject
+            this.pages = pageObject;
         }
     }
-}
+};
 </script>
 <style scoped>
 .page {

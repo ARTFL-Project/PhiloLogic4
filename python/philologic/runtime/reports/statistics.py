@@ -32,13 +32,16 @@ def statistics_by_field(request, config):
     )
     metadata_dict = {}
     for row in cursor:
-        metadata_dict[row["philo_id"]] = {field: row[field] for field in db.locals["metadata_fields"]}
+        metadata_dict[row["philo_id"]] = {field: row[field] for field in db.locals["metadata_fields"] if row[field]}
 
     counts_by_field = {}
     field_obj = __get_field_config(request, config)
     break_up_field_name = field_obj["break_up_field"]
     for philo_id in philo_ids:
-        field_name = metadata_dict[philo_id][request.group_by]
+        try:
+            field_name = metadata_dict[philo_id][request.group_by]
+        except KeyError:
+            field_name = "N/A"
         break_up_field = metadata_dict[philo_id][break_up_field_name]
         if field_name not in counts_by_field:
             counts_by_field[field_name] = {
@@ -55,28 +58,40 @@ def statistics_by_field(request, config):
 
     counts_by_field = sorted(counts_by_field.items(), key=lambda x: x[1]["count"], reverse=True)
     results = []
-    group_by_field = request.group_by
+    # group_by_field = request.group_by
     del request.group_by
     for field_name, values in counts_by_field:
-        result_citation = __build_citation(
-            values["metadata_fields"], field_obj["field_citation"], group_by_field, config, request
-        )
+        # result_citation = __build_citation(
+        #     values["metadata_fields"], field_obj["field_citation"], group_by_field, config, request
+        # )
 
+        # results.append(
+        #     {
+        #         "citation": result_citation,
+        #         "count": values["count"],
+        #         "break_up_field": [
+        #             {
+        #                 "count": v["count"],
+        #                 "citation": __build_citation(
+        #                     metadata_dict[v["philo_id"]],
+        #                     field_obj["break_up_field_citation"],
+        #                     break_up_field_name,
+        #                     config,
+        #                     request,
+        #                 ),
+        #             }
+        #             for k, v in sorted(
+        #                 values["break_up_field"].items(), key=lambda item: item[1]["count"], reverse=True
+        #             )
+        #         ],
+        #     }
+        # )
         results.append(
             {
-                "citation": result_citation,
+                "metadata_fields": values["metadata_fields"],
                 "count": values["count"],
                 "break_up_field": [
-                    {
-                        "count": v["count"],
-                        "citation": __build_citation(
-                            metadata_dict[v["philo_id"]],
-                            field_obj["break_up_field_citation"],
-                            break_up_field_name,
-                            config,
-                            request,
-                        ),
-                    }
+                    {"count": v["count"], "metadata_fields": metadata_dict[v["philo_id"]]}
                     for k, v in sorted(
                         values["break_up_field"].items(), key=lambda item: item[1]["count"], reverse=True
                     )

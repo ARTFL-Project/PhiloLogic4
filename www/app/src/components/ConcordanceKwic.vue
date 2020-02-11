@@ -98,6 +98,8 @@ export default {
             "formData.first_kwic_sorting_option",
             "formData.second_kwic_sorting_option",
             "formData.third_kwic_sorting_option",
+            "formData.start",
+            "formData.end",
             "resultsLength",
             "description"
         ])
@@ -125,18 +127,21 @@ export default {
     created() {
         this.hits = this.buildDescription();
         this.updateTotalResults();
-        EventBus.$on("resultsDone", () => {
-            this.hits = this.buildDescription();
-            this.updateTotalResults();
-        });
-    },
-    beforeDestroy() {
-        EventBus.$off("resultsDone");
     },
     methods: {
         buildDescription() {
-            let start = this.description.start;
-            let end = this.description.end;
+            let start;
+            let end;
+            if (this.start === "" || this.start == 0) {
+                start = 1;
+                end = this.results_per_page;
+            } else {
+                start = this.start;
+                end = this.end;
+            }
+            if (end > this.resultsLength) {
+                end = this.resultsLength;
+            }
             let resultsPerPage = this.description.results_per_page;
             let description;
             if (

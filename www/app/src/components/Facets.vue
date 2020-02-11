@@ -391,7 +391,13 @@ export default {
                 key: this.selectedFacet.facet,
                 value: `"${metadata[this.selectedFacet.facet]}"`
             });
-            this.$router.push(this.paramsToRoute(this.$store.state.formData));
+            this.$router.push(
+                this.paramsToRoute({
+                    ...this.$store.state.formData,
+                    start: "0",
+                    end: "0"
+                })
+            );
         }
     }
 };

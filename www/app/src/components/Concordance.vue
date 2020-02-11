@@ -51,7 +51,6 @@ import citations from "./Citations";
 import conckwic from "./ConcordanceKwic";
 import facets from "./Facets";
 import pages from "./Pages";
-import { EventBus } from "../main.js";
 import Velocity from "velocity-animate";
 
 export default {
@@ -82,14 +81,10 @@ export default {
         this.report = "concordance";
         this.currentReport = "concordance";
         this.fetchResults();
-        EventBus.$on("urlUpdate", () => {
-            if (this.report == "concordance") {
-                this.fetchResults();
-            }
-        });
     },
-    beforeDestroy() {
-        EventBus.$off("urlUpdate");
+    watch: {
+        // call again the method if the route changes
+        $route: "fetchResults"
     },
     methods: {
         fetchResults() {
@@ -111,7 +106,6 @@ export default {
                             .results_per_page
                     });
                     this.searching = false;
-                    EventBus.$emit("resultsDone");
                 })
                 .catch(error => {
                     this.searching = false;
