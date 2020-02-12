@@ -86,10 +86,12 @@ export default {
     },
     methods: {
         fetchData() {
-            this.loading = true;
+            this.searching = true;
             if (
-                JSON.stringify(this.statisticsCache.query) ==
-                JSON.stringify(this.$route.query)
+                this.deepEqual(
+                    { ...this.statisticsCache.query, start: "", end: "" },
+                    { ...this.$route.query, start: "", end: "" }
+                )
             ) {
                 this.statisticsResults = this.statisticsCache.results;
                 this.breakUpFields = this.statisticsResults
@@ -154,7 +156,9 @@ export default {
             for (let citation of citationObject) {
                 let label = metadataFields[citation.field];
                 if (label == null || label.length == 0) {
-                    continue;
+                    if (citation["field"] != fieldToLink) {
+                        continue;
+                    }
                 }
                 if (citation["field"] == fieldToLink) {
                     let queryParams = {
@@ -162,8 +166,13 @@ export default {
                         start: "0",
                         end: "25"
                     };
-                    queryParams[fieldToLink] = `"${label}"`;
 
+                    if (label == null || label.length == 0) {
+                        queryParams[fieldToLink] = "NULL";
+                        label = "N/A";
+                    } else {
+                        queryParams[fieldToLink] = `"${label}"`;
+                    }
                     let link = this.paramsToRoute({
                         ...queryParams,
                         report: "concordance"
