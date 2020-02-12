@@ -83,9 +83,6 @@ export default {
         pages
     },
     computed: {
-        // When using nested data structures, the string
-        // after the last dot (e.g. `firstName`) is used
-        // for defining the name of the computed property.
         ...mapFields([
             "formData.report",
             "formData.q",

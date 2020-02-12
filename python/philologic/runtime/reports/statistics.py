@@ -58,34 +58,8 @@ def statistics_by_field(request, config):
 
     counts_by_field = sorted(counts_by_field.items(), key=lambda x: x[1]["count"], reverse=True)
     results = []
-    # group_by_field = request.group_by
     del request.group_by
     for field_name, values in counts_by_field:
-        # result_citation = __build_citation(
-        #     values["metadata_fields"], field_obj["field_citation"], group_by_field, config, request
-        # )
-
-        # results.append(
-        #     {
-        #         "citation": result_citation,
-        #         "count": values["count"],
-        #         "break_up_field": [
-        #             {
-        #                 "count": v["count"],
-        #                 "citation": __build_citation(
-        #                     metadata_dict[v["philo_id"]],
-        #                     field_obj["break_up_field_citation"],
-        #                     break_up_field_name,
-        #                     config,
-        #                     request,
-        #                 ),
-        #             }
-        #             for k, v in sorted(
-        #                 values["break_up_field"].items(), key=lambda item: item[1]["count"], reverse=True
-        #             )
-        #         ],
-        #     }
-        # )
         results.append(
             {
                 "metadata_fields": values["metadata_fields"],
@@ -99,7 +73,7 @@ def statistics_by_field(request, config):
             }
         )
 
-    return {"results": results, "query": dict([i for i in request])}
+    return {"results": results, "query": dict([i for i in request]), "total_results": len(philo_ids)}
 
 
 def __expand_hits(hits, metadata_type):

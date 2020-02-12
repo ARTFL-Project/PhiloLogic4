@@ -13,30 +13,41 @@
                         <export-results></export-results>
                     </b-modal>
                     <search-arguments></search-arguments>
-                    <div id="result-stats" class="pl-3 pb-3">
-                        {{ resultsLength }} total occurrences spread across
-                        <span
-                            v-for="(stat, statIndex) in statsDescription"
-                            :key="stat.field"
-                        >
-                            <router-link
-                                :to="`/statistics?${stat.link}&group_by=${stat.field}`"
-                            >{{stat.count}} {{stat.label}}(s)</router-link>
-                            <span v-if="statIndex != statsDescription.length-1">&nbsp;and&nbsp;</span>
-                        </span>
+                    <div v-if="report != 'statistics'">
+                        <div id="result-stats" class="pl-3 pb-3">
+                            {{ resultsLength }} total occurrences spread across
+                            <span
+                                v-for="(stat, statIndex) in statsDescription"
+                                :key="stat.field"
+                            >
+                                <router-link
+                                    :to="`/statistics?${stat.link}&group_by=${stat.field}`"
+                                >{{stat.count}} {{stat.label}}(s)</router-link>
+                                <span v-if="statIndex != statsDescription.length-1">&nbsp;and&nbsp;</span>
+                            </span>
+                        </div>
+                        <div id="search-hits" class="pl-3">
+                            <b>{{ hits }}</b>
+                            <span v-if="report != 'bibliography'">
+                                from these
+                                <b-button
+                                    pill
+                                    size="sm"
+                                    variant="outline-secondary"
+                                    style="margin-top: -.05rem;"
+                                    @click="showResultsBiblio"
+                                >titles</b-button>
+                            </span>
+                        </div>
                     </div>
-                    <div id="search-hits" class="pl-3">
-                        <b>{{ hits }}</b>
-                        <span v-if="report != 'bibliography'">
-                            from these
-                            <b-button
-                                pill
-                                size="sm"
-                                variant="outline-secondary"
-                                style="margin-top: -.05rem;"
-                                @click="showResultsBiblio"
-                            >titles</b-button>
-                        </span>
+                    <div v-else>
+                        <div
+                            id="result-stats"
+                            class="pl-3 pb-3"
+                        >{{ resultsLength }} total occurrences spread across {{ statisticsCache.results.length }} {{ group_by }}(s)</div>
+                        <div id="search-hits" class="pl-3">
+                            <b>{{ hits }}</b>
+                        </div>
                     </div>
                 </div>
                 <b-button
@@ -47,7 +58,11 @@
             </div>
             <results-bibliography :results="results" v-if="showBiblio && resultsLength > 0"></results-bibliography>
         </b-card>
-        <b-row class="d-xs-none mt-4 mb-3" id="act-on-report">
+        <b-row
+            class="d-xs-none mt-4 mb-3"
+            id="act-on-report"
+            v-if="report == 'concordance' || report == 'kwic'"
+        >
             <b-col sm="7" lg="8" v-if="report != 'bibliography'">
                 <b-button-group id="report_switch">
                     <b-button
@@ -100,8 +115,10 @@ export default {
             "formData.third_kwic_sorting_option",
             "formData.start",
             "formData.end",
+            "formData.group_by",
             "resultsLength",
-            "description"
+            "description",
+            "statisticsCache"
         ])
     },
     data() {
@@ -126,7 +143,9 @@ export default {
     },
     created() {
         this.hits = this.buildDescription();
-        this.updateTotalResults();
+        if (this.report != "statistics") {
+            this.updateTotalResults();
+        }
     },
     methods: {
         buildDescription() {

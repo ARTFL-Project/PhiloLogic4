@@ -135,6 +135,7 @@ export default {
                 });
             }
             this.pages = pageObject;
+            console.log(this.pages, this.$store.state.formData.report);
         }
     }
 };

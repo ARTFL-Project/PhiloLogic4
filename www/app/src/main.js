@@ -19,7 +19,7 @@ export const EventBus = new Vue() // To pass messages between components
 
 Vue.mixin({
     methods: {
-        paramsFilter: function(formValues) {
+        paramsFilter: function (formValues) {
             let localFormData = {}
             let validFields = []
             if ("report" in formValues && formValues.report in this.$store.state.reportValues) {
@@ -53,7 +53,7 @@ Vue.mixin({
             }
             return localFormData
         },
-        paramsToRoute: function(formValues) {
+        paramsToRoute: function (formValues) {
             let report = formValues.report
             let localFormData = this.paramsFilter(formValues)
             let routeObject = {
@@ -62,7 +62,7 @@ Vue.mixin({
             }
             return routeObject
         },
-        paramsToUrlString: function(params) {
+        paramsToUrlString: function (params) {
             let filteredParams = this.paramsFilter(params)
             let queryParams = []
             for (let param in filteredParams) {
@@ -70,10 +70,10 @@ Vue.mixin({
             }
             return queryParams.join('&')
         },
-        copyObject: function(objectToCopy) {
+        copyObject: function (objectToCopy) {
             return JSON.parse(JSON.stringify(objectToCopy))
         },
-        saveToLocalStorage: function(urlString, results) {
+        saveToLocalStorage: function (urlString, results) {
             try {
                 sessionStorage[urlString] = JSON.stringify(results)
                 console.log('saved results to localStorage')
@@ -89,7 +89,7 @@ Vue.mixin({
                 }
             }
         },
-        mergeResults: function(fullResults, newData, sortKey) {
+        mergeResults: function (fullResults, newData, sortKey) {
             if (typeof fullResults === 'undefined' || Object.keys(fullResults).length === 0) {
                 fullResults = newData
             } else {
@@ -110,7 +110,7 @@ Vue.mixin({
                 unsorted: fullResults
             }
         },
-        sortResults: function(fullResults, sortKey) {
+        sortResults: function (fullResults, sortKey) {
             let sortedList = []
             for (let key in fullResults) {
                 sortedList.push({
@@ -120,17 +120,17 @@ Vue.mixin({
                 })
             }
             if (sortKey === 'label') {
-                sortedList.sort(function(a, b) {
+                sortedList.sort(function (a, b) {
                     return a.label - b.label
                 })
             } else {
-                sortedList.sort(function(a, b) {
+                sortedList.sort(function (a, b) {
                     return b.count - a.count
                 })
             }
             return sortedList
         },
-        deepEqual: function(x, y) {
+        deepEqual: function (x, y) {
             const ok = Object.keys,
                 tx = typeof x,
                 ty = typeof y;
@@ -158,15 +158,15 @@ Vue.mixin({
 })
 
 Vue.directive('scroll', {
-    inserted: function(el, binding) {
-        el.scrollHandler = function(evt) {
+    inserted: function (el, binding) {
+        el.scrollHandler = function (evt) {
             if (binding.value(evt, el)) {
                 window.removeEventListener('scroll', el.scrollHandler)
             }
         }
         window.addEventListener('scroll', el.scrollHandler)
     },
-    unbind: function(el) {
+    unbind: function (el) {
         window.removeEventListener("scroll", el.scrollHandler)
     }
 })

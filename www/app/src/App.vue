@@ -120,7 +120,13 @@ export default {
                 "year_interval",
                 "max_time"
             ]);
-            reportValues.statistics = new Set([...commonFields, "group_by"]);
+            reportValues.statistics = new Set([
+                ...commonFields,
+                "start",
+                "end",
+                "results_per_page",
+                "group_by"
+            ]);
             return reportValues;
         }
     },
