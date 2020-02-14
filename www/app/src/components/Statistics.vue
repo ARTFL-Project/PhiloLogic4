@@ -40,7 +40,7 @@
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import searchArguments from "./SearchArguments";
-import { EventBus } from "../main.js";
+// import { EventBus } from "../main.js";
 import pages from "./Pages";
 import conckwic from "./ConcordanceKwic";
 
@@ -78,6 +78,7 @@ export default {
     },
     created() {
         this.report = "statistics";
+        this.currentReport = "statistics";
         this.fetchData();
     },
     watch: {
@@ -86,7 +87,13 @@ export default {
     },
     methods: {
         fetchData() {
-            this.searching = true;
+            if (isNaN(this.start) || this.start == "") {
+                this.start = 1;
+                this.end = parseInt(this.results_per_page);
+            }
+            if (isNaN(this.end) || this.end == "") {
+                this.end = 25;
+            }
             if (
                 this.deepEqual(
                     { ...this.statisticsCache.query, start: "", end: "" },
@@ -107,15 +114,9 @@ export default {
                     end: this.end,
                     results_per_page: this.results_per_page
                 });
-                EventBus.$emit("totalResultsDone");
+                // EventBus.$emit("totalResultsDone");
             } else {
-                if (isNaN(this.start) || this.start == "") {
-                    this.start = 1;
-                    this.end = parseInt(this.results_per_page);
-                }
-                if (isNaN(this.end) || this.end == "") {
-                    this.end = 25;
-                }
+                this.searching = true;
                 this.$http
                     .get(`${this.$dbUrl}/reports/statistics.py`, {
                         params: this.paramsFilter({
@@ -143,7 +144,7 @@ export default {
                             query: this.$route.query,
                             totalResults: response.data.results.total_results
                         };
-                        EventBus.$emit("totalResultsDone");
+                        // EventBus.$emit("totalResultsDone");
                     })
                     .catch(error => {
                         this.searching = false;

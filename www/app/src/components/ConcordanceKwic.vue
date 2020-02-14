@@ -27,7 +27,10 @@
                             </span>
                         </div>
                         <div id="search-hits" class="pl-3">
-                            <b>{{ hits }}</b>
+                            <b
+                                v-if="resultsLength > 0"
+                            >Displaying hits {{ descriptionStart }}-{{descriptionEnd}} of {{resultsLength}}</b>
+                            <b v-else>No results for your query</b>
                             <span v-if="report != 'bibliography'">
                                 from these
                                 <b-button
@@ -46,7 +49,10 @@
                             class="pl-3 pb-3"
                         >{{ resultsLength }} total occurrences spread across {{ statisticsCache.results.length }} {{ group_by }}(s)</div>
                         <div id="search-hits" class="pl-3">
-                            <b>{{ hits }}</b>
+                            <b
+                                v-if="resultsLength > 0"
+                            >Displaying hits {{ descriptionStart }}-{{descriptionEnd}} of {{resultsLength}}</b>
+                            <b v-else>No results for your query</b>
                         </div>
                     </div>
                 </div>
@@ -126,6 +132,8 @@ export default {
             facets: this.$philoConfig.facets,
             showFacetedBrowsing: false,
             hits: "",
+            descriptionStart: 1,
+            descriptionEnd: this.$store.state.formData.results_per_page,
             statsDescription: [],
             resultsPerPage: 0,
             reportSwitch: {
@@ -142,10 +150,18 @@ export default {
         };
     },
     created() {
-        this.hits = this.buildDescription();
+        console.log("created", this.report);
+        this.buildDescription();
         if (this.report != "statistics") {
             this.updateTotalResults();
+        } else {
+            console.log("triggering totalResultsDone");
+            EventBus.$emit("totalResultsDone");
         }
+    },
+    watch: {
+        // call again the method if the route changes
+        $route: "buildDescription"
     },
     methods: {
         buildDescription() {
@@ -168,33 +184,19 @@ export default {
                 end <= resultsPerPage &&
                 end <= this.resultsLength
             ) {
-                description =
-                    "Displaying hits " +
-                    start +
-                    " - " +
-                    end +
-                    " of " +
-                    this.resultsLength;
+                this.descriptionStart = start;
+                this.descriptionEnd = end;
+                // description = `Displaying hits ${start}-${end} of `;
             } else if (this.resultsLength) {
                 if (resultsPerPage > this.resultsLength) {
-                    description =
-                        "Displaying hits " +
-                        start +
-                        " - " +
-                        this.resultsLength +
-                        " of " +
-                        this.resultsLength;
+                    this.descriptionStart = start;
+                    this.descriptionEnd = this.resultsLength;
+                    // description = `Displaying hits ${start}-${this.resultsLength} of `;
                 } else {
-                    description =
-                        "Displaying hits " +
-                        start +
-                        " - " +
-                        end +
-                        " of " +
-                        this.resultsLength;
+                    this.descriptionStart = start;
+                    this.descriptionEnd = end;
+                    // description = `Displaying hits ${start}-${end} of `;
                 }
-            } else {
-                description = "No results for your query.";
             }
             return description;
         },
@@ -215,7 +217,9 @@ export default {
                     count: stat.count,
                     link: this.paramsToUrlString({
                         ...this.$store.state.formData,
-                        report: "statistics"
+                        report: "statistics",
+                        start: "",
+                        end: ""
                     })
                 });
             }

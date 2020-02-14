@@ -36,12 +36,9 @@ export default {
     },
     created() {
         EventBus.$on("totalResultsDone", () => {
+            console.log("doing my thing");
             this.buildPages();
         });
-        // EventBus.$on("urlUpdate", () => {
-        //     this.pages = [];
-        //     this.buildPages();
-        // });
     },
     watch: {
         // call again the method if the route changes
@@ -135,7 +132,11 @@ export default {
                 });
             }
             this.pages = pageObject;
-            console.log(this.pages, this.$store.state.formData.report);
+            console.log(
+                this.pages.length,
+                this.$store.state.formData.report,
+                currentPage
+            );
         }
     }
 };
