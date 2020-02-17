@@ -59,16 +59,17 @@
                 >x</b-button>
             </h6>
             <b-button-group
-                id="frequency-selection"
+                class="shadow-sm"
+                size="sm"
                 v-if="percent == 100 && report !== 'bibliography' && facet.type === 'facet'"
             >
                 <b-button
-                    size="sm"
+                    variant="light"
                     :class="{'active': showingRelativeFrequencies === false}"
                     @click="displayAbsoluteFrequencies()"
                 >Absolute Frequency</b-button>
                 <b-button
-                    size="sm"
+                    variant="light"
                     :class="{'active': showingRelativeFrequencies}"
                     @click="displayRelativeFrequencies()"
                 >Relative Frequency</b-button>
@@ -82,7 +83,7 @@
                 show-progress
                 variant="secondary"
                 class="ml-3 mr-3 mb-3"
-                v-if="runningTotal != resultsLength"
+                v-if="percent != 100"
             >
                 <b-progress-bar
                     :value="runningTotal"
@@ -91,36 +92,30 @@
             </b-progress>
             <b-list-group flush>
                 <b-list-group-item v-for="result in facetResults" :key="result.label">
-                    <b-row>
-                        <b-col cols="8">
-                            <span
-                                class="sidebar-text text-content-area"
-                                v-if="facet.facet !== 'all_collocates'"
-                                @click="facetClick(result.metadata)"
-                            >
-                                <span>{{ result.label }}</span>
-                            </span>
-                            <span
-                                class="sidebar-text text-content-area"
-                                v-if="facet.facet === 'all_collocates'"
-                                @click="collocationToConcordance(result.label)"
-                            >
-                                <span>{{ result.label }}</span>
-                            </span>
-                            <div
-                                style="line-height: 70%; padding-bottom: 15px; font-size: 85%;"
-                                v-if="showingRelativeFrequencies"
-                            >
-                                <div style="opacity: .8">
-                                    {{ fullResults.unsorted[result.label].count }} actual {{ occurrence(fullResults.unsorted[result.label].count) }}
-                                    in {{ fullRelativeFrequencies[result.label].total_count }} words
-                                </div>
-                            </div>
-                        </b-col>
-                        <b-col cols="4">
-                            <span class="sidebar-count text-right">{{ result.count }}</span>
-                        </b-col>
-                    </b-row>
+                    <div>
+                        <a
+                            href
+                            class="sidebar-text text-content-area"
+                            v-if="facet.facet !== 'all_collocates'"
+                            @click.prevent="facetClick(result.metadata)"
+                        >{{ result.label }}</a>
+                        <a
+                            href
+                            class="sidebar-text text-content-area"
+                            v-else
+                            @click.prevent="collocationToConcordance(result.label)"
+                        >{{ result.label }}</a>
+                        <b-badge variant="secondary" pill class="float-right">{{ result.count }}</b-badge>
+                    </div>
+                    <div
+                        style="line-height: 70%; padding-bottom: 15px; font-size: 85%;"
+                        v-if="showingRelativeFrequencies"
+                    >
+                        <div style="display: inline-block; opacity: .8">
+                            {{ fullResults.unsorted[result.label].count }} actual {{ occurrence(fullResults.unsorted[result.label].count) }}
+                            in {{ fullRelativeFrequencies[result.label].total_count }} words
+                        </div>
+                    </div>
                 </b-list-group-item>
             </b-list-group>
         </b-card>
@@ -306,6 +301,7 @@ export default {
                 this.loading = false;
                 this.runningTotal = this.resultsLength;
                 this.fullResults = fullResults;
+                this.percent = 100;
                 let urlString = this.paramsToUrlString({
                     ...queryParams,
                     frequency_field: this.selectedFacet.alias

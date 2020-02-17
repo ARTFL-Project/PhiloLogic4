@@ -41,7 +41,7 @@ def statistics_by_field(request, config):
             if request.group_by == "title":  # account for same title for different works
                 field_name = f"{metadata_dict[philo_id][request.group_by]} {philo_id}"
             else:
-                field_name = metadata_dict[philo_id][request.group_by].strip()
+                field_name = metadata_dict[philo_id][request.group_by]
         except KeyError:
             field_name = ""
         if break_up_field_name is not None:
