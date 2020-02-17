@@ -22,6 +22,7 @@ except ImportError:
 
 
 OBJECT_LEVEL = {"doc": 6, "div1": 5, "div2": 4, "div3": 3, "para": 2, "sent": 1}
+OBJ_DICT = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
 
 
 def get_total_doc_count(environ, start_response):
@@ -41,21 +42,26 @@ def get_total_doc_count(environ, start_response):
             config["hitlist_stats"]["fields"].remove("title")
     else:
         hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
-    docs = set()
+
     hits.finish()
     total_results = 0
-    zeros_to_append = " ".join("0" for _ in range(OBJECT_LEVEL[config["stats_report_config"]["object_level"]]))
+    docs = [set() for _ in range(len(config["stats_report_config"]))]
+    zeros_to_append = [
+        " ".join("0" for _ in range(OBJECT_LEVEL[field["object_level"]])) for field in config["stats_report_config"]
+    ]
     for hit in hits:
-        docs.add(f'''"{hit[0]} {zeros_to_append}"''')
+        for pos, field in enumerate(config["stats_report_config"]):
+            docs[pos].add(f'''"{' '.join(map(str, hit[:OBJ_DICT[field["object_level"]]]))} {zeros_to_append[pos]}"''')
         total_results += 1
     stats = []
     cursor = db.dbh.cursor()
-    for field_obj in config["stats_report_config"]["fields"]:
+    for pos, field_obj in enumerate(config["stats_report_config"]):
         if field_obj["field"] == "title":
-            count = len(docs)
+            count = len(docs[pos])
         else:
+            print(docs[pos], file=sys.stderr)
             cursor.execute(
-                f"SELECT COUNT(0) FROM (SELECT DISTINCT {field_obj['field']} FROM toms WHERE philo_id IN ({', '.join(docs)}))"  # we also count NULLs as distinct
+                f"SELECT COUNT(0) FROM (SELECT DISTINCT {field_obj['field']} FROM toms WHERE philo_id IN ({', '.join(docs[pos])}))"  # we also count NULLs as distinct
             )
             count = cursor.fetchone()[0]
         stats.append({"field": field_obj["field"], "count": count})

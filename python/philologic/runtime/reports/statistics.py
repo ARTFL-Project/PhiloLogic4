@@ -113,6 +113,6 @@ def __expand_hits(hits, metadata_type):
 
 
 def __get_field_config(request, config):
-    for field_obj in config["stats_report_config"]["fields"]:
+    for field_obj in config["stats_report_config"]:
         if field_obj["field"] == request.group_by:
             return field_obj

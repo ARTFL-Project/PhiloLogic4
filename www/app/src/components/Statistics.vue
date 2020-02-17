@@ -61,8 +61,7 @@ export default {
             "statisticsCache"
         ]),
         statsConfig() {
-            for (let fieldObject of this.$philoConfig.stats_report_config
-                .fields) {
+            for (let fieldObject of this.$philoConfig.stats_report_config) {
                 if (fieldObject.field == this.$route.query.group_by) {
                     return fieldObject;
                 }

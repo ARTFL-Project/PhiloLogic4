@@ -125,11 +125,7 @@
                             </div>
                             <transition name="slide-fade">
                                 s
-                                <div
-                                    id="search-elements"
-                                    v-if="formOpen && report != 'statistics'"
-                                    class="pl-3 pr-3 shadow"
-                                >
+                                <div id="search-elements" v-if="formOpen" class="pl-3 pr-3 shadow">
                                     <h5>Refine your search with the following options and fields:</h5>
                                     <b-row>
                                         <b-col cols="12" sm="2">Search Terms</b-col>
@@ -328,7 +324,7 @@
                                     </b-row>
                                     <b-row
                                         id="results_per_page"
-                                        v-if="report != 'collocation' && report != 'time_series'"
+                                        v-if="report != 'collocation' && report != 'time_series' && report != 'statistics'"
                                     >
                                         <b-col cols="12" sm="2">Results per page:</b-col>
                                         <b-col cols="12" sm="10">
@@ -344,64 +340,15 @@
                                             </b-form-group>
                                         </b-col>
                                     </b-row>
-                                </div>
-                            </transition>
-                            <transition name="slide-fade">
-                                <div
-                                    id="search-elements"
-                                    v-if="formOpen && report == 'statistics'"
-                                    class="pt-3 pl-3 pr-3 shadow"
-                                >
-                                    <div id="global-stats-search">
-                                        <h5>Gather global statistics on corpus</h5>
-                                        <p>Filter statistics by metadata:</p>
-                                        <b-row
-                                            v-for="localField in metadataDisplayFiltered"
-                                            :key="localField.value"
-                                        >
-                                            <b-col cols="12" class="pb-2">
-                                                <div
-                                                    class="input-group"
-                                                    :id="localField.value + '-group'"
-                                                >
-                                                    <div class="input-group-prepend">
-                                                        <span
-                                                            class="input-group-text"
-                                                        >{{localField.label}}</span>
-                                                    </div>
-                                                    <input
-                                                        type="text"
-                                                        class="form-control"
-                                                        autocomplete="off"
-                                                        :name="localField.value"
-                                                        :placeholder="localField.example"
-                                                        v-model="metadataValues[localField.value]"
-                                                        @input="onChange(localField.value)"
-                                                        @keydown.down="onArrowDown(localField.value)"
-                                                        @keydown.up="onArrowUp(localField.value)"
-                                                        @keyup.enter="onEnter(localField.value)"
-                                                    />
-                                                    <ul
-                                                        :id="'autocomplete-' + localField.value"
-                                                        class="autocomplete-results shadow"
-                                                        :style="autoCompletePosition(localField.value)"
-                                                        v-if="autoCompleteResults[localField.value].length > 0"
-                                                    >
-                                                        <li
-                                                            tabindex="-1"
-                                                            v-for="(result, i) in autoCompleteResults[localField.value]"
-                                                            :key="result"
-                                                            @click="setResult(result, localField.value)"
-                                                            class="autocomplete-result"
-                                                            :class="{ 'is-active': i === arrowCounters[localField.value] }"
-                                                            v-html="result"
-                                                        ></li>
-                                                    </ul>
-                                                </div>
-                                            </b-col>
-                                        </b-row>
-                                        <b-button class="mt-2 mb-3" @click="getStats">Get stats</b-button>
-                                    </div>
+                                    <b-row id="group-by" v-if="report =='statistics'">
+                                        <b-col cols="12" sm="2">Group results by:</b-col>
+                                        <b-col cols="12" sm="10">
+                                            <b-form-select
+                                                v-model="group_by"
+                                                :options="statsOptions"
+                                            ></b-form-select>
+                                        </b-col>
+                                    </b-row>
                                 </div>
                             </transition>
                         </div>
@@ -529,6 +476,9 @@ export default {
             ],
             selectedSortValues: "rowid",
             resultsPerPageOptions: [25, 100, 500, 1000],
+            statsOptions: this.$philoConfig.stats_report_config.map(
+                f => f.field
+            ),
             autoCompleteResults: { q: [] },
             arrowCounters: { q: -1 },
             isOpen: false,
