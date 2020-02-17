@@ -47,12 +47,10 @@
                         <div
                             id="result-stats"
                             class="pl-3 pb-3"
+                            v-if="resultsLength > 0"
                         >{{ resultsLength }} total occurrences spread across {{ statisticsCache.results.length }} {{ group_by }}(s)</div>
-                        <div id="search-hits" class="pl-3">
-                            <b
-                                v-if="resultsLength > 0"
-                            >Displaying hits {{ descriptionStart }}-{{descriptionEnd}} of {{resultsLength}}</b>
-                            <b v-else>No results for your query</b>
+                        <div id="result-stats" class="pl-3 pb-3" v-else>
+                            <b>No results for your query</b>
                         </div>
                     </div>
                 </div>
@@ -160,7 +158,6 @@ export default {
         }
     },
     watch: {
-        // call again the method if the route changes
         $route: "buildDescription"
     },
     methods: {
@@ -186,16 +183,13 @@ export default {
             ) {
                 this.descriptionStart = start;
                 this.descriptionEnd = end;
-                // description = `Displaying hits ${start}-${end} of `;
             } else if (this.resultsLength) {
                 if (resultsPerPage > this.resultsLength) {
                     this.descriptionStart = start;
                     this.descriptionEnd = this.resultsLength;
-                    // description = `Displaying hits ${start}-${this.resultsLength} of `;
                 } else {
                     this.descriptionStart = start;
                     this.descriptionEnd = end;
-                    // description = `Displaying hits ${start}-${end} of `;
                 }
             }
             return description;

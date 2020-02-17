@@ -1,52 +1,52 @@
 <template>
     <b-container fluid class="mt-4">
-        <conckwic v-if="description.end != 0" :results="statisticsResults"></conckwic>
+        <conckwic :results="statisticsResults"></conckwic>
         <b-card no-body class="shadow mt-4 ml-4 mr-4">
             <b-list-group flush>
-                <b-list-group-item
-                    v-for="(result, resultIndex) in statisticsResults.slice(start, end)"
-                    :key="resultIndex"
-                >
-                    <b-button
-                        variant="outline-secondary"
-                        size="sm"
-                        class="d-inline-block"
-                        :id="`button-${resultIndex}`"
-                        @click="toggleBreakUp(resultIndex)"
-                        v-if="result.break_up_field"
-                    >&plus;</b-button>
-                    <citations
-                        :citation="buildCitationObject(groupedByField, statsConfig.field_citation, result.metadata_fields)"
-                    ></citations>
-                    : {{result.count}} occurrence(s)
-                    <b-list-group class="ml-4" v-if="breakUpFields[resultIndex].show">
-                        <b-list-group-item
-                            v-for="(value, key) in breakUpFields[resultIndex].results"
-                            :key="key"
-                        >
-                            {{ value.count }}:
-                            <citations
-                                :citation="buildCitationObject(statsConfig.break_up_field, statsConfig.break_up_field_citation, value.metadata_fields)"
-                            ></citations>
-                        </b-list-group-item>
-                    </b-list-group>
-                </b-list-group-item>
+                <virtual-list :size="50" :remain="25">
+                    <b-list-group-item
+                        v-for="(result, resultIndex) in statisticsResults"
+                        :key="resultIndex"
+                    >
+                        <b-button
+                            variant="outline-secondary"
+                            size="sm"
+                            class="d-inline-block"
+                            :id="`button-${resultIndex}`"
+                            @click="toggleBreakUp(resultIndex)"
+                            v-if="result.break_up_field"
+                        >&plus;</b-button>
+                        <citations
+                            :citation="buildCitationObject(groupedByField, statsConfig.field_citation, result.metadata_fields)"
+                        ></citations>
+                        : {{result.count}} occurrence(s)
+                        <b-list-group class="ml-4" v-if="breakUpFields[resultIndex].show">
+                            <b-list-group-item
+                                v-for="(value, key) in breakUpFields[resultIndex].results"
+                                :key="key"
+                            >
+                                {{ value.count }}:
+                                <citations
+                                    :citation="buildCitationObject(statsConfig.break_up_field, statsConfig.break_up_field_citation, value.metadata_fields)"
+                                ></citations>
+                            </b-list-group-item>
+                        </b-list-group>
+                    </b-list-group-item>
+                </virtual-list>
             </b-list-group>
         </b-card>
-        <pages></pages>
     </b-container>
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import searchArguments from "./SearchArguments";
-// import { EventBus } from "../main.js";
-import pages from "./Pages";
 import conckwic from "./ConcordanceKwic";
+import virtualList from "vue-virtual-scroll-list";
 
 export default {
     name: "statistics",
-    components: { citations, searchArguments, pages, conckwic },
+    components: { citations, searchArguments, conckwic, virtualList },
     computed: {
         ...mapFields([
             "formData.report",
@@ -87,13 +87,6 @@ export default {
     },
     methods: {
         fetchData() {
-            if (isNaN(this.start) || this.start == "") {
-                this.start = 1;
-                this.end = parseInt(this.results_per_page);
-            }
-            if (isNaN(this.end) || this.end == "") {
-                this.end = 25;
-            }
             if (
                 this.deepEqual(
                     { ...this.statisticsCache.query, start: "", end: "" },
@@ -101,20 +94,11 @@ export default {
                 )
             ) {
                 this.statisticsResults = this.statisticsCache.results;
-                this.breakUpFields = this.statisticsResults
-                    .slice(this.start, this.end)
-                    .map(results => ({
-                        show: false,
-                        results: results.break_up_field
-                    }));
+                this.breakUpFields = this.statisticsResults.map(results => ({
+                    show: false,
+                    results: results.break_up_field
+                }));
                 this.resultsLength = this.statisticsResults.length;
-                this.$store.commit("updateDescription", {
-                    ...this.description,
-                    start: this.start,
-                    end: this.end,
-                    results_per_page: this.results_per_page
-                });
-                // EventBus.$emit("totalResultsDone");
             } else {
                 this.searching = true;
                 this.$http
@@ -125,26 +109,19 @@ export default {
                     })
                     .then(response => {
                         this.statisticsResults = response.data.results;
-                        this.breakUpFields = this.statisticsResults
-                            .slice(this.start, this.end)
-                            .map(results => ({
+                        this.breakUpFields = this.statisticsResults.map(
+                            results => ({
                                 show: false,
                                 results: results.break_up_field
-                            }));
+                            })
+                        );
                         this.resultsLength = this.statisticsResults.length;
-                        this.$store.commit("updateDescription", {
-                            ...this.description,
-                            start: this.start,
-                            end: this.end,
-                            results_per_page: this.results_per_page
-                        });
                         this.searching = false;
                         this.statisticsCache = {
                             results: response.data.results,
                             query: this.$route.query,
                             totalResults: response.data.results.total_results
                         };
-                        // EventBus.$emit("totalResultsDone");
                     })
                     .catch(error => {
                         this.searching = false;
