@@ -162,11 +162,13 @@ export default {
             return promise;
         },
         formDataUpdate() {
+            console.log(this.report);
             let localParams = this.copyObject(this.defaultFieldValues);
             this.$store.commit("updateFormData", {
                 ...localParams,
                 ...this.$route.query
             });
+            console.log(this.report);
             if (
                 !["textNavigation", "tableOfContents"].includes(
                     this.$route.name
@@ -183,11 +185,17 @@ export default {
             if (this.$route.name == null) {
                 this.$router.push("./");
             } else if (
-                this.$route.name != "home" &&
-                this.$route.name != "textNavigation" &&
-                this.$route.name != "tableOfContents"
+                !["home", "textNavigation", "tableOfContents"].includes(
+                    this.$route.name
+                )
             ) {
-                if (this.q.length == 0 && this.report != "bibliography") {
+                if (
+                    this.q.length == 0 &&
+                    !["bibliography", "statistics", "timeSeries"].includes(
+                        this.$route.name
+                    )
+                ) {
+                    console.log("matched", this.report);
                     this.report = "bibliography";
                     this.$router.push(
                         this.paramsToRoute(this.$store.state.formData)

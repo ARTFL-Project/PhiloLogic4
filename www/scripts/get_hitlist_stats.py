@@ -55,7 +55,7 @@ def get_total_doc_count(environ, start_response):
             count = len(docs)
         else:
             cursor.execute(
-                f"SELECT COUNT(DISTINCT {field_obj['field']}) FROM toms WHERE philo_id IN ({', '.join(docs)})"
+                f"SELECT COUNT(0) FROM (SELECT DISTINCT {field_obj['field']} FROM toms WHERE philo_id IN ({', '.join(docs)}))"  # we also count NULLs as distinct
             )
             count = cursor.fetchone()[0]
         stats.append({"field": field_obj["field"], "count": count})

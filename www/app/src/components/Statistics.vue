@@ -3,18 +3,20 @@
         <conckwic :results="statisticsResults"></conckwic>
         <b-card no-body class="shadow mt-4 ml-4 mr-4">
             <b-list-group flush>
-                <virtual-list :size="50" :remain="25">
+                <virtual-list :size="55" :remain="25">
                     <b-list-group-item
                         v-for="(result, resultIndex) in statisticsResults"
                         :key="resultIndex"
+                        class="pt-3 pb-3"
                     >
                         <b-button
                             variant="outline-secondary"
                             size="sm"
                             class="d-inline-block"
+                            style="padding: 0 0.25rem"
                             :id="`button-${resultIndex}`"
                             @click="toggleBreakUp(resultIndex)"
-                            v-if="result.break_up_field"
+                            v-if="result.break_up_field.length > 0"
                         >&plus;</b-button>
                         <citations
                             :citation="buildCitationObject(groupedByField, statsConfig.field_citation, result.metadata_fields)"
@@ -98,7 +100,7 @@ export default {
                     show: false,
                     results: results.break_up_field
                 }));
-                this.resultsLength = this.statisticsResults.length;
+                this.resultsLength = this.statisticsCache.totalResults;
             } else {
                 this.searching = true;
                 this.$http
@@ -115,7 +117,7 @@ export default {
                                 results: results.break_up_field
                             })
                         );
-                        this.resultsLength = this.statisticsResults.length;
+                        this.resultsLength = response.data.total_results;
                         this.searching = false;
                         this.statisticsCache = {
                             results: response.data.results,

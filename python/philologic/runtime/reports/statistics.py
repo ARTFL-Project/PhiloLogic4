@@ -2,7 +2,6 @@
 """Report designed to group results by metadata with additional breakdown optional"""
 
 from philologic.runtime.DB import DB
-from philologic.runtime.link import make_absolute_query_link
 
 
 OBJ_DICT = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
@@ -39,40 +38,60 @@ def statistics_by_field(request, config):
     break_up_field_name = field_obj["break_up_field"]
     for philo_id in philo_ids:
         try:
-            field_name = metadata_dict[philo_id][request.group_by]
-        except KeyError:
-            field_name = "N/A"
-        break_up_field = metadata_dict[philo_id][break_up_field_name]
-        if field_name not in counts_by_field:
-            counts_by_field[field_name] = {
-                "count": 1,
-                "metadata_fields": metadata_dict[philo_id],
-                "break_up_field": {break_up_field: {"count": 1, "philo_id": philo_id}},
-            }
-        else:
-            counts_by_field[field_name]["count"] += 1
-            if break_up_field not in counts_by_field[field_name]["break_up_field"]:
-                counts_by_field[field_name]["break_up_field"][break_up_field] = {"count": 1, "philo_id": philo_id}
+            if request.group_by == "title":  # account for same title for different works
+                field_name = f"{metadata_dict[philo_id][request.group_by]} {philo_id}"
             else:
-                counts_by_field[field_name]["break_up_field"][break_up_field]["count"] += 1
+                field_name = metadata_dict[philo_id][request.group_by].strip()
+        except KeyError:
+            field_name = ""
+        if break_up_field_name is not None:
+            if field_obj["break_up_field"] == "title":  # account for same title for different works
+                break_up_field = f"{metadata_dict[philo_id][break_up_field_name]} {philo_id}"
+            else:
+                break_up_field = metadata_dict[philo_id][break_up_field_name]
+            if field_name not in counts_by_field:
+                counts_by_field[field_name] = {
+                    "count": 1,
+                    "metadata_fields": metadata_dict[philo_id],
+                    "break_up_field": {break_up_field: {"count": 1, "philo_id": philo_id}},
+                }
+            else:
+                counts_by_field[field_name]["count"] += 1
+                if break_up_field not in counts_by_field[field_name]["break_up_field"]:
+                    counts_by_field[field_name]["break_up_field"][break_up_field] = {"count": 1, "philo_id": philo_id}
+                else:
+                    counts_by_field[field_name]["break_up_field"][break_up_field]["count"] += 1
+        else:
+            if field_name not in counts_by_field:
+                counts_by_field[field_name] = {
+                    "count": 1,
+                    "metadata_fields": metadata_dict[philo_id],
+                    "break_up_field": {},
+                }
+            else:
+                counts_by_field[field_name]["count"] += 1
 
-    counts_by_field = sorted(counts_by_field.items(), key=lambda x: x[1]["count"], reverse=True)
     results = []
     del request.group_by
-    for field_name, values in counts_by_field:
-        results.append(
-            {
-                "metadata_fields": values["metadata_fields"],
-                "count": values["count"],
-                "break_up_field": [
-                    {"count": v["count"], "metadata_fields": metadata_dict[v["philo_id"]]}
-                    for k, v in sorted(
-                        values["break_up_field"].items(), key=lambda item: item[1]["count"], reverse=True
-                    )
-                ],
-            }
-        )
-
+    if break_up_field_name is not None:
+        for field_name, values in sorted(counts_by_field.items(), key=lambda x: x[1]["count"], reverse=True):
+            results.append(
+                {
+                    "metadata_fields": values["metadata_fields"],
+                    "count": values["count"],
+                    "break_up_field": [
+                        {"count": v["count"], "metadata_fields": metadata_dict[v["philo_id"]]}
+                        for k, v in sorted(
+                            values["break_up_field"].items(), key=lambda item: item[1]["count"], reverse=True
+                        )
+                    ],
+                }
+            )
+    else:
+        results = [
+            {"metadata_fields": values["metadata_fields"], "count": values["count"], "break_up_field": []}
+            for field_name, values in sorted(counts_by_field.items(), key=lambda x: x[1]["count"], reverse=True)
+        ]
     return {"results": results, "query": dict([i for i in request]), "total_results": len(philo_ids)}
 
 
@@ -80,8 +99,7 @@ def __expand_hits(hits, metadata_type):
     try:
         object_level = OBJ_DICT[metadata_type]
     except KeyError:
-        # metadata_type == "div"
-        pass
+        metadata_type == "div"
     expanded_hits = []
     for philo_id in hits:
         if metadata_type == "div":
@@ -98,21 +116,3 @@ def __get_field_config(request, config):
     for field_obj in config["stats_report_config"]["fields"]:
         if field_obj["field"] == request.group_by:
             return field_obj
-
-
-def __build_citation(metadata_fields, citation_object, field_to_link, config, request):
-    citations = []
-    for citation in citation_object:
-        try:
-            label = metadata_fields[citation["field"]]
-        except KeyError:
-            continue
-        if not label:
-            continue
-        if citation["field"] == field_to_link:
-            quoted_field = f'"{label}"'
-            link = f"""concordance?{make_absolute_query_link(config, request, script_name="", **{field_to_link :quoted_field})}"""
-            citations.append({"label": label, "href": link, **citation})
-        else:
-            citations.append({"label": label, "href": "", **citation})
-    return citations

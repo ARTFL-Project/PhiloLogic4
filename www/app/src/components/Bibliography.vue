@@ -1,8 +1,13 @@
 <template>
-    <div>
+    <b-container fluid>
         <conckwic :results="results.results" v-if="Object.keys(results).length"></conckwic>
-        <b-row class="mr-2">
-            <b-col cols="12" md="7" xl="8" v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'">
+        <b-row class="mr-2 mt-4">
+            <b-col
+                cols="12"
+                md="7"
+                xl="8"
+                v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'"
+            >
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
                     <b-card
                         no-body
@@ -13,7 +18,9 @@
                         <b-row class="citation-container">
                             <b-col cols="12" sm="10" md="11">
                                 <span class="cite" :data-id="result.philo_id.join(' ')">
-                                    <span class="result-number">{{ results.description.start + index }}</span>
+                                    <span
+                                        class="result-number"
+                                    >{{ results.description.start + index }}</span>
                                     <input
                                         type="checkbox"
                                         class="ml-3 mr-2"
@@ -38,7 +45,7 @@
             </b-col>
         </b-row>
         <pages></pages>
-    </div>
+    </b-container>
     <!-- <ol
         id="bibliographic-results"
         class="text-content-area"
@@ -92,13 +99,13 @@
     </ol>-->
 </template>
 <script>
-import { mapFields } from "vuex-map-fields"
-import { EventBus } from "../main.js"
-import citations from "./Citations"
-import conckwic from "./ConcordanceKwic"
-import facets from "./Facets"
-import pages from "./Pages"
-import Velocity from "velocity-animate"
+import { mapFields } from "vuex-map-fields";
+import { EventBus } from "../main.js";
+import citations from "./Citations";
+import conckwic from "./ConcordanceKwic";
+import facets from "./Facets";
+import pages from "./Pages";
+import Velocity from "velocity-animate";
 
 export default {
     name: "bibliography",
@@ -130,66 +137,67 @@ export default {
             results: {},
             resultType: "doc",
             metadataAddition: []
-        }
+        };
     },
     created() {
-        this.report = "bibliography"
-        this.currentReport = "bibliography"
-        this.fetchResults()
+        this.report = "bibliography";
+        this.currentReport = "bibliography";
+        this.fetchResults();
         EventBus.$on("urlUpdate", () => {
-            this.fetchResults()
-        })
+            this.fetchResults();
+        });
     },
     methods: {
         fetchResults() {
-            this.results = {}
-            this.searchParams = { ...this.$store.state.formData }
+            this.results = {};
+            this.searchParams = { ...this.$store.state.formData };
             this.$http
                 .get(`${this.$dbUrl}/reports/bibliography.py`, {
                     params: this.paramsFilter(this.searchParams)
                 })
                 .then(response => {
-                    this.results = response.data
-                    this.resultType = this.results.result_type
+                    this.results = response.data;
+                    this.resultType = this.results.result_type;
                     this.$store.commit("updateDescription", {
                         ...this.description,
                         start: this.results.description.start,
                         end: this.results.description.end,
-                        results_per_page: this.results.description.results_per_page
-                    })
+                        results_per_page: this.results.description
+                            .results_per_page
+                    });
                 })
                 .catch(error => {
-                    this.loading = false
-                    this.error = error.toString()
-                    this.debug(this, error)
-                })
+                    this.loading = false;
+                    this.error = error.toString();
+                    this.debug(this, error);
+                });
         },
         addToSearch(titleValue) {
-            let title = '"' + titleValue + '"'
-            let itemIndex = this.metadataAddition.indexOf(title)
+            let title = '"' + titleValue + '"';
+            let itemIndex = this.metadataAddition.indexOf(title);
             if (itemIndex === -1) {
-                this.metadataAddition.push(title)
+                this.metadataAddition.push(title);
             } else {
-                this.metadataAddition.splice(itemIndex, 1)
+                this.metadataAddition.splice(itemIndex, 1);
             }
-            let newTitleValue = this.metadataAddition.join(" | ")
+            let newTitleValue = this.metadataAddition.join(" | ");
             this.$store.commit("updateFormDataField", {
                 key: "title",
                 value: newTitleValue
-            })
-            EventBus.$emit("metadataUpdate", { title: newTitleValue })
+            });
+            EventBus.$emit("metadataUpdate", { title: newTitleValue });
         },
         beforeEnter: function(el) {
-            el.style.opacity = 0
+            el.style.opacity = 0;
         },
         enter: function(el, done) {
-            var delay = el.dataset.index * 100
+            var delay = el.dataset.index * 100;
             setTimeout(function() {
-                Velocity(el, { opacity: 1 }, { complete: done })
-            }, delay)
+                Velocity(el, { opacity: 1 }, { complete: done });
+            }, delay);
         }
     }
-}
+};
 </script>
 <style scoped>
 .citation-container {

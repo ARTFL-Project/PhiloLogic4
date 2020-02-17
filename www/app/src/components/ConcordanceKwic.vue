@@ -148,13 +148,9 @@ export default {
         };
     },
     created() {
-        console.log("created", this.report);
         this.buildDescription();
         if (this.report != "statistics") {
             this.updateTotalResults();
-        } else {
-            console.log("triggering totalResultsDone");
-            EventBus.$emit("totalResultsDone");
         }
     },
     watch: {
