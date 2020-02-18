@@ -59,7 +59,8 @@ export default {
             "description",
             "resultsLength",
             "statisticsCache",
-            "searching"
+            "searching",
+            "currentReport"
         ]),
         statsConfig() {
             for (let fieldObject of this.$philoConfig.stats_report_config) {

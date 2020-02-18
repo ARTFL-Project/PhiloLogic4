@@ -38,7 +38,7 @@
                                     size="sm"
                                     variant="outline-secondary"
                                     style="margin-top: -.05rem;"
-                                    @click="showResultsBiblio"
+                                    v-b-modal.results-bibliography
                                 >titles</b-button>
                             </span>
                         </div>
@@ -60,7 +60,15 @@
                     @click="showFacets() "
                 >Show Facets</b-button>
             </div>
-            <results-bibliography :results="results" v-if="showBiblio && resultsLength > 0"></results-bibliography>
+            <b-modal
+                size="xl"
+                scrollable
+                hide-footer
+                title="Results Bibliography"
+                id="results-bibliography"
+            >
+                <results-bibliography :results="results"></results-bibliography>
+            </b-modal>
         </b-card>
         <b-row
             class="d-xs-none mt-4 mb-3"
@@ -260,5 +268,14 @@ export default {
 #export-results {
     position: absolute;
     right: 0;
+}
+#results-bibliography .modal-header {
+    padding-bottom: 0.5rem;
+}
+#results-bibliography .modal-header button {
+    padding: 0.5rem;
+}
+#results-bibliography .modal-header h5 {
+    line-height: 1;
 }
 </style>

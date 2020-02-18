@@ -12,7 +12,7 @@
                                         v-for="searchReport in reports"
                                         @click="reportChange(searchReport.value)"
                                         :key="searchReport.value"
-                                        :class="{'active':  report == searchReport.value}"
+                                        :class="{'active':  currentReport == searchReport.value}"
                                     >{{ searchReport.label }}</b-button>
                                 </b-button-group>
                                 <div id="search_terms_container" class="p-3">
@@ -417,7 +417,8 @@ export default {
             "formData.end",
             "formData.byte",
             "formData.group_by",
-            "searching"
+            "searching",
+            "currentReport"
         ]),
         formData() {
             return this.$store.state.formData;
@@ -586,14 +587,15 @@ export default {
         },
         onSubmit() {
             this.q = this.q.trim();
-            if (this.q.length == 0 && this.report != "statistics") {
+            if (this.q.length == 0 && this.currentReport != "statistics") {
                 this.report = "bibliography";
-            }
-            if (
+            } else if (
                 this.report == "textNavigation" ||
                 this.report == "tableOfContents"
             ) {
                 this.report = "concordance";
+            } else {
+                this.report = this.currentReport;
             }
             this.start = "";
             this.end = "";
@@ -624,8 +626,10 @@ export default {
                     this.colloc_filter_choice = "frequency";
                 }
             }
-            this.report = report;
-            this.formOpen = true;
+            this.currentReport = report;
+            if (!this.formOpen) {
+                this.toggleForm();
+            }
         },
         toggleForm() {
             if (!this.formOpen) {
