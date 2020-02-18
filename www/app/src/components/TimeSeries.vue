@@ -260,8 +260,9 @@ export default {
                             } else {
                                 year = `${startDate}-${endDate}`;
                             }
-                            vm.$store.commit("updateMetadata", {
-                                year: year
+                            vm.$store.commit("updateFormDataField", {
+                                key: "year",
+                                value: year
                             });
                             vm.$router.push(
                                 vm.paramsToRoute({

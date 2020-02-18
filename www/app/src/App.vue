@@ -162,13 +162,11 @@ export default {
             return promise;
         },
         formDataUpdate() {
-            console.log(this.report);
             let localParams = this.copyObject(this.defaultFieldValues);
             this.$store.commit("updateFormData", {
                 ...localParams,
                 ...this.$route.query
             });
-            console.log(this.report);
             if (
                 !["textNavigation", "tableOfContents"].includes(
                     this.$route.name

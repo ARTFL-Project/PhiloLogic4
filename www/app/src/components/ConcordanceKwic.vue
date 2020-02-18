@@ -120,6 +120,7 @@ export default {
             "formData.start",
             "formData.end",
             "formData.group_by",
+            "currentReport",
             "resultsLength",
             "description",
             "statisticsCache"

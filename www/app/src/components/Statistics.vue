@@ -58,7 +58,8 @@ export default {
             "formData.end",
             "description",
             "resultsLength",
-            "statisticsCache"
+            "statisticsCache",
+            "searching"
         ]),
         statsConfig() {
             for (let fieldObject of this.$philoConfig.stats_report_config) {

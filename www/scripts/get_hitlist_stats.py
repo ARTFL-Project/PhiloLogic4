@@ -59,7 +59,6 @@ def get_total_doc_count(environ, start_response):
         if field_obj["field"] == "title":
             count = len(docs[pos])
         else:
-            print(docs[pos], file=sys.stderr)
             cursor.execute(
                 f"SELECT COUNT(0) FROM (SELECT DISTINCT {field_obj['field']} FROM toms WHERE philo_id IN ({', '.join(docs[pos])}))"  # we also count NULLs as distinct
             )

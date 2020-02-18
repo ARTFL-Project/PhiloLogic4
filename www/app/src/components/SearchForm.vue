@@ -340,13 +340,22 @@
                                             </b-form-group>
                                         </b-col>
                                     </b-row>
-                                    <b-row id="group-by" v-if="report =='statistics'">
+                                    <b-row
+                                        id="group-by"
+                                        class="mb-4 mt-2"
+                                        v-if="report =='statistics'"
+                                    >
                                         <b-col cols="12" sm="2">Group results by:</b-col>
                                         <b-col cols="12" sm="10">
-                                            <b-form-select
-                                                v-model="group_by"
-                                                :options="statsOptions"
-                                            ></b-form-select>
+                                            <b-dropdown
+                                                :text="statFieldSelected || 'Select from dropdown'"
+                                            >
+                                                <b-dropdown-item
+                                                    @click="selectStatField(stat)"
+                                                    v-for="stat in statsOptions"
+                                                    :key="stat.field"
+                                                >{{ stat.label }}</b-dropdown-item>
+                                            </b-dropdown>
                                         </b-col>
                                     </b-row>
                                 </div>
@@ -407,6 +416,7 @@ export default {
             "formData.start",
             "formData.end",
             "formData.byte",
+            "formData.group_by",
             "searching"
         ]),
         formData() {
@@ -442,16 +452,6 @@ export default {
                 localMetadataDisplay.splice(this.headIndex, 1);
                 return localMetadataDisplay;
             }
-        },
-        groupByMetadata() {
-            let groupByValues = [];
-            for (let metadataField of this.$philoConfig.metadata) {
-                groupByValues.push({
-                    value: metadataField,
-                    text: this.$philoConfig.metadata_aliases[metadataField]
-                });
-            }
-            return groupByValues;
         }
     },
     data() {
@@ -476,9 +476,13 @@ export default {
             ],
             selectedSortValues: "rowid",
             resultsPerPageOptions: [25, 100, 500, 1000],
-            statsOptions: this.$philoConfig.stats_report_config.map(
-                f => f.field
-            ),
+            statsOptions: this.$philoConfig.stats_report_config.map(f => ({
+                label:
+                    this.$philoConfig.metadata_aliases[f.field] ||
+                    f.field.charAt(0).toUpperCase() + f.field.slice(1),
+                field: f.field
+            })),
+            statFieldSelected: this.getLoadedStatField(),
             autoCompleteResults: { q: [] },
             arrowCounters: { q: -1 },
             isOpen: false,
@@ -550,6 +554,16 @@ export default {
                 this.metadataDisplay.push(metadataObj);
             }
         },
+        getLoadedStatField() {
+            let queryParam = this.$store.state.formData.group_by;
+            if (queryParam) {
+                return (
+                    this.$philoConfig.metadata_aliases[queryParam] ||
+                    queryParam.charAt(0).toUpperCase() + queryParam.slice(1)
+                );
+            }
+            return "";
+        },
         generateSortValues() {
             let sortValues = [
                 {
@@ -572,7 +586,7 @@ export default {
         },
         onSubmit() {
             this.q = this.q.trim();
-            if (this.q.length == 0) {
+            if (this.q.length == 0 && this.report != "statistics") {
                 this.report = "bibliography";
             }
             if (
@@ -587,9 +601,6 @@ export default {
             this.formOpen = false;
             this.debug(this, this.$store.state.formData);
             this.$router.push(this.paramsToRoute(this.$store.state.formData));
-        },
-        getStats() {
-            this.debug(this, this.$store.state.formData);
         },
         onReset() {
             this.$store.commit(
@@ -614,6 +625,7 @@ export default {
                 }
             }
             this.report = report;
+            this.formOpen = true;
         },
         toggleForm() {
             if (!this.formOpen) {
@@ -680,7 +692,6 @@ export default {
             window.addEventListener("click", clearAutocomplete);
         },
         onArrowDown(field) {
-            console.log(field);
             if (
                 this.arrowCounters[field] <
                 this.autoCompleteResults[field].length
@@ -746,6 +757,10 @@ export default {
             let input = parent.querySelector("input");
             let childOffset = input.offsetLeft - parent.offsetLeft;
             return `left: ${childOffset}px; width: ${input.offsetWidth}px`;
+        },
+        selectStatField(field) {
+            this.statFieldSelected = field.label;
+            this.group_by = field.field;
         }
     }
 };
