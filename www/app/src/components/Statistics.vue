@@ -27,7 +27,7 @@
                                 v-for="(value, key) in breakUpFields[resultIndex].results"
                                 :key="key"
                             >
-                                {{ value.count }}:
+                                <b-badge variant="secondary" pill>{{ value.count }}</b-badge>
                                 <citations
                                     :citation="buildCitationObject(statsConfig.break_up_field, statsConfig.break_up_field_citation, value.metadata_fields)"
                                 ></citations>

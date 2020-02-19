@@ -252,10 +252,10 @@ if __name__ == "__main__":
         pass
 
     fake_db = Fake_DB()
-    from philologic.Config import Config, db_locals_defaults, db_locals_header
+    from philologic.Config import Config, DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER
 
     fake_db.path = path + "/data/"
-    fake_db.locals = Config(fake_db.path + "/db.locals.py", db_locals_defaults, db_locals_header)
+    fake_db.locals = Config(fake_db.path + "/db.locals.py", DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER)
     fake_db.encoding = "utf-8"
     freq_file = path + "/data/frequencies/normalized_word_frequencies"
     # expand_query_not(split, freq_file, sys.stdout)

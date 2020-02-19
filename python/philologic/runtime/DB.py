@@ -3,7 +3,7 @@
 import hashlib
 import os
 import sqlite3
-from philologic.Config import Config, db_locals_defaults, db_locals_header
+from philologic.Config import Config, DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER
 
 from philologic.runtime import Query
 
@@ -37,7 +37,7 @@ class DB:
         without running into collisions"""
         self.path = dbpath
         self.width = width
-        self.locals = Config(dbpath + "/db.locals.py", db_locals_defaults, db_locals_header)
+        self.locals = Config(dbpath + "/db.locals.py", DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER)
         self.cached = cached
 
     def __getitem__(self, item):

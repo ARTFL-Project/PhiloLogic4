@@ -252,18 +252,7 @@ export default {
             this.end = "";
             let localParams = this.copyObject(this.formData);
             localParams[metadata] = "";
-            if (
-                this.report === "concordance" ||
-                this.report === "kwic" ||
-                this.report === "bibliography"
-            ) {
-                this.$router.push(this.paramsToRoute(localParams));
-            } else if (
-                this.report === "collocation" ||
-                this.report === "time_series"
-            ) {
-                this.$router.push(this.paramsToRoute(localParams));
-            }
+            this.$router.push(this.paramsToRoute(localParams));
         },
         getQueryTerms(group, index) {
             this.groupIndexSelected = index;
