@@ -36,7 +36,6 @@ export default {
     },
     created() {
         EventBus.$on("totalResultsDone", () => {
-            console.log("doing my thing");
             this.buildPages();
         });
     },
@@ -132,11 +131,6 @@ export default {
                 });
             }
             this.pages = pageObject;
-            console.log(
-                this.pages.length,
-                this.$store.state.formData.report,
-                currentPage
-            );
         }
     }
 };
