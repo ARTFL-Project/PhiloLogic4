@@ -13,6 +13,8 @@ RewriteRule ^time_series(.*) dispatcher.py$1 [PT,QSA]
 RewriteRule ^query?report=(.*) dispatcher.py$1 [PT,QSA]
 RewriteRule ^navigate(.*) dispatcher.py$1 [PT,QSA]
 RewriteRule ^statistics(.*) dispatcher.py$1 [PT,QSA]
+RewriteRule ^bibliography(.*) dispatcher.py$1 [PT,QSA]
+
 
 
 <IfModule mod_deflate.c>

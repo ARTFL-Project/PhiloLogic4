@@ -19,8 +19,7 @@ from black import FileMode, format_str
 from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.loadtime.PostFilters import make_sql_table
-from philologic.utils import (convert_entities, load_module, pretty_print,
-                              sort_list)
+from philologic.utils import convert_entities, load_module, pretty_print, sort_list
 from tqdm import tqdm
 
 SORT_BY_WORD = "-k 2,2"
@@ -118,7 +117,6 @@ class Loader:
         os.mkdir(self.workdir)
         os.mkdir(self.textdir)
 
-        
         load_config_path = os.path.join(loader_options["data_destination"], "load_config.py")
         # Loading these from a load_config would crash the parser for a number of reasons...
         values_to_ignore = [
@@ -182,7 +180,6 @@ class Loader:
         self.normalized_fields = []
         self.metadata_fields_not_found = []
         self.sort_order = ""
-
 
     def add_files(self, files):
         """Copy files to database directory"""
@@ -285,8 +282,10 @@ class Loader:
                 self.deleted_files.append(file.name)
             print(f"\r{time.ctime()}: Parsing document level metadata: {pos+1}/{doc_count} done...", flush=True, end="")
         if self.deleted_files:
-            for f in self.deleted_files:
-                print("%s has no valid TEI header or contains invalid data: removing from database load..." % f)
+            print(
+                "\nThe following files have been removed from the load since they have no valid TEI header or contain invalid data:\n",
+                ", ".join(self.deleted_files),
+            )
         return load_metadata
 
     def parse_dc_header(self):
@@ -374,7 +373,7 @@ class Loader:
                     sorted_load_metadata.append(m)
                     break
         return sorted_load_metadata
-    
+
     @classmethod
     def set_file_data(cls, load_metadata, textdir, workdir):
         if load_metadata is None:
@@ -714,9 +713,7 @@ class Loader:
             print("#define DEPENDENCIES {-1,0,1,2,3,4,5,0,0}", file=dbs)
             print("#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl), file=dbs)
         print("%s: analysis done" % time.ctime())
-        os.system(
-            f'/bin/bash -c "lz4cat {self.workdir}/all_words_sorted.lz4 | pack4 {self.workdir}/dbspecs4.h"',
-        )
+        os.system(f'/bin/bash -c "lz4cat {self.workdir}/all_words_sorted.lz4 | pack4 {self.workdir}/dbspecs4.h"',)
         print("%s: all indices built. moving into place." % time.ctime())
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1")
@@ -758,8 +755,10 @@ class Loader:
         """Run important post-parsing functions for frequencies and word normalization"""
         print("\n### Storing in database ###")
         for f in cls.post_filters:
-            f(cls)
-
+            if f.__name__ == "metadata_frequencies":
+                cls.metadata_fields_not_found = f(cls)
+            else:
+                f(cls)
         if extra_filters:
             print("Running the following additional filters:")
             for f in extra_filters:
@@ -789,7 +788,7 @@ class Loader:
     def write_db_config(self):
         """ Write local variables used by libphilo"""
         filename = self.destination + "/db.locals.py"
-        metadata = [i for i in Loader.metadata_fields if i not in self.metadata_fields_not_found]
+        metadata = [i for i in Loader.metadata_fields if i not in Loader.metadata_fields_not_found]
         db_values = {
             "metadata_fields": metadata,
             "metadata_hierarchy": Loader.metadata_hierarchy,
@@ -865,8 +864,10 @@ class Loader:
             json.dump({"dbUrl": os.path.join(self.url_root, f"{dbname}/")}, appConfig)
 
         print("Building Web Client Application...", end=" ", flush=True)
-        web_app_path = os.path.join(self.destination, '../app')
-        os.system(f"cd {web_app_path}; npm install > {web_app_path}/web_app_build.log 2>&1 && npm run build >> {web_app_path}/web_app_build.log 2>&1")
+        web_app_path = os.path.join(self.destination, "../app")
+        os.system(
+            f"cd {web_app_path}; npm install > {web_app_path}/web_app_build.log 2>&1 && npm run build >> {web_app_path}/web_app_build.log 2>&1"
+        )
         print("done.")
 
 

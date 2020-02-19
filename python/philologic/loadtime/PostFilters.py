@@ -122,6 +122,7 @@ def metadata_frequencies(loader_obj):
             % ", ".join(loader_obj.metadata_fields_not_found)
         )
     conn.close()
+    return loader_obj.metadata_fields_not_found
 
 
 def normalized_metadata_frequencies(loader_obj):
