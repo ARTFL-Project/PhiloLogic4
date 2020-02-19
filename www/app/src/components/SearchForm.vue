@@ -161,7 +161,7 @@
                                             </b-row>
                                         </b-col>
                                     </b-row>
-                                    <b-row id="method" v-if="report != 'collocation'">
+                                    <b-row id="method" v-if="currentReport != 'collocation'">
                                         <b-col cols="12" sm="2">Search Terms</b-col>
                                         <b-col cols="12" sm="3" lg="2" id="method-buttons">
                                             <b-form-group>
@@ -242,7 +242,10 @@
                                             </div>
                                         </b-col>
                                     </b-row>
-                                    <b-row id="collocation-options" v-if="report === 'collocation'">
+                                    <b-row
+                                        id="collocation-options"
+                                        v-if="currentReport === 'collocation'"
+                                    >
                                         <b-col cols="12">
                                             <b-row>
                                                 <b-col cols="3" sm="2">Word Filtering</b-col>
@@ -269,7 +272,10 @@
                                             </b-row>
                                         </b-col>
                                     </b-row>
-                                    <b-row id="time-series-options" v-if="report === 'time_series'">
+                                    <b-row
+                                        id="time-series-options"
+                                        v-if="currentReport === 'time_series'"
+                                    >
                                         <b-col cols="12" sm="2">Date range:</b-col>
                                         <b-col cols="12" sm="10">
                                             from
@@ -290,7 +296,7 @@
                                             />
                                         </b-col>
                                     </b-row>
-                                    <b-row id="date_range" v-if="report == 'time_series'">
+                                    <b-row id="date_range" v-if="currentReport == 'time_series'">
                                         <b-col cols="12" sm="2">Year interval:</b-col>
                                         <b-col cols="12" sm="10">
                                             every
@@ -305,7 +311,7 @@
                                     </b-row>
                                     <b-row
                                         id="sort-options"
-                                        v-if="report === 'concordance' || report === 'bibliography'"
+                                        v-if="currentReport === 'concordance' || currentReport === 'bibliography'"
                                     >
                                         <b-col cols="12" style="margin-top: 10px;">
                                             <b-row>
@@ -324,7 +330,7 @@
                                     </b-row>
                                     <b-row
                                         id="results_per_page"
-                                        v-if="report != 'collocation' && report != 'time_series' && report != 'statistics'"
+                                        v-if="currentReport != 'collocation' && currentReport != 'time_series' && currentReport != 'statistics'"
                                     >
                                         <b-col cols="12" sm="2">Results per page:</b-col>
                                         <b-col cols="12" sm="10">
@@ -343,12 +349,13 @@
                                     <b-row
                                         id="group-by"
                                         class="mb-4 mt-2"
-                                        v-if="report =='statistics'"
+                                        v-if="currentReport =='statistics'"
                                     >
                                         <b-col cols="12" sm="2">Group results by:</b-col>
                                         <b-col cols="12" sm="10">
                                             <b-dropdown
-                                                :text="statFieldSelected || 'Select from dropdown'"
+                                                :text="statFieldSelected || 'Select'"
+                                                variant="outline-secondary"
                                             >
                                                 <b-dropdown-item
                                                     @click="selectStatField(stat)"
@@ -563,7 +570,6 @@ export default {
                     queryParam.charAt(0).toUpperCase() + queryParam.slice(1)
                 );
             }
-            return "";
         },
         generateSortValues() {
             let sortValues = [
@@ -1045,9 +1051,6 @@ input:focus:-ms-input-placeholder {
 input:focus::-ms-input-placeholder {
     /* Microsoft Edge */
     opacity: 0;
-}
-li {
-    list-style-type: disc;
 }
 .code-block {
     font-family: monospace;

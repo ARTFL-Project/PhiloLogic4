@@ -180,6 +180,9 @@ export default {
             let alias;
             for (let i = 0; i < facetConfig.length; i++) {
                 let facet = facetConfig[i];
+                if (!this.$philoConfig.metadata.includes(facet)) {
+                    continue;
+                }
                 if (facet in this.philoConfig.metadata_aliases) {
                     alias = this.philoConfig.metadata_aliases[facet];
                 } else {

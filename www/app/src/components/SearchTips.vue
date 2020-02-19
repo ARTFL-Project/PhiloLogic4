@@ -115,3 +115,8 @@ export default {
     name: "SearchTips"
 };
 </script>
+<style scoped>
+li {
+    list-style-type: disc;
+}
+</style>

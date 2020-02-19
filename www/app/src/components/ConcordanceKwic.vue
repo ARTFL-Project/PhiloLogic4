@@ -218,7 +218,8 @@ export default {
                         ...this.$store.state.formData,
                         report: "statistics",
                         start: "",
-                        end: ""
+                        end: "",
+                        group_by: ""
                     })
                 });
             }
