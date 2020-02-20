@@ -1,9 +1,9 @@
 <template>
     <div id="search-arguments" class="p-3">
-        <div v-if="q !== ''">
+        <div v-if="currentWordQuery !== ''">
             Searching database for
             <span v-if="approximate == 'yes'">
-                <b>{{ q }}</b> and the following similar terms:
+                <b>{{ currentWordQuery }}</b> and the following similar terms:
             </span>
             <span v-if="approximate.length == 0 || approximate == 'no'"></span>
             <b-button
@@ -114,6 +114,7 @@ export default {
     },
     data() {
         return {
+            currentWordQuery: this.$route.query.q,
             queryArgs: {},
             words: [],
             wordListChanged: false,
@@ -132,6 +133,7 @@ export default {
     },
     methods: {
         fetchSearchArgs() {
+            this.currentWordQuery = this.$route.query.q;
             let queryParams = { ...this.$store.state.formData };
             if ("q" in queryParams) {
                 this.queryArgs.queryTerm = queryParams.q;
@@ -245,7 +247,7 @@ export default {
             return biblio;
         },
         removeMetadata(metadata) {
-            if (this.q.length == 0) {
+            if (this.q.length == 0 && this.currentReport != "statistics") {
                 this.report = "bibliography";
             }
             this.start = "";
@@ -298,7 +300,10 @@ export default {
             let queryTermGroup = this.copyObject(this.description.termGroups);
             queryTermGroup.splice(index, 1);
             this.q = queryTermGroup.join(" ");
-            if (queryTermGroup.length === 0) {
+            if (
+                queryTermGroup.length === 0 &&
+                this.currentReport != "statistics"
+            ) {
                 this.report = "bibliography";
             }
             this.start = 0;

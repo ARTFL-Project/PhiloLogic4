@@ -32,9 +32,8 @@
                                                 </b-input-group-prepend>
 
                                                 <b-form-input
-                                                    autocomplete="off"
                                                     type="text"
-                                                    v-model="q"
+                                                    v-model.lazy="q"
                                                     @input="onChange('q')"
                                                     @keyup.down.native="onArrowDown('q')"
                                                     @keyup.up.native="onArrowUp('q')"
@@ -654,7 +653,11 @@ export default {
             // Let's warn the parent that a change was made
             if (field == "q") {
                 let currentQueryTerm = this.$route.query.q;
-                if (this.q.length > 1 && this.q != currentQueryTerm) {
+                if (
+                    this.q.replace('"', "").length > 1 &&
+                    this.q != currentQueryTerm
+                ) {
+                    console.log("typed", this.q);
                     this.$http
                         .get(`${this.$dbUrl}/scripts/autocomplete_term.py`, {
                             params: { term: this.q }
@@ -663,6 +666,7 @@ export default {
                             this.autoCompleteResults.q = response.data;
                             this.isLoading = false;
                         });
+                    console.log("typed", this.q);
                 }
             } else {
                 this.$store.commit("updateFormDataField", {

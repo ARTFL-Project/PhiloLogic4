@@ -13,15 +13,17 @@
                             variant="outline-secondary"
                             size="sm"
                             class="d-inline-block"
-                            style="padding: 0 0.25rem"
+                            style="padding: 0 0.25rem; margin-right: .5rem"
                             :id="`button-${resultIndex}`"
                             @click="toggleBreakUp(resultIndex)"
                             v-if="result.break_up_field.length > 0"
                         >&plus;</b-button>
-                        <citations
-                            :citation="buildCitationObject(groupedByField, statsConfig.field_citation, result.metadata_fields)"
-                        ></citations>
-                        : {{result.count}} occurrence(s)
+                        <b-badge variant="secondary" pill>{{ result.count }}</b-badge>
+                        <citations :citation="result.citation"></citations>
+                        <span
+                            class="d-inline-block pl-1"
+                            v-if="breakUpFields[resultIndex].results.length"
+                        >across {{ breakUpFields[resultIndex].results.length }} {{ breakUpFieldName }}(s)</span>
                         <b-list-group class="ml-4" v-if="breakUpFields[resultIndex].show">
                             <b-list-group-item
                                 v-for="(value, key) in breakUpFields[resultIndex].results"
@@ -52,11 +54,6 @@ export default {
     computed: {
         ...mapFields([
             "formData.report",
-            "formData.q",
-            "formData.results_per_page",
-            "formData.start",
-            "formData.end",
-            "description",
             "resultsLength",
             "statisticsCache",
             "searching",
@@ -76,7 +73,8 @@ export default {
             loading: false,
             statisticsResults: [],
             groupedByField: this.$route.query.group_by,
-            breakUpFields: []
+            breakUpFields: [],
+            breakUpFieldName: ""
         };
     },
     created() {
@@ -111,13 +109,16 @@ export default {
                         })
                     })
                     .then(response => {
-                        this.statisticsResults = response.data.results;
+                        this.statisticsResults = this.buildStatResults(
+                            response.data.results
+                        );
                         this.breakUpFields = this.statisticsResults.map(
                             results => ({
                                 show: false,
                                 results: results.break_up_field
                             })
                         );
+                        this.breakUpFieldName = response.data.break_up_field;
                         this.resultsLength = response.data.total_results;
                         this.searching = false;
                         this.statisticsCache = {
@@ -131,6 +132,18 @@ export default {
                         this.debug(this, error);
                     });
             }
+        },
+        buildStatResults(results) {
+            let resultsWithCiteObject = [];
+            for (let result of results) {
+                result.citation = this.buildCitationObject(
+                    this.groupedByField,
+                    this.statsConfig.field_citation,
+                    result.metadata_fields
+                );
+                resultsWithCiteObject.push(result);
+            }
+            return resultsWithCiteObject;
         },
         buildCitationObject(fieldToLink, citationObject, metadataFields) {
             let citations = [];

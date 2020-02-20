@@ -92,7 +92,16 @@ def statistics_by_field(request, config):
             {"metadata_fields": values["metadata_fields"], "count": values["count"], "break_up_field": []}
             for field_name, values in sorted(counts_by_field.items(), key=lambda x: x[1]["count"], reverse=True)
         ]
-    return {"results": results, "query": dict([i for i in request]), "total_results": len(philo_ids)}
+    if request.q == "" and request.no_q:
+        total_results = len(results)
+    else:
+        total_results = len(philo_ids)
+    return {
+        "results": results,
+        "break_up_field": break_up_field_name,
+        "query": dict([i for i in request]),
+        "total_results": total_results,
+    }
 
 
 def __expand_hits(hits, metadata_type):

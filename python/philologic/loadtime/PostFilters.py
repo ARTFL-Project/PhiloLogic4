@@ -168,8 +168,6 @@ def tfidf_per_word(loader_obj):
             desc="Vectorizing words...",
         )
 
-    path = os.path.join(loader_obj.destination, "words_and_philo_ids")
-    pool = Pool(loader_obj.cores)
     vectorizer = TfidfVectorizer(sublinear_tf=True, token_pattern=r"(?u)\b\w+\b")
     corpus = vectorizer.fit_transform((get_all_words()))
     mean_tf_idf = np.mean(corpus.toarray(), axis=0)

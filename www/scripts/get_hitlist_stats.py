@@ -38,8 +38,6 @@ def get_total_doc_count(environ, start_response):
 
         else:
             hits = db.query(sort_order=request["sort_order"], raw_results=True, **request.metadata)
-        if "title" in config["hitlist_stats"]["fields"]:
-            config["hitlist_stats"]["fields"].remove("title")
     else:
         hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
 
