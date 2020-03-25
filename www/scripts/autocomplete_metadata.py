@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json
+import rapidjson
 import os
 import re
 import subprocess
@@ -16,6 +16,7 @@ from philologic.runtime import access_control, login_access
 
 sys.path.append("..")
 import custom_functions
+
 try:
     from custom_functions import WebConfig
 except ImportError:
@@ -52,7 +53,7 @@ def autocomplete_metadata(metadata, field, db):
         field = field[-1]
 
     words = format_query(metadata, field, db)[:100]
-    return json.dumps(words)
+    return rapidjson.dumps(words)
 
 
 def format_query(q, field, db):

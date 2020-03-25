@@ -1,11 +1,11 @@
 <template>
     <b-container fluid class="mt-4">
-        <conckwic :results="statisticsResults"></conckwic>
+        <conckwic :results="aggregationResults"></conckwic>
         <b-card no-body class="shadow mt-4 ml-4 mr-4">
             <b-list-group flush>
                 <virtual-list :size="55" :remain="25">
                     <b-list-group-item
-                        v-for="(result, resultIndex) in statisticsResults"
+                        v-for="(result, resultIndex) in aggregationResults"
                         :key="resultIndex"
                         class="pt-3 pb-3"
                     >
@@ -18,7 +18,7 @@
                             @click="toggleBreakUp(resultIndex)"
                             v-if="result.break_up_field.length > 0"
                         >&plus;</b-button>
-                        <b-badge variant="secondary" pill>{{ result.count }}</b-badge>
+                        <b-badge variant="secondary" pill style="font-size: 100%">{{ result.count }}</b-badge>
                         <citations :citation="result.citation"></citations>
                         <span
                             class="d-inline-block pl-1"
@@ -49,13 +49,13 @@ import conckwic from "./ConcordanceKwic";
 import virtualList from "vue-virtual-scroll-list";
 
 export default {
-    name: "statistics",
+    name: "aggregation",
     components: { citations, searchArguments, conckwic, virtualList },
     computed: {
         ...mapFields([
             "formData.report",
             "resultsLength",
-            "statisticsCache",
+            "aggregationCache",
             "searching",
             "currentReport"
         ]),
@@ -71,15 +71,15 @@ export default {
         return {
             results: [],
             loading: false,
-            statisticsResults: [],
+            aggregationResults: [],
             groupedByField: this.$route.query.group_by,
             breakUpFields: [],
             breakUpFieldName: ""
         };
     },
     created() {
-        this.report = "statistics";
-        this.currentReport = "statistics";
+        this.report = "aggregation";
+        this.currentReport = "aggregation";
         this.fetchData();
     },
     watch: {
@@ -90,29 +90,29 @@ export default {
         fetchData() {
             if (
                 this.deepEqual(
-                    { ...this.statisticsCache.query, start: "", end: "" },
+                    { ...this.aggregationCache.query, start: "", end: "" },
                     { ...this.$route.query, start: "", end: "" }
                 )
             ) {
-                this.statisticsResults = this.statisticsCache.results;
-                this.breakUpFields = this.statisticsResults.map(results => ({
+                this.aggregationResults = this.aggregationCache.results;
+                this.breakUpFields = this.aggregationResults.map(results => ({
                     show: false,
                     results: results.break_up_field
                 }));
-                this.resultsLength = this.statisticsCache.totalResults;
+                this.resultsLength = this.aggregationCache.totalResults;
             } else {
                 this.searching = true;
                 this.$http
-                    .get(`${this.$dbUrl}/reports/statistics.py`, {
+                    .get(`${this.$dbUrl}/reports/aggregation.py`, {
                         params: this.paramsFilter({
                             ...this.$store.state.formData
                         })
                     })
                     .then(response => {
-                        this.statisticsResults = this.buildStatResults(
+                        this.aggregationResults = this.buildStatResults(
                             response.data.results
                         );
-                        this.breakUpFields = this.statisticsResults.map(
+                        this.breakUpFields = this.aggregationResults.map(
                             results => ({
                                 show: false,
                                 results: results.break_up_field
@@ -121,7 +121,7 @@ export default {
                         this.breakUpFieldName = response.data.break_up_field;
                         this.resultsLength = response.data.total_results;
                         this.searching = false;
-                        this.statisticsCache = {
+                        this.aggregationCache = {
                             results: response.data.results,
                             query: this.$route.query,
                             totalResults: response.data.results.total_results

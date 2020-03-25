@@ -2,7 +2,8 @@ module.exports = {
     devServer: {
         compress: true,
         disableHostCheck: true,
-        host: "condorcet.uchicago.edu",
+        host: "192.168.86.28",
+        // proxy: "http://condorcet.localhost:8080",
         headers: {
             'Access-Control-Allow-Origin': '*'
         }

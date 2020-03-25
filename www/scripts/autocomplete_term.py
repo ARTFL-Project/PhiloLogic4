@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json
+import rapidjson
 import os
 import subprocess
 import sys
@@ -35,7 +35,7 @@ def term_list(environ, start_response):
     if isinstance(term, list):
         term = term[-1]
     all_words = format_query(term, db, config)[:100]
-    yield json.dumps(all_words).encode("utf8")
+    yield rapidjson.dumps(all_words).encode("utf8")
 
 
 def format_query(q, db, config):

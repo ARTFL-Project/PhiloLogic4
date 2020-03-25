@@ -174,7 +174,8 @@ Vue.directive('scroll', {
 Vue.use(BootstrapVue)
 
 axios
-    .get(`${appConfig.dbUrl}/scripts/get_web_config.py`)
+    .get(`${appConfig.dbUrl}/scripts/get_web_config.py`, {
+    })
     .then((response) => {
         Vue.prototype.$philoConfig = response.data
         new Vue({

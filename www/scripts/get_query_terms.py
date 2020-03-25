@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json
+import rapidjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -32,7 +32,7 @@ def term_list(environ, start_response):
     hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
     hits.finish()
     expanded_terms = get_expanded_query(hits)
-    yield json.dumps(expanded_terms[0]).encode("utf8")
+    yield rapidjson.dumps(expanded_terms[0]).encode("utf8")
 
 
 if __name__ == "__main__":

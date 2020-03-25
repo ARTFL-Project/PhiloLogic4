@@ -6,6 +6,8 @@ import timeit
 from philologic.runtime.link import make_absolute_query_link
 from philologic.runtime.DB import DB
 
+OBJ_DICT = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
+
 
 def frequency_results(request, config, sorted_results=False):
     """reads through a hitlist. looks up request.frequency_field in each hit, and builds up a list of
@@ -21,30 +23,35 @@ def frequency_results(request, config, sorted_results=False):
     else:
         hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
 
-    if sorted_results is True:
-        hits.finish()
+    metadata_type = db.locals["metadata_types"][request.frequency_field]
+    try:
+        object_level = OBJ_DICT[metadata_type]
+    except KeyError:
+        metadata_type == "div"
+
+    hits.finish()
+    philo_ids = __expand_hits(hits, metadata_type)
 
     cursor = db.dbh.cursor()
-
-    cursor.execute(f"select philo_id, {request.frequency_field} from toms where {request.frequency_field} is not null")
-    metadata_dict = {}
-    for i in cursor:
-        philo_id, field = i
-        philo_id = tuple(int(s) for s in philo_id.split() if int(s))
-        metadata_dict[philo_id] = field
+    if metadata_type != "div":
+        distinct_philo_ids = tuple(" ".join(map(str, id)) for id in set(philo_ids))
+        cursor.execute(
+            f"select * from toms where philo_{metadata_type}_id IN ({', '.join('?' for _ in range(len(distinct_philo_ids)))})",
+            distinct_philo_ids,
+        )
+    else:
+        sql_query = "select * from toms where "
+        sql_clauses = []
+        for pos, obj_type in enumerate(["div1", "div2", "div3"]):
+            distinct_philo_ids = tuple(" ".join(map(str, id)) for id in set(philo_ids[pos]))
+            sql_clauses.append(f"philo_{obj_type}_id IN ({', '.join('?' for _ in range(len(distinct_philo_ids)))})")
+        sql_clauses = " OR ".join(sql_clauses)
+        cursor.execute(sql_query)
 
     counts = {}
     frequency_object = {}
     start_time = timeit.default_timer()
     last_hit_done = request.start
-
-    obj_dict = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
-    metadata_type = db.locals["metadata_types"][request.frequency_field]
-    try:
-        object_level = obj_dict[metadata_type]
-    except KeyError:
-        # metadata_type == "div"
-        pass
 
     try:
         for philo_id in hits[request.start :]:
@@ -148,3 +155,16 @@ def frequency_results(request, config, sorted_results=False):
         )
 
     return frequency_object
+
+
+def __expand_hits(hits, metadata_type):
+    expanded_hits = []
+    try:
+        object_level = OBJ_DICT[metadata_type]
+        expanded_hits = [philo_id[:object_level] for philo_id in hits]
+    except KeyError:
+        expanded_hits = [[] for _ in ["div1", "div2", "div3"]]
+        for philo_id in hits:
+            for pos, local_type in enumerate(["div1", "div2", "div3"]):
+                expanded_hits[pos].append(philo_id[: OBJ_DICT[local_type]])
+    return expanded_hits

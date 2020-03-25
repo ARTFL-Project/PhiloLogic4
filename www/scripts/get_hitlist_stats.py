@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json
+import rapidjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -62,7 +62,7 @@ def get_total_doc_count(environ, start_response):
             )
             count = cursor.fetchone()[0]
         stats.append({"field": field_obj["field"], "count": count})
-    yield json.dumps({"total_results": total_results, "stats": stats}).encode("utf8")
+    yield rapidjson.dumps({"total_results": total_results, "stats": stats}).encode("utf8")
 
 
 if __name__ == "__main__":

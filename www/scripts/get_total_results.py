@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json
+import rapidjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -41,7 +41,7 @@ def get_total_results(environ, start_response):
     hits.finish()
     total_results = len(hits)
 
-    yield json.dumps(total_results).encode("utf8")
+    yield rapidjson.dumps(total_results).encode("utf8")
 
 
 if __name__ == "__main__":

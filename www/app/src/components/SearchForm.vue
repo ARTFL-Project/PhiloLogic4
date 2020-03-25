@@ -309,6 +309,23 @@
                                         </b-col>
                                     </b-row>
                                     <b-row
+                                        id="group-options"
+                                        v-if="currentReport === 'aggregation'"
+                                    >
+                                        <b-col cols="12" style="margin-top: 10px;">
+                                            <b-row>
+                                                <b-col cols="3" sm="2">Group results by</b-col>
+                                                <b-col cols="6" sm="4">
+                                                    <b-form-select
+                                                        v-model="group_by"
+                                                        :options="aggregationOptions"
+                                                        class="mb-3"
+                                                    ></b-form-select>
+                                                </b-col>
+                                            </b-row>
+                                        </b-col>
+                                    </b-row>
+                                    <b-row
                                         id="sort-options"
                                         v-if="currentReport === 'concordance' || currentReport === 'bibliography'"
                                     >
@@ -329,7 +346,7 @@
                                     </b-row>
                                     <b-row
                                         id="results_per_page"
-                                        v-if="currentReport != 'collocation' && currentReport != 'time_series' && currentReport != 'statistics'"
+                                        v-if="currentReport != 'collocation' && currentReport != 'time_series' && currentReport != 'aggregation'"
                                     >
                                         <b-col cols="12" sm="2">Results per page:</b-col>
                                         <b-col cols="12" sm="10">
@@ -343,25 +360,6 @@
                                                     name="radio-btn"
                                                 ></b-form-radio-group>
                                             </b-form-group>
-                                        </b-col>
-                                    </b-row>
-                                    <b-row
-                                        id="group-by"
-                                        class="mb-4 mt-2"
-                                        v-if="currentReport =='statistics'"
-                                    >
-                                        <b-col cols="12" sm="2">Group results by:</b-col>
-                                        <b-col cols="12" sm="10">
-                                            <b-dropdown
-                                                :text="statFieldSelected || 'Select'"
-                                                variant="outline-secondary"
-                                            >
-                                                <b-dropdown-item
-                                                    @click="selectStatField(stat)"
-                                                    v-for="stat in statsOptions"
-                                                    :key="stat.field"
-                                                >{{ stat.label }}</b-dropdown-item>
-                                            </b-dropdown>
                                         </b-col>
                                     </b-row>
                                 </div>
@@ -483,18 +481,24 @@ export default {
             ],
             selectedSortValues: "rowid",
             resultsPerPageOptions: [25, 100, 500, 1000],
-            statsOptions: this.$philoConfig.stats_report_config.map(f => ({
-                label:
-                    this.$philoConfig.metadata_aliases[f.field] ||
-                    f.field.charAt(0).toUpperCase() + f.field.slice(1),
-                field: f.field
-            })),
+            aggregationOptions: this.$philoConfig.stats_report_config.map(
+                f => ({
+                    text:
+                        this.$philoConfig.metadata_aliases[f.field] ||
+                        f.field.charAt(0).toUpperCase() + f.field.slice(1),
+                    value: f.field
+                })
+            ),
             statFieldSelected: this.getLoadedStatField(),
             autoCompleteResults: { q: [] },
             arrowCounters: { q: -1 },
             isOpen: false,
             showTips: false
         };
+    },
+    watch: {
+        // call again the method if the route changes
+        $route: "updateMetadataValues"
     },
     created() {
         this.reports = this.buildReports();
@@ -532,6 +536,11 @@ export default {
         });
     },
     methods: {
+        updateMetadataValues() {
+            for (let field in this.metadataValues) {
+                this.metadataValues[field] = this.formData[field];
+            }
+        },
         buildReports() {
             let reports = [];
             for (let value of this.$philoConfig.search_reports) {
@@ -570,29 +579,9 @@ export default {
                 );
             }
         },
-        generateSortValues() {
-            let sortValues = [
-                {
-                    value: ["rowid"],
-                    label: "select"
-                }
-            ];
-            for (let fields of this.$philoConfig.concordance_biblio_sorting) {
-                let label = [];
-                for (let field of fields) {
-                    if (field in this.$philoConfig.metadata_aliases) {
-                        label.push(this.$philoConfig.metadata_aliases[field]);
-                    } else {
-                        label.push(field);
-                    }
-                }
-                sortValues.push({ label: label.join(", "), value: fields });
-            }
-            return sortValues;
-        },
         onSubmit() {
             this.q = this.q.trim();
-            if (this.q.length == 0 && this.currentReport != "statistics") {
+            if (this.q.length == 0 && this.currentReport != "aggregation") {
                 this.report = "bibliography";
             } else if (
                 this.report == "textNavigation" ||
@@ -771,10 +760,6 @@ export default {
             let input = parent.querySelector("input");
             let childOffset = input.offsetLeft - parent.offsetLeft;
             return `left: ${childOffset}px; width: ${input.offsetWidth}px`;
-        },
-        selectStatField(field) {
-            this.statFieldSelected = field.label;
-            this.group_by = field.field;
         }
     }
 };

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json
+import rapidjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -33,7 +33,7 @@ def get_frequency(environ, start_response):
     request = WSGIHandler(environ, config)
 
     results = frequency_results(request, config)
-    yield json.dumps(results).encode("utf8")
+    yield rapidjson.dumps(results).encode("utf8")
 
 
 if __name__ == "__main__":

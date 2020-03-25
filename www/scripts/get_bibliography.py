@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json
+import rapidjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -28,7 +28,7 @@ def get_bibliography(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("scripts", ""))
     request = WSGIHandler(environ, config)
     results = landing_page_bibliography(request, config)
-    yield json.dumps(results).encode("utf8")
+    yield rapidjson.dumps(results).encode("utf8")
 
 
 if __name__ == "__main__":

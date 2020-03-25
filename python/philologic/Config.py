@@ -205,11 +205,11 @@ WEB_CONFIG_DEFAULTS = {
         ),
     },
     "search_reports": {
-        "value": ["concordance", "kwic", "collocation", "time_series", "statistics"],
+        "value": ["concordance", "kwic", "aggregation", "collocation", "time_series"],
         "comment": "\n".join(
             [
                 "# The search_reports variable sets which search report is viewable in the search form",
-                "# Available reports are concordance, kwic, collocation, and time_series",
+                "# Available reports are concordance, kwic, aggregation, collocation, and time_series",
             ]
         ),
     },
@@ -616,7 +616,7 @@ WEB_CONFIG_DEFAULTS = {
         "comment": "\n".join(
             [
                 "# The stats_report_config variable determins which fields get stats displayed in at the top of concordance/KWIC results."
-                "# It also drives the statistics report: which fields concordances can be grouped by, and further broken down by particular metadata."
+                "# It also drives the aggregation report: which fields concordances can be grouped by, and further broken down by particular metadata."
             ]
         ),
     },

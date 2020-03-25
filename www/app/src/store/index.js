@@ -27,7 +27,7 @@ export default new Vuex.Store({
             results_per_page: 25,
             termGroups: []
         },
-        statisticsCache: {
+        aggregationCache: {
             results: [],
             query: {}
         },

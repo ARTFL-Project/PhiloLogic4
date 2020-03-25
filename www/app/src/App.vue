@@ -120,7 +120,7 @@ export default {
                 "year_interval",
                 "max_time"
             ]);
-            reportValues.statistics = new Set([...commonFields, "group_by"]);
+            reportValues.aggregation = new Set([...commonFields, "group_by"]);
             return reportValues;
         }
     },
@@ -167,6 +167,7 @@ export default {
                 ...localParams,
                 ...this.$route.query
             });
+            console.log(this.$store.state.formData);
             if (
                 !["textNavigation", "tableOfContents"].includes(
                     this.$route.name
@@ -189,7 +190,7 @@ export default {
             ) {
                 if (
                     this.q.length == 0 &&
-                    !["bibliography", "statistics", "timeSeries"].includes(
+                    !["bibliography", "aggregation", "timeSeries"].includes(
                         this.$route.name
                     )
                 ) {
@@ -216,7 +217,7 @@ export default {
     }
 };
 </script>
-
+aggregon
 <style>
 .highlight {
     color: #ef4500;

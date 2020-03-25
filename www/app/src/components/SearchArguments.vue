@@ -247,7 +247,7 @@ export default {
             return biblio;
         },
         removeMetadata(metadata) {
-            if (this.q.length == 0 && this.currentReport != "statistics") {
+            if (this.q.length == 0 && this.currentReport != "aggregation") {
                 this.report = "bibliography";
             }
             this.start = "";
@@ -302,7 +302,7 @@ export default {
             this.q = queryTermGroup.join(" ");
             if (
                 queryTermGroup.length === 0 &&
-                this.currentReport != "statistics"
+                this.currentReport != "aggregation"
             ) {
                 this.report = "bibliography";
             }

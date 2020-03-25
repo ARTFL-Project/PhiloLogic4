@@ -3,9 +3,10 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import json
+import rapidjson
 
 import sys
+
 sys.path.append("..")
 import custom_functions
 
@@ -24,13 +25,13 @@ except ImportError:
 
 
 def kwic(environ, start_response):
-    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('reports', ''))
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("reports", ""))
     request = WSGIHandler(environ, config)
     kwic_object = kwic_results(request, config)
-    headers = [('Content-type', 'application/json; charset=UTF-8'),
-               ("Access-Control-Allow-Origin", "*")]
-    start_response('200 OK', headers)
-    yield json.dumps(kwic_object).encode('utf8')
+    headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
+    start_response("200 OK", headers)
+    yield rapidjson.dumps(kwic_object).encode("utf8")
+
 
 if __name__ == "__main__":
     CGIHandler().run(kwic)

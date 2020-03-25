@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json
+import rapidjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -37,7 +37,9 @@ def get_start_end_date(environ, start_response):
     total_results = 0
     hits.finish()
     total_results = len(hits)
-    yield json.dumps({"start_date": start_date, "end_date": end_date, "total_results": total_results}).encode("utf8")
+    yield rapidjson.dumps({"start_date": start_date, "end_date": end_date, "total_results": total_results}).encode(
+        "utf8"
+    )
 
 
 if __name__ == "__main__":

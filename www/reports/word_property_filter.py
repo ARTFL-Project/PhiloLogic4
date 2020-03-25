@@ -3,9 +3,10 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import json
+import rapidjson
 
 import sys
+
 sys.path.append("..")
 import custom_functions
 
@@ -24,14 +25,12 @@ except ImportError:
 
 
 def word_property_filter(environ, start_response):
-    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('reports', ''))
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("reports", ""))
     request = WSGIHandler(environ, config)
-    headers = [('Content-type', 'application/json; charset=UTF-8'),
-               ("Access-Control-Allow-Origin", "*")]
-    start_response('200 OK', headers)
-    filter_results = filter_words_by_property(hits, config.db_path, request,
-                                              db, config)
-    yield json.dumps(filter_results).encode('utf8')
+    headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
+    start_response("200 OK", headers)
+    filter_results = filter_words_by_property(hits, config.db_path, request, db, config)
+    yield rapidjson.dumps(filter_results).encode("utf8")
 
 
 if __name__ == "__main__":

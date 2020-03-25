@@ -3,9 +3,10 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import json
+import rapidjson
 
 import sys
+
 sys.path.append("..")
 import custom_functions
 
@@ -24,12 +25,12 @@ except ImportError:
 
 
 def collocation(environ, start_response):
-    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace('reports', ''))
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("reports", ""))
     request = WSGIHandler(environ, config)
-    headers = [('Content-type', 'application/json; charset=UTF-8'), ("Access-Control-Allow-Origin", "*")]
-    start_response('200 OK', headers)
+    headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
+    start_response("200 OK", headers)
     collocation_object = collocation_results(request, config)
-    yield json.dumps(collocation_object).encode('utf8')
+    yield rapidjson.dumps(collocation_object).encode("utf8")
 
 
 if __name__ == "__main__":

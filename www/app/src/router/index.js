@@ -9,7 +9,7 @@ import timeSeries from '../components/TimeSeries'
 import textNavigation from '../components/TextNavigation'
 import tableOfContents from '../components/TableOfContents'
 import landingPage from '../components/LandingPage'
-import statistics from "../components/Statistics"
+import aggregation from "../components/Aggregation"
 import appConfig from '../../appConfig.json'
 
 
@@ -59,9 +59,9 @@ export default new Router({
         component: tableOfContents
     },
     {
-        path: "/statistics",
-        name: 'statistics',
-        component: statistics
+        path: "/aggregation",
+        name: 'aggregation',
+        component: aggregation
     },
     // for compatibility with old Philo links: still used in landing page
     {
