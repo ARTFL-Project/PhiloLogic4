@@ -18,8 +18,11 @@
                                 <div id="search_terms_container" class="p-3">
                                     <b-row id="search_terms">
                                         <b-col cols="12" md="8">
-                                            <b-input-group id="q-group" prepend="Search Terms">
+                                            <b-input-group id="q-group">
                                                 <b-input-group-prepend>
+                                                    <b-button
+                                                        variant="outline-secondary"
+                                                    >Search Terms</b-button>
                                                     <b-button
                                                         v-b-modal.search-tips
                                                         variant="outline-info"
@@ -57,7 +60,7 @@
                                                 </ul>
                                                 <b-input-group-append>
                                                     <b-button
-                                                        variant="outline-secondary"
+                                                        variant="secondary"
                                                         id="button-search"
                                                         @click="onSubmit()"
                                                     >Search</b-button>
@@ -205,11 +208,11 @@
                                                 class="input-group"
                                                 :id="localField.value + '-group'"
                                             >
-                                                <div class="input-group-prepend">
-                                                    <span
-                                                        class="input-group-text"
-                                                    >{{localField.label}}</span>
-                                                </div>
+                                                <b-input-group-prepend>
+                                                    <b-button
+                                                        variant="outline-secondary"
+                                                    >{{localField.label}}</b-button>
+                                                </b-input-group-prepend>
                                                 <input
                                                     type="text"
                                                     class="form-control"

@@ -42,7 +42,6 @@ def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
 
 
 def query_recursive(db, param_dict, parent, sort_order):
-    #    print >> sys.stderr, "query_recursive:",param_dict,parent
     r = query_lowlevel(db, param_dict, sort_order)
     if parent:
         try:
@@ -50,7 +49,6 @@ def query_recursive(db, param_dict, parent, sort_order):
         except StopIteration:
             return
         for inner_hit in r:
-            #            print >> sys.stderr, "corpus_cmp:",outer_hit["philo_id"], inner_hit["philo_id"]
             while corpus_cmp(str_to_hit(outer_hit["philo_id"]), str_to_hit(inner_hit["philo_id"])) < 0:
                 try:
                     outer_hit = next(parent)

@@ -11,7 +11,7 @@
                         :key="result.philo_id.join('-')"
                         :data-index="index"
                     >
-                        <b-row class="citation-container">
+                        <b-row no-gutters class="citation-container">
                             <b-col cols="12" sm="10" md="11">
                                 <span class="cite">
                                     <span class="number">{{ description.start + index }}</span>
@@ -176,7 +176,7 @@ export default {
 }
 .more-context {
     position: absolute;
-    right: 15px;
+    right: 0;
 }
 .more_context,
 .citation-container {
@@ -185,19 +185,20 @@ export default {
 .number {
     background-color: rgb(78, 93, 108);
     color: #fff;
-    padding: 7px;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 0.375rem 0.75rem;
     display: inline-block;
-    margin-left: -10px;
-    margin-top: -10px;
     margin-right: 5px;
+    border-radius: 0.25rem;
+    height: 100%;
 }
 .hit_n {
     vertical-align: 5px;
     /*align numbers*/
 }
 .cite {
-    padding-left: 0.6em;
-    padding-top: 7px;
+    height: 38px;
     display: inline-block;
 }
 .philologic-doc {

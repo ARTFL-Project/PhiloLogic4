@@ -13,7 +13,7 @@
                         <export-results></export-results>
                     </b-modal>
                     <search-arguments></search-arguments>
-                    <div v-if="report != 'statistics'">
+                    <div v-if="report != 'aggregation'">
                         <div id="result-stats" class="pl-3 pb-3">
                             {{ resultsLength }} total occurrences spread across
                             <span
@@ -21,7 +21,7 @@
                                 :key="stat.field"
                             >
                                 <router-link
-                                    :to="`/statistics?${stat.link}&group_by=${stat.field}`"
+                                    :to="`/aggregation?${stat.link}&group_by=${stat.field}`"
                                 >{{stat.count}} {{stat.label}}(s)</router-link>
                                 <span v-if="statIndex != statsDescription.length-1">&nbsp;and&nbsp;</span>
                             </span>
@@ -48,7 +48,7 @@
                             id="result-stats"
                             class="pl-3 pb-3"
                             v-if="resultsLength > 0"
-                        >{{ resultsLength }} total occurrences spread across {{ statisticsCache.results.length }} {{ group_by }}(s)</div>
+                        >{{ resultsLength }} total occurrences spread across {{ aggregationCache.results.length }} {{ group_by }}(s)</div>
                         <div id="result-stats" class="pl-3 pb-3" v-else>
                             <b>No results for your query</b>
                         </div>
@@ -131,7 +131,7 @@ export default {
             "currentReport",
             "resultsLength",
             "description",
-            "statisticsCache"
+            "aggregationCache"
         ])
     },
     data() {
@@ -158,8 +158,9 @@ export default {
     },
     created() {
         this.buildDescription();
-        if (this.report != "statistics") {
+        if (this.report != "aggregation") {
             this.updateTotalResults();
+            this.getHitListStats();
         }
     },
     watch: {
@@ -216,7 +217,7 @@ export default {
                     count: stat.count,
                     link: this.paramsToUrlString({
                         ...this.$store.state.formData,
-                        report: "statistics",
+                        report: "aggregation",
                         start: "",
                         end: "",
                         group_by: ""
@@ -227,6 +228,20 @@ export default {
         },
         updateTotalResults() {
             this.$http
+                .get(`${this.$dbUrl}/scripts/get_total_results.py`, {
+                    params: this.paramsFilter(this.$store.state.formData)
+                })
+                .then(response => {
+                    this.resultsLength = response.data;
+                    this.hits = this.buildDescription();
+                    EventBus.$emit("totalResultsDone");
+                })
+                .catch(error => {
+                    this.debug(this, error);
+                });
+        },
+        getHitListStats() {
+            this.$http
                 .get(`${this.$dbUrl}/scripts/get_hitlist_stats.py`, {
                     params: this.paramsFilter(this.$store.state.formData)
                 })
@@ -235,8 +250,6 @@ export default {
                     this.statsDescription = this.buildStatsDescription(
                         response.data.stats
                     );
-                    this.hits = this.buildDescription();
-                    EventBus.$emit("totalResultsDone");
                 })
                 .catch(error => {
                     this.debug(this, error);
