@@ -37,14 +37,10 @@ class HitList(object):
             self.has_word_id = 1
             self.length = 7 + 2 * (words)
         else:
-            self.has_word_id = (
-                0  # unfortunately.  fix this next time I have 3 months to spare.
-            )
+            self.has_word_id = 0  # unfortunately.  fix this next time I have 3 months to spare.
             self.length = methodarg + 1 + (words)
         self.fh = open(self.filename, "rb")  # need a full path here.
-        self.format = (
-            "=%dI" % self.length
-        )  # short for object id's, int for byte offset.
+        self.format = "=%dI" % self.length  # short for object id's, int for byte offset.
         self.hitsize = struct.calcsize(self.format)
         self.doc = doc
         self.byte = byte
@@ -52,9 +48,7 @@ class HitList(object):
         self.done = False
         self.update()
         if self.sort_order:
-            metadata_types = set(
-                [dbh.locals["metadata_types"][i] for i in self.sort_order]
-            )
+            metadata_types = set([dbh.locals["metadata_types"][i] for i in self.sort_order])
             if "div" in metadata_types:
                 metadata_types.remove("div")
                 metadata_types.add("div1")
@@ -63,9 +57,7 @@ class HitList(object):
             cursor = self.dbh.dbh.cursor()
             query = "select * from toms where "
             if metadata_types:
-                query += "philo_type in (%s) AND " % ", ".join(
-                    ['"%s"' % m for m in metadata_types]
-                )
+                query += "philo_type in (%s) AND " % ", ".join(['"%s"' % m for m in metadata_types])
             order_params = []
             for s in self.sort_order:
                 order_params.append("%s is not null" % s)
@@ -75,9 +67,7 @@ class HitList(object):
             for i in cursor:
                 sql_row = dict(i)
                 philo_id = tuple(int(s) for s in sql_row["philo_id"].split() if int(s))
-                metadata[philo_id] = [
-                    smash_accents(sql_row[m] or "ZZZZZ") for m in sort_order
-                ]
+                metadata[philo_id] = [smash_accents(sql_row[m] or "ZZZZZ") for m in sort_order]
             self.sorted_hitlist = []
             iter_position = 0
             self.seek(iter_position)
@@ -215,15 +205,6 @@ class HitList(object):
         return struct.unpack(self.format, buffer)
 
     def get_total_word_count(self):
-        # print("start")
-        # self.finish()
-        # print("finished")
-        # cursor = self.dbh.dbh.cursor()
-        # print("start cursor", tuple(" ".join(map(str, philo_id)) for philo_id in self))
-        # print(
-        #     f"SELECT SUM(word_count) FROM toms WHERE philo_id IN ({', '.join('?' for _ in range(len(self)))})",
-        #     tuple(" ".join(map(str, philo_id)) for philo_id in self),
-        # )
         philo_ids = []
         iter_position = 0
         self.seek(iter_position)
@@ -261,10 +242,7 @@ class CombinedHitlist(object):
             max_sent_count = 2
             for hit in hitlist:
                 sentence_id = repr(hit.philo_id[:6])
-                if (
-                    sentence_id not in sentence_counts
-                    or sentence_counts[sentence_id] == max_sent_count
-                ):
+                if sentence_id not in sentence_counts or sentence_counts[sentence_id] == max_sent_count:
                     self.combined_hitlist.append(hit)
                     sentence_counts[sentence_id] += 1
 
