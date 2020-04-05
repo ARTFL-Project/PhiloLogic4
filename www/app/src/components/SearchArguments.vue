@@ -1,5 +1,5 @@
 <template>
-    <div id="search-arguments" class="p-3">
+    <div id="search-arguments" class="pb-2">
         <div v-if="currentWordQuery !== ''">
             Searching database for
             <span v-if="approximate == 'yes'">
@@ -48,7 +48,7 @@
                 </b-row>
             </b-card>
         </div>
-        <div style="margin-top: 5px;">
+        <div>
             Bibliography criteria:
             <span
                 class="metadata-args rounded-pill"

@@ -1,8 +1,6 @@
 <template>
     <div>
-        <p>
-            Results from the current page ONLY will be generated.
-        </p>
+        <p>ONLY results from the current page will be generated.</p>
         <h6>With text in HTML:</h6>
         <b-button @click="getResults('json', false)">JSON</b-button>&nbsp;
         <b-button @click="getResults('csv', false)">CSV</b-button>

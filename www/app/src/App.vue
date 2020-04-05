@@ -63,7 +63,7 @@ export default {
                 approximate_ratio: 100,
                 start_date: "",
                 end_date: "",
-                year_interval: "",
+                year_interval: this.$philoConfig.time_series_interval,
                 sort_by: "rowid",
                 first_kwic_sorting_option: "",
                 second_kwic_sorting_option: "",
@@ -230,9 +230,18 @@ aggregon
 li {
     list-style-type: none;
 }
-body {
-    font-size: 0.95rem;
+body,
+.btn,
+select,
+.custom-control-label,
+.custom-control,
+.input-group-text,
+input {
+    font-size: 14px !important;
     font-family: "Open-Sans", sans-serif;
+}
+.custom-control {
+    min-height: auto;
 }
 .toc-div1 > a,
 .toc-div2 > a,

@@ -1,6 +1,6 @@
 <template>
     <div id="concordanceKwic-container" class="mt-4 ml-4 mr-4">
-        <b-card no-body class="shadow-sm pb-3">
+        <b-card no-body class="shadow-sm px-3 py-2">
             <div id="initial_report">
                 <div id="description">
                     <b-button
@@ -14,7 +14,7 @@
                     </b-modal>
                     <search-arguments></search-arguments>
                     <div v-if="report != 'aggregation'">
-                        <div id="result-stats" class="pl-3 pb-3">
+                        <div id="result-stats" class="pb-2">
                             {{ resultsLength }} total occurrences spread across
                             <span
                                 v-for="(stat, statIndex) in statsDescription"
@@ -26,7 +26,7 @@
                                 <span v-if="statIndex != statsDescription.length-1">&nbsp;and&nbsp;</span>
                             </span>
                         </div>
-                        <div id="search-hits" class="pl-3">
+                        <div id="search-hits">
                             <b
                                 v-if="resultsLength > 0"
                             >Displaying hits {{ descriptionStart }}-{{descriptionEnd}} of {{resultsLength}}</b>
@@ -46,10 +46,10 @@
                     <div v-else>
                         <div
                             id="result-stats"
-                            class="pl-3 pb-3"
+                            class="pb-2"
                             v-if="resultsLength > 0"
                         >{{ resultsLength }} total occurrences spread across {{ aggregationCache.results.length }} {{ group_by }}(s)</div>
-                        <div id="result-stats" class="pl-3 pb-3" v-else>
+                        <div id="result-stats" class="pb-2" v-else>
                             <b>No results for your query</b>
                         </div>
                     </div>
