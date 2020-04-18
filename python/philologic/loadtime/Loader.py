@@ -868,6 +868,7 @@ class Loader:
         os.system(
             f"cd {web_app_path}; npm install > {web_app_path}/web_app_build.log 2>&1 && npm run build >> {web_app_path}/web_app_build.log 2>&1"
         )
+        os.system("rm -rf node_modules")
         print("done.")
 
 

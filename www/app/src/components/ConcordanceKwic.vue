@@ -229,7 +229,7 @@ export default {
         updateTotalResults() {
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_total_results.py`, {
-                    params: this.paramsFilter(this.$store.state.formData)
+                    params: this.paramsFilter({ ...this.$store.state.formData })
                 })
                 .then(response => {
                     this.resultsLength = response.data;
@@ -243,10 +243,9 @@ export default {
         getHitListStats() {
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_hitlist_stats.py`, {
-                    params: this.paramsFilter(this.$store.state.formData)
+                    params: this.paramsFilter({ ...this.$store.state.formData })
                 })
                 .then(response => {
-                    this.resultsLength = response.data.total_results;
                     this.statsDescription = this.buildStatsDescription(
                         response.data.stats
                     );

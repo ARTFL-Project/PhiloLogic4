@@ -146,19 +146,11 @@ export default {
         this.currentReport = "kwic";
         this.initializeKwic();
         this.fetchResults();
-        // EventBus.$on("urlUpdate", () => {
-        //     if (this.report == "kwic") {
-        //         this.fetchResults();
-        //     }
-        // });
     },
     watch: {
         // call again the method if the route changes
         $route: "fetchResults"
     },
-    // beforeDestroy() {
-    //     EventBus.$off("urlUpdate");
-    // },
     methods: {
         initializeKwic() {
             // Sorting fields
@@ -283,7 +275,7 @@ export default {
                     })
                     .then(response => {
                         this.results = response.data;
-                        this.resultsLength = this.results.results_length;
+                        this.resultsLength = response.data.results_length;
                         this.$store.commit("updateDescription", {
                             ...this.description,
                             start: this.results.description.start,

@@ -585,7 +585,7 @@ class XMLParser:
             if m[-1] is not None:
                 return f"""{m[0]}{m[2]}{m[4]}{"_" * len(m[1])}{"_" * len(m[3])}"""
             else:
-                return f"""{m[0]}{m[2]}{"_" * len(m[1])}"""
+                return f"""{m[0]}{m[2]}{"_" * (len(m[1])+len(m[3]))}"""
 
         self.content = self.tag_exceptions.sub(lambda match: replace_tag(match.groups()), self.content)
 

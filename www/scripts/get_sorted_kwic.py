@@ -29,7 +29,7 @@ def get_sorted_kwic(environ, start_response):
     start_response(status, headers)
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("scripts", ""))
     db = DB(config.db_path + "/data/")
-    input_object = json.loads(environ["wsgi.input"].read().decode("utf8", "ignore"))
+    input_object = rapidjson.loads(environ["wsgi.input"].read().decode("utf8", "ignore"))
     all_results = input_object["results"]
     query_string = input_object["query_string"]
     sort_keys = [i for i in input_object["sort_keys"] if i]
@@ -50,6 +50,7 @@ def get_sorted_hits(all_results, sort_keys, request, config, db, start, end):
     }
 
     kwic_results = []
+    print(all_results[0], sort_keys, file=sys.stderr)
     for index in sort_list(all_results, sort_keys)[start:end]:
         hit = hits[index["index"]]
         kwic_result = kwic_hit_object(hit, config, db)
