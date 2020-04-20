@@ -167,7 +167,6 @@ export default {
                 ...localParams,
                 ...this.$route.query
             });
-            console.log(this.$store.state.formData);
             if (
                 !["textNavigation", "tableOfContents"].includes(
                     this.$route.name

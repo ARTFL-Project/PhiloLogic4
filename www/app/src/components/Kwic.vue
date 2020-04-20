@@ -317,7 +317,9 @@ export default {
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_neighboring_words.py`, {
                     params: {
-                        ...this.paramsFilter(this.$store.state.formData),
+                        ...this.paramsFilter(
+                            this.copyObject(this.$store.state.formData)
+                        ),
                         hits_done: hitsDone,
                         max_time: 10
                     }
@@ -364,7 +366,7 @@ export default {
                         results: this.sortedResults,
                         hits_done: hitsDone,
                         query_string: this.paramsToUrlString(
-                            this.$store.state.formData
+                            this.copyObject(this.$store.state.formData)
                         ),
                         start: start,
                         end: end,
