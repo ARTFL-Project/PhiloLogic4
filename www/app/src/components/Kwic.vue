@@ -317,9 +317,7 @@ export default {
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_neighboring_words.py`, {
                     params: {
-                        ...this.paramsFilter(
-                            this.copyObject(this.$store.state.formData)
-                        ),
+                        ...this.paramsFilter({ ...this.$store.state.formData }),
                         hits_done: hitsDone,
                         max_time: 10
                     }
@@ -365,9 +363,9 @@ export default {
                     JSON.stringify({
                         results: this.sortedResults,
                         hits_done: hitsDone,
-                        query_string: this.paramsToUrlString(
-                            this.copyObject(this.$store.state.formData)
-                        ),
+                        query_string: this.paramsToUrlString({
+                            ...this.$store.state.formData
+                        }),
                         start: start,
                         end: end,
                         sort_keys: [
@@ -395,7 +393,7 @@ export default {
             if (this.resultsLength < 50000) {
                 this.results = {};
                 this.$router.push(
-                    this.paramsToRoute(this.$store.state.formData)
+                    this.paramsToRoute({ ...this.$store.state.formData })
                 );
             } else {
                 alert(

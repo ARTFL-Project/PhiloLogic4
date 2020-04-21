@@ -260,7 +260,9 @@ export default {
             this.second_kwic_sorting_option = "";
             this.third_kwic_sorting_option = "";
             this.results_per_page = 25;
-            this.$router.push(this.paramsToRoute(this.$store.state.formData));
+            this.$router.push(
+                this.paramsToRoute({ ...this.$store.state.formData })
+            );
         },
         showFacets() {},
         showResultsBiblio() {

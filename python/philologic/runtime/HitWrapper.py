@@ -203,11 +203,7 @@ class WordWrapper:
     def __getitem__(self, key):
         if key == "parent":
             return self.philo_id.split()[:6] + ["0"]
-        if self.row is None:
-            self.row = self.db.get_word(self.philo_id)
-            if self.row is None:
-                print("WORD LOOKUP ERROR for ", repr(self.philo_id), file=sys.stderr)
-        return _safe_lookup(self.row, key)
+        return ""
 
     def __getattr__(self, name):
         return self[name]

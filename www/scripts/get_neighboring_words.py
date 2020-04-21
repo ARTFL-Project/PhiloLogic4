@@ -9,7 +9,8 @@ from wsgiref.handlers import CGIHandler
 from philologic.runtime.DB import DB
 
 # from philologic.runtime import kwic_hit_object
-from philologic.runtime.ObjectFormatter import format_strip, adjust_bytes
+from philologic.runtime.get_text import get_text
+from philologic.runtime.ObjectFormatter import format_strip, adjust_bytes, clean_tags
 from philologic.runtime.FragmentParser import parse as FragmentParserParse
 
 import re
@@ -50,10 +51,8 @@ def get_neighboring_words(environ, start_response):
     kwic_words = []
     start_time = timeit.default_timer()
     hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
-    cursor = db.dbh.cursor()
 
     token_regex = re.compile(fr"""{db.locals["token_regex"]}""")
-    filenames = {}
     for hit in hits[index:]:
         # Determine length of text needed
         byte_distance = hit.bytes[-1] - hit.bytes[0]
@@ -90,32 +89,15 @@ def get_neighboring_words(environ, start_response):
     yield rapidjson.dumps({"results": kwic_words, "hits_done": index}).encode("utf8")
 
 
-def get_text(hit, start_byte, length, path):
-    # Determine length of text needed
-    file_path = path + "/data/TEXT/" + hit.filename
-    with open(file_path, "rb") as text_file:
-        text_file.seek(start_byte)
-        text = text_file.read(length)
-    return text
-
-
 def split_text(text, token_regex):
     text = text.decode("utf8", "ignore")
     xml = FragmentParserParse(text)
-    output = clean_tags(xml)
+    output = clean_tags(xml, token_regex)
     text = output.replace("\n", " ")
     text = text.replace("\r", "")
     text = text.replace("\t", " ")
     text = text.translate(remove_punctuation_map)
     return token_regex.findall(text.lower())
-
-
-def clean_tags(element):
-    """Remove all tags"""
-    text = ""
-    for child in element:
-        text += clean_tags(child)
-    return element.text + text + element.tail
 
 
 if __name__ == "__main__":
