@@ -1,5 +1,5 @@
 <template>
-    <div id="concordanceKwic-container" class="mt-4 ml-4 mr-4">
+    <div id="concordanceKwic-container" class="mt-4 ml-2 mr-2">
         <b-card no-body class="shadow-sm px-3 py-2">
             <div id="initial_report">
                 <div id="description">

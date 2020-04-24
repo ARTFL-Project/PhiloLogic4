@@ -1,12 +1,12 @@
 <template>
     <b-container fluid>
         <conckwic v-if="description.end != 0" :results="results.results"></conckwic>
-        <b-row class="mr-2">
+        <b-row>
             <b-col cols="12" md="8" xl="8">
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
                     <b-card
                         no-body
-                        class="philologic-occurrence ml-4 mr-4 mb-4 shadow-sm"
+                        class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm"
                         v-for="(result, index) in results.results"
                         :key="result.philo_id.join('-')"
                         :data-index="index"

@@ -1,98 +1,103 @@
 <template>
-    <div id="collocation-container" class="mt-4" v-if="authorized">
-        <b-card no-body class="shadow-sm m-4 pb-3">
-            <div id="description">
-                <b-button
-                    variant="outline-primary"
-                    size="sm"
-                    id="export-results"
-                    data-target="#export-dialog"
-                >Export results</b-button>
-                <search-arguments></search-arguments>
-            </div>
-            <b-progress
-                :max="resultsLength"
-                show-progress
-                variant="secondary"
-                class="ml-3 mr-3 mb-3"
-                v-if="runningTotal != resultsLength"
-            >
-                <b-progress-bar
-                    :value="runningTotal"
-                    :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
-                ></b-progress-bar>
-            </b-progress>
-            <div class="pl-3">
-                <span>
-                    <span tooltip tooltip-title="Click to display filtered words">
-                        The
-                        <a
-                            href
-                            @click="toggleFilterList()"
-                            v-if="colloc_filter_choice === 'frequency'"
-                        >{{ filter_frequency }} most common words</a>
-                        <a
-                            href
-                            @click="toggleFilterList()"
-                            v-if="colloc_filter_choice === 'stopwords'"
-                        >Common function words</a>
-                        <a
-                            href
-                            @click="toggleFilterList()"
-                            v-if="colloc_filter_choice === 'tfidf'"
-                        >{{ filter_frequency }} most highly weighted terms across the corpus</a>
-                        are being filtered from this report.
-                    </span>
-                </span>
-                <b-card
-                    no-body
-                    id="filter-list"
-                    class="pl-3 pr-3 pb-3 shadow-lg"
-                    data-velocity-opts="{duration: 200}"
-                    v-if="showFilteredWords"
+    <b-container fluid>
+        <div id="collocation-container" class="mt-4 ml-2 mr-2" v-if="authorized">
+            <b-card no-body class="shadow-sm px-3 py-2">
+                <div id="description">
+                    <b-button
+                        variant="outline-primary"
+                        size="sm"
+                        id="export-results"
+                        data-target="#export-dialog"
+                    >Export results</b-button>
+                    <search-arguments></search-arguments>
+                </div>
+                <b-progress
+                    :max="resultsLength"
+                    show-progress
+                    variant="secondary"
+                    class="ml-3 mr-3 mb-3"
+                    v-if="runningTotal != resultsLength"
                 >
-                    <b-button class="close" @click="toggleFilterList()">
-                        <span aria-hidden="true">&times;</span>
-                    </b-button>
-                    <b-row class="mt-4">
-                        <b-col v-for="wordGroup in splittedFilterList" :key="wordGroup[0]">
-                            <b-list-group flush>
-                                <b-list-group-item v-for="word in wordGroup" :key="word">{{ word }}</b-list-group-item>
-                            </b-list-group>
-                        </b-col>
-                    </b-row>
-                </b-card>
-            </div>
-        </b-card>
-        <b-row class="m-2">
-            <b-col cols="12" sm="4">
-                <b-card no-body class="shadow-sm">
-                    <b-table
-                        hover
-                        striped
-                        borderless
-                        caption-top
-                        :items="sortedList"
-                        @row-clicked="collocTableClick"
-                    ></b-table>
-                </b-card>
-            </b-col>
-            <b-col cols="12" sm="8">
-                <b-card no-body class="p-3 shadow-sm">
-                    <div class="card-text">
-                        <span
-                            class="cloud-word"
-                            v-for="word in collocCloudWords"
-                            :key="word.word"
-                            :style="getWordCloudStyle(word)"
-                            @click="collocTableClick(word)"
-                        >{{ word.collocate}}</span>
-                    </div>
-                </b-card>
-            </b-col>
-        </b-row>
-        <!-- <access-control v-if="!authorized"></access-control> -->
-    </div>
+                    <b-progress-bar
+                        :value="runningTotal"
+                        :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
+                    ></b-progress-bar>
+                </b-progress>
+                <div class="pl-3">
+                    <span>
+                        <span tooltip tooltip-title="Click to display filtered words">
+                            The
+                            <a
+                                href
+                                @click="toggleFilterList()"
+                                v-if="colloc_filter_choice === 'frequency'"
+                            >{{ filter_frequency }} most common words</a>
+                            <a
+                                href
+                                @click="toggleFilterList()"
+                                v-if="colloc_filter_choice === 'stopwords'"
+                            >Common function words</a>
+                            <a
+                                href
+                                @click="toggleFilterList()"
+                                v-if="colloc_filter_choice === 'tfidf'"
+                            >{{ filter_frequency }} most highly weighted terms across the corpus</a>
+                            are being filtered from this report.
+                        </span>
+                    </span>
+                    <b-card
+                        no-body
+                        id="filter-list"
+                        class="pl-3 pr-3 pb-3 shadow-lg"
+                        data-velocity-opts="{duration: 200}"
+                        v-if="showFilteredWords"
+                    >
+                        <b-button class="close" @click="toggleFilterList()">
+                            <span aria-hidden="true">&times;</span>
+                        </b-button>
+                        <b-row class="mt-4">
+                            <b-col v-for="wordGroup in splittedFilterList" :key="wordGroup[0]">
+                                <b-list-group flush>
+                                    <b-list-group-item
+                                        v-for="word in wordGroup"
+                                        :key="word"
+                                    >{{ word }}</b-list-group-item>
+                                </b-list-group>
+                            </b-col>
+                        </b-row>
+                    </b-card>
+                </div>
+            </b-card>
+            <b-row class="mt-4">
+                <b-col cols="12" sm="4">
+                    <b-card no-body class="shadow-sm">
+                        <b-table
+                            hover
+                            striped
+                            borderless
+                            caption-top
+                            :items="sortedList"
+                            @row-clicked="collocTableClick"
+                        ></b-table>
+                    </b-card>
+                </b-col>
+                <b-col cols="12" sm="8">
+                    <b-card no-body class="p-3 shadow-sm">
+                        <div class="card-text">
+                            <span
+                                class="cloud-word"
+                                v-for="word in collocCloudWords"
+                                :key="word.word"
+                                :style="getWordCloudStyle(word)"
+                                @click="collocTableClick(word)"
+                            >{{ word.collocate}}</span>
+                        </div>
+                    </b-card>
+                </b-col>
+            </b-row>
+            <!-- <access-control v-if="!authorized"></access-control> -->
+        </div>
+    </b-container>
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";

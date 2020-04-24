@@ -1,9 +1,9 @@
 <template>
-    <div>
+    <b-container fluid>
         <conckwic :results="results.results"></conckwic>
-        <b-row class="ml-2 mr-2 mb-2">
+        <b-row>
             <b-col cols="12" md="7" xl="8">
-                <b-card no-body class="p-2 shadow-sm">
+                <b-card no-body class="p-2 ml-2 shadow-sm">
                     <div class="p-2 mb-1">
                         Resort results by
                         <div
@@ -65,7 +65,7 @@
             </b-col>
         </b-row>
         <pages></pages>
-    </div>
+    </b-container>
 </template>
 
 <script>
