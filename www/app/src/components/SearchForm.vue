@@ -581,7 +581,9 @@ export default {
             this.byte = "";
             this.formOpen = false;
             this.debug(this, this.$store.state.formData);
-            this.$router.push(this.paramsToRoute(this.$store.state.formData));
+            this.$router.push(
+                this.paramsToRoute({ ...this.$store.state.formData })
+            );
         },
         onReset() {
             this.$store.commit(
@@ -631,7 +633,6 @@ export default {
                     this.q.replace('"', "").length > 1 &&
                     this.q != currentQueryTerm
                 ) {
-                    console.log("typed", this.q);
                     this.$http
                         .get(`${this.$dbUrl}/scripts/autocomplete_term.py`, {
                             params: { term: this.q }
@@ -640,7 +641,6 @@ export default {
                             this.autoCompleteResults.q = response.data;
                             this.isLoading = false;
                         });
-                    console.log("typed", this.q);
                 }
             } else {
                 this.$store.commit("updateFormDataField", {

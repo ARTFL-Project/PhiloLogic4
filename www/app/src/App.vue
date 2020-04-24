@@ -196,7 +196,7 @@ export default {
                     console.log("matched", this.report);
                     this.report = "bibliography";
                     this.$router.push(
-                        this.paramsToRoute(this.$store.state.formData)
+                        this.paramsToRoute({ ...this.$store.state.formData })
                     );
                 } else if (
                     this.q.length > 0 &&
@@ -208,7 +208,7 @@ export default {
                     });
                     this.debug(this, this.report);
                     this.$router.push(
-                        this.paramsToRoute(this.$store.state.formData)
+                        this.paramsToRoute({ ...this.$store.state.formData })
                     );
                 }
             }

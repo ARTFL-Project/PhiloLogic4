@@ -1,7 +1,7 @@
 <template>
     <b-container fluid>
         <conckwic :results="results.results" v-if="Object.keys(results).length"></conckwic>
-        <b-row class="mr-2 mt-4">
+        <b-row class="mt-4">
             <b-col
                 cols="12"
                 md="7"
@@ -11,16 +11,14 @@
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
                     <b-card
                         no-body
-                        class="philologic-occurrence ml-4 mr-4 mb-4 shadow-sm p-1"
+                        class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm"
                         v-for="(result, index) in results.results"
                         :key="result.philo_id.join('-')"
                     >
                         <b-row class="citation-container">
                             <b-col cols="12" sm="10" md="11">
                                 <span class="cite" :data-id="result.philo_id.join(' ')">
-                                    <span
-                                        class="result-number"
-                                    >{{ results.description.start + index }}</span>
+                                    <span class="number">{{ results.description.start + index }}</span>
                                     <input
                                         type="checkbox"
                                         class="ml-3 mr-2"
@@ -202,5 +200,16 @@ export default {
 <style scoped>
 .citation-container {
     border-width: 0 !important;
+}
+.number {
+    background-color: rgb(78, 93, 108);
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 0.375rem 0.75rem;
+    display: inline-block;
+    margin-right: 5px;
+    border-radius: 0.25rem;
+    height: 100%;
 }
 </style>

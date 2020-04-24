@@ -294,7 +294,9 @@ export default {
             this.approximate_ratio = "";
         },
         rerunQuery() {
-            this.$router.push(this.paramsToRoute(this.$store.state.formData));
+            this.$router.push(
+                this.paramsToRoute({ ...this.$store.state.formData })
+            );
         },
         removeTerm(index) {
             let queryTermGroup = this.copyObject(this.description.termGroups);
@@ -317,7 +319,9 @@ export default {
                 ...this.description,
                 termGroups: queryTermGroup
             });
-            this.$router.push(this.paramsToRoute(this.$store.state.formData));
+            this.$router.push(
+                this.paramsToRoute({ ...this.$store.state.formData })
+            );
         }
     }
 };

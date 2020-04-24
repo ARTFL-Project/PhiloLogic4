@@ -48,7 +48,7 @@
                             id="result-stats"
                             class="pb-2"
                             v-if="resultsLength > 0"
-                        >{{ resultsLength }} total occurrences spread across {{ aggregationCache.results.length }} {{ group_by }}(s)</div>
+                        >{{ resultsLength }} total occurrences spread across {{ aggregationCache.results.length }} {{ groupByLabel.toLowerCase() }}(s)</div>
                         <div id="result-stats" class="pb-2" v-else>
                             <b>No results for your query</b>
                         </div>
@@ -153,7 +153,11 @@ export default {
                     labelSmall: "Keyword in context"
                 }
             },
-            showBiblio: false
+            showBiblio: false,
+            groupByLabel:
+                this.$philoConfig.metadata_aliases[
+                    this.$route.query.group_by
+                ] || this.group_by
         };
     },
     created() {

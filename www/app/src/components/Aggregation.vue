@@ -1,7 +1,7 @@
 <template>
     <b-container fluid class="mt-4">
         <conckwic :results="aggregationResults"></conckwic>
-        <b-card no-body class="shadow mt-4 ml-4 mr-4">
+        <b-card no-body class="shadow mt-4 ml-2 mr-2">
             <b-list-group flush>
                 <virtual-list :size="55" :remain="25">
                     <b-list-group-item
@@ -118,7 +118,9 @@ export default {
                                 results: results.break_up_field
                             })
                         );
-                        this.breakUpFieldName = response.data.break_up_field;
+                        this.breakUpFieldName = this.$philoConfig.metadata_aliases[
+                            response.data.break_up_field
+                        ].toLowerCase();
                         this.resultsLength = response.data.total_results;
                         this.searching = false;
                         this.aggregationCache = {
