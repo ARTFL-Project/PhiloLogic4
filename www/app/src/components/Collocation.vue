@@ -247,7 +247,7 @@ export default {
                 this.paramsToRoute({
                     ...this.$store.state.formData,
                     report: "concordance",
-                    q: `${this.q} ${item.collocate}`,
+                    q: `${this.q} "${item.collocate}"`,
                     method: "cooc"
                 })
             );

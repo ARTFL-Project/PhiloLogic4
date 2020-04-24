@@ -52,7 +52,6 @@ def collocation_results(request, config):
     else:
         hits = db.query(request["q"], "proxy", request["arg"], raw_results=True, **request.metadata)
     hits.finish()
-    # return parse_version(hits, config, request, db, filter_list, collocation_object)
     return precompute_version(hits, config, request, db, filter_list, collocation_object)
 
 
@@ -61,13 +60,11 @@ def precompute_version(hits, config, request, db, filter_list, collocation_objec
     stored_sentence_counts = defaultdict(int)
     sentence_hit_count = 1
     hits_done = request.start or 0
-    max_time = request.max_time or 10
+    max_time = request.max_time or 2
     all_collocates = defaultdict(lambda: {"count": 0})
-    db = sqlite3.connect("/var/www/html/philologic/frantext/data/sentences_msgpack_lz4.db")
-    cursor = db.cursor()
+    cursor = db.dbh.cursor()
     start_time = timeit.default_timer()
     for hit in hits[hits_done:]:
-        hits_done += 1
         # start_byte = extract_bytes(hit)[0]
         sentence = " ".join(map(str, hit[:6])) + " 0"
         cursor.execute("SELECT words FROM sentences WHERE philo_id = ?", (sentence,))
