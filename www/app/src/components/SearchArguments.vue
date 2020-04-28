@@ -405,6 +405,7 @@ export default {
 }
 .remove-metadata {
     float: right;
+    line-height: 29px;
     padding-right: 5px;
     padding-left: 5px;
     border-left: #ddd solid 1px;

@@ -211,7 +211,12 @@
                                                 @keydown.down="onArrowDown(localField.value)"
                                                 @keydown.up="onArrowUp(localField.value)"
                                                 @keyup.enter="onEnter(localField.value)"
+                                                v-if="metadataInputStyle[localField.value] == 'text'"
                                             />
+                                            <b-form-select
+                                                :options="dropdownValues[localField.value]"
+                                                v-if="metadataInputStyle[localField.value] == 'dropdown'"
+                                            ></b-form-select>
                                             <ul
                                                 :id="'autocomplete-' + localField.value"
                                                 class="autocomplete-results shadow"
@@ -377,9 +382,6 @@ export default {
         SearchTips
     },
     computed: {
-        // When using nested data structures, the string
-        // after the last dot (e.g. `firstName`) is used
-        // for defining the name of the computed property.
         ...mapFields([
             "formData.report",
             "formData.q",
@@ -440,6 +442,7 @@ export default {
     data() {
         return {
             dictionary: this.$philoConfig.dictionary,
+            metadataInputStyle: this.$philoConfig.metadata_input_style,
             headIndex: 0,
             formOpen: false,
             searchOptionsButton: "Show search options",
@@ -458,6 +461,7 @@ export default {
             ],
             metadataDisplay: [],
             metadataValues: {},
+            dropdownValues: {},
             collocationOptions: [
                 { text: "Most Frequent Terms", value: "frequency" },
                 { text: "Less distinctive terms on average", value: "tfidf" },
@@ -519,6 +523,20 @@ export default {
                 this.$set(this.arrowCounters, metadataField, -1);
             }
         });
+        for (let metadata in this.$philoConfig.metadata_dropdown_values) {
+            console.log(metadata, this.dropdownValues);
+            this.dropdownValues[metadata] = [];
+            let dropdownValue = this.$philoConfig.metadata_dropdown_values[
+                metadata
+            ];
+            for (let i = 0; i < dropdownValue.length; i++) {
+                let quotedValue = dropdownValue[i].value;
+                this.dropdownValues[metadata].push({
+                    text: dropdownValue[i].label,
+                    value: quotedValue
+                });
+            }
+        }
     },
     methods: {
         updateMetadataValues() {
