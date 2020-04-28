@@ -14,6 +14,7 @@ description, you can refer to [our blog](<http://artfl.blogspot.com>).
 -   [**Query Syntax**](query_syntax.md)
 -   [**Text Encoding Spec**](encoding_spec.md)
 -   [**Access Control**](access_control.md)
+-   [**Custom Bibliographic Citations**](custom_citations.md)
 
 ### IMPORTANT
 
