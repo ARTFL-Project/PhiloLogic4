@@ -118,9 +118,11 @@ export default {
                                 results: results.break_up_field
                             })
                         );
-                        this.breakUpFieldName = this.$philoConfig.metadata_aliases[
-                            response.data.break_up_field
-                        ].toLowerCase();
+                        this.breakUpFieldName =
+                            this.$philoConfig.metadata_aliases[
+                                response.data.break_up_field
+                            ] || response.data.break_up_field;
+                        this.breakUpFieldName = this.breakUpFieldName.toLowerCase();
                         this.resultsLength = response.data.total_results;
                         this.searching = false;
                         this.aggregationCache = {

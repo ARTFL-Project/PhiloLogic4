@@ -116,7 +116,8 @@ export default {
             "formData.q",
             "formData.filter_frequency",
             "currentReport",
-            "resultsLength"
+            "resultsLength",
+            "searching"
         ]),
         colorCodes: function() {
             let colorCodes = {};
@@ -153,7 +154,6 @@ export default {
             searchParams: {},
             authorized: true,
             moreResults: false,
-            loading: false,
             sortedList: [],
             showFilteredWords: false,
             runningTotal: 0,
@@ -176,8 +176,8 @@ export default {
     methods: {
         fetchResults() {
             this.localFormData = this.copyObject(this.$store.state.formData);
-            this.loading = false;
             var collocObject = {};
+            this.searching = true;
             this.updateCollocation(collocObject, 0);
             // } else {
             //     this.retrieveFromStorage();
@@ -198,10 +198,11 @@ export default {
                     this.moreResults = data.more_results;
                     this.runningTotal = data.hits_done;
                     start = data.hits_done;
+                    this.searching = false;
                     this.sortAndRenderCollocation(fullResults, data, start);
                 })
                 .catch(error => {
-                    this.loading = false;
+                    this.searching = false;
                     this.debug(this, error);
                 });
         },
@@ -220,7 +221,6 @@ export default {
             }
             this.sortedList = sortedList;
             this.buildWordCloud();
-            this.loading = false;
             if (this.moreResults) {
                 var tempFullResults = collocates.unsorted;
                 var runningQuery = this.$store.state.formData;
@@ -245,7 +245,7 @@ export default {
             this.filterList = savedObject.filterList;
             // this.percent = 100;
             this.done = true;
-            this.loading = false;
+            this.searching = false;
         },
         collocTableClick(item) {
             this.$router.push(

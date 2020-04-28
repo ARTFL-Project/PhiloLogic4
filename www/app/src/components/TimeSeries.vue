@@ -58,7 +58,8 @@ export default {
         ...mapFields({
             report: "formData.report",
             interval: "formData.year_interval",
-            currentReport: "currentReport"
+            currentReport: "currentReport",
+            searching: "searching"
         })
     },
     data() {
@@ -98,12 +99,14 @@ export default {
             }
             this.resultsLength = 0;
             this.frequencyType = "absolute_time";
+            this.searching = true;
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_start_end_date.py`, {
                     params: this.paramsFilter({ ...this.$store.state.formData })
                 })
                 .then(response => {
                     // if no dates supplied or if invalid dates
+                    console.log(this.$store.state.formData);
                     if (this.$store.state.formData.year.length > 0) {
                         let yearSplit = this.$store.state.formData.year.split(
                             "-"
@@ -282,7 +285,7 @@ export default {
                     var fullResults;
                     this.updateTimeSeries(fullResults);
                 })
-                .catch(function(response) {
+                .catch(response => {
                     this.debug(this, response);
                 });
         },
@@ -297,7 +300,7 @@ export default {
                     }
                 })
                 .then(results => {
-                    this.loading = false;
+                    this.searching = false;
                     var timeSeriesResults = results.data;
                     this.resultsLength += timeSeriesResults.results_length;
                     this.resultsLength = this.resultsLength;
@@ -318,7 +321,7 @@ export default {
                 })
                 .catch(response => {
                     this.debug(this, response);
-                    this.loading = false;
+                    this.searching = false;
                 });
         },
         sortAndRenderTimeSeries(fullResults, timeSeriesResults) {
