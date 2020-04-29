@@ -155,9 +155,11 @@ export default {
             },
             showBiblio: false,
             groupByLabel:
-                this.$philoConfig.metadata_aliases[
-                    this.$route.query.group_by
-                ] || this.group_by
+                this.$route.query.group_by in this.$philoConfig.metadata_aliases
+                    ? this.$philoConfig.metadata_aliases[
+                          this.$route.query.group_by
+                      ]
+                    : this.$route.query.group_by
         };
     },
     created() {

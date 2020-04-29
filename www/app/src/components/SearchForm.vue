@@ -524,7 +524,6 @@ export default {
             }
         });
         for (let metadata in this.$philoConfig.metadata_dropdown_values) {
-            console.log(metadata, this.dropdownValues);
             this.dropdownValues[metadata] = [];
             let dropdownValue = this.$philoConfig.metadata_dropdown_values[
                 metadata
