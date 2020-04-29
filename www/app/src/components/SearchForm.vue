@@ -4,7 +4,7 @@
             <b-col sm="10" offset-sm="1" xl="8" offset-xl="2">
                 <b-card no-body class="shadow">
                     <b-form @submit.prevent @reset="onReset" @keyup.enter="onSubmit()">
-                        <div id="form_body">
+                        <div id="form-body">
                             <div id="initial-form">
                                 <b-button-group id="report" style="width: 100%">
                                     <b-button
@@ -214,7 +214,9 @@
                                                 v-if="metadataInputStyle[localField.value] == 'text'"
                                             />
                                             <b-form-select
+                                                :id="localField.value"
                                                 :options="dropdownValues[localField.value]"
+                                                :value="formData[localField.value]"
                                                 v-if="metadataInputStyle[localField.value] == 'dropdown'"
                                             ></b-form-select>
                                             <ul
@@ -536,6 +538,28 @@ export default {
                 });
             }
         }
+    },
+    mounted() {
+        this.$nextTick(() => {
+            document
+                .getElementById("form-body")
+                .addEventListener("change", event => {
+                    if (
+                        event.srcElement.id in
+                        this.$philoConfig.metadata_dropdown_values
+                    ) {
+                        let value =
+                            event.srcElement.options[
+                                document.getElementById(event.srcElement.id)
+                                    .selectedIndex
+                            ].value;
+                        this.$store.commit("updateFormDataField", {
+                            key: event.srcElement.id,
+                            value: value
+                        });
+                    }
+                });
+        });
     },
     methods: {
         updateMetadataValues() {
