@@ -70,4 +70,3 @@ def return_record(line):
     record = Record(rec_type, word, id)
     record.attrib = eval(attrib)
     return rec_type, word.decode("utf-8"), record
-

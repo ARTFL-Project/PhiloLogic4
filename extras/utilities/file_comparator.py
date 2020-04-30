@@ -109,4 +109,3 @@ if __name__ == "__main__":
     output.close()
 
     os.system("diff -w %s %s >> %s_%s_diff" % (a, b, os.path.basename(a), os.path.basename(b)))
-

@@ -3,7 +3,7 @@
 import sys
 import os
 import errno
-import philologic5
+import philologic
 
 from philologic5.LoadFilters import *
 from philologic5.PostFilters import *

@@ -2,16 +2,16 @@
 from distutils.core import setup
 
 setup(
-    name="philologic5",
+    name="philologic",
     version="5.0a1",
     author="The ARTFL Project",
     author_email="artfl@artfl.uchicago.edu",
     packages=[
-        "philologic5",
-        "philologic5.runtime",
-        "philologic5.utils",
-        "philologic5.runtime.reports",
-        "philologic5.loadtime",
+        "philologic",
+        "philologic.runtime",
+        "philologic.utils",
+        "philologic.runtime.reports",
+        "philologic.loadtime",
     ],
     scripts=["scripts/philoload5"],
     install_requires=[
