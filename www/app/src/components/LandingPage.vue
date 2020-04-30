@@ -35,8 +35,7 @@
                                             last: rangeIndex === browseType.queries.length - 1
                                         }"
                                         style="border-radius: 0; width: 100%"
-                                        >{{ range }}</b-button
-                                    >
+                                    >{{ range }}</b-button>
                                 </b-col>
                             </b-row>
                         </b-card>
@@ -70,15 +69,25 @@
             ></div>
             <div id="dictionary-landing-page" v-if="landingPageBrowsing === 'dictionary'">
                 <b-row>
-                    <b-col cols="6" :class="{ 'col-xs-offset-3': !showDicoLetterRows }" id="dico-landing-volume">
+                    <b-col
+                        cols="6"
+                        :class="{ 'col-xs-offset-3': !showDicoLetterRows }"
+                        id="dico-landing-volume"
+                    >
                         <b-card no-body header="Browse by volume" class="shadow-sm">
                             <b-list-group flush v-if="volumeData.length">
-                                <b-list-group-item v-for="volume in volumeData" :key="volume.philo_id">
-                                    <router-link :to="`/navigate/${volume.philo_id}/table-of-contents`">
+                                <b-list-group-item
+                                    v-for="volume in volumeData"
+                                    :key="volume.philo_id"
+                                >
+                                    <router-link
+                                        :to="`/navigate/${volume.philo_id}/table-of-contents`"
+                                    >
                                         <i style="font-variant: small-caps">{{ volume.title }}</i>
-                                        <span style="font-weight: 300" v-if="volume.start_head"
-                                            >({{ volume.start_head }} - {{ volume.end_head }})</span
-                                        >
+                                        <span
+                                            style="font-weight: 300"
+                                            v-if="volume.start_head"
+                                        >({{ volume.start_head }} - {{ volume.end_head }})</span>
                                     </router-link>
                                 </b-list-group-item>
                             </b-list-group>
@@ -98,8 +107,7 @@
                                         :key="letter.letter"
                                         class="letter"
                                         @click="goToLetter(letter.letter)"
-                                        >{{ letter.letter }}</b-td
-                                    >
+                                    >{{ letter.letter }}</b-td>
                                 </b-tr>
                             </b-table-simple>
                         </b-card>
@@ -113,7 +121,14 @@
                 class="mt-4"
             >
                 <b-row>
-                    <b-col cols="12" offset-sm="1" sm="9" offset-md="2" md="8" class="text-content-area">
+                    <b-col
+                        cols="12"
+                        offset-sm="1"
+                        sm="9"
+                        offset-md="2"
+                        md="8"
+                        class="text-content-area"
+                    >
                         <b-card
                             :header="group.prefix.toString()"
                             v-for="group in resultGroups"
@@ -136,7 +151,7 @@
     </div>
 </template>
 <script>
-import citations from "./Citations"
+import citations from "./Citations";
 
 export default {
     name: "landingPage",
@@ -150,7 +165,8 @@ export default {
             logo: this.$philoConfig.logo,
             authorized: true,
             landingPageBrowsing: this.$philoConfig.landing_page_browsing,
-            defaultLandingPageBrowsing: this.$philoConfig.default_landing_page_browsing,
+            defaultLandingPageBrowsing: this.$philoConfig
+                .default_landing_page_browsing,
             displayCount: true,
             resultGroups: [],
             contentType: "",
@@ -159,46 +175,50 @@ export default {
             showDicoLetterRows: true,
             volumeData: [],
             dicoLetterRows: []
-        }
+        };
     },
     created() {
         if (this.dictionary) {
-            this.setupDictView()
+            this.setupDictView();
         }
     },
     methods: {
         setupDictView() {
-            this.$http.get(`${this.$dbUrl}/scripts/get_bibliography.py?object_level=doc`).then(response => {
-                for (let i = 0; i < response.data.length; i++) {
-                    this.volumeData.push(response.data[i])
-                }
-            })
+            this.$http
+                .get(
+                    `${this.$dbUrl}/scripts/get_bibliography.py?object_level=doc`
+                )
+                .then(response => {
+                    for (let i = 0; i < response.data.length; i++) {
+                        this.volumeData.push(response.data[i]);
+                    }
+                });
 
-            let dicoLetterRange = this.$philoConfig.dico_letter_range
-            let row = []
-            let position = 0
+            let dicoLetterRange = this.$philoConfig.dico_letter_range;
+            let row = [];
+            let position = 0;
             for (var i = 0; i < dicoLetterRange.length; i++) {
-                position++
+                position++;
                 row.push({
                     letter: dicoLetterRange[i],
                     url: "bibliography&head=^" + dicoLetterRange[i] + ".*"
-                })
+                });
                 if (position === 4) {
-                    this.dicoLetterRows.push(row)
-                    row = []
-                    position = 0
+                    this.dicoLetterRows.push(row);
+                    row = [];
+                    position = 0;
                 }
             }
             if (row.length) {
-                this.dicoLetterRows.push(row)
+                this.dicoLetterRows.push(row);
             }
             if (this.dicoLetterRows.length == 0) {
-                this.showDicoLetterRows = false
+                this.showDicoLetterRows = false;
             }
         },
         getContent(browseType, range) {
-            this.selectedField = browseType.group_by_field
-            this.loading = true
+            this.selectedField = browseType.group_by_field;
+            this.loading = true;
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_landing_page_content.py`, {
                     params: {
@@ -211,33 +231,35 @@ export default {
                 })
                 .then(response => {
                     if (browseType.group_by_field == "author") {
-                        this.resultGroups = this.groupByAuthor(response.data.content)
+                        this.resultGroups = this.groupByAuthor(
+                            response.data.content
+                        );
                     } else {
-                        this.resultGroups = response.data.content
+                        this.resultGroups = response.data.content;
                     }
-                    this.displayCount = response.data.display_count
-                    this.contentType = response.data.content_type
-                    this.loading = false
+                    this.displayCount = response.data.display_count;
+                    this.contentType = response.data.content_type;
+                    this.loading = false;
                 })
                 .catch(error => {
-                    this.debug(this, error)
-                    this.loading = false
-                })
+                    this.debug(this, error);
+                    this.loading = false;
+                });
         },
         groupByAuthor(letterGroups) {
-            var groupedResults = []
+            var groupedResults = [];
             for (let group of letterGroups) {
-                var localGroup = []
+                var localGroup = [];
                 for (let i = 0; i < group.results.length; i += 1) {
-                    const innerGroup = group.results[i]
-                    const citations = innerGroup.citation
-                    let authorName = innerGroup.metadata.author
-                    let savedCitation = ""
+                    const innerGroup = group.results[i];
+                    const citations = innerGroup.citation;
+                    let authorName = innerGroup.metadata.author;
+                    let savedCitation = "";
                     for (let c = 0; c < citations.length; c += 1) {
-                        let citation = citations[c]
+                        let citation = citations[c];
                         if (citation.label == authorName) {
-                            savedCitation = citation
-                            break
+                            savedCitation = citation;
+                            break;
                         }
                     }
                     localGroup.push({
@@ -245,20 +267,20 @@ export default {
                         citation: [savedCitation],
                         count: innerGroup.count,
                         normalized: innerGroup.normalized
-                    })
+                    });
                 }
                 groupedResults.push({
                     prefix: group.prefix,
                     results: localGroup
-                })
+                });
             }
-            return groupedResults
+            return groupedResults;
         },
         goToLetter(letter) {
-            this.$router.push(`/bibliography?head=^${letter}.*`)
+            this.$router.push(`/bibliography?head=^${letter}.*`);
         }
     }
-}
+};
 </script>
 <style thisd>
 .btn-light {
@@ -286,7 +308,7 @@ export default {
     color: #007bff;
 }
 .letter:hover {
-    background-color: #e8e8e8 !important;
+    background-color: #e8e8e8;
 }
 tr:nth-child(odd) {
     background-color: #f8f8f8;

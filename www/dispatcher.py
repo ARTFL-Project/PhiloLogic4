@@ -10,7 +10,7 @@ from random import randint
 from glob import glob
 from wsgiref.handlers import CGIHandler
 
-from philologic.runtime import WebConfig, WSGIHandler
+from philologic5.runtime import WebConfig, WSGIHandler
 
 import reports
 from webApp import start_web_app

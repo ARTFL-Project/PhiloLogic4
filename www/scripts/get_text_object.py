@@ -4,9 +4,9 @@ import rapidjson
 import os
 from wsgiref.handlers import CGIHandler
 
-from philologic.runtime.DB import DB
-from philologic.runtime.HitWrapper import ObjectWrapper
-from philologic.runtime import generate_text_object
+from philologic5.runtime.DB import DB
+from philologic5.runtime.HitWrapper import ObjectWrapper
+from philologic5.runtime import generate_text_object
 
 import sys
 
@@ -16,11 +16,11 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.runtime import WebConfig
+    from philologic5.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic.runtime import WSGIHandler
+    from philologic5.runtime import WSGIHandler
 
 
 def get_text_object(environ, start_response):

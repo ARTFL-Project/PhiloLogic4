@@ -12,7 +12,7 @@
                             v-for="(fields, index) in sortingFields"
                             :key="index"
                         >
-                            <b-dropdown size="sm">
+                            <b-dropdown variant="outline-secondary" size="sm">
                                 <template slot="button-content">{{ sortingSelection[index] }}</template>
                                 <b-dropdown-item
                                     v-for="(selection, fieldIndex) in fields"
@@ -22,7 +22,7 @@
                             </b-dropdown>
                         </div>
                         <b-button
-                            variant="primary"
+                            variant="secondary"
                             type="button"
                             class="ml-1"
                             size="sm"
@@ -453,20 +453,20 @@ export default {
     margin-left: -5px;
     opacity: 1;
 }
-/deep/ .kwic-before {
+::v-deep .kwic-before {
     text-align: right;
     overflow: hidden;
     display: inline-block;
     position: absolute;
 }
-/deep/ .inner-before {
+::v-deep .inner-before {
     float: right;
 }
-/deep/ .kwic-after {
+::v-deep .kwic-after {
     text-align: left;
     display: inline-block;
 }
-/deep/ .kwic-text {
+::v-deep .kwic-text {
     display: inline-block;
     overflow: hidden;
     vertical-align: bottom;
@@ -475,40 +475,40 @@ export default {
     margin-left: -3px;
 }
 @media (min-width: 1300px) {
-    /deep/ .kwic-highlight {
+    ::v-deep .kwic-highlight {
         margin-left: 330px;
     }
-    /deep/ .kwic-before {
+    ::v-deep .kwic-before {
         width: 330px;
     }
 }
 @media (min-width: 992px) and (max-width: 1299px) {
-    /deep/ .kwic-highlight {
+    ::v-deep .kwic-highlight {
         margin-left: 230px;
     }
-    /deep/ .kwic-before {
+    ::v-deep .kwic-before {
         width: 230px;
     }
 }
 @media (min-width: 768px) and (max-width: 991px) {
-    /deep/ .kwic-highlight {
+    ::v-deep .kwic-highlight {
         margin-left: 120px;
     }
-    /deep/ .kwic-before {
+    ::v-deep .kwic-before {
         width: 120px;
     }
-    /deep/ .kwic-line {
+    ::v-deep .kwic-line {
         font-size: 12px;
     }
 }
 @media (max-width: 767px) {
-    /deep/ .kwic-highlight {
+    ::v-deep .kwic-highlight {
         margin-left: 200px;
     }
-    /deep/ .kwic-before {
+    ::v-deep .kwic-before {
         width: 200px;
     }
-    /deep/ .kwic-line {
+    ::v-deep .kwic-line {
         font-size: 12px;
     }
 }

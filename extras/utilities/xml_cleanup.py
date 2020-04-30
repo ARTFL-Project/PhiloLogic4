@@ -3,11 +3,11 @@ import re
 import os
 import html.entities
 import traceback
-from philologic import TagCensus
+from philologic5 import TagCensus
 from optparse import OptionParser
 from lxml import etree
 from collections import defaultdict
-from philologic.runtime.FragmentParser import parse as FragmentParserParse
+from philologic5.runtime.FragmentParser import parse as FragmentParserParse
 from html import unescape as unescape_html
 
 
@@ -244,4 +244,3 @@ if __name__ == "__main__":
     if failed_files:
         print("The following files were not converted due to failure:")
         print("\n".join(failed_files))
-

@@ -216,7 +216,10 @@ export default {
     }
 };
 </script>
-aggregon
+<style lang="scss">
+@import "./assets/styles/artfl-theme.scss";
+@import "../node_modules/bootstrap/scss/bootstrap.scss";
+</style>
 <style>
 .highlight {
     color: #ef4500;

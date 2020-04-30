@@ -12,15 +12,15 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.runtime import WebConfig
+    from philologic5.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic.runtime import WSGIHandler
+    from philologic5.runtime import WSGIHandler
 try:
     from custom_functions import frequency_results
 except ImportError:
-    from philologic.runtime import frequency_results
+    from philologic5.runtime import frequency_results
 
 
 def get_frequency(environ, start_response):

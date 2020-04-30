@@ -4,7 +4,7 @@ import os
 from wsgiref.handlers import CGIHandler
 
 import rapidjson
-from philologic.runtime import access_control, login_access
+from philologic5.runtime import access_control, login_access
 
 import sys
 
@@ -14,11 +14,11 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.runtime import WebConfig
+    from philologic5.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic.runtime import WSGIHandler
+    from philologic5.runtime import WSGIHandler
 
 
 default_reports = ["concordance", "kwic", "collocation", "time_series", "navigation"]

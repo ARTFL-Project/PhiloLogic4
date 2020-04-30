@@ -4,8 +4,8 @@ import rapidjson
 import os
 from wsgiref.handlers import CGIHandler
 
-from philologic.runtime.DB import DB
-from philologic.runtime import get_concordance_text
+from philologic5.runtime.DB import DB
+from philologic5.runtime import get_concordance_text
 
 import sys
 
@@ -15,11 +15,11 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.runtime import WebConfig
+    from philologic5.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic.runtime import WSGIHandler
+    from philologic5.runtime import WSGIHandler
 
 
 def get_more_context(environ, start_response):

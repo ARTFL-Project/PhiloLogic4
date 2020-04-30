@@ -6,7 +6,7 @@
                     <b-form @submit.prevent @reset="onReset" @keyup.enter="onSubmit()">
                         <div id="form-body">
                             <div id="initial-form">
-                                <b-button-group id="report" style="width: 100%">
+                                <b-button-group id="report" style="width: 100%; top: -1px;">
                                     <b-button
                                         :id="report.value"
                                         v-for="searchReport in reports"
@@ -72,13 +72,13 @@
                                                 <b-button
                                                     type="reset"
                                                     id="reset_form"
-                                                    variant="outline-danger"
+                                                    variant="secondary"
                                                     @click="onReset()"
                                                 >Clear</b-button>
                                                 <b-button
                                                     type="button"
                                                     id="show-search-form"
-                                                    variant="outline-info"
+                                                    variant="outline-secondary"
                                                     @click="toggleForm()"
                                                 >{{ searchOptionsButton }}</b-button>
                                             </b-button-group>

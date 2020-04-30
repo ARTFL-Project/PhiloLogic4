@@ -15,31 +15,31 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.runtime import WebConfig
+    from philologic5.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic.runtime import WSGIHandler
+    from philologic5.runtime import WSGIHandler
 try:
     from custom_functions import bibliography_results
 except ImportError:
-    from philologic.runtime import bibliography_results
+    from philologic5.runtime import bibliography_results
 try:
     from custom_functions import concordance_results
 except ImportError:
-    from philologic.runtime import concordance_results
+    from philologic5.runtime import concordance_results
 try:
     from custom_functions import kwic_results
 except ImportError:
-    from philologic.runtime import kwic_results
+    from philologic5.runtime import kwic_results
 try:
     from custom_functions import collocation_results
 except ImportError:
-    from philologic.runtime import collocation_results
+    from philologic5.runtime import collocation_results
 try:
     from custom_functions import generate_time_series
 except ImportError:
-    from philologic.runtime import generate_time_series
+    from philologic5.runtime import generate_time_series
 
 
 TAGS = re.compile(r"<[^>]+>")

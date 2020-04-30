@@ -12,10 +12,10 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.runtime import WebConfig
+    from philologic5.runtime import WebConfig
 
-from philologic.Config import MakeDBConfig
-from philologic.runtime.DB import DB
+from philologic5.Config import MakeDBConfig
+from philologic5.runtime.DB import DB
 
 
 def get_web_config(_, start_response):

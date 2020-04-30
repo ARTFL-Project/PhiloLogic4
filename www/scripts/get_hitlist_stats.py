@@ -4,7 +4,7 @@ import rapidjson
 import os
 from wsgiref.handlers import CGIHandler
 
-from philologic.runtime.DB import DB
+from philologic5.runtime.DB import DB
 
 import sys
 
@@ -14,11 +14,11 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.runtime import WebConfig
+    from philologic5.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic.runtime import WSGIHandler
+    from philologic5.runtime import WSGIHandler
 
 
 OBJECT_LEVEL = {"doc": 6, "div1": 5, "div2": 4, "div3": 3, "para": 2, "sent": 1}

@@ -13,21 +13,19 @@ import custom_functions
 try:
     from custom_functions import aggregation_by_field
 except ImportError:
-    from philologic.runtime import aggregation_by_field
+    from philologic5.runtime import aggregation_by_field
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.runtime import WebConfig
+    from philologic5.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic.runtime import WSGIHandler
+    from philologic5.runtime import WSGIHandler
 
 
 def aggregation(environ, start_response):
-    config = WebConfig(
-        os.path.abspath(os.path.dirname(__file__)).replace("reports", "")
-    )
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("reports", ""))
     request = WSGIHandler(environ, config)
     aggregation_object = aggregation_by_field(request, config)
     headers = [

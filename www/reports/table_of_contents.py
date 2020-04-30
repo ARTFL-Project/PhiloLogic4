@@ -13,15 +13,15 @@ import custom_functions
 try:
     from custom_functions import generate_toc_object
 except ImportError:
-    from philologic.runtime import generate_toc_object
+    from philologic5.runtime import generate_toc_object
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.runtime import WebConfig
+    from philologic5.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic.runtime import WSGIHandler
+    from philologic5.runtime import WSGIHandler
 
 
 def table_of_contents(environ, start_response):

@@ -3,13 +3,13 @@
 import sys
 import os
 import errno
-import philologic
+import philologic5
 
-from philologic.LoadFilters import *
-from philologic.PostFilters import *
-from philologic.Parser import Parser
-from philologic.Loader import Loader, handle_command_line, setup_db_dir
-from philologic.PlainTextParser import PlainTextParser
+from philologic5.LoadFilters import *
+from philologic5.PostFilters import *
+from philologic5.Parser import Parser
+from philologic5.Loader import Loader, handle_command_line, setup_db_dir
+from philologic5.PlainTextParser import PlainTextParser
 
 ## Flush buffer output
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)

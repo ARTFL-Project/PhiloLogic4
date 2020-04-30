@@ -6,9 +6,9 @@ import subprocess
 import sys
 from wsgiref.handlers import CGIHandler
 
-from philologic.runtime.DB import DB
-from philologic.runtime.Query import grep_exact, grep_word, split_terms
-from philologic.runtime.QuerySyntax import group_terms, parse_query
+from philologic5.runtime.DB import DB
+from philologic5.runtime.Query import grep_exact, grep_word, split_terms
+from philologic5.runtime.QuerySyntax import group_terms, parse_query
 
 
 sys.path.append("..")
@@ -17,11 +17,11 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.runtime import WebConfig
+    from philologic5.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic.runtime import WSGIHandler
+    from philologic5.runtime import WSGIHandler
 
 
 def term_list(environ, start_response):

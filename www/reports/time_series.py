@@ -13,15 +13,15 @@ import custom_functions
 try:
     from custom_functions import generate_time_series
 except ImportError:
-    from philologic.runtime import generate_time_series
+    from philologic5.runtime import generate_time_series
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic.runtime import WebConfig
+    from philologic5.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic.runtime import WSGIHandler
+    from philologic5.runtime import WSGIHandler
 
 
 def time_series(environ, start_response):
