@@ -5,7 +5,7 @@ import os
 import sqlite3
 import sys
 
-from philologic5.runtime.DB import DB
+from philologic.runtime.DB import DB
 
 
 object_levels = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}

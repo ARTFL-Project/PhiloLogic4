@@ -1,6 +1,6 @@
 
 
-from philologic5 import shlaxtree as st
+from philologic import shlaxtree as st
 import sys
 
 

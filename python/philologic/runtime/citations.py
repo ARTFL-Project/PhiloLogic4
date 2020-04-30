@@ -2,7 +2,7 @@
 """Citations"""
 
 
-from philologic5.runtime.link import make_absolute_object_link, make_absolute_query_link
+from philologic.runtime.link import make_absolute_object_link, make_absolute_query_link
 
 
 def citation_links(db, config, i):

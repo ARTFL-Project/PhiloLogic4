@@ -4,8 +4,8 @@ import sys
 import os
 import re
 from lxml import etree
-from philologic5.Loader import Loader
-from philologic5.Parser import DefaultMetadataXPaths
+from philologic.Loader import Loader
+from philologic.Parser import DefaultMetadataXPaths
 
 
 ### USAGE ###

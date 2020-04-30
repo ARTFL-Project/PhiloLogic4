@@ -2,7 +2,7 @@
 
 import re
 import sys
-from philologic5.TagCensus import TagCensus
+from philologic.TagCensus import TagCensus
 
 
 class TokenCounter(object):

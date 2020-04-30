@@ -5,8 +5,8 @@ import sys
 from json import dumps
 from wsgiref.handlers import CGIHandler
 
-from philologic5.runtime.DB import DB
-from philologic5.runtime.link import byte_range_to_link
+from philologic.runtime.DB import DB
+from philologic.runtime.link import byte_range_to_link
 
 sys.path.append("..")
 import custom_functions
@@ -14,11 +14,11 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic5.runtime import WebConfig
+    from philologic.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic5.runtime import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 
 def alignment_to_text(environ, start_response):

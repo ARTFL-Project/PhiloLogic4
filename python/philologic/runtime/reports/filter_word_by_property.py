@@ -2,10 +2,10 @@
 """Filter word by property
 Currently unmaintained"""
 
-from philologic5.runtime.citations import citation_links, citations
-from philologic5.runtime.get_text import get_concordance_text
-from philologic5.runtime.reports.generate_word_frequency import get_word_attrib
-from philologic5.runtime.DB import DB
+from philologic.runtime.citations import citation_links, citations
+from philologic.runtime.get_text import get_concordance_text
+from philologic.runtime.reports.generate_word_frequency import get_word_attrib
+from philologic.runtime.DB import DB
 
 
 def filter_words_by_property(request, config):

@@ -8,9 +8,9 @@ import unicodedata
 from collections import defaultdict
 from operator import itemgetter
 
-from philologic5.runtime.DB import DB
-from philologic5.runtime.citations import citation_links, citations
-from philologic5.utils import unaccent
+from philologic.runtime.DB import DB
+from philologic.runtime.citations import citation_links, citations
+from philologic.utils import unaccent
 
 
 def landing_page_bibliography(request, config):

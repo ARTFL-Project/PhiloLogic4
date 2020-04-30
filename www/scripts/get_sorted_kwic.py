@@ -4,9 +4,9 @@ import rapidjson
 import os
 from wsgiref.handlers import CGIHandler
 
-from philologic5.runtime.DB import DB
-from philologic5.runtime import kwic_hit_object, page_interval
-from philologic5.utils import sort_list
+from philologic.runtime.DB import DB
+from philologic.runtime import kwic_hit_object, page_interval
+from philologic.utils import sort_list
 
 import sys
 
@@ -16,11 +16,11 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic5.runtime import WebConfig
+    from philologic.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic5.runtime import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 
 def get_sorted_kwic(environ, start_response):

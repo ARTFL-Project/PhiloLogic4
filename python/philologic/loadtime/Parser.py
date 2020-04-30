@@ -6,8 +6,8 @@ import re
 import string
 import sys
 
-from philologic5.loadtime.OHCOVector import CompoundStack
-from philologic5.utils import convert_entities
+from philologic.loadtime.OHCOVector import CompoundStack
+from philologic.utils import convert_entities
 from collections import deque
 
 DEFAULT_TAG_TO_OBJ_MAP = {

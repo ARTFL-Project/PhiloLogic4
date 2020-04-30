@@ -7,9 +7,9 @@ import os.path
 import sys
 import shutil
 
-from philologic5.runtime import WebConfig
-from philologic5.runtime import WSGIHandler
-from philologic5.runtime import access_control
+from philologic.runtime import WebConfig
+from philologic.runtime import WSGIHandler
+from philologic.runtime import access_control
 
 config = WebConfig(os.path.abspath(os.path.dirname(__file__)))
 global_config = imp.load_source("philologic4", config.global_config_location)

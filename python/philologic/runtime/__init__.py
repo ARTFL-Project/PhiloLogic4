@@ -1,12 +1,12 @@
 """Runtime exports"""
 
-from philologic5.runtime.access_control import check_access, login_access
-from philologic5.runtime.find_similar_words import find_similar_words
-from philologic5.runtime.FragmentParser import FragmentParser
-from philologic5.runtime.get_text import get_concordance_text, get_tei_header
-from philologic5.runtime.pages import page_interval
-from philologic5.runtime.Query import parse_query
-from philologic5.runtime.reports import (
+from philologic.runtime.access_control import check_access, login_access
+from philologic.runtime.find_similar_words import find_similar_words
+from philologic.runtime.FragmentParser import FragmentParser
+from philologic.runtime.get_text import get_concordance_text, get_tei_header
+from philologic.runtime.pages import page_interval
+from philologic.runtime.Query import parse_query
+from philologic.runtime.reports import (
     bibliography_results,
     collocation_results,
     concordance_results,
@@ -24,5 +24,5 @@ from philologic5.runtime.reports import (
     landing_page_bibliography,
     aggregation_by_field,
 )
-from philologic5.runtime.web_config import WebConfig
-from philologic5.runtime.WSGIHandler import WSGIHandler
+from philologic.runtime.web_config import WebConfig
+from philologic.runtime.WSGIHandler import WSGIHandler

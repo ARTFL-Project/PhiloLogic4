@@ -263,6 +263,6 @@ pos_tagger = ""
 
 # This is where you define your own parser which needs to have the same signature
 # as the one located in python/philologic/Parser.py
-from philologic5.loadtime import XMLParser
+from philologic.loadtime import XMLParser
 
 parser_factory = XMLParser

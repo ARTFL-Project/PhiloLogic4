@@ -4,7 +4,7 @@ import rapidjson
 import os
 from wsgiref.handlers import CGIHandler
 
-from philologic5.runtime import frequency_results
+from philologic.runtime import frequency_results
 
 import sys
 
@@ -14,11 +14,11 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic5.runtime import WebConfig
+    from philologic.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic5.runtime import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 
 def get_frequency(environ, start_response):

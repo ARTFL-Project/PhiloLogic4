@@ -13,15 +13,15 @@ import custom_functions
 try:
     from custom_functions import collocation_results
 except ImportError:
-    from philologic5.runtime import collocation_results
+    from philologic.runtime import collocation_results
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic5.runtime import WebConfig
+    from philologic.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic5.runtime import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 
 def collocation(environ, start_response):

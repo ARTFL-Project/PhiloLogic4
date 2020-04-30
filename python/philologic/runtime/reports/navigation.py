@@ -3,9 +3,9 @@
 
 import re
 
-from philologic5.runtime.citations import citation_links, citations
-from philologic5.runtime.get_text import get_text_obj
-from philologic5.runtime.DB import DB
+from philologic.runtime.citations import citation_links, citations
+from philologic.runtime.get_text import get_text_obj
+from philologic.runtime.DB import DB
 
 
 def generate_text_object(request, config, note=False):

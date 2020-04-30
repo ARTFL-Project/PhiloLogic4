@@ -1,7 +1,7 @@
 import re
 import sys
 
-from philologic5 import shlax
+from philologic import shlax
 
 try:
     import elementtree.ElementTree as ElementTree

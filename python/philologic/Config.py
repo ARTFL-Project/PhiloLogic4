@@ -5,7 +5,7 @@ import os
 import sys
 
 import rapidjson as json
-from philologic5.utils import pretty_print
+from philologic.utils import pretty_print
 
 CITATIONS = {
     "author": {

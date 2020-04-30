@@ -9,8 +9,8 @@ import sys
 import time
 from urllib.parse import unquote
 
-from philologic5.runtime.DB import DB
-from philologic5.utils import load_module
+from philologic.runtime.DB import DB
+from philologic.utils import load_module
 
 # These should always be allowed for local access
 local_blocks = ["10.0.0.", "172.16.0.", "192.168.0.", "127.0.0."]

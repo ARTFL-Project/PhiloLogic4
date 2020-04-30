@@ -5,7 +5,7 @@ import os
 import pickle
 from rapidjson import dumps, loads
 
-from philologic5.loadtime.OHCOVector import Record
+from philologic.loadtime.OHCOVector import Record
 
 
 # Default filters

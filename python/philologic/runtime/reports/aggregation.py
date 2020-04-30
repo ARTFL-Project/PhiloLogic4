@@ -1,7 +1,7 @@
 # /usr/bin/env python3
 """Report designed to group results by metadata with additional breakdown optional"""
 
-from philologic5.runtime.DB import DB
+from philologic.runtime.DB import DB
 from itertools import tee
 
 

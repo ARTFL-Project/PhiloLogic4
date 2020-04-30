@@ -3,9 +3,9 @@
 import hashlib
 import os
 import sqlite3
-from philologic5.Config import Config, DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER
+from philologic.Config import Config, DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER
 
-from philologic5.runtime import Query
+from philologic.runtime import Query
 
 from . import HitList
 from . import MetadataQuery

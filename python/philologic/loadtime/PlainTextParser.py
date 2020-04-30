@@ -1,7 +1,7 @@
 import sys
 import os
 import re
-from philologic5.loadtime import OHCOVector
+from philologic.loadtime import OHCOVector
 
 
 class PlainTextParser(object):

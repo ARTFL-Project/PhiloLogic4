@@ -1,1 +1,1 @@
-from philologic5.loadtime.Parser import XMLParser
+from philologic.loadtime.Parser import XMLParser

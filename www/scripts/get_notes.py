@@ -4,8 +4,8 @@ import rapidjson
 import os
 from wsgiref.handlers import CGIHandler
 
-from philologic5.runtime.DB import DB
-from philologic5.runtime import generate_text_object
+from philologic.runtime.DB import DB
+from philologic.runtime import generate_text_object
 
 import sys
 
@@ -15,11 +15,11 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic5.runtime import WebConfig
+    from philologic.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic5.runtime import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 
 def get_notes(environ, start_response):

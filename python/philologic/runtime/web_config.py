@@ -3,7 +3,7 @@
 
 import sys
 
-from philologic5.Config import MakeWebConfig
+from philologic.Config import MakeWebConfig
 
 
 class brokenConfig(object):

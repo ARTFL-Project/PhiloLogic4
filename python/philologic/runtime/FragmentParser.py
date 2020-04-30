@@ -4,7 +4,7 @@
 import re
 
 from lxml import etree
-from philologic5 import shlaxtree as st
+from philologic import shlaxtree as st
 
 
 class FragmentParser:

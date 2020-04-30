@@ -13,15 +13,15 @@ import custom_functions
 try:
     from custom_functions import aggregation_by_field
 except ImportError:
-    from philologic5.runtime import aggregation_by_field
+    from philologic.runtime import aggregation_by_field
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic5.runtime import WebConfig
+    from philologic.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic5.runtime import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 
 def aggregation(environ, start_response):

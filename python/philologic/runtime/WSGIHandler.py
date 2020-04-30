@@ -6,9 +6,9 @@ from http.cookies import SimpleCookie
 import hashlib
 import urllib.parse
 
-from philologic5.runtime.find_similar_words import find_similar_words
-from philologic5.runtime.Query import query_parse
-from philologic5.runtime.DB import DB
+from philologic.runtime.find_similar_words import find_similar_words
+from philologic.runtime.Query import query_parse
+from philologic.runtime.DB import DB
 
 
 class WSGIHandler(object):

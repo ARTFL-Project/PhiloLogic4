@@ -5,8 +5,8 @@ import re
 import timeit
 from collections import defaultdict
 
-from philologic5.runtime.link import make_absolute_query_link
-from philologic5.runtime.DB import DB
+from philologic.runtime.link import make_absolute_query_link
+from philologic.runtime.DB import DB
 
 
 def generate_time_series(request, config):

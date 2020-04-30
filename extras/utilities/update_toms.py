@@ -3,7 +3,7 @@
 import sqlite3
 import sys
 import re
-from philologic5.PostFilters import metadata_frequencies, normalized_metadata_frequencies
+from philologic.PostFilters import metadata_frequencies, normalized_metadata_frequencies
 
 
 def change_metadata(metadata_field):

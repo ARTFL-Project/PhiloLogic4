@@ -4,8 +4,8 @@ import sys
 import os
 import re
 from collections import defaultdict
-from philologic5.TagCensus import TagCensus
-from philologic5.TokenCounter import TokenCounter
+from philologic.TagCensus import TagCensus
+from philologic.TokenCounter import TokenCounter
 from BeautifulSoup import BeautifulStoneSoup as bss
 
 

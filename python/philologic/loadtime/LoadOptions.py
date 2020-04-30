@@ -7,8 +7,8 @@ import sys
 from glob import glob
 from argparse import ArgumentParser
 
-from philologic5.loadtime import Loader, LoadFilters, Parser, PlainTextParser, PostFilters
-from philologic5.utils import pretty_print, load_module
+from philologic.loadtime import Loader, LoadFilters, Parser, PlainTextParser, PostFilters
+from philologic.utils import pretty_print, load_module
 
 # Load global config
 CONFIG_PATH = os.getenv("PHILOLOGIC_CONFIG", "/etc/philologic/philologic4.cfg")

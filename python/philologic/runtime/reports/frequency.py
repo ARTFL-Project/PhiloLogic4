@@ -3,9 +3,9 @@
 
 import time
 from urllib.parse import quote_plus
-from philologic5.runtime.DB import DB
+from philologic.runtime.DB import DB
 
-from philologic5.runtime.link import make_absolute_query_link
+from philologic.runtime.link import make_absolute_query_link
 
 
 def frequency_results(request, config, sorted_results=False):
@@ -147,8 +147,8 @@ def frequency_results(request, config, sorted_results=False):
 
 # import timeit
 
-# from philologic5.runtime.link import make_absolute_query_link
-# from philologic5.runtime.DB import DB
+# from philologic.runtime.link import make_absolute_query_link
+# from philologic.runtime.DB import DB
 
 # OBJ_DICT = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
 

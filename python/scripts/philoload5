@@ -3,8 +3,8 @@
 import os
 import sys
 
-from philologic5.loadtime.LoadOptions import LoadOptions, CONFIG_FILE
-from philologic5.loadtime.Loader import Loader, setup_db_dir
+from philologic.loadtime.LoadOptions import LoadOptions, CONFIG_FILE
+from philologic.loadtime.Loader import Loader, setup_db_dir
 
 os.environ["LC_ALL"] = "C"  # Exceedingly important to get uniform sort order.
 os.environ["PYTHONIOENCODING"] = "utf-8"

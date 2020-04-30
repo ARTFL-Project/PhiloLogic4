@@ -3,11 +3,11 @@
 
 import re
 
-from philologic5.runtime.pages import page_interval
-from philologic5.runtime.citations import citations, citation_links
-from philologic5.runtime.get_text import get_concordance_text
-from philologic5.runtime.DB import DB
-from philologic5.runtime.HitList import CombinedHitlist
+from philologic.runtime.pages import page_interval
+from philologic.runtime.citations import citations, citation_links
+from philologic.runtime.get_text import get_concordance_text
+from philologic.runtime.DB import DB
+from philologic.runtime.HitList import CombinedHitlist
 
 
 def concordance_results(request, config):

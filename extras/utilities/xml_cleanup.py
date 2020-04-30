@@ -3,11 +3,11 @@ import re
 import os
 import html.entities
 import traceback
-from philologic5 import TagCensus
+from philologic import TagCensus
 from optparse import OptionParser
 from lxml import etree
 from collections import defaultdict
-from philologic5.runtime.FragmentParser import parse as FragmentParserParse
+from philologic.runtime.FragmentParser import parse as FragmentParserParse
 from html import unescape as unescape_html
 
 

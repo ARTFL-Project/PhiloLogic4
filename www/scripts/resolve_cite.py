@@ -5,8 +5,8 @@ import re
 import sys
 from wsgiref.handlers import CGIHandler
 
-from philologic5.runtime.DB import DB
-from philologic5.runtime.HitWrapper import ObjectWrapper
+from philologic.runtime.DB import DB
+from philologic.runtime.HitWrapper import ObjectWrapper
 
 import sys
 
@@ -16,11 +16,11 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic5.runtime import WebConfig
+    from philologic.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic5.runtime import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 
 def resolve_cite_service(environ, start_response):

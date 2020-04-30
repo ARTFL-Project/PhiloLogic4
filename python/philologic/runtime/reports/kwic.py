@@ -4,11 +4,11 @@
 
 import re
 
-from philologic5.runtime.citations import citation_links, citations
-from philologic5.runtime.get_text import get_text
-from philologic5.runtime.ObjectFormatter import adjust_bytes, format_strip
-from philologic5.runtime.pages import page_interval
-from philologic5.runtime.DB import DB
+from philologic.runtime.citations import citation_links, citations
+from philologic.runtime.get_text import get_text
+from philologic.runtime.ObjectFormatter import adjust_bytes, format_strip
+from philologic.runtime.pages import page_interval
+from philologic.runtime.DB import DB
 
 
 def kwic_results(request, config):

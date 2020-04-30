@@ -8,10 +8,10 @@ import sys
 import unicodedata
 from wsgiref.handlers import CGIHandler
 
-from philologic5.runtime.DB import DB
-from philologic5.runtime.MetadataQuery import metadata_pattern_search
-from philologic5.runtime.QuerySyntax import parse_query
-from philologic5.runtime import access_control, login_access
+from philologic.runtime.DB import DB
+from philologic.runtime.MetadataQuery import metadata_pattern_search
+from philologic.runtime.QuerySyntax import parse_query
+from philologic.runtime import access_control, login_access
 
 
 sys.path.append("..")
@@ -20,11 +20,11 @@ import custom_functions
 try:
     from custom_functions import WebConfig
 except ImportError:
-    from philologic5.runtime import WebConfig
+    from philologic.runtime import WebConfig
 try:
     from custom_functions import WSGIHandler
 except ImportError:
-    from philologic5.runtime import WSGIHandler
+    from philologic.runtime import WSGIHandler
 
 environ = os.environ
 environ["PATH"] += ":/usr/local/bin/"

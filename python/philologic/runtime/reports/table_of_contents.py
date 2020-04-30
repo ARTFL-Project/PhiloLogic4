@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Table of contents"""
 
-from philologic5.runtime.DB import DB
-from philologic5.runtime.link import make_absolute_object_link
-from philologic5.runtime import HitWrapper
-from philologic5.runtime.citations import citations, citation_links
+from philologic.runtime.DB import DB
+from philologic.runtime.link import make_absolute_object_link
+from philologic.runtime import HitWrapper
+from philologic.runtime.citations import citations, citation_links
 
 
 def generate_toc_object(request, config):

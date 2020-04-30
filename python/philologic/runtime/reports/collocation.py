@@ -10,8 +10,8 @@ import string
 import msgpack
 import lz4.block
 
-from philologic5.runtime.DB import DB
-from philologic5.runtime.Query import get_expanded_query
+from philologic.runtime.DB import DB
+from philologic.runtime.Query import get_expanded_query
 
 remove_punctuation_map = dict((ord(char), None) for char in string.punctuation if char != "'")
 

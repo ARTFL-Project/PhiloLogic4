@@ -7,10 +7,10 @@ import re
 import sqlite3
 
 from lxml import etree
-from philologic5.runtime.DB import DB
-from philologic5.runtime.FragmentParser import parse as FragmentParserParse
-from philologic5.runtime.link import make_absolute_query_link
-from philologic5.utils import convert_entities
+from philologic.runtime.DB import DB
+from philologic.runtime.FragmentParser import parse as FragmentParserParse
+from philologic.runtime.link import make_absolute_query_link
+from philologic.utils import convert_entities
 
 BEGIN_MATCH = re.compile(rb"^[^<]*?>")
 START_CUTOFF_MATCH = re.compile(rb"^[^ |\n<]+")

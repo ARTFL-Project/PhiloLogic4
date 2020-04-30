@@ -8,8 +8,8 @@ import sys
 import unicodedata
 from datetime import datetime
 
-from philologic5.runtime import HitList
-from philologic5.runtime.QuerySyntax import group_terms, parse_query
+from philologic.runtime import HitList
+from philologic.runtime.QuerySyntax import group_terms, parse_query
 
 # Work around issue where environ PATH does not contain path to C core
 os.environ["PATH"] += ":/usr/local/bin/"
@@ -252,7 +252,7 @@ if __name__ == "__main__":
         pass
 
     fake_db = Fake_DB()
-    from philologic5.Config import Config, DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER
+    from philologic.Config import Config, DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER
 
     fake_db.path = path + "/data/"
     fake_db.locals = Config(fake_db.path + "/db.locals.py", DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER)

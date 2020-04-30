@@ -17,9 +17,9 @@ from glob import glob
 import lxml
 from black import FileMode, format_str
 from multiprocess import Pool
-from philologic5.Config import MakeDBConfig, MakeWebConfig
-from philologic5.loadtime.PostFilters import make_sql_table, make_sentences_table
-from philologic5.utils import convert_entities, load_module, pretty_print, sort_list
+from philologic.Config import MakeDBConfig, MakeWebConfig
+from philologic.loadtime.PostFilters import make_sql_table, make_sentences_table
+from philologic.utils import convert_entities, load_module, pretty_print, sort_list
 from tqdm import tqdm
 
 SORT_BY_WORD = "-k 2,2"

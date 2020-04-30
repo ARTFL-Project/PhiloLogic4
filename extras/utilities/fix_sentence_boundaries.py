@@ -2,7 +2,7 @@
 #!/usr/bin/env python
 
 import os
-from philologic5.OHCOVector import Record
+from philologic.OHCOVector import Record
 
 
 abbreviations = set(["Mr", "Mrs", "Ms", "Mme", "Mlle", "pp", "vol"])
