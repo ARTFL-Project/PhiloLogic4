@@ -175,29 +175,21 @@
             </b-col>
         </b-row>
         <!-- <access-control v-if="!authorized"></access-control> -->
-        <!-- <div
-        id="blueimp-gallery"
-        class="blueimp-gallery blueimp-gallery-controls"
-        data-full-screen="true"
-        data-continuous="false"
-        style="display: none"
-    >
-        <div class="slides"></div>
-        <h3 class="title"></h3>
-        <a class="prev">
-            <span class="glyphicon glyphicon-arrow-left"></span>
-        </a>
-        <a class="next">
-            <span class="glyphicon glyphicon-arrow-right"></span>
-        </a>
-        <a
-            id="full-size-image"
-            class="glyphicon glyphicon-new-window"
-            @click="fullSizeImage()"
-        ></a>
-        <a class="close">&#10005;</a>
-        <ol class="indicator"></ol>
-        </div>-->
+        <div
+            id="blueimp-gallery"
+            class="blueimp-gallery blueimp-gallery-controls"
+            data-full-screen="true"
+            data-continuous="false"
+            style="display: none"
+        >
+            <div class="slides"></div>
+            <h3 class="title"></h3>
+            <a class="prev img-buttons">&lt;</a>
+            <a class="next img-buttons">&gt;</a>
+            <a id="full-size-image" class="img-buttons">&nearr;</a>
+            <a class="close img-buttons">&#10005;</a>
+            <ol class="indicator"></ol>
+        </div>
     </div>
 </template>
 <script>
@@ -205,6 +197,8 @@ import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import searchArguments from "./SearchArguments";
 import { EventBus } from "../main.js";
+import Gallery from "blueimp-gallery";
+import "blueimp-gallery/css/blueimp-gallery.min.css";
 
 export default {
     name: "textNavigation",
@@ -252,7 +246,8 @@ export default {
             tocPosition: 0,
             navButtonPosition: 0,
             navBarVisible: false,
-            timeToRender: 0
+            timeToRender: 0,
+            gallery: null
         };
     },
     created() {
@@ -292,7 +287,45 @@ export default {
             tocButton.removeAttribute("disabled");
             tocButton.classList.remove("disabled");
             this.navButtonPosition = tocButton.getBoundingClientRect().top;
+
+            // Image Gallery handling
+            Array.from(
+                document.getElementsByClassName("page-image-link")
+            ).forEach(item => {
+                item.addEventListener("click", event => {
+                    event.preventDefault();
+                    let target = event.srcElement;
+                    this.gallery = Gallery(
+                        [
+                            ...document.getElementsByClassName(
+                                "page-image-link"
+                            )
+                        ].map(item => item.getAttribute("href")),
+                        {
+                            index: Array.from(
+                                document.getElementsByClassName(
+                                    "page-image-link"
+                                )
+                            ).indexOf(target),
+                            continuous: false,
+                            thumbnailIndicators: false
+                        }
+                    );
+                });
+            });
+            document
+                .getElementById("full-size-image")
+                .addEventListener("click", () => {
+                    let imageIndex = this.gallery.getIndex();
+                    let img = Array.from(
+                        document.getElementsByClassName("page-image-link")
+                    )[imageIndex].getAttribute("large-img");
+                    window.open(img);
+                });
         }, 1000);
+    },
+    destroyed() {
+        this.gallery.close();
     },
     methods: {
         fetchText() {
@@ -1124,5 +1157,29 @@ body {
 /* .slide-fade-leave-active below version 2.1.8 */ {
     transform: translateY(-30px);
     opacity: 0;
+}
+
+/* Image button styling */
+.img-buttons {
+    font-size: 45px !important;
+    color: #fff !important;
+}
+#full-size-image {
+    right: 90px;
+    font-weight: 700 !important;
+    font-size: 20px !important;
+    left: auto;
+    margin: -15px;
+    text-decoration: none;
+    cursor: pointer;
+    position: absolute;
+    top: 28px;
+    color: #fff;
+    opacity: 0.8;
+    border: 3px solid;
+    padding: 0 0.25rem;
+}
+#full-size-image:hover {
+    opacity: 1;
 }
 </style>
