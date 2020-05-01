@@ -27,6 +27,9 @@ Vue.mixin({
             } else {
                 validFields = new Set(Object.keys(formValues))
             }
+            if (formValues.approximate == "no") {
+                formValues.approximate_ratio = ""
+            }
             for (const field in formValues) {
                 let value = formValues[field]
                 if (field === 'report') {

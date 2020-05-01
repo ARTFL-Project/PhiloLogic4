@@ -1,12 +1,12 @@
 <template>
     <b-container fluid>
         <conckwic v-if="description.end != 0" :results="results.results"></conckwic>
-        <b-row class="mr-2">
-            <b-col cols="12" md="7" xl="8">
+        <b-row>
+            <b-col cols="12" md="8" xl="8">
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
                     <b-card
                         no-body
-                        class="philologic-occurrence ml-4 mr-4 mb-4 shadow-sm"
+                        class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm"
                         v-for="(result, index) in results.results"
                         :key="result.philo_id.join('-')"
                         :data-index="index"
@@ -18,8 +18,11 @@
                                     <citations :citation="result.citation"></citations>
                                 </span>
                             </b-col>
-                            <b-col sm="2" md="1" class="hidden-xs">
-                                <b-button class="more-context" @click="moreContext(index)">More</b-button>
+                            <b-col sm="2" md="1" class="d-none d-sm-inline-block">
+                                <b-button class="more-context" @click="moreContext(index)">
+                                    <span class="d-none d-lg-inline-block">More</span>
+                                    <span class="d-lg-none">+</span>
+                                </b-button>
                             </b-col>
                         </b-row>
                         <b-row>
@@ -37,7 +40,7 @@
                     </b-card>
                 </transition-group>
             </b-col>
-            <b-col md="5" xl="4">
+            <b-col md="4" xl="4">
                 <facets></facets>
             </b-col>
         </b-row>

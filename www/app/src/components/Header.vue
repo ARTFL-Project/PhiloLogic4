@@ -1,11 +1,15 @@
 <template>
     <div>
-        <b-navbar toggleable="lg" type="light" variant="light" class="shadow">
+        <b-navbar toggleable="lg" type="light" variant="light" class="shadow" style="height: 53px">
             <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
             <b-collapse id="nav-collapse" is-nav>
                 <b-navbar-nav>
-                    <b-nav-item href="https://textual-optics-lab.uchicago.edu">Textual Optics Lab</b-nav-item>
+                    <b-nav-item
+                        :href="philoConfig.link_to_home_page"
+                        v-if="philoConfig.link_to_home_page != ''"
+                    >Go to home page</b-nav-item>
                     <b-nav-item href="https://artfl-project.uchicago.edu">ARTFL Project</b-nav-item>
+                    <b-nav-item href="https://textual-optics-lab.uchicago.edu">Textual Optics Lab</b-nav-item>
                 </b-navbar-nav>
             </b-collapse>
             <b-navbar-brand
@@ -13,7 +17,7 @@
                 to="/"
                 v-html="philoConfig.dbname"
             ></b-navbar-brand>
-            <b-navbar-nav class="ml-auto">
+            <b-navbar-nav class="ml-auto" v-if="philoConfig.report_error_link">
                 <b-nav-item
                     :href="philoConfig.report_error_link"
                     target="_blank"

@@ -21,25 +21,26 @@ def aggregation_by_field(request, config):
         hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
 
     group_by = request.group_by
-    metadata_type = db.locals["metadata_types"][request.group_by]
+    field_obj = __get_field_config(group_by, config)
+    metadata_type = field_obj["object_level"]
 
     hits.finish()
     philo_ids = __expand_hits(hits, metadata_type)
     cursor = db.dbh.cursor()
-    if metadata_type != "div":
-        distinct_philo_ids = tuple(" ".join(map(str, id)) for id in set(philo_ids))
-        cursor.execute(
-            f"select * from toms where philo_{metadata_type}_id IN ({', '.join('?' for _ in range(len(distinct_philo_ids)))})",
-            distinct_philo_ids,
-        )
-    else:
-        sql_query = "select * from toms where "
-        sql_clauses = []
-        for pos, obj_type in enumerate(["div1", "div2", "div3"]):
-            distinct_philo_ids = tuple(" ".join(map(str, id)) for id in set(philo_ids[pos]))
-            sql_clauses.append(f"philo_{obj_type}_id IN ({', '.join('?' for _ in range(len(distinct_philo_ids)))})")
-        sql_clauses = " OR ".join(sql_clauses)
-        cursor.execute(sql_query)
+    # if metadata_type != "div":
+    distinct_philo_ids = tuple(" ".join(map(str, id)) for id in set(philo_ids))
+    cursor.execute(
+        f"select * from toms where philo_{metadata_type}_id IN ({', '.join('?' for _ in range(len(distinct_philo_ids)))})",
+        distinct_philo_ids,
+    )
+    # else:
+    #     sql_query = "select * from toms where "
+    #     sql_clauses = []
+    #     for pos, obj_type in enumerate(["div1", "div2", "div3"]):
+    #         distinct_philo_ids = tuple(" ".join(map(str, id)) for id in set(philo_ids[pos]))
+    #         sql_clauses.append(f"philo_{obj_type}_id IN ({', '.join('?' for _ in range(len(distinct_philo_ids)))})")
+    #     sql_query += " OR ".join(sql_clauses)
+    #     cursor.execute(sql_query)
 
     metadata_dict = {}
     for row in cursor:
@@ -53,7 +54,6 @@ def aggregation_by_field(request, config):
         }
 
     counts_by_field = {}
-    field_obj = __get_field_config(group_by, config)
     break_up_field_name = field_obj["break_up_field"]
     if break_up_field_name is not None:
         for philo_id in philo_ids:

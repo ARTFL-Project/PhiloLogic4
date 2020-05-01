@@ -1,7 +1,7 @@
 <template>
-    <div id="time-series-container">
-        <div id="philo-view" v-if="authorized">
-            <b-card no-body class="shadow-sm m-4 pb-3">
+    <b-container fluid>
+        <div id="time-series-container" class="mt-4 ml-2 mr-2" v-if="authorized">
+            <b-card no-body class="shadow-sm px-3 py-2">
                 <div id="description">
                     <b-button
                         variant="outline-primary"
@@ -24,7 +24,7 @@
                     ></b-progress-bar>
                 </b-progress>
             </b-card>
-            <b-card no-body id="time-series" class="m-4">
+            <b-card no-body id="time-series" class="mt-4">
                 <b-button-group class="d-inline-block">
                     <b-button
                         :class="{'active':  frequencyType == 'absolute_time'}"
@@ -41,7 +41,7 @@
             </b-card>
         </div>
         <!-- <access-control v-if="!authorized"></access-control> -->
-    </div>
+    </b-container>
 </template>
 <script>
 import Chart from "chart.js/dist/Chart.min.js";
@@ -58,7 +58,8 @@ export default {
         ...mapFields({
             report: "formData.report",
             interval: "formData.year_interval",
-            currentReport: "currentReport"
+            currentReport: "currentReport",
+            searching: "searching"
         })
     },
     data() {
@@ -98,12 +99,14 @@ export default {
             }
             this.resultsLength = 0;
             this.frequencyType = "absolute_time";
+            this.searching = true;
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_start_end_date.py`, {
-                    params: this.paramsFilter(this.$store.state.formData)
+                    params: this.paramsFilter({ ...this.$store.state.formData })
                 })
                 .then(response => {
                     // if no dates supplied or if invalid dates
+                    console.log(this.$store.state.formData);
                     if (this.$store.state.formData.year.length > 0) {
                         let yearSplit = this.$store.state.formData.year.split(
                             "-"
@@ -282,7 +285,7 @@ export default {
                     var fullResults;
                     this.updateTimeSeries(fullResults);
                 })
-                .catch(function(response) {
+                .catch(response => {
                     this.debug(this, response);
                 });
         },
@@ -290,14 +293,14 @@ export default {
             this.$http
                 .get(`${this.$dbUrl}/reports/time_series.py`, {
                     params: {
-                        ...this.paramsFilter(this.$store.state.formData),
+                        ...this.paramsFilter({ ...this.$store.state.formData }),
                         start_date: this.startDate,
                         max_time: 5,
                         year_interval: this.interval
                     }
                 })
                 .then(results => {
-                    this.loading = false;
+                    this.searching = false;
                     var timeSeriesResults = results.data;
                     this.resultsLength += timeSeriesResults.results_length;
                     this.resultsLength = this.resultsLength;
@@ -318,7 +321,7 @@ export default {
                 })
                 .catch(response => {
                     this.debug(this, response);
-                    this.loading = false;
+                    this.searching = false;
                 });
         },
         sortAndRenderTimeSeries(fullResults, timeSeriesResults) {

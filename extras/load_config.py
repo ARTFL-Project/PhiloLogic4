@@ -266,4 +266,3 @@ pos_tagger = ""
 from philologic.loadtime import XMLParser
 
 parser_factory = XMLParser
-

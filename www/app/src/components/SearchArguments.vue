@@ -1,5 +1,5 @@
 <template>
-    <div id="search-arguments" class="p-3">
+    <div id="search-arguments" class="pb-2">
         <div v-if="currentWordQuery !== ''">
             Searching database for
             <span v-if="approximate == 'yes'">
@@ -48,7 +48,7 @@
                 </b-row>
             </b-card>
         </div>
-        <div style="margin-top: 5px;">
+        <div>
             Bibliography criteria:
             <span
                 class="metadata-args rounded-pill"
@@ -294,7 +294,9 @@ export default {
             this.approximate_ratio = "";
         },
         rerunQuery() {
-            this.$router.push(this.paramsToRoute(this.$store.state.formData));
+            this.$router.push(
+                this.paramsToRoute({ ...this.$store.state.formData })
+            );
         },
         removeTerm(index) {
             let queryTermGroup = this.copyObject(this.description.termGroups);
@@ -317,7 +319,9 @@ export default {
                 ...this.description,
                 termGroups: queryTermGroup
             });
-            this.$router.push(this.paramsToRoute(this.$store.state.formData));
+            this.$router.push(
+                this.paramsToRoute({ ...this.$store.state.formData })
+            );
         }
     }
 };
@@ -401,6 +405,7 @@ export default {
 }
 .remove-metadata {
     float: right;
+    line-height: 29px;
     padding-right: 5px;
     padding-left: 5px;
     border-left: #ddd solid 1px;

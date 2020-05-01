@@ -25,9 +25,7 @@ except ImportError:
 
 
 def aggregation(environ, start_response):
-    config = WebConfig(
-        os.path.abspath(os.path.dirname(__file__)).replace("reports", "")
-    )
+    config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("reports", ""))
     request = WSGIHandler(environ, config)
     aggregation_object = aggregation_by_field(request, config)
     headers = [

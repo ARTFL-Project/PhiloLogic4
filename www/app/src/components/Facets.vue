@@ -1,5 +1,5 @@
 <template>
-    <div id="facet-search" class="d-xs-none" loading="loading">
+    <div id="facet-search" class="d-xs-none mr-2" loading="loading">
         <b-card
             no-body
             title="Title"
@@ -369,7 +369,9 @@ export default {
             this.start = "";
             this.end = "";
             this.report = "concordance";
-            this.$router.push(this.paramsToRoute(this.$store.state.formData));
+            this.$router.push(
+                this.paramsToRoute({ ...this.$store.state.formData })
+            );
         },
         showFacetOptions() {
             this.showFacetSelection = true;

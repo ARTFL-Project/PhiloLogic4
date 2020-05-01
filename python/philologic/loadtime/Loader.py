@@ -18,7 +18,7 @@ import lxml
 from black import FileMode, format_str
 from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
-from philologic.loadtime.PostFilters import make_sql_table
+from philologic.loadtime.PostFilters import make_sql_table, make_sentences_table
 from philologic.utils import convert_entities, load_module, pretty_print, sort_list
 from tqdm import tqdm
 
@@ -29,7 +29,7 @@ OBJECT_TYPES = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
 BLOCKSIZE = 2048  # index block size.  Don't alter.
 INDEX_CUTOFF = 10  # index frequency cutoff.  Don't alter.
 
-DEFAULT_TABLES = ("toms", "pages", "refs", "graphics", "lines", "words")
+DEFAULT_TABLES = ("toms", "pages", "refs", "graphics", "lines", "sentences")
 
 DEFAULT_OBJECT_LEVEL = "doc"
 
@@ -521,11 +521,11 @@ class Loader:
         print("%s: sorting words" % time.ctime())
         self.merge_files("words")
 
-        if "words" in self.tables:
-            print("%s: concatenating document-order words file..." % time.ctime(), end=" ", flush=True)
-            for f in self.filequeue:
-                os.system(f'lz4cat {f["raw"]}.lz4 | egrep -a "^word" >> all_words_ordered')
-            print("done")
+        # Build file to be used for building sentences table
+        print("%s: concatenating document-order words file..." % time.ctime(), end=" ", flush=True)
+        for f in self.filequeue:
+            os.system(f'lz4cat {f["raw"]}.lz4 | egrep -a "^word" >> all_words_ordered')
+        print("done")
 
         print("%s: sorting objects" % time.ctime(), flush=True)
         self.merge_files("toms")
@@ -723,11 +723,7 @@ class Loader:
     def setup_sql_load(self):
         """Setup SQL DB creation"""
         for table in self.tables:
-            if table == "words":
-                file_in = self.destination + "/WORK/all_words_ordered"
-                indices = [("philo_name",), ("philo_id",), ("parent",), ("start_byte",), ("end_byte",)]
-                depth = 7
-            elif table == "pages":
+            if table == "pages":
                 file_in = self.destination + "/WORK/all_pages"
                 indices = [("philo_id",)]
                 depth = 9
@@ -747,7 +743,12 @@ class Loader:
                 file_in = self.destination + "/WORK/all_lines"
                 indices = [("doc_id", "start_byte", "end_byte")]
                 depth = 9
-            post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
+            if table == "sentences":
+                file_in = self.destination + "/WORK/all_words_ordered"
+                db_destination = os.path.join(self.destination, "toms.db")
+                post_filter = make_sentences_table(file_in, db_destination)
+            else:
+                post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)
 
     @classmethod

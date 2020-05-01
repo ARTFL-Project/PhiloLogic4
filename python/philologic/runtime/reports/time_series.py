@@ -51,7 +51,7 @@ def generate_time_series(request, config):
         params = {"report": "concordance", "start": "0", "end": "0"}
         params[config.time_series_year_field] = date_range
         url = make_absolute_query_link(config, request, **params)
-        absolute_count[start_range] = {"label": start_range, "count": hit_len, "url": url}
+        absolute_count[str(start_range)] = {"label": start_range, "count": hit_len, "url": url}
 
         # Get date total count
         if interval != 1:
@@ -85,7 +85,10 @@ def generate_time_series(request, config):
     else:
         time_series_object["more_results"] = True
         time_series_object["new_start_date"] = last_date_done + int(request.year_interval)
-    time_series_object["results"] = {"absolute_count": absolute_count, "date_count": date_counts}
+    time_series_object["results"] = {
+        "absolute_count": absolute_count,
+        "date_count": {str(date): count for date, count in date_counts.items()},
+    }
 
     return time_series_object
 

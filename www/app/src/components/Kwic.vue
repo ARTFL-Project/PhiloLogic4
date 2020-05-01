@@ -1,9 +1,9 @@
 <template>
-    <div>
+    <b-container fluid>
         <conckwic :results="results.results"></conckwic>
-        <b-row class="ml-2 mr-2 mb-2">
+        <b-row>
             <b-col cols="12" md="7" xl="8">
-                <b-card no-body class="p-2 shadow-sm">
+                <b-card no-body class="p-2 ml-2 shadow-sm">
                     <div class="p-2 mb-1">
                         Resort results by
                         <div
@@ -12,7 +12,7 @@
                             v-for="(fields, index) in sortingFields"
                             :key="index"
                         >
-                            <b-dropdown size="sm">
+                            <b-dropdown variant="outline-secondary" size="sm">
                                 <template slot="button-content">{{ sortingSelection[index] }}</template>
                                 <b-dropdown-item
                                     v-for="(selection, fieldIndex) in fields"
@@ -22,7 +22,7 @@
                             </b-dropdown>
                         </div>
                         <b-button
-                            variant="primary"
+                            variant="secondary"
                             type="button"
                             class="ml-1"
                             size="sm"
@@ -65,7 +65,7 @@
             </b-col>
         </b-row>
         <pages></pages>
-    </div>
+    </b-container>
 </template>
 
 <script>
@@ -146,19 +146,11 @@ export default {
         this.currentReport = "kwic";
         this.initializeKwic();
         this.fetchResults();
-        // EventBus.$on("urlUpdate", () => {
-        //     if (this.report == "kwic") {
-        //         this.fetchResults();
-        //     }
-        // });
     },
     watch: {
         // call again the method if the route changes
         $route: "fetchResults"
     },
-    // beforeDestroy() {
-    //     EventBus.$off("urlUpdate");
-    // },
     methods: {
         initializeKwic() {
             // Sorting fields
@@ -283,7 +275,7 @@ export default {
                     })
                     .then(response => {
                         this.results = response.data;
-                        this.resultsLength = this.results.results_length;
+                        this.resultsLength = response.data.results_length;
                         this.$store.commit("updateDescription", {
                             ...this.description,
                             start: this.results.description.start,
@@ -325,7 +317,7 @@ export default {
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_neighboring_words.py`, {
                     params: {
-                        ...this.paramsFilter(this.$store.state.formData),
+                        ...this.paramsFilter({ ...this.$store.state.formData }),
                         hits_done: hitsDone,
                         max_time: 10
                     }
@@ -371,9 +363,9 @@ export default {
                     JSON.stringify({
                         results: this.sortedResults,
                         hits_done: hitsDone,
-                        query_string: this.paramsToUrlString(
-                            this.$store.state.formData
-                        ),
+                        query_string: this.paramsToUrlString({
+                            ...this.$store.state.formData
+                        }),
                         start: start,
                         end: end,
                         sort_keys: [
@@ -401,7 +393,7 @@ export default {
             if (this.resultsLength < 50000) {
                 this.results = {};
                 this.$router.push(
-                    this.paramsToRoute(this.$store.state.formData)
+                    this.paramsToRoute({ ...this.$store.state.formData })
                 );
             } else {
                 alert(
@@ -461,20 +453,20 @@ export default {
     margin-left: -5px;
     opacity: 1;
 }
-/deep/ .kwic-before {
+::v-deep .kwic-before {
     text-align: right;
     overflow: hidden;
     display: inline-block;
     position: absolute;
 }
-/deep/ .inner-before {
+::v-deep .inner-before {
     float: right;
 }
-/deep/ .kwic-after {
+::v-deep .kwic-after {
     text-align: left;
     display: inline-block;
 }
-/deep/ .kwic-text {
+::v-deep .kwic-text {
     display: inline-block;
     overflow: hidden;
     vertical-align: bottom;
@@ -483,40 +475,40 @@ export default {
     margin-left: -3px;
 }
 @media (min-width: 1300px) {
-    /deep/ .kwic-highlight {
+    ::v-deep .kwic-highlight {
         margin-left: 330px;
     }
-    /deep/ .kwic-before {
+    ::v-deep .kwic-before {
         width: 330px;
     }
 }
 @media (min-width: 992px) and (max-width: 1299px) {
-    /deep/ .kwic-highlight {
+    ::v-deep .kwic-highlight {
         margin-left: 230px;
     }
-    /deep/ .kwic-before {
+    ::v-deep .kwic-before {
         width: 230px;
     }
 }
 @media (min-width: 768px) and (max-width: 991px) {
-    /deep/ .kwic-highlight {
+    ::v-deep .kwic-highlight {
         margin-left: 120px;
     }
-    /deep/ .kwic-before {
+    ::v-deep .kwic-before {
         width: 120px;
     }
-    /deep/ .kwic-line {
+    ::v-deep .kwic-line {
         font-size: 12px;
     }
 }
 @media (max-width: 767px) {
-    /deep/ .kwic-highlight {
+    ::v-deep .kwic-highlight {
         margin-left: 200px;
     }
-    /deep/ .kwic-before {
+    ::v-deep .kwic-before {
         width: 200px;
     }
-    /deep/ .kwic-line {
+    ::v-deep .kwic-line {
         font-size: 12px;
     }
 }

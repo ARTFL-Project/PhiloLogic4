@@ -9,6 +9,7 @@
     },
     "dependencies": {
         "axios": "^0.19.2",
+        "blueimp-gallery": "^2.38.0",
         "bootstrap": "^4.4.1",
         "bootstrap-vue": "^2.9.0",
         "chart.js": "^2.9.3",
@@ -24,7 +25,9 @@
     "devDependencies": {
         "@vue/cli-plugin-babel": "^3.12.1",
         "@vue/cli-plugin-eslint": "^3.12.1",
-        "@vue/cli-service": "^4.2.3",
+        "@vue/cli-service": "^4.3.1",
+        "node-sass": "^4.14.0",
+        "sass-loader": "^8.0.2",
         "vue-template-compiler": "^2.6.11"
     },
     "eslintConfig": {

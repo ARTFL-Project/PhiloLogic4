@@ -7,6 +7,8 @@ import sqlite3
 import time
 import unicodedata
 from rapidjson import loads
+import msgpack
+import lz4.block
 
 import numpy as np
 from multiprocess import Pool
@@ -70,6 +72,41 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
             os.system("rm %s" % file_in)
 
     return inner_make_sql_table
+
+
+def make_sentences_table(words_ordered_file, db_destination):
+    """Generate a table where each row is a sentence containing all the words in it"""
+
+    def inner_make_sentences(loader_obj):
+        print(f"{time.ctime()}: Loading the sentences SQLite table...")
+        with sqlite3.connect(db_destination) as conn:
+            conn.text_factory = str
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute("CREATE TABLE IF NOT EXISTS sentences(philo_id text, words blob)")
+            line_count = sum(1 for _ in open(words_ordered_file, "rbU"))
+            with tqdm(total=line_count, leave=False) as pbar:
+                with open(words_ordered_file) as input_file:
+                    current_sentence = None
+                    words = []
+                    for line in input_file:
+                        _, word, philo_id, _ = line.split("\t", 3)
+                        start_byte = philo_id.split()[7]
+                        sentence_id = " ".join(philo_id.split()[:6]) + " 0"
+                        if sentence_id != current_sentence:
+                            if current_sentence is not None:
+                                cursor.execute(
+                                    "insert into sentences values(?, ?)",
+                                    (current_sentence, lz4.block.compress(msgpack.dumps(words))),
+                                )
+                                words = []
+                            current_sentence = sentence_id
+                        words.append({"word": word, "start_byte": start_byte})
+                        pbar.update()
+            cursor.execute("create index sentence_index on sentences (philo_id)")
+            conn.commit()
+
+    return inner_make_sentences
 
 
 def word_frequencies(loader_obj):

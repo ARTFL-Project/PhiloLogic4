@@ -175,29 +175,21 @@
             </b-col>
         </b-row>
         <!-- <access-control v-if="!authorized"></access-control> -->
-        <!-- <div
-        id="blueimp-gallery"
-        class="blueimp-gallery blueimp-gallery-controls"
-        data-full-screen="true"
-        data-continuous="false"
-        style="display: none"
-    >
-        <div class="slides"></div>
-        <h3 class="title"></h3>
-        <a class="prev">
-            <span class="glyphicon glyphicon-arrow-left"></span>
-        </a>
-        <a class="next">
-            <span class="glyphicon glyphicon-arrow-right"></span>
-        </a>
-        <a
-            id="full-size-image"
-            class="glyphicon glyphicon-new-window"
-            @click="fullSizeImage()"
-        ></a>
-        <a class="close">&#10005;</a>
-        <ol class="indicator"></ol>
-        </div>-->
+        <div
+            id="blueimp-gallery"
+            class="blueimp-gallery blueimp-gallery-controls"
+            data-full-screen="true"
+            data-continuous="false"
+            style="display: none"
+        >
+            <div class="slides"></div>
+            <h3 class="title"></h3>
+            <a class="prev img-buttons">&lt;</a>
+            <a class="next img-buttons">&gt;</a>
+            <a id="full-size-image" class="img-buttons">&nearr;</a>
+            <a class="close img-buttons">&#10005;</a>
+            <ol class="indicator"></ol>
+        </div>
     </div>
 </template>
 <script>
@@ -205,6 +197,8 @@ import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import searchArguments from "./SearchArguments";
 import { EventBus } from "../main.js";
+import Gallery from "blueimp-gallery";
+import "blueimp-gallery/css/blueimp-gallery.min.css";
 
 export default {
     name: "textNavigation",
@@ -252,7 +246,8 @@ export default {
             tocPosition: 0,
             navButtonPosition: 0,
             navBarVisible: false,
-            timeToRender: 0
+            timeToRender: 0,
+            gallery: null
         };
     },
     created() {
@@ -292,7 +287,14 @@ export default {
             tocButton.removeAttribute("disabled");
             tocButton.classList.remove("disabled");
             this.navButtonPosition = tocButton.getBoundingClientRect().top;
+
+            this.setUpGallery();
         }, 1000);
+    },
+    destroyed() {
+        if (this.gallery) {
+            this.gallery.close();
+        }
     },
     methods: {
         fetchText() {
@@ -510,6 +512,48 @@ export default {
                 });
             }
         },
+        setUpGallery() {
+            // Image Gallery handling
+            for (let imageType of ["page-image-link", "inline-img"]) {
+                Array.from(document.getElementsByClassName(imageType)).forEach(
+                    item => {
+                        item.addEventListener("click", event => {
+                            event.preventDefault();
+                            let target = event.srcElement;
+                            this.gallery = Gallery(
+                                [
+                                    ...document.getElementsByClassName(
+                                        imageType
+                                    )
+                                ].map(
+                                    item =>
+                                        item.getAttribute("href") ||
+                                        item.getAttribute("src")
+                                ),
+                                {
+                                    index: Array.from(
+                                        document.getElementsByClassName(
+                                            imageType
+                                        )
+                                    ).indexOf(target),
+                                    continuous: false,
+                                    thumbnailIndicators: false
+                                }
+                            );
+                        });
+                    }
+                );
+                document
+                    .getElementById("full-size-image")
+                    .addEventListener("click", () => {
+                        let imageIndex = this.gallery.getIndex();
+                        let img = Array.from(
+                            document.getElementsByClassName(imageType)
+                        )[imageIndex].getAttribute("large-img");
+                        window.open(img);
+                    });
+            }
+        },
         loadBefore() {
             var firstElement = this.tocElements[this.start - 2].philo_id;
             this.start -= 200;
@@ -712,37 +756,37 @@ a.current-obj,
     text-align: justify;
 }
 
-/deep/ .xml-pb {
+::v-deep .xml-pb {
     display: block;
     text-align: center;
     margin: 10px;
 }
 
-/deep/ .xml-pb::before {
+::v-deep .xml-pb::before {
     content: "-" attr(n) "-";
     white-space: pre;
 }
 
-/deep/ p {
+::v-deep p {
     margin-bottom: 0.5rem;
 }
-/deep/ .highlight {
+::v-deep .highlight {
     background-color: red;
     color: #fff;
 }
 /* Styling for theater */
 
-/deep/ .xml-castitem::after {
+::v-deep .xml-castitem::after {
     content: "\A";
     white-space: pre;
 }
 
-/deep/ .xml-castlist > .xml-castitem:first-of-type::before {
+::v-deep .xml-castlist > .xml-castitem:first-of-type::before {
     content: "\A";
     white-space: pre;
 }
 
-/deep/ .xml-castgroup::before {
+::v-deep .xml-castgroup::before {
     content: "\A";
     white-space: pre;
 }
@@ -754,24 +798,24 @@ b.headword {
     margin-top: 20px;
 }
 
-/deep/ #bibliographic-results b.headword {
+::v-deep #bibliographic-results b.headword {
     font-weight: 400 !important;
     font-size: 100%;
     display: inline;
 }
 
-/deep/ .xml-lb,
-/deep/ .xml-l {
+::v-deep .xml-lb,
+::v-deep .xml-l {
     text-align: justify;
     display: block;
 }
 
-/deep/ .xml-sp .xml-lb:first-of-type {
+::v-deep .xml-sp .xml-lb:first-of-type {
     content: "";
     white-space: normal;
 }
 
-/deep/ .xml-lb[type="hyphenInWord"] {
+::v-deep .xml-lb[type="hyphenInWord"] {
     display: inline;
 }
 
@@ -779,110 +823,110 @@ b.headword {
     display: block;
 }
 
-/deep/ .xml-sp::before {
+::v-deep .xml-sp::before {
     content: "\A";
     white-space: pre;
 }
 
-/deep/ .xml-stage + .xml-sp:nth-of-type(n + 2)::before {
+::v-deep .xml-stage + .xml-sp:nth-of-type(n + 2)::before {
     content: "";
 }
 
-/deep/ .xml-fw,
-/deep/ .xml-join {
+::v-deep .xml-fw,
+::v-deep .xml-join {
     display: none;
 }
 
-/deep/ .xml-speaker + .xml-stage::before {
+::v-deep .xml-speaker + .xml-stage::before {
     content: "";
     white-space: normal;
 }
 
-/deep/ .xml-stage {
+::v-deep .xml-stage {
     font-style: italic;
 }
 
-/deep/ .xml-stage::after {
+::v-deep .xml-stage::after {
     content: "\A";
     white-space: pre;
 }
 
-/deep/ div1 div2::before {
+::v-deep div1 div2::before {
     content: "\A";
     white-space: pre;
 }
 
-/deep/ .xml-speaker {
+::v-deep .xml-speaker {
     font-weight: 700;
 }
 
-/deep/ .xml-pb {
+::v-deep .xml-pb {
     display: block;
     text-align: center;
     margin: 10px;
 }
 
-/deep/ .xml-pb::before {
+::v-deep .xml-pb::before {
     content: "-" attr(n) "-";
     white-space: pre;
 }
 
-/deep/ .xml-lg {
+::v-deep .xml-lg {
     display: block;
 }
 
-/deep/ .xml-lg::after {
+::v-deep .xml-lg::after {
     content: "\A";
     white-space: pre;
 }
 
-/deep/ .xml-lg:first-of-type::before {
+::v-deep .xml-lg:first-of-type::before {
     content: "\A";
     white-space: pre;
 }
 
-/deep/ .xml-castList,
-/deep/ .xml-front,
-/deep/ .xml-castItem,
-/deep/ .xml-docTitle,
-/deep/ .xml-docImprint,
-/deep/ .xml-performance,
-/deep/ .xml-docAuthor,
-/deep/ .xml-docDate,
-/deep/ .xml-premiere,
-/deep/ .xml-casting,
-/deep/ .xml-recette,
-/deep/ .xml-nombre {
+::v-deep .xml-castList,
+::v-deep .xml-front,
+::v-deep .xml-castItem,
+::v-deep .xml-docTitle,
+::v-deep .xml-docImprint,
+::v-deep .xml-performance,
+::v-deep .xml-docAuthor,
+::v-deep .xml-docDate,
+::v-deep .xml-premiere,
+::v-deep .xml-casting,
+::v-deep .xml-recette,
+::v-deep .xml-nombre {
     display: block;
 }
 
-/deep/ .xml-docTitle {
+::v-deep .xml-docTitle {
     font-style: italic;
     font-weight: bold;
 }
 
-/deep/ .xml-docTitle,
-/deep/ .xml-docAuthor,
-/deep/ .xml-docDate {
+::v-deep .xml-docTitle,
+::v-deep .xml-docAuthor,
+::v-deep .xml-docDate {
     text-align: center;
 }
 
-/deep/ .xml-docTitle span[type="main"] {
+::v-deep .xml-docTitle span[type="main"] {
     font-size: 150%;
     display: block;
 }
 
-/deep/ .xml-docTitle span[type="sub"] {
+::v-deep .xml-docTitle span[type="sub"] {
     font-size: 120%;
     display: block;
 }
 
-/deep/ .xml-performance,
-/deep/ .xml-docImprint {
+::v-deep .xml-performance,
+::v-deep .xml-docImprint {
     margin-top: 10px;
 }
 
-/deep/ .xml-set {
+::v-deep .xml-set {
     display: block;
     font-style: italic;
     margin-top: 10px;
@@ -895,152 +939,152 @@ body {
     /* Set the section counter to 0 */
 }
 
-/deep/ .xml-prononciation::before {
+::v-deep .xml-prononciation::before {
     content: "(";
 }
 
-/deep/ .xml-prononciation::after {
+::v-deep .xml-prononciation::after {
     content: ")\A";
 }
 
-/deep/ .xml-nature {
+::v-deep .xml-nature {
     font-style: italic;
 }
 
-/deep/ .xml-indent,
-/deep/ .xml-variante {
+::v-deep .xml-indent,
+::v-deep .xml-variante {
     display: block;
 }
 
-/deep/ .xml-variante {
+::v-deep .xml-variante {
     padding-top: 10px;
     padding-bottom: 10px;
     text-indent: -1.3em;
     padding-left: 1.3em;
 }
 
-/deep/ .xml-variante::before {
+::v-deep .xml-variante::before {
     counter-increment: section;
     content: counter(section) ")\00a0";
     font-weight: 700;
 }
 
-/deep/ :not(.xml-rubrique) + .xml-indent {
+::v-deep :not(.xml-rubrique) + .xml-indent {
     padding-top: 10px;
 }
 
-/deep/ .xml-indent {
+::v-deep .xml-indent {
     padding-left: 1.3em;
 }
 
-/deep/ .xml-cit {
+::v-deep .xml-cit {
     padding-left: 2.3em;
     display: block;
     text-indent: -1.3em;
 }
 
-/deep/ .xml-indent > .xml-cit {
+::v-deep .xml-indent > .xml-cit {
     padding-left: 1em;
 }
 
-/deep/ .xml-cit::before {
+::v-deep .xml-cit::before {
     content: "\2012\00a0\00ab\00a0";
 }
 
-/deep/ .xml-cit::after {
+::v-deep .xml-cit::after {
     content: "\00a0\00bb\00a0("attr(aut) "\00a0"attr(ref) ")";
     font-variant: small-caps;
 }
 
-/deep/ .xml-rubrique {
+::v-deep .xml-rubrique {
     display: block;
     margin-top: 20px;
 }
 
-/deep/ .xml-rubrique::before {
+::v-deep .xml-rubrique::before {
     content: attr(nom);
     font-variant: small-caps;
     font-weight: 700;
 }
 
-/deep/ .xml-corps + .xml-rubrique {
+::v-deep .xml-corps + .xml-rubrique {
     margin-top: 10px;
 }
 
 /*Methodique styling*/
 
-/deep/ div[type="article"] .headword {
+::v-deep div[type="article"] .headword {
     display: inline-block;
     margin-bottom: 10px;
 }
 
-/deep/ .headword + p {
+::v-deep .headword + p {
     display: inline;
 }
 
-/deep/ .headword + p + p {
+::v-deep .headword + p + p {
     margin-top: 10px;
 }
 
 /*Note handling*/
 
-/deep/ .popover {
+::v-deep .popover {
     max-width: 350px;
     overflow: scroll;
 }
 
-/deep/ .popover-content {
+::v-deep .popover-content {
     text-align: justify;
 }
 
-/deep/ .popover-content .xml-p:not(:first-of-type) {
+::v-deep .popover-content .xml-p:not(:first-of-type) {
     display: block;
     margin-top: 1em;
     margin-bottom: 1em;
 }
 
-/deep/ .note-content {
+::v-deep .note-content {
     display: none;
 }
 
-/deep/ .note,
-/deep/ .note-ref {
+::v-deep .note,
+::v-deep .note-ref {
     vertical-align: 0.3em;
     font-size: 0.7em;
 }
 
-/deep/ .note:hover,
-/deep/ .note-ref:hover {
+::v-deep .note:hover,
+::v-deep .note-ref:hover {
     cursor: pointer;
     text-decoration: none;
 }
 
-/deep/ div[type="notes"] .xml-note {
+::v-deep div[type="notes"] .xml-note {
     margin: 15px 0px;
     display: block;
 }
 
-/deep/ .xml-note::before {
+::v-deep .xml-note::before {
     content: "note\00a0"attr(n) "\00a0:\00a0";
     font-weight: 700;
 }
 
 /*Page images*/
 
-/deep/ .xml-pb-image {
+::v-deep .xml-pb-image {
     display: block;
     text-align: center;
     margin: 10px;
 }
 
-/deep/ .page-image-link {
+::v-deep .page-image-link {
     margin-top: 10px;
     /*display: block;*/
     text-align: center;
 }
 
 /*Inline images*/
-/deep/ .inline-img {
+::v-deep .inline-img {
     max-width: 40%;
     float: right;
     height: auto;
@@ -1048,44 +1092,44 @@ body {
     padding-top: 15px;
 }
 
-/deep/ .inline-img:hover {
+::v-deep .inline-img:hover {
     cursor: pointer;
 }
 
-/deep/ .link-back {
+::v-deep .link-back {
     margin-left: 10px;
     line-height: initial;
 }
 
-/deep/ .xml-add {
+::v-deep .xml-add {
     color: #ef4500;
 }
 
-/deep/ .xml-seg {
+::v-deep .xml-seg {
     display: block;
 }
 
 /*Table display*/
 
-/deep/ b.headword[rend="center"] {
+::v-deep b.headword[rend="center"] {
     margin-bottom: 30px;
     text-align: center;
 }
 
-/deep/ .xml-table {
+::v-deep .xml-table {
     display: table;
     position: relative;
     text-align: center;
     border-collapse: collapse;
 }
 
-/deep/ .xml-table .xml-pb-image {
+::v-deep .xml-table .xml-pb-image {
     position: absolute;
     width: 100%;
     margin-top: 15px;
 }
 
-/deep/ .xml-row {
+::v-deep .xml-row {
     display: table-row;
     font-weight: 700;
     text-align: left;
@@ -1097,19 +1141,19 @@ body {
     border-bottom: #ddd 1px solid;
 }
 
-/deep/ .xml-row ~ .xml-row {
+::v-deep .xml-row ~ .xml-row {
     font-weight: inherit;
     text-align: justify;
     font-variant: inherit;
 }
 
-/deep/ .xml-pb-image + .xml-row {
+::v-deep .xml-pb-image + .xml-row {
     padding-top: 50px;
     padding-bottom: 10px;
     border-top-width: 0px;
 }
 
-/deep/ .xml-cell {
+::v-deep .xml-cell {
     display: table-cell;
     padding-top: inherit; /*inherit padding when image is above */
     padding-bottom: inherit;
@@ -1124,5 +1168,29 @@ body {
 /* .slide-fade-leave-active below version 2.1.8 */ {
     transform: translateY(-30px);
     opacity: 0;
+}
+
+/* Image button styling */
+.img-buttons {
+    font-size: 45px !important;
+    color: #fff !important;
+}
+#full-size-image {
+    right: 90px;
+    font-weight: 700 !important;
+    font-size: 20px !important;
+    left: auto;
+    margin: -15px;
+    text-decoration: none;
+    cursor: pointer;
+    position: absolute;
+    top: 28px;
+    color: #fff;
+    opacity: 0.8;
+    border: 3px solid;
+    padding: 0 0.25rem;
+}
+#full-size-image:hover {
+    opacity: 1;
 }
 </style>

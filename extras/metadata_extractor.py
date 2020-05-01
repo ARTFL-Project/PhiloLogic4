@@ -8,7 +8,8 @@ import sys
 from philologic.runtime.DB import DB
 
 
-object_levels = {'doc': 1, 'div1': 2, 'div2': 3, 'div3': 4, 'para': 5}
+object_levels = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
+
 
 def main(object_level, db_path):
     metadata_fields = {}
@@ -22,7 +23,7 @@ def main(object_level, db_path):
     cursor.execute("SELECT * FROM toms WHERE philo_type=?", (object_level,))
     for result in cursor:
         fields = result
-        philo_id = "_".join(fields["philo_id"].split()[:object_levels[object_level]])
+        philo_id = "_".join(fields["philo_id"].split()[: object_levels[object_level]])
         metadata_fields[philo_id] = {}
         for field in database.locals["metadata_fields"]:
             metadata_fields[philo_id][field] = result[field] or ""
@@ -32,7 +33,7 @@ def main(object_level, db_path):
         json.dump(metadata_fields, metadata_file)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     object_level = sys.argv[1]
     db_path = sys.argv[2]
     main(object_level, db_path)

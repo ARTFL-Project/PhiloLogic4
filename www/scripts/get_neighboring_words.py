@@ -7,8 +7,13 @@ import timeit
 from wsgiref.handlers import CGIHandler
 
 from philologic.runtime.DB import DB
-from philologic.runtime import kwic_hit_object
 
+# from philologic.runtime import kwic_hit_object
+from philologic.runtime.get_text import get_text
+from philologic.runtime.ObjectFormatter import format_strip, adjust_bytes, clean_tags
+from philologic.runtime.FragmentParser import parse as FragmentParserParse
+
+import re
 import sys
 
 sys.path.append("..")
@@ -24,7 +29,7 @@ except ImportError:
     from philologic.runtime import WSGIHandler
 
 
-remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
+remove_punctuation_map = dict((ord(char), None) for char in string.punctuation if ord(char) != "'")
 
 
 def get_neighboring_words(environ, start_response):
@@ -46,40 +51,28 @@ def get_neighboring_words(environ, start_response):
     kwic_words = []
     start_time = timeit.default_timer()
     hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
-    cursor = db.dbh.cursor()
 
+    token_regex = re.compile(fr"""{db.locals["token_regex"]}""")
     for hit in hits[index:]:
-        word_id = " ".join([str(i) for i in hit.philo_id])
-        query = 'select rowid, philo_name, parent from words where philo_id="%s" limit 1' % word_id
-        cursor.execute(query)
-        results = cursor.fetchone()
+        # Determine length of text needed
+        byte_distance = hit.bytes[-1] - hit.bytes[0]
+        length = config.concordance_length + byte_distance + config.concordance_length
 
-        highlighted_text = kwic_hit_object(hit, config, db)["highlighted_text"]
-        highlighted_text = highlighted_text.translate(remove_punctuation_map)
-        highlighted_text = highlighted_text.strip()
+        # Get concordance and align it
+        new_bytes, start_byte = adjust_bytes(hit.bytes, config.concordance_length)
+        conc_text = get_text(hit, start_byte, length, config.db_path)
+        left_side_text = split_text(conc_text[: new_bytes[0]], token_regex)[-10:]
+        right_side_text = split_text(conc_text[new_bytes[0] :], token_regex)[:10]
+        word = right_side_text[0]
+        right_side_text = right_side_text[1:]
+        left_side_text.reverse()
 
-        result_obj = {"left": "", "right": "", "index": index, "q": highlighted_text}
-
-        left_rowid = results["rowid"] - 10
-        right_rowid = results["rowid"] + 10
-
-        cursor.execute(
-            "select philo_name, philo_id from words where rowid between ? and ?", (left_rowid, results["rowid"] - 1)
-        )
-        result_obj["left"] = []
-        for i in cursor:
-            result_obj["left"].append(i["philo_name"])
-        result_obj["left"].reverse()
-        result_obj["left"] = " ".join(result_obj["left"])
-
-        cursor.execute(
-            "select philo_name, philo_id from words where rowid between ? and ?", (results["rowid"] + 1, right_rowid)
-        )
-        result_obj["right"] = []
-        for i in cursor:
-            result_obj["right"].append(i["philo_name"])
-        result_obj["right"] = " ".join(result_obj["right"])
-
+        result_obj = {
+            "right": " ".join(right_side_text),
+            "left": " ".join(left_side_text),
+            "q": word,
+            "index": index,
+        }
         for metadata in config.kwic_metadata_sorting_fields:
             result_obj[metadata] = hit[metadata].lower()
 
@@ -94,6 +87,17 @@ def get_neighboring_words(environ, start_response):
             break
 
     yield rapidjson.dumps({"results": kwic_words, "hits_done": index}).encode("utf8")
+
+
+def split_text(text, token_regex):
+    text = text.decode("utf8", "ignore")
+    xml = FragmentParserParse(text)
+    output = clean_tags(xml, token_regex)
+    text = output.replace("\n", " ")
+    text = text.replace("\r", "")
+    text = text.replace("\t", " ")
+    text = text.translate(remove_punctuation_map)
+    return token_regex.findall(text.lower())
 
 
 if __name__ == "__main__":

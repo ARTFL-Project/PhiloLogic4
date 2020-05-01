@@ -1,7 +1,7 @@
 <template>
     <b-container fluid>
         <conckwic :results="results.results" v-if="Object.keys(results).length"></conckwic>
-        <b-row class="mr-2 mt-4">
+        <b-row class="mt-4">
             <b-col
                 cols="12"
                 md="7"
@@ -11,16 +11,14 @@
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
                     <b-card
                         no-body
-                        class="philologic-occurrence ml-4 mr-4 mb-4 shadow-sm p-1"
+                        class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm"
                         v-for="(result, index) in results.results"
                         :key="result.philo_id.join('-')"
                     >
                         <b-row class="citation-container">
                             <b-col cols="12" sm="10" md="11">
                                 <span class="cite" :data-id="result.philo_id.join(' ')">
-                                    <span
-                                        class="result-number"
-                                    >{{ results.description.start + index }}</span>
+                                    <span class="number">{{ results.description.start + index }}</span>
                                     <input
                                         type="checkbox"
                                         class="ml-3 mr-2"
@@ -38,65 +36,42 @@
                 cols="12"
                 md="7"
                 xl="8"
-                v-if="philoConfig.dictionary_bibliography || results.result_type != 'doc'"
-            ></b-col>
+                v-if="philoConfig.dictionary_bibliography && results.result_type != 'doc'"
+            >
+                <b-card
+                    no-body
+                    class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm"
+                    v-for="(group, groupKey) in results.results"
+                    :key="groupKey"
+                >
+                    <b-list-group flush>
+                        <b-list-group-item v-for="(result, index) in group" :key="index">
+                            <div class="citation-dico-container">
+                                <span class="cite" :data-id="result.philo_id.join(' ')">
+                                    <span
+                                        class="number"
+                                        style="margin-left: -1.25rem; margin-top: -5rem"
+                                    >{{ results.description.start + index }}</span>
+                                    <citations :citation="result.citation"></citations>
+                                </span>
+                            </div>
+                            <div
+                                class="philologic_context text-content-area pt-4 px-1 text-justify"
+                                select-word
+                                :position="result.position"
+                            >
+                                <div v-html="result.context"></div>
+                            </div>
+                        </b-list-group-item>
+                    </b-list-group>
+                </b-card>
+            </b-col>
             <b-col md="5" xl="4">
                 <facets></facets>
             </b-col>
         </b-row>
         <pages></pages>
     </b-container>
-    <!-- <ol
-        id="bibliographic-results"
-        class="text-content-area"
-        ng-if="philoConfig.dictionary_bibliography && result.result_type != 'doc'"
-    >
-        <li class="biblio-occurrence panel panel-default" ng-repeat="group in ::results.results">
-            <h3 style="margin: 0; padding: 0px 10px; text-align: center; font-variant: small-caps;">
-                <i>{{ ::group[0].metadata_fields.title }}</i>
-            </h3>
-            <ol style="margin-top: 10px;">
-                <li style="margin-top: 0;" ng-repeat="result in ::group">
-                    <input
-                        type="checkbox"
-                        style="margin-left:10px"
-                        ng-click="addToSearch(result.citation.title.label)"
-                        ng-if="results.doc_level && philoConfig.metadata.indexOf('title') !== -1"
-                    >
-                    <span style="padding-left: 10px;">{{ ::result.position }}.</span>
-                    <span class="philologic_cite">
-                        <span class="citation" ng-repeat="citation in result.citation">
-                            <span ng-if="citation.href">
-                                <span ng-bind-html="citation.prefix"></span>
-                                <a
-                                    ng-href="{{ ::citation.href }}"
-                                    ng-style="citation.style"
-                                >{{ ::citation.label }}</a>
-                                <span ng-bind-html="citation.suffix"></span>
-                                <span ng-bind-html="citation.separator" ng-if="!$last"></span>
-                            </span>
-                            <span ng-if="!citation.href">
-                                <span ng-bind-html="citation.prefix"></span>
-                                <span ng-style="citation.style">{{ ::citation.label }}</span>
-                                <span ng-bind-html="citation.suffix"></span>
-                                <span ng-bind-html="citation.separator" ng-if="!$last"></span>
-                            </span>
-                        </span>
-                    </span>
-                    <div
-                        class="philologic_context text-content-area"
-                        select-word
-                        position="{{ result.position }}"
-                    >
-                        <div
-                            style="padding: 0px 15px 0px 30px;"
-                            ng-bind-html="result.context | unsafe"
-                        ></div>
-                    </div>
-                </li>
-            </ol>
-        </li>
-    </ol>-->
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
@@ -156,21 +131,50 @@ export default {
                     params: this.paramsFilter(this.searchParams)
                 })
                 .then(response => {
-                    this.results = response.data;
-                    this.resultType = this.results.result_type;
-                    this.$store.commit("updateDescription", {
-                        ...this.description,
-                        start: this.results.description.start,
-                        end: this.results.description.end,
-                        results_per_page: this.results.description
-                            .results_per_page
-                    });
+                    if (
+                        !this.philoConfig.dictionary_bibliography ||
+                        response.data.doc_level
+                    ) {
+                        this.results = response.data;
+                        this.resultType = this.results.result_type;
+                        this.$store.commit("updateDescription", {
+                            ...this.description,
+                            start: this.results.description.start,
+                            end: this.results.description.end,
+                            results_per_page: this.results.description
+                                .results_per_page
+                        });
+                    } else {
+                        this.results = this.dictionaryBibliography(
+                            response.data
+                        );
+                        console.log(this.results);
+                    }
                 })
                 .catch(error => {
                     this.loading = false;
                     this.error = error.toString();
                     this.debug(this, error);
                 });
+        },
+        dictionaryBibliography(data) {
+            let groupedResults = [];
+            let currentTitle = data.results[0].metadata_fields.title;
+            let titleGroup = [];
+            for (let i = 0; i < data.results.length; i += 1) {
+                if (data.results[i].metadata_fields.title !== currentTitle) {
+                    groupedResults.push(titleGroup);
+                    titleGroup = [];
+                    currentTitle = data.results[i].metadata_fields.title;
+                }
+                data.results[i].position = i + 1;
+                titleGroup.push(data.results[i]);
+                if (i + 1 == data.results.length) {
+                    groupedResults.push(titleGroup);
+                }
+            }
+            data.results = groupedResults;
+            return data;
         },
         addToSearch(titleValue) {
             let title = '"' + titleValue + '"';
@@ -202,5 +206,19 @@ export default {
 <style scoped>
 .citation-container {
     border-width: 0 !important;
+}
+.citation-dico-container {
+    border-bottom: solid 1px #eee !important;
+}
+.number {
+    background-color: rgb(78, 93, 108);
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 0.375rem 0.75rem;
+    display: inline-block;
+    margin-right: 5px;
+    border-radius: 0.25rem;
+    height: 100%;
 }
 </style>

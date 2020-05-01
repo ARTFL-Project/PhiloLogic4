@@ -4,9 +4,9 @@
             <b-col sm="10" offset-sm="1" xl="8" offset-xl="2">
                 <b-card no-body class="shadow">
                     <b-form @submit.prevent @reset="onReset" @keyup.enter="onSubmit()">
-                        <div id="form_body">
+                        <div id="form-body">
                             <div id="initial-form">
-                                <b-button-group id="report" style="width: 100%">
+                                <b-button-group id="report" style="width: 100%; top: -1px;">
                                     <b-button
                                         :id="report.value"
                                         v-for="searchReport in reports"
@@ -72,13 +72,13 @@
                                                 <b-button
                                                     type="reset"
                                                     id="reset_form"
-                                                    variant="outline-danger"
+                                                    variant="secondary"
                                                     @click="onReset()"
                                                 >Clear</b-button>
                                                 <b-button
                                                     type="button"
                                                     id="show-search-form"
-                                                    variant="outline-info"
+                                                    variant="outline-secondary"
                                                     @click="toggleForm()"
                                                 >{{ searchOptionsButton }}</b-button>
                                             </b-button-group>
@@ -126,245 +126,227 @@
                                 </b-row>
                             </div>
                             <transition name="slide-fade">
-                                s
-                                <div id="search-elements" v-if="formOpen" class="pl-3 pr-3 shadow">
+                                <div
+                                    id="search-elements"
+                                    v-if="formOpen"
+                                    class="pl-3 pr-3 pb-3 shadow"
+                                >
                                     <h5>Refine your search with the following options and fields:</h5>
-                                    <b-row>
-                                        <b-col cols="12" sm="2">Search Terms</b-col>
-                                        <b-col cols="12" sm="10">
-                                            <b-row>
-                                                <b-col cols="12" sm="3">
-                                                    <b-form-checkbox
-                                                        id="approximate"
-                                                        v-model="approximate"
-                                                        name="checkbox-1"
-                                                        value="yes"
-                                                        unchecked-value="no"
-                                                    >Approximate match</b-form-checkbox>
-                                                </b-col>
-                                                <b-col
-                                                    cols="12"
-                                                    sm="9"
-                                                    style="margin-top: -.5rem !important"
-                                                    v-if="approximate === 'yes'"
-                                                >
-                                                    <b-dropdown
-                                                        id="approximate-values"
-                                                        text="100%"
-                                                        class="mr-1"
-                                                    >
-                                                        <b-dropdown-item
-                                                            v-for="value in approximateValues"
-                                                            @click="selectApproximate(value)"
-                                                            :key="value"
-                                                        >{{ value }}%</b-dropdown-item>
-                                                    </b-dropdown>or more
-                                                </b-col>
-                                            </b-row>
-                                        </b-col>
-                                    </b-row>
-                                    <b-row id="method" v-if="currentReport != 'collocation'">
-                                        <b-col cols="12" sm="2">Search Terms</b-col>
-                                        <b-col cols="12" sm="3" lg="2" id="method-buttons">
-                                            <b-form-group>
-                                                <b-form-radio-group
-                                                    v-model="method"
-                                                    :options="methodOptions"
-                                                    buttons
-                                                    stacked
-                                                    size="sm"
-                                                    name="radio-btn-stacked"
-                                                ></b-form-radio-group>
-                                            </b-form-group>
-                                        </b-col>
-                                        <b-col cols="12" sm="7" lg="8">
-                                            <b-row>
-                                                <b-col sm="8" md="5">
-                                                    <b-input-group
-                                                        size="sm"
-                                                        append="words in the same sentence"
-                                                    >
-                                                        <b-form-input v-model="arg_proxy"></b-form-input>
-                                                    </b-input-group>
-                                                </b-col>
-                                                <b-col sm="4" md="7"></b-col>
-                                                <b-col sm="8" md="5">
-                                                    <b-input-group
-                                                        size="sm"
-                                                        append="words in the same sentence"
-                                                    >
-                                                        <b-form-input v-model="arg_phrase"></b-form-input>
-                                                    </b-input-group>
-                                                </b-col>
-                                            </b-row>
-                                        </b-col>
-                                    </b-row>
-                                    <b-row
-                                        v-for="localField in metadataDisplayFiltered"
-                                        :key="localField.value"
+                                    <b-input-group>
+                                        <template v-slot:prepend>
+                                            <span
+                                                class="btn btn-outline-secondary"
+                                                style="height: fit-content;"
+                                            >Search Terms</span>
+                                        </template>
+                                        <b-input-group-prepend is-text>
+                                            <b-form-checkbox
+                                                id="approximate"
+                                                v-model="approximate"
+                                                value="yes"
+                                                switch
+                                                unchecked-value="no"
+                                            >Approximate match</b-form-checkbox>
+                                        </b-input-group-prepend>
+                                        <b-form-select
+                                            style="max-width: fit-content;"
+                                            :options="approximateValues"
+                                            v-model="approximate_ratio"
+                                            v-if="approximate == 'yes'"
+                                        ></b-form-select>
+                                    </b-input-group>
+                                    <b-input-group
+                                        class="mt-2"
+                                        v-if="currentReport != 'collocation'"
                                     >
-                                        <b-col cols="12" class="pb-2">
-                                            <div
-                                                class="input-group"
-                                                :id="localField.value + '-group'"
+                                        <template v-slot:prepend>
+                                            <span
+                                                class="btn btn-outline-secondary"
+                                                style="height: fit-content;"
+                                            >Search Terms</span>
+                                        </template>
+                                        <b-form-select
+                                            style="max-width: fit-content;"
+                                            v-model="method"
+                                            :options="methodOptions"
+                                        ></b-form-select>
+                                        <input
+                                            type="text"
+                                            name="arg_proxy"
+                                            style="width:50px; text-align: center"
+                                            v-model="arg_proxy"
+                                            v-if="method == 'proxy'"
+                                        />
+                                        <input
+                                            type="text"
+                                            name="arg_phrase"
+                                            style="width:50px; text-align: center"
+                                            v-model="arg_phrase"
+                                            v-if="method == 'phrase'"
+                                        />
+                                        <b-input-group-text
+                                            v-if="method == 'proxy' || method == 'phrase'"
+                                        >words in the same sentence</b-input-group-text>
+                                    </b-input-group>
+                                    <div class="mt-4">
+                                        <div
+                                            class="input-group pb-2"
+                                            v-for="localField in metadataDisplayFiltered"
+                                            :key="localField.value"
+                                            :id="localField.value + '-group'"
+                                        >
+                                            <b-input-group-prepend>
+                                                <b-button
+                                                    variant="outline-secondary"
+                                                >{{localField.label}}</b-button>
+                                            </b-input-group-prepend>
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                autocomplete="off"
+                                                :name="localField.value"
+                                                :placeholder="localField.example"
+                                                v-model="metadataValues[localField.value]"
+                                                @input="onChange(localField.value)"
+                                                @keydown.down="onArrowDown(localField.value)"
+                                                @keydown.up="onArrowUp(localField.value)"
+                                                @keyup.enter="onEnter(localField.value)"
+                                                v-if="metadataInputStyle[localField.value] == 'text'"
+                                            />
+                                            <b-form-select
+                                                :id="localField.value"
+                                                :options="dropdownValues[localField.value]"
+                                                :value="formData[localField.value]"
+                                                v-if="metadataInputStyle[localField.value] == 'dropdown'"
+                                            ></b-form-select>
+                                            <ul
+                                                :id="'autocomplete-' + localField.value"
+                                                class="autocomplete-results shadow"
+                                                :style="autoCompletePosition(localField.value)"
+                                                v-if="autoCompleteResults[localField.value].length > 0"
                                             >
-                                                <b-input-group-prepend>
-                                                    <b-button
-                                                        variant="outline-secondary"
-                                                    >{{localField.label}}</b-button>
-                                                </b-input-group-prepend>
-                                                <input
-                                                    type="text"
-                                                    class="form-control"
-                                                    autocomplete="off"
-                                                    :name="localField.value"
-                                                    :placeholder="localField.example"
-                                                    v-model="metadataValues[localField.value]"
-                                                    @input="onChange(localField.value)"
-                                                    @keydown.down="onArrowDown(localField.value)"
-                                                    @keydown.up="onArrowUp(localField.value)"
-                                                    @keyup.enter="onEnter(localField.value)"
-                                                />
-                                                <ul
-                                                    :id="'autocomplete-' + localField.value"
-                                                    class="autocomplete-results shadow"
-                                                    :style="autoCompletePosition(localField.value)"
-                                                    v-if="autoCompleteResults[localField.value].length > 0"
-                                                >
-                                                    <li
-                                                        tabindex="-1"
-                                                        v-for="(result, i) in autoCompleteResults[localField.value]"
-                                                        :key="result"
-                                                        @click="setResult(result, localField.value)"
-                                                        class="autocomplete-result"
-                                                        :class="{ 'is-active': i === arrowCounters[localField.value] }"
-                                                        v-html="result"
-                                                    ></li>
-                                                </ul>
-                                            </div>
-                                        </b-col>
-                                    </b-row>
-                                    <b-row
-                                        id="collocation-options"
+                                                <li
+                                                    tabindex="-1"
+                                                    v-for="(result, i) in autoCompleteResults[localField.value]"
+                                                    :key="result"
+                                                    @click="setResult(result, localField.value)"
+                                                    class="autocomplete-result"
+                                                    :class="{ 'is-active': i === arrowCounters[localField.value] }"
+                                                    v-html="result"
+                                                ></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <b-input-group
+                                        class="mt-4"
                                         v-if="currentReport === 'collocation'"
                                     >
-                                        <b-col cols="12">
-                                            <b-row>
-                                                <b-col cols="3" sm="2">Word Filtering</b-col>
-                                                <b-col cols="3" sm="2">
-                                                    <b-form-input
-                                                        name="filter_frequency"
-                                                        placeholder="100"
-                                                        v-model="filter_frequency"
-                                                    ></b-form-input>
-                                                </b-col>
-                                                <b-col cols="6">
-                                                    <b-form-group>
-                                                        <b-form-radio-group
-                                                            id="btn-radios-3"
-                                                            v-model="colloc_filter_choice"
-                                                            :options="collocationOptions"
-                                                            buttons
-                                                            stacked
-                                                            size="sm"
-                                                            name="radio-btn-stacked"
-                                                        ></b-form-radio-group>
-                                                    </b-form-group>
-                                                </b-col>
-                                            </b-row>
-                                        </b-col>
-                                    </b-row>
-                                    <b-row
-                                        id="time-series-options"
+                                        <template v-slot:prepend>
+                                            <span
+                                                class="btn btn-outline-secondary"
+                                                style="height: fit-content;"
+                                            >Word filtering</span>
+                                        </template>
+                                        <b-form-input
+                                            name="filter_frequency"
+                                            placeholder="100"
+                                            v-model="filter_frequency"
+                                            style="max-width: 60px; text-align: center"
+                                        ></b-form-input>
+                                        <b-form-group>
+                                            <b-form-radio-group
+                                                id="btn-radios-3"
+                                                v-model="colloc_filter_choice"
+                                                :options="collocationOptions"
+                                                buttons
+                                                stacked
+                                            ></b-form-radio-group>
+                                        </b-form-group>
+                                    </b-input-group>
+                                    <b-input-group
+                                        class="mt-4 pt-1 pb-2"
                                         v-if="currentReport === 'time_series'"
                                     >
-                                        <b-col cols="12" sm="2">Date range:</b-col>
-                                        <b-col cols="12" sm="10">
-                                            from
-                                            <input
-                                                type="text"
-                                                name="start_date"
-                                                id="start_date"
-                                                style="width:35px;"
-                                                v-model="start_date"
-                                            />
-                                            to
-                                            <input
-                                                type="text"
-                                                name="end_date"
-                                                id="end_date"
-                                                style="width:35px;"
-                                                v-model="end_date"
-                                            />
-                                        </b-col>
-                                    </b-row>
-                                    <b-row id="date_range" v-if="currentReport == 'time_series'">
-                                        <b-col cols="12" sm="2">Year interval:</b-col>
-                                        <b-col cols="12" sm="10">
-                                            every
-                                            <input
-                                                type="text"
-                                                name="year_interval"
-                                                id="year_interval"
-                                                style="width:35px; text-align: center;"
-                                                v-model="year_interval"
-                                            />&nbsp;years
-                                        </b-col>
-                                    </b-row>
-                                    <b-row
-                                        id="group-options"
+                                        <template v-slot:prepend>
+                                            <span class="btn btn-outline-secondary">Date range</span>
+                                            <b-input-group-text>from</b-input-group-text>
+                                        </template>
+                                        <input
+                                            type="text"
+                                            name="start_date"
+                                            id="start_date"
+                                            style="width:50px; text-align: center"
+                                            v-model="start_date"
+                                        />
+                                        <b-input-group-text>to</b-input-group-text>
+                                        <input
+                                            type="text"
+                                            name="end_date"
+                                            id="end_date"
+                                            style="width:50px; text-align: center"
+                                            v-model="end_date"
+                                        />
+                                    </b-input-group>
+                                    <b-input-group v-if="currentReport == 'time_series'">
+                                        <template v-slot:prepend>
+                                            <span class="btn btn-outline-secondary">Year interval</span>
+                                            <b-input-group-text>every</b-input-group-text>
+                                        </template>
+                                        <input
+                                            type="text"
+                                            name="year_interval"
+                                            id="year_interval"
+                                            style="width:50px; text-align: center;"
+                                            v-model="year_interval"
+                                        />
+                                        <template v-slot:append>
+                                            <b-input-group-text>year(s)</b-input-group-text>
+                                        </template>
+                                    </b-input-group>
+                                    <b-input-group
+                                        class="mt-4"
                                         v-if="currentReport === 'aggregation'"
                                     >
-                                        <b-col cols="12" style="margin-top: 10px;">
-                                            <b-row>
-                                                <b-col cols="3" sm="2">Group results by</b-col>
-                                                <b-col cols="6" sm="4">
-                                                    <b-form-select
-                                                        v-model="group_by"
-                                                        :options="aggregationOptions"
-                                                        class="mb-3"
-                                                    ></b-form-select>
-                                                </b-col>
-                                            </b-row>
-                                        </b-col>
-                                    </b-row>
-                                    <b-row
-                                        id="sort-options"
+                                        <template v-slot:prepend>
+                                            <span class="btn btn-outline-secondary">Group results by</span>
+                                        </template>
+                                        <b-form-select
+                                            style="max-width: fit-content;"
+                                            v-model="group_by"
+                                            :options="aggregationOptions"
+                                        ></b-form-select>
+                                    </b-input-group>
+                                    <b-input-group
+                                        class="mt-4 pb-2"
                                         v-if="currentReport === 'concordance' || currentReport === 'bibliography'"
                                     >
-                                        <b-col cols="12" style="margin-top: 10px;">
-                                            <b-row>
-                                                <b-col cols="3" sm="2">Sort results by</b-col>
-                                                <b-col cols="6" sm="4">
-                                                    <b-form-select
-                                                        v-model="sort_by"
-                                                        :options="sortValues"
-                                                        class="mb-3"
-                                                    >
-                                                        <option>Sort results by</option>
-                                                    </b-form-select>
-                                                </b-col>
-                                            </b-row>
-                                        </b-col>
-                                    </b-row>
-                                    <b-row
-                                        id="results_per_page"
+                                        <template v-slot:prepend>
+                                            <span class="btn btn-outline-secondary">Sort results by</span>
+                                        </template>
+                                        <b-form-select
+                                            style="max-width: fit-content;"
+                                            v-model="sort_by"
+                                            :options="sortValues"
+                                        >
+                                            <option>Sort results by</option>
+                                        </b-form-select>
+                                    </b-input-group>
+                                    <b-input-group
                                         v-if="currentReport != 'collocation' && currentReport != 'time_series' && currentReport != 'aggregation'"
                                     >
-                                        <b-col cols="12" sm="2">Results per page:</b-col>
-                                        <b-col cols="12" sm="10">
-                                            <b-form-group>
-                                                <b-form-radio-group
-                                                    id="btn-radios-3"
-                                                    v-model="results_per_page"
-                                                    :options="resultsPerPageOptions"
-                                                    buttons
-                                                    size="sm"
-                                                    name="radio-btn"
-                                                ></b-form-radio-group>
-                                            </b-form-group>
-                                        </b-col>
-                                    </b-row>
+                                        <template v-slot:prepend>
+                                            <span class="btn btn-outline-secondary">Results per page</span>
+                                        </template>
+                                        <b-form-group style="margin-bottom: 0">
+                                            <b-form-radio-group
+                                                id="btn-radios-3"
+                                                v-model="results_per_page"
+                                                :options="resultsPerPageOptions"
+                                                buttons
+                                                name="radio-btn"
+                                            ></b-form-radio-group>
+                                        </b-form-group>
+                                    </b-input-group>
                                 </div>
                             </transition>
                         </div>
@@ -402,9 +384,6 @@ export default {
         SearchTips
     },
     computed: {
-        // When using nested data structures, the string
-        // after the last dot (e.g. `firstName`) is used
-        // for defining the name of the computed property.
         ...mapFields([
             "formData.report",
             "formData.q",
@@ -465,10 +444,18 @@ export default {
     data() {
         return {
             dictionary: this.$philoConfig.dictionary,
+            metadataInputStyle: this.$philoConfig.metadata_input_style,
             headIndex: 0,
             formOpen: false,
             searchOptionsButton: "Show search options",
-            approximateValues: [50, 60, 70, 80, 90],
+            approximateValues: [
+                { text: "100%", value: "100" },
+                { text: "90% or more", value: "90" },
+                { text: "80% or more", value: "80" },
+                { text: "70% or more", value: "70" },
+                { text: "60% or more", value: "60" },
+                { text: "50% or more", value: "50" }
+            ],
             methodOptions: [
                 { text: "Within", value: "proxy" },
                 { text: "Exactly", value: "phrase" },
@@ -476,9 +463,10 @@ export default {
             ],
             metadataDisplay: [],
             metadataValues: {},
+            dropdownValues: {},
             collocationOptions: [
-                { text: "Less distintive terms on average", value: "tfidf" },
                 { text: "Most Frequent Terms", value: "frequency" },
+                { text: "Less distinctive terms on average", value: "tfidf" },
                 { text: "Stopwords", value: "stopwords" },
                 { text: "No Filtering", value: "nofilter" }
             ],
@@ -536,6 +524,41 @@ export default {
                 this.$set(this.autoCompleteResults, metadataField, []);
                 this.$set(this.arrowCounters, metadataField, -1);
             }
+        });
+        for (let metadata in this.$philoConfig.metadata_dropdown_values) {
+            this.dropdownValues[metadata] = [];
+            let dropdownValue = this.$philoConfig.metadata_dropdown_values[
+                metadata
+            ];
+            for (let i = 0; i < dropdownValue.length; i++) {
+                let quotedValue = dropdownValue[i].value;
+                this.dropdownValues[metadata].push({
+                    text: dropdownValue[i].label,
+                    value: quotedValue
+                });
+            }
+        }
+    },
+    mounted() {
+        this.$nextTick(() => {
+            document
+                .getElementById("form-body")
+                .addEventListener("change", event => {
+                    if (
+                        event.srcElement.id in
+                        this.$philoConfig.metadata_dropdown_values
+                    ) {
+                        let value =
+                            event.srcElement.options[
+                                document.getElementById(event.srcElement.id)
+                                    .selectedIndex
+                            ].value;
+                        this.$store.commit("updateFormDataField", {
+                            key: event.srcElement.id,
+                            value: value
+                        });
+                    }
+                });
         });
     },
     methods: {
@@ -599,7 +622,9 @@ export default {
             this.byte = "";
             this.formOpen = false;
             this.debug(this, this.$store.state.formData);
-            this.$router.push(this.paramsToRoute(this.$store.state.formData));
+            this.$router.push(
+                this.paramsToRoute({ ...this.$store.state.formData })
+            );
         },
         onReset() {
             this.$store.commit(
@@ -649,7 +674,6 @@ export default {
                     this.q.replace('"', "").length > 1 &&
                     this.q != currentQueryTerm
                 ) {
-                    console.log("typed", this.q);
                     this.$http
                         .get(`${this.$dbUrl}/scripts/autocomplete_term.py`, {
                             params: { term: this.q }
@@ -658,7 +682,6 @@ export default {
                             this.autoCompleteResults.q = response.data;
                             this.isLoading = false;
                         });
-                    console.log("typed", this.q);
                 }
             } else {
                 this.$store.commit("updateFormDataField", {
@@ -791,6 +814,11 @@ export default {
     margin-bottom: 15px;
 }
 
+#search-elements .btn-outline-secondary,
+#q-group .btn-outline-secondary {
+    pointer-events: none; /*disable hover effect*/
+}
+
 #report label {
     font-size: 1.1em;
     font-variant: small-caps;
@@ -838,17 +866,6 @@ export default {
 #collocation-options > div,
 #time-series-options > div {
     margin-top: 10px;
-}
-
-#method,
-.metadata_fields.row,
-#time_series_num.row,
-#date_range.row,
-#results_per_page.row,
-#collocation-options > div,
-#time-series-options > div {
-    padding-top: 10px;
-    padding-bottom: 10px;
 }
 
 #initial-form .btn-primary.active {

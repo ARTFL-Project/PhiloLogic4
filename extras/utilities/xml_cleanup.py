@@ -244,4 +244,3 @@ if __name__ == "__main__":
     if failed_files:
         print("The following files were not converted due to failure:")
         print("\n".join(failed_files))
-
