@@ -288,44 +288,13 @@ export default {
             tocButton.classList.remove("disabled");
             this.navButtonPosition = tocButton.getBoundingClientRect().top;
 
-            // Image Gallery handling
-            Array.from(
-                document.getElementsByClassName("page-image-link")
-            ).forEach(item => {
-                item.addEventListener("click", event => {
-                    event.preventDefault();
-                    let target = event.srcElement;
-                    this.gallery = Gallery(
-                        [
-                            ...document.getElementsByClassName(
-                                "page-image-link"
-                            )
-                        ].map(item => item.getAttribute("href")),
-                        {
-                            index: Array.from(
-                                document.getElementsByClassName(
-                                    "page-image-link"
-                                )
-                            ).indexOf(target),
-                            continuous: false,
-                            thumbnailIndicators: false
-                        }
-                    );
-                });
-            });
-            document
-                .getElementById("full-size-image")
-                .addEventListener("click", () => {
-                    let imageIndex = this.gallery.getIndex();
-                    let img = Array.from(
-                        document.getElementsByClassName("page-image-link")
-                    )[imageIndex].getAttribute("large-img");
-                    window.open(img);
-                });
+            this.setUpGallery();
         }, 1000);
     },
     destroyed() {
-        this.gallery.close();
+        if (this.gallery) {
+            this.gallery.close();
+        }
     },
     methods: {
         fetchText() {
@@ -541,6 +510,48 @@ export default {
                     tocButton.removeAttribute("disabled");
                     tocButton.classList.remove("disabled");
                 });
+            }
+        },
+        setUpGallery() {
+            // Image Gallery handling
+            for (let imageType of ["page-image-link", "inline-img"]) {
+                Array.from(document.getElementsByClassName(imageType)).forEach(
+                    item => {
+                        item.addEventListener("click", event => {
+                            event.preventDefault();
+                            let target = event.srcElement;
+                            this.gallery = Gallery(
+                                [
+                                    ...document.getElementsByClassName(
+                                        imageType
+                                    )
+                                ].map(
+                                    item =>
+                                        item.getAttribute("href") ||
+                                        item.getAttribute("src")
+                                ),
+                                {
+                                    index: Array.from(
+                                        document.getElementsByClassName(
+                                            imageType
+                                        )
+                                    ).indexOf(target),
+                                    continuous: false,
+                                    thumbnailIndicators: false
+                                }
+                            );
+                        });
+                    }
+                );
+                document
+                    .getElementById("full-size-image")
+                    .addEventListener("click", () => {
+                        let imageIndex = this.gallery.getIndex();
+                        let img = Array.from(
+                            document.getElementsByClassName(imageType)
+                        )[imageIndex].getAttribute("large-img");
+                        window.open(img);
+                    });
             }
         },
         loadBefore() {
