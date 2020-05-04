@@ -314,6 +314,7 @@ entity_regex = [
 
 LINE_SPLITTER = re.compile(r"([^\n]+)")
 
+
 class DocumentContent:
     """Content of document: a generator functionning like a list"""
 
@@ -345,7 +346,6 @@ class DocumentContent:
         return line
 
 
-
 class XMLParser:
     """Parses clean or dirty XML.
     This is a port of the PhiloLogic3 parser originally written by Mark Olsen in Perl.
@@ -361,7 +361,7 @@ class XMLParser:
         tag_to_obj_map=DEFAULT_TAG_TO_OBJ_MAP,
         metadata_to_parse=DEFAULT_METADATA_TO_PARSE,
         file_type="xml",
-        **parse_options
+        **parse_options,
     ):
         """Initialize class"""
         self.types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
@@ -375,7 +375,14 @@ class XMLParser:
 
         # Initialize an OHCOVector Stack. operations on this stack produce all parser output.
         self.v = CompoundStack(
-            self.types, self.parallel_type, docid=docid, out=output, ref="ref", line="line", graphic="graphic", punctuation="punct"
+            self.types,
+            self.parallel_type,
+            docid=docid,
+            out=output,
+            ref="ref",
+            line="line",
+            graphic="graphic",
+            punctuation="punct",
         )
 
         self.filesize = filesize
@@ -438,11 +445,12 @@ class XMLParser:
         tag_exceptions = "|".join(tag_exceptions)
         try:
             compiled_tag = re.compile(
-                rf'({parse_options["token_regex"]})({tag_exceptions})({parse_options["token_regex"]})({tag_exceptions})({parse_options["token_regex"]})?', re.I | re.M
+                rf'({parse_options["token_regex"]})({tag_exceptions})({parse_options["token_regex"]})({tag_exceptions})({parse_options["token_regex"]})?',
+                re.I | re.M,
             )
         except:
             compiled_tag = re.compile(
-                rf'({TOKEN_REGEX})({tag_exceptions})({TOKEN_REGEX})({tag_exceptions})({TOKEN_REGEX})?', re.I | re.M
+                rf"({TOKEN_REGEX})({tag_exceptions})({TOKEN_REGEX})({tag_exceptions})({TOKEN_REGEX})?", re.I | re.M
             )
         self.tag_exceptions = compiled_tag
 
@@ -577,7 +585,7 @@ class XMLParser:
             if m[-1] is not None:
                 return f"""{m[0]}{m[2]}{m[4]}{"_" * len(m[1])}{"_" * len(m[3])}"""
             else:
-                return f"""{m[0]}{m[2]}{"_" * len(m[1])}"""
+                return f"""{m[0]}{m[2]}{"_" * (len(m[1])+len(m[3]))}"""
 
         self.content = self.tag_exceptions.sub(lambda match: replace_tag(match.groups()), self.content)
 
@@ -848,6 +856,7 @@ class XMLParser:
             elif body_tag.search(tag) and not self.got_a_div:
                 self.v.push("div1", tag_name, start_byte)
                 self.current_div_id = self.v["div1"].id
+                self.v["div1"].attrib["philo_div1_id"] = " ".join(str(i) for i in self.v["div1"].id[:2])
                 self.context_div_level = 1
                 self.open_div1 = True
                 div_head = self.get_div_head(tag)
@@ -1168,9 +1177,8 @@ class XMLParser:
                                 end_pos = len(single_punct.encode("utf8"))
                                 if single_punct != " ":
                                     self.v.push("punct", single_punct, punc_pos)
-                                    self.v.pull("punct", punc_pos+len(single_punct.encode("utf8")))
+                                    self.v.pull("punct", punc_pos + len(single_punct.encode("utf8")))
                                 punc_pos = end_pos
-
 
     def close_sent(self, end_byte):
         """Close sentence objects."""
@@ -1504,7 +1512,6 @@ class XMLParser:
 
     def remove_control_chars(self, text):
         return control_char_re.sub("", text)
-
 
 
 if __name__ == "__main__":
