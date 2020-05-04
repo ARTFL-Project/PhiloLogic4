@@ -39,7 +39,7 @@
                             v-if="showHeader"
                             v-html="teiHeader"
                         ></b-card>
-                        <div id="toc-report" class="text-content-area" loading="loading">
+                        <div id="toc-report" class="text-content-area">
                             <div
                                 id="toc-content"
                                 infinite-scroll="getMoreItems()"
@@ -77,7 +77,8 @@ export default {
     computed: {
         ...mapFields({
             report: "formData.report",
-            textNavigationCitation: "textNavigationCitation"
+            textNavigationCitation: "textNavigationCitation",
+            searching: "searching"
         })
     },
     data() {
@@ -85,7 +86,6 @@ export default {
             philoConfig: this.$philoConfig,
             authorized: true,
             displayLimit: 50,
-            loading: true,
             teiHeader: "",
             tocObject: {},
             showHeader: false,
@@ -97,18 +97,18 @@ export default {
     },
     methods: {
         fetchToC() {
-            this.loading = true;
+            this.searching = true;
             this.$http
                 .get(`${this.$dbUrl}/reports/table_of_contents.py`, {
                     params: { philo_id: this.$route.params.pathInfo }
                 })
                 .then(response => {
-                    this.loading = false;
+                    this.searching = false;
                     this.tocObject = response.data;
                     this.textNavigationCitation = response.data.citation;
                 })
                 .catch(error => {
-                    this.loading = false;
+                    this.searching = false;
                     this.debug(this, error);
                 });
         },
