@@ -47,11 +47,7 @@
                 </div>
                 <div id="toc">
                     <div id="toc-titlebar" class="d-none">
-                        <b-button
-                            class="btn btn-primary btn-xs pull-right"
-                            id="hide-toc"
-                            @click="toggleTableOfContents()"
-                        >X</b-button>
+                        <b-button id="hide-toc" @click="toggleTableOfContents()">X</b-button>
                     </div>
                     <transition name="slide-fade">
                         <b-card
@@ -261,35 +257,38 @@ export default {
                 .join(" ");
         });
     },
+    mounted() {
+        let tocButton = document.querySelector("#show-toc");
+        this.navButtonPosition = tocButton.getBoundingClientRect().top;
+    },
     updated: function() {
-        this.searching = false;
-        this.$nextTick(() => {
-            if (this.byte != "") {
-                this.$scrollTo(
-                    document.querySelectorAll(".highlight")[0],
-                    1000,
-                    {
-                        easing: "ease-out",
-                        offset: -100
-                    }
-                );
-            } else if (this.start_byte != "") {
-                this.$scrollTo(
-                    document.querySelectorAll(".start-highlight")[0],
-                    1000,
-                    {
-                        easing: "ease-out",
-                        offset: -100
-                    }
-                );
-            }
-            let tocButton = document.querySelector("#show-toc");
-            tocButton.removeAttribute("disabled");
-            tocButton.classList.remove("disabled");
-            this.navButtonPosition = tocButton.getBoundingClientRect().top;
+        if (this.searching) {
+            // only trigger at first render
+            this.$nextTick(() => {
+                if (this.byte != "") {
+                    this.$scrollTo(
+                        document.getElementsByClassName("highlight")[0],
+                        1000,
+                        {
+                            easing: "ease-out",
+                            offset: -150
+                        }
+                    );
+                } else if (this.start_byte != "") {
+                    this.$scrollTo(
+                        document.getElementsByClassName("start-highlight")[0],
+                        1000,
+                        {
+                            easing: "ease-out",
+                            offset: -150
+                        }
+                    );
+                }
 
-            this.setUpGallery();
-        }, 1000);
+                this.setUpGallery();
+            }, 1000);
+            this.searching = false;
+        }
     },
     destroyed() {
         if (this.gallery) {
@@ -379,21 +378,13 @@ export default {
                     if (currentObjImgs.indexOf(img[0]) === -1) {
                         if (img.length == 2) {
                             this.beforeObjImgs.push([
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
-                                    img[0],
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
-                                    img[1]
+                                `${this.philoConfig.page_images_url_root}/${img[0]}`,
+                                `${this.philoConfig.page_images_url_root}/${img[1]}`
                             ]);
                         } else {
                             this.beforeObjImgs.push([
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
-                                    img[0],
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
-                                    img[0]
+                                `${this.philoConfig.page_images_url_root}/${img[0]}`,
+                                `${this.philoConfig.page_images_url_root}/${img[0]}`
                             ]);
                         }
                     } else {
@@ -406,21 +397,13 @@ export default {
                     if (currentObjImgs.indexOf(img[0]) === -1) {
                         if (img.length == 2) {
                             this.afterObjImgs.push([
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
-                                    img[0],
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
-                                    img[1]
+                                `${this.philoConfig.page_images_url_root}/${img[0]}`,
+                                `${this.philoConfig.page_images_url_root}/${img[1]}`
                             ]);
                         } else {
                             this.afterObjImgs.push([
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
-                                    img[0],
-                                this.philoConfig.page_images_url_root +
-                                    "/" +
-                                    img[0]
+                                `${this.philoConfig.page_images_url_root}/${img[0]}`,
+                                `${this.philoConfig.page_images_url_root}/${img[0]}`
                             ]);
                         }
                     }
@@ -498,6 +481,9 @@ export default {
                             start: this.start,
                             end: this.end
                         };
+                        let tocButton = document.querySelector("#show-toc");
+                        tocButton.removeAttribute("disabled");
+                        tocButton.classList.remove("disabled");
                     })
                     .catch(error => {
                         this.debug(this, error);
@@ -514,7 +500,11 @@ export default {
         },
         setUpGallery() {
             // Image Gallery handling
-            for (let imageType of ["page-image-link", "inline-img"]) {
+            for (let imageType of [
+                "page-image-link",
+                "inline-img",
+                "external-img"
+            ]) {
                 Array.from(document.getElementsByClassName(imageType)).forEach(
                     item => {
                         item.addEventListener("click", event => {
@@ -688,6 +678,7 @@ export default {
 #toc-content {
     display: inline-block;
     position: relative;
+    max-height: 90vh;
     overflow: scroll;
     text-align: justify;
     line-height: 180%;
@@ -725,6 +716,7 @@ export default {
     pointer-events: none;
 }
 #report-error {
+    position: absolute;
     right: 0;
     opacity: 0;
     transition: opacity 0.25s;
@@ -733,13 +725,13 @@ export default {
 #back-to-top.visible,
 #report-error.visible {
     opacity: 0.95;
+    pointer-events: all;
 }
 
 #nav-buttons {
     position: absolute;
     opacity: 0.9;
     width: 100%;
-    /*  */
 }
 #toc-nav-bar {
     background-color: #ddd;
