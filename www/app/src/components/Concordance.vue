@@ -118,9 +118,12 @@ export default {
         },
         moreContext(index) {
             let button = event.srcElement;
-            let parentNode = button.parentNode.parentNode.parentNode;
-            let defaultNode = parentNode.querySelector(".default-length");
-            let moreNode = parentNode.querySelector(".more-length");
+            let defaultNode = document.getElementsByClassName("default-length")[
+                index
+            ];
+            let moreNode = document.getElementsByClassName("more-length")[
+                index
+            ];
             let resultNumber = this.results.description.start + index - 1;
             let localParams = { hit_num: resultNumber, ...this.searchParams };
             if (button.innerHTML == "More") {

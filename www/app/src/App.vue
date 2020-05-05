@@ -217,7 +217,7 @@ export default {
 };
 </script>
 <style lang="scss">
-@import "./assets/styles/artfl-theme.scss";
+@import "./assets/styles/theme.scss";
 @import "../node_modules/bootstrap/scss/bootstrap.scss";
 </style>
 <style>

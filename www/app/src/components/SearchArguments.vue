@@ -23,7 +23,7 @@
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only">Close</span>
                 </b-button>
-                <h4>The search terms query expanded to the following {{ words.length }} terms:</h4>
+                <h5>The search terms query expanded to the following {{ words.length }} terms:</h5>
                 <h6 v-if="words.length > 100">100 most frequent terms displayed</h6>
                 <b-button
                     size="sm"

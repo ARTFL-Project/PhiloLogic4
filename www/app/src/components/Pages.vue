@@ -145,9 +145,10 @@ export default {
 }
 .page-number {
     display: block;
+    font-size: 110%;
 }
 .page-range {
-    font-size: 70%;
+    font-size: 80%;
     opacity: 0.7;
 }
 </style>
