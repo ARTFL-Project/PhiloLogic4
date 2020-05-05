@@ -250,12 +250,6 @@ export default {
         this.report = "textNavigation";
         this.fetchText();
         this.fetchToC();
-        EventBus.$on("navChange", () => {
-            this.fetchText();
-            this.currentPhiloId = this.$route.params.pathInfo
-                .split("/")
-                .join(" ");
-        });
     },
     mounted() {
         let tocButton = document.querySelector("#show-toc");
@@ -328,7 +322,6 @@ export default {
                 .get(`${this.$dbUrl}/reports/navigation.py?${urlQuery}`)
                 .then(response => {
                     this.textObject = response.data;
-                    // textNavigationValues.textObject = response.data;
                     this.textNavigationCitation = response.data.citation;
                     this.navBar = true;
                     if (this.byte.length > 0) {
