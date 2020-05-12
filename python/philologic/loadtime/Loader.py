@@ -183,13 +183,12 @@ class Loader:
 
     def add_files(self, files):
         """Copy files to database directory"""
-        print("\nCopying files to database directory...", end=" ", flush=True)
-        for f in files:
+        for f in tqdm(files, total=len(files), leave=False, desc="Copying files to database directory"):
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
             shutil.copy2(f, new_file_path)
             os.chmod(new_file_path, 775)
             self.filenames.append(f)
-        print("done.\n", flush=True)
+        print("Copying files to database directory... done.\n", flush=True)
 
     def parse_bibliography_file(self, bibliography_file, sort_by_field, reverse_sort=True):
         """Parse tab delimited bibliography file"""
@@ -223,7 +222,8 @@ class Loader:
         load_metadata = []
         metadata_xpaths = self.parser_config["doc_xpaths"]
         doc_count = len(os.listdir(self.textdir))
-        for pos, file in enumerate(os.scandir(self.textdir)):
+        prefix = f"{time.ctime()}: Parsing document level metadata"
+        for file in tqdm(os.scandir(self.textdir), total=doc_count, desc=prefix, leave=False,):
             data = {"filename": file.name}
             header = ""
             with open(file.path) as text_file:
@@ -280,7 +280,7 @@ class Loader:
                 load_metadata.append(data)
             except lxml.etree.XMLSyntaxError:
                 self.deleted_files.append(file.name)
-            print(f"\r{time.ctime()}: Parsing document level metadata: {pos+1}/{doc_count} done...", flush=True, end="")
+        print(f"{prefix}... done.", flush=True)
         if self.deleted_files:
             print(
                 "\nThe following files have been removed from the load since they have no valid TEI header or contain invalid data:\n",
@@ -292,7 +292,8 @@ class Loader:
         """Parse Dublin Core header"""
         load_metadata = []
         doc_count = len(os.listdir(self.textdir))
-        for pos, file in enumerate(os.scandir(self.textdir)):
+        prefix = f"{time.ctime()}: Parsing document level metadata"
+        for file in tqdm(os.scandir(self.textdir), total=doc_count, leave=False, desc=prefix):
             data = {}
             header = ""
             with open(file.path) as fh:
@@ -318,7 +319,7 @@ class Loader:
             if self.debug:
                 print(pretty_print(data))
             load_metadata.append(data)
-            print(f"\r{time.ctime()}: Parsing document level metadata: {pos+1}/{doc_count} done...", flush=True, end="")
+        print(f"{prefix}... done.", flush=True)
         return load_metadata
 
     def create_year_field(self, metadata):
@@ -342,19 +343,10 @@ class Loader:
     def parse_metadata(self, sort_by_field, header="tei"):
         """Parsing metadata fields in TEI or Dublin Core headers"""
         print("### Parsing metadata ###", flush=True)
-        print(
-            f"{time.ctime()}: Parsing document level metadata: 0/{len(os.listdir(self.textdir))} done...",
-            flush=True,
-            end="",
-        )
         if header == "tei":
             load_metadata = self.parse_tei_header()
         elif header == "dc":
             load_metadata = self.parse_dc_header()
-        print(
-            f"\r{time.ctime()}: Parsing document level metadata: {len(os.listdir(self.textdir))}/{len(os.listdir(self.textdir))} done...",
-            flush=True,
-        )
 
         print(
             "%s: Sorting files by the following metadata fields: %s..."
@@ -509,10 +501,8 @@ class Loader:
             except Exception:
                 raise ParserError(f"{text['name']} has caused parser to die.")
 
-        os.system("lz4 -c -q %s > %s" % (text["raw"], text["raw"] + ".lz4"))
-        os.system("rm %s" % text["raw"])
-        os.system("lz4 -c -q %s > %s" % (text["words"], text["words"] + ".lz4"))
-        os.system("rm %s" % text["words"])
+        os.system("lz4 --rm -c -q -3 %s > %s" % (text["words"], text["words"] + ".lz4"))
+        os.remove(text["raw"])
         return text["results"]
 
     def merge_objects(self):
@@ -520,12 +510,6 @@ class Loader:
         print("\n### Merge parser output ###")
         print("%s: sorting words" % time.ctime())
         self.merge_files("words")
-
-        # Build file to be used for building sentences table
-        print("%s: concatenating document-order words file..." % time.ctime(), end=" ", flush=True)
-        for f in self.filequeue:
-            os.system(f'lz4cat {f["raw"]}.lz4 | egrep -a "^word" >> all_words_ordered')
-        print("done")
 
         print("%s: sorting objects" % time.ctime(), flush=True)
         self.merge_files("toms")
@@ -599,7 +583,10 @@ class Loader:
         files = []
         if file_type == "words":
             suffix = "/*words.sorted.lz4"
-            open_file_command = "lz4cat"
+            if self.debug is False:
+                open_file_command = "lz4cat --rm"
+            else:
+                open_file_command = "lz4cat"
             sort_command = f"LANG=C sort -S 25% -m -T {self.workdir} {self.sort_by_word} {self.sort_by_id} "
             all_object_file = "all_words_sorted.lz4"
         elif file_type == "toms":
@@ -624,21 +611,19 @@ class Loader:
         os.system(f"touch {self.workdir}/sorted.init")
         for pos, object_list in enumerate(lists_of_files):
             command_list = " ".join([i[0] for i in object_list])
-            file_list = " ".join([i[1] for i in object_list])
+            # file_list = " ".join([i[1] for i in object_list])
             output = self.workdir + "sorted.%d.split" % pos
             args = sort_command + command_list
-            command = f'/bin/bash -c "{args} | lz4 -q >{output}"'
+            command = f'/bin/bash -c "{args} | lz4 -3 -q >{output}"'
             status = os.system(command)
             if status != 0:
                 print(f"{file_type} sorting failed\nInterrupting database load...")
                 sys.exit()
             already_merged += len(object_list)
             print(f"\r{time.ctime()}: {already_merged} files sorted...", end="")
-            if not self.debug:
-                os.system(f"rm {file_list}")
         print(flush=True)
 
-        sorted_files = " ".join([f"<(lz4cat -q {i})" for i in glob(f"{self.workdir}/*.split")])
+        sorted_files = " ".join([f"<(lz4cat -q --rm {i})" for i in glob(f"{self.workdir}/*.split")])
         if file_type == "words":
             output_file = os.path.join(self.workdir, all_object_file)
             command = f'/bin/bash -c "{sort_command} {sorted_files} | lz4 -q > {output_file}"'
@@ -717,8 +702,6 @@ class Loader:
         print("%s: all indices built. moving into place." % time.ctime())
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1")
-        # if self.clean:
-        #    os.system('rm all_words_sorted')
 
     def setup_sql_load(self):
         """Setup SQL DB creation"""
@@ -744,9 +727,8 @@ class Loader:
                 indices = [("doc_id", "start_byte", "end_byte")]
                 depth = 9
             if table == "sentences":
-                file_in = self.destination + "/WORK/all_words_ordered"
                 db_destination = os.path.join(self.destination, "toms.db")
-                post_filter = make_sentences_table(file_in, db_destination)
+                post_filter = make_sentences_table(self.destination, db_destination)
             else:
                 post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)

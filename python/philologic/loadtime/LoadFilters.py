@@ -4,6 +4,7 @@
 import os
 import pickle
 from rapidjson import dumps, loads
+import lz4.frame
 
 from philologic.loadtime.OHCOVector import Record
 
@@ -269,7 +270,8 @@ def store_words_and_philo_ids(loader_obj, text):
     except OSError:
         # Path was already created
         pass
-    with open(os.path.join(files_path, str(text["id"])), "w") as output:
+    filename = os.path.join(files_path, str(text["id"]))
+    with open(filename, "w") as output:
         with open(text["raw"]) as filehandle:
             for line in filehandle:
                 philo_type, word, philo_id, attrib = line.split("\t")
@@ -290,6 +292,10 @@ def store_words_and_philo_ids(loader_obj, text):
                         }
                     )
                     print(word_obj, file=output)
+    with open(f"{filename}.lz4", "wb") as compressed_file:
+        with open(filename, "rb") as input_file:
+            compressed_file.write(lz4.frame.compress(input_file.read(), compression_level=4))
+        os.remove(filename)
 
 
 def pos_tagger(language):
@@ -343,7 +349,6 @@ DefaultLoadFilters = [
     generate_graphics,
     generate_lines,
     make_max_id,
-    store_in_plain_text,
     store_words_and_philo_ids,
 ]
 

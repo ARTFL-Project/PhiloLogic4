@@ -6,12 +6,12 @@ import os
 import sqlite3
 import time
 import unicodedata
-from rapidjson import loads
-import msgpack
-import lz4.block
 
+import lz4.frame
+import msgpack
 import numpy as np
 from multiprocess import Pool
+from rapidjson import loads
 from sklearn.feature_extraction.text import TfidfVectorizer
 from tqdm import tqdm
 
@@ -74,7 +74,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
     return inner_make_sql_table
 
 
-def make_sentences_table(words_ordered_file, db_destination):
+def make_sentences_table(datadir, db_destination):
     """Generate a table where each row is a sentence containing all the words in it"""
 
     def inner_make_sentences(loader_obj):
@@ -84,25 +84,28 @@ def make_sentences_table(words_ordered_file, db_destination):
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute("CREATE TABLE IF NOT EXISTS sentences(philo_id text, words blob)")
-            line_count = sum(1 for _ in open(words_ordered_file, "rbU"))
+            line_count = sum(
+                sum(1 for _ in lz4.frame.open(raw_words.path))
+                for raw_words in os.scandir(f"{datadir}/words_and_philo_ids")
+            )
             with tqdm(total=line_count, leave=False) as pbar:
-                with open(words_ordered_file) as input_file:
-                    current_sentence = None
-                    words = []
-                    for line in input_file:
-                        _, word, philo_id, _ = line.split("\t", 3)
-                        start_byte = philo_id.split()[7]
-                        sentence_id = " ".join(philo_id.split()[:6]) + " 0"
-                        if sentence_id != current_sentence:
-                            if current_sentence is not None:
-                                cursor.execute(
-                                    "insert into sentences values(?, ?)",
-                                    (current_sentence, lz4.block.compress(msgpack.dumps(words))),
-                                )
-                                words = []
-                            current_sentence = sentence_id
-                        words.append({"word": word, "start_byte": start_byte})
-                        pbar.update()
+                for raw_words in os.scandir(f"{datadir}/words_and_philo_ids"):
+                    with lz4.frame.open(raw_words.path) as input_file:
+                        current_sentence = None
+                        words = []
+                        for line in input_file:
+                            word_obj = loads(line.decode("utf8"))
+                            sentence_id = " ".join(word_obj["position"].split()[:6]) + " 0"
+                            if sentence_id != current_sentence:
+                                if current_sentence is not None:
+                                    cursor.execute(
+                                        "insert into sentences values(?, ?)",
+                                        (current_sentence, lz4.frame.compress(msgpack.dumps(words))),
+                                    )
+                                    words = []
+                                current_sentence = sentence_id
+                            words.append({"word": word_obj["token"], "start_byte": word_obj["start_byte"]})
+                            pbar.update()
             cursor.execute("create index sentence_index on sentences (philo_id)")
             conn.commit()
 
@@ -187,10 +190,10 @@ def tfidf_per_word(loader_obj):
 
     def get_text(doc):
         words = []
-        with open(doc) as text:
+        with lz4.frame.open(doc) as text:
             for line in text:
                 try:
-                    words.append(loads(line.strip())["token"])
+                    words.append(loads(line.decode("utf8").strip())["token"])
                 except:
                     pass
         return " ".join(words)
