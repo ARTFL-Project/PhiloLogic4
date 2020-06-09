@@ -704,7 +704,11 @@ export default {
                             }
                         )
                         .then(response => {
-                            this.autoCompleteResults[field] = response.data;
+                            this.autoCompleteResults[
+                                field
+                            ] = response.data.map(result =>
+                                result.replace(/CUTHERE/, "<last/>")
+                            );
                         })
                         .catch(error => {
                             this.debug(this, error);
@@ -757,24 +761,48 @@ export default {
                 }
             }
         },
-        setResult(result, field) {
-            if (typeof result != "undefined") {
-                let update = {};
-                if (result.startsWith('"')) {
-                    result = result.slice(1);
-                }
-                if (result.endsWith('"')) {
-                    result = result.slice(0, result.length - 1);
-                }
-                let selected = `"${result.replace(/<[^>]+>/g, "")}"`;
-                update[field] = selected;
+        setResult(inputString, field) {
+            if (typeof inputString != "undefined") {
+                let inputGroup, lastInput;
                 if (field == "q") {
-                    this.q = selected;
+                    if (lastInput.match(/"/)) {
+                        if (lastInput.startsWith('"')) {
+                            lastInput = lastInput.slice(1);
+                        }
+                        if (lastInput.endsWith('"')) {
+                            lastInput = lastInput.slice(
+                                0,
+                                lastInput.length - 1
+                            );
+                        }
+                    }
+                    this.q = `${inputGroup.join("")}"${lastInput.trim()}"`;
                 } else {
-                    this.metadataValues[field] = selected;
+                    let prefix = "";
+                    if (inputString.match(/<last\/>/)) {
+                        inputGroup = inputString.split(/<last\/>/);
+                        lastInput = inputGroup.pop();
+                        lastInput = lastInput.trim().replace(/<[^>]+>/g, "");
+                        prefix = inputGroup.join("");
+                    } else {
+                        lastInput = inputString.replace(/<[^>]+>/g, "").trim();
+                    }
+                    if (lastInput.match(/"/)) {
+                        if (lastInput.startsWith('"')) {
+                            lastInput = lastInput.slice(1);
+                        }
+                        if (lastInput.endsWith('"')) {
+                            lastInput = lastInput.slice(
+                                0,
+                                lastInput.length - 1
+                            );
+                        }
+                    }
+                    let finalInput = `${prefix}"${lastInput}"`;
+                    this.metadataValues[field] = finalInput;
                     this.$store.commit("updateFormDataField", {
                         key: field,
-                        value: selected
+                        value: finalInput
                     });
                 }
             }
