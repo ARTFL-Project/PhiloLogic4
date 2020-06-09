@@ -28,8 +28,9 @@
             <transition name="slide-fade">
                 <b-list-group
                     flush
+                    class="mt-1"
+                    style="border-top: 0"
                     v-if="showFacetSelection && report != 'bibliography'"
-                    class="mt-2"
                 >
                     <span class="dropdown-header text-center">Collocates of query term(s)</span>
                     <b-list-group-item
