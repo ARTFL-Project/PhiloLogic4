@@ -9,10 +9,11 @@ import unicodedata
 
 import lz4.frame
 import msgpack
+import multiprocess as mp
 import numpy as np
-from multiprocess import Pool
 from rapidjson import loads
-from sklearn.feature_extraction.text import TfidfVectorizer
+from scipy.sparse import csr_matrix, vstack
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from tqdm import tqdm
 
 
@@ -186,7 +187,15 @@ def normalized_metadata_frequencies(loader_obj):
 
 def tfidf_per_word(loader_obj):
     """Get the mean TF-IDF weighting of every word in corpus"""
-    print(f"{time.ctime()}: Storing Inverse Document Frequency of all words in corpus...")
+    print(f"{time.ctime()}: Storing mean TF-IDF of all words in corpus...")
+    path = os.path.join(loader_obj.destination, "words_and_philo_ids")
+    batches = round(len(os.listdir(path)) / 1000)
+
+    def uniq_word_list(start=-1, end=math.inf):
+        with open(os.path.join(loader_obj.workdir, "all_frequencies")) as fh:
+            for pos, line in enumerate(fh):
+                if pos >= start and pos < end:
+                    yield line.strip().split()[1], pos
 
     def get_text(doc):
         words = []
@@ -198,21 +207,43 @@ def tfidf_per_word(loader_obj):
                     pass
         return " ".join(words)
 
-    def get_all_words():
-        path = os.path.join(loader_obj.destination, "words_and_philo_ids")
-        pool = Pool(32)
+    def get_all_words(filenames, batch_number):
+        pool = mp.Pool(mp.cpu_count() - 1)
         return tqdm(
-            pool.imap_unordered(get_text, (i.path for i in os.scandir(path))),
+            pool.imap_unordered(get_text, filenames),
             leave=False,
-            total=len(os.listdir(path)),
-            desc="Vectorizing words...",
+            total=len(filenames),
+            desc=f"Vectorizing file batch {batch_number}/{batches}",
         )
 
-    vectorizer = TfidfVectorizer(sublinear_tf=True, token_pattern=r"(?u)\b\w+\b")
-    corpus = vectorizer.fit_transform((get_all_words()))
-    mean_tf_idf = np.mean(corpus.toarray(), axis=0)
-    weighted_words = {word: mean_tf_idf[vectorizer.vocabulary_[word]] for word in vectorizer.vocabulary_}
-    with open(os.path.join(loader_obj.destination, "frequencies/words_mean_tfidf"), "w") as idf_output:
+    full_corpus_chunked = []
+    filenames = []
+    batch_number = 0
+    print("Computing mean TF-IDF for each word in corpus...", flush=True)
+    for file in os.scandir(path):
+        filenames.append(file.path)
+        if len(filenames) == 1000:
+            batch_number += 1
+            vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b", vocabulary=dict(uniq_word_list()))
+            full_corpus_chunked.append(vectorizer.fit_transform((get_all_words(filenames, batch_number))))
+            filenames = []
+    if filenames:
+        batch_number += 1
+        vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b", vocabulary=dict(uniq_word_list()))
+        full_corpus_chunked.append(vectorizer.fit_transform((get_all_words(filenames, batch_number))))
+        filenames = []
+
+    transformer = TfidfTransformer(sublinear_tf=True)
+    vectorized_corpus = transformer.fit_transform(vstack(full_corpus_chunked).transpose())
+    with open(os.path.join("/var/www/html/philologic/tgb/data", "frequencies/words_mean_tfidf"), "w") as idf_output:
+        weighted_words = {}
+        word_num = vectorized_corpus.shape[0]
+        with tqdm(total=word_num, leave=False, desc="Calculating mean TF-IDF...") as pbar:
+            for start in range(0, word_num, 10000):
+                tf_idf_mean = csr_matrix.mean(vectorized_corpus[start : start + 10000], axis=1)
+                for word, word_id in uniq_word_list(start=start, end=start + 10000):
+                    weighted_words[word] = tf_idf_mean[word_id - start][0, 0]
+                    pbar.update()
         for word, idf in sorted(weighted_words.items(), key=lambda x: x[1], reverse=True):
             print(f"{word}\t{idf}", file=idf_output)
 

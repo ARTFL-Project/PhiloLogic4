@@ -588,12 +588,10 @@ class Loader:
             else:
                 open_file_command = "lz4cat"
             sort_command = f"LANG=C sort -S 25% -m -T {self.workdir} {self.sort_by_word} {self.sort_by_id} "
-            all_object_file = "all_words_sorted.lz4"
         elif file_type == "toms":
             suffix = "/*.toms.sorted"
             open_file_command = "cat"
             sort_command = f"LANG=C sort -S 25% -m -T {self.workdir} {self.sort_by_id} "
-            all_object_file = "all_toms_sorted.lz4"
 
         # First we split the sort workload into chunks of 100 (default defined in the file_num keyword)
         for f in glob(self.workdir + suffix):
@@ -612,7 +610,7 @@ class Loader:
         for pos, object_list in enumerate(lists_of_files):
             command_list = " ".join([i[0] for i in object_list])
             # file_list = " ".join([i[1] for i in object_list])
-            output = self.workdir + "sorted.%d.split" % pos
+            output = os.path.join(self.workdir, f"sorted.{pos}.split")
             args = sort_command + command_list
             command = f'/bin/bash -c "{args} | lz4 -3 -q >{output}"'
             status = os.system(command)
@@ -623,10 +621,11 @@ class Loader:
             print(f"\r{time.ctime()}: {already_merged} files sorted...", end="")
         print(flush=True)
 
+        # WARNING: we are technically limited to the file descriptor limit, which should be 1,000,000 or more.
         sorted_files = " ".join([f"<(lz4cat -q --rm {i})" for i in glob(f"{self.workdir}/*.split")])
         if file_type == "words":
-            output_file = os.path.join(self.workdir, all_object_file)
-            command = f'/bin/bash -c "{sort_command} {sorted_files} | lz4 -q > {output_file}"'
+            output_file = os.path.join(self.workdir, "all_words_sorted.lz4")
+            command = f'/bin/bash -c "{sort_command} -b --compress-program=lz4 {sorted_files} | lz4 -q > {output_file}"'
         else:
             output_file = os.path.join(self.workdir, "all_toms_sorted")
             command = f'/bin/bash -c "{sort_command} {sorted_files} > {output_file}"'
@@ -658,7 +657,7 @@ class Loader:
 
         # unix one-liner for a frequency table
         os.system(
-            f'/bin/bash -c "cut -f 2 <(lz4cat {self.workdir}/all_words_sorted.lz4) | uniq -c | LANG=C sort -S 10% -rn -k 1,1> {self.workdir}/all_frequencies"'
+            f'/bin/bash -c "cut -f 2 <(lz4cat {self.workdir}/all_words_sorted.lz4) | uniq -c | LANG=C sort -S 25% -rn -k 1,1> {self.workdir}/all_frequencies"'
         )
 
         # now scan over the frequency table to figure out how wide (in bits) the frequency fields are,
