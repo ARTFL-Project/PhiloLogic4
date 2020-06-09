@@ -753,7 +753,7 @@ export default {
             if (!this.$el.contains(evt.target)) {
                 this.isOpen = false;
                 for (let field in this.arrowCounters) {
-                    this.arrowCounters[field] = 0;
+                    this.arrowCounters[field] = -1;
                 }
             }
         },
@@ -779,7 +779,7 @@ export default {
                 }
             }
             this.autoCompleteResults[field] = [];
-            this.arrowCounters[field] = 0;
+            this.arrowCounters[field] = -1;
         },
         autoCompletePosition(field) {
             let parent = document.getElementById(`${field}-group`);
