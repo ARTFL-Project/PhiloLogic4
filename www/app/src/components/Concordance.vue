@@ -1,8 +1,15 @@
 <template>
     <b-container fluid>
         <conckwic v-if="description.end != 0" :results="results.results"></conckwic>
+        <div style="position: relative">
+            <b-btn
+                style="position: absolute; bottom: 1rem; right: .5rem;"
+                @click="toggleFacets()"
+                v-if="!showFacets"
+            >Show Facets</b-btn>
+        </div>
         <b-row>
-            <b-col cols="12" md="8" xl="8">
+            <b-col cols="12" md="8" xl="8" :class="{'col-md-12': !showFacets}">
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
                     <b-card
                         no-body
@@ -40,7 +47,7 @@
                     </b-card>
                 </transition-group>
             </b-col>
-            <b-col md="4" xl="4">
+            <b-col md="4" xl="4" v-if="showFacets">
                 <facets></facets>
             </b-col>
         </b-row>
@@ -50,6 +57,7 @@
 
 <script>
 import { mapFields } from "vuex-map-fields";
+import { EventBus } from "../main.js";
 import citations from "./Citations";
 import conckwic from "./ConcordanceKwic";
 import facets from "./Facets";
@@ -77,13 +85,17 @@ export default {
         return {
             philoConfig: this.$philoConfig,
             results: {},
-            searchParams: {}
+            searchParams: {},
+            showFacets: true
         };
     },
     created() {
         this.report = "concordance";
         this.currentReport = "concordance";
         this.fetchResults();
+        EventBus.$on("toggleFacets", () => {
+            this.toggleFacets();
+        });
     },
     watch: {
         // call again the method if the route changes
@@ -164,6 +176,13 @@ export default {
             setTimeout(function() {
                 Velocity(el, { opacity: 1 }, { complete: done });
             }, delay);
+        },
+        toggleFacets() {
+            if (this.showFacets) {
+                this.showFacets = false;
+            } else {
+                this.showFacets = true;
+            }
         }
     }
 };

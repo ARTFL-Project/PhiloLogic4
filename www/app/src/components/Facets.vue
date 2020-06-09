@@ -1,5 +1,5 @@
 <template>
-    <div id="facet-search" class="d-xs-none mr-2" loading="loading">
+    <div id="facet-search" class="d-xs-none mr-2">
         <b-card
             no-body
             title="Title"
@@ -7,7 +7,13 @@
             id="facet-panel-wrapper"
             class="shadow-sm"
         >
+            <b-btn
+                size="sm"
+                style="position: absolute; top:0; right: 0; line-height: 1"
+                @click="toggleFacets()"
+            >x</b-btn>
             <h6 slot="header" class="mb-0 text-center">Browse by facet</h6>
+
             <transition name="slide-fade">
                 <b-list-group flush id="select-facets" v-if="showFacetSelection">
                     <span class="dropdown-header text-center">Frequency by</span>
@@ -399,6 +405,9 @@ export default {
                     end: "0"
                 })
             );
+        },
+        toggleFacets() {
+            EventBus.$emit("toggleFacets");
         }
     }
 };
