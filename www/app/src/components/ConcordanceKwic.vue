@@ -16,14 +16,28 @@
                     <div v-if="report != 'aggregation'">
                         <div id="result-stats" class="pb-2">
                             {{ resultsLength }} total occurrences spread across
-                            <span
-                                v-for="(stat, statIndex) in statsDescription"
-                                :key="stat.field"
+                            <div
+                                class="d-inline-block"
+                                style="position: relative"
+                                v-if="!hitlistStatsDone"
                             >
-                                <router-link
-                                    :to="`/aggregation?${stat.link}&group_by=${stat.field}`"
-                                >{{stat.count}} {{stat.label}}(s)</router-link>
-                                <span v-if="statIndex != statsDescription.length-1">&nbsp;and&nbsp;</span>
+                                <b-spinner
+                                    variant="secondary"
+                                    style="position: absolute; width: 2rem; height: 2rem; z-index: 50; bottom: -.75rem;"
+                                ></b-spinner>
+                            </div>
+                            <span v-if="hitlistStatsDone">
+                                <span
+                                    v-for="(stat, statIndex) in statsDescription"
+                                    :key="stat.field"
+                                >
+                                    <router-link
+                                        :to="`/aggregation?${stat.link}&group_by=${stat.field}`"
+                                    >{{stat.count}} {{stat.label}}(s)</router-link>
+                                    <span
+                                        v-if="statIndex != statsDescription.length-1"
+                                    >&nbsp;and&nbsp;</span>
+                                </span>
                             </span>
                         </div>
                         <div id="search-hits">
@@ -143,6 +157,7 @@ export default {
             descriptionEnd: this.$store.state.formData.results_per_page,
             statsDescription: [],
             resultsPerPage: 0,
+            hitlistStatsDone: false,
             reportSwitch: {
                 concordance: {
                     labelBig: "View occurrences with context",
@@ -247,11 +262,13 @@ export default {
                 });
         },
         getHitListStats() {
+            this.hitlistStatsDone = false;
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_hitlist_stats.py`, {
                     params: this.paramsFilter({ ...this.$store.state.formData })
                 })
                 .then(response => {
+                    this.hitlistStatsDone = true;
                     this.statsDescription = this.buildStatsDescription(
                         response.data.stats
                     );
