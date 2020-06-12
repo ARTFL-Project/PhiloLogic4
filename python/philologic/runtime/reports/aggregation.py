@@ -59,9 +59,15 @@ def aggregation_by_field(request, config):
         for philo_id in philo_ids:
             field_name = metadata_dict[philo_id]["field_name"]
             if field_obj["break_up_field"] == "title":  # account for same title for different works
-                break_up_field = f"{metadata_dict[philo_id][break_up_field_name]} {philo_id}"
+                try:
+                    break_up_field = f"{metadata_dict[philo_id][break_up_field_name]} {philo_id}"
+                except KeyError:
+                    break_up_field = f"NO TITLE {philo_id}"
             else:
-                break_up_field = metadata_dict[philo_id][break_up_field_name]
+                try:
+                    break_up_field = metadata_dict[philo_id][break_up_field_name]
+                except KeyError:
+                    break_up_field = f"NO {break_up_field_name} {philo_id}"
             if field_name not in counts_by_field:
                 counts_by_field[field_name] = {
                     "count": 1,

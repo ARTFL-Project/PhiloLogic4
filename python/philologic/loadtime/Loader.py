@@ -711,7 +711,11 @@ class Loader:
                 depth = 9
             elif table == "toms":
                 file_in = self.destination + "/WORK/all_toms_sorted"
-                indices = [("philo_type",), ("philo_id",), ("img",)] + self.metadata_fields
+                indices = (
+                    [("philo_type",), ("philo_id",), ("img",)]
+                    + self.metadata_fields
+                    + [(f"philo_{philo_type}_id",) for philo_type in ["doc", "div1", "div2", "div3", "para"]]
+                )
                 depth = 7
             elif table == "refs":
                 file_in = self.destination + "/WORK/all_refs"

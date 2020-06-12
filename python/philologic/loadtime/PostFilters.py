@@ -107,6 +107,10 @@ def make_sentences_table(datadir, db_destination):
                                 current_sentence = sentence_id
                             words.append({"word": word_obj["token"], "start_byte": word_obj["start_byte"]})
                             pbar.update()
+                        cursor.execute(  # insert last sentence in doc
+                            "insert into sentences values(?, ?)",
+                            (sentence_id, lz4.frame.compress(msgpack.dumps(words))),
+                        )
             cursor.execute("create index sentence_index on sentences (philo_id)")
             conn.commit()
 
