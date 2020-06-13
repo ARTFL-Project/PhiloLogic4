@@ -31,17 +31,14 @@ def get_web_config(_, start_response):
 
 
 def time_series_tester(config):
-    db = DB(config.db_path + "/data/")
-    c = db.dbh.cursor()
-    try:
-        c.execute("SELECT COUNT(*) FROM toms WHERE %s IS NOT NULL" % config.time_series_year_field)
-        count = c.fetchone()[0]
-        if count > 0:
+    """Test if we have at least two distinct values for time series"""
+    frequencies_file = os.path.join(config.db_path, f"frequencies/{config.time_series_year_field}_frequencies")
+    if os.path.exists(frequencies_file):
+        with open(frequencies_file) as input_file:
+            line_count = sum(1 for _ in input_file)
+        if line_count > 1:
             return True
-        else:
-            return False
-    except sqlite3.OperationalError:
-        return False
+    return False
 
 
 if __name__ == "__main__":
