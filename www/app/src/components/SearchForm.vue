@@ -765,6 +765,10 @@ export default {
             if (typeof inputString != "undefined") {
                 let inputGroup, lastInput;
                 if (field == "q") {
+                    inputGroup = inputString
+                        .replace(/<[^>]+>/g, "")
+                        .split(/(\s*\|\s*|\s*OR\s*|\s+|\s*NOT\s*)/);
+                    lastInput = inputGroup.pop();
                     if (lastInput.match(/"/)) {
                         if (lastInput.startsWith('"')) {
                             lastInput = lastInput.slice(1);

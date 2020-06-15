@@ -96,16 +96,17 @@ def make_sentences_table(datadir, db_destination):
                         words = []
                         for line in input_file:
                             word_obj = loads(line.decode("utf8"))
-                            sentence_id = " ".join(word_obj["position"].split()[:6]) + " 0"
-                            if sentence_id != current_sentence:
-                                if current_sentence is not None:
-                                    cursor.execute(
-                                        "insert into sentences values(?, ?)",
-                                        (current_sentence, lz4.frame.compress(msgpack.dumps(words))),
-                                    )
-                                    words = []
-                                current_sentence = sentence_id
-                            words.append({"word": word_obj["token"], "start_byte": word_obj["start_byte"]})
+                            if word_obj["philo_type"] == "word":
+                                sentence_id = " ".join(word_obj["position"].split()[:6]) + " 0"
+                                if sentence_id != current_sentence:
+                                    if current_sentence is not None:
+                                        cursor.execute(
+                                            "insert into sentences values(?, ?)",
+                                            (current_sentence, lz4.frame.compress(msgpack.dumps(words))),
+                                        )
+                                        words = []
+                                    current_sentence = sentence_id
+                                words.append({"word": word_obj["token"], "start_byte": word_obj["start_byte"]})
                             pbar.update()
                         cursor.execute(  # insert last sentence in doc
                             "insert into sentences values(?, ?)",

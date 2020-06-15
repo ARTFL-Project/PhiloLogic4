@@ -245,7 +245,7 @@ export default {
             }
         },
         populateSidebar(facet, fullResults, start, queryParams) {
-            var promise;
+            let promise;
             if (this.moreResults) {
                 if (facet.type !== "collocationFacet") {
                     promise = this.$http.get(
@@ -271,9 +271,9 @@ export default {
                 this.showFacetSelection = false;
                 promise
                     .then(response => {
-                        var results = response.data.results;
+                        let results = response.data.results;
                         this.moreResults = response.data.more_results;
-                        var merge;
+                        let merge;
                         if (!this.interrupt && this.selected == facet.alias) {
                             if (facet.type === "collocationFacet") {
                                 merge = this.mergeResults(
@@ -323,9 +323,9 @@ export default {
             return +(Math.round(num + "e+2") + "e-2");
         },
         getRelativeFrequencies() {
-            var relativeResults = {};
-            for (var label in this.fullResults.unsorted) {
-                var resultObj = this.fullResults.unsorted[label];
+            let relativeResults = {};
+            for (let label in this.fullResults.unsorted) {
+                let resultObj = this.fullResults.unsorted[label];
                 relativeResults[label] = {
                     count: this.roundToTwo(
                         (resultObj.count / resultObj.total_word_count) * 10000
@@ -336,7 +336,7 @@ export default {
                 };
             }
             this.fullRelativeFrequencies = relativeResults;
-            var sortedRelativeResults = this.sortResults(
+            let sortedRelativeResults = this.sortResults(
                 this.fullRelativeFrequencies
             );
             this.facetResults = this.copyObject(

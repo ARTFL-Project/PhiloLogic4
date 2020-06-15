@@ -289,6 +289,7 @@ def store_words_and_philo_ids(loader_obj, text):
                             "position": philo_id,
                             "start_byte": attrib["start_byte"],
                             "end_byte": attrib["end_byte"],
+                            "philo_type": philo_type,
                         }
                     )
                     print(word_obj, file=output)

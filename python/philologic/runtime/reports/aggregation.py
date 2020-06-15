@@ -48,6 +48,7 @@ def aggregation_by_field(request, config):
             uniq_name = row[f"philo_{metadata_type}_id"]
         else:
             uniq_name = row[group_by]
+        id = tuple(map(int, row[f"philo_{metadata_type}_id"].split()))
         metadata_dict[tuple(map(int, row[f"philo_{metadata_type}_id"].split()))] = {
             **{field: row[field] or "" for field in db.locals["metadata_fields"] if row[field] or field == group_by},
             "field_name": uniq_name,
@@ -57,7 +58,10 @@ def aggregation_by_field(request, config):
     break_up_field_name = field_obj["break_up_field"]
     if break_up_field_name is not None:
         for philo_id in philo_ids:
-            field_name = metadata_dict[philo_id]["field_name"]
+            try:
+                field_name = metadata_dict[philo_id]["field_name"]
+            except KeyError:
+                continue  # TODO: investigate cases if need be...
             if field_obj["break_up_field"] == "title":  # account for same title for different works
                 try:
                     break_up_field = f"{metadata_dict[philo_id][break_up_field_name]} {philo_id}"
