@@ -5,6 +5,7 @@
 from http.cookies import SimpleCookie
 import hashlib
 import urllib.parse
+import json
 
 from philologic.runtime.find_similar_words import find_similar_words
 from philologic.runtime.Query import query_parse
@@ -33,7 +34,14 @@ class WSGIHandler(object):
                 h.update(db.locals.secret.encode("utf8"))
                 if self.cookies["hash"].value == h.hexdigest():
                     self.authenticated = True
+
+        # Parse GET and POST requests
         self.cgi = urllib.parse.parse_qs(self.query_string, keep_blank_values=True)
+        post_data = environ["wsgi.input"].read().decode("utf8", "ignore")
+        self.post_data = {}
+        if post_data:
+            self.post_data = json.loads(post_data)
+
         self.defaults = {"results_per_page": "25", "start": "0", "end": "0"}
 
         # Check the header for JSON content_type or look for a format=json
@@ -49,10 +57,14 @@ class WSGIHandler(object):
             else:
                 self.content_type = self.cgi["format"][0] or ""
 
-        # Make byte a direct attribute of the class since it is a special case and
+        # Make byte and start_byte/end_byte a direct attribute of the class since it is a special case and
         # can contain more than one element
         if "byte" in self.cgi:
             self.byte = self.cgi["byte"]
+
+        if "start_byte" in self.cgi:
+            self.start_byte = self.cgi["start_byte"][0]
+            self.end_byte = self.cgi["end_byte"][0]
 
         # Temporary fix for search term arguments before new core merge
         method = self["method"] or "proxy"
@@ -143,16 +155,6 @@ class WSGIHandler(object):
         else:
             self.cgi["sort_order"] = [["rowid"]]
 
-        if "start_byte" in self.cgi:
-            try:
-                self.start_byte = int(self["start_byte"])
-            except (ValueError, TypeError) as e:
-                self.start_byte = ""
-            try:
-                self.end_byte = int(self["end_byte"])
-            except (ValueError, TypeError) as e:
-                self.end_byte = ""
-
     def __getattr__(self, key):
         """Return query arg as attribute of class."""
         return self[key]
@@ -161,6 +163,8 @@ class WSGIHandler(object):
         """Return query arg as key of class."""
         if key in self.cgi:
             return self.cgi[key][0]
+        elif key in self.post_data:
+            return self.post_data[key]
         elif key in self.defaults:
             return self.defaults[key]
         else:

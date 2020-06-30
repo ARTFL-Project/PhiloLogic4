@@ -20,7 +20,6 @@ class FragmentParser:
         self.stack = []
 
     def start(self, tag, attrib):
-        # print >> sys.stderr, "START: " + tag + repr(attrib)
         self.stack.append(tag)
         for k, v in list(attrib.items()):
             no_ns_k = re.sub(r"^.*?:", "", k)
@@ -36,7 +35,6 @@ class FragmentParser:
 
     def end(self, tag):
         if len(self.stack) and self.stack[-1] == tag:
-            # print >> sys.stderr, "END: " + tag
             self.current_tail = self.current_el
             self.stack.pop()
             self.current_el = self.current_el.getparent()

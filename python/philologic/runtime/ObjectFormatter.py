@@ -135,8 +135,8 @@ VALID_HTML_TAGS = set(
         "summary",
         "menuitem",
         "menu",
-        "start-highlight",
-        "end-highlight",
+        "start-passage",
+        "end-passage",
     ]
 )
 
@@ -282,7 +282,16 @@ def format_strip(text, word_regex, byte_offsets=None):
 
 
 def format_text_object(
-    obj, text, config, request, word_regex, byte_offsets=None, note=False, images=True, start_byte="", end_byte=""
+    obj,
+    text,
+    config,
+    request,
+    word_regex,
+    object_start_byte,
+    byte_offsets=None,
+    note=False,
+    images=True,
+    start_end_pairs=[],
 ):
     """Format text objects"""
     philo_id = obj.philo_id
@@ -293,20 +302,37 @@ def format_text_object(
             new_text += text[last_offset:b] + b"<philoHighlight/>"
             last_offset = b
         text = new_text + text[last_offset:]
-    if start_byte and end_byte:
-        text = (
-            text[:start_byte]
-            + b"<start-highlight/>"
-            + text[start_byte:end_byte]
-            + b"<end-highlight/>"
-            + text[end_byte:]
-        )
+    if start_end_pairs:
+        new_text = b""
+        last_offset = 0
+        count = 0
+        for start_byte, end_byte in start_end_pairs:
+            if last_offset >= end_byte:
+                continue
+            elif last_offset > start_byte:
+                start_byte = last_offset
+            count += 1
+            new_text += (
+                text[last_offset:start_byte]
+                + b'<span class="passage-marker" '
+                + f"""data-offsets="{start_byte+object_start_byte}-{end_byte+object_start_byte}" n="{count}">""".encode(
+                    "utf8"
+                )
+                + b"&#9654;</span>"
+                + f"""<start-passage n="{count}"/>""".encode("utf8")
+                + text[start_byte:end_byte]
+                + f"""<end-passage n="{count}"/>""".encode("utf8")
+            )
+            last_offset = end_byte
+        text = new_text + text[last_offset:]
     current_obj_img = []
     current_graphic_img = []
     text = "<div>" + text.decode("utf8", "ignore") + "</div>"
     xml = FragmentParserParse(text)
     c = obj.db.dbh.cursor()
+    passage_number = None
     for el in xml.iter():
+        is_page = False
         try:
             if el.tag.startswith("DIV"):
                 el.tag = el.tag.lower()
@@ -425,6 +451,7 @@ def format_text_object(
             elif el.tag == "img":
                 el.attrib["onerror"] = "this.style.display='none'"
             elif el.tag == "pb" and "n" in el.attrib:
+                is_page = True
                 el.tag = "span"
                 el.attrib["class"] = "xml-pb-image"
                 if config.page_images_url_root and "facs" in el.attrib or "id" in el.attrib:
@@ -500,18 +527,38 @@ def format_text_object(
                     el.tail = el.tail[word_match.end() :]
                 el.tag = "span"
                 el.attrib["class"] = "highlight"
+            elif el.tag == "start-passage":
+                passage_number = el.attrib["n"]
+                el.tag = "span"
+                text_element_wrapper = etree.fromstring(
+                    f"""<span class="passage-{passage_number}">{el.tail[:]}</span>"""
+                )
+                el.tail = ""
+                parent = el.getparent()
+                parent.insert(parent.index(el) + 1, text_element_wrapper)
+                parent.remove(el)
+                continue
+            elif el.tag == "end-passage":
+                el.tag = "span"
+                el.attrib["id"] = f"end-passage-{passage_number}"
+                el.attrib["class"] = "passage-marker"
+                el.text = "&#9664;"
+                passage_number = None
             if el.tag not in VALID_HTML_TAGS:
                 el = xml_to_html_class(el)
+            if passage_number is not None and is_page is False:
+                el.attrib["class"] = f"passage-{passage_number}"
+                if el.tail is not None:
+                    text_element_wrapper = etree.fromstring(
+                        f"""<span class="passage-{passage_number}">{el.tail[:]}</span>"""
+                    )
+                    el.tail = ""
+                    parent = el.getparent()
+                    parent.insert(parent.index(el) + 1, text_element_wrapper)
         except Exception as exception:
-            import sys
-
-            print(exception, file=sys.stderr)
+            pass
     output = etree.tostring(xml).decode("utf8", "ignore")
     output = convert_entities(output)
-
-    # if start_byte and end_byte:  # for highlight whole passages
-    output = output.replace("<start-highlight></start-highlight>", '<div class="passage-highlight">')
-    output = output.replace("<end-highlight></end-highlight>", "</div>")
 
     if note:  ## Notes don't need to fetch images
         return (output, {})
