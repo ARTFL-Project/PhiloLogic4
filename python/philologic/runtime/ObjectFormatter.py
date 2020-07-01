@@ -547,8 +547,13 @@ def format_text_object(
             if el.tag not in VALID_HTML_TAGS:
                 el = xml_to_html_class(el)
             if passage_number is not None and is_page is False:
-                el.attrib["class"] = f"passage-{passage_number}"
-                if el.tail is not None:
+                if el.text:
+                    text_element_wrapper = etree.fromstring(
+                        f"""<span class="passage-{passage_number}">{el.text[:]}</span>"""
+                    )
+                    el.text = ""
+                    el.insert(0, text_element_wrapper)
+                if el.tail:
                     text_element_wrapper = etree.fromstring(
                         f"""<span class="passage-{passage_number}">{el.tail[:]}</span>"""
                     )
