@@ -562,6 +562,25 @@ def format_text_object(
                     parent.insert(parent.index(el) + 1, text_element_wrapper)
         except Exception as exception:
             pass
+
+    if start_end_pairs:
+        # Make sure we did not miss element tails
+        for el in xml.iter():
+            match = False
+            class_name = ""
+            for child in el:
+                if "class" in child.attrib and child.attrib["class"].startswith("passage-"):
+                    if el.tail:
+                        match = True
+                        class_name = child.attrib["class"]
+                    if "id " in child.attrib and child.attrib["id"].startswith("end-passage-"):
+                        match = False
+            if match:
+                if isinstance(el.tail, str) and el.tail.strip():
+                    text_element_wrapper = etree.fromstring(f"""<span class="{class_name}">{el.tail[:]}</span>""")
+                    el.tail = ""
+                    parent = el.getparent()
+                    parent.insert(parent.index(el) + 1, text_element_wrapper)
     output = etree.tostring(xml).decode("utf8", "ignore")
     output = convert_entities(output)
 
