@@ -6,7 +6,7 @@ import os
 import re
 import sqlite3
 
-from lxml import etree
+from lxml import etree, html
 from philologic.runtime.DB import DB
 from philologic.runtime.FragmentParser import parse as FragmentParserParse
 from philologic.runtime.link import make_absolute_query_link
@@ -305,7 +305,7 @@ def format_text_object(
     if start_end_pairs:
         new_text = b""
         last_offset = 0
-        count = 0
+        count = -1
         for start_byte, end_byte in start_end_pairs:
             if last_offset >= end_byte:
                 continue
@@ -318,7 +318,7 @@ def format_text_object(
                 + f"""data-offsets="{start_byte+object_start_byte}-{end_byte+object_start_byte}" n="{count}">""".encode(
                     "utf8"
                 )
-                + b"&#9654;</span>"
+                + b"</span>"
                 + f"""<start-passage n="{count}"/>""".encode("utf8")
                 + text[start_byte:end_byte]
                 + f"""<end-passage n="{count}"/>""".encode("utf8")
@@ -530,8 +530,8 @@ def format_text_object(
             elif el.tag == "start-passage":
                 passage_number = el.attrib["n"]
                 el.tag = "span"
-                text_element_wrapper = etree.fromstring(
-                    f"""<span class="passage-{passage_number}">{el.tail[:]}</span>"""
+                text_element_wrapper = create_element(
+                    f"""<span class="passage-{passage_number}" n="{passage_number}">{el.tail[:]}</span>"""
                 )
                 el.tail = ""
                 parent = el.getparent()
@@ -541,21 +541,21 @@ def format_text_object(
             elif el.tag == "end-passage":
                 el.tag = "span"
                 el.attrib["id"] = f"end-passage-{passage_number}"
-                el.attrib["class"] = "passage-marker"
-                el.text = "&#9664;"
+                # el.attrib["class"] = "passage-marker"
+                el.attrib["n"] = passage_number
                 passage_number = None
             if el.tag not in VALID_HTML_TAGS:
                 el = xml_to_html_class(el)
             if passage_number is not None and is_page is False:
                 if el.text:
-                    text_element_wrapper = etree.fromstring(
-                        f"""<span class="passage-{passage_number}">{el.text[:]}</span>"""
+                    text_element_wrapper = create_element(
+                        f"""<span class="passage-{passage_number}" n="{passage_number}">{el.text[:]}</span>"""
                     )
                     el.text = ""
                     el.insert(0, text_element_wrapper)
                 if el.tail:
-                    text_element_wrapper = etree.fromstring(
-                        f"""<span class="passage-{passage_number}">{el.tail[:]}</span>"""
+                    text_element_wrapper = create_element(
+                        f"""<span class="passage-{passage_number}" n="{passage_number}">{el.tail[:]}</span>"""
                     )
                     el.tail = ""
                     parent = el.getparent()
@@ -568,19 +568,31 @@ def format_text_object(
         for el in xml.iter():
             match = False
             class_name = ""
+            n = ""
             for child in el:
                 if "class" in child.attrib and child.attrib["class"].startswith("passage-"):
                     if el.tail:
                         match = True
                         class_name = child.attrib["class"]
+                        n = child.attrib["n"]
                     if "id " in child.attrib and child.attrib["id"].startswith("end-passage-"):
                         match = False
             if match:
                 if isinstance(el.tail, str) and el.tail.strip():
-                    text_element_wrapper = etree.fromstring(f"""<span class="{class_name}">{el.tail[:]}</span>""")
+                    text_element_wrapper = create_element(f"""<span class="{class_name}" n="{n}">{el.tail[:]}</span>""")
                     el.tail = ""
                     parent = el.getparent()
                     parent.insert(parent.index(el) + 1, text_element_wrapper)
+        # Make sure we do not have trailing spans after end marker
+        passages_done = set()
+        for el in xml.iter():
+            if "id" in el.attrib and el.attrib["id"].startswith("end-passage"):
+                passages_done.add(el.attrib["n"])
+                continue
+            if "class" in el.attrib and el.attrib["class"].startswith("passage") and el.attrib["n"] in passages_done:
+                del el.attrib["class"]
+                del el.attrib["n"]
+
     output = etree.tostring(xml).decode("utf8", "ignore")
     output = convert_entities(output)
 
@@ -756,3 +768,11 @@ def clean_tags(element, word_regex):
         text = element.text + text + element.tail
         return '<span class="highlight">' + element.text + text + "</span>" + element.tail
     return element.text + text + element.tail
+
+
+def create_element(content):
+    """Fail safe LXML element creation"""
+    try:
+        return etree.fromstring(content)
+    except:
+        return html.fromstring(content)
