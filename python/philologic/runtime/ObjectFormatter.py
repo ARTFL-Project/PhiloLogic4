@@ -454,7 +454,7 @@ def format_text_object(
                 is_page = True
                 el.tag = "span"
                 el.attrib["class"] = "xml-pb-image"
-                if config.page_images_url_root and "facs" in el.attrib or "id" in el.attrib:
+                if config.page_images_url_root and ("facs" in el.attrib or "id" in el.attrib):
                     if "facs" in el.attrib:
                         img = el.attrib["facs"]
                     else:
