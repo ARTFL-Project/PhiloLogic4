@@ -48,6 +48,16 @@ class HitList(object):
         self.done = False
         self.update()
         if self.sort_order:
+            self.sorted_hitlist = []
+            iter_position = 0
+            self.seek(iter_position)
+            while True:
+                try:
+                    hit = self.readhit(iter_position)
+                except IndexError as IOError:
+                    break
+                self.sorted_hitlist.append(hit)
+                iter_position += 1
             metadata_types = set([dbh.locals["metadata_types"][i] for i in self.sort_order])
             if "div" in metadata_types:
                 metadata_types.remove("div")
@@ -68,16 +78,6 @@ class HitList(object):
                 sql_row = dict(i)
                 philo_id = tuple(int(s) for s in sql_row["philo_id"].split() if int(s))
                 metadata[philo_id] = [smash_accents(sql_row[m] or "ZZZZZ") for m in sort_order]
-            self.sorted_hitlist = []
-            iter_position = 0
-            self.seek(iter_position)
-            while True:
-                try:
-                    hit = self.readhit(iter_position)
-                except IndexError as IOError:
-                    break
-                self.sorted_hitlist.append(hit)
-                iter_position += 1
 
             def sort_by_metadata(philo_id):
                 while philo_id:
@@ -87,7 +87,7 @@ class HitList(object):
                         if len(philo_id) == 1:
                             break
                         philo_id = philo_id[:-1]
-                return "ZZZZZ"
+                return ["ZZZZZ"]
 
             self.sorted_hitlist.sort(key=sort_by_metadata, reverse=False)
 
