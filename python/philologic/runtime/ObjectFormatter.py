@@ -331,6 +331,9 @@ def format_text_object(
     xml = FragmentParserParse(text)
     c = obj.db.dbh.cursor()
     passage_number = None
+    tei_header = xml.find(".//teiHeader")
+    if tei_header is not None:
+        tei_header.getparent().remove(tei_header)
     for el in xml.iter():
         is_page = False
         try:
@@ -546,14 +549,22 @@ def format_text_object(
                 passage_number = None
             if el.tag not in VALID_HTML_TAGS:
                 el = xml_to_html_class(el)
-            if passage_number is not None and is_page is False:
-                if el.text:
-                    text_element_wrapper = create_element(
-                        f"""<span class="passage-{passage_number}" n="{passage_number}">{el.text[:]}</span>"""
-                    )
-                    el.text = ""
-                    el.insert(0, text_element_wrapper)
-                if el.tail:
+            if passage_number is not None:
+                if is_page is False:
+                    if el.text:
+                        text_element_wrapper = create_element(
+                            f"""<span class="passage-{passage_number}" n="{passage_number}">{el.text[:]}</span>"""
+                        )
+                        el.text = ""
+                        el.insert(0, text_element_wrapper)
+                    if el.tail:
+                        text_element_wrapper = create_element(
+                            f"""<span class="passage-{passage_number}" n="{passage_number}">{el.tail[:]}</span>"""
+                        )
+                        el.tail = ""
+                        parent = el.getparent()
+                        parent.insert(parent.index(el) + 1, text_element_wrapper)
+                elif el.tail:
                     text_element_wrapper = create_element(
                         f"""<span class="passage-{passage_number}" n="{passage_number}">{el.tail[:]}</span>"""
                     )
