@@ -74,24 +74,26 @@ def frequency_results(request, config, sorted_results=False):
                 except:
                     last_hit_done += 1
                     continue
-            if key not in counts:
-                counts[key] = {"count": 0, "metadata": {request.frequency_field: key}}
-                counts[key]["url"] = make_absolute_query_link(
-                    config,
-                    request,
-                    frequency_field="",
-                    start="0",
-                    end="0",
-                    report=request.report,
-                    script="",
-                    **{request.frequency_field: '"%s"' % key}
-                )
-                if not biblio_search:
-                    query_metadata = dict([(k, v) for k, v in request.metadata.items() if v])
-                    query_metadata[request.frequency_field] = '"%s"' % key
-                    local_hits = db.query(**query_metadata)
-                    counts[key]["total_word_count"] = local_hits.get_total_word_count()
-            counts[key]["count"] += 1
+            for metadata_field in key.split("|"):
+                metadata_field = metadata_field.strip()
+                if metadata_field not in counts:
+                    counts[metadata_field] = {"count": 0, "metadata": {request.frequency_field: metadata_field}}
+                    counts[metadata_field]["url"] = make_absolute_query_link(
+                        config,
+                        request,
+                        frequency_field="",
+                        start="0",
+                        end="0",
+                        report=request.report,
+                        script="",
+                        **{request.frequency_field: "%s" % metadata_field}
+                    )
+                    if not biblio_search:
+                        query_metadata = dict([(k, v) for k, v in request.metadata.items() if v])
+                        query_metadata[request.frequency_field] = "%s" % metadata_field
+                        local_hits = db.query(**query_metadata)
+                        counts[metadata_field]["total_word_count"] = local_hits.get_total_word_count()
+                counts[metadata_field]["count"] += 1
 
             # avoid timeouts by splitting the query if more than
             # request.max_time (in seconds) has been spent in the loop
