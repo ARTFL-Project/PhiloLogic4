@@ -86,11 +86,11 @@ def frequency_results(request, config, sorted_results=False):
                         end="0",
                         report=request.report,
                         script="",
-                        **{request.frequency_field: "%s" % metadata_field}
+                        **{request.frequency_field: f'"{metadata_field}"'},
                     )
                     if not biblio_search:
                         query_metadata = dict([(k, v) for k, v in request.metadata.items() if v])
-                        query_metadata[request.frequency_field] = "%s" % metadata_field
+                        query_metadata[request.frequency_field] = f'"{metadata_field}"'
                         local_hits = db.query(**query_metadata)
                         counts[metadata_field]["total_word_count"] = local_hits.get_total_word_count()
                 counts[metadata_field]["count"] += 1
@@ -121,7 +121,7 @@ def frequency_results(request, config, sorted_results=False):
                     end="0",
                     report=request.report,
                     script="",
-                    **{request.frequency_field: '"NULL"'}
+                    **{request.frequency_field: '"NULL"'},
                 )
                 local_hits = db.query(**new_metadata)
                 if not biblio_search:
