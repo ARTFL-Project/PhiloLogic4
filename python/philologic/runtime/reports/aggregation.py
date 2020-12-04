@@ -48,7 +48,6 @@ def aggregation_by_field(request, config):
             uniq_name = row[f"philo_{metadata_type}_id"]
         else:
             uniq_name = row[group_by]
-        id = tuple(map(int, row[f"philo_{metadata_type}_id"].split()))
         metadata_dict[tuple(map(int, row[f"philo_{metadata_type}_id"].split()))] = {
             **{field: row[field] or "" for field in db.locals["metadata_fields"] if row[field] or field == group_by},
             "field_name": uniq_name,
