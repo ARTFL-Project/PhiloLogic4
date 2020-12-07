@@ -1,8 +1,8 @@
 module.exports = {
     devServer: {
         compress: true,
-        disableHostCheck: true,
-        host: "192.168.86.28",
+        // disableHostCheck: true,
+        // host: "localhost",
         // proxy: "http://condorcet.localhost:8080",
         headers: {
             'Access-Control-Allow-Origin': '*'

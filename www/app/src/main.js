@@ -1,7 +1,5 @@
 import Vue from 'vue'
 import BootstrapVue from 'bootstrap-vue'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
 import vueScrollTo from 'vue-scrollto'
 import App from './App.vue'
 import router from './router'
@@ -10,7 +8,7 @@ import axios from 'axios'
 
 import appConfig from "../appConfig.json"
 
-Vue.config.productionTip = false
+// Vue.config.productionTip = false
 Vue.prototype.$http = axios
 Vue.prototype.$scrollTo = vueScrollTo.scrollTo
 Vue.prototype.$dbUrl = appConfig.dbUrl
@@ -57,7 +55,12 @@ Vue.mixin({
             return localFormData
         },
         paramsToRoute: function (formValues) {
-            let report = formValues.report
+            let report
+            if (formValues.q.length == 0 && !["bibliography", "aggregation", "timeSeries"].includes(formValues.report)) {
+                report = "bibliography"
+            } else {
+                report = formValues.report
+            }
             let localFormData = this.paramsFilter(formValues)
             let routeObject = {
                 path: `/${report}`,

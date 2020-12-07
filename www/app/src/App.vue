@@ -3,15 +3,11 @@
         <Header />
         <SearchForm v-if="authorized" />
         <router-view :key="$route.fullPath" v-if="authorized"></router-view>
-        <access-control
-            :client-ip="clientIp"
-            :domain-name="domainName"
-            :authorized="authorized"
-            v-if="!authorized"
-        />
+        <access-control :client-ip="clientIp" :domain-name="domainName" :authorized="authorized" v-if="!authorized" />
         <b-container fluid v-if="authorized">
             <div class="text-center mb-4">
-                <hr width="20%" />Powered by
+                <hr width="20%" />
+                Powered by
                 <br />
                 <a
                     href="https://artfl-project.uchicago.edu/"
@@ -26,8 +22,8 @@
 
 <script>
 import Header from "./components/Header.vue";
-import SearchForm from "./components/SearchForm.vue";
-import AccessControl from "./components/AccessControl.vue";
+const SearchForm = () => import("./components/SearchForm.vue");
+const AccessControl = () => import("./components/AccessControl.vue");
 import { EventBus } from "./main.js";
 import { mapFields } from "vuex-map-fields";
 
@@ -36,13 +32,14 @@ export default {
     components: {
         Header,
         SearchForm,
-        AccessControl
+        AccessControl,
     },
     data() {
         return {
+            initialLoad: true,
             authorized: true,
             clientIp: "",
-            domainName: ""
+            domainName: "",
         };
     },
     computed: {
@@ -70,7 +67,7 @@ export default {
                 third_kwic_sorting_option: "",
                 start_byte: "",
                 end_byte: "",
-                group_by: this.$philoConfig.stats_report_config[0].field
+                group_by: this.$philoConfig.stats_report_config[0].field,
             };
             for (let field of this.$philoConfig.metadata) {
                 localFields[field] = "";
@@ -86,7 +83,7 @@ export default {
                 "arg_phrase",
                 "approximate",
                 "approximate_ratio",
-                ...this.$philoConfig.metadata
+                ...this.$philoConfig.metadata,
             ];
             reportValues.concordance = new Set([
                 ...commonFields,
@@ -95,7 +92,7 @@ export default {
                 "hit_num",
                 "start",
                 "end",
-                "frequency_field"
+                "frequency_field",
             ]);
             reportValues.kwic = new Set([
                 ...commonFields,
@@ -105,30 +102,25 @@ export default {
                 "third_kwic_sorting_option",
                 "start",
                 "end",
-                "frequency_field"
+                "frequency_field",
             ]);
-            reportValues.collocation = new Set([
-                ...commonFields,
-                "start",
-                "colloc_filter_choice",
-                "filter_frequency"
-            ]);
+            reportValues.collocation = new Set([...commonFields, "start", "colloc_filter_choice", "filter_frequency"]);
             reportValues.time_series = new Set([
                 ...commonFields,
                 "start_date",
                 "end_date",
                 "year_interval",
-                "max_time"
+                "max_time",
             ]);
             reportValues.aggregation = new Set([...commonFields, "group_by"]);
             return reportValues;
-        }
+        },
     },
     created() {
         document.title = this.$philoConfig.dbname.replace(/<[^>]+>/, "");
         if (this.$philoConfig.access_control) {
             let promise = this.checkAccessAuthorization();
-            promise.then(response => {
+            promise.then((response) => {
                 this.authorized = response.data.access;
                 if (this.authorized) {
                     this.setupApp();
@@ -147,7 +139,7 @@ export default {
     },
     watch: {
         // call again the method if the route changes
-        $route: "formDataUpdate"
+        $route: "formDataUpdate",
     },
     methods: {
         setupApp() {
@@ -156,22 +148,16 @@ export default {
             this.formDataUpdate();
         },
         checkAccessAuthorization() {
-            let promise = this.$http.get(
-                `${this.$dbUrl}/scripts/access_request.py`
-            );
+            let promise = this.$http.get(`${this.$dbUrl}/scripts/access_request.py`);
             return promise;
         },
         formDataUpdate() {
             let localParams = this.copyObject(this.defaultFieldValues);
             this.$store.commit("updateFormData", {
                 ...localParams,
-                ...this.$route.query
+                ...this.$route.query,
             });
-            if (
-                !["textNavigation", "tableOfContents"].includes(
-                    this.$route.name
-                )
-            ) {
+            if (!["textNavigation", "tableOfContents"].includes(this.$route.name)) {
                 this.evaluateRoute();
                 EventBus.$emit("urlUpdate");
             }
@@ -180,40 +166,20 @@ export default {
             if (this.$route.name == "bibliography") {
                 this.report = "bibliography";
             }
-            if (this.$route.name == null) {
-                this.$router.push("./");
-            } else if (
-                !["home", "textNavigation", "tableOfContents"].includes(
-                    this.$route.name
-                )
+            if (
+                !["home", "textNavigation", "tableOfContents"].includes(this.$route.name) &&
+                this.q.length > 0 &&
+                this.$route.name == "bibliography"
             ) {
-                if (
-                    this.q.length == 0 &&
-                    !["bibliography", "aggregation", "timeSeries"].includes(
-                        this.$route.name
-                    )
-                ) {
-                    console.log("matched", this.report);
-                    this.report = "bibliography";
-                    this.$router.push(
-                        this.paramsToRoute({ ...this.$store.state.formData })
-                    );
-                } else if (
-                    this.q.length > 0 &&
-                    this.$route.name == "bibliography"
-                ) {
-                    this.$store.commit("updateFormDataField", {
-                        key: "report",
-                        value: "concordance"
-                    });
-                    this.debug(this, this.report);
-                    this.$router.push(
-                        this.paramsToRoute({ ...this.$store.state.formData })
-                    );
-                }
+                this.$store.commit("updateFormDataField", {
+                    key: "report",
+                    value: "concordance",
+                });
+                this.debug(this, this.report);
+                this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
             }
-        }
-    }
+        },
+    },
 };
 </script>
 <style lang="scss">

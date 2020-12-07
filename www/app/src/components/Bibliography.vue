@@ -2,12 +2,7 @@
     <b-container fluid>
         <conckwic :results="results.results" v-if="Object.keys(results).length"></conckwic>
         <b-row class="mt-4">
-            <b-col
-                cols="12"
-                md="7"
-                xl="8"
-                v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'"
-            >
+            <b-col cols="12" md="7" xl="8" v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'">
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
                     <b-card
                         no-body
@@ -32,12 +27,7 @@
                     </b-card>
                 </transition-group>
             </b-col>
-            <b-col
-                cols="12"
-                md="7"
-                xl="8"
-                v-if="philoConfig.dictionary_bibliography && results.result_type != 'doc'"
-            >
+            <b-col cols="12" md="7" xl="8" v-if="philoConfig.dictionary_bibliography && results.result_type != 'doc'">
                 <b-card
                     no-body
                     class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm"
@@ -48,10 +38,9 @@
                         <b-list-group-item v-for="(result, index) in group" :key="index">
                             <div class="citation-dico-container">
                                 <span class="cite" :data-id="result.philo_id.join(' ')">
-                                    <span
-                                        class="number"
-                                        style="margin-left: -1.25rem; margin-top: -5rem"
-                                    >{{ results.description.start + index }}</span>
+                                    <span class="number" style="margin-left: -1.25rem; margin-top: -5rem">{{
+                                        results.description.start + index
+                                    }}</span>
                                     <citations :citation="result.citation"></citations>
                                 </span>
                             </div>
@@ -88,7 +77,7 @@ export default {
         citations,
         conckwic,
         facets,
-        pages
+        pages,
     },
     computed: {
         ...mapFields([
@@ -103,15 +92,15 @@ export default {
             "formData.approximate_ratio",
             "formData.metadataFields",
             "description",
-            "currentReport"
-        ])
+            "currentReport",
+        ]),
     },
     data() {
         return {
             philoConfig: this.$philoConfig,
             results: {},
             resultType: "doc",
-            metadataAddition: []
+            metadataAddition: [],
         };
     },
     created() {
@@ -128,30 +117,24 @@ export default {
             this.searchParams = { ...this.$store.state.formData };
             this.$http
                 .get(`${this.$dbUrl}/reports/bibliography.py`, {
-                    params: this.paramsFilter(this.searchParams)
+                    params: this.paramsFilter(this.searchParams),
                 })
-                .then(response => {
-                    if (
-                        !this.philoConfig.dictionary_bibliography ||
-                        response.data.doc_level
-                    ) {
+                .then((response) => {
+                    if (!this.philoConfig.dictionary_bibliography || response.data.doc_level) {
                         this.results = response.data;
                         this.resultType = this.results.result_type;
                         this.$store.commit("updateDescription", {
                             ...this.description,
                             start: this.results.description.start,
                             end: this.results.description.end,
-                            results_per_page: this.results.description
-                                .results_per_page
+                            results_per_page: this.results.description.results_per_page,
                         });
                     } else {
-                        this.results = this.dictionaryBibliography(
-                            response.data
-                        );
+                        this.results = this.dictionaryBibliography(response.data);
                         console.log(this.results);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.loading = false;
                     this.error = error.toString();
                     this.debug(this, error);
@@ -187,20 +170,20 @@ export default {
             let newTitleValue = this.metadataAddition.join(" | ");
             this.$store.commit("updateFormDataField", {
                 key: "title",
-                value: newTitleValue
+                value: newTitleValue,
             });
             EventBus.$emit("metadataUpdate", { title: newTitleValue });
         },
-        beforeEnter: function(el) {
+        beforeEnter: function (el) {
             el.style.opacity = 0;
         },
-        enter: function(el, done) {
+        enter: function (el, done) {
             var delay = el.dataset.index * 100;
-            setTimeout(function() {
+            setTimeout(function () {
                 Velocity(el, { opacity: 1 }, { complete: done });
             }, delay);
-        }
-    }
+        },
+    },
 };
 </script>
 <style scoped>
@@ -219,6 +202,5 @@ export default {
     display: inline-block;
     margin-right: 5px;
     border-radius: 0.25rem;
-    height: 100%;
 }
 </style>

@@ -1,15 +1,15 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import concordance from '../components/Concordance'
-import kwic from '../components/Kwic'
-import bibliography from '../components/Bibliography'
-import collocation from '../components/Collocation'
-import timeSeries from '../components/TimeSeries'
-import textNavigation from '../components/TextNavigation'
-import tableOfContents from '../components/TableOfContents'
-import landingPage from '../components/LandingPage'
-import aggregation from "../components/Aggregation"
+const concordance = () => import('../components/Concordance');
+const kwic = () => import('../components/Kwic');
+const bibliography = () => import('../components/Bibliography');
+const collocation = () => import('../components/Collocation');
+const timeSeries = () => import('../components/TimeSeries');
+const textNavigation = () => import('../components/TextNavigation');
+const tableOfContents = () => import('../components/TableOfContents');
+const landingPage = () => import('../components/LandingPage');
+const aggregation = () => import("../components/Aggregation");
 import appConfig from '../../appConfig.json'
 
 
@@ -85,3 +85,8 @@ export default new Router({
         }
     }
 })
+
+// function determineRoute() {
+//     console.log(process.env.NODE_ENV)
+//     return appConfig.dbUrl.replace(/https?:\/\/[^/]+\//, "")
+// }

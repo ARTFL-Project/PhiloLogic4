@@ -24,5 +24,7 @@ setup(
         "numpy",
         "python-rapidjson",
         "black",
+        "msgpack",
+        "lz4"
     ],
 )

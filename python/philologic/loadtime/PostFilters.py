@@ -240,7 +240,7 @@ def tfidf_per_word(loader_obj):
 
     transformer = TfidfTransformer(sublinear_tf=True)
     vectorized_corpus = transformer.fit_transform(vstack(full_corpus_chunked).transpose())
-    with open(os.path.join("/var/www/html/philologic/tgb/data", "frequencies/words_mean_tfidf"), "w") as idf_output:
+    with open(os.path.join(loader_obj.destination, "frequencies/words_mean_tfidf"), "w") as idf_output:
         weighted_words = {}
         word_num = vectorized_corpus.shape[0]
         with tqdm(total=word_num, leave=False, desc="Calculating mean TF-IDF...") as pbar:
