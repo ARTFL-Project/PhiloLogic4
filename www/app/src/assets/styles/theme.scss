@@ -21,6 +21,9 @@ $info: $button-color;
     background-color: #eee !important;
 }
 a { color: $link-color !important}
+a.btn-secondary {
+    color: #fff !important;
+}
 .metadata-label, .remove-metadata:hover {
     background-color: $button-color !important;
     color: #fff;

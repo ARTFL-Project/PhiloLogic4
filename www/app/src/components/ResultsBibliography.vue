@@ -1,11 +1,11 @@
 <template>
     <ul id="results-bibliography">
         <li class="result" v-for="(result, resultIndex) in uniquedResults" :key="resultIndex">
-            <citations :citation="result.citation"></citations>&nbsp;:
-            <router-link
-                class="ml-2"
-                :to="`/${report}?${buildLink(result.metadata_fields.title)}`"
-            >{{ result.count }} occurrence(s)</router-link>
+            <citations :citation="result.citation"></citations>
+            <br />
+            <b-button variant="secondary" size="sm" pill :to="`/${report}?${buildLink(result.metadata_fields.title)}`"
+                >{{ result.count }} occurrence(s)</b-button
+            >
         </li>
     </ul>
 </template>
@@ -40,16 +40,16 @@ export default {
                 previousFilename = result.metadata_fields.filename;
             }
             return uniqueResults;
-        }
+        },
     },
     methods: {
         buildLink(title) {
             return this.paramsToUrlString({
                 ...this.$store.state.formData,
-                title: `"${title}"`
+                title: `"${title}"`,
             });
-        }
-    }
+        },
+    },
 };
 </script>
 <style scoped>

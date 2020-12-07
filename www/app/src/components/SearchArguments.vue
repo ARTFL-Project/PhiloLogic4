@@ -45,8 +45,8 @@
             Bibliography criteria:
             <span class="metadata-args rounded-pill" v-for="metadata in queryArgs.biblio" :key="metadata.key">
                 <span class="metadata-label">{{ metadata.alias }}</span>
-                <span class="remove-metadata" @click="removeMetadata(metadata.key, restart)">X</span>
                 <span class="metadata-value">{{ metadata.value }}</span>
+                <span class="remove-metadata" @click="removeMetadata(metadata.key, restart)">X</span>
             </span>
             <b v-if="queryArgs.biblio.length === 0">None</b>
         </div>
@@ -356,8 +356,10 @@ export default {
 }
 .metadata-args {
     border: 1px solid #ddd;
-    display: inline-block !important;
+    display: inline-flex !important;
     margin-right: 5px;
+    border-radius: 50rem;
+    width: fit-content;
 }
 .metadata-label {
     background-color: #e9ecef;
@@ -365,30 +367,33 @@ export default {
     border-width: 0 1px 0 0;
     border-top-left-radius: 50rem;
     border-bottom-left-radius: 50rem;
-    float: left;
-    line-height: 29px;
-    padding: 0 5px 0 10px;
+    padding: 0 0.5rem;
 }
 .metadata-value {
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
     line-height: 29px;
-    padding: 6px 10px 10px;
+    padding: 0.2rem 0.5rem;
 }
 .remove-metadata {
-    float: right;
-    line-height: 29px;
     padding-right: 5px;
     padding-left: 5px;
     border-left: #ddd solid 1px;
+    border-top-right-radius: 50rem;
+    border-bottom-right-radius: 50rem;
+    padding: 0 0.5rem;
 }
 .remove-metadata:hover {
     background-color: #e9ecef;
     cursor: pointer;
-    border-top-right-radius: 50rem;
-    border-bottom-right-radius: 50rem;
 }
 .rounded-pill a {
     margin-right: 0.5rem;
+}
+.metadata-label,
+.metadata-value,
+.remove-metadata {
+    display: flex;
+    align-items: center;
 }
 </style>

@@ -187,6 +187,9 @@ export default {
 @import "../node_modules/bootstrap/scss/bootstrap.scss";
 </style>
 <style>
+.modal-backdrop {
+    opacity: 0.7;
+}
 .highlight {
     color: #ef4500;
     font-weight: 400;
