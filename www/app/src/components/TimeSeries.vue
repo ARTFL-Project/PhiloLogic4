@@ -3,12 +3,9 @@
         <div id="time-series-container" class="mt-4 ml-2 mr-2" v-if="authorized">
             <b-card no-body class="shadow-sm px-3 py-2">
                 <div id="description">
-                    <b-button
-                        variant="outline-primary"
-                        size="sm"
-                        id="export-results"
-                        data-target="#export-dialog"
-                    >Export results</b-button>
+                    <b-button variant="outline-primary" size="sm" id="export-results" data-target="#export-dialog"
+                        >Export results</b-button
+                    >
                     <search-arguments :results-length="resultsLength"></search-arguments>
                 </div>
                 <b-progress
@@ -27,13 +24,15 @@
             <b-card no-body id="time-series" class="mt-4">
                 <b-button-group class="d-inline-block">
                     <b-button
-                        :class="{'active':  frequencyType == 'absolute_time'}"
+                        :class="{ active: frequencyType == 'absolute_time' }"
                         @click="toggleFrequency('absolute_time')"
-                    >Absolute Frequency</b-button>
+                        >Absolute Frequency</b-button
+                    >
                     <b-button
-                        :class="{'active':  frequencyType == 'relative_time'}"
+                        :class="{ active: frequencyType == 'relative_time' }"
                         @click="toggleFrequency('relative_time')"
-                    >Relative Frequency</b-button>
+                        >Relative Frequency</b-button
+                    >
                 </b-button-group>
                 <div class="p-3 mt-4" style="min-height: 500px; max-height: 800px">
                     <canvas id="bar" class="chart"></canvas>
@@ -52,15 +51,15 @@ import { EventBus } from "../main.js";
 export default {
     name: "timeSeries",
     components: {
-        searchArguments
+        searchArguments,
     },
     computed: {
         ...mapFields({
             report: "formData.report",
             interval: "formData.year_interval",
             currentReport: "currentReport",
-            searching: "searching"
-        })
+            searching: "searching",
+        }),
     },
     data() {
         return {
@@ -77,7 +76,7 @@ export default {
             done: false,
             authorized: true,
             startDate: "",
-            endDate: ""
+            endDate: "",
         };
     },
     created() {
@@ -102,33 +101,21 @@ export default {
             this.searching = true;
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_start_end_date.py`, {
-                    params: this.paramsFilter({ ...this.$store.state.formData })
+                    params: this.paramsFilter({ ...this.$store.state.formData }),
                 })
-                .then(response => {
+                .then((response) => {
                     // if no dates supplied or if invalid dates
-                    console.log(this.$store.state.formData);
                     if (this.$store.state.formData.year.length > 0) {
-                        let yearSplit = this.$store.state.formData.year.split(
-                            "-"
-                        );
-                        if (
-                            yearSplit[0].length > 0 &&
-                            yearSplit[1].length > 0
-                        ) {
+                        let yearSplit = this.$store.state.formData.year.split("-");
+                        if (yearSplit[0].length > 0 && yearSplit[1].length > 0) {
                             // year is a range
                             this.startDate = parseInt(yearSplit[0]);
                             this.endDate = parseInt(yearSplit[1]);
-                        } else if (
-                            yearSplit[0].length > 0 &&
-                            yearSplit[1].length < 1
-                        ) {
+                        } else if (yearSplit[0].length > 0 && yearSplit[1].length < 1) {
                             // year is a range with just the start year provided
                             this.startDate = parseInt(yearSplit[0]);
                             this.endDate = parseInt(response.data.end_date);
-                        } else if (
-                            yearSplit[0].length < 1 &&
-                            yearSplit[1].length > 0
-                        ) {
+                        } else if (yearSplit[0].length < 1 && yearSplit[1].length > 0) {
                             // year is a range with just the end year provided
                             this.startDate = parseInt(response.data.start_date);
                             this.endDate = parseInt(yearSplit[1]);
@@ -140,23 +127,17 @@ export default {
                     }
                     this.$store.dispatch("updateStartEndDate", {
                         startDate: this.startDate,
-                        endDate: this.endDate
+                        endDate: this.endDate,
                     });
                     this.interval = parseInt(this.interval);
                     this.totalResults = response.data.total_results;
                     // Store the current query as a local and global variable in order to make sure they are equal later on...
-                    this.globalQuery = this.copyObject(
-                        this.$store.state.formData
-                    );
+                    this.globalQuery = this.copyObject(this.$store.state.formData);
                     this.localQuery = this.copyObject(this.globalQuery);
 
                     var dateList = [];
                     var zeros = [];
-                    for (
-                        let i = this.startDate;
-                        i <= this.endDate;
-                        i += this.interval
-                    ) {
+                    for (let i = this.startDate; i <= this.endDate; i += this.interval) {
                         dateList.push(i);
                         zeros.push(0);
                     }
@@ -181,17 +162,16 @@ export default {
                                     backgroundColor: "rgba(0, 160, 205, .6)",
                                     // borderColor: backgroundColor,
                                     borderWidth: 1,
-                                    hoverBackgroundColor:
-                                        "rgba(0, 160, 205, .8)",
+                                    hoverBackgroundColor: "rgba(0, 160, 205, .8)",
                                     // hoverBorderColor: backgroundColor,
                                     yAxisID: "absolute",
-                                    data: zeros
-                                }
-                            ]
+                                    data: zeros,
+                                },
+                            ],
                         },
                         options: {
                             legend: {
-                                display: false
+                                display: false,
                             },
                             scales: {
                                 yAxes: [
@@ -202,60 +182,44 @@ export default {
                                         id: "absolute",
                                         gridLines: {
                                             // drawOnChartArea: false,
-                                            offsetGridLines: true
+                                            offsetGridLines: true,
                                         },
                                         ticks: {
-                                            beginAtZero: true
-                                        }
-                                    }
-                                ]
+                                            beginAtZero: true,
+                                        },
+                                    },
+                                ],
                             },
                             tooltips: {
                                 cornerRadius: 0,
                                 callbacks: {
-                                    title: function(tooltipItem) {
+                                    title: function (tooltipItem) {
                                         var interval;
                                         if (vm.interval == 1) {
                                             interval = tooltipItem[0].xLabel;
                                         } else {
-                                            interval = `${
-                                                tooltipItem[0].xLabel
-                                            }-${parseInt(
-                                                tooltipItem[0].xLabel
-                                            ) +
-                                                parseInt(vm.interval) -
-                                                1}`;
+                                            interval = `${tooltipItem[0].xLabel}-${
+                                                parseInt(tooltipItem[0].xLabel) + parseInt(vm.interval) - 1
+                                            }`;
                                         }
                                         return interval;
                                     },
-                                    label: function(tooltipItem) {
-                                        if (
-                                            vm.frequencyType == "absolute_time"
-                                        ) {
-                                            return (
-                                                tooltipItem.yLabel +
-                                                " occurrences"
-                                            );
+                                    label: function (tooltipItem) {
+                                        if (vm.frequencyType == "absolute_time") {
+                                            return tooltipItem.yLabel + " occurrences";
                                         } else {
-                                            return (
-                                                tooltipItem.yLabel +
-                                                " occurrences per 10,000 words"
-                                            );
+                                            return tooltipItem.yLabel + " occurrences per 10,000 words";
                                         }
-                                    }
-                                }
-                            }
-                        }
+                                    },
+                                },
+                            },
+                        },
                     });
-                    chart.onclick = function(evt) {
-                        var activePoints = vm.myBarChart.getElementsAtEvent(
-                            evt
-                        );
+                    chart.onclick = function (evt) {
+                        var activePoints = vm.myBarChart.getElementsAtEvent(evt);
                         if (activePoints.length > 0) {
                             var clickedElementindex = activePoints[0]["_index"];
-                            var startDate = parseInt(
-                                vm.myBarChart.data.labels[clickedElementindex]
-                            );
+                            var startDate = parseInt(vm.myBarChart.data.labels[clickedElementindex]);
                             let endDate = startDate + parseInt(vm.interval) - 1;
                             var year;
                             if (startDate == endDate) {
@@ -265,7 +229,7 @@ export default {
                             }
                             vm.$store.commit("updateFormDataField", {
                                 key: "year",
-                                value: year
+                                value: year,
                             });
                             vm.$router.push(
                                 vm.paramsToRoute({
@@ -273,7 +237,7 @@ export default {
                                     report: "concordance",
                                     start_date: "",
                                     end_date: "",
-                                    year_interval: ""
+                                    year_interval: "",
                                 })
                             );
                         }
@@ -285,7 +249,7 @@ export default {
                     var fullResults;
                     this.updateTimeSeries(fullResults);
                 })
-                .catch(response => {
+                .catch((response) => {
                     this.debug(this, response);
                 });
         },
@@ -296,10 +260,10 @@ export default {
                         ...this.paramsFilter({ ...this.$store.state.formData }),
                         start_date: this.startDate,
                         max_time: 5,
-                        year_interval: this.interval
-                    }
+                        year_interval: this.interval,
+                    },
                 })
-                .then(results => {
+                .then((results) => {
                     this.searching = false;
                     var timeSeriesResults = results.data;
                     this.resultsLength += timeSeriesResults.results_length;
@@ -308,46 +272,31 @@ export default {
                     this.startDate = timeSeriesResults.new_start_date;
                     for (let date in timeSeriesResults.results.date_count) {
                         // Update date counts
-                        this.dateCounts[date] =
-                            timeSeriesResults.results.date_count[date];
+                        this.dateCounts[date] = timeSeriesResults.results.date_count[date];
                     }
-                    this.percent = Math.floor(
-                        (this.resultsLength / this.totalResults) * 100
-                    );
-                    this.sortAndRenderTimeSeries(
-                        fullResults,
-                        timeSeriesResults
-                    );
+                    this.percent = Math.floor((this.resultsLength / this.totalResults) * 100);
+                    this.sortAndRenderTimeSeries(fullResults, timeSeriesResults);
                 })
-                .catch(response => {
+                .catch((response) => {
                     this.debug(this, response);
                     this.searching = false;
                 });
         },
         sortAndRenderTimeSeries(fullResults, timeSeriesResults) {
-            var allResults = this.mergeResults(
-                fullResults,
-                timeSeriesResults.results["absolute_count"],
-                "label"
-            );
+            var allResults = this.mergeResults(fullResults, timeSeriesResults.results["absolute_count"], "label");
             fullResults = allResults.unsorted;
             for (let i = 0; i < allResults.sorted.length; i += 1) {
                 var date = allResults.sorted[i].label;
                 var value = allResults.sorted[i].count;
                 this.absoluteCounts[i] = value;
-                this.relativeCounts[i] =
-                    Math.round((value / this.dateCounts[date]) * 10000 * 100) /
-                    100;
+                this.relativeCounts[i] = Math.round((value / this.dateCounts[date]) * 10000 * 100) / 100;
                 if (isNaN(this.relativeCounts[i])) {
                     this.relativeCounts[i] = 0;
                 }
             }
             this.myBarChart.data.datasets[0].data = this.absoluteCounts;
             this.myBarChart.update();
-            if (
-                this.report === "time_series" &&
-                this.deepEqual(this.globalQuery, this.localQuery)
-            ) {
+            if (this.report === "time_series" && this.deepEqual(this.globalQuery, this.localQuery)) {
                 // are we running a different query?
                 if (this.moreResults) {
                     this.updateTimeSeries(fullResults);
@@ -373,8 +322,8 @@ export default {
                 this.frequencyType = frequencyType;
             }
             this.myBarChart.update();
-        }
-    }
+        },
+    },
 };
 </script>
 <style scoped>

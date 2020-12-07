@@ -60,6 +60,7 @@ export default new Vuex.Store({
             Vue.set(state, 'textNavigationCitation', payload)
         },
         updateDescription(state, payload) {
+            console.log("description mutated", payload)
             Vue.set(state, "description", payload)
         }
     },

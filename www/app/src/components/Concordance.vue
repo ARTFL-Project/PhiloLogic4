@@ -1,15 +1,17 @@
 <template>
     <b-container fluid>
-        <conckwic v-if="description.end != 0" :results="results.results"></conckwic>
+        <conckwic
+            v-if="results.description.end != 0"
+            :results="results.results"
+            :description="results.description"
+        ></conckwic>
         <div style="position: relative">
-            <b-btn
-                style="position: absolute; bottom: 1rem; right: .5rem;"
-                @click="toggleFacets()"
-                v-if="!showFacets"
-            >Show Facets</b-btn>
+            <b-btn style="position: absolute; bottom: 1rem; right: 0.5rem" @click="toggleFacets()" v-if="!showFacets"
+                >Show Facets</b-btn
+            >
         </div>
         <b-row>
-            <b-col cols="12" md="8" xl="8" :class="{'col-md-12': !showFacets}">
+            <b-col cols="12" md="8" xl="8" :class="{ 'col-md-12': !showFacets }">
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
                     <b-card
                         no-body
@@ -70,23 +72,17 @@ export default {
         citations,
         conckwic,
         facets,
-        pages
+        pages,
     },
     computed: {
-        ...mapFields([
-            "formData.report",
-            "resultsLength",
-            "searching",
-            "currentReport",
-            "description"
-        ])
+        ...mapFields(["formData.report", "resultsLength", "searching", "currentReport", "description"]),
     },
     data() {
         return {
             philoConfig: this.$philoConfig,
-            results: {},
+            results: { description: { end: 0 } },
             searchParams: {},
-            showFacets: true
+            showFacets: true,
         };
     },
     created() {
@@ -99,30 +95,30 @@ export default {
     },
     watch: {
         // call again the method if the route changes
-        $route: "fetchResults"
+        $route: "fetchResults",
     },
     methods: {
         fetchResults() {
-            this.results = {};
+            this.results = { description: { end: 0 } };
             this.searchParams = { ...this.$store.state.formData };
             this.searching = true;
             this.$http
                 .get(`${this.$dbUrl}/reports/concordance.py`, {
-                    params: this.paramsFilter(this.searchParams)
+                    params: this.paramsFilter(this.searchParams),
                 })
-                .then(response => {
+                .then((response) => {
                     this.results = response.data;
                     this.resultsLength = response.data.results_length;
-                    this.$store.commit("updateDescription", {
-                        ...this.description,
-                        start: this.results.description.start,
-                        end: this.results.description.end,
-                        results_per_page: this.results.description
-                            .results_per_page
-                    });
+                    // this.$store.commit("updateDescription", {
+                    //     ...this.description,
+                    //     start: this.results.description.start,
+                    //     end: this.results.description.end,
+                    //     results_per_page: this.results.description
+                    //         .results_per_page
+                    // });
                     this.searching = false;
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.searching = false;
                     this.error = error.toString();
                     this.debug(this, error);
@@ -130,28 +126,24 @@ export default {
         },
         moreContext(index) {
             let button = event.srcElement;
-            let defaultNode = document.getElementsByClassName("default-length")[
-                index
-            ];
-            let moreNode = document.getElementsByClassName("more-length")[
-                index
-            ];
+            let defaultNode = document.getElementsByClassName("default-length")[index];
+            let moreNode = document.getElementsByClassName("more-length")[index];
             let resultNumber = this.results.description.start + index - 1;
             let localParams = { hit_num: resultNumber, ...this.searchParams };
             if (button.innerHTML == "More") {
                 if (moreNode.innerHTML.length == 0) {
                     this.$http
                         .get(`${this.$dbUrl}/scripts/get_more_context.py`, {
-                            params: this.paramsFilter(localParams)
+                            params: this.paramsFilter(localParams),
                         })
-                        .then(response => {
+                        .then((response) => {
                             let moreText = response.data;
                             moreNode.innerHTML = moreText;
                             defaultNode.style.display = "none";
                             moreNode.style.display = "block";
                             button.innerHTML = "Less";
                         })
-                        .catch(error => {
+                        .catch((error) => {
                             this.loading = false;
                             this.error = error.toString();
                             this.debug(this, error);
@@ -168,12 +160,12 @@ export default {
             }
         },
         dicoLookup() {},
-        beforeEnter: function(el) {
+        beforeEnter: function (el) {
             el.style.opacity = 0;
         },
-        enter: function(el, done) {
+        enter: function (el, done) {
             var delay = el.dataset.index * 50;
-            setTimeout(function() {
+            setTimeout(function () {
                 Velocity(el, { opacity: 1 }, { complete: done });
             }, delay);
         },
@@ -183,8 +175,8 @@ export default {
             } else {
                 this.showFacets = true;
             }
-        }
-    }
+        },
+    },
 };
 </script>
 

@@ -8,7 +8,7 @@
                         :key="page.display"
                         :class="page.active"
                         variant="outline-secondary"
-                        :to="page.route"
+                        @click="goToPage(page.start, page.end)"
                     >
                         <span class="page-number">{{ page.display }}</span>
                         <span class="page-range">{{ page.range }}</span>
@@ -25,11 +25,7 @@ import { mapFields } from "vuex-map-fields";
 export default {
     name: "pages",
     computed: {
-        ...mapFields([
-            "formData.start",
-            "formData.results_per_page",
-            "resultsLength"
-        ])
+        ...mapFields(["formData.start", "formData.results_per_page", "resultsLength"]),
     },
     data() {
         return { pages: [] };
@@ -41,7 +37,7 @@ export default {
     },
     watch: {
         // call again the method if the route changes
-        $route: "buildPages"
+        $route: "buildPages",
     },
     methods: {
         buildPages() {
@@ -87,7 +83,7 @@ export default {
             if (pages[-1] !== totalPages) {
                 pages.push(totalPages);
             }
-            pages.sort(function(a, b) {
+            pages.sort(function (a, b) {
                 return a - b;
             });
 
@@ -118,21 +114,25 @@ export default {
                     continue;
                 }
                 lastPageName = page;
-                let route = this.paramsToRoute({
-                    ...this.$store.state.formData,
-                    start: pageStart.toString(),
-                    end: pageEnd.toString()
-                });
                 pageObject.push({
                     display: page,
-                    route: route,
                     active: active,
-                    range: `${pageStart}-${pageEnd}`
+                    start: pageStart.toString(),
+                    end: pageEnd.toString(),
+                    range: `${pageStart}-${pageEnd}`,
                 });
             }
             this.pages = pageObject;
-        }
-    }
+        },
+        goToPage(start, end) {
+            let route = this.paramsToRoute({
+                ...this.$store.state.formData,
+                start: start,
+                end: end,
+            });
+            return this.$router.push(route);
+        },
+    },
 };
 </script>
 <style scoped>

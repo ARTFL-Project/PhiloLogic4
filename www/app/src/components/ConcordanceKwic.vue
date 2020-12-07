@@ -3,47 +3,38 @@
         <b-card no-body class="shadow-sm px-3 py-2">
             <div id="initial_report">
                 <div id="description">
-                    <b-button
-                        variant="outline-primary"
-                        size="sm"
-                        id="export-results"
-                        v-b-modal.export-modal
-                    >Export results</b-button>
+                    <b-button variant="outline-primary" size="sm" id="export-results" v-b-modal.export-modal
+                        >Export results</b-button
+                    >
                     <b-modal id="export-modal" title="Export Results" hide-footer>
                         <export-results></export-results>
                     </b-modal>
-                    <search-arguments></search-arguments>
+                    <search-arguments
+                        :result-start="description.start"
+                        :result-end="description.end"
+                    ></search-arguments>
                     <div v-if="report != 'aggregation'">
                         <div id="result-stats" class="pb-2">
                             {{ resultsLength }} total occurrences spread across
-                            <div
-                                class="d-inline-block"
-                                style="position: relative"
-                                v-if="!hitlistStatsDone"
-                            >
+                            <div class="d-inline-block" style="position: relative" v-if="!hitlistStatsDone">
                                 <b-spinner
                                     variant="secondary"
-                                    style="position: absolute; width: 2rem; height: 2rem; z-index: 50; bottom: -.75rem;"
+                                    style="position: absolute; width: 2rem; height: 2rem; z-index: 50; bottom: -0.75rem"
                                 ></b-spinner>
                             </div>
                             <span v-if="hitlistStatsDone">
-                                <span
-                                    v-for="(stat, statIndex) in statsDescription"
-                                    :key="stat.field"
-                                >
-                                    <router-link
-                                        :to="`/aggregation?${stat.link}&group_by=${stat.field}`"
-                                    >{{stat.count}} {{stat.label}}(s)</router-link>
-                                    <span
-                                        v-if="statIndex != statsDescription.length-1"
-                                    >&nbsp;and&nbsp;</span>
+                                <span v-for="(stat, statIndex) in statsDescription" :key="stat.field">
+                                    <router-link :to="`/aggregation?${stat.link}&group_by=${stat.field}`"
+                                        >{{ stat.count }} {{ stat.label }}(s)</router-link
+                                    >
+                                    <span v-if="statIndex != statsDescription.length - 1">&nbsp;and&nbsp;</span>
                                 </span>
                             </span>
                         </div>
                         <div id="search-hits">
-                            <b
-                                v-if="resultsLength > 0"
-                            >Displaying hits {{ descriptionStart }}-{{descriptionEnd}} of {{resultsLength}}</b>
+                            <b v-if="resultsLength > 0"
+                                >Displaying hits {{ descriptionStart }}-{{ descriptionEnd }} of {{ resultsLength }}</b
+                            >
                             <b v-else>No results for your query</b>
                             <span v-if="report != 'bibliography'">
                                 from these
@@ -51,18 +42,18 @@
                                     pill
                                     size="sm"
                                     variant="outline-secondary"
-                                    style="margin-top: -.05rem;"
+                                    style="margin-top: -0.05rem"
                                     v-b-modal.results-bibliography
-                                >titles</b-button>
+                                    >titles</b-button
+                                >
                             </span>
                         </div>
                     </div>
                     <div v-else>
-                        <div
-                            id="result-stats"
-                            class="pb-2"
-                            v-if="resultsLength > 0"
-                        >{{ resultsLength }} total occurrences spread across {{ aggregationCache.results.length }} {{ groupByLabel.toLowerCase() }}(s)</div>
+                        <div id="result-stats" class="pb-2" v-if="resultsLength > 0">
+                            {{ resultsLength }} total occurrences spread across {{ aggregationCache.results.length }}
+                            {{ groupByLabel.toLowerCase() }}(s)
+                        </div>
                         <div id="result-stats" class="pb-2" v-else>
                             <b>No results for your query</b>
                         </div>
@@ -71,44 +62,24 @@
                 <b-button
                     variant="outline-secondary"
                     v-if="!showFacetedBrowsing && facets.length < 1"
-                    @click="showFacets() "
-                >Show Facets</b-button>
+                    @click="showFacets()"
+                    >Show Facets</b-button
+                >
             </div>
-            <b-modal
-                size="xl"
-                scrollable
-                hide-footer
-                title="Results Bibliography"
-                id="results-bibliography"
-            >
+            <b-modal size="xl" scrollable hide-footer title="Results Bibliography" id="results-bibliography">
                 <results-bibliography :results="results"></results-bibliography>
             </b-modal>
         </b-card>
-        <b-row
-            class="d-xs-none mt-4 mb-3"
-            id="act-on-report"
-            v-if="report == 'concordance' || report == 'kwic'"
-        >
+        <b-row class="d-xs-none mt-4 mb-3" id="act-on-report" v-if="report == 'concordance' || report == 'kwic'">
             <b-col sm="7" lg="8" v-if="report != 'bibliography'">
                 <b-button-group id="report_switch">
-                    <b-button
-                        :class="{'active':  report === 'concordance'}"
-                        @click="switchReport('concordance')"
-                    >
-                        <span
-                            class="d-xs-none d-sm-none d-md-inline"
-                        >{{ reportSwitch.concordance.labelBig }}</span>
-                        <span
-                            class="d-xs-inline d-sm-inline d-md-none"
-                        >{{ reportSwitch.concordance.labelSmall }}</span>
+                    <b-button :class="{ active: report === 'concordance' }" @click="switchReport('concordance')">
+                        <span class="d-xs-none d-sm-none d-md-inline">{{ reportSwitch.concordance.labelBig }}</span>
+                        <span class="d-xs-inline d-sm-inline d-md-none">{{ reportSwitch.concordance.labelSmall }}</span>
                     </b-button>
-                    <b-button :class="{'active':  report === 'kwic'}" @click="switchReport('kwic')">
-                        <span
-                            class="d-xs-none d-sm-none d-md-inline"
-                        >{{ reportSwitch.kwic.labelBig }}</span>
-                        <span
-                            class="d-xs-inline d-sm-inline d-md-none"
-                        >{{ reportSwitch.kwic.labelSmall }}</span>
+                    <b-button :class="{ active: report === 'kwic' }" @click="switchReport('kwic')">
+                        <span class="d-xs-none d-sm-none d-md-inline">{{ reportSwitch.kwic.labelBig }}</span>
+                        <span class="d-xs-inline d-sm-inline d-md-none">{{ reportSwitch.kwic.labelSmall }}</span>
                     </b-button>
                 </b-button-group>
             </b-col>
@@ -129,9 +100,9 @@ export default {
     components: {
         searchArguments,
         ResultsBibliography,
-        ExportResults
+        ExportResults,
     },
-    props: ["results"],
+    props: ["results", "description"],
     computed: {
         ...mapFields([
             "formData.report",
@@ -144,9 +115,8 @@ export default {
             "formData.group_by",
             "currentReport",
             "resultsLength",
-            "description",
-            "aggregationCache"
-        ])
+            "aggregationCache",
+        ]),
     },
     data() {
         return {
@@ -161,23 +131,22 @@ export default {
             reportSwitch: {
                 concordance: {
                     labelBig: "View occurrences with context",
-                    labelSmall: "Concordance"
+                    labelSmall: "Concordance",
                 },
                 kwic: {
                     labelBig: "View occurrences line by line (KWIC)",
-                    labelSmall: "Keyword in context"
-                }
+                    labelSmall: "Keyword in context",
+                },
             },
             showBiblio: false,
             groupByLabel:
                 this.$route.query.group_by in this.$philoConfig.metadata_aliases
-                    ? this.$philoConfig.metadata_aliases[
-                          this.$route.query.group_by
-                      ]
-                    : this.$route.query.group_by
+                    ? this.$philoConfig.metadata_aliases[this.$route.query.group_by]
+                    : this.$route.query.group_by,
         };
     },
     created() {
+        console.log(this.description);
         this.buildDescription();
         if (this.report != "aggregation") {
             this.updateTotalResults();
@@ -185,29 +154,26 @@ export default {
         }
     },
     watch: {
-        $route: "buildDescription"
+        $route: "buildDescription",
     },
     methods: {
         buildDescription() {
+            console.log(this.description);
             let start;
             let end;
-            if (this.start === "" || this.start == 0) {
+            if (this.description.start === "" || this.description.start == 0) {
                 start = 1;
                 end = this.results_per_page;
             } else {
-                start = this.start;
+                start = this.description.start;
                 end = this.end;
             }
             if (end > this.resultsLength) {
                 end = this.resultsLength;
             }
-            let resultsPerPage = this.description.results_per_page;
+            let resultsPerPage = this.results_per_page;
             let description;
-            if (
-                this.resultsLength &&
-                end <= resultsPerPage &&
-                end <= this.resultsLength
-            ) {
+            if (this.resultsLength && end <= resultsPerPage && end <= this.resultsLength) {
                 this.descriptionStart = start;
                 this.descriptionEnd = end;
             } else if (this.resultsLength) {
@@ -226,9 +192,7 @@ export default {
             for (let stat of stats) {
                 let label = "";
                 if (stat.field in this.$philoConfig.metadata_aliases) {
-                    label = this.$philoConfig.metadata_aliases[
-                        stat.field
-                    ].toLowerCase();
+                    label = this.$philoConfig.metadata_aliases[stat.field].toLowerCase();
                 } else {
                     label = stat.field;
                 }
@@ -241,8 +205,8 @@ export default {
                         report: "aggregation",
                         start: "",
                         end: "",
-                        group_by: ""
-                    })
+                        group_by: "",
+                    }),
                 });
             }
             return statsDescription;
@@ -250,14 +214,14 @@ export default {
         updateTotalResults() {
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_total_results.py`, {
-                    params: this.paramsFilter({ ...this.$store.state.formData })
+                    params: this.paramsFilter({ ...this.$store.state.formData }),
                 })
-                .then(response => {
+                .then((response) => {
                     this.resultsLength = response.data;
                     this.hits = this.buildDescription();
                     EventBus.$emit("totalResultsDone");
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.debug(this, error);
                 });
         },
@@ -265,15 +229,13 @@ export default {
             this.hitlistStatsDone = false;
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_hitlist_stats.py`, {
-                    params: this.paramsFilter({ ...this.$store.state.formData })
+                    params: this.paramsFilter({ ...this.$store.state.formData }),
                 })
-                .then(response => {
+                .then((response) => {
                     this.hitlistStatsDone = true;
-                    this.statsDescription = this.buildStatsDescription(
-                        response.data.stats
-                    );
+                    this.statsDescription = this.buildStatsDescription(response.data.stats);
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.debug(this, error);
                 });
         },
@@ -283,9 +245,7 @@ export default {
             this.second_kwic_sorting_option = "";
             this.third_kwic_sorting_option = "";
             this.results_per_page = 25;
-            this.$router.push(
-                this.paramsToRoute({ ...this.$store.state.formData })
-            );
+            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
         },
         showFacets() {},
         showResultsBiblio() {
@@ -294,8 +254,8 @@ export default {
             } else {
                 this.showBiblio = false;
             }
-        }
-    }
+        },
+    },
 };
 </script>
 

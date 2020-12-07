@@ -1,6 +1,10 @@
 <template>
     <b-container fluid>
-        <conckwic :results="results.results" v-if="Object.keys(results).length"></conckwic>
+        <conckwic
+            :results="results.results"
+            v-if="Object.keys(results).length"
+            :description="results.description"
+        ></conckwic>
         <b-row class="mt-4">
             <b-col cols="12" md="7" xl="8" v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'">
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
@@ -123,12 +127,6 @@ export default {
                     if (!this.philoConfig.dictionary_bibliography || response.data.doc_level) {
                         this.results = response.data;
                         this.resultType = this.results.result_type;
-                        this.$store.commit("updateDescription", {
-                            ...this.description,
-                            start: this.results.description.start,
-                            end: this.results.description.end,
-                            results_per_page: this.results.description.results_per_page,
-                        });
                     } else {
                         this.results = this.dictionaryBibliography(response.data);
                         console.log(this.results);

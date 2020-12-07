@@ -6,23 +6,22 @@
                     <b-form @submit.prevent @reset="onReset" @keyup.enter="onSubmit()">
                         <div id="form-body">
                             <div id="initial-form">
-                                <b-button-group id="report" style="width: 100%; top: -1px;">
+                                <b-button-group id="report" style="width: 100%; top: -1px">
                                     <b-button
                                         :id="report.value"
                                         v-for="searchReport in reports"
                                         @click="reportChange(searchReport.value)"
                                         :key="searchReport.value"
-                                        :class="{'active':  currentReport == searchReport.value}"
-                                    >{{ searchReport.label }}</b-button>
+                                        :class="{ active: currentReport == searchReport.value }"
+                                        >{{ searchReport.label }}</b-button
+                                    >
                                 </b-button-group>
                                 <div id="search_terms_container" class="p-3">
                                     <b-row id="search_terms">
                                         <b-col cols="12" md="8">
                                             <b-input-group id="q-group">
                                                 <b-input-group-prepend>
-                                                    <b-button
-                                                        variant="outline-secondary"
-                                                    >Search Terms</b-button>
+                                                    <b-button variant="outline-secondary">Search Terms</b-button>
                                                     <b-button
                                                         v-b-modal.search-tips
                                                         variant="outline-info"
@@ -59,11 +58,9 @@
                                                     ></li>
                                                 </ul>
                                                 <b-input-group-append>
-                                                    <b-button
-                                                        variant="secondary"
-                                                        id="button-search"
-                                                        @click="onSubmit()"
-                                                    >Search</b-button>
+                                                    <b-button variant="secondary" id="button-search" @click="onSubmit()"
+                                                        >Search</b-button
+                                                    >
                                                 </b-input-group-append>
                                             </b-input-group>
                                         </b-col>
@@ -74,13 +71,15 @@
                                                     id="reset_form"
                                                     variant="secondary"
                                                     @click="onReset()"
-                                                >Clear</b-button>
+                                                    >Clear</b-button
+                                                >
                                                 <b-button
                                                     type="button"
                                                     id="show-search-form"
                                                     variant="outline-secondary"
                                                     @click="toggleForm()"
-                                                >{{ searchOptionsButton }}</b-button>
+                                                    >{{ searchOptionsButton }}</b-button
+                                                >
                                             </b-button-group>
                                         </b-col>
                                     </b-row>
@@ -89,9 +88,9 @@
                                     <b-col cols="12" md="8">
                                         <div class="input-group" id="head-group">
                                             <div class="input-group-prepend">
-                                                <span
-                                                    class="input-group-text"
-                                                >{{metadataDisplay[headIndex].label}}</span>
+                                                <span class="input-group-text">{{
+                                                    metadataDisplay[headIndex].label
+                                                }}</span>
                                             </div>
                                             <input
                                                 type="text"
@@ -113,11 +112,16 @@
                                             >
                                                 <li
                                                     tabindex="-1"
-                                                    v-for="(result, i) in autoCompleteResults[metadataDisplay[headIndex].value]"
+                                                    v-for="(result, i) in autoCompleteResults[
+                                                        metadataDisplay[headIndex].value
+                                                    ]"
                                                     :key="result"
                                                     @click="setResult(result, metadataDisplay[headIndex].value)"
                                                     class="autocomplete-result"
-                                                    :class="{ 'is-active': i === arrowCounters[metadataDisplay[headIndex].value] }"
+                                                    :class="{
+                                                        'is-active':
+                                                            i === arrowCounters[metadataDisplay[headIndex].value],
+                                                    }"
                                                     v-html="result"
                                                 ></li>
                                             </ul>
@@ -126,18 +130,13 @@
                                 </b-row>
                             </div>
                             <transition name="slide-fade">
-                                <div
-                                    id="search-elements"
-                                    v-if="formOpen"
-                                    class="pl-3 pr-3 pb-3 shadow"
-                                >
+                                <div id="search-elements" v-if="formOpen" class="pl-3 pr-3 pb-3 shadow">
                                     <h5>Refine your search with the following options and fields:</h5>
                                     <b-input-group>
                                         <template v-slot:prepend>
-                                            <span
-                                                class="btn btn-outline-secondary"
-                                                style="height: fit-content;"
-                                            >Search Terms</span>
+                                            <span class="btn btn-outline-secondary" style="height: fit-content"
+                                                >Search Terms</span
+                                            >
                                         </template>
                                         <b-input-group-prepend is-text>
                                             <b-form-checkbox
@@ -146,47 +145,44 @@
                                                 value="yes"
                                                 switch
                                                 unchecked-value="no"
-                                            >Approximate match</b-form-checkbox>
+                                                >Approximate match</b-form-checkbox
+                                            >
                                         </b-input-group-prepend>
                                         <b-form-select
-                                            style="max-width: fit-content;"
+                                            style="max-width: fit-content"
                                             :options="approximateValues"
                                             v-model="approximate_ratio"
                                             v-if="approximate == 'yes'"
                                         ></b-form-select>
                                     </b-input-group>
-                                    <b-input-group
-                                        class="mt-2"
-                                        v-if="currentReport != 'collocation'"
-                                    >
+                                    <b-input-group class="mt-2" v-if="currentReport != 'collocation'">
                                         <template v-slot:prepend>
-                                            <span
-                                                class="btn btn-outline-secondary"
-                                                style="height: fit-content;"
-                                            >Search Terms</span>
+                                            <span class="btn btn-outline-secondary" style="height: fit-content"
+                                                >Search Terms</span
+                                            >
                                         </template>
                                         <b-form-select
-                                            style="max-width: fit-content;"
+                                            style="max-width: fit-content"
                                             v-model="method"
                                             :options="methodOptions"
                                         ></b-form-select>
                                         <input
                                             type="text"
                                             name="arg_proxy"
-                                            style="width:50px; text-align: center"
+                                            style="width: 50px; text-align: center"
                                             v-model="arg_proxy"
                                             v-if="method == 'proxy'"
                                         />
                                         <input
                                             type="text"
                                             name="arg_phrase"
-                                            style="width:50px; text-align: center"
+                                            style="width: 50px; text-align: center"
                                             v-model="arg_phrase"
                                             v-if="method == 'phrase'"
                                         />
-                                        <b-input-group-text
-                                            v-if="method == 'proxy' || method == 'phrase'"
-                                        >words in the same sentence</b-input-group-text>
+                                        <b-input-group-text v-if="method == 'proxy' || method == 'phrase'"
+                                            >words in the same sentence</b-input-group-text
+                                        >
                                     </b-input-group>
                                     <div class="mt-4">
                                         <div
@@ -196,9 +192,7 @@
                                             :id="localField.value + '-group'"
                                         >
                                             <b-input-group-prepend>
-                                                <b-button
-                                                    variant="outline-secondary"
-                                                >{{localField.label}}</b-button>
+                                                <b-button variant="outline-secondary">{{ localField.label }}</b-button>
                                             </b-input-group-prepend>
                                             <input
                                                 type="text"
@@ -237,15 +231,11 @@
                                             </ul>
                                         </div>
                                     </div>
-                                    <b-input-group
-                                        class="mt-4"
-                                        v-if="currentReport === 'collocation'"
-                                    >
+                                    <b-input-group class="mt-4" v-if="currentReport === 'collocation'">
                                         <template v-slot:prepend>
-                                            <span
-                                                class="btn btn-outline-secondary"
-                                                style="height: fit-content;"
-                                            >Word filtering</span>
+                                            <span class="btn btn-outline-secondary" style="height: fit-content"
+                                                >Word filtering</span
+                                            >
                                         </template>
                                         <b-form-input
                                             name="filter_frequency"
@@ -263,10 +253,7 @@
                                             ></b-form-radio-group>
                                         </b-form-group>
                                     </b-input-group>
-                                    <b-input-group
-                                        class="mt-4 pt-1 pb-2"
-                                        v-if="currentReport === 'time_series'"
-                                    >
+                                    <b-input-group class="mt-4 pt-1 pb-2" v-if="currentReport === 'time_series'">
                                         <template v-slot:prepend>
                                             <span class="btn btn-outline-secondary">Date range</span>
                                             <b-input-group-text>from</b-input-group-text>
@@ -275,7 +262,7 @@
                                             type="text"
                                             name="start_date"
                                             id="start_date"
-                                            style="width:50px; text-align: center"
+                                            style="width: 50px; text-align: center"
                                             v-model="start_date"
                                         />
                                         <b-input-group-text>to</b-input-group-text>
@@ -283,7 +270,7 @@
                                             type="text"
                                             name="end_date"
                                             id="end_date"
-                                            style="width:50px; text-align: center"
+                                            style="width: 50px; text-align: center"
                                             v-model="end_date"
                                         />
                                     </b-input-group>
@@ -296,22 +283,19 @@
                                             type="text"
                                             name="year_interval"
                                             id="year_interval"
-                                            style="width:50px; text-align: center;"
+                                            style="width: 50px; text-align: center"
                                             v-model="year_interval"
                                         />
                                         <template v-slot:append>
                                             <b-input-group-text>year(s)</b-input-group-text>
                                         </template>
                                     </b-input-group>
-                                    <b-input-group
-                                        class="mt-4"
-                                        v-if="currentReport === 'aggregation'"
-                                    >
+                                    <b-input-group class="mt-4" v-if="currentReport === 'aggregation'">
                                         <template v-slot:prepend>
                                             <span class="btn btn-outline-secondary">Group results by</span>
                                         </template>
                                         <b-form-select
-                                            style="max-width: fit-content;"
+                                            style="max-width: fit-content"
                                             v-model="group_by"
                                             :options="aggregationOptions"
                                         ></b-form-select>
@@ -324,7 +308,7 @@
                                             <span class="btn btn-outline-secondary">Sort results by</span>
                                         </template>
                                         <b-form-select
-                                            style="max-width: fit-content;"
+                                            style="max-width: fit-content"
                                             v-model="sort_by"
                                             :options="sortValues"
                                         >
@@ -332,7 +316,11 @@
                                         </b-form-select>
                                     </b-input-group>
                                     <b-input-group
-                                        v-if="currentReport != 'collocation' && currentReport != 'time_series' && currentReport != 'aggregation'"
+                                        v-if="
+                                            currentReport != 'collocation' &&
+                                            currentReport != 'time_series' &&
+                                            currentReport != 'aggregation'
+                                        "
                                     >
                                         <template v-slot:prepend>
                                             <span class="btn btn-outline-secondary">Results per page</span>
@@ -357,17 +345,10 @@
         <div class="d-flex justify-content-center position-relative" v-if="searching">
             <b-spinner
                 variant="secondary"
-                style="width: 8rem; height: 8rem; position: absolute; z-index: 50; top: 30px;"
+                style="width: 8rem; height: 8rem; position: absolute; z-index: 50; top: 30px"
             ></b-spinner>
         </div>
-        <b-modal
-            id="search-tips"
-            size="lg"
-            scrollable
-            title="Search Syntax"
-            hide-header-close
-            ok-only
-        >
+        <b-modal id="search-tips" size="lg" scrollable title="Search Syntax" hide-header-close ok-only>
             <SearchTips></SearchTips>
         </b-modal>
     </b-container>
@@ -381,7 +362,7 @@ import SearchTips from "./SearchTips";
 export default {
     name: "SearchForm",
     components: {
-        SearchTips
+        SearchTips,
     },
     computed: {
         ...mapFields([
@@ -404,7 +385,7 @@ export default {
             "formData.byte",
             "formData.group_by",
             "searching",
-            "currentReport"
+            "currentReport",
         ]),
         formData() {
             return this.$store.state.formData;
@@ -413,8 +394,8 @@ export default {
             let sortValues = [
                 {
                     value: "rowid",
-                    text: "select"
-                }
+                    text: "select",
+                },
             ];
             for (let fields of this.$philoConfig.concordance_biblio_sorting) {
                 let label = [];
@@ -433,13 +414,11 @@ export default {
             if (!this.dictionary) {
                 return this.metadataDisplay;
             } else {
-                let localMetadataDisplay = this.copyObject(
-                    this.metadataDisplay
-                );
+                let localMetadataDisplay = this.copyObject(this.metadataDisplay);
                 localMetadataDisplay.splice(this.headIndex, 1);
                 return localMetadataDisplay;
             }
-        }
+        },
     },
     data() {
         return {
@@ -454,12 +433,12 @@ export default {
                 { text: "80% or more", value: "80" },
                 { text: "70% or more", value: "70" },
                 { text: "60% or more", value: "60" },
-                { text: "50% or more", value: "50" }
+                { text: "50% or more", value: "50" },
             ],
             methodOptions: [
                 { text: "Within", value: "proxy" },
                 { text: "Exactly", value: "phrase" },
-                { text: "In the same sentence", value: "cooc" }
+                { text: "In the same sentence", value: "cooc" },
             ],
             metadataDisplay: [],
             metadataValues: {},
@@ -468,28 +447,24 @@ export default {
                 { text: "Most Frequent Terms", value: "frequency" },
                 { text: "Less distinctive terms on average", value: "tfidf" },
                 { text: "Stopwords", value: "stopwords" },
-                { text: "No Filtering", value: "nofilter" }
+                { text: "No Filtering", value: "nofilter" },
             ],
             selectedSortValues: "rowid",
             resultsPerPageOptions: [25, 100, 500, 1000],
-            aggregationOptions: this.$philoConfig.stats_report_config.map(
-                f => ({
-                    text:
-                        this.$philoConfig.metadata_aliases[f.field] ||
-                        f.field.charAt(0).toUpperCase() + f.field.slice(1),
-                    value: f.field
-                })
-            ),
+            aggregationOptions: this.$philoConfig.stats_report_config.map((f) => ({
+                text: this.$philoConfig.metadata_aliases[f.field] || f.field.charAt(0).toUpperCase() + f.field.slice(1),
+                value: f.field,
+            })),
             statFieldSelected: this.getLoadedStatField(),
             autoCompleteResults: { q: [] },
             arrowCounters: { q: -1 },
             isOpen: false,
-            showTips: false
+            showTips: false,
         };
     },
     watch: {
         // call again the method if the route changes
-        $route: "updateMetadataValues"
+        $route: "updateMetadataValues",
     },
     created() {
         this.reports = this.buildReports();
@@ -497,18 +472,14 @@ export default {
             let metadataObj = {
                 label: metadataField[0].toUpperCase() + metadataField.slice(1),
                 value: metadataField,
-                example: this.$philoConfig.search_examples[metadataField]
+                example: this.$philoConfig.search_examples[metadataField],
             };
             if (metadataField in this.$philoConfig.metadata_aliases) {
-                metadataObj.label = this.$philoConfig.metadata_aliases[
-                    metadataField
-                ];
+                metadataObj.label = this.$philoConfig.metadata_aliases[metadataField];
             }
             this.metadataDisplay.push(metadataObj);
             if (this.formData[metadataField] != "") {
-                this.metadataValues[metadataField] = this.formData[
-                    metadataField
-                ];
+                this.metadataValues[metadataField] = this.formData[metadataField];
             }
             this.$set(this.autoCompleteResults, metadataField, []);
             this.$set(this.arrowCounters, metadataField, -1);
@@ -516,7 +487,7 @@ export default {
                 this.headIndex = this.metadataDisplay.length - 1;
             }
         }
-        EventBus.$on("metadataUpdate", metadata => {
+        EventBus.$on("metadataUpdate", (metadata) => {
             for (let field in metadata) {
                 this.metadataValues[field] = metadata[field];
             }
@@ -527,38 +498,28 @@ export default {
         });
         for (let metadata in this.$philoConfig.metadata_dropdown_values) {
             this.dropdownValues[metadata] = [];
-            let dropdownValue = this.$philoConfig.metadata_dropdown_values[
-                metadata
-            ];
+            let dropdownValue = this.$philoConfig.metadata_dropdown_values[metadata];
             for (let i = 0; i < dropdownValue.length; i++) {
                 let quotedValue = dropdownValue[i].value;
                 this.dropdownValues[metadata].push({
                     text: dropdownValue[i].label,
-                    value: quotedValue
+                    value: quotedValue,
                 });
             }
         }
     },
     mounted() {
         this.$nextTick(() => {
-            document
-                .getElementById("form-body")
-                .addEventListener("change", event => {
-                    if (
-                        event.srcElement.id in
-                        this.$philoConfig.metadata_dropdown_values
-                    ) {
-                        let value =
-                            event.srcElement.options[
-                                document.getElementById(event.srcElement.id)
-                                    .selectedIndex
-                            ].value;
-                        this.$store.commit("updateFormDataField", {
-                            key: event.srcElement.id,
-                            value: value
-                        });
-                    }
-                });
+            document.getElementById("form-body").addEventListener("change", (event) => {
+                if (event.srcElement.id in this.$philoConfig.metadata_dropdown_values) {
+                    let value =
+                        event.srcElement.options[document.getElementById(event.srcElement.id).selectedIndex].value;
+                    this.$store.commit("updateFormDataField", {
+                        key: event.srcElement.id,
+                        value: value,
+                    });
+                }
+            });
         });
     },
     methods: {
@@ -574,7 +535,7 @@ export default {
                 label = label.charAt(0).toUpperCase() + label.slice(1);
                 reports.push({
                     value: value,
-                    label: label
+                    label: label,
                 });
             }
             return reports;
@@ -582,15 +543,12 @@ export default {
         buildMetadataFieldDisplay() {
             for (let metadataField of this.$philoConfig.metadata) {
                 let metadataObj = {
-                    label:
-                        metadataField[0].toUpperCase() + metadataField.slice(1),
+                    label: metadataField[0].toUpperCase() + metadataField.slice(1),
                     value: metadataField,
-                    example: this.$philoConfig.search_examples[metadataField]
+                    example: this.$philoConfig.search_examples[metadataField],
                 };
                 if (metadataField in this.$philoConfig.metadata_aliases) {
-                    metadataObj.label = this.$philoConfig.metadata_aliases[
-                        metadataField
-                    ];
+                    metadataObj.label = this.$philoConfig.metadata_aliases[metadataField];
                 }
                 this.metadataValues[metadataField] = "";
                 this.metadataDisplay.push(metadataObj);
@@ -607,30 +565,15 @@ export default {
         },
         onSubmit() {
             this.q = this.q.trim();
-            if (this.q.length == 0 && this.currentReport != "aggregation") {
-                this.report = "bibliography";
-            } else if (
-                this.report == "textNavigation" ||
-                this.report == "tableOfContents"
-            ) {
-                this.report = "concordance";
-            } else {
-                this.report = this.currentReport;
-            }
+            this.report = this.currentReport;
             this.start = "";
             this.end = "";
             this.byte = "";
             this.formOpen = false;
-            this.debug(this, this.$store.state.formData);
-            this.$router.push(
-                this.paramsToRoute({ ...this.$store.state.formData })
-            );
+            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
         },
         onReset() {
-            this.$store.commit(
-                "setDefaultFields",
-                this.$parent.defaultFieldValues
-            );
+            this.$store.commit("setDefaultFields", this.$parent.defaultFieldValues);
             for (let field in this.metadataValues) {
                 this.metadataValues[field] = "";
             }
@@ -670,15 +613,12 @@ export default {
             // Let's warn the parent that a change was made
             if (field == "q") {
                 let currentQueryTerm = this.$route.query.q;
-                if (
-                    this.q.replace('"', "").length > 1 &&
-                    this.q != currentQueryTerm
-                ) {
+                if (this.q.replace('"', "").length > 1 && this.q != currentQueryTerm) {
                     this.$http
                         .get(`${this.$dbUrl}/scripts/autocomplete_term.py`, {
-                            params: { term: this.q }
+                            params: { term: this.q },
                         })
-                        .then(response => {
+                        .then((response) => {
                             this.autoCompleteResults.q = response.data;
                             this.isLoading = false;
                         });
@@ -686,37 +626,29 @@ export default {
             } else {
                 this.$store.commit("updateFormDataField", {
                     key: field,
-                    value: this.metadataValues[field]
+                    value: this.metadataValues[field],
                 });
                 let currentFieldValue = this.$route.query[field];
-                if (
-                    this.metadataValues[field].length > 1 &&
-                    this.metadataValues[field] != currentFieldValue
-                ) {
+                if (this.metadataValues[field].length > 1 && this.metadataValues[field] != currentFieldValue) {
                     this.$http
-                        .get(
-                            `${this.$dbUrl}/scripts/autocomplete_metadata.py`,
-                            {
-                                params: {
-                                    term: this.metadataValues[field],
-                                    field: field
-                                }
-                            }
-                        )
-                        .then(response => {
-                            this.autoCompleteResults[
-                                field
-                            ] = response.data.map(result =>
+                        .get(`${this.$dbUrl}/scripts/autocomplete_metadata.py`, {
+                            params: {
+                                term: this.metadataValues[field],
+                                field: field,
+                            },
+                        })
+                        .then((response) => {
+                            this.autoCompleteResults[field] = response.data.map((result) =>
                                 result.replace(/CUTHERE/, "<last/>")
                             );
                         })
-                        .catch(error => {
+                        .catch((error) => {
                             this.debug(this, error);
                         });
                 }
             }
             let popup = document.querySelector(`#autocomplete-${field}`);
-            const clearAutocomplete = e => {
+            const clearAutocomplete = (e) => {
                 if (e.target !== popup) {
                     this.autoCompleteResults[field] = [];
                 }
@@ -725,16 +657,11 @@ export default {
             window.addEventListener("click", clearAutocomplete);
         },
         onArrowDown(field) {
-            if (
-                this.arrowCounters[field] <
-                this.autoCompleteResults[field].length
-            ) {
+            if (this.arrowCounters[field] < this.autoCompleteResults[field].length) {
                 this.arrowCounters[field] = this.arrowCounters[field] + 1;
             }
             if (this.arrowCounters[field] > 5) {
-                let container = document.getElementById(
-                    `autocomplete-${field}`
-                );
+                let container = document.getElementById(`autocomplete-${field}`);
                 let topOffset = container.scrollTop;
                 container.scrollTop = topOffset + 36;
             }
@@ -748,9 +675,7 @@ export default {
             container.scrollTop = topOffset - 36;
         },
         onEnter(field) {
-            let result = this.autoCompleteResults[field][
-                this.arrowCounters[field]
-            ];
+            let result = this.autoCompleteResults[field][this.arrowCounters[field]];
             this.setResult(result, field);
         },
         handleClickOutside(evt) {
@@ -765,19 +690,14 @@ export default {
             if (typeof inputString != "undefined") {
                 let inputGroup, lastInput;
                 if (field == "q") {
-                    inputGroup = inputString
-                        .replace(/<[^>]+>/g, "")
-                        .split(/(\s*\|\s*|\s*OR\s*|\s+|\s*NOT\s*)/);
+                    inputGroup = inputString.replace(/<[^>]+>/g, "").split(/(\s*\|\s*|\s*OR\s*|\s+|\s*NOT\s*)/);
                     lastInput = inputGroup.pop();
                     if (lastInput.match(/"/)) {
                         if (lastInput.startsWith('"')) {
                             lastInput = lastInput.slice(1);
                         }
                         if (lastInput.endsWith('"')) {
-                            lastInput = lastInput.slice(
-                                0,
-                                lastInput.length - 1
-                            );
+                            lastInput = lastInput.slice(0, lastInput.length - 1);
                         }
                     }
                     this.q = `${inputGroup.join("")}"${lastInput.trim()}"`;
@@ -796,17 +716,14 @@ export default {
                             lastInput = lastInput.slice(1);
                         }
                         if (lastInput.endsWith('"')) {
-                            lastInput = lastInput.slice(
-                                0,
-                                lastInput.length - 1
-                            );
+                            lastInput = lastInput.slice(0, lastInput.length - 1);
                         }
                     }
                     let finalInput = `${prefix}"${lastInput}"`;
                     this.metadataValues[field] = finalInput;
                     this.$store.commit("updateFormDataField", {
                         key: field,
-                        value: finalInput
+                        value: finalInput,
                     });
                 }
             }
@@ -818,8 +735,8 @@ export default {
             let input = parent.querySelector("input");
             let childOffset = input.offsetLeft - parent.offsetLeft;
             return `left: ${childOffset}px; width: ${input.offsetWidth}px`;
-        }
-    }
+        },
+    },
 };
 </script>
 

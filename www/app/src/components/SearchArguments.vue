@@ -11,35 +11,28 @@
                 pill
                 size="sm"
                 class="term-groups"
-                v-for="(group, index) in description.termGroups"
+                v-for="(group, index) in wordGroups"
                 :key="index"
             >
                 <a href @click.prevent="getQueryTerms(group, index)">{{ group }}</a>
                 <span class="close-pill" @click="removeTerm(index)">X</span>
             </b-button>
             {{ queryArgs.proximity }}
-            <b-card no-body variant="outline-secondary" id="query-terms" style="display: none;">
+            <b-card no-body variant="outline-secondary" id="query-terms" style="display: none">
                 <b-button size="sm" class="close" @click="closeTermsList()">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only">Close</span>
                 </b-button>
                 <h5>The search terms query expanded to the following {{ words.length }} terms:</h5>
                 <h6 v-if="words.length > 100">100 most frequent terms displayed</h6>
-                <b-button
-                    size="sm"
-                    style="margin:10px 0px"
-                    v-if="wordListChanged"
-                    @click="rerunQuery()"
-                >Rerun query with the current modifications</b-button>
+                <b-button size="sm" style="margin: 10px 0px" v-if="wordListChanged" @click="rerunQuery()"
+                    >Rerun query with the current modifications</b-button
+                >
                 <b-row id="query-terms-list">
                     <b-col cols="3" v-for="word in words" :key="word">
                         <b-card no-body class="query-terms-element">
                             {{ word }}
-                            <b-button
-                                size="sm"
-                                class="close"
-                                @click="removeFromTermsList(word, groupIndexSelected)"
-                            >
+                            <b-button size="sm" class="close" @click="removeFromTermsList(word, groupIndexSelected)">
                                 <span aria-hidden="true">&times;</span>
                                 <span class="sr-only">Close</span>
                             </b-button>
@@ -50,11 +43,7 @@
         </div>
         <div>
             Bibliography criteria:
-            <span
-                class="metadata-args rounded-pill"
-                v-for="metadata in queryArgs.biblio"
-                :key="metadata.key"
-            >
+            <span class="metadata-args rounded-pill" v-for="metadata in queryArgs.biblio" :key="metadata.key">
                 <span class="metadata-label">{{ metadata.alias }}</span>
                 <span class="remove-metadata" @click="removeMetadata(metadata.key, restart)">X</span>
                 <span class="metadata-value">{{ metadata.value }}</span>
@@ -62,15 +51,13 @@
             <b v-if="queryArgs.biblio.length === 0">None</b>
         </div>
         <div v-if="currentReport === 'time_series'">
-            {{ resultsLength || '...' }} occurrences of the term(s) between
-            <span
-                class="biblio-criteria"
-            >
+            {{ resultsLength || "..." }} occurrences of the term(s) between
+            <span class="biblio-criteria">
                 <span class="metadata-args rounded-pill">
                     <span class="remove-metadata" @click="removeMetadata('start_date', restart)">X</span>
                     <span class="metadata-value">{{ start_date }}</span>
-                </span>
-            </span>&nbsp; and
+                </span> </span
+            >&nbsp; and
             <span class="biblio-criteria">
                 <span class="metadata-args rounded-pill">
                     <span class="remove-metadata" @click="removeMetadata('end_date', restart)">X</span>
@@ -78,10 +65,9 @@
                 </span>
             </span>
         </div>
-        <div
-            style="margin-top: 10px;"
-            v-if="currentReport === 'collocation'"
-        >Displaying the top 100 collocates for {{ resultsLength || '...' }} occurrences</div>
+        <div style="margin-top: 10px" v-if="currentReport === 'collocation'">
+            Displaying the top 100 collocates for {{ resultsLength || "..." }} occurrences
+        </div>
     </div>
 </template>
 <script>
@@ -90,6 +76,7 @@ import { EventBus } from "../main.js";
 
 export default {
     name: "searchArguments",
+    props: ["resultStart", "resultEnd"],
     computed: {
         ...mapFields([
             "formData.report",
@@ -106,19 +93,22 @@ export default {
             "formData.end_date",
             "currentReport",
             "resultsLength",
-            "description"
+            "description",
         ]),
         formData() {
             return this.$store.state.formData;
-        }
+        },
+        wordGroups() {
+            return this.description.termGroups;
+        },
     },
     data() {
         return {
-            currentWordQuery: this.$route.query.q,
+            currentWordQuery: typeof this.$route.query.q == "undefined" ? "" : this.$route.query.q,
             queryArgs: {},
             words: [],
             wordListChanged: false,
-            restart: false
+            restart: false,
         };
     },
     created() {
@@ -129,11 +119,11 @@ export default {
     },
     watch: {
         // call again the method if the route changes
-        $route: "fetchSearchArgs"
+        $route: "fetchSearchArgs",
     },
     methods: {
         fetchSearchArgs() {
-            this.currentWordQuery = this.$route.query.q;
+            this.currentWordQuery = typeof this.$route.query.q == "undefined" ? "" : this.$route.query.q;
             let queryParams = { ...this.$store.state.formData };
             if ("q" in queryParams) {
                 this.queryArgs.queryTerm = queryParams.q;
@@ -149,24 +139,14 @@ export default {
                 }
                 if (queryParams.q.split(" ").length > 1) {
                     if (method === "proxy") {
-                        if (
-                            typeof queryParams.arg_proxy !== "undefined" ||
-                            queryParams.arg_proxy
-                        ) {
-                            this.queryArgs.proximity =
-                                "within " + queryParams.arg_proxy + " words";
+                        if (typeof queryParams.arg_proxy !== "undefined" || queryParams.arg_proxy) {
+                            this.queryArgs.proximity = "within " + queryParams.arg_proxy + " words";
                         } else {
                             this.queryArgs.proximity = "";
                         }
                     } else if (method === "phrase") {
-                        if (
-                            typeof queryParams.arg_proxy !== "undefined" ||
-                            queryParams.arg_phrase
-                        ) {
-                            this.queryArgs.proximity =
-                                "within exactly " +
-                                queryParams.arg_phrase +
-                                " words";
+                        if (typeof queryParams.arg_proxy !== "undefined" || queryParams.arg_phrase) {
+                            this.queryArgs.proximity = "within exactly " + queryParams.arg_phrase + " words";
                         } else {
                             this.queryArgs.proximity = "";
                         }
@@ -184,16 +164,19 @@ export default {
             }
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_term_groups.py`, {
-                    params: this.paramsFilter({ ...this.$route.query })
+                    params: this.paramsFilter({ ...this.$route.query }),
                 })
-                .then(response => {
+                .then((response) => {
                     this.$store.commit("updateDescription", {
                         ...this.description,
-                        termGroups: response.data.term_groups
+                        start: this.resultStart,
+                        end: this.resultEnd,
+                        results_per_page: this.formData.results_per_page,
+                        termGroups: response.data.term_groups,
                     });
                     this.originalQuery = response.data.original_query;
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.loading = false;
                     this.error = error.toString();
                     this.debug(this, error);
@@ -202,10 +185,7 @@ export default {
         buildCriteria() {
             let queryArgs = {};
             for (let field of this.$philoConfig.metadata) {
-                if (
-                    field in this.$route.query &&
-                    this.formData[field].length > 0
-                ) {
+                if (field in this.$route.query && this.formData[field].length > 0) {
                     queryArgs[field] = this.formData[field];
                 }
             }
@@ -263,15 +243,14 @@ export default {
                     params: {
                         q: group,
                         approximate: 0,
-                        ...this.paramsFilter(this.$route.query)
-                    }
+                        ...this.paramsFilter(this.$route.query),
+                    },
                 })
-                .then(response => {
+                .then((response) => {
                     this.words = response.data;
-                    document.querySelector("#query-terms").style.display =
-                        "block";
+                    document.querySelector("#query-terms").style.display = "block";
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.error = error.toString();
                     this.debug(this, error);
                 });
@@ -294,18 +273,13 @@ export default {
             this.approximate_ratio = "";
         },
         rerunQuery() {
-            this.$router.push(
-                this.paramsToRoute({ ...this.$store.state.formData })
-            );
+            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
         },
         removeTerm(index) {
             let queryTermGroup = this.copyObject(this.description.termGroups);
             queryTermGroup.splice(index, 1);
             this.q = queryTermGroup.join(" ");
-            if (
-                queryTermGroup.length === 0 &&
-                this.currentReport != "aggregation"
-            ) {
+            if (queryTermGroup.length === 0 && this.currentReport != "aggregation") {
                 this.report = "bibliography";
             }
             this.start = 0;
@@ -317,13 +291,11 @@ export default {
             }
             this.$store.commit("updateDescription", {
                 ...this.description,
-                termGroups: queryTermGroup
+                termGroups: queryTermGroup,
             });
-            this.$router.push(
-                this.paramsToRoute({ ...this.$store.state.formData })
-            );
-        }
-    }
+            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
+        },
+    },
 };
 </script>
 <style scoped>

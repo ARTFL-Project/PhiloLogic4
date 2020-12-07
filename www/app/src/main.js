@@ -56,11 +56,12 @@ Vue.mixin({
         },
         paramsToRoute: function (formValues) {
             let report
-            if (formValues.q.length == 0 && !["bibliography", "aggregation", "timeSeries"].includes(formValues.report)) {
+            if (formValues.q.length == 0 && !["bibliography", "aggregation", "time_series"].includes(formValues.report)) {
                 report = "bibliography"
             } else {
                 report = formValues.report
             }
+            console.log(report)
             let localFormData = this.paramsFilter(formValues)
             let routeObject = {
                 path: `/${report}`,
