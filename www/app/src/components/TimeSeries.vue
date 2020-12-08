@@ -1,29 +1,11 @@
 <template>
     <b-container fluid>
         <div id="time-series-container" class="mt-4 ml-2 mr-2" v-if="authorized">
-            <b-card no-body class="shadow-sm px-3 py-2">
-                <div id="description">
-                    <b-button variant="outline-primary" size="sm" id="export-results" v-b-modal.export-modal
-                        >Export results</b-button
-                    >
-                    <b-modal id="export-modal" title="Export Results" hide-footer>
-                        <export-results></export-results>
-                    </b-modal>
-                    <search-arguments :results-length="resultsLength"></search-arguments>
-                </div>
-                <b-progress
-                    :max="totalResults"
-                    show-progress
-                    variant="secondary"
-                    class="ml-3 mr-3 mb-3"
-                    v-if="resultsLength != totalResults"
-                >
-                    <b-progress-bar
-                        :value="resultsLength"
-                        :label="`${((resultsLength / totalResults) * 100).toFixed(2)}%`"
-                    ></b-progress-bar>
-                </b-progress>
-            </b-card>
+            <results-summary
+                :results="results.results"
+                :description="results.description"
+                :running-total="runningTotal"
+            ></results-summary>
             <b-card no-body id="time-series" class="mt-4">
                 <b-button-group class="d-inline-block">
                     <b-button
@@ -50,6 +32,7 @@ import Chart from "chart.js/dist/Chart.min.js";
 import { mapFields } from "vuex-map-fields";
 import searchArguments from "./SearchArguments";
 import ExportResults from "./ExportResults";
+import ResultsSummary from "./ResultsSummary";
 import { EventBus } from "../main.js";
 
 export default {
@@ -57,19 +40,22 @@ export default {
     components: {
         searchArguments,
         ExportResults,
+        ResultsSummary,
     },
     computed: {
         ...mapFields({
             report: "formData.report",
             interval: "formData.year_interval",
+            start_date: "formData.start_date",
+            end_date: "formData.end_date",
             currentReport: "currentReport",
             searching: "searching",
+            resultsLength: "resultsLength",
         }),
     },
     data() {
         return {
             frequencyType: "absolute_time",
-            resultsLength: 0,
             totalResults: 100,
             globalQuery: "",
             localQuery: "",
@@ -80,11 +66,12 @@ export default {
             moreResults: false,
             done: false,
             authorized: true,
-            startDate: "",
             endDate: "",
+            results: [],
+            runningTotal: 0,
         };
     },
-    created() {
+    mounted() {
         this.report = "time_series";
         this.currentReport = "time_series";
         this.fetchResults();
@@ -99,164 +86,136 @@ export default {
     methods: {
         fetchResults() {
             if (this.interval == "") {
-                this.interval = 10;
+                this.interval = this.$philoConfig.time_series.interval;
             }
+            this.interval = parseInt(this.interval);
             this.resultsLength = 0;
             this.frequencyType = "absolute_time";
             this.searching = true;
-            this.$http
-                .get(`${this.$dbUrl}/scripts/get_start_end_date.py`, {
-                    params: this.paramsFilter({ ...this.$store.state.formData }),
-                })
-                .then((response) => {
-                    // if no dates supplied or if invalid dates
-                    if (this.$store.state.formData.year.length > 0) {
-                        let yearSplit = this.$store.state.formData.year.split("-");
-                        if (yearSplit[0].length > 0 && yearSplit[1].length > 0) {
-                            // year is a range
-                            this.startDate = parseInt(yearSplit[0]);
-                            this.endDate = parseInt(yearSplit[1]);
-                        } else if (yearSplit[0].length > 0 && yearSplit[1].length < 1) {
-                            // year is a range with just the start year provided
-                            this.startDate = parseInt(yearSplit[0]);
-                            this.endDate = parseInt(response.data.end_date);
-                        } else if (yearSplit[0].length < 1 && yearSplit[1].length > 0) {
-                            // year is a range with just the end year provided
-                            this.startDate = parseInt(response.data.start_date);
-                            this.endDate = parseInt(yearSplit[1]);
-                        }
+            this.startDate = parseInt(this.start_date || this.$philoConfig.time_series_start_end_date.start_date);
+            this.endDate = parseInt(this.end_date || this.$philoConfig.time_series_start_end_date.end_date);
+            this.$store.dispatch("updateStartEndDate", {
+                startDate: this.startDate,
+                endDate: this.endDate,
+            });
+
+            // Store the current query as a local and global variable in order to make sure they are equal later on...
+            this.globalQuery = this.copyObject(this.$store.state.formData);
+            this.localQuery = this.copyObject(this.globalQuery);
+
+            var dateList = [];
+            var zeros = [];
+            for (let i = this.startDate; i <= this.endDate; i += this.interval) {
+                dateList.push(i);
+                zeros.push(0);
+            }
+            // Initialize Chart
+            Chart.defaults.global.responsive = true;
+            Chart.defaults.global.animation.duration = 400;
+            Chart.defaults.global.tooltipCornerRadius = 0;
+            Chart.defaults.global.maintainAspectRatio = false;
+            Chart.defaults.bar.scales.xAxes[0].gridLines.display = false;
+            if (this.myBarChart != null) {
+                this.myBarChart.destroy();
+            }
+            var chart = document.querySelector("#bar");
+            var vm = this;
+            vm.myBarChart = new Chart(chart, {
+                type: "bar",
+                data: {
+                    labels: dateList,
+                    datasets: [
+                        {
+                            label: "Absolute Frequency",
+                            backgroundColor: "rgba(0, 160, 205, .6)",
+                            // borderColor: backgroundColor,
+                            borderWidth: 1,
+                            hoverBackgroundColor: "rgba(0, 160, 205, .8)",
+                            // hoverBorderColor: backgroundColor,
+                            yAxisID: "absolute",
+                            data: zeros,
+                        },
+                    ],
+                },
+                options: {
+                    legend: {
+                        display: false,
+                    },
+                    scales: {
+                        yAxes: [
+                            {
+                                type: "linear",
+                                display: true,
+                                position: "left",
+                                id: "absolute",
+                                gridLines: {
+                                    // drawOnChartArea: false,
+                                    offsetGridLines: true,
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                            },
+                        ],
+                    },
+                    tooltips: {
+                        cornerRadius: 0,
+                        callbacks: {
+                            title: function (tooltipItem) {
+                                var interval;
+                                if (vm.interval == 1) {
+                                    interval = tooltipItem[0].xLabel;
+                                } else {
+                                    interval = `${tooltipItem[0].xLabel}-${
+                                        parseInt(tooltipItem[0].xLabel) + parseInt(vm.interval) - 1
+                                    }`;
+                                }
+                                return interval;
+                            },
+                            label: function (tooltipItem) {
+                                if (vm.frequencyType == "absolute_time") {
+                                    return tooltipItem.yLabel + " occurrences";
+                                } else {
+                                    return tooltipItem.yLabel + " occurrences per 10,000 words";
+                                }
+                            },
+                        },
+                    },
+                },
+            });
+            chart.onclick = function (evt) {
+                var activePoints = vm.myBarChart.getElementsAtEvent(evt);
+                if (activePoints.length > 0) {
+                    var clickedElementindex = activePoints[0]["_index"];
+                    var startDate = parseInt(vm.myBarChart.data.labels[clickedElementindex]);
+                    let endDate = startDate + parseInt(vm.interval) - 1;
+                    var year;
+                    if (startDate == endDate) {
+                        year = startDate;
                     } else {
-                        // no year provided
-                        this.startDate = parseInt(response.data.start_date);
-                        this.endDate = parseInt(response.data.end_date);
+                        year = `${startDate}-${endDate}`;
                     }
-                    this.$store.dispatch("updateStartEndDate", {
-                        startDate: this.startDate,
-                        endDate: this.endDate,
+                    vm.$store.commit("updateFormDataField", {
+                        key: "year",
+                        value: year,
                     });
-                    this.interval = parseInt(this.interval);
-                    this.totalResults = response.data.total_results;
-                    // Store the current query as a local and global variable in order to make sure they are equal later on...
-                    this.globalQuery = this.copyObject(this.$store.state.formData);
-                    this.localQuery = this.copyObject(this.globalQuery);
+                    vm.$router.push(
+                        vm.paramsToRoute({
+                            ...vm.$store.state.formData,
+                            report: "concordance",
+                            start_date: "",
+                            end_date: "",
+                            year_interval: "",
+                        })
+                    );
+                }
+            };
 
-                    var dateList = [];
-                    var zeros = [];
-                    for (let i = this.startDate; i <= this.endDate; i += this.interval) {
-                        dateList.push(i);
-                        zeros.push(0);
-                    }
-                    // Initialize Chart
-                    Chart.defaults.global.responsive = true;
-                    Chart.defaults.global.animation.duration = 400;
-                    Chart.defaults.global.tooltipCornerRadius = 0;
-                    Chart.defaults.global.maintainAspectRatio = false;
-                    Chart.defaults.bar.scales.xAxes[0].gridLines.display = false;
-                    if (this.myBarChart != null) {
-                        this.myBarChart.destroy();
-                    }
-                    var chart = document.querySelector("#bar");
-                    var vm = this;
-                    vm.myBarChart = new Chart(chart, {
-                        type: "bar",
-                        data: {
-                            labels: dateList,
-                            datasets: [
-                                {
-                                    label: "Absolute Frequency",
-                                    backgroundColor: "rgba(0, 160, 205, .6)",
-                                    // borderColor: backgroundColor,
-                                    borderWidth: 1,
-                                    hoverBackgroundColor: "rgba(0, 160, 205, .8)",
-                                    // hoverBorderColor: backgroundColor,
-                                    yAxisID: "absolute",
-                                    data: zeros,
-                                },
-                            ],
-                        },
-                        options: {
-                            legend: {
-                                display: false,
-                            },
-                            scales: {
-                                yAxes: [
-                                    {
-                                        type: "linear",
-                                        display: true,
-                                        position: "left",
-                                        id: "absolute",
-                                        gridLines: {
-                                            // drawOnChartArea: false,
-                                            offsetGridLines: true,
-                                        },
-                                        ticks: {
-                                            beginAtZero: true,
-                                        },
-                                    },
-                                ],
-                            },
-                            tooltips: {
-                                cornerRadius: 0,
-                                callbacks: {
-                                    title: function (tooltipItem) {
-                                        var interval;
-                                        if (vm.interval == 1) {
-                                            interval = tooltipItem[0].xLabel;
-                                        } else {
-                                            interval = `${tooltipItem[0].xLabel}-${
-                                                parseInt(tooltipItem[0].xLabel) + parseInt(vm.interval) - 1
-                                            }`;
-                                        }
-                                        return interval;
-                                    },
-                                    label: function (tooltipItem) {
-                                        if (vm.frequencyType == "absolute_time") {
-                                            return tooltipItem.yLabel + " occurrences";
-                                        } else {
-                                            return tooltipItem.yLabel + " occurrences per 10,000 words";
-                                        }
-                                    },
-                                },
-                            },
-                        },
-                    });
-                    chart.onclick = function (evt) {
-                        var activePoints = vm.myBarChart.getElementsAtEvent(evt);
-                        if (activePoints.length > 0) {
-                            var clickedElementindex = activePoints[0]["_index"];
-                            var startDate = parseInt(vm.myBarChart.data.labels[clickedElementindex]);
-                            let endDate = startDate + parseInt(vm.interval) - 1;
-                            var year;
-                            if (startDate == endDate) {
-                                year = startDate;
-                            } else {
-                                year = `${startDate}-${endDate}`;
-                            }
-                            vm.$store.commit("updateFormDataField", {
-                                key: "year",
-                                value: year,
-                            });
-                            vm.$router.push(
-                                vm.paramsToRoute({
-                                    ...vm.$store.state.formData,
-                                    report: "concordance",
-                                    start_date: "",
-                                    end_date: "",
-                                    year_interval: "",
-                                })
-                            );
-                        }
-                    };
-
-                    this.absoluteCounts = this.copyObject(zeros);
-                    this.relativeCounts = this.copyObject(zeros);
-                    this.dateCounts = {};
-                    var fullResults;
-                    this.updateTimeSeries(fullResults);
-                })
-                .catch((response) => {
-                    this.debug(this, response);
-                });
+            this.absoluteCounts = this.copyObject(zeros);
+            this.relativeCounts = this.copyObject(zeros);
+            this.dateCounts = {};
+            var fullResults;
+            this.updateTimeSeries(fullResults);
         },
         updateTimeSeries(fullResults) {
             this.$http
@@ -271,8 +230,8 @@ export default {
                 .then((results) => {
                     this.searching = false;
                     var timeSeriesResults = results.data;
-                    this.resultsLength += timeSeriesResults.results_length;
-                    this.resultsLength = this.resultsLength;
+                    this.results = results.data;
+                    this.runningTotal += timeSeriesResults.results_length;
                     this.moreResults = timeSeriesResults.more_results;
                     this.startDate = timeSeriesResults.new_start_date;
                     for (let date in timeSeriesResults.results.date_count) {
@@ -281,6 +240,7 @@ export default {
                     }
                     this.percent = Math.floor((this.resultsLength / this.totalResults) * 100);
                     this.sortAndRenderTimeSeries(fullResults, timeSeriesResults);
+                    console.log(this.resultsLength, this.totalResults);
                 })
                 .catch((response) => {
                     this.debug(this, response);
@@ -308,11 +268,6 @@ export default {
                 } else {
                     this.percent = 100;
                     this.done = true;
-                    // angular.element("#relative_time").removeAttr("disabled");
-                    // angular
-                    //     .element(".progress")
-                    //     .delay(500)
-                    //     .velocity("slideUp");
                 }
             }
         },

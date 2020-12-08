@@ -177,6 +177,10 @@ export default {
                 });
                 this.debug(this, this.report);
                 this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
+            } else if (this.$route.name == "timeSeries") {
+                this.report = "time_series";
+            } else if (this.$route.name == "collocation") {
+                this.report = "collocation";
             }
         },
     },
@@ -187,6 +191,9 @@ export default {
 @import "../node_modules/bootstrap/scss/bootstrap.scss";
 </style>
 <style>
+.btn:focus {
+    box-shadow: none !important;
+}
 .modal-backdrop {
     opacity: 0.7;
 }

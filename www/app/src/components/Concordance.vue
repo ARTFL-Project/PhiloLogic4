@@ -1,6 +1,6 @@
 <template>
     <b-container fluid>
-        <conckwic :results="results.results" :description="results.description"></conckwic>
+        <results-summary :results="results.results" :description="results.description"></results-summary>
         <div style="position: relative">
             <b-btn style="position: absolute; bottom: 1rem; right: 0.5rem" @click="toggleFacets()" v-if="!showFacets"
                 >Show Facets</b-btn
@@ -57,7 +57,7 @@
 import { mapFields } from "vuex-map-fields";
 import { EventBus } from "../main.js";
 import citations from "./Citations";
-import conckwic from "./ConcordanceKwic";
+import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
 import Velocity from "velocity-animate";
@@ -66,7 +66,7 @@ export default {
     name: "concordance",
     components: {
         citations,
-        conckwic,
+        ResultsSummary,
         facets,
         pages,
     },

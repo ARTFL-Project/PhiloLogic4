@@ -22,8 +22,6 @@ except ImportError:
 
 
 def get_total_results(environ, start_response):
-    ### DEPRECATED ###
-    ### kept only for compatibility reasons with PhiloLogic 4.6 ###
     status = "200 OK"
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)

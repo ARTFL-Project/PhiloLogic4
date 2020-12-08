@@ -25,7 +25,7 @@ export default new Vuex.Store({
             start: 0,
             end: 0,
             results_per_page: 25,
-            termGroups: []
+            termGroups: [],
         },
         aggregationCache: {
             results: [],
@@ -60,7 +60,6 @@ export default new Vuex.Store({
             Vue.set(state, 'textNavigationCitation', payload)
         },
         updateDescription(state, payload) {
-            console.log("description mutated", payload)
             Vue.set(state, "description", payload)
         },
         updateResultsLength(state, payload) {

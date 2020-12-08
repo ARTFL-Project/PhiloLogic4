@@ -1,6 +1,6 @@
 <template>
     <b-container fluid>
-        <conckwic :results="results.results" :description="results.description"></conckwic>
+        <results-summary :results="results.results" :description="results.description"></results-summary>
         <b-row>
             <b-col cols="12" md="7" xl="8">
                 <b-card no-body class="p-2 ml-2 shadow-sm">
@@ -60,7 +60,7 @@
 
 <script>
 import { mapFields } from "vuex-map-fields";
-import conckwic from "./ConcordanceKwic";
+import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
 import Velocity from "velocity-animate";
@@ -68,7 +68,7 @@ import Velocity from "velocity-animate";
 export default {
     name: "kwic",
     components: {
-        conckwic,
+        ResultsSummary,
         facets,
         pages,
     },

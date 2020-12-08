@@ -1,7 +1,7 @@
 <template>
     <b-container fluid class="mt-4">
-        <conckwic :results="aggregationResults"></conckwic>
-        <b-card no-body class="shadow mt-4 ml-2 mr-2">
+        <results-summary :results="aggregationResults"></results-summary>
+        <b-card no-body class="shadow mt-4 ml-2 mr-2" v-if="resultsLength">
             <b-list-group flush>
                 <virtual-list :size="55" :remain="25">
                     <b-list-group-item
@@ -48,12 +48,12 @@
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import searchArguments from "./SearchArguments";
-import conckwic from "./ConcordanceKwic";
+import ResultsSummary from "./ResultsSummary";
 import virtualList from "vue-virtual-scroll-list";
 
 export default {
     name: "aggregation",
-    components: { citations, searchArguments, conckwic, virtualList },
+    components: { citations, searchArguments, ResultsSummary, virtualList },
     computed: {
         ...mapFields(["formData.report", "resultsLength", "aggregationCache", "searching", "currentReport"]),
         statsConfig() {

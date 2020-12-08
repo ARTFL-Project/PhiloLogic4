@@ -570,6 +570,7 @@ export default {
             this.end = "";
             this.byte = "";
             this.formOpen = false;
+            console.log(this.$store.state.formData);
             this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
         },
         onReset() {

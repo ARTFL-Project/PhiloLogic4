@@ -223,7 +223,12 @@ class Loader:
         metadata_xpaths = self.parser_config["doc_xpaths"]
         doc_count = len(os.listdir(self.textdir))
         prefix = f"{time.ctime()}: Parsing document level metadata"
-        for file in tqdm(os.scandir(self.textdir), total=doc_count, desc=prefix, leave=False,):
+        for file in tqdm(
+            os.scandir(self.textdir),
+            total=doc_count,
+            desc=prefix,
+            leave=False,
+        ):
             data = {"filename": file.name}
             header = ""
             with open(file.path) as text_file:
@@ -697,7 +702,9 @@ class Loader:
             print("#define DEPENDENCIES {-1,0,1,2,3,4,5,0,0}", file=dbs)
             print("#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl), file=dbs)
         print("%s: analysis done" % time.ctime())
-        os.system(f'/bin/bash -c "lz4cat {self.workdir}/all_words_sorted.lz4 | pack4 {self.workdir}/dbspecs4.h"',)
+        os.system(
+            f'/bin/bash -c "lz4cat {self.workdir}/all_words_sorted.lz4 | pack4 {self.workdir}/dbspecs4.h"',
+        )
         print("%s: all indices built. moving into place." % time.ctime())
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1")
@@ -799,23 +806,23 @@ class Loader:
         conn = sqlite3.connect(self.destination + "/toms.db")
         conn.text_factory = str
         conn.row_factory = sqlite3.Row
-        c = conn.cursor()
+        cursor = conn.cursor()
         for field in metadata:
             object_type = Loader.metadata_types[field]
             try:
                 if object_type != "div":
-                    c.execute(
+                    cursor.execute(
                         'select %s from toms where philo_type="%s" and %s!="" limit 1' % (field, object_type, field)
                     )
                 else:
-                    c.execute(
+                    cursor.execute(
                         'select %s from toms where philo_type="div1" or philo_type="div2" or philo_type="div3" and %s!="" limit 1'
                         % (field, field)
                     )
             except sqlite3.OperationalError:
                 continue
             try:
-                search_examples[field] = c.fetchone()[0]
+                search_examples[field] = cursor.fetchone()[0]
             except (TypeError, AttributeError):
                 continue
         config_values["search_examples"] = search_examples
@@ -838,6 +845,24 @@ class Loader:
 
         if "author" in config_values["search_examples"] and "title" in config_values["search_examples"]:
             config_values["concordance_biblio_sorting"] = [("author", "title"), ("title", "author")]
+
+        # Find default start and end dates for times series
+        dates = []
+        cursor.execute("SELECT DISTINCT year FROM toms")
+        for i in cursor:
+            try:
+                dates.append(int(i[0]))
+            except:
+                date_match = date_finder.search(i[0])
+                if date_match:
+                    dates.append(int(date_match.groups()[0]))
+                else:
+                    pass
+        min_date = min(dates)
+        if not start_date:
+            start_date = min_date
+        max_date = max(dates)
+        config_values["time_series_start_end_date"] = {"start_date": min_date, "end_date": max_date}
 
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)

@@ -1,59 +1,12 @@
 <template>
     <b-container fluid>
         <div id="collocation-container" class="mt-4 ml-2 mr-2" v-if="authorized">
-            <b-card no-body class="shadow-sm px-3 py-2">
-                <div id="description">
-                    <b-button variant="outline-primary" size="sm" id="export-results" v-b-modal.export-modal
-                        >Export results</b-button
-                    >
-                    <b-modal id="export-modal" title="Export Results" hide-footer>
-                        <export-results></export-results>
-                    </b-modal>
-                    <search-arguments></search-arguments>
-                </div>
-                <b-progress
-                    :max="resultsLength"
-                    show-progress
-                    variant="secondary"
-                    class="ml-3 mr-3 mb-3"
-                    v-if="runningTotal != resultsLength"
-                >
-                    <b-progress-bar
-                        :value="runningTotal"
-                        :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
-                    ></b-progress-bar>
-                </b-progress>
-                <div>
-                    <span>
-                        <span tooltip tooltip-title="Click to display filtered words">
-                            The
-                            <a href @click="toggleFilterList()" v-if="colloc_filter_choice === 'frequency'"
-                                >{{ filter_frequency }} most common words</a
-                            >
-                            <a href @click="toggleFilterList()" v-if="colloc_filter_choice === 'stopwords'"
-                                >Common function words</a
-                            >
-                            <a href @click="toggleFilterList()" v-if="colloc_filter_choice === 'tfidf'"
-                                >{{ filter_frequency }} most highly weighted terms across the corpus</a
-                            >
-                            are being filtered from this report.
-                        </span>
-                    </span>
-                    <b-card no-body id="filter-list" class="pl-3 pr-3 pb-3 shadow-lg" v-if="showFilteredWords">
-                        <b-button id="close-filter-list" @click="toggleFilterList()"> &times; </b-button>
-                        <b-row class="mt-4">
-                            <b-col v-for="wordGroup in splittedFilterList" :key="wordGroup[0]">
-                                <b-list-group flush>
-                                    <b-list-group-item v-for="word in wordGroup" :key="word">{{
-                                        word
-                                    }}</b-list-group-item>
-                                </b-list-group>
-                            </b-col>
-                        </b-row>
-                    </b-card>
-                </div>
-            </b-card>
-            <b-row class="mt-4">
+            <results-summary
+                :results="results.results"
+                :description="results.description"
+                :running-total="runningTotal"
+            ></results-summary>
+            <b-row class="mt-4" v-if="resultsLength">
                 <b-col cols="12" sm="4">
                     <b-card no-body class="shadow-sm">
                         <b-table
@@ -89,6 +42,7 @@
 import { mapFields } from "vuex-map-fields";
 import searchArguments from "./SearchArguments";
 import ExportResults from "./ExportResults";
+import ResultsSummary from "./ResultsSummary";
 import { EventBus } from "../main.js";
 
 export default {
@@ -96,6 +50,7 @@ export default {
     components: {
         searchArguments,
         ExportResults,
+        ResultsSummary,
     },
     computed: {
         ...mapFields([
@@ -186,7 +141,9 @@ export default {
                     this.runningTotal = data.hits_done;
                     start = data.hits_done;
                     this.searching = false;
-                    this.sortAndRenderCollocation(fullResults, data, start);
+                    if (this.resultsLength) {
+                        this.sortAndRenderCollocation(fullResults, data, start);
+                    }
                 })
                 .catch((error) => {
                     this.searching = false;

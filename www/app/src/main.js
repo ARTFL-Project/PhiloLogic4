@@ -61,7 +61,6 @@ Vue.mixin({
             } else {
                 report = formValues.report
             }
-            console.log(report)
             let localFormData = this.paramsFilter(formValues)
             let routeObject = {
                 path: `/${report}`,
