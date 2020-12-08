@@ -9,10 +9,7 @@
                     <b-modal id="export-modal" title="Export Results" hide-footer>
                         <export-results></export-results>
                     </b-modal>
-                    <search-arguments
-                        :result-start="description.start"
-                        :result-end="description.end"
-                    ></search-arguments>
+                    <search-arguments :result-start="descriptionStart" :result-end="descriptionEnd"></search-arguments>
                     <div v-if="report != 'aggregation'">
                         <div id="result-stats" class="pb-2">
                             {{ resultsLength }} total occurrences spread across
@@ -146,7 +143,6 @@ export default {
         };
     },
     created() {
-        console.log(this.description);
         this.buildDescription();
         if (this.report != "aggregation") {
             this.updateTotalResults();
@@ -161,18 +157,23 @@ export default {
             console.log(this.description);
             let start;
             let end;
-            if (this.description.start === "" || this.description.start == 0) {
+            if (
+                typeof this.description == "undefined" ||
+                this.description.start === "" ||
+                this.description.start == 0
+            ) {
                 start = 1;
-                end = this.results_per_page;
+                end = parseInt(this.results_per_page);
             } else {
-                start = this.description.start;
-                end = this.end;
+                start = this.description.start || 1;
+                end = this.end || parseInt(this.results_per_page);
             }
             if (end > this.resultsLength) {
                 end = this.resultsLength;
             }
-            let resultsPerPage = this.results_per_page;
+            let resultsPerPage = parseInt(this.results_per_page);
             let description;
+            console.log(this.resultsLength, resultsPerPage, end, this.resultsLength);
             if (this.resultsLength && end <= resultsPerPage && end <= this.resultsLength) {
                 this.descriptionStart = start;
                 this.descriptionEnd = end;
@@ -266,6 +267,8 @@ export default {
 #export-results {
     position: absolute;
     right: 0;
+    padding: 0.125rem 0.25rem;
+    font-size: 0.8rem !important;
 }
 #results-bibliography .modal-header {
     padding-bottom: 0.5rem;

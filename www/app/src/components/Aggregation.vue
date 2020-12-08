@@ -13,25 +13,28 @@
                             variant="outline-secondary"
                             size="sm"
                             class="d-inline-block"
-                            style="padding: 0 0.25rem; margin-right: .5rem"
+                            style="padding: 0 0.25rem; margin-right: 0.5rem"
                             :id="`button-${resultIndex}`"
                             @click="toggleBreakUp(resultIndex)"
                             v-if="result.break_up_field.length > 0"
-                        >&plus;</b-button>
+                            >&plus;</b-button
+                        >
                         <b-badge variant="secondary" pill style="font-size: 100%">{{ result.count }}</b-badge>
                         <citations :citation="result.citation"></citations>
-                        <span
-                            class="d-inline-block pl-1"
-                            v-if="breakUpFields[resultIndex].results.length"
-                        >across {{ breakUpFields[resultIndex].results.length }} {{ breakUpFieldName }}(s)</span>
+                        <span class="d-inline-block pl-1" v-if="breakUpFields[resultIndex].results.length"
+                            >across {{ breakUpFields[resultIndex].results.length }} {{ breakUpFieldName }}(s)</span
+                        >
                         <b-list-group class="ml-4" v-if="breakUpFields[resultIndex].show">
-                            <b-list-group-item
-                                v-for="(value, key) in breakUpFields[resultIndex].results"
-                                :key="key"
-                            >
+                            <b-list-group-item v-for="(value, key) in breakUpFields[resultIndex].results" :key="key">
                                 <b-badge variant="secondary" pill>{{ value.count }}</b-badge>
                                 <citations
-                                    :citation="buildCitationObject(statsConfig.break_up_field, statsConfig.break_up_field_citation, value.metadata_fields)"
+                                    :citation="
+                                        buildCitationObject(
+                                            statsConfig.break_up_field,
+                                            statsConfig.break_up_field_citation,
+                                            value.metadata_fields
+                                        )
+                                    "
                                 ></citations>
                             </b-list-group-item>
                         </b-list-group>
@@ -52,20 +55,14 @@ export default {
     name: "aggregation",
     components: { citations, searchArguments, conckwic, virtualList },
     computed: {
-        ...mapFields([
-            "formData.report",
-            "resultsLength",
-            "aggregationCache",
-            "searching",
-            "currentReport"
-        ]),
+        ...mapFields(["formData.report", "resultsLength", "aggregationCache", "searching", "currentReport"]),
         statsConfig() {
             for (let fieldObject of this.$philoConfig.stats_report_config) {
                 if (fieldObject.field == this.$route.query.group_by) {
                     return fieldObject;
                 }
             }
-        }
+        },
     },
     data() {
         return {
@@ -74,7 +71,7 @@ export default {
             aggregationResults: [],
             groupedByField: this.$route.query.group_by,
             breakUpFields: [],
-            breakUpFieldName: ""
+            breakUpFieldName: "",
         };
     },
     created() {
@@ -84,7 +81,7 @@ export default {
     },
     watch: {
         // call again the method if the route changes
-        $route: "fetchData"
+        $route: "fetchData",
     },
     methods: {
         fetchData() {
@@ -95,9 +92,9 @@ export default {
                 )
             ) {
                 this.aggregationResults = this.aggregationCache.results;
-                this.breakUpFields = this.aggregationResults.map(results => ({
+                this.breakUpFields = this.aggregationResults.map((results) => ({
                     show: false,
-                    results: results.break_up_field
+                    results: results.break_up_field,
                 }));
                 this.resultsLength = this.aggregationCache.totalResults;
             } else {
@@ -105,23 +102,18 @@ export default {
                 this.$http
                     .get(`${this.$dbUrl}/reports/aggregation.py`, {
                         params: this.paramsFilter({
-                            ...this.$store.state.formData
-                        })
+                            ...this.$store.state.formData,
+                        }),
                     })
-                    .then(response => {
-                        this.aggregationResults = this.buildStatResults(
-                            response.data.results
-                        );
-                        this.breakUpFields = this.aggregationResults.map(
-                            results => ({
-                                show: false,
-                                results: results.break_up_field
-                            })
-                        );
+                    .then((response) => {
+                        this.aggregationResults = this.buildStatResults(response.data.results);
+                        this.breakUpFields = this.aggregationResults.map((results) => ({
+                            show: false,
+                            results: results.break_up_field,
+                        }));
                         this.breakUpFieldName =
-                            this.$philoConfig.metadata_aliases[
-                                response.data.break_up_field
-                            ] || response.data.break_up_field;
+                            this.$philoConfig.metadata_aliases[response.data.break_up_field] ||
+                            response.data.break_up_field;
                         if (typeof this.breakUpFieldName != "undefined") {
                             this.breakUpFieldName = this.breakUpFieldName.toLowerCase();
                         }
@@ -130,10 +122,10 @@ export default {
                         this.aggregationCache = {
                             results: response.data.results,
                             query: this.$route.query,
-                            totalResults: response.data.results.total_results
+                            totalResults: response.data.results.total_results,
                         };
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         this.searching = false;
                         this.debug(this, error);
                     });
@@ -164,7 +156,7 @@ export default {
                     let queryParams = {
                         ...this.$store.state.formData,
                         start: "0",
-                        end: "25"
+                        end: "25",
                     };
 
                     if (label == null || label.length == 0) {
@@ -175,7 +167,7 @@ export default {
                     }
                     let link = this.paramsToRoute({
                         ...queryParams,
-                        report: "concordance"
+                        report: "concordance",
                     });
                     citations.push({ ...citation, href: link, label: label });
                 } else {
@@ -187,14 +179,23 @@ export default {
         toggleBreakUp(resultIndex) {
             if (this.breakUpFields[resultIndex].show) {
                 this.breakUpFields[resultIndex].show = false;
-                document.getElementById(`button-${resultIndex}`).innerHTML =
-                    "&plus;";
+                document.getElementById(`button-${resultIndex}`).innerHTML = "&plus;";
             } else {
                 this.breakUpFields[resultIndex].show = true;
-                document.getElementById(`button-${resultIndex}`).innerHTML =
-                    "&minus;";
+                document.getElementById(`button-${resultIndex}`).innerHTML = "&minus;";
             }
-        }
-    }
+        },
+    },
 };
 </script>
+<style scoped>
+#description {
+    position: relative;
+}
+#export-results {
+    position: absolute;
+    right: 0;
+    padding: 0.125rem 0.25rem;
+    font-size: 0.8rem !important;
+}
+</style>

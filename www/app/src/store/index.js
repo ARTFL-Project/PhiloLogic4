@@ -62,6 +62,9 @@ export default new Vuex.Store({
         updateDescription(state, payload) {
             console.log("description mutated", payload)
             Vue.set(state, "description", payload)
+        },
+        updateResultsLength(state, payload) {
+            Vue.set(state, "resultsLength", payload)
         }
     },
     actions: {

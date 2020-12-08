@@ -23,7 +23,7 @@
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only">Close</span>
                 </b-button>
-                <h5>The search terms query expanded to the following {{ words.length }} terms:</h5>
+                <h6>The search terms query expanded to the following {{ words.length }} terms:</h6>
                 <h6 v-if="words.length > 100">100 most frequent terms displayed</h6>
                 <b-button size="sm" style="margin: 10px 0px" v-if="wordListChanged" @click="rerunQuery()"
                     >Rerun query with the current modifications</b-button
@@ -54,14 +54,14 @@
             {{ resultsLength || "..." }} occurrences of the term(s) between
             <span class="biblio-criteria">
                 <span class="metadata-args rounded-pill">
-                    <span class="remove-metadata" @click="removeMetadata('start_date', restart)">X</span>
                     <span class="metadata-value">{{ start_date }}</span>
+                    <span class="remove-metadata" @click="removeMetadata('start_date', restart)">X</span>
                 </span> </span
             >&nbsp; and
             <span class="biblio-criteria">
                 <span class="metadata-args rounded-pill">
-                    <span class="remove-metadata" @click="removeMetadata('end_date', restart)">X</span>
                     <span class="metadata-value">{{ end_date }}</span>
+                    <span class="remove-metadata" @click="removeMetadata('end_date', restart)">X</span>
                 </span>
             </span>
         </div>
@@ -305,7 +305,7 @@ export default {
 #query-terms {
     position: absolute;
     z-index: 100;
-    padding: 20px 15px 0px 15px;
+    padding: 10px 15px 0px 15px;
     box-shadow: 0px 0.2em 8px 0.01em rgba(0, 0, 0, 0.1);
 }
 
@@ -325,6 +325,7 @@ export default {
 .query-terms-element {
     padding: 0px 20px 0px 5px;
     text-align: center;
+    width: fit-content;
 }
 .close {
     position: absolute;
@@ -333,7 +334,8 @@ export default {
 .term-groups {
     display: inline-block;
     position: relative;
-    padding: 3px 20px 3px 10px;
+    line-height: 2;
+    padding: 0 20px 0 10px;
     margin: 5px 5px 5px 0px;
     white-space: inherit;
 }
@@ -348,7 +350,6 @@ export default {
     width: 1.6rem;
     border-radius: 50rem !important;
     display: inline-block;
-    padding: 0.2rem;
 }
 .close-pill:hover {
     color: #fff;
@@ -360,6 +361,8 @@ export default {
     margin-right: 5px;
     border-radius: 50rem;
     width: fit-content;
+    line-height: 2;
+    margin-bottom: 0.5rem;
 }
 .metadata-label {
     background-color: #e9ecef;
@@ -372,8 +375,7 @@ export default {
 .metadata-value {
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
-    line-height: 29px;
-    padding: 0.2rem 0.5rem;
+    padding: 0 0.5rem;
 }
 .remove-metadata {
     padding-right: 5px;

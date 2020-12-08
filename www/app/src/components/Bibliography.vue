@@ -1,10 +1,6 @@
 <template>
     <b-container fluid>
-        <conckwic
-            :results="results.results"
-            v-if="Object.keys(results).length"
-            :description="results.description"
-        ></conckwic>
+        <conckwic :results="results.results" :description="results.description"></conckwic>
         <b-row class="mt-4">
             <b-col cols="12" md="7" xl="8" v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'">
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">

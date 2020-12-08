@@ -1,10 +1,6 @@
 <template>
     <b-container fluid>
-        <conckwic
-            v-if="results.description.end != 0"
-            :results="results.results"
-            :description="results.description"
-        ></conckwic>
+        <conckwic :results="results.results" :description="results.description"></conckwic>
         <b-row>
             <b-col cols="12" md="7" xl="8">
                 <b-card no-body class="p-2 ml-2 shadow-sm">

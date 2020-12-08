@@ -3,9 +3,12 @@
         <div id="time-series-container" class="mt-4 ml-2 mr-2" v-if="authorized">
             <b-card no-body class="shadow-sm px-3 py-2">
                 <div id="description">
-                    <b-button variant="outline-primary" size="sm" id="export-results" data-target="#export-dialog"
+                    <b-button variant="outline-primary" size="sm" id="export-results" v-b-modal.export-modal
                         >Export results</b-button
                     >
+                    <b-modal id="export-modal" title="Export Results" hide-footer>
+                        <export-results></export-results>
+                    </b-modal>
                     <search-arguments :results-length="resultsLength"></search-arguments>
                 </div>
                 <b-progress
@@ -46,12 +49,14 @@
 import Chart from "chart.js/dist/Chart.min.js";
 import { mapFields } from "vuex-map-fields";
 import searchArguments from "./SearchArguments";
+import ExportResults from "./ExportResults";
 import { EventBus } from "../main.js";
 
 export default {
     name: "timeSeries",
     components: {
         searchArguments,
+        ExportResults,
     },
     computed: {
         ...mapFields({
@@ -327,4 +332,13 @@ export default {
 };
 </script>
 <style scoped>
+#description {
+    position: relative;
+}
+#export-results {
+    position: absolute;
+    right: 0;
+    padding: 0.125rem 0.25rem;
+    font-size: 0.8rem !important;
+}
 </style>

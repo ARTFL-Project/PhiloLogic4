@@ -1,10 +1,6 @@
 <template>
     <b-container fluid>
-        <conckwic
-            v-if="results.description.end != 0"
-            :results="results.results"
-            :description="results.description"
-        ></conckwic>
+        <conckwic :results="results.results" :description="results.description"></conckwic>
         <div style="position: relative">
             <b-btn style="position: absolute; bottom: 1rem; right: 0.5rem" @click="toggleFacets()" v-if="!showFacets"
                 >Show Facets</b-btn
@@ -53,7 +49,7 @@
                 <facets></facets>
             </b-col>
         </b-row>
-        <pages v-if="resultsLength > 0"></pages>
+        <pages></pages>
     </b-container>
 </template>
 
@@ -108,14 +104,7 @@ export default {
                 })
                 .then((response) => {
                     this.results = response.data;
-                    this.resultsLength = response.data.results_length;
-                    // this.$store.commit("updateDescription", {
-                    //     ...this.description,
-                    //     start: this.results.description.start,
-                    //     end: this.results.description.end,
-                    //     results_per_page: this.results.description
-                    //         .results_per_page
-                    // });
+                    this.$store.commit("updateResultsLength", parseInt(response.data.results_length));
                     this.searching = false;
                 })
                 .catch((error) => {
@@ -164,7 +153,7 @@ export default {
             el.style.opacity = 0;
         },
         enter: function (el, done) {
-            var delay = el.dataset.index * 50;
+            let delay = el.dataset.index * 35;
             setTimeout(function () {
                 Velocity(el, { opacity: 1 }, { complete: done });
             }, delay);
