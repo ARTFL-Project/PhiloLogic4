@@ -1,17 +1,9 @@
 <template>
     <div id="facet-search" class="d-xs-none mr-2">
-        <b-card
-            no-body
-            title="Title"
-            header-tag="header"
-            id="facet-panel-wrapper"
-            class="shadow-sm"
-        >
-            <b-btn
-                size="sm"
-                style="position: absolute; top:0; right: 0; line-height: 1"
-                @click="toggleFacets()"
-            >x</b-btn>
+        <b-card no-body title="Title" header-tag="header" id="facet-panel-wrapper" class="shadow-sm">
+            <b-btn size="sm" style="position: absolute; top: 0; right: 0; line-height: 1" @click="toggleFacets()"
+                >x</b-btn
+            >
             <h6 slot="header" class="mb-0 text-center">Browse by facet</h6>
 
             <transition name="slide-fade">
@@ -22,7 +14,8 @@
                         :key="facet.alias"
                         @click="getFacet(facet)"
                         class="facet-selection"
-                    >{{ facet.alias }}</b-list-group-item>
+                        >{{ facet.alias }}</b-list-group-item
+                    >
                 </b-list-group>
             </transition>
             <transition name="slide-fade">
@@ -37,33 +30,31 @@
                         @click="getFacet(collocationFacet)"
                         v-if="report !== 'bibliography'"
                         class="facet-selection"
-                    >{{ collocationFacet.alias }}</b-list-group-item>
+                        >{{ collocationFacet.alias }}</b-list-group-item
+                    >
                 </b-list-group>
             </transition>
             <transition name="options-slide">
                 <div
                     class="m-2 text-center"
-                    style="width: 100%; font-size: 90%; opacity: 0.8; cursor: pointer;"
+                    style="width: 100%; font-size: 90%; opacity: 0.8; cursor: pointer"
                     v-if="!showFacetSelection"
                     @click="showFacetOptions()"
-                >Show Options</div>
+                >
+                    Show Options
+                </div>
             </transition>
         </b-card>
         <div class="d-flex justify-content-center position-relative" v-if="loading">
             <b-spinner
                 variant="secondary"
-                style="width: 4rem; height: 4rem; position: absolute; z-index: 50; top: 10px;"
+                style="width: 4rem; height: 4rem; position: absolute; z-index: 50; top: 10px"
             ></b-spinner>
         </div>
         <b-card no-body id="facet-results" class="mt-3 shadow-sm" v-if="showFacetResults">
             <h6 slot="header" class="mb-0 text-center">
-                <span>Frequency by {{selectedFacet.alias}}</span>
-                <b-button
-                    size="sm"
-                    variant="outline-secondary"
-                    class="close-box"
-                    @click="hideFacets()"
-                >x</b-button>
+                <span>Frequency by {{ selectedFacet.alias }}</span>
+                <b-button size="sm" variant="outline-secondary" class="close-box" @click="hideFacets()">x</b-button>
             </h6>
             <b-button-group
                 class="shadow-sm"
@@ -72,19 +63,18 @@
             >
                 <b-button
                     variant="light"
-                    :class="{'active': showingRelativeFrequencies === false}"
+                    :class="{ active: showingRelativeFrequencies === false }"
                     @click="displayAbsoluteFrequencies()"
-                >Absolute Frequency</b-button>
+                    >Absolute Frequency</b-button
+                >
                 <b-button
                     variant="light"
-                    :class="{'active': showingRelativeFrequencies}"
+                    :class="{ active: showingRelativeFrequencies }"
                     @click="displayRelativeFrequencies()"
-                >Relative Frequency</b-button>
+                    >Relative Frequency</b-button
+                >
             </b-button-group>
-            <div
-                class="m-2 text-center"
-                style="opacity: 0.5"
-            >Top 500 results for {{ selectedFacet.alias }}</div>
+            <div class="m-2 text-center" style="opacity: 0.5">Top 500 results for {{ selectedFacet.alias }}</div>
             <b-progress
                 :max="resultsLength"
                 show-progress
@@ -105,22 +95,25 @@
                             class="sidebar-text text-content-area"
                             v-if="facet.facet !== 'all_collocates'"
                             @click.prevent="facetClick(result.metadata)"
-                        >{{ result.label }}</a>
+                            >{{ result.label }}</a
+                        >
                         <a
                             href
                             class="sidebar-text text-content-area"
                             v-else
                             @click.prevent="collocationToConcordance(result.label)"
-                        >{{ result.label }}</a>
+                            >{{ result.label }}</a
+                        >
                         <b-badge variant="secondary" pill class="float-right">{{ result.count }}</b-badge>
                     </div>
                     <div
-                        style="line-height: 70%; padding-bottom: 15px; font-size: 85%;"
+                        style="line-height: 70%; padding-bottom: 15px; font-size: 85%"
                         v-if="showingRelativeFrequencies"
                     >
-                        <div style="display: inline-block; opacity: .8">
-                            {{ fullResults.unsorted[result.label].count }} actual {{ occurrence(fullResults.unsorted[result.label].count) }}
-                            in {{ fullRelativeFrequencies[result.label].total_count }} words
+                        <div style="display: inline-block; opacity: 0.8">
+                            {{ fullResults.unsorted[result.label].count }} actual
+                            {{ occurrence(fullResults.unsorted[result.label].count) }} in
+                            {{ fullRelativeFrequencies[result.label].total_count }} words
                         </div>
                     </div>
                 </b-list-group-item>
@@ -142,8 +135,8 @@ export default {
             "formData.start",
             "formData.end",
             "formData.metadataFields",
-            "resultsLength"
-        ])
+            "resultsLength",
+        ]),
     },
     data() {
         return {
@@ -155,7 +148,7 @@ export default {
             collocationFacet: {
                 facet: "all_collocates",
                 alias: "in the same sentence",
-                type: "collocationFacet"
+                type: "collocationFacet",
             },
             loading: false,
             moreResults: false,
@@ -168,7 +161,7 @@ export default {
             absoluteFrequencies: [],
             interrupt: false,
             selected: "",
-            runningTotal: 0
+            runningTotal: 0,
         };
     },
     created() {
@@ -198,7 +191,7 @@ export default {
                 facets.push({
                     facet: facet,
                     alias: alias,
-                    type: "facet"
+                    type: "facet",
                 });
             }
             return facets;
@@ -213,12 +206,9 @@ export default {
             this.debug(this, this.$store.state.formData);
             let urlString = this.paramsToUrlString({
                 ...this.$store.state.formData,
-                frequency_field: facetObj.alias
+                frequency_field: facetObj.alias,
             });
-            if (
-                typeof sessionStorage[urlString] !== "undefined" &&
-                this.philoConfig.production === true
-            ) {
+            if (typeof sessionStorage[urlString] !== "undefined" && this.philoConfig.production === true) {
                 this.loading = true;
                 this.fullResults = JSON.parse(sessionStorage[urlString]);
                 this.facetResults = this.fullResults.sorted.slice(0, 500);
@@ -248,43 +238,31 @@ export default {
             let promise;
             if (this.moreResults) {
                 if (facet.type !== "collocationFacet") {
-                    promise = this.$http.get(
-                        `${this.$dbUrl}/scripts/get_frequency.py`,
-                        {
-                            params: this.paramsFilter({
-                                ...queryParams,
-                                start: start.toString()
-                            })
-                        }
-                    );
+                    promise = this.$http.get(`${this.$dbUrl}/scripts/get_frequency.py`, {
+                        params: this.paramsFilter({
+                            ...queryParams,
+                            start: start.toString(),
+                        }),
+                    });
                 } else {
-                    promise = this.$http.get(
-                        `${this.$dbUrl}/reports/collocation.py`,
-                        {
-                            params: this.paramsFilter({
-                                ...queryParams,
-                                start: start.toString()
-                            })
-                        }
-                    );
+                    promise = this.$http.get(`${this.$dbUrl}/reports/collocation.py`, {
+                        params: this.paramsFilter({
+                            ...queryParams,
+                            start: start.toString(),
+                        }),
+                    });
                 }
                 this.showFacetSelection = false;
                 promise
-                    .then(response => {
+                    .then((response) => {
                         let results = response.data.results;
                         this.moreResults = response.data.more_results;
                         let merge;
                         if (!this.interrupt && this.selected == facet.alias) {
                             if (facet.type === "collocationFacet") {
-                                merge = this.mergeResults(
-                                    fullResults.unsorted,
-                                    response.data.collocates
-                                );
+                                merge = this.mergeResults(fullResults.unsorted, response.data.collocates);
                             } else {
-                                merge = this.mergeResults(
-                                    fullResults.unsorted,
-                                    results
-                                );
+                                merge = this.mergeResults(fullResults.unsorted, results);
                             }
                             this.facetResults = merge.sorted.slice(0, 500);
                             this.loading = false;
@@ -292,18 +270,13 @@ export default {
                             fullResults = merge;
                             this.runningTotal = response.data.hits_done;
                             start = response.data.hits_done;
-                            this.populateSidebar(
-                                facet,
-                                fullResults,
-                                start,
-                                queryParams
-                            );
+                            this.populateSidebar(facet, fullResults, start, queryParams);
                         } else {
                             // this won't affect the full collocation report which can't be interrupted when on the page
                             this.interrupt = false;
                         }
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         this.debug(this, error);
                         this.loading = false;
                     });
@@ -314,7 +287,7 @@ export default {
                 this.percent = 100;
                 let urlString = this.paramsToUrlString({
                     ...queryParams,
-                    frequency_field: this.selectedFacet.alias
+                    frequency_field: this.selectedFacet.alias,
                 });
                 this.saveToLocalStorage(urlString, fullResults);
             }
@@ -327,21 +300,15 @@ export default {
             for (let label in this.fullResults.unsorted) {
                 let resultObj = this.fullResults.unsorted[label];
                 relativeResults[label] = {
-                    count: this.roundToTwo(
-                        (resultObj.count / resultObj.total_word_count) * 10000
-                    ),
+                    count: this.roundToTwo((resultObj.count / resultObj.total_word_count) * 10000),
                     url: resultObj.url,
                     label: label,
-                    total_count: resultObj.total_word_count
+                    total_count: resultObj.total_word_count,
                 };
             }
             this.fullRelativeFrequencies = relativeResults;
-            let sortedRelativeResults = this.sortResults(
-                this.fullRelativeFrequencies
-            );
-            this.facetResults = this.copyObject(
-                sortedRelativeResults.slice(0, 500)
-            );
+            let sortedRelativeResults = this.sortResults(this.fullRelativeFrequencies);
+            this.facetResults = this.copyObject(sortedRelativeResults.slice(0, 500));
             this.showingRelativeFrequencies = true;
             this.loading = false;
             this.percent = 100;
@@ -371,14 +338,12 @@ export default {
             this.q = `${this.q} "${word}"`;
             this.$store.commit("updateFormDataField", {
                 key: "method",
-                value: "cooc"
+                value: "cooc",
             });
             this.start = "";
             this.end = "";
             this.report = "concordance";
-            this.$router.push(
-                this.paramsToRoute({ ...this.$store.state.formData })
-            );
+            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
         },
         showFacetOptions() {
             this.showFacetSelection = true;
@@ -397,20 +362,20 @@ export default {
         facetClick(metadata) {
             this.$store.commit("updateFormDataField", {
                 key: this.selectedFacet.facet,
-                value: `"${metadata[this.selectedFacet.facet]}"`
+                value: `"${metadata[this.selectedFacet.facet]}"`,
             });
             this.$router.push(
                 this.paramsToRoute({
                     ...this.$store.state.formData,
                     start: "0",
-                    end: "0"
+                    end: "0",
                 })
             );
         },
         toggleFacets() {
             EventBus.$emit("toggleFacets");
-        }
-    }
+        },
+    },
 };
 </script>
 <style thisd>

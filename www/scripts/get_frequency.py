@@ -31,7 +31,6 @@ def get_frequency(environ, start_response):
     start_response(status, headers)
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("scripts", ""))
     request = WSGIHandler(environ, config)
-
     results = frequency_results(request, config)
     yield rapidjson.dumps(results).encode("utf8")
 

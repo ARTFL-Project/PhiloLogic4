@@ -121,7 +121,13 @@
                     >Show Facets</b-button
                 >
             </div>
-            <b-modal size="xl" scrollable hide-footer title="Results Bibliography" id="results-bibliography">
+            <b-modal
+                size="xl"
+                scrollable
+                hide-footer
+                title="Bibliography of results on this page"
+                id="results-bibliography"
+            >
                 <results-bibliography :results="results"></results-bibliography>
             </b-modal>
         </b-card>

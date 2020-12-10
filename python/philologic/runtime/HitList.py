@@ -5,6 +5,8 @@ import time
 import struct
 from .HitWrapper import HitWrapper
 from philologic.utils import smash_accents
+import sys
+
 
 obj_dict = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
 
@@ -200,6 +202,7 @@ class HitList(object):
             offset = self.hitsize * n
             self.fh.seek(offset)
             self.position = n
+        # print(n, file=sys.stderr)
         buffer = self.fh.read(self.hitsize)
         self.position += 1
         return struct.unpack(self.format, buffer)

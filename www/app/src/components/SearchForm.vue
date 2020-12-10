@@ -733,9 +733,11 @@ export default {
         },
         autoCompletePosition(field) {
             let parent = document.getElementById(`${field}-group`);
-            let input = parent.querySelector("input");
-            let childOffset = input.offsetLeft - parent.offsetLeft;
-            return `left: ${childOffset}px; width: ${input.offsetWidth}px`;
+            if (parent) {
+                let input = parent.querySelector("input");
+                let childOffset = input.offsetLeft - parent.offsetLeft;
+                return `left: ${childOffset}px; width: ${input.offsetWidth}px`;
+            }
         },
     },
 };
