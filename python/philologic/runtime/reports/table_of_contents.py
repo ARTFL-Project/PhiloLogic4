@@ -66,7 +66,14 @@ def generate_toc_object(request, config):
             display_name = display_name[0].upper() + display_name[1:]
             link = make_absolute_object_link(config, philo_id.split()[: philo_slices[philo_type]])
             philo_id = " ".join(philo_id.split()[: philo_slices[philo_type]])
-            toc_element = {"philo_id": philo_id, "philo_type": philo_type, "label": display_name, "href": link}
+            citation_hrefs = citation_links(db, config, text)
+            toc_element = {
+                "philo_id": philo_id,
+                "philo_type": philo_type,
+                "label": display_name,
+                "href": link,
+                "citation": citations(text, citation_hrefs, config, report="table_of_contents"),
+            }
             text_hierarchy.append(toc_element)
     metadata_fields = {}
     for metadata in db.locals["metadata_fields"]:

@@ -11,23 +11,10 @@ from philologic.runtime import WebConfig
 from philologic.runtime import WSGIHandler
 from philologic.runtime import access_control
 
-config = WebConfig(os.path.abspath(os.path.dirname(__file__)))
-global_config = imp.load_source("philologic4", config.global_config_location)
-path = os.path.abspath(os.path.dirname(__file__))
-dbname = path.strip().split("/")[-1]
-
-config = WebConfig(os.path.abspath(os.path.dirname(__file__)))
-config_location = os.path.join("app/assets/css/split/", os.path.basename(config.theme))
-if os.path.realpath(os.path.abspath(config.theme)) == os.path.realpath(os.path.abspath(config_location)):
-    theme = config_location
-elif os.path.exists(config_location) and config.production:
-    theme = config_location
-else:
-    os.system("cp %s %s" % (config.theme, config_location))
-    theme = config_location
-
+PATH = os.path.abspath(os.path.dirname(__file__))
 
 def start_web_app(environ, start_response):
+    config = WebConfig(os.path.abspath(PATH))
     headers = [("Content-type", "text/html; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     if not config.valid_config:  # This means we have an error in the webconfig file
         html = build_misconfig_page(config.traceback, "webconfig.cfg")
@@ -48,7 +35,7 @@ def start_web_app(environ, start_response):
 
 
 def build_misconfig_page(traceback, config_file):
-    html_page = open("%s/app/misconfiguration.html" % path).read()
+    html_page = open("%s/app/misconfiguration.html" % PATH).read()
     html_page = html_page.replace("$TRACEBACK", traceback)
-    html_page = html_page.replace("$CONFIG_FILE", config_file)
+    html_page = html_page.replace("$config_FILE", config_file)
     return html_page

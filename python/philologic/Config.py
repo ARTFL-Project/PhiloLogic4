@@ -499,21 +499,11 @@ WEB_CONFIG_DEFAULTS = {
         ),
     },
     "table_of_contents_citation": {
-        "value": [
-            CITATIONS["author"],
-            CITATIONS["title"],
-            CITATIONS["year"],
-            CITATIONS["pub_place"],
-            CITATIONS["publisher"],
-            CITATIONS["collection"],
-        ],
+        "value": [],
         "comment": "\n".join(
             [
-                "# The table_of_contents_citation variable define how and in what field order citations are displayed in navigation reports.",
-                "# You can define styling with a dictionary of valid CSS property/value such as those in the default values.",
-                "# begin and end keywords define what precedes and follows each field. You can use HTML for these strings.",
-                "# The link key enables linking for that metadata field. It links to the table of contents for title and filename,",
-                "# and to a metadata query for all other metadata fields.",
+                "# The table_of_contents_citation variable define how and in what field order citations are displayed within the table of content",
+                "# In most cases, this should remain empty, except in the cases of div elements with different metadata values",
             ]
         ),
     },
@@ -571,8 +561,7 @@ WEB_CONFIG_DEFAULTS = {
         "value": "year",
         "comment": "\n".join(
             [
-                "# The time_series_year_field variable defines which metadata field to use for time series. The year field is built at load time by finding the earliest 4 digit number",
-                "# in multiple date fields.",
+                "# The time_series_year_field variable defines which metadata field to use for time series.",
                 "",
             ]
         ),

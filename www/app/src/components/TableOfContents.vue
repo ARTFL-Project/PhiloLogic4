@@ -9,49 +9,26 @@
         </b-row>
         <div class="text-center">
             <b-row>
-                <b-col
-                    cols="12"
-                    sm="10"
-                    md="8"
-                    lg="6"
-                    xl="4"
-                    offset-sm="1"
-                    offset-md="2"
-                    offset-lg="3"
-                    offset-xl="4"
-                >
-                    <b-card
-                        no-body
-                        class="mt-4 mb-4 p-4 d-inline-block text-justify shadow"
-                        style="width: 100%"
-                    >
+                <b-col cols="12">
+                    <b-card no-body class="mt-4 mb-4 p-4 d-inline-block text-justify shadow" style="width: 100%">
                         <b-button
                             id="show-header"
                             class="mb-2"
                             variant="outline-secondary"
                             v-if="philoConfig.header_in_toc"
                             @click="toggleHeader()"
-                        >{{ headerButton }}</b-button>
-                        <b-card
-                            no-body
-                            id="tei-header"
-                            class="shadow-sm"
-                            v-if="showHeader"
-                            v-html="teiHeader"
-                        ></b-card>
+                            >{{ headerButton }}</b-button
+                        >
+                        <b-card no-body id="tei-header" class="shadow-sm" v-if="showHeader" v-html="teiHeader"></b-card>
                         <div id="toc-report" class="text-content-area">
-                            <div
-                                id="toc-content"
-                                infinite-scroll="getMoreItems()"
-                                infinite-scroll-distance="4"
-                            >
+                            <div id="toc-content" infinite-scroll="getMoreItems()" infinite-scroll-distance="4">
                                 <div v-for="(element, elIndex) in tocObject.toc" :key="elIndex">
                                     <div :class="'toc-' + element.philo_type">
                                         <span :class="'bullet-point-' + element.philo_type"></span>
-                                        <router-link
-                                            :to="'/' + element.href"
-                                            class="toc-section"
-                                        >{{ element.label }}</router-link>
+                                        <router-link :to="'/' + element.href" class="toc-section">{{
+                                            element.label
+                                        }}</router-link>
+                                        <citations :citation="element.citation"></citations>
                                     </div>
                                 </div>
                             </div>
@@ -72,14 +49,14 @@ export default {
     name: "tableOfContents",
     components: {
         citations,
-        searchArguments
+        searchArguments,
     },
     computed: {
         ...mapFields({
             report: "formData.report",
             textNavigationCitation: "textNavigationCitation",
-            searching: "searching"
-        })
+            searching: "searching",
+        }),
     },
     data() {
         return {
@@ -89,7 +66,7 @@ export default {
             teiHeader: "",
             tocObject: {},
             showHeader: false,
-            headerButton: "Show Header"
+            headerButton: "Show Header",
         };
     },
     created() {
@@ -100,14 +77,14 @@ export default {
             this.searching = true;
             this.$http
                 .get(`${this.$dbUrl}/reports/table_of_contents.py`, {
-                    params: { philo_id: this.$route.params.pathInfo }
+                    params: { philo_id: this.$route.params.pathInfo },
                 })
-                .then(response => {
+                .then((response) => {
                     this.searching = false;
                     this.tocObject = response.data;
                     this.textNavigationCitation = response.data.citation;
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.searching = false;
                     this.debug(this, error);
                 });
@@ -118,15 +95,15 @@ export default {
                     this.$http
                         .get(`${this.$dbUrl}/scripts/get_header.py`, {
                             params: {
-                                philo_id: this.$route.params.pathInfo
-                            }
+                                philo_id: this.$route.params.pathInfo,
+                            },
                         })
-                        .then(response => {
+                        .then((response) => {
                             this.teiHeader = response.data;
                             this.headerButton = "Hide Header";
                             this.showHeader = true;
                         })
-                        .catch(error => {
+                        .catch((error) => {
                             this.debug(this, error);
                         });
                 } else {
@@ -140,8 +117,8 @@ export default {
         },
         getMoreItems() {
             this.displayLimit += 200;
-        }
-    }
+        },
+    },
 };
 </script>
 <style scoped>

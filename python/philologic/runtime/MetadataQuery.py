@@ -15,7 +15,7 @@ from .QuerySyntax import group_terms, parse_query
 os.environ["PATH"] += ":/usr/local/bin/"
 
 
-def metadata_query(db, filename, param_dicts, sort_order, raw_results=False, get_word_count=False):
+def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
     """Prepare and execute SQL metadata query."""
     if db.locals["debug"]:
         print("METADATA_QUERY:", param_dicts, file=sys.stderr)
@@ -23,15 +23,6 @@ def metadata_query(db, filename, param_dicts, sort_order, raw_results=False, get
     for d in param_dicts:
         query = query_recursive(db, d, prev, sort_order)
         prev = query
-    if get_word_count is True:
-        philo_ids = []
-        for corpus_obj in query:
-            philo_ids.append(corpus_obj["philo_id"])
-        cursor = db.dbh.cursor()
-        cursor.execute(f"SELECT SUM(word_count) FROM toms WHERE philo_id IN ({', '.join('?' for _ in range(len(philo_ids)))})",
-            tuple(philo_ids),
-        )
-        return cursor.fetchone()[0]
     try:
         corpus_fh = open(filename, "wb")
         for corpus_obj in query:

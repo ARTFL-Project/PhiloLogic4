@@ -52,10 +52,6 @@ def collocation_results(request, config):
     else:
         hits = db.query(request["q"], "proxy", request["arg"], raw_results=True, **request.metadata)
     hits.finish()
-    return precompute_version(hits, config, request, db, filter_list, collocation_object)
-
-
-def precompute_version(hits, config, request, db, filter_list, collocation_object):
     stored_sentence_id = None
     stored_sentence_counts = defaultdict(int)
     sentence_hit_count = 1

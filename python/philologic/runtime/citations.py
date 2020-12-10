@@ -37,9 +37,9 @@ def citation_links(db, config, i):
     return links
 
 
-def citations(hit, citation_hrefs, config, report="concordance", citation_type=None, result_type="doc"):
-    """ Returns a representation of a PhiloLogic object and all its ancestors
-        suitable for a precise citation. """
+def citations(hit, citation_hrefs, config, report="concordance", citation_type=None):
+    """Returns a representation of a PhiloLogic object and all its ancestors
+    suitable for a precise citation."""
     if citation_type is None:
         citation_type = config[report + "_citation"]
     citation = []
