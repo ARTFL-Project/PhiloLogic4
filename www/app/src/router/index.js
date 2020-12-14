@@ -45,7 +45,7 @@ export default new Router({
     },
     {
         path: "/time_series",
-        name: "timeSeries",
+        name: "time_series",
         component: timeSeries
     },
     {

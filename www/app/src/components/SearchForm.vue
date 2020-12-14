@@ -35,7 +35,7 @@
 
                                                 <b-form-input
                                                     type="text"
-                                                    v-model.lazy="q"
+                                                    v-model.lazy="queryTermTyped"
                                                     @input="onChange('q')"
                                                     @keyup.down.native="onArrowDown('q')"
                                                     @keyup.up.native="onArrowUp('q')"
@@ -57,6 +57,7 @@
                                                         v-html="result"
                                                     ></li>
                                                 </ul>
+                                                <!-- <input-text></input-text> -->
                                                 <b-input-group-append>
                                                     <b-button variant="secondary" id="button-search" @click="onSubmit()"
                                                         >Search</b-button
@@ -95,11 +96,10 @@
                                             <input
                                                 type="text"
                                                 class="form-control"
-                                                autocomplete="off"
                                                 :name="metadataDisplay[headIndex].value"
                                                 :placeholder="metadataDisplay[headIndex].example"
                                                 v-model="metadataValues.head"
-                                                @input="onChange(metadataDisplay[headIndex].value)"
+                                                @input="onChange('head')"
                                                 @keydown.down="onArrowDown(metadataDisplay[headIndex].value)"
                                                 @keydown.up="onArrowUp(metadataDisplay[headIndex].value)"
                                                 @keyup.enter="onEnter(metadataDisplay[headIndex].value)"
@@ -460,6 +460,8 @@ export default {
             arrowCounters: { q: -1 },
             isOpen: false,
             showTips: false,
+            queryTermTyped: this.$route.query.q || "",
+            metadataTyped: {},
         };
     },
     watch: {
@@ -564,14 +566,18 @@ export default {
             }
         },
         onSubmit() {
-            this.q = this.q.trim();
             this.report = this.currentReport;
-            this.start = "";
-            this.end = "";
-            this.byte = "";
             this.formOpen = false;
-            console.log(this.$store.state.formData);
-            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
+            this.$router.push(
+                this.paramsToRoute({
+                    ...this.$store.state.formData,
+                    ...this.metadataValues,
+                    q: this.queryTermTyped.trim(),
+                    start: "",
+                    end: "",
+                    byte: "",
+                })
+            );
         },
         onReset() {
             this.$store.commit("setDefaultFields", this.$parent.defaultFieldValues);
@@ -611,51 +617,49 @@ export default {
             this.approximate_ratio = approximateValue;
         },
         onChange(field) {
-            // Let's warn the parent that a change was made
-            if (field == "q") {
-                let currentQueryTerm = this.$route.query.q;
-                if (this.q.replace('"', "").length > 1 && this.q != currentQueryTerm) {
-                    this.$http
-                        .get(`${this.$dbUrl}/scripts/autocomplete_term.py`, {
-                            params: { term: this.q },
-                        })
-                        .then((response) => {
-                            this.autoCompleteResults.q = response.data;
-                            this.isLoading = false;
-                        });
+            if (this.timeout) clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => {
+                if (field == "q") {
+                    let currentQueryTerm = this.$route.query.q;
+                    if (this.queryTermTyped.replace('"', "").length > 1 && this.queryTermTyped != currentQueryTerm) {
+                        this.$http
+                            .get(`${this.$dbUrl}/scripts/autocomplete_term.py`, {
+                                params: { term: this.queryTermTyped },
+                            })
+                            .then((response) => {
+                                this.autoCompleteResults.q = response.data;
+                                this.isLoading = false;
+                            });
+                    }
+                } else {
+                    let currentFieldValue = this.$route.query[field];
+                    if (this.metadataValues[field].length > 1 && this.metadataValues[field] != currentFieldValue) {
+                        this.$http
+                            .get(`${this.$dbUrl}/scripts/autocomplete_metadata.py`, {
+                                params: {
+                                    term: this.metadataValues[field],
+                                    field: field,
+                                },
+                            })
+                            .then((response) => {
+                                this.autoCompleteResults[field] = response.data.map((result) =>
+                                    result.replace(/CUTHERE/, "<last/>")
+                                );
+                            })
+                            .catch((error) => {
+                                this.debug(this, error);
+                            });
+                    }
                 }
-            } else {
-                this.$store.commit("updateFormDataField", {
-                    key: field,
-                    value: this.metadataValues[field],
-                });
-                let currentFieldValue = this.$route.query[field];
-                if (this.metadataValues[field].length > 1 && this.metadataValues[field] != currentFieldValue) {
-                    this.$http
-                        .get(`${this.$dbUrl}/scripts/autocomplete_metadata.py`, {
-                            params: {
-                                term: this.metadataValues[field],
-                                field: field,
-                            },
-                        })
-                        .then((response) => {
-                            this.autoCompleteResults[field] = response.data.map((result) =>
-                                result.replace(/CUTHERE/, "<last/>")
-                            );
-                        })
-                        .catch((error) => {
-                            this.debug(this, error);
-                        });
-                }
-            }
-            let popup = document.querySelector(`#autocomplete-${field}`);
-            const clearAutocomplete = (e) => {
-                if (e.target !== popup) {
-                    this.autoCompleteResults[field] = [];
-                }
-                window.removeEventListener("click", clearAutocomplete);
-            };
-            window.addEventListener("click", clearAutocomplete);
+                let popup = document.querySelector(`#autocomplete-${field}`);
+                const clearAutocomplete = (e) => {
+                    if (e.target !== popup) {
+                        this.autoCompleteResults[field] = [];
+                    }
+                    window.removeEventListener("click", clearAutocomplete);
+                };
+                window.addEventListener("click", clearAutocomplete);
+            }, 200);
         },
         onArrowDown(field) {
             if (this.arrowCounters[field] < this.autoCompleteResults[field].length) {

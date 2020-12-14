@@ -53,6 +53,9 @@ export default new Vuex.Store({
         updateFormDataField(state, payload) {
             Vue.set(state.formData, payload.key, payload.value)
         },
+        updateAllMetadata(state, payload) {
+            Vue.set(state, 'formData', { ...state.formData, ...payload })
+        },
         setReportValues(state, payload) {
             Vue.set(state, "reportValues", payload)
         },

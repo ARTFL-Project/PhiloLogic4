@@ -50,7 +50,7 @@
             </span>
             <b v-if="queryArgs.biblio.length === 0">None</b>
         </div>
-        <div v-if="currentReport === 'time_series'">
+        <div v-if="queryReport === 'time_series'">
             {{ resultsLength }} occurrences of the term(s) between
             <span class="biblio-criteria">
                 <span class="metadata-args rounded-pill">
@@ -65,7 +65,7 @@
                 </span>
             </span>
         </div>
-        <div style="margin-top: 10px" v-if="currentReport === 'collocation'">
+        <div style="margin-top: 10px" v-if="queryReport === 'collocation'">
             Displaying the top 100 collocates for {{ resultsLength }} occurrences
         </div>
     </div>
@@ -109,6 +109,7 @@ export default {
             words: [],
             wordListChanged: false,
             restart: false,
+            queryReport: this.$route.name,
         };
     },
     created() {
@@ -123,6 +124,7 @@ export default {
     },
     methods: {
         fetchSearchArgs() {
+            this.queryReport = this.$route.name;
             this.currentWordQuery = typeof this.$route.query.q == "undefined" ? "" : this.$route.query.q;
             let queryParams = { ...this.$store.state.formData };
             if ("q" in queryParams) {

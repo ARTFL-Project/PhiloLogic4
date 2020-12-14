@@ -40,7 +40,7 @@ def bibliography_results(request, config):
         if request.simple_bibliography == "all":
             citation = citations(hit, citation_hrefs, config, report="simple_landing")
         else:
-            citation = citations(hit, citation_hrefs, config, report="bibliography", result_type=result_type)
+            citation = citations(hit, citation_hrefs, config, report="bibliography")
         if config.dictionary_bibliography is False or result_type == "doc":
             results.append(
                 {

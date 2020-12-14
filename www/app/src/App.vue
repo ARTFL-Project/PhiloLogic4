@@ -177,7 +177,7 @@ export default {
                 });
                 this.debug(this, this.report);
                 this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
-            } else if (this.$route.name == "timeSeries") {
+            } else if (this.$route.name == "time_series") {
                 this.report = "time_series";
             } else if (this.$route.name == "collocation") {
                 this.report = "collocation";

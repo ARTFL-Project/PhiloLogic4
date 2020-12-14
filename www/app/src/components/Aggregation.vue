@@ -3,43 +3,45 @@
         <results-summary :results="aggregationResults"></results-summary>
         <b-card no-body class="shadow mt-4 ml-2 mr-2" v-if="resultsLength">
             <b-list-group flush>
-                <virtual-list :size="55" :remain="25">
-                    <b-list-group-item
-                        v-for="(result, resultIndex) in aggregationResults"
-                        :key="resultIndex"
-                        class="pt-3 pb-3"
+                <b-list-group-item
+                    v-for="(result, resultIndex) in aggregationResults.slice(0, lastResult)"
+                    :key="resultIndex"
+                    class="pt-3 pb-3"
+                >
+                    <b-button
+                        variant="outline-secondary"
+                        size="sm"
+                        class="d-inline-block"
+                        style="padding: 0 0.25rem; margin-right: 0.5rem"
+                        :id="`button-${resultIndex}`"
+                        @click="toggleBreakUp(resultIndex)"
+                        v-if="result.break_up_field.length > 0"
+                        >&plus;</b-button
                     >
-                        <b-button
-                            variant="outline-secondary"
-                            size="sm"
-                            class="d-inline-block"
-                            style="padding: 0 0.25rem; margin-right: 0.5rem"
-                            :id="`button-${resultIndex}`"
-                            @click="toggleBreakUp(resultIndex)"
-                            v-if="result.break_up_field.length > 0"
-                            >&plus;</b-button
-                        >
-                        <b-badge variant="secondary" pill style="font-size: 100%">{{ result.count }}</b-badge>
-                        <citations :citation="result.citation"></citations>
-                        <span class="d-inline-block pl-1" v-if="breakUpFields[resultIndex].results.length"
-                            >across {{ breakUpFields[resultIndex].results.length }} {{ breakUpFieldName }}(s)</span
-                        >
-                        <b-list-group class="ml-4" v-if="breakUpFields[resultIndex].show">
-                            <b-list-group-item v-for="(value, key) in breakUpFields[resultIndex].results" :key="key">
-                                <b-badge variant="secondary" pill>{{ value.count }}</b-badge>
-                                <citations
-                                    :citation="
-                                        buildCitationObject(
-                                            statsConfig.break_up_field,
-                                            statsConfig.break_up_field_citation,
-                                            value.metadata_fields
-                                        )
-                                    "
-                                ></citations>
-                            </b-list-group-item>
-                        </b-list-group>
-                    </b-list-group-item>
-                </virtual-list>
+                    <b-badge variant="secondary" pill style="font-size: 100%">{{ result.count }}</b-badge>
+                    <citations :citation="result.citation"></citations>
+                    <span class="d-inline-block pl-1" v-if="breakUpFields[resultIndex].results.length"
+                        >across {{ breakUpFields[resultIndex].results.length }} {{ breakUpFieldName }}(s)</span
+                    >
+                    <b-list-group class="ml-4" v-if="breakUpFields[resultIndex].show">
+                        <b-list-group-item v-for="(value, key) in breakUpFields[resultIndex].results" :key="key">
+                            <b-badge variant="secondary" pill>{{ value.count }}</b-badge>
+                            <citations
+                                :citation="
+                                    buildCitationObject(
+                                        statsConfig.break_up_field,
+                                        statsConfig.break_up_field_citation,
+                                        value.metadata_fields
+                                    )
+                                "
+                            ></citations>
+                        </b-list-group-item>
+                    </b-list-group>
+                </b-list-group-item>
+                <infinite-loading :identifier="infiniteId" @infinite="infiniteHandler">
+                    <div slot="no-more"></div>
+                    <div slot="no-results"></div>
+                </infinite-loading>
             </b-list-group>
         </b-card>
     </b-container>
@@ -49,11 +51,12 @@ import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import searchArguments from "./SearchArguments";
 import ResultsSummary from "./ResultsSummary";
-import virtualList from "vue-virtual-scroll-list";
+// import virtualList from "vue-virtual-scroll-list";
+import InfiniteLoading from "vue-infinite-loading";
 
 export default {
     name: "aggregation",
-    components: { citations, searchArguments, ResultsSummary, virtualList },
+    components: { citations, searchArguments, ResultsSummary, InfiniteLoading },
     computed: {
         ...mapFields(["formData.report", "resultsLength", "aggregationCache", "searching", "currentReport"]),
         statsConfig() {
@@ -69,6 +72,8 @@ export default {
             results: [],
             loading: false,
             aggregationResults: [],
+            lastResult: 50,
+            infiniteId: 0,
             groupedByField: this.$route.query.group_by,
             breakUpFields: [],
             breakUpFieldName: "",
@@ -106,7 +111,9 @@ export default {
                         }),
                     })
                     .then((response) => {
-                        this.aggregationResults = this.buildStatResults(response.data.results);
+                        this.infiniteId += 1;
+                        this.aggregationResults = Object.freeze(this.buildStatResults(response.data.results));
+                        this.lastResult = 50;
                         this.breakUpFields = this.aggregationResults.map((results) => ({
                             show: false,
                             results: results.break_up_field,
@@ -119,16 +126,19 @@ export default {
                         }
                         this.resultsLength = response.data.total_results;
                         this.searching = false;
-                        this.aggregationCache = {
-                            results: response.data.results,
-                            query: this.$route.query,
-                            totalResults: response.data.results.total_results,
-                        };
                     })
                     .catch((error) => {
                         this.searching = false;
                         this.debug(this, error);
                     });
+            }
+        },
+        infiniteHandler($state) {
+            if (this.aggregationResults.length > this.lastResult) {
+                this.lastResult += 50;
+                $state.loaded();
+            } else {
+                $state.complete();
             }
         },
         buildStatResults(results) {
