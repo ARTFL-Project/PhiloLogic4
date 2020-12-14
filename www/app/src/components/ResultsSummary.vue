@@ -234,7 +234,7 @@ export default {
                 start = 1;
                 end = parseInt(this.results_per_page);
             } else {
-                start = this.description.start || 1;
+                start = this.description.start || this.$route.query.start || 1;
                 end = this.end || parseInt(this.results_per_page);
             }
             if (end > this.resultsLength) {

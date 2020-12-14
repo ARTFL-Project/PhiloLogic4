@@ -23,7 +23,7 @@
                     <span class="d-inline-block pl-1" v-if="breakUpFields[resultIndex].results.length"
                         >across {{ breakUpFields[resultIndex].results.length }} {{ breakUpFieldName }}(s)</span
                     >
-                    <b-list-group class="ml-4" v-if="breakUpFields[resultIndex].show">
+                    <b-list-group class="ml-4 mt-2" v-if="breakUpFields[resultIndex].show">
                         <b-list-group-item v-for="(value, key) in breakUpFields[resultIndex].results" :key="key">
                             <b-badge variant="secondary" pill>{{ value.count }}</b-badge>
                             <citations

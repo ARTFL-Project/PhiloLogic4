@@ -20,24 +20,26 @@ export default {
     computed: {
         ...mapFields(["formData.report"]),
         uniquedResults() {
+            //TODO: We should provide the object level of hits. This is a HACK.
+            let objectLevel = this.results[0].citation[0].object_type;
             let uniqueResults = [];
-            let previousFilename = "";
+            let previousPhiloId = "";
             for (let result of this.results) {
-                if (result.metadata_fields.filename == previousFilename) {
+                if (result.metadata_fields[`philo_${objectLevel}_id`] == previousPhiloId) {
                     uniqueResults[uniqueResults.length - 1].count++;
                     continue;
                 }
                 result = this.copyObject(result);
                 let citation = [];
                 for (let i = 0; i < result.citation.length; i++) {
-                    if (result.citation[i].object_type == "doc") {
+                    if (result.citation[i].object_type == objectLevel) {
                         citation.push(result.citation[i]);
                     }
                 }
                 result.citation = citation;
                 result.count = 1;
                 uniqueResults.push(result);
-                previousFilename = result.metadata_fields.filename;
+                previousPhiloId = result.metadata_fields[`philo_${objectLevel}_id`];
             }
             return uniqueResults;
         },
