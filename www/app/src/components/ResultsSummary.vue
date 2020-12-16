@@ -48,7 +48,7 @@
                     </div>
                     <div v-if="report == 'aggregation'">
                         <div id="result-stats" class="pb-2" v-if="resultsLength > 0">
-                            {{ resultsLength }} total occurrences spread across {{ aggregationCache.results.length }}
+                            {{ resultsLength }} total occurrences spread across {{ results.length }}
                             {{ groupByLabel.toLowerCase() }}(s)
                         </div>
                         <div id="result-stats" class="pb-2" v-else>
@@ -79,7 +79,7 @@
                                         >Common function words</a
                                     >
                                     <a href @click="toggleFilterList()" v-if="colloc_filter_choice === 'tfidf'"
-                                        >{{ filter_frequency }} most highly weighted terms across the corpus</a
+                                        >{{ filter_frequency }} least distinctive terms across the corpus</a
                                     >
                                     are being filtered from this report.
                                 </span>
@@ -163,7 +163,7 @@ export default {
         ResultsBibliography,
         ExportResults,
     },
-    props: ["results", "description", "runningTotal"],
+    props: ["results", "description", "runningTotal", "filterList"],
     computed: {
         ...mapFields([
             "formData.report",
@@ -180,6 +180,16 @@ export default {
             "resultsLength",
             "aggregationCache",
         ]),
+        splittedFilterList: function () {
+            let arrayLength = this.filterList.length;
+            let chunkSize = arrayLength / 5;
+            let splittedList = [];
+            for (let index = 0; index < arrayLength; index += chunkSize) {
+                let myChunk = this.filterList.slice(index, index + chunkSize);
+                splittedList.push(myChunk);
+            }
+            return splittedList;
+        },
     },
     data() {
         return {
@@ -330,6 +340,14 @@ export default {
                 this.showBiblio = false;
             }
         },
+        toggleFilterList() {
+            event.preventDefault();
+            if (this.showFilteredWords == true) {
+                this.showFilteredWords = false;
+            } else {
+                this.showFilteredWords = true;
+            }
+        },
     },
 };
 </script>
@@ -352,5 +370,16 @@ export default {
 }
 #results-bibliography .modal-header h5 {
     line-height: 1;
+}
+#close-filter-list {
+    width: fit-content;
+    float: right;
+    padding: 0 0.2rem;
+    position: absolute;
+    right: 0;
+}
+#filter-list .list-group-item {
+    border-width: 0px;
+    padding: 0.1rem;
 }
 </style>

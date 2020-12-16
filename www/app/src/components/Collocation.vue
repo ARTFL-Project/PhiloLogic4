@@ -5,6 +5,7 @@
                 :results="results.results"
                 :description="results.description"
                 :running-total="runningTotal"
+                :filter-list="filterList"
             ></results-summary>
             <b-row class="mt-4" v-if="resultsLength">
                 <b-col cols="12" sm="4">

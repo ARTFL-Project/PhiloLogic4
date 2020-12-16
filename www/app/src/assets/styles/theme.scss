@@ -33,7 +33,7 @@ a.btn-secondary {
     background-color: $header-color !important; 
     color: $link-color !important;
 }
-.input-group-text {
+.input-group-text, .custom-control-input:checked ~ .custom-control-label::before, .custom-control-input:focus ~ .custom-control-label::before  {
     color: $link-color !important;
     background-color: #fff !important;
     border-color: $link-color !important;
@@ -53,4 +53,8 @@ a.btn-secondary {
 }
 #report-error {
     color: #fff !important;
+}
+.custom-select:focus, .custom-control-input:checked ~ .custom-control-label::before, .custom-control-input:focus ~ .custom-control-label::before {
+    box-shadow: none !important;
+    border-color: $link-color !important;
 }

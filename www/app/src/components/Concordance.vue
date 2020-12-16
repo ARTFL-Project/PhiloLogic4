@@ -32,11 +32,9 @@
                         </b-row>
                         <b-row>
                             <b-col
-                                class="m-2 mt-3"
-                                select-word
+                                class="m-2 mt-3 concordance-text"
                                 :position="results.description.start + index"
                                 @keyup="dicoLookup($event, result.metadata_fields.year)"
-                                tabindex="0"
                             >
                                 <div class="default-length" v-html="result.context"></div>
                                 <div class="more-length"></div>
@@ -170,6 +168,9 @@ export default {
 </script>
 
 <style>
+.concordance-text {
+    text-align: justify;
+}
 .philologic-occurrence {
     left: 0;
     position: relative;

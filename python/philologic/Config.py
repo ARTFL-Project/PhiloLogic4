@@ -231,9 +231,9 @@ WEB_CONFIG_DEFAULTS = {
         "value": {},
         "comment": "\n".join(
             [
-                "# The metadata_input_style variable defines whether to use an text input field or a dropdown menu for any given",
-                '# metadata field. All fields are set by default to text. If using a dropdown menu, you need to set it to "dropdown"',
-                "# and populate the metadata_dropdown_values variable",
+                "# The metadata_input_style variable defines whether to use an text input field, a dropdown menu or checkboxes for any given",
+                '# metadata field. All fields are set by default to text. Note that dropdowns only allow you to select one value, whereas checkboxes allow you to select more than one.'
+                '# If using a dropdown menu, you need to set it to "dropdown" and populate the metadata_dropdown_values variable. If using checkboxes, set to "checkboxes"',
             ]
         ),
     },
