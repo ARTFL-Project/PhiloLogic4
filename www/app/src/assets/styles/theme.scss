@@ -54,7 +54,8 @@ a.btn-secondary {
 #report-error {
     color: #fff !important;
 }
-.custom-select:focus, .custom-control-input:checked ~ .custom-control-label::before, .custom-control-input:focus ~ .custom-control-label::before {
-    box-shadow: none !important;
-    border-color: $link-color !important;
+.custom-select:focus, .custom-control-input:checked ~ .custom-control-label::before, .custom-control-input:focus ~ .custom-control-label::before, input[type="text"]:focus {
+    box-shadow: 0 0 0 0.05rem $button-color !important;
+    border-color: $button-color !important;
+    opacity: .5
 }

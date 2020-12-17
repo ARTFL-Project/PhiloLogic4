@@ -67,40 +67,25 @@
                                         </b-input-group-append>
                                     </b-input-group>
                                 </b-col>
-                                <b-col cols="12" md="4" id="search-buttons">
-                                    <b-button-group>
-                                        <b-button type="reset" id="reset_form" variant="secondary" @click="onReset()"
-                                            >Clear</b-button
-                                        >
-                                        <b-button
-                                            type="button"
-                                            id="show-search-form"
-                                            variant="outline-secondary"
-                                            @click="toggleForm()"
-                                            >{{ searchOptionsButton }}</b-button
-                                        >
-                                    </b-button-group>
-                                </b-col>
                             </b-row>
-                            <b-row class="mt-2" style="margin-left: -0.5rem">
-                                <b-col sm="6" lg="3">
-                                    <b-form-checkbox
-                                        id="approximate"
-                                        style="display: inline-block; height: 31px"
-                                        v-model="approximateSelected"
-                                        value="yes"
-                                        switch
-                                        unchecked-value="no"
-                                        @change="approximateChange(approximateSelected)"
-                                        >Approximate match</b-form-checkbox
-                                    >
-                                    <b-form-select
-                                        style="max-width: fit-content; margin-left: 0.5rem"
-                                        :options="approximateValues"
-                                        v-model="approximate_ratio"
-                                        size="sm"
-                                    ></b-form-select> </b-col
-                                ><b-col sm="6" v-if="currentReport != 'collocation'">
+                            <div class="mt-2">
+                                <b-form-checkbox
+                                    id="approximate"
+                                    style="display: inline-block; height: 31px"
+                                    v-model="approximateSelected"
+                                    value="yes"
+                                    switch
+                                    unchecked-value="no"
+                                    @change="approximateChange(approximateSelected)"
+                                    >Approximate match</b-form-checkbox
+                                >
+                                <b-form-select
+                                    style="max-width: fit-content; margin-left: 0.5rem"
+                                    :options="approximateValues"
+                                    v-model="approximate_ratio"
+                                    size="sm"
+                                ></b-form-select>
+                                <span id="method-args" class="pl-2" v-if="currentReport != 'collocation'">
                                     <b-form-select
                                         style="max-width: fit-content; height: 31px"
                                         v-model="method"
@@ -125,48 +110,62 @@
                                         size="sm"
                                         v-if="method == 'phrase'"
                                     />
-                                    <span v-if="method != 'cooc'"> words in the same sentence</span></b-col
+                                    <span v-if="method != 'cooc'"> words in the same sentence</span></span
                                 >
-                            </b-row>
+                            </div>
                         </div>
-                        <b-row id="head-search-container" class="px-3 pt-1 pb-3" v-if="dictionary">
-                            <b-col cols="12" md="8">
-                                <div class="input-group" id="head-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">{{ metadataDisplay[headIndex].label }}</span>
-                                    </div>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        :name="metadataDisplay[headIndex].value"
-                                        :placeholder="metadataDisplay[headIndex].example"
-                                        v-model="metadataValues.head"
-                                        @input="onChange('head')"
-                                        @keydown.down="onArrowDown(metadataDisplay[headIndex].value)"
-                                        @keydown.up="onArrowUp(metadataDisplay[headIndex].value)"
-                                        @keyup.enter="onEnter(metadataDisplay[headIndex].value)"
-                                    />
-                                    <ul
-                                        :id="'autocomplete-' + metadataDisplay[headIndex].value"
-                                        class="autocomplete-results shadow"
-                                        :style="autoCompletePosition(metadataDisplay[headIndex].value)"
-                                        v-if="autoCompleteResults[metadataDisplay[headIndex].value].length > 0"
-                                    >
-                                        <li
-                                            tabindex="-1"
-                                            v-for="(result, i) in autoCompleteResults[metadataDisplay[headIndex].value]"
-                                            :key="result"
-                                            @click="setResult(result, metadataDisplay[headIndex].value)"
-                                            class="autocomplete-result"
-                                            :class="{
-                                                'is-active': i === arrowCounters[metadataDisplay[headIndex].value],
-                                            }"
-                                            v-html="result"
-                                        ></li>
-                                    </ul>
+                        <div id="head-search-container" class="px-3 pt-1 pb-3" v-if="dictionary">
+                            <div class="input-group" id="head-group">
+                                <div class="input-group-prepend">
+                                    <b-button variant="outline-secondary">{{
+                                        metadataDisplay[headIndex].label
+                                    }}</b-button>
                                 </div>
-                            </b-col>
-                        </b-row>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    :name="metadataDisplay[headIndex].value"
+                                    :placeholder="metadataDisplay[headIndex].example"
+                                    v-model="metadataValues.head"
+                                    @input="onChange('head')"
+                                    @keydown.down="onArrowDown(metadataDisplay[headIndex].value)"
+                                    @keydown.up="onArrowUp(metadataDisplay[headIndex].value)"
+                                    @keyup.enter="onEnter(metadataDisplay[headIndex].value)"
+                                />
+                                <ul
+                                    :id="'autocomplete-' + metadataDisplay[headIndex].value"
+                                    class="autocomplete-results shadow"
+                                    :style="autoCompletePosition(metadataDisplay[headIndex].value)"
+                                    v-if="autoCompleteResults[metadataDisplay[headIndex].value].length > 0"
+                                >
+                                    <li
+                                        tabindex="-1"
+                                        v-for="(result, i) in autoCompleteResults[metadataDisplay[headIndex].value]"
+                                        :key="result"
+                                        @click="setResult(result, metadataDisplay[headIndex].value)"
+                                        class="autocomplete-result"
+                                        :class="{
+                                            'is-active': i === arrowCounters[metadataDisplay[headIndex].value],
+                                        }"
+                                        v-html="result"
+                                    ></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="search-buttons">
+                            <b-button-group>
+                                <b-button type="reset" id="reset_form" variant="outline-secondary" @click="onReset()"
+                                    >Clear</b-button
+                                >
+                                <b-button
+                                    type="button"
+                                    id="show-search-form"
+                                    variant="secondary"
+                                    @click="toggleForm()"
+                                    >{{ searchOptionsButton }}</b-button
+                                >
+                            </b-button-group>
+                        </div>
                     </div>
                     <transition name="slide-fade">
                         <div id="search-elements" v-if="formOpen" class="pl-3 pr-3 pb-3 shadow">
@@ -769,7 +768,7 @@ export default {
 <style scoped>
 .input-group,
 #search-elements h6 {
-    max-width: 800px;
+    max-width: 700px;
 }
 #report .btn {
     font-variant: small-caps;
@@ -794,7 +793,8 @@ export default {
 }
 
 #search-elements .btn-outline-secondary,
-#q-group .btn-outline-secondary {
+#q-group .btn-outline-secondary,
+#head-group .btn {
     pointer-events: none; /*disable hover effect*/
 }
 
@@ -869,8 +869,31 @@ export default {
     padding-left: 20px;
     padding-right: 20px;
 }
+#search-buttons {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 51;
+}
+
+@media (max-width: 992px) {
+    #search-buttons {
+        position: initial;
+        margin-bottom: 1rem;
+        margin-left: 0;
+        margin-right: 0;
+        text-align: center;
+    }
+    #search-elements {
+        margin-top: -1rem;
+    }
+}
 
 @media (max-width: 768px) {
+    #method-args {
+        display: block;
+        margin-left: -0.5rem;
+    }
     #collocation-options .row {
         margin-left: -15px;
     }
@@ -880,80 +903,6 @@ export default {
 
 #search_elements {
     border-top-width: 0px;
-}
-
-/*Responsiveness*/
-
-@media (min-width: 1201px) {
-    #initial-form,
-    #search-elements {
-        /* left: 100px; */
-        right: 100px;
-    }
-}
-
-@media (max-width: 1200px) {
-    #initial-form,
-    #search-elements {
-        /* left: 70px; */
-        right: 70px;
-    }
-}
-
-@media (max-width: 992px) {
-    #search-buttons {
-        padding-top: 15px;
-    }
-    #search_terms > div:nth-of-type(2),
-    #head-search-container .metadata_fields div:nth-of-type(2) {
-        padding-right: 20px;
-        padding-left: 20px;
-    }
-    #head-search-container #metadata-fields #initial-form,
-    #search-elements {
-        /* left: 40px; */
-        right: 40px;
-    }
-    #philologic_response {
-        margin-top: 170px;
-    }
-    #search-elements {
-        margin-top: 148px;
-    }
-    #search-elements.dico {
-        margin-top: 217px;
-    }
-    .dico-margin {
-        margin-top: 245px !important;
-    }
-}
-
-@media (max-width: 768px) {
-    #right-act-on-report .btn-group {
-        float: left !important;
-    }
-    #search-elements {
-        padding-right: 20px;
-        margin-top: 160px;
-    }
-    #search-elements.dico {
-        margin-top: 248px;
-    }
-    #philologic_response {
-        margin-top: 180px;
-    }
-    #initial-form,
-    #search-elements {
-        left: 0px;
-        right: 0px;
-    }
-    #kwic,
-    #time_series {
-        display: none;
-    }
-    .dico-margin {
-        margin-top: 270px !important;
-    }
 }
 
 .select {

@@ -7,7 +7,7 @@
             >
         </div>
         <b-row>
-            <b-col cols="12" md="8" xl="8" :class="{ 'col-md-12': !showFacets }">
+            <b-col cols="12" md="8" xl="9" :class="{ 'col-md-12': !showFacets }">
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
                     <b-card
                         no-body
@@ -43,7 +43,7 @@
                     </b-card>
                 </transition-group>
             </b-col>
-            <b-col md="4" xl="4" v-if="showFacets">
+            <b-col md="4" xl="3" v-if="showFacets">
                 <facets></facets>
             </b-col>
         </b-row>
