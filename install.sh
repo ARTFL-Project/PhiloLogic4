@@ -18,7 +18,7 @@ cd ..;
 PYTHON_INSTALL="\n## INSTALLING PYTHON LIBRARY ##"
 echo "$PYTHON_INSTALL"
 cd python;
-sudo -H pip3 install --upgrade .
+sudo -H python3 -m pip install --upgrade .
 sudo mkdir -p /etc/philologic/
 
 cd ..;
