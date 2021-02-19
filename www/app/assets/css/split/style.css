@@ -299,9 +299,9 @@ s {
     color: #EF4500;
     font-weight: 400;
 }
-.passage-highlight {
-    display: inline-block;
-    color: royalblue;
+[class^="passage-"] {
+    background-color: #1e90ff;
+    color: #fff;
 }
 
 #book-page .highlight {
