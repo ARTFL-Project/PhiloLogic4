@@ -400,6 +400,11 @@ def format_text_object(
                     el.tag = "a"
                     el.attrib["href"] = make_absolute_query_link(config, [], **params)
                     del el.attrib["target"]
+                elif el.attrib["type"] == "url":
+                    el.tag = "a"
+                    el.attrib["href"] = el.attrib["type"]
+                    el.attrib["target"] = "_blank"
+                    del el.attrib["type"]
             elif el.tag == "note":
                 # endnotes
                 in_end_note = False
