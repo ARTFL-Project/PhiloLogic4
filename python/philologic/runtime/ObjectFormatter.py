@@ -402,7 +402,7 @@ def format_text_object(
                     del el.attrib["target"]
                 elif el.attrib["type"] == "url":
                     el.tag = "a"
-                    el.attrib["href"] = el.attrib["type"]
+                    el.attrib["href"] = el.attrib["url"]
                     el.attrib["target"] = "_blank"
                     del el.attrib["type"]
             elif el.tag == "note":
