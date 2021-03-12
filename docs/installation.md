@@ -2,7 +2,7 @@
 title: Installation
 ---
 
-*NEW*: We now provide a docker image for PhiloLogic artfl/philologic. You can alternatively build your own docker image from the Dockerfile provided in the PhiloLogic distribution.
+<b>NEW</b>: We now provide a docker image for PhiloLogic artfl/philologic. You can alternatively build your own docker image from the Dockerfile provided in the PhiloLogic distribution.
 
 Installing PhiloLogic consists of two steps:
 
