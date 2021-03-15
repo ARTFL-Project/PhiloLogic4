@@ -95,7 +95,6 @@ def group_by_range(request_range, request, config):
     results = []
     if is_date:
         content_type = "date"
-        query_range = set(range(int(request_range[0]), int(request_range[1])))
         query = 'select * from toms where philo_type="doc" and cast(%s as integer) between ? and ?' % metadata_queried
         cursor.execute(query, (int(request_range[0]), int(request_range[1])))
         content = {}
