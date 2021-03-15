@@ -3,13 +3,16 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-from philologic.runtime import group_by_metadata, group_by_range
 
 import sys
 
 sys.path.append("..")
 import custom_functions
 
+try:
+    from custom_functions import group_by_metadata, group_by_range
+except ImportError:
+    from philologic.runtime import group_by_metadata, group_by_range
 try:
     from custom_functions import WebConfig
 except ImportError:
