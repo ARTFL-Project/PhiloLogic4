@@ -9,6 +9,7 @@ description, you can refer to [our blog](<http://artfl.blogspot.com>).
 ### Documentation
 
 -   [**Installation**](installation.md)
+-   [**Running PhiloLogic in Docker**](docker.md)
 -   [**Database Loading**](database_loading.md)
 -   [**Configuring the Web Application**](configure_web_app.md)
 -   [**Query Syntax**](query_syntax.md)
