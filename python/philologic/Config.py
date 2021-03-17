@@ -232,16 +232,17 @@ WEB_CONFIG_DEFAULTS = {
         "comment": "\n".join(
             [
                 "# The metadata_input_style variable defines whether to use an text input field, a dropdown menu or checkboxes for any given",
-                '# metadata field. All fields are set by default to text. Note that dropdowns only allow you to select one value, whereas checkboxes allow you to select more than one.'
-                '# If using a dropdown menu, you need to set it to "dropdown" and populate the metadata_dropdown_values variable. If using checkboxes, set to "checkboxes"',
+                "# metadata field. All fields are set by default to text. Note that dropdowns only allow you to select one value, whereas checkboxes allow you to select more than one."
+                '# If using a dropdown menu, you need to set it to "dropdown" and populate the metadata_choice_values variable. If using checkboxes, set to "checkboxes", and populate'
+                "# the metadata_choice_values variable",
             ]
         ),
     },
-    "metadata_dropdown_values": {
+    "metadata_choice_values": {
         "value": {},
         "comment": "\n".join(
             [
-                "# The metadata_dropdown_values variable defines what values to display in the metadata dropdown. It defaults to an empty dict.",
+                "# The metadata_choice_values variable defines what values to display in the metadata dropdown. It defaults to an empty dict.",
                 "# If no value is provided for a metadata field which has an input type of dropdown, no value will be displayed. You should",
                 "# provide a list of strings with labels and values for metadata.",
                 """# ex: {"title": [{"label": "Contrat Social", "value": "Du Contrat Social"}, {"label": "Emile", "value": "Emile, ou de l'éducation"}]}""",
