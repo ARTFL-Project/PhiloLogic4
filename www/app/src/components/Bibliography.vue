@@ -28,32 +28,30 @@
                 </transition-group>
             </b-col>
             <b-col cols="12" md="7" xl="8" v-if="philoConfig.dictionary_bibliography && results.result_type != 'doc'">
-                <b-card
-                    no-body
-                    class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm"
-                    v-for="(group, groupKey) in results.results"
-                    :key="groupKey"
-                >
-                    <b-list-group flush>
-                        <b-list-group-item v-for="(result, index) in group" :key="index">
+                <b-list-group flush v-for="(group, groupKey) in results.results" :key="groupKey">
+                    <b-list-group-item
+                        v-for="(result, index) in group"
+                        :key="index"
+                        class="p-0"
+                        style="border-width: 0"
+                    >
+                        <b-card no-body class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm">
                             <div class="citation-dico-container">
                                 <span class="cite" :data-id="result.philo_id.join(' ')">
-                                    <span class="number" style="margin-left: -1.25rem; margin-top: -5rem">{{
-                                        results.description.start + index
-                                    }}</span>
+                                    <span class="number">{{ results.description.start + index }}</span>
                                     <citations :citation="result.citation"></citations>
                                 </span>
                             </div>
                             <div
-                                class="philologic_context text-content-area pt-4 px-1 text-justify"
+                                class="philologic_context text-content-area pt-2 px-2 text-justify"
                                 select-word
                                 :position="result.position"
                             >
                                 <div v-html="result.context"></div>
                             </div>
-                        </b-list-group-item>
-                    </b-list-group>
-                </b-card>
+                        </b-card>
+                    </b-list-group-item>
+                </b-list-group>
             </b-col>
             <b-col md="5" xl="4">
                 <facets></facets>
