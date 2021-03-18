@@ -49,20 +49,27 @@ def get_text_obj(obj, config, request, word_regex, note=False, images=True):
         byte_offsets = sorted([int(byte) - obj_start_byte for byte in request.byte])
     except ValueError:  ## request.byte contains an empty string
         byte_offsets = []
+    start_end_pairs = []
     if request.start_byte:
-        request.start_byte = request.start_byte - obj_start_byte
-        request.end_byte = request.end_byte - obj_start_byte
+        start_end_pairs = [(int(request.start_byte) - obj_start_byte, int(request.end_byte) - obj_start_byte)]
+    elif request.passages:
+        start_end_pairs = sorted(
+            [
+                (passage["start_byte"] - obj_start_byte, passage["end_byte"] - obj_start_byte)
+                for passage in request.passages
+            ]
+        )
     formatted_text, imgs = format_text_object(
         obj,
         raw_text,
         config,
         request,
         word_regex,
+        obj_start_byte,
         byte_offsets=byte_offsets,
         note=note,
         images=images,
-        start_byte=request.start_byte,
-        end_byte=request.end_byte,
+        start_end_pairs=start_end_pairs,
     )
     if images:
         return formatted_text, imgs

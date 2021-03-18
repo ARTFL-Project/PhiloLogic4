@@ -6,7 +6,7 @@ import os
 import re
 import sqlite3
 
-from lxml import etree
+from lxml import etree, html
 from philologic.runtime.DB import DB
 from philologic.runtime.FragmentParser import parse as FragmentParserParse
 from philologic.runtime.link import make_absolute_query_link
@@ -135,8 +135,8 @@ VALID_HTML_TAGS = set(
         "summary",
         "menuitem",
         "menu",
-        "start-highlight",
-        "end-highlight",
+        "start-passage",
+        "end-passage",
     ]
 )
 
@@ -282,7 +282,16 @@ def format_strip(text, word_regex, byte_offsets=None):
 
 
 def format_text_object(
-    obj, text, config, request, word_regex, byte_offsets=None, note=False, images=True, start_byte="", end_byte=""
+    obj,
+    text,
+    config,
+    request,
+    word_regex,
+    object_start_byte,
+    byte_offsets=None,
+    note=False,
+    images=True,
+    start_end_pairs=[],
 ):
     """Format text objects"""
     philo_id = obj.philo_id
@@ -293,20 +302,40 @@ def format_text_object(
             new_text += text[last_offset:b] + b"<philoHighlight/>"
             last_offset = b
         text = new_text + text[last_offset:]
-    if start_byte and end_byte:
-        text = (
-            text[:start_byte]
-            + b"<start-highlight/>"
-            + text[start_byte:end_byte]
-            + b"<end-highlight/>"
-            + text[end_byte:]
-        )
+    if start_end_pairs:
+        new_text = b""
+        last_offset = 0
+        count = -1
+        for start_byte, end_byte in start_end_pairs:
+            if last_offset >= end_byte:
+                continue
+            elif last_offset > start_byte:
+                start_byte = last_offset
+            count += 1
+            new_text += (
+                text[last_offset:start_byte]
+                + b'<span class="passage-marker" '
+                + f"""data-offsets="{start_byte+object_start_byte}-{end_byte+object_start_byte}" n="{count}">""".encode(
+                    "utf8"
+                )
+                + b"</span>"
+                + f"""<start-passage n="{count}"/>""".encode("utf8")
+                + text[start_byte:end_byte]
+                + f"""<end-passage n="{count}"/>""".encode("utf8")
+            )
+            last_offset = end_byte
+        text = new_text + text[last_offset:]
     current_obj_img = []
     current_graphic_img = []
     text = "<div>" + text.decode("utf8", "ignore") + "</div>"
     xml = FragmentParserParse(text)
     c = obj.db.dbh.cursor()
+    passage_number = None
+    tei_header = xml.find(".//teiHeader")
+    if tei_header is not None:
+        tei_header.getparent().remove(tei_header)
     for el in xml.iter():
+        is_page = False
         try:
             if el.tag.startswith("DIV"):
                 el.tag = el.tag.lower()
@@ -371,6 +400,11 @@ def format_text_object(
                     el.tag = "a"
                     el.attrib["href"] = make_absolute_query_link(config, [], **params)
                     del el.attrib["target"]
+                elif el.attrib["type"] == "url":
+                    el.tag = "a"
+                    el.attrib["href"] = el.attrib["url"]
+                    el.attrib["target"] = "_blank"
+                    del el.attrib["type"]
             elif el.tag == "note":
                 # endnotes
                 in_end_note = False
@@ -425,9 +459,10 @@ def format_text_object(
             elif el.tag == "img":
                 el.attrib["onerror"] = "this.style.display='none'"
             elif el.tag == "pb" and "n" in el.attrib:
+                is_page = True
                 el.tag = "span"
                 el.attrib["class"] = "xml-pb-image"
-                if config.page_images_url_root and "facs" in el.attrib or "id" in el.attrib:
+                if config.page_images_url_root and ("facs" in el.attrib or "id" in el.attrib):
                     if "facs" in el.attrib:
                         img = el.attrib["facs"]
                     else:
@@ -500,16 +535,82 @@ def format_text_object(
                     el.tail = el.tail[word_match.end() :]
                 el.tag = "span"
                 el.attrib["class"] = "highlight"
+            elif el.tag == "start-passage":
+                passage_number = el.attrib["n"]
+                el.tag = "span"
+                text_element_wrapper = create_element(
+                    f"""<span class="passage-{passage_number}" n="{passage_number}">{el.tail[:]}</span>"""
+                )
+                el.tail = ""
+                parent = el.getparent()
+                parent.insert(parent.index(el) + 1, text_element_wrapper)
+                parent.remove(el)
+                continue
+            elif el.tag == "end-passage":
+                el.tag = "span"
+                el.attrib["id"] = f"end-passage-{passage_number}"
+                # el.attrib["class"] = "passage-marker"
+                el.attrib["n"] = passage_number
+                passage_number = None
             if el.tag not in VALID_HTML_TAGS:
                 el = xml_to_html_class(el)
+            if passage_number is not None:
+                if is_page is False:
+                    if el.text:
+                        text_element_wrapper = create_element(
+                            f"""<span class="passage-{passage_number}" n="{passage_number}">{el.text[:]}</span>"""
+                        )
+                        el.text = ""
+                        el.insert(0, text_element_wrapper)
+                    if el.tail:
+                        text_element_wrapper = create_element(
+                            f"""<span class="passage-{passage_number}" n="{passage_number}">{el.tail[:]}</span>"""
+                        )
+                        el.tail = ""
+                        parent = el.getparent()
+                        parent.insert(parent.index(el) + 1, text_element_wrapper)
+                elif el.tail:
+                    text_element_wrapper = create_element(
+                        f"""<span class="passage-{passage_number}" n="{passage_number}">{el.tail[:]}</span>"""
+                    )
+                    el.tail = ""
+                    parent = el.getparent()
+                    parent.insert(parent.index(el) + 1, text_element_wrapper)
         except Exception as exception:
             pass
+
+    if start_end_pairs:
+        # Make sure we did not miss element tails
+        for el in xml.iter():
+            match = False
+            class_name = ""
+            n = ""
+            for child in el:
+                if "class" in child.attrib and child.attrib["class"].startswith("passage-"):
+                    if el.tail:
+                        match = True
+                        class_name = child.attrib["class"]
+                        n = child.attrib["n"]
+                    if "id " in child.attrib and child.attrib["id"].startswith("end-passage-"):
+                        match = False
+            if match:
+                if isinstance(el.tail, str) and el.tail.strip():
+                    text_element_wrapper = create_element(f"""<span class="{class_name}" n="{n}">{el.tail[:]}</span>""")
+                    el.tail = ""
+                    parent = el.getparent()
+                    parent.insert(parent.index(el) + 1, text_element_wrapper)
+        # Make sure we do not have trailing spans after end marker
+        passages_done = set()
+        for el in xml.iter():
+            if "id" in el.attrib and el.attrib["id"].startswith("end-passage"):
+                passages_done.add(el.attrib["n"])
+                continue
+            if "class" in el.attrib and el.attrib["class"].startswith("passage") and el.attrib["n"] in passages_done:
+                del el.attrib["class"]
+                del el.attrib["n"]
+
     output = etree.tostring(xml).decode("utf8", "ignore")
     output = convert_entities(output)
-
-    # if start_byte and end_byte:  # for highlight whole passages
-    output = output.replace("<start-highlight></start-highlight>", '<div class="passage-highlight">')
-    output = output.replace("<end-highlight></end-highlight>", "</div>")
 
     if note:  ## Notes don't need to fetch images
         return (output, {})
@@ -683,3 +784,11 @@ def clean_tags(element, word_regex):
         text = element.text + text + element.tail
         return '<span class="highlight">' + element.text + text + "</span>" + element.tail
     return element.text + text + element.tail
+
+
+def create_element(content):
+    """Fail safe LXML element creation"""
+    try:
+        return etree.fromstring(content)
+    except:
+        return html.fromstring(content)

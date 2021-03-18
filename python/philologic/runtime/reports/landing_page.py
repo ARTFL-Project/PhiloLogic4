@@ -91,32 +91,50 @@ def group_by_range(request_range, request, config):
         pass
 
     cursor = db.dbh.cursor()
+    content = {}
+    results = []
     if is_date:
         content_type = "date"
-        query_range = set(range(int(request_range[0]), int(request_range[1])))
-        cursor.execute('select * from toms where philo_type="doc"')
+        query = 'select * from toms where philo_type="doc" and cast(%s as integer) between ? and ?' % metadata_queried
+        cursor.execute(query, (int(request_range[0]), int(request_range[1])))
+        content = {}
+        for doc in cursor:
+            year = doc[metadata_queried]
+            if year not in content:
+                content[year] = {"prefix": year, "results": []}
+            obj = db[doc["philo_id"]]
+            links = citation_links(db, config, obj)
+            citation = citations(obj, links, config, report="landing_page", citation_type=citation_types)
+            try:
+                normalized_field = unaccent.smash_accents(doc["title"]).lower()
+            except:
+                normalized_field = None
+            content[year]["results"].append(
+                {
+                    "metadata": get_all_metadata(db, doc),
+                    "citation": citation,
+                    "count": 1,
+                    "normalized": normalized_field,
+                }
+            )
+        results = [
+            {"prefix": prefix, "results": sorted(result_set["results"], key=lambda x: x["normalized"])}
+            for prefix, result_set in sorted(content.items(), key=lambda x: int(x[0]))
+        ]
     else:
         content_type = metadata_queried
         query_range = set(range(ord(request_range[0]), ord(request_range[1]) + 1))  # Ordinal avoids unicode issues...
         cursor.execute('select *, count(*) as count from toms where philo_type="doc" group by %s' % metadata_queried)
-    try:
-        cursor.execute('select *, count(*) as count from toms where philo_type="doc" group by %s' % metadata_queried)
-    except sqlite3.OperationalError:
-        return json.dumps({"display_count": request.display_count, "content_type": content_type, "content": []})
-    content = {}
-    date_count = defaultdict(int)
-    for doc in cursor:
-        normalized_test_value = ""
-        if doc[metadata_queried] is None:
-            continue
-        if is_date:
-            try:
-                initial = int(doc[metadata_queried])
-                test_value = initial
-                date_count[initial] += 1
-            except:
+        try:
+            cursor.execute(
+                'select *, count(*) as count from toms where philo_type="doc" group by %s' % metadata_queried
+            )
+        except sqlite3.OperationalError:
+            return json.dumps({"display_count": request.display_count, "content_type": content_type, "content": []})
+        for doc in cursor:
+            normalized_test_value = ""
+            if doc[metadata_queried] is None:
                 continue
-        else:
             try:
                 initial_letter = doc[metadata_queried][0].lower()
             except IndexError:
@@ -130,31 +148,17 @@ def group_by_range(request_range, request, config):
             except TypeError:
                 continue
             initial = initial_letter.upper()
-        # Are we within the range?
-        if test_value in query_range or normalized_test_value in query_range:
-            if normalized_test_value in query_range:
-                initial = "".join(
-                    [i for i in unicodedata.normalize("NFKD", initial_letter) if not unicodedata.combining(i)]
-                ).upper()
-            obj = db[doc["philo_id"]]
-            links = citation_links(db, config, obj)
-            citation = citations(obj, links, config, report="landing_page", citation_type=citation_types)
-            if initial not in content:
-                content[initial] = []
-            if is_date:
-                try:
-                    normalized_field = unaccent.smash_accents(doc["title"]).lower()
-                except:
-                    normalized_field = None
-                content[initial].append(
-                    {
-                        "metadata": get_all_metadata(db, doc),
-                        "citation": citation,
-                        "count": date_count[initial],
-                        "normalized": normalized_field,
-                    }
-                )
-            else:
+            # Are we within the range?
+            if test_value in query_range or normalized_test_value in query_range:
+                if normalized_test_value in query_range:
+                    initial = "".join(
+                        [i for i in unicodedata.normalize("NFKD", initial_letter) if not unicodedata.combining(i)]
+                    ).upper()
+                obj = db[doc["philo_id"]]
+                links = citation_links(db, config, obj)
+                citation = citations(obj, links, config, report="landing_page", citation_type=citation_types)
+                if initial not in content:
+                    content[initial] = []
                 content[initial].append(
                     {
                         "metadata": get_all_metadata(db, doc),
@@ -163,9 +167,10 @@ def group_by_range(request_range, request, config):
                         "normalized": unaccent.smash_accents(doc[metadata_queried]).lower(),
                     }
                 )
-    results = []
-    for prefix, result_set in sorted(content.items(), key=itemgetter(0)):
-        results.append({"prefix": prefix, "results": sorted(result_set, key=lambda x: x["normalized"])})
+        results = [
+            {"prefix": prefix, "results": sorted(result_set, key=lambda x: x["normalized"])}
+            for prefix, result_set in sorted(content.items(), key=lambda x: x[0])
+        ]
     return json.dumps({"display_count": request.display_count, "content_type": content_type, "content": results})
 
 

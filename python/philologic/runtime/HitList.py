@@ -5,8 +5,6 @@ import time
 import struct
 from .HitWrapper import HitWrapper
 from philologic.utils import smash_accents
-import sys
-
 
 obj_dict = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
 
@@ -50,6 +48,16 @@ class HitList(object):
         self.done = False
         self.update()
         if self.sort_order:
+            self.sorted_hitlist = []
+            iter_position = 0
+            self.seek(iter_position)
+            while True:
+                try:
+                    hit = self.readhit(iter_position)
+                except IndexError as IOError:
+                    break
+                self.sorted_hitlist.append(hit)
+                iter_position += 1
             metadata_types = set([dbh.locals["metadata_types"][i] for i in self.sort_order])
             if "div" in metadata_types:
                 metadata_types.remove("div")
@@ -70,16 +78,6 @@ class HitList(object):
                 sql_row = dict(i)
                 philo_id = tuple(int(s) for s in sql_row["philo_id"].split() if int(s))
                 metadata[philo_id] = [smash_accents(sql_row[m] or "ZZZZZ") for m in sort_order]
-            self.sorted_hitlist = []
-            iter_position = 0
-            self.seek(iter_position)
-            while True:
-                try:
-                    hit = self.readhit(iter_position)
-                except IndexError as IOError:
-                    break
-                self.sorted_hitlist.append(hit)
-                iter_position += 1
 
             def sort_by_metadata(philo_id):
                 while philo_id:
@@ -89,7 +87,7 @@ class HitList(object):
                         if len(philo_id) == 1:
                             break
                         philo_id = philo_id[:-1]
-                return "ZZZZZ"
+                return ["ZZZZZ"]
 
             self.sorted_hitlist.sort(key=sort_by_metadata, reverse=False)
 
@@ -202,13 +200,13 @@ class HitList(object):
             offset = self.hitsize * n
             self.fh.seek(offset)
             self.position = n
-        # print(n, file=sys.stderr)
         buffer = self.fh.read(self.hitsize)
         self.position += 1
         return struct.unpack(self.format, buffer)
 
     def get_total_word_count(self):
         philo_ids = []
+        total_count = 0
         iter_position = 0
         self.seek(iter_position)
         while True:
@@ -218,12 +216,21 @@ class HitList(object):
             except IndexError as IOError:
                 break
             iter_position += 1
-        cursor = self.dbh.dbh.cursor()
-        cursor.execute(
-            f"SELECT SUM(word_count) FROM toms WHERE philo_id IN ({', '.join('?' for _ in range(len(self)))})",
-            tuple(" ".join(map(str, philo_id)) for philo_id in philo_ids),
-        )
-        return cursor.fetchone()[0]
+        c = self.dbh.dbh.cursor()
+        query = "SELECT SUM(word_count) FROM toms WHERE "
+        ids = []
+        for id in philo_ids:
+            ids.append('philo_id="%s"' % " ".join([str(i) for i in id]))
+            if len(ids) == 999:  # max expression tree in sqlite is 1000
+                clause = " OR ".join(ids)
+                c.execute(query + clause)
+                total_count += int(c.fetchone()[0])
+                ids = []
+        if ids:
+            clause = " OR ".join(ids)
+            c.execute(query + clause)
+            total_count += int(c.fetchone()[0])
+        return total_count
 
 
 # TODO: check if we still need this...
