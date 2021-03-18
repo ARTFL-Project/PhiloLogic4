@@ -117,6 +117,7 @@ export default {
         },
     },
     created() {
+        console.log(this.$route.fullPath);
         document.title = this.$philoConfig.dbname.replace(/<[^>]+>/, "");
         if (this.$philoConfig.access_control) {
             let promise = this.checkAccessAuthorization();

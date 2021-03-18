@@ -9,11 +9,7 @@
                 </div>
             </b-col>
         </b-row>
-        <b-row
-            id="toc-wrapper"
-            class="text-center mt-4"
-            v-if="navBar === true || loading === false"
-        >
+        <b-row id="toc-wrapper" class="text-center mt-4" v-if="navBar === true || loading === false">
             <div id="toc-top-bar">
                 <div id="nav-buttons" v-scroll="handleScroll">
                     <b-button id="back-to-top" size="sm" @click="backToTop()">
@@ -21,21 +17,15 @@
                         <span class="d-xs-inline-block d-sm-none">Top</span>
                     </b-button>
                     <b-button-group size="sm" style="pointer-events: all">
-                        <b-button
-                            disabled="disabled"
-                            id="prev-obj"
-                            @click="goToTextObject(textObject.prev)"
-                        >&lt;</b-button>
-                        <b-button
-                            id="show-toc"
-                            disabled="disabled"
-                            @click="toggleTableOfContents()"
-                        >Table of contents</b-button>
-                        <b-button
-                            disabled="disabled"
-                            id="next-obj"
-                            @click="goToTextObject(textObject.next)"
-                        >&gt;</b-button>
+                        <b-button disabled="disabled" id="prev-obj" @click="goToTextObject(textObject.prev)"
+                            >&lt;</b-button
+                        >
+                        <b-button id="show-toc" disabled="disabled" @click="toggleTableOfContents()"
+                            >Table of contents</b-button
+                        >
+                        <b-button disabled="disabled" id="next-obj" @click="goToTextObject(textObject.next)"
+                            >&gt;</b-button
+                        >
                     </b-button-group>
                     <a
                         id="report-error"
@@ -43,7 +33,8 @@
                         target="_blank "
                         :href="philoConfig.report_error_link"
                         v-if="philoConfig.report_error_link != ''"
-                    >Report Error</a>
+                        >Report Error</a
+                    >
                 </div>
                 <div id="toc">
                     <div id="toc-titlebar" class="d-none">
@@ -65,23 +56,15 @@
                                     @click="loadBefore()"
                                 ></b-button>
                             </div>
-                            <div
-                                v-for="(element, tocIndex) in tocElementsToDisplay"
-                                :key="tocIndex"
-                            >
+                            <div v-for="(element, tocIndex) in tocElementsToDisplay" :key="tocIndex">
                                 <div
                                     :id="element.philo_id"
                                     :class="'toc-' + element.philo_type"
                                     @click="textObjectSelection(element.philo_id, tocIndex)"
                                 >
                                     <span :class="'bullet-point-' + element.philo_type"></span>
-                                    <a
-                                        :class="{ 'current-obj': element.philo_id === currentPhiloId }"
-                                        href
-                                    >
-                                        {{
-                                        element.label
-                                        }}
+                                    <a :class="{ 'current-obj': element.philo_id === currentPhiloId }" href>
+                                        {{ element.label }}
                                     </a>
                                 </div>
                             </div>
@@ -97,10 +80,9 @@
                 </div>
             </div>
         </b-row>
-        <div
-            style="font-size: 80%; text-align: center;"
-            v-if="philoConfig.dictionary_lookup != ''"
-        >To look up a word in a dictionary, select the word with your mouse and press 'd' on your keyboard.</div>
+        <div style="font-size: 80%; text-align: center" v-if="philoConfig.dictionary_lookup != ''">
+            To look up a word in a dictionary, select the word with your mouse and press 'd' on your keyboard.
+        </div>
         <b-row id="all-content" loading="loading">
             <b-col
                 cols="12"
@@ -191,7 +173,6 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
-import searchArguments from "./SearchArguments";
 import { EventBus } from "../main.js";
 import Gallery from "blueimp-gallery";
 import "blueimp-gallery/css/blueimp-gallery.min.css";
@@ -200,7 +181,6 @@ export default {
     name: "textNavigation",
     components: {
         citations,
-        searchArguments
     },
     computed: {
         ...mapFields({
@@ -211,14 +191,14 @@ export default {
             navBar: "navBar",
             tocElements: "tocElements",
             byte: "byte",
-            searching: "searching"
+            searching: "searching",
         }),
-        tocElementsToDisplay: function() {
+        tocElementsToDisplay: function () {
             return this.tocElements.elements.slice(this.start, this.end);
         },
         tocHeight() {
             return `max-height: ${window.innerHeight - 200}`;
-        }
+        },
     },
     data() {
         return {
@@ -243,7 +223,7 @@ export default {
             navButtonPosition: 0,
             navBarVisible: false,
             timeToRender: 0,
-            gallery: null
+            gallery: null,
         };
     },
     created() {
@@ -255,28 +235,20 @@ export default {
         let tocButton = document.querySelector("#show-toc");
         this.navButtonPosition = tocButton.getBoundingClientRect().top;
     },
-    updated: function() {
+    updated: function () {
         if (this.searching) {
             // only trigger at first render
             this.$nextTick(() => {
                 if (this.byte != "") {
-                    this.$scrollTo(
-                        document.getElementsByClassName("highlight")[0],
-                        1000,
-                        {
-                            easing: "ease-out",
-                            offset: -150
-                        }
-                    );
+                    this.$scrollTo(document.getElementsByClassName("highlight")[0], 1000, {
+                        easing: "ease-out",
+                        offset: -150,
+                    });
                 } else if (this.start_byte != "") {
-                    this.$scrollTo(
-                        document.getElementsByClassName("start-highlight")[0],
-                        1000,
-                        {
-                            easing: "ease-out",
-                            offset: -150
-                        }
-                    );
+                    this.$scrollTo(document.getElementsByClassName("start-highlight")[0], 1000, {
+                        easing: "ease-out",
+                        offset: -150,
+                    });
                 }
 
                 this.setUpGallery();
@@ -308,19 +280,17 @@ export default {
             }
             let navigationParams = {
                 report: "navigation",
-                philo_id: this.philoID
+                philo_id: this.philoID,
             };
             if (this.start_byte !== "") {
                 navigationParams.start_byte = this.start_byte;
                 navigationParams.end_byte = this.end_byte;
             }
-            let urlQuery = `${byteString}&${this.paramsToUrlString(
-                navigationParams
-            )}`;
+            let urlQuery = `${byteString}&${this.paramsToUrlString(navigationParams)}`;
             this.timeToRender = new Date().getTime();
             this.$http
                 .get(`${this.$dbUrl}/reports/navigation.py?${urlQuery}`)
-                .then(response => {
+                .then((response) => {
                     this.textObject = response.data;
                     this.textNavigationCitation = response.data.citation;
                     this.navBar = true;
@@ -354,7 +324,7 @@ export default {
                     }
                     this.setUpNavBar();
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.debug(this, error);
                     this.loading = false;
                 });
@@ -372,12 +342,12 @@ export default {
                         if (img.length == 2) {
                             this.beforeObjImgs.push([
                                 `${this.philoConfig.page_images_url_root}/${img[0]}`,
-                                `${this.philoConfig.page_images_url_root}/${img[1]}`
+                                `${this.philoConfig.page_images_url_root}/${img[1]}`,
                             ]);
                         } else {
                             this.beforeObjImgs.push([
                                 `${this.philoConfig.page_images_url_root}/${img[0]}`,
-                                `${this.philoConfig.page_images_url_root}/${img[0]}`
+                                `${this.philoConfig.page_images_url_root}/${img[0]}`,
                             ]);
                         }
                     } else {
@@ -391,12 +361,12 @@ export default {
                         if (img.length == 2) {
                             this.afterObjImgs.push([
                                 `${this.philoConfig.page_images_url_root}/${img[0]}`,
-                                `${this.philoConfig.page_images_url_root}/${img[1]}`
+                                `${this.philoConfig.page_images_url_root}/${img[1]}`,
                             ]);
                         } else {
                             this.afterObjImgs.push([
                                 `${this.philoConfig.page_images_url_root}/${img[0]}`,
-                                `${this.philoConfig.page_images_url_root}/${img[0]}`
+                                `${this.philoConfig.page_images_url_root}/${img[0]}`,
                             ]);
                         }
                     }
@@ -417,12 +387,12 @@ export default {
                         if (img.length == 2) {
                             this.beforeGraphicsImgs.push([
                                 `${this.philoConfig.page_images_url_root}/${img[0]}`,
-                                `${this.philoConfig.page_images_url_root}/${img[1]}`
+                                `${this.philoConfig.page_images_url_root}/${img[1]}`,
                             ]);
                         } else {
                             this.beforeGraphicsImgs.push([
                                 `${this.philoConfig.page_images_url_root}/${img[0]}`,
-                                `${this.philoConfig.page_images_url_root}/${img[0]}`
+                                `${this.philoConfig.page_images_url_root}/${img[0]}`,
                             ]);
                         }
                     } else {
@@ -436,12 +406,12 @@ export default {
                         if (img.length == 2) {
                             this.afterGraphicsImgs.push([
                                 `${this.philoConfig.page_images_url_root}/${img[0]}`,
-                                `${this.philoConfig.page_images_url_root}/${img[1]}`
+                                `${this.philoConfig.page_images_url_root}/${img[1]}`,
                             ]);
                         } else {
                             this.afterGraphicsImgs.push([
                                 `${this.philoConfig.page_images_url_root}/${img[0]}`,
-                                `${this.philoConfig.page_images_url_root}/${img[0]}`
+                                `${this.philoConfig.page_images_url_root}/${img[0]}`,
                             ]);
                         }
                     }
@@ -457,10 +427,10 @@ export default {
                 this.$http
                     .get(`${this.$dbUrl}/scripts/get_table_of_contents.py`, {
                         params: {
-                            philo_id: this.currentPhiloId
-                        }
+                            philo_id: this.currentPhiloId,
+                        },
                     })
-                    .then(response => {
+                    .then((response) => {
                         let tocElements = response.data.toc;
                         this.start = response.data.current_obj_position - 100;
                         if (this.start < 0) {
@@ -472,19 +442,19 @@ export default {
                             docId: philoId.split(" ")[0],
                             elements: tocElements,
                             start: this.start,
-                            end: this.end
+                            end: this.end,
                         };
                         let tocButton = document.querySelector("#show-toc");
                         tocButton.removeAttribute("disabled");
                         tocButton.classList.remove("disabled");
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         this.debug(this, error);
                     });
             } else {
                 this.start = this.tocElements.start;
                 this.end = this.tocElements.end;
-                this.$nextTick(function() {
+                this.$nextTick(function () {
                     let tocButton = document.querySelector("#show-toc");
                     tocButton.removeAttribute("disabled");
                     tocButton.classList.remove("disabled");
@@ -493,48 +463,30 @@ export default {
         },
         setUpGallery() {
             // Image Gallery handling
-            for (let imageType of [
-                "page-image-link",
-                "inline-img",
-                "external-img"
-            ]) {
-                Array.from(document.getElementsByClassName(imageType)).forEach(
-                    item => {
-                        item.addEventListener("click", event => {
-                            event.preventDefault();
-                            let target = event.srcElement;
-                            this.gallery = Gallery(
-                                [
-                                    ...document.getElementsByClassName(
-                                        imageType
-                                    )
-                                ].map(
-                                    item =>
-                                        item.getAttribute("href") ||
-                                        item.getAttribute("src")
-                                ),
-                                {
-                                    index: Array.from(
-                                        document.getElementsByClassName(
-                                            imageType
-                                        )
-                                    ).indexOf(target),
-                                    continuous: false,
-                                    thumbnailIndicators: false
-                                }
-                            );
-                        });
-                    }
-                );
-                document
-                    .getElementById("full-size-image")
-                    .addEventListener("click", () => {
-                        let imageIndex = this.gallery.getIndex();
-                        let img = Array.from(
-                            document.getElementsByClassName(imageType)
-                        )[imageIndex].getAttribute("large-img");
-                        window.open(img);
+            for (let imageType of ["page-image-link", "inline-img", "external-img"]) {
+                Array.from(document.getElementsByClassName(imageType)).forEach((item) => {
+                    item.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        let target = event.srcElement;
+                        this.gallery = Gallery(
+                            [...document.getElementsByClassName(imageType)].map(
+                                (item) => item.getAttribute("href") || item.getAttribute("src")
+                            ),
+                            {
+                                index: Array.from(document.getElementsByClassName(imageType)).indexOf(target),
+                                continuous: false,
+                                thumbnailIndicators: false,
+                            }
+                        );
                     });
+                });
+                document.getElementById("full-size-image").addEventListener("click", () => {
+                    let imageIndex = this.gallery.getIndex();
+                    let img = Array.from(document.getElementsByClassName(imageType))[imageIndex].getAttribute(
+                        "large-img"
+                    );
+                    window.open(img);
+                });
             }
         },
         loadBefore() {
@@ -554,13 +506,9 @@ export default {
             } else {
                 this.tocOpen = true;
                 this.$nextTick(() => {
-                    this.$scrollTo(
-                        document.querySelector(".current-obj"),
-                        500,
-                        {
-                            container: document.querySelector("#toc-content")
-                        }
-                    );
+                    this.$scrollTo(document.querySelector(".current-obj"), 500, {
+                        container: document.querySelector("#toc-content"),
+                    });
                 });
             }
         },
@@ -584,26 +532,20 @@ export default {
             this.tocElements = {
                 ...this.tocElements,
                 start: newStart,
-                end: this.tocElements.end - index + 100
+                end: this.tocElements.end - index + 100,
             };
             this.goToTextObject(philoId);
         },
         setUpNavBar() {
             let prevButton = document.querySelector("#prev-obj");
             let nextButton = document.querySelector("#next-obj");
-            if (
-                this.textObject.next === "" ||
-                typeof this.textObject.next === "undefined"
-            ) {
+            if (this.textObject.next === "" || typeof this.textObject.next === "undefined") {
                 nextButton.classList.add("disabled");
             } else {
                 nextButton.removeAttribute("disabled");
                 nextButton.classList.remove("disabled");
             }
-            if (
-                this.textObject.prev === "" ||
-                typeof this.textObject.prev === "undefined"
-            ) {
+            if (this.textObject.prev === "" || typeof this.textObject.prev === "undefined") {
                 prevButton.classList.add("disabled");
             } else {
                 prevButton.removeAttribute("disabled");
@@ -657,8 +599,8 @@ export default {
                 let link = `${this.philoConfig.dictionary_lookup}?docyear=${range}&strippedhw=${selection}`;
                 window.open(link);
             }
-        }
-    }
+        },
+    },
 };
 </script>
 <style scoped>

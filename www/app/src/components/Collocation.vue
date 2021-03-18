@@ -41,16 +41,12 @@
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
-import searchArguments from "./SearchArguments";
-import ExportResults from "./ExportResults";
 import ResultsSummary from "./ResultsSummary";
 import { EventBus } from "../main.js";
 
 export default {
     name: "collocation",
     components: {
-        searchArguments,
-        ExportResults,
         ResultsSummary,
     },
     computed: {

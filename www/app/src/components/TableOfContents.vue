@@ -43,13 +43,11 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
-import searchArguments from "./SearchArguments";
 
 export default {
     name: "tableOfContents",
     components: {
         citations,
-        searchArguments,
     },
     computed: {
         ...mapFields({

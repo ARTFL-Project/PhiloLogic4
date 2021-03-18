@@ -30,16 +30,12 @@
 <script>
 import Chart from "chart.js/dist/Chart.min.js";
 import { mapFields } from "vuex-map-fields";
-import searchArguments from "./SearchArguments";
-import ExportResults from "./ExportResults";
 import ResultsSummary from "./ResultsSummary";
 import { EventBus } from "../main.js";
 
 export default {
     name: "timeSeries",
     components: {
-        searchArguments,
-        ExportResults,
         ResultsSummary,
     },
     computed: {

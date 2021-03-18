@@ -49,14 +49,12 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
-import searchArguments from "./SearchArguments";
 import ResultsSummary from "./ResultsSummary";
-// import virtualList from "vue-virtual-scroll-list";
 import InfiniteLoading from "vue-infinite-loading";
 
 export default {
     name: "aggregation",
-    components: { citations, searchArguments, ResultsSummary, InfiniteLoading },
+    components: { citations, ResultsSummary, InfiniteLoading },
     computed: {
         ...mapFields(["formData.report", "resultsLength", "aggregationCache", "searching", "currentReport"]),
         statsConfig() {
@@ -65,6 +63,7 @@ export default {
                     return fieldObject;
                 }
             }
+            return null;
         },
     },
     data() {

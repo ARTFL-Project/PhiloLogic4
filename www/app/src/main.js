@@ -7,6 +7,8 @@ import store from './store'
 import axios from 'axios'
 
 import appConfig from "../appConfig.json"
+// import baseUrl from '../baseURL'
+
 
 // Vue.config.productionTip = false
 Vue.prototype.$http = axios
