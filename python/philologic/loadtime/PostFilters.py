@@ -40,11 +40,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
                         row["philo_name"] = philo_name
                         row["philo_id"] = " ".join(fields[:depth])
                         row["philo_seq"] = sequence
-                        insert = "INSERT INTO %s (%s) values (%s);" % (
-                            table,
-                            ",".join(list(row.keys())),
-                            ",".join("?" for i in range(len(row))),
-                        )
+                        insert = f"INSERT INTO {table} ({','.join(list(row.keys()))}) values ({','.join('?' for i in range(len(row)))});"
                         try:
                             cursor.execute(insert, list(row.values()))
                         except sqlite3.OperationalError:
