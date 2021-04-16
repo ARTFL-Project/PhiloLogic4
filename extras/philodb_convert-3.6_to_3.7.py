@@ -104,4 +104,5 @@ if __name__ == "__main__":
 
     # TF-IDF generation
     loader = Loader(data_dir)
+    print(loader.destination)
     tfidf_per_word(loader)
