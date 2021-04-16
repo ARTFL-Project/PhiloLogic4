@@ -8,8 +8,9 @@ from collections import namedtuple
 import lz4.frame
 from philologic.loadtime.PostFilters import make_sentences_table, tfidf_per_word
 from philologic.runtime.DB import DB
+from philologic.Config import MakeWebConfig
 from tqdm import tqdm
-
+from black import format_str, FileMode
 
 Loader = namedtuple("Loader", "destination")
 
@@ -76,6 +77,23 @@ def generate_words_and_philo_ids(db_path):
             pbar.update()
 
 
+def get_time_series_dates(toms):
+    # Find default start and end dates for times series
+    with sqlite3.connect(toms_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT min(year), max(year) FROM toms")
+        min_year, max_year = cursor.fetchone()
+        try:
+            start_date = int(min_year)
+        except TypeError:
+            start_date: 0
+        try:
+            end_date = int(max_year)
+        except TypeError:
+            end_date = 2100
+    return start_date, end_date
+
+
 if __name__ == "__main__":
     philo_db = sys.argv[1]
 
@@ -104,5 +122,24 @@ if __name__ == "__main__":
 
     # TF-IDF generation
     loader = Loader(data_dir)
-    print(loader.destination)
     tfidf_per_word(loader)
+
+    # Regenerate new WebConfig file
+    old_config = MakeWebConfig(os.path.join(philo_db + "data/web_config.cfg"))
+    start_date, end_date = get_time_series_dates(toms_path)
+    config_values = {
+        "dbname": old_config.dbname,
+        "metadata": old_config.metadata,
+        "facets": old_config.facets,
+        "theme": old_config.theme,
+        "time_series_start_end_date": {"start_date": start_date, "end_date": end_date},
+        "search_examples": old_config.search_examples,
+        "metadata_input_style": old_config.metadata_input_style,
+        "kwic_metadata_sorting_fields": old_config.kwic_metadata_sorting_fields,
+        "kwic_bibliography_fields": old_config.kwic_bibliography_fields,
+        "concordance_biblio_sorting": old_config.concordance_biblio_sorting,
+    }
+    filename = os.path.join(data_dir, "web_config.cfg")
+    new_config = MakeWebConfig(filename, **config_values)
+    with open(os.path.join(filename), "w") as output_file:
+        print(format_str(str(new_config), mode=FileMode()), file=output_file)

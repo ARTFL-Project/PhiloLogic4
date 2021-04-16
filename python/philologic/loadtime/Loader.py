@@ -847,7 +847,6 @@ class Loader:
             config_values["concordance_biblio_sorting"] = [("author", "title"), ("title", "author")]
 
         # Find default start and end dates for times series
-        dates = []
         cursor.execute("SELECT min(year), max(year) FROM toms")
         min_year, max_year = cursor.fetchone()
         try:
@@ -857,7 +856,7 @@ class Loader:
         try:
             end_date = int(max_year)
         except TypeError:
-            end_date = 2000
+            end_date = 2100
         config_values["time_series_start_end_date"] = {"start_date": start_date, "end_date": end_date}
 
         filename = self.destination + "/web_config.cfg"
