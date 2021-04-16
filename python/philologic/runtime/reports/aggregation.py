@@ -105,16 +105,14 @@ def aggregation_by_field(request, config):
                     "count": values["count"],
                     "break_up_field": [
                         {"count": v["count"], "metadata_fields": metadata_dict[v["philo_id"]]}
-                        for k, v in sorted(
-                            values["break_up_field"].items(), key=lambda item: item[1]["count"], reverse=True
-                        )
+                        for v in sorted(values["break_up_field"].values(), key=lambda item: item["count"], reverse=True)
                     ],
                 }
             )
     else:
         results = [
             {"metadata_fields": values["metadata_fields"], "count": values["count"], "break_up_field": []}
-            for field_name, values in sorted(counts_by_field.items(), key=lambda x: x[1]["count"], reverse=True)
+            for values in sorted(counts_by_field.values(), key=lambda x: x["count"], reverse=True)
         ]
     if request.q == "" and request.no_q:
         total_results = len(results)
@@ -122,7 +120,7 @@ def aggregation_by_field(request, config):
         total_results = len(philo_ids)
     return {
         "results": results,
-        "break_up_field": break_up_field_name,
+        "break_up_field": break_up_field_name or "",
         "query": dict([i for i in request]),
         "total_results": total_results,
     }

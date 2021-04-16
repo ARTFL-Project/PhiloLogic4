@@ -8,7 +8,7 @@ from collections import namedtuple
 import lz4.frame
 from philologic.loadtime.PostFilters import make_sentences_table, tfidf_per_word
 from philologic.runtime.DB import DB
-from philologic.Config import MakeWebConfig
+from philologic.Config import MakeWebConfig, MakeDBConfig
 from tqdm import tqdm
 from black import format_str, FileMode
 
@@ -75,6 +75,7 @@ def generate_words_and_philo_ids(db_path):
                 output.write("\n".join(current_words))
             compress_file(os.path.join(words_and_ids_path, current_doc_id))
             pbar.update()
+    print("Regenerating words_and_philo_ids files... done.")
 
 
 def get_time_series_dates(toms):
@@ -101,30 +102,22 @@ if __name__ == "__main__":
     data_dir = os.path.join(philo_db, "data")
     generate_words_and_philo_ids(data_dir)
     toms_path = os.path.join(philo_db, "data/toms.db")
+    print("Dropping words table (make take a while)...", end=" ")
     with sqlite3.connect(toms_path) as conn:
         cursor = conn.cursor()
         cursor.execute("DROP TABLE words")
+    print("Done.")
     sentence_table_generator = make_sentences_table(data_dir, toms_path)
     sentence_table_generator(None)
     with sqlite3.connect(toms_path) as conn:
         cursor = conn.cursor()
         cursor.execute("VACUUM")
 
-    # Deal with web app changes
-    os.system(f"rm -rf {philo_db}/scripts/*")
-    os.system(f"rm -rf {philo_db}/reports/*")
-    os.system(f"rm -rf {philo_db}/app/*")
-    os.system(f"cp -R /var/lib/philologic4/web_app/* {philo_db}/")
-    web_app_path = os.path.join(philo_db, "app")
-    os.system(
-        f"cd {web_app_path}; npm install > {web_app_path}/web_app_build.log 2>&1 && npm run build >> {web_app_path}/web_app_build.log 2>&1"
-    )
-
     # TF-IDF generation
     loader = Loader(data_dir)
     tfidf_per_word(loader)
 
-    # Regenerate new WebConfig file
+    # # Regenerate new WebConfig file
     old_config = MakeWebConfig(os.path.join(philo_db + "data/web_config.cfg"))
     start_date, end_date = get_time_series_dates(toms_path)
     config_values = {
@@ -138,8 +131,60 @@ if __name__ == "__main__":
         "kwic_metadata_sorting_fields": old_config.kwic_metadata_sorting_fields,
         "kwic_bibliography_fields": old_config.kwic_bibliography_fields,
         "concordance_biblio_sorting": old_config.concordance_biblio_sorting,
+        "metadata_choice_values": old_config.metadata_dropdown_values,
     }
     filename = os.path.join(data_dir, "web_config.cfg")
     new_config = MakeWebConfig(filename, **config_values)
     with open(os.path.join(filename), "w") as output_file:
         print(format_str(str(new_config), mode=FileMode()), file=output_file)
+
+    # Regenerate new db.locals.py
+    old_db_locals = MakeDBConfig(os.path.join(data_dir, "db.locals.py"))
+    filename = os.path.join(data_dir, "db.locals.py")
+    with sqlite3.connect(toms_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(toms)")
+        metadata = [
+            i[1]
+            for i in cursor
+            if i[1]
+            not in (
+                "prev",
+                "next",
+                "philo_id",
+                "word_count",
+                "parent",
+                "start_byte",
+                "end_byte",
+                "philo_seq",
+                "philo_name",
+                "philo_type",
+                "page",
+            )
+        ]
+    db_values = {
+        "metadata_fields": metadata,
+        "metadata_hierarchy": old_db_locals.metadata_hierarchy,
+        "metadata_types": old_db_locals.metadata_types,
+        "normalized_fields": old_db_locals.normalized_fields,
+        "debug": False,
+    }
+    db_values["token_regex"] = old_db_locals.token_regex
+    db_values["default_object_level"] = old_db_locals.default_object_level
+    db_config = MakeDBConfig(filename, **db_values)
+    with open(filename, "w") as output_file:
+        print(format_str(str(db_config), mode=FileMode()), file=output_file)
+
+    os.system(f"rm -rf {philo_db}/data/hitlists")
+    os.system(f"mkdir {philo_db}/data/hitlists && chmod -R 777 {philo_db}/data/hitlists")
+
+    # Deal with web app changes
+    os.system(f"rm -rf {philo_db}/scripts/*")
+    os.system(f"rm -rf {philo_db}/reports/*")
+    os.system(f"rm -rf {philo_db}/app/*")
+    os.system(f"cp -R /var/lib/philologic4/web_app/* {philo_db}/")
+    web_app_path = os.path.join(philo_db, "app")
+    os.system(
+        f"cd {web_app_path}; npm install > {web_app_path}/web_app_build.log 2>&1 && npm run build >> {web_app_path}/web_app_build.log 2>&1"
+    )
+    os.system(f"cp /var/lib/philologic4/web_app/.htaccess {philo_db}")

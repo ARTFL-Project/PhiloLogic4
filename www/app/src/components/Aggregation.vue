@@ -120,7 +120,7 @@ export default {
                         this.breakUpFieldName =
                             this.$philoConfig.metadata_aliases[response.data.break_up_field] ||
                             response.data.break_up_field;
-                        if (typeof this.breakUpFieldName != "undefined") {
+                        if (typeof this.breakUpFieldName != "undefined" || this.breakUpFieldName != null) {
                             this.breakUpFieldName = this.breakUpFieldName.toLowerCase();
                         }
                         this.resultsLength = response.data.total_results;

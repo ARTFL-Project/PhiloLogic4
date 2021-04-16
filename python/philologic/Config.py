@@ -573,11 +573,11 @@ WEB_CONFIG_DEFAULTS = {
             ["# The time_series_interval variable defines the default year span used for time series."]
         ),
     },
-    "times_series_start_end_date": {
+    "time_series_start_end_date": {
         "value": {"start_date": 0, "end_date": 0},
         "comment": "\n".join(
             [
-                "# The times_series_start_end_date variable defines the default start and end dates for time series when no dates are provided."
+                "# The time_series_start_end_date variable defines the default start and end dates for time series when no dates are provided."
             ]
         ),
     },
@@ -613,8 +613,8 @@ WEB_CONFIG_DEFAULTS = {
         ],
         "comment": "\n".join(
             [
-                "# The stats_report_config variable determins which fields get stats displayed in at the top of concordance/KWIC results."
-                "# It also drives the aggregation report: which fields concordances can be grouped by, and further broken down by particular metadata."
+                "# The stats_report_config variable determins which fields get stats displayed in at the top of concordance/KWIC results.",
+                "# It also drives the aggregation report: which fields concordances can be grouped by, and further broken down by particular metadata.",
             ]
         ),
     },
