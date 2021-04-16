@@ -3,11 +3,15 @@ import json
 import os
 import sqlite3
 import sys
+from collections import namedtuple
 
 import lz4.frame
-from philologic.loadtime.PostFilters import make_sentences_table
+from philologic.loadtime.PostFilters import make_sentences_table, tfidf_per_word
 from philologic.runtime.DB import DB
 from tqdm import tqdm
+
+
+Loader = namedtuple("Loader", "destination")
 
 
 def compress_file(filename):
@@ -99,3 +103,5 @@ if __name__ == "__main__":
     )
 
     # TF-IDF generation
+    loader = Loader(data_dir)
+    tfidf_per_word(loader)

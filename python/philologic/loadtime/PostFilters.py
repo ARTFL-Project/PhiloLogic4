@@ -193,10 +193,10 @@ def tfidf_per_word(loader_obj):
     batches = round(len(os.listdir(path)) / 1000)
 
     def uniq_word_list(start=-1, end=math.inf):
-        with open(os.path.join(loader_obj.workdir, "all_frequencies")) as fh:
+        with open(os.path.join(loader_obj.destination, "/frequencies/word_frequencies")) as fh:
             for pos, line in enumerate(fh):
                 if pos >= start and pos < end:
-                    yield line.strip().split()[1], pos
+                    yield line.strip().split()[0], pos
 
     def get_text(doc):
         words = []

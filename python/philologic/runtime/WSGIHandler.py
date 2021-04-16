@@ -1,306 +1,197 @@
 #!/usr/bin/env python3
-
-import os
-import time
-import struct
-from .HitWrapper import HitWrapper
-from philologic.utils import smash_accents
-
-obj_dict = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
+"""Parses queries stored in the environ object."""
 
 
-class HitList(object):
-    def __init__(
-        self,
-        filename,
-        words,
-        dbh,
-        encoding=None,
-        doc=0,
-        byte=6,
-        method="proxy",
-        methodarg=3,
-        sort_order=None,
-        raw=False,
-    ):
-        self.filename = filename
-        self.words = words
-        self.method = method
-        self.methodarg = methodarg
-        self.sort_order = sort_order
-        if self.sort_order == ["rowid"]:
-            self.sort_order = None
-        self.raw = raw  # if true, this return the raw hitlist consisting of a list of philo_ids
-        self.dbh = dbh
-        self.encoding = encoding or dbh.encoding
-        if method != "cooc":
-            self.has_word_id = 1
-            self.length = 7 + 2 * (words)
+from http.cookies import SimpleCookie
+import hashlib
+import urllib.parse
+
+from philologic.runtime.find_similar_words import find_similar_words
+from philologic.runtime.Query import query_parse
+from philologic.runtime.DB import DB
+
+
+class WSGIHandler(object):
+    """Class which parses the environ object and massages query arguments for PhiloLogic4."""
+
+    def __init__(self, environ, config):
+        """Initialize class."""
+        # Create db object to access config variables
+        db = DB(config.db_path + "/data/")
+        self.path_info = environ.get("PATH_INFO", "")
+        self.query_string = environ["QUERY_STRING"]
+        self.script_filename = environ["SCRIPT_FILENAME"]
+        self.authenticated = False
+        if "HTTP_COOKIE" in environ:
+            self.cookies = SimpleCookie(
+                "".join(environ["HTTP_COOKIE"].split())
+            )  # remove all whitespace in Cookie since it breaks parsing in Python 3.6
+            if "hash" in self.cookies and "timestamp" in self.cookies:
+                h = hashlib.md5()
+                h.update(environ["REMOTE_ADDR"].encode("utf8"))
+                h.update(self.cookies["timestamp"].value.encode("utf8"))
+                h.update(db.locals.secret.encode("utf8"))
+                if self.cookies["hash"].value == h.hexdigest():
+                    self.authenticated = True
+        self.cgi = urllib.parse.parse_qs(self.query_string, keep_blank_values=True)
+        self.defaults = {"results_per_page": "25", "start": "0", "end": "0"}
+
+        # Check the header for JSON content_type or look for a format=json
+        # keyword
+        if "CONTENT_TYPE" in environ:
+            self.content_type = environ["CONTENT_TYPE"]
         else:
-            self.has_word_id = 0  # unfortunately.  fix this next time I have 3 months to spare.
-            self.length = methodarg + 1 + (words)
-        self.fh = open(self.filename, "rb")  # need a full path here.
-        self.format = "=%dI" % self.length  # short for object id's, int for byte offset.
-        self.hitsize = struct.calcsize(self.format)
-        self.doc = doc
-        self.byte = byte
-        self.position = 0
-        self.done = False
-        self.update()
-        if self.sort_order:
-            self.sorted_hitlist = []
-            iter_position = 0
-            self.seek(iter_position)
-            while True:
-                try:
-                    hit = self.readhit(iter_position)
-                except IndexError as IOError:
-                    break
-                self.sorted_hitlist.append(hit)
-                iter_position += 1
-            metadata_types = set([dbh.locals["metadata_types"][i] for i in self.sort_order])
-            if "div" in metadata_types:
-                metadata_types.remove("div")
-                metadata_types.add("div1")
-                metadata_types.add("div2")
-                metadata_types.add("div3")
-            cursor = self.dbh.dbh.cursor()
-            query = "select * from toms where "
-            if metadata_types:
-                query += "philo_type in (%s) AND " % ", ".join(['"%s"' % m for m in metadata_types])
-            order_params = []
-            for s in self.sort_order:
-                order_params.append("%s is not null" % s)
-            query += " AND ".join(order_params)
-            cursor.execute(query)
-            metadata = {}
-            for i in cursor:
-                sql_row = dict(i)
-                philo_id = tuple(int(s) for s in sql_row["philo_id"].split() if int(s))
-                metadata[philo_id] = [smash_accents(sql_row[m] or "ZZZZZ") for m in sort_order]
-
-            def sort_by_metadata(philo_id):
-                while philo_id:
-                    try:
-                        return metadata[philo_id]
-                    except KeyError:
-                        if len(philo_id) == 1:
-                            break
-                        philo_id = philo_id[:-1]
-                return ["ZZZZZ"]
-
-            self.sorted_hitlist.sort(key=sort_by_metadata, reverse=False)
-
-    def __getitem__(self, n):
-        if self.sort_order:
-            return self.get_slice(n)
-        else:
-            self.update()
-            if isinstance(n, slice):
-                return self.get_slice(n)
+            self.content_type = "text/HTML"
+        # If format is set, it overrides the content_type
+        if "format" in self.cgi:
+            if self.cgi["format"][0] == "json":
+                self.content_type = "application/json"
             else:
-                if self.raw:
-                    return self.readhit(n)
-                else:
-                    self.readhit(n)
-                    return HitWrapper(self.readhit(n), self.dbh)
+                self.content_type = self.cgi["format"][0] or ""
 
-    def get_slice(self, n):
-        if self.sort_order:
+        # Make byte a direct attribute of the class since it is a special case and
+        # can contain more than one element
+        if "byte" in self.cgi:
+            self.byte = self.cgi["byte"]
+
+        # Temporary fix for search term arguments before new core merge
+        method = self["method"] or "proxy"
+        arg = self["arg"]
+        if method == "proxy":
+            if not arg:
+                arg = self["arg_proxy"]
+        elif method == "phrase":
+            if not arg:
+                arg = self["arg_phrase"]
+        elif method == "sentence" or method == "cooc":
+            arg = "6"
+        if not arg:
+            arg = 0
+        self.arg = arg
+        self.cgi["arg"] = [arg]
+
+        self.metadata_fields = db.locals["metadata_fields"]
+        self.metadata = {}
+        num_empty = 0
+
+        self.start = int(self["start"])
+        self.end = int(self["end"])
+        self.results_per_page = int(self["results_per_page"])
+        if self.start_date:
             try:
-                for hit in self.sorted_hitlist[n]:
-                    yield HitWrapper(hit, self.dbh)
+                self.start_date = int(self["start_date"])
+            except ValueError:
+                self.start_date = "invalid"
+        if self.end_date:
+            try:
+                self.end_date = int(self["end_date"])
+            except ValueError:
+                self.end_date = "invalid"
+
+        for field in self.metadata_fields:
+            if field in self.cgi and self.cgi[field]:
+                # Hack to remove hyphens in Frantext
+                if field != "date" and isinstance(self.cgi[field][0], str):
+                    if not self.cgi[field][0].startswith('"'):
+                        self.cgi[field][0] = query_parse(self.cgi[field][0], config)
+                # these ifs are to fix the no results you get when you do a
+                # metadata query
+                if self["q"] != "":
+                    self.metadata[field] = self.cgi[field][0]
+                elif self.cgi[field][0] != "":
+                    self.metadata[field] = self.cgi[field][0]
+            # in case of an empty query
+            if field not in self.cgi or not self.cgi[field][0]:
+                num_empty += 1
+
+        self.metadata["philo_type"] = self["philo_type"]
+
+        if num_empty == len(self.metadata_fields):
+            self.no_metadata = True
+        else:
+            self.no_metadata = False
+
+        try:
+            self.path_components = [c for c in self.path_info.split("/") if c]
+        except:
+            self.path_components = []
+
+        if "approximate" in self.cgi:
+            if "approximate_ratio" in self.cgi:
+                self.approximate_ratio = float(self.cgi["approximate_ratio"][0]) / 100
+            else:
+                self.approximate_ratio = 1
+
+        if "q" in self.cgi:
+            self.cgi["q"][0] = query_parse(self.cgi["q"][0], config)
+            if self.approximate == "yes":
+                self.cgi["original_q"] = self.cgi["q"][:]
+                self.cgi["q"][0] = find_similar_words(db, config, self)
+            if self.cgi["q"][0] != "":
+                self.no_q = False
+            else:
+                self.no_q = True
+            # self.cgi['q'][0] = self.cgi['q'][0].encode('utf8')
+        else:
+            self.no_q = True
+
+        if "sort_order" in self.cgi:
+            sort_order = []
+            for metadata in self.cgi["sort_order"]:
+                sort_order.append(metadata)
+            self.cgi["sort_order"][0] = sort_order
+        else:
+            self.cgi["sort_order"] = [["rowid"]]
+
+        if "start_byte" in self.cgi:
+            try:
+                self.start_byte = int(self["start_byte"])
+            except (ValueError, TypeError) as e:
+                self.start_byte = ""
+            try:
+                self.end_byte = int(self["end_byte"])
+            except (ValueError, TypeError) as e:
+                self.end_byte = ""
+
+    def __getattr__(self, key):
+        """Return query arg as attribute of class."""
+        return self[key]
+
+    def __getitem__(self, key):
+        """Return query arg as key of class."""
+        if key in self.cgi:
+            return self.cgi[key][0]
+        elif key in self.defaults:
+            return self.defaults[key]
+        else:
+            return ""
+
+    def __setitem__(self, key, item):
+        if key not in self.cgi:
+            self.cgi[key] = []
+        if isinstance(item, list or set):
+            self.cgi[key] = item
+        else:
+            try:
+                self.cgi[key][0] = item
             except IndexError:
-                pass
-        else:
-            self.update()
-            # need to handle negative offsets.
-            slice_position = n.start or 0
-            self.seek(slice_position)
-            while True:
-                if n.stop is not None:
-                    if slice_position >= n.stop:
-                        break
-                try:
-                    hit = self.readhit(slice_position)
-                except IndexError as IOError:
-                    break
-                if self.raw:
-                    yield hit
-                else:
-                    yield HitWrapper(hit, self.dbh)
-                slice_position += 1
+                self.cgi[key] = [""]
 
-    def __len__(self):
-        self.update()
-        return self.count
+    def __delattr__(self, name):
+        if name in self.cgi:
+            del self.cgi[name]
+        elif name in self.defaults:
+            self.defaults[key] = ""
+        else:
+            pass
 
     def __iter__(self):
-        if self.sort_order:
-            for hit in self.sorted_hitlist:
-                yield HitWrapper(hit, self.dbh)
-        else:
-            self.update()
-            iter_position = 0
-            self.seek(iter_position)
-            while True:
-                try:
-                    hit = self.readhit(iter_position)
-                except IndexError as IOError:
-                    break
-                if self.raw:
-                    yield hit
-                else:
-                    yield HitWrapper(hit, self.dbh)
-                iter_position += 1
+        """Iterate over query args."""
+        for key in list(self.cgi.keys()):
+            yield (key, self[key])
 
-    def seek(self, n):
-        if self.position == n:
-            pass
-        else:
-            while n >= len(self):
-                if self.done:
-                    raise IndexError
-                else:
-                    time.sleep(0.05)
-                    self.update()
-            offset = self.hitsize * n
-            self.fh.seek(offset)
-            self.position = n
+    def __repr__(self):
+        return repr(self.cgi)
 
-    def update(self):
-        # Since the file could be growing, we should frequently check size/ if it's finished yet.
-        if self.done:
-            pass
-        else:
-            try:
-                os.stat(self.filename + ".done")
-                self.done = True
-            except OSError:
-                pass
-            self.size = os.stat(self.filename).st_size  # in bytes
-            self.count = int(self.size / self.hitsize)
-
-    def finish(self):
-        while not self.done:
-            self.update()
-            time.sleep(0.05)
-
-    def readhit(self, n):
-        # reads hitlist into buffer, unpacks
-        # should do some work to read k at once, track buffer state.
-        self.update()
-        while n >= len(self):
-            if self.done:
-                raise IndexError
-            else:
-                time.sleep(0.05)
-                self.update()
-        if n != self.position:
-            offset = self.hitsize * n
-            self.fh.seek(offset)
-            self.position = n
-        buffer = self.fh.read(self.hitsize)
-        self.position += 1
-        return struct.unpack(self.format, buffer)
-
-    def get_total_word_count(self):
-        philo_ids = []
-        total_count = 0
-        iter_position = 0
-        self.seek(iter_position)
-        while True:
-            try:
-                hit = self.readhit(iter_position)
-                philo_ids.append(hit)
-            except IndexError as IOError:
-                break
-            iter_position += 1
-        c = self.dbh.dbh.cursor()
-        query = "SELECT SUM(word_count) FROM toms WHERE "
-        ids = []
-        for id in philo_ids:
-            ids.append('philo_id="%s"' % " ".join([str(i) for i in id]))
-            if len(ids) == 999:  # max expression tree in sqlite is 1000
-                clause = " OR ".join(ids)
-                c.execute(query + clause)
-                total_count += int(c.fetchone()[0])
-                ids = []
-        if ids:
-            clause = " OR ".join(ids)
-            c.execute(query + clause)
-            total_count += int(c.fetchone()[0])
-        return total_count
-
-
-# TODO: check if we still need this...
-class CombinedHitlist(object):
-    """A combined hitlists used for binding collocation hits"""
-
-    def __init__(self, *hitlists):
-        self.combined_hitlist = []
-        # sentence_ids = set()
-        # for hit in sorted(chain(*hitlists), key=lambda x: x.date):
-        #     sentence_id = hit.philo_id[:6]
-        #     if sentence_id not in sentence_ids:
-        #         self.combined_hitlist.append(hit)
-        #         sentence_ids.add(sentence_id)
-        from collections import defaultdict
-
-        sentence_counts = defaultdict(int)
-        for pos, hitlist in enumerate(hitlists):
-            max_sent_count = 2
-            for hit in hitlist:
-                sentence_id = repr(hit.philo_id[:6])
-                if sentence_id not in sentence_counts or sentence_counts[sentence_id] == max_sent_count:
-                    self.combined_hitlist.append(hit)
-                    sentence_counts[sentence_id] += 1
-
-        self.done = True
-
-    def __len__(self):
-        return len(self.combined_hitlist)
-
-    def __getitem__(self, key):
-        return self.combined_hitlist[key]
-
-    def __getattr__(self, name):
-        return self.combined_hitlist[name]
-
-
-class WordPropertyHitlist(object):
-    def __init__(self, hitlist):
-        self.done = True
-        self.hitlist = hitlist
-
-    def __getitem__(self, key):
-        return self.hitlist[key]
-
-    def __getattr__(self, name):
-        return self.hitlist[name]
-
-    def __len__(self):
-        return len(self.hitlist)
-
-
-class NoHits(object):
-    def __init__(self):
-        self.done = True
-
-    def __len__(self):
-        return 0
-
-    def __getitem__(self, item):
-        return ""
-
-    def __iter__(self):
-        return ""
-
-    def finish(self):
-        return
-
-    def update(self):
-        return
-
-    def get_total_word_count(self):
-        return 0
+    def __str__(self):
+        return " ".join(["{}: {}".format(i, j) for i, j in self])
