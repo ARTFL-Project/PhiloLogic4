@@ -24,7 +24,7 @@ def query(
     method_arg=None,
     limit=3000,
     filename="",
-    query_debug=False,
+    query_debug=True,
     sort_order=None,
     raw_results=False,
 ):
@@ -34,7 +34,6 @@ def query(
     parsed = parse_query(terms)
     grouped = group_terms(parsed)
     split = split_terms(grouped)
-
     words_per_hit = len(split)
     origpid = os.getpid()
     if not filename:
@@ -64,7 +63,6 @@ def query(
             if method and method_arg:
                 args.extend(("-m", method, "-a", str(method_arg)))
             args.extend(("-o", "binary", db.path))
-
             worker = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=hl, stderr=err, env=os.environ)
             # worker2 = subprocess.Popen("head -c 1", stdin=subprocess.PIPE, stdout=worker.stdin, stderr=err)
 

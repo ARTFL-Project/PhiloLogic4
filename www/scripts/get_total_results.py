@@ -38,7 +38,7 @@ def get_total_results(environ, start_response):
     total_results = 0
     hits.finish()
     total_results = len(hits)
-
+    print(total_results)
     yield rapidjson.dumps(total_results).encode("utf8")
 
 

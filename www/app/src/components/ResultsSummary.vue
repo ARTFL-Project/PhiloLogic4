@@ -111,7 +111,6 @@
                                 :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
                             ></b-progress-bar>
                         </b-progress>
-                        {{ this.runningTotal }} {{ this.resultsLength }}
                     </div>
                 </div>
                 <b-button

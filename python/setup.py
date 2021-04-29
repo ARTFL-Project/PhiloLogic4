@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name="philologic",
-    version="5.0a1",
+    version="4.7a1",
     author="The ARTFL Project",
     author_email="artfl@artfl.uchicago.edu",
     packages=[
@@ -25,6 +25,6 @@ setup(
         "python-rapidjson",
         "black",
         "msgpack",
-        "lz4"
+        "lz4",
     ],
 )

@@ -12,7 +12,7 @@ import shutil
 import sqlite3
 import sys
 import time
-from glob import glob
+from glob import iglob
 
 import lxml
 from black import FileMode, format_str
@@ -518,65 +518,26 @@ class Loader:
 
         print("%s: sorting objects" % time.ctime(), flush=True)
         self.merge_files("toms")
-        if not self.debug:
-            for toms_file in glob(self.workdir + "/*toms.sorted"):
+        if self.debug is False:
+            for toms_file in iglob(self.workdir + "/*toms.sorted"):
                 os.system("rm %s" % toms_file)
 
-        print("%s: joining pages" % time.ctime(), flush=True)
-        if self.debug is False:
-            os.system(
-                'for i in $(find {} -type f -name "*pages"); do cat $i >> {}/all_pages; rm $i; done'.format(
-                    self.workdir, self.workdir
-                )
-            )
-        else:
-            os.system(
-                'for i in $(find {} -type f -name "*pages"); do cat $i >> {}/all_pages; done'.format(
-                    self.workdir, self.workdir
-                )
-            )
+        for object_type, extension in [
+            ("pages", "pages"),
+            ("references", "refs"),
+            ("graphics", "graphics"),
+            ("lines", "lines"),
+        ]:
 
-        print("%s: joining references" % time.ctime(), flush=True)
-        if self.debug is False:
-            os.system(
-                'for i in $(find {} -type f -name "*refs"); do cat $i >> {}/all_refs; rm $i; done'.format(
-                    self.workdir, self.workdir
+            print(f"{time.ctime()}: joining {object_type}", flush=True)
+            if self.debug is False:
+                os.system(
+                    f'for i in $(find {self.workdir} -type f -name "*{extension}"); do cat $i >> {self.workdir}/all_{extension}; rm $i; done'
                 )
-            )
-        else:
-            os.system(
-                'for i in $(find {} -type f -name "*refs"); do cat $i >> {}/all_refs; done'.format(
-                    self.workdir, self.workdir
+            else:
+                os.system(
+                    f'for i in $(find {self.workdir} -type f -name "*{extension}"); do cat $i >> {self.workdir}/all_{extension}; done'
                 )
-            )
-
-        print("%s: joining graphics" % time.ctime(), flush=True)
-        if self.debug is False:
-            os.system(
-                'for i in $(find {} -type f -name "*graphics"); do cat $i >> {}/all_graphics; rm $i; done'.format(
-                    self.workdir, self.workdir
-                )
-            )
-        else:
-            os.system(
-                'for i in $(find {} -type f -name "*graphics"); do cat $i >> {}/all_graphics; done'.format(
-                    self.workdir, self.workdir
-                )
-            )
-
-        print("%s: joining lines" % time.ctime(), flush=True)
-        if self.debug is False:
-            os.system(
-                'for i in $(find {} -type f -name "*lines"); do cat $i >> {}/all_lines; rm $i; done'.format(
-                    self.workdir, self.workdir
-                )
-            )
-        else:
-            os.system(
-                'for i in $(find {} -type f -name "*lines"); do cat $i >> {}/all_lines; done'.format(
-                    self.workdir, self.workdir
-                )
-            )
 
     def merge_files(self, file_type, file_num=1000):
         """This function runs a multi-stage merge sort on words
@@ -593,13 +554,13 @@ class Loader:
             else:
                 open_file_command = "lz4cat"
             sort_command = f"LANG=C sort -S 25% -m -T {self.workdir} {self.sort_by_word} {self.sort_by_id} "
-        elif file_type == "toms":
+        else:  # sorting for toms
             suffix = "/*.toms.sorted"
             open_file_command = "cat"
             sort_command = f"LANG=C sort -S 25% -m -T {self.workdir} {self.sort_by_id} "
 
-        # First we split the sort workload into chunks of 100 (default defined in the file_num keyword)
-        for f in glob(self.workdir + suffix):
+        # First we split the sort workload into chunks of 1000 (default defined in the file_num keyword)
+        for f in iglob(self.workdir + suffix):
             f = os.path.basename(f)
             files.append((f"<({open_file_command} {f})", self.workdir + "/" + f))
             if len(files) == file_num:
@@ -614,7 +575,6 @@ class Loader:
         os.system(f"touch {self.workdir}/sorted.init")
         for pos, object_list in enumerate(lists_of_files):
             command_list = " ".join([i[0] for i in object_list])
-            # file_list = " ".join([i[1] for i in object_list])
             output = os.path.join(self.workdir, f"sorted.{pos}.split")
             args = sort_command + command_list
             command = f'/bin/bash -c "{args} | lz4 -3 -q >{output}"'
@@ -623,11 +583,11 @@ class Loader:
                 print(f"{file_type} sorting failed\nInterrupting database load...")
                 sys.exit()
             already_merged += len(object_list)
-            print(f"\r{time.ctime()}: {already_merged} files sorted...", end="")
+            print(f"\r{time.ctime()}: {already_merged} files sorted...", end="", flush=True)
         print(flush=True)
 
-        # WARNING: we are technically limited to the file descriptor limit, which should be 1,000,000 or more.
-        sorted_files = " ".join([f"<(lz4cat -q --rm {i})" for i in glob(f"{self.workdir}/*.split")])
+        # WARNING: we are technically limited by the file descriptor limit (1024), which should be equivalent to 1,024,000 files.
+        sorted_files = " ".join([f"<(lz4cat -q --rm {i})" for i in iglob(f"{self.workdir}/*.split")])
         if file_type == "words":
             output_file = os.path.join(self.workdir, "all_words_sorted.lz4")
             command = f'/bin/bash -c "{sort_command} -b --compress-program=lz4 {sorted_files} | lz4 -q > {output_file}"'
@@ -660,26 +620,27 @@ class Loader:
         freq2 = 0
         offset = 0
 
-        # unix one-liner for a frequency table
+        # Generate frequency table
         os.system(
             f'/bin/bash -c "cut -f 2 <(lz4cat {self.workdir}/all_words_sorted.lz4) | uniq -c | LANG=C sort -S 25% -rn -k 1,1> {self.workdir}/all_frequencies"'
         )
 
         # now scan over the frequency table to figure out how wide (in bits) the frequency fields are,
         # and how large the block file will be.
-        for line in open(self.workdir + "/all_frequencies"):
-            f, _ = line.rsplit(" ", 1)  # uniq -c pads output on the left side, so we split on the right.
-            try:
-                f = int(f)
-            except ValueError:
-                f = int(re.sub(r"(\d+)\D+", r"\1", f.strip()))
-            if f > freq2:
-                freq2 = f
-            if f < INDEX_CUTOFF:
-                pass  # low-frequency words don't go into the block-mode index.
-            else:
-                blocks = 1 + f // (hits_per_block + 1)  # high frequency words have at least one block.
-                offset += blocks * BLOCKSIZE
+        with open(self.workdir + "/all_frequencies") as frequencies:
+            for line in frequencies:
+                f, _ = line.rsplit(" ", 1)  # uniq -c pads output on the left side, so we split on the right.
+                try:
+                    f = int(f)
+                except ValueError:
+                    f = int(re.sub(r"(\d+)\D+", r"\1", f.strip()))
+                if f > freq2:
+                    freq2 = f
+                if f < INDEX_CUTOFF:
+                    pass  # low-frequency words don't go into the block-mode index.
+                else:
+                    blocks = 1 + f // (hits_per_block + 1)  # high frequency words have at least one block.
+                    offset += blocks * BLOCKSIZE
 
         # take the log base 2 for the length of the binary representation.
         freq1_l = math.ceil(math.log(float(freq1), 2.0))
@@ -710,7 +671,7 @@ class Loader:
         os.system("mv index.1 " + self.destination + "/index.1")
 
     def setup_sql_load(self):
-        """Setup SQL DB creation"""
+        """Setup SQLite DB creation"""
         for table in self.tables:
             if table == "pages":
                 file_in = self.destination + "/WORK/all_pages"
@@ -852,7 +813,7 @@ class Loader:
         try:
             start_date = int(min_year)
         except TypeError:
-            start_date: 0
+            start_date = 0
         try:
             end_date = int(max_year)
         except TypeError:

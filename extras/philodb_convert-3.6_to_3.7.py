@@ -9,6 +9,7 @@ import lz4.frame
 from philologic.loadtime.PostFilters import make_sentences_table, tfidf_per_word
 from philologic.runtime.DB import DB
 from philologic.Config import MakeWebConfig, MakeDBConfig
+from philologic.utils import load_module
 from tqdm import tqdm
 from black import format_str, FileMode
 
@@ -100,6 +101,7 @@ if __name__ == "__main__":
 
     # Deal with TOMS db changes
     data_dir = os.path.join(philo_db, "data")
+    os.environ["SQLITE_TMPDIR"] = data_dir
     generate_words_and_philo_ids(data_dir)
     toms_path = os.path.join(philo_db, "data/toms.db")
     print("Dropping words table (make take a while)...", end=" ")
@@ -113,12 +115,12 @@ if __name__ == "__main__":
         cursor = conn.cursor()
         cursor.execute("VACUUM")
 
-    # TF-IDF generation
+    # # TF-IDF generation
     loader = Loader(data_dir)
     tfidf_per_word(loader)
 
     # # Regenerate new WebConfig file
-    old_config = MakeWebConfig(os.path.join(philo_db + "data/web_config.cfg"))
+    old_config = load_module("old_config", os.path.join(philo_db + "/data/web_config.cfg"))
     start_date, end_date = get_time_series_dates(toms_path)
     config_values = {
         "dbname": old_config.dbname,
@@ -133,13 +135,16 @@ if __name__ == "__main__":
         "concordance_biblio_sorting": old_config.concordance_biblio_sorting,
         "metadata_choice_values": old_config.metadata_dropdown_values,
     }
+    os.system(
+        f'mv {os.path.join(philo_db + "/data/web_config.cfg")} {os.path.join(philo_db + "/data/web_config.cfg_old")}'
+    )
     filename = os.path.join(data_dir, "web_config.cfg")
     new_config = MakeWebConfig(filename, **config_values)
-    with open(os.path.join(filename), "w") as output_file:
+    with open(filename, "w") as output_file:
         print(format_str(str(new_config), mode=FileMode()), file=output_file)
 
     # Regenerate new db.locals.py
-    old_db_locals = MakeDBConfig(os.path.join(data_dir, "db.locals.py"))
+    old_db_locals = load_module("old_db_locals", os.path.join(data_dir, "db.locals.py"))
     filename = os.path.join(data_dir, "db.locals.py")
     with sqlite3.connect(toms_path) as conn:
         cursor = conn.cursor()
@@ -179,6 +184,7 @@ if __name__ == "__main__":
     os.system(f"mkdir {philo_db}/data/hitlists && chmod -R 777 {philo_db}/data/hitlists")
 
     # Deal with web app changes
+    print("Regenerating web app...")
     os.system(f"rm -rf {philo_db}/scripts/*")
     os.system(f"rm -rf {philo_db}/reports/*")
     os.system(f"rm -rf {philo_db}/app/*")
