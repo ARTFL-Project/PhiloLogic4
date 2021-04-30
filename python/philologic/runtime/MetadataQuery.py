@@ -226,10 +226,24 @@ def make_grouped_sql_clause(expanded, column, db):
 
 def metadata_pattern_search(term, path):
     command = ["egrep", "-awie", "[[:blank:]]?%s" % term, "%s" % path]
+    import sys
+    print("APPROX", repr(command), file=sys.stderr)
     grep = subprocess.Popen(command, stdout=subprocess.PIPE, env=os.environ)
     cut = subprocess.Popen(["cut", "-f", "2"], stdin=grep.stdout, stdout=subprocess.PIPE)
     match, stderr = cut.communicate()
     matches = [i for i in match.decode("utf8", "ignore").split("\n") if i]
+    return matches
+
+def exact_metadata_pattern_search(term, path):
+    command = ["egrep", "-awie", b"[[:blank:]]?" + term, path]
+    import sys
+    print("EXACT", repr(command), file=sys.stderr)
+    environ = os.environ
+    environ["PYTHONIOENCODING"] = "UTF-8"
+    grep = subprocess.run(command, stdout=subprocess.PIPE, env=environ, encoding="utf-8")
+    cut = subprocess.run(["cut", "-f", "1"], stdin=grep.stdout, stdout=subprocess.PIPE, encoding="utf-8")
+    match, _ = cut.communicate()
+    matches = [i.decode("utf8") for i in match.split(b"\n") if i]
     return matches
 
 

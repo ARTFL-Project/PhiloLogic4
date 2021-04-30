@@ -630,6 +630,8 @@ b.headword[rend=center] {
     position: relative;
     text-align: center;
     border-collapse: collapse;
+    table-layout: auto;
+    width: 100%;
 }
 
 .xml-table .xml-pb-image {
