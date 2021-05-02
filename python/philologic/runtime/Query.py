@@ -24,7 +24,7 @@ def query(
     method_arg=None,
     limit=3000,
     filename="",
-    query_debug=True,
+    query_debug=False,
     sort_order=None,
     raw_results=False,
 ):
@@ -141,9 +141,6 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
 
         # find all the NOT terms and separate them out by type
         exclude = []
-        term_exclude = []
-        quote_exclude = []
-
         for i, g in enumerate(group):
             kind, token = g
             if kind == "NOT":

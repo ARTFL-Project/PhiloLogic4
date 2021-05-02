@@ -3,9 +3,8 @@
 
 import time
 from urllib.parse import quote_plus
-from philologic.runtime.DB import DB
-import sys
 
+from philologic.runtime.DB import DB
 from philologic.runtime.link import make_absolute_query_link
 
 
@@ -36,15 +35,28 @@ def frequency_results(request, config, sorted_results=False):
     if sorted_results is True:
         hits.finish()
 
+    metadata_type = db.locals["metadata_types"][request.frequency_field]
     cursor = db.dbh.cursor()
-
-    cursor.execute(f"SELECT philo_id, {request.frequency_field} FROM toms WHERE {request.frequency_field} IS NOT NULL")
+    if metadata_type != "div":
+        cursor.execute(
+            f"SELECT philo_id, {request.frequency_field} FROM toms WHERE philo_type=? AND {request.frequency_field} IS NOT NULL",
+            (metadata_type,),
+        )
+    else:
+        cursor.execute(
+            f"SELECT philo_id, {request.frequency_field} FROM toms WHERE philo_type IN (?, ?, ?) AND {request.frequency_field} IS NOT NULL",
+            ("div1", "div2", "div3"),
+        )
     metadata_dict = {}
     for i in cursor:
         philo_id, field = i
         philo_id = tuple(int(s) for s in philo_id.split() if int(s))
         metadata_dict[philo_id] = field
+    import sys
+
+    print("START", flush=True, file=sys.stderr)
     word_counts_by_field_name = db.query(get_word_count_field=request.frequency_field, **request.metadata)
+    print("DONE", flush=True, file=sys.stderr)
 
     counts = {}
     frequency_object = {}
@@ -59,7 +71,6 @@ def frequency_results(request, config, sorted_results=False):
         "sent": 6,
         "word": 7,
     }
-    metadata_type = db.locals["metadata_types"][request.frequency_field]
     try:
         object_level = obj_dict[metadata_type]
     except KeyError:
@@ -110,7 +121,7 @@ def frequency_results(request, config, sorted_results=False):
                         counts[key]["total_word_count"] = word_counts_by_field_name[key]
                     except KeyError:
                         # Worst case when there are different values for the field in div1, div2, and div3
-                        query_metadata = dict([(k, v) for k, v in request.metadata.items() if v])
+                        query_metadata = {k: v for k, v in request.metadata.items() if v}
                         query_metadata[request.frequency_field] = '"%s"' % key
                         local_hits = db.query(**query_metadata)
                         counts[key]["total_word_count"] = local_hits.get_total_word_count()

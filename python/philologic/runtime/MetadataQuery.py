@@ -1,5 +1,3 @@
-
-
 import os
 import sqlite3
 import struct
@@ -41,6 +39,7 @@ def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
     flag.close()
     return HitList.HitList(filename, 0, db, raw=raw_results, sort_order=sort_order)
 
+
 def metadata_total_word_count_query(db, metadata, metadata_field_name):
     param_dicts = [{} for level in db.locals["metadata_hierarchy"]]
     # Taken from DB.query
@@ -66,16 +65,30 @@ def metadata_total_word_count_query(db, metadata, metadata_field_name):
         query = query_recursive(db, param_dict, prev, None)
         prev = query
     cursor = db.dbh.cursor()
+    philo_type = db.locals["metadata_types"][metadata_field_name]
     if query is not None:
         philo_ids = []
         for row in query:
             philo_ids.append(row["philo_id"])
-        
-        cursor.execute(f"SELECT {metadata_field_name}, SUM(word_count) AS total_sum FROM toms WHERE philo_id IN ({', '.join('?' for _ in range(len(philo_ids)))}) GROUP BY {metadata_field_name}",
+        if philo_type != "div":
+            cursor.execute(
+                f"SELECT {metadata_field_name}, SUM(word_count) AS total_sum FROM toms WHERE philo_id IN ({', '.join('?' for _ in range(len(philo_ids)))}) AND philo_type='{philo_type}' GROUP BY {metadata_field_name}",
+                tuple(philo_ids),
+            )
+        else:
+            cursor.execute(
+                f"SELECT {metadata_field_name}, SUM(word_count) AS total_sum FROM toms WHERE philo_id IN ({', '.join('?' for _ in range(len(philo_ids)))}) AND philo_type IN ('div1', 'div2', 'div3') GROUP BY {metadata_field_name}",
                 tuple(philo_ids),
             )
     else:
-        cursor.execute(f"SELECT {metadata_field_name}, SUM(word_count) AS total_sum FROM toms GROUP BY {metadata_field_name}")
+        if philo_type != "div":
+            cursor.execute(
+                f"SELECT {metadata_field_name}, SUM(word_count) AS total_sum FROM toms WHERE philo_type='{philo_type}' GROUP BY {metadata_field_name}"
+            )
+        else:
+            cursor.execute(
+                f"SELECT {metadata_field_name}, SUM(word_count) AS total_sum FROM toms WHERE philo_type IN ('div1', 'div2', 'div3') GROUP BY {metadata_field_name}"
+            )
     results = {row[metadata_field_name]: row["total_sum"] for row in cursor}
     return results
 
@@ -124,11 +137,7 @@ def query_lowlevel(db, param_dict, sort_order):
     if not sort_order:
         sort_order = ["rowid"]
     if clauses:
-        query = (
-            "SELECT philo_id FROM toms WHERE "
-            + " AND ".join("(%s)" % c for c in clauses)
-            
-        )
+        query = "SELECT philo_id FROM toms WHERE " + " AND ".join("(%s)" % c for c in clauses)
     else:
         query = "SELECT philo_id FROM toms"
     if sort_order:

@@ -7,6 +7,8 @@ from philologic.Config import MakeWebConfig
 
 
 class brokenConfig(object):
+    """Broken config returned with some default values"""
+
     def __init__(self, db_path, traceback):
         self.production = True
         self.db_path = db_path
@@ -15,6 +17,9 @@ class brokenConfig(object):
         self.valid_config = False
         self.traceback = traceback
         self.global_config_location = "/etc/philologic/philologic4.cfg"
+
+    def __getitem__(self, _):
+        return ""
 
 
 def WebConfig(db_path):

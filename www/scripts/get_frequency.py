@@ -25,7 +25,7 @@ except ImportError:
 
 def get_frequency(environ, start_response):
     """reads through a hitlist. looks up q.frequency_field in each hit, and builds up a list of
-       unique values and their frequencies."""
+    unique values and their frequencies."""
     status = "200 OK"
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)

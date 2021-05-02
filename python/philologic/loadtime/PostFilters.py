@@ -60,6 +60,11 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
                 index_name = "%s_%s_index" % (table, "_".join(index))
                 index = ",".join(index)
                 cursor.execute("create index if not exists %s on %s (%s)" % (index_name, table, index))
+                if table == "toms":
+                    index_null_name = f"{index}_null_index"  # this is for hitlist stats queries which require indexing philo_id with null metadata values
+                    cursor.execute(
+                        f"CREATE UNIQUE INDEX IF NOT EXISTS {index_null_name} ON toms(philo_id, {index}) WHERE {index} IS NULL"
+                    )
             except sqlite3.OperationalError:
                 pass
         conn.commit()
