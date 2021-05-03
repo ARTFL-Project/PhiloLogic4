@@ -49,6 +49,8 @@ export default {
             return this.paramsToUrlString({
                 ...this.$store.state.formData,
                 title: `"${title}"`,
+                start: 1,
+                end: this.$store.state.formData,
             });
         },
     },
