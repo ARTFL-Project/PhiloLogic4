@@ -2,8 +2,6 @@
 """Report designed to group results by metadata with additional breakdown optional"""
 
 from philologic.runtime.DB import DB
-from itertools import tee
-
 
 OBJ_DICT = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
 OBJ_ZEROS = {"doc": 6, "div1": 5, "div2": 4, "div3": 3, "para": 2, "sent": 1, "word": 0}
@@ -24,13 +22,21 @@ def aggregation_by_field(request, config):
     field_obj = __get_field_config(group_by, config)
     metadata_type = field_obj["object_level"]
 
+    metadata_fields_needed = {group_by, field_obj["break_up_field"], "philo_id", f"philo_{metadata_type}_id"}
+    for citation in field_obj["break_up_field_citation"]:
+        if citation["field"] in db.locals["metadata_fields"]:
+            metadata_fields_needed.add(citation["field"])
+
+    import sys
+
+    print(metadata_fields_needed, file=sys.stderr)
     hits.finish()
     philo_ids = __expand_hits(hits, metadata_type)
     cursor = db.dbh.cursor()
     # if metadata_type != "div":
     distinct_philo_ids = tuple(" ".join(map(str, id)) for id in set(philo_ids))
     cursor.execute(
-        f"select * from toms where philo_{metadata_type}_id IN ({', '.join('?' for _ in range(len(distinct_philo_ids)))})",
+        f"select {', '.join(metadata_fields_needed)} from toms where philo_{metadata_type}_id IN ({', '.join('?' for _ in range(len(distinct_philo_ids)))})",
         distinct_philo_ids,
     )
     # else:
@@ -49,7 +55,7 @@ def aggregation_by_field(request, config):
         else:
             uniq_name = row[group_by]
         metadata_dict[tuple(map(int, row[f"philo_{metadata_type}_id"].split()))] = {
-            **{field: row[field] or "" for field in db.locals["metadata_fields"] if row[field] or field == group_by},
+            **{field: row[field] or "" for field in metadata_fields_needed if row[field] or field == group_by},
             "field_name": uniq_name,
         }
 
