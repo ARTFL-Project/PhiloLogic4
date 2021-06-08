@@ -1,31 +1,37 @@
 <template>
-    <b-container fluid>
-        <div id="time-series-container" class="mt-4 ml-2 mr-2" v-if="authorized">
+    <div class="container-fluid">
+        <div id="time-series-container" class="mt-4 mx-2" v-if="authorized">
             <results-summary
                 :results="results.results"
                 :description="results.description"
                 :running-total="runningTotal"
             ></results-summary>
-            <b-card no-body id="time-series" class="mt-4">
-                <b-button-group class="d-inline-block">
-                    <b-button
+            <div class="card mt-4" id="time-series">
+                <div class="btn-group d-inline-block" role="group">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
                         :class="{ active: frequencyType == 'absolute_time' }"
                         @click="toggleFrequency('absolute_time')"
-                        >Absolute Frequency</b-button
                     >
-                    <b-button
+                        Absolute Frequency
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
                         :class="{ active: frequencyType == 'relative_time' }"
                         @click="toggleFrequency('relative_time')"
-                        >Relative Frequency</b-button
                     >
-                </b-button-group>
+                        Relative Frequency
+                    </button>
+                </div>
                 <div class="p-3 mt-4" style="min-height: 500px; max-height: 800px">
                     <canvas id="bar" class="chart"></canvas>
                 </div>
-            </b-card>
+            </div>
         </div>
         <!-- <access-control v-if="!authorized"></access-control> -->
-    </b-container>
+    </div>
 </template>
 <script>
 import Chart from "chart.js/dist/Chart.min.js";

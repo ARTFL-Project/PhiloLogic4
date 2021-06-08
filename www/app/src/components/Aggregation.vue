@@ -1,31 +1,35 @@
 <template>
-    <b-container fluid class="mt-4">
+    <div class="container-fluid mt-4">
         <results-summary :results="aggregationResults"></results-summary>
-        <b-card no-body class="shadow mt-4 ml-2 mr-2" v-if="resultsLength">
-            <b-list-group flush>
-                <b-list-group-item
+        <div class="card shadow mt-4 ms-2 me-2" v-if="resultsLength">
+            <div class="list-group" flush>
+                <div
+                    class="list-group-item pt-3 pb-3"
                     v-for="(result, resultIndex) in aggregationResults.slice(0, lastResult)"
                     :key="resultIndex"
-                    class="pt-3 pb-3"
                 >
-                    <b-button
-                        variant="outline-secondary"
-                        size="sm"
-                        class="d-inline-block"
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary btn-sm d-inline-block"
                         style="padding: 0 0.25rem; margin-right: 0.5rem"
                         :id="`button-${resultIndex}`"
                         @click="toggleBreakUp(resultIndex)"
                         v-if="result.break_up_field.length > 0"
-                        >&plus;</b-button
                     >
-                    <b-badge variant="secondary" pill style="font-size: 100%">{{ result.count }}</b-badge>
+                        &plus;
+                    </button>
+                    <span class="badge rounded-pill bg-secondary" style="font-size: 100%">{{ result.count }}</span>
                     <citations :citation="result.citation"></citations>
-                    <span class="d-inline-block pl-1" v-if="breakUpFields[resultIndex].results.length"
+                    <span class="d-inline-block ps-1" v-if="breakUpFields[resultIndex].results.length"
                         >across {{ breakUpFields[resultIndex].results.length }} {{ breakUpFieldName }}(s)</span
                     >
-                    <b-list-group class="ml-4 mt-2" v-if="breakUpFields[resultIndex].show">
-                        <b-list-group-item v-for="(value, key) in breakUpFields[resultIndex].results" :key="key">
-                            <b-badge variant="secondary" pill>{{ value.count }}</b-badge>
+                    <div class="list-group ms-4 mt-2" v-if="breakUpFields[resultIndex].show">
+                        <div
+                            class="list-group-item"
+                            v-for="(value, key) in breakUpFields[resultIndex].results"
+                            :key="key"
+                        >
+                            <span class="badge rounded-pill bg-secondary">{{ value.count }}</span>
                             <citations
                                 :citation="
                                     buildCitationObject(
@@ -35,16 +39,16 @@
                                     )
                                 "
                             ></citations>
-                        </b-list-group-item>
-                    </b-list-group>
-                </b-list-group-item>
+                        </div>
+                    </div>
+                </div>
                 <infinite-loading :identifier="infiniteId" @infinite="infiniteHandler">
                     <div slot="no-more"></div>
                     <div slot="no-results"></div>
                 </infinite-loading>
-            </b-list-group>
-        </b-card>
-    </b-container>
+            </div>
+        </div>
+    </div>
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";

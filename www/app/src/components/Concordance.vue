@@ -1,54 +1,63 @@
 <template>
-    <b-container fluid>
+    <div class="container-fluid">
         <results-summary :results="results.results" :description="results.description"></results-summary>
         <div style="position: relative">
-            <b-btn style="position: absolute; bottom: 1rem; right: 0.5rem" @click="toggleFacets()" v-if="!showFacets"
-                >Show Facets</b-btn
+            <button
+                type="button"
+                class="btn btn-secondary"
+                style="position: absolute; bottom: 1rem; right: 0.5rem"
+                @click="toggleFacets()"
+                v-if="!showFacets"
             >
+                Show Facets
+            </button>
         </div>
-        <b-row>
-            <b-col cols="12" md="8" xl="9" :class="{ 'col-md-12': !showFacets }">
+        <div class="row" style="padding-right: 0.5rem">
+            <div class="col-12 col-md-8 col-xl-9" :class="{ 'col-md-12': !showFacets }">
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
-                    <b-card
-                        no-body
-                        class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm"
+                    <div
+                        class="card philologic-occurrence ms-2 me-2 mb-4 shadow-sm"
                         v-for="(result, index) in results.results"
                         :key="result.philo_id.join('-')"
                         :data-index="index"
                     >
-                        <b-row no-gutters class="citation-container">
-                            <b-col cols="12" sm="10" md="11">
+                        <div class="row citation-container g-0">
+                            <div class="col-12 cpl-sm-10 col-md-11">
                                 <span class="cite">
                                     <span class="number">{{ description.start + index }}</span>
                                     <citations :citation="result.citation"></citations>
                                 </span>
-                            </b-col>
-                            <b-col sm="2" md="1" class="d-none d-sm-inline-block">
-                                <b-button class="more-context" @click="moreContext(index)">
+                            </div>
+                            <div class="col-sm-2 col-md-1 d-none d-sm-inline-block">
+                                <button
+                                    type="button"
+                                    class="btn btn-secondary more-context"
+                                    @click="moreContext(index)"
+                                >
                                     <span class="d-none d-lg-inline-block">More</span>
                                     <span class="d-lg-none">+</span>
-                                </b-button>
-                            </b-col>
-                        </b-row>
-                        <b-row>
-                            <b-col
-                                class="m-2 mt-3 concordance-text"
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div
+                                class="col m-2 mt-3 concordance-text"
                                 :position="results.description.start + index"
                                 @keyup="dicoLookup($event, result.metadata_fields.year)"
                             >
                                 <div class="default-length" v-html="result.context"></div>
                                 <div class="more-length"></div>
-                            </b-col>
-                        </b-row>
-                    </b-card>
+                            </div>
+                        </div>
+                    </div>
                 </transition-group>
-            </b-col>
-            <b-col md="4" xl="3" v-if="showFacets">
+            </div>
+            <div class="col col-md-4 col-xl-3" v-if="showFacets">
                 <facets></facets>
-            </b-col>
-        </b-row>
+            </div>
+        </div>
         <pages></pages>
-    </b-container>
+    </div>
 </template>
 
 <script>

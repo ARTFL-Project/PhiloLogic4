@@ -6,6 +6,7 @@ import struct
 from .HitWrapper import HitWrapper
 from philologic.utils import smash_accents
 
+
 obj_dict = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
 
 
@@ -139,6 +140,25 @@ class HitList(object):
         if self.sort_order:
             for hit in self.sorted_hitlist:
                 yield HitWrapper(hit, self.dbh)
+        # elif self.raw is True:
+        #     iter_position = 0
+        #     self.seek(iter_position)
+        #     while iter_position < self.count:
+        #         # while iter_position >= len(self):
+        #         #     if self.done:
+        #         #         print(iter_position)
+        #         #         raise IndexError
+        #         #     # else:
+        #         #     #     time.sleep(0.05)
+        #         #     #     self.update()
+        #         # if iter_position != self.position:
+        #         offset = self.hitsize * iter_position
+        #         self.fh.seek(offset)
+        #         # self.position = iter_position
+        #         buffer = self.fh.read(self.hitsize)
+        #         # self.position += 1
+        #         yield struct.unpack(self.format, buffer)
+        #         iter_position += 1
         else:
             self.update()
             iter_position = 0

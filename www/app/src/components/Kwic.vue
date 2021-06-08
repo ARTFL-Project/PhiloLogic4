@@ -1,9 +1,9 @@
 <template>
-    <b-container fluid>
+    <div class="container-fluid">
         <results-summary :results="results.results" :description="results.description"></results-summary>
-        <b-row>
-            <b-col cols="12" md="7" xl="8">
-                <b-card no-body class="p-2 ml-2 shadow-sm">
+        <div class="row">
+            <div class="col-12 col-md-7 col-xl-8">
+                <div class="card p-2 ml-2 shadow-sm">
                     <div class="p-2 mb-1">
                         Resort results by
                         <div
@@ -12,19 +12,30 @@
                             v-for="(fields, index) in sortingFields"
                             :key="index"
                         >
-                            <b-dropdown variant="outline-secondary" size="sm">
-                                <template slot="button-content">{{ sortingSelection[index] }}</template>
-                                <b-dropdown-item
-                                    v-for="(selection, fieldIndex) in fields"
-                                    :key="fieldIndex"
-                                    @click="updateSortingSelection(index, selection)"
-                                    >{{ selection.label }}</b-dropdown-item
+                            <div class="dropdown">
+                                <button
+                                    class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                    :id="`kwicDrop${index}`"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
                                 >
-                            </b-dropdown>
+                                    {{ sortingSelection[index] }}
+                                </button>
+                                <ul class="dropdown-menu" :aria-labelledby="`kwicDrop${index}`">
+                                    <li
+                                        class="dropdown-item"
+                                        v-for="(selection, fieldIndex) in fields"
+                                        :key="fieldIndex"
+                                        @click="updateSortingSelection(index, selection)"
+                                    >
+                                        {{ selection.label }}
+                                    </li>
+                                </ul>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm ms-1" @click="sortResults()">
+                                Sort
+                            </button>
                         </div>
-                        <b-button variant="secondary" type="button" class="ml-1" size="sm" @click="sortResults()"
-                            >Sort</b-button
-                        >
                     </div>
                     <div id="kwic-concordance">
                         <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
@@ -48,14 +59,14 @@
                             </div>
                         </transition-group>
                     </div>
-                </b-card>
-            </b-col>
-            <b-col md="5" xl="4">
+                </div>
+            </div>
+            <div class="col col-md-5 col-xl-4" md="5" xl="4">
                 <facets></facets>
-            </b-col>
-        </b-row>
+            </div>
+        </div>
         <pages></pages>
-    </b-container>
+    </div>
 </template>
 
 <script>

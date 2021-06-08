@@ -1,25 +1,25 @@
 <template>
     <div class="container-fluid mt-4">
-        <b-row id="toc-report-title" class="text-center pt-4">
-            <b-col offset="2" cols="8">
+        <div class="row text-center pt-4" id="toc-report-title">
+            <div class="col-8 offset-2">
                 <h5>
                     <citations :citation="textNavigationCitation"></citations>
                 </h5>
-            </b-col>
-        </b-row>
+            </div>
+        </div>
         <div class="text-center">
-            <b-row>
-                <b-col cols="12">
-                    <b-card no-body class="mt-4 mb-4 p-4 d-inline-block text-justify shadow" style="width: 100%">
-                        <b-button
+            <div class="row">
+                <div class="col-12">
+                    <div class="card mt-4 mb-4 p-4 d-inline-block text-justify shadow" style="width: 100%">
+                        <button
                             id="show-header"
-                            class="mb-2"
-                            variant="outline-secondary"
+                            class="btn btn-outline-secondary mb-2"
                             v-if="philoConfig.header_in_toc"
                             @click="toggleHeader()"
-                            >{{ headerButton }}</b-button
                         >
-                        <b-card no-body id="tei-header" class="shadow-sm" v-if="showHeader" v-html="teiHeader"></b-card>
+                            {{ headerButton }}
+                        </button>
+                        <div class="card shadow-sm" no-body id="tei-header" v-if="showHeader" v-html="teiHeader"></div>
                         <div id="toc-report" class="text-content-area">
                             <div id="toc-content" infinite-scroll="getMoreItems()" infinite-scroll-distance="4">
                                 <div v-for="(element, elIndex) in tocObject.toc" :key="elIndex">
@@ -33,9 +33,9 @@
                                 </div>
                             </div>
                         </div>
-                    </b-card>
-                </b-col>
-            </b-row>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- <access-control v-if="!authorized"></access-control> -->
     </div>

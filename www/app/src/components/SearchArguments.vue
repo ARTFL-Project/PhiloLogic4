@@ -1,45 +1,42 @@
 <template>
     <div id="search-arguments" class="pb-2">
         <div v-if="currentWordQuery !== ''">
-            Searching database for
+            Searching database for the term(s)
             <span v-if="approximate == 'yes'">
                 <b>{{ currentWordQuery }}</b> and the following similar terms:
             </span>
             <span v-if="approximate.length == 0 || approximate == 'no'"></span>
-            <b-button
-                variant="outline-secondary"
-                pill
-                size="sm"
-                class="term-groups"
-                v-for="(group, index) in wordGroups"
-                :key="index"
-            >
-                <a href @click.prevent="getQueryTerms(group, index)">{{ group }}</a>
+            <span class="rounded-pill term-groups" v-for="(group, index) in wordGroups" :key="index">
+                <a class="term-group-word" href @click.prevent="getQueryTerms(group, index)">{{ group }}</a>
                 <span class="close-pill" @click="removeTerm(index)">X</span>
-            </b-button>
+            </span>
             {{ queryArgs.proximity }}
-            <b-card no-body variant="outline-secondary" id="query-terms" style="display: none">
-                <b-button size="sm" class="close" @click="closeTermsList()">
+            <div class="card outline-secondary shadow" id="query-terms" style="display: none">
+                <button type="button" class="btn btn-secondary btn-sm close" @click="closeTermsList()">
                     <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </b-button>
-                <h6>The search terms query expanded to the following {{ words.length }} terms:</h6>
+                </button>
+                <h6 class="pe-4">The search terms query expanded to the following {{ words.length }} terms:</h6>
                 <h6 v-if="words.length > 100">100 most frequent terms displayed</h6>
-                <b-button size="sm" style="margin: 10px 0px" v-if="wordListChanged" @click="rerunQuery()"
-                    >Rerun query with the current modifications</b-button
+                <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    style="margin: 10px 0px"
+                    v-if="wordListChanged"
+                    @click="rerunQuery()"
                 >
-                <b-row id="query-terms-list">
-                    <b-col cols="3" v-for="word in words" :key="word">
-                        <b-card no-body class="query-terms-element">
-                            {{ word }}
-                            <b-button size="sm" class="close" @click="removeFromTermsList(word, groupIndexSelected)">
-                                <span aria-hidden="true">&times;</span>
-                                <span class="sr-only">Close</span>
-                            </b-button>
-                        </b-card>
-                    </b-col>
-                </b-row>
-            </b-card>
+                    Rerun query with the current modifications
+                </button>
+                <div class="row" id="query-terms-list">
+                    <div class="col-3" v-for="word in words" :key="word">
+                        <button class="rounded-pill term-groups">
+                            <span class="px-2">{{ word.replace(/"/g, "") }}</span>
+                            <span class="close-pill pe-1" @click="removeFromTermsList(word, groupIndexSelected)"
+                                >X</span
+                            >
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
         <div>
             Bibliography criteria:
@@ -110,6 +107,7 @@ export default {
             wordListChanged: false,
             restart: false,
             queryReport: this.$route.name,
+            termGroupsCopy: [],
         };
     },
     created() {
@@ -264,6 +262,9 @@ export default {
             var index = this.words.indexOf(word);
             this.words.splice(index, 1);
             this.wordListChanged = true;
+            if (this.termGroupsCopy.length == 0) {
+                this.termGroupsCopy = this.copyObject(this.wordGroups);
+            }
             if (this.termGroupsCopy[groupIndex].indexOf(" NOT ") !== -1) {
                 // if there's already a NOT in the clause add an OR
                 this.termGroupsCopy[groupIndex] += " | " + word.trim();
@@ -275,7 +276,7 @@ export default {
             this.approximate_ratio = "";
         },
         rerunQuery() {
-            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
+            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData, q: this.q }));
         },
         removeTerm(index) {
             let queryTermGroup = this.copyObject(this.description.termGroups);
@@ -336,12 +337,21 @@ export default {
 .term-groups {
     display: inline-block;
     position: relative;
+    border: 1px solid #ddd;
     line-height: 2;
-    padding: 0 20px 0 10px;
+    padding: 0 25px 0 0;
     margin: 5px 5px 5px 0px;
     white-space: inherit;
+    background-color: #fff;
 }
-.term-groups:hover {
+.term-group-word {
+    display: inline-block;
+    border-radius: 50rem 0 0 50rem !important;
+    height: 100%;
+    width: 100%;
+    padding-left: 0.5rem;
+}
+.term-group-word:hover {
     background-color: #e9ecef;
     color: initial;
 }
@@ -349,13 +359,11 @@ export default {
     position: absolute;
     right: 0;
     top: 0;
+    padding-left: 0.5rem;
     width: 1.6rem;
-    border-radius: 50rem !important;
+    border-radius: 0 50rem 50rem 0 !important;
     display: inline-block;
-}
-.close-pill:hover {
-    color: #fff;
-    background: #545b62;
+    border-left: solid 1px #888;
 }
 .metadata-args {
     border: 1px solid #ddd;
@@ -387,12 +395,14 @@ export default {
     border-bottom-right-radius: 50rem;
     padding: 0 0.5rem;
 }
-.remove-metadata:hover {
+.remove-metadata:hover,
+.close-pill:hover {
     background-color: #e9ecef;
     cursor: pointer;
 }
 .rounded-pill a {
     margin-right: 0.5rem;
+    text-decoration: none;
 }
 .metadata-label,
 .metadata-value,

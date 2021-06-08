@@ -1,41 +1,46 @@
 <template>
-    <b-container fluid>
+    <div class="container-fluid">
         <results-summary :results="results.results" :description="results.description"></results-summary>
-        <b-row class="mt-4">
-            <b-col cols="12" md="7" xl="8" v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'">
+        <div class="row mt-4" style="padding-right: 0.5rem">
+            <div
+                class="col-12 col-md-7 col-xl-8"
+                v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'"
+            >
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
-                    <b-card
-                        no-body
-                        class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm"
+                    <div
+                        class="card philologic-occurrence mx-2 mb-4 shadow-sm"
                         v-for="(result, index) in results.results"
                         :key="result.philo_id.join('-')"
                     >
-                        <b-row class="citation-container">
-                            <b-col cols="12" sm="10" md="11">
+                        <div class="row citation-container">
+                            <div class="col-12 col-sm-10 col-md-11">
                                 <span class="cite" :data-id="result.philo_id.join(' ')">
                                     <span class="number">{{ results.description.start + index }}</span>
                                     <input
                                         type="checkbox"
-                                        class="ml-3 mr-2"
+                                        class="ms-3 me-2"
                                         @click="addToSearch(result.metadata_fields.title)"
                                         v-if="resultType == 'doc' && philoConfig.metadata.indexOf('title') !== -1"
                                     />
                                     <citations :citation="result.citation"></citations>
                                 </span>
-                            </b-col>
-                        </b-row>
-                    </b-card>
+                            </div>
+                        </div>
+                    </div>
                 </transition-group>
-            </b-col>
-            <b-col cols="12" md="7" xl="8" v-if="philoConfig.dictionary_bibliography && results.result_type != 'doc'">
-                <b-list-group flush v-for="(group, groupKey) in results.results" :key="groupKey">
-                    <b-list-group-item
+            </div>
+            <div
+                class="col-12 col-md-7 col-xl-8"
+                v-if="philoConfig.dictionary_bibliography && results.result_type != 'doc'"
+            >
+                <div class="list-group" flush v-for="(group, groupKey) in results.results" :key="groupKey">
+                    <div
+                        class="list-group-item p-0"
                         v-for="(result, index) in group"
                         :key="index"
-                        class="p-0"
                         style="border-width: 0"
                     >
-                        <b-card no-body class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm">
+                        <div class="card philologic-occurrence mx-2 mb-4 shadow-sm">
                             <div class="citation-dico-container">
                                 <span class="cite" :data-id="result.philo_id.join(' ')">
                                     <span class="number">{{ results.description.start + index }}</span>
@@ -49,16 +54,16 @@
                             >
                                 <div v-html="result.context"></div>
                             </div>
-                        </b-card>
-                    </b-list-group-item>
-                </b-list-group>
-            </b-col>
-            <b-col md="5" xl="4">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col" md="5" xl="4">
                 <facets></facets>
-            </b-col>
-        </b-row>
+            </div>
+        </div>
         <pages></pages>
-    </b-container>
+    </div>
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";

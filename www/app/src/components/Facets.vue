@@ -1,38 +1,38 @@
 <template>
-    <div id="facet-search" class="d-xs-none mr-2">
-        <b-card no-body title="Title" header-tag="header" id="facet-panel-wrapper" class="shadow-sm">
-            <b-btn size="sm" style="position: absolute; top: 0; right: 0; line-height: 1" @click="toggleFacets()"
-                >x</b-btn
-            >
-            <h6 slot="header" class="mb-0 text-center">Browse by facet</h6>
-
+    <div id="facet-search" class="d-none d-sm-block mr-2">
+        <div class="card shadow-sm" title="Title" header-tag="header" id="facet-panel-wrapper">
+            <div class="card-header text-center">
+                <h6 class="mb-0">Browse by facet</h6>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm close-box" @click="toggleFacets()">x</button>
             <transition name="slide-fade">
-                <b-list-group flush id="select-facets" v-if="showFacetSelection">
+                <div class="list-group" flush id="select-facets" v-if="showFacetSelection">
                     <span class="dropdown-header text-center">Frequency by</span>
-                    <b-list-group-item
+                    <div
+                        class="list-group-item facet-selection"
                         v-for="facet in facets"
                         :key="facet.alias"
                         @click="getFacet(facet)"
-                        class="facet-selection"
-                        >{{ facet.alias }}</b-list-group-item
                     >
-                </b-list-group>
+                        {{ facet.alias }}
+                    </div>
+                </div>
             </transition>
             <transition name="slide-fade">
-                <b-list-group
-                    flush
-                    class="mt-1"
+                <div
+                    class="list-group list-group-flush mt-1"
                     style="border-top: 0"
                     v-if="showFacetSelection && report != 'bibliography'"
                 >
                     <span class="dropdown-header text-center">Collocates of query term(s)</span>
-                    <b-list-group-item
+                    <div
+                        class="list-group-item facet-selection"
                         @click="getFacet(collocationFacet)"
                         v-if="report !== 'bibliography'"
-                        class="facet-selection"
-                        >{{ collocationFacet.alias }}</b-list-group-item
                     >
-                </b-list-group>
+                        {{ collocationFacet.alias }}
+                    </div>
+                </div>
             </transition>
             <transition name="options-slide">
                 <div
@@ -44,51 +44,59 @@
                     Show Options
                 </div>
             </transition>
-        </b-card>
-        <div class="d-flex justify-content-center position-relative" v-if="loading">
-            <b-spinner
-                variant="secondary"
-                style="width: 4rem; height: 4rem; position: absolute; z-index: 50; top: 10px"
-            ></b-spinner>
         </div>
-        <b-card no-body id="facet-results" class="mt-3 shadow-sm" v-if="showFacetResults">
-            <h6 slot="header" class="mb-0 text-center">
-                <span>Frequency by {{ selectedFacet.alias }}</span>
-                <b-button size="sm" variant="outline-secondary" class="close-box" @click="hideFacets()">x</b-button>
-            </h6>
-            <b-button-group
-                class="shadow-sm"
-                size="sm"
+        <div class="d-flex justify-content-center position-relative" v-if="loading">
+            <div
+                class="spinner-border text-secondary"
+                role="status"
+                style="width: 4rem; height: 4rem; position: absolute; z-index: 50; top: 10px"
+            >
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <div class="card mt-3 shadow-sm" id="facet-results" v-if="showFacetResults">
+            <div class="card-header text-center">
+                <h6 class="mb-0">Frequency by {{ selectedFacet.alias }}</h6>
+                <button type="button" class="btn btn-secondary btn-sm close-box" @click="hideFacets()">x</button>
+            </div>
+            <div
+                class="btn-group btn-group-sm shadow-sm"
+                role="group"
                 v-if="percent == 100 && report !== 'bibliography' && facet.type === 'facet'"
             >
-                <b-button
-                    variant="light"
+                <button
+                    type="button"
+                    class="btn btn-light"
                     :class="{ active: showingRelativeFrequencies === false }"
                     @click="displayAbsoluteFrequencies()"
-                    >Absolute Frequency</b-button
                 >
-                <b-button
-                    variant="light"
+                    Absolute Frequency
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-light"
                     :class="{ active: showingRelativeFrequencies }"
                     @click="displayRelativeFrequencies()"
-                    >Relative Frequency</b-button
                 >
-            </b-button-group>
+                    Relative Frequency
+                </button>
+            </div>
             <div class="m-2 text-center" style="opacity: 0.5">Top 500 results for {{ selectedFacet.alias }}</div>
-            <b-progress
+            <div
+                class="progress my-3 mb-3"
                 :max="resultsLength"
                 show-progress
                 variant="secondary"
-                class="ml-3 mr-3 mb-3"
                 v-if="percent != 100"
             >
-                <b-progress-bar
+                <div
+                    class="progress-bar"
                     :value="runningTotal"
                     :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
-                ></b-progress-bar>
-            </b-progress>
-            <b-list-group flush>
-                <b-list-group-item v-for="result in facetResults" :key="result.label">
+                ></div>
+            </div>
+            <div class="list-group" flush>
+                <div class="list-group-item" v-for="result in facetResults" :key="result.label">
                     <div>
                         <a
                             href
@@ -104,7 +112,7 @@
                             @click.prevent="collocationToConcordance(result.label)"
                             >{{ result.label }}</a
                         >
-                        <b-badge variant="secondary" pill class="float-right">{{ result.count }}</b-badge>
+                        <div class="badge bg-secondary rounded-pill float-end">{{ result.count }}</div>
                     </div>
                     <div
                         style="line-height: 70%; padding-bottom: 15px; font-size: 85%"
@@ -116,9 +124,9 @@
                             {{ fullRelativeFrequencies[result.label].total_count }} words
                         </div>
                     </div>
-                </b-list-group-item>
-            </b-list-group>
-        </b-card>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
@@ -381,7 +389,7 @@ export default {
 <style thisd>
 .close-box {
     position: absolute;
-    padding: 0px 5px;
+    line-height: 1.9;
     top: 0;
     right: 0;
 }

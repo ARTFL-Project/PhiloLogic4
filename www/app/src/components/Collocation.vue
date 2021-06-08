@@ -1,43 +1,53 @@
 <template>
-    <b-container fluid>
-        <div id="collocation-container" class="mt-4 ml-2 mr-2" v-if="authorized">
-            <results-summary
-                :results="results.results"
-                :description="results.description"
-                :running-total="runningTotal"
-                :filter-list="filterList"
-            ></results-summary>
-            <b-row class="mt-4" v-if="resultsLength">
-                <b-col cols="12" sm="4">
-                    <b-card no-body class="shadow-sm">
-                        <b-table
-                            hover
-                            striped
-                            borderless
-                            caption-top
-                            :items="sortedList"
-                            @row-clicked="collocTableClick"
-                        ></b-table>
-                    </b-card>
-                </b-col>
-                <b-col cols="12" sm="8">
-                    <b-card no-body class="p-3 shadow-sm">
-                        <div class="card-text">
-                            <span
-                                class="cloud-word"
-                                v-for="word in collocCloudWords"
-                                :key="word.word"
-                                :style="getWordCloudStyle(word)"
+    <div class="container-fluid mt-4" v-if="authorized">
+        <results-summary
+            :results="results.results"
+            :description="results.description"
+            :running-total="runningTotal"
+            :filter-list="filterList"
+        ></results-summary>
+        <div class="row mt-4 pe-1" style="padding: 0 0.5rem" v-if="resultsLength">
+            <div class="col-12 col-sm-4">
+                <div class="card shadow-sm">
+                    <table class="table table-hover table-striped table-borderless caption-top">
+                        <thead>
+                            <tr style="line-height: 2rem">
+                                <th scope="col">Collocate</th>
+                                <th scope="col">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                style="line-height: 2rem"
+                                v-for="word in sortedList"
+                                :key="word.collocate"
                                 @click="collocTableClick(word)"
-                                >{{ word.collocate }}</span
                             >
-                        </div>
-                    </b-card>
-                </b-col>
-            </b-row>
-            <!-- <access-control v-if="!authorized"></access-control> -->
+                                <td>{{ word.collocate }}</td>
+                                <td>{{ word.count }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-12 col-sm-8">
+                >
+                <div class="card p-3 shadow-sm">
+                    <div class="card-text">
+                        <span
+                            class="cloud-word"
+                            v-for="word in collocCloudWords"
+                            :key="word.word"
+                            :style="getWordCloudStyle(word)"
+                            @click="collocTableClick(word)"
+                            >{{ word.collocate }}</span
+                        >
+                    </div>
+                </div>
+            </div>
         </div>
-    </b-container>
+        <!-- <access-control v-if="!authorized"></access-control> -->
+    </div>
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";

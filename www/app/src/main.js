@@ -1,13 +1,12 @@
 import Vue from 'vue'
-import BootstrapVue from 'bootstrap-vue'
 import vueScrollTo from 'vue-scrollto'
 import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from 'axios'
+import "bootstrap"
 
 import appConfig from "../appConfig.json"
-// import baseUrl from '../baseURL'
 
 
 // Vue.config.productionTip = false
@@ -178,8 +177,6 @@ Vue.directive('scroll', {
         window.removeEventListener("scroll", el.scrollHandler)
     }
 })
-
-Vue.use(BootstrapVue)
 
 axios
     .get(`${appConfig.dbUrl}/scripts/get_web_config.py`, {

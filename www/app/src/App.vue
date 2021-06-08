@@ -4,9 +4,9 @@
         <SearchForm v-if="authorized" />
         <router-view :key="$route.fullPath" v-if="authorized"></router-view>
         <access-control :client-ip="clientIp" :domain-name="domainName" :authorized="authorized" v-if="!authorized" />
-        <b-container fluid v-if="authorized">
+        <div class="container-fluid" v-if="authorized">
             <div class="text-center mb-4">
-                <hr width="20%" />
+                <hr class="mb-3" width="20%" style="margin: auto" />
                 Powered by
                 <br />
                 <a
@@ -16,7 +16,7 @@
                     <img src="./assets/philo.png" height="40" width="110" />
                 </a>
             </div>
-        </b-container>
+        </div>
     </div>
 </template>
 
@@ -192,6 +192,9 @@ export default {
 @import "../node_modules/bootstrap/scss/bootstrap.scss";
 </style>
 <style>
+a {
+    text-decoration: none;
+}
 .btn:focus {
     box-shadow: none !important;
 }

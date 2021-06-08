@@ -1,16 +1,25 @@
 <template>
-    <div>
-        <p v-if="report == 'concordance' || report == 'kwic' || report == 'bibliography'">
-            ONLY results from the current page will be generated.
-        </p>
-        <div v-if="report == 'concordance' || report == 'kwic'">
-            <h6>With text in HTML:</h6>
-            <b-button @click="getResults('json', false)">JSON</b-button>&nbsp;
-            <b-button @click="getResults('csv', false)">CSV</b-button>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Results</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p v-if="report == 'concordance' || report == 'kwic' || report == 'bibliography'">
+                    ONLY results from the current page will be generated.
+                </p>
+                <div v-if="report == 'concordance' || report == 'kwic'">
+                    <h6>With text in HTML:</h6>
+                    <button type="button" class="btn btn-secondary" @click="getResults('json', false)">JSON</button
+                    >&nbsp;
+                    <button type="button" class="btn btn-secondary" @click="getResults('csv', false)">CSV</button>
+                </div>
+                <h6 class="mt-2" v-if="report == 'concordance' || report == 'kwic'">With plain text:</h6>
+                <button type="button" class="btn btn-secondary" @click="getResults('json', true)">JSON</button>&nbsp;
+                <button type="button" class="btn btn-secondary" @click="getResults('csv', true)">CSV</button>
+            </div>
         </div>
-        <h6 class="mt-2" v-if="report == 'concordance' || report == 'kwic'">With plain text:</h6>
-        <b-button @click="getResults('json', true)">JSON</b-button>&nbsp;
-        <b-button @click="getResults('csv', true)">CSV</b-button>
     </div>
 </template>
 <script>

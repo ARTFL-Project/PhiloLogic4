@@ -1,21 +1,22 @@
 <template>
     <div id="page-links" class="mt-4 pb-4 text-center" v-if="pages.length > 0">
-        <b-row>
-            <b-col cols="12" sm="10" offset-sm="1" md="8" offset-md="2">
-                <b-button-group class="shadow">
-                    <b-button
+        <div class="row">
+            <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2">
+                <div class="btn-group shadow" role="group">
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
                         v-for="page in pages"
                         :key="page.display"
                         :class="page.active"
-                        variant="outline-secondary"
                         @click="goToPage(page.start, page.end)"
                     >
                         <span class="page-number">{{ page.display }}</span>
                         <span class="page-range">{{ page.range }}</span>
-                    </b-button>
-                </b-button-group>
-            </b-col>
-        </b-row>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
@@ -138,7 +139,6 @@ export default {
 <style scoped>
 .page {
     transition: width 0.4s ease !important;
-    /* overflow: hidden; */
 }
 .btn {
     line-height: initial !important;

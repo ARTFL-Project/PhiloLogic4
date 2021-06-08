@@ -1,27 +1,38 @@
 <template>
-    <div id="results-summary-container" class="mt-4 ml-2 mr-2">
-        <b-card no-body class="shadow-sm px-3 py-2">
+    <div id="results-summary-container" class="mt-4 ms-2 me-2">
+        <div class="card shadow-sm px-3 py-2">
             <div id="initial_report">
                 <div id="description">
-                    <b-button variant="outline-primary" size="sm" id="export-results" v-b-modal.export-modal
-                        >Export results</b-button
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        id="export-results"
+                        data-bs-toggle="modal"
+                        data-bs-target="#export-modal"
                     >
-                    <b-modal id="export-modal" title="Export Results" hide-footer>
+                        Export results
+                    </button>
+                    <div class="modal fade" tabindex="-1" id="export-modal" title="Export Results">
                         <export-results></export-results>
-                    </b-modal>
+                    </div>
                     <search-arguments :result-start="descriptionStart" :result-end="descriptionEnd"></search-arguments>
                     <div v-if="['concordance', 'kwic', 'bibliography'].includes(report)">
                         <div id="result-stats" class="pb-2">
                             {{ resultsLength }} total occurrences spread across
                             <div class="d-inline-block" style="position: relative" v-if="!hitlistStatsDone">
-                                <b-spinner
-                                    variant="secondary"
+                                <div
+                                    class="spinner-border text-secondary"
+                                    role="status"
                                     style="position: absolute; width: 2rem; height: 2rem; z-index: 50; bottom: -0.75rem"
-                                ></b-spinner>
+                                >
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
                             </div>
                             <span v-if="hitlistStatsDone">
                                 <span v-for="(stat, statIndex) in statsDescription" :key="stat.field">
-                                    <router-link :to="`/aggregation?${stat.link}&group_by=${stat.field}`"
+                                    <router-link
+                                        :to="`/aggregation?${stat.link}&group_by=${stat.field}`"
+                                        class="stat-link"
                                         >{{ stat.count }} {{ stat.label }}(s)</router-link
                                     >
                                     <span v-if="statIndex != statsDescription.length - 1">&nbsp;and&nbsp;</span>
@@ -35,14 +46,15 @@
                             <b v-else>No results for your query</b>
                             <span v-if="report != 'bibliography'">
                                 from these
-                                <b-button
-                                    pill
-                                    size="sm"
-                                    variant="outline-secondary"
+                                <button
+                                    type="button"
+                                    class="btn rounded-pill btn-outline-secondary btn-sm"
                                     style="margin-top: -0.05rem"
-                                    v-b-modal.results-bibliography
-                                    >titles</b-button
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#results-bibliography"
                                 >
+                                    titles
+                                </button>
                             </span>
                         </div>
                     </div>
@@ -56,18 +68,24 @@
                         </div>
                     </div>
                     <div v-if="report == 'collocation'">
-                        <b-progress
+                        <div
+                            class="progress ms-3 me-3 mb-3"
                             :max="resultsLength"
                             show-progress
                             variant="secondary"
-                            class="ml-3 mr-3 mb-3"
                             v-if="runningTotal != resultsLength"
                         >
-                            <b-progress-bar
+                            <div
+                                class="progress-bar"
+                                role="progressbar"
+                                :aria-valuenow="runningTotal"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
                                 :value="runningTotal"
-                                :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
-                            ></b-progress-bar>
-                        </b-progress>
+                            >
+                                {{ ((runningTotal / resultsLength) * 100).toFixed(2) }}%
+                            </div>
+                        </div>
                         <div>
                             <span>
                                 <span tooltip tooltip-title="Click to display filtered words">
@@ -84,66 +102,84 @@
                                     are being filtered from this report.
                                 </span>
                             </span>
-                            <b-card no-body id="filter-list" class="pl-3 pr-3 pb-3 shadow-lg" v-if="showFilteredWords">
-                                <b-button id="close-filter-list" @click="toggleFilterList()"> &times; </b-button>
-                                <b-row class="mt-4">
-                                    <b-col v-for="wordGroup in splittedFilterList" :key="wordGroup[0]">
-                                        <b-list-group flush>
-                                            <b-list-group-item v-for="word in wordGroup" :key="word">{{
-                                                word
-                                            }}</b-list-group-item>
-                                        </b-list-group>
-                                    </b-col>
-                                </b-row>
-                            </b-card>
+                            <div class="card ps-3 pe-3 pb-3 shadow-lg" id="filter-list" v-if="showFilteredWords">
+                                <button
+                                    type="button"
+                                    class="btn btn-primary"
+                                    id="close-filter-list"
+                                    @click="toggleFilterList()"
+                                >
+                                    &times;
+                                </button>
+                                <div class="row mt-4">
+                                    <div class="col" v-for="wordGroup in splittedFilterList" :key="wordGroup[0]">
+                                        <div class="list-group list-group-flush">
+                                            <div class="list-group-item" v-for="word in wordGroup" :key="word">
+                                                {{ word }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div v-if="report == 'time_series'">
-                        <b-progress
+                        <div
+                            class="progress ms-3 me-3 mb-3"
                             :max="resultsLength"
                             show-progress
                             variant="secondary"
-                            class="ml-3 mr-3 mb-3"
                             v-if="runningTotal != resultsLength"
                         >
-                            <b-progress-bar
+                            <div
+                                class="progress-bar"
                                 :value="runningTotal"
                                 :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
-                            ></b-progress-bar>
-                        </b-progress>
+                            ></div>
+                        </div>
                     </div>
                 </div>
-                <b-button
-                    variant="outline-secondary"
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
                     v-if="!showFacetedBrowsing && facets.length < 1"
                     @click="showFacets()"
-                    >Show Facets</b-button
                 >
+                    Show Facets
+                </button>
             </div>
-            <b-modal
-                size="xl"
-                scrollable
-                hide-footer
-                title="Bibliography of results on this page"
-                id="results-bibliography"
-            >
-                <results-bibliography :results="results"></results-bibliography>
-            </b-modal>
-        </b-card>
-        <b-row class="d-xs-none mt-4 mb-3" id="act-on-report" v-if="report == 'concordance' || report == 'kwic'">
-            <b-col sm="7" lg="8" v-if="['concordance', 'kwic'].includes(report)">
-                <b-button-group id="report_switch">
-                    <b-button :class="{ active: report === 'concordance' }" @click="switchReport('concordance')">
-                        <span class="d-xs-none d-sm-none d-md-inline">{{ reportSwitch.concordance.labelBig }}</span>
-                        <span class="d-xs-inline d-sm-inline d-md-none">{{ reportSwitch.concordance.labelSmall }}</span>
-                    </b-button>
-                    <b-button :class="{ active: report === 'kwic' }" @click="switchReport('kwic')">
-                        <span class="d-xs-none d-sm-none d-md-inline">{{ reportSwitch.kwic.labelBig }}</span>
-                        <span class="d-xs-inline d-sm-inline d-md-none">{{ reportSwitch.kwic.labelSmall }}</span>
-                    </b-button>
-                </b-button-group>
-            </b-col>
-        </b-row>
+            <div class="modal fade" tabindex="-1" id="results-bibliography">
+                <results-bibliography :results="results" v-if="results"></results-bibliography>
+            </div>
+        </div>
+        <div
+            class="row d-none d-sm-block mt-4 mb-3"
+            id="act-on-report"
+            v-if="report == 'concordance' || report == 'kwic'"
+        >
+            <div class="col col-sm-7 col-lg-8" v-if="['concordance', 'kwic'].includes(report)">
+                <div class="btn-group" role="group" id="report_switch">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        :class="{ active: report === 'concordance' }"
+                        @click="switchReport('concordance')"
+                    >
+                        <span class="d-none d-sm-none d-md-inline">{{ reportSwitch.concordance.labelBig }}</span>
+                        <span class="d-inline d-sm-inline d-md-none">{{ reportSwitch.concordance.labelSmall }}</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        :class="{ active: report === 'kwic' }"
+                        @click="switchReport('kwic')"
+                    >
+                        <span class="d-none d-sm-none d-md-inline">{{ reportSwitch.kwic.labelBig }}</span>
+                        <span class="d-inline d-sm-inline d-md-none">{{ reportSwitch.kwic.labelSmall }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -380,5 +416,8 @@ export default {
 #filter-list .list-group-item {
     border-width: 0px;
     padding: 0.1rem;
+}
+.stat-link {
+    text-decoration: none;
 }
 </style>

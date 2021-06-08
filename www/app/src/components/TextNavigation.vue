@@ -1,32 +1,50 @@
 <template>
     <div class="container-fluid mt-4" v-if="authorized">
-        <b-row>
-            <b-col cols="8" offset="2">
+        <div class="row">
+            <div class="col-8 offset-2">
                 <div id="object-title" class="text-center pt-4">
                     <h5>
                         <citations :citation="textNavigationCitation"></citations>
                     </h5>
                 </div>
-            </b-col>
-        </b-row>
-        <b-row id="toc-wrapper" class="text-center mt-4" v-if="navBar === true || loading === false">
+            </div>
+        </div>
+        <div class="row text-center mt-4" id="toc-wrapper" v-if="navBar === true || loading === false">
             <div id="toc-top-bar">
                 <div id="nav-buttons" v-scroll="handleScroll">
-                    <b-button id="back-to-top" size="sm" @click="backToTop()">
-                        <span class="d-xs-none d-sm-inline-block">Back to top</span>
-                        <span class="d-xs-inline-block d-sm-none">Top</span>
-                    </b-button>
-                    <b-button-group size="sm" style="pointer-events: all">
-                        <b-button disabled="disabled" id="prev-obj" @click="goToTextObject(textObject.prev)"
-                            >&lt;</b-button
+                    <button type="button" class="btn btn-secondary btn-sm" id="back-to-top" @click="backToTop()">
+                        <span class="d-none d-sm-inline-block">Back to top</span>
+                        <span class="d-inline-block d-sm-none">Top</span>
+                    </button>
+                    <div class="btn-group btn-group-sm" style="pointer-events: all">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            disabled
+                            id="prev-obj"
+                            @click="goToTextObject(textObject.prev)"
                         >
-                        <b-button id="show-toc" disabled="disabled" @click="toggleTableOfContents()"
-                            >Table of contents</b-button
+                            &lt;
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            id="show-toc"
+                            disabled
+                            @click="toggleTableOfContents()"
                         >
-                        <b-button disabled="disabled" id="next-obj" @click="goToTextObject(textObject.next)"
-                            >&gt;</b-button
+                            Table of contents
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            disabled
+                            id="next-obj"
+                            @click="goToTextObject(textObject.next)"
                         >
-                    </b-button-group>
+                            &gt;
+                        </button>
+                    </div>
                     <a
                         id="report-error"
                         class="btn btn-secondary btn-sm position-absolute"
@@ -38,23 +56,24 @@
                 </div>
                 <div id="toc">
                     <div id="toc-titlebar" class="d-none">
-                        <b-button id="hide-toc" @click="toggleTableOfContents()">X</b-button>
+                        <button type="button" class="btn btn-secondary" id="hide-toc" @click="toggleTableOfContents()">
+                            X
+                        </button>
                     </div>
                     <transition name="slide-fade">
-                        <b-card
-                            no-body
+                        <div
+                            class="card p-3 shadow"
                             id="toc-content"
-                            class="p-3 shadow"
                             :style="tocHeight"
                             :scroll-to="tocPosition"
                             v-if="tocOpen"
                         >
                             <div class="toc-more before" v-if="start !== 0">
-                                <b-button
+                                <button
                                     type="button"
                                     class="btn btn-default btn-sm glyphicon glyphicon-menu-up"
                                     @click="loadBefore()"
-                                ></b-button>
+                                ></button>
                             </div>
                             <div v-for="(element, tocIndex) in tocElementsToDisplay" :key="tocIndex">
                                 <div
@@ -69,32 +88,28 @@
                                 </div>
                             </div>
                             <div class="toc-more after" v-if="end < tocElements.length">
-                                <b-button
+                                <button
                                     type="button"
                                     class="btn btn-default btn-sm glyphicon glyphicon-menu-down"
                                     @click="loadAfter()"
-                                ></b-button>
+                                ></button>
                             </div>
-                        </b-card>
+                        </div>
                     </transition>
                 </div>
             </div>
-        </b-row>
+        </div>
         <div style="font-size: 80%; text-align: center" v-if="philoConfig.dictionary_lookup != ''">
             To look up a word in a dictionary, select the word with your mouse and press 'd' on your keyboard.
         </div>
-        <b-row id="all-content" loading="loading">
-            <b-col
-                cols="12"
-                sm="10"
-                offset-sm="1"
-                lg="8"
-                offset-lg="2"
+        <div class="row" id="all-content" loading="loading">
+            <div
+                class="col-12 col-sm-10 offset-sm-1 col-lg-8 offset-lg-2"
                 id="center-content"
                 v-if="textObject.text"
                 style="text-align: center"
             >
-                <b-card no-body class="mt-2 mb-4 p-4 shadow d-inline-block">
+                <div class="card mt-2 mb-4 p-4 shadow d-inline-block">
                     <div id="book-page">
                         <div id="previous-pages" v-if="beforeObjImgs">
                             <span class="xml-pb-image">
@@ -149,9 +164,9 @@
                             ></a>
                         </div>
                     </div>
-                </b-card>
-            </b-col>
-        </b-row>
+                </div>
+            </div>
+        </div>
         <!-- <access-control v-if="!authorized"></access-control> -->
         <div
             id="blueimp-gallery"

@@ -24,10 +24,6 @@ a { color: $link-color !important}
 a.btn-secondary {
     color: #fff !important;
 }
-.metadata-label, .remove-metadata:hover {
-    background-color: $button-color !important;
-    color: #fff;
-}
 .number,
 .card-header {
     background-color: $header-color !important; 
@@ -38,8 +34,12 @@ a.btn-secondary {
     background-color: #fff !important;
     border-color: $link-color !important;
 }
-.metadata-args, .remove-metadata {
+.metadata-args, .remove-metadata, .term-groups, .close-pill {
     border-color: $link-color !important;
+}
+.metadata-label, .remove-metadata:hover, .term-group-word:hover, .close-pill:hover {
+    background-color: $button-color !important;
+    color: #fff !important;
 }
 .custom-control-label::after {
     background-color: $button-color !important;

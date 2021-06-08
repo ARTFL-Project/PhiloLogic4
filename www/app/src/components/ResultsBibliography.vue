@@ -1,13 +1,25 @@
 <template>
-    <ul id="results-bibliography">
-        <li class="result" v-for="(result, resultIndex) in uniquedResults" :key="resultIndex">
-            <citations :citation="result.citation"></citations>
-            <br />
-            <b-button variant="secondary" size="sm" pill :to="`/${report}?${buildLink(result.metadata_fields.title)}`"
-                >{{ result.count }} occurrence(s)</b-button
-            >
-        </li>
-    </ul>
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="biblio-modal-title">Bibliography of results on this page</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul id="results-bibliography">
+                    <li class="result" v-for="(result, resultIndex) in uniquedResults" :key="resultIndex">
+                        <citations :citation="result.citation"></citations>
+                        <br />
+                        <router-link :to="`/${report}?${buildLink(result.metadata_fields.title)}`">
+                            <button type="button" class="btn rounded-pill btn-secondary btn-sm">
+                                {{ result.count }} occurrence(s)
+                            </button>
+                        </router-link>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </template>
 <script>
 import citations from "./Citations";

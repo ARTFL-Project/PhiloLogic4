@@ -1,49 +1,51 @@
 <template>
     <div>
-        <b-card no-body class="shadow" style="border: transparent">
-            <b-form @submit.prevent @reset="onReset" @keyup.enter="onSubmit()">
+        <div class="card shadow" style="border: transparent">
+            <form @submit.prevent @reset="onReset" @keyup.enter="onSubmit()">
                 <div id="form-body">
                     <div id="initial-form">
-                        <b-button-group id="report" style="width: 100%; top: -1px">
-                            <b-button
+                        <div class="btn-group" role="group" id="report" style="width: 100%; top: -1px">
+                            <button
+                                type="button"
                                 :id="report.value"
                                 v-for="searchReport in reports"
                                 @click="reportChange(searchReport.value)"
                                 :key="searchReport.value"
+                                class="btn btn-secondary rounded-0"
                                 :class="{ active: currentReport == searchReport.value }"
-                                squared
-                                ><span v-if="searchReport.value != 'kwic'">{{ searchReport.label }}</span>
+                            >
+                                <span v-if="searchReport.value != 'kwic'">{{ searchReport.label }}</span>
                                 <span v-else
                                     ><span class="d-md-inline d-sm-none">Keyword In Context</span
                                     ><span class="d-md-none">{{ searchReport.label }}</span></span
                                 >
-                            </b-button>
-                        </b-button-group>
+                            </button>
+                        </div>
                         <div id="search_terms_container" class="p-3">
-                            <b-row id="search_terms">
-                                <b-col cols="12" md="8">
-                                    <b-input-group id="q-group">
-                                        <b-input-group-prepend>
-                                            <b-button variant="outline-secondary">Search Terms</b-button>
-                                            <b-button
-                                                v-b-modal.search-tips
-                                                variant="outline-info"
-                                                @mouseover="showTips = true"
-                                                @mouseleave="showTips = false"
-                                            >
-                                                <span v-if="!showTips">?</span>
-                                                <span v-if="showTips">Tips</span>
-                                            </b-button>
-                                        </b-input-group-prepend>
-
-                                        <b-form-input
+                            <div class="row" id="search_terms">
+                                <div class="cols-12 cols-md-8">
+                                    <div class="input-group" id="q-group">
+                                        <button class="btn btn-outline-secondary" type="button">Search Terms</button>
+                                        <button
+                                            class="btn btn-outline-info"
+                                            type="button"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#search-tips"
+                                            @mouseover="showTips = true"
+                                            @mouseleave="showTips = false"
+                                        >
+                                            <span v-if="!showTips">?</span>
+                                            <span v-if="showTips">Tips</span>
+                                        </button>
+                                        <input
                                             type="text"
-                                            v-model.lazy="queryTermTyped"
+                                            class="form-control"
+                                            v-model="queryTermTyped"
                                             @input="onChange('q')"
-                                            @keyup.down.native="onArrowDown('q')"
-                                            @keyup.up.native="onArrowUp('q')"
-                                            @keyup.enter.native="onEnter('q')"
-                                        ></b-form-input>
+                                            @keyup.down="onArrowDown('q')"
+                                            @keyup.up="onArrowUp('q')"
+                                            @keyup.enter="onEnter('q')"
+                                        />
                                         <ul
                                             id="autocomplete-q"
                                             class="autocomplete-results shadow"
@@ -60,54 +62,64 @@
                                                 v-html="result"
                                             ></li>
                                         </ul>
-                                        <b-input-group-append>
-                                            <b-button variant="secondary" id="button-search" @click="onSubmit()"
-                                                >Search</b-button
-                                            >
-                                        </b-input-group-append>
-                                    </b-input-group>
-                                </b-col>
-                            </b-row>
-                            <div class="mt-2">
-                                <b-form-checkbox
+                                        <button class="btn btn-secondary" id="button-search" @click="onSubmit()">
+                                            Search
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <div
+                                    class="form-check form-switch form-check-inline"
                                     id="approximate"
-                                    style="display: inline-block; height: 31px"
-                                    v-model="approximateSelected"
-                                    value="yes"
-                                    switch
-                                    unchecked-value="no"
-                                    @change="approximateChange(approximateSelected)"
-                                    >Approximate match</b-form-checkbox
+                                    style="height: 31px"
                                 >
-                                <b-form-select
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        id="approximate-input"
+                                        v-model="approximateSelected"
+                                        @change="approximateChange(approximateSelected)"
+                                    />
+                                    <label class="form-check-label" for="approximate-input"> Approximate match </label>
+                                </div>
+                                <select
+                                    class="form-select form-select-sm d-inline-block"
                                     style="max-width: fit-content; margin-left: 0.5rem"
-                                    :options="approximateValues"
                                     v-model="approximate_ratio"
-                                    size="sm"
-                                ></b-form-select>
-                                <span id="method-args" class="pl-2" v-if="currentReport != 'collocation'">
-                                    <b-form-select
+                                    v-if="approximateSelected"
+                                    aria-label=".form-select-sm"
+                                >
+                                    <option v-for="value in approximateValues" :key="value.value" :value="value.value">
+                                        {{ value.text }}
+                                    </option>
+                                    >
+                                </select>
+                                <span id="method-args" class="ps-2" v-if="currentReport != 'collocation'">
+                                    <select
+                                        class="form-select form-select-sm d-inline-block"
                                         style="max-width: fit-content; height: 31px"
                                         v-model="method"
-                                        :options="methodOptions"
-                                        size="sm"
-                                    ></b-form-select>
+                                        aria-label=".form-select-sm"
+                                    >
+                                        <option v-for="value in methodOptions" :key="value.value" :value="value.value">
+                                            {{ value.text }}
+                                        </option>
+                                    </select>
                                     <input
+                                        class="form-control d-inline-block mx-1"
                                         type="text"
                                         name="arg_proxy"
-                                        class="d-inline-block mx-1"
                                         style="width: 50px; text-align: center; height: 31px"
                                         v-model="arg_proxy"
-                                        size="sm"
                                         v-if="method == 'proxy'"
                                     />
                                     <input
+                                        class="form-control d-inline-block mx-1"
                                         type="text"
                                         name="arg_phrase"
-                                        class="d-inline-block mx-1"
                                         style="width: 50px; text-align: center; height: 31px"
                                         v-model="arg_phrase"
-                                        size="sm"
                                         v-if="method == 'phrase'"
                                     />
                                     <span v-if="method != 'cooc'"> words in the same sentence</span></span
@@ -116,11 +128,9 @@
                         </div>
                         <div id="head-search-container" class="px-3 pt-1 pb-3" v-if="dictionary">
                             <div class="input-group" id="head-group">
-                                <div class="input-group-prepend">
-                                    <b-button variant="outline-secondary">{{
-                                        metadataDisplay[headIndex].label
-                                    }}</b-button>
-                                </div>
+                                <button type="button" class="btn btn-outline-secondary">
+                                    {{ metadataDisplay[headIndex].label }}
+                                </button>
                                 <input
                                     type="text"
                                     class="form-control"
@@ -153,22 +163,28 @@
                             </div>
                         </div>
                         <div id="search-buttons">
-                            <b-button-group>
-                                <b-button type="reset" id="reset_form" variant="outline-secondary" @click="onReset()"
-                                    >Clear</b-button
+                            <div class="input-group">
+                                <button
+                                    type="reset"
+                                    id="reset_form"
+                                    class="btn btn-outline-secondary"
+                                    @click="onReset()"
                                 >
-                                <b-button
+                                    Clear
+                                </button>
+                                <button
                                     type="button"
                                     id="show-search-form"
-                                    variant="secondary"
+                                    class="btn btn-secondary"
                                     @click="toggleForm()"
-                                    >{{ searchOptionsButton }}</b-button
                                 >
-                            </b-button-group>
+                                    {{ searchOptionsButton }}
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <transition name="slide-fade">
-                        <div id="search-elements" v-if="formOpen" class="pl-3 pr-3 pb-3 shadow">
+                        <div id="search-elements" v-if="formOpen" class="ps-3 pe-3 pb-3 shadow">
                             <div class="mt-2">
                                 <h6>Filter by metadata field:</h6>
                                 <div
@@ -177,13 +193,13 @@
                                     :key="localField.value"
                                     :id="localField.value + '-group'"
                                 >
-                                    <b-input-group-prepend>
-                                        <b-button
-                                            variant="outline-secondary"
-                                            v-if="metadataInputStyle[localField.value] != 'checkbox'"
-                                            >{{ localField.label }}</b-button
-                                        >
-                                    </b-input-group-prepend>
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        v-if="metadataInputStyle[localField.value] != 'checkbox'"
+                                    >
+                                        {{ localField.label }}
+                                    </button>
                                     <input
                                         type="text"
                                         class="form-control"
@@ -213,146 +229,203 @@
                                             v-html="result"
                                         ></li>
                                     </ul>
-                                    <b-form-select
+                                    <select
+                                        class="form-select"
                                         :id="localField.value"
                                         :options="metadataChoiceValues[localField.value]"
                                         v-model="metadataValues[localField.value]"
                                         v-if="metadataInputStyle[localField.value] == 'dropdown'"
-                                    ></b-form-select>
-                                    <b-button
-                                        class="mr-2"
-                                        style="border-top-right-radius: 0; border-bottom-right-radius: 0"
-                                        variant="outline-secondary"
-                                        v-if="metadataInputStyle[localField.value] == 'checkbox'"
-                                        >{{ localField.label }}</b-button
                                     >
-                                    <b-form-checkbox-group
-                                        style="padding-top: 0.35rem"
-                                        :id="localField.value"
-                                        :options="metadataChoiceValues[localField.value]"
-                                        v-model="metadataChoiceSelected[localField.value]"
+                                        <option
+                                            v-for="value in metadataChoiceValues[localField.value]"
+                                            :key="value.value"
+                                            :value="value.value"
+                                        >
+                                            {{ value.text }}
+                                        </option>
+                                    </select>
+                                    <button
+                                        style="border-top-right-radius: 0; border-bottom-right-radius: 0"
+                                        class="btn btn-outline-secondary me-2"
                                         v-if="metadataInputStyle[localField.value] == 'checkbox'"
-                                    ></b-form-checkbox-group>
+                                    >
+                                        {{ localField.label }}
+                                    </button>
+                                    <div
+                                        class="d-inline-block"
+                                        v-if="metadataInputStyle[localField.value] == 'checkbox'"
+                                    >
+                                        <div
+                                            class="form-check d-inline-block ms-3"
+                                            style="padding-top: 0.35rem"
+                                            :id="localField.value"
+                                            :options="metadataChoiceValues[localField.value]"
+                                            v-for="metadataChoice in metadataChoiceValues[localField.value]"
+                                            :key="metadataChoice.value"
+                                        >
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                :id="metadataChoice.value"
+                                                v-model="metadataChoiceSelected[localField.value]"
+                                            />
+                                            <label class="form-check-label" :for="metadataChoice.value">{{
+                                                metadataChoice.text
+                                            }}</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <b-input-group class="mt-4" v-if="currentReport === 'collocation'">
-                                <template v-slot:prepend>
-                                    <span class="btn btn-outline-secondary" style="height: fit-content"
-                                        >Word filtering</span
+                            <div class="d-flex mt-4" v-if="currentReport === 'collocation'">
+                                <div class="input-group d-inline" style="width: fit-content">
+                                    <button class="btn btn-outline-secondary" style="height: fit-content">
+                                        Word filtering
+                                    </button>
+                                    <input
+                                        type="text"
+                                        class="form-control d-inline-block"
+                                        name="filter_frequency"
+                                        placeholder="100"
+                                        v-model="filter_frequency"
+                                        style="width: 60px; text-align: center"
+                                    />
+                                </div>
+                                <div>
+                                    <div
+                                        class="form-check"
+                                        v-for="collocFilter in collocationOptions"
+                                        :key="collocFilter.value"
                                     >
-                                </template>
-                                <b-form-input
-                                    name="filter_frequency"
-                                    placeholder="100"
-                                    v-model="filter_frequency"
-                                    style="max-width: 60px; text-align: center"
-                                ></b-form-input>
-                                <b-form-group>
-                                    <b-form-radio-group
-                                        id="btn-radios-3"
-                                        v-model="colloc_filter_choice"
-                                        :options="collocationOptions"
-                                        buttons
-                                        stacked
-                                    ></b-form-radio-group>
-                                </b-form-group>
-                            </b-input-group>
-                            <b-input-group class="mt-4 pt-1 pb-2" v-if="currentReport === 'time_series'">
-                                <template v-slot:prepend>
-                                    <span class="btn btn-outline-secondary">Date range</span>
-                                    <b-input-group-text>from</b-input-group-text>
-                                </template>
+                                        <input
+                                            class="btn-check"
+                                            type="radio"
+                                            name="colloc_filter_choice"
+                                            v-model="colloc_filter_choice"
+                                            :value="collocFilter.value"
+                                            :id="collocFilter.value"
+                                        />
+                                        <label class="btn btn-secondary" :for="collocFilter.value">{{
+                                            collocFilter.text
+                                        }}</label
+                                        ><br />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-group mt-4 pt-1 pb-2" v-if="currentReport === 'time_series'">
+                                <button class="btn btn-outline-secondary">Date range</button>
+                                <span class="d-inline-flex align-self-center mx-2">from</span>
                                 <input
                                     type="text"
+                                    class="form-control"
                                     name="start_date"
                                     id="start_date"
-                                    style="width: 50px; text-align: center"
+                                    style="max-width: 50px; text-align: center"
                                     v-model="start_date"
                                 />
-                                <b-input-group-text>to</b-input-group-text>
+                                <span class="d-inline-flex align-self-center mx-2">to</span>
                                 <input
                                     type="text"
+                                    class="form-control"
                                     name="end_date"
                                     id="end_date"
-                                    style="width: 50px; text-align: center"
+                                    style="max-width: 50px; text-align: center"
                                     v-model="end_date"
                                 />
-                            </b-input-group>
-                            <b-input-group v-if="currentReport == 'time_series'">
-                                <template v-slot:prepend>
-                                    <span class="btn btn-outline-secondary">Year interval</span>
-                                    <b-input-group-text>every</b-input-group-text>
-                                </template>
+                            </div>
+                            <div class="input-group" v-if="currentReport == 'time_series'">
+                                <button class="btn btn-outline-secondary">Year interval</button>
+                                <span class="d-inline-flex align-self-center mx-2">every</span>
                                 <input
                                     type="text"
+                                    class="form-control"
                                     name="year_interval"
                                     id="year_interval"
-                                    style="width: 50px; text-align: center"
+                                    style="max-width: 50px; text-align: center"
                                     v-model="year_interval"
                                 />
-                                <template v-slot:append>
-                                    <b-input-group-text>year(s)</b-input-group-text>
-                                </template>
-                            </b-input-group>
-                            <b-input-group class="mt-4" v-if="currentReport === 'aggregation'">
-                                <template v-slot:prepend>
-                                    <span class="btn btn-outline-secondary">Group results by</span>
-                                </template>
-                                <b-form-select
+                                <span class="d-inline-flex align-self-center mx-2">year(s)</span>
+                            </div>
+                            <div class="input-group mt-4" v-if="currentReport === 'aggregation'">
+                                <button class="btn btn-outline-secondary">Group results by</button>
+                                <select
+                                    class="form-select"
+                                    :aria-label="aggregationOptions[0].text"
                                     style="max-width: fit-content"
                                     v-model="group_by"
                                     :options="aggregationOptions"
-                                ></b-form-select>
-                            </b-input-group>
+                                >
+                                    <option
+                                        v-for="aggregationOption in aggregationOptions"
+                                        :key="aggregationOption.text"
+                                        :value="aggregationOption.value"
+                                    >
+                                        {{ aggregationOption.text }}
+                                    </option>
+                                </select>
+                            </div>
                             <h6 class="mt-3" v-if="currentReport === 'concordance' || currentReport === 'bibliography'">
                                 Display Options:
                             </h6>
-                            <b-input-group
-                                class="pb-2"
+                            <div
+                                class="input-group pb-2"
                                 v-if="currentReport === 'concordance' || currentReport === 'bibliography'"
                             >
-                                <template v-slot:prepend>
-                                    <span class="btn btn-outline-secondary">Sort results by</span>
-                                </template>
-                                <b-form-select style="max-width: fit-content" v-model="sort_by" :options="sortValues">
-                                    <option>Sort results by</option>
-                                </b-form-select>
-                            </b-input-group>
-                            <b-input-group
+                                <button class="btn btn-outline-secondary">Sort results by</button>
+                                <select
+                                    class="form-select"
+                                    style="max-width: fit-content"
+                                    aria-label="select fields"
+                                    v-model="sort_by"
+                                >
+                                    <option v-for="sortValue in sortValues" :key="sortValue.value">
+                                        {{ sortValue.text }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div
+                                class="btn-group radio-btn-group"
+                                role="group"
                                 v-if="
                                     currentReport != 'collocation' &&
                                     currentReport != 'time_series' &&
                                     currentReport != 'aggregation'
                                 "
                             >
-                                <template v-slot:prepend>
-                                    <span class="btn btn-outline-secondary">Results per page</span>
-                                </template>
-                                <b-form-group style="margin-bottom: 0">
-                                    <b-form-radio-group
-                                        id="btn-radios-3"
+                                <button class="btn btn-outline-secondary">Results per page</button>
+                                <span v-for="resultsPerPage in resultsPerPageOptions" :key="resultsPerPage">
+                                    <input
+                                        type="radio"
+                                        class="btn-check"
+                                        :id="`page-${resultsPerPage}`"
                                         v-model="results_per_page"
-                                        :options="resultsPerPageOptions"
-                                        buttons
-                                        name="radio-btn"
-                                    ></b-form-radio-group>
-                                </b-form-group>
-                            </b-input-group>
+                                    />
+                                    <label class="btn btn-secondary radio-group" :for="`page-${resultsPerPage}`">{{
+                                        resultsPerPage
+                                    }}</label>
+                                </span>
+                            </div>
                         </div>
                     </transition>
                 </div>
-            </b-form>
-        </b-card>
+            </form>
+        </div>
 
         <div class="d-flex justify-content-center position-relative" v-if="searching">
-            <b-spinner
-                variant="secondary"
+            <div
+                class="spinner-border"
                 style="width: 8rem; height: 8rem; position: absolute; z-index: 50; top: 30px"
-            ></b-spinner>
+                role="status"
+            >
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <!-- <b-spinner
+                class="btn btn-secondary"
+                style="width: 8rem; height: 8rem; position: absolute; z-index: 50; top: 30px"
+            ></b-spinner> -->
         </div>
-        <b-modal id="search-tips" size="lg" scrollable title="Search Syntax" hide-header-close ok-only>
+        <div class="modal fade" id="search-tips" tabindex="-1">
             <SearchTips></SearchTips>
-        </b-modal>
+        </div>
     </div>
 </template>
 
@@ -360,7 +433,6 @@
 import { mapFields } from "vuex-map-fields";
 import { EventBus } from "../main.js";
 import SearchTips from "./SearchTips";
-
 export default {
     name: "SearchForm",
     components: {
@@ -433,10 +505,10 @@ export default {
                 { text: "90% or higher", value: "90" },
                 { text: "80% or higher", value: "80" },
             ],
-            approximateSelected: "no",
+            approximateSelected: false,
             methodOptions: [
                 { text: "Within", value: "proxy" },
-                { text: "Exactly", value: "phrase" },
+                { text: "Within exactly", value: "phrase" },
                 { text: "In the same sentence", value: "cooc" },
             ],
             metadataDisplay: [],
@@ -530,7 +602,7 @@ export default {
     },
     methods: {
         approximateChange(val) {
-            if (val == "yes") {
+            if (val) {
                 this.approximate_ratio = "90";
             } else {
                 this.approximate_ratio = "";
@@ -588,7 +660,7 @@ export default {
                     ...this.$store.state.formData,
                     ...this.metadataValues,
                     ...metadataChoices,
-                    approximate: this.approximateSelected,
+                    approximate: this.approximateSelected ? "yes" : "no",
                     q: this.queryTermTyped.trim(),
                     start: "",
                     end: "",
@@ -874,6 +946,14 @@ export default {
     bottom: 1rem;
     right: 1rem;
     z-index: 51;
+}
+
+.radio-group {
+    border-radius: 0;
+}
+.radio-btn-group span:last-of-type label {
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
 }
 
 @media (max-width: 992px) {

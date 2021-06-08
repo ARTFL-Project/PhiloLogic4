@@ -22,14 +22,15 @@ def aggregation_by_field(request, config):
     field_obj = __get_field_config(group_by, config)
     metadata_type = field_obj["object_level"]
 
-    metadata_fields_needed = {group_by, field_obj["break_up_field"], "philo_id", f"philo_{metadata_type}_id"}
-    for citation in field_obj["break_up_field_citation"]:
+    metadata_fields_needed = {group_by, "philo_id", f"philo_{metadata_type}_id"}
+    for citation in field_obj["field_citation"]:
         if citation["field"] in db.locals["metadata_fields"]:
             metadata_fields_needed.add(citation["field"])
+    if field_obj["break_up_field_citation"] is not None:
+        for citation in field_obj["break_up_field_citation"]:
+            if citation["field"] in db.locals["metadata_fields"]:
+                metadata_fields_needed.add(citation["field"])
 
-    import sys
-
-    print(metadata_fields_needed, file=sys.stderr)
     hits.finish()
     philo_ids = __expand_hits(hits, metadata_type)
     cursor = db.dbh.cursor()
@@ -101,7 +102,7 @@ def aggregation_by_field(request, config):
             else:
                 counts_by_field[field_name]["count"] += 1
 
-    del request.group_by
+    # del request.group_by
     if break_up_field_name is not None:
         results = []
         for field_name, values in sorted(counts_by_field.items(), key=lambda x: x[1]["count"], reverse=True):
@@ -121,13 +122,13 @@ def aggregation_by_field(request, config):
             for values in sorted(counts_by_field.values(), key=lambda x: x["count"], reverse=True)
         ]
     if request.q == "" and request.no_q:
-        total_results = len(results)
+        total_results = len(philo_ids)
     else:
         total_results = len(philo_ids)
     return {
         "results": results,
         "break_up_field": break_up_field_name or "",
-        "query": dict([i for i in request]),
+        "query": {k: v for k, v in request},
         "total_results": total_results,
     }
 
@@ -149,3 +150,34 @@ def __get_field_config(group_by, config):
     for field_obj in config["stats_report_config"]:
         if field_obj["field"] == group_by:
             return field_obj
+
+
+if __name__ == "__main__":
+    import sys
+    from philologic.runtime import WebConfig
+
+    class Request:
+        def __init__(self, q, field, metadata):
+            self.q = q
+            self.group_by = field
+            self.no_metadata = False
+            self.no_q = False
+            self.metadata = metadata
+            self.method = "proxy"
+            self.report = "aggregation"
+            self.arg = ""
+            self.start = 0
+
+        def __getitem__(self, item):
+            if item == "group_by":
+                return self.group_by
+            return getattr(self, item)
+
+        def __iter__(self):
+            for item in ["q", "group_by", "report"]:
+                yield item, self[item]
+
+    query_term, field, db_path = sys.argv[1:]
+    config = WebConfig(db_path)
+    request = Request(query_term, field, {})
+    aggregation_by_field(request, config)
