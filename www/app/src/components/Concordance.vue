@@ -62,7 +62,7 @@
 
 <script>
 import { mapFields } from "vuex-map-fields";
-import { EventBus } from "../main.js";
+import { emitter } from "../main.js";
 import citations from "./Citations";
 import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
@@ -77,6 +77,7 @@ export default {
         facets,
         pages,
     },
+    inject: ["$http"],
     computed: {
         ...mapFields(["formData.report", "resultsLength", "searching", "currentReport", "description"]),
     },
@@ -86,19 +87,27 @@ export default {
             results: { description: { end: 0 } },
             searchParams: {},
             showFacets: true,
+            unbindToggleEmitter: null,
+            unbindUrlUpdate: null,
         };
     },
     created() {
         this.report = "concordance";
         this.currentReport = "concordance";
         this.fetchResults();
-        EventBus.$on("toggleFacets", () => {
+        this.unbindUrlUpdate = emitter.on("urlUpdate", () => {
+            console.log(this.report);
+            if (this.report == "concordance") {
+                this.fetchResults();
+            }
+        });
+        this.unbindToggleEmitter = emitter.on("toggleFacets", () => {
             this.toggleFacets();
         });
     },
-    watch: {
-        // call again the method if the route changes
-        $route: "fetchResults",
+    beforeUnmount() {
+        this.unbindUrlUpdate();
+        this.unbindToggleEmitter();
     },
     methods: {
         fetchResults() {

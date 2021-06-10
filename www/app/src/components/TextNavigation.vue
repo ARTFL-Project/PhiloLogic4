@@ -188,7 +188,7 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
-import { EventBus } from "../main.js";
+import { emitter } from "../main.js";
 import Gallery from "blueimp-gallery";
 import "blueimp-gallery/css/blueimp-gallery.min.css";
 
@@ -197,6 +197,7 @@ export default {
     components: {
         citations,
     },
+    inject: ["$http"],
     computed: {
         ...mapFields({
             report: "formData.report",
@@ -271,7 +272,7 @@ export default {
             this.searching = false;
         }
     },
-    destroyed() {
+    unmounted() {
         if (this.gallery) {
             this.gallery.close();
         }
@@ -536,7 +537,7 @@ export default {
                 this.tocOpen = false;
             }
             this.$router.push({ path: `/navigate/${philoID}` });
-            EventBus.$emit("navChange");
+            emitter.emit("navChange");
         },
         textObjectSelection(philoId, index) {
             event.preventDefault();
@@ -698,37 +699,37 @@ a.current-obj,
     text-align: justify;
 }
 
-::v-deep .xml-pb {
+:deep(.xml-pb) {
     display: block;
     text-align: center;
     margin: 10px;
 }
 
-::v-deep .xml-pb::before {
+:deep(.xml-pb::before) {
     content: "-" attr(n) "-";
     white-space: pre;
 }
 
-::v-deep p {
+:deep(p) {
     margin-bottom: 0.5rem;
 }
-::v-deep .highlight {
+:deep(.highlight) {
     background-color: red;
     color: #fff;
 }
 /* Styling for theater */
 
-::v-deep .xml-castitem::after {
+:deep(.xml-castitem::after) {
     content: "\A";
     white-space: pre;
 }
 
-::v-deep .xml-castlist > .xml-castitem:first-of-type::before {
+:deep(.xml-castlist > .xml-castitem:first-of-type::before) {
     content: "\A";
     white-space: pre;
 }
 
-::v-deep .xml-castgroup::before {
+:deep(.xml-castgroup::before) {
     content: "\A";
     white-space: pre;
 }
@@ -740,24 +741,23 @@ b.headword {
     margin-top: 20px;
 }
 
-::v-deep #bibliographic-results b.headword {
+:deep(#bibliographic-results b.headword) {
     font-weight: 400 !important;
     font-size: 100%;
     display: inline;
 }
 
-::v-deep .xml-lb,
-::v-deep .xml-l {
+:deep(.xml-lb, .xml-l) {
     text-align: justify;
     display: block;
 }
 
-::v-deep .xml-sp .xml-lb:first-of-type {
+:deep(.xml-sp .xml-lb:first-of-type) {
     content: "";
     white-space: normal;
 }
 
-::v-deep .xml-lb[type="hyphenInWord"] {
+:deep(.xml-lb[type="hyphenInWord"]) {
     display: inline;
 }
 
@@ -765,110 +765,95 @@ b.headword {
     display: block;
 }
 
-::v-deep .xml-sp::before {
+:deep(.xml-sp::before) {
     content: "\A";
     white-space: pre;
 }
 
-::v-deep .xml-stage + .xml-sp:nth-of-type(n + 2)::before {
+:deep(.xml-stage + .xml-sp:nth-of-type(n + 2)::before) {
     content: "";
 }
 
-::v-deep .xml-fw,
-::v-deep .xml-join {
+:deep(.xml-fw, .xml-join) {
     display: none;
 }
 
-::v-deep .xml-speaker + .xml-stage::before {
+:deep(.xml-speaker + .xml-stage::before) {
     content: "";
     white-space: normal;
 }
 
-::v-deep .xml-stage {
+:deep(.xml-stage) {
     font-style: italic;
 }
 
-::v-deep .xml-stage::after {
+:deep(.xml-stage::after) {
     content: "\A";
     white-space: pre;
 }
 
-::v-deep div1 div2::before {
+:deep(div1 div2::before) {
     content: "\A";
     white-space: pre;
 }
 
-::v-deep .xml-speaker {
+:deep(.xml-speaker) {
     font-weight: 700;
 }
 
-::v-deep .xml-pb {
+:deep(.xml-pb) {
     display: block;
     text-align: center;
     margin: 10px;
 }
 
-::v-deep .xml-pb::before {
+:deep(.xml-pb::before) {
     content: "-" attr(n) "-";
     white-space: pre;
 }
 
-::v-deep .xml-lg {
+:deep(.xml-lg) {
     display: block;
 }
 
-::v-deep .xml-lg::after {
+:deep(.xml-lg::after) {
     content: "\A";
     white-space: pre;
 }
 
-::v-deep .xml-lg:first-of-type::before {
+:deep(.xml-lg:first-of-type::before) {
     content: "\A";
     white-space: pre;
 }
 
-::v-deep .xml-castList,
-::v-deep .xml-front,
-::v-deep .xml-castItem,
-::v-deep .xml-docTitle,
-::v-deep .xml-docImprint,
-::v-deep .xml-performance,
-::v-deep .xml-docAuthor,
-::v-deep .xml-docDate,
-::v-deep .xml-premiere,
-::v-deep .xml-casting,
-::v-deep .xml-recette,
-::v-deep .xml-nombre {
+:deep(.xml-castList, .xml-front, .xml-castItem, .xml-docTitle, .xml-docImprint, .xml-performance, .xml-docAuthor, .xml-docDate, .xml-premiere, .xml-casting, .xml-recette, .xml-nombre) {
     display: block;
 }
 
-::v-deep .xml-docTitle {
+:deep(.xml-docTitle) {
     font-style: italic;
     font-weight: bold;
 }
 
-::v-deep .xml-docTitle,
-::v-deep .xml-docAuthor,
-::v-deep .xml-docDate {
+:deep(.xml-docAuthor, .xml-docTitle, .xml-docDate) {
     text-align: center;
 }
 
-::v-deep .xml-docTitle span[type="main"] {
+:deep(.xml-docTitle span[type="main"]) {
     font-size: 150%;
     display: block;
 }
 
-::v-deep .xml-docTitle span[type="sub"] {
+:deep(.xml-docTitle span[type="sub"]) {
     font-size: 120%;
     display: block;
 }
 
-::v-deep .xml-performance,
-::v-deep .xml-docImprint {
+:deep(.xml-performance, .xml-docImprint) {
     margin-top: 10px;
 }
 
-::v-deep .xml-set {
+:deep(.xml-set) {
     display: block;
     font-style: italic;
     margin-top: 10px;
@@ -881,152 +866,149 @@ body {
     /* Set the section counter to 0 */
 }
 
-::v-deep .xml-prononciation::before {
+:deep(.xml-prononciation::before) {
     content: "(";
 }
 
-::v-deep .xml-prononciation::after {
+:deep(.xml-prononciation::after) {
     content: ")\A";
 }
 
-::v-deep .xml-nature {
+:deep(.xml-nature) {
     font-style: italic;
 }
 
-::v-deep .xml-indent,
-::v-deep .xml-variante {
+:deep(.xml-indent, .xml-variante) {
     display: block;
 }
 
-::v-deep .xml-variante {
+:deep(.xml-variante) {
     padding-top: 10px;
     padding-bottom: 10px;
     text-indent: -1.3em;
     padding-left: 1.3em;
 }
 
-::v-deep .xml-variante::before {
+:deep(.xml-variante::before) {
     counter-increment: section;
     content: counter(section) ")\00a0";
     font-weight: 700;
 }
 
-::v-deep :not(.xml-rubrique) + .xml-indent {
+:deep(:not(.xml-rubrique) + .xml-indent) {
     padding-top: 10px;
 }
 
-::v-deep .xml-indent {
+:deep(.xml-indent) {
     padding-left: 1.3em;
 }
 
-::v-deep .xml-cit {
+:deep(.xml-cit) {
     padding-left: 2.3em;
     display: block;
     text-indent: -1.3em;
 }
 
-::v-deep .xml-indent > .xml-cit {
+:deep(.xml-indent > .xml-cit) {
     padding-left: 1em;
 }
 
-::v-deep .xml-cit::before {
+:deep(.xml-cit::before) {
     content: "\2012\00a0\00ab\00a0";
 }
 
-::v-deep .xml-cit::after {
+:deep(.xml-cit::after) {
     content: "\00a0\00bb\00a0("attr(aut) "\00a0"attr(ref) ")";
     font-variant: small-caps;
 }
 
-::v-deep .xml-rubrique {
+:deep(.xml-rubrique) {
     display: block;
     margin-top: 20px;
 }
 
-::v-deep .xml-rubrique::before {
+:deep(.xml-rubrique::before) {
     content: attr(nom);
     font-variant: small-caps;
     font-weight: 700;
 }
 
-::v-deep .xml-corps + .xml-rubrique {
+:deep(.xml-corps + .xml-rubrique) {
     margin-top: 10px;
 }
 
 /*Methodique styling*/
 
-::v-deep div[type="article"] .headword {
+:deep(div[type="article"] .headword) {
     display: inline-block;
     margin-bottom: 10px;
 }
 
-::v-deep .headword + p {
+:deep(.headword + p) {
     display: inline;
 }
 
-::v-deep .headword + p + p {
+:deep(.headword + p + p) {
     margin-top: 10px;
 }
 
 /*Note handling*/
 
-::v-deep .popover {
+:deep(.popover) {
     max-width: 350px;
     overflow: scroll;
 }
 
-::v-deep .popover-content {
+:deep(.popover-content) {
     text-align: justify;
 }
 
-::v-deep .popover-content .xml-p:not(:first-of-type) {
+:deep(.popover-content .xml-p:not(:first-of-type)) {
     display: block;
     margin-top: 1em;
     margin-bottom: 1em;
 }
 
-::v-deep .note-content {
+:deep(.note-content) {
     display: none;
 }
 
-::v-deep .note,
-::v-deep .note-ref {
+:deep(.note, .note-ref) {
     vertical-align: 0.3em;
     font-size: 0.7em;
 }
 
-::v-deep .note:hover,
-::v-deep .note-ref:hover {
+:deep(.note:hover, .note-ref:hover) {
     cursor: pointer;
     text-decoration: none;
 }
 
-::v-deep div[type="notes"] .xml-note {
+:deep(div[type="notes"] .xml-note) {
     margin: 15px 0px;
     display: block;
 }
 
-::v-deep .xml-note::before {
+:deep(.xml-note::before) {
     content: "note\00a0"attr(n) "\00a0:\00a0";
     font-weight: 700;
 }
 
 /*Page images*/
 
-::v-deep .xml-pb-image {
+:deep(.xml-pb-image) {
     display: block;
     text-align: center;
     margin: 10px;
 }
 
-::v-deep .page-image-link {
+:deep(.page-image-link) {
     margin-top: 10px;
     /*display: block;*/
     text-align: center;
 }
 
 /*Inline images*/
-::v-deep .inline-img {
+:deep(.inline-img) {
     max-width: 40%;
     float: right;
     height: auto;
@@ -1034,44 +1016,44 @@ body {
     padding-top: 15px;
 }
 
-::v-deep .inline-img:hover {
+:deep(.inline-img:hover) {
     cursor: pointer;
 }
 
-::v-deep .link-back {
+:deep(.link-back) {
     margin-left: 10px;
     line-height: initial;
 }
 
-::v-deep .xml-add {
+:deep(.xml-add) {
     color: #ef4500;
 }
 
-::v-deep .xml-seg {
+:deep(.xml-seg) {
     display: block;
 }
 
 /*Table display*/
 
-::v-deep b.headword[rend="center"] {
+:deep(b.headword[rend="center"]) {
     margin-bottom: 30px;
     text-align: center;
 }
 
-::v-deep .xml-table {
+:deep(.xml-table) {
     display: table;
     position: relative;
     text-align: center;
     border-collapse: collapse;
 }
 
-::v-deep .xml-table .xml-pb-image {
+:deep(.xml-table .xml-pb-image) {
     position: absolute;
     width: 100%;
     margin-top: 15px;
 }
 
-::v-deep .xml-row {
+:deep(.xml-row) {
     display: table-row;
     font-weight: 700;
     text-align: left;
@@ -1083,19 +1065,19 @@ body {
     border-bottom: #ddd 1px solid;
 }
 
-::v-deep .xml-row ~ .xml-row {
+:deep(.xml-row ~ .xml-row) {
     font-weight: inherit;
     text-align: justify;
     font-variant: inherit;
 }
 
-::v-deep .xml-pb-image + .xml-row {
+:deep(.xml-pb-image + .xml-row) {
     padding-top: 50px;
     padding-bottom: 10px;
     border-top-width: 0px;
 }
 
-::v-deep .xml-cell {
+:deep(.xml-cell) {
     display: table-cell;
     padding-top: inherit; /*inherit padding when image is above */
     padding-bottom: inherit;

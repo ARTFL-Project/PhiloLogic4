@@ -15,14 +15,12 @@
                     class="mt-4 p-4"
                     style="text-align: justify"
                 >
-                    <h5
-                        v-if="!accessDenied"
-                        class="mt-2 mb-3"
-                    >If you have a username and password, please enter them here:</h5>
-                    <h5
-                        class="text-danger"
-                        v-if="accessDenied"
-                    >Your username or password don't match. Please try again.</h5>
+                    <h5 v-if="!accessDenied" class="mt-2 mb-3">
+                        If you have a username and password, please enter them here:
+                    </h5>
+                    <h5 class="text-danger" v-if="accessDenied">
+                        Your username or password don't match. Please try again.
+                    </h5>
                     <b-row class="mb-3">
                         <b-col cols="12" sm="6" md="5" lg="4">
                             <b-input-group prepend="Username">
@@ -50,27 +48,19 @@
                     <p>
                         Please
                         <a href="http://artfl-project.uchicago.edu/node/24">contact ARTFL</a>
-                        for more information or to have your computer enabled if your institution
-                        is an
-                        <a
-                            href="http://artfl-project.uchicago.edu/node/2"
-                        >ARTFL subscriber</a>
+                        for more information or to have your computer enabled if your institution is an
+                        <a href="http://artfl-project.uchicago.edu/node/2">ARTFL subscriber</a>
                     </p>
                     <p>
-                        If you belong to a subscribing institution and are attempting to access
-                        ARTFL from your Internet Service Provider, please note that you should
-                        use your institution's
-                        <b>proxy server</b> and should contact your
-                        networking support office. Your proxy server must be configured to
-                        include
-                        <tt>{{ domainName }}</tt> to access this database.
+                        If you belong to a subscribing institution and are attempting to access ARTFL from your Internet
+                        Service Provider, please note that you should use your institution's
+                        <b>proxy server</b> and should contact your networking support office. Your proxy server must be
+                        configured to include <tt>{{ domainName }}</tt> to access this database.
                     </p>
                     <p>
                         Please consult
-                        <a
-                            href="http://artfl-project.uchicago.edu/node/14"
-                        >Subscription Information</a> to see how your institution can
-                        gain access to ARTFL resources.
+                        <a href="http://artfl-project.uchicago.edu/node/14">Subscription Information</a> to see how your
+                        institution can gain access to ARTFL resources.
                     </p>
                     <p ng-if="access.clientIp">
                         Requesting Computer Address:
@@ -82,15 +72,16 @@
     </b-container>
 </template>
 <script>
-import { EventBus } from "../main.js";
+import { emitter } from "../main.js";
 
 export default {
     name: "AccessControl",
     props: ["authorized", "clientIp", "domainName"],
+    inject: ["$http"],
     data() {
         return {
             accessInput: { username: "", password: "" },
-            accessDenied: false
+            accessDenied: false,
         };
     },
     created() {},
@@ -98,18 +89,14 @@ export default {
         submit() {
             this.$http
                 .get(
-                    `${
-                        this.$dbUrl
-                    }/scripts/access_request.py?username=${encodeURIComponent(
+                    `${this.$dbUrl}/scripts/access_request.py?username=${encodeURIComponent(
                         this.accessInput.username
-                    )}&password=${encodeURIComponent(
-                        this.accessInput.password
-                    )}`
+                    )}&password=${encodeURIComponent(this.accessInput.password)}`
                 )
-                .then(response => {
+                .then((response) => {
                     var authorization = response.data;
                     if (authorization.access) {
-                        EventBus.$emit("accessAuthorized");
+                        emitter.emit("accessAuthorized");
                     } else {
                         this.accessDenied = true;
                     }
@@ -117,7 +104,7 @@ export default {
         },
         reset() {
             this.accessInput = { username: "", password: "" };
-        }
-    }
+        },
+    },
 };
 </script>

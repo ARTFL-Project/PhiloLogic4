@@ -1,5 +1,5 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+// import Vue from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
 
 const concordance = () => import('../components/Concordance');
 const kwic = () => import('../components/Kwic');
@@ -13,11 +13,10 @@ const aggregation = () => import("../components/Aggregation");
 import appConfig from '../../appConfig.json'
 
 
-Vue.use(Router)
+// Vue.use(Router)
 
-export default new Router({
-    mode: 'history',
-    base: appConfig.dbUrl.replace(/https?:\/\/[^/]+\//, ""),
+const router = createRouter({
+    history: createWebHistory(appConfig.dbUrl.replace(/https?:\/\/[^/]+\//, "")),
     routes: [{
         path: '/',
         name: 'home',
@@ -63,7 +62,7 @@ export default new Router({
         name: 'aggregation',
         component: aggregation
     },
-    // for compatibility with old Philo links: still used in landing page
+    // for compatibility with old Philo links: still used in landing page and TOC
     {
         path: "/query",
         redirect: to => {
@@ -79,14 +78,10 @@ export default new Router({
             return savedPosition
         } else {
             return {
-                x: 0,
-                y: 0
+                left: 0,
+                top: 0
             }
         }
     }
 })
-
-// function determineRoute() {
-//     console.log(process.env.NODE_ENV)
-//     return appConfig.dbUrl.replace(/https?:\/\/[^/]+\//, "")
-// }
+export default router

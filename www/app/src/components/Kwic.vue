@@ -47,10 +47,10 @@
                             >
                                 <span v-html="initializePos(kwicIndex)"></span>
                                 <router-link
-                                    :to="'/' + result.citation_links.div1"
+                                    :to="result.citation_links.div1"
                                     class="kwic-biblio"
-                                    @mouseover.native="showFullBiblio()"
-                                    @mouseleave.native="hideFullBiblio()"
+                                    @mouseover="showFullBiblio()"
+                                    @mouseleave="hideFullBiblio()"
                                 >
                                     <span class="full-biblio" style="display: none">{{ result.fullBiblio }}</span>
                                     <span class="short-biblio" v-html="result.shortBiblio"></span>
@@ -75,6 +75,7 @@ import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
 import Velocity from "velocity-animate";
+import { emitter } from "../main.js";
 
 export default {
     name: "kwic",
@@ -121,6 +122,7 @@ export default {
             return sortingSelection;
         },
     },
+    inject: ["$http"],
     data() {
         return {
             philoConfig: this.$philoConfig,
@@ -134,6 +136,7 @@ export default {
             },
             sortedResults: [],
             loading: false,
+            unbindEmitter: null,
         };
     },
     created() {
@@ -141,10 +144,14 @@ export default {
         this.currentReport = "kwic";
         this.initializeKwic();
         this.fetchResults();
+        this.unbindEmitter = emitter.on("urlUpdate", () => {
+            if (this.report == "kwic") {
+                this.fetchResults();
+            }
+        });
     },
-    watch: {
-        // call again the method if the route changes
-        $route: "fetchResults",
+    beforeUnmount() {
+        this.unbindEmitter();
     },
     methods: {
         initializeKwic() {
@@ -424,20 +431,20 @@ export default {
     margin-left: -5px;
     opacity: 1;
 }
-::v-deep .kwic-before {
+:deep(.kwic-before) {
     text-align: right;
     overflow: hidden;
     display: inline-block;
     position: absolute;
 }
-::v-deep .inner-before {
+:deep(.inner-before) {
     float: right;
 }
-::v-deep .kwic-after {
+:deep(.kwic-after) {
     text-align: left;
     display: inline-block;
 }
-::v-deep .kwic-text {
+:deep(.kwic-text) {
     display: inline-block;
     overflow: hidden;
     vertical-align: bottom;
@@ -446,40 +453,40 @@ export default {
     margin-left: -3px;
 }
 @media (min-width: 1300px) {
-    ::v-deep .kwic-highlight {
+    :deep(.kwic-highlight) {
         margin-left: 330px;
     }
-    ::v-deep .kwic-before {
+    :deep(.kwic-before) {
         width: 330px;
     }
 }
 @media (min-width: 992px) and (max-width: 1299px) {
-    ::v-deep .kwic-highlight {
+    :deep(.kwic-highlight) {
         margin-left: 230px;
     }
-    ::v-deep .kwic-before {
+    :deep(.kwic-before) {
         width: 230px;
     }
 }
 @media (min-width: 768px) and (max-width: 991px) {
-    ::v-deep .kwic-highlight {
+    :deep(.kwic-highlight) {
         margin-left: 120px;
     }
-    ::v-deep .kwic-before {
+    :deep(.kwic-before) {
         width: 120px;
     }
-    ::v-deep .kwic-line {
+    :deep(.kwic-line) {
         font-size: 12px;
     }
 }
 @media (max-width: 767px) {
-    ::v-deep .kwic-highlight {
+    :deep(.kwic-highlight) {
         margin-left: 200px;
     }
-    ::v-deep .kwic-before {
+    :deep(.kwic-before) {
         width: 200px;
     }
-    ::v-deep .kwic-line {
+    :deep(.kwic-line) {
         font-size: 12px;
     }
 }

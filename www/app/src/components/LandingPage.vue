@@ -144,6 +144,7 @@ export default {
         citations,
     },
     computed: {},
+    inject: ["$http"],
     data() {
         return {
             dictionary: this.$philoConfig.dictionary,

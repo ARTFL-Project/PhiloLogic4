@@ -1,20 +1,20 @@
 import Vue from 'vue'
+import { createApp, configureCompat } from 'vue'
 import vueScrollTo from 'vue-scrollto'
 import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from 'axios'
 import "bootstrap"
+import { createNanoEvents } from 'nanoevents'
 
 import appConfig from "../appConfig.json"
 
+configureCompat({
+    MODE: 3
+})
 
-// Vue.config.productionTip = false
-Vue.prototype.$http = axios
-Vue.prototype.$scrollTo = vueScrollTo.scrollTo
-Vue.prototype.$dbUrl = appConfig.dbUrl
-
-export const EventBus = new Vue() // To pass messages between components
+export const emitter = createNanoEvents()
 
 Vue.mixin({
     methods: {
@@ -165,7 +165,7 @@ Vue.mixin({
 })
 
 Vue.directive('scroll', {
-    inserted: function (el, binding) {
+    mounted: function (el, binding) {
         el.scrollHandler = function (evt) {
             if (binding.value(evt, el)) {
                 window.removeEventListener('scroll', el.scrollHandler)
@@ -182,19 +182,16 @@ axios
     .get(`${appConfig.dbUrl}/scripts/get_web_config.py`, {
     })
     .then((response) => {
-        Vue.prototype.$philoConfig = response.data
-        new Vue({
-            el: '#app',
-            router,
-            store,
-            template: '<App/>',
-            components: {
-                App
-            }
-        })
+        const app = createApp(App)
+        app.config.globalProperties.$philoConfig = response.data
+        app.config.globalProperties.$scrollTo = vueScrollTo.scrollTo
+        app.config.globalProperties.$dbUrl = appConfig.dbUrl
+        app.provide("$http", axios)
+        app.use(router)
+        app.use(store)
+        router.isReady().then(() => app.mount('#app'))
     })
     .catch((error) => {
-        this.loading = false
-        this.error = error.toString()
-        console.log(error)
+        // this.loading = false
+        console.log(error.toString())
     })

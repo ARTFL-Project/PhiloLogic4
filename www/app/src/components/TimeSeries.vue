@@ -37,13 +37,14 @@
 import Chart from "chart.js/dist/Chart.min.js";
 import { mapFields } from "vuex-map-fields";
 import ResultsSummary from "./ResultsSummary";
-import { EventBus } from "../main.js";
+import { emitter } from "../main.js";
 
 export default {
     name: "timeSeries",
     components: {
         ResultsSummary,
     },
+    inject: ["$http"],
     computed: {
         ...mapFields({
             report: "formData.report",
@@ -71,18 +72,21 @@ export default {
             endDate: "",
             results: [],
             runningTotal: 0,
+            unboundListener: null,
         };
     },
     mounted() {
         this.report = "time_series";
         this.currentReport = "time_series";
         this.fetchResults();
-        EventBus.$on("urlUpdate", () => {
-            this.fetchResults();
+        this.unboundListener = emitter.on("urlUpdate", () => {
+            if (this.report == "time_series") {
+                this.fetchResults();
+            }
         });
     },
-    beforeDestroy() {
-        EventBus.$off("urlUpdate");
+    beforeUnmount() {
+        this.unboundListener();
         this.myBarChart.destroy();
     },
     methods: {

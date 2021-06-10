@@ -352,7 +352,6 @@
                                     :aria-label="aggregationOptions[0].text"
                                     style="max-width: fit-content"
                                     v-model="group_by"
-                                    :options="aggregationOptions"
                                 >
                                     <option
                                         v-for="aggregationOption in aggregationOptions"
@@ -377,7 +376,11 @@
                                     aria-label="select fields"
                                     v-model="sort_by"
                                 >
-                                    <option v-for="sortValue in sortValues" :key="sortValue.value">
+                                    <option
+                                        v-for="sortValue in sortValues"
+                                        :key="sortValue.value"
+                                        :value="sortValue.value"
+                                    >
                                         {{ sortValue.text }}
                                     </option>
                                 </select>
@@ -418,10 +421,6 @@
             >
                 <span class="visually-hidden">Loading...</span>
             </div>
-            <!-- <b-spinner
-                class="btn btn-secondary"
-                style="width: 8rem; height: 8rem; position: absolute; z-index: 50; top: 30px"
-            ></b-spinner> -->
         </div>
         <div class="modal fade" id="search-tips" tabindex="-1">
             <SearchTips></SearchTips>
@@ -431,13 +430,14 @@
 
 <script>
 import { mapFields } from "vuex-map-fields";
-import { EventBus } from "../main.js";
+import { emitter } from "../main.js";
 import SearchTips from "./SearchTips";
 export default {
     name: "SearchForm",
     components: {
         SearchTips,
     },
+    inject: ["$http"],
     computed: {
         ...mapFields([
             "formData.report",
@@ -559,19 +559,19 @@ export default {
                     this.metadataChoiceSelected[metadataField] = this.formData[metadataField].split(" | ");
                 }
             }
-            this.$set(this.autoCompleteResults, metadataField, []);
-            this.$set(this.arrowCounters, metadataField, -1);
+            this.autoCompleteResults[metadataField] = [];
+            this.arrowCounters[metadataField] = -1;
             if (metadataField == "head") {
                 this.headIndex = this.metadataDisplay.length - 1;
             }
         }
-        EventBus.$on("metadataUpdate", (metadata) => {
+        emitter.on("metadataUpdate", (metadata) => {
             for (let field in metadata) {
                 this.metadataValues[field] = metadata[field];
             }
             for (let metadataField of this.$philoConfig.metadata) {
-                this.$set(this.autoCompleteResults, metadataField, []);
-                this.$set(this.arrowCounters, metadataField, -1);
+                this.autoCompleteResults[metadataField] = [];
+                this.arrowCounters[metadataField] = -1;
             }
         });
         for (let metadata in this.$philoConfig.metadata_choice_values) {
@@ -667,6 +667,7 @@ export default {
                     byte: "",
                 })
             );
+            console.log(this.report);
         },
         onReset() {
             this.$store.commit("setDefaultFields", this.$parent.defaultFieldValues);
@@ -829,7 +830,7 @@ export default {
             let parent = document.getElementById(`${field}-group`);
             if (parent) {
                 let input = parent.querySelector("input");
-                let childOffset = input.offsetLeft - parent.offsetLeft;
+                let childOffset = input.offsetLeft;
                 return `left: ${childOffset}px; width: ${input.offsetWidth}px`;
             }
         },
@@ -838,6 +839,9 @@ export default {
 </script>
 
 <style scoped>
+input[type="text"] {
+    opacity: 1;
+}
 .input-group,
 #search-elements h6 {
     max-width: 700px;

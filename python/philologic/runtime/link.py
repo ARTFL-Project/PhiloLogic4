@@ -27,15 +27,15 @@ def make_object_link(philo_id, hit_bytes):
 
 def make_absolute_object_link(config, philo_id, byte_offsets=None):
     """ Takes a valid PhiloLogic object, and returns an absolute URL representation of such. """
-    href = "navigate/" + "/".join(str(x) for x in philo_id)
+    href = "/navigate/" + "/".join(str(x) for x in philo_id)
     if byte_offsets is not None:
         href += byte_query(byte_offsets)
     return href
 
 
-def make_absolute_query_link(config, params, script_name="query", **extra_params):
-    """ Takes a dictionary of query parameters as produced by WSGIHandler,
-    and returns an absolute URL representation of such. """
+def make_absolute_query_link(config, params, script_name="/query", **extra_params):
+    """Takes a dictionary of query parameters as produced by WSGIHandler,
+    and returns an absolute URL representation of such."""
     params = dict([i for i in params])
     for k, v in extra_params.items():
         params[k] = v

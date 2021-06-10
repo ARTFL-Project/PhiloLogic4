@@ -21,10 +21,11 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue";
 import Header from "./components/Header.vue";
-const SearchForm = () => import("./components/SearchForm.vue");
-const AccessControl = () => import("./components/AccessControl.vue");
-import { EventBus } from "./main.js";
+const SearchForm = defineAsyncComponent(() => import("./components/SearchForm.vue"));
+const AccessControl = defineAsyncComponent(() => import("./components/AccessControl.vue"));
+import { emitter } from "./main.js";
 import { mapFields } from "vuex-map-fields";
 
 export default {
@@ -34,6 +35,7 @@ export default {
         SearchForm,
         AccessControl,
     },
+    inject: ["$http"],
     data() {
         return {
             initialLoad: true,
@@ -46,7 +48,7 @@ export default {
         ...mapFields(["formData.report", "formData.q"]),
         defaultFieldValues() {
             let localFields = {
-                report: "concordance",
+                report: "home",
                 q: "",
                 method: "proxy",
                 arg_proxy: "",
@@ -117,7 +119,6 @@ export default {
         },
     },
     created() {
-        console.log(this.$route.fullPath);
         document.title = this.$philoConfig.dbname.replace(/<[^>]+>/, "");
         if (this.$philoConfig.access_control) {
             let promise = this.checkAccessAuthorization();
@@ -133,7 +134,7 @@ export default {
         } else {
             this.setupApp();
         }
-        EventBus.$on("accessAuthorized", () => {
+        emitter.on("accessAuthorized", () => {
             this.setupApp();
             this.authorized = true;
         });
@@ -158,9 +159,9 @@ export default {
                 ...localParams,
                 ...this.$route.query,
             });
-            if (!["textNavigation", "tableOfContents"].includes(this.$route.name)) {
+            if (!["textNavigation", "tableOfContents", "home"].includes(this.$route.name)) {
                 this.evaluateRoute();
-                EventBus.$emit("urlUpdate");
+                emitter.emit("urlUpdate");
             }
         },
         evaluateRoute() {
@@ -178,10 +179,8 @@ export default {
                 });
                 this.debug(this, this.report);
                 this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
-            } else if (this.$route.name == "time_series") {
-                this.report = "time_series";
-            } else if (this.$route.name == "collocation") {
-                this.report = "collocation";
+            } else {
+                this.report = this.$route.name;
             }
         },
     },

@@ -67,7 +67,7 @@
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
-import { EventBus } from "../main.js";
+import { emitter } from "../main.js";
 import citations from "./Citations";
 import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
@@ -98,21 +98,28 @@ export default {
             "currentReport",
         ]),
     },
+    inject: ["$http"],
     data() {
         return {
             philoConfig: this.$philoConfig,
             results: {},
             resultType: "doc",
             metadataAddition: [],
+            unbindEmitter: null,
         };
     },
     created() {
         this.report = "bibliography";
         this.currentReport = "bibliography";
         this.fetchResults();
-        EventBus.$on("urlUpdate", () => {
-            this.fetchResults();
+        this.unbindEmitter = emitter.on("urlUpdate", () => {
+            if (this.report == "bibliography") {
+                this.fetchResults();
+            }
         });
+    },
+    beforeUnmount() {
+        this.unbindEmitter();
     },
     methods: {
         fetchResults() {
@@ -169,7 +176,7 @@ export default {
                 key: "title",
                 value: newTitleValue,
             });
-            EventBus.$emit("metadataUpdate", { title: newTitleValue });
+            emitter.emit("metadataUpdate", { title: newTitleValue });
         },
         beforeEnter: function (el) {
             el.style.opacity = 0;

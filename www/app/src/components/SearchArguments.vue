@@ -69,7 +69,7 @@
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
-import { EventBus } from "../main.js";
+import { emitter } from "../main.js";
 
 export default {
     name: "searchArguments",
@@ -99,6 +99,7 @@ export default {
             return this.description.termGroups;
         },
     },
+    inject: ["$http"],
     data() {
         return {
             currentWordQuery: typeof this.$route.query.q == "undefined" ? "" : this.$route.query.q,
@@ -112,7 +113,7 @@ export default {
     },
     created() {
         this.fetchSearchArgs();
-        EventBus.$on("resultsDone", () => {
+        emitter.on("resultsDone", () => {
             this.fetchSearchArgs();
         });
     },

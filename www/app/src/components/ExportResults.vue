@@ -30,6 +30,7 @@ export default {
     computed: {
         ...mapFields(["formData.report"]),
     },
+    inject: ["$http"],
     methods: {
         getResults(format, html) {
             this.$http

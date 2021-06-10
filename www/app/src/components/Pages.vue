@@ -20,25 +20,24 @@
     </div>
 </template>
 <script>
-import { EventBus } from "../main.js";
 import { mapFields } from "vuex-map-fields";
 
 export default {
     name: "pages",
     computed: {
-        ...mapFields(["formData.start", "formData.results_per_page", "resultsLength"]),
+        ...mapFields(["formData.start", "formData.results_per_page", "resultsLength", "totalResultsDone"]),
     },
     data() {
         return { pages: [] };
     },
-    created() {
-        EventBus.$on("totalResultsDone", () => {
-            this.buildPages();
-        });
-    },
     watch: {
         // call again the method if the route changes
-        $route: "buildPages",
+        // $route: "buildPages",
+        totalResultsDone(done) {
+            if (done) {
+                this.buildPages();
+            }
+        },
     },
     methods: {
         buildPages() {

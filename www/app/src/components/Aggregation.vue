@@ -42,10 +42,10 @@
                         </div>
                     </div>
                 </div>
-                <infinite-loading :identifier="infiniteId" @infinite="infiniteHandler">
+                <!-- <infinite-loading :identifier="infiniteId" @infinite="infiniteHandler">
                     <div slot="no-more"></div>
                     <div slot="no-results"></div>
-                </infinite-loading>
+                </infinite-loading> -->
             </div>
         </div>
     </div>
@@ -54,11 +54,13 @@
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import ResultsSummary from "./ResultsSummary";
-import InfiniteLoading from "vue-infinite-loading";
+import { emitter } from "../main.js";
+// import InfiniteLoading from "vue-infinite-loading";
 
 export default {
     name: "aggregation",
-    components: { citations, ResultsSummary, InfiniteLoading },
+    components: { citations, ResultsSummary },
+    inject: ["$http"],
     computed: {
         ...mapFields(["formData.report", "resultsLength", "aggregationCache", "searching", "currentReport"]),
         statsConfig() {
@@ -80,16 +82,21 @@ export default {
             groupedByField: this.$route.query.group_by,
             breakUpFields: [],
             breakUpFieldName: "",
+            unbindEmitter: null,
         };
     },
     created() {
         this.report = "aggregation";
         this.currentReport = "aggregation";
         this.fetchData();
+        this.unbindEmitter = emitter.on("urlUpdate", () => {
+            if (this.report == "aggregation") {
+                this.fetchData();
+            }
+        });
     },
-    watch: {
-        // call again the method if the route changes
-        $route: "fetchData",
+    beforeUnmount() {
+        this.unbindEmitter();
     },
     methods: {
         fetchData() {

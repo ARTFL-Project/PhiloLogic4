@@ -131,7 +131,7 @@
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
-import { EventBus } from "../main.js";
+import { emitter } from "../main.js";
 
 export default {
     name: "facets",
@@ -146,6 +146,7 @@ export default {
             "resultsLength",
         ]),
     },
+    inject: ["$http"],
     data() {
         return {
             philoConfig: this.$philoConfig,
@@ -174,7 +175,7 @@ export default {
     },
     created() {
         this.facets = this.populateFacets();
-        EventBus.$on("urlUpdate", () => {
+        emitter.on("urlUpdate", () => {
             this.facetResults = [];
             this.fullResults = {};
             this.showFacetSelection = true;
@@ -381,7 +382,7 @@ export default {
             );
         },
         toggleFacets() {
-            EventBus.$emit("toggleFacets");
+            emitter.emit("toggleFacets");
         },
     },
 };

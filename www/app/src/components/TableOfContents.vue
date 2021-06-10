@@ -25,7 +25,7 @@
                                 <div v-for="(element, elIndex) in tocObject.toc" :key="elIndex">
                                     <div :class="'toc-' + element.philo_type">
                                         <span :class="'bullet-point-' + element.philo_type"></span>
-                                        <router-link :to="'/' + element.href" class="toc-section">{{
+                                        <router-link :to="element.href" class="toc-section">{{
                                             element.label
                                         }}</router-link>
                                         <citations :citation="element.citation"></citations>
@@ -49,6 +49,7 @@ export default {
     components: {
         citations,
     },
+    inject: ["$http"],
     computed: {
         ...mapFields({
             report: "formData.report",

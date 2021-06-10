@@ -44,7 +44,7 @@
                                 >Displaying hits {{ descriptionStart }}-{{ descriptionEnd }} of {{ resultsLength }}</b
                             >
                             <b v-else>No results for your query</b>
-                            <span v-if="report != 'bibliography'">
+                            <span>
                                 from these
                                 <button
                                     type="button"
@@ -57,8 +57,11 @@
                                 </button>
                             </span>
                         </div>
+                        <div class="modal fade" tabindex="-1" id="results-bibliography">
+                            <results-bibliography :results="results" v-if="results"></results-bibliography>
+                        </div>
                     </div>
-                    <div v-if="report == 'aggregation'">
+                    <div v-if="report == 'aggregation' && groupByLabel">
                         <div id="result-stats" class="pb-2" v-if="resultsLength > 0">
                             {{ resultsLength }} total occurrences spread across {{ results.length }}
                             {{ groupByLabel.toLowerCase() }}(s)
@@ -67,7 +70,7 @@
                             <b>No results for your query</b>
                         </div>
                     </div>
-                    <div v-if="report == 'collocation'">
+                    <div v-if="['collocation', 'time_series'].includes(report)">
                         <div
                             class="progress ms-3 me-3 mb-3"
                             :max="resultsLength"
@@ -78,15 +81,14 @@
                             <div
                                 class="progress-bar"
                                 role="progressbar"
-                                :aria-valuenow="runningTotal"
                                 aria-valuemin="0"
                                 aria-valuemax="100"
-                                :value="runningTotal"
+                                :style="`width: ${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
                             >
-                                {{ ((runningTotal / resultsLength) * 100).toFixed(2) }}%
+                                {{ Math.floor((runningTotal / resultsLength) * 100) }}%
                             </div>
                         </div>
-                        <div>
+                        <div v-if="report == 'collocation'">
                             <span>
                                 <span tooltip tooltip-title="Click to display filtered words">
                                     The
@@ -123,21 +125,6 @@
                             </div>
                         </div>
                     </div>
-                    <div v-if="report == 'time_series'">
-                        <div
-                            class="progress ms-3 me-3 mb-3"
-                            :max="resultsLength"
-                            show-progress
-                            variant="secondary"
-                            v-if="runningTotal != resultsLength"
-                        >
-                            <div
-                                class="progress-bar"
-                                :value="runningTotal"
-                                :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
-                            ></div>
-                        </div>
-                    </div>
                 </div>
                 <button
                     type="button"
@@ -147,9 +134,6 @@
                 >
                     Show Facets
                 </button>
-            </div>
-            <div class="modal fade" tabindex="-1" id="results-bibliography">
-                <results-bibliography :results="results" v-if="results"></results-bibliography>
             </div>
         </div>
         <div
@@ -187,7 +171,6 @@
 import searchArguments from "./SearchArguments";
 import ResultsBibliography from "./ResultsBibliography";
 import ExportResults from "./ExportResults";
-import { EventBus } from "../main.js";
 
 import { mapFields } from "vuex-map-fields";
 
@@ -214,6 +197,7 @@ export default {
             "currentReport",
             "resultsLength",
             "aggregationCache",
+            "totalResultsDone",
         ]),
         splittedFilterList: function () {
             let arrayLength = this.filterList.length;
@@ -226,6 +210,7 @@ export default {
             return splittedList;
         },
     },
+    inject: ["$http"],
     data() {
         return {
             facets: this.$philoConfig.facets,
@@ -332,6 +317,7 @@ export default {
                     this.end_date || this.$philoConfig.time_series_start_end_date.end_date
                 }`;
             }
+            this.totalResultsDone = false;
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_total_results.py`, {
                     params: this.paramsFilter(params),
@@ -339,7 +325,7 @@ export default {
                 .then((response) => {
                     this.resultsLength = response.data;
                     this.hits = this.buildDescription();
-                    EventBus.$emit("totalResultsDone");
+                    this.totalResultsDone = true;
                 })
                 .catch((error) => {
                     this.debug(this, error);

@@ -31,7 +31,6 @@
                 </div>
             </div>
             <div class="col-12 col-sm-8">
-                >
                 <div class="card p-3 shadow-sm">
                     <div class="card-text">
                         <span
@@ -52,7 +51,7 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import ResultsSummary from "./ResultsSummary";
-import { EventBus } from "../main.js";
+import { emitter } from "../main.js";
 
 export default {
     name: "collocation",
@@ -95,6 +94,7 @@ export default {
             return splittedList;
         },
     },
+    inject: ["$http"],
     data() {
         return {
             philoConfig: this.$philoConfig,
@@ -107,20 +107,21 @@ export default {
             showFilteredWords: false,
             runningTotal: 0,
             collocCloudWords: [],
+            unboundListener: null,
         };
     },
     created() {
         this.report = "collocation";
         this.currentReport = "collocation";
         this.fetchResults();
-        EventBus.$on("urlUpdate", () => {
+        this.unboundListener = emitter.on("urlUpdate", () => {
             if (this.report == "collocation") {
                 this.fetchResults();
             }
         });
     },
-    beforeDestroy() {
-        EventBus.$off("urlUpdate");
+    beforeUnmount() {
+        this.unboundListener();
     },
     methods: {
         fetchResults() {
