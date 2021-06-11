@@ -200,6 +200,7 @@ export default {
     vertical-align: middle;
 }
 .more-context {
+    line-height: 1.8;
     position: absolute;
     right: 0;
 }
