@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid">
-        <div id="time-series-container" class="mt-4 mx-2" v-if="authorized">
+        <div id="time-series-container" class="mt-4 mx-2" v-if="accessAuthorized">
             <results-summary
                 :results="results.results"
                 :description="results.description"
@@ -30,14 +30,12 @@
                 </div>
             </div>
         </div>
-        <!-- <access-control v-if="!authorized"></access-control> -->
     </div>
 </template>
 <script>
 import Chart from "chart.js/dist/Chart.min.js";
 import { mapFields } from "vuex-map-fields";
 import ResultsSummary from "./ResultsSummary";
-// import { emitter } from "../main.js";
 
 export default {
     name: "timeSeries",
@@ -55,6 +53,7 @@ export default {
             searching: "searching",
             resultsLength: "resultsLength",
             urlUpdate: "urlUpdate",
+            accessAuthorized: "accessAuthorized",
         }),
     },
     data() {
@@ -69,7 +68,6 @@ export default {
             relativeCounts: [],
             moreResults: false,
             done: false,
-            authorized: true,
             endDate: "",
             results: [],
             runningTotal: 0,
@@ -83,6 +81,7 @@ export default {
     watch: {
         urlUpdate() {
             if (this.report == "time_series") {
+                console.log("fetching time series");
                 this.fetchResults();
             }
         },
@@ -247,7 +246,6 @@ export default {
                     }
                     this.percent = Math.floor((this.resultsLength / this.totalResults) * 100);
                     this.sortAndRenderTimeSeries(fullResults, timeSeriesResults);
-                    console.log(this.resultsLength, this.totalResults);
                 })
                 .catch((response) => {
                     this.debug(this, response);

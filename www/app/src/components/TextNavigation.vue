@@ -1,5 +1,5 @@
 <template>
-    <div class="container-fluid mt-4" v-if="authorized">
+    <div class="container-fluid mt-4" v-if="accessAuthorized">
         <div class="row">
             <div class="col-8 offset-2">
                 <div id="object-title" class="text-center pt-4">
@@ -207,6 +207,7 @@ export default {
             tocElements: "tocElements",
             byte: "byte",
             searching: "searching",
+            accessAuthorized: "accessAuthorized",
         }),
         tocElementsToDisplay: function () {
             return this.tocElements.elements.slice(this.start, this.end);

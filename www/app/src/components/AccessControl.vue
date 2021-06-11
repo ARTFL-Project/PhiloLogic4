@@ -72,11 +72,14 @@
     </b-container>
 </template>
 <script>
-import { emitter } from "../main.js";
+import { mapFields } from "vuex-map-fields";
 
 export default {
     name: "AccessControl",
-    props: ["authorized", "clientIp", "domainName"],
+    computed: {
+        ...mapFields(["accessAuthorized"]),
+    },
+    props: ["clientIp", "domainName"],
     inject: ["$http"],
     data() {
         return {
@@ -96,9 +99,9 @@ export default {
                 .then((response) => {
                     var authorization = response.data;
                     if (authorization.access) {
-                        emitter.emit("accessAuthorized");
+                        this.accessAuthorized = true;
                     } else {
-                        this.accessDenied = true;
+                        this.accessAuthorized = false;
                     }
                 });
         },

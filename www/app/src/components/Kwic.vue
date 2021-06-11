@@ -75,7 +75,6 @@ import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
 import Velocity from "velocity-animate";
-// import { emitter } from "../main.js";
 
 export default {
     name: "kwic",

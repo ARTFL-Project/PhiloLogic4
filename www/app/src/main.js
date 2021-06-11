@@ -6,7 +6,6 @@ import store from './store'
 import { paramsFilter, paramsToRoute, paramsToUrlString, copyObject, saveToLocalStorage, mergeResults, sortResults, deepEqual, dictionaryLookup, debug } from './mixins.js'
 import axios from 'axios'
 import "bootstrap"
-import { createNanoEvents } from 'nanoevents'
 
 import appConfig from "../appConfig.json"
 
@@ -14,7 +13,6 @@ configureCompat({
     MODE: 3
 })
 
-export const emitter = createNanoEvents()
 
 axios
     .get(`${appConfig.dbUrl}/scripts/get_web_config.py`, {

@@ -60,7 +60,6 @@ export default {
     data() {
         return {
             philoConfig: this.$philoConfig,
-            authorized: true,
             displayLimit: 50,
             teiHeader: "",
             tocObject: {},

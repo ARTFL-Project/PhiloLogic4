@@ -6,7 +6,7 @@
             <span :style="cite.style" v-else>{{ cite.label }}</span>
             <span v-html="cite.suffix" v-if="cite.suffix"></span>
             <span v-html="cite.separator" v-if="cite.separator.length > 0 && citeIndex != maxIndex"></span>
-            <span class="separator" v-if="cite.separator.length == 0 && citeIndex != maxIndex">&#9679;</span>
+            <span class="px-2" v-if="cite.separator.length == 0 && citeIndex != maxIndex">&#9679;</span>
         </span>
     </span>
 </template>
@@ -21,8 +21,3 @@ export default {
     },
 };
 </script>
-<style scoped>
-.separator {
-    padding: 0 0.5rem;
-}
-</style>

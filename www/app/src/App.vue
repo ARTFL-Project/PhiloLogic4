@@ -1,10 +1,10 @@
 <template>
     <div id="app">
         <Header />
-        <SearchForm v-if="authorized" />
-        <router-view :key="$route.fullPath" v-if="authorized"></router-view>
-        <access-control :client-ip="clientIp" :domain-name="domainName" :authorized="authorized" v-if="!authorized" />
-        <div class="container-fluid" v-if="authorized">
+        <SearchForm v-if="accessAuthorized" />
+        <router-view v-if="accessAuthorized"></router-view>
+        <access-control :client-ip="clientIp" :domain-name="domainName" v-if="!accessAuthorized" />
+        <div class="container-fluid" v-if="accessAuthorized">
             <div class="text-center mb-4">
                 <hr class="mb-3" width="20%" style="margin: auto" />
                 Powered by
@@ -25,7 +25,6 @@ import { defineAsyncComponent } from "vue";
 import Header from "./components/Header.vue";
 const SearchForm = defineAsyncComponent(() => import("./components/SearchForm.vue"));
 const AccessControl = defineAsyncComponent(() => import("./components/AccessControl.vue"));
-import { emitter } from "./main.js";
 import { mapFields } from "vuex-map-fields";
 
 export default {
@@ -39,13 +38,12 @@ export default {
     data() {
         return {
             initialLoad: true,
-            authorized: true,
             clientIp: "",
             domainName: "",
         };
     },
     computed: {
-        ...mapFields(["formData.report", "formData.q", "urlUpdate"]),
+        ...mapFields(["formData.report", "formData.q", "urlUpdate", "accessAuthorized"]),
         defaultFieldValues() {
             let localFields = {
                 report: "home",
@@ -123,8 +121,8 @@ export default {
         if (this.$philoConfig.access_control) {
             let promise = this.checkAccessAuthorization();
             promise.then((response) => {
-                this.authorized = response.data.access;
-                if (this.authorized) {
+                this.accessAuthorized = response.data.access;
+                if (this.accessAuthorized) {
                     this.setupApp();
                 } else {
                     this.clientIp = response.data.incoming_address;
@@ -134,14 +132,15 @@ export default {
         } else {
             this.setupApp();
         }
-        emitter.on("accessAuthorized", () => {
-            this.setupApp();
-            this.authorized = true;
-        });
     },
     watch: {
         // call again the method if the route changes
         $route: "formDataUpdate",
+        accessAuthorized(authorized) {
+            if (authorized) {
+                this.setupApp();
+            }
+        },
     },
     methods: {
         setupApp() {

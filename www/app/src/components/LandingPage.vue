@@ -1,6 +1,6 @@
 <template>
     <div id="landing-page-container" class="mt-5">
-        <div class="container-fluid" v-if="authorized">
+        <div class="container-fluid" v-if="accessAuthorized">
             <div class="landing-page-logo" :class="{ dictionary: dictionary }" v-if="logo">
                 <img style="max-height: 300px; width: auto" :src="logo" />
             </div>
@@ -137,19 +137,19 @@
 </template>
 <script>
 import citations from "./Citations";
+import { mapFields } from "vuex-map-fields";
 
 export default {
     name: "landingPage",
     components: {
         citations,
     },
-    computed: {},
+    computed: { ...mapFields(["accessAuthorized"]) },
     inject: ["$http"],
     data() {
         return {
             dictionary: this.$philoConfig.dictionary,
             logo: this.$philoConfig.logo,
-            authorized: true,
             landingPageBrowsing: this.$philoConfig.landing_page_browsing,
             defaultLandingPageBrowsing: this.$philoConfig.default_landing_page_browsing,
             displayCount: true,

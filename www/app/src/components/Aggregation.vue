@@ -88,7 +88,6 @@ export default {
             groupedByField: this.$route.query.group_by,
             breakUpFields: [],
             breakUpFieldName: "",
-            unbindEmitter: null,
         };
     },
     created() {

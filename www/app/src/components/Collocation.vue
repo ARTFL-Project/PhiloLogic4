@@ -1,5 +1,5 @@
 <template>
-    <div class="container-fluid mt-4" v-if="authorized">
+    <div class="container-fluid mt-4" v-if="accessAuthorized">
         <results-summary
             :results="results.results"
             :description="results.description"
@@ -67,6 +67,7 @@ export default {
             "resultsLength",
             "searching",
             "urlUpdate",
+            "accessAuthorized",
         ]),
         colorCodes: function () {
             let colorCodes = {};
@@ -101,7 +102,6 @@ export default {
             results: {},
             filterList: [],
             searchParams: {},
-            authorized: true,
             moreResults: false,
             sortedList: [],
             showFilteredWords: false,

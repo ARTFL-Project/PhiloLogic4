@@ -106,7 +106,6 @@ export default {
             results: {},
             resultType: "doc",
             metadataAddition: [],
-            unbindEmitter: null,
         };
     },
     created() {

@@ -69,7 +69,6 @@
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
-import { emitter } from "../main.js";
 
 export default {
     name: "searchArguments",
@@ -113,9 +112,6 @@ export default {
     },
     created() {
         this.fetchSearchArgs();
-        emitter.on("resultsDone", () => {
-            this.fetchSearchArgs();
-        });
     },
     watch: {
         // call again the method if the route changes

@@ -40,7 +40,7 @@ export default new Vuex.Store({
         showFacets: true,
         urlUpdate: "",
         metadataUpdate: {},
-        accessAuthorized: false
+        accessAuthorized: true
     },
     getters: {
         getField
