@@ -131,7 +131,6 @@
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
-import { emitter } from "../main.js";
 
 export default {
     name: "facets",
@@ -144,6 +143,8 @@ export default {
             "formData.end",
             "formData.metadataFields",
             "resultsLength",
+            "showFacets",
+            "urlUpdate",
         ]),
     },
     inject: ["$http"],
@@ -175,12 +176,14 @@ export default {
     },
     created() {
         this.facets = this.populateFacets();
-        emitter.on("urlUpdate", () => {
+    },
+    watch: {
+        urlUpdate() {
             this.facetResults = [];
             this.fullResults = {};
             this.showFacetSelection = true;
             this.showFacetResults = false;
-        });
+        },
     },
     methods: {
         populateFacets() {
@@ -382,7 +385,12 @@ export default {
             );
         },
         toggleFacets() {
-            emitter.emit("toggleFacets");
+            if (this.showFacets) {
+                this.showFacets = false;
+            } else {
+                this.showFacets = true;
+            }
+            console.log(this.showFacets);
         },
     },
 };

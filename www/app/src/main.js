@@ -41,7 +41,7 @@ axios
                 }
                 window.addEventListener('scroll', el.scrollHandler)
             },
-            unbind: function (el) {
+            unmounted: function (el) {
                 window.removeEventListener("scroll", el.scrollHandler)
             }
         })

@@ -45,7 +45,7 @@ export default {
         };
     },
     computed: {
-        ...mapFields(["formData.report", "formData.q"]),
+        ...mapFields(["formData.report", "formData.q", "urlUpdate"]),
         defaultFieldValues() {
             let localFields = {
                 report: "home",
@@ -161,7 +161,7 @@ export default {
             });
             if (!["textNavigation", "tableOfContents", "home"].includes(this.$route.name)) {
                 this.evaluateRoute();
-                emitter.emit("urlUpdate");
+                this.urlUpdate = this.$route.fullPath;
             }
         },
         evaluateRoute() {

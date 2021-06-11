@@ -54,7 +54,6 @@
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import ResultsSummary from "./ResultsSummary";
-import { emitter } from "../main.js";
 // import InfiniteLoading from "vue-infinite-loading";
 
 export default {
@@ -62,7 +61,14 @@ export default {
     components: { citations, ResultsSummary },
     inject: ["$http"],
     computed: {
-        ...mapFields(["formData.report", "resultsLength", "aggregationCache", "searching", "currentReport"]),
+        ...mapFields([
+            "formData.report",
+            "resultsLength",
+            "aggregationCache",
+            "searching",
+            "currentReport",
+            "urlUpdate",
+        ]),
         statsConfig() {
             for (let fieldObject of this.$philoConfig.stats_report_config) {
                 if (fieldObject.field == this.$route.query.group_by) {
@@ -88,18 +94,17 @@ export default {
     created() {
         this.report = "aggregation";
         this.currentReport = "aggregation";
-        this.fetchData();
-        this.unbindEmitter = emitter.on("urlUpdate", () => {
-            if (this.report == "aggregation") {
-                this.fetchData();
-            }
-        });
+        this.fetchResults();
     },
-    beforeUnmount() {
-        this.unbindEmitter();
+    watch: {
+        urlUpdate() {
+            if (this.report == "aggregation") {
+                this.fetchResults();
+            }
+        },
     },
     methods: {
-        fetchData() {
+        fetchResults() {
             if (
                 this.deepEqual(
                     { ...this.aggregationCache.query, start: "", end: "" },

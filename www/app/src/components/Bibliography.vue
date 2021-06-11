@@ -67,7 +67,6 @@
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
-import { emitter } from "../main.js";
 import citations from "./Citations";
 import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
@@ -96,6 +95,8 @@ export default {
             "formData.metadataFields",
             "description",
             "currentReport",
+            "metadataUpdate",
+            "urlUpdate",
         ]),
     },
     inject: ["$http"],
@@ -112,14 +113,13 @@ export default {
         this.report = "bibliography";
         this.currentReport = "bibliography";
         this.fetchResults();
-        this.unbindEmitter = emitter.on("urlUpdate", () => {
+    },
+    watch: {
+        urlUpdate() {
             if (this.report == "bibliography") {
                 this.fetchResults();
             }
-        });
-    },
-    beforeUnmount() {
-        this.unbindEmitter();
+        },
     },
     methods: {
         fetchResults() {
@@ -176,7 +176,7 @@ export default {
                 key: "title",
                 value: newTitleValue,
             });
-            emitter.emit("metadataUpdate", { title: newTitleValue });
+            this.metadataUpdate = { title: newTitleValue };
         },
         beforeEnter: function (el) {
             el.style.opacity = 0;

@@ -36,7 +36,11 @@ export default new Vuex.Store({
             results: [],
             totalResults: 0
         },
-        totalResultsDone: false
+        totalResultsDone: false,
+        showFacets: true,
+        urlUpdate: "",
+        metadataUpdate: {},
+        accessAuthorized: false
     },
     getters: {
         getField

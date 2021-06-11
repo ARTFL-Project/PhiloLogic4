@@ -75,7 +75,7 @@ import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
 import Velocity from "velocity-animate";
-import { emitter } from "../main.js";
+// import { emitter } from "../main.js";
 
 export default {
     name: "kwic",
@@ -99,6 +99,7 @@ export default {
             "currentReport",
             "description",
             "sortedKwicCache",
+            "urlUpdate",
         ]),
         sortingSelection() {
             let sortingSelection = [];
@@ -136,7 +137,6 @@ export default {
             },
             sortedResults: [],
             loading: false,
-            unbindEmitter: null,
         };
     },
     created() {
@@ -144,14 +144,13 @@ export default {
         this.currentReport = "kwic";
         this.initializeKwic();
         this.fetchResults();
-        this.unbindEmitter = emitter.on("urlUpdate", () => {
+    },
+    watch: {
+        urlUpdate() {
             if (this.report == "kwic") {
                 this.fetchResults();
             }
-        });
-    },
-    beforeUnmount() {
-        this.unbindEmitter();
+        },
     },
     methods: {
         initializeKwic() {

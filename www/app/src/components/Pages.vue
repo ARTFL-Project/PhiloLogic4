@@ -31,8 +31,6 @@ export default {
         return { pages: [] };
     },
     watch: {
-        // call again the method if the route changes
-        // $route: "buildPages",
         totalResultsDone(done) {
             if (done) {
                 this.buildPages();

@@ -430,7 +430,6 @@
 
 <script>
 import { mapFields } from "vuex-map-fields";
-import { emitter } from "../main.js";
 import SearchTips from "./SearchTips";
 export default {
     name: "SearchForm",
@@ -460,6 +459,7 @@ export default {
             "formData.group_by",
             "searching",
             "currentReport",
+            "metadataUpdate",
         ]),
         formData() {
             return this.$store.state.formData;
@@ -539,6 +539,15 @@ export default {
     watch: {
         // call again the method if the route changes
         $route: "updateInputData",
+        metadataUpdate(metadata) {
+            for (let field in metadata) {
+                this.metadataValues[field] = metadata[field];
+            }
+            for (let metadataField of this.$philoConfig.metadata) {
+                this.autoCompleteResults[metadataField] = [];
+                this.arrowCounters[metadataField] = -1;
+            }
+        },
     },
     created() {
         this.reports = this.buildReports();
@@ -565,15 +574,6 @@ export default {
                 this.headIndex = this.metadataDisplay.length - 1;
             }
         }
-        emitter.on("metadataUpdate", (metadata) => {
-            for (let field in metadata) {
-                this.metadataValues[field] = metadata[field];
-            }
-            for (let metadataField of this.$philoConfig.metadata) {
-                this.autoCompleteResults[metadataField] = [];
-                this.arrowCounters[metadataField] = -1;
-            }
-        });
         for (let metadata in this.$philoConfig.metadata_choice_values) {
             this.metadataChoiceValues[metadata] = [];
             let choiceValue = this.$philoConfig.metadata_choice_values[metadata];
@@ -667,7 +667,6 @@ export default {
                     byte: "",
                 })
             );
-            console.log(this.report);
         },
         onReset() {
             this.$store.commit("setDefaultFields", this.$parent.defaultFieldValues);

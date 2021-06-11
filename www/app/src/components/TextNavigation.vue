@@ -188,7 +188,6 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
-import { emitter } from "../main.js";
 import Gallery from "blueimp-gallery";
 import "blueimp-gallery/css/blueimp-gallery.min.css";
 
@@ -256,19 +255,18 @@ export default {
             // only trigger at first render
             this.$nextTick(() => {
                 if (this.byte != "") {
-                    this.$scrollTo(document.getElementsByClassName("highlight")[0], 1000, {
+                    this.$scrollTo(document.getElementsByClassName("highlight")[0], 250, {
                         easing: "ease-out",
                         offset: -150,
                     });
                 } else if (this.start_byte != "") {
-                    this.$scrollTo(document.getElementsByClassName("start-highlight")[0], 1000, {
+                    this.$scrollTo(document.getElementsByClassName("start-highlight")[0], 250, {
                         easing: "ease-out",
                         offset: -150,
                     });
                 }
-
                 this.setUpGallery();
-            }, 1000);
+            });
             this.searching = false;
         }
     },
@@ -537,7 +535,6 @@ export default {
                 this.tocOpen = false;
             }
             this.$router.push({ path: `/navigate/${philoID}` });
-            emitter.emit("navChange");
         },
         textObjectSelection(philoId, index) {
             event.preventDefault();

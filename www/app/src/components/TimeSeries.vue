@@ -37,7 +37,7 @@
 import Chart from "chart.js/dist/Chart.min.js";
 import { mapFields } from "vuex-map-fields";
 import ResultsSummary from "./ResultsSummary";
-import { emitter } from "../main.js";
+// import { emitter } from "../main.js";
 
 export default {
     name: "timeSeries",
@@ -54,6 +54,7 @@ export default {
             currentReport: "currentReport",
             searching: "searching",
             resultsLength: "resultsLength",
+            urlUpdate: "urlUpdate",
         }),
     },
     data() {
@@ -72,21 +73,21 @@ export default {
             endDate: "",
             results: [],
             runningTotal: 0,
-            unboundListener: null,
         };
     },
     mounted() {
         this.report = "time_series";
         this.currentReport = "time_series";
         this.fetchResults();
-        this.unboundListener = emitter.on("urlUpdate", () => {
+    },
+    watch: {
+        urlUpdate() {
             if (this.report == "time_series") {
                 this.fetchResults();
             }
-        });
+        },
     },
     beforeUnmount() {
-        this.unboundListener();
         this.myBarChart.destroy();
     },
     methods: {

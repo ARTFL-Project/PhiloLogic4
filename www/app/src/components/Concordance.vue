@@ -1,19 +1,18 @@
 <template>
     <div class="container-fluid">
         <results-summary :results="results.results" :description="results.description"></results-summary>
-        <div style="position: relative">
+        <div style="position: relative" v-if="!showFacets">
             <button
                 type="button"
                 class="btn btn-secondary"
                 style="position: absolute; bottom: 1rem; right: 0.5rem"
                 @click="toggleFacets()"
-                v-if="!showFacets"
             >
                 Show Facets
             </button>
         </div>
         <div class="row" style="padding-right: 0.5rem">
-            <div class="col-12 col-md-8 col-xl-9" :class="{ 'col-md-12': !showFacets }">
+            <div class="col-12" :class="{ 'col-md-8': showFacets, 'col-xl-9': showFacets }">
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
                     <div
                         class="card philologic-occurrence ms-2 me-2 mb-4 shadow-sm"
@@ -62,7 +61,6 @@
 
 <script>
 import { mapFields } from "vuex-map-fields";
-import { emitter } from "../main.js";
 import citations from "./Citations";
 import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
@@ -79,15 +77,21 @@ export default {
     },
     inject: ["$http"],
     computed: {
-        ...mapFields(["formData.report", "resultsLength", "searching", "currentReport", "description"]),
+        ...mapFields([
+            "formData.report",
+            "resultsLength",
+            "searching",
+            "currentReport",
+            "description",
+            "showFacets",
+            "urlUpdate",
+        ]),
     },
     data() {
         return {
             philoConfig: this.$philoConfig,
             results: { description: { end: 0 } },
             searchParams: {},
-            showFacets: true,
-            unbindToggleEmitter: null,
             unbindUrlUpdate: null,
         };
     },
@@ -95,19 +99,13 @@ export default {
         this.report = "concordance";
         this.currentReport = "concordance";
         this.fetchResults();
-        this.unbindUrlUpdate = emitter.on("urlUpdate", () => {
-            console.log(this.report);
+    },
+    watch: {
+        urlUpdate() {
             if (this.report == "concordance") {
                 this.fetchResults();
             }
-        });
-        this.unbindToggleEmitter = emitter.on("toggleFacets", () => {
-            this.toggleFacets();
-        });
-    },
-    beforeUnmount() {
-        this.unbindUrlUpdate();
-        this.unbindToggleEmitter();
+        },
     },
     methods: {
         fetchResults() {

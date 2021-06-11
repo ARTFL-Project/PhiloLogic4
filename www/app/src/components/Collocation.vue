@@ -51,7 +51,6 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import ResultsSummary from "./ResultsSummary";
-import { emitter } from "../main.js";
 
 export default {
     name: "collocation",
@@ -67,6 +66,7 @@ export default {
             "currentReport",
             "resultsLength",
             "searching",
+            "urlUpdate",
         ]),
         colorCodes: function () {
             let colorCodes = {};
@@ -114,14 +114,13 @@ export default {
         this.report = "collocation";
         this.currentReport = "collocation";
         this.fetchResults();
-        this.unboundListener = emitter.on("urlUpdate", () => {
+    },
+    watch: {
+        urlUpdate() {
             if (this.report == "collocation") {
                 this.fetchResults();
             }
-        });
-    },
-    beforeUnmount() {
-        this.unboundListener();
+        },
     },
     methods: {
         fetchResults() {
