@@ -769,7 +769,6 @@ export default {
             container.scrollTop = topOffset - 36;
         },
         onEnter(field) {
-            console.log(field);
             let result = this.autoCompleteResults[field][this.arrowCounters[field]];
             this.setResult(result, field);
         },

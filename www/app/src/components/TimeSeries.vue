@@ -81,7 +81,6 @@ export default {
     watch: {
         urlUpdate() {
             if (this.report == "time_series") {
-                console.log("fetching time series");
                 this.fetchResults();
             }
         },

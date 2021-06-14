@@ -1,4 +1,4 @@
-import { createApp, configureCompat } from 'vue'
+import { createApp } from 'vue'
 import vueScrollTo from 'vue-scrollto'
 import App from './App.vue'
 import router from './router'
@@ -8,11 +8,6 @@ import axios from 'axios'
 import "bootstrap"
 
 import appConfig from "../appConfig.json"
-
-configureCompat({
-    MODE: 3
-})
-
 
 axios
     .get(`${appConfig.dbUrl}/scripts/get_web_config.py`, {
