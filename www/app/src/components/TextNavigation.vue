@@ -242,8 +242,10 @@ export default {
     },
     watch: {
         $route() {
-            this.fetchText();
-            this.fetchToC();
+            if (this.report == "textNavigation") {
+                this.fetchText();
+                this.fetchToC();
+            }
         },
     },
     mounted() {
@@ -254,11 +256,32 @@ export default {
         if (this.searching) {
             // only trigger at first render
             this.$nextTick(() => {
+                // Handle notes if there are any
+                let notes = document.getElementsByClassName("note");
+                notes.forEach((note) => {
+                    let innerHTML = note.nextElementSibling.innerHTML;
+                    new Popover(note, { html: true, content: innerHTML, trigger: "focus" });
+                });
+
+                // Scroll to highlight
                 if (this.byte != "") {
-                    this.$scrollTo(document.getElementsByClassName("highlight")[0], 250, {
-                        easing: "ease-out",
-                        offset: -150,
-                    });
+                    let element = document.getElementsByClassName("highlight")[0];
+                    let parent = element.parentElement;
+                    if (parent.classList.contains("note-content")) {
+                        let note = parent.previousSibling;
+                        this.$scrollTo(note, 250, {
+                            easing: "ease-out",
+                            offset: -150,
+                            onDone: function () {
+                                note.focus();
+                            },
+                        });
+                    } else {
+                        this.$scrollTo(element, 250, {
+                            easing: "ease-out",
+                            offset: -150,
+                        });
+                    }
                 } else if (this.start_byte != "") {
                     this.$scrollTo(document.getElementsByClassName("start-highlight")[0], 250, {
                         easing: "ease-out",
@@ -266,11 +289,6 @@ export default {
                     });
                 }
                 this.setUpGallery();
-                let notes = document.getElementsByClassName("note");
-                notes.forEach((note) => {
-                    let innerHTML = note.nextElementSibling.innerHTML;
-                    new Popover(note, { html: true, content: innerHTML, trigger: "focus" });
-                });
             });
             this.searching = false;
         }
