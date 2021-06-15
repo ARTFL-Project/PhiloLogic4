@@ -5,7 +5,8 @@
                 <div id="description">
                     <button
                         type="button"
-                        class="btn btn-outline-primary btn-sm"
+                        class="btn btn-secondary btn-sm"
+                        style="margin-top: -0.5rem; margin-right: -1rem"
                         id="export-results"
                         data-bs-toggle="modal"
                         data-bs-target="#export-modal"

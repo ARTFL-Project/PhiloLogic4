@@ -69,11 +69,7 @@
                             v-if="tocOpen"
                         >
                             <div class="toc-more before" v-if="start !== 0">
-                                <button
-                                    type="button"
-                                    class="btn btn-default btn-sm glyphicon glyphicon-menu-up"
-                                    @click="loadBefore()"
-                                ></button>
+                                <button type="button" class="btn btn-default btn-sm" @click="loadBefore()"></button>
                             </div>
                             <div v-for="(element, tocIndex) in tocElementsToDisplay" :key="tocIndex">
                                 <div
@@ -88,11 +84,7 @@
                                 </div>
                             </div>
                             <div class="toc-more after" v-if="end < tocElements.length">
-                                <button
-                                    type="button"
-                                    class="btn btn-default btn-sm glyphicon glyphicon-menu-down"
-                                    @click="loadAfter()"
-                                ></button>
+                                <button type="button" class="btn btn-default btn-sm" @click="loadAfter()"></button>
                             </div>
                         </div>
                     </transition>
@@ -102,7 +94,7 @@
         <div style="font-size: 80%; text-align: center" v-if="philoConfig.dictionary_lookup != ''">
             To look up a word in a dictionary, select the word with your mouse and press 'd' on your keyboard.
         </div>
-        <div class="row" id="all-content" loading="loading">
+        <div class="row" id="all-content">
             <div
                 class="col-12 col-sm-10 offset-sm-1 col-lg-8 offset-lg-2"
                 id="center-content"
@@ -190,6 +182,7 @@ import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import Gallery from "blueimp-gallery";
 import "blueimp-gallery/css/blueimp-gallery.min.css";
+import { Popover } from "bootstrap";
 
 export default {
     name: "textNavigation",
@@ -247,6 +240,12 @@ export default {
         this.fetchText();
         this.fetchToC();
     },
+    watch: {
+        $route() {
+            this.fetchText();
+            this.fetchToC();
+        },
+    },
     mounted() {
         let tocButton = document.querySelector("#show-toc");
         this.navButtonPosition = tocButton.getBoundingClientRect().top;
@@ -267,6 +266,11 @@ export default {
                     });
                 }
                 this.setUpGallery();
+                let notes = document.getElementsByClassName("note");
+                notes.forEach((note) => {
+                    let innerHTML = note.nextElementSibling.innerHTML;
+                    new Popover(note, { html: true, content: innerHTML, trigger: "focus" });
+                });
             });
             this.searching = false;
         }
@@ -278,6 +282,7 @@ export default {
     },
     methods: {
         fetchText() {
+            // this.loading = true;
             this.searching = true;
             this.textRendered = false;
             this.textObjectURL = this.$route.params;
