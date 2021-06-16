@@ -425,7 +425,7 @@ def format_text_object(
                         (el.attrib["id"], str(philo_id[0]) + " %"),
                     )
                     object_id = c.fetchone()[0]
-                    link_back.attrib["href"] = "navigate/%s%s" % (
+                    link_back.attrib["href"] = "/navigate/%s%s" % (
                         "/".join([i for i in object_id.split() if i != "0"]),
                         "#%s-link-back" % el.attrib["id"],
                     )

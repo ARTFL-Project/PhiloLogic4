@@ -19,6 +19,7 @@
                         &plus;
                     </button>
                     <span class="badge rounded-pill bg-secondary" style="font-size: 100%">{{ result.count }}</span>
+                    <span class="ps-2">occurrences in</span>
                     <citations :citation="result.citation"></citations>
                     <span class="d-inline-block ps-1" v-if="breakUpFields[resultIndex].results.length"
                         >across {{ breakUpFields[resultIndex].results.length }} {{ breakUpFieldName }}(s)</span
@@ -30,6 +31,7 @@
                             :key="key"
                         >
                             <span class="badge rounded-pill bg-secondary">{{ value.count }}</span>
+                            <span class="ps-2">occurrences in</span>
                             <citations
                                 :citation="
                                     buildCitationObject(

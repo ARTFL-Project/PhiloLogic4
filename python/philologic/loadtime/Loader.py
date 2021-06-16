@@ -808,17 +808,20 @@ class Loader:
             config_values["concordance_biblio_sorting"] = [("author", "title"), ("title", "author")]
 
         # Find default start and end dates for times series
-        cursor.execute("SELECT min(year), max(year) FROM toms")
-        min_year, max_year = cursor.fetchone()
         try:
-            start_date = int(min_year)
-        except TypeError:
-            start_date = 0
-        try:
-            end_date = int(max_year)
-        except TypeError:
-            end_date = 2100
-        config_values["time_series_start_end_date"] = {"start_date": start_date, "end_date": end_date}
+            cursor.execute("SELECT min(year), max(year) FROM toms")
+            min_year, max_year = cursor.fetchone()
+            try:
+                start_date = int(min_year)
+            except TypeError:
+                start_date = 0
+            try:
+                end_date = int(max_year)
+            except TypeError:
+                end_date = 2100
+            config_values["time_series_start_end_date"] = {"start_date": start_date, "end_date": end_date}
+        except sqlite3.OperationalError:  # no year field present
+            config_values["time_series_start_end_date"] = {"start_date": "", "end_date": ""}
 
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)

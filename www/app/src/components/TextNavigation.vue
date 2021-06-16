@@ -159,7 +159,6 @@
                 </div>
             </div>
         </div>
-        <!-- <access-control v-if="!authorized"></access-control> -->
         <div
             id="blueimp-gallery"
             class="blueimp-gallery blueimp-gallery-controls"
@@ -242,7 +241,9 @@ export default {
     },
     watch: {
         $route() {
-            if (this.report == "textNavigation") {
+            console.log(this.$route, this.report);
+            if (this.$route.name == "textNavigation") {
+                this.destroyPopovers();
                 this.fetchText();
                 this.fetchToC();
             }
@@ -252,51 +253,11 @@ export default {
         let tocButton = document.querySelector("#show-toc");
         this.navButtonPosition = tocButton.getBoundingClientRect().top;
     },
-    updated: function () {
-        if (this.searching) {
-            // only trigger at first render
-            this.$nextTick(() => {
-                // Handle notes if there are any
-                let notes = document.getElementsByClassName("note");
-                notes.forEach((note) => {
-                    let innerHTML = note.nextElementSibling.innerHTML;
-                    new Popover(note, { html: true, content: innerHTML, trigger: "focus" });
-                });
-
-                // Scroll to highlight
-                if (this.byte != "") {
-                    let element = document.getElementsByClassName("highlight")[0];
-                    let parent = element.parentElement;
-                    if (parent.classList.contains("note-content")) {
-                        let note = parent.previousSibling;
-                        this.$scrollTo(note, 250, {
-                            easing: "ease-out",
-                            offset: -150,
-                            onDone: function () {
-                                note.focus();
-                            },
-                        });
-                    } else {
-                        this.$scrollTo(element, 250, {
-                            easing: "ease-out",
-                            offset: -150,
-                        });
-                    }
-                } else if (this.start_byte != "") {
-                    this.$scrollTo(document.getElementsByClassName("start-highlight")[0], 250, {
-                        easing: "ease-out",
-                        offset: -150,
-                    });
-                }
-                this.setUpGallery();
-            });
-            this.searching = false;
-        }
-    },
     unmounted() {
         if (this.gallery) {
             this.gallery.close();
         }
+        this.destroyPopovers();
     },
     methods: {
         fetchText() {
@@ -338,29 +299,82 @@ export default {
                         this.highlight = false;
                     }
 
-                    // this.loading = false;
-
-                    // let hash = this.$route.hash; // For note link back
-                    // if (hash) {
-                    //     $timeout(function() {
-                    //         angular
-                    //             .element("#" + hash)
-                    //             .css({
-                    //                 backgroundColor: "red",
-                    //                 color: "white"
-                    //             })
-                    //             .velocity("scroll", {
-                    //                 duration: 200,
-                    //                 offset: -50
-                    //             });
-                    //     });
-                    // }
-
                     if (!this.deepEqual(response.data.imgs, {})) {
                         this.insertPageLinks(response.data.imgs);
                         this.insertInlineImgs(response.data.imgs);
                     }
                     this.setUpNavBar();
+                    this.$nextTick(() => {
+                        // Handle inline notes if there are any
+                        let notes = document.getElementsByClassName("note");
+                        notes.forEach((note) => {
+                            let innerHTML = note.nextElementSibling.innerHTML;
+                            new Popover(note, { html: true, content: innerHTML, trigger: "focus" });
+                        });
+
+                        // Handle ref notes if there are any
+                        let noteRefs = document.getElementsByClassName("note-ref");
+                        noteRefs.forEach((noteRef) => {
+                            let getNotes = () => {
+                                this.$http
+                                    .get(`${this.$dbUrl}/scripts/get_notes.py?`, {
+                                        params: {
+                                            target: noteRef.getAttribute("target"),
+                                            philo_id: this.$route.params.pathInfo.split("/").join(" "),
+                                        },
+                                    })
+                                    .then((response) => {
+                                        new Popover(noteRef, {
+                                            html: true,
+                                            content: response.data.text,
+                                            trigger: "focus",
+                                        });
+                                        noteRef.removeEventListener("click", getNotes);
+                                        // noteRef.focus();
+                                    });
+                            };
+                            noteRef.addEventListener("click", getNotes());
+                        });
+
+                        // Scroll to highlight
+                        if (this.byte != "") {
+                            let element = document.getElementsByClassName("highlight")[0];
+                            let parent = element.parentElement;
+                            if (parent.classList.contains("note-content")) {
+                                let note = parent.previousSibling;
+                                this.$scrollTo(note, 250, {
+                                    easing: "ease-out",
+                                    offset: -150,
+                                    onDone: function () {
+                                        note.focus();
+                                    },
+                                });
+                            } else {
+                                this.$scrollTo(element, 250, {
+                                    easing: "ease-out",
+                                    offset: -150,
+                                });
+                            }
+                        } else if (this.start_byte != "") {
+                            this.$scrollTo(document.getElementsByClassName("start-highlight")[0], 250, {
+                                easing: "ease-out",
+                                offset: -150,
+                            });
+                        } else if (this.$route.hash) {
+                            // for note link back
+                            let note = document.querySelector(this.$route.hash);
+                            this.$scrollTo(note, 250, {
+                                easing: "ease-out",
+                                offset: -150,
+                                onDone: () => {
+                                    note.focus();
+                                },
+                            });
+                        }
+
+                        this.setUpGallery();
+                        this.searching = false;
+                    });
                 })
                 .catch((error) => {
                     this.debug(this, error);
@@ -637,6 +651,14 @@ export default {
                 window.open(link);
             }
         },
+        destroyPopovers() {
+            document.querySelectorAll(".note, .note-ref").forEach((note) => {
+                let popover = Popover.getInstance(note);
+                if (popover != null) {
+                    Popover.getInstance(note).dispose();
+                }
+            });
+        },
     },
 };
 </script>
@@ -755,11 +777,16 @@ a.current-obj,
     white-space: pre;
 }
 
-b.headword {
+:deep(b.headword) {
     font-weight: 700 !important;
     font-size: 130%;
+    font-variant: small-caps;
     display: block;
     margin-top: 20px;
+}
+:deep(b.headword::before) {
+    content: "\A";
+    white-space: pre;
 }
 
 :deep(#bibliographic-results b.headword) {
@@ -994,12 +1021,14 @@ body {
     display: none;
 }
 
-:deep(.note, .note-ref) {
+:deep(.note),
+:deep(.note-ref) {
     vertical-align: 0.3em;
     font-size: 0.7em;
 }
 
-:deep(.note:hover, .note-ref:hover) {
+:deep(.note:hover),
+:deep(.note-ref:hover) {
     cursor: pointer;
     text-decoration: none;
 }
