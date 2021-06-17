@@ -760,7 +760,13 @@ class Loader:
         """ Write configuration variables for the Web application"""
         dbname = os.path.basename(os.path.dirname(self.destination.rstrip("/")))
         metadata = [i for i in Loader.metadata_fields if i not in self.metadata_fields_not_found]
-        config_values = {"dbname": dbname, "metadata": metadata, "facets": metadata, "theme": self.theme}
+        config_values = {
+            "dbname": dbname,
+            "metadata": metadata,
+            "autocomplete": ["q", *metadata],
+            "facets": metadata,
+            "theme": self.theme,
+        }
 
         # Fetch search examples:
         search_examples = {}

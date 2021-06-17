@@ -237,6 +237,10 @@ WEB_CONFIG_DEFAULTS = {
             ]
         ),
     },
+    "autocomplete": {
+        "value": [],
+        "comment": "# The autocomplete variable determines which fields have autocomplete enabled.",
+    },
     "facets": {
         "value": [],
         "comment": "\n".join(
@@ -744,7 +748,7 @@ WEB_CONFIG_HEADER = """
 """
 
 
-class Config(object):
+class Config:
     def __init__(self, filename, defaults, header=""):
         self.filename = filename
         self.db_path = os.path.dirname(os.path.dirname(self.filename))

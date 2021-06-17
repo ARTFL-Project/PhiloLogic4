@@ -704,49 +704,54 @@ export default {
             this.approximate_ratio = approximateValue;
         },
         onChange(field) {
-            if (this.timeout) clearTimeout(this.timeout);
-            this.timeout = setTimeout(() => {
-                if (field == "q") {
-                    let currentQueryTerm = this.$route.query.q;
-                    if (this.queryTermTyped.replace('"', "").length > 1 && this.queryTermTyped != currentQueryTerm) {
-                        this.$http
-                            .get(`${this.$dbUrl}/scripts/autocomplete_term.py`, {
-                                params: { term: this.queryTermTyped },
-                            })
-                            .then((response) => {
-                                this.autoCompleteResults.q = response.data;
-                                this.isLoading = false;
-                            });
+            if (this.$philoConfig.autocomplete.includes(field)) {
+                if (this.timeout) clearTimeout(this.timeout);
+                this.timeout = setTimeout(() => {
+                    if (field == "q") {
+                        let currentQueryTerm = this.$route.query.q;
+                        if (
+                            this.queryTermTyped.replace('"', "").length > 1 &&
+                            this.queryTermTyped != currentQueryTerm
+                        ) {
+                            this.$http
+                                .get(`${this.$dbUrl}/scripts/autocomplete_term.py`, {
+                                    params: { term: this.queryTermTyped },
+                                })
+                                .then((response) => {
+                                    this.autoCompleteResults.q = response.data;
+                                    this.isLoading = false;
+                                });
+                        }
+                    } else {
+                        let currentFieldValue = this.$route.query[field];
+                        if (this.metadataValues[field].length > 1 && this.metadataValues[field] != currentFieldValue) {
+                            this.$http
+                                .get(`${this.$dbUrl}/scripts/autocomplete_metadata.py`, {
+                                    params: {
+                                        term: this.metadataValues[field],
+                                        field: field,
+                                    },
+                                })
+                                .then((response) => {
+                                    this.autoCompleteResults[field] = response.data.map((result) =>
+                                        result.replace(/CUTHERE/, "<last/>")
+                                    );
+                                })
+                                .catch((error) => {
+                                    this.debug(this, error);
+                                });
+                        }
                     }
-                } else {
-                    let currentFieldValue = this.$route.query[field];
-                    if (this.metadataValues[field].length > 1 && this.metadataValues[field] != currentFieldValue) {
-                        this.$http
-                            .get(`${this.$dbUrl}/scripts/autocomplete_metadata.py`, {
-                                params: {
-                                    term: this.metadataValues[field],
-                                    field: field,
-                                },
-                            })
-                            .then((response) => {
-                                this.autoCompleteResults[field] = response.data.map((result) =>
-                                    result.replace(/CUTHERE/, "<last/>")
-                                );
-                            })
-                            .catch((error) => {
-                                this.debug(this, error);
-                            });
-                    }
-                }
-                let popup = document.querySelector(`#autocomplete-${field}`);
-                const clearAutocomplete = (e) => {
-                    if (e.target !== popup) {
-                        this.autoCompleteResults[field] = [];
-                    }
-                    window.removeEventListener("click", clearAutocomplete);
-                };
-                window.addEventListener("click", clearAutocomplete);
-            }, 200);
+                    let popup = document.querySelector(`#autocomplete-${field}`);
+                    const clearAutocomplete = (e) => {
+                        if (e.target !== popup) {
+                            this.autoCompleteResults[field] = [];
+                        }
+                        window.removeEventListener("click", clearAutocomplete);
+                    };
+                    window.addEventListener("click", clearAutocomplete);
+                }, 200);
+            }
         },
         onArrowDown(field) {
             if (this.arrowCounters[field] < this.autoCompleteResults[field].length) {
