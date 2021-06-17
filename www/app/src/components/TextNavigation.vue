@@ -330,10 +330,20 @@ export default {
                                             trigger: "focus",
                                         });
                                         noteRef.removeEventListener("click", getNotes);
-                                        // noteRef.focus();
                                     });
                             };
                             noteRef.addEventListener("click", getNotes());
+                        });
+
+                        document.getElementsByClassName("link-back").forEach((el) => {
+                            if (el) {
+                                var goToNote = () => {
+                                    let link = el.getAttribute("link");
+                                    this.$router.push(link);
+                                    el.removeEventListener("click", goToNote);
+                                };
+                                el.addEventListener("click", goToNote);
+                            }
                         });
 
                         // Scroll to highlight
