@@ -92,7 +92,10 @@ def aggregation_by_field(request, config):
                     counts_by_field[field_name]["break_up_field"][break_up_field]["count"] += 1
     else:
         for philo_id in philo_ids:
-            field_name = metadata_dict[philo_id]["field_name"]
+            try:
+                field_name = metadata_dict[philo_id]["field_name"]
+            except KeyError:  # no row found in toms table
+                continue
             if field_name not in counts_by_field:
                 counts_by_field[field_name] = {
                     "count": 1,

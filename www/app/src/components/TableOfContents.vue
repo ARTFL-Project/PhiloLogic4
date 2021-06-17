@@ -3,7 +3,6 @@
         <div class="row text-center pt-4" id="toc-report-title">
             <div class="col-8 offset-2">
                 <h5>
-                    {{ textNavigationCitation }}
                     <citations :citation="textNavigationCitation"></citations>
                 </h5>
             </div>

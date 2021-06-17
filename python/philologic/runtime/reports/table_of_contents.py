@@ -77,7 +77,7 @@ def generate_toc_object(request, config):
         if db.locals["metadata_types"][metadata] == "doc":
             metadata_fields[metadata] = obj[metadata]
     citation_hrefs = citation_links(db, config, obj)
-    citation = citations(obj, citation_hrefs, config, report="table_of_contents")
+    citation = citations(obj, citation_hrefs, config, report="navigation")
     toc_object = {
         "query": {k: v for k, v in request},
         "philo_id": obj.philo_id,

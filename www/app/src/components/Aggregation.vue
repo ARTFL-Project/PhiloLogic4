@@ -1,8 +1,8 @@
 <template>
     <div class="container-fluid mt-4">
         <results-summary :groupLength="aggregationResults.length"></results-summary>
-        <div class="card shadow mt-4 ms-2 me-2" v-if="resultsLength">
-            <div class="list-group" flush>
+        <div class="card shadow mt-4 ms-2 me-2" v-if="resultsLength" v-scroll="handleFullResultsScroll">
+            <div id="aggregation-results" class="list-group">
                 <div
                     class="list-group-item pt-3 pb-3"
                     v-for="(result, resultIndex) in aggregationResults.slice(0, lastResult)"
@@ -19,19 +19,27 @@
                         &plus;
                     </button>
                     <span class="badge rounded-pill bg-secondary" style="font-size: 100%">{{ result.count }}</span>
-                    <span class="ps-2">occurrences in</span>
                     <citations :citation="result.citation"></citations>
                     <span class="d-inline-block ps-1" v-if="breakUpFields[resultIndex].results.length"
                         >across {{ breakUpFields[resultIndex].results.length }} {{ breakUpFieldName }}(s)</span
                     >
+                    <h6
+                        class="ms-4 mt-2"
+                        v-if="breakUpFields[resultIndex].show && breakUpFields[resultIndex].results.length > 1000"
+                    >
+                        For performance reasons, only the first 1000 results are displayed. Click on the link above for
+                        full results.
+                    </h6>
                     <div class="list-group ms-4 mt-2" v-if="breakUpFields[resultIndex].show">
                         <div
                             class="list-group-item"
-                            v-for="(value, key) in breakUpFields[resultIndex].results"
+                            v-for="(value, key) in breakUpFields[resultIndex].results.slice(
+                                0,
+                                breakUpFields[resultIndex].limit
+                            )"
                             :key="key"
                         >
                             <span class="badge rounded-pill bg-secondary">{{ value.count }}</span>
-                            <span class="ps-2">occurrences in</span>
                             <citations
                                 :citation="
                                     buildCitationObject(
@@ -44,10 +52,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- <infinite-loading :identifier="infiniteId" @infinite="infiniteHandler">
-                    <div slot="no-more"></div>
-                    <div slot="no-results"></div>
-                </infinite-loading> -->
             </div>
         </div>
     </div>
@@ -56,7 +60,6 @@
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import ResultsSummary from "./ResultsSummary";
-// import InfiniteLoading from "vue-infinite-loading";
 
 export default {
     name: "aggregation",
@@ -104,6 +107,7 @@ export default {
     watch: {
         urlUpdate() {
             if (this.report == "aggregation") {
+                this.groupedByField = this.$route.query.group_by;
                 this.fetchResults();
             }
         },
@@ -137,6 +141,7 @@ export default {
                         this.breakUpFields = this.aggregationResults.map((results) => ({
                             show: false,
                             results: results.break_up_field,
+                            limit: 1000,
                         }));
                         this.breakUpFieldName =
                             this.$philoConfig.metadata_aliases[response.data.break_up_field] ||
@@ -153,12 +158,10 @@ export default {
                     });
             }
         },
-        infiniteHandler($state) {
-            if (this.aggregationResults.length > this.lastResult) {
+        handleFullResultsScroll() {
+            let scrollPosition = document.getElementById("aggregation-results").getBoundingClientRect().bottom - 200;
+            if (scrollPosition < window.innerHeight) {
                 this.lastResult += 50;
-                $state.loaded();
-            } else {
-                $state.complete();
             }
         },
         buildStatResults(results) {
@@ -194,6 +197,9 @@ export default {
                         label = "N/A";
                     } else {
                         queryParams[fieldToLink] = `"${label}"`;
+                    }
+                    if (fieldToLink != this.groupedByField) {
+                        queryParams[this.groupedByField] = `"${metadataFields[this.groupedByField]}"`;
                     }
                     let link = this.paramsToRoute({
                         ...queryParams,
