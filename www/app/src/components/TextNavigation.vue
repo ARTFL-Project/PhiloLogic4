@@ -805,7 +805,8 @@ a.current-obj,
     display: inline;
 }
 
-:deep(.xml-lb, .xml-l) {
+:deep(.xml-lb),
+:deep(.xml-l) {
     text-align: justify;
     display: block;
 }
@@ -884,7 +885,17 @@ a.current-obj,
     white-space: pre;
 }
 
-:deep(.xml-castList, .xml-front, .xml-castItem, .xml-docTitle, .xml-docImprint, .xml-performance, .xml-docAuthor, .xml-docDate, .xml-premiere, .xml-casting, .xml-recette, .xml-nombre) {
+:deep(.xml-castList) :deep(.xml-front),
+:deep(.xml-castItem),
+:deep(.xml-docTitle),
+:deep(.xml-docImprint),
+:deep(.xml-performance),
+:deep(.xml-docAuthor),
+:deep(.xml-docDate),
+:deep(.xml-premiere),
+:deep(.xml-casting),
+:deep(.xml-recette),
+:deep(.xml-nombre) {
     display: block;
 }
 
@@ -893,7 +904,9 @@ a.current-obj,
     font-weight: bold;
 }
 
-:deep(.xml-docAuthor, .xml-docTitle, .xml-docDate) {
+:deep(.xml-docAuthor),
+:deep(.xml-docTitle),
+:deep(.xml-docDate) {
     text-align: center;
 }
 
@@ -907,7 +920,8 @@ a.current-obj,
     display: block;
 }
 
-:deep(.xml-performance, .xml-docImprint) {
+:deep(.xml-performance),
+:deep(.xml-docImprint) {
     margin-top: 10px;
 }
 
@@ -936,7 +950,8 @@ body {
     font-style: italic;
 }
 
-:deep(.xml-indent, .xml-variante) {
+:deep(.xml-indent),
+:deep(.xml-variante) {
     display: block;
 }
 
@@ -1148,8 +1163,8 @@ body {
 .slide-fade-leave-active {
     transition: all 0.3s ease-out;
 }
-.slide-fade-enter, .slide-fade-leave-to
-/* .slide-fade-leave-active below version 2.1.8 */ {
+.slide-fade-enter-from,
+.slide-fade-leave-to {
     transform: translateY(-30px);
     opacity: 0;
 }
