@@ -3,6 +3,7 @@
         <div class="row text-center pt-4" id="toc-report-title">
             <div class="col-8 offset-2">
                 <h5>
+                    {{ textNavigationCitation }}
                     <citations :citation="textNavigationCitation"></citations>
                 </h5>
             </div>
@@ -10,7 +11,7 @@
         <div class="text-center">
             <div class="row">
                 <div class="col-12">
-                    <div class="card mt-4 mb-4 p-4 d-inline-block text-justify shadow" style="width: 100%">
+                    <div class="card mt-4 mb-4 p-4 d-inline-block shadow" style="width: 100%; text-align: justify">
                         <button
                             id="show-header"
                             class="btn btn-outline-secondary mb-2"
@@ -21,8 +22,8 @@
                         </button>
                         <div class="card shadow-sm" no-body id="tei-header" v-if="showHeader" v-html="teiHeader"></div>
                         <div id="toc-report" class="text-content-area">
-                            <div id="toc-content" infinite-scroll="getMoreItems()" infinite-scroll-distance="4">
-                                <div v-for="(element, elIndex) in tocObject.toc" :key="elIndex">
+                            <div id="toc-content" v-scroll="handleScroll">
+                                <div v-for="(element, elIndex) in tocElements.slice(0, displayLimit)" :key="elIndex">
                                     <div :class="'toc-' + element.philo_type">
                                         <span :class="'bullet-point-' + element.philo_type"></span>
                                         <router-link :to="element.href" class="toc-section">{{
@@ -37,7 +38,6 @@
                 </div>
             </div>
         </div>
-        <!-- <access-control v-if="!authorized"></access-control> -->
     </div>
 </template>
 <script>
@@ -60,9 +60,10 @@ export default {
     data() {
         return {
             philoConfig: this.$philoConfig,
-            displayLimit: 50,
+            displayLimit: 200,
             teiHeader: "",
             tocObject: {},
+            tocElements: [],
             showHeader: false,
             headerButton: "Show Header",
         };
@@ -80,6 +81,7 @@ export default {
                 .then((response) => {
                     this.searching = false;
                     this.tocObject = response.data;
+                    this.tocElements = response.data.toc;
                     this.textNavigationCitation = response.data.citation;
                 })
                 .catch((error) => {
@@ -113,8 +115,12 @@ export default {
                 this.showHeader = false;
             }
         },
-        getMoreItems() {
-            this.displayLimit += 200;
+        handleScroll() {
+            let scrollPosition = document.getElementById("toc-content").getBoundingClientRect().bottom - 200;
+            if (scrollPosition < window.innerHeight) {
+                console.log("adding more");
+                this.displayLimit += 200;
+            }
         },
     },
 };

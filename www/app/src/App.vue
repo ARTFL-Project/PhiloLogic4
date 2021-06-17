@@ -240,7 +240,7 @@ input {
 }
 
 .bullet-point-div1 {
-    border: solid 1px;
+    background: #000;
 }
 
 .bullet-point-div2 {

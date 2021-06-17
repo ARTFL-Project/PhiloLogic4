@@ -25,7 +25,7 @@ import { mapFields } from "vuex-map-fields";
 export default {
     name: "pages",
     computed: {
-        ...mapFields(["formData.start", "formData.results_per_page", "resultsLength", "totalResultsDone"]),
+        ...mapFields(["formData.results_per_page", "resultsLength", "totalResultsDone", "urlUpdate"]),
     },
     data() {
         return { pages: [] };
@@ -36,28 +36,31 @@ export default {
                 this.buildPages();
             }
         },
+        urlUpdate() {
+            this.buildPages();
+        },
     },
     methods: {
         buildPages() {
-            var start = this.start;
-            var resultsPerPage = parseInt(this.results_per_page) || 25;
-            var resultsLength = this.resultsLength;
+            let start = parseInt(this.$route.query.start);
+            let resultsPerPage = parseInt(this.results_per_page) || 25;
+            let resultsLength = this.resultsLength;
 
             // first find out what page we are on currently.
-            var currentPage = Math.floor(start / resultsPerPage) + 1 || 1;
+            let currentPage = Math.floor(start / resultsPerPage) + 1 || 1;
 
             // then how many total pages the query has
-            var totalPages = Math.floor(resultsLength / resultsPerPage);
-            var remainder = resultsLength % resultsPerPage;
+            let totalPages = Math.floor(resultsLength / resultsPerPage);
+            let remainder = resultsLength % resultsPerPage;
             if (remainder !== 0) {
                 totalPages += 1;
             }
             totalPages = totalPages || 1;
 
             // construct the list of page numbers we will output.
-            var pages = [];
+            let pages = [];
             // up to four previous pages
-            var prev = currentPage - 4;
+            let prev = currentPage - 4;
             while (prev < currentPage) {
                 if (prev > 0) {
                     pages.push(prev);
@@ -67,7 +70,7 @@ export default {
             // the current page
             pages.push(currentPage);
             // up to five following pages
-            var next = currentPage + 5;
+            let next = currentPage + 5;
             while (next > currentPage) {
                 if (next < totalPages) {
                     pages.push(next);
@@ -86,9 +89,9 @@ export default {
             });
 
             // now we construct the actual links from the page numbers
-            var pageObject = [];
+            let pageObject = [];
             let lastPageName = "";
-            var pageEnd, pageStart, active;
+            let pageEnd, pageStart, active;
             for (let page of pages) {
                 pageStart = page * resultsPerPage - resultsPerPage + 1;
                 pageEnd = page * resultsPerPage;

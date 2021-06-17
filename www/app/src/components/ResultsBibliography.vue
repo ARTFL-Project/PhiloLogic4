@@ -28,12 +28,16 @@ import { mapFields } from "vuex-map-fields";
 export default {
     name: "ResultsBibliography",
     components: { citations },
-    props: ["results"],
+    inject: ["results"],
     computed: {
         ...mapFields(["formData.report"]),
         uniquedResults() {
             //TODO: We should provide the object level of hits. This is a HACK.
-            if (typeof this.results[0] != "undefined") {
+            if (
+                typeof results != "undefined" &&
+                typeof this.results[0] != "undefined" &&
+                typeof this.results[0].citation != "undefined"
+            ) {
                 // time series sends a results object which is incompatible
                 let objectLevel = this.results[0].citation[0].object_type;
                 let uniqueResults = [];

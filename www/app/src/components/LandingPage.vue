@@ -71,7 +71,8 @@
             <div id="dictionary-landing-page" v-if="landingPageBrowsing === 'dictionary'">
                 <div class="row">
                     <div class="col-6" :class="{ 'offset-3': !showDicoLetterRows }" id="dico-landing-volume">
-                        <div class="card shadow-sm" header="Browse by volume">
+                        <div class="card shadow-sm">
+                            <div class="card-header">Browse by volume</div>
                             <div class="list-group" flush v-if="volumeData.length">
                                 <div class="list-group-item" v-for="volume in volumeData" :key="volume.philo_id">
                                     <router-link :to="`/navigate/${volume.philo_id}/table-of-contents`">
@@ -91,7 +92,8 @@
                         style="border-width: 0px; box-shadow: 0 0 0"
                         v-if="showDicoLetterRows"
                     >
-                        <div class="card" no-body header="Browse by letter">
+                        <div class="card">
+                            <div class="card-header">Browse by letter</div>
                             <table class="table table-borderless" style="margin-bottom: 0">
                                 <tr v-for="(row, rowIndex) in dicoLetterRows" :key="rowIndex">
                                     <td

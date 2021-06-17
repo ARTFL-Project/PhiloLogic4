@@ -59,12 +59,12 @@
                             </span>
                         </div>
                         <div class="modal fade" tabindex="-1" id="results-bibliography">
-                            <results-bibliography :results="results" v-if="results"></results-bibliography>
+                            <results-bibliography></results-bibliography>
                         </div>
                     </div>
                     <div v-if="report == 'aggregation' && groupByLabel">
                         <div id="result-stats" class="pb-2" v-if="resultsLength > 0">
-                            {{ resultsLength }} total occurrences spread across {{ results.length }}
+                            {{ resultsLength }} total occurrences spread across {{ groupLength }}
                             {{ groupByLabel.toLowerCase() }}(s)
                         </div>
                         <div id="result-stats" class="pb-2" v-else>
@@ -93,13 +93,19 @@
                             <span>
                                 <span tooltip tooltip-title="Click to display filtered words">
                                     The
-                                    <a href @click="toggleFilterList()" v-if="colloc_filter_choice === 'frequency'"
+                                    <a
+                                        href
+                                        @click="toggleFilterList($event)"
+                                        v-if="colloc_filter_choice === 'frequency'"
                                         >{{ filter_frequency }} most common words</a
                                     >
-                                    <a href @click="toggleFilterList()" v-if="colloc_filter_choice === 'stopwords'"
+                                    <a
+                                        href
+                                        @click="toggleFilterList($event)"
+                                        v-if="colloc_filter_choice === 'stopwords'"
                                         >Common function words</a
                                     >
-                                    <a href @click="toggleFilterList()" v-if="colloc_filter_choice === 'tfidf'"
+                                    <a href @click="toggleFilterList($event)" v-if="colloc_filter_choice === 'tfidf'"
                                         >{{ filter_frequency }} least distinctive terms across the corpus</a
                                     >
                                     are being filtered from this report.
@@ -110,7 +116,7 @@
                                     type="button"
                                     class="btn btn-primary"
                                     id="close-filter-list"
-                                    @click="toggleFilterList()"
+                                    @click="toggleFilterList($event)"
                                 >
                                     &times;
                                 </button>
@@ -182,7 +188,7 @@ export default {
         ResultsBibliography,
         ExportResults,
     },
-    props: ["results", "description", "runningTotal", "filterList"],
+    props: ["description", "runningTotal", "filterList", "groupLength"],
     computed: {
         ...mapFields([
             "formData.report",
@@ -362,7 +368,7 @@ export default {
                 this.showBiblio = false;
             }
         },
-        toggleFilterList() {
+        toggleFilterList(event) {
             event.preventDefault();
             if (this.showFilteredWords == true) {
                 this.showFilteredWords = false;

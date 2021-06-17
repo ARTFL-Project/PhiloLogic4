@@ -1,11 +1,7 @@
 <template>
     <div class="container-fluid">
         <div id="time-series-container" class="mt-4 mx-2" v-if="accessAuthorized">
-            <results-summary
-                :results="results.results"
-                :description="results.description"
-                :running-total="runningTotal"
-            ></results-summary>
+            <results-summary :description="results.description" :running-total="runningTotal"></results-summary>
             <div class="card mt-4" id="time-series">
                 <div class="btn-group d-inline-block" role="group">
                     <button
@@ -43,6 +39,11 @@ export default {
         ResultsSummary,
     },
     inject: ["$http"],
+    provide() {
+        return {
+            results: this.results.results,
+        };
+    },
     computed: {
         ...mapFields({
             report: "formData.report",

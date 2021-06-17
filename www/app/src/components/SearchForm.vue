@@ -232,7 +232,6 @@
                                     <select
                                         class="form-select"
                                         :id="localField.value"
-                                        :options="metadataChoiceValues[localField.value]"
                                         v-model="metadataValues[localField.value]"
                                         v-if="metadataInputStyle[localField.value] == 'dropdown'"
                                     >
@@ -589,11 +588,10 @@ export default {
     mounted() {
         this.$nextTick(() => {
             document.getElementById("form-body").addEventListener("change", (event) => {
-                if (event.srcElement.id in this.$philoConfig.metadata_choice_values) {
-                    let value =
-                        event.srcElement.options[document.getElementById(event.srcElement.id).selectedIndex].value;
+                if (event.target.id in this.$philoConfig.metadata_choice_values) {
+                    let value = event.target.options[document.getElementById(event.target.id).selectedIndex].value;
                     this.$store.commit("updateFormDataField", {
-                        key: event.srcElement.id,
+                        key: event.target.id,
                         value: value,
                     });
                 }
@@ -1044,47 +1042,25 @@ input[type="text"] {
     color: black;
 }
 ::placeholder {
-    /* Chrome, Firefox, Opera, Safari 10.1+ */
-    opacity: 0.4; /* Firefox */
-}
-
-:-ms-input-placeholder {
-    /* Internet Explorer 10-11 */
     opacity: 0.4;
 }
 
-::-ms-input-placeholder {
-    /* Microsoft Edge */
-    opacity: 0.4;
-}
 input:focus::placeholder {
-    /* Chrome, Firefox, Opera, Safari 10.1+ */
-    opacity: 0; /* Firefox */
-}
-
-input:focus:-ms-input-placeholder {
-    /* Internet Explorer 10-11 */
     opacity: 0;
 }
 
-input:focus::-ms-input-placeholder {
-    /* Microsoft Edge */
-    opacity: 0;
-}
 .code-block {
     font-family: monospace;
     font-size: 120%;
     background-color: #ededed;
     padding: 0px 4px;
 }
-.slide-fade-enter-active {
-    transition: all 0.3s ease-out;
-}
+.slide-fade-enter-active,
 .slide-fade-leave-active {
     transition: all 0.3s ease-out;
 }
-.slide-fade-enter, .slide-fade-leave-to
-/* .slide-fade-leave-active below version 2.1.8 */ {
+.slide-fade-enter-from,
+.slide-fade-leave-to {
     transform: translateY(-30px);
     opacity: 0;
 }

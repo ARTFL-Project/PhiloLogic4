@@ -75,7 +75,7 @@
                                 <div
                                     :id="element.philo_id"
                                     :class="'toc-' + element.philo_type"
-                                    @click="textObjectSelection(element.philo_id, tocIndex)"
+                                    @click="textObjectSelection(element.philo_id, tocIndex, $event)"
                                 >
                                     <span :class="'bullet-point-' + element.philo_type"></span>
                                     <a :class="{ 'current-obj': element.philo_id === currentPhiloId }" href>
@@ -529,7 +529,7 @@ export default {
                 Array.from(document.getElementsByClassName(imageType)).forEach((item) => {
                     item.addEventListener("click", (event) => {
                         event.preventDefault();
-                        let target = event.srcElement;
+                        let target = event.target;
                         this.gallery = Gallery(
                             [...document.getElementsByClassName(imageType)].map(
                                 (item) => item.getAttribute("href") || item.getAttribute("src")
@@ -584,7 +584,7 @@ export default {
             }
             this.$router.push({ path: `/navigate/${philoID}` });
         },
-        textObjectSelection(philoId, index) {
+        textObjectSelection(philoId, index, event) {
             event.preventDefault();
             let newStart = this.tocElements.start + index - 100;
             if (newStart < 0) {

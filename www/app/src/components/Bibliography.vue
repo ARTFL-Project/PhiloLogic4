@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid">
-        <results-summary :results="results.results" :description="results.description"></results-summary>
+        <results-summary :description="results.description"></results-summary>
         <div class="row mt-4" style="padding-right: 0.5rem">
             <div
                 class="col-12 col-md-7 col-xl-8"
@@ -100,6 +100,11 @@ export default {
         ]),
     },
     inject: ["$http"],
+    provide() {
+        return {
+            results: this.results,
+        };
+    },
     data() {
         return {
             philoConfig: this.$philoConfig,
@@ -134,7 +139,6 @@ export default {
                         this.resultType = this.results.result_type;
                     } else {
                         this.results = this.dictionaryBibliography(response.data);
-                        console.log(this.results);
                     }
                 })
                 .catch((error) => {

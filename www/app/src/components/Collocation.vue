@@ -1,7 +1,6 @@
 <template>
     <div class="container-fluid mt-4" v-if="accessAuthorized">
         <results-summary
-            :results="results.results"
             :description="results.description"
             :running-total="runningTotal"
             :filter-list="filterList"
@@ -96,6 +95,11 @@ export default {
         },
     },
     inject: ["$http"],
+    provide() {
+        return {
+            results: this.results.results,
+        };
+    },
     data() {
         return {
             philoConfig: this.$philoConfig,
@@ -117,7 +121,7 @@ export default {
     },
     watch: {
         urlUpdate() {
-            if (this.report == "collocation") {
+            if (this.$route.name == "collocation") {
                 this.fetchResults();
             }
         },
@@ -218,7 +222,6 @@ export default {
             let weightedWordList = [];
             for (let wordObject of this.sortedList) {
                 let adjustedWeight = adjustWeight(wordObject.count);
-                // console.log(adjustedWeight);
                 weightedWordList.push({
                     collocate: wordObject.collocate,
                     weight: 1 + adjustedWeight / 10,
@@ -231,16 +234,7 @@ export default {
             this.collocCloudWords = weightedWordList;
         },
         getWordCloudStyle(word) {
-            // console.log(word.color, word.word);
             return `font-size: ${word.weight}rem; color: ${word.color}`;
-        },
-        toggleFilterList() {
-            event.preventDefault();
-            if (this.showFilteredWords == true) {
-                this.showFilteredWords = false;
-            } else {
-                this.showFilteredWords = true;
-            }
         },
     },
 };

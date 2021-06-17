@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid mt-4">
-        <results-summary :results="aggregationResults"></results-summary>
+        <results-summary :groupLength="aggregationResults.length"></results-summary>
         <div class="card shadow mt-4 ms-2 me-2" v-if="resultsLength">
             <div class="list-group" flush>
                 <div
@@ -62,6 +62,11 @@ export default {
     name: "aggregation",
     components: { citations, ResultsSummary },
     inject: ["$http"],
+    provide() {
+        return {
+            results: this.aggregationResults,
+        };
+    },
     computed: {
         ...mapFields([
             "formData.report",
@@ -82,7 +87,6 @@ export default {
     },
     data() {
         return {
-            results: [],
             loading: false,
             aggregationResults: [],
             lastResult: 50,

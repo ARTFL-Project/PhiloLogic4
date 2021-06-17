@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid">
-        <results-summary :results="results.results" :description="results.description"></results-summary>
+        <results-summary :description="results.description"></results-summary>
         <div style="position: relative" v-if="!showFacets">
             <button
                 type="button"
@@ -23,7 +23,7 @@
                         <div class="row citation-container g-0">
                             <div class="col-12 cpl-sm-10 col-md-11">
                                 <span class="cite">
-                                    <span class="number">{{ description.start + index }}</span>
+                                    <span class="number">{{ results.description.start + index }}</span>
                                     <citations :citation="result.citation"></citations>
                                 </span>
                             </div>
@@ -31,7 +31,7 @@
                                 <button
                                     type="button"
                                     class="btn btn-secondary more-context"
-                                    @click="moreContext(index)"
+                                    @click="moreContext(index, $event)"
                                 >
                                     <span class="d-none d-lg-inline-block">More</span>
                                     <span class="d-lg-none">+</span>
@@ -76,6 +76,11 @@ export default {
         pages,
     },
     inject: ["$http"],
+    provide() {
+        return {
+            results: this.results,
+        };
+    },
     computed: {
         ...mapFields([
             "formData.report",
@@ -93,6 +98,7 @@ export default {
             results: { description: { end: 0 } },
             searchParams: {},
             unbindUrlUpdate: null,
+            start: 1,
         };
     },
     created() {
@@ -127,7 +133,7 @@ export default {
                     this.debug(this, error);
                 });
         },
-        moreContext(index) {
+        moreContext(index, event) {
             let button = event.srcElement;
             let defaultNode = document.getElementsByClassName("default-length")[index];
             let moreNode = document.getElementsByClassName("more-length")[index];

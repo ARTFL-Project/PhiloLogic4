@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid">
-        <results-summary :results="results.results" :description="results.description"></results-summary>
+        <results-summary :description="results.description"></results-summary>
         <div class="row">
             <div class="col-12 col-md-7 col-xl-8">
                 <div class="card p-2 ml-2 shadow-sm">
@@ -49,8 +49,8 @@
                                 <router-link
                                     :to="result.citation_links.div1"
                                     class="kwic-biblio"
-                                    @mouseover="showFullBiblio()"
-                                    @mouseleave="hideFullBiblio()"
+                                    @mouseover="showFullBiblio($event)"
+                                    @mouseleave="hideFullBiblio($event)"
                                 >
                                     <span class="full-biblio" style="display: none">{{ result.fullBiblio }}</span>
                                     <span class="short-biblio" v-html="result.shortBiblio"></span>
@@ -123,6 +123,11 @@ export default {
         },
     },
     inject: ["$http"],
+    provide() {
+        return {
+            results: this.results,
+        };
+    },
     data() {
         return {
             philoConfig: this.$philoConfig,
@@ -222,12 +227,12 @@ export default {
             }
             return filteredResults;
         },
-        showFullBiblio() {
-            let target = event.srcElement.parentNode.querySelector(".full-biblio");
+        showFullBiblio(event) {
+            let target = event.target.parentNode.querySelector(".full-biblio");
             target.classList.add("show");
         },
-        hideFullBiblio() {
-            let target = event.srcElement.parentNode.querySelector(".full-biblio");
+        hideFullBiblio(event) {
+            let target = event.target.parentNode.querySelector(".full-biblio");
             target.classList.remove("show");
         },
         updateSortingSelection(index, selection) {
