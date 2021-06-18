@@ -770,6 +770,14 @@ a.current-obj,
     background-color: red;
     color: #fff;
 }
+:deep(.xml-div1::after), /* clear floats from inline images */
+:deep(.xml-div2::after),
+:deep(.xml-div3::after) {
+    content: "";
+    display: block;
+    clear: right;
+}
+
 /* Styling for theater */
 
 :deep(.xml-castitem::after) {
