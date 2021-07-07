@@ -191,9 +191,8 @@ export default {
                         start: "0",
                         end: "25",
                     };
-
                     if (label == null || label.length == 0) {
-                        queryParams[fieldToLink] = "NULL";
+                        queryParams[fieldToLink] = ""; // Should be NULL, but that's broken in the philo lib
                         label = "N/A";
                     } else {
                         queryParams[fieldToLink] = `"${label}"`;
@@ -201,11 +200,17 @@ export default {
                     if (fieldToLink != this.groupedByField) {
                         queryParams[this.groupedByField] = `"${metadataFields[this.groupedByField]}"`;
                     }
-                    let link = this.paramsToRoute({
-                        ...queryParams,
-                        report: "concordance",
-                    });
-                    citations.push({ ...citation, href: link, label: label });
+                    let link = "";
+                    // workaround for broken NULL searches
+                    if (queryParams[fieldToLink].length) {
+                        link = this.paramsToRoute({
+                            ...queryParams,
+                            report: "concordance",
+                        });
+                        citations.push({ ...citation, href: link, label: label });
+                    } else {
+                        citations.push({ ...citation, href: "", label: label });
+                    }
                 } else {
                     citations.push({ ...citation, href: "", label: label });
                 }

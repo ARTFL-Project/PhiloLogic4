@@ -62,6 +62,7 @@ def aggregation_by_field(request, config):
 
     counts_by_field = {}
     break_up_field_name = field_obj["break_up_field"]
+    philo_ids_done = set()
     if break_up_field_name is not None:
         for philo_id in philo_ids:
             try:
@@ -87,9 +88,11 @@ def aggregation_by_field(request, config):
             else:
                 counts_by_field[field_name]["count"] += 1
                 if break_up_field not in counts_by_field[field_name]["break_up_field"]:
+                    philo_ids_done.add(philo_id)
                     counts_by_field[field_name]["break_up_field"][break_up_field] = {"count": 1, "philo_id": philo_id}
                 else:
-                    counts_by_field[field_name]["break_up_field"][break_up_field]["count"] += 1
+                    if not request.no_q and philo_id not in philo_ids_done: # we only count 1 occurrence per field for biblio searches
+                        counts_by_field[field_name]["break_up_field"][break_up_field]["count"] += 1
     else:
         for philo_id in philo_ids:
             try:
@@ -123,11 +126,13 @@ def aggregation_by_field(request, config):
         results = [
             {"metadata_fields": values["metadata_fields"], "count": values["count"], "break_up_field": []}
             for values in sorted(counts_by_field.values(), key=lambda x: x["count"], reverse=True)
-        ]
+            ]    
+    
     if request.q == "" and request.no_q:
         total_results = len(philo_ids)
     else:
-        total_results = len(philo_ids)
+        total_results = len(philo_ids)    
+    
     return {
         "results": results,
         "break_up_field": break_up_field_name or "",

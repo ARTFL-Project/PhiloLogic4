@@ -48,7 +48,7 @@
                                 </span>
                             </div>
                             <div
-                                class="philologic_context text-content-area pt-2 px-2 text-justify"
+                                class="pt-3 px-3 text-content"
                                 select-word
                                 :position="result.position"
                             >
@@ -209,5 +209,8 @@ export default {
     display: inline-block;
     margin-right: 5px;
     border-radius: 0.25rem;
+}
+.text-content {
+    text-align: justify;
 }
 </style>

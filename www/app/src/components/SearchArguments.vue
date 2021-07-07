@@ -1,10 +1,12 @@
 <template>
     <div id="search-arguments" class="pb-2">
         <div v-if="currentWordQuery !== ''">
-            Searching database for the term(s)
+            Searching database for
             <span v-if="approximate == 'yes'">
-                <b>{{ currentWordQuery }}</b> and the following similar terms:
+                terms similar to <b>{{ currentWordQuery }}</b
+                >:
             </span>
+            <span v-else>the term(s) </span>
             <span v-if="approximate.length == 0 || approximate == 'no'"></span>
             <span class="rounded-pill term-groups" v-for="(group, index) in wordGroups" :key="index">
                 <a class="term-group-word" href @click.prevent="getQueryTerms(group, index)">{{ group }}</a>
