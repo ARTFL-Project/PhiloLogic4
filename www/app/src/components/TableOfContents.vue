@@ -1,95 +1,70 @@
 <template>
     <div class="container-fluid mt-4">
-        <b-row id="toc-report-title" class="text-center pt-4">
-            <b-col offset="2" cols="8">
+        <div class="row text-center pt-4" id="toc-report-title">
+            <div class="col-8 offset-2">
                 <h5>
                     <citations :citation="textNavigationCitation"></citations>
                 </h5>
-            </b-col>
-        </b-row>
+            </div>
+        </div>
         <div class="text-center">
-            <b-row>
-                <b-col
-                    cols="12"
-                    sm="10"
-                    md="8"
-                    lg="6"
-                    xl="4"
-                    offset-sm="1"
-                    offset-md="2"
-                    offset-lg="3"
-                    offset-xl="4"
-                >
-                    <b-card
-                        no-body
-                        class="mt-4 mb-4 p-4 d-inline-block text-justify shadow"
-                        style="width: 100%"
-                    >
-                        <b-button
+            <div class="row">
+                <div class="col-12">
+                    <div class="card mt-4 mb-4 p-4 d-inline-block shadow" style="width: 100%; text-align: justify">
+                        <button
                             id="show-header"
-                            class="mb-2"
-                            variant="outline-secondary"
+                            class="btn btn-outline-secondary mb-2"
                             v-if="philoConfig.header_in_toc"
                             @click="toggleHeader()"
-                        >{{ headerButton }}</b-button>
-                        <b-card
-                            no-body
-                            id="tei-header"
-                            class="shadow-sm"
-                            v-if="showHeader"
-                            v-html="teiHeader"
-                        ></b-card>
-                        <div id="toc-report" class="text-content-area" loading="loading">
-                            <div
-                                id="toc-content"
-                                infinite-scroll="getMoreItems()"
-                                infinite-scroll-distance="4"
-                            >
-                                <div v-for="(element, elIndex) in tocObject.toc" :key="elIndex">
+                        >
+                            {{ headerButton }}
+                        </button>
+                        <div class="card shadow-sm" no-body id="tei-header" v-if="showHeader" v-html="teiHeader"></div>
+                        <div id="toc-report" class="text-content-area">
+                            <div id="toc-content" v-scroll="handleScroll">
+                                <div v-for="(element, elIndex) in tocElements.slice(0, displayLimit)" :key="elIndex">
                                     <div :class="'toc-' + element.philo_type">
                                         <span :class="'bullet-point-' + element.philo_type"></span>
-                                        <router-link
-                                            :to="'/' + element.href"
-                                            class="toc-section"
-                                        >{{ element.label }}</router-link>
+                                        <router-link :to="element.href" class="toc-section">{{
+                                            element.label
+                                        }}</router-link>
+                                        <citations :citation="element.citation"></citations>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </b-card>
-                </b-col>
-            </b-row>
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- <access-control v-if="!authorized"></access-control> -->
     </div>
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
-import searchArguments from "./SearchArguments";
 
 export default {
     name: "tableOfContents",
     components: {
         citations,
-        searchArguments
     },
+    inject: ["$http"],
     computed: {
         ...mapFields({
             report: "formData.report",
-            textNavigationCitation: "textNavigationCitation"
-        })
+            textNavigationCitation: "textNavigationCitation",
+            searching: "searching",
+        }),
     },
     data() {
         return {
             philoConfig: this.$philoConfig,
-            authorized: true,
-            displayLimit: 50,
-            loading: true,
+            displayLimit: 200,
             teiHeader: "",
             tocObject: {},
+            tocElements: [],
             showHeader: false,
-            headerButton: "Show Header"
+            headerButton: "Show Header",
         };
     },
     created() {
@@ -97,18 +72,19 @@ export default {
     },
     methods: {
         fetchToC() {
-            this.loading = true;
+            this.searching = true;
             this.$http
                 .get(`${this.$dbUrl}/reports/table_of_contents.py`, {
-                    params: { philo_id: this.$route.params.pathInfo }
+                    params: { philo_id: this.$route.params.pathInfo },
                 })
-                .then(response => {
-                    this.loading = false;
+                .then((response) => {
+                    this.searching = false;
                     this.tocObject = response.data;
+                    this.tocElements = response.data.toc;
                     this.textNavigationCitation = response.data.citation;
                 })
-                .catch(error => {
-                    this.loading = false;
+                .catch((error) => {
+                    this.searching = false;
                     this.debug(this, error);
                 });
         },
@@ -118,15 +94,15 @@ export default {
                     this.$http
                         .get(`${this.$dbUrl}/scripts/get_header.py`, {
                             params: {
-                                philo_id: this.$route.params.pathInfo
-                            }
+                                philo_id: this.$route.params.pathInfo,
+                            },
                         })
-                        .then(response => {
+                        .then((response) => {
                             this.teiHeader = response.data;
                             this.headerButton = "Hide Header";
                             this.showHeader = true;
                         })
-                        .catch(error => {
+                        .catch((error) => {
                             this.debug(this, error);
                         });
                 } else {
@@ -138,10 +114,14 @@ export default {
                 this.showHeader = false;
             }
         },
-        getMoreItems() {
-            this.displayLimit += 200;
-        }
-    }
+        handleScroll() {
+            let scrollPosition = document.getElementById("toc-content").getBoundingClientRect().bottom - 200;
+            if (scrollPosition < window.innerHeight) {
+                console.log("adding more");
+                this.displayLimit += 200;
+            }
+        },
+    },
 };
 </script>
 <style scoped>

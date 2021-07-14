@@ -1,11 +1,10 @@
-
-
 import os
 import sqlite3
 import struct
 import subprocess
 import sys
 import unicodedata
+from collections import defaultdict
 
 from . import HitList
 from .HitList import NoHits
@@ -39,6 +38,59 @@ def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
     flag.write("1")
     flag.close()
     return HitList.HitList(filename, 0, db, raw=raw_results, sort_order=sort_order)
+
+
+def metadata_total_word_count_query(db, metadata, metadata_field_name):
+    param_dicts = [{} for level in db.locals["metadata_hierarchy"]]
+    # Taken from DB.query
+    for k, v in list(metadata.items()):
+        for i, params in enumerate(db.locals["metadata_hierarchy"]):
+            if v and (k in params):
+                param_dicts[i][k] = v
+                if k in db.locals["metadata_types"]:
+                    this_type = db.locals["metadata_types"][k]
+                    if this_type == "div":
+                        param_dicts[i]["philo_type"] = ['"div"|"div1"|"div2"|"div3"']
+                    else:
+                        param_dicts[i]["philo_type"] = ['"%s"' % db.locals["metadata_types"][k]]
+    param_dicts = [d for d in param_dicts if d]
+    if "philo_id" in metadata:
+        if param_dicts:
+            param_dicts[-1]["philo_id"] = metadata["philo_id"]
+        else:
+            param_dicts.append({"philo_id": metadata["philo_id"]})
+    prev = None
+    query = None
+    for param_dict in param_dicts:
+        query = query_recursive(db, param_dict, prev, None)
+        prev = query
+    cursor = db.dbh.cursor()
+    philo_type = db.locals["metadata_types"][metadata_field_name]
+    if query is not None:
+        philo_ids = []
+        for row in query:
+            philo_ids.append(row["philo_id"])
+        if philo_type != "div":
+            cursor.execute(
+                f"SELECT {metadata_field_name}, SUM(word_count) AS total_sum FROM toms WHERE philo_id IN ({', '.join('?' for _ in range(len(philo_ids)))}) AND philo_type='{philo_type}' GROUP BY {metadata_field_name}",
+                tuple(philo_ids),
+            )
+        else:
+            cursor.execute(
+                f"SELECT {metadata_field_name}, SUM(word_count) AS total_sum FROM toms WHERE philo_id IN ({', '.join('?' for _ in range(len(philo_ids)))}) AND philo_type IN ('div1', 'div2', 'div3') GROUP BY {metadata_field_name}",
+                tuple(philo_ids),
+            )
+    else:
+        if philo_type != "div":
+            cursor.execute(
+                f"SELECT {metadata_field_name}, SUM(word_count) AS total_sum FROM toms WHERE philo_type='{philo_type}' GROUP BY {metadata_field_name}"
+            )
+        else:
+            cursor.execute(
+                f"SELECT {metadata_field_name}, SUM(word_count) AS total_sum FROM toms WHERE philo_type IN ('div1', 'div2', 'div3') GROUP BY {metadata_field_name}"
+            )
+    results = {row[metadata_field_name]: row["total_sum"] for row in cursor}
+    return results
 
 
 def query_recursive(db, param_dict, parent, sort_order):
@@ -85,15 +137,14 @@ def query_lowlevel(db, param_dict, sort_order):
     if not sort_order:
         sort_order = ["rowid"]
     if clauses:
-        query = (
-            "SELECT philo_id FROM toms WHERE "
-            + " AND ".join("(%s)" % c for c in clauses)
-            + " order by %s;" % ", ".join(sort_order)
-        )
+        query = "SELECT philo_id FROM toms WHERE " + " AND ".join("(%s)" % c for c in clauses)
     else:
-        query = "SELECT philo_id FROM toms order by %s;" % ", ".join(sort_order)
+        query = "SELECT philo_id FROM toms"
+    if sort_order:
+        query = f"{query} ORDER BY {', '.join(sort_order)}"
     if db.locals["debug"]:
         print("INNER QUERY: ", "%s %% %s" % (query, vars), sort_order, file=sys.stderr)
+    # print("INNER QUERY: ", "%s %% %s" % (query, vars), sort_order, file=sys.stderr)
     results = db.dbh.execute(query, vars)
     return results
 
@@ -252,7 +303,7 @@ def hit_to_string(hit, width):
 
 
 def str_to_hit(string):
-    return [int(x) for x in string.split(" ")]
+    return list(map(int, string.split(" ")))
 
 
 def obj_cmp(x, y):

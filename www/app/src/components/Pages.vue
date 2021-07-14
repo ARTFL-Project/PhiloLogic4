@@ -1,69 +1,66 @@
 <template>
     <div id="page-links" class="mt-4 pb-4 text-center" v-if="pages.length > 0">
-        <b-row>
-            <b-col cols="12" sm="10" offset-sm="1" md="8" offset-md="2">
-                <b-button-group class="shadow">
-                    <b-button
+        <div class="row">
+            <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2">
+                <div class="btn-group shadow" role="group">
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
                         v-for="page in pages"
                         :key="page.display"
                         :class="page.active"
-                        variant="outline-secondary"
-                        :to="page.route"
+                        @click="goToPage(page.start, page.end)"
                     >
                         <span class="page-number">{{ page.display }}</span>
                         <span class="page-range">{{ page.range }}</span>
-                    </b-button>
-                </b-button-group>
-            </b-col>
-        </b-row>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
-import { EventBus } from "../main.js";
 import { mapFields } from "vuex-map-fields";
 
 export default {
     name: "pages",
     computed: {
-        ...mapFields([
-            "formData.start",
-            "formData.results_per_page",
-            "resultsLength"
-        ])
+        ...mapFields(["formData.results_per_page", "resultsLength", "totalResultsDone", "urlUpdate"]),
     },
     data() {
         return { pages: [] };
     },
-    created() {
-        EventBus.$on("totalResultsDone", () => {
-            this.buildPages();
-        });
-    },
     watch: {
-        // call again the method if the route changes
-        $route: "buildPages"
+        totalResultsDone(done) {
+            if (done) {
+                this.buildPages();
+            }
+        },
+        urlUpdate() {
+            this.buildPages();
+        },
     },
     methods: {
         buildPages() {
-            var start = this.start;
-            var resultsPerPage = parseInt(this.results_per_page) || 25;
-            var resultsLength = this.resultsLength;
+            let start = parseInt(this.$route.query.start);
+            let resultsPerPage = parseInt(this.results_per_page) || 25;
+            let resultsLength = this.resultsLength;
 
             // first find out what page we are on currently.
-            var currentPage = Math.floor(start / resultsPerPage) + 1 || 1;
+            let currentPage = Math.floor(start / resultsPerPage) + 1 || 1;
 
             // then how many total pages the query has
-            var totalPages = Math.floor(resultsLength / resultsPerPage);
-            var remainder = resultsLength % resultsPerPage;
+            let totalPages = Math.floor(resultsLength / resultsPerPage);
+            let remainder = resultsLength % resultsPerPage;
             if (remainder !== 0) {
                 totalPages += 1;
             }
             totalPages = totalPages || 1;
 
             // construct the list of page numbers we will output.
-            var pages = [];
+            let pages = [];
             // up to four previous pages
-            var prev = currentPage - 4;
+            let prev = currentPage - 4;
             while (prev < currentPage) {
                 if (prev > 0) {
                     pages.push(prev);
@@ -73,7 +70,7 @@ export default {
             // the current page
             pages.push(currentPage);
             // up to five following pages
-            var next = currentPage + 5;
+            let next = currentPage + 5;
             while (next > currentPage) {
                 if (next < totalPages) {
                     pages.push(next);
@@ -87,14 +84,14 @@ export default {
             if (pages[-1] !== totalPages) {
                 pages.push(totalPages);
             }
-            pages.sort(function(a, b) {
+            pages.sort(function (a, b) {
                 return a - b;
             });
 
             // now we construct the actual links from the page numbers
-            var pageObject = [];
+            let pageObject = [];
             let lastPageName = "";
-            var pageEnd, pageStart, active;
+            let pageEnd, pageStart, active;
             for (let page of pages) {
                 pageStart = page * resultsPerPage - resultsPerPage + 1;
                 pageEnd = page * resultsPerPage;
@@ -118,36 +115,40 @@ export default {
                     continue;
                 }
                 lastPageName = page;
-                let route = this.paramsToRoute({
-                    ...this.$store.state.formData,
-                    start: pageStart.toString(),
-                    end: pageEnd.toString()
-                });
                 pageObject.push({
                     display: page,
-                    route: route,
                     active: active,
-                    range: `${pageStart}-${pageEnd}`
+                    start: pageStart.toString(),
+                    end: pageEnd.toString(),
+                    range: `${pageStart}-${pageEnd}`,
                 });
             }
             this.pages = pageObject;
-        }
-    }
+        },
+        goToPage(start, end) {
+            let route = this.paramsToRoute({
+                ...this.$store.state.formData,
+                start: start,
+                end: end,
+            });
+            return this.$router.push(route);
+        },
+    },
 };
 </script>
 <style scoped>
 .page {
     transition: width 0.4s ease !important;
-    /* overflow: hidden; */
 }
 .btn {
     line-height: initial !important;
 }
 .page-number {
     display: block;
+    font-size: 110%;
 }
 .page-range {
-    font-size: 70%;
+    font-size: 80%;
     opacity: 0.7;
 }
 </style>

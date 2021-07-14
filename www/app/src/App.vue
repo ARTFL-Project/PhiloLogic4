@@ -1,17 +1,13 @@
 <template>
     <div id="app">
         <Header />
-        <SearchForm v-if="authorized" />
-        <router-view :key="$route.fullPath" v-if="authorized"></router-view>
-        <access-control
-            :client-ip="clientIp"
-            :domain-name="domainName"
-            :authorized="authorized"
-            v-if="!authorized"
-        />
-        <b-container fluid v-if="authorized">
+        <SearchForm v-if="accessAuthorized" />
+        <router-view v-if="accessAuthorized"></router-view>
+        <access-control :client-ip="clientIp" :domain-name="domainName" v-if="!accessAuthorized" />
+        <div class="container-fluid" v-if="accessAuthorized">
             <div class="text-center mb-4">
-                <hr width="20%" />Powered by
+                <hr class="mb-3" width="20%" style="margin: auto" />
+                Powered by
                 <br />
                 <a
                     href="https://artfl-project.uchicago.edu/"
@@ -20,15 +16,15 @@
                     <img src="./assets/philo.png" height="40" width="110" />
                 </a>
             </div>
-        </b-container>
+        </div>
     </div>
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue";
 import Header from "./components/Header.vue";
-import SearchForm from "./components/SearchForm.vue";
-import AccessControl from "./components/AccessControl.vue";
-import { EventBus } from "./main.js";
+const SearchForm = defineAsyncComponent(() => import("./components/SearchForm.vue"));
+const AccessControl = defineAsyncComponent(() => import("./components/AccessControl.vue"));
 import { mapFields } from "vuex-map-fields";
 
 export default {
@@ -36,20 +32,21 @@ export default {
     components: {
         Header,
         SearchForm,
-        AccessControl
+        AccessControl,
     },
+    inject: ["$http"],
     data() {
         return {
-            authorized: true,
+            initialLoad: true,
             clientIp: "",
-            domainName: ""
+            domainName: "",
         };
     },
     computed: {
-        ...mapFields(["formData.report", "formData.q"]),
+        ...mapFields(["formData.report", "formData.q", "urlUpdate", "accessAuthorized"]),
         defaultFieldValues() {
             let localFields = {
-                report: "concordance",
+                report: "home",
                 q: "",
                 method: "proxy",
                 arg_proxy: "",
@@ -70,7 +67,7 @@ export default {
                 third_kwic_sorting_option: "",
                 start_byte: "",
                 end_byte: "",
-                group_by: this.$philoConfig.stats_report_config[0].field
+                group_by: this.$philoConfig.stats_report_config[0].field,
             };
             for (let field of this.$philoConfig.metadata) {
                 localFields[field] = "";
@@ -86,7 +83,7 @@ export default {
                 "arg_phrase",
                 "approximate",
                 "approximate_ratio",
-                ...this.$philoConfig.metadata
+                ...this.$philoConfig.metadata,
             ];
             reportValues.concordance = new Set([
                 ...commonFields,
@@ -95,7 +92,7 @@ export default {
                 "hit_num",
                 "start",
                 "end",
-                "frequency_field"
+                "frequency_field",
             ]);
             reportValues.kwic = new Set([
                 ...commonFields,
@@ -105,32 +102,27 @@ export default {
                 "third_kwic_sorting_option",
                 "start",
                 "end",
-                "frequency_field"
+                "frequency_field",
             ]);
-            reportValues.collocation = new Set([
-                ...commonFields,
-                "start",
-                "colloc_filter_choice",
-                "filter_frequency"
-            ]);
+            reportValues.collocation = new Set([...commonFields, "start", "colloc_filter_choice", "filter_frequency"]);
             reportValues.time_series = new Set([
                 ...commonFields,
                 "start_date",
                 "end_date",
                 "year_interval",
-                "max_time"
+                "max_time",
             ]);
             reportValues.aggregation = new Set([...commonFields, "group_by"]);
             return reportValues;
-        }
+        },
     },
     created() {
         document.title = this.$philoConfig.dbname.replace(/<[^>]+>/, "");
         if (this.$philoConfig.access_control) {
             let promise = this.checkAccessAuthorization();
-            promise.then(response => {
-                this.authorized = response.data.access;
-                if (this.authorized) {
+            promise.then((response) => {
+                this.accessAuthorized = response.data.access;
+                if (this.accessAuthorized) {
                     this.setupApp();
                 } else {
                     this.clientIp = response.data.incoming_address;
@@ -140,14 +132,15 @@ export default {
         } else {
             this.setupApp();
         }
-        EventBus.$on("accessAuthorized", () => {
-            this.setupApp();
-            this.authorized = true;
-        });
     },
     watch: {
         // call again the method if the route changes
-        $route: "formDataUpdate"
+        $route: "formDataUpdate",
+        accessAuthorized(authorized) {
+            if (authorized) {
+                this.setupApp();
+            }
+        },
     },
     methods: {
         setupApp() {
@@ -156,71 +149,56 @@ export default {
             this.formDataUpdate();
         },
         checkAccessAuthorization() {
-            let promise = this.$http.get(
-                `${this.$dbUrl}/scripts/access_request.py`
-            );
+            let promise = this.$http.get(`${this.$dbUrl}/scripts/access_request.py`);
             return promise;
         },
         formDataUpdate() {
             let localParams = this.copyObject(this.defaultFieldValues);
             this.$store.commit("updateFormData", {
                 ...localParams,
-                ...this.$route.query
+                ...this.$route.query,
             });
-            if (
-                !["textNavigation", "tableOfContents"].includes(
-                    this.$route.name
-                )
-            ) {
+            if (!["textNavigation", "tableOfContents", "home"].includes(this.$route.name)) {
                 this.evaluateRoute();
-                EventBus.$emit("urlUpdate");
+                this.urlUpdate = this.$route.fullPath;
             }
         },
         evaluateRoute() {
             if (this.$route.name == "bibliography") {
                 this.report = "bibliography";
             }
-            if (this.$route.name == null) {
-                this.$router.push("./");
-            } else if (
-                !["home", "textNavigation", "tableOfContents"].includes(
-                    this.$route.name
-                )
+            if (
+                !["home", "textNavigation", "tableOfContents"].includes(this.$route.name) &&
+                this.q.length > 0 &&
+                this.$route.name == "bibliography"
             ) {
-                if (
-                    this.q.length == 0 &&
-                    !["bibliography", "aggregation", "timeSeries"].includes(
-                        this.$route.name
-                    )
-                ) {
-                    console.log("matched", this.report);
-                    this.report = "bibliography";
-                    this.$router.push(
-                        this.paramsToRoute({ ...this.$store.state.formData })
-                    );
-                } else if (
-                    this.q.length > 0 &&
-                    this.$route.name == "bibliography"
-                ) {
-                    this.$store.commit("updateFormDataField", {
-                        key: "report",
-                        value: "concordance"
-                    });
-                    this.debug(this, this.report);
-                    this.$router.push(
-                        this.paramsToRoute({ ...this.$store.state.formData })
-                    );
-                }
+                this.$store.commit("updateFormDataField", {
+                    key: "report",
+                    value: "concordance",
+                });
+                this.debug(this, this.report);
+                this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
+            } else {
+                this.report = this.$route.name;
             }
-        }
-    }
+        },
+    },
 };
 </script>
 <style lang="scss">
-@import "./assets/styles/artfl-theme.scss";
+@import "./assets/styles/theme.scss";
 @import "../node_modules/bootstrap/scss/bootstrap.scss";
 </style>
 <style>
+a {
+    text-decoration: none;
+}
+.btn:focus {
+    box-shadow: none !important;
+}
+.modal-backdrop {
+    opacity: 0.7;
+}
 .highlight {
     color: #ef4500;
     font-weight: 400;
@@ -262,7 +240,7 @@ input {
 }
 
 .bullet-point-div1 {
-    border: solid 1px;
+    background: #000;
 }
 
 .bullet-point-div2 {

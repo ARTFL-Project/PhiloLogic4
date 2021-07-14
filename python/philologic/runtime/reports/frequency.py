@@ -3,36 +3,56 @@
 
 import time
 from urllib.parse import quote_plus
-from philologic.runtime.DB import DB
 
+from philologic.runtime.DB import DB
 from philologic.runtime.link import make_absolute_query_link
 
 
 def frequency_results(request, config, sorted_results=False):
     """reads through a hitlist. looks up request.frequency_field in each hit, and builds up a list of
-       unique values and their frequencies."""
+    unique values and their frequencies."""
     db = DB(config.db_path + "/data/")
     biblio_search = False
     if request.q == "" and request.no_q:
         biblio_search = True
         if request.no_metadata:
-            hits = db.get_all(db.locals["default_object_level"], sort_order=["rowid"], raw_results=True,)
+            hits = db.get_all(
+                db.locals["default_object_level"],
+                sort_order=["rowid"],
+                raw_results=True,
+            )
         else:
             hits = db.query(sort_order=["rowid"], raw_results=True, **request.metadata)
     else:
-        hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata,)
+        hits = db.query(
+            request["q"],
+            request["method"],
+            request["arg"],
+            raw_results=True,
+            **request.metadata,
+        )
 
     if sorted_results is True:
         hits.finish()
 
+    metadata_type = db.locals["metadata_types"][request.frequency_field]
     cursor = db.dbh.cursor()
-
-    cursor.execute(f"SELECT philo_id, {request.frequency_field} FROM toms WHERE {request.frequency_field} IS NOT NULL")
+    if metadata_type != "div":
+        cursor.execute(
+            f"SELECT philo_id, {request.frequency_field} FROM toms WHERE philo_type=? AND {request.frequency_field} IS NOT NULL",
+            (metadata_type,),
+        )
+    else:
+        cursor.execute(
+            f"SELECT philo_id, {request.frequency_field} FROM toms WHERE philo_type IN (?, ?, ?) AND {request.frequency_field} IS NOT NULL",
+            ("div1", "div2", "div3"),
+        )
     metadata_dict = {}
-    for i in cursor:
-        philo_id, field = i
+    for philo_id, field_name in cursor:
         philo_id = tuple(int(s) for s in philo_id.split() if int(s))
-        metadata_dict[philo_id] = field
+        metadata_dict[philo_id] = field_name
+
+    word_counts_by_field_name = db.query(get_word_count_field=request.frequency_field, **request.metadata)
 
     counts = {}
     frequency_object = {}
@@ -47,7 +67,6 @@ def frequency_results(request, config, sorted_results=False):
         "sent": 6,
         "word": 7,
     }
-    metadata_type = db.locals["metadata_types"][request.frequency_field]
     try:
         object_level = obj_dict[metadata_type]
     except KeyError:
@@ -56,7 +75,13 @@ def frequency_results(request, config, sorted_results=False):
 
     query_metadata = dict([(k, v) for k, v in request.metadata.items() if v])
     base_url = make_absolute_query_link(
-        config, request, frequency_field="", start="0", end="0", report=request.report, script="",
+        config,
+        request,
+        frequency_field="",
+        start="0",
+        end="0",
+        report=request.report,
+        script="",
     )
 
     hit_count = 0
@@ -88,13 +113,19 @@ def frequency_results(request, config, sorted_results=False):
                 counts[key] = {"count": 0, "metadata": {request.frequency_field: key}}
                 counts[key]["url"] = f'{base_url}&{request.frequency_field}="{quote_plus(key)}"'
                 if not biblio_search:
-                    query_metadata[request.frequency_field] = f'"{key}"'
-                    local_hits = db.query(**query_metadata, raw_results=True)
-                    counts[key]["total_word_count"] = local_hits.get_total_word_count()
+                    try:
+                        counts[key]["total_word_count"] = word_counts_by_field_name[key]
+                    except KeyError:
+                        # Worst case when there are different values for the field in div1, div2, and div3
+                        query_metadata = {k: v for k, v in request.metadata.items() if v}
+                        query_metadata[request.frequency_field] = '"%s"' % key
+                        local_hits = db.query(**query_metadata)
+                        counts[key]["total_word_count"] = local_hits.get_total_word_count()
             counts[key]["count"] += 1
 
             # avoid timeouts by splitting the query if more than
             # request.max_time (in seconds) has been spent in the loop
+            # print(time.perf_counter() - start_time, hit_count, flush=True, file=sys.stderr)
             if time.perf_counter() - start_time > 5 and sorted_results is False:
                 break
 
@@ -107,7 +138,13 @@ def frequency_results(request, config, sorted_results=False):
             if request.q == "" and request.no_q:
                 new_hits = db.query(sort_order=["rowid"], raw_results=True, **new_metadata)
             else:
-                new_hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **new_metadata,)
+                new_hits = db.query(
+                    request["q"],
+                    request["method"],
+                    request["arg"],
+                    raw_results=True,
+                    **new_metadata,
+                )
             new_hits.finish()
             if len(new_hits):
                 null_url = f'{base_url}&{request.frequency_field}="NULL"'
@@ -136,204 +173,38 @@ def frequency_results(request, config, sorted_results=False):
 
     if sorted_results is True:
         frequency_object["results"] = sorted(
-            frequency_object["results"].items(), key=lambda x: x[1]["count"], reverse=True,
+            frequency_object["results"].items(),
+            key=lambda x: x[1]["count"],
+            reverse=True,
         )
 
     return frequency_object
 
 
-# #!/usr/bin env python3
-# """Frequency results for facets"""
+if __name__ == "__main__":
+    import sys
+    from philologic.runtime import WebConfig
 
-# import timeit
+    class Request:
+        def __init__(self, q, field, metadata):
+            self.q = q
+            self.frequency_field = field
+            self.no_metadata = False
+            self.no_q = False
+            self.metadata = metadata
+            self.method = "proxy"
+            self.report = "frequency"
+            self.arg = ""
+            self.start = 0
 
-# from philologic.runtime.link import make_absolute_query_link
-# from philologic.runtime.DB import DB
+        def __getitem__(self, item):
+            return getattr(self, item)
 
-# OBJ_DICT = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
+        def __iter__(self):
+            for item in ["q", "frequency_field", "report"]:
+                yield item, self[item]
 
-
-# def frequency_results(request, config, sorted_results=False):
-#     """reads through a hitlist. looks up request.frequency_field in each hit, and builds up a list of
-#        unique values and their frequencies."""
-#     db = DB(config.db_path + "/data/")
-#     biblio_search = False
-#     if request.q == "" and request.no_q:
-#         biblio_search = True
-#         if request.no_metadata:
-#             hits = db.get_all(
-#                 db.locals["default_object_level"],
-#                 sort_order=["rowid"],
-#                 raw_results=True,
-#             )
-#         else:
-#             hits = db.query(sort_order=["rowid"], raw_results=True, **request.metadata)
-#     else:
-#         hits = db.query(
-#             request["q"],
-#             request["method"],
-#             request["arg"],
-#             raw_results=True,
-#             **request.metadata,
-#         )
-
-#     metadata_type = db.locals["metadata_types"][request.frequency_field]
-#     try:
-#         object_level = OBJ_DICT[metadata_type]
-#     except KeyError:
-#         metadata_type == "div"
-
-#     hits.finish()
-#     philo_ids, last_hit_done = __expand_hits(
-#         hits, metadata_type, request, sorted_results
-#     )
-#     import sys
-
-#     print(last_hit_done, file=sys.stderr)
-
-#     cursor = db.dbh.cursor()
-#     if metadata_type != "div":
-#         distinct_philo_ids = tuple(" ".join(map(str, id)) for id in set(philo_ids))
-#         cursor.execute(
-#             f"select philo_id, philo_type, {request.frequency_field} from toms where philo_{metadata_type}_id IN ({', '.join('?' for _ in range(len(distinct_philo_ids)))})",
-#             distinct_philo_ids,
-#         )
-#     else:
-#         sql_query = (
-#             f"select philo_id, philo_type, {request.frequency_field} from toms where "
-#         )
-#         sql_clauses = []
-#         for pos, obj_type in enumerate(["div1", "div2", "div3"]):
-#             distinct_philo_ids = tuple(
-#                 " ".join(map(str, id)) for id in set(philo_ids[pos])
-#             )
-#             sql_clauses.append(
-#                 f"philo_{obj_type}_id IN ({', '.join('?' for _ in range(len(distinct_philo_ids)))})"
-#             )
-#         sql_clauses = " OR ".join(sql_clauses)
-#         cursor.execute(sql_query)
-
-#     metadata_dict = {
-#         tuple(map(int, row["philo_id"].split()[: OBJ_DICT[row["philo_type"]]])): row[
-#             request.frequency_field
-#         ]
-#         for row in cursor
-#     }
-
-#     counts = {}
-#     frequency_object = {}
-#     query_metadata = dict([(k, v) for k, v in request.metadata.items() if v])
-#     base_url = make_absolute_query_link(
-#         config,
-#         request,
-#         frequency_field="",
-#         start="0",
-#         end="0",
-#         report=request.report,
-#         script="",
-#     )
-
-#     try:
-#         for philo_id in philo_ids[request.start :]:
-#             try:
-#                 key = metadata_dict[philo_id[:object_level]] or ""
-#             except:
-#                 last_hit_done += 1
-#                 continue
-#             if key not in counts:
-#                 counts[key] = {"count": 0, "metadata": {request.frequency_field: key}}
-#                 counts[key]["url"] = f'{base_url}&{request.frequency_field}="{key}"'
-#                 if not biblio_search:
-#                     query_metadata[request.frequency_field] = '"%s"' % key
-#                     local_hits = db.query(**query_metadata, raw_results=True)
-#                     counts[key]["total_word_count"] = local_hits.get_total_word_count()
-#             counts[key]["count"] += 1
-
-#             # avoid timeouts by splitting the query if more than
-#             # request.max_time (in seconds) has been spent in the loop
-#             # elapsed = timeit.default_timer() - start_time
-#             # last_hit_done += 1
-#             # if elapsed > 5 and sorted_results is False:
-#             #     break
-
-#         frequency_object["results"] = counts
-#         frequency_object["hits_done"] = last_hit_done
-#         if last_hit_done == len(hits):
-#             new_metadata = dict([(k, v) for k, v in request.metadata.items() if v])
-#             new_metadata[request.frequency_field] = '"NULL"'
-#             if request.q == "" and request.no_q:
-#                 new_hits = db.query(
-#                     sort_order=["rowid"], raw_results=True, **new_metadata
-#                 )
-#             else:
-#                 new_hits = db.query(
-#                     request["q"],
-#                     request["method"],
-#                     request["arg"],
-#                     raw_results=True,
-#                     **new_metadata,
-#                 )
-#             new_hits.finish()
-#             if len(new_hits):
-#                 null_url = f'{base_url}&{request.frequency_field}="NULL"'
-#                 local_hits = db.query(**new_metadata, raw_results=True)
-#                 if not biblio_search:
-#                     frequency_object["results"]["NULL"] = {
-#                         "count": len(new_hits),
-#                         "url": null_url,
-#                         "metadata": {request.frequency_field: '"NULL"'},
-#                         "total_word_count": local_hits.get_total_word_count(),
-#                     }
-#                 else:
-#                     frequency_object["results"]["NULL"] = {
-#                         "count": len(new_hits),
-#                         "url": null_url,
-#                         "metadata": {request.frequency_field: '"NULL"'},
-#                     }
-#             frequency_object["more_results"] = False
-#         else:
-#             frequency_object["more_results"] = True
-#     except IndexError as e:
-#         import sys
-
-#         print(e, file=sys.stderr)
-#         frequency_object["results"] = {}
-#         frequency_object["more_results"] = False
-#     frequency_object["results_length"] = len(hits)
-#     frequency_object["query"] = dict([i for i in request])
-
-#     if sorted_results is True:
-#         frequency_object["results"] = sorted(
-#             frequency_object["results"].items(),
-#             key=lambda x: x[1]["count"],
-#             reverse=True,
-#         )
-
-#     return frequency_object
-
-
-# def __expand_hits(hits, metadata_type, request, sorted_results):
-#     start_time = timeit.default_timer()
-#     last_hit_done = request.start
-#     expanded_hits = []
-#     # import sys
-
-#     try:
-#         object_level = OBJ_DICT[metadata_type]
-#         append = expanded_hits.append
-#         for philo_id in hits[request.start :]:
-#             append(philo_id[:object_level])
-#             # avoid timeouts by splitting the query if more than
-#             # request.max_time (in seconds) has been spent in the loop
-#             elapsed = timeit.default_timer() - start_time
-#             # print(elapsed, file=sys.stderr)
-#             last_hit_done += 1
-#             if elapsed > 5 and sorted_results is False:
-#                 break
-#         expanded_hits = [philo_id[:object_level] for philo_id in hits[request.start :]]
-#     except KeyError:
-#         expanded_hits = [[] for _ in ["div1", "div2", "div3"]]
-#         for philo_id in hits:
-#             for pos, local_type in enumerate(["div1", "div2", "div3"]):
-#                 expanded_hits[pos].append(philo_id[: OBJ_DICT[local_type]])
-#     return expanded_hits, last_hit_done
+    query_term, field, db_path = sys.argv[1:]
+    config = WebConfig(db_path)
+    request = Request(query_term, field, {})
+    frequency_results(request, config)

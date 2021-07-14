@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import Vuex from 'vuex'
 
 import {
@@ -6,7 +5,6 @@ import {
     updateField
 } from 'vuex-map-fields'
 
-Vue.use(Vuex)
 
 export default new Vuex.Store({
     strict: true,
@@ -25,7 +23,7 @@ export default new Vuex.Store({
             start: 0,
             end: 0,
             results_per_page: 25,
-            termGroups: []
+            termGroups: [],
         },
         aggregationCache: {
             results: [],
@@ -35,7 +33,12 @@ export default new Vuex.Store({
             queryParams: {},
             results: [],
             totalResults: 0
-        }
+        },
+        totalResultsDone: false,
+        showFacets: true,
+        urlUpdate: "",
+        metadataUpdate: {},
+        accessAuthorized: true
     },
     getters: {
         getField
@@ -43,24 +46,30 @@ export default new Vuex.Store({
     mutations: {
         updateField,
         updateFormData(state, payload) {
-            Vue.set(state, 'formData', payload)
+            state.formData = payload
         },
         setDefaultFields(state, payload) {
             for (let field in payload) {
-                Vue.set(state.formData, field, payload[field])
+                state.formData[field] = payload[field]
             }
         },
         updateFormDataField(state, payload) {
-            Vue.set(state.formData, payload.key, payload.value)
+            state.formData[payload.key] = payload.value
+        },
+        updateAllMetadata(state, payload) {
+            state.formData = { ...state.formData, ...payload }
         },
         setReportValues(state, payload) {
-            Vue.set(state, "reportValues", payload)
+            state.reportValues = payload
         },
         updateCitation(state, payload) {
-            Vue.set(state, 'textNavigationCitation', payload)
+            state.textNavigationCitation = payload
         },
         updateDescription(state, payload) {
-            Vue.set(state, "description", payload)
+            state.description = payload
+        },
+        updateResultsLength(state, payload) {
+            state.resultsLength = payload
         }
     },
     actions: {

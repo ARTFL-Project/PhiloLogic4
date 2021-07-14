@@ -13,7 +13,6 @@ CITATIONS = {
         "object_level": "doc",
         "prefix": "",
         "suffix": "",
-        "separator": "",
         "link": True,
         "style": {"font-variant": "small-caps"},
     },
@@ -22,7 +21,6 @@ CITATIONS = {
         "object_level": "doc",
         "prefix": "",
         "suffix": "",
-        "separator": "",
         "link": True,
         "style": {"font-variant": "small-caps", "font-style": "italic", "font-weight": 700},
     },
@@ -31,7 +29,6 @@ CITATIONS = {
         "object_level": "doc",
         "prefix": "[",
         "suffix": "]",
-        "separator": "",
         "link": False,
         "style": {},
     },
@@ -40,7 +37,6 @@ CITATIONS = {
         "object_level": "doc",
         "prefix": "",
         "suffix": ",&nbsp;",
-        "separator": "",
         "link": False,
         "style": {},
     },
@@ -49,7 +45,6 @@ CITATIONS = {
         "object_level": "doc",
         "prefix": "",
         "suffix": ",&nbsp;",
-        "separator": "",
         "link": False,
         "style": {},
     },
@@ -58,7 +53,6 @@ CITATIONS = {
         "object_level": "doc",
         "prefix": "",
         "suffix": ",&nbsp;",
-        "separator": "",
         "link": False,
         "style": {},
     },
@@ -67,7 +61,6 @@ CITATIONS = {
         "object_level": "div1",
         "prefix": "",
         "suffix": "",
-        "separator": "",
         "link": True,
         "style": {"font-variant": "small-caps"},
     },
@@ -76,7 +69,6 @@ CITATIONS = {
         "object_level": "div2",
         "prefix": "",
         "suffix": "",
-        "separator": "",
         "link": True,
         "style": {"font-variant": "small-caps"},
     },
@@ -85,7 +77,6 @@ CITATIONS = {
         "object_level": "div3",
         "prefix": "",
         "suffix": "",
-        "separator": "",
         "link": True,
         "style": {"font-variant": "small-caps"},
     },
@@ -94,7 +85,6 @@ CITATIONS = {
         "object_level": "para",
         "prefix": "",
         "suffix": "",
-        "separator": "",
         "link": True,
         "style": {"font-variant": "small-caps"},
     },
@@ -103,7 +93,6 @@ CITATIONS = {
         "object_level": "para",
         "prefix": "",
         "suffix": "",
-        "separator": "",
         "link": True,
         "style": {"font-variant": "small-caps"},
     },
@@ -114,7 +103,6 @@ CITATIONS = {
         "field": "n",
         "prefix": "&nbsp;[",
         "link": True,
-        "separator": "",
     },
 }
 
@@ -231,22 +219,27 @@ WEB_CONFIG_DEFAULTS = {
         "value": {},
         "comment": "\n".join(
             [
-                "# The metadata_input_style variable defines whether to use an text input field or a dropdown menu for any given",
-                '# metadata field. All fields are set by default to text. If using a dropdown menu, you need to set it to "dropdown"',
-                "# and populate the metadata_dropdown_values variable",
+                "# The metadata_input_style variable defines whether to use an text input field, a dropdown menu or checkboxes for any given",
+                "# metadata field. All fields are set by default to text. Note that dropdowns only allow you to select one value, whereas checkboxes allow you to select more than one."
+                '# If using a dropdown menu, you need to set it to "dropdown" and populate the metadata_choice_values variable. If using checkboxes, set to "checkboxes", and populate'
+                "# the metadata_choice_values variable",
             ]
         ),
     },
-    "metadata_dropdown_values": {
+    "metadata_choice_values": {
         "value": {},
         "comment": "\n".join(
             [
-                "# The metadata_dropdown_values variable defines what values to display in the metadata dropdown. It defaults to an empty dict.",
+                "# The metadata_choice_values variable defines what values to display in the metadata dropdown. It defaults to an empty dict.",
                 "# If no value is provided for a metadata field which has an input type of dropdown, no value will be displayed. You should",
                 "# provide a list of strings with labels and values for metadata.",
                 """# ex: {"title": [{"label": "Contrat Social", "value": "Du Contrat Social"}, {"label": "Emile", "value": "Emile, ou de l'éducation"}]}""",
             ]
         ),
+    },
+    "autocomplete": {
+        "value": [],
+        "comment": "# The autocomplete variable determines which fields have autocomplete enabled.",
     },
     "facets": {
         "value": [],
@@ -499,21 +492,11 @@ WEB_CONFIG_DEFAULTS = {
         ),
     },
     "table_of_contents_citation": {
-        "value": [
-            CITATIONS["author"],
-            CITATIONS["title"],
-            CITATIONS["year"],
-            CITATIONS["pub_place"],
-            CITATIONS["publisher"],
-            CITATIONS["collection"],
-        ],
+        "value": [],
         "comment": "\n".join(
             [
-                "# The table_of_contents_citation variable define how and in what field order citations are displayed in navigation reports.",
-                "# You can define styling with a dictionary of valid CSS property/value such as those in the default values.",
-                "# begin and end keywords define what precedes and follows each field. You can use HTML for these strings.",
-                "# The link key enables linking for that metadata field. It links to the table of contents for title and filename,",
-                "# and to a metadata query for all other metadata fields.",
+                "# The table_of_contents_citation variable define how and in what field order citations are displayed within the table of content",
+                "# In most cases, this should remain empty, except in the cases of div elements with different metadata values",
             ]
         ),
     },
@@ -571,8 +554,7 @@ WEB_CONFIG_DEFAULTS = {
         "value": "year",
         "comment": "\n".join(
             [
-                "# The time_series_year_field variable defines which metadata field to use for time series. The year field is built at load time by finding the earliest 4 digit number",
-                "# in multiple date fields.",
+                "# The time_series_year_field variable defines which metadata field to use for time series.",
                 "",
             ]
         ),
@@ -581,6 +563,14 @@ WEB_CONFIG_DEFAULTS = {
         "value": 10,
         "comment": "\n".join(
             ["# The time_series_interval variable defines the default year span used for time series."]
+        ),
+    },
+    "time_series_start_end_date": {
+        "value": {"start_date": 0, "end_date": 0},
+        "comment": "\n".join(
+            [
+                "# The time_series_start_end_date variable defines the default start and end dates for time series when no dates are provided."
+            ]
         ),
     },
     "stats_report_config": {
@@ -615,8 +605,8 @@ WEB_CONFIG_DEFAULTS = {
         ],
         "comment": "\n".join(
             [
-                "# The stats_report_config variable determins which fields get stats displayed in at the top of concordance/KWIC results."
-                "# It also drives the aggregation report: which fields concordances can be grouped by, and further broken down by particular metadata."
+                "# The stats_report_config variable determins which fields get stats displayed in at the top of concordance/KWIC results.",
+                "# It also drives the aggregation report: which fields concordances can be grouped by, and further broken down by particular metadata.",
             ]
         ),
     },
@@ -758,7 +748,7 @@ WEB_CONFIG_HEADER = """
 """
 
 
-class Config(object):
+class Config:
     def __init__(self, filename, defaults, header=""):
         self.filename = filename
         self.db_path = os.path.dirname(os.path.dirname(self.filename))

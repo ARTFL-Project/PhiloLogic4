@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name="philologic",
-    version="5.0a1",
+    version="4.7b1",
     author="The ARTFL Project",
     author_email="artfl@artfl.uchicago.edu",
     packages=[
@@ -13,7 +13,7 @@ setup(
         "philologic.runtime.reports",
         "philologic.loadtime",
     ],
-    scripts=["scripts/philoload5"],
+    scripts=["scripts/philoload4"],
     install_requires=[
         "lxml",
         "python-levenshtein",
@@ -24,5 +24,7 @@ setup(
         "numpy",
         "python-rapidjson",
         "black",
+        "msgpack",
+        "lz4",
     ],
 )

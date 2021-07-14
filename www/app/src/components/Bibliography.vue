@@ -1,83 +1,74 @@
 <template>
-    <b-container fluid>
-        <conckwic :results="results.results" v-if="Object.keys(results).length"></conckwic>
-        <b-row class="mt-4">
-            <b-col
-                cols="12"
-                md="7"
-                xl="8"
+    <div class="container-fluid">
+        <results-summary :description="results.description"></results-summary>
+        <div class="row mt-4" style="padding-right: 0.5rem">
+            <div
+                class="col-12 col-md-7 col-xl-8"
                 v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'"
             >
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
-                    <b-card
-                        no-body
-                        class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm"
+                    <div
+                        class="card philologic-occurrence mx-2 mb-4 shadow-sm"
                         v-for="(result, index) in results.results"
                         :key="result.philo_id.join('-')"
                     >
-                        <b-row class="citation-container">
-                            <b-col cols="12" sm="10" md="11">
+                        <div class="row citation-container">
+                            <div class="col-12 col-sm-10 col-md-11">
                                 <span class="cite" :data-id="result.philo_id.join(' ')">
                                     <span class="number">{{ results.description.start + index }}</span>
                                     <input
                                         type="checkbox"
-                                        class="ml-3 mr-2"
+                                        class="ms-3 me-2"
                                         @click="addToSearch(result.metadata_fields.title)"
                                         v-if="resultType == 'doc' && philoConfig.metadata.indexOf('title') !== -1"
                                     />
                                     <citations :citation="result.citation"></citations>
                                 </span>
-                            </b-col>
-                        </b-row>
-                    </b-card>
+                            </div>
+                        </div>
+                    </div>
                 </transition-group>
-            </b-col>
-            <b-col
-                cols="12"
-                md="7"
-                xl="8"
+            </div>
+            <div
+                class="col-12 col-md-7 col-xl-8"
                 v-if="philoConfig.dictionary_bibliography && results.result_type != 'doc'"
             >
-                <b-card
-                    no-body
-                    class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm"
-                    v-for="(group, groupKey) in results.results"
-                    :key="groupKey"
-                >
-                    <b-list-group flush>
-                        <b-list-group-item v-for="(result, index) in group" :key="index">
+                <div class="list-group" flush v-for="(group, groupKey) in results.results" :key="groupKey">
+                    <div
+                        class="list-group-item p-0"
+                        v-for="(result, index) in group"
+                        :key="index"
+                        style="border-width: 0"
+                    >
+                        <div class="card philologic-occurrence mx-2 mb-4 shadow-sm">
                             <div class="citation-dico-container">
                                 <span class="cite" :data-id="result.philo_id.join(' ')">
-                                    <span
-                                        class="number"
-                                        style="margin-left: -1.25rem; margin-top: -5rem"
-                                    >{{ results.description.start + index }}</span>
+                                    <span class="number">{{ results.description.start + index }}</span>
                                     <citations :citation="result.citation"></citations>
                                 </span>
                             </div>
                             <div
-                                class="philologic_context text-content-area pt-4 px-1 text-justify"
+                                class="pt-3 px-3 text-content"
                                 select-word
                                 :position="result.position"
                             >
                                 <div v-html="result.context"></div>
                             </div>
-                        </b-list-group-item>
-                    </b-list-group>
-                </b-card>
-            </b-col>
-            <b-col md="5" xl="4">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col" md="5" xl="4">
                 <facets></facets>
-            </b-col>
-        </b-row>
+            </div>
+        </div>
         <pages></pages>
-    </b-container>
+    </div>
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
-import { EventBus } from "../main.js";
 import citations from "./Citations";
-import conckwic from "./ConcordanceKwic";
+import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
 import Velocity from "velocity-animate";
@@ -86,9 +77,9 @@ export default {
     name: "bibliography",
     components: {
         citations,
-        conckwic,
+        ResultsSummary,
         facets,
-        pages
+        pages,
     },
     computed: {
         ...mapFields([
@@ -103,24 +94,36 @@ export default {
             "formData.approximate_ratio",
             "formData.metadataFields",
             "description",
-            "currentReport"
-        ])
+            "currentReport",
+            "metadataUpdate",
+            "urlUpdate",
+        ]),
+    },
+    inject: ["$http"],
+    provide() {
+        return {
+            results: this.results,
+        };
     },
     data() {
         return {
             philoConfig: this.$philoConfig,
             results: {},
             resultType: "doc",
-            metadataAddition: []
+            metadataAddition: [],
         };
     },
     created() {
         this.report = "bibliography";
         this.currentReport = "bibliography";
         this.fetchResults();
-        EventBus.$on("urlUpdate", () => {
-            this.fetchResults();
-        });
+    },
+    watch: {
+        urlUpdate() {
+            if (this.report == "bibliography") {
+                this.fetchResults();
+            }
+        },
     },
     methods: {
         fetchResults() {
@@ -128,30 +131,17 @@ export default {
             this.searchParams = { ...this.$store.state.formData };
             this.$http
                 .get(`${this.$dbUrl}/reports/bibliography.py`, {
-                    params: this.paramsFilter(this.searchParams)
+                    params: this.paramsFilter(this.searchParams),
                 })
-                .then(response => {
-                    if (
-                        !this.philoConfig.dictionary_bibliography ||
-                        response.data.doc_level
-                    ) {
+                .then((response) => {
+                    if (!this.philoConfig.dictionary_bibliography || response.data.doc_level) {
                         this.results = response.data;
                         this.resultType = this.results.result_type;
-                        this.$store.commit("updateDescription", {
-                            ...this.description,
-                            start: this.results.description.start,
-                            end: this.results.description.end,
-                            results_per_page: this.results.description
-                                .results_per_page
-                        });
                     } else {
-                        this.results = this.dictionaryBibliography(
-                            response.data
-                        );
-                        console.log(this.results);
+                        this.results = this.dictionaryBibliography(response.data);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.loading = false;
                     this.error = error.toString();
                     this.debug(this, error);
@@ -187,20 +177,20 @@ export default {
             let newTitleValue = this.metadataAddition.join(" | ");
             this.$store.commit("updateFormDataField", {
                 key: "title",
-                value: newTitleValue
+                value: newTitleValue,
             });
-            EventBus.$emit("metadataUpdate", { title: newTitleValue });
+            this.metadataUpdate = { title: newTitleValue };
         },
-        beforeEnter: function(el) {
+        beforeEnter: function (el) {
             el.style.opacity = 0;
         },
-        enter: function(el, done) {
+        enter: function (el, done) {
             var delay = el.dataset.index * 100;
-            setTimeout(function() {
+            setTimeout(function () {
                 Velocity(el, { opacity: 1 }, { complete: done });
             }, delay);
-        }
-    }
+        },
+    },
 };
 </script>
 <style scoped>
@@ -219,6 +209,8 @@ export default {
     display: inline-block;
     margin-right: 5px;
     border-radius: 0.25rem;
-    height: 100%;
+}
+.text-content {
+    text-align: justify;
 }
 </style>

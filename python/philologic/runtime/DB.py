@@ -3,14 +3,10 @@
 import hashlib
 import os
 import sqlite3
-from philologic.Config import Config, DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER
 
-from philologic.runtime import Query
-
-from . import HitList
-from . import MetadataQuery
-from . import QuerySyntax
-from .HitWrapper import HitWrapper, PageWrapper
+from philologic.Config import DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER, Config
+from philologic.runtime import HitList, MetadataQuery, Query, QuerySyntax
+from philologic.runtime.HitWrapper import HitWrapper, PageWrapper
 
 
 def hit_to_string(hit, width):
@@ -108,7 +104,17 @@ class DB:
         else:
             return HitList.HitList(all_file, 0, self, sort_order=sort_order, raw=raw_results)
 
-    def query(self, qs="", method="", method_arg="", limit="", sort_order=["rowid"], raw_results=False, **metadata):
+    def query(
+        self,
+        qs="",
+        method="",
+        method_arg="",
+        limit="",
+        sort_order=["rowid"],
+        raw_results=False,
+        get_word_count_field=None,
+        **metadata
+    ):
         """query the PhiloLogic database"""
         method = method or "proxy"
         if isinstance(method_arg, str):
@@ -143,7 +149,8 @@ class DB:
                 has_metadata = True
                 key_value = "%s=%s" % (key, "|".join(value))
                 hash.update(key_value.encode("utf8"))
-
+        if get_word_count_field is not None:
+            return MetadataQuery.metadata_total_word_count_query(self, metadata, get_word_count_field)
         if has_metadata:
             corpus_hash = hash.hexdigest()
             corpus_file = self.path + "/hitlists/" + corpus_hash + ".hitlist"
@@ -168,7 +175,10 @@ class DB:
                         metadata_dicts[-1]["philo_id"] = metadata["philo_id"]
                     else:
                         metadata_dicts.append({"philo_id": metadata["philo_id"]})
-                corpus = MetadataQuery.metadata_query(self, corpus_file, metadata_dicts, sort_order)
+                corpus = MetadataQuery.metadata_query(
+                    self, corpus_file, metadata_dicts, sort_order, raw_results=raw_results
+                )
+
             else:
                 if sort_order == ["rowid"]:
                     sort_order = None
@@ -208,3 +218,14 @@ class DB:
         if corpus:
             return corpus
         return self.get_all(self.locals["default_object_level"], sort_order)
+
+
+if __name__ == "__main__":
+    import sys
+
+    path = sys.argv[1]
+    db = DB(path)
+    terms = sys.argv[2:]
+    hits = db.query(" ".join(terms), "proxy", "0", **{"philo_type": ""})
+    hits.finish()
+    print(len(hits))

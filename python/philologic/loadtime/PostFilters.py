@@ -6,13 +6,14 @@ import os
 import sqlite3
 import time
 import unicodedata
-from rapidjson import loads
-import msgpack
-import lz4.block
 
+import lz4.frame
+import msgpack
+import multiprocess as mp
 import numpy as np
-from multiprocess import Pool
-from sklearn.feature_extraction.text import TfidfVectorizer
+from rapidjson import loads
+from scipy.sparse import csr_matrix, vstack
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from tqdm import tqdm
 
 
@@ -39,11 +40,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
                         row["philo_name"] = philo_name
                         row["philo_id"] = " ".join(fields[:depth])
                         row["philo_seq"] = sequence
-                        insert = "INSERT INTO %s (%s) values (%s);" % (
-                            table,
-                            ",".join(list(row.keys())),
-                            ",".join("?" for i in range(len(row))),
-                        )
+                        insert = f"INSERT INTO {table} ({','.join(list(row.keys()))}) values ({','.join('?' for i in range(len(row)))});"
                         try:
                             cursor.execute(insert, list(row.values()))
                         except sqlite3.OperationalError:
@@ -63,6 +60,11 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
                 index_name = "%s_%s_index" % (table, "_".join(index))
                 index = ",".join(index)
                 cursor.execute("create index if not exists %s on %s (%s)" % (index_name, table, index))
+                if table == "toms":
+                    index_null_name = f"{index}_null_index"  # this is for hitlist stats queries which require indexing philo_id with null metadata values
+                    cursor.execute(
+                        f"CREATE UNIQUE INDEX IF NOT EXISTS {index_null_name} ON toms(philo_id, {index}) WHERE {index} IS NULL"
+                    )
             except sqlite3.OperationalError:
                 pass
         conn.commit()
@@ -74,7 +76,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
     return inner_make_sql_table
 
 
-def make_sentences_table(words_ordered_file, db_destination):
+def make_sentences_table(datadir, db_destination):
     """Generate a table where each row is a sentence containing all the words in it"""
 
     def inner_make_sentences(loader_obj):
@@ -84,25 +86,33 @@ def make_sentences_table(words_ordered_file, db_destination):
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute("CREATE TABLE IF NOT EXISTS sentences(philo_id text, words blob)")
-            line_count = sum(1 for _ in open(words_ordered_file, "rbU"))
+            line_count = sum(
+                sum(1 for _ in lz4.frame.open(raw_words.path))
+                for raw_words in os.scandir(f"{datadir}/words_and_philo_ids")
+            )
             with tqdm(total=line_count, leave=False) as pbar:
-                with open(words_ordered_file) as input_file:
-                    current_sentence = None
-                    words = []
-                    for line in input_file:
-                        _, word, philo_id, _ = line.split("\t", 3)
-                        start_byte = philo_id.split()[7]
-                        sentence_id = " ".join(philo_id.split()[:6]) + " 0"
-                        if sentence_id != current_sentence:
-                            if current_sentence is not None:
-                                cursor.execute(
-                                    "insert into sentences values(?, ?)",
-                                    (current_sentence, lz4.block.compress(msgpack.dumps(words))),
-                                )
-                                words = []
-                            current_sentence = sentence_id
-                        words.append({"word": word, "start_byte": start_byte})
-                        pbar.update()
+                for raw_words in os.scandir(f"{datadir}/words_and_philo_ids"):
+                    with lz4.frame.open(raw_words.path) as input_file:
+                        current_sentence = None
+                        words = []
+                        for line in input_file:
+                            word_obj = loads(line.decode("utf8"))
+                            if word_obj["philo_type"] == "word":
+                                sentence_id = " ".join(word_obj["position"].split()[:6]) + " 0"
+                                if sentence_id != current_sentence:
+                                    if current_sentence is not None:
+                                        cursor.execute(
+                                            "insert into sentences values(?, ?)",
+                                            (current_sentence, lz4.frame.compress(msgpack.dumps(words))),
+                                        )
+                                        words = []
+                                    current_sentence = sentence_id
+                                words.append({"word": word_obj["token"], "start_byte": word_obj["start_byte"]})
+                            pbar.update()
+                        cursor.execute(  # insert last sentence in doc
+                            "insert into sentences values(?, ?)",
+                            (sentence_id, lz4.frame.compress(msgpack.dumps(words))),
+                        )
             cursor.execute("create index sentence_index on sentences (philo_id)")
             conn.commit()
 
@@ -183,33 +193,63 @@ def normalized_metadata_frequencies(loader_obj):
 
 def tfidf_per_word(loader_obj):
     """Get the mean TF-IDF weighting of every word in corpus"""
-    print(f"{time.ctime()}: Storing Inverse Document Frequency of all words in corpus...")
+    print(f"{time.ctime()}: Storing mean TF-IDF of all words in corpus...")
+    path = os.path.join(loader_obj.destination, "words_and_philo_ids")
+    batches = round(len(os.listdir(path)) / 1000)
+
+    def uniq_word_list(start=-1, end=math.inf):
+        with open(os.path.join(loader_obj.destination, "frequencies/word_frequencies")) as fh:
+            for pos, line in enumerate(fh):
+                if pos >= start and pos < end:
+                    yield line.strip().split()[0], pos
 
     def get_text(doc):
         words = []
-        with open(doc) as text:
+        with lz4.frame.open(doc) as text:
             for line in text:
                 try:
-                    words.append(loads(line.strip())["token"])
+                    words.append(loads(line.decode("utf8").strip())["token"])
                 except:
                     pass
         return " ".join(words)
 
-    def get_all_words():
-        path = os.path.join(loader_obj.destination, "words_and_philo_ids")
-        pool = Pool(32)
+    def get_all_words(filenames, batch_number):
+        pool = mp.Pool(mp.cpu_count() - 1)
         return tqdm(
-            pool.imap_unordered(get_text, (i.path for i in os.scandir(path))),
+            pool.imap_unordered(get_text, filenames),
             leave=False,
-            total=len(os.listdir(path)),
-            desc="Vectorizing words...",
+            total=len(filenames),
+            desc=f"Vectorizing file batch {batch_number}/{batches}",
         )
 
-    vectorizer = TfidfVectorizer(sublinear_tf=True, token_pattern=r"(?u)\b\w+\b")
-    corpus = vectorizer.fit_transform((get_all_words()))
-    mean_tf_idf = np.mean(corpus.toarray(), axis=0)
-    weighted_words = {word: mean_tf_idf[vectorizer.vocabulary_[word]] for word in vectorizer.vocabulary_}
+    full_corpus_chunked = []
+    filenames = []
+    batch_number = 0
+    print("Computing mean TF-IDF for each word in corpus...", flush=True)
+    for file in os.scandir(path):
+        filenames.append(file.path)
+        if len(filenames) == 1000:
+            batch_number += 1
+            vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b", vocabulary=dict(uniq_word_list()))
+            full_corpus_chunked.append(vectorizer.fit_transform((get_all_words(filenames, batch_number))))
+            filenames = []
+    if filenames:
+        batch_number += 1
+        vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b", vocabulary=dict(uniq_word_list()))
+        full_corpus_chunked.append(vectorizer.fit_transform((get_all_words(filenames, batch_number))))
+        filenames = []
+
+    transformer = TfidfTransformer(sublinear_tf=True)
+    vectorized_corpus = transformer.fit_transform(vstack(full_corpus_chunked).transpose())
     with open(os.path.join(loader_obj.destination, "frequencies/words_mean_tfidf"), "w") as idf_output:
+        weighted_words = {}
+        word_num = vectorized_corpus.shape[0]
+        with tqdm(total=word_num, leave=False, desc="Calculating mean TF-IDF...") as pbar:
+            for start in range(0, word_num, 10000):
+                tf_idf_mean = csr_matrix.mean(vectorized_corpus[start : start + 10000], axis=1)
+                for word, word_id in uniq_word_list(start=start, end=start + 10000):
+                    weighted_words[word] = tf_idf_mean[word_id - start][0, 0]
+                    pbar.update()
         for word, idf in sorted(weighted_words.items(), key=lambda x: x[1], reverse=True):
             print(f"{word}\t{idf}", file=idf_output)
 

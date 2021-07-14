@@ -8,7 +8,7 @@ import sqlite3
 from collections import defaultdict
 import string
 import msgpack
-import lz4.block
+import lz4.frame
 
 from philologic.runtime.DB import DB
 from philologic.runtime.Query import get_expanded_query
@@ -52,10 +52,6 @@ def collocation_results(request, config):
     else:
         hits = db.query(request["q"], "proxy", request["arg"], raw_results=True, **request.metadata)
     hits.finish()
-    return precompute_version(hits, config, request, db, filter_list, collocation_object)
-
-
-def precompute_version(hits, config, request, db, filter_list, collocation_object):
     stored_sentence_id = None
     stored_sentence_counts = defaultdict(int)
     sentence_hit_count = 1
@@ -68,7 +64,7 @@ def precompute_version(hits, config, request, db, filter_list, collocation_objec
         # start_byte = extract_bytes(hit)[0]
         sentence = " ".join(map(str, hit[:6])) + " 0"
         cursor.execute("SELECT words FROM sentences WHERE philo_id = ?", (sentence,))
-        words = msgpack.loads(lz4.block.decompress(cursor.fetchone()[0]))
+        words = msgpack.loads(lz4.frame.decompress(cursor.fetchone()[0]))
         parent = hit[:6] + (0,)
         if parent != stored_sentence_id:
             sentence_hit_count = 1

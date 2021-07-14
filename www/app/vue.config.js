@@ -2,22 +2,30 @@ module.exports = {
     devServer: {
         compress: true,
         disableHostCheck: true,
-        host: "192.168.86.28",
-        // proxy: "http://condorcet.localhost:8080",
+        host: "localhost",
+        proxy: "https://marat.uchicago.edu/philologic5/:8080",
         headers: {
             'Access-Control-Allow-Origin': '*'
         }
     },
     chainWebpack: config => {
-        config.externals({
-            Vue: 'vue'
-        })
+        config.module
+            .rule('vue')
+            .use('vue-loader')
     },
     runtimeCompiler: true,
     publicPath: process.env.NODE_ENV === 'production' ? getBaseUrl() : '/'
 }
 
 function getBaseUrl() {
-    const globalConfig = require('./appConfig.json')
-    return globalConfig.dbUrl
+    const fs = require('fs')
+    let dbPath = __dirname.replace(/app$/, "")
+    let dbname = dbPath.split("/").reverse()[1]
+    let config = fs.readFileSync("/etc/philologic/philologic4.cfg", "utf8")
+    let re = /url_root = "([^"]+)"/gm
+    let match = re.exec(config)
+    let url = new URL(dbname, match[1])
+    let jsonString = JSON.stringify({ dbUrl: url.href })
+    fs.writeFileSync("./appConfig.json", jsonString)
+    return url.href
 }

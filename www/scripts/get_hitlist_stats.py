@@ -37,12 +37,22 @@ def get_total_doc_count(environ, start_response):
     request = WSGIHandler(environ, config)
     if request.no_q:
         if request.no_metadata:
-            hits = db.get_all(db.locals["default_object_level"], request["sort_order"], raw_results=True,)
+            hits = db.get_all(
+                db.locals["default_object_level"],
+                request["sort_order"],
+                raw_results=True,
+            )
 
         else:
             hits = db.query(sort_order=request["sort_order"], raw_results=True, **request.metadata)
     else:
-        hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata,)
+        hits = db.query(
+            request["q"],
+            request["method"],
+            request["arg"],
+            raw_results=True,
+            **request.metadata,
+        )
 
     hits.finish()
     total_results = 0
@@ -61,10 +71,20 @@ def get_total_doc_count(environ, start_response):
         if field_obj["field"] == "title":
             count = len(docs[pos])
         else:
-            cursor.execute(
-                f"SELECT COUNT(0) FROM (SELECT DISTINCT {field_obj['field']} FROM toms WHERE philo_id IN ({', '.join(docs[pos])}))"  # we also count NULLs as distinct
-            )
+            philo_type = db.locals["metadata_types"][field_obj["field"]]
+            if philo_type != "div":
+                cursor.execute(
+                    f"SELECT COUNT(DISTINCT {field_obj['field']}) FROM toms WHERE philo_type='{philo_type}' AND philo_id IN ({', '.join(docs[pos])})"
+                )
+            else:
+                cursor.execute(
+                    f"SELECT COUNT(DISTINCT {field_obj['field']}) FROM toms WHERE philo_type IN ('div1', 'div2', 'div3') AND philo_id IN ({', '.join(docs[pos])})"
+                )
             count = cursor.fetchone()[0]
+            cursor.execute(
+                f"SELECT COUNT(0) FROM (SELECT DISTINCT {field_obj['field']} FROM toms WHERE philo_id IN ({', '.join(docs[pos])}) AND {field_obj['field']} IS NULL)"
+            )
+            count += cursor.fetchone()[0]
         stats.append({"field": field_obj["field"], "count": count})
     yield rapidjson.dumps({"stats": stats}).encode("utf8")
 

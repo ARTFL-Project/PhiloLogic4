@@ -1,23 +1,22 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+// import Vue from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
 
-import concordance from '../components/Concordance'
-import kwic from '../components/Kwic'
-import bibliography from '../components/Bibliography'
-import collocation from '../components/Collocation'
-import timeSeries from '../components/TimeSeries'
-import textNavigation from '../components/TextNavigation'
-import tableOfContents from '../components/TableOfContents'
-import landingPage from '../components/LandingPage'
-import aggregation from "../components/Aggregation"
+const concordance = () => import('../components/Concordance');
+const kwic = () => import('../components/Kwic');
+const bibliography = () => import('../components/Bibliography');
+const collocation = () => import('../components/Collocation');
+const timeSeries = () => import('../components/TimeSeries');
+const textNavigation = () => import('../components/TextNavigation');
+const tableOfContents = () => import('../components/TableOfContents');
+const landingPage = () => import('../components/LandingPage');
+const aggregation = () => import("../components/Aggregation");
 import appConfig from '../../appConfig.json'
 
 
-Vue.use(Router)
+// Vue.use(Router)
 
-export default new Router({
-    mode: 'history',
-    base: appConfig.dbUrl.replace(/https?:\/\/[^/]+\//, ""),
+const router = createRouter({
+    history: createWebHistory(appConfig.dbUrl.replace(/https?:\/\/[^/]+\//, "")),
     routes: [{
         path: '/',
         name: 'home',
@@ -45,7 +44,7 @@ export default new Router({
     },
     {
         path: "/time_series",
-        name: "timeSeries",
+        name: "time_series",
         component: timeSeries
     },
     {
@@ -63,7 +62,7 @@ export default new Router({
         name: 'aggregation',
         component: aggregation
     },
-    // for compatibility with old Philo links: still used in landing page
+    // for compatibility with old Philo links: still used in landing page and TOC
     {
         path: "/query",
         redirect: to => {
@@ -79,9 +78,10 @@ export default new Router({
             return savedPosition
         } else {
             return {
-                x: 0,
-                y: 0
+                left: 0,
+                top: 0
             }
         }
     }
 })
+export default router

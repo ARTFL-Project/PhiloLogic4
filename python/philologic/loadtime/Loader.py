@@ -12,7 +12,7 @@ import shutil
 import sqlite3
 import sys
 import time
-from glob import glob
+from glob import iglob
 
 import lxml
 from black import FileMode, format_str
@@ -183,13 +183,12 @@ class Loader:
 
     def add_files(self, files):
         """Copy files to database directory"""
-        print("\nCopying files to database directory...", end=" ", flush=True)
-        for f in files:
+        for f in tqdm(files, total=len(files), leave=False, desc="Copying files to database directory"):
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
             shutil.copy2(f, new_file_path)
             os.chmod(new_file_path, 775)
             self.filenames.append(f)
-        print("done.\n", flush=True)
+        print("Copying files to database directory... done.\n", flush=True)
 
     def parse_bibliography_file(self, bibliography_file, sort_by_field, reverse_sort=True):
         """Parse tab delimited bibliography file"""
@@ -223,7 +222,13 @@ class Loader:
         load_metadata = []
         metadata_xpaths = self.parser_config["doc_xpaths"]
         doc_count = len(os.listdir(self.textdir))
-        for pos, file in enumerate(os.scandir(self.textdir)):
+        prefix = f"{time.ctime()}: Parsing document level metadata"
+        for file in tqdm(
+            os.scandir(self.textdir),
+            total=doc_count,
+            desc=prefix,
+            leave=False,
+        ):
             data = {"filename": file.name}
             header = ""
             with open(file.path) as text_file:
@@ -280,7 +285,7 @@ class Loader:
                 load_metadata.append(data)
             except lxml.etree.XMLSyntaxError:
                 self.deleted_files.append(file.name)
-            print(f"\r{time.ctime()}: Parsing document level metadata: {pos+1}/{doc_count} done...", flush=True, end="")
+        print(f"{prefix}... done.", flush=True)
         if self.deleted_files:
             print(
                 "\nThe following files have been removed from the load since they have no valid TEI header or contain invalid data:\n",
@@ -292,7 +297,8 @@ class Loader:
         """Parse Dublin Core header"""
         load_metadata = []
         doc_count = len(os.listdir(self.textdir))
-        for pos, file in enumerate(os.scandir(self.textdir)):
+        prefix = f"{time.ctime()}: Parsing document level metadata"
+        for file in tqdm(os.scandir(self.textdir), total=doc_count, leave=False, desc=prefix):
             data = {}
             header = ""
             with open(file.path) as fh:
@@ -318,7 +324,7 @@ class Loader:
             if self.debug:
                 print(pretty_print(data))
             load_metadata.append(data)
-            print(f"\r{time.ctime()}: Parsing document level metadata: {pos+1}/{doc_count} done...", flush=True, end="")
+        print(f"{prefix}... done.", flush=True)
         return load_metadata
 
     def create_year_field(self, metadata):
@@ -342,19 +348,10 @@ class Loader:
     def parse_metadata(self, sort_by_field, header="tei"):
         """Parsing metadata fields in TEI or Dublin Core headers"""
         print("### Parsing metadata ###", flush=True)
-        print(
-            f"{time.ctime()}: Parsing document level metadata: 0/{len(os.listdir(self.textdir))} done...",
-            flush=True,
-            end="",
-        )
         if header == "tei":
             load_metadata = self.parse_tei_header()
         elif header == "dc":
             load_metadata = self.parse_dc_header()
-        print(
-            f"\r{time.ctime()}: Parsing document level metadata: {len(os.listdir(self.textdir))}/{len(os.listdir(self.textdir))} done...",
-            flush=True,
-        )
 
         print(
             "%s: Sorting files by the following metadata fields: %s..."
@@ -509,10 +506,8 @@ class Loader:
             except Exception:
                 raise ParserError(f"{text['name']} has caused parser to die.")
 
-        os.system("lz4 -c -q %s > %s" % (text["raw"], text["raw"] + ".lz4"))
-        os.system("rm %s" % text["raw"])
-        os.system("lz4 -c -q %s > %s" % (text["words"], text["words"] + ".lz4"))
-        os.system("rm %s" % text["words"])
+        os.system("lz4 --rm -c -q -3 %s > %s" % (text["words"], text["words"] + ".lz4"))
+        os.remove(text["raw"])
         return text["results"]
 
     def merge_objects(self):
@@ -521,73 +516,28 @@ class Loader:
         print("%s: sorting words" % time.ctime())
         self.merge_files("words")
 
-        # Build file to be used for building sentences table
-        print("%s: concatenating document-order words file..." % time.ctime(), end=" ", flush=True)
-        for f in self.filequeue:
-            os.system(f'lz4cat {f["raw"]}.lz4 | egrep -a "^word" >> all_words_ordered')
-        print("done")
-
         print("%s: sorting objects" % time.ctime(), flush=True)
         self.merge_files("toms")
-        if not self.debug:
-            for toms_file in glob(self.workdir + "/*toms.sorted"):
+        if self.debug is False:
+            for toms_file in iglob(self.workdir + "/*toms.sorted"):
                 os.system("rm %s" % toms_file)
 
-        print("%s: joining pages" % time.ctime(), flush=True)
-        if self.debug is False:
-            os.system(
-                'for i in $(find {} -type f -name "*pages"); do cat $i >> {}/all_pages; rm $i; done'.format(
-                    self.workdir, self.workdir
-                )
-            )
-        else:
-            os.system(
-                'for i in $(find {} -type f -name "*pages"); do cat $i >> {}/all_pages; done'.format(
-                    self.workdir, self.workdir
-                )
-            )
+        for object_type, extension in [
+            ("pages", "pages"),
+            ("references", "refs"),
+            ("graphics", "graphics"),
+            ("lines", "lines"),
+        ]:
 
-        print("%s: joining references" % time.ctime(), flush=True)
-        if self.debug is False:
-            os.system(
-                'for i in $(find {} -type f -name "*refs"); do cat $i >> {}/all_refs; rm $i; done'.format(
-                    self.workdir, self.workdir
+            print(f"{time.ctime()}: joining {object_type}", flush=True)
+            if self.debug is False:
+                os.system(
+                    f'for i in $(find {self.workdir} -type f -name "*{extension}"); do cat $i >> {self.workdir}/all_{extension}; rm $i; done'
                 )
-            )
-        else:
-            os.system(
-                'for i in $(find {} -type f -name "*refs"); do cat $i >> {}/all_refs; done'.format(
-                    self.workdir, self.workdir
+            else:
+                os.system(
+                    f'for i in $(find {self.workdir} -type f -name "*{extension}"); do cat $i >> {self.workdir}/all_{extension}; done'
                 )
-            )
-
-        print("%s: joining graphics" % time.ctime(), flush=True)
-        if self.debug is False:
-            os.system(
-                'for i in $(find {} -type f -name "*graphics"); do cat $i >> {}/all_graphics; rm $i; done'.format(
-                    self.workdir, self.workdir
-                )
-            )
-        else:
-            os.system(
-                'for i in $(find {} -type f -name "*graphics"); do cat $i >> {}/all_graphics; done'.format(
-                    self.workdir, self.workdir
-                )
-            )
-
-        print("%s: joining lines" % time.ctime(), flush=True)
-        if self.debug is False:
-            os.system(
-                'for i in $(find {} -type f -name "*lines"); do cat $i >> {}/all_lines; rm $i; done'.format(
-                    self.workdir, self.workdir
-                )
-            )
-        else:
-            os.system(
-                'for i in $(find {} -type f -name "*lines"); do cat $i >> {}/all_lines; done'.format(
-                    self.workdir, self.workdir
-                )
-            )
 
     def merge_files(self, file_type, file_num=1000):
         """This function runs a multi-stage merge sort on words
@@ -599,17 +549,18 @@ class Loader:
         files = []
         if file_type == "words":
             suffix = "/*words.sorted.lz4"
-            open_file_command = "lz4cat"
+            if self.debug is False:
+                open_file_command = "lz4cat --rm"
+            else:
+                open_file_command = "lz4cat"
             sort_command = f"LANG=C sort -S 25% -m -T {self.workdir} {self.sort_by_word} {self.sort_by_id} "
-            all_object_file = "all_words_sorted.lz4"
-        elif file_type == "toms":
+        else:  # sorting for toms
             suffix = "/*.toms.sorted"
             open_file_command = "cat"
             sort_command = f"LANG=C sort -S 25% -m -T {self.workdir} {self.sort_by_id} "
-            all_object_file = "all_toms_sorted.lz4"
 
-        # First we split the sort workload into chunks of 100 (default defined in the file_num keyword)
-        for f in glob(self.workdir + suffix):
+        # First we split the sort workload into chunks of 1000 (default defined in the file_num keyword)
+        for f in iglob(self.workdir + suffix):
             f = os.path.basename(f)
             files.append((f"<({open_file_command} {f})", self.workdir + "/" + f))
             if len(files) == file_num:
@@ -624,24 +575,22 @@ class Loader:
         os.system(f"touch {self.workdir}/sorted.init")
         for pos, object_list in enumerate(lists_of_files):
             command_list = " ".join([i[0] for i in object_list])
-            file_list = " ".join([i[1] for i in object_list])
-            output = self.workdir + "sorted.%d.split" % pos
+            output = os.path.join(self.workdir, f"sorted.{pos}.split")
             args = sort_command + command_list
-            command = f'/bin/bash -c "{args} | lz4 -q >{output}"'
+            command = f'/bin/bash -c "{args} | lz4 -3 -q >{output}"'
             status = os.system(command)
             if status != 0:
                 print(f"{file_type} sorting failed\nInterrupting database load...")
                 sys.exit()
             already_merged += len(object_list)
-            print(f"\r{time.ctime()}: {already_merged} files sorted...", end="")
-            if not self.debug:
-                os.system(f"rm {file_list}")
+            print(f"\r{time.ctime()}: {already_merged} files sorted...", end="", flush=True)
         print(flush=True)
 
-        sorted_files = " ".join([f"<(lz4cat -q {i})" for i in glob(f"{self.workdir}/*.split")])
+        # WARNING: we are technically limited by the file descriptor limit (1024), which should be equivalent to 1,024,000 files.
+        sorted_files = " ".join([f"<(lz4cat -q --rm {i})" for i in iglob(f"{self.workdir}/*.split")])
         if file_type == "words":
-            output_file = os.path.join(self.workdir, all_object_file)
-            command = f'/bin/bash -c "{sort_command} {sorted_files} | lz4 -q > {output_file}"'
+            output_file = os.path.join(self.workdir, "all_words_sorted.lz4")
+            command = f'/bin/bash -c "{sort_command} -b --compress-program=lz4 {sorted_files} | lz4 -q > {output_file}"'
         else:
             output_file = os.path.join(self.workdir, "all_toms_sorted")
             command = f'/bin/bash -c "{sort_command} {sorted_files} > {output_file}"'
@@ -671,26 +620,27 @@ class Loader:
         freq2 = 0
         offset = 0
 
-        # unix one-liner for a frequency table
+        # Generate frequency table
         os.system(
-            f'/bin/bash -c "cut -f 2 <(lz4cat {self.workdir}/all_words_sorted.lz4) | uniq -c | LANG=C sort -S 10% -rn -k 1,1> {self.workdir}/all_frequencies"'
+            f'/bin/bash -c "cut -f 2 <(lz4cat {self.workdir}/all_words_sorted.lz4) | uniq -c | LANG=C sort -S 25% -rn -k 1,1> {self.workdir}/all_frequencies"'
         )
 
         # now scan over the frequency table to figure out how wide (in bits) the frequency fields are,
         # and how large the block file will be.
-        for line in open(self.workdir + "/all_frequencies"):
-            f, _ = line.rsplit(" ", 1)  # uniq -c pads output on the left side, so we split on the right.
-            try:
-                f = int(f)
-            except ValueError:
-                f = int(re.sub(r"(\d+)\D+", r"\1", f.strip()))
-            if f > freq2:
-                freq2 = f
-            if f < INDEX_CUTOFF:
-                pass  # low-frequency words don't go into the block-mode index.
-            else:
-                blocks = 1 + f // (hits_per_block + 1)  # high frequency words have at least one block.
-                offset += blocks * BLOCKSIZE
+        with open(self.workdir + "/all_frequencies") as frequencies:
+            for line in frequencies:
+                f, _ = line.rsplit(" ", 1)  # uniq -c pads output on the left side, so we split on the right.
+                try:
+                    f = int(f)
+                except ValueError:
+                    f = int(re.sub(r"(\d+)\D+", r"\1", f.strip()))
+                if f > freq2:
+                    freq2 = f
+                if f < INDEX_CUTOFF:
+                    pass  # low-frequency words don't go into the block-mode index.
+                else:
+                    blocks = 1 + f // (hits_per_block + 1)  # high frequency words have at least one block.
+                    offset += blocks * BLOCKSIZE
 
         # take the log base 2 for the length of the binary representation.
         freq1_l = math.ceil(math.log(float(freq1), 2.0))
@@ -713,15 +663,15 @@ class Loader:
             print("#define DEPENDENCIES {-1,0,1,2,3,4,5,0,0}", file=dbs)
             print("#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl), file=dbs)
         print("%s: analysis done" % time.ctime())
-        os.system(f'/bin/bash -c "lz4cat {self.workdir}/all_words_sorted.lz4 | pack4 {self.workdir}/dbspecs4.h"',)
+        os.system(
+            f'/bin/bash -c "lz4cat {self.workdir}/all_words_sorted.lz4 | pack4 {self.workdir}/dbspecs4.h"',
+        )
         print("%s: all indices built. moving into place." % time.ctime())
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1")
-        # if self.clean:
-        #    os.system('rm all_words_sorted')
 
     def setup_sql_load(self):
-        """Setup SQL DB creation"""
+        """Setup SQLite DB creation"""
         for table in self.tables:
             if table == "pages":
                 file_in = self.destination + "/WORK/all_pages"
@@ -729,7 +679,11 @@ class Loader:
                 depth = 9
             elif table == "toms":
                 file_in = self.destination + "/WORK/all_toms_sorted"
-                indices = [("philo_type",), ("philo_id",), ("img",)] + self.metadata_fields
+                indices = (
+                    [("philo_type",), ("philo_id",), ("img",)]
+                    + Loader.metadata_fields
+                    + [(f"philo_{philo_type}_id",) for philo_type in ["doc", "div1", "div2", "div3", "para"]]
+                )
                 depth = 7
             elif table == "refs":
                 file_in = self.destination + "/WORK/all_refs"
@@ -744,9 +698,8 @@ class Loader:
                 indices = [("doc_id", "start_byte", "end_byte")]
                 depth = 9
             if table == "sentences":
-                file_in = self.destination + "/WORK/all_words_ordered"
                 db_destination = os.path.join(self.destination, "toms.db")
-                post_filter = make_sentences_table(file_in, db_destination)
+                post_filter = make_sentences_table(self.destination, db_destination)
             else:
                 post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
             self.post_filters.insert(0, post_filter)
@@ -807,30 +760,36 @@ class Loader:
         """ Write configuration variables for the Web application"""
         dbname = os.path.basename(os.path.dirname(self.destination.rstrip("/")))
         metadata = [i for i in Loader.metadata_fields if i not in self.metadata_fields_not_found]
-        config_values = {"dbname": dbname, "metadata": metadata, "facets": metadata, "theme": self.theme}
+        config_values = {
+            "dbname": dbname,
+            "metadata": metadata,
+            "autocomplete": ["q", *metadata],
+            "facets": metadata,
+            "theme": self.theme,
+        }
 
         # Fetch search examples:
         search_examples = {}
         conn = sqlite3.connect(self.destination + "/toms.db")
         conn.text_factory = str
         conn.row_factory = sqlite3.Row
-        c = conn.cursor()
+        cursor = conn.cursor()
         for field in metadata:
             object_type = Loader.metadata_types[field]
             try:
                 if object_type != "div":
-                    c.execute(
+                    cursor.execute(
                         'select %s from toms where philo_type="%s" and %s!="" limit 1' % (field, object_type, field)
                     )
                 else:
-                    c.execute(
+                    cursor.execute(
                         'select %s from toms where philo_type="div1" or philo_type="div2" or philo_type="div3" and %s!="" limit 1'
                         % (field, field)
                     )
             except sqlite3.OperationalError:
                 continue
             try:
-                search_examples[field] = c.fetchone()[0]
+                search_examples[field] = cursor.fetchone()[0]
             except (TypeError, AttributeError):
                 continue
         config_values["search_examples"] = search_examples
@@ -853,6 +812,22 @@ class Loader:
 
         if "author" in config_values["search_examples"] and "title" in config_values["search_examples"]:
             config_values["concordance_biblio_sorting"] = [("author", "title"), ("title", "author")]
+
+        # Find default start and end dates for times series
+        try:
+            cursor.execute("SELECT min(year), max(year) FROM toms")
+            min_year, max_year = cursor.fetchone()
+            try:
+                start_date = int(min_year)
+            except TypeError:
+                start_date = 0
+            try:
+                end_date = int(max_year)
+            except TypeError:
+                end_date = 2100
+            config_values["time_series_start_end_date"] = {"start_date": start_date, "end_date": end_date}
+        except sqlite3.OperationalError:  # no year field present
+            config_values["time_series_start_end_date"] = {"start_date": "", "end_date": ""}
 
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)

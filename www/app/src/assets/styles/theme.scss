@@ -1,0 +1,61 @@
+// Theme colors
+$header-color: rgb(245, 219, 157);
+$button-color: rgba(143, 57, 49, .8);
+$button-color-active: rgb(143, 57, 49);
+$link-color: rgb(143, 57, 49);
+
+
+// Themed elements
+nav.navbar {
+    background-color: $header-color !important;
+}
+$secondary: $button-color;
+.btn-secondary.active {
+    background-color: $button-color-active !important;
+}
+.btn-outline-secondary.active {
+    color: #fff !important;
+}
+$info: $button-color;
+.btn-light.active {
+    background-color: #eee !important;
+}
+a { color: $link-color !important}
+a.btn-secondary {
+    color: #fff !important;
+}
+.number,
+.card-header {
+    background-color: $header-color !important; 
+    color: $link-color !important;
+}
+.input-group-text, .custom-control-input:checked ~ .custom-control-label::before, .custom-control-input:focus ~ .custom-control-label::before  {
+    color: $link-color !important;
+    background-color: #fff !important;
+    border-color: $link-color !important;
+}
+.metadata-args, .remove-metadata, .term-groups, .close-pill {
+    border-color: $link-color !important;
+}
+.metadata-label, .remove-metadata:hover, .term-group-word:hover, .close-pill:hover {
+    background-color: $button-color !important;
+    color: #fff !important;
+}
+.custom-control-label::after {
+    background-color: $button-color !important;
+}
+.letter {
+    color: $link-color !important;
+}
+.letter:hover {
+    background-color: $button-color !important; 
+    color: #fff !important;
+}
+#report-error {
+    color: #fff !important;
+}
+.custom-select:focus, .custom-control-input:checked ~ .custom-control-label::before, .custom-control-input:focus ~ .custom-control-label::before, input[type="text"]:focus {
+    box-shadow: 0 0 0 0.05rem $button-color !important;
+    border-color: $button-color !important;
+    opacity: .5
+}

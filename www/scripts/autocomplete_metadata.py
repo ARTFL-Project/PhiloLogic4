@@ -59,7 +59,6 @@ def autocomplete_metadata(metadata, field, db):
 def format_query(q, field, db):
     parsed = parse_query(q)
     parsed_split = []
-    unique_matches = set()
     for label, token in parsed:
         l, t = label, token
         if l == "QUOTE":
@@ -76,7 +75,6 @@ def format_query(q, field, db):
     prefix = " ".join('"' + t[1] + '"' if t[0] == "QUOTE_S" else t[1] for t in parsed_split[:-1])
     if prefix:
         prefix = prefix + " CUTHERE "
-    expanded = []
     if label == "QUOTE_S" or label == "TERM":
         norm_tok = token.lower()
         norm_tok = [i for i in unicodedata.normalize("NFKD", norm_tok) if not unicodedata.combining(i)]
@@ -96,7 +94,7 @@ def format_query(q, field, db):
             if label == "QUOTE_S":
                 output_string.append(prefix + '"%s"' % m)
             else:
-                if re.search("\|", m):
+                if re.search(r"\|", m):
                     m = '"' + m + '"'
                 output_string.append(prefix + m)
     return output_string

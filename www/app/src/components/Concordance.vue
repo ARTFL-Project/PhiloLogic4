@@ -1,57 +1,68 @@
 <template>
-    <b-container fluid>
-        <conckwic v-if="description.end != 0" :results="results.results"></conckwic>
-        <b-row>
-            <b-col cols="12" md="8" xl="8">
+    <div class="container-fluid">
+        <results-summary :description="results.description"></results-summary>
+        <div style="position: relative" v-if="!showFacets">
+            <button
+                type="button"
+                class="btn btn-secondary"
+                style="position: absolute; bottom: 1rem; right: 0.5rem"
+                @click="toggleFacets()"
+            >
+                Show Facets
+            </button>
+        </div>
+        <div class="row" style="padding-right: 0.5rem">
+            <div class="col-12" :class="{ 'col-md-8': showFacets, 'col-xl-9': showFacets }">
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
-                    <b-card
-                        no-body
-                        class="philologic-occurrence ml-2 mr-2 mb-4 shadow-sm"
+                    <div
+                        class="card philologic-occurrence ms-2 me-2 mb-4 shadow-sm"
                         v-for="(result, index) in results.results"
                         :key="result.philo_id.join('-')"
                         :data-index="index"
                     >
-                        <b-row no-gutters class="citation-container">
-                            <b-col cols="12" sm="10" md="11">
+                        <div class="row citation-container g-0">
+                            <div class="col-12 cpl-sm-10 col-md-11">
                                 <span class="cite">
-                                    <span class="number">{{ description.start + index }}</span>
+                                    <span class="number">{{ results.description.start + index }}</span>
                                     <citations :citation="result.citation"></citations>
                                 </span>
-                            </b-col>
-                            <b-col sm="2" md="1" class="d-none d-sm-inline-block">
-                                <b-button class="more-context" @click="moreContext(index)">
+                            </div>
+                            <div class="col-sm-2 col-md-1 d-none d-sm-inline-block">
+                                <button
+                                    type="button"
+                                    class="btn btn-secondary more-context"
+                                    @click="moreContext(index, $event)"
+                                >
                                     <span class="d-none d-lg-inline-block">More</span>
                                     <span class="d-lg-none">+</span>
-                                </b-button>
-                            </b-col>
-                        </b-row>
-                        <b-row>
-                            <b-col
-                                class="m-2 mt-3"
-                                select-word
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div
+                                class="col m-2 mt-3 concordance-text"
                                 :position="results.description.start + index"
                                 @keyup="dicoLookup($event, result.metadata_fields.year)"
-                                tabindex="0"
                             >
                                 <div class="default-length" v-html="result.context"></div>
                                 <div class="more-length"></div>
-                            </b-col>
-                        </b-row>
-                    </b-card>
+                            </div>
+                        </div>
+                    </div>
                 </transition-group>
-            </b-col>
-            <b-col md="4" xl="4">
+            </div>
+            <div class="col col-md-4 col-xl-3" v-if="showFacets">
                 <facets></facets>
-            </b-col>
-        </b-row>
-        <pages v-if="resultsLength > 0"></pages>
-    </b-container>
+            </div>
+        </div>
+        <pages></pages>
+    </div>
 </template>
 
 <script>
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
-import conckwic from "./ConcordanceKwic";
+import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
 import Velocity from "velocity-animate";
@@ -60,9 +71,15 @@ export default {
     name: "concordance",
     components: {
         citations,
-        conckwic,
+        ResultsSummary,
         facets,
-        pages
+        pages,
+    },
+    inject: ["$http"],
+    provide() {
+        return {
+            results: this.results,
+        };
     },
     computed: {
         ...mapFields([
@@ -70,14 +87,18 @@ export default {
             "resultsLength",
             "searching",
             "currentReport",
-            "description"
-        ])
+            "description",
+            "showFacets",
+            "urlUpdate",
+        ]),
     },
     data() {
         return {
             philoConfig: this.$philoConfig,
-            results: {},
-            searchParams: {}
+            results: { description: { end: 0 } },
+            searchParams: {},
+            unbindUrlUpdate: null,
+            start: 1,
         };
     },
     created() {
@@ -86,57 +107,52 @@ export default {
         this.fetchResults();
     },
     watch: {
-        // call again the method if the route changes
-        $route: "fetchResults"
+        urlUpdate() {
+            if (this.report == "concordance") {
+                this.fetchResults();
+            }
+        },
     },
     methods: {
         fetchResults() {
-            this.results = {};
+            this.results = { description: { end: 0 } };
             this.searchParams = { ...this.$store.state.formData };
             this.searching = true;
             this.$http
                 .get(`${this.$dbUrl}/reports/concordance.py`, {
-                    params: this.paramsFilter(this.searchParams)
+                    params: this.paramsFilter(this.searchParams),
                 })
-                .then(response => {
+                .then((response) => {
                     this.results = response.data;
-                    this.resultsLength = response.data.results_length;
-                    this.$store.commit("updateDescription", {
-                        ...this.description,
-                        start: this.results.description.start,
-                        end: this.results.description.end,
-                        results_per_page: this.results.description
-                            .results_per_page
-                    });
+                    this.$store.commit("updateResultsLength", parseInt(response.data.results_length));
                     this.searching = false;
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.searching = false;
                     this.error = error.toString();
                     this.debug(this, error);
                 });
         },
-        moreContext(index) {
+        moreContext(index, event) {
             let button = event.srcElement;
-            let parentNode = button.parentNode.parentNode.parentNode;
-            let defaultNode = parentNode.querySelector(".default-length");
-            let moreNode = parentNode.querySelector(".more-length");
+            let defaultNode = document.getElementsByClassName("default-length")[index];
+            let moreNode = document.getElementsByClassName("more-length")[index];
             let resultNumber = this.results.description.start + index - 1;
             let localParams = { hit_num: resultNumber, ...this.searchParams };
             if (button.innerHTML == "More") {
                 if (moreNode.innerHTML.length == 0) {
                     this.$http
                         .get(`${this.$dbUrl}/scripts/get_more_context.py`, {
-                            params: this.paramsFilter(localParams)
+                            params: this.paramsFilter(localParams),
                         })
-                        .then(response => {
+                        .then((response) => {
                             let moreText = response.data;
                             moreNode.innerHTML = moreText;
                             defaultNode.style.display = "none";
                             moreNode.style.display = "block";
                             button.innerHTML = "Less";
                         })
-                        .catch(error => {
+                        .catch((error) => {
                             this.loading = false;
                             this.error = error.toString();
                             this.debug(this, error);
@@ -153,20 +169,30 @@ export default {
             }
         },
         dicoLookup() {},
-        beforeEnter: function(el) {
+        beforeEnter: function (el) {
             el.style.opacity = 0;
         },
-        enter: function(el, done) {
-            var delay = el.dataset.index * 50;
-            setTimeout(function() {
+        enter: function (el, done) {
+            let delay = el.dataset.index * 35;
+            setTimeout(function () {
                 Velocity(el, { opacity: 1 }, { complete: done });
             }, delay);
-        }
-    }
+        },
+        toggleFacets() {
+            if (this.showFacets) {
+                this.showFacets = false;
+            } else {
+                this.showFacets = true;
+            }
+        },
+    },
 };
 </script>
 
 <style>
+.concordance-text {
+    text-align: justify;
+}
 .philologic-occurrence {
     left: 0;
     position: relative;
@@ -178,6 +204,7 @@ export default {
     vertical-align: middle;
 }
 .more-context {
+    line-height: 1.8;
     position: absolute;
     right: 0;
 }

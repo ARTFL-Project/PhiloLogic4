@@ -3,93 +3,78 @@
         <div v-if="currentWordQuery !== ''">
             Searching database for
             <span v-if="approximate == 'yes'">
-                <b>{{ currentWordQuery }}</b> and the following similar terms:
+                terms similar to <b>{{ currentWordQuery }}</b
+                >:
             </span>
+            <span v-else>the term(s) </span>
             <span v-if="approximate.length == 0 || approximate == 'no'"></span>
-            <b-button
-                variant="outline-secondary"
-                pill
-                size="sm"
-                class="term-groups"
-                v-for="(group, index) in description.termGroups"
-                :key="index"
-            >
-                <a href @click.prevent="getQueryTerms(group, index)">{{ group }}</a>
+            <span class="rounded-pill term-groups" v-for="(group, index) in wordGroups" :key="index">
+                <a class="term-group-word" href @click.prevent="getQueryTerms(group, index)">{{ group }}</a>
                 <span class="close-pill" @click="removeTerm(index)">X</span>
-            </b-button>
+            </span>
             {{ queryArgs.proximity }}
-            <b-card no-body variant="outline-secondary" id="query-terms" style="display: none;">
-                <b-button size="sm" class="close" @click="closeTermsList()">
+            <div class="card outline-secondary shadow" id="query-terms" style="display: none">
+                <button type="button" class="btn btn-secondary btn-sm close" @click="closeTermsList()">
                     <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </b-button>
-                <h4>The search terms query expanded to the following {{ words.length }} terms:</h4>
+                </button>
+                <h6 class="pe-4">The search terms query expanded to the following {{ words.length }} terms:</h6>
                 <h6 v-if="words.length > 100">100 most frequent terms displayed</h6>
-                <b-button
-                    size="sm"
-                    style="margin:10px 0px"
+                <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    style="margin: 10px 0px"
                     v-if="wordListChanged"
                     @click="rerunQuery()"
-                >Rerun query with the current modifications</b-button>
-                <b-row id="query-terms-list">
-                    <b-col cols="3" v-for="word in words" :key="word">
-                        <b-card no-body class="query-terms-element">
-                            {{ word }}
-                            <b-button
-                                size="sm"
-                                class="close"
-                                @click="removeFromTermsList(word, groupIndexSelected)"
+                >
+                    Rerun query with the current modifications
+                </button>
+                <div class="row" id="query-terms-list">
+                    <div class="col-3" v-for="word in words" :key="word">
+                        <button class="rounded-pill term-groups">
+                            <span class="px-2">{{ word.replace(/"/g, "") }}</span>
+                            <span class="close-pill pe-1" @click="removeFromTermsList(word, groupIndexSelected)"
+                                >X</span
                             >
-                                <span aria-hidden="true">&times;</span>
-                                <span class="sr-only">Close</span>
-                            </b-button>
-                        </b-card>
-                    </b-col>
-                </b-row>
-            </b-card>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
         <div>
             Bibliography criteria:
-            <span
-                class="metadata-args rounded-pill"
-                v-for="metadata in queryArgs.biblio"
-                :key="metadata.key"
-            >
+            <span class="metadata-args rounded-pill" v-for="metadata in queryArgs.biblio" :key="metadata.key">
                 <span class="metadata-label">{{ metadata.alias }}</span>
-                <span class="remove-metadata" @click="removeMetadata(metadata.key, restart)">X</span>
                 <span class="metadata-value">{{ metadata.value }}</span>
+                <span class="remove-metadata" @click="removeMetadata(metadata.key, restart)">X</span>
             </span>
             <b v-if="queryArgs.biblio.length === 0">None</b>
         </div>
-        <div v-if="currentReport === 'time_series'">
-            {{ resultsLength || '...' }} occurrences of the term(s) between
-            <span
-                class="biblio-criteria"
-            >
-                <span class="metadata-args rounded-pill">
-                    <span class="remove-metadata" @click="removeMetadata('start_date', restart)">X</span>
-                    <span class="metadata-value">{{ start_date }}</span>
-                </span>
-            </span>&nbsp; and
+        <div v-if="queryReport === 'time_series'">
+            {{ resultsLength }} occurrences of the term(s) between
             <span class="biblio-criteria">
                 <span class="metadata-args rounded-pill">
-                    <span class="remove-metadata" @click="removeMetadata('end_date', restart)">X</span>
+                    <span class="metadata-value">{{ start_date }}</span>
+                    <span class="remove-metadata" @click="removeMetadata('start_date', restart)">X</span>
+                </span> </span
+            >&nbsp; and
+            <span class="biblio-criteria">
+                <span class="metadata-args rounded-pill">
                     <span class="metadata-value">{{ end_date }}</span>
+                    <span class="remove-metadata" @click="removeMetadata('end_date', restart)">X</span>
                 </span>
             </span>
         </div>
-        <div
-            style="margin-top: 10px;"
-            v-if="currentReport === 'collocation'"
-        >Displaying the top 100 collocates for {{ resultsLength || '...' }} occurrences</div>
+        <div style="margin-top: 10px" v-if="queryReport === 'collocation'">
+            Displaying the top 100 collocates for {{ resultsLength }} occurrences
+        </div>
     </div>
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
-import { EventBus } from "../main.js";
 
 export default {
     name: "searchArguments",
+    props: ["resultStart", "resultEnd"],
     computed: {
         ...mapFields([
             "formData.report",
@@ -106,34 +91,38 @@ export default {
             "formData.end_date",
             "currentReport",
             "resultsLength",
-            "description"
+            "description",
         ]),
         formData() {
             return this.$store.state.formData;
-        }
+        },
+        wordGroups() {
+            return this.description.termGroups;
+        },
     },
+    inject: ["$http"],
     data() {
         return {
-            currentWordQuery: this.$route.query.q,
+            currentWordQuery: typeof this.$route.query.q == "undefined" ? "" : this.$route.query.q,
             queryArgs: {},
             words: [],
             wordListChanged: false,
-            restart: false
+            restart: false,
+            queryReport: this.$route.name,
+            termGroupsCopy: [],
         };
     },
     created() {
         this.fetchSearchArgs();
-        EventBus.$on("resultsDone", () => {
-            this.fetchSearchArgs();
-        });
     },
     watch: {
         // call again the method if the route changes
-        $route: "fetchSearchArgs"
+        $route: "fetchSearchArgs",
     },
     methods: {
         fetchSearchArgs() {
-            this.currentWordQuery = this.$route.query.q;
+            this.queryReport = this.$route.name;
+            this.currentWordQuery = typeof this.$route.query.q == "undefined" ? "" : this.$route.query.q;
             let queryParams = { ...this.$store.state.formData };
             if ("q" in queryParams) {
                 this.queryArgs.queryTerm = queryParams.q;
@@ -149,24 +138,14 @@ export default {
                 }
                 if (queryParams.q.split(" ").length > 1) {
                     if (method === "proxy") {
-                        if (
-                            typeof queryParams.arg_proxy !== "undefined" ||
-                            queryParams.arg_proxy
-                        ) {
-                            this.queryArgs.proximity =
-                                "within " + queryParams.arg_proxy + " words";
+                        if (typeof queryParams.arg_proxy !== "undefined" || queryParams.arg_proxy) {
+                            this.queryArgs.proximity = "within " + queryParams.arg_proxy + " words";
                         } else {
                             this.queryArgs.proximity = "";
                         }
                     } else if (method === "phrase") {
-                        if (
-                            typeof queryParams.arg_proxy !== "undefined" ||
-                            queryParams.arg_phrase
-                        ) {
-                            this.queryArgs.proximity =
-                                "within exactly " +
-                                queryParams.arg_phrase +
-                                " words";
+                        if (typeof queryParams.arg_proxy !== "undefined" || queryParams.arg_phrase) {
+                            this.queryArgs.proximity = "within exactly " + queryParams.arg_phrase + " words";
                         } else {
                             this.queryArgs.proximity = "";
                         }
@@ -184,16 +163,19 @@ export default {
             }
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_term_groups.py`, {
-                    params: this.paramsFilter({ ...this.$route.query })
+                    params: this.paramsFilter({ ...this.$route.query }),
                 })
-                .then(response => {
+                .then((response) => {
                     this.$store.commit("updateDescription", {
                         ...this.description,
-                        termGroups: response.data.term_groups
+                        start: this.resultStart,
+                        end: this.resultEnd,
+                        results_per_page: this.formData.results_per_page,
+                        termGroups: response.data.term_groups,
                     });
                     this.originalQuery = response.data.original_query;
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.loading = false;
                     this.error = error.toString();
                     this.debug(this, error);
@@ -202,10 +184,7 @@ export default {
         buildCriteria() {
             let queryArgs = {};
             for (let field of this.$philoConfig.metadata) {
-                if (
-                    field in this.$route.query &&
-                    this.formData[field].length > 0
-                ) {
+                if (field in this.$route.query && this.formData[field].length > 0) {
                     queryArgs[field] = this.formData[field];
                 }
             }
@@ -263,15 +242,14 @@ export default {
                     params: {
                         q: group,
                         approximate: 0,
-                        ...this.paramsFilter(this.$route.query)
-                    }
+                        ...this.paramsFilter(this.$route.query),
+                    },
                 })
-                .then(response => {
+                .then((response) => {
                     this.words = response.data;
-                    document.querySelector("#query-terms").style.display =
-                        "block";
+                    document.querySelector("#query-terms").style.display = "block";
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.error = error.toString();
                     this.debug(this, error);
                 });
@@ -283,6 +261,9 @@ export default {
             var index = this.words.indexOf(word);
             this.words.splice(index, 1);
             this.wordListChanged = true;
+            if (this.termGroupsCopy.length == 0) {
+                this.termGroupsCopy = this.copyObject(this.wordGroups);
+            }
             if (this.termGroupsCopy[groupIndex].indexOf(" NOT ") !== -1) {
                 // if there's already a NOT in the clause add an OR
                 this.termGroupsCopy[groupIndex] += " | " + word.trim();
@@ -294,18 +275,13 @@ export default {
             this.approximate_ratio = "";
         },
         rerunQuery() {
-            this.$router.push(
-                this.paramsToRoute({ ...this.$store.state.formData })
-            );
+            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData, q: this.q }));
         },
         removeTerm(index) {
             let queryTermGroup = this.copyObject(this.description.termGroups);
             queryTermGroup.splice(index, 1);
             this.q = queryTermGroup.join(" ");
-            if (
-                queryTermGroup.length === 0 &&
-                this.currentReport != "aggregation"
-            ) {
+            if (queryTermGroup.length === 0 && this.currentReport != "aggregation") {
                 this.report = "bibliography";
             }
             this.start = 0;
@@ -317,13 +293,11 @@ export default {
             }
             this.$store.commit("updateDescription", {
                 ...this.description,
-                termGroups: queryTermGroup
+                termGroups: queryTermGroup,
             });
-            this.$router.push(
-                this.paramsToRoute({ ...this.$store.state.formData })
-            );
-        }
-    }
+            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
+        },
+    },
 };
 </script>
 <style scoped>
@@ -333,7 +307,7 @@ export default {
 #query-terms {
     position: absolute;
     z-index: 100;
-    padding: 20px 15px 0px 15px;
+    padding: 10px 15px 0px 15px;
     box-shadow: 0px 0.2em 8px 0.01em rgba(0, 0, 0, 0.1);
 }
 
@@ -353,6 +327,7 @@ export default {
 .query-terms-element {
     padding: 0px 20px 0px 5px;
     text-align: center;
+    width: fit-content;
 }
 .close {
     position: absolute;
@@ -361,11 +336,21 @@ export default {
 .term-groups {
     display: inline-block;
     position: relative;
-    padding: 3px 20px 3px 10px;
+    border: 1px solid #ddd;
+    line-height: 2;
+    padding: 0 25px 0 0;
     margin: 5px 5px 5px 0px;
     white-space: inherit;
+    background-color: #fff;
 }
-.term-groups:hover {
+.term-group-word {
+    display: inline-block;
+    border-radius: 50rem 0 0 50rem !important;
+    height: 100%;
+    width: 100%;
+    padding-left: 0.5rem;
+}
+.term-group-word:hover {
     background-color: #e9ecef;
     color: initial;
 }
@@ -373,19 +358,20 @@ export default {
     position: absolute;
     right: 0;
     top: 0;
+    padding-left: 0.5rem;
     width: 1.6rem;
-    border-radius: 50rem !important;
+    border-radius: 0 50rem 50rem 0 !important;
     display: inline-block;
-    padding: 0.2rem;
-}
-.close-pill:hover {
-    color: #fff;
-    background: #545b62;
+    border-left: solid 1px #888;
 }
 .metadata-args {
     border: 1px solid #ddd;
-    display: inline-block !important;
+    display: inline-flex !important;
     margin-right: 5px;
+    border-radius: 50rem;
+    width: fit-content;
+    line-height: 2;
+    margin-bottom: 0.5rem;
 }
 .metadata-label {
     background-color: #e9ecef;
@@ -393,30 +379,34 @@ export default {
     border-width: 0 1px 0 0;
     border-top-left-radius: 50rem;
     border-bottom-left-radius: 50rem;
-    float: left;
-    line-height: 29px;
-    padding: 0 5px 0 10px;
+    padding: 0 0.5rem;
 }
 .metadata-value {
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
-    line-height: 29px;
-    padding: 6px 10px 10px;
+    padding: 0 0.5rem;
 }
 .remove-metadata {
-    float: right;
-    line-height: 29px;
     padding-right: 5px;
     padding-left: 5px;
     border-left: #ddd solid 1px;
-}
-.remove-metadata:hover {
-    background-color: #e9ecef;
-    cursor: pointer;
     border-top-right-radius: 50rem;
     border-bottom-right-radius: 50rem;
+    padding: 0 0.5rem;
+}
+.remove-metadata:hover,
+.close-pill:hover {
+    background-color: #e9ecef;
+    cursor: pointer;
 }
 .rounded-pill a {
     margin-right: 0.5rem;
+    text-decoration: none;
+}
+.metadata-label,
+.metadata-value,
+.remove-metadata {
+    display: flex;
+    align-items: center;
 }
 </style>

@@ -8,7 +8,7 @@ from philologic.runtime.link import make_absolute_object_link, make_absolute_que
 def citation_links(db, config, i):
     """ Returns links to a PhiloLogic object and all its ancestors."""
     if config.skip_table_of_contents is False:
-        doc_href = make_absolute_object_link(config, i.philo_id[:1]) + "/table-of-contents"
+        doc_href = f"{make_absolute_object_link(config, i.philo_id[:1])}/table-of-contents"
     else:
         doc_href = make_absolute_object_link(config, i.philo_id[:1], i.bytes)
     div1_href = make_absolute_object_link(config, i.philo_id[:2], i.bytes)
@@ -37,9 +37,9 @@ def citation_links(db, config, i):
     return links
 
 
-def citations(hit, citation_hrefs, config, report="concordance", citation_type=None, result_type="doc"):
-    """ Returns a representation of a PhiloLogic object and all its ancestors
-        suitable for a precise citation. """
+def citations(hit, citation_hrefs, config, report="concordance", citation_type=None):
+    """Returns a representation of a PhiloLogic object and all its ancestors
+    suitable for a precise citation."""
     if citation_type is None:
         citation_type = config[report + "_citation"]
     citation = []

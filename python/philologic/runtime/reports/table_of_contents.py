@@ -40,42 +40,46 @@ def generate_toc_object(request, config):
     for row in cursor:
         philo_id = [int(n) for n in row["philo_id"].split(" ")]
         text = HitWrapper.ObjectWrapper(philo_id, db, row=row)
-        if text["philo_name"] == "__philo_virtual" and text["philo_type"] != "div1":
+        if text["philo_name"] == "__philo_virtual" and text["philo_type"] != "div1" or text["word_count"] == 0:
             continue
-        elif text["word_count"] == 0:
+        philo_id = text["philo_id"]
+        philo_type = text["philo_type"]
+        display_name = ""
+        if text["philo_name"] == "front":
+            display_name = "Front Matter"
+        elif text["philo_name"] == "note":
             continue
         else:
-            philo_id = text["philo_id"]
-            philo_type = text["philo_type"]
-            display_name = ""
-            if text["philo_name"] == "front":
-                display_name = "Front Matter"
-            elif text["philo_name"] == "note":
-                continue
-            else:
-                display_name = text["head"]
-                if display_name:
-                    display_name = display_name.strip()
-                if not display_name:
-                    if text["type"] and text["n"]:
-                        display_name = text["type"] + " " + text["n"]
-                    else:
-                        display_name = text["head"] or text["type"] or text["philo_name"] or text["philo_type"]
-                        if display_name == "__philo_virtual":
-                            display_name = text["philo_type"]
-            display_name = display_name[0].upper() + display_name[1:]
-            link = make_absolute_object_link(config, philo_id.split()[: philo_slices[philo_type]])
-            philo_id = " ".join(philo_id.split()[: philo_slices[philo_type]])
-            toc_element = {"philo_id": philo_id, "philo_type": philo_type, "label": display_name, "href": link}
-            text_hierarchy.append(toc_element)
+            display_name = text["head"]
+            if display_name:
+                display_name = display_name.strip()
+            if not display_name:
+                if text["type"] and text["n"]:
+                    display_name = text["type"] + " " + text["n"]
+                else:
+                    display_name = text["head"] or text["type"] or text["philo_name"] or text["philo_type"]
+                    if display_name == "__philo_virtual":
+                        display_name = text["philo_type"]
+        display_name = display_name[0].upper() + display_name[1:]
+        link = make_absolute_object_link(config, philo_id.split()[: philo_slices[philo_type]])
+        philo_id = " ".join(philo_id.split()[: philo_slices[philo_type]])
+        citation_hrefs = citation_links(db, config, text)
+        toc_element = {
+            "philo_id": philo_id,
+            "philo_type": philo_type,
+            "label": display_name,
+            "href": link,
+            "citation": citations(text, citation_hrefs, config, report="table_of_contents"),
+        }
+        text_hierarchy.append(toc_element)
     metadata_fields = {}
     for metadata in db.locals["metadata_fields"]:
         if db.locals["metadata_types"][metadata] == "doc":
             metadata_fields[metadata] = obj[metadata]
     citation_hrefs = citation_links(db, config, obj)
-    citation = citations(obj, citation_hrefs, config, report="table_of_contents")
+    citation = citations(obj, citation_hrefs, config, report="navigation")
     toc_object = {
-        "query": dict([i for i in request]),
+        "query": {k: v for k, v in request},
         "philo_id": obj.philo_id,
         "toc": text_hierarchy,
         "metadata_fields": metadata_fields,

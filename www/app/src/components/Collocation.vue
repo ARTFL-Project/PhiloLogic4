@@ -1,113 +1,60 @@
 <template>
-    <b-container fluid>
-        <div id="collocation-container" class="mt-4 ml-2 mr-2" v-if="authorized">
-            <b-card no-body class="shadow-sm px-3 py-2">
-                <div id="description">
-                    <b-button
-                        variant="outline-primary"
-                        size="sm"
-                        id="export-results"
-                        data-target="#export-dialog"
-                    >Export results</b-button>
-                    <search-arguments></search-arguments>
-                </div>
-                <b-progress
-                    :max="resultsLength"
-                    show-progress
-                    variant="secondary"
-                    class="ml-3 mr-3 mb-3"
-                    v-if="runningTotal != resultsLength"
-                >
-                    <b-progress-bar
-                        :value="runningTotal"
-                        :label="`${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
-                    ></b-progress-bar>
-                </b-progress>
-                <div class="pl-3">
-                    <span>
-                        <span tooltip tooltip-title="Click to display filtered words">
-                            The
-                            <a
-                                href
-                                @click="toggleFilterList()"
-                                v-if="colloc_filter_choice === 'frequency'"
-                            >{{ filter_frequency }} most common words</a>
-                            <a
-                                href
-                                @click="toggleFilterList()"
-                                v-if="colloc_filter_choice === 'stopwords'"
-                            >Common function words</a>
-                            <a
-                                href
-                                @click="toggleFilterList()"
-                                v-if="colloc_filter_choice === 'tfidf'"
-                            >{{ filter_frequency }} most highly weighted terms across the corpus</a>
-                            are being filtered from this report.
-                        </span>
-                    </span>
-                    <b-card
-                        no-body
-                        id="filter-list"
-                        class="pl-3 pr-3 pb-3 shadow-lg"
-                        data-velocity-opts="{duration: 200}"
-                        v-if="showFilteredWords"
-                    >
-                        <b-button class="close" @click="toggleFilterList()">
-                            <span aria-hidden="true">&times;</span>
-                        </b-button>
-                        <b-row class="mt-4">
-                            <b-col v-for="wordGroup in splittedFilterList" :key="wordGroup[0]">
-                                <b-list-group flush>
-                                    <b-list-group-item
-                                        v-for="word in wordGroup"
-                                        :key="word"
-                                    >{{ word }}</b-list-group-item>
-                                </b-list-group>
-                            </b-col>
-                        </b-row>
-                    </b-card>
-                </div>
-            </b-card>
-            <b-row class="mt-4">
-                <b-col cols="12" sm="4">
-                    <b-card no-body class="shadow-sm">
-                        <b-table
-                            hover
-                            striped
-                            borderless
-                            caption-top
-                            :items="sortedList"
-                            @row-clicked="collocTableClick"
-                        ></b-table>
-                    </b-card>
-                </b-col>
-                <b-col cols="12" sm="8">
-                    <b-card no-body class="p-3 shadow-sm">
-                        <div class="card-text">
-                            <span
-                                class="cloud-word"
-                                v-for="word in collocCloudWords"
-                                :key="word.word"
-                                :style="getWordCloudStyle(word)"
+    <div class="container-fluid mt-4" v-if="accessAuthorized">
+        <results-summary
+            :description="results.description"
+            :running-total="runningTotal"
+            :filter-list="filterList"
+        ></results-summary>
+        <div class="row mt-4 pe-1" style="padding: 0 0.5rem" v-if="resultsLength">
+            <div class="col-12 col-sm-4">
+                <div class="card shadow-sm">
+                    <table class="table table-hover table-striped table-borderless caption-top">
+                        <thead>
+                            <tr style="line-height: 2rem">
+                                <th scope="col">Collocate</th>
+                                <th scope="col">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                style="line-height: 2rem"
+                                v-for="word in sortedList"
+                                :key="word.collocate"
                                 @click="collocTableClick(word)"
-                            >{{ word.collocate}}</span>
-                        </div>
-                    </b-card>
-                </b-col>
-            </b-row>
-            <!-- <access-control v-if="!authorized"></access-control> -->
+                            >
+                                <td>{{ word.collocate }}</td>
+                                <td>{{ word.count }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-12 col-sm-8">
+                <div class="card p-3 shadow-sm">
+                    <div class="card-text">
+                        <span
+                            class="cloud-word"
+                            v-for="word in collocCloudWords"
+                            :key="word.word"
+                            :style="getWordCloudStyle(word)"
+                            @click="collocTableClick(word)"
+                            >{{ word.collocate }}</span
+                        >
+                    </div>
+                </div>
+            </div>
         </div>
-    </b-container>
+        <!-- <access-control v-if="!authorized"></access-control> -->
+    </div>
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
-import searchArguments from "./SearchArguments";
-import { EventBus } from "../main.js";
+import ResultsSummary from "./ResultsSummary";
 
 export default {
     name: "collocation",
     components: {
-        searchArguments
+        ResultsSummary,
     },
     computed: {
         ...mapFields([
@@ -117,9 +64,11 @@ export default {
             "formData.filter_frequency",
             "currentReport",
             "resultsLength",
-            "searching"
+            "searching",
+            "urlUpdate",
+            "accessAuthorized",
         ]),
-        colorCodes: function() {
+        colorCodes: function () {
             let colorCodes = {};
             let r = 45;
             let g = 184;
@@ -130,12 +79,11 @@ export default {
                 let gLocal = g - g * step * i;
                 let bLocal = b - b * step * i;
                 let opacityStep = i * 0.03;
-                colorCodes[i] = `rgba(${rLocal}, ${gLocal}, ${bLocal}, ${0.4 +
-                    opacityStep})`;
+                colorCodes[i] = `rgba(${rLocal}, ${gLocal}, ${bLocal}, ${0.4 + opacityStep})`;
             }
             return colorCodes;
         },
-        splittedFilterList: function() {
+        splittedFilterList: function () {
             let arrayLength = this.filterList.length;
             let chunkSize = arrayLength / 5;
             let splittedList = [];
@@ -144,7 +92,13 @@ export default {
                 splittedList.push(myChunk);
             }
             return splittedList;
-        }
+        },
+    },
+    inject: ["$http"],
+    provide() {
+        return {
+            results: this.results.results,
+        };
     },
     data() {
         return {
@@ -152,26 +106,25 @@ export default {
             results: {},
             filterList: [],
             searchParams: {},
-            authorized: true,
             moreResults: false,
             sortedList: [],
             showFilteredWords: false,
             runningTotal: 0,
-            collocCloudWords: []
+            collocCloudWords: [],
+            unboundListener: null,
         };
     },
     created() {
         this.report = "collocation";
         this.currentReport = "collocation";
         this.fetchResults();
-        EventBus.$on("urlUpdate", () => {
-            if (this.report == "collocation") {
+    },
+    watch: {
+        urlUpdate() {
+            if (this.$route.name == "collocation") {
                 this.fetchResults();
             }
-        });
-    },
-    beforeDestroy() {
-        EventBus.$off("urlUpdate");
+        },
     },
     methods: {
         fetchResults() {
@@ -186,31 +139,30 @@ export default {
         updateCollocation(fullResults, start) {
             let params = {
                 ...this.$store.state.formData,
-                start: start.toString()
+                start: start.toString(),
             };
             this.$http
                 .get(`${this.$dbUrl}/reports/collocation.py`, {
-                    params: this.paramsFilter(params)
+                    params: this.paramsFilter(params),
                 })
-                .then(response => {
+                .then((response) => {
                     var data = response.data;
                     this.resultsLength = data.results_length;
                     this.moreResults = data.more_results;
                     this.runningTotal = data.hits_done;
                     start = data.hits_done;
                     this.searching = false;
-                    this.sortAndRenderCollocation(fullResults, data, start);
+                    if (this.resultsLength) {
+                        this.sortAndRenderCollocation(fullResults, data, start);
+                    }
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.searching = false;
                     this.debug(this, error);
                 });
         },
         sortAndRenderCollocation(fullResults, data, start) {
-            if (
-                typeof fullResults === "undefined" ||
-                Object.keys(fullResults).length === 0
-            ) {
+            if (typeof fullResults === "undefined" || Object.keys(fullResults).length === 0) {
                 fullResults = {};
                 this.filterList = data.filter_list;
             }
@@ -224,10 +176,7 @@ export default {
             if (this.moreResults) {
                 var tempFullResults = collocates.unsorted;
                 var runningQuery = this.$store.state.formData;
-                if (
-                    this.report === "collocation" &&
-                    this.deepEqual(runningQuery, this.localFormData)
-                ) {
+                if (this.report === "collocation" && this.deepEqual(runningQuery, this.localFormData)) {
                     // make sure we're still running the same query
                     this.updateCollocation(tempFullResults, start);
                 }
@@ -253,7 +202,7 @@ export default {
                     ...this.$store.state.formData,
                     report: "concordance",
                     q: `${this.q} "${item.collocate}"`,
-                    method: "cooc"
+                    method: "cooc",
                 })
             );
         },
@@ -263,7 +212,7 @@ export default {
             let diff = higestValue - lowestValue;
             let coeff = diff / 20;
 
-            var adjustWeight = function(count) {
+            var adjustWeight = function (count) {
                 let adjustedCount = count - lowestValue;
                 let adjustedWeight = Math.round(adjustedCount / coeff);
                 adjustedWeight = parseInt(adjustedWeight);
@@ -273,31 +222,21 @@ export default {
             let weightedWordList = [];
             for (let wordObject of this.sortedList) {
                 let adjustedWeight = adjustWeight(wordObject.count);
-                // console.log(adjustedWeight);
                 weightedWordList.push({
                     collocate: wordObject.collocate,
                     weight: 1 + adjustedWeight / 10,
-                    color: this.colorCodes[adjustedWeight]
+                    color: this.colorCodes[adjustedWeight],
                 });
             }
-            weightedWordList.sort(function(a, b) {
+            weightedWordList.sort(function (a, b) {
                 return a.collocate.localeCompare(b.collocate);
             });
             this.collocCloudWords = weightedWordList;
         },
         getWordCloudStyle(word) {
-            // console.log(word.color, word.word);
             return `font-size: ${word.weight}rem; color: ${word.color}`;
         },
-        toggleFilterList() {
-            event.preventDefault();
-            if (this.showFilteredWords == true) {
-                this.showFilteredWords = false;
-            } else {
-                this.showFilteredWords = true;
-            }
-        }
-    }
+    },
 };
 </script>
 <style scoped>
@@ -307,6 +246,8 @@ export default {
 #export-results {
     position: absolute;
     right: 0;
+    padding: 0.125rem 0.25rem;
+    font-size: 0.8rem !important;
 }
 .cloud-word {
     display: inline-block;
@@ -325,6 +266,13 @@ export default {
 #filter-list .list-group-item {
     border-width: 0px;
     padding: 0.1rem;
+}
+#close-filter-list {
+    width: fit-content;
+    float: right;
+    padding: 0 0.2rem;
+    position: absolute;
+    right: 0;
 }
 </style>
 

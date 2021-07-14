@@ -40,6 +40,10 @@ try:
     from custom_functions import generate_time_series
 except ImportError:
     from philologic.runtime import generate_time_series
+try:
+    from custom_functions import aggregation_by_field
+except ImportError:
+    from philologic.runtime import aggregation_by_field
 
 
 TAGS = re.compile(r"<[^>]+>")
@@ -75,6 +79,8 @@ def export_results(environ, start_response):
         results_object = collocation_results(request, config)["collocates"]
     elif request.report == "time_series":
         results_object = generate_time_series(request, config)["results"]
+    elif request.report == "aggregation":
+        results_object = aggregation_by_field(request, config)["results"]
 
     if request.output_format == "json":
         status = "200 OK"

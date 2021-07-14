@@ -34,7 +34,6 @@ def query(
     parsed = parse_query(terms)
     grouped = group_terms(parsed)
     split = split_terms(grouped)
-
     words_per_hit = len(split)
     origpid = os.getpid()
     if not filename:
@@ -64,7 +63,6 @@ def query(
             if method and method_arg:
                 args.extend(("-m", method, "-a", str(method_arg)))
             args.extend(("-o", "binary", db.path))
-
             worker = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=hl, stderr=err, env=os.environ)
             # worker2 = subprocess.Popen("head -c 1", stdin=subprocess.PIPE, stdout=worker.stdin, stderr=err)
 
@@ -143,9 +141,6 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
 
         # find all the NOT terms and separate them out by type
         exclude = []
-        term_exclude = []
-        quote_exclude = []
-
         for i, g in enumerate(group):
             kind, token = g
             if kind == "NOT":

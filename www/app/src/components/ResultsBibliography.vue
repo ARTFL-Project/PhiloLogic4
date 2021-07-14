@@ -1,13 +1,25 @@
 <template>
-    <ul id="results-bibliography">
-        <li class="result" v-for="(result, resultIndex) in uniquedResults" :key="resultIndex">
-            <citations :citation="result.citation"></citations>&nbsp;:
-            <router-link
-                class="ml-2"
-                :to="`/${report}?${buildLink(result.metadata_fields.title)}`"
-            >{{ result.count }} occurrence(s)</router-link>
-        </li>
-    </ul>
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="biblio-modal-title">Bibliography of results on this page</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul id="results-bibliography">
+                    <li class="result" v-for="(result, resultIndex) in uniquedResults" :key="resultIndex">
+                        <citations :citation="result.citation"></citations>
+                        <br />
+                        <router-link :to="`/${report}?${buildLink(result.metadata_fields.title)}`">
+                            <button type="button" class="btn rounded-pill btn-secondary btn-sm">
+                                {{ result.count }} occurrence(s)
+                            </button>
+                        </router-link>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </template>
 <script>
 import citations from "./Citations";
@@ -16,40 +28,53 @@ import { mapFields } from "vuex-map-fields";
 export default {
     name: "ResultsBibliography",
     components: { citations },
-    props: ["results"],
+    inject: ["results"],
     computed: {
         ...mapFields(["formData.report"]),
         uniquedResults() {
-            let uniqueResults = [];
-            let previousFilename = "";
-            for (let result of this.results) {
-                if (result.metadata_fields.filename == previousFilename) {
-                    uniqueResults[uniqueResults.length - 1].count++;
-                    continue;
-                }
-                result = this.copyObject(result);
-                let citation = [];
-                for (let i = 0; i < result.citation.length; i++) {
-                    if (result.citation[i].object_type == "doc") {
-                        citation.push(result.citation[i]);
+            //TODO: We should provide the object level of hits. This is a HACK.
+            if (
+                typeof results != "undefined" &&
+                typeof this.results[0] != "undefined" &&
+                typeof this.results[0].citation != "undefined"
+            ) {
+                // time series sends a results object which is incompatible
+                let objectLevel = this.results[0].citation[0].object_type;
+                let uniqueResults = [];
+                let previousPhiloId = "";
+                for (let result of this.results) {
+                    if (result.metadata_fields[`philo_${objectLevel}_id`] == previousPhiloId) {
+                        uniqueResults[uniqueResults.length - 1].count++;
+                        continue;
                     }
+                    result = this.copyObject(result);
+                    let citation = [];
+                    for (let i = 0; i < result.citation.length; i++) {
+                        if (result.citation[i].object_type == objectLevel) {
+                            citation.push(result.citation[i]);
+                        }
+                    }
+                    result.citation = citation;
+                    result.count = 1;
+                    uniqueResults.push(result);
+                    previousPhiloId = result.metadata_fields[`philo_${objectLevel}_id`];
                 }
-                result.citation = citation;
-                result.count = 1;
-                uniqueResults.push(result);
-                previousFilename = result.metadata_fields.filename;
+                return uniqueResults;
+            } else {
+                return [];
             }
-            return uniqueResults;
-        }
+        },
     },
     methods: {
         buildLink(title) {
             return this.paramsToUrlString({
                 ...this.$store.state.formData,
-                title: `"${title}"`
+                title: `"${title}"`,
+                start: 1,
+                end: this.$store.state.formData,
             });
-        }
-    }
+        },
+    },
 };
 </script>
 <style scoped>
