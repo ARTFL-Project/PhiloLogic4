@@ -40,10 +40,11 @@ export default {
             initialLoad: true,
             clientIp: "",
             domainName: "",
+            accessAuthorized: true,
         };
     },
     computed: {
-        ...mapFields(["formData.report", "formData.q", "urlUpdate", "accessAuthorized"]),
+        ...mapFields(["formData.report", "formData.q", "urlUpdate"]),
         defaultFieldValues() {
             let localFields = {
                 report: "home",

@@ -8,7 +8,7 @@
                     <form
                         @submit.prevent
                         @reset="onReset"
-                        @keyup.enter="onSubmit()"
+                        @keyup.enter="submit()"
                         id="password-access"
                         class="mt-4 p-2"
                     >
@@ -44,6 +44,7 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="text-danger pb-3" v-if="incorrectLogin">Incorrect login, please try again.</div>
                         <div class="row">
                             <div class="cols-12">
                                 <div class="btn-group" role="group">
@@ -85,17 +86,15 @@
 </template>
 <script>
 import { ref, inject } from "vue";
-import { useStore } from "vuex";
 
 export default {
     props: ["clientIp", "domainName"],
     setup() {
         let accessDenied = ref(false);
+        let incorrectLogin = ref(false);
         let accessInput = { username: "", password: "" };
         let http = inject("$http");
         let dbUrl = inject("$dbUrl");
-
-        const store = useStore();
 
         function submit() {
             http.get(
@@ -105,16 +104,16 @@ export default {
             ).then((response) => {
                 let authorization = response.data;
                 if (authorization.access) {
-                    store.commit("updateAccess", true);
+                    location.reload();
                 } else {
-                    store.commit("updateAccess", false);
+                    incorrectLogin = true;
                 }
             });
         }
         function reset() {
             accessInput = { username: "", password: "" };
         }
-        return { accessDenied, accessInput, submit, reset };
+        return { accessDenied, accessInput, incorrectLogin, submit, reset };
     },
 };
 </script>

@@ -38,7 +38,6 @@ export default new Vuex.Store({
         showFacets: true,
         urlUpdate: "",
         metadataUpdate: {},
-        accessAuthorized: true
     },
     getters: {
         getField
@@ -71,9 +70,6 @@ export default new Vuex.Store({
         updateResultsLength(state, payload) {
             state.resultsLength = payload
         },
-        updateAccess(state, payload) {
-            state.accessAuthorized = payload
-        }
     },
     actions: {
         updateStartEndDate(context, payload) {
