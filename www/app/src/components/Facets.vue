@@ -316,6 +316,7 @@ export default {
                     url: resultObj.url,
                     label: label,
                     total_count: resultObj.total_word_count,
+                    metadata: resultObj.metadata,
                 };
             }
             this.fullRelativeFrequencies = relativeResults;

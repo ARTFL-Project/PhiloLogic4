@@ -15,7 +15,7 @@
                         <h5 v-if="!accessDenied" class="mt-2 mb-3">
                             If you have a username and password, please enter them here:
                         </h5>
-                        <h5 class="text-danger" v-if="accessDenied">
+                        <h5 class="text-danger" v-if="incorrectLogin">
                             Your username or password don't match. Please try again.
                         </h5>
                         <div class="row mb-3">
