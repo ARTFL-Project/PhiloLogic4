@@ -18,6 +18,7 @@ axios
         app.config.globalProperties.$scrollTo = vueScrollTo.scrollTo
         app.config.globalProperties.$dbUrl = appConfig.dbUrl
         app.provide("$http", axios)
+        app.provide("$dbUrl", appConfig.dbUrl)
         app.use(router)
         app.use(store)
         app.mixin({

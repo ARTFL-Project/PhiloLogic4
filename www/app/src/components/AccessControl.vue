@@ -1,113 +1,126 @@
 <template>
-    <b-container fluid>
+    <div class="container-fluid mt-4">
         <div id="access-control-container" class="mt-4">
-            <b-card
-                class="text-center mt-4 shadow"
-                title="Access Restricted to ARTFL subscribing institutions"
-                title-tag="h3"
-                sub-title="Please read the following below"
-            >
-                <b-form
-                    @submit.prevent
-                    @reset="reset()"
-                    @keyup.enter="submit()"
-                    id="password-access"
-                    class="mt-4 p-4"
-                    style="text-align: justify"
-                >
-                    <h5 v-if="!accessDenied" class="mt-2 mb-3">
-                        If you have a username and password, please enter them here:
-                    </h5>
-                    <h5 class="text-danger" v-if="accessDenied">
-                        Your username or password don't match. Please try again.
-                    </h5>
-                    <b-row class="mb-3">
-                        <b-col cols="12" sm="6" md="5" lg="4">
-                            <b-input-group prepend="Username">
-                                <b-form-input v-model="accessInput.username"></b-form-input>
-                            </b-input-group>
-                        </b-col>
-                    </b-row>
-                    <b-row class="mb-3">
-                        <b-col cols="12" sm="6" md="5" lg="4">
-                            <b-input-group prepend="Password">
-                                <b-form-input v-model="accessInput.password"></b-form-input>
-                            </b-input-group>
-                        </b-col>
-                    </b-row>
-                    <b-row>
-                        <b-col cols="12">
-                            <b-button-group>
-                                <b-button @click="submit">Submit</b-button>
-                                <b-button type="reset" variant="danger" @click="reset">Reset</b-button>
-                            </b-button-group>
-                        </b-col>
-                    </b-row>
-                </b-form>
-                <b-card class="mt-4 p4">
-                    <p>
-                        Please
-                        <a href="http://artfl-project.uchicago.edu/node/24">contact ARTFL</a>
-                        for more information or to have your computer enabled if your institution is an
-                        <a href="http://artfl-project.uchicago.edu/node/2">ARTFL subscriber</a>
-                    </p>
-                    <p>
-                        If you belong to a subscribing institution and are attempting to access ARTFL from your Internet
-                        Service Provider, please note that you should use your institution's
-                        <b>proxy server</b> and should contact your networking support office. Your proxy server must be
-                        configured to include <tt>{{ domainName }}</tt> to access this database.
-                    </p>
-                    <p>
-                        Please consult
-                        <a href="http://artfl-project.uchicago.edu/node/14">Subscription Information</a> to see how your
-                        institution can gain access to ARTFL resources.
-                    </p>
-                    <p ng-if="access.clientIp">
-                        Requesting Computer Address:
-                        <tt>{{ clientIp }}</tt>
-                    </p>
-                </b-card>
-            </b-card>
+            <div class="card mt-4 shadow" sub-title="Please read the following below">
+                <div class="card-body">
+                    <h3 class="card-title text-center">Access Restricted to ARTFL subscribing institutions</h3>
+                    <h6 class="card-subtitle mb-2 text-muted text-center">Please read the following below</h6>
+                    <form
+                        @submit.prevent
+                        @reset="onReset"
+                        @keyup.enter="onSubmit()"
+                        id="password-access"
+                        class="mt-4 p-2"
+                    >
+                        <h5 v-if="!accessDenied" class="mt-2 mb-3">
+                            If you have a username and password, please enter them here:
+                        </h5>
+                        <h5 class="text-danger" v-if="accessDenied">
+                            Your username or password don't match. Please try again.
+                        </h5>
+                        <div class="row mb-3">
+                            <div class="cols-12 cols-sm-6 cols-md-5 cols-lg-4">
+                                <div class="input-group">
+                                    <button type="button" class="btn btn-outline-secondary">Username</button>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        style="max-width: 300px"
+                                        v-model="accessInput.username"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="cols-12 cols-sm-6 cols-md-5 cols-lg-4">
+                                <div class="input-group">
+                                    <button type="button" class="btn btn-outline-secondary">Password</button>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        style="max-width: 300px"
+                                        v-model="accessInput.password"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="cols-12">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-secondary" @click="submit">
+                                        Submit
+                                    </button>
+                                    <button type="reset" class="btn btn-danger" @click="reset">Reset</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="card mt-4 p-3 shadow-sm" style="font-size: 1.1rem">
+                        <p>
+                            Please
+                            <a href="http://artfl-project.uchicago.edu/node/24">contact ARTFL</a>
+                            for more information or to have your computer enabled if your institution is an
+                            <a href="http://artfl-project.uchicago.edu/node/2">ARTFL subscriber</a>
+                        </p>
+                        <p>
+                            If you belong to a subscribing institution and are attempting to access ARTFL from your
+                            Internet Service Provider, please note that you should use your institution's
+                            <b>proxy server</b> and should contact your networking support office. Your proxy server
+                            must be configured to include <code>{{ domainName }}</code> to access this database.
+                        </p>
+                        <p>
+                            Please consult
+                            <a href="http://artfl-project.uchicago.edu/node/14">Subscription Information</a> to see how
+                            your institution can gain access to ARTFL resources.
+                        </p>
+                        <p ng-if="access.clientIp">
+                            Requesting Computer Address:
+                            <code>{{ clientIp }}</code>
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-    </b-container>
+    </div>
 </template>
 <script>
-import { mapFields } from "vuex-map-fields";
+import { ref, inject } from "vue";
+import { useStore } from "vuex";
 
 export default {
-    name: "AccessControl",
-    computed: {
-        ...mapFields(["accessAuthorized"]),
-    },
     props: ["clientIp", "domainName"],
-    inject: ["$http"],
-    data() {
-        return {
-            accessInput: { username: "", password: "" },
-            accessDenied: false,
-        };
-    },
-    created() {},
-    methods: {
-        submit() {
-            this.$http
-                .get(
-                    `${this.$dbUrl}/scripts/access_request.py?username=${encodeURIComponent(
-                        this.accessInput.username
-                    )}&password=${encodeURIComponent(this.accessInput.password)}`
-                )
-                .then((response) => {
-                    var authorization = response.data;
-                    if (authorization.access) {
-                        this.accessAuthorized = true;
-                    } else {
-                        this.accessAuthorized = false;
-                    }
-                });
-        },
-        reset() {
-            this.accessInput = { username: "", password: "" };
-        },
+    setup() {
+        let accessDenied = ref(false);
+        let accessInput = { username: "", password: "" };
+        let http = inject("$http");
+        let dbUrl = inject("$dbUrl");
+
+        const store = useStore();
+
+        function submit() {
+            http.get(
+                `${dbUrl}/scripts/access_request.py?username=${encodeURIComponent(
+                    accessInput.username
+                )}&password=${encodeURIComponent(accessInput.password)}`
+            ).then((response) => {
+                let authorization = response.data;
+                if (authorization.access) {
+                    store.commit("updateAccess", true);
+                } else {
+                    store.commit("updateAccess", false);
+                }
+            });
+        }
+        function reset() {
+            accessInput = { username: "", password: "" };
+        }
+        return { accessDenied, accessInput, submit, reset };
     },
 };
 </script>
+<style scoped>
+code {
+    color: #000;
+    font-weight: 700;
+}
+</style>

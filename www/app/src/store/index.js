@@ -70,6 +70,9 @@ export default new Vuex.Store({
         },
         updateResultsLength(state, payload) {
             state.resultsLength = payload
+        },
+        updateAccess(state, payload) {
+            state.accessAuthorized = payload
         }
     },
     actions: {
