@@ -47,11 +47,7 @@
                                     <citations :citation="result.citation"></citations>
                                 </span>
                             </div>
-                            <div
-                                class="pt-3 px-3 text-content"
-                                select-word
-                                :position="result.position"
-                            >
+                            <div class="pt-3 px-3 text-content" select-word :position="result.position">
                                 <div v-html="result.context"></div>
                             </div>
                         </div>
@@ -66,6 +62,7 @@
     </div>
 </template>
 <script>
+import { computed } from "vue";
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import ResultsSummary from "./ResultsSummary";
@@ -102,7 +99,7 @@ export default {
     inject: ["$http"],
     provide() {
         return {
-            results: this.results,
+            results: computed(() => this.results.results),
         };
     },
     data() {

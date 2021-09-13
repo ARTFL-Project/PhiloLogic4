@@ -70,6 +70,7 @@
 </template>
 
 <script>
+import { computed } from "vue";
 import { mapFields } from "vuex-map-fields";
 import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
@@ -125,7 +126,7 @@ export default {
     inject: ["$http"],
     provide() {
         return {
-            results: this.results,
+            results: computed(() => this.results.results),
         };
     },
     data() {

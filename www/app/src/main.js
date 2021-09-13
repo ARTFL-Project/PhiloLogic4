@@ -17,6 +17,7 @@ axios
         app.config.globalProperties.$philoConfig = response.data
         app.config.globalProperties.$scrollTo = vueScrollTo.scrollTo
         app.config.globalProperties.$dbUrl = appConfig.dbUrl
+        app.config.unwrapInjectedRef = true
         app.provide("$http", axios)
         app.provide("$dbUrl", appConfig.dbUrl)
         app.use(router)

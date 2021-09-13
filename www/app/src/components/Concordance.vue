@@ -60,6 +60,7 @@
 </template>
 
 <script>
+import { computed } from "vue";
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
 import ResultsSummary from "./ResultsSummary";
@@ -78,7 +79,7 @@ export default {
     inject: ["$http"],
     provide() {
         return {
-            results: this.results,
+            results: computed(() => this.results.results),
         };
     },
     computed: {
@@ -95,7 +96,7 @@ export default {
     data() {
         return {
             philoConfig: this.$philoConfig,
-            results: { description: { end: 0 } },
+            results: { description: { end: 0 }, results: [] },
             searchParams: {},
             unbindUrlUpdate: null,
             start: 1,
