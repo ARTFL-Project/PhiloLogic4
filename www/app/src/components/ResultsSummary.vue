@@ -178,6 +178,7 @@
 import searchArguments from "./SearchArguments";
 import ResultsBibliography from "./ResultsBibliography";
 import ExportResults from "./ExportResults";
+import { Modal } from "bootstrap";
 
 import { mapFields } from "vuex-map-fields";
 
@@ -247,19 +248,25 @@ export default {
         };
     },
     created() {
-        this.buildDescription();
-        if (["concordance", "kwic", "bibliography"].includes(this.report)) {
-            this.updateTotalResults();
-            this.getHitListStats();
-        }
-        if (this.report == "time_series") {
-            this.updateTotalResults();
-        }
+        this.updateDescriptions();
     },
     watch: {
-        $route: "buildDescription",
+        $route: "updateDescriptions",
     },
     methods: {
+        updateDescriptions() {
+            let modalEl = document.getElementById("results-bibliography");
+            if (modalEl) {
+                // hide modal if open
+                let modal = Modal.getOrCreateInstance(modalEl);
+                modal.hide();
+            }
+            this.buildDescription();
+            this.updateTotalResults();
+            if (["concordance", "kwic", "bibliography"].includes(this.report)) {
+                this.getHitListStats();
+            }
+        },
         buildDescription() {
             let start;
             let end;
@@ -293,30 +300,6 @@ export default {
             }
             return description;
         },
-        buildStatsDescription(stats) {
-            let statsDescription = [];
-            for (let stat of stats) {
-                let label = "";
-                if (stat.field in this.$philoConfig.metadata_aliases) {
-                    label = this.$philoConfig.metadata_aliases[stat.field].toLowerCase();
-                } else {
-                    label = stat.field;
-                }
-                statsDescription.push({
-                    label: label,
-                    field: stat.field,
-                    count: stat.count,
-                    link: this.paramsToUrlString({
-                        ...this.$store.state.formData,
-                        report: "aggregation",
-                        start: "",
-                        end: "",
-                        group_by: "",
-                    }),
-                });
-            }
-            return statsDescription;
-        },
         updateTotalResults() {
             let params = { ...this.$store.state.formData };
             if (this.report == "time_series") {
@@ -346,7 +329,28 @@ export default {
                 })
                 .then((response) => {
                     this.hitlistStatsDone = true;
-                    this.statsDescription = this.buildStatsDescription(response.data.stats);
+                    let statsDescription = [];
+                    for (let stat of response.data.stats) {
+                        let label = "";
+                        if (stat.field in this.$philoConfig.metadata_aliases) {
+                            label = this.$philoConfig.metadata_aliases[stat.field].toLowerCase();
+                        } else {
+                            label = stat.field;
+                        }
+                        statsDescription.push({
+                            label: label,
+                            field: stat.field,
+                            count: stat.count,
+                            link: this.paramsToUrlString({
+                                ...this.$store.state.formData,
+                                report: "aggregation",
+                                start: "",
+                                end: "",
+                                group_by: "",
+                            }),
+                        });
+                    }
+                    this.statsDescription = statsDescription;
                 })
                 .catch((error) => {
                     this.debug(this, error);

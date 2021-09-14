@@ -411,7 +411,6 @@
                 </div>
             </form>
         </div>
-
         <div class="d-flex justify-content-center position-relative" v-if="searching">
             <div
                 class="spinner-border"
@@ -663,6 +662,8 @@ export default {
                     start: "",
                     end: "",
                     byte: "",
+                    start_date: this.start_date,
+                    end_date: this.end_date,
                 })
             );
         },
