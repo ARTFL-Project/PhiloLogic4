@@ -399,6 +399,7 @@
                                         type="radio"
                                         class="btn-check"
                                         :id="`page-${resultsPerPage}`"
+                                        :value="`${resultsPerPage}`"
                                         v-model="results_per_page"
                                     />
                                     <label class="btn btn-secondary radio-group" :for="`page-${resultsPerPage}`">{{

@@ -215,7 +215,6 @@ export default {
             this.facet = facetObj;
             this.selectedFacet = facetObj;
             this.selected = facetObj.alias;
-            this.debug(this, this.$store.state.formData);
             let urlString = this.paramsToUrlString({
                 ...this.$store.state.formData,
                 frequency_field: facetObj.alias,
