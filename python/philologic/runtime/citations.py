@@ -6,7 +6,7 @@ from philologic.runtime.link import make_absolute_object_link, make_absolute_que
 
 
 def citation_links(db, config, i):
-    """ Returns links to a PhiloLogic object and all its ancestors."""
+    """Returns links to a PhiloLogic object and all its ancestors."""
     if config.skip_table_of_contents is False:
         doc_href = f"{make_absolute_object_link(config, i.philo_id[:1])}/table-of-contents"
     else:
@@ -49,7 +49,6 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=N
         if cite["label"]:
             cite["prefix"] = citation_object["prefix"]
             cite["suffix"] = citation_object["suffix"]
-            cite["separator"] = citation_object["separator"]
             cite["href"] = cite_linker(hit, citation_object, citation_hrefs, config, report)
             cite["style"] = citation_object["style"]
             cite["object_type"] = citation_object["object_level"]
