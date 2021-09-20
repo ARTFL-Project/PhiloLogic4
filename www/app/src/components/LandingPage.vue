@@ -1,6 +1,6 @@
 <template>
     <div id="landing-page-container" class="mt-5">
-        <div class="container-fluid" v-if="accessAuthorized">
+        <div class="container-fluid">
             <div class="landing-page-logo" :class="{ dictionary: dictionary }" v-if="logo">
                 <img style="max-height: 300px; width: auto" :src="logo" />
             </div>

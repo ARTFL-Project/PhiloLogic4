@@ -399,6 +399,7 @@
                                         type="radio"
                                         class="btn-check"
                                         :id="`page-${resultsPerPage}`"
+                                        :value="`${resultsPerPage}`"
                                         v-model="results_per_page"
                                     />
                                     <label class="btn btn-secondary radio-group" :for="`page-${resultsPerPage}`">{{
@@ -411,7 +412,6 @@
                 </div>
             </form>
         </div>
-
         <div class="d-flex justify-content-center position-relative" v-if="searching">
             <div
                 class="spinner-border"
@@ -663,6 +663,8 @@ export default {
                     start: "",
                     end: "",
                     byte: "",
+                    start_date: this.start_date,
+                    end_date: this.end_date,
                 })
             );
         },

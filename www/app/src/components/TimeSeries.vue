@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid">
-        <div id="time-series-container" class="mt-4 mx-2" v-if="accessAuthorized">
+        <div id="time-series-container" class="mt-4 mx-2">
             <results-summary :description="results.description" :running-total="runningTotal"></results-summary>
             <div class="card mt-4" id="time-series">
                 <div class="btn-group d-inline-block" role="group">
@@ -69,6 +69,7 @@ export default {
             relativeCounts: [],
             moreResults: false,
             done: false,
+            startDate: "",
             endDate: "",
             results: [],
             runningTotal: 0,
@@ -91,13 +92,14 @@ export default {
     },
     methods: {
         fetchResults() {
+            this.runningTotal = 0;
             if (this.interval == "") {
                 this.interval = this.$philoConfig.time_series.interval;
             }
             this.interval = parseInt(this.interval);
-            this.resultsLength = 0;
             this.frequencyType = "absolute_time";
             this.searching = true;
+            console.log("START", this.start_date);
             this.startDate = parseInt(this.start_date || this.$philoConfig.time_series_start_end_date.start_date);
             this.endDate = parseInt(this.end_date || this.$philoConfig.time_series_start_end_date.end_date);
             this.$store.dispatch("updateStartEndDate", {
@@ -134,10 +136,8 @@ export default {
                         {
                             label: "Absolute Frequency",
                             backgroundColor: "rgba(0, 160, 205, .6)",
-                            // borderColor: backgroundColor,
                             borderWidth: 1,
                             hoverBackgroundColor: "rgba(0, 160, 205, .8)",
-                            // hoverBorderColor: backgroundColor,
                             yAxisID: "absolute",
                             data: zeros,
                         },
@@ -155,7 +155,6 @@ export default {
                                 position: "left",
                                 id: "absolute",
                                 gridLines: {
-                                    // drawOnChartArea: false,
                                     offsetGridLines: true,
                                 },
                                 ticks: {
@@ -241,10 +240,8 @@ export default {
                     this.moreResults = timeSeriesResults.more_results;
                     this.startDate = timeSeriesResults.new_start_date;
                     for (let date in timeSeriesResults.results.date_count) {
-                        // Update date counts
                         this.dateCounts[date] = timeSeriesResults.results.date_count[date];
                     }
-                    this.percent = Math.floor((this.resultsLength / this.totalResults) * 100);
                     this.sortAndRenderTimeSeries(fullResults, timeSeriesResults);
                 })
                 .catch((response) => {
@@ -271,7 +268,7 @@ export default {
                 if (this.moreResults) {
                     this.updateTimeSeries(fullResults);
                 } else {
-                    this.percent = 100;
+                    this.runningTotal = this.resultsLength;
                     this.done = true;
                 }
             }

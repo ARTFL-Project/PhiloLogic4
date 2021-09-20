@@ -2,7 +2,7 @@
     <div id="app">
         <Header />
         <SearchForm v-if="accessAuthorized" />
-        <router-view v-if="accessAuthorized"></router-view>
+        <router-view v-if="accessAuthorized" />
         <access-control :client-ip="clientIp" :domain-name="domainName" v-if="!accessAuthorized" />
         <div class="container-fluid" v-if="accessAuthorized">
             <div class="text-center mb-4">
@@ -40,10 +40,11 @@ export default {
             initialLoad: true,
             clientIp: "",
             domainName: "",
+            accessAuthorized: true,
         };
     },
     computed: {
-        ...mapFields(["formData.report", "formData.q", "urlUpdate", "accessAuthorized"]),
+        ...mapFields(["formData.report", "formData.q", "urlUpdate"]),
         defaultFieldValues() {
             let localFields = {
                 report: "home",
@@ -118,9 +119,9 @@ export default {
     },
     created() {
         document.title = this.$philoConfig.dbname.replace(/<[^>]+>/, "");
+        this.accessAuthorized = this.$philoConfig.access_control ? false : true;
         if (this.$philoConfig.access_control) {
-            let promise = this.checkAccessAuthorization();
-            promise.then((response) => {
+            this.$http.get(`${this.$dbUrl}/scripts/access_request.py`).then((response) => {
                 this.accessAuthorized = response.data.access;
                 if (this.accessAuthorized) {
                     this.setupApp();
@@ -147,10 +148,6 @@ export default {
             this.$store.commit("setDefaultFields", this.defaultFieldValues);
             this.$store.commit("setReportValues", this.reportValues);
             this.formDataUpdate();
-        },
-        checkAccessAuthorization() {
-            let promise = this.$http.get(`${this.$dbUrl}/scripts/access_request.py`);
-            return promise;
         },
         formDataUpdate() {
             let localParams = this.copyObject(this.defaultFieldValues);

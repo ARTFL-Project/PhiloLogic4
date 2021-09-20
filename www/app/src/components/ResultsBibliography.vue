@@ -34,7 +34,7 @@ export default {
         uniquedResults() {
             //TODO: We should provide the object level of hits. This is a HACK.
             if (
-                typeof results != "undefined" &&
+                typeof this.results != "undefined" &&
                 typeof this.results[0] != "undefined" &&
                 typeof this.results[0].citation != "undefined"
             ) {

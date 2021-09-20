@@ -13,8 +13,6 @@ const aggregation = () => import("../components/Aggregation");
 import appConfig from '../../appConfig.json'
 
 
-// Vue.use(Router)
-
 const router = createRouter({
     history: createWebHistory(appConfig.dbUrl.replace(/https?:\/\/[^/]+\//, "")),
     routes: [{

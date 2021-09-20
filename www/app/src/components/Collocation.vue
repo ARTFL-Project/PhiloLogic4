@@ -1,5 +1,5 @@
 <template>
-    <div class="container-fluid mt-4" v-if="accessAuthorized">
+    <div class="container-fluid mt-4">
         <results-summary
             :description="results.description"
             :running-total="runningTotal"
