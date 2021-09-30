@@ -241,7 +241,6 @@ export default {
     },
     watch: {
         $route() {
-            console.log(this.$route, this.report);
             if (this.$route.name == "textNavigation") {
                 this.destroyPopovers();
                 this.fetchText();

@@ -740,7 +740,7 @@ class Loader:
             os.system(f"rm -rf {self.workdir}")
 
     def write_db_config(self):
-        """ Write local variables used by libphilo"""
+        """Write local variables used by libphilo"""
         filename = self.destination + "/db.locals.py"
         metadata = [i for i in Loader.metadata_fields if i not in Loader.metadata_fields_not_found]
         db_values = {
@@ -753,13 +753,18 @@ class Loader:
         db_values["token_regex"] = self.token_regex
         db_values["default_object_level"] = self.default_object_level
         db_config = MakeDBConfig(filename, **db_values)
-        print(format_str(str(db_config), mode=FileMode()), file=open(filename, "w"))
+        with open(filename, "w") as db_file:
+            print(format_str(str(db_config), mode=FileMode()), file=db_file)
         print("wrote database info to %s." % (filename))
 
     def write_web_config(self):
-        """ Write configuration variables for the Web application"""
+        """Write configuration variables for the Web application"""
         dbname = os.path.basename(os.path.dirname(self.destination.rstrip("/")))
-        metadata = [i for i in Loader.metadata_fields if i not in self.metadata_fields_not_found]
+        metadata = [
+            i
+            for i in Loader.metadata_fields
+            if i not in self.metadata_fields_not_found and not i.startswith("philo_") and i != "filename"
+        ]
         config_values = {
             "dbname": dbname,
             "metadata": metadata,
@@ -779,12 +784,11 @@ class Loader:
             try:
                 if object_type != "div":
                     cursor.execute(
-                        'select %s from toms where philo_type="%s" and %s!="" limit 1' % (field, object_type, field)
+                        f'select {field} from toms where philo_type="{object_type}" and {field} !="" limit 1'
                     )
                 else:
                     cursor.execute(
-                        'select %s from toms where philo_type="div1" or philo_type="div2" or philo_type="div3" and %s!="" limit 1'
-                        % (field, field)
+                        f'select {field} from toms where philo_type="div1" or philo_type="div2" or philo_type="div3" and {field} !="" limit 1'
                     )
             except sqlite3.OperationalError:
                 continue
@@ -834,10 +838,6 @@ class Loader:
         with open(os.path.join(filename), "w") as output_file:
             print(format_str(str(web_config), mode=FileMode()), file=output_file)
         print(f"wrote Web application info to {filename}")
-
-        dbname = os.path.basename(os.path.dirname(self.destination.rstrip("/")))
-        with open(os.path.join(self.destination, "../app/appConfig.json"), "w") as appConfig:
-            json.dump({"dbUrl": os.path.join(self.url_root, f"{dbname}/")}, appConfig)
 
         print("Building Web Client Application...", end=" ", flush=True)
         web_app_path = os.path.join(self.destination, "../app")

@@ -80,8 +80,7 @@ export function mergeResults(fullResults, newData, sortKey) {
     if (typeof fullResults === 'undefined' || Object.keys(fullResults).length === 0) {
         fullResults = newData
     } else {
-        for (let key in newData) {
-            let value = newData[key]
+        for (let [key, value] in Object.entries(newData)) {
             if (typeof value.count !== 'undefined') {
                 if (key in fullResults) {
                     fullResults[key].count += value.count

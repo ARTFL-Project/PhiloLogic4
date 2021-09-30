@@ -294,12 +294,6 @@ export default {
                 }
             }
         },
-        mergeLists(list1, list2) {
-            for (var i = 0; i < list2.length; i += 1) {
-                list1.push(list2[i]);
-            }
-            return list1;
-        },
         recursiveLookup(hitsDone) {
             this.$http
                 .get(`${this.$dbUrl}/scripts/get_neighboring_words.py`, {
@@ -314,7 +308,7 @@ export default {
                     if (this.sortedResults.length === 0) {
                         this.sortedResults = response.data.results;
                     } else {
-                        this.sortedResults = this.mergeLists(this.sortedResults, response.data.results);
+                        this.sortedResults.push(...response.data.results);
                     }
                     if (hitsDone < this.resultsLength) {
                         this.recursiveLookup(hitsDone);
@@ -322,7 +316,7 @@ export default {
                         this.start = "0";
                         this.end = "0";
                         this.sortedKwicCache = {
-                            results: this.sortedResults,
+                            results: [...this.sortedResults],
                             queryParams: {
                                 ...this.$store.state.formData,
                                 start: "0",
