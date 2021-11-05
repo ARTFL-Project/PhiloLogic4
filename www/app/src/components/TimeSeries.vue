@@ -32,6 +32,7 @@
 import Chart from "chart.js/dist/Chart.min.js";
 import { mapFields } from "vuex-map-fields";
 import ResultsSummary from "./ResultsSummary";
+import variables from "../assets/styles/theme.scss";
 
 export default {
     name: "timeSeries",
@@ -135,9 +136,9 @@ export default {
                     datasets: [
                         {
                             label: "Absolute Frequency",
-                            backgroundColor: "rgba(0, 160, 205, .6)",
+                            backgroundColor: variables.color,
                             borderWidth: 1,
-                            hoverBackgroundColor: "rgba(0, 160, 205, .8)",
+                            hoverBackgroundColor: this.hexToRGBA(variables.color),
                             yAxisID: "absolute",
                             data: zeros,
                         },
@@ -284,6 +285,25 @@ export default {
                 this.frequencyType = frequencyType;
             }
             this.myBarChart.update();
+        },
+        hexToRGBA(h) {
+            let r = 0,
+                g = 0,
+                b = 0;
+
+            // 3 digits
+            if (h.length == 4) {
+                r = "0x" + h[1] + h[1];
+                g = "0x" + h[2] + h[2];
+                b = "0x" + h[3] + h[3];
+
+                // 6 digits
+            } else if (h.length == 7) {
+                r = "0x" + h[1] + h[2];
+                g = "0x" + h[3] + h[4];
+                b = "0x" + h[5] + h[6];
+            }
+            return "rgba(" + +r + "," + +g + "," + +b + ", .7)";
         },
     },
 };
