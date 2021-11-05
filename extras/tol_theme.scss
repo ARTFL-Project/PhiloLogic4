@@ -1,17 +1,19 @@
 // Theme colors
-$header-color: rgb(245, 219, 157);
-$button-color: rgba(143, 57, 49, .8);
-$button-color-active: rgb(143, 57, 49);
-$link-color: rgb(143, 57, 49);
+$header-color: rgb(103, 10, 10);
+$button-color: rgb(103, 10, 10);
+$button-color-active: rgb(256, 256, 256);
+$link-color: rgb(103, 10, 10);
 
 
 // Themed elements
 nav.navbar {
-    background-color: $header-color !important;
+    background-color: #fff !important;
 }
 $secondary: $button-color;
 .btn-secondary.active {
     background-color: $button-color-active !important;
+    color: $link-color !important;
+    border-color: $button-color !important;
 }
 .btn-outline-secondary.active {
     color: #fff !important;
@@ -27,7 +29,7 @@ a.btn-secondary {
 .number,
 .card-header {
     background-color: $header-color !important; 
-    color: $link-color !important;
+    color: #fff !important;
 }
 .input-group-text, .custom-control-input:checked ~ .custom-control-label::before, .custom-control-input:focus ~ .custom-control-label::before  {
     color: $link-color !important;
@@ -59,7 +61,6 @@ a.btn-secondary {
     border-color: $button-color !important;
     opacity: .5
 }
-
 :export {
     color: $link-color
 }

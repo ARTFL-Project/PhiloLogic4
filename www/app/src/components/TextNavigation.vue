@@ -1,5 +1,5 @@
 <template>
-    <div class="container-fluid mt-4" v-if="accessAuthorized">
+    <div class="container-fluid mt-4">
         <div class="row">
             <div class="col-8 offset-2">
                 <div id="object-title" class="text-center pt-4">
@@ -236,12 +236,11 @@ export default {
     },
     created() {
         this.report = "textNavigation";
-        this.fetchText();
         this.fetchToC();
+        this.fetchText();
     },
     watch: {
         $route() {
-            console.log(this.$route, this.report);
             if (this.$route.name == "textNavigation") {
                 this.destroyPopovers();
                 this.fetchText();

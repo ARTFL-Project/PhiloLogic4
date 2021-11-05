@@ -50,6 +50,7 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import ResultsSummary from "./ResultsSummary";
+import variables from "../assets/styles/theme.scss";
 
 export default {
     name: "collocation",
@@ -69,10 +70,22 @@ export default {
             "accessAuthorized",
         ]),
         colorCodes: function () {
+            let r = 0,
+                g = 0,
+                b = 0;
+            // 3 digits
+            if (this.cloudColor.length == 4) {
+                r = "0x" + this.cloudColor[1] + this.cloudColor[1];
+                g = "0x" + this.cloudColor[2] + this.cloudColor[2];
+                b = "0x" + this.cloudColor[3] + this.cloudColor[3];
+
+                // 6 digits
+            } else if (this.cloudColor.length == 7) {
+                r = "0x" + this.cloudColor[1] + this.cloudColor[2];
+                g = "0x" + this.cloudColor[3] + this.cloudColor[4];
+                b = "0x" + this.cloudColor[5] + this.cloudColor[6];
+            }
             let colorCodes = {};
-            let r = 45;
-            let g = 184;
-            let b = 255;
             var step = 0.03;
             for (let i = 0; i < 21; i += 1) {
                 let rLocal = r - r * step * i;
@@ -112,6 +125,7 @@ export default {
             runningTotal: 0,
             collocCloudWords: [],
             unboundListener: null,
+            cloudColor: variables.color,
         };
     },
     created() {
