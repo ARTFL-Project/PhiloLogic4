@@ -33,7 +33,7 @@ class HitList(object):
             self.sort_order = None
         self.raw = raw  # if true, this return the raw hitlist consisting of a list of philo_ids
         self.dbh = dbh
-        self.encoding = encoding or dbh.encoding
+        self.encoding = encoding or "utf-8"
         if method != "cooc":
             self.has_word_id = 1
             self.length = 7 + 2 * (words)
@@ -140,25 +140,6 @@ class HitList(object):
         if self.sort_order:
             for hit in self.sorted_hitlist:
                 yield HitWrapper(hit, self.dbh)
-        # elif self.raw is True:
-        #     iter_position = 0
-        #     self.seek(iter_position)
-        #     while iter_position < self.count:
-        #         # while iter_position >= len(self):
-        #         #     if self.done:
-        #         #         print(iter_position)
-        #         #         raise IndexError
-        #         #     # else:
-        #         #     #     time.sleep(0.05)
-        #         #     #     self.update()
-        #         # if iter_position != self.position:
-        #         offset = self.hitsize * iter_position
-        #         self.fh.seek(offset)
-        #         # self.position = iter_position
-        #         buffer = self.fh.read(self.hitsize)
-        #         # self.position += 1
-        #         yield struct.unpack(self.format, buffer)
-        #         iter_position += 1
         else:
             self.update()
             iter_position = 0
@@ -314,7 +295,7 @@ class NoHits(object):
         return ""
 
     def __iter__(self):
-        return ""
+        yield ""
 
     def finish(self):
         return

@@ -10,7 +10,6 @@ import unicodedata
 import lz4.frame
 import msgpack
 import multiprocess as mp
-import numpy as np
 from rapidjson import loads
 from scipy.sparse import csr_matrix, vstack
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer

@@ -3,7 +3,6 @@
 Calls all parsing functions and stores data in index"""
 
 import collections
-import json
 import math
 import os
 import pickle
