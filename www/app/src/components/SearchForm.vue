@@ -516,7 +516,6 @@ export default {
             metadataChoiceSelected: {},
             collocationOptions: [
                 { text: "Most Frequent Terms", value: "frequency" },
-                { text: "Least Distinctive Terms", value: "tfidf" },
                 { text: "Stopwords", value: "stopwords" },
                 { text: "No Filtering", value: "nofilter" },
             ],

@@ -118,10 +118,7 @@ def build_filter_list(request, config):
             return ["stopwords list not found"]
         filter_num = float("inf")
     else:
-        if request.colloc_filter_choice == "tfidf":
-            filter_file = config.db_path + "/data/frequencies/words_mean_tfidf"
-        else:
-            filter_file = config.db_path + "/data/frequencies/word_frequencies"
+        filter_file = config.db_path + "/data/frequencies/word_frequencies"
         if request.filter_frequency:
             filter_num = int(request.filter_frequency)
         else:
