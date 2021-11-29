@@ -8,7 +8,6 @@ import unicodedata
 
 
 from philologic.runtime.DB import DB
-from philologic.runtime.citations import citation_links, citations
 
 
 def landing_page_bibliography(request, config):
@@ -31,9 +30,9 @@ def landing_page_bibliography(request, config):
             hit_object["philo_id"] = "/".join([str(i) for i in hit.philo_id])
         doc_id = str(hit.philo_id[0]) + " 0 0 0 0 0 0"
         next_doc_id = str(hit.philo_id[0] + 1) + " 0 0 0 0 0 0"
-        c.execute('select rowid from toms where philo_id="%s"' % doc_id)
+        c.execute(f'select rowid from toms where philo_id="{doc_id}"')
         doc_row = c.fetchone()["rowid"]
-        c.execute('select rowid from toms where philo_id="%s"' % next_doc_id)
+        c.execute(f'select rowid from toms where philo_id="{next_doc_id}"')
         try:
             next_doc_row = c.fetchone()["rowid"]
         except TypeError:  # if this is the last doc, just get the last rowid in the table.
@@ -41,8 +40,7 @@ def landing_page_bibliography(request, config):
             next_doc_row = c.fetchone()[0]
         try:
             c.execute(
-                'select * from toms where rowid between %d and %d and head is not null and head !="" limit 1'
-                % (doc_row, next_doc_row)
+                f'select * from toms where rowid between {doc_row} and {next_doc_row} and head is not null and head !="" limit 1'
             )
         except sqlite3.OperationalError:  # no type field in DB
             c.execute(
@@ -57,13 +55,11 @@ def landing_page_bibliography(request, config):
             start_head = ""
         try:
             c.execute(
-                'select head from toms where rowid between %d and %d and head is not null and head !="" order by rowid desc limit 1'
-                % (doc_row, next_doc_row)
+                f'select head from toms where rowid between {doc_row} and {next_doc_row} and head is not null and head !="" order by rowid desc limit 1'
             )
         except sqlite3.OperationalError:  # no type field in DB
             c.execute(
-                'select head from toms where rowid between %d and %d and head is not null and head !="" order by rowid desc limit 1'
-                % (doc_row, next_doc_row)
+                f'select head from toms where rowid between {doc_row} and {next_doc_row} and head is not null and head !="" order by rowid desc limit 1'
             )
         try:
             end_head = c.fetchone()["head"]
@@ -80,7 +76,6 @@ def landing_page_bibliography(request, config):
 def group_by_range(request_range, request, config):
     db = DB(config.db_path + "/data/")
     metadata_queried = request.group_by_field
-    citation_types = json.loads(request.citation)
     is_date = False
     try:
         int(request_range[0])
@@ -124,9 +119,8 @@ def group_by_range(request_range, request, config):
         )
     content_type = metadata_queried
     query_range = set(range(ord(request_range[0]), ord(request_range[1]) + 1))  # Ordinal avoids unicode issues...
-    cursor.execute('select *, count(*) as count from toms where philo_type="doc" group by %s' % metadata_queried)
     try:
-        cursor.execute('select *, count(*) as count from toms where philo_type="doc" group by %s' % metadata_queried)
+        cursor.execute(f'select *, count(*) as count from toms where philo_type="doc" group by {metadata_queried}')
     except sqlite3.OperationalError:
         return json.dumps({"display_count": request.display_count, "content_type": content_type, "content": []})
     for doc in cursor:
@@ -157,7 +151,6 @@ def group_by_range(request_range, request, config):
                 content[initial] = {"prefix": initial, "results": []}
             content[initial]["results"].append(
                 {
-                    "prefix": initial,
                     "metadata": metadata,
                     "count": doc["count"],
                 }
@@ -173,17 +166,28 @@ def group_by_range(request_range, request, config):
 
 
 def group_by_metadata(request, config):
-    citation_types = json.loads(request.citation)
+    """Count result by metadata field"""
+    # citation_types = json.loads(request.citation)
     db = DB(config.db_path + "/data/")
+    metadata_fields_needed = [request.group_by_field, "philo_id"]
+    citations = []
+    for conf in config.default_landing_page_browsing:
+        if conf["group_by_field"] == request.group_by_field:
+            for citation in conf["citation"]:
+                citations.append(citation)
+                metadata_fields_needed.append(citation["field"])
+            break
     cursor = db.dbh.cursor()
-    query = """select * from toms where philo_type="doc" and %s=?""" % request.group_by_field
+    query = f"""select * from toms where philo_type="doc" and {request.group_by_field}=?"""
     cursor.execute(query, (request.query,))
     result_group = []
     for doc in cursor:
-        obj = db[doc["philo_id"]]
-        links = citation_links(db, config, obj)
-        citation = citations(obj, links, config, report="landing_page", citation_type=citation_types)
-        result_group.append({"metadata": get_all_metadata(db, doc), "citation": citation})
+        metadata = {m: doc[m] for m in metadata_fields_needed}
+        result_group.append(
+            {
+                "metadata": metadata,
+            }
+        )
     return json.dumps(
         {
             "display_count": request.display_count,
@@ -191,13 +195,3 @@ def group_by_metadata(request, config):
             "content": [{"prefix": request.query, "results": result_group}],
         }
     )
-
-
-def get_all_metadata(db, doc):
-    doc_metadata = {}
-    for metadata in db.locals.metadata_fields:
-        try:
-            doc_metadata[metadata] = doc[metadata] or "NA"
-        except IndexError:
-            doc_metadata[metadata] = "NA"
-    return doc_metadata

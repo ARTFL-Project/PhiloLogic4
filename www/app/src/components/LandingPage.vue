@@ -131,7 +131,7 @@
                                 <citations :citation="buildCitationObject(result.metadata, citations)"></citations>
                                 <span v-if="displayCount == 'true'">&nbsp;({{ result.count }})</span>
                             </li>
-                            <p class="pt-2 ps-3" v-if="group.results.length > 50">
+                            <p class="pt-2 ps-3" v-if="group.results.length > 100">
                                 <button type="button" class="btn btn-outline-secondary" @click="seeAll(groupIndex)">
                                     See all {{ group.results.length }} results
                                 </button>
@@ -217,20 +217,14 @@ export default {
                         display_count: browseType.display_count,
                         is_range: browseType.is_range,
                         query: range,
-                        citation: JSON.stringify(browseType.citation),
                     },
                 })
                 .then((response) => {
                     for (let i in response.data.content) {
-                        this.groupDisplay[i] = 50;
+                        this.groupDisplay[i] = 100;
                     }
-                    // if (browseType.group_by_field == "author") {
-                    //     this.resultGroups = this.groupByAuthor(response.data.content);
-                    // } else {
                     this.resultGroups = response.data.content;
                     this.citations = response.data.citations;
-                    // }
-
                     this.displayCount = response.data.display_count;
                     this.contentType = response.data.content_type;
                     this.loading = false;
@@ -278,39 +272,8 @@ export default {
                     citationObject.push({ ...citation, href: "", label: label });
                 }
             }
-            console.log(citationObject);
             return citationObject;
         },
-        // groupByAuthor(letterGroups) {
-        //     var groupedResults = [];
-        //     for (let group of letterGroups) {
-        //         var localGroup = [];
-        //         for (let i = 0; i < group.results.length; i += 1) {
-        //             const innerGroup = group.results[i];
-        //             const citations = innerGroup.citation;
-        //             let authorName = innerGroup.metadata.author;
-        //             let savedCitation = "";
-        //             for (let c = 0; c < citations.length; c += 1) {
-        //                 let citation = citations[c];
-        //                 if (citation.label == authorName) {
-        //                     savedCitation = citation;
-        //                     break;
-        //                 }
-        //             }
-        //             localGroup.push({
-        //                 metadata: innerGroup.metadata,
-        //                 citation: [savedCitation],
-        //                 count: innerGroup.count,
-        //                 normalized: innerGroup.normalized,
-        //             });
-        //         }
-        //         groupedResults.push({
-        //             prefix: group.prefix,
-        //             results: localGroup,
-        //         });
-        //     }
-        //     return groupedResults;
-        // },
         goToLetter(letter) {
             this.$router.push(`/bibliography?head=^${letter}.*`);
         },

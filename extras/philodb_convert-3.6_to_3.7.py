@@ -120,6 +120,13 @@ def update_toms(toms):
             conn.commit()
             cursor.execute("drop table toms")
             cursor.execute("alter table new_toms rename to toms")
+            for index in columns:
+                index_name = f"{index}_toms_index"
+                cursor.execute("create index if not exists %s on toms (%s)" % (index_name, index))
+                index_null_name = f"{index}_null_index"  # this is for hitlist stats queries which require indexing philo_id with null metadata values
+                cursor.execute(
+                    f"CREATE UNIQUE INDEX IF NOT EXISTS {index_null_name} ON toms(philo_id, {index}) WHERE {index} IS NULL"
+                )
             os.remove(toms + ".tmp")
 
 
@@ -155,17 +162,18 @@ if __name__ == "__main__":
         except sqlite3.OperationalError:
             update_toms(toms_path)
 
-    print("Dropping words table (make take a while)...", end=" ")
+    print("Dropping words table (make take a while)...", end=" ", flush=True)
     with sqlite3.connect(toms_path) as conn:
         cursor = conn.cursor()
         cursor.execute("DROP TABLE words")
-    print("Done.")
+    print("Done.", flush=True)
     sentence_table_generator = make_sentences_table(data_dir, toms_path)
     sentence_table_generator(None)
     with sqlite3.connect(toms_path) as conn:
         cursor = conn.cursor()
         cursor.execute("VACUUM")
 
+    exit()
     # Regenerate new WebConfig file
     old_config = load_module("old_config", os.path.join(philo_db + "/data/web_config.cfg"))
     start_date, end_date = get_time_series_dates(toms_path)
@@ -180,7 +188,7 @@ if __name__ == "__main__":
         "kwic_metadata_sorting_fields": old_config.kwic_metadata_sorting_fields,
         "kwic_bibliography_fields": old_config.kwic_bibliography_fields,
         "concordance_biblio_sorting": old_config.concordance_biblio_sorting,
-        "metadata_choice_values": old_config.metadata_dropdown_values,
+        # "metadata_choice_values": old_config.metadata_dropdown_values, #TODO: investigate why broken...
     }
     os.system(
         f'mv {os.path.join(philo_db + "/data/web_config.cfg")} {os.path.join(philo_db + "/data/web_config.cfg_old")}'
@@ -214,10 +222,26 @@ if __name__ == "__main__":
                 "page",
             )
         ]
+    metadata_hierarchy = old_db_locals.metadata_hierarchy
+    metadata_hierarchy[0].append("philo_doc_id")
+    metadata_hierarchy[1].append("philo_div1_id")
+    metadata_hierarchy[2].append("philo_div2_id")
+    metadata_hierarchy[3].append("philo_div3_id")
+    try:
+        metadata_hierarchy[4].append("philo_para_id")
+    except:
+        pass
     db_values = {
         "metadata_fields": metadata,
-        "metadata_hierarchy": old_db_locals.metadata_hierarchy,
-        "metadata_types": old_db_locals.metadata_types,
+        "metadata_hierarchy": metadata_hierarchy,
+        "metadata_types": {
+            **old_db_locals.metadata_types,
+            "philo_doc_id": "doc",
+            "philo_div1_id": "div1",
+            "philo_div2_id": "div2",
+            "philo_div3_id": "div3",
+            "philo_para_id": "para",
+        },
         "normalized_fields": old_db_locals.normalized_fields,
         "debug": False,
     }
