@@ -84,14 +84,7 @@ def group_by_range(request_range, request, config):
     except ValueError:
         pass
 
-    metadata_fields_needed = [metadata_queried, "philo_id"]
-    citations = []
-    for conf in config.default_landing_page_browsing:
-        if conf["group_by_field"] == metadata_queried:
-            for citation in conf["citation"]:
-                citations.append(citation)
-                metadata_fields_needed.append(citation["field"])
-            break
+    metadata_fields_needed, citations = get_fields_and_citations(request, config)
     cursor = db.dbh.cursor()
     content = {}
     if is_date:
@@ -169,14 +162,7 @@ def group_by_metadata(request, config):
     """Count result by metadata field"""
     # citation_types = json.loads(request.citation)
     db = DB(config.db_path + "/data/")
-    metadata_fields_needed = [request.group_by_field, "philo_id"]
-    citations = []
-    for conf in config.default_landing_page_browsing:
-        if conf["group_by_field"] == request.group_by_field:
-            for citation in conf["citation"]:
-                citations.append(citation)
-                metadata_fields_needed.append(citation["field"])
-            break
+    metadata_fields_needed, citations = get_fields_and_citations(request, config)
     cursor = db.dbh.cursor()
     query = f"""select * from toms where philo_type="doc" and {request.group_by_field}=?"""
     cursor.execute(query, (request.query,))
@@ -193,5 +179,18 @@ def group_by_metadata(request, config):
             "display_count": request.display_count,
             "content_type": request.group_by_field,
             "content": [{"prefix": request.query, "results": result_group}],
+            "citations": citations,
         }
     )
+
+
+def get_fields_and_citations(request, config):
+    metadata_fields_needed = [request.group_by_field, "philo_id"]
+    citations = []
+    for conf in config.default_landing_page_browsing:
+        if conf["group_by_field"] == request.group_by_field:
+            for citation in conf["citation"]:
+                citations.append(citation)
+                metadata_fields_needed.append(citation["field"])
+            break
+    return metadata_fields_needed, citations
