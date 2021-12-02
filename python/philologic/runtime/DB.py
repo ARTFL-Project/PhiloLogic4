@@ -35,6 +35,9 @@ class DB:
         self.width = width
         self.locals = Config(dbpath + "/db.locals.py", DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER)
         self.cached = cached
+        self.dbh = sqlite3.connect(self.path + "/toms.db", self.width)
+        self.dbh.text_factory = str
+        self.dbh.row_factory = sqlite3.Row
 
     def __getitem__(self, item):
         if self.width != 9:  # verify this isn't a page id
@@ -44,29 +47,12 @@ class DB:
         hit = [int(x) for x in hit_to_string(item, 9).split(" ")]
         return PageWrapper(hit, self)
 
-    def __getattr__(self, attr):
-        # We need to open DB only when accessed
-        # Useful when using a single instance of the DB class accross multiple processors
-        if attr == "dbh":
-            dbh = sqlite3.connect(self.path + "/toms.db", self.width)
-            dbh.text_factory = str
-            dbh.row_factory = sqlite3.Row
-            setattr(self, "dbh", dbh)
-            return self.dbh
-
     def get_id_lowlevel(self, item):
         """Retrieve text object metadata"""
         hit_s = hit_to_string(item, self.width)
         c = self.dbh.cursor()
         c.execute("SELECT * FROM toms WHERE philo_id=? LIMIT 1;", (hit_s,))
         return c.fetchone()
-
-    # def get_word(self, item):
-    #     """Retrieve word from words table"""
-    #     word_s = hit_to_string(item, self.width)
-    #     c = self.dbh.cursor()
-    #     c.execute("SELECT * FROM words WHERE philo_id=? LIMIT 1;", (word_s,))
-    #     return c.fetchone()
 
     def get_page(self, item):
         """Retrieve page data"""
@@ -88,7 +74,7 @@ class DB:
             return ""
 
     def get_all(self, philo_type="doc", sort_order=["rowid"], raw_results=False):
-        """ get all objects of type philo_type """
+        """get all objects of type philo_type"""
         hash = hashlib.sha1()
         hash.update(self.path.encode("utf8"))
         hash.update(philo_type.encode("utf8"))
@@ -113,7 +99,7 @@ class DB:
         sort_order=["rowid"],
         raw_results=False,
         get_word_count_field=None,
-        **metadata
+        **metadata,
     ):
         """query the PhiloLogic database"""
         method = method or "proxy"

@@ -6,7 +6,6 @@ from wsgiref.handlers import CGIHandler
 
 from philologic.runtime.DB import DB
 from philologic.runtime import kwic_hit_object, page_interval
-from philologic.utils import sort_list
 
 import sys
 
@@ -29,32 +28,54 @@ def get_sorted_kwic(environ, start_response):
     start_response(status, headers)
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("scripts", ""))
     db = DB(config.db_path + "/data/")
-    input_object = rapidjson.loads(environ["wsgi.input"].read().decode("utf8", "ignore"))
-    all_results = input_object["results"]
-    query_string = input_object["query_string"]
-    sort_keys = [i for i in input_object["sort_keys"] if i]
-    environ["QUERY_STRING"] = query_string
     request = WSGIHandler(environ, config)
-    sorted_hits = get_sorted_hits(
-        all_results, sort_keys, request, config, db, input_object["start"], input_object["end"]
-    )
+    sorted_hits = get_sorted_hits(request, config, db)
     yield rapidjson.dumps(sorted_hits).encode("utf8")
 
 
-def get_sorted_hits(all_results, sort_keys, request, config, db, start, end):
+def get_sorted_hits(request, config, db):
     hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
-    start, end, n = page_interval(request.results_per_page, hits, start, end)
+    start, end, _ = page_interval(request.results_per_page, hits, request.start, request.end)
     kwic_object = {
         "description": {"start": start, "end": end, "results_per_page": request.results_per_page},
         "query": dict([i for i in request]),
     }
-
+    if not os.path.exists(f"{request.cache_path}.sorted"):
+        with open(request.cache_path) as cache:
+            fields = cache.readline().strip().split("\t")
+        sort_order = []
+        if request.first_kwic_sorting_option:
+            key = fields.index(request.first_kwic_sorting_option) + 1
+            sort_order.append(f"-k {key},{key}")
+        if request.second_kwic_sorting_option:
+            key = fields.index(request.second_kwic_sorting_option) + 1
+            sort_order.append(f"-k {key},{key}")
+        if request.third_kwic_sorting_option:
+            key = fields.index(request.third_kwic_sorting_option) + 1
+            sort_order.append(f"-k {key},{key}")
+        sort_order = " ".join(sort_order)
+        print(
+            f"sort {sort_order} {request.cache_path} > {request.cache_path}.sorted && rm {request.cache_path}",
+            file=sys.stderr,
+            flush=True,
+        )
+        os.system(
+            f"sort {sort_order} {request.cache_path} > {request.cache_path}.sorted && rm {request.cache_path}"
+        )  # no numeric sort since we would have to know the type of the field being sorted on: e.g. -k 2,2n
     kwic_results = []
-    print(all_results[0], sort_keys, file=sys.stderr)
-    for index in sort_list(all_results, sort_keys)[start:end]:
-        hit = hits[index["index"]]
-        kwic_result = kwic_hit_object(hit, config, db)
-        kwic_results.append(kwic_result)
+    with open(f"{request.cache_path}.sorted") as sorted_results:
+        for line_number, line in enumerate(sorted_results):
+            if line_number < start:
+                continue
+            if line_number > end:
+                break
+            try:
+                index = int(line.split("\t")[0])
+            except ValueError:  # we've hit the field name rather than value
+                continue
+            hit = hits[index]
+            kwic_result = kwic_hit_object(hit, config, db)
+            kwic_results.append(kwic_result)
 
     kwic_object["results"] = kwic_results
     kwic_object["results_length"] = len(hits)

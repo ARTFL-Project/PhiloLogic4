@@ -2,9 +2,7 @@
 """Collocation results"""
 
 import os
-import re
 import timeit
-import sqlite3
 from collections import defaultdict
 import string
 import msgpack
@@ -61,7 +59,6 @@ def collocation_results(request, config):
     cursor = db.dbh.cursor()
     start_time = timeit.default_timer()
     for hit in hits[hits_done:]:
-        # start_byte = extract_bytes(hit)[0]
         sentence = " ".join(map(str, hit[:6])) + " 0"
         cursor.execute("SELECT words FROM sentences WHERE philo_id = ?", (sentence,))
         words = msgpack.loads(lz4.frame.decompress(cursor.fetchone()[0]))
@@ -118,10 +115,7 @@ def build_filter_list(request, config):
             return ["stopwords list not found"]
         filter_num = float("inf")
     else:
-        if request.colloc_filter_choice == "tfidf":
-            filter_file = config.db_path + "/data/frequencies/words_mean_tfidf"
-        else:
-            filter_file = config.db_path + "/data/frequencies/word_frequencies"
+        filter_file = config.db_path + "/data/frequencies/word_frequencies"
         if request.filter_frequency:
             filter_num = int(request.filter_frequency)
         else:

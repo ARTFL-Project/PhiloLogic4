@@ -6,7 +6,7 @@ import sys
 from collections import namedtuple
 
 import lz4.frame
-from philologic.loadtime.PostFilters import make_sentences_table, tfidf_per_word
+from philologic.loadtime.PostFilters import make_sentences_table
 from philologic.runtime.DB import DB
 from philologic.Config import MakeWebConfig, MakeDBConfig
 from philologic.utils import load_module
@@ -79,6 +79,57 @@ def generate_words_and_philo_ids(db_path):
     print("Regenerating words_and_philo_ids files... done.")
 
 
+def update_toms(toms):
+    """Update toms to add object_id values"""
+    print("Adding ids in toms db for:", flush=True, end=" ")
+    obj_levels = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
+    with sqlite3.connect(toms) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("select count(*) from toms")
+        count = cursor.fetchone()[0]
+        cursor.execute("pragma table_info(toms)")
+        ids_to_add = [
+            "philo_doc_id",
+            "philo_div1_id",
+            "philo_div2_id",
+            "philo_div3_id",
+            "philo_para_id",
+        ]
+        original_columns = [r[1] for r in cursor]
+        columns = original_columns + ids_to_add
+        cursor.execute(f"create table new_toms ({','.join(columns)})")
+        cursor.execute("select * from toms")
+        with open(toms + ".tmp", "w") as outfile:
+            for row in cursor:
+                print("\t".join(map(str, row)), file=outfile)
+        with tqdm(total=count, leave=True) as pbar:
+            with open(toms + ".tmp") as infile:
+                for line in infile:
+                    row = dict(zip(original_columns, line.split("\t")))
+                    object_level = row["philo_type"]
+                    philo_obj_id = " ".join(row["philo_id"].split()[: obj_levels[object_level]])
+                    ids = [None, None, None, None, None]
+                    ids[obj_levels[object_level] - 1] = philo_obj_id
+                    values = tuple(list(row.values()) + ids)
+                    cursor.execute(
+                        f"insert into new_toms ({','.join(columns)}) values ({','.join(['?' for _ in range(len(values))])})",
+                        values,
+                    )
+                    pbar.update()
+            conn.commit()
+            cursor.execute("drop table toms")
+            cursor.execute("alter table new_toms rename to toms")
+            for index in columns:
+                index_name = f"{index}_toms_index"
+                cursor.execute("create index if not exists %s on toms (%s)" % (index_name, index))
+                index_null_name = f"{index}_null_index"  # this is for hitlist stats queries which require indexing philo_id with null metadata values
+                cursor.execute(
+                    f"CREATE UNIQUE INDEX IF NOT EXISTS {index_null_name} ON toms(philo_id, {index}) WHERE {index} IS NULL"
+                )
+            os.remove(toms + ".tmp")
+
+
 def get_time_series_dates(toms):
     # Find default start and end dates for times series
     with sqlite3.connect(toms_path) as conn:
@@ -87,11 +138,11 @@ def get_time_series_dates(toms):
         min_year, max_year = cursor.fetchone()
         try:
             start_date = int(min_year)
-        except TypeError:
-            start_date: 0
+        except (TypeError, ValueError):
+            start_date = 0
         try:
             end_date = int(max_year)
-        except TypeError:
+        except (TypeError, ValueError):
             end_date = 2100
     return start_date, end_date
 
@@ -104,22 +155,26 @@ if __name__ == "__main__":
     os.environ["SQLITE_TMPDIR"] = data_dir
     generate_words_and_philo_ids(data_dir)
     toms_path = os.path.join(philo_db, "data/toms.db")
-    print("Dropping words table (make take a while)...", end=" ")
+    with sqlite3.connect(toms_path) as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute("select philo_doc_id from toms limit 1")
+        except sqlite3.OperationalError:
+            update_toms(toms_path)
+
+    print("Dropping words table (make take a while)...", end=" ", flush=True)
     with sqlite3.connect(toms_path) as conn:
         cursor = conn.cursor()
         cursor.execute("DROP TABLE words")
-    print("Done.")
+    print("Done.", flush=True)
     sentence_table_generator = make_sentences_table(data_dir, toms_path)
     sentence_table_generator(None)
     with sqlite3.connect(toms_path) as conn:
         cursor = conn.cursor()
         cursor.execute("VACUUM")
 
-    # # TF-IDF generation
-    loader = Loader(data_dir)
-    tfidf_per_word(loader)
-
-    # # Regenerate new WebConfig file
+    exit()
+    # Regenerate new WebConfig file
     old_config = load_module("old_config", os.path.join(philo_db + "/data/web_config.cfg"))
     start_date, end_date = get_time_series_dates(toms_path)
     config_values = {
@@ -133,7 +188,7 @@ if __name__ == "__main__":
         "kwic_metadata_sorting_fields": old_config.kwic_metadata_sorting_fields,
         "kwic_bibliography_fields": old_config.kwic_bibliography_fields,
         "concordance_biblio_sorting": old_config.concordance_biblio_sorting,
-        "metadata_choice_values": old_config.metadata_dropdown_values,
+        # "metadata_choice_values": old_config.metadata_dropdown_values, #TODO: investigate why broken...
     }
     os.system(
         f'mv {os.path.join(philo_db + "/data/web_config.cfg")} {os.path.join(philo_db + "/data/web_config.cfg_old")}'
@@ -167,10 +222,26 @@ if __name__ == "__main__":
                 "page",
             )
         ]
+    metadata_hierarchy = old_db_locals.metadata_hierarchy
+    metadata_hierarchy[0].append("philo_doc_id")
+    metadata_hierarchy[1].append("philo_div1_id")
+    metadata_hierarchy[2].append("philo_div2_id")
+    metadata_hierarchy[3].append("philo_div3_id")
+    try:
+        metadata_hierarchy[4].append("philo_para_id")
+    except:
+        pass
     db_values = {
         "metadata_fields": metadata,
-        "metadata_hierarchy": old_db_locals.metadata_hierarchy,
-        "metadata_types": old_db_locals.metadata_types,
+        "metadata_hierarchy": metadata_hierarchy,
+        "metadata_types": {
+            **old_db_locals.metadata_types,
+            "philo_doc_id": "doc",
+            "philo_div1_id": "div1",
+            "philo_div2_id": "div2",
+            "philo_div3_id": "div3",
+            "philo_para_id": "para",
+        },
         "normalized_fields": old_db_locals.normalized_fields,
         "debug": False,
     }

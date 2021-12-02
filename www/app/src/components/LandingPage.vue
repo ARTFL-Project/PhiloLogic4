@@ -110,26 +110,32 @@
                     </div>
                 </div>
             </div>
-            <div
-                id="landing-page-content"
-                infinite-scroll="displayMoreItems()"
-                infinite-scroll-distance="2"
-                class="mt-4"
-            >
+            <div id="landing-page-content" class="mt-4">
                 <div class="row">
                     <div class="col-12 col-sm-9 offset-sm-1 col-md-8 offset-md-2 text-content-area">
-                        <div class="card mb-4 shadow-sm" v-for="group in resultGroups" :key="group.prefix">
+                        <div
+                            class="card mb-4 shadow-sm"
+                            v-for="(group, groupIndex) in resultGroups"
+                            :key="group.prefix"
+                            :id="`landing-${group.prefix}`"
+                        >
                             <div class="card-header">
                                 {{ group.prefix.toString() }}
                             </div>
+
                             <li
                                 class="contentClass p-2"
-                                v-for="(result, resultIndex) in group.results"
+                                v-for="(result, resultIndex) in group.results.slice(0, groupDisplay[groupIndex])"
                                 :key="resultIndex"
                             >
-                                <citations :citation="result.citation"></citations>
+                                <citations :citation="buildCitationObject(result.metadata, citations)"></citations>
                                 <span v-if="displayCount == 'true'">&nbsp;({{ result.count }})</span>
                             </li>
+                            <p class="pt-2 ps-3" v-if="group.results.length > 100">
+                                <button type="button" class="btn btn-outline-secondary" @click="seeAll(groupIndex)">
+                                    See all {{ group.results.length }} results
+                                </button>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -162,6 +168,8 @@ export default {
             showDicoLetterRows: true,
             volumeData: [],
             dicoLetterRows: [],
+            citations: [],
+            groupDisplay: {},
         };
     },
     created() {
@@ -209,15 +217,14 @@ export default {
                         display_count: browseType.display_count,
                         is_range: browseType.is_range,
                         query: range,
-                        citation: JSON.stringify(browseType.citation),
                     },
                 })
                 .then((response) => {
-                    if (browseType.group_by_field == "author") {
-                        this.resultGroups = this.groupByAuthor(response.data.content);
-                    } else {
-                        this.resultGroups = response.data.content;
+                    for (let i in response.data.content) {
+                        this.groupDisplay[i] = 100;
                     }
+                    this.resultGroups = response.data.content;
+                    this.citations = response.data.citations;
                     this.displayCount = response.data.display_count;
                     this.contentType = response.data.content_type;
                     this.loading = false;
@@ -227,43 +234,56 @@ export default {
                     this.loading = false;
                 });
         },
-        groupByAuthor(letterGroups) {
-            var groupedResults = [];
-            for (let group of letterGroups) {
-                var localGroup = [];
-                for (let i = 0; i < group.results.length; i += 1) {
-                    const innerGroup = group.results[i];
-                    const citations = innerGroup.citation;
-                    let authorName = innerGroup.metadata.author;
-                    let savedCitation = "";
-                    for (let c = 0; c < citations.length; c += 1) {
-                        let citation = citations[c];
-                        if (citation.label == authorName) {
-                            savedCitation = citation;
-                            break;
+        buildCitationObject(metadataFields, citations) {
+            // Used because too many results are returned from server
+            let citationObject = [];
+            for (let citation of citations) {
+                let label = metadataFields[citation.field] || "";
+                if (citation.link) {
+                    let link = "";
+                    if (citation.field == "title") {
+                        link = `/navigate/${metadataFields.philo_id.split(" ")[0]}/table-of-contents`;
+                        citationObject.push({ ...citation, href: link, label: metadataFields.title });
+                    } else {
+                        let queryParams = {
+                            ...this.$store.state.formData,
+                            start: "0",
+                            end: "25",
+                        };
+                        if (label == "") {
+                            queryParams[citation.field] = ""; // Should be NULL, but that's broken in the philo lib
+                            label = "N/A";
+                        } else {
+                            queryParams[citation.field] = `"${label}"`;
+                        }
+
+                        // workaround for broken NULL searches
+                        if (queryParams[citation.field].length) {
+                            link = this.paramsToRoute({
+                                ...queryParams,
+                                report: "concordance",
+                            });
+                            citationObject.push({ ...citation, href: link, label: label });
+                        } else {
+                            citationObject.push({ ...citation, href: "", label: label });
                         }
                     }
-                    localGroup.push({
-                        metadata: innerGroup.metadata,
-                        citation: [savedCitation],
-                        count: innerGroup.count,
-                        normalized: innerGroup.normalized,
-                    });
+                } else {
+                    citationObject.push({ ...citation, href: "", label: label });
                 }
-                groupedResults.push({
-                    prefix: group.prefix,
-                    results: localGroup,
-                });
             }
-            return groupedResults;
+            return citationObject;
         },
         goToLetter(letter) {
             this.$router.push(`/bibliography?head=^${letter}.*`);
         },
+        seeAll(groupIndex) {
+            this.groupDisplay[groupIndex] = this.resultGroups[groupIndex].length;
+        },
     },
 };
 </script>
-<style thisd>
+<style scoped>
 .btn-light {
     background-color: #fff;
     border-width: 0px 1px 0px 0px;

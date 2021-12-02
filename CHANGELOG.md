@@ -1,8 +1,13 @@
 ### 4.7 ###
-- New aggregation report
-- Database size should be 50% (or more) smaller
-- Performance improvements for collocations (in some cases 3X)
-- Optimized frequency report: much faster for certain use cases
+- New aggregation 
+- New metadata stats in search results
+- Results bibliography in concordance and KWIC results.
+- Database size should be between 50% and 500% (or more) smaller
+- Significant speed-ups for:
+    * Collocations: in some cases 3X
+    * Sorted KWICs: between 6X and 25X (or more) depending on use case, with no more limits on the size of the sort as a result.
+    * Faceted browsing (frequencies): anywhere from 3X to 100X or more
+- Export results to CSV
 - Web config has been simplified with the use of global variables for citations
 - Some breaking changes to web config: you should not use a 4.6 config
 - Revamped Web UI: move to VueJS and Bootstrap 5.

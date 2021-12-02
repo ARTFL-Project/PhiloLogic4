@@ -32,9 +32,24 @@
                                     </li>
                                 </ul>
                             </div>
-                            <button type="button" class="btn btn-secondary btn-sm ms-1" @click="sortResults()">
-                                Sort
-                            </button>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm ms-1" @click="sortResults()">Sort</button>
+                        <div
+                            class="progress mt-3"
+                            :max="resultsLength"
+                            show-progress
+                            variant="secondary"
+                            v-if="runningTotal != resultsLength"
+                        >
+                            <div
+                                class="progress-bar"
+                                role="progressbar"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                :style="`width: ${((runningTotal / resultsLength) * 100).toFixed(2)}%`"
+                            >
+                                {{ Math.floor((runningTotal / resultsLength) * 100) }}%
+                            </div>
                         </div>
                     </div>
                     <div id="kwic-concordance">
@@ -142,6 +157,8 @@ export default {
             },
             sortedResults: [],
             loading: false,
+            runningTotal: 0,
+            cachePath: "",
         };
     },
     created() {
@@ -259,9 +276,9 @@ export default {
         },
         fetchResults() {
             this.results = { description: { end: 0 } };
-            this.searching = true;
             this.searchParams = { ...this.$store.state.formData };
             if (this.first_kwic_sorting_option === "") {
+                this.searching = true;
                 this.$http
                     .get(`${this.$dbUrl}/reports/kwic.py`, {
                         params: this.paramsFilter(this.searchParams),
@@ -269,6 +286,7 @@ export default {
                     .then((response) => {
                         this.results = response.data;
                         this.resultsLength = response.data.results_length;
+                        this.runningTotal = response.data.results_length;
                         this.results.description = response.data.description;
                         this.searching = false;
                     })
@@ -278,20 +296,12 @@ export default {
                         this.debug(this, error);
                     });
             } else {
-                if (
-                    JSON.stringify({
-                        ...this.$store.state.formData,
-                        start: "0",
-                        end: "0",
-                    }) == JSON.stringify(this.sortedKwicCache.queryParams)
-                ) {
-                    this.sortedResults = this.sortedKwicCache.results;
-                    this.getKwicResults(this.results.hits_done);
-                } else {
+                if (this.start == "") {
                     this.start = "0";
-                    this.end = "0";
-                    this.recursiveLookup(0);
+                    this.end = this.results_per_page;
                 }
+                this.runningTotal = 0;
+                this.recursiveLookup(0);
             }
         },
         recursiveLookup(hitsDone) {
@@ -300,29 +310,16 @@ export default {
                     params: {
                         ...this.paramsFilter({ ...this.$store.state.formData }),
                         hits_done: hitsDone,
-                        max_time: 10,
+                        max_time: 5,
                     },
                 })
                 .then((response) => {
                     hitsDone = response.data.hits_done;
-                    if (this.sortedResults.length === 0) {
-                        this.sortedResults = response.data.results;
-                    } else {
-                        this.sortedResults.push(...response.data.results);
-                    }
+                    this.runningTotal = hitsDone;
+                    this.cachePath = response.data.cache_path;
                     if (hitsDone < this.resultsLength) {
                         this.recursiveLookup(hitsDone);
                     } else {
-                        this.start = "0";
-                        this.end = "0";
-                        this.sortedKwicCache = {
-                            results: [...this.sortedResults],
-                            queryParams: {
-                                ...this.$store.state.formData,
-                                start: "0",
-                                end: "0",
-                            },
-                        };
                         this.getKwicResults(hitsDone);
                     }
                 });
@@ -336,23 +333,15 @@ export default {
                 end = start + parseInt(this.results_per_page);
             }
             this.$http
-                .post(
-                    `${this.$dbUrl}/scripts/get_sorted_kwic.py`,
-                    JSON.stringify({
-                        results: this.sortedResults,
+                .get(`${this.$dbUrl}/scripts/get_sorted_kwic.py`, {
+                    params: {
                         hits_done: hitsDone,
-                        query_string: this.paramsToUrlString({
-                            ...this.$store.state.formData,
-                        }),
+                        ...this.paramsFilter({ ...this.$store.state.formData }),
                         start: start,
                         end: end,
-                        sort_keys: [
-                            this.first_kwic_sorting_option,
-                            this.second_kwic_sorting_option,
-                            this.third_kwic_sorting_option,
-                        ],
-                    })
-                )
+                        cache_path: this.cachePath,
+                    },
+                })
                 .then((response) => {
                     this.results = response.data;
                     this.searching = false;
@@ -368,14 +357,8 @@ export default {
             return currentPos + "." + Array(spaces).join("&nbsp");
         },
         sortResults() {
-            if (this.resultsLength < 50000) {
-                this.results = {};
-                this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
-            } else {
-                alert(
-                    "For performance reasons, you cannot sort KWIC reports of more than 50,000 results. Please narrow your query to filter results."
-                );
-            }
+            this.results.results = [];
+            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
         },
         dicoLookup() {},
         beforeEnter: function (el) {
