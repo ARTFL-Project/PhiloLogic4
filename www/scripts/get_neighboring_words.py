@@ -25,6 +25,7 @@ except ImportError:
     from philologic.runtime import WSGIHandler
 
 NUMBER = re.compile(r"\d")
+OBJECT_LEVELS = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
 
 
 def get_neighboring_words(environ, start_response):
@@ -40,19 +41,48 @@ def get_neighboring_words(environ, start_response):
         index = 0
     max_time = int(request.max_time)
     start_time = timeit.default_timer()
-    hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+
+    fields = ["index", "left", "right", "q"]
+    metadata_search = False
+    if (
+        request.first_kwic_sorting_option in ("left", "right", "q", "")
+        and request.second_kwic_sorting_option in ("left", "right", "q", "")
+        and request.third_kwic_sorting_option in ("left", "right", "q", "")
+    ):  # fast path
+        hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
+        # object_types = []
+        # for field in config.kwic_metadata_sorting_fields:
+        #     object_type = db.locals["metadata_types"][field]
+        #     if object_type == "div":
+        #         object_types.extend(["div1", "div2", "div3"])
+        #     else:
+        #         object_types.append(object_type)
+    else:
+        metadata_search = True
+        hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
+        fields.extend(config.kwic_metadata_sorting_fields)
     cache_path = get_cache_path(request, db)
     if os.path.exists(f"{cache_path}.sorted"):
         yield rapidjson.dumps({"hits_done": len(hits), "cache_path": cache_path}).encode("utf8")
     else:
-        fields = ["index", "left", "right", "q"] + config.kwic_metadata_sorting_fields
         if not os.path.exists(cache_path):
             with open(cache_path, "w") as cache_file:
                 print("\t".join(fields), file=cache_file)
         cursor = db.dbh.cursor()
         with open(cache_path, "a") as cache_file:
             for hit in hits[index:]:
-                sentence = " ".join(map(str, hit.hit[:6])) + " 0"
+                if metadata_search is False:
+                    remaining = list(hit[7:])
+                    offsets = []
+                    while remaining:
+                        remaining.pop(0)
+                        if remaining:
+                            offsets.append(remaining.pop(0))
+                    offsets.sort()
+                    sentence = " ".join(map(str, hit[:6])) + " 0"
+                else:
+                    offsets = hit.bytes
+                    sentence = " ".join(map(str, hit.hit[:6])) + " 0"
                 cursor.execute("SELECT words FROM sentences WHERE philo_id = ?", (sentence,))
                 words = msgpack.loads(lz4.frame.decompress(cursor.fetchone()[0]))
                 left_side_text = []
@@ -61,9 +91,9 @@ def get_neighboring_words(environ, start_response):
                 for word in words:
                     if NUMBER.search(word["word"]):
                         continue
-                    if hit.bytes[0] > word["start_byte"]:
+                    if offsets[0] > word["start_byte"]:
                         left_side_text.append(word["word"])
-                    elif word["start_byte"] > hit.bytes[-1]:
+                    elif word["start_byte"] > offsets[-1]:
                         right_side_text.append(word["word"])
                     else:
                         query_words.append(word["word"])
@@ -79,8 +109,17 @@ def get_neighboring_words(environ, start_response):
                     "q": ",".join(query_words),
                     "index": index,
                 }
-                for metadata in config.kwic_metadata_sorting_fields:
-                    result_obj[metadata] = ",".join(hit[metadata].lower().split())
+                if metadata_search is True:
+                    for metadata in config.kwic_metadata_sorting_fields:
+                        result_obj[metadata] = ",".join(hit[metadata].lower().split())
+                # else: object_ids = []
+                # for object_type in object_types:
+                #     object_id = list(hit[: OBJECT_LEVELS[object_type]])
+                #     philo_id = object_id + [0 for _ in range(7 - len(object_id))]
+                #     object_ids.append(" ".join(map(str, philo_id)))
+                # cursor.execute(
+                #     f"SELECT {','.join(config.kwic_metadata_sorting_fields)} FROM toms WHERE philo_type in ({','.join(object_types)}) AND philo_id"
+                # )
                 print("\t".join(str(result_obj[field]) for field in fields), file=cache_file)
                 index += 1
                 elapsed = timeit.default_timer() - start_time
