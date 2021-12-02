@@ -99,7 +99,7 @@ class DB:
         sort_order=["rowid"],
         raw_results=False,
         get_word_count_field=None,
-        **metadata
+        **metadata,
     ):
         """query the PhiloLogic database"""
         method = method or "proxy"

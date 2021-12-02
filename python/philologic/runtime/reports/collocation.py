@@ -2,9 +2,7 @@
 """Collocation results"""
 
 import os
-import re
 import timeit
-import sqlite3
 from collections import defaultdict
 import string
 import msgpack
@@ -61,7 +59,6 @@ def collocation_results(request, config):
     cursor = db.dbh.cursor()
     start_time = timeit.default_timer()
     for hit in hits[hits_done:]:
-        # start_byte = extract_bytes(hit)[0]
         sentence = " ".join(map(str, hit[:6])) + " 0"
         cursor.execute("SELECT words FROM sentences WHERE philo_id = ?", (sentence,))
         words = msgpack.loads(lz4.frame.decompress(cursor.fetchone()[0]))
