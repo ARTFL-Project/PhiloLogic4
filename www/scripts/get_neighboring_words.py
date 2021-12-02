@@ -10,6 +10,7 @@ import lz4.frame
 import msgpack
 import rapidjson
 from philologic.runtime.DB import DB
+import re
 
 sys.path.append("..")
 import custom_functions
@@ -22,6 +23,8 @@ try:
     from custom_functions import WSGIHandler
 except ImportError:
     from philologic.runtime import WSGIHandler
+
+NUMBER = re.compile(r"\d")
 
 
 def get_neighboring_words(environ, start_response):
@@ -56,6 +59,8 @@ def get_neighboring_words(environ, start_response):
                 right_side_text = []
                 query_words = []
                 for word in words:
+                    if NUMBER.search(word["word"]):
+                        continue
                     if hit.bytes[0] > word["start_byte"]:
                         left_side_text.append(word["word"])
                     elif word["start_byte"] > hit.bytes[-1]:
@@ -65,7 +70,7 @@ def get_neighboring_words(environ, start_response):
                 left_side_text = left_side_text[-10:]
                 left_side_text.reverse()
                 if not left_side_text:
-                    left_side_text = ["zzzzzzz" for _ in range(10)]  # make sure we sort last if no words before: DP
+                    left_side_text = ["zzzzzzz" for _ in range(10)]  # make sure we sort last if no words before
                 if not right_side_text:
                     right_side_text = ["zzzzzzz" for _ in range(10)]  # make sure we sort last if no words after
                 result_obj = {
