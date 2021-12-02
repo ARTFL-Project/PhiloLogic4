@@ -357,7 +357,7 @@ export default {
             return currentPos + "." + Array(spaces).join("&nbsp");
         },
         sortResults() {
-            this.results = {};
+            this.results.results = [];
             this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
         },
         dicoLookup() {},
