@@ -6,7 +6,8 @@
 - Significant speed-ups for:
     * Collocations: in some cases 3X
     * Sorted KWICs: between 6X and 25X (or more) depending on use case, with no more limits on the size of the sort as a result.
-    * Faceted browsing (frequencies): anywhere from 3X to 100X or more
+    * Faceted browsing (frequencies): anywhere from 3X to 100X (or more)
+    * Landing page browsing: 10X faster or more on large corpora
 - Export results to CSV
 - Web config has been simplified with the use of global variables for citations
 - Some breaking changes to web config: you should not use a 4.6 config
