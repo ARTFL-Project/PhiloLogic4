@@ -160,7 +160,7 @@ export default {
                     params: this.paramsFilter(params),
                 })
                 .then((response) => {
-                    var data = response.data;
+                    let data = response.data;
                     this.resultsLength = data.results_length;
                     this.moreResults = data.more_results;
                     this.runningTotal = data.hits_done;
@@ -180,7 +180,7 @@ export default {
                 fullResults = {};
                 this.filterList = data.filter_list;
             }
-            var collocates = this.mergeResults(fullResults, data["collocates"]);
+            var collocates = this.mergeResults(fullResults, data.collocates);
             let sortedList = [];
             for (let word of collocates.sorted.slice(0, 100)) {
                 sortedList.push({ collocate: word.label, count: word.count });

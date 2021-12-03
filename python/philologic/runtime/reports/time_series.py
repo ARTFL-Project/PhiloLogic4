@@ -57,11 +57,7 @@ def generate_time_series(request, config):
         if interval != 1:
             end_range = start_range + (int(request["year_interval"]) - 1)
             if request.q:
-                query = 'select sum(word_count) from toms where %s between "%d" and "%d"' % (
-                    config.time_series_year_field,
-                    start_range,
-                    end_range,
-                )
+                query = f'select sum(word_count) from toms where {config.time_series_year_field} between "{start_range}" and "{end_range}"'
             else:
                 query = f"SELECT COUNT(*) FROM toms WHERE philo_type='{db.locals.default_object_level}' AND {config.time_series_year_field} BETWEEN {start_range} AND {end_range}"
         else:
@@ -97,8 +93,14 @@ def get_start_end_date(db, config, start_date=None, end_date=None):
     """Get start and end date of dataset"""
     date_finder = re.compile(r"^.*?(\d{1,}).*")
     cursor = db.dbh.cursor()
+    object_type = db.locals["metadata_types"][config.time_series_year_field]
+    if object_type == "div":
+        year_field_type = ("div1", "div2", "div3")
+    else:
+        year_field_type = (object_type,)
     cursor.execute(
-        "select %s from toms where %s is not null" % (config.time_series_year_field, config.time_series_year_field)
+        f"select {config.time_series_year_field} from toms where {config.time_series_year_field} is not null AND philo_type IN ({','.join('?' for _ in range(len(year_field_type)))})",
+        year_field_type,
     )
     dates = []
     for i in cursor:

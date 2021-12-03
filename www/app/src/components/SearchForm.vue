@@ -318,7 +318,7 @@
                                     class="form-control"
                                     name="start_date"
                                     id="start_date"
-                                    style="max-width: 50px; text-align: center"
+                                    style="max-width: 60px; text-align: center"
                                     v-model="start_date"
                                 />
                                 <span class="d-inline-flex align-self-center mx-2">to</span>
@@ -327,7 +327,7 @@
                                     class="form-control"
                                     name="end_date"
                                     id="end_date"
-                                    style="max-width: 50px; text-align: center"
+                                    style="max-width: 60px; text-align: center"
                                     v-model="end_date"
                                 />
                             </div>

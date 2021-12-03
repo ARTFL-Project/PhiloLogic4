@@ -300,6 +300,7 @@ export default {
                     this.start = "0";
                     this.end = this.results_per_page;
                 }
+                this.searching = true;
                 this.runningTotal = 0;
                 this.recursiveLookup(0);
             }
@@ -314,6 +315,7 @@ export default {
                     },
                 })
                 .then((response) => {
+                    this.searching = false;
                     hitsDone = response.data.hits_done;
                     this.runningTotal = hitsDone;
                     this.cachePath = response.data.cache_path;
@@ -365,7 +367,7 @@ export default {
             el.style.opacity = 0;
         },
         enter: function (el, done) {
-            var delay = el.dataset.index * 10;
+            var delay = el.dataset.index * 8;
             setTimeout(function () {
                 Velocity(el, { opacity: 1 }, { complete: done });
             }, delay);
