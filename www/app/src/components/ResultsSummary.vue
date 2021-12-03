@@ -245,9 +245,18 @@ export default {
                     ? this.$philoConfig.metadata_aliases[this.$route.query.group_by]
                     : this.$route.query.group_by,
             showFilteredWords: false,
+            currentQuery: {},
         };
     },
     created() {
+        this.currentQuery = {
+            ...this.$store.state.formData,
+            start: "",
+            end: "",
+            first_kwic_sorting_option: "",
+            second_kwic_sorting_option: "",
+            third_kwic_sorting_option: "",
+        };
         this.updateDescriptions();
     },
     watch: {
@@ -264,7 +273,22 @@ export default {
             this.buildDescription();
             this.updateTotalResults();
             if (["concordance", "kwic", "bibliography"].includes(this.report)) {
-                this.getHitListStats();
+                let newQuery = {
+                    ...this.$store.state.formData,
+                    start: "",
+                    end: "",
+                    first_kwic_sorting_option: "",
+                    second_kwic_sorting_option: "",
+                    third_kwic_sorting_option: "",
+                };
+                console.log(
+                    !this.deepEqual(newQuery, this.currentQuery),
+                    Object.keys(this.statsDescription).length == 0
+                );
+                if (!this.deepEqual(newQuery, this.currentQuery) || Object.keys(this.statsDescription).length == 0) {
+                    this.getHitListStats();
+                    this.currentQuery = newQuery;
+                }
             }
         },
         buildDescription() {
