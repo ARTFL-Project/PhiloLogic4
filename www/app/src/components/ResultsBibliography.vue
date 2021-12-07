@@ -9,9 +9,8 @@
                 <ul id="results-bibliography">
                     <li class="result" v-for="(result, resultIndex) in uniquedResults" :key="resultIndex">
                         <citations :citation="result.citation"></citations>
-                        <br />
                         <router-link :to="`/${report}?${buildLink(result.metadata_fields.title)}`">
-                            <button type="button" class="btn rounded-pill btn-secondary btn-sm">
+                            <button type="button" class="btn rounded-pill btn-outline-secondary btn-sm ms-3">
                                 {{ result.count }} occurrence(s)
                             </button>
                         </router-link>

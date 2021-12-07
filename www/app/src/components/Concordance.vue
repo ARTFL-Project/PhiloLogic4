@@ -33,8 +33,7 @@
                                     class="btn btn-secondary more-context"
                                     @click="moreContext(index, $event)"
                                 >
-                                    <span class="d-none d-lg-inline-block">More</span>
-                                    <span class="d-lg-none">+</span>
+                                    <span class="more d-none d-lg-inline-block">More</span>
                                 </button>
                             </div>
                         </div>
@@ -136,6 +135,9 @@ export default {
         },
         moreContext(index, event) {
             let button = event.srcElement;
+            if (button.tagName == "BUTTON") {
+                button = button.querySelector("span");
+            }
             let defaultNode = document.getElementsByClassName("default-length")[index];
             let moreNode = document.getElementsByClassName("more-length")[index];
             let resultNumber = this.results.description.start + index - 1;
