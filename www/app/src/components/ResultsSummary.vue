@@ -281,10 +281,6 @@ export default {
                     second_kwic_sorting_option: "",
                     third_kwic_sorting_option: "",
                 };
-                console.log(
-                    !this.deepEqual(newQuery, this.currentQuery),
-                    Object.keys(this.statsDescription).length == 0
-                );
                 if (!this.deepEqual(newQuery, this.currentQuery) || Object.keys(this.statsDescription).length == 0) {
                     this.getHitListStats();
                     this.currentQuery = newQuery;

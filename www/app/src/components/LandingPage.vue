@@ -223,7 +223,7 @@ export default {
                     for (let i in response.data.content) {
                         this.groupDisplay[i] = 100;
                     }
-                    this.resultGroups = response.data.content;
+                    this.resultGroups = Object.freeze(response.data.content);
                     this.citations = response.data.citations;
                     this.displayCount = response.data.display_count;
                     this.contentType = response.data.content_type;
@@ -242,7 +242,11 @@ export default {
                 if (citation.link) {
                     let link = "";
                     if (citation.field == "title") {
-                        link = `/navigate/${metadataFields.philo_id.split(" ")[0]}/table-of-contents`;
+                        if (this.$philoConfig.skip_table_of_contents) {
+                            link = `/navigate/${metadataFields.philo_id.split(" ")[0]}`;
+                        } else {
+                            link = `/navigate/${metadataFields.philo_id.split(" ")[0]}/table-of-contents`;
+                        }
                         citationObject.push({ ...citation, href: link, label: metadataFields.title });
                     } else {
                         let queryParams = {
