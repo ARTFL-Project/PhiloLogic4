@@ -131,7 +131,7 @@
                                 <citations :citation="buildCitationObject(result.metadata, citations)"></citations>
                                 <span v-if="displayCount == 'true'">&nbsp;({{ result.count }})</span>
                             </li>
-                            <p class="pt-2 ps-3" v-if="group.results.length > 100">
+                            <p class="pt-2 ps-3" v-if="group.results.length > 50">
                                 <button type="button" class="btn btn-outline-secondary" @click="seeAll(groupIndex)">
                                     See all {{ group.results.length }} results
                                 </button>
@@ -221,7 +221,7 @@ export default {
                 })
                 .then((response) => {
                     for (let i in response.data.content) {
-                        this.groupDisplay[i] = 100;
+                        this.groupDisplay[i] = 50;
                     }
                     this.resultGroups = response.data.content;
                     this.citations = response.data.citations;
@@ -242,7 +242,11 @@ export default {
                 if (citation.link) {
                     let link = "";
                     if (citation.field == "title") {
-                        link = `/navigate/${metadataFields.philo_id.split(" ")[0]}/table-of-contents`;
+                        if (this.$philoConfig.skip_table_of_contents) {
+                            link = `/navigate/${metadataFields.philo_id.split(" ")[0]}`;
+                        } else {
+                            link = `/navigate/${metadataFields.philo_id.split(" ")[0]}/table-of-contents`;
+                        }
                         citationObject.push({ ...citation, href: link, label: metadataFields.title });
                     } else {
                         let queryParams = {
