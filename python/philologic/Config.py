@@ -298,7 +298,11 @@ WEB_CONFIG_DEFAULTS = {
         "value": CITATIONS,
         "comment": "\n".join(
             [
-                "# Define how individual metadata is displayed. The citations variable is reused by default for citations in individual reports."
+                "# Define how individual metadata is displayed. The citations variable is reused by default for citations in individual reports.",
+                "# You can define styling with a dictionary of valid CSS property/value such as those in the default values.",
+                "# prefix and suffix keywords define what precedes and follows each field. You can use HTML for these strings.",
+                "# The link key enables linking for that metadata field. It links to the table of contents for title and filename,",
+                "# and to a regular query for all other metadata fields.",
             ]
         ),
     },
@@ -463,9 +467,7 @@ WEB_CONFIG_DEFAULTS = {
             [
                 "# The concordance_citation variable define how and in what field order citations are displayed in concordance reports.",
                 "# You can define styling with a dictionary of valid CSS property/value such as those in the default values.",
-                "# begin and end keywords define what precedes and follows each field. You can use HTML for these strings.",
-                "# The link key enables linking for that metadata field. It links to the table of contents for title and filename,",
-                "# and to a regular query for all other metadata fields.",
+                "# See comments for the citations variable for how to configure citations",
             ]
         ),
     },
@@ -485,9 +487,7 @@ WEB_CONFIG_DEFAULTS = {
             [
                 "# The bibligraphy_citation variable define how and in what field order citations are displayed in bibliography reports.",
                 "# You can define styling with a dictionary of valid CSS property/value such as those in the default values.",
-                "# begin and end keywords define what precedes and follows each field. You can use HTML for these strings.",
-                "# The link key enables linking for that metadata field. It links to the table of contents for title and filename,",
-                "# and to a regular query for all other metadata fields.",
+                "# See comments for the citations variable for how to configure citations",
             ]
         ),
     },
@@ -513,9 +513,7 @@ WEB_CONFIG_DEFAULTS = {
             [
                 "# The navigation_citation variable define how and in what field order citations are displayed in navigation reports.",
                 "# You can define styling with a dictionary of valid CSS property/value such as those in the default values.",
-                "# begin and end keywords define what precedes and follows each field. You can use HTML for these strings.",
-                "# The link key enables linking for that metadata field. It links to the table of contents for title and filename,",
-                "# and to a metadata query for all other metadata fields.",
+                "# See comments for the citations variable for how to configure citations",
             ]
         ),
     },
