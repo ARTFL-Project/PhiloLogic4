@@ -305,44 +305,51 @@ export default {
                     this.$nextTick(() => {
                         // Handle inline notes if there are any
                         let notes = document.getElementsByClassName("note");
-                        notes.forEach((note) => {
-                            let innerHTML = note.nextElementSibling.innerHTML;
-                            new Popover(note, { html: true, content: innerHTML, trigger: "focus" });
-                        });
+                        if (notes.length > 0) {
+                            notes.forEach((note) => {
+                                let innerHTML = note.nextElementSibling.innerHTML;
+                                new Popover(note, { html: true, content: innerHTML, trigger: "focus" });
+                            });
+                        }
 
                         // Handle ref notes if there are any
                         let noteRefs = document.getElementsByClassName("note-ref");
-                        noteRefs.forEach((noteRef) => {
-                            let getNotes = () => {
-                                this.$http
-                                    .get(`${this.$dbUrl}/scripts/get_notes.py?`, {
-                                        params: {
-                                            target: noteRef.getAttribute("target"),
-                                            philo_id: this.$route.params.pathInfo.split("/").join(" "),
-                                        },
-                                    })
-                                    .then((response) => {
-                                        new Popover(noteRef, {
-                                            html: true,
-                                            content: response.data.text,
-                                            trigger: "focus",
+                        if (noteRefs.length > 0) {
+                            noteRefs.forEach((noteRef) => {
+                                let getNotes = () => {
+                                    this.$http
+                                        .get(`${this.$dbUrl}/scripts/get_notes.py?`, {
+                                            params: {
+                                                target: noteRef.getAttribute("target"),
+                                                philo_id: this.$route.params.pathInfo.split("/").join(" "),
+                                            },
+                                        })
+                                        .then((response) => {
+                                            new Popover(noteRef, {
+                                                html: true,
+                                                content: response.data.text,
+                                                trigger: "focus",
+                                            });
+                                            noteRef.removeEventListener("click", getNotes);
                                         });
-                                        noteRef.removeEventListener("click", getNotes);
-                                    });
-                            };
-                            noteRef.addEventListener("click", getNotes());
-                        });
-
-                        document.getElementsByClassName("link-back").forEach((el) => {
-                            if (el) {
-                                var goToNote = () => {
-                                    let link = el.getAttribute("link");
-                                    this.$router.push(link);
-                                    el.removeEventListener("click", goToNote);
                                 };
-                                el.addEventListener("click", goToNote);
-                            }
-                        });
+                                noteRef.addEventListener("click", getNotes());
+                            });
+                        }
+
+                        let linkBack = document.getElementsByClassName("link-back");
+                        if (linkBack.length > 0) {
+                            linkBack.forEach((el) => {
+                                if (el) {
+                                    var goToNote = () => {
+                                        let link = el.getAttribute("link");
+                                        this.$router.push(link);
+                                        el.removeEventListener("click", goToNote);
+                                    };
+                                    el.addEventListener("click", goToNote);
+                                }
+                            });
+                        }
 
                         // Scroll to highlight
                         if (this.byte != "") {

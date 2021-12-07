@@ -15,13 +15,16 @@ export default {
     props: ["citation"],
     setup() {
         const filterNone = (citation) => {
-            let filteredCitation = [];
-            for (let cite of citation) {
-                if (cite.label != "None") {
-                    filteredCitation.push(cite);
+            if (Symbol.iterator in Object(citation)) {
+                let filteredCitation = [];
+                for (let cite of citation) {
+                    if (cite.label != "None") {
+                        filteredCitation.push(cite);
+                    }
                 }
+                return filteredCitation;
             }
-            return filteredCitation;
+            return citation;
         };
         return { filterNone };
     },
