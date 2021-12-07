@@ -131,7 +131,7 @@
                                 <citations :citation="buildCitationObject(result.metadata, citations)"></citations>
                                 <span v-if="displayCount == 'true'">&nbsp;({{ result.count }})</span>
                             </li>
-                            <p class="pt-2 ps-3" v-if="group.results.length > 50">
+                            <p class="pt-2 ps-3" v-if="group.results.length > 100">
                                 <button type="button" class="btn btn-outline-secondary" @click="seeAll(groupIndex)">
                                     See all {{ group.results.length }} results
                                 </button>
@@ -221,9 +221,9 @@ export default {
                 })
                 .then((response) => {
                     for (let i in response.data.content) {
-                        this.groupDisplay[i] = 50;
+                        this.groupDisplay[i] = 100;
                     }
-                    this.resultGroups = response.data.content;
+                    this.resultGroups = Object.freeze(response.data.content);
                     this.citations = response.data.citations;
                     this.displayCount = response.data.display_count;
                     this.contentType = response.data.content_type;

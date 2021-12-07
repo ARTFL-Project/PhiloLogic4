@@ -25,14 +25,16 @@
 </template>
 
 <script>
+import { inject } from "vue";
+
 export default {
     name: "Header",
-    data() {
+    setup() {
+        const philoConfig = inject("$philoConfig");
         return {
-            philoConfig: this.$philoConfig,
+            philoConfig,
         };
     },
-    created() {},
 };
 </script>
 

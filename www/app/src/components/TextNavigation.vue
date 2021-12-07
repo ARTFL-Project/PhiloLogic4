@@ -260,7 +260,6 @@ export default {
     },
     methods: {
         fetchText() {
-            // this.loading = true;
             this.searching = true;
             this.textRendered = false;
             this.textObjectURL = this.$route.params;

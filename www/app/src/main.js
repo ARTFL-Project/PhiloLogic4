@@ -20,6 +20,7 @@ axios
         app.config.unwrapInjectedRef = true
         app.provide("$http", axios)
         app.provide("$dbUrl", appConfig.dbUrl)
+        app.provide("$philoConfig", response.data)
         app.use(router)
         app.use(store)
         app.mixin({

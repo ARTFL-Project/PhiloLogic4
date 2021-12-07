@@ -13,8 +13,8 @@
 export default {
     name: "citations",
     props: ["citation"],
-    methods: {
-        filterNone(citation) {
+    setup() {
+        const filterNone = (citation) => {
             let filteredCitation = [];
             for (let cite of citation) {
                 if (cite.label != "None") {
@@ -22,7 +22,8 @@ export default {
                 }
             }
             return filteredCitation;
-        },
+        };
+        return { filterNone };
     },
 };
 </script>
