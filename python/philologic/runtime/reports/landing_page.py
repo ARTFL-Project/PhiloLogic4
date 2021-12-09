@@ -28,8 +28,8 @@ def landing_page_bibliography(request, config):
             hit_object["philo_id"] = hit.philo_id[0]
         else:
             hit_object["philo_id"] = "/".join([str(i) for i in hit.philo_id])
-        doc_id = str(hit.philo_id[0]) + " 0 0 0 0 0 0"
-        next_doc_id = str(hit.philo_id[0] + 1) + " 0 0 0 0 0 0"
+        doc_id = f"{hit.philo_id[0]} 0 0 0 0 0 0"
+        next_doc_id = f"{hit.philo_id[0] + 1} 0 0 0 0 0 0"
         c.execute(f'select rowid from toms where philo_id="{doc_id}"')
         doc_row = c.fetchone()["rowid"]
         c.execute(f'select rowid from toms where philo_id="{next_doc_id}"')

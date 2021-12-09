@@ -103,10 +103,7 @@
                                         href
                                         @click="toggleFilterList($event)"
                                         v-if="colloc_filter_choice === 'stopwords'"
-                                        >Common function words</a
-                                    >
-                                    <a href @click="toggleFilterList($event)" v-if="colloc_filter_choice === 'tfidf'"
-                                        >{{ filter_frequency }} least distinctive terms across the corpus</a
+                                        >most common function words</a
                                     >
                                     are being filtered from this report.
                                 </span>
@@ -114,7 +111,7 @@
                             <div class="card ps-3 pe-3 pb-3 shadow-lg" id="filter-list" v-if="showFilteredWords">
                                 <button
                                     type="button"
-                                    class="btn btn-primary"
+                                    class="btn btn-secondary"
                                     id="close-filter-list"
                                     @click="toggleFilterList($event)"
                                 >

@@ -59,7 +59,7 @@ def collocation_results(request, config):
     cursor = db.dbh.cursor()
     start_time = timeit.default_timer()
     for hit in hits[hits_done:]:
-        sentence = " ".join(map(str, hit[:6])) + " 0"
+        sentence = f"{hit[0]} {hit[1]} {hit[2]} {hit[3]} {hit[4]} {hit[5]} 0"
         cursor.execute("SELECT words FROM sentences WHERE philo_id = ?", (sentence,))
         words = msgpack.loads(lz4.frame.decompress(cursor.fetchone()[0]))
         parent = hit[:6] + (0,)

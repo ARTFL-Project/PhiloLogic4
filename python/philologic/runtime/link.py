@@ -11,23 +11,23 @@ def url_encode(q_params):
         if v:
             if isinstance(v, list):
                 for s in v:
-                    encoded_str.append(quote_plus(k, safe="/") + "=" + quote_plus(s, safe="/"))
+                    encoded_str.append(f'{quote_plus(k, safe="/")}={quote_plus(s, safe="/")}')
             else:
-                encoded_str.append(quote_plus(k, safe="/") + "=" + quote_plus(v, safe="/"))
+                encoded_str.append(f'{quote_plus(k, safe="/")}={quote_plus(v, safe="/")}')
         else:  # Value is None
-            encoded_str.append(quote_plus(k, safe="/") + "=" + "")
+            encoded_str.append(f'{quote_plus(k, safe="/")}=')
     return "&".join(encoded_str)
 
 
 def make_object_link(philo_id, hit_bytes):
-    """ Takes a valid PhiloLogic object, and returns a relative URL representation of such. """
-    href = "./" + "/".join(str(x) for x in philo_id) + byte_query(hit_bytes)
+    """Takes a valid PhiloLogic object, and returns a relative URL representation of such."""
+    href = f'./{"/".join(map(str, philo_id))}{byte_query(hit_bytes)}'
     return href
 
 
 def make_absolute_object_link(config, philo_id, byte_offsets=None):
-    """ Takes a valid PhiloLogic object, and returns an absolute URL representation of such. """
-    href = "/navigate/" + "/".join(str(x) for x in philo_id)
+    """Takes a valid PhiloLogic object, and returns an absolute URL representation of such."""
+    href = f"/navigate/{'/'.join(map(str, philo_id))}"
     if byte_offsets is not None:
         href += byte_query(byte_offsets)
     return href
@@ -47,13 +47,13 @@ def make_absolute_query_link(config, params, script_name="/query", **extra_param
 
 def byte_query(hit_bytes):
     """This is used for navigating concordance results and highlighting hits"""
-    return "?" + "&".join(["byte=%d" % int(byte) for byte in hit_bytes])
+    return f'?{"&".join([f"byte={byte}" for byte in hit_bytes])}'
 
 
 def make_byte_range_link(config, philo_id, start_byte, end_byte):
     """Return an absolute link with byte range to highlight"""
     href = make_absolute_object_link(config, philo_id.split())
-    href += "?start_byte={}&end_byte={}".format(start_byte, end_byte)
+    href += f"?start_byte={start_byte}&end_byte={end_byte}"
     return href
 
 

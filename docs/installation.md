@@ -27,6 +27,7 @@ You can find a copy of the latest version of PhiloLogic4 [here](../../../release
 -   Make
 -   [gdbm](http://www.gnu.org.ua/software/gdbm/)
 -   LZ4
+-   Brotli (for Apache compression)
 
 ### Installing
 

@@ -27,8 +27,8 @@ CITATIONS = {
     "year": {
         "field": "year",
         "object_level": "doc",
-        "prefix": "[",
-        "suffix": "]",
+        "prefix": "",
+        "suffix": "",
         "link": False,
         "style": {},
     },
@@ -36,7 +36,7 @@ CITATIONS = {
         "field": "pub_place",
         "object_level": "doc",
         "prefix": "",
-        "suffix": ",&nbsp;",
+        "suffix": "",
         "link": False,
         "style": {},
     },
@@ -44,7 +44,7 @@ CITATIONS = {
         "field": "publisher",
         "object_level": "doc",
         "prefix": "",
-        "suffix": ",&nbsp;",
+        "suffix": "",
         "link": False,
         "style": {},
     },
@@ -98,10 +98,10 @@ CITATIONS = {
     },
     "page": {
         "style": {},
-        "suffix": "]",
+        "suffix": "",
         "object_level": "page",
         "field": "n",
-        "prefix": "&nbsp;[",
+        "prefix": "",
         "link": True,
     },
 }
@@ -139,7 +139,6 @@ DB_LOCALS_DEFAULTS = {
     },
 }
 DB_LOCALS_HEADER = """
-   # -*- coding: utf-8 -*-\n
    #########################################################\n
    #### Database configuration options for PhiloLogic4 #####\n
    #########################################################\n
@@ -737,7 +736,6 @@ WEB_CONFIG_DEFAULTS = {
 }
 
 WEB_CONFIG_HEADER = """
-   # -*- coding: utf-8 -*-"
    ####################################################\n
    #### Web configuration options for PhiloLogic4 #####\n
    ####################################################\n
@@ -801,11 +799,11 @@ class Config:
                     + "[{"
                     + """"field": "author", "object_level": "doc", "break_up_field": "title",
                         "field_citation": [citations["author"]], "break_up_field_citation": [
-                        citations["title"], citations["year"], citations["pub_place"], citations["publisher"], citations["collection"],
+                        citations["title"], citations["pub_place"], citations["publisher"], citations["collection"],citations["year"] 
                         ],"""
                     + "}, {"
-                    + """"field": "title", "object_level": "doc", "field_citation": [citations["title"], citations["year"],
-                        citations["pub_place"], citations["publisher"], citations["collection"], ],"break_up_field": None,
+                    + """"field": "title", "object_level": "doc", "field_citation": [citations["title"],
+                        citations["pub_place"], citations["publisher"], citations["collection"], citations["year"]],"break_up_field": None,
                         "citation": citations["title"], "break_up_field_citation": None, """
                     + "}]"
                 )

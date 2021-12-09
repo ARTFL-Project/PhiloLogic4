@@ -118,7 +118,7 @@ def frequency_results(request, config, sorted_results=False):
                     except KeyError:
                         # Worst case when there are different values for the field in div1, div2, and div3
                         query_metadata = {k: v for k, v in request.metadata.items() if v}
-                        query_metadata[request.frequency_field] = '"%s"' % key
+                        query_metadata[request.frequency_field] = f'"{key}"'
                         local_hits = db.query(**query_metadata)
                         counts[key]["total_word_count"] = local_hits.get_total_word_count()
             counts[key]["count"] += 1
