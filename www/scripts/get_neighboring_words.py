@@ -50,13 +50,6 @@ def get_neighboring_words(environ, start_response):
         and request.third_kwic_sorting_option in ("left", "right", "q", "")
     ):  # fast path
         hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
-        # object_types = []
-        # for field in config.kwic_metadata_sorting_fields:
-        #     object_type = db.locals["metadata_types"][field]
-        #     if object_type == "div":
-        #         object_types.extend(["div1", "div2", "div3"])
-        #     else:
-        #         object_types.append(object_type)
     else:
         metadata_search = True
         hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
@@ -79,10 +72,10 @@ def get_neighboring_words(environ, start_response):
                         if remaining:
                             offsets.append(remaining.pop(0))
                     offsets.sort()
-                    sentence = " ".join(map(str, hit[:6])) + " 0"
+                    sentence = f"{hit[0]} {hit[1]} {hit[2]} {hit[3]} {hit[4]} {hit[5]} 0"
                 else:
                     offsets = hit.bytes
-                    sentence = " ".join(map(str, hit.hit[:6])) + " 0"
+                    sentence = f"{hit.hit[0]} {hit.hit[1]} {hit.hit[2]} {hit.hit[3]} {hit.hit[4]} {hit.hit[5]} 0"
                 cursor.execute("SELECT words FROM sentences WHERE philo_id = ?", (sentence,))
                 words = msgpack.loads(lz4.frame.decompress(cursor.fetchone()[0]))
                 left_side_text = []
@@ -112,14 +105,6 @@ def get_neighboring_words(environ, start_response):
                 if metadata_search is True:
                     for metadata in config.kwic_metadata_sorting_fields:
                         result_obj[metadata] = ",".join(hit[metadata].lower().split())
-                # else: object_ids = []
-                # for object_type in object_types:
-                #     object_id = list(hit[: OBJECT_LEVELS[object_type]])
-                #     philo_id = object_id + [0 for _ in range(7 - len(object_id))]
-                #     object_ids.append(" ".join(map(str, philo_id)))
-                # cursor.execute(
-                #     f"SELECT {','.join(config.kwic_metadata_sorting_fields)} FROM toms WHERE philo_type in ({','.join(object_types)}) AND philo_id"
-                # )
                 print("\t".join(str(result_obj[field]) for field in fields), file=cache_file)
                 index += 1
                 elapsed = timeit.default_timer() - start_time

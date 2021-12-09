@@ -8,9 +8,9 @@
         <div class="row mt-4 pe-1" style="padding: 0 0.5rem" v-if="resultsLength">
             <div class="col-12 col-sm-4">
                 <div class="card shadow-sm">
-                    <table class="table table-hover table-striped table-borderless caption-top">
-                        <thead>
-                            <tr style="line-height: 2rem">
+                    <table class="table table-hover table-striped table-light table-borderless caption-top">
+                        <thead class="table-header">
+                            <tr>
                                 <th scope="col">Collocate</th>
                                 <th scope="col">Count</th>
                             </tr>
@@ -206,7 +206,6 @@ export default {
             this.sortedList = savedObject.results;
             this.resultsLength = savedObject.resultsLength;
             this.filterList = savedObject.filterList;
-            // this.percent = 100;
             this.done = true;
             this.searching = false;
         },
@@ -253,7 +252,18 @@ export default {
     },
 };
 </script>
-<style scoped>
+<style lang="scss" scoped>
+@import "../assets/styles/theme.scss";
+
+th {
+    background-color: $link-color;
+    color: #fff;
+    font-weight: 400;
+    font-variant: small-caps;
+}
+tbody tr {
+    cursor: pointer;
+}
 #description {
     position: relative;
 }

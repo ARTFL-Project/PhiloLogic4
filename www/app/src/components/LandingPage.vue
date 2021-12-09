@@ -122,15 +122,16 @@
                             <div class="card-header">
                                 {{ group.prefix.toString() }}
                             </div>
-
-                            <li
-                                class="contentClass p-2"
-                                v-for="(result, resultIndex) in group.results.slice(0, groupDisplay[groupIndex])"
-                                :key="resultIndex"
-                            >
-                                <citations :citation="buildCitationObject(result.metadata, citations)"></citations>
-                                <span v-if="displayCount == 'true'">&nbsp;({{ result.count }})</span>
-                            </li>
+                            <ul class="list-group list-group-flush">
+                                <li
+                                    class="list-group-item contentClass p-2"
+                                    v-for="(result, resultIndex) in group.results.slice(0, groupDisplay[groupIndex])"
+                                    :key="resultIndex"
+                                >
+                                    <citations :citation="buildCitationObject(result.metadata, citations)"></citations>
+                                    <span v-if="displayCount == 'true'">&nbsp;({{ result.count }})</span>
+                                </li>
+                            </ul>
                             <p class="pt-2 ps-3" v-if="group.results.length > 100">
                                 <button type="button" class="btn btn-outline-secondary" @click="seeAll(groupIndex)">
                                     See all {{ group.results.length }} results

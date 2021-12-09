@@ -95,7 +95,7 @@ def get_label(hit, citation_object):
                 label = str(page_num)
             except UnicodeEncodeError:
                 label = page_num.encode("utf-8", "ignore")  # page number is a unicode char
-            label = "page {}".format(label)
+            label = f"page {label}"
     elif citation_object["object_level"] == "line":
         try:
             line = hit.line[citation_object["field"]].strip()
@@ -138,7 +138,7 @@ def cite_linker(hit, citation_object, citation_hrefs, config, report):
             else:
                 params = [
                     ("report", "bibliography"),
-                    (citation_object["field"], '"%s"' % hit[citation_object["field"]]),
+                    (citation_object["field"], f'"{hit[citation_object["field"]]}"'),
                 ]
                 href = make_absolute_query_link(config, params)
         else:
