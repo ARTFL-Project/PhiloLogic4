@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rapidjson
+import orjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -30,7 +30,7 @@ def get_sorted_kwic(environ, start_response):
     db = DB(config.db_path + "/data/")
     request = WSGIHandler(environ, config)
     sorted_hits = get_sorted_hits(request, config, db)
-    yield rapidjson.dumps(sorted_hits).encode("utf8")
+    yield orjson.dumps(sorted_hits)
 
 
 def get_sorted_hits(request, config, db):

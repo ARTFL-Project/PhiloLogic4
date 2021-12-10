@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rapidjson
+import orjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -32,7 +32,7 @@ def get_frequency(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("scripts", ""))
     request = WSGIHandler(environ, config)
     results = frequency_results(request, config)
-    yield rapidjson.dumps(results).encode("utf8")
+    yield orjson.dumps(results)
 
 
 if __name__ == "__main__":

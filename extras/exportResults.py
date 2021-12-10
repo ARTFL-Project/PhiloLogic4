@@ -4,7 +4,7 @@
 import requests
 import sys
 from optparse import OptionParser, BadOptionError, AmbiguousOptionError
-from rapidjson import dump
+from orjson import dump
 from time import sleep
 import six
 

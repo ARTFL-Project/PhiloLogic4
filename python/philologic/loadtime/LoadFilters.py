@@ -3,7 +3,7 @@
 
 import os
 import pickle
-from rapidjson import dumps, loads
+from orjson import dumps, loads
 import lz4.frame
 
 from philologic.loadtime.OHCOVector import Record

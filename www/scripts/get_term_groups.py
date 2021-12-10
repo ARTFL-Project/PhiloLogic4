@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rapidjson
+import orjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -31,7 +31,7 @@ def term_group(environ, start_response):
     db = DB(config.db_path + "/data/")
     request = WSGIHandler(environ, config)
     if not request["q"]:
-        dump = rapidjson.dumps({"original_query": "", "term_groups": []})
+        dump = orjson.dumps({"original_query": "", "term_groups": []})
     else:
         hits = db.query(
             request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata
@@ -56,8 +56,8 @@ def term_group(environ, start_response):
                     term_group += " %s " % term
             term_group = term_group.strip()
             term_groups.append(term_group)
-        dump = rapidjson.dumps({"term_groups": term_groups, "original_query": request.original_q})
-    yield dump.encode("utf8")
+        dump = orjson.dumps({"term_groups": term_groups, "original_query": request.original_q})
+    yield dump
 
 
 if __name__ == "__main__":

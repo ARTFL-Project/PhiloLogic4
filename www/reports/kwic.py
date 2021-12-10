@@ -3,7 +3,7 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import rapidjson
+import orjson
 
 import sys
 
@@ -30,7 +30,7 @@ def kwic(environ, start_response):
     kwic_object = kwic_results(request, config)
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response("200 OK", headers)
-    yield rapidjson.dumps(kwic_object).encode("utf8")
+    yield orjson.dumps(kwic_object)
 
 
 if __name__ == "__main__":

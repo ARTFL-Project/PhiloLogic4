@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rapidjson
+import orjson
 import os
 import re
 import subprocess
@@ -40,7 +40,7 @@ def metadata_list(environ, start_response):
     request = WSGIHandler(environ, config)
     metadata = request.term
     field = request.field
-    yield autocomplete_metadata(metadata, field, db).encode("utf8")
+    yield autocomplete_metadata(metadata, field, db)
 
 
 def autocomplete_metadata(metadata, field, db):
@@ -53,7 +53,7 @@ def autocomplete_metadata(metadata, field, db):
         field = field[-1]
 
     words = format_query(metadata, field, db)[:100]
-    return rapidjson.dumps(words)
+    return orjson.dumps(words)
 
 
 def format_query(q, field, db):

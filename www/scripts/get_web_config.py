@@ -27,7 +27,7 @@ def get_web_config(_, start_response):
     config.time_series_status = time_series_tester(config)
     db_locals = MakeDBConfig(os.path.join(db_path, "data/db.locals.py"))
     config.data["available_metadata"] = db_locals.metadata_fields
-    yield config.to_json().encode("utf8")
+    yield config.to_json()
 
 
 def time_series_tester(config):

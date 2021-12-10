@@ -2,7 +2,7 @@
 
 
 import sys
-from rapidjson import dumps
+from orjson import dumps
 
 ### CompoundStack is the class to use for all parsers.
 
@@ -237,7 +237,7 @@ class CompoundStack:
 
 
 class NewStack:
-    """ NewStack is where the low-level object arithmetic and instantiation happens.  Pretty wonky,
+    """NewStack is where the low-level object arithmetic and instantiation happens.  Pretty wonky,
     so there's inline documentation where needed"""
 
     def __init__(self, types, out=None, factory=None):

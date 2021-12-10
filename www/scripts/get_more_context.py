@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rapidjson
+import orjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -33,7 +33,7 @@ def get_more_context(environ, start_response):
     hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
     context_size = config["concordance_length"] * 3
     hit_context = get_concordance_text(db, hits[hit_num], config.db_path, context_size)
-    yield rapidjson.dumps(hit_context).encode("utf8")
+    yield orjson.dumps(hit_context)
 
 
 if __name__ == "__main__":

@@ -3,9 +3,9 @@ from distutils.core import setup
 
 setup(
     name="philologic",
-    version="4.7b1",
+    version="4.7b3",
     author="The ARTFL Project",
-    author_email="artfl@artfl.uchicago.edu",
+    author_email="clovisgladstone@artfl.uchicago.edu",
     packages=[
         "philologic",
         "philologic.runtime",
@@ -22,7 +22,7 @@ setup(
         "tqdm",
         "sklearn",
         "numpy",
-        "python-rapidjson",
+        "orjson",
         "black",
         "msgpack",
         "lz4",

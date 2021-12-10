@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rapidjson
+import orjson
 import os
 import sys
 from wsgiref.handlers import CGIHandler
@@ -28,7 +28,7 @@ def bibliography(environ, start_response):
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response("200 OK", headers)
     bibliography_object, hits = bibliography_results(request, config)
-    yield rapidjson.dumps(bibliography_object).encode("utf8")
+    yield orjson.dumps(bibliography_object)
 
 
 if __name__ == "__main__":

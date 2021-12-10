@@ -3,7 +3,7 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import rapidjson
+import orjson
 
 import sys
 
@@ -30,7 +30,7 @@ def time_series(environ, start_response):
     time_series_object = generate_time_series(request, config)
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response("200 OK", headers)
-    yield rapidjson.dumps(time_series_object).encode("utf8")
+    yield orjson.dumps(time_series_object)
 
 
 if __name__ == "__main__":

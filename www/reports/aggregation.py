@@ -3,7 +3,7 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import rapidjson
+import orjson
 
 import sys
 
@@ -33,7 +33,7 @@ def aggregation(environ, start_response):
         ("Access-Control-Allow-Origin", "*"),
     ]
     start_response("200 OK", headers)
-    yield rapidjson.dumps(aggregation_object).encode("utf8")
+    yield orjson.dumps(aggregation_object)
 
 
 if __name__ == "__main__":

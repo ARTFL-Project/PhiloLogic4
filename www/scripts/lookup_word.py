@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rapidjson
+import orjson
 import os
 import sqlite3
 import sys
@@ -56,7 +56,7 @@ def lookup_word_service(environ, start_response):
         pass
     #    print >> sys.stderr, "TOKEN", token, "BYTES: ", start_byte, end_byte, "FILENAME: ", filename, "POSITION", request.position
     token_n = 0
-    yield lookup_word(db, cursor, token, token_n, start_byte, end_byte, filename).encode("utf8")
+    yield lookup_word(db, cursor, token, token_n, start_byte, end_byte, filename)
 
 
 def lookup_word(db, cursor, token, n, start, end, filename):
@@ -148,10 +148,10 @@ def lookup_word(db, cursor, token, n, start, end, filename):
                     #     }
                     # ]
                 }
-                return rapidjson.dumps(result_object)
+                return orjson.dumps(result_object)
             else:
                 i += 1
-    return rapidjson.dumps({})
+    return orjson.dumps({})
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ from wsgiref.handlers import CGIHandler
 
 import lz4.frame
 import msgpack
-import rapidjson
+import orjson
 from philologic.runtime.DB import DB
 import re
 
@@ -56,7 +56,7 @@ def get_neighboring_words(environ, start_response):
         fields.extend(config.kwic_metadata_sorting_fields)
     cache_path = get_cache_path(request, db)
     if os.path.exists(f"{cache_path}.sorted"):
-        yield rapidjson.dumps({"hits_done": len(hits), "cache_path": cache_path}).encode("utf8")
+        yield orjson.dumps({"hits_done": len(hits), "cache_path": cache_path})
     else:
         if not os.path.exists(cache_path):
             with open(cache_path, "w") as cache_file:
@@ -112,7 +112,7 @@ def get_neighboring_words(environ, start_response):
                     elapsed > max_time
                 ):  # avoid timeouts by splitting the query if more than 5 seconds has been spent in the loop
                     break
-        yield rapidjson.dumps({"hits_done": index, "cache_path": cache_path}).encode("utf8")
+        yield orjson.dumps({"hits_done": index, "cache_path": cache_path})
 
 
 def get_cache_path(request, db):

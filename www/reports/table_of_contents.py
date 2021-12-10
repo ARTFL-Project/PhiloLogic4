@@ -3,7 +3,7 @@
 import os
 from wsgiref.handlers import CGIHandler
 
-import rapidjson
+import orjson
 
 import sys
 
@@ -31,7 +31,7 @@ def table_of_contents(environ, start_response):
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response("200 OK", headers)
     toc_object = generate_toc_object(request, config)
-    yield rapidjson.dumps(toc_object).encode("utf8")
+    yield orjson.dumps(toc_object)
 
 
 if __name__ == "__main__":

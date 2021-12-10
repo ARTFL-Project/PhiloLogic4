@@ -4,7 +4,7 @@ import os
 import sys
 from wsgiref.handlers import CGIHandler
 
-import rapidjson
+import orjson
 from philologic.runtime.DB import DB
 
 sys.path.append("..")
@@ -81,7 +81,7 @@ def get_total_doc_count(environ, start_response):
             )
             count += cursor.fetchone()[0]
         stats.append({"field": field_obj["field"], "count": count})
-    yield rapidjson.dumps({"stats": stats}).encode("utf8")
+    yield orjson.dumps({"stats": stats})
 
 
 def tuple_to_str(philo_id, obj_level):

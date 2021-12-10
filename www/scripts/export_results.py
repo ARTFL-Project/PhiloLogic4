@@ -5,7 +5,7 @@ import csv
 import io
 import os
 import sys
-from json import dumps
+from orjson import dumps
 import re
 from wsgiref.handlers import CGIHandler
 
@@ -86,7 +86,7 @@ def export_results(environ, start_response):
         status = "200 OK"
         headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
         start_response(status, headers)
-        yield dumps(results).encode("utf8")
+        yield dumps(results)
     elif request.output_format == "csv":
         status = "200 OK"
         headers = [("Content-type", "text/csv; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
