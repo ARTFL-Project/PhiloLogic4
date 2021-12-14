@@ -27,8 +27,7 @@ def get_bibliography(environ, start_response):
     start_response(status, headers)
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("scripts", ""))
     request = WSGIHandler(environ, config)
-    results = landing_page_bibliography(request, config)
-    yield orjson.dumps(results)
+    yield landing_page_bibliography(request, config)
 
 
 if __name__ == "__main__":

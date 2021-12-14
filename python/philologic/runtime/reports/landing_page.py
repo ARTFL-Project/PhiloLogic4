@@ -49,7 +49,7 @@ def landing_page_bibliography(request, config):
             )
         try:
             start_head = c.fetchone()["head"]
-            start_head = start_head.lower().title().encode("utf-8")
+            start_head = start_head.lower().title()
         except Exception as e:
             print(repr(e), file=sys.stderr)
             start_head = ""
@@ -63,14 +63,14 @@ def landing_page_bibliography(request, config):
             )
         try:
             end_head = c.fetchone()["head"]
-            end_head = end_head.lower().title().encode("utf-8")
+            end_head = end_head.lower().title()
         except:
             end_head = ""
         hit_object["start_head"] = start_head
         hit_object["end_head"] = end_head
 
         results.append(hit_object)
-    return results
+    return orjson.dumps(results)
 
 
 def group_by_range(request_range, request, config):

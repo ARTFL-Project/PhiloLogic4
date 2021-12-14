@@ -54,11 +54,6 @@ def get_sorted_hits(request, config, db):
             key = fields.index(request.third_kwic_sorting_option) + 1
             sort_order.append(f"-k {key},{key}")
         sort_order = " ".join(sort_order)
-        print(
-            f"sort {sort_order} {request.cache_path} > {request.cache_path}.sorted && rm {request.cache_path}",
-            file=sys.stderr,
-            flush=True,
-        )
         os.system(
             f"sort {sort_order} {request.cache_path} > {request.cache_path}.sorted && rm {request.cache_path}"
         )  # no numeric sort since we would have to know the type of the field being sorted on: e.g. -k 2,2n
