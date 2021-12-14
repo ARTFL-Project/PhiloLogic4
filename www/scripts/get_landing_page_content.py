@@ -35,7 +35,7 @@ def landing_page_content(environ, start_response):
         results = group_by_range(request_range, request, config)
     else:
         results = group_by_metadata(request, config)
-    yield results.encode("utf8")
+    yield results
 
 
 if __name__ == "__main__":

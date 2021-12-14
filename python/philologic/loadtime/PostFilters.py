@@ -9,7 +9,7 @@ import unicodedata
 
 import lz4.frame
 import msgpack
-from rapidjson import loads
+from orjson import loads
 from tqdm import tqdm
 
 

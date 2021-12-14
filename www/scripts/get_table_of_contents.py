@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rapidjson
+import orjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -39,7 +39,7 @@ def get_table_of_contents(environ, start_response):
             current_obj_position = pos
             break
     toc_object["current_obj_position"] = current_obj_position
-    yield rapidjson.dumps(toc_object).encode("utf8")
+    yield orjson.dumps(toc_object)
 
 
 if __name__ == "__main__":

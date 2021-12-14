@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rapidjson
+import orjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -30,7 +30,7 @@ def get_notes(environ, start_response):
     db = DB(config.db_path + "/data/")
     request = WSGIHandler(environ, config)
     text_object = generate_text_object(request, config, note=True)
-    yield rapidjson.dumps(text_object).encode("utf8")
+    yield orjson.dumps(text_object)
 
 
 if __name__ == "__main__":

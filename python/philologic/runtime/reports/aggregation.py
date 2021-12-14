@@ -7,6 +7,7 @@ OBJ_DICT = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "wo
 OBJ_ZEROS = {"doc": 6, "div1": 5, "div2": 4, "div3": 3, "para": 2, "sent": 1, "word": 0}
 
 
+# @profile
 def aggregation_by_field(request, config):
     """Group hitlist by metadata field"""
     db = DB(config.db_path + "/data/")
@@ -36,8 +37,9 @@ def aggregation_by_field(request, config):
     cursor = db.dbh.cursor()
     # if metadata_type != "div":
     distinct_philo_ids = tuple(" ".join(map(str, id)) for id in set(philo_ids))
+    # we use ORDER BY to force use of index on large queries
     cursor.execute(
-        f"select {', '.join(metadata_fields_needed)} from toms where philo_{metadata_type}_id IN ({', '.join('?' for _ in range(len(distinct_philo_ids)))})",
+        f"select {', '.join(metadata_fields_needed)} from toms where philo_{metadata_type}_id IN ({', '.join('?' for _ in range(len(distinct_philo_ids)))}) ORDER BY philo_{metadata_type}_id",
         distinct_philo_ids,
     )
     # else:

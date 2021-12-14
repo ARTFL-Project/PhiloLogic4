@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rapidjson
+import orjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -28,7 +28,7 @@ def get_filter_list(environ, start_response):
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("scripts", ""))
     request = WSGIHandler(environ, config)
     filter_list = build_filter_list(request, config)
-    yield rapidjson.dumps(filter_list).encode("utf8")
+    yield orjson.dumps(filter_list)
 
 
 if __name__ == "__main__":

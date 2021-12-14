@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rapidjson
+import orjson
 import os
 from wsgiref.handlers import CGIHandler
 
@@ -36,7 +36,7 @@ def get_text_object(environ, start_response):
         request.philo_id += zeros * " 0"
     obj = ObjectWrapper(request["philo_id"].split(), db)
     text_object = generate_text_object(request, config)
-    yield rapidjson.dumps(text_object).encode("utf8")
+    yield orjson.dumps(text_object)
 
 
 if __name__ == "__main__":

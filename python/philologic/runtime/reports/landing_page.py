@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Landing page reports."""
 
-import json
+import orjson
 import sqlite3
 import sys
 import unicodedata
@@ -49,7 +49,7 @@ def landing_page_bibliography(request, config):
             )
         try:
             start_head = c.fetchone()["head"]
-            start_head = start_head.lower().title().encode("utf-8")
+            start_head = start_head.lower().title()
         except Exception as e:
             print(repr(e), file=sys.stderr)
             start_head = ""
@@ -63,14 +63,14 @@ def landing_page_bibliography(request, config):
             )
         try:
             end_head = c.fetchone()["head"]
-            end_head = end_head.lower().title().encode("utf-8")
+            end_head = end_head.lower().title()
         except:
             end_head = ""
         hit_object["start_head"] = start_head
         hit_object["end_head"] = end_head
 
         results.append(hit_object)
-    return results
+    return orjson.dumps(results)
 
 
 def group_by_range(request_range, request, config):
@@ -102,7 +102,7 @@ def group_by_range(request_range, request, config):
                     "count": 1,
                 }
             )
-        return json.dumps(
+        return orjson.dumps(
             {
                 "display_count": request.display_count,
                 "content_type": content_type,
@@ -115,7 +115,7 @@ def group_by_range(request_range, request, config):
     try:
         cursor.execute(f'select *, count(*) as count from toms where philo_type="doc" group by {metadata_queried}')
     except sqlite3.OperationalError:
-        return json.dumps({"display_count": request.display_count, "content_type": content_type, "content": []})
+        return orjson.dumps({"display_count": request.display_count, "content_type": content_type, "content": []})
     for doc in cursor:
         normalized_test_value = ""
         if doc[metadata_queried] is None:
@@ -148,7 +148,7 @@ def group_by_range(request_range, request, config):
                     "count": doc["count"],
                 }
             )
-    return json.dumps(
+    return orjson.dumps(
         {
             "display_count": request.display_count,
             "content_type": content_type,
@@ -160,7 +160,7 @@ def group_by_range(request_range, request, config):
 
 def group_by_metadata(request, config):
     """Count result by metadata field"""
-    # citation_types = json.loads(request.citation)
+    # citation_types = orjson.loads(request.citation)
     db = DB(config.db_path + "/data/")
     metadata_fields_needed, citations = get_fields_and_citations(request, config)
     cursor = db.dbh.cursor()
@@ -174,7 +174,7 @@ def group_by_metadata(request, config):
                 "metadata": metadata,
             }
         )
-    return json.dumps(
+    return orjson.dumps(
         {
             "display_count": request.display_count,
             "content_type": request.group_by_field,

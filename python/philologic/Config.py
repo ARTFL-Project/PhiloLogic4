@@ -4,7 +4,7 @@
 import os
 import sys
 
-import rapidjson as json
+import orjson as json
 from philologic.utils import pretty_print
 
 CITATIONS = {

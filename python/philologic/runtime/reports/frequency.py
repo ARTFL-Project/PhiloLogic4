@@ -34,7 +34,6 @@ def frequency_results(request, config, sorted_results=False):
 
     if sorted_results is True:
         hits.finish()
-
     metadata_type = db.locals["metadata_types"][request.frequency_field]
     cursor = db.dbh.cursor()
     if metadata_type != "div":
@@ -49,14 +48,14 @@ def frequency_results(request, config, sorted_results=False):
         )
     metadata_dict = {}
     for philo_id, field_name in cursor:
-        philo_id = tuple(int(s) for s in philo_id.split() if int(s))
+        philo_id = tuple(map(int, philo_id[: philo_id.index(" 0")].split()))
         metadata_dict[philo_id] = field_name
 
     word_counts_by_field_name = db.query(get_word_count_field=request.frequency_field, **request.metadata)
 
     counts = {}
     frequency_object = {}
-    start_time = time.perf_counter()
+    start_time = time.time()
 
     obj_dict = {
         "doc": 1,
@@ -91,9 +90,10 @@ def frequency_results(request, config, sorted_results=False):
                 philo_id = tuple(list(philo_id[:6]) + [philo_id[7]])
             if metadata_type == "div":
                 key = ""
-                for div in ["div1", "div2", "div3"]:
+                for div in ["div3", "div2", "div1"]:  # Reverse order since deeper level takes priority
                     if philo_id[: obj_dict[div]] in metadata_dict:
                         key = metadata_dict[philo_id[: obj_dict[div]]]
+                        break
                 while not key:
                     if philo_id[:4] in metadata_dict:
                         key = metadata_dict[philo_id[:4]]
@@ -125,8 +125,7 @@ def frequency_results(request, config, sorted_results=False):
 
             # avoid timeouts by splitting the query if more than
             # request.max_time (in seconds) has been spent in the loop
-            # print(time.perf_counter() - start_time, hit_count, flush=True, file=sys.stderr)
-            if time.perf_counter() - start_time > 5 and sorted_results is False:
+            if time.time() - start_time > 5 and sorted_results is False:
                 break
 
         hit_count += 1  # account for the fact we count from 0

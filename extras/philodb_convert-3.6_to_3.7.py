@@ -173,7 +173,6 @@ if __name__ == "__main__":
         cursor = conn.cursor()
         cursor.execute("VACUUM")
 
-    exit()
     # Regenerate new WebConfig file
     old_config = load_module("old_config", os.path.join(philo_db + "/data/web_config.cfg"))
     start_date, end_date = get_time_series_dates(toms_path)
