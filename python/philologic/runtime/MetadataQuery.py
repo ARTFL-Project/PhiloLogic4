@@ -4,7 +4,6 @@ import struct
 import subprocess
 import sys
 import unicodedata
-from collections import defaultdict
 
 from . import HitList
 from .HitList import NoHits
@@ -288,17 +287,18 @@ def escape_sql_string(s):
 
 
 def hit_to_string(hit, width):
+    """Convert Philo hit to a string"""
     if isinstance(hit, sqlite3.Row):
         hit = hit["philo_id"]
     if isinstance(hit, str):
-        hit = [int(x) for x in hit.split(" ")]
+        hit = list(map(int, hit.split(" ")))
     if isinstance(hit, int):
         hit = [hit]
     if len(hit) > width:
         hit = hit[:width]
     pad = width - len(hit)
-    hit_string = " ".join(str(h) for h in hit)
-    hit_string += "".join(" 0" for n in range(pad))
+    hit_string = " ".join(map(str, hit))
+    hit_string += "".join(" 0" for _ in range(pad))
     return hit_string
 
 
