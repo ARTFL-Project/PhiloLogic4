@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """PhiloLogic4 main parser"""
 
+import datetime
 import os
 import re
 import string
@@ -1017,8 +1018,8 @@ class XMLParser:
                 div = "div%d" % self.context_div_level
                 for attrib_name, attrib_value in self.get_attributes(tag):
                     if attrib_name == "value" or attrib_name == "when":
-                        if "div_date" not in self.v[div].attrib:
-                            self.v[div].attrib["div_date"] = attrib_value
+                        if "full_date" not in self.v[div].attrib:
+                            self.v[div].attrib["full_date"] = extract_full_date(attrib_value)
                     else:
                         attrib_name = f"div_{attrib_name}"
                         if attrib_name not in self.v[div].attrib:
@@ -1499,7 +1500,7 @@ class XMLParser:
         return text_in_bytes.decode("utf8")
 
     def convert_other_ents(self, text):
-        """ handles character entities in index words.
+        """handles character entities in index words.
         There should not be many of these."""
         text = text.replace("&apos;", "'")
         text = text.replace("&s;", "s")
@@ -1512,6 +1513,26 @@ class XMLParser:
 
     def remove_control_chars(self, text):
         return control_char_re.sub("", text)
+
+
+def extract_full_date(date):
+    """Extract full dates and format as year-month-day"""
+    date_finder = re.compile(r"^(\d+)-?(\d+)?-?(\d+)?")
+    date_match = date_finder.search(date)
+    if date_match:
+        day, month, year = date_match.groups()
+        if year is None:
+            year = 1
+        if month is None or int(month) > 12 or int(month) == 0:
+            month = 1
+        if day is None or int(day) > 31 or int(day) == 0:
+            day = 1
+        try:
+            return datetime.date(int(year), int(month), int(day))
+        except:
+            print(day, month, year)
+            exit()
+    return ""
 
 
 if __name__ == "__main__":

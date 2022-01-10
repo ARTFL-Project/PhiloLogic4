@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 
-import math
 import os
 import sqlite3
 import time
@@ -18,12 +17,14 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
         print(f"{time.ctime()}: Loading the {table} SQLite table...")
         db_destination = os.path.join(loader_obj.destination, db_file)
         line_count = sum(1 for _ in open(file_in, "rbU"))
-        conn = sqlite3.connect(db_destination)
+        conn = sqlite3.connect(db_destination, detect_types=sqlite3.PARSE_DECLTYPES)
         conn.text_factory = str
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        columns = "philo_type, philo_name, philo_id, philo_seq"
-        query = "create table if not exists %s (%s)" % (table, columns)
+        if table == "toms":
+            query = f"create table if not exists {table} (philo_type text, philo_name text, philo_id text, philo_seq text, year int, full_date date)"
+        else:
+            query = f"create table if not exists {table} (philo_type, philo_name, philo_id, philo_seq)"
         cursor.execute(query)
         with tqdm(total=line_count, leave=False) as pbar:
             with open(file_in) as input_file:
@@ -148,13 +149,15 @@ def metadata_frequencies(loader_obj):
         query = "select %s, count(*) from toms group by %s order by count(%s) desc" % (field, field, field)
         try:
             cursor.execute(query)
-            output = open(frequencies + "/%s_frequencies" % field, "w")
-            for result in cursor:
-                if result[0] is not None:
-                    val = result[0]
-                    clean_val = val.replace("\n", " ").replace("\t", "")
-                    print(clean_val + "\t" + str(result[1]), file=output)
-            output.close()
+            with open(frequencies + "/%s_frequencies" % field, "w") as output:
+                for result in cursor:
+                    if result[0] is not None:
+                        val = result[0]
+                        try:
+                            clean_val = val.replace("\n", " ").replace("\t", "")
+                        except AttributeError:  # type is not a string
+                            clean_val = f"{val}"
+                        print(clean_val + "\t" + str(result[1]), file=output)
         except sqlite3.OperationalError:
             loader_obj.metadata_fields_not_found.append(field)
             if os.path.exists(f"{frequencies}/{field}_frequencies"):

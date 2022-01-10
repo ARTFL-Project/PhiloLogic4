@@ -7,7 +7,7 @@ import unicodedata
 
 from . import HitList
 from .HitList import NoHits
-from .QuerySyntax import group_terms, parse_query
+from .QuerySyntax import group_terms, parse_query, parse_date_query
 
 os.environ["PATH"] += ":/usr/local/bin/"
 
@@ -120,17 +120,18 @@ def query_lowlevel(db, param_dict, sort_order):
     for column, values in list(param_dict.items()):
         norm_path = db.path + "/frequencies/normalized_" + column + "_frequencies"
         for v in values:
-            parsed = parse_query(v)
+            if column != "full_date":
+                parsed = parse_query(v)
+            else:
+                parsed = parse_date_query(v)
+            grouped = group_terms(parsed)
+            expanded = expand_grouped_query(grouped, norm_path)
+            sql_clause = make_grouped_sql_clause(expanded, column, db)
+            print(sql_clause, file=sys.stderr)
             if db.locals["debug"]:
                 print("METADATA_TOKENS:", parsed, file=sys.stderr)
-            grouped = group_terms(parsed)
-            if db.locals["debug"]:
                 print("METADATA_SYNTAX GROUPED:", grouped, file=sys.stderr)
-            expanded = expand_grouped_query(grouped, norm_path)
-            if db.locals["debug"]:
                 print("METADATA_SYNTAX EXPANDED:", expanded, file=sys.stderr)
-            sql_clause = make_grouped_sql_clause(expanded, column, db)
-            if db.locals["debug"]:
                 print("SQL_SYNTAX:", sql_clause, file=sys.stderr)
             clauses.append(sql_clause)
     if not sort_order:
@@ -141,6 +142,7 @@ def query_lowlevel(db, param_dict, sort_order):
         query = "SELECT philo_id FROM toms"
     if sort_order:
         query = f"{query} ORDER BY {', '.join(sort_order)}"
+    print(query, vars, file=sys.stderr)
     if db.locals["debug"]:
         print("INNER QUERY: ", "%s %% %s" % (query, vars), sort_order, file=sys.stderr)
     # print("INNER QUERY: ", "%s %% %s" % (query, vars), sort_order, file=sys.stderr)
@@ -206,8 +208,11 @@ def make_grouped_sql_clause(expanded, column, db):
             neg = True
             if len(group) > 1:
                 second_token, second_value = group[1]
-                if second_token == "RANGE":
-                    lower, upper = second_value.split("-")
+                if second_token in ("RANGE", "DATE_RANGE"):
+                    if first_token == "RANGE":
+                        lower, upper = second_value.split("-")
+                    else:
+                        lower, upper = second_value.split("<=>")
                     clause += "(%s < %s OR %s > %s)" % (column, esc(lower), column, esc(upper))
                     if first_group:
                         first_group = False
@@ -217,8 +222,11 @@ def make_grouped_sql_clause(expanded, column, db):
                     continue
             clause += "%s NOT IN (" % column
         else:
-            if first_token == "RANGE":
-                lower, upper = first_value.split("-")
+            if first_token in ("RANGE", "DATE_RANGE"):
+                if first_token == "RANGE":
+                    lower, upper = first_value.split("-")
+                else:
+                    lower, upper = first_value.split("<=>")
                 if not lower:
                     c = db.dbh.cursor()
                     c.execute("select min(%s) from toms" % column)

@@ -14,12 +14,29 @@ patterns = [
     ("TERM", r'[^\-|\s"]+'),
 ]
 
+date_patterns = [("NOT", "NOT"), ("OR", r"\|"), ("DATE_RANGE", r"([^<]+)<=>(.*)"), ("DATE", r"(.+)")]
+
 
 def parse_query(qstring):
     buf = qstring[:]
     parsed = []
     while len(buf) > 0:
         for label, pattern in patterns:
+            m = re.match(pattern, buf)
+            if m:
+                parsed.append((label, m.group()))
+                buf = buf[m.end() :]
+                break
+        else:
+            buf = buf[1:]
+    return parsed
+
+
+def parse_date_query(qstring):
+    buf = qstring[:]
+    parsed = []
+    while len(buf) > 0:
+        for label, pattern in date_patterns:
             m = re.match(pattern, buf)
             if m:
                 parsed.append((label, m.group()))
