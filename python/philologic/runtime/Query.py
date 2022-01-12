@@ -3,7 +3,7 @@
 
 import os
 import subprocess
-import re
+import regex as re
 import sys
 import unicodedata
 from datetime import datetime

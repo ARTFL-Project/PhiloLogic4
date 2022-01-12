@@ -15,6 +15,7 @@ setup(
     ],
     scripts=["scripts/philoload4"],
     install_requires=[
+        "regex",
         "lxml",
         "python-levenshtein",
         "natsort",

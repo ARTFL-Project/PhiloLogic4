@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Navigate inside objects"""
 
-import re
-
+import regex as re
 from philologic.runtime.citations import citation_links, citations
 from philologic.runtime.get_text import get_text_obj
 from philologic.runtime.DB import DB

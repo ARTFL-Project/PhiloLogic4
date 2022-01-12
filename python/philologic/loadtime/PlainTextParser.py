@@ -1,6 +1,6 @@
 import sys
 import os
-import re
+import regex as re
 from philologic.loadtime import OHCOVector
 
 

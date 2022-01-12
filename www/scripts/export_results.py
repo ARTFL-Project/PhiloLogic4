@@ -6,7 +6,7 @@ import io
 import os
 import sys
 from orjson import dumps
-import re
+import regex as re
 from wsgiref.handlers import CGIHandler
 
 sys.path.append("..")

@@ -3,7 +3,7 @@
 
 
 import os
-import re
+import regex as re
 import sqlite3
 
 from lxml import etree, html

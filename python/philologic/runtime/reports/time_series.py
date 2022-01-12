@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Time series"""
 
-import re
+import regex as re
 import timeit
 from collections import defaultdict
 

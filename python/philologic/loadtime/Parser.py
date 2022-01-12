@@ -3,7 +3,7 @@
 
 import datetime
 import os
-import re
+import regex as re
 import string
 import sys
 
@@ -142,7 +142,7 @@ TAG_EXCEPTIONS = [
     r"</sup>",
 ]
 
-TOKEN_REGEX = r"\w+|[&\w;]+"
+TOKEN_REGEX = r"[\p{L}\p{M}\p{Pd}\p{N}]+|[&\p{L};]+"
 
 PUNCTUATION = r"""[;,:=+()"]"""
 
@@ -229,7 +229,7 @@ hyper_div_tag = re.compile(r"<hyperdiv\W", re.I)
 div_num_tag = re.compile(r"<div(.)", re.I)
 char_ents = re.compile(r"\&[a-zA-Z0-9\#][a-zA-Z0-9]*;", re.I)
 newline_shortener = re.compile(r"\n\n*")
-check_if_char_word = re.compile(r"\w", re.I | re.U)
+check_if_char_word = re.compile(r"\p{L}", re.I)
 cap_char_or_num = re.compile(r"[A-Z0-9]")  # Capitals
 ending_punctuation = re.compile(r"[%s]$" % string.punctuation.replace(")", "").replace("]", ""))
 add_tag = re.compile(r"<add\W", re.I)
@@ -1088,7 +1088,7 @@ class XMLParser:
                     current_pos += word_length
 
                     # Do we have a word? At least one of these characters.
-                    if check_if_char_word.search(word.replace("_", "")):
+                    if check_if_char_word.search(word):
                         last_word = word
                         word_pos = current_pos - len(word_in_utf8)
                         if "&" in word:

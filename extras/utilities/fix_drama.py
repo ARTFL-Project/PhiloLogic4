@@ -2,8 +2,7 @@
 
 from lxml import etree
 import sys
-import re
-
+import regex as re
 def promote(el):
     # snips el out of parent, creates it as a sibling of parent under container, and 
     # creates a new copy of parent with type="split" to contain all trailing content

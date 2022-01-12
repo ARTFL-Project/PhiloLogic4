@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 
-import re
-
+import regex as re
 from lxml import etree
 from philologic import shlaxtree as st
 

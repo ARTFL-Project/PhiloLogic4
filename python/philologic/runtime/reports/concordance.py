@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Concordance report"""
 
-import re
-
+import regex as re
 from philologic.runtime.pages import page_interval
 from philologic.runtime.citations import citations, citation_links
 from philologic.runtime.get_text import get_concordance_text

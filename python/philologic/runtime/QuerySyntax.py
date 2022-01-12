@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import re
+import regex as re
 
 patterns = [
     ("QUOTE", r'".+?"'),

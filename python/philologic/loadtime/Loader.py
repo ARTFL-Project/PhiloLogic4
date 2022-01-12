@@ -6,7 +6,7 @@ import collections
 import math
 import os
 import pickle
-import re
+import regex as re
 import shutil
 import sqlite3
 import sys
@@ -342,24 +342,6 @@ class Loader:
                         earliest_year = year
         if earliest_year != 2500:
             metadata["year"] = str(earliest_year)
-        return metadata
-
-    def create_full_date_field(self, metadata):
-        date_finder = re.compile(r"^(\d+)(-\d+)?(-\d+)?")
-        full_date = ""
-        for field in ["date", "create_date", "pub_date", "period"]:
-            if field in metadata:
-                date_match = date_finder.search(metadata[field])
-                if date_match:
-                    year, month, day = date_match.groups()
-                    if month is None:
-                        month = "01"
-                    if day is None:
-                        day = "01"
-                    full_date = f"{year}-{month}-{day}"
-                    break
-        if full_date:
-            metadata["full_date"] = full_date
         return metadata
 
     def parse_metadata(self, sort_by_field, header="tei"):
