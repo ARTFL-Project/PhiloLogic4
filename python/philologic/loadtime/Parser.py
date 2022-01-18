@@ -142,7 +142,7 @@ TAG_EXCEPTIONS = [
     r"</sup>",
 ]
 
-TOKEN_REGEX = r"[\p{L}\p{M}\p{Pd}\p{N}]+|[&\p{L};]+"
+TOKEN_REGEX = r"[\p{L}\p{M}\p{N}]+|[&\p{L};]+"
 
 PUNCTUATION = r"""[;,:=+()"]"""
 

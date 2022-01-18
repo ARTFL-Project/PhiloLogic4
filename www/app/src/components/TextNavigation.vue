@@ -306,7 +306,7 @@ export default {
                         // Handle inline notes if there are any
                         let notes = document.getElementsByClassName("note");
                         if (notes.length > 0) {
-                            notes.forEach((note) => {
+                            Array.from(notes).forEach((note) => {
                                 let innerHTML = note.nextElementSibling.innerHTML;
                                 new Popover(note, { html: true, content: innerHTML, trigger: "focus" });
                             });
@@ -315,7 +315,7 @@ export default {
                         // Handle ref notes if there are any
                         let noteRefs = document.getElementsByClassName("note-ref");
                         if (noteRefs.length > 0) {
-                            noteRefs.forEach((noteRef) => {
+                            Array.from(noteRefs).forEach((noteRef) => {
                                 let getNotes = () => {
                                     this.$http
                                         .get(`${this.$dbUrl}/scripts/get_notes.py?`, {
@@ -339,7 +339,7 @@ export default {
 
                         let linkBack = document.getElementsByClassName("link-back");
                         if (linkBack.length > 0) {
-                            linkBack.forEach((el) => {
+                            Array.from(linkBack).forEach((el) => {
                                 if (el) {
                                     var goToNote = () => {
                                         let link = el.getAttribute("link");
@@ -1169,6 +1169,9 @@ body {
     display: table-cell;
     padding-top: inherit; /*inherit padding when image is above */
     padding-bottom: inherit;
+}
+:deep(s) {
+    text-decoration: none;
 }
 .slide-fade-enter-active {
     transition: all 0.3s ease-out;
