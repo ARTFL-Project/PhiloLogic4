@@ -242,7 +242,7 @@ def format_concordance(text_in_utf8, word_regex, byte_offsets=[]):
             el.attrib["class"] = "highlight"
         if el.tag not in VALID_HTML_TAGS:
             el = xml_to_html_class(el)
-    output = etree.tostring(xml).decode("utf8", "ignore")
+    output = etree.tostring(xml, encoding="unicode")
     output = re.sub(r'\A<div class="philologic-fragment">', "", output)
     output = re.sub(r"</div>\Z", "", output)
     output = convert_entities(output)
@@ -609,7 +609,7 @@ def format_text_object(
                 del el.attrib["class"]
                 del el.attrib["n"]
 
-    output = etree.tostring(xml).decode("utf8", "ignore")
+    output = etree.tostring(xml, encoding="unicode")
     output = convert_entities(output)
 
     if note:  ## Notes don't need to fetch images
