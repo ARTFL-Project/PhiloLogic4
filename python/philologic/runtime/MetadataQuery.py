@@ -120,7 +120,7 @@ def query_lowlevel(db, param_dict, sort_order):
     for column, values in list(param_dict.items()):
         norm_path = db.path + "/frequencies/normalized_" + column + "_frequencies"
         for v in values:
-            if column != "full_date":
+            if column != "div_date":
                 parsed = parse_query(v)
             else:
                 parsed = parse_date_query(v)
@@ -204,6 +204,7 @@ def make_grouped_sql_clause(expanded, column, db):
         neg = False
         has_null = False
         first_token, first_value = group[0]
+        print("GROUP", first_token, first_value, column, file=sys.stderr)
         if first_token == "NOT":
             neg = True
             if len(group) > 1:
@@ -249,6 +250,7 @@ def make_grouped_sql_clause(expanded, column, db):
         # if we don't have a range, we have something that we can evaluate
         # as an exact IN/NOT IN expression
         first_value = True
+        print("CLAUSE", clause, file=sys.stderr)
         for kind, token in group:
             if kind == "OR" or kind == "NOT":
                 continue
@@ -266,6 +268,8 @@ def make_grouped_sql_clause(expanded, column, db):
                 except:
                     clause += esc(token[1:-1])
                 # but harmless, as well was its own clause below.  Fix later, if possible.
+            if kind == "DATE":
+                clause += esc(token)
         clause += ")"
         if has_null:
             if not neg:

@@ -145,7 +145,7 @@ metadata_to_parse = {
 words_to_index = ""
 
 # This regex defines how to tokenize words and punctuation
-token_regex = r"\w+|[&\w;]+"
+token_regex = r"[\p{L}\p{M}\p{N}]+|[&\p{L};]+"
 
 
 # Define the order in which files are sorted. This will affect the order in which

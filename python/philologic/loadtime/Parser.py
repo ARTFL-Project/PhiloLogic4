@@ -40,7 +40,7 @@ DEFAULT_TAG_TO_OBJ_MAP = {
 }
 
 DEFAULT_METADATA_TO_PARSE = {
-    "div": ["head", "type", "n", "id", "vol"],
+    "div": ["head", "type", "n", "id", "vol", "div_date"],
     "para": ["who", "resp", "id"],  # for <sp> and <add> tags
     "page": ["n", "id", "facs"],
     "ref": ["target", "n", "type"],
@@ -167,6 +167,7 @@ UNICODE_WORD_BREAKERS = [
     b"\xe2\x80\xa6",  # U+2026 &hellip; HORIZONTAL ELLIPSIS
 ]
 
+MONTH_MAX_DAY = {1: 31, 2: 29, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
 
 # Pre-compiled regexes used for parsing
 join_hyphen_with_lb = re.compile(r"(\&shy;[\n \t]*<lb\/>)", re.I | re.M)
@@ -897,7 +898,7 @@ class XMLParser:
                     if self.open_div3:
                         self.close_div3(start_byte)
                     self.open_div3 = True
-                current_div = "div%d" % self.context_div_level
+                current_div = f"div{self.context_div_level}"
                 self.v.push(current_div, tag_name, start_byte)
                 look_ahead = self.line_count
                 read_more = True
@@ -1003,7 +1004,7 @@ class XMLParser:
                 # the type attrib has its value in the value attrib
             elif tag_name == "index" and self.context_div_level != 0:
                 attrib = dict(self.get_attributes(tag))
-                div = "div%d" % self.context_div_level
+                div = f"div{self.context_div_level}"
                 if "type" in attrib:
                     if attrib["type"] in self.metadata_to_parse["div"]:
                         try:
@@ -1015,11 +1016,11 @@ class XMLParser:
                         self.v[div].attrib[metadata_name] = metadata_value
 
             elif tag_name == "date":
-                div = "div%d" % self.context_div_level
+                div = f"div{self.context_div_level}"
                 for attrib_name, attrib_value in self.get_attributes(tag):
                     if attrib_name == "value" or attrib_name == "when":
-                        if "full_date" not in self.v[div].attrib:
-                            self.v[div].attrib["full_date"] = extract_full_date(attrib_value)
+                        if "div_date" not in self.v[div].attrib:
+                            self.v[div].attrib["div_date"] = extract_full_date(attrib_value)
                     else:
                         attrib_name = f"div_{attrib_name}"
                         if attrib_name not in self.v[div].attrib:
@@ -1515,23 +1516,54 @@ class XMLParser:
         return control_char_re.sub("", text)
 
 
+def day_fail_safe(day, month=None):
+    if month is not None:
+        if day > MONTH_MAX_DAY[month]:
+            day = 1
+    if day > 31 or day <= 0:
+        day = 1
+    return day
+
+
+def month_fail_safe(month):
+    if month > 12:
+        month = 1
+    return month
+
+
 def extract_full_date(date):
     """Extract full dates and format as year-month-day"""
-    date_finder = re.compile(r"^(\d+)-?(\d+)?-?(\d+)?")
-    date_match = date_finder.search(date)
-    if date_match:
-        day, month, year = date_match.groups()
-        if year is None:
-            year = 1
-        if month is None or int(month) > 12 or int(month) == 0:
-            month = 1
-        if day is None or int(day) > 31 or int(day) == 0:
-            day = 1
-        try:
-            return datetime.date(int(year), int(month), int(day))
-        except:
-            print(day, month, year)
-            exit()
+    full_date_match = re.search(r"^(\d+)-(\d+)-(\d+)", date)
+    if full_date_match:  # e.g. 1987-10-23
+        year, month, day = map(int, full_date_match.groups())
+        month = month_fail_safe(month)
+        day = day_fail_safe(day, month)
+        return datetime.date(year, month, day)
+    month_year_match = re.search(r"^(\d+)-(\d+)$", date)
+    if month_year_match:  # e.g. 1987-10
+        year, month = map(int, month_year_match.groups())
+        month = month_fail_safe(month)
+        return datetime.date(year, month, 1)
+    month_day_match = re.search(r"^--(\d+)-(\d+)$", date)
+    if month_day_match:  # e.g. --10-23
+        month, day = map(int, month_day_match.groups())
+        month = month_fail_safe(month)
+        day = day_fail_safe(day, month)
+        return datetime.date(1, month, day)
+    day_match = re.search(r"^---(\d+)$", date)
+    if day_match:  # e.g. ---23
+        day = int(day_match.groups()[0])
+        day = day_fail_safe(day)
+        return datetime.date(1, 1, day)
+    month_match = re.search(r"^--(\d+)$", date)
+    if month_match:  # e.g. --10
+        month = int(month_match.groups()[0])
+        month = month_fail_safe(month)
+        return datetime.date(1, month, 1)
+    year_match = re.search(r"^(\d+)$", date)
+    if year_match:  # e.g. 1987
+        year = int(year_match.groups()[0])
+        return datetime.date(year, 1, 1)
     return ""
 
 

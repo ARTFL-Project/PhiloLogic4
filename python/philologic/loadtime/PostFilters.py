@@ -22,7 +22,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         if table == "toms":
-            query = f"create table if not exists {table} (philo_type text, philo_name text, philo_id text, philo_seq text, year int, full_date date)"
+            query = f"create table if not exists {table} (philo_type text, philo_name text, philo_id text, philo_seq text, year int, div_date date)"
         else:
             query = f"create table if not exists {table} (philo_type, philo_name, philo_id, philo_seq)"
         cursor.execute(query)

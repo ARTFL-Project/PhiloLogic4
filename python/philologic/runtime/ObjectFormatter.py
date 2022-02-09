@@ -158,7 +158,7 @@ def xml_to_html_class(element):
         element.tag = "div"
     else:
         element.tag = "span"
-    element.attrib["class"] = "xml-%s" % old_tag
+    element.attrib["class"] = f"xml-{old_tag}"
     return element
 
 
@@ -511,6 +511,7 @@ def format_text_object(
                     el.attrib["class"] = "inline-img"
                     el.attrib["data-gallery"] = ""
                     el.attrib["inline-img"] = ""
+                    el.attrib["alt"] = "illustrative image"
                     if len(imgs) > 1:
                         el.attrib["large-img"] = os.path.join(config.page_images_url_root, imgs[1])
                     else:
