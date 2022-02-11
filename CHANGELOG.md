@@ -1,5 +1,5 @@
 ### 4.7 ###
-- New aggregation 
+- New aggregation report
 - New metadata stats in search results
 - Results bibliography in concordance and KWIC results.
 - Database size should be between 50% and 500% (or more) smaller
