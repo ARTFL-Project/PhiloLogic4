@@ -36,7 +36,7 @@ def kwic_hit_object(hit, config, db):
     # Get all metadata
     metadata_fields = {}
     for metadata in db.locals["metadata_fields"]:
-        metadata_fields[metadata] = hit[metadata].strip()
+        metadata_fields[metadata] = f"{hit[metadata]}".strip()
 
     # Get all links and citations
     citation_hrefs = citation_links(db, config, hit)
