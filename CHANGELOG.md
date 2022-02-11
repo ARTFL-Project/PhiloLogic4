@@ -4,7 +4,7 @@
 - Results bibliography in concordance and KWIC results.
 - Database size should be between 50% and 500% (or more) smaller
 - Significant speed-ups for:
-    * Collocations: in some cases 3X
+    * Collocations: in some cases 3-4X
     * Sorted KWICs: between 6X and 25X (or more) depending on use case, with no more limits on the size of the sort as a result.
     * Faceted browsing (frequencies): anywhere from 3X to 100X (or more)
     * Landing page browsing: 10X faster or more on large corpora
