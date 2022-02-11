@@ -3,9 +3,9 @@
   "version": "4.7.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "serve": "export SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
+    "build": "export SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
+    "lint": "export SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service lint"
   },
   "dependencies": {
     "@popperjs/core": "^2.9.2",
