@@ -221,7 +221,7 @@ class HitList(object):
         query = "SELECT SUM(word_count) FROM toms WHERE "
         ids = []
         for id in philo_ids:
-            ids.append('philo_id="%s"' % " ".join([str(i) for i in id]))
+            ids.append(f'''philo_id="{' '.join(map(str, id))}"''')
             if len(ids) == 999:  # max expression tree in sqlite is 1000
                 clause = " OR ".join(ids)
                 c.execute(query + clause)

@@ -1,5 +1,5 @@
 import sys
-import re
+import regex as re
 import os
 import html.entities
 import traceback
@@ -54,10 +54,10 @@ invalid_entities = defaultdict(int)
 
 def convert_remaining_entities(s, quiet):
     """Take an input string s, find all things that look like SGML character
-    entities, and replace them with the Unicode equivalent.
+        entities, and replace them with the Unicode equivalent.
 
-    Function is from:
-http://stackoverflow.com/questions/1197981/convert-html-entities-to-ascii-in-python/1582036#1582036
+        Function is from:
+    http://stackoverflow.com/questions/1197981/convert-html-entities-to-ascii-in-python/1582036#1582036
 
     """
 

@@ -66,7 +66,10 @@ def get_total_doc_count(environ, start_response):
         if field_obj["field"] == "title":
             count = len(docs[pos])
         else:
-            philo_type = db.locals["metadata_types"][field_obj["field"]]
+            try:
+                philo_type = db.locals["metadata_types"][field_obj["field"]]
+            except KeyError:
+                continue
             if philo_type != "div":
                 cursor.execute(
                     f"SELECT COUNT(DISTINCT {field_obj['field']}) FROM toms WHERE philo_type='{philo_type}' AND philo_id IN ({', '.join(docs[pos])})"

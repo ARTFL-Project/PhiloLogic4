@@ -10,7 +10,7 @@ import lz4.frame
 import msgpack
 import orjson
 from philologic.runtime.DB import DB
-import re
+import regex as re
 
 sys.path.append("..")
 import custom_functions

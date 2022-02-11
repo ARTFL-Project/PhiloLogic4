@@ -2,7 +2,7 @@
 
 import sys
 import os
-import re
+import regex as re
 from lxml import etree
 from philologic.Loader import Loader
 from philologic.Parser import DefaultMetadataXPaths

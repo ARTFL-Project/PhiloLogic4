@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import re
+import regex as re
 
 patterns = [
     ("QUOTE", r'".+?"'),
@@ -14,12 +14,40 @@ patterns = [
     ("TERM", r'[^\-|\s"]+'),
 ]
 
+# TODO: support quotes around a date, support range such as 1789-08-.* ???
+date_patterns = [
+    ("NOT", "NOT"),
+    ("OR", r"\|"),
+    ("DATE_RANGE", r"([^<]+)<=>(.*)"),
+    ("DATE", r'"?(.+)"?'),
+    ("YEAR", r"(\d+)"),
+    ("YEAR_MONTH", r"(\d+-\d+)"),
+    ("MONTH", r"(--\d+)"),  # TODO: support the whole range of queries the parser supports and convert to range queries
+    ("MONTH_DAY", r"(--\d+-\d+"),
+]
+
 
 def parse_query(qstring):
     buf = qstring[:]
     parsed = []
     while len(buf) > 0:
         for label, pattern in patterns:
+            m = re.match(pattern, buf)
+            if m:
+                parsed.append((label, m.group()))
+                buf = buf[m.end() :]
+                break
+        else:
+            buf = buf[1:]
+    return parsed
+
+
+# TODO: convert a month DATE query into a RANGE: e.g. 1789-06 into 1789-06<=>1789-07
+def parse_date_query(qstring):
+    buf = qstring[:]
+    parsed = []
+    while len(buf) > 0:
+        for label, pattern in date_patterns:
             m = re.match(pattern, buf)
             if m:
                 parsed.append((label, m.group()))

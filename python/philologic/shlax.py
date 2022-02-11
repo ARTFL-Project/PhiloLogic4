@@ -2,7 +2,7 @@
 # ShLaX-- a Shallow Lazy XML tokenizer.  Very useful for dirty, broken XML-like documents.
 
 
-import re
+import regex as re
 import sys
 
 TextSE = "(?P<Text>[^<]+)"

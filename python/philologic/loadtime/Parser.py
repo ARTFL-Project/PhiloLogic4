@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """PhiloLogic4 main parser"""
 
+import datetime
 import os
-import re
+import regex as re
 import string
 import sys
 
@@ -39,7 +40,7 @@ DEFAULT_TAG_TO_OBJ_MAP = {
 }
 
 DEFAULT_METADATA_TO_PARSE = {
-    "div": ["head", "type", "n", "id", "vol"],
+    "div": ["head", "type", "n", "id", "vol", "div_date"],
     "para": ["who", "resp", "id"],  # for <sp> and <add> tags
     "page": ["n", "id", "facs"],
     "ref": ["target", "n", "type"],
@@ -141,7 +142,7 @@ TAG_EXCEPTIONS = [
     r"</sup>",
 ]
 
-TOKEN_REGEX = r"\w+|[&\w;]+"
+TOKEN_REGEX = r"[\p{L}\p{M}\p{N}]+|[&\p{L};]+"
 
 PUNCTUATION = r"""[;,:=+()"]"""
 
@@ -166,6 +167,7 @@ UNICODE_WORD_BREAKERS = [
     b"\xe2\x80\xa6",  # U+2026 &hellip; HORIZONTAL ELLIPSIS
 ]
 
+MONTH_MAX_DAY = {1: 31, 2: 29, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
 
 # Pre-compiled regexes used for parsing
 join_hyphen_with_lb = re.compile(r"(\&shy;[\n \t]*<lb\/>)", re.I | re.M)
@@ -228,7 +230,7 @@ hyper_div_tag = re.compile(r"<hyperdiv\W", re.I)
 div_num_tag = re.compile(r"<div(.)", re.I)
 char_ents = re.compile(r"\&[a-zA-Z0-9\#][a-zA-Z0-9]*;", re.I)
 newline_shortener = re.compile(r"\n\n*")
-check_if_char_word = re.compile(r"\w", re.I | re.U)
+check_if_char_word = re.compile(r"\p{L}", re.I)
 cap_char_or_num = re.compile(r"[A-Z0-9]")  # Capitals
 ending_punctuation = re.compile(r"[%s]$" % string.punctuation.replace(")", "").replace("]", ""))
 add_tag = re.compile(r"<add\W", re.I)
@@ -896,7 +898,7 @@ class XMLParser:
                     if self.open_div3:
                         self.close_div3(start_byte)
                     self.open_div3 = True
-                current_div = "div%d" % self.context_div_level
+                current_div = f"div{self.context_div_level}"
                 self.v.push(current_div, tag_name, start_byte)
                 look_ahead = self.line_count
                 read_more = True
@@ -1002,7 +1004,7 @@ class XMLParser:
                 # the type attrib has its value in the value attrib
             elif tag_name == "index" and self.context_div_level != 0:
                 attrib = dict(self.get_attributes(tag))
-                div = "div%d" % self.context_div_level
+                div = f"div{self.context_div_level}"
                 if "type" in attrib:
                     if attrib["type"] in self.metadata_to_parse["div"]:
                         try:
@@ -1014,11 +1016,11 @@ class XMLParser:
                         self.v[div].attrib[metadata_name] = metadata_value
 
             elif tag_name == "date":
-                div = "div%d" % self.context_div_level
+                div = f"div{self.context_div_level}"
                 for attrib_name, attrib_value in self.get_attributes(tag):
                     if attrib_name == "value" or attrib_name == "when":
                         if "div_date" not in self.v[div].attrib:
-                            self.v[div].attrib["div_date"] = attrib_value
+                            self.v[div].attrib["div_date"] = extract_full_date(attrib_value)
                     else:
                         attrib_name = f"div_{attrib_name}"
                         if attrib_name not in self.v[div].attrib:
@@ -1087,7 +1089,7 @@ class XMLParser:
                     current_pos += word_length
 
                     # Do we have a word? At least one of these characters.
-                    if check_if_char_word.search(word.replace("_", "")):
+                    if check_if_char_word.search(word):
                         last_word = word
                         word_pos = current_pos - len(word_in_utf8)
                         if "&" in word:
@@ -1499,7 +1501,7 @@ class XMLParser:
         return text_in_bytes.decode("utf8")
 
     def convert_other_ents(self, text):
-        """ handles character entities in index words.
+        """handles character entities in index words.
         There should not be many of these."""
         text = text.replace("&apos;", "'")
         text = text.replace("&s;", "s")
@@ -1512,6 +1514,57 @@ class XMLParser:
 
     def remove_control_chars(self, text):
         return control_char_re.sub("", text)
+
+
+def day_fail_safe(day, month=None):
+    if month is not None:
+        if day > MONTH_MAX_DAY[month]:
+            day = 1
+    if day > 31 or day <= 0:
+        day = 1
+    return day
+
+
+def month_fail_safe(month):
+    if month > 12:
+        month = 1
+    return month
+
+
+def extract_full_date(date):
+    """Extract full dates and format as year-month-day"""
+    full_date_match = re.search(r"^(\d+)-(\d+)-(\d+)", date)
+    if full_date_match:  # e.g. 1987-10-23
+        year, month, day = map(int, full_date_match.groups())
+        month = month_fail_safe(month)
+        day = day_fail_safe(day, month)
+        return datetime.date(year, month, day)
+    month_year_match = re.search(r"^(\d+)-(\d+)$", date)
+    if month_year_match:  # e.g. 1987-10
+        year, month = map(int, month_year_match.groups())
+        month = month_fail_safe(month)
+        return datetime.date(year, month, 1)
+    month_day_match = re.search(r"^--(\d+)-(\d+)$", date)
+    if month_day_match:  # e.g. --10-23
+        month, day = map(int, month_day_match.groups())
+        month = month_fail_safe(month)
+        day = day_fail_safe(day, month)
+        return datetime.date(1, month, day)
+    day_match = re.search(r"^---(\d+)$", date)
+    if day_match:  # e.g. ---23
+        day = int(day_match.groups()[0])
+        day = day_fail_safe(day)
+        return datetime.date(1, 1, day)
+    month_match = re.search(r"^--(\d+)$", date)
+    if month_match:  # e.g. --10
+        month = int(month_match.groups()[0])
+        month = month_fail_safe(month)
+        return datetime.date(1, month, 1)
+    year_match = re.search(r"^(\d+)$", date)
+    if year_match:  # e.g. 1987
+        year = int(year_match.groups()[0])
+        return datetime.date(year, 1, 1)
+    return ""
 
 
 if __name__ == "__main__":

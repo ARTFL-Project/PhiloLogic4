@@ -13,7 +13,7 @@
                     href="https://artfl-project.uchicago.edu/"
                     title="Philologic 4: Open Source ARTFL Search and Retrieval Engine"
                 >
-                    <img src="./assets/philo.png" height="40" width="110" />
+                    <img src="./assets/philo.png" alt="PhiloLogic" height="40" width="110" />
                 </a>
             </div>
         </div>
@@ -119,6 +119,8 @@ export default {
     },
     created() {
         document.title = this.$philoConfig.dbname.replace(/<[^>]+>/, "");
+        const html = document.documentElement;
+        html.setAttribute("lang", "sv");
         this.accessAuthorized = this.$philoConfig.access_control ? false : true;
         if (this.$philoConfig.access_control) {
             this.$http.get(`${this.$dbUrl}/scripts/access_request.py`).then((response) => {

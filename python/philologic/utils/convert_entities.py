@@ -2,8 +2,7 @@
 
 
 from html.entities import name2codepoint
-import re
-
+import regex as re
 
 entities_match = re.compile(r"&#?\w+;")
 

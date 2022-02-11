@@ -3,7 +3,7 @@
 
 
 import os
-import re
+import regex as re
 import sqlite3
 
 from lxml import etree, html
@@ -158,7 +158,7 @@ def xml_to_html_class(element):
         element.tag = "div"
     else:
         element.tag = "span"
-    element.attrib["class"] = "xml-%s" % old_tag
+    element.attrib["class"] = f"xml-{old_tag}"
     return element
 
 
@@ -242,7 +242,7 @@ def format_concordance(text_in_utf8, word_regex, byte_offsets=[]):
             el.attrib["class"] = "highlight"
         if el.tag not in VALID_HTML_TAGS:
             el = xml_to_html_class(el)
-    output = etree.tostring(xml).decode("utf8", "ignore")
+    output = etree.tostring(xml, encoding="unicode")
     output = re.sub(r'\A<div class="philologic-fragment">', "", output)
     output = re.sub(r"</div>\Z", "", output)
     output = convert_entities(output)
@@ -436,7 +436,6 @@ def format_text_object(
                 else:  ## inline notes
                     el.tag = "span"
                     el.attrib["class"] = "note-content"
-
                     for child in el:
                         child = note_content(child)
                     # insert an anchor before this element by scanning through the parent
@@ -512,6 +511,7 @@ def format_text_object(
                     el.attrib["class"] = "inline-img"
                     el.attrib["data-gallery"] = ""
                     el.attrib["inline-img"] = ""
+                    el.attrib["alt"] = "illustrative image"
                     if len(imgs) > 1:
                         el.attrib["large-img"] = os.path.join(config.page_images_url_root, imgs[1])
                     else:
@@ -609,7 +609,7 @@ def format_text_object(
                 del el.attrib["class"]
                 del el.attrib["n"]
 
-    output = etree.tostring(xml).decode("utf8", "ignore")
+    output = etree.tostring(xml, encoding="unicode")
     output = convert_entities(output)
 
     if note:  ## Notes don't need to fetch images

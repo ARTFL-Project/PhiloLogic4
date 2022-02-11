@@ -25,7 +25,9 @@
                             <div class="row" id="search_terms">
                                 <div class="cols-12 cols-md-8">
                                     <div class="input-group" id="q-group">
-                                        <button class="btn btn-outline-secondary" type="button">Search Terms</button>
+                                        <button class="btn btn-outline-secondary" type="button">
+                                            <label for="query-term-input">Search Terms</label>
+                                        </button>
                                         <button
                                             class="btn btn-outline-info"
                                             type="button"
@@ -40,12 +42,14 @@
                                         <input
                                             type="text"
                                             class="form-control"
+                                            id="query-term-input"
                                             v-model="queryTermTyped"
                                             @input="onChange('q')"
                                             @keyup.down="onArrowDown('q')"
                                             @keyup.up="onArrowUp('q')"
                                             @keyup.enter="onEnter('q')"
                                         />
+
                                         <ul
                                             id="autocomplete-q"
                                             class="autocomplete-results shadow"
@@ -106,34 +110,49 @@
                                             {{ value.text }}
                                         </option>
                                     </select>
-                                    <input
-                                        class="form-control d-inline-block mx-1"
-                                        type="text"
-                                        name="arg_proxy"
-                                        style="width: 50px; text-align: center; height: 31px"
-                                        v-model="arg_proxy"
-                                        v-if="method == 'proxy'"
-                                    />
-                                    <input
-                                        class="form-control d-inline-block mx-1"
-                                        type="text"
-                                        name="arg_phrase"
-                                        style="width: 50px; text-align: center; height: 31px"
-                                        v-model="arg_phrase"
-                                        v-if="method == 'phrase'"
-                                    />
-                                    <span v-if="method != 'cooc'"> words in the same sentence</span></span
-                                >
+                                    <div class="input-group d-inline-block ms-1" v-if="method != 'cooc'">
+                                        <button
+                                            class="btn btn-sm btn-outline-secondary"
+                                            style="margin-top: -3px"
+                                            type="button"
+                                        >
+                                            <label for="arg-proxy" v-if="method == 'proxy'">how many?</label>
+                                            <label for="arg-phrase" v-if="method == 'phrase'">how many?</label>
+                                        </button>
+                                        <input
+                                            class="form-control d-inline-block"
+                                            type="text"
+                                            name="arg_proxy"
+                                            id="arg-proxy"
+                                            style="width: 50px; text-align: center; height: 31px"
+                                            v-model="arg_proxy"
+                                            v-if="method == 'proxy'"
+                                        />
+                                        <input
+                                            class="form-control d-inline-block mx-1"
+                                            type="text"
+                                            name="arg_phrase"
+                                            id="arg-phrase"
+                                            style="width: 50px; text-align: center; height: 31px"
+                                            v-model="arg_phrase"
+                                            v-if="method == 'phrase'"
+                                        />
+                                        words in the same sentence
+                                    </div>
+                                </span>
                             </div>
                         </div>
                         <div id="head-search-container" class="px-3 pt-1 pb-3" v-if="dictionary">
                             <div class="input-group" id="head-group">
                                 <button type="button" class="btn btn-outline-secondary">
-                                    {{ metadataDisplay[headIndex].label }}
+                                    <label :for="metadataDisplay[headIndex].value + '-input'">{{
+                                        metadataDisplay[headIndex].label
+                                    }}</label>
                                 </button>
                                 <input
                                     type="text"
                                     class="form-control"
+                                    :id="metadataDisplay[headIndex].value + '-input'"
                                     :name="metadataDisplay[headIndex].value"
                                     :placeholder="metadataDisplay[headIndex].example"
                                     v-model="metadataValues.head"
@@ -198,11 +217,12 @@
                                         class="btn btn-outline-secondary"
                                         v-if="metadataInputStyle[localField.value] != 'checkbox'"
                                     >
-                                        {{ localField.label }}
+                                        <label :for="localField.value + 'input-filter'">{{ localField.label }}</label>
                                     </button>
                                     <input
                                         type="text"
                                         class="form-control"
+                                        :id="localField.value + 'input-filter'"
                                         :name="localField.value"
                                         :placeholder="localField.example"
                                         v-model="metadataValues[localField.value]"
@@ -278,11 +298,12 @@
                             <div class="d-flex mt-4" v-if="currentReport === 'collocation'">
                                 <div class="input-group d-inline" style="width: fit-content">
                                     <button class="btn btn-outline-secondary" style="height: fit-content">
-                                        Word filtering
+                                        <label for="filter-frequency">Word filtering</label>
                                     </button>
                                     <input
                                         type="text"
                                         class="form-control d-inline-block"
+                                        id="filter-frequency"
                                         name="filter_frequency"
                                         placeholder="100"
                                         v-model="filter_frequency"
@@ -312,27 +333,33 @@
                             </div>
                             <div class="input-group mt-4 pt-1 pb-2" v-if="currentReport === 'time_series'">
                                 <button class="btn btn-outline-secondary">Date range</button>
-                                <span class="d-inline-flex align-self-center mx-2">from</span>
+                                <span class="d-inline-flex align-self-center mx-2"
+                                    ><label for="start_date">from</label></span
+                                >
                                 <input
                                     type="text"
                                     class="form-control"
                                     name="start_date"
                                     id="start_date"
-                                    style="max-width: 60px; text-align: center"
+                                    style="max-width: 65px; text-align: center"
                                     v-model="start_date"
                                 />
-                                <span class="d-inline-flex align-self-center mx-2">to</span>
+                                <span class="d-inline-flex align-self-center mx-2"
+                                    ><label for="end_date">to</label></span
+                                >
                                 <input
                                     type="text"
                                     class="form-control"
                                     name="end_date"
                                     id="end_date"
-                                    style="max-width: 60px; text-align: center"
+                                    style="max-width: 65px; text-align: center"
                                     v-model="end_date"
                                 />
                             </div>
                             <div class="input-group" v-if="currentReport == 'time_series'">
-                                <button class="btn btn-outline-secondary">Year interval</button>
+                                <button class="btn btn-outline-secondary">
+                                    <label for="year_interval">Year interval</label>
+                                </button>
                                 <span class="d-inline-flex align-self-center mx-2">every</span>
                                 <input
                                     type="text"

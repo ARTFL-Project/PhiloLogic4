@@ -1,6 +1,4 @@
-
-
-import re
+import regex as re
 import sys
 from philologic.TagCensus import TagCensus
 

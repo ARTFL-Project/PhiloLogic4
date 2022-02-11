@@ -6,7 +6,7 @@ import collections
 import math
 import os
 import pickle
-import re
+import regex as re
 import shutil
 import sqlite3
 import sys

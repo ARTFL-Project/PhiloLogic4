@@ -18,7 +18,7 @@ class ParallelRecord(object):
 
     def __str__(self):
         print_id = [self.id[0], 0, 0, 0, 0, 0, 0, 0, self.id[1]]
-        return f"{self.type}\t{self.name}\t{' '.join(str(i) for i in print_id)}\t{dumps(self.attrib)}"
+        return f"{self.type}\t{self.name}\t{' '.join(str(i) for i in print_id)}\t{dumps(self.attrib).decode('utf8')}"
 
     def __getitem__(self, n):
         return self.attrib[n]
@@ -61,7 +61,7 @@ class CompoundRecord(object):
                 clean_attrib[k] = " ".join(v.split())
             except AttributeError:
                 clean_attrib[k] = v
-        return f"{self.type}\t{self.name}\t{' '.join(map(str, print_id))}\t{dumps(clean_attrib)}"
+        return f"{self.type}\t{self.name}\t{' '.join(map(str, print_id))}\t{dumps(clean_attrib).decode('utf8')}"
 
     def __getitem__(self, n):
         return self.attrib[n]
@@ -354,7 +354,7 @@ class Record(object):
 
     def __str__(self):
         # Using json.dumps to write dict as it is much faster to read from a json string
-        return f"{self.type}\t{self.name}\t{' '.join(map(str, self.id))}\t{dumps(self.attrib)}"
+        return f"{self.type}\t{self.name}\t{' '.join(map(str, self.id))}\t{dumps(self.attrib).decode('utf8')}"
 
     def __repr__(self):
         return "Record('%s','%s',%s)" % (self.type, self.name, self.id)

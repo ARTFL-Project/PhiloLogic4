@@ -291,7 +291,7 @@ def store_words_and_philo_ids(loader_obj, text):
                             "end_byte": attrib["end_byte"],
                             "philo_type": philo_type,
                         }
-                    )
+                    ).decode("utf-8")
                     print(word_obj, file=output)
     with open(f"{filename}.lz4", "wb") as compressed_file:
         with open(filename, "rb") as input_file:

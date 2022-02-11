@@ -60,7 +60,7 @@ def get_label(hit, citation_object):
     """Get metadata labels"""
     label = ""
     if citation_object["object_level"] == "doc":
-        label = hit[citation_object["field"]].strip()
+        label = f'{hit[citation_object["field"]]}'.strip()
     if citation_object["object_level"].startswith("div"):
         if citation_object["field"] == "head":
             if citation_object["object_level"] == "div1":

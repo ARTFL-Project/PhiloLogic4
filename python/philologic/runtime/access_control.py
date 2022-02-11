@@ -3,7 +3,7 @@
 
 import hashlib
 import os
-import re
+import regex as re
 import socket
 import sys
 import time

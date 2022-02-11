@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-import re
+import regex as re
 import sys
 from wsgiref.handlers import CGIHandler
 

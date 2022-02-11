@@ -2,7 +2,7 @@
 
 import sys
 import os
-import re
+import regex as re
 from collections import defaultdict
 from philologic.TagCensus import TagCensus
 from philologic.TokenCounter import TokenCounter

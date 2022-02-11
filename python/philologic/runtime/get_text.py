@@ -2,8 +2,7 @@
 
 
 import os
-import re
-
+import regex as re
 from lxml import etree
 from philologic.runtime.DB import DB
 from philologic.runtime.HitWrapper import ObjectWrapper

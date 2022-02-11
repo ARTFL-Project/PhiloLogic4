@@ -2,8 +2,7 @@
 """KWIC results"""
 
 
-import re
-
+import regex as re
 from philologic.runtime.citations import citation_links, citations
 from philologic.runtime.get_text import get_text
 from philologic.runtime.ObjectFormatter import adjust_bytes, format_strip
