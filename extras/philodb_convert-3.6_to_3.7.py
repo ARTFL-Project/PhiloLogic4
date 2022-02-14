@@ -134,16 +134,19 @@ def get_time_series_dates(toms):
     # Find default start and end dates for times series
     with sqlite3.connect(toms_path) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT min(year), max(year) FROM toms")
-        min_year, max_year = cursor.fetchone()
         try:
-            start_date = int(min_year)
-        except (TypeError, ValueError):
-            start_date = 0
-        try:
-            end_date = int(max_year)
-        except (TypeError, ValueError):
-            end_date = 2100
+            cursor.execute("SELECT min(year), max(year) FROM toms")
+            min_year, max_year = cursor.fetchone()
+            try:
+                start_date = int(min_year)
+            except (TypeError, ValueError):
+                start_date = 0
+            try:
+                end_date = int(max_year)
+            except (TypeError, ValueError):
+                end_date = 2100
+        except sqlite3.OperationalError:
+            return 0, 0
     return start_date, end_date
 
 
@@ -266,6 +269,6 @@ if __name__ == "__main__":
     os.system(f"cp /var/lib/philologic4/web_app/.htaccess {philo_db}")
 
     # Deactivate old custom functions
-    for file in os.scandir(philo_db):
+    for file in os.scandir(os.path.join(philo_db, "custom_functions")):
         if file.name.endswith(".py"):
             os.system(f"mv {file.path} {file.path + '_old'}")
