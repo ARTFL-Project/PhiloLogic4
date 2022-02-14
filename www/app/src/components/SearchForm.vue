@@ -976,7 +976,7 @@ input[type="text"] {
 }
 #search-buttons {
     position: absolute;
-    bottom: 1rem;
+    top: 3rem;
     right: 1rem;
     z-index: 51;
 }

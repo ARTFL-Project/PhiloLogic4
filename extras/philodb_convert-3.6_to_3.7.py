@@ -81,7 +81,7 @@ def generate_words_and_philo_ids(db_path):
 
 def update_toms(toms):
     """Update toms to add object_id values"""
-    print("Adding ids in toms db for:", flush=True, end=" ")
+    print("Adding ids in toms db:", flush=True, end=" ")
     obj_levels = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
     with sqlite3.connect(toms) as conn:
         conn.row_factory = sqlite3.Row
@@ -103,7 +103,7 @@ def update_toms(toms):
         with open(toms + ".tmp", "w") as outfile:
             for row in cursor:
                 print("\t".join(map(str, row)), file=outfile)
-        with tqdm(total=count, leave=True) as pbar:
+        with tqdm(total=count, leave=False, desc="Adding ids") as pbar:
             with open(toms + ".tmp") as infile:
                 for line in infile:
                     row = dict(zip(original_columns, line.split("\t")))
@@ -264,3 +264,8 @@ if __name__ == "__main__":
         f"cd {web_app_path}; npm install > {web_app_path}/web_app_build.log 2>&1 && npm run build >> {web_app_path}/web_app_build.log 2>&1"
     )
     os.system(f"cp /var/lib/philologic4/web_app/.htaccess {philo_db}")
+
+    # Deactivate old custom functions
+    for file in os.scandir(philo_db):
+        if file.name.endswith(".py"):
+            os.system(f"mv {file.path} {file.path + '_old'}")

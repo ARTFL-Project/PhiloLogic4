@@ -21,8 +21,6 @@ setup(
         "natsort",
         "multiprocess",
         "tqdm",
-        "sklearn",
-        "numpy",
         "orjson",
         "black",
         "msgpack",

@@ -2,8 +2,8 @@ module.exports = {
     devServer: {
         compress: true,
         disableHostCheck: true,
-        host: "localhost",
-        proxy: "https://marat.uchicago.edu/philologic5/:8080",
+        // host: "localhost",
+        proxy: "https://anomander.uchicago.edu/philologic",
         headers: {
             'Access-Control-Allow-Origin': '*'
         }
