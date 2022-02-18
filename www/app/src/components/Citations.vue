@@ -1,6 +1,6 @@
 <template>
     <span class="philologic-cite ps-2">
-        <span class="citation" v-for="(cite, citeIndex) in filterNone(citation)" :key="citeIndex">
+        <span class="citation text-view" v-for="(cite, citeIndex) in filterNone(citation)" :key="citeIndex">
             <span v-html="cite.prefix" v-if="cite.prefix"></span>
             <router-link :to="cite.href" :style="cite.style" v-if="cite.href">{{ cite.label }}</router-link>
             <span :style="cite.style" v-else>{{ cite.label }}</span>
@@ -34,5 +34,8 @@ export default {
 .separator {
     font-size: 0.75rem;
     vertical-align: 0.05rem;
+}
+.citation {
+    font-weight: 600;
 }
 </style>

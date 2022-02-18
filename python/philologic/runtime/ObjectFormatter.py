@@ -188,7 +188,8 @@ def adjust_bytes(bytes, padding):
     return new_bytes, start_byte
 
 
-def format_concordance(text_in_utf8, word_regex, byte_offsets=[]):
+def format_concordance(text_in_utf8, word_regex, byte_offsets=None):
+    """Formatting concordances"""
     removed_from_start = 0
     begin = BEGIN_MATCH.search(text_in_utf8)
     if begin:
@@ -201,7 +202,7 @@ def format_concordance(text_in_utf8, word_regex, byte_offsets=[]):
     end = END_MATCH.search(text_in_utf8)
     if end:
         text_in_utf8 = text_in_utf8[: end.start(0)]
-    if byte_offsets:
+    if byte_offsets is not None:
         byte_offsets = [b - removed_from_start for b in byte_offsets]
         new_text = b""
         last_offset = 0
@@ -291,7 +292,7 @@ def format_text_object(
     byte_offsets=None,
     note=False,
     images=True,
-    start_end_pairs=[],
+    start_end_pairs=None,
 ):
     """Format text objects"""
     philo_id = obj.philo_id
@@ -302,7 +303,7 @@ def format_text_object(
             new_text += text[last_offset:b] + b"<philoHighlight/>"
             last_offset = b
         text = new_text + text[last_offset:]
-    if start_end_pairs:
+    if start_end_pairs is not None:
         new_text = b""
         last_offset = 0
         count = -1

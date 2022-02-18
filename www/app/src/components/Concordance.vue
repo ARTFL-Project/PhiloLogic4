@@ -39,7 +39,7 @@
                         </div>
                         <div class="row">
                             <div
-                                class="col m-2 mt-3 concordance-text"
+                                class="col m-2 mt-3 concordance-text text-view"
                                 :position="results.description.start + index"
                                 @keyup="dicoLookup($event, result.metadata_fields.year)"
                             >

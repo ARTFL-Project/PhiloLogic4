@@ -100,7 +100,7 @@
                     <div>
                         <a
                             href
-                            class="sidebar-text text-content-area"
+                            class="sidebar-text text-content-area text-view"
                             v-if="facet.facet !== 'all_collocates'"
                             @click.prevent="facetClick(result.metadata)"
                             >{{ result.label }}</a

@@ -22,7 +22,7 @@
                                 :key="word.collocate"
                                 @click="collocTableClick(word)"
                             >
-                                <td>{{ word.collocate }}</td>
+                                <td class="text-view">{{ word.collocate }}</td>
                                 <td>{{ word.count }}</td>
                             </tr>
                         </tbody>
@@ -33,7 +33,7 @@
                 <div class="card p-3 shadow-sm">
                     <div class="card-text">
                         <span
-                            class="cloud-word"
+                            class="cloud-word text-view"
                             v-for="word in collocCloudWords"
                             :key="word.word"
                             :style="getWordCloudStyle(word)"

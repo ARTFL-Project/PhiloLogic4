@@ -219,6 +219,10 @@ input {
     font-size: 14px !important;
     font-family: "Open-Sans", sans-serif;
 }
+.text-view {
+    font-family: "Source Serif Pro", serif;
+    font-size: 0.9rem;
+}
 .custom-control {
     min-height: auto;
 }

@@ -187,6 +187,7 @@ class Loader:
             shutil.copy2(f, new_file_path)
             os.chmod(new_file_path, 775)
             self.filenames.append(f)
+        os.system(f"chmod -R 775 {self.textdir}")
         print("Copying files to database directory... done.\n", flush=True)
 
     def parse_bibliography_file(self, bibliography_file, sort_by_field, reverse_sort=True):

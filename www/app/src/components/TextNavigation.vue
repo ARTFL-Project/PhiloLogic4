@@ -102,7 +102,7 @@
                 style="text-align: center"
             >
                 <div class="card mt-2 mb-4 p-4 shadow d-inline-block">
-                    <div id="book-page">
+                    <div id="book-page" class="text-view">
                         <div id="previous-pages" v-if="beforeObjImgs">
                             <span class="xml-pb-image">
                                 <a
