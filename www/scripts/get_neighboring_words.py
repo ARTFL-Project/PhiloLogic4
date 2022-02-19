@@ -9,8 +9,9 @@ from wsgiref.handlers import CGIHandler
 import lz4.frame
 import msgpack
 import orjson
-from philologic.runtime.DB import DB
 import regex as re
+from philologic.runtime.DB import DB
+from unidecode import unidecode
 
 sys.path.append("..")
 import custom_functions
@@ -85,6 +86,7 @@ def get_neighboring_words(environ, start_response):
                 for word in words:
                     if NUMBER.search(word["word"]):
                         continue
+                    word["word"] = unidecode(word["word"])
                     if offsets[0] > word["start_byte"]:
                         left_side_text.append(word["word"])
                     elif word["start_byte"] > offsets[-1]:
