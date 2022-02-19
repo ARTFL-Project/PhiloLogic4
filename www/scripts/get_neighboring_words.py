@@ -29,6 +29,7 @@ OBJECT_LEVELS = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
 
 
 def get_neighboring_words(environ, start_response):
+    """Get words in the same sentence as query"""
     status = "200 OK"
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
@@ -116,6 +117,7 @@ def get_neighboring_words(environ, start_response):
 
 
 def get_cache_path(request, db):
+    """Retrieve the file path for the cache"""
     hash = hashlib.sha1()
     hash.update(request["q"].encode("utf-8"))
     hash.update(request["method"].encode("utf-8"))

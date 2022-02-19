@@ -2,12 +2,14 @@
 
 from natsort import natsorted
 
-from .unaccent import smash_accents
+from unidecode import unidecode
 
 
 def sort_list(list_to_sort, sort_keys):
+    """Sort strings converted to ascii"""
+
     def make_sort_key(d):
-        key = [smash_accents(d.get(f, "ZZZZZ")) for f in sort_keys]
+        key = [unidecode(d.get(f, "ZZZZZ")) for f in sort_keys]
         return key
 
     return natsorted(list_to_sort, key=make_sort_key, reverse=False)

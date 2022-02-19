@@ -2,7 +2,7 @@
 - New aggregation report
 - New metadata stats in search results
 - Results bibliography in concordance and KWIC results.
-- Database size should be between 50% and 500% (or more) smaller
+- Database size should be between 50% and 80% (or more) smaller
 - Significant speed-ups for:
     * Collocations: in some cases 3-4X
     * Sorted KWICs: between 6X and 25X (or more) depending on use case, with no more limits on the size of the sort as a result.

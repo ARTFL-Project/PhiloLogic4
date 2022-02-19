@@ -24,6 +24,7 @@ setup(
         "orjson",
         "black",
         "msgpack",
+        "unidecode",
         "lz4",
     ],
 )

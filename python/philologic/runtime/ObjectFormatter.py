@@ -3,9 +3,9 @@
 
 
 import os
-import regex as re
 import sqlite3
 
+import regex as re
 from lxml import etree, html
 from philologic.runtime.DB import DB
 from philologic.runtime.FragmentParser import parse as FragmentParserParse

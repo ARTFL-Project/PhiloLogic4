@@ -4,13 +4,14 @@ import os
 import time
 import struct
 from .HitWrapper import HitWrapper
-from philologic.utils import smash_accents
-
+from unidecode import unidecode
 
 obj_dict = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
 
 
 class HitList(object):
+    """Iterable containing philologic hits"""
+
     def __init__(
         self,
         filename,
@@ -78,7 +79,7 @@ class HitList(object):
             for i in cursor:
                 sql_row = dict(i)
                 philo_id = tuple(int(s) for s in sql_row["philo_id"].split() if int(s))
-                metadata[philo_id] = [smash_accents(sql_row[m] or "ZZZZZ") for m in sort_order]
+                metadata[philo_id] = [unidecode(sql_row[m] or "ZZZZZ") for m in sort_order]
 
             def sort_by_metadata(philo_id):
                 while philo_id:
