@@ -146,7 +146,7 @@ TOKEN_REGEX = r"[\p{L}\p{M}\p{N}]+|[&\p{L};]+"
 
 PUNCTUATION = r"""[;,:=+()"]"""
 
-CHARS_NOT_TO_INDEX = r"\[\{\]\}"
+CHARS_NOT_TO_INDEX = r"[\[\{\]\}]"
 
 UNICODE_WORD_BREAKERS = [
     b"\xe2\x80\x93",  # U+2013 &ndash; EN DASH

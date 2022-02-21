@@ -165,7 +165,7 @@ break_apost = True
 # ------------- Define Characters to Exclude from Index words -------
 # Leading to a second list, characters which can be in words
 # but you don't want to index.
-chars_not_to_index = r"\[\{\]\}"
+chars_not_to_index = r"[\[\{\]\}]"
 
 # ---------------------- Treat Lines as Sentences --------------------
 # In linegroups, break sentence objects on </l> and turns off
