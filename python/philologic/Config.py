@@ -697,14 +697,31 @@ WEB_CONFIG_DEFAULTS = {
         ),
     },
     "dictionary_lookup": {
-        "value": "",
+        "value": {"url_root": "", "keywords": False},
         "comment": "\n".join(
             [
-                "# Dictionary lookup function. You select a word in running text and hit D, and it'll query an external dictionary",
-                "# and return definitions. This is currently hardcoded to ARTFL's dictionary model. To be made more generic at a later date",
+                "# Dictionary lookup function. You select a word in running text and hit D, and it'll query an external dictionary and return",
+                "# definitions. You need to provide the URL root of the dictionary. If keywords is false, the word selected is just appened to",
+                "# the URL. Otherwise, if set to True, you need to configure the dictionary_lookup_keywords variable below to construct the full URL."
                 "",
             ]
         ),
+    },
+    "dictionary_lookup_keywords": {
+        "value": {
+            "immutable_key_values": {},
+            "variable_key_values": {},
+            "selected_keyword": "",
+        },
+        "comment": [
+            "\n".join(
+                [
+                    "# This defines what keyword/values are appended to the root URL for dico lookup. The immutable_key_values defines key/values which are hardcoded",
+                    "# The variable_key_values defines a key/value pair where the key is the URL key, and the value is a corresponding metadata field value from the text",
+                    "# currently displayed. The selected_keyword corresponds to the URL key for the word selected in the text.",
+                ]
+            )
+        ],
     },
     "query_parser_regex": {
         "value": [
@@ -799,7 +816,7 @@ class Config:
                     + "[{"
                     + """"field": "author", "object_level": "doc", "break_up_field": "title",
                         "field_citation": [citations["author"]], "break_up_field_citation": [
-                        citations["title"], citations["pub_place"], citations["publisher"], citations["collection"],citations["year"] 
+                        citations["title"], citations["pub_place"], citations["publisher"], citations["collection"],citations["year"]
                         ],"""
                     + "}, {"
                     + """"field": "title", "object_level": "doc", "field_citation": [citations["title"],

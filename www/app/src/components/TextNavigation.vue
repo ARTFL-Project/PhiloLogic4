@@ -130,7 +130,7 @@
                             class="text-content-area"
                             v-html="textObject.text"
                             :philo-id="philoID"
-                            @keydown="dicoLookup($event, textObject.metadata_fields.year)"
+                            @keydown="dicoLookup($event)"
                             tabindex="0"
                         ></div>
                         <div id="next-pages" v-if="afterObjImgs">
@@ -654,15 +654,28 @@ export default {
                 }
             }
         },
-        dicoLookup(event, year) {
+        dicoLookup(event) {
             if (event.key === "d") {
                 let selection = window.getSelection().toString();
-                let century = parseInt(year.slice(0, year.length - 2));
-                let range = `${century.toString()}00-${String(century + 1)}00`;
-                if (range == "NaN00-NaN00") {
-                    range = "";
+                let link;
+                if (this.$philoConfig.dictionary_lookup.keywords) {
+                    link = `${this.philoConfig.dictionary_lookup.url_root}?${this.philoConfig.dictionary_lookup_keywords.selected_keyword}=${selection}&`;
+                    let keyValues = [];
+                    for (const [key, value] of Object.entries(
+                        this.philoConfig.dictionary_lookup_keywords.immutable_key_values
+                    )) {
+                        keyValues.push(`${key}=${value}`);
+                    }
+                    for (const [key, value] of Object.entries(
+                        this.philoConfig.dictionary_lookup_keywords.variable_key_values
+                    )) {
+                        let fieldValue = this.textObject.metadata_fields[value] || "";
+                        keyValues.push(`${key}=${fieldValue}`);
+                    }
+                    link += keyValues.join("&");
+                } else {
+                    link = `${this.philoConfig.dictionary_lookup.url_root}/${selection}`;
                 }
-                let link = `${this.philoConfig.dictionary_lookup}?docyear=${range}&strippedhw=${selection}`;
                 window.open(link);
             }
         },

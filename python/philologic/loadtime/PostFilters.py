@@ -12,7 +12,9 @@ from orjson import loads
 from tqdm import tqdm
 
 
-def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
+def make_sql_table(table, file_in, db_file="toms.db", indices=None, depth=7):
+    """SQL Loader function"""
+
     def inner_make_sql_table(loader_obj):
         print(f"{time.ctime()}: Loading the {table} SQLite table...")
         db_destination = os.path.join(loader_obj.destination, db_file)
@@ -29,8 +31,8 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
         with tqdm(total=line_count, leave=False) as pbar:
             with open(file_in) as input_file:
                 for sequence, line in enumerate(input_file):
-                    philo_type, philo_name, id, attrib = line.split("\t", 3)
-                    fields = id.split(None, 8)
+                    philo_type, philo_name, philo_id, attrib = line.split("\t", 3)
+                    fields = philo_id.split(None, 8)
                     if len(fields) == 9:
                         row = loads(attrib)
                         row["philo_type"] = philo_type
@@ -41,34 +43,35 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
                         try:
                             cursor.execute(insert, list(row.values()))
                         except sqlite3.OperationalError:
-                            cursor.execute("PRAGMA table_info(%s)" % table)
+                            cursor.execute(f"PRAGMA table_info({table})")
                             column_list = [i[1] for i in cursor]
                             for column in row:
                                 if column not in column_list:
-                                    cursor.execute("ALTER TABLE %s ADD COLUMN %s;" % (table, column))
+                                    cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column};")
                             cursor.execute(insert, list(row.values()))
                     pbar.update()
         conn.commit()
 
-        for index in indices:
-            try:
-                if isinstance(index, str):
-                    index = (index,)
-                index_name = "%s_%s_index" % (table, "_".join(index))
-                index = ",".join(index)
-                cursor.execute("create index if not exists %s on %s (%s)" % (index_name, table, index))
-                if table == "toms":
-                    index_null_name = f"{index}_null_index"  # this is for hitlist stats queries which require indexing philo_id with null metadata values
-                    cursor.execute(
-                        f"CREATE UNIQUE INDEX IF NOT EXISTS {index_null_name} ON toms(philo_id, {index}) WHERE {index} IS NULL"
-                    )
-            except sqlite3.OperationalError:
-                pass
+        if indices is not None:
+            for index in indices:
+                try:
+                    if isinstance(index, str):
+                        index = (index,)
+                    index_name = f'{table}_{"_".join(index)}_index'
+                    index = ",".join(index)
+                    cursor.execute(f"create index if not exists {index_name} on {table} ({index})")
+                    if table == "toms":
+                        index_null_name = f"{index}_null_index"  # this is for hitlist stats queries which require indexing philo_id with null metadata values
+                        cursor.execute(
+                            f"CREATE UNIQUE INDEX IF NOT EXISTS {index_null_name} ON toms(philo_id, {index}) WHERE {index} IS NULL"
+                        )
+                except sqlite3.OperationalError:
+                    pass
         conn.commit()
         conn.close()
 
         if not loader_obj.debug:
-            os.system("rm %s" % file_in)
+            os.system(f"rm {file_in}")
 
     return inner_make_sql_table
 
@@ -76,7 +79,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=[], depth=7):
 def make_sentences_table(datadir, db_destination):
     """Generate a table where each row is a sentence containing all the words in it"""
 
-    def inner_make_sentences(loader_obj):
+    def inner_make_sentences(_):
         print(f"{time.ctime()}: Loading the sentences SQLite table...")
         with sqlite3.connect(db_destination) as conn:
             conn.text_factory = str
@@ -117,6 +120,7 @@ def make_sentences_table(datadir, db_destination):
 
 
 def word_frequencies(loader_obj):
+    """Generate word frequencies"""
     print("%s: Generating word frequencies..." % time.ctime())
     frequencies = loader_obj.destination + "/frequencies"
     os.system("mkdir %s" % frequencies)
@@ -128,6 +132,7 @@ def word_frequencies(loader_obj):
 
 
 def normalized_word_frequencies(loader_obj):
+    """Generate normalized word frequencies"""
     print("%s: Generating normalized word frequencies..." % time.ctime())
     frequencies = loader_obj.destination + "/frequencies"
     output = open(frequencies + "/normalized_word_frequencies", "w")
@@ -141,6 +146,7 @@ def normalized_word_frequencies(loader_obj):
 
 
 def metadata_frequencies(loader_obj):
+    """ "Generate metadata frequencies"""
     print("%s: Generating metadata frequencies..." % time.ctime())
     frequencies = loader_obj.destination + "/frequencies"
     conn = sqlite3.connect(loader_obj.destination + "/toms.db")
@@ -172,6 +178,7 @@ def metadata_frequencies(loader_obj):
 
 
 def normalized_metadata_frequencies(loader_obj):
+    """Generate normalized metadata frequencies"""
     print("%s: Generating normalized metadata frequencies..." % time.ctime())
     frequencies = loader_obj.destination + "/frequencies"
     for field in loader_obj.metadata_fields:
@@ -199,6 +206,7 @@ DefaultPostFilters = [
 
 
 def set_default_postfilters(postfilters=DefaultPostFilters):
+    """Setting default post filters"""
     filters = []
     for postfilter in postfilters:
         filters.append(postfilter)

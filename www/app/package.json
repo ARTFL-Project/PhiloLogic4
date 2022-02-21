@@ -1,64 +1,63 @@
 {
-  "name": "philologic",
-  "version": "4.7.0",
-  "private": true,
-  "scripts": {
-    "serve": "export SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
-    "build": "export SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
-    "lint": "export SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service lint"
-  },
-  "dependencies": {
-    "@popperjs/core": "^2.9.2",
-    "axios": "^0.21.0",
-    "blueimp-gallery": "^2.38.0",
-    "bootstrap": "^5.0.1",
-    "chart.js": "^2.9.3",
-    "core-js": "^3.13.1",
-    "velocity-animate": "^1.5.2",
-    "vue": "^3.2.0",
-    "vue-router": "^4.0.0",
-    "vue-scrollto": "^2.17.1",
-    "vuex": "^4.0.0",
-    "vuex-map-fields": "^1.4.0"
-  },
-  "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.13",
-    "@vue/cli-plugin-eslint": "~4.5.13",
-    "@vue/cli-service": "^4.5.14",
-    "@vue/compiler-sfc": "^3.1.0",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^6.8.0",
-    "eslint-plugin-vue": "^7.3.0",
-    "node-sass": "^6.0.0",
-    "sass-loader": "^10.1.0",
-    "webpack-dashboard": "^3.2.1"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
+    "name": "philologic",
+    "version": "4.7.0",
+    "private": true,
+    "scripts": {
+        "serve": "export SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
+        "build": "export SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
+        "lint": "export SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service lint"
     },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {
-      "no-console": "off"
+    "dependencies": {
+        "@popperjs/core": "^2.9.2",
+        "axios": "^0.21.0",
+        "blueimp-gallery": "^2.38.0",
+        "bootstrap": "^5.0.1",
+        "chart.js": "^2.9.3",
+        "core-js": "^3.13.1",
+        "velocity-animate": "^1.5.2",
+        "vue": "^3.2.0",
+        "vue-router": "^4.0.0",
+        "vue-scrollto": "^2.17.1",
+        "vuex": "^4.0.0",
+        "vuex-map-fields": "^1.4.0"
     },
-    "parserOptions": {
-      "parser": "babel-eslint",
-      "ecmaVersion": 11,
-      "sourceType": "module"
-    }
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 10"
-  ]
+    "devDependencies": {
+        "@vue/cli-plugin-babel": "~4.5.13",
+        "@vue/cli-plugin-eslint": "~4.5.13",
+        "@vue/cli-service": "^4.5.14",
+        "@vue/compiler-sfc": "^3.1.0",
+        "babel-eslint": "^10.1.0",
+        "eslint": "^6.8.0",
+        "eslint-plugin-vue": "^7.3.0",
+        "node-sass": "^6.0.0",
+        "sass-loader": "^10.1.0"
+    },
+    "eslintConfig": {
+        "root": true,
+        "env": {
+            "node": true
+        },
+        "extends": [
+            "plugin:vue/essential",
+            "eslint:recommended"
+        ],
+        "rules": {
+            "no-console": "off"
+        },
+        "parserOptions": {
+            "parser": "babel-eslint",
+            "ecmaVersion": 11,
+            "sourceType": "module"
+        }
+    },
+    "postcss": {
+        "plugins": {
+            "autoprefixer": {}
+        }
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not ie <= 10"
+    ]
 }

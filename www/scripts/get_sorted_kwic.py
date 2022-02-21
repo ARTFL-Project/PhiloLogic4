@@ -23,6 +23,7 @@ except ImportError:
 
 
 def get_sorted_kwic(environ, start_response):
+    """Get sorted KWIC"""
     status = "200 OK"
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
@@ -34,6 +35,7 @@ def get_sorted_kwic(environ, start_response):
 
 
 def get_sorted_hits(request, config, db):
+    """Get sorted hits"""
     hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
     start, end, _ = page_interval(request.results_per_page, hits, request.start, request.end)
     kwic_object = {
