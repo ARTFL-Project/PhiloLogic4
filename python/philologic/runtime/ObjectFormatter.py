@@ -470,9 +470,14 @@ def format_text_object(
                     current_obj_img.append(img.split()[0])
                     el.append(etree.Element("a"))
                     img_split = img.split()
-                    el[-1].attrib["href"] = (
-                        os.path.join(config.page_images_url_root, img_split[0]) + config.page_image_extension
-                    )
+                    if config.external_page_image:
+                        el[-1].attrib[
+                            "href"
+                        ] = f"{config.page_images_url_root}{img_split[0]}{config.page_image_extension}"  # We add no slash at the end of the URL
+                    else:
+                        el[-1].attrib["href"] = (
+                            os.path.join(config.page_images_url_root, img_split[0]) + config.page_image_extension
+                        )
                     if len(img_split) == 2:
                         el[-1].attrib["large-img"] = (
                             os.path.join(config.page_images_url_root, img_split[1]) + config.page_image_extension
