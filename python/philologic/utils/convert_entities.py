@@ -8,6 +8,8 @@ entities_match = re.compile(r"&#?\w+;")
 
 
 def convert_entities(text):
+    """Convert entities"""
+
     def fixup(m):
         text = m.group(0)
         if text[:2] == "&#":

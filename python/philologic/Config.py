@@ -80,8 +80,8 @@ CITATIONS = {
         "link": True,
         "style": {"font-variant": "small-caps"},
     },
-    "who": {
-        "field": "who",
+    "speaker": {
+        "field": "speaker",
         "object_level": "para",
         "prefix": "",
         "suffix": "",
@@ -458,7 +458,7 @@ WEB_CONFIG_DEFAULTS = {
             CITATIONS["div1_head"],
             CITATIONS["div2_head"],
             CITATIONS["div3_head"],
-            CITATIONS["who"],
+            CITATIONS["speaker"],
             CITATIONS["resp"],
             CITATIONS["page"],
         ],
@@ -478,7 +478,7 @@ WEB_CONFIG_DEFAULTS = {
             CITATIONS["div1_head"],
             CITATIONS["div2_head"],
             CITATIONS["div3_head"],
-            CITATIONS["who"],
+            CITATIONS["speaker"],
             CITATIONS["resp"],
             CITATIONS["page"],
         ],
@@ -713,15 +713,13 @@ WEB_CONFIG_DEFAULTS = {
             "variable_key_values": {},
             "selected_keyword": "",
         },
-        "comment": [
-            "\n".join(
-                [
-                    "# This defines what keyword/values are appended to the root URL for dico lookup. The immutable_key_values defines key/values which are hardcoded",
-                    "# The variable_key_values defines a key/value pair where the key is the URL key, and the value is a corresponding metadata field value from the text",
-                    "# currently displayed. The selected_keyword corresponds to the URL key for the word selected in the text.",
-                ]
-            )
-        ],
+        "comment": "\n".join(
+            [
+                "# This defines what keyword/values are appended to the root URL for dico lookup. The immutable_key_values defines key/values which are hardcoded",
+                "# The variable_key_values defines a key/value pair where the key is the URL key, and the value is a corresponding metadata field value from the text",
+                "# currently displayed. The selected_keyword corresponds to the URL key for the word selected in the text.",
+            ]
+        ),
     },
     "query_parser_regex": {
         "value": [
@@ -762,6 +760,8 @@ WEB_CONFIG_HEADER = """
 
 
 class Config:
+    """Main Config class to build out web_config and db.locals"""
+
     def __init__(self, filename, defaults, header=""):
         self.filename = filename
         self.db_path = os.path.dirname(os.path.dirname(self.filename))
@@ -803,7 +803,7 @@ class Config:
                 string += f"""\n{key} = [
                     citations["author"], citations["title"], citations["year"],
                     citations["div1_head"], citations["div2_head"], citations["div3_head"],
-                    citations["who"], citations["resp"], citations["page"],
+                    citations["speaker"], citations["resp"], citations["page"],
                 ]"""
             elif key in ("table_of_contents_citation", "navigation_citation", "simple_landing_citation"):
                 string += f"""\n{key} = [
@@ -854,6 +854,7 @@ class Config:
 
 
 def MakeWebConfig(path, **extra_values):
+    """Build web_config with non-default arguments"""
     web_config = Config(path, WEB_CONFIG_DEFAULTS, header=WEB_CONFIG_HEADER)
     if extra_values:
         for key, value in extra_values.items():
@@ -862,6 +863,7 @@ def MakeWebConfig(path, **extra_values):
 
 
 def MakeDBConfig(path, **extra_values):
+    """Build db.locals with non-default arguments"""
     db_config = Config(path, DB_LOCALS_DEFAULTS, header=DB_LOCALS_HEADER)
     if extra_values:
         for key, value in extra_values.items():

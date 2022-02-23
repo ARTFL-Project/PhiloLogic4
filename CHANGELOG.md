@@ -13,6 +13,7 @@
 - Some breaking changes to web config: you should not use a 4.6 config
 - Revamped Web UI: move to VueJS and Bootstrap 5.
 - Cleaner URLS for queries
+- Faster database loads
 
 ### 4.6 ###
 - Port PhiloLogic4 codebase to Python3

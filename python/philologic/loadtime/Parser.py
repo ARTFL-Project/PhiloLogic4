@@ -41,7 +41,7 @@ DEFAULT_TAG_TO_OBJ_MAP = {
 
 DEFAULT_METADATA_TO_PARSE = {
     "div": ["head", "type", "n", "id", "vol", "div_date"],
-    "para": ["who", "resp", "id"],  # for <sp> and <add> tags
+    "para": ["who", "speaker", "resp", "id"],  # for <sp> and <add> tags
     "page": ["n", "id", "facs"],
     "ref": ["target", "n", "type"],
     "graphic": ["facs"],
@@ -190,8 +190,10 @@ epigraph_tag = re.compile(r"<epigraph\W", re.I)
 closed_epigraph_tag = re.compile(r"</epigraph>", re.I)
 list_tag = re.compile(r"<list\W", re.I)
 closed_list_tag = re.compile(r"</list>", re.I)
-speaker_tag = re.compile(r"<sp\W", re.I)
-closed_speaker_tag = re.compile(r"</sp>", re.I)
+sp_tag = re.compile(r"<sp\W", re.I)
+closed_sp_tag = re.compile(r"</sp>", re.I)
+speaker_tag = re.compile(r"<speaker\W", re.I)
+closed_speaker_tag = re.compile(r"</speaker>")
 argument_tag = re.compile(r"<argument\W", re.I)
 closed_argument_tag = re.compile(r"</argument>", re.I)
 opener_tag = re.compile(r"<opener\W", re.I)
@@ -413,9 +415,9 @@ class XMLParser:
             self.sentence_breakers = []
 
         if "punctuation" in parse_options:
-            self.punct_regex = re.compile(fr"""{parse_options["punctuation"]}""")
+            self.punct_regex = re.compile(rf"""{parse_options["punctuation"]}""")
         else:
-            self.punct_regex = re.compile(fr"{PUNCTUATION}")
+            self.punct_regex = re.compile(rf"{PUNCTUATION}")
 
         if "suppress_tags" in parse_options:
             self.suppress_tags = set([i for i in parse_options["suppress_tags"] if i])
@@ -675,7 +677,7 @@ class XMLParser:
                 self.get_object_attributes(tag, tag_name, "para")
 
             # SPEECH BREAKS: treat them as para objects
-            elif speaker_tag.search(tag):
+            elif sp_tag.search(tag):
                 if self.open_para:  # account for unclosed paragraph tags
                     para_end_byte = self.bytes_read_in - len(tag.encode("utf8"))
                     self.close_para(para_end_byte)
@@ -683,10 +685,25 @@ class XMLParser:
                 self.v.push("para", tag_name, start_byte)
                 self.get_object_attributes(tag, tag_name, "para")
                 self.no_deeper_objects = True
-            elif closed_speaker_tag.search(tag):
+            elif closed_sp_tag.search(tag):
                 self.close_para(self.bytes_read_in)
                 self.no_deeper_objects = False
                 self.open_para = False
+
+            # Speaker tags: we attach them to the parent <sp>
+            elif speaker_tag.search(tag):
+                if self.open_para:
+                    read_more = True
+                    next_line_num = self.line_count
+                    speaker_name = ""
+                    while read_more:
+                        next_line = self.content[next_line_num]
+                        if next_line.startswith("<"):  # we've reached the next tag
+                            break
+                        speaker_name += next_line.strip()
+                        next_line_num += 1
+                    speaker_name = re.sub(r"\.$", "", speaker_name)  # trailing period often found in speaker names
+                    self.v["para"]["speaker"] = speaker_name.title()
 
             # ARGUMENT BREAKS: treat them as para objects
             elif argument_tag.search(tag):
@@ -1562,7 +1579,10 @@ def extract_full_date(date):
         return datetime.date(1, month, 1)
     year_match = re.search(r"^(\d+)$", date)
     if year_match:  # e.g. 1987
-        year = int(year_match.groups()[0])
+        year_str = year_match.groups()[0]
+        if len(year_str) > 4:
+            year_str = year_str[:4]
+        year = int(year_str)
         return datetime.date(year, 1, 1)
     return ""
 
