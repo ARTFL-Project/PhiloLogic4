@@ -26,7 +26,6 @@ except ImportError:
     from philologic.runtime import WSGIHandler
 
 NUMBER = re.compile(r"\d")
-OBJECT_LEVELS = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5}
 
 
 def get_neighboring_words(environ, start_response):
@@ -124,7 +123,6 @@ def get_cache_path(request, db):
     hash.update(request["q"].encode("utf-8"))
     hash.update(request["method"].encode("utf-8"))
     hash.update(str(request["arg"]).encode("utf-8"))
-    print(request.first_kwic_sorting_option, file=sys.stderr)
     hash.update(request.first_kwic_sorting_option.encode("utf-8"))
     hash.update(request.second_kwic_sorting_option.encode("utf-8"))
     hash.update(request.third_kwic_sorting_option.encode("utf-8"))

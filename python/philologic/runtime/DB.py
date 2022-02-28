@@ -14,7 +14,7 @@ def hit_to_string(hit, width):
     if isinstance(hit, sqlite3.Row):
         hit = hit["philo_id"]
     if isinstance(hit, str):
-        hit = list(map(int, hit.split(" ")))
+        hit = list(map(int, hit.strip().split(" ")))
     if isinstance(hit, int):
         hit = [hit]
     if len(hit) > width:

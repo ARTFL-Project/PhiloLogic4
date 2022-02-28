@@ -774,6 +774,7 @@ class Config:
             exec(compile(open(self.filename, "rb").read(), self.filename, "exec"), globals(), self.data)
             self.valid_config = True
         self.time_series_status = True
+        self.converted = False
 
     def __getitem__(self, item):
         try:

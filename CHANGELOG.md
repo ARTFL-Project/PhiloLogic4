@@ -14,6 +14,7 @@
 - Revamped Web UI: move to VueJS and Bootstrap 5.
 - Cleaner URLS for queries
 - Faster database loads
+- New generic dictionary lookup code
 
 ### 4.6 ###
 - Port PhiloLogic4 codebase to Python3

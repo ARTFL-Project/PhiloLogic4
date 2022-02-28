@@ -468,33 +468,34 @@ def format_text_object(
                     else:
                         img = el.attrib["id"]
                     current_obj_img.append(img.split()[0])
-                    el.append(etree.Element("a"))
+                    link_tag = etree.SubElement(el, "a")
                     img_split = img.split()
-                    if config.external_page_image:
-                        el[-1].attrib[
+
+                    if config.external_page_images:
+                        link_tag.attrib[
                             "href"
                         ] = f"{config.page_images_url_root}{img_split[0]}{config.page_image_extension}"  # We add no slash at the end of the URL
                     else:
-                        el[-1].attrib["href"] = (
+                        link_tag.attrib["href"] = (
                             os.path.join(config.page_images_url_root, img_split[0]) + config.page_image_extension
                         )
                     if len(img_split) == 2:
-                        el[-1].attrib["large-img"] = (
+                        link_tag.attrib["large-img"] = (
                             os.path.join(config.page_images_url_root, img_split[1]) + config.page_image_extension
                         )
                     else:
-                        el[-1].attrib["large-img"] = (
+                        link_tag.attrib["large-img"] = (
                             os.path.join(config.page_images_url_root, img_split[0]) + config.page_image_extension
                         )
-                    el[-1].text = "[page " + el.attrib["n"] + "]"
+                    link_tag.text = f'[page {el.attrib["n"]}]'
                     if config.external_page_images:
-                        el[-1].attrib["target"] = "_blank"
+                        link_tag.attrib["target"] = "_blank"
                     else:
-                        el[-1].attrib["class"] = "page-image-link"
-                        el[-1].attrib["data-gallery"] = ""
+                        link_tag.attrib["class"] = "page-image-link"
+                        link_tag.attrib["data-gallery"] = ""
                 else:
                     if el.attrib["n"]:
-                        el.text = "--%s--" % el.attrib["n"]
+                        el.text = f"--{el.attrib['n']}--"
                     else:
                         el.text = "--na--"
                 grand_parent = el.getparent().getparent()
@@ -693,13 +694,14 @@ def get_first_page(philo_id, config):
     starting the object"""
     db = DB(config.db_path + "/data/")
     c = db.dbh.cursor()
+
     if len(philo_id) < 9:
         c.execute("select start_byte, end_byte from toms where philo_id=?", (" ".join([str(i) for i in philo_id]),))
         result = c.fetchone()
         start_byte = result["start_byte"]
-        approx_id = str(philo_id[0]) + " 0 0 0 0 0 0 %"
+        approx_id = f"{philo_id[0]} 0 0 0 0 0 0 %"
         try:
-            c.execute("select * from pages where philo_id like ? and end_byte >= ? limit 1", (approx_id, start_byte))
+            c.execute(f"select * from pages where philo_id like '{approx_id}' and end_byte >= {start_byte} limit 1")
         except:
             return {"filename": "", "start_byte": ""}
     else:

@@ -8,10 +8,51 @@ from collections import namedtuple
 import lz4.frame
 from philologic.loadtime.PostFilters import make_sentences_table
 from philologic.runtime.DB import DB
-from philologic.Config import MakeWebConfig, MakeDBConfig
+from philologic.Config import Config, MakeDBConfig, WEB_CONFIG_DEFAULTS, WEB_CONFIG_HEADER
 from philologic.utils import load_module
 from tqdm import tqdm
 from black import format_str, FileMode
+
+
+class CustomConfig(Config):
+    def __str__(self):
+        string = "\n".join([line.strip() for line in self.header.splitlines() if line.strip()]) + "\n\n"
+        written_keys = []
+        for key, value in self.defaults.items():
+            if value["comment"]:
+                string += "\n" + "\n".join(line.strip() for line in value["comment"].splitlines() if line.strip())
+            if key == "stats_report_config":
+                string += (
+                    f"\n{key} = "
+                    + "[{"
+                    + """"field": "author", "object_level": "doc", "break_up_field": "title",
+                        "field_citation": [citations["author"]], "break_up_field_citation": [
+                        citations["title"], citations["pub_place"], citations["publisher"], citations["collection"],citations["year"]
+                        ],"""
+                    + "}, {"
+                    + """"field": "title", "object_level": "doc", "field_citation": [citations["title"],
+                        citations["pub_place"], citations["publisher"], citations["collection"], citations["year"]],"break_up_field": None,
+                        "citation": citations["title"], "break_up_field_citation": None, """
+                    + "}]"
+                )
+            else:
+                string += "\n%s = %s\n" % (key, pretty_print(self.data[key]))
+            written_keys.append(key)
+        for key in self.data:
+            if key not in written_keys:
+                string += "\n%s = %s\n" % (key, pretty_print(self.data[key]))
+                written_keys.append(key)
+        return string
+
+
+def MakeWebConfig(path, **extra_values):
+    """Build web_config with non-default arguments"""
+    web_config = CustomConfig(path, WEB_CONFIG_DEFAULTS, header=WEB_CONFIG_HEADER)
+    if extra_values:
+        for key, value in extra_values.items():
+            web_config[key] = value
+    return web_config
+
 
 Loader = namedtuple("Loader", "destination")
 
@@ -150,6 +191,22 @@ def get_time_series_dates(toms):
     return start_date, end_date
 
 
+def citations_filter(citations):
+    new_citations = []
+    for citation in citations:
+        del citation["separator"]
+        new_citations.append(citation)
+    return new_citations
+
+
+def convert_landing_page_browsing(landing_page):
+    new_landing_page = []
+    for l in landing_page:
+        l["citation"] = citations_filter(l["citation"])
+        new_landing_page.append(l)
+    return new_landing_page
+
+
 if __name__ == "__main__":
     philo_db = sys.argv[1]
 
@@ -190,8 +247,38 @@ if __name__ == "__main__":
         "kwic_metadata_sorting_fields": old_config.kwic_metadata_sorting_fields,
         "kwic_bibliography_fields": old_config.kwic_bibliography_fields,
         "concordance_biblio_sorting": old_config.concordance_biblio_sorting,
-        # "metadata_choice_values": old_config.metadata_dropdown_values, #TODO: investigate why broken...
+        "page_images_url_root": old_config.page_images_url_root,
+        "link_to_home_page": old_config.link_to_home_page,
+        "metadata_aliases": old_config.metadata_aliases,
+        "stopwords": old_config.stopwords,
+        "time_series_interval": old_config.time_series_interval,
+        "external_page_images": old_config.external_page_images,
+        "header_in_toc": old_config.header_in_toc,
+        "default_landing_page_browsing": convert_landing_page_browsing(old_config.default_landing_page_browsing),
+        "default_landing_page_display": old_config.default_landing_page_display,
+        "simple_landing_citation": old_config.simple_landing_citation,
+        "dico_letter_range": old_config.dico_letter_range,
+        "concordance_citation": old_config.concordance_citation,
+        "bibliography_citation": old_config.bibliography_citation,
+        "table_of_contents_citation": old_config.table_of_contents_citation,
+        "navigation_citation": old_config.navigation_citation,
+        "kwic_bibliography_fields": old_config.kwic_bibliography_fields,
+        "concordance_biblio_sorting": old_config.concordance_biblio_sorting,
+        "kwic_metadata_sorting_fields": old_config.kwic_metadata_sorting_fields,
+        "time_series_year_field": old_config.time_series_year_field,
+        "page_image_extension": old_config.page_image_extension,
+        "search_syntax_template": old_config.search_syntax_template or "default",
+        "concordance_formatting_regex": old_config.concordance_formatting_regex,
+        "kwic_formatting_regex": old_config.kwic_formatting_regex,
+        "navigation_formatting_regex": old_config.navigation_formatting_regex,
+        "query_parser_regex": old_config.query_parser_regex,
+        "report_error_link": old_config.report_error_link,
+        "metadata_choice_values": old_config.metadata_dropdown_values,  # TODO: investigate why broken...
     }
+    try:
+        config_values["skip_table_of_contents"] = old_config.skip_table_of_contents
+    except AttributeError:
+        config_values["skip_table_of_contents"] = False
     os.system(
         f'mv {os.path.join(philo_db + "/data/web_config.cfg")} {os.path.join(philo_db + "/data/web_config.cfg_old")}'
     )
