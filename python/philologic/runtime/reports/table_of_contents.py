@@ -20,10 +20,10 @@ def generate_toc_object(request, config):
     doc_id = int(obj.philo_id[0])
     next_doc_id = doc_id + 1
     # find the starting rowid for this doc
-    cursor.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % doc_id)
+    cursor.execute(f'select rowid from toms where philo_id="{doc_id} 0 0 0 0 0 0"')
     start_rowid = cursor.fetchone()[0]
     # find the starting rowid for the next doc
-    cursor.execute('select rowid from toms where philo_id="%d 0 0 0 0 0 0"' % next_doc_id)
+    cursor.execute(f'select rowid from toms where philo_id="{next_doc_id} 0 0 0 0 0 0"')
     try:
         end_rowid = cursor.fetchone()[0]
     except TypeError:  # if this is the last doc, just get the last rowid in the table.
@@ -55,7 +55,7 @@ def generate_toc_object(request, config):
                 display_name = display_name.strip()
             if not display_name:
                 if text["type"] and text["n"]:
-                    display_name = text["type"] + " " + text["n"]
+                    display_name = f'{text["type"]} {text["n"]}'
                 else:
                     display_name = text["head"] or text["type"] or text["philo_name"] or text["philo_type"]
                     if display_name == "__philo_virtual":

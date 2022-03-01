@@ -10,6 +10,7 @@ from philologic.loadtime.PostFilters import make_sentences_table
 from philologic.runtime.DB import DB
 from philologic.Config import Config, MakeDBConfig, WEB_CONFIG_DEFAULTS, WEB_CONFIG_HEADER
 from philologic.utils import load_module
+from philologic.utils import pretty_print
 from tqdm import tqdm
 from black import format_str, FileMode
 

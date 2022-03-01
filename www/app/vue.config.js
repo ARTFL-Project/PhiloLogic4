@@ -12,6 +12,7 @@ module.exports = {
         config.module
             .rule('vue')
             .use('vue-loader')
+            // config.output.hashFunction("sha256")
     },
     runtimeCompiler: true,
     publicPath: process.env.NODE_ENV === 'production' ? getBaseUrl() : '/'
