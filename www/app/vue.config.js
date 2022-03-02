@@ -1,21 +1,15 @@
 module.exports = {
     devServer: {
         compress: true,
-        disableHostCheck: true,
-        // host: "localhost",
+        allowedHosts: 'all',
         proxy: "https://anomander.uchicago.edu/philologic",
         headers: {
             'Access-Control-Allow-Origin': '*'
         }
     },
-    chainWebpack: config => {
-        config.module
-            .rule('vue')
-            .use('vue-loader')
-            // config.output.hashFunction("sha256")
-    },
     runtimeCompiler: true,
-    publicPath: process.env.NODE_ENV === 'production' ? getBaseUrl() : '/'
+    publicPath: process.env.NODE_ENV === 'production' ? getBaseUrl() : '/',
+    transpileDependencies: true
 }
 
 function getBaseUrl() {

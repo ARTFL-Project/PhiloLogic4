@@ -23,7 +23,7 @@
 import { mapFields } from "vuex-map-fields";
 
 export default {
-    name: "pages",
+    name: "pages-component",
     computed: {
         ...mapFields(["formData.results_per_page", "resultsLength", "totalResultsDone", "urlUpdate"]),
     },

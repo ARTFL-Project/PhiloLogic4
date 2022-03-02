@@ -32,7 +32,7 @@
 import Chart from "chart.js/dist/Chart.min.js";
 import { mapFields } from "vuex-map-fields";
 import ResultsSummary from "./ResultsSummary";
-import variables from "../assets/styles/theme.scss";
+import cssVariables from "../assets/styles/theme.module.scss";
 
 export default {
     name: "timeSeries",
@@ -136,9 +136,9 @@ export default {
                     datasets: [
                         {
                             label: "Absolute Frequency",
-                            backgroundColor: variables.color,
+                            backgroundColor: cssVariables.color,
                             borderWidth: 1,
-                            hoverBackgroundColor: this.hexToRGBA(variables.color),
+                            hoverBackgroundColor: this.hexToRGBA(cssVariables.color),
                             yAxisID: "absolute",
                             data: zeros,
                         },

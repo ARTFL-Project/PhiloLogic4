@@ -185,10 +185,8 @@ export default {
 };
 </script>
 <style lang="scss">
-@import "./assets/styles/theme.scss";
+@import "./assets/styles/theme.module.scss";
 @import "../node_modules/bootstrap/scss/bootstrap.scss";
-</style>
-<style>
 a {
     text-decoration: none;
 }

@@ -28,7 +28,7 @@
 import { inject } from "vue";
 
 export default {
-    name: "Header",
+    name: "Header-component",
     setup() {
         const philoConfig = inject("$philoConfig");
         return {

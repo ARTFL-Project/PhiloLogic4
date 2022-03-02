@@ -133,7 +133,7 @@
 import { mapFields } from "vuex-map-fields";
 
 export default {
-    name: "facets",
+    name: "facets-report",
     computed: {
         ...mapFields([
             "formData.report",

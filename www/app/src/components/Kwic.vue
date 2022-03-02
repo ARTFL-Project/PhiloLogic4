@@ -93,7 +93,7 @@ import pages from "./Pages";
 import Velocity from "velocity-animate";
 
 export default {
-    name: "kwic",
+    name: "kwic-report",
     components: {
         ResultsSummary,
         facets,

@@ -274,7 +274,8 @@ if __name__ == "__main__":
         "navigation_formatting_regex": old_config.navigation_formatting_regex,
         "query_parser_regex": old_config.query_parser_regex,
         "report_error_link": old_config.report_error_link,
-        "metadata_choice_values": old_config.metadata_dropdown_values,  # TODO: investigate why broken...
+        "metadata_choice_values": old_config.metadata_dropdown_values,
+        "dictionary": old_config.dictionary,
     }
     try:
         config_values["skip_table_of_contents"] = old_config.skip_table_of_contents

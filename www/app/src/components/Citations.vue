@@ -11,7 +11,7 @@
 </template>
 <script>
 export default {
-    name: "citations",
+    name: "citations-generator",
     props: ["citation"],
     setup() {
         const filterNone = (citation) => {

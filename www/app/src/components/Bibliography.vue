@@ -71,7 +71,7 @@ import pages from "./Pages";
 import Velocity from "velocity-animate";
 
 export default {
-    name: "bibliography",
+    name: "bibliography-report",
     components: {
         citations,
         ResultsSummary,

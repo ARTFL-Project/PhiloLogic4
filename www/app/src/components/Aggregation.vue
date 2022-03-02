@@ -62,7 +62,7 @@ import citations from "./Citations";
 import ResultsSummary from "./ResultsSummary";
 
 export default {
-    name: "aggregation",
+    name: "aggregation-report",
     components: { citations, ResultsSummary },
     inject: ["$http"],
     provide() {

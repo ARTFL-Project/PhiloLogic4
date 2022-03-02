@@ -50,10 +50,10 @@
 <script>
 import { mapFields } from "vuex-map-fields";
 import ResultsSummary from "./ResultsSummary";
-import variables from "../assets/styles/theme.scss";
+import variables from "../assets/styles/theme.module.scss";
 
 export default {
-    name: "collocation",
+    name: "collocation-report",
     components: {
         ResultsSummary,
     },
@@ -253,7 +253,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-@import "../assets/styles/theme.scss";
+@import "../assets/styles/theme.module.scss";
 
 th {
     background-color: $link-color;
