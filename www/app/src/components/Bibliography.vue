@@ -1,9 +1,20 @@
 <template>
     <div class="container-fluid">
         <results-summary :description="results.description"></results-summary>
+        <div style="position: relative" v-if="!showFacets">
+            <button
+                type="button"
+                class="btn btn-sm btn-secondary"
+                style="position: absolute; bottom: 0; right: 0.5rem; padding: 0.125rem 0.25rem"
+                @click="toggleFacets()"
+            >
+                Show Facets
+            </button>
+        </div>
         <div class="row mt-4" style="padding-right: 0.5rem">
             <div
-                class="col-12 col-md-7 col-xl-8"
+                class="col-12"
+                :class="{ 'col-md-8': showFacets, 'col-xl-9': showFacets }"
                 v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'"
             >
                 <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
@@ -54,7 +65,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col" md="5" xl="4">
+            <div class="col" md="5" xl="4" v-if="showFacets">
                 <facets></facets>
             </div>
         </div>
@@ -94,6 +105,7 @@ export default {
             "currentReport",
             "metadataUpdate",
             "urlUpdate",
+            "showFacets",
         ]),
     },
     inject: ["$http"],
@@ -186,6 +198,13 @@ export default {
             setTimeout(function () {
                 Velocity(el, { opacity: 1 }, { complete: done });
             }, delay);
+        },
+        toggleFacets() {
+            if (this.showFacets) {
+                this.showFacets = false;
+            } else {
+                this.showFacets = true;
+            }
         },
     },
 };

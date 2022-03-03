@@ -1,8 +1,18 @@
 <template>
     <div class="container-fluid">
         <results-summary :description="results.description"></results-summary>
+        <div style="position: relative" v-if="!showFacets">
+            <button
+                type="button"
+                class="btn btn-secondary"
+                style="position: absolute; bottom: 1rem; right: 0.5rem"
+                @click="toggleFacets()"
+            >
+                Show Facets
+            </button>
+        </div>
         <div class="row">
-            <div class="col-12 col-md-7 col-xl-8">
+            <div class="col-12" :class="{ 'col-md-8': showFacets, 'col-xl-9': showFacets }">
                 <div class="card p-2 ml-2 shadow-sm">
                     <div class="p-2 mb-1">
                         Resort results by
@@ -76,7 +86,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col col-md-5 col-xl-4" md="5" xl="4">
+            <div class="col col-md-4 col-xl-3" v-if="showFacets">
                 <facets></facets>
             </div>
         </div>
@@ -115,6 +125,7 @@ export default {
             "description",
             "sortedKwicCache",
             "urlUpdate",
+            "showFacets",
         ]),
         sortingSelection() {
             let sortingSelection = [];
@@ -371,6 +382,13 @@ export default {
             setTimeout(function () {
                 Velocity(el, { opacity: 1 }, { complete: done });
             }, delay);
+        },
+        toggleFacets() {
+            if (this.showFacets) {
+                this.showFacets = false;
+            } else {
+                this.showFacets = true;
+            }
         },
     },
 };
