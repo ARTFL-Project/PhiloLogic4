@@ -15,7 +15,7 @@
             <div class="col-12" :class="{ 'col-md-8': showFacets, 'col-xl-9': showFacets }">
                 <div class="card p-2 ml-2 shadow-sm">
                     <div class="p-2 mb-1">
-                        Resort results by
+                        Sort results by
                         <div
                             class="btn-group"
                             style="margin-left: 3px"
@@ -44,6 +44,32 @@
                             </div>
                         </div>
                         <button type="button" class="btn btn-secondary btn-sm ms-1" @click="sortResults()">Sort</button>
+                        <div class="float-lg-end mt-lg-0 mt-md-2">
+                            Show
+                            <div class="dropdown d-inline-block">
+                                <button
+                                    class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                    type="button"
+                                    id="kwic-results-per-page"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    {{ results_per_page }}
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="kwic-results-per-page">
+                                    <li>
+                                        <a
+                                            class="dropdown-item"
+                                            v-for="number in ['25', '100', '500', '1000']"
+                                            :key="number"
+                                            @click="switchResultsPerPage(number)"
+                                            >{{ number }}</a
+                                        >
+                                    </li>
+                                </ul>
+                            </div>
+                            results per page
+                        </div>
                         <div
                             class="progress mt-3"
                             :max="resultsLength"
@@ -85,12 +111,12 @@
                         </transition-group>
                     </div>
                 </div>
+                <pages></pages>
             </div>
             <div class="col col-md-4 col-xl-3" v-if="showFacets">
                 <facets></facets>
             </div>
         </div>
-        <pages></pages>
     </div>
 </template>
 
@@ -389,6 +415,9 @@ export default {
             } else {
                 this.showFacets = true;
             }
+        },
+        switchResultsPerPage(number) {
+            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData, results_per_page: number }));
         },
     },
 };

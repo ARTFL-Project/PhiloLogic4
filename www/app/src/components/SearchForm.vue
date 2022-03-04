@@ -215,10 +215,41 @@
                                     <button
                                         type="button"
                                         class="btn btn-outline-secondary"
-                                        v-if="metadataInputStyle[localField.value] != 'checkbox'"
+                                        v-if="
+                                            metadataInputStyle[localField.value] != 'checkbox' &&
+                                            localField.value != 'div_date'
+                                        "
                                     >
                                         <label :for="localField.value + 'input-filter'">{{ localField.label }}</label>
                                     </button>
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        style="border-top-right-radius: 0; border-bottom-right-radius: 0"
+                                        v-if="localField.value == 'div_date'"
+                                    >
+                                        <label for="div-date">Date</label>
+                                    </button>
+                                    <div class="btn-group" role="group" v-if="localField.value == 'div_date'">
+                                        <button
+                                            class="btn btn-secondary dropdown-toggle"
+                                            style="border-top-left-radius: 0; border-bottom-left-radius: 0"
+                                            type="button"
+                                            id="div-date-selector"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false"
+                                        >
+                                            {{ `${dateType[0].toUpperCase()}${dateType.slice(1)}` }}
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="div-date-selector">
+                                            <li @click="dateTypeToggle('exact')">
+                                                <a class="dropdown-item">Exact</a>
+                                            </li>
+                                            <li @click="dateTypeToggle('range')">
+                                                <a class="dropdown-item">Range</a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                     <input
                                         type="text"
                                         class="form-control"
@@ -230,14 +261,19 @@
                                         @keydown.down="onArrowDown(localField.value)"
                                         @keydown.up="onArrowUp(localField.value)"
                                         @keyup.enter="onEnter(localField.value)"
-                                        v-if="metadataInputStyle[localField.value] == 'text'"
+                                        v-if="
+                                            metadataInputStyle[localField.value] == 'text' &&
+                                            localField.value != 'div_date'
+                                        "
                                     />
-
                                     <ul
                                         :id="'autocomplete-' + localField.value"
                                         class="autocomplete-results shadow"
                                         :style="autoCompletePosition(localField.value)"
-                                        v-if="autoCompleteResults[localField.value].length > 0"
+                                        v-if="
+                                            autoCompleteResults[localField.value].length > 0 &&
+                                            localField.value != 'div_date'
+                                        "
                                     >
                                         <li
                                             tabindex="-1"
@@ -249,6 +285,43 @@
                                             v-html="result"
                                         ></li>
                                     </ul>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        :id="localField.value + 'input-filter'"
+                                        :name="localField.value"
+                                        :placeholder="localField.example"
+                                        v-model="metadataValues[localField.value]"
+                                        v-if="localField.value == 'div_date' && dateType == 'exact'"
+                                    />
+                                    <span
+                                        class="d-inline-block"
+                                        v-if="localField.value == 'div_date' && dateType == 'range'"
+                                    >
+                                        <div class="input-group ms-3">
+                                            <button class="btn btn-outline-secondary" type="button">
+                                                <label for="query-term-input">From</label>
+                                            </button>
+                                            <input
+                                                type="text"
+                                                class="form-control date-range"
+                                                :id="localField.value + '-start-input-filter'"
+                                                :name="localField.value + '-start'"
+                                                :placeholder="localField.example"
+                                                v-model="divDateRange.start"
+                                            />
+                                            <button class="btn btn-outline-secondary ms-3" type="button">
+                                                <label for="query-term-input">To</label></button
+                                            ><input
+                                                type="text"
+                                                class="form-control date-range"
+                                                :id="localField.value + 'end-input-filter'"
+                                                :name="localField.value + '-end'"
+                                                :placeholder="localField.example"
+                                                v-model="divDateRange.end"
+                                            />
+                                        </div>
+                                    </span>
                                     <select
                                         class="form-select"
                                         :id="localField.value"
@@ -559,6 +632,8 @@ export default {
             showTips: false,
             queryTermTyped: this.$route.query.q || this.q || "",
             metadataTyped: {},
+            dateType: "exact",
+            divDateRange: {},
         };
     },
     watch: {
@@ -609,6 +684,11 @@ export default {
                     value: quotedValue,
                 });
             }
+        }
+        if (this.formData.div_date.search(/<=>/) != -1) {
+            this.dateType = "range";
+            let dateRanges = this.formData.div_date.split(/<=>/);
+            this.divDateRange = { start: dateRanges[0], end: dateRanges[1] };
         }
     },
     mounted() {
@@ -673,12 +753,22 @@ export default {
                 );
             }
         },
+        divDateRangeHandler() {
+            if (this.divDateRange.start.length > 0 && this.divDateRange.end.length > 0) {
+                this.metadataValues.div_date = `${this.divDateRange.start}<=>${this.divDateRange.end}`;
+            } else if (this.divDateRange.start.length > 0 && this.divDateRange.end.length == 0) {
+                this.metadataValues.div_date = `${this.divDateRange.start}<=>`;
+            } else if (this.divDateRange.start.length == 0 && this.divDateRange.end.length > 0) {
+                this.metadataValues.div_date = `<=>${this.divDateRange.end}`;
+            }
+        },
         onSubmit() {
             this.report = this.currentReport;
             this.formOpen = false;
             let metadataChoices = Object.fromEntries(
                 Object.entries(this.metadataChoiceSelected).map(([key, val]) => [key, val.join(" | ")])
             );
+            this.divDateRangeHandler();
             this.$router.push(
                 this.paramsToRoute({
                     ...this.$store.state.formData,
@@ -862,6 +952,9 @@ export default {
                 let childOffset = input.offsetLeft;
                 return `left: ${childOffset}px; width: ${input.offsetWidth}px`;
             }
+        },
+        dateTypeToggle(dateType) {
+            this.dateType = dateType;
         },
     },
 };
@@ -1081,12 +1174,15 @@ input[type="text"] {
 input:focus::placeholder {
     opacity: 0;
 }
-
 .code-block {
     font-family: monospace;
     font-size: 120%;
     background-color: #ededed;
     padding: 0px 4px;
+}
+.date-range {
+    display: inline-block;
+    width: auto;
 }
 .slide-fade-enter-active,
 .slide-fade-leave-active {

@@ -1561,22 +1561,6 @@ def extract_full_date(date):
         year, month = map(int, month_year_match.groups())
         month = month_fail_safe(month)
         return datetime.date(year, month, 1)
-    month_day_match = re.search(r"^--(\d+)-(\d+)$", date)
-    if month_day_match:  # e.g. --10-23
-        month, day = map(int, month_day_match.groups())
-        month = month_fail_safe(month)
-        day = day_fail_safe(day, month)
-        return datetime.date(1, month, day)
-    day_match = re.search(r"^---(\d+)$", date)
-    if day_match:  # e.g. ---23
-        day = int(day_match.groups()[0])
-        day = day_fail_safe(day)
-        return datetime.date(1, 1, day)
-    month_match = re.search(r"^--(\d+)$", date)
-    if month_match:  # e.g. --10
-        month = int(month_match.groups()[0])
-        month = month_fail_safe(month)
-        return datetime.date(1, month, 1)
     year_match = re.search(r"^(\d+)$", date)
     if year_match:  # e.g. 1987
         year_str = year_match.groups()[0]
@@ -1584,7 +1568,7 @@ def extract_full_date(date):
             year_str = year_str[:4]
         year = int(year_str)
         return datetime.date(year, 1, 1)
-    return ""
+    return datetime.date(9999, 12, 31)
 
 
 if __name__ == "__main__":

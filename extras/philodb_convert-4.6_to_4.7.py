@@ -276,6 +276,7 @@ if __name__ == "__main__":
         "report_error_link": old_config.report_error_link,
         "metadata_choice_values": old_config.metadata_dropdown_values,
         "dictionary": old_config.dictionary,
+        "landing_page_browsing": old_config.landing_page_browsing,
     }
     try:
         config_values["skip_table_of_contents"] = old_config.skip_table_of_contents
