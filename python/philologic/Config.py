@@ -177,12 +177,6 @@ WEB_CONFIG_DEFAULTS = {
         "value": "",
         "comment": "\n".join(["# Location of access file which contains authorized/unauthorized IPs and domain names"]),
     },
-    "production": {
-        "value": True,
-        "comment": "\n".join(
-            ["# Do not set to False unless you want to make changes in the Web Client in the app/ directory"]
-        ),
-    },
     "link_to_home_page": {
         "value": "",
         "comment": "\n".join(

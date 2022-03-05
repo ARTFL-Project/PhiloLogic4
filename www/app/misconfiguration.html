@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>PhiloLogic4 misconfiguration</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,700,700italic&subset=latin,cyrillic-ext,greek-ext,greek,latin-ext,cyrillic' rel='stylesheet' type='text/css'>
+
+    <!-- This is an optional font to use for Greek -->
+    <!--<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700&subset=latin,cyrillic-ext,greek-ext,greek,latin-ext,cyrillic' rel='stylesheet' type='text/css'>-->
+
+    <!--Load all required CSS-->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <!-- PhiloLogic4 CSS -->
+    $CSS
+    <style>
+        #main-body {
+            font-size: 130%;
+        }
+        
+        h1 {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        #main-body .bg-danger {
+            margin: 50px 50px 10px 50px;
+            padding: 15px;
+        }
+        
+        .code-block {
+            margin: 0px 50px;
+            padding: 15px;
+            font-size: 14px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container" id="main-body">
+        <h1>PhiloLogic configuration error!</h1>
+        <div class="bg-danger">
+            A syntax error was detected in the $CONFIG_FILE configuration file. The following traceback should help you identify the issue:
+        </div>
+        <div class="code-block">$TRACEBACK</div>
+    </div>
+</body>
+
+</html>

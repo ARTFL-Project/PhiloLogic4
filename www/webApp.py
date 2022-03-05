@@ -2,10 +2,7 @@
 """Bootstrap Web app"""
 
 
-import imp
 import os.path
-import sys
-import shutil
 
 from philologic.runtime import WebConfig
 from philologic.runtime import WSGIHandler
@@ -13,11 +10,13 @@ from philologic.runtime import access_control
 
 PATH = os.path.abspath(os.path.dirname(__file__))
 
+
 def start_web_app(environ, start_response):
+    """Return index.html to start web app"""
     config = WebConfig(os.path.abspath(PATH))
     headers = [("Content-type", "text/html; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     if not config.valid_config:  # This means we have an error in the webconfig file
-        html = build_misconfig_page(config.traceback, "webconfig.cfg")
+        html_page = build_misconfig_page(config.traceback, "webconfig.cfg")
     # TODO handle errors in db.locals.py
     else:
         request = WSGIHandler(environ, config)
@@ -35,7 +34,9 @@ def start_web_app(environ, start_response):
 
 
 def build_misconfig_page(traceback, config_file):
-    html_page = open("%s/app/misconfiguration.html" % PATH).read()
+    """Return bad config HTML page"""
+    with open("%s/app/misconfiguration.html" % PATH) as input:
+        html_page = input.read()
     html_page = html_page.replace("$TRACEBACK", traceback)
     html_page = html_page.replace("$config_FILE", config_file)
     return html_page
