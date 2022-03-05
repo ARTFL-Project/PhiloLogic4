@@ -18,6 +18,10 @@ $secondary: $button-color;
 }
 
 $info: $button-color;
+.btn-light {
+    border: solid 1px rgb(206, 212, 218) !important;
+}
+
 .btn-light.active {
     background-color: #eee !important;
 }

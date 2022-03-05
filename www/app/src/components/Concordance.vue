@@ -176,7 +176,7 @@ export default {
             el.style.opacity = 0;
         },
         enter: function (el, done) {
-            let delay = el.dataset.index * 35;
+            let delay = (el.dataset.index * 500) / parseInt(this.results_per_page);
             setTimeout(function () {
                 Velocity(el, { opacity: 1 }, { complete: done });
             }, delay);

@@ -15,60 +15,72 @@
             <div class="col-12" :class="{ 'col-md-8': showFacets, 'col-xl-9': showFacets }">
                 <div class="card p-2 ml-2 shadow-sm">
                     <div class="p-2 mb-1">
-                        Sort results by
-                        <div
-                            class="btn-group"
-                            style="margin-left: 3px"
-                            v-for="(fields, index) in sortingFields"
-                            :key="index"
-                        >
-                            <div class="dropdown">
-                                <button
-                                    class="btn btn-outline-secondary btn-sm dropdown-toggle"
-                                    :id="`kwicDrop${index}`"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                >
-                                    {{ sortingSelection[index] }}
-                                </button>
-                                <ul class="dropdown-menu" :aria-labelledby="`kwicDrop${index}`">
-                                    <li
-                                        class="dropdown-item"
-                                        v-for="(selection, fieldIndex) in fields"
-                                        :key="fieldIndex"
-                                        @click="updateSortingSelection(index, selection)"
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" style="border-right: solid">
+                                Sort results by
+                            </button>
+                            <div class="btn-group" v-for="(fields, index) in sortingFields" :key="index">
+                                <div class="dropdown">
+                                    <button
+                                        class="btn btn-light btn-sm dropdown-toggle sort-toggle"
+                                        :style="index == 0 ? 'border-left: 0 !important' : ''"
+                                        :id="`kwicDrop${index}`"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
                                     >
-                                        {{ selection.label }}
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-secondary btn-sm ms-1" @click="sortResults()">Sort</button>
-                        <div class="float-lg-end mt-lg-0 mt-md-2">
-                            Show
-                            <div class="dropdown d-inline-block">
-                                <button
-                                    class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                                    type="button"
-                                    id="kwic-results-per-page"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                >
-                                    {{ results_per_page }}
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="kwic-results-per-page">
-                                    <li>
-                                        <a
+                                        {{ sortingSelection[index] }}
+                                    </button>
+                                    <ul class="dropdown-menu" :aria-labelledby="`kwicDrop${index}`">
+                                        <li
                                             class="dropdown-item"
-                                            v-for="number in ['25', '100', '500', '1000']"
-                                            :key="number"
-                                            @click="switchResultsPerPage(number)"
-                                            >{{ number }}</a
+                                            v-for="(selection, fieldIndex) in fields"
+                                            :key="fieldIndex"
+                                            @click="updateSortingSelection(index, selection)"
                                         >
-                                    </li>
-                                </ul>
+                                            {{ selection.label }}
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
-                            results per page
+                            <button type="button" class="btn btn-secondary btn-sm" @click="sortResults()">Sort</button>
+                        </div>
+                        <div class="float-lg-end mt-lg-0 mt-md-2">
+                            <div class="btn-group" role="group">
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-secondary"
+                                    style="border-right: solid"
+                                >
+                                    Results displayed
+                                </button>
+                                <div class="dropdown d-inline-block">
+                                    <button
+                                        class="btn btn-sm btn-light dropdown-toggle"
+                                        style="
+                                            border-left: 0 !important;
+                                            border-bottom-left-radius: 0;
+                                            border-top-left-radius: 0;
+                                        "
+                                        type="button"
+                                        id="kwic-results-per-page"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                    >
+                                        {{ results_per_page }}
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="kwic-results-per-page">
+                                        <li>
+                                            <a
+                                                class="dropdown-item"
+                                                v-for="number in ['25', '100', '500', '1000']"
+                                                :key="number"
+                                                @click="switchResultsPerPage(number)"
+                                                >{{ number }}</a
+                                            >
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                         <div
                             class="progress mt-3"
@@ -312,7 +324,7 @@ export default {
             }
         },
         fetchResults() {
-            this.results = { description: { end: 0 } };
+            this.results = { description: { end: 0 }, results: [] };
             this.searchParams = { ...this.$store.state.formData };
             if (this.first_kwic_sorting_option === "") {
                 this.searching = true;
@@ -424,6 +436,12 @@ export default {
 </script>
 
 <style scoped>
+.sort-toggle {
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
 #kwic-concordance {
     font-family: monospace;
 }

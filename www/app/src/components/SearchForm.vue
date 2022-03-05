@@ -754,12 +754,14 @@ export default {
             }
         },
         divDateRangeHandler() {
-            if (this.divDateRange.start.length > 0 && this.divDateRange.end.length > 0) {
-                this.metadataValues.div_date = `${this.divDateRange.start}<=>${this.divDateRange.end}`;
-            } else if (this.divDateRange.start.length > 0 && this.divDateRange.end.length == 0) {
-                this.metadataValues.div_date = `${this.divDateRange.start}<=>`;
-            } else if (this.divDateRange.start.length == 0 && this.divDateRange.end.length > 0) {
-                this.metadataValues.div_date = `<=>${this.divDateRange.end}`;
+            if (this.dateType != "exact") {
+                if (this.divDateRange.start.length > 0 && this.divDateRange.end.length > 0) {
+                    this.metadataValues.div_date = `${this.divDateRange.start}<=>${this.divDateRange.end}`;
+                } else if (this.divDateRange.start.length > 0 && this.divDateRange.end.length == 0) {
+                    this.metadataValues.div_date = `${this.divDateRange.start}<=>`;
+                } else if (this.divDateRange.start.length == 0 && this.divDateRange.end.length > 0) {
+                    this.metadataValues.div_date = `<=>${this.divDateRange.end}`;
+                }
             }
         },
         onSubmit() {
