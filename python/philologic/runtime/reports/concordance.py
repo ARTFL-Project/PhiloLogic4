@@ -20,7 +20,7 @@ def concordance_results(request, config):
         hits = db.query(
             request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata
         )
-    start, end, page_num = page_interval(request["results_per_page"], hits, request.start, request.end)
+    start, end, _ = page_interval(request["results_per_page"], hits, request.start, request.end)
 
     concordance_object = {
         "description": {"start": start, "end": end, "results_per_page": request.results_per_page},
@@ -31,19 +31,17 @@ def concordance_results(request, config):
     formatting_regexes = []
     if config.concordance_formatting_regex:
         for pattern, replacement in config.concordance_formatting_regex:
-            compiled_regex = re.compile(r"%s" % pattern)
+            compiled_regex = re.compile(rf"{pattern}")
             formatting_regexes.append((compiled_regex, replacement))
     results = []
     for hit in hits[start - 1 : end]:
         citation_hrefs = citation_links(db, config, hit)
-        metadata_fields = {}
-        for metadata in db.locals["metadata_fields"]:
-            metadata_fields[metadata] = hit[metadata]
+        metadata_fields = {metadata: hit[metadata] for metadata in db.locals["metadata_fields"]}
         citation = citations(hit, citation_hrefs, config, report="concordance")
         context = get_concordance_text(db, hit, config.db_path, config.concordance_length)
         if formatting_regexes:
             for formatting_regex, replacement in formatting_regexes:
-                context = formatting_regex.sub(r"%s" % replacement, context)
+                context = formatting_regex.sub(rf"{replacement}", context)
         result_obj = {
             "philo_id": hit.philo_id,
             "citation": citation,

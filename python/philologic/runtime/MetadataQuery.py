@@ -40,6 +40,7 @@ def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
 
 
 def metadata_total_word_count_query(db, metadata, metadata_field_name):
+    """Retrieve word count from text object"""
     param_dicts = [{} for level in db.locals["metadata_hierarchy"]]
     # Taken from DB.query
     for k, v in list(metadata.items()):
@@ -93,6 +94,7 @@ def metadata_total_word_count_query(db, metadata, metadata_field_name):
 
 
 def query_recursive(db, param_dict, parent, sort_order):
+    """Build recursise SQL query"""
     r = query_lowlevel(db, param_dict, sort_order)
     if parent:
         try:
@@ -115,6 +117,7 @@ def query_recursive(db, param_dict, parent, sort_order):
 
 
 def query_lowlevel(db, param_dict, sort_order):
+    """SQL query builder"""
     vars = []
     clauses = []
     for column, values in list(param_dict.items()):
@@ -127,7 +130,6 @@ def query_lowlevel(db, param_dict, sort_order):
             grouped = group_terms(parsed)
             expanded = expand_grouped_query(grouped, norm_path)
             sql_clause = make_grouped_sql_clause(expanded, column, db)
-            print(sql_clause, file=sys.stderr)
             if db.locals["debug"]:
                 print("METADATA_TOKENS:", parsed, file=sys.stderr)
                 print("METADATA_SYNTAX GROUPED:", grouped, file=sys.stderr)
@@ -142,7 +144,6 @@ def query_lowlevel(db, param_dict, sort_order):
         query = "SELECT philo_id FROM toms"
     if sort_order:
         query = f"{query} ORDER BY {', '.join(sort_order)}"
-    print(query, vars, file=sys.stderr)
     if db.locals["debug"]:
         print("INNER QUERY: ", "%s %% %s" % (query, vars), sort_order, file=sys.stderr)
     # print("INNER QUERY: ", "%s %% %s" % (query, vars), sort_order, file=sys.stderr)
@@ -151,6 +152,7 @@ def query_lowlevel(db, param_dict, sort_order):
 
 
 def expand_grouped_query(grouped, norm_path):
+    """Expand grouped SQL query"""
     expanded = []
     pure = True
     # first test to see if this is a "pure" query, which can be entirely evaluated in egrep
@@ -196,6 +198,7 @@ def expand_grouped_query(grouped, norm_path):
 
 
 def make_grouped_sql_clause(expanded, column, db):
+    """Make SQL clauses"""
     clauses = ""
     esc = escape_sql_string
     first_group = True
@@ -204,7 +207,6 @@ def make_grouped_sql_clause(expanded, column, db):
         neg = False
         has_null = False
         first_token, first_value = group[0]
-        print("GROUP", first_token, first_value, column, file=sys.stderr)
         if first_token == "NOT":
             neg = True
             if len(group) > 1:
@@ -214,14 +216,14 @@ def make_grouped_sql_clause(expanded, column, db):
                         lower, upper = second_value.split("-")
                     else:
                         lower, upper = second_value.split("<=>")
-                    clause += "(%s < %s OR %s > %s)" % (column, esc(lower), column, esc(upper))
+                    clause += f"({column} < {esc(lower)} OR {column} > {esc(upper)})"
                     if first_group:
                         first_group = False
                         clauses += clause
                     else:
-                        clauses += "AND %s" % clause
+                        clauses += f"AND {clause}"
                     continue
-            clause += "%s NOT IN (" % column
+            clause += f"{column} NOT IN ("
         else:
             if first_token in ("RANGE", "DATE_RANGE"):
                 if first_token == "RANGE":
@@ -230,27 +232,23 @@ def make_grouped_sql_clause(expanded, column, db):
                     lower, upper = first_value.split("<=>")
                 if not lower:
                     c = db.dbh.cursor()
-                    c.execute("select min(%s) from toms" % column)
+                    c.execute(f"select min({column}) from toms")
                     lower = str(c.fetchone()[0])
                 if not upper:
                     c = db.dbh.cursor()
-                    c.execute("select max(%s) from toms" % column)
+                    c.execute("select max({column}) from toms")
                     upper = str(c.fetchone()[0])
-                clause += "(%s >= %s AND %s <= %s)" % (column, esc(lower), column, esc(upper))
+                clause += f"({column} >= {esc(lower)} AND {column} <= {esc(upper)})"
                 if first_group:
                     first_group = False
                     clauses += clause
                 else:
-                    try:
-                        clauses += "AND %s" % clause
-                    except UnicodeDecodeError:
-                        clauses += "AND %s" % clause
+                    clauses += f"AND {clause}"
                 continue
-            clause += "%s IN (" % column
+            clause += f"{column} IN ("
         # if we don't have a range, we have something that we can evaluate
         # as an exact IN/NOT IN expression
         first_value = True
-        print("CLAUSE", clause, file=sys.stderr)
         for kind, token in group:
             if kind == "OR" or kind == "NOT":
                 continue
@@ -263,10 +261,7 @@ def make_grouped_sql_clause(expanded, column, db):
             else:
                 clause += ", "
             if kind == "QUOTE":
-                try:
-                    clause += esc(token[1:-1])
-                except:
-                    clause += esc(token[1:-1])
+                clause += esc(token[1:-1])
                 # but harmless, as well was its own clause below.  Fix later, if possible.
             if kind == "DATE":
                 clause += esc(token)
@@ -285,15 +280,17 @@ def make_grouped_sql_clause(expanded, column, db):
 
 
 def metadata_pattern_search(term, path):
+    """Create egrep pattern to find metadata"""
     command = ["egrep", "-awie", "[[:blank:]]?%s" % term, "%s" % path]
     grep = subprocess.Popen(command, stdout=subprocess.PIPE, env=os.environ)
     cut = subprocess.Popen(["cut", "-f", "2"], stdin=grep.stdout, stdout=subprocess.PIPE)
-    match, stderr = cut.communicate()
+    match, _ = cut.communicate()
     matches = [i for i in match.decode("utf8", "ignore").split("\n") if i]
     return matches
 
 
 def escape_sql_string(s):
+    """Escape SQL string"""
     s = s.replace("'", "''")
     return "'%s'" % s
 
@@ -315,10 +312,12 @@ def hit_to_string(hit, width):
 
 
 def str_to_hit(string):
+    """Convert string to hit"""
     return list(map(int, string.split(" ")))
 
 
 def obj_cmp(x, y):
+    """Compare function"""
     for a, b in zip(x, y):
         if a < b:
             return -1

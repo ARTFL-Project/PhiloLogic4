@@ -18,16 +18,18 @@ patterns = [
 date_patterns = [
     ("NOT", "NOT"),
     ("OR", r"\|"),
+    ("YEAR", r"^(\d+)\Z"),
+    ("YEAR_MONTH", r"^(\d+-\d+)\Z"),
     ("DATE_RANGE", r"([^<]+)<=>(.*)"),
-    ("DATE", r'"?(.+)"?'),
-    ("YEAR", r"(\d+)"),
-    ("YEAR_MONTH", r"(\d+-\d+)"),
-    ("MONTH", r"(--\d+)"),  # TODO: support the whole range of queries the parser supports and convert to range queries
-    ("MONTH_DAY", r"(--\d+-\d+"),
 ]
+
+YEAR_MONTH_DAY = re.compile(r"(\d+)-(\d+)-(\d+)")
+YEAR_MONTH = re.compile(r"^(\d+)-(\d+)\Z")
+YEAR = re.compile(r"^(\d+)\Z")
 
 
 def parse_query(qstring):
+    """Parse query"""
     buf = qstring[:]
     parsed = []
     while len(buf) > 0:
@@ -43,14 +45,46 @@ def parse_query(qstring):
 
 
 # TODO: convert a month DATE query into a RANGE: e.g. 1789-06 into 1789-06<=>1789-07
+
+
+def expand_date(date, start=True):
+    """Expand incomplete dates"""
+    if YEAR.search(date):
+        if start is True:
+            date = f"{date}-01-01"
+        else:
+            date = f"{date}-12-31"
+    if YEAR_MONTH.search(date):
+        if start is True:
+            date = f"{date}-01"
+        else:
+            date = f"{date}-31"
+    return date
+
+
 def parse_date_query(qstring):
+    """Parse date query"""
     buf = qstring[:]
     parsed = []
     while len(buf) > 0:
         for label, pattern in date_patterns:
             m = re.match(pattern, buf)
             if m:
-                parsed.append((label, m.group()))
+                date = m.group().strip()
+                if label == "YEAR":
+                    label = "DATE_RANGE"
+                    query = f"{date}-01-01<=>{date}-12-31"
+                elif label == "YEAR_MONTH":
+                    label = "DATE_RANGE"
+                    query = f"{date}-01-01<=>{date}-12-31"
+                elif label == "DATE_RANGE":
+                    start_date, end_date = date.split("<=>")
+                    start_date = expand_date(start_date)
+                    end_date = expand_date(end_date, start=False)
+                    query = f"{start_date}<=>{end_date}"
+                else:
+                    query = m.group()
+                parsed.append((label, query))
                 buf = buf[m.end() :]
                 break
         else:
@@ -59,6 +93,7 @@ def parse_date_query(qstring):
 
 
 def group_terms(parsed):
+    """Group terms for SQL query"""
     grouped = []
     current_clause = []
     last_term = None

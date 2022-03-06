@@ -44,7 +44,8 @@
             Bibliography criteria:
             <span class="metadata-args rounded-pill" v-for="metadata in queryArgs.biblio" :key="metadata.key">
                 <span class="metadata-label">{{ metadata.alias }}</span>
-                <span class="metadata-value">{{ metadata.value }}</span>
+                <span class="metadata-value" v-if="metadata.key != 'div_date'">{{ metadata.value }}</span>
+                <span class="metadata-value" v-else>{{ metadata.value.split("<=>").join("&#8212;") }}</span>
                 <span class="remove-metadata" @click="removeMetadata(metadata.key, restart)">X</span>
             </span>
             <b v-if="queryArgs.biblio.length === 0">None</b>

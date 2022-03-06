@@ -132,7 +132,7 @@ tag_to_obj_map = {
 # Defines which metadata to parse out for each object. All metadata defined here are attributes of a tag,
 # with the exception of head which is its own tag. Below are defaults.
 metadata_to_parse = {
-    "div": ["head", "type", "n", "id", "vol"],
+    "div": ["head", "type", "n", "id", "vol", "div_date"],
     "para": ["who", "speaker", "resp", "id"],
     "page": ["n", "id", "facs"],
     "ref": ["target", "n", "type"],

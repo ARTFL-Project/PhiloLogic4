@@ -956,6 +956,8 @@ export default {
             }
         },
         dateTypeToggle(dateType) {
+            this.divDateRange = {};
+            this.metadataValues.div_date = "";
             this.dateType = dateType;
         },
     },
