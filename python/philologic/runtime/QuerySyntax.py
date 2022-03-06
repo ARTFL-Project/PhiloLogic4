@@ -76,7 +76,7 @@ def parse_date_query(qstring):
                     query = f"{date}-01-01<=>{date}-12-31"
                 elif label == "YEAR_MONTH":
                     label = "DATE_RANGE"
-                    query = f"{date}-01-01<=>{date}-12-31"
+                    query = f"{date}-01<=>{date}-31"
                 elif label == "DATE_RANGE":
                     start_date, end_date = date.split("<=>")
                     start_date = expand_date(start_date)

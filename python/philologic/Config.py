@@ -818,7 +818,13 @@ class Config:
                 "citation": [citations["author"]],}, {"label": "Title", "group_by_field": "title",
                 "display_count": False, "queries": ["A-D", "E-I", "J-M", "N-R", "S-Z"], "is_range": True,
                 "citation": [citations["author"], citations["title"], citations["year"]]}]"""
-            elif key in ("concordance_citation", "bibliography_citation"):
+            elif key == "concordance_citation":
+                string += f"""\n{key} = [
+                    citations["author"], citations["title"], citations["year"], citations["div1_head"],
+                    citations["div1_date"], citations["div2_head"], citations["div2_date"], citations["div3_head"],
+                    citations["div3_date"], citations["speaker"], citations["resp"], citations["page"],
+                ]"""
+            elif key == "bibliography":
                 string += f"""\n{key} = [
                     citations["author"], citations["title"], citations["year"],
                     citations["div1_head"], citations["div2_head"], citations["div3_head"],
