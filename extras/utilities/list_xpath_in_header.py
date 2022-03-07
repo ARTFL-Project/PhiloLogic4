@@ -1,11 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
-import os
 import regex as re
 from lxml import etree
-from philologic.Loader import Loader
-from philologic.Parser import DefaultMetadataXPaths
 
 
 ### USAGE ###
@@ -13,17 +10,18 @@ from philologic.Parser import DefaultMetadataXPaths
 
 
 def pre_parse_header(fn):
+    """Parse header"""
     fh = open(fn)
     header = ""
     while True:
         line = fh.readline()
-        scan = re.search("<teiheader>|<temphead>", line, re.IGNORECASE)
+        scan = re.search(r"<teiheader>|<temphead>", line, re.IGNORECASE)
         if scan:
             header = line[scan.start() :]
             break
     while True:
         line = fh.readline()
-        scan = re.search("</teiheader>|<\/?temphead>", line, re.IGNORECASE)
+        scan = re.search(r"</teiheader>|<\/?temphead>", line, re.IGNORECASE)
         if scan:
             header = header + line[: scan.end()]
             break
@@ -39,21 +37,8 @@ def pre_parse_header(fn):
     return tree
 
 
-def pre_parse_whole_file(fn):
-    fh = open(fn)
-    tree = etree.fromstring(fh.read())
-    # Remove namespace
-    for el in tree.iter():
-        try:
-            if el.tag.startswith("{"):
-                el.tag = el.tag.rsplit("}", 1)[-1]
-        except AttributeError:  ## el.tag is not a string for some reason
-            pass
-    return tree
-
-
 def retrieve_xpaths(filelist):
-    metadata_xpaths = {}
+    """Retrieve XPATHS"""
     for fn in filelist:
         print("## XPATHS for %s" % fn)
         tree = pre_parse_header(fn)
