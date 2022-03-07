@@ -7,7 +7,6 @@ module.exports = {
             'Access-Control-Allow-Origin': '*'
         }
     },
-    runtimeCompiler: true,
     publicPath: process.env.NODE_ENV === 'production' ? getBaseUrl() : '/',
     transpileDependencies: true
 }

@@ -329,20 +329,25 @@ class Loader:
 
     def create_year_field(self, metadata):
         """Create year field from date fields in header"""
-        year_finder = re.compile(r"^.*?(\-?\d{1,}).*")  # we are assuming dates from 1000 AC
+        year_finder = re.compile(r"^.*?(\-?\d{1,}).*")  # we are assuming positive years
         earliest_year = 2500
+        metadata_with_year = ""
         for field in ["date", "create_date", "pub_date", "period"]:
             if field in metadata:
                 year_match = year_finder.search(metadata[field])
                 if year_match:
                     year = int(year_match.groups()[0])
+                    metadata_with_year = field
                     if field == "create_date":  # this should be the canonical date
                         earliest_year = year
                         break
                     if year < earliest_year:
                         earliest_year = year
         if earliest_year != 2500:
-            metadata["year"] = str(earliest_year)
+            if re.search(r"BC", metadata[metadata_with_year], re.I):
+                metadata["year"] = f"-{earliest_year}"
+            else:
+                metadata["year"] = str(earliest_year)
         return metadata
 
     def parse_metadata(self, sort_by_field, header="tei"):

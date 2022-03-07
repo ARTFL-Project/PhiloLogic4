@@ -332,6 +332,7 @@
                                             v-for="value in metadataChoiceValues[localField.value]"
                                             :key="value.value"
                                             :value="value.value"
+                                            v-once
                                         >
                                             {{ value.text }}
                                         </option>
@@ -354,6 +355,7 @@
                                             :options="metadataChoiceValues[localField.value]"
                                             v-for="metadataChoice in metadataChoiceValues[localField.value]"
                                             :key="metadataChoice.value"
+                                            v-once
                                         >
                                             <input
                                                 class="form-check-input"
@@ -447,6 +449,7 @@
                             <div class="input-group mt-4" v-if="currentReport === 'aggregation'">
                                 <button class="btn btn-outline-secondary">Group results by</button>
                                 <select
+                                    v-once
                                     class="form-select"
                                     :aria-label="aggregationOptions[0].text"
                                     style="max-width: fit-content"
@@ -461,15 +464,16 @@
                                     </option>
                                 </select>
                             </div>
-                            <h6 class="mt-3" v-if="currentReport === 'concordance' || currentReport === 'bibliography'">
+                            <h6 class="mt-3" v-if="['concordance', 'kwic', 'bibliography'].includes(currentReport)">
                                 Display Options:
                             </h6>
                             <div
                                 class="input-group pb-2"
-                                v-if="currentReport === 'concordance' || currentReport === 'bibliography'"
+                                v-if="['concordance', 'bibliography'].includes(currentReport)"
                             >
                                 <button class="btn btn-outline-secondary">Sort results by</button>
                                 <select
+                                    v-once
                                     class="form-select"
                                     style="max-width: fit-content"
                                     aria-label="select fields"
@@ -494,7 +498,7 @@
                                 "
                             >
                                 <button class="btn btn-outline-secondary">Results per page</button>
-                                <span v-for="resultsPerPage in resultsPerPageOptions" :key="resultsPerPage">
+                                <span v-for="resultsPerPage in resultsPerPageOptions" :key="resultsPerPage" v-once>
                                     <input
                                         type="radio"
                                         class="btn-check"

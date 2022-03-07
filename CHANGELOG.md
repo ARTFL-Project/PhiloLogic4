@@ -15,6 +15,7 @@
 - Cleaner URLS for queries
 - Faster database loads
 - New generic dictionary lookup code
+- Support for date type searching in div level text objects
 
 ### 4.6 ###
 - Port PhiloLogic4 codebase to Python3
