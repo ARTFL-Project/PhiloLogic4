@@ -359,8 +359,7 @@ class Loader:
             load_metadata = self.parse_dc_header()
 
         print(
-            "%s: Sorting files by the following metadata fields: %s..."
-            % (time.ctime(), ", ".join([i for i in sort_by_field])),
+            f'{time.ctime()}: Sorting files by the following metadata fields: {", ".join([i for i in sort_by_field])}...',
             end=" ",
             flush=True,
         )
@@ -437,13 +436,13 @@ class Loader:
         chunksize is setable from the philoload script and can be helpful when loading
         many small files"""
         print("\n\n### Parsing files ###")
-        os.chdir(cls.workdir)  # questionable
+        os.chdir(cls.workdir)
         print("%s: parsing %d files." % (time.ctime(), len(cls.filequeue)))
         with tqdm(total=len(cls.filequeue), smoothing=0, leave=False) as pbar:
             with Pool(workers) as pool:
                 for results in pool.imap_unordered(cls.__parse_file, range(len(cls.data_dicts))):
                     with open(results, "rb") as proc_fh:
-                        vec = pickle.load(proc_fh)  # load in the results from the child's parsework() function.
+                        vec = pickle.load(proc_fh)
                     cls.omax = [max(x, y) for x, y in zip(vec, cls.omax)]
                     pbar.update()
         print("%s: done parsing" % time.ctime())
@@ -518,14 +517,14 @@ class Loader:
     def merge_objects(self):
         """Merge all parsed objects"""
         print("\n### Merge parser output ###")
-        print("%s: sorting words" % time.ctime())
+        print(f"{time.ctime()}: sorting words")
         self.merge_files("words")
 
-        print("%s: sorting objects" % time.ctime(), flush=True)
+        print(f"{time.ctime()}: sorting objects", flush=True)
         self.merge_files("toms")
         if self.debug is False:
             for toms_file in iglob(self.workdir + "/*toms.sorted"):
-                os.system("rm %s" % toms_file)
+                os.system(f"rm {toms_file}")
 
         for object_type, extension in [
             ("pages", "pages"),
