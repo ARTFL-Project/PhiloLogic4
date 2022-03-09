@@ -80,7 +80,7 @@ export default {
             "urlUpdate",
         ]),
         statsConfig() {
-            for (let fieldObject of this.$philoConfig.stats_report_config) {
+            for (let fieldObject of this.$philoConfig.aggregation_config) {
                 if (fieldObject.field == this.$route.query.group_by) {
                     return fieldObject;
                 }

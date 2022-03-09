@@ -25,6 +25,7 @@ OBJ_DICT = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "wo
 
 
 def get_total_doc_count(environ, start_response):
+    """Count hit occurences per doc"""
     status = "200 OK"
     headers = [
         ("Content-type", "application/json; charset=UTF-8"),
@@ -55,14 +56,14 @@ def get_total_doc_count(environ, start_response):
 
     hits.finish()
     total_results = 0
-    docs = [set() for _ in range(len(config["stats_report_config"]))]
+    docs = [set() for _ in range(len(config["results_summary"]))]
     for hit in hits:
-        for pos, field in enumerate(config["stats_report_config"]):
+        for pos, field in enumerate(config["results_summary"]):
             docs[pos].add(tuple_to_str(hit, OBJ_DICT[field["object_level"]]))
         total_results += 1
     stats = []
     cursor = db.dbh.cursor()
-    for pos, field_obj in enumerate(config["stats_report_config"]):
+    for pos, field_obj in enumerate(config["results_summary"]):
         if field_obj["field"] == "title":
             count = len(docs[pos])
         else:

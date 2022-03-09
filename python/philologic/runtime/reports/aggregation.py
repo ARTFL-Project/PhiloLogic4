@@ -7,7 +7,6 @@ OBJ_DICT = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "wo
 OBJ_ZEROS = {"doc": 6, "div1": 5, "div2": 4, "div3": 3, "para": 2, "sent": 1, "word": 0}
 
 
-# @profile
 def aggregation_by_field(request, config):
     """Group hitlist by metadata field"""
     db = DB(config.db_path + "/data/")
@@ -149,7 +148,7 @@ def __expand_hits(hits, metadata_type):
 
 def __get_field_config(group_by, config):
     field_to_return = {}
-    for field_obj in config["stats_report_config"]:
+    for field_obj in config["aggregation_config"]:
         if field_obj["field"] == group_by:
             field_to_return = field_obj
     return field_to_return

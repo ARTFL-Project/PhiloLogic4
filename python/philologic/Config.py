@@ -301,6 +301,55 @@ WEB_CONFIG_DEFAULTS = {
             ]
         ),
     },
+    "aggregation_config": {
+        "value": [
+            {
+                "field": "author",
+                "object_level": "doc",
+                "break_up_field": "title",
+                "field_citation": [CITATIONS["author"]],
+                "break_up_field_citation": [
+                    CITATIONS["title"],
+                    CITATIONS["year"],
+                    CITATIONS["pub_place"],
+                    CITATIONS["publisher"],
+                    CITATIONS["collection"],
+                ],
+            },
+            {
+                "field": "title",
+                "object_level": "doc",
+                "field_citation": [
+                    CITATIONS["title"],
+                    CITATIONS["year"],
+                    CITATIONS["pub_place"],
+                    CITATIONS["publisher"],
+                    CITATIONS["collection"],
+                ],
+                "break_up_field": None,
+                "break_up_field_citation": None,
+            },
+        ],
+        "comment": "\n".join(
+            [
+                "# The aggregation_config variable drives the aggregation report: which fields can be used to group concordances,"
+                "# and whether you can further break down these counts by a particular metadata field.",
+            ]
+        ),
+    },
+    "results_summary": {
+        "value": [
+            {
+                "field": "author",
+                "object_level": "doc",
+            },
+            {
+                "field": "title",
+                "object_level": "doc",
+            },
+        ],
+        "comment": "The results_summary variable determins which fields get stats displayed at the top of concordance/KWIC results.",
+    },
     "stopwords": {
         "value": "",
         "comment": "\n".join(
@@ -588,43 +637,6 @@ WEB_CONFIG_DEFAULTS = {
             ]
         ),
     },
-    "stats_report_config": {
-        "value": [
-            {
-                "field": "author",
-                "object_level": "doc",
-                "break_up_field": "title",
-                "field_citation": [CITATIONS["author"]],
-                "break_up_field_citation": [
-                    CITATIONS["title"],
-                    CITATIONS["year"],
-                    CITATIONS["pub_place"],
-                    CITATIONS["publisher"],
-                    CITATIONS["collection"],
-                ],
-            },
-            {
-                "field": "title",
-                "object_level": "doc",
-                "field_citation": [
-                    CITATIONS["title"],
-                    CITATIONS["year"],
-                    CITATIONS["pub_place"],
-                    CITATIONS["publisher"],
-                    CITATIONS["collection"],
-                ],
-                "break_up_field": None,
-                "citation": CITATIONS["title"],
-                "break_up_field_citation": None,
-            },
-        ],
-        "comment": "\n".join(
-            [
-                "# The stats_report_config variable determins which fields get stats displayed in at the top of concordance/KWIC results.",
-                "# It also drives the aggregation report: which fields concordances can be grouped by, and further broken down by particular metadata.",
-            ]
-        ),
-    },
     "external_page_images": {
         "value": False,
         "comment": "\n".join(["# This defines whether the page images should be viewed in a non-PhiloLogic instance"]),
@@ -835,26 +847,26 @@ class Config:
                     citations["author"], citations["title"], citations["year"],
                     citations["pub_place"], citations["publisher"], citations["collection"],
                 ]"""
-            elif key == "stats_report_config":
+            elif key == "aggregation_config":
                 string += (
                     f"\n{key} = "
                     + "[{"
-                    + """"field": "author", "object_level": "doc", "break_up_field": "title",
-                        "field_citation": [citations["author"]], "break_up_field_citation": [
+                    + """"field": "author", "object_level": "doc",  "field_citation": [citations["author"]],
+                       "break_up_field": "title", "break_up_field_citation": [
                         citations["title"], citations["pub_place"], citations["publisher"], citations["collection"],citations["year"]
                         ],"""
                     + "}, {"
                     + """"field": "title", "object_level": "doc", "field_citation": [citations["title"],
                         citations["pub_place"], citations["publisher"], citations["collection"], citations["year"]],"break_up_field": None,
-                        "citation": citations["title"], "break_up_field_citation": None, """
+                        "break_up_field_citation": None, """
                     + "}]"
                 )
             else:
-                string += "\n%s = %s\n" % (key, pretty_print(self.data[key]))
+                string += f"\n{key} = {self.data[key]}\n"
             written_keys.append(key)
         for key in self.data:
             if key not in written_keys:
-                string += "\n%s = %s\n" % (key, pretty_print(self.data[key]))
+                string += f"\n{key} = {self.data[key]}\n"
                 written_keys.append(key)
         return string
 

@@ -22,7 +22,7 @@ class CustomConfig(Config):
         for key, value in self.defaults.items():
             if value["comment"]:
                 string += "\n" + "\n".join(line.strip() for line in value["comment"].splitlines() if line.strip())
-            if key == "stats_report_config":
+            if key == "aggregation_config":
                 string += (
                     f"\n{key} = "
                     + "[{"

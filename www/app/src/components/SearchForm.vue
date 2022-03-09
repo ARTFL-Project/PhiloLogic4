@@ -625,7 +625,7 @@ export default {
             ],
             selectedSortValues: "rowid",
             resultsPerPageOptions: [25, 100, 500, 1000],
-            aggregationOptions: this.$philoConfig.stats_report_config.map((f) => ({
+            aggregationOptions: this.$philoConfig.aggregation_config.map((f) => ({
                 text: this.$philoConfig.metadata_aliases[f.field] || f.field.charAt(0).toUpperCase() + f.field.slice(1),
                 value: f.field,
             })),

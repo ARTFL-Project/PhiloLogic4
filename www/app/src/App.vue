@@ -68,7 +68,7 @@ export default {
                 third_kwic_sorting_option: "",
                 start_byte: "",
                 end_byte: "",
-                group_by: this.$philoConfig.stats_report_config[0].field,
+                group_by: this.$philoConfig.aggregation_config[0].field,
             };
             for (let field of this.$philoConfig.metadata) {
                 localFields[field] = "";
