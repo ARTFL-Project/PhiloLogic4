@@ -241,7 +241,6 @@ if __name__ == "__main__":
         "dbname": old_config.dbname,
         "metadata": old_config.metadata,
         "facets": old_config.facets,
-        "theme": old_config.theme,
         "time_series_start_end_date": {"start_date": start_date, "end_date": end_date},
         "search_examples": old_config.search_examples,
         "metadata_input_style": old_config.metadata_input_style,

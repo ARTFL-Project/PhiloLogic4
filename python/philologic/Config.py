@@ -348,7 +348,7 @@ WEB_CONFIG_DEFAULTS = {
                 "object_level": "doc",
             },
         ],
-        "comment": "The results_summary variable determins which fields get stats displayed at the top of concordance/KWIC results.",
+        "comment": "# The results_summary variable determins which fields get stats displayed at the top of concordance/KWIC results.",
     },
     "stopwords": {
         "value": "",
@@ -369,16 +369,6 @@ WEB_CONFIG_DEFAULTS = {
                 "# prefix and suffix keywords define what precedes and follows each field. You can use HTML for these strings.",
                 "# The link key enables linking for that metadata field. It links to the table of contents for title and filename,",
                 "# and to a regular query for all other metadata fields.",
-            ]
-        ),
-    },
-    "theme": {
-        "value": "app/assets/css/split/default_theme.css",
-        "comment": "\n".join(
-            [
-                "# The theme variable defines the default CSS theme to be used in the WebApp. The default theme called default_theme.css",
-                "# can be edited directly or you can define a new CSS file below. This file must be located in the app/assets/css/split/",
-                "# directory for the Web App to find it.",
             ]
         ),
     },
@@ -862,11 +852,11 @@ class Config:
                     + "}]"
                 )
             else:
-                string += f"\n{key} = {self.data[key]}\n"
+                string += f"\n{key} = {pretty_print(self.data[key])}\n"
             written_keys.append(key)
-        for key in self.data:
+        for key, value in self.data.items():
             if key not in written_keys:
-                string += f"\n{key} = {self.data[key]}\n"
+                string += f"\n{key} = {pretty_print(value)}\n"
                 written_keys.append(key)
         return string
 

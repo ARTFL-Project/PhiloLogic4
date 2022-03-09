@@ -168,8 +168,6 @@ class Loader:
         else:
             self.predefined_web_config = False
 
-        self.theme = loader_options["theme"]
-
         self.filenames = []
         self.raw_files = []
         self.deleted_files = []
@@ -758,7 +756,11 @@ class Loader:
         db_values["default_object_level"] = self.default_object_level
         db_config = MakeDBConfig(filename, **db_values)
         with open(filename, "w") as db_file:
-            print(format_str(str(db_config), mode=FileMode()), file=db_file)
+            try:
+                print(format_str(str(db_config), mode=FileMode()), file=db_file)
+            except:
+                print(str(db_config))
+                exit()
         print("wrote database info to %s." % (filename))
 
     def write_web_config(self):
@@ -774,7 +776,6 @@ class Loader:
             "metadata": metadata,
             "autocomplete": ["q", *metadata],
             "facets": metadata,
-            "theme": self.theme,
         }
 
         # Fetch search examples:
