@@ -258,10 +258,9 @@ if __name__ == "__main__":
         "default_landing_page_display": old_config.default_landing_page_display,
         "simple_landing_citation": old_config.simple_landing_citation,
         "dico_letter_range": old_config.dico_letter_range,
-        "concordance_citation": old_config.concordance_citation,
-        "bibliography_citation": old_config.bibliography_citation,
-        "table_of_contents_citation": old_config.table_of_contents_citation,
-        "navigation_citation": old_config.navigation_citation,
+        "concordance_citation": citations_filter(old_config.concordance_citation),
+        "bibliography_citation": citations_filter(old_config.bibliography_citation),
+        "navigation_citation": citations_filter(old_config.navigation_citation),
         "kwic_bibliography_fields": old_config.kwic_bibliography_fields,
         "concordance_biblio_sorting": old_config.concordance_biblio_sorting,
         "kwic_metadata_sorting_fields": old_config.kwic_metadata_sorting_fields,
@@ -277,6 +276,15 @@ if __name__ == "__main__":
         "dictionary": old_config.dictionary,
         "landing_page_browsing": old_config.landing_page_browsing,
     }
+    # Check for the presence of some new config options
+    try:
+        config_values["table_of_contents_citation"] = citations_filter(old_config.table_of_contents_citation)
+    except AttributeError:
+        config_values["table_of_contents_citation"] = WEB_CONFIG_DEFAULTS["table_of_contents_citation"]["value"]
+    try:
+        config_values["external_page_images"] = old_config.external_page_images
+    except AttributeError:
+        config_values["external_page_images"] = WEB_CONFIG_DEFAULTS["external_page_images"]["value"]
     try:
         config_values["skip_table_of_contents"] = old_config.skip_table_of_contents
     except AttributeError:

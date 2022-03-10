@@ -18,8 +18,10 @@ patterns = [
 date_patterns = [
     ("NOT", "NOT"),
     ("OR", r"\|"),
-    ("YEAR", r"^(\d+)\Z"),
-    ("YEAR_MONTH", r"^(\d+-\d+)\Z"),
+    ("DATE", r"(\d+-\d+-\d+)\Z"),
+    ("YEAR", r"(\d+)\Z"),
+    ("YEAR_MONTH", r"(\d+-\d+)\Z"),
+    ("YEAR_MONTH_DAY", r"(\d+-\d+-\d+)\Z"),
     ("DATE_RANGE", r"([^<]+)<=>(.*)"),
 ]
 
