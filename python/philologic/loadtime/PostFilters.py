@@ -139,7 +139,8 @@ def normalized_word_frequencies(loader_obj):
     for line in open(frequencies + "/word_frequencies"):
         word, _ = line.split("\t")
         norm_word = word.lower()
-        norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
+        if loader_obj.ascii_conversion is True:
+            norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
         norm_word = "".join(norm_word)
         print(norm_word + "\t" + word, file=output)
     output.close()
@@ -187,7 +188,8 @@ def normalized_metadata_frequencies(loader_obj):
             for line in open(frequencies + "/" + field + "_frequencies"):
                 word, _ = line.split("\t")
                 norm_word = word.lower()
-                norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
+                if loader_obj.ascii_conversion is True:
+                    norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
                 norm_word = "".join(norm_word)
                 print(norm_word + "\t" + word, file=output)
             output.close()

@@ -12,7 +12,7 @@ from .QuerySyntax import group_terms, parse_query, parse_date_query
 os.environ["PATH"] += ":/usr/local/bin/"
 
 
-def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
+def metadata_query(db, filename, param_dicts, sort_order, raw_results=False, ascii_sort=True):
     """Prepare and execute SQL metadata query."""
     if db.locals["debug"]:
         print("METADATA_QUERY:", param_dicts, file=sys.stderr)
@@ -36,7 +36,7 @@ def metadata_query(db, filename, param_dicts, sort_order, raw_results=False):
     flag = open(filename + ".done", "w")
     flag.write("1")
     flag.close()
-    return HitList.HitList(filename, 0, db, raw=raw_results, sort_order=sort_order)
+    return HitList.HitList(filename, 0, db, raw=raw_results, sort_order=sort_order, ascii_sort=ascii_sort)
 
 
 def metadata_total_word_count_query(db, metadata, metadata_field_name):

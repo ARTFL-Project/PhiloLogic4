@@ -73,7 +73,9 @@ class DB:
         except sqlite3.OperationalError:
             return ""
 
-    def get_all(self, philo_type="doc", sort_order=["rowid"], raw_results=False):
+    def get_all(
+        self, philo_type="doc", sort_order=["rowid"], raw_results=False, ascii_sort=True
+    ):  # pylint: disable=dangerous-default-value
         """get all objects of type philo_type"""
         hash = hashlib.sha1()
         hash.update(self.path.encode("utf8"))
@@ -86,9 +88,11 @@ class DB:
                 param_dicts = [{"philo_type": ['"div1"|"div2"|"div3"']}]
             else:
                 param_dicts = [{"philo_type": ['"%s"' % philo_type]}]
-            return MetadataQuery.metadata_query(self, all_file, param_dicts, sort_order, raw_results=raw_results)
+            return MetadataQuery.metadata_query(
+                self, all_file, param_dicts, sort_order, raw_results=raw_results, ascii_sort=ascii_sort
+            )
         else:
-            return HitList.HitList(all_file, 0, self, sort_order=sort_order, raw=raw_results)
+            return HitList.HitList(all_file, 0, self, sort_order=sort_order, raw=raw_results, ascii_sort=ascii_sort)
 
     def query(
         self,
@@ -99,8 +103,9 @@ class DB:
         sort_order=["rowid"],
         raw_results=False,
         get_word_count_field=None,
+        ascii_sort=True,
         **metadata,
-    ):
+    ):  # pylint: disable=dangerous-default-value
         """query the PhiloLogic database"""
         method = method or "proxy"
         if isinstance(method_arg, str):
@@ -168,7 +173,9 @@ class DB:
             else:
                 if sort_order == ["rowid"]:
                     sort_order = None
-                corpus = HitList.HitList(corpus_file, 0, self, sort_order=sort_order, raw=raw_results)
+                corpus = HitList.HitList(
+                    corpus_file, 0, self, sort_order=sort_order, raw=raw_results, ascii_sort=ascii_sort
+                )
                 corpus.finish()
             if len(corpus) == 0:
                 return corpus
@@ -200,7 +207,9 @@ class DB:
             grouped = QuerySyntax.group_terms(parsed)
             split = Query.split_terms(grouped)
             words_per_hit = len(split)
-            return HitList.HitList(search_file, words_per_hit, self, sort_order=sort_order, raw=raw_results)
+            return HitList.HitList(
+                search_file, words_per_hit, self, sort_order=sort_order, raw=raw_results, ascii_sort=ascii_sort
+            )
         if corpus:
             return corpus
         return self.get_all(self.locals["default_object_level"], sort_order)

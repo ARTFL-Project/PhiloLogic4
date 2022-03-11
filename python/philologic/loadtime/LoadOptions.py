@@ -45,6 +45,7 @@ class LoadOptions:
         self.values["plain_text_obj"] = []
         self.values["parser_factory"] = Parser.XMLParser
         self.values["token_regex"] = Parser.TOKEN_REGEX
+        self.values["ascii_conversion"] = Loader.ASCII_CONVERSION
         self.values["doc_xpaths"] = Parser.DEFAULT_DOC_XPATHS
         self.values["tag_to_obj_map"] = Parser.DEFAULT_TAG_TO_OBJ_MAP
         self.values["metadata_to_parse"] = Parser.DEFAULT_METADATA_TO_PARSE
@@ -222,7 +223,7 @@ class LoadConfig:
                 self.config["parser_factory"] = value
             elif not a.startswith("__") and not isinstance(getattr(load_config_file, a), collections.Callable):
                 value = getattr(load_config_file, a)
-                if value:
+                if value or value is False:
                     if a == "navigable_objects":
                         self.config["load_filters"] = LoadFilters.set_load_filters(navigable_objects=value)
                     if a == "words_to_index":

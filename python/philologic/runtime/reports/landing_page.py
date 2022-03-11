@@ -74,6 +74,7 @@ def landing_page_bibliography(request, config):
 
 
 def group_by_range(request_range, request, config):
+    """Group metadata by range"""
     db = DB(config.db_path + "/data/")
     metadata_queried = request.group_by_field
     is_date = False
@@ -160,7 +161,6 @@ def group_by_range(request_range, request, config):
 
 def group_by_metadata(request, config):
     """Count result by metadata field"""
-    # citation_types = orjson.loads(request.citation)
     db = DB(config.db_path + "/data/")
     metadata_fields_needed, citations = get_fields_and_citations(request, config)
     cursor = db.dbh.cursor()
@@ -168,7 +168,12 @@ def group_by_metadata(request, config):
     cursor.execute(query, (request.query,))
     result_group = []
     for doc in cursor:
-        metadata = {m: doc[m] for m in metadata_fields_needed}
+        metadata = {}
+        for m in metadata_fields_needed:
+            try:
+                metadata[m] = doc[m]
+            except IndexError:
+                pass
         result_group.append(
             {
                 "metadata": metadata,
@@ -185,6 +190,7 @@ def group_by_metadata(request, config):
 
 
 def get_fields_and_citations(request, config):
+    """Get fields and citations"""
     metadata_fields_needed = [request.group_by_field, "philo_id"]
     citations = []
     for conf in config.default_landing_page_browsing:

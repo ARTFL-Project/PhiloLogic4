@@ -27,7 +27,9 @@ def query(
     query_debug=False,
     sort_order=None,
     raw_results=False,
+    ascii_sort=True,
 ):
+    """Runs concordance queries"""
     sys.stdout.flush()
     tstart = datetime.now()
 
@@ -87,7 +89,9 @@ def query(
             os._exit(0)
     else:
         hl.close()
-        return HitList.HitList(filename, words_per_hit, db, sort_order=sort_order, raw=raw_results)
+        return HitList.HitList(
+            filename, words_per_hit, db, sort_order=sort_order, raw=raw_results, ascii_sort=ascii_sort
+        )
 
 
 def get_expanded_query(hitlist):

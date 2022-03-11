@@ -689,7 +689,7 @@ export default {
                 });
             }
         }
-        if (this.formData.div_date.search(/<=>/) != -1) {
+        if ("div_date" in this.formData && this.formData.div_date.search(/<=>/) != -1) {
             this.dateType = "range";
             let dateRanges = this.formData.div_date.split(/<=>/);
             this.divDateRange = { start: dateRanges[0], end: dateRanges[1] };

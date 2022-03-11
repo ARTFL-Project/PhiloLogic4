@@ -147,6 +147,10 @@ words_to_index = ""
 # This regex defines how to tokenize words and punctuation
 token_regex = r"[\p{L}\p{M}\p{N}]+|[&\p{L};]+"
 
+# This defines whether you want to convert your text and metadata to an ASCII representation for
+# search and autocomplete. Turn off if your language does not translate well to ascii (non-European languages in general)
+ascii_conversion = True
+
 
 # Define the order in which files are sorted. This will affect the order in which
 # results are displayed. Supply a list of metadata strings, e.g.:

@@ -764,6 +764,10 @@ WEB_CONFIG_DEFAULTS = {
             ]
         ),
     },
+    "ascii_conversion": {
+        "value": True,
+        "comment": "# Defines whether to convert text to an ASCII representation for sorting. You probably should turn this off for all non-European languages.",
+    },
     "report_error_link": {
         "value": "",
         "comment": "# The link should start with http:// or https://. This will display an error report link in the header and in document navigation",
@@ -862,7 +866,7 @@ class Config:
 
     def to_json(self):
         """Convert Config to JSON representation"""
-        out_obj = {}
+        out_obj = {"valid_config": True}
         written = []
         for key in self.defaults.keys():
             out_obj[key] = self.data[key]

@@ -13,6 +13,7 @@ from philologic.utils import load_module
 from philologic.utils import pretty_print
 from tqdm import tqdm
 from black import format_str, FileMode
+from web_config_convert_4_6_to_4_7 import convert_web_config
 
 
 class CustomConfig(Config):
@@ -235,67 +236,7 @@ if __name__ == "__main__":
         cursor.execute("VACUUM")
 
     # Regenerate new WebConfig file
-    old_config = load_module("old_config", os.path.join(philo_db + "/data/web_config.cfg"))
-    start_date, end_date = get_time_series_dates(toms_path)
-    config_values = {
-        "dbname": old_config.dbname,
-        "metadata": old_config.metadata,
-        "facets": old_config.facets,
-        "time_series_start_end_date": {"start_date": start_date, "end_date": end_date},
-        "search_examples": old_config.search_examples,
-        "metadata_input_style": old_config.metadata_input_style,
-        "kwic_metadata_sorting_fields": old_config.kwic_metadata_sorting_fields,
-        "kwic_bibliography_fields": old_config.kwic_bibliography_fields,
-        "concordance_biblio_sorting": old_config.concordance_biblio_sorting,
-        "page_images_url_root": old_config.page_images_url_root,
-        "link_to_home_page": old_config.link_to_home_page,
-        "metadata_aliases": old_config.metadata_aliases,
-        "stopwords": old_config.stopwords,
-        "time_series_interval": old_config.time_series_interval,
-        "external_page_images": old_config.external_page_images,
-        "header_in_toc": old_config.header_in_toc,
-        "default_landing_page_browsing": convert_landing_page_browsing(old_config.default_landing_page_browsing),
-        "default_landing_page_display": old_config.default_landing_page_display,
-        "simple_landing_citation": old_config.simple_landing_citation,
-        "dico_letter_range": old_config.dico_letter_range,
-        "concordance_citation": citations_filter(old_config.concordance_citation),
-        "bibliography_citation": citations_filter(old_config.bibliography_citation),
-        "navigation_citation": citations_filter(old_config.navigation_citation),
-        "kwic_bibliography_fields": old_config.kwic_bibliography_fields,
-        "concordance_biblio_sorting": old_config.concordance_biblio_sorting,
-        "kwic_metadata_sorting_fields": old_config.kwic_metadata_sorting_fields,
-        "time_series_year_field": old_config.time_series_year_field,
-        "page_image_extension": old_config.page_image_extension,
-        "search_syntax_template": old_config.search_syntax_template or "default",
-        "concordance_formatting_regex": old_config.concordance_formatting_regex,
-        "kwic_formatting_regex": old_config.kwic_formatting_regex,
-        "navigation_formatting_regex": old_config.navigation_formatting_regex,
-        "query_parser_regex": old_config.query_parser_regex,
-        "report_error_link": old_config.report_error_link,
-        "metadata_choice_values": old_config.metadata_dropdown_values,
-        "dictionary": old_config.dictionary,
-        "landing_page_browsing": old_config.landing_page_browsing,
-    }
-    # Check for the presence of some new config options
-    try:
-        config_values["table_of_contents_citation"] = citations_filter(old_config.table_of_contents_citation)
-    except AttributeError:
-        config_values["table_of_contents_citation"] = WEB_CONFIG_DEFAULTS["table_of_contents_citation"]["value"]
-    try:
-        config_values["external_page_images"] = old_config.external_page_images
-    except AttributeError:
-        config_values["external_page_images"] = WEB_CONFIG_DEFAULTS["external_page_images"]["value"]
-    try:
-        config_values["skip_table_of_contents"] = old_config.skip_table_of_contents
-    except AttributeError:
-        config_values["skip_table_of_contents"] = False
-    os.system(
-        f'mv {os.path.join(philo_db + "/data/web_config.cfg")} {os.path.join(philo_db + "/data/web_config.cfg_old")}'
-    )
-    filename = os.path.join(data_dir, "web_config.cfg")
-    new_config = MakeWebConfig(filename, **config_values)
-    with open(filename, "w") as output_file:
-        print(format_str(str(new_config), mode=FileMode()), file=output_file)
+    convert_web_config(os.path.join(data_dir, "web_config.cfg"), philo_db)
 
     # Regenerate new db.locals.py
     old_db_locals = load_module("old_db_locals", os.path.join(data_dir, "db.locals.py"))

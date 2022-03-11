@@ -34,6 +34,8 @@ DEFAULT_OBJECT_LEVEL = "doc"
 
 NAVIGABLE_OBJECTS = ("doc", "div1", "div2", "div3", "para")
 
+ASCII_CONVERSION = True
+
 PARSER_OPTIONS = [
     "parser_factory",
     "doc_xpaths",
@@ -88,6 +90,7 @@ class Loader:
     token_regex = ""
     url_root = ""
     cores = 2
+    ascii_conversion = ASCII_CONVERSION
 
     @classmethod
     def set_class_attributes(cls, loader_options):
@@ -104,6 +107,7 @@ class Loader:
         cls.token_regex = loader_options["token_regex"]
         cls.url_root = loader_options["url_root"]
         cls.cores = loader_options["cores"]
+        cls.ascii_conversion = loader_options["ascii_conversion"]
         for option in PARSER_OPTIONS:
             try:
                 cls.parser_config[option] = loader_options[option]
@@ -837,6 +841,8 @@ class Loader:
             config_values["time_series_start_end_date"] = {"start_date": start_date, "end_date": end_date}
         except sqlite3.OperationalError:  # no year field present
             config_values["time_series_start_end_date"] = {"start_date": "", "end_date": ""}
+
+        config_values["ascii_conversion"] = Loader.ascii_conversion
 
         filename = self.destination + "/web_config.cfg"
         web_config = MakeWebConfig(filename, **config_values)

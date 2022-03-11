@@ -21,6 +21,7 @@ except ImportError:
 
 
 def landing_page_content(environ, start_response):
+    """Get landing page content"""
     status = "200 OK"
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
@@ -29,7 +30,7 @@ def landing_page_content(environ, start_response):
     if request.is_range == "true":
         if isinstance(request.query, bytes):
             request_range = request.query.decode("utf8")
-        request_range = request.query.lower().split("-")
+        request_range = [item.strip() for item in request.query.lower().split("-")]
         if len(request_range) == 1:
             request_range.append(request_range[0])
         results = group_by_range(request_range, request, config)

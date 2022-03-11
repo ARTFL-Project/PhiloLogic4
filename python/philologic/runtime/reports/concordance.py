@@ -18,7 +18,12 @@ def concordance_results(request, config):
         hits = CombinedHitlist(first_hits, second_hits)
     else:
         hits = db.query(
-            request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata
+            request["q"],
+            request["method"],
+            request["arg"],
+            sort_order=request["sort_order"],
+            ascii_sort=config.ascii_conversion,
+            **request.metadata,
         )
     start, end, _ = page_interval(request["results_per_page"], hits, request.start, request.end)
 
