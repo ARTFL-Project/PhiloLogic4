@@ -12,10 +12,10 @@
             </button>
         </div>
         <div class="row" style="padding-right: 0.5rem">
-            <div class="col-12" :class="{ 'col-md-8': showFacets, 'col-xl-9': showFacets }">
-                <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
+            <div class="col-12" :class="{ 'col-md-9': showFacets, 'col-xl-9': showFacets }">
+                <transition-group tag="div" :css="false" v-on:before-enter="onBeforeEnter" v-on:enter="onEnter">
                     <div
-                        class="card philologic-occurrence ms-2 me-2 mb-4 shadow-sm"
+                        class="card philologic-occurrence ms-2 me-2 mb-3 shadow-sm"
                         v-for="(result, index) in results.results"
                         :key="result.philo_id.join('-')"
                         :data-index="index"
@@ -39,7 +39,7 @@
                         </div>
                         <div class="row">
                             <div
-                                class="col m-2 mt-3 concordance-text text-view"
+                                class="col m-2 concordance-text text-view"
                                 :position="results.description.start + index"
                                 @keyup="dicoLookup($event, result.metadata_fields.year)"
                             >
@@ -50,11 +50,11 @@
                     </div>
                 </transition-group>
             </div>
-            <div class="col col-md-4 col-xl-3" v-if="showFacets">
+            <div class="col col-md-3 col-xl-3 ps-0" v-if="showFacets">
                 <facets></facets>
             </div>
+            <pages></pages>
         </div>
-        <pages></pages>
     </div>
 </template>
 
@@ -65,7 +65,7 @@ import citations from "./Citations";
 import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
-import Velocity from "velocity-animate";
+import gsap from "gsap";
 
 export default {
     name: "concordance-report",
@@ -118,11 +118,13 @@ export default {
             this.results = { description: { end: 0 } };
             this.searchParams = { ...this.$store.state.formData };
             this.searching = true;
+            console.log("FETCHING");
             this.$http
                 .get(`${this.$dbUrl}/reports/concordance.py`, {
                     params: this.paramsFilter(this.searchParams),
                 })
                 .then((response) => {
+                    console.log("GOT DATA");
                     this.results = response.data;
                     this.$store.commit("updateResultsLength", parseInt(response.data.results_length));
                     this.searching = false;
@@ -172,21 +174,22 @@ export default {
             }
         },
         dicoLookup() {},
-        beforeEnter: function (el) {
-            el.style.opacity = 0;
-        },
-        enter: function (el, done) {
-            let delay = (el.dataset.index * 500) / parseInt(this.results_per_page);
-            setTimeout(function () {
-                Velocity(el, { opacity: 1 }, { complete: done });
-            }, delay);
-        },
         toggleFacets() {
             if (this.showFacets) {
                 this.showFacets = false;
             } else {
                 this.showFacets = true;
             }
+        },
+        onBeforeEnter(el) {
+            el.style.opacity = 0;
+        },
+        onEnter(el, done) {
+            gsap.to(el, {
+                opacity: 1,
+                delay: el.dataset.index * 0.015,
+                onComplete: done,
+            });
         },
     },
 };

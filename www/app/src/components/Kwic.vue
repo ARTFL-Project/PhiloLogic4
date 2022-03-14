@@ -101,7 +101,7 @@
                         </div>
                     </div>
                     <div id="kwic-concordance">
-                        <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
+                        <transition-group tag="div" :css="false" v-on:before-enter="onBeforeEnter" v-on:enter="onEnter">
                             <div
                                 class="kwic-line"
                                 v-for="(result, kwicIndex) in filteredKwic(results.results)"
@@ -138,7 +138,7 @@ import { mapFields } from "vuex-map-fields";
 import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
-import Velocity from "velocity-animate";
+import gsap from "gsap";
 
 export default {
     name: "kwic-report",
@@ -412,14 +412,15 @@ export default {
             this.$router.push(this.paramsToRoute({ ...this.$store.state.formData }));
         },
         dicoLookup() {},
-        beforeEnter: function (el) {
+        onBeforeEnter(el) {
             el.style.opacity = 0;
         },
-        enter: function (el, done) {
-            var delay = el.dataset.index * 8;
-            setTimeout(function () {
-                Velocity(el, { opacity: 1 }, { complete: done });
-            }, delay);
+        onEnter(el, done) {
+            gsap.to(el, {
+                opacity: 1,
+                delay: el.dataset.index * 0.0075,
+                onComplete: done,
+            });
         },
         toggleFacets() {
             if (this.showFacets) {
@@ -429,7 +430,9 @@ export default {
             }
         },
         switchResultsPerPage(number) {
-            this.$router.push(this.paramsToRoute({ ...this.$store.state.formData, results_per_page: number }));
+            this.$router.push(
+                this.paramsToRoute({ ...this.$store.state.formData, results_per_page: number, start: "1", end: number })
+            );
         },
     },
 };

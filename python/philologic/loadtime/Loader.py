@@ -745,6 +745,13 @@ class Loader:
         if self.debug is False:
             os.system(f"rm -rf {self.workdir}")
 
+        print("Building Web Client Application...", end=" ", flush=True)
+        web_app_path = os.path.join(self.destination, "../app")
+        os.system(
+            f"cd {web_app_path}; npm install > {web_app_path}/web_app_build.log 2>&1 && npm run build >> {web_app_path}/web_app_build.log 2>&1"
+        )
+        print("done.")
+
     def write_db_config(self):
         """Write local variables used by libphilo"""
         filename = self.destination + "/db.locals.py"
@@ -849,13 +856,6 @@ class Loader:
         with open(os.path.join(filename), "w") as output_file:
             print(format_str(str(web_config), mode=FileMode()), file=output_file)
         print(f"wrote Web application info to {filename}")
-
-        print("Building Web Client Application...", end=" ", flush=True)
-        web_app_path = os.path.join(self.destination, "../app")
-        os.system(
-            f"cd {web_app_path}; npm install > {web_app_path}/web_app_build.log 2>&1 && npm run build >> {web_app_path}/web_app_build.log 2>&1"
-        )
-        print("done.")
 
 
 def shellquote(s):

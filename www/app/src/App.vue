@@ -119,7 +119,7 @@ export default {
     },
     created() {
         if (!this.$philoConfig.valid_config) {
-            document.body.innerHTML = `<h2>Invalid web config file: ${this.$philoConfig.web_config_path}</h2>`;
+            document.body.innerHTML = `<h2>Invalid web config file: ${this.$philoConfig.web_config_path}<br/>Check for python syntax error in the config file</h2>`;
         } else {
             document.title = this.$philoConfig.dbname.replace(/<[^>]+>/, "");
             const html = document.documentElement;

@@ -14,7 +14,7 @@
         "bootstrap": "^5.0.1",
         "chart.js": "^2.9.3",
         "core-js": "^3.13.1",
-        "velocity-animate": "^1.5.2",
+        "gsap": "^3.9.1",
         "vue": "^3.2.0",
         "vue-router": "^4.0.0",
         "vue-scrollto": "^2.17.1",
