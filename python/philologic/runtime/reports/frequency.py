@@ -109,6 +109,7 @@ def frequency_results(request, config, sorted_results=False):
                     key = metadata_dict[philo_id[:object_level]]
                 except:
                     continue
+            key = f"{key}"  # convert potential integers to strings
             if key not in counts:
                 counts[key] = {"count": 0, "metadata": {request.frequency_field: key}}
                 counts[key]["url"] = f'{base_url}&{request.frequency_field}="{quote_plus(key)}"'

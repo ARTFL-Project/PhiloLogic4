@@ -79,7 +79,7 @@ def kwic_hit_object(hit, config, db):
 
     if config.kwic_formatting_regex:
         for pattern, replacement in config.kwic_formatting_regex:
-            conc_text = re.sub(r"%s" % pattern, "%s" % replacement, conc_text)
+            conc_text = re.sub(rf"{pattern}", replacement, conc_text)
     kwic_result = {
         "philo_id": hit.philo_id,
         "context": conc_text,
