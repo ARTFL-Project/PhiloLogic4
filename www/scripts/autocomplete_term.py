@@ -25,6 +25,7 @@ except ImportError:
 
 
 def term_list(environ, start_response):
+    """Get term list"""
     status = "200 OK"
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
@@ -39,6 +40,7 @@ def term_list(environ, start_response):
 
 
 def format_query(q, db, config):
+    """Format query"""
     parsed = parse_query(q)
     group = group_terms(parsed)
     all_groups = split_terms(group)
@@ -58,7 +60,10 @@ def format_query(q, db, config):
 
     frequency_file = config.db_path + "/data/frequencies/normalized_word_frequencies"
 
-    if kind == "TERM":
+    if kind == "TERM" and db.locals.ascii_conversion is True:
+        expanded_token = token + ".*"
+        grep_proc = grep_word(expanded_token, frequency_file, subprocess.PIPE, db.locals["lowercase_index"])
+    elif kind == "TERM" and db.locals.ascii_conversion is False:
         expanded_token = token + ".*"
         grep_proc = grep_word(expanded_token, frequency_file, subprocess.PIPE, db.locals["lowercase_index"])
     elif kind == "QUOTE":
@@ -85,10 +90,10 @@ def format_query(q, db, config):
 
 
 def highlighter(word, token_len):
+    """Highlight matching substring"""
     highlighted_section = word[:token_len]
     end_word = word[token_len:]
     highlighted_word = '<span class="highlight">' + highlighted_section + "</span>" + end_word
-    highlighted_word = highlighted_word
     return highlighted_word
 
 

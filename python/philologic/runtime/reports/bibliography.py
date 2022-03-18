@@ -18,7 +18,7 @@ def bibliography_results(request, config):
             ascii_sort=config.ascii_conversion,
         )
     else:
-        hits = db.query(sort_order=request["sort_order"], ascii_sort=config.ascii_conversion, **request.metadata)
+        hits = db.query(sort_order=request["sort_order"], ascii_sort=db.locals.ascii_conversion, **request.metadata)
     if (
         request.simple_bibliography == "all"
     ):  # request from simple landing page report which gets all biblio in load order

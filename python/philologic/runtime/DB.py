@@ -191,6 +191,9 @@ class DB:
             if sort_order == ["rowid"]:
                 sort_order = None
             if not os.path.isfile(search_file):
+                import sys
+
+                print("NO HITLIST", file=sys.stderr)
                 return Query.query(
                     self,
                     qs,
@@ -202,6 +205,7 @@ class DB:
                     filename=search_file,
                     sort_order=sort_order,
                     raw_results=raw_results,
+                    ascii_sort=ascii_sort,
                 )
             parsed = QuerySyntax.parse_query(qs)
             grouped = QuerySyntax.group_terms(parsed)

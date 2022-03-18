@@ -22,7 +22,7 @@ def concordance_results(request, config):
             request["method"],
             request["arg"],
             sort_order=request["sort_order"],
-            ascii_sort=config.ascii_conversion,
+            ascii_sort=db.locals.ascii_conversion,
             **request.metadata,
         )
     start, end, _ = page_interval(request["results_per_page"], hits, request.start, request.end)

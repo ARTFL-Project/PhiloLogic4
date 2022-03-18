@@ -44,7 +44,11 @@ def query(
     filename = filename or (dir + hfile)
     hl = open(filename, "wb")
     err = open("/dev/null", "w")
+    # if db.locals.ascii_conversion is True:
     freq_file = db.path + "/frequencies/normalized_word_frequencies"
+    # else:
+    # freq_file = db.path + "/frequencies/word_frequencies"
+    query_debug = True
     if query_debug:
         print("FORKING", file=sys.stderr)
     pid = os.fork()
@@ -58,7 +62,7 @@ def query(
         else:
             # now we're detached from the parent, and can do our work.
             if query_debug:
-                print("WORKER DETACHED at ", datetime.now() - tstart, file=sys.stderr)
+                print("WORKER DETACHED at ", datetime.now() - tstart, file=sys.stderr, flush=True)
             args = ["corpus_search"]
             if corpus_file:
                 args.extend(("-c", corpus_file))
@@ -70,9 +74,10 @@ def query(
 
             query_log_fh = filename + ".terms"
             if query_debug:
-                print("LOGGING TERMS to " + filename + ".terms", file=sys.stderr)
+                print("LOGGING TERMS to " + filename + ".terms", file=sys.stderr, flush=True)
             logger = subprocess.Popen(["tee", query_log_fh], stdin=subprocess.PIPE, stdout=worker.stdin)
-            expand_query_not(split, freq_file, logger.stdin, db.locals["lowercase_index"])
+
+            expand_query_not(split, freq_file, logger.stdin, db.locals.ascii_conversion, db.locals["lowercase_index"])
             logger.stdin.close()
             worker.stdin.close()
 
@@ -130,7 +135,8 @@ def split_terms(grouped):
     return split
 
 
-def expand_query_not(split, freq_file, dest_fh, lowercase=True):
+def expand_query_not(split, freq_file, dest_fh, ascii_conversion, lowercase=True):
+    """Expand search term"""
     first = True
     grep_proc = None
     for group in split:
@@ -157,19 +163,26 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
 
         # We will chain all NOT operators backward from the main filter.
         for kind, token in exclude:
-            if kind == "TERM":
+            if kind == "TERM" and ascii_conversion is True:
                 proc = invert_grep(token, subprocess.PIPE, filter_inputs[0], lowercase)
+            if kind == "TERM" and ascii_conversion is True:
+                proc = invert_grep_exact(token, subprocess.PIPE, filter_inputs[0])
             if kind == "QUOTE":
+                token = token[1:-1]
                 proc = invert_grep_exact(token, subprocess.PIPE, filter_inputs[0])
             filter_inputs = [proc.stdin] + filter_inputs
             filter_procs = [proc] + filter_procs
 
         # then we append output from all the greps into the front of that filter chain.
         for kind, token in group:  # or, splits, and ranges should have been taken care of by now.
-            if kind == "TERM" or kind == "RANGE":
+            if (kind == "TERM" and ascii_conversion is True) or kind == "RANGE":
                 grep_proc = grep_word(token, freq_file, filter_inputs[0], lowercase)
                 grep_proc.wait()
+            elif kind == "TERM" and ascii_conversion is False:
+                grep_proc = grep_exact(token, freq_file, filter_inputs[0])
+                grep_proc.wait()
             elif kind == "QUOTE":
+                token = token[1:-1]
                 grep_proc = grep_exact(token, freq_file, filter_inputs[0])
                 grep_proc.wait()
         # close all the pipes and wait for procs to finish.
@@ -179,6 +192,7 @@ def expand_query_not(split, freq_file, dest_fh, lowercase=True):
 
 
 def grep_word(token, freq_file, dest_fh, lowercase=True):
+    """Grep on normalized words"""
     if lowercase:
         token = token.lower()
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", token) if not unicodedata.combining(i)]
@@ -193,6 +207,7 @@ def grep_word(token, freq_file, dest_fh, lowercase=True):
 
 
 def invert_grep(token, in_fh, dest_fh, lowercase=True):
+    """NOT grep"""
     if lowercase:
         token = token.lower()
     norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", token) if not unicodedata.combining(i)]
@@ -207,24 +222,24 @@ def invert_grep(token, in_fh, dest_fh, lowercase=True):
 
 
 def grep_exact(token, freq_file, dest_fh):
+    """Exact grep"""
     try:
-        grep_proc = subprocess.Popen(["egrep", "-a", b"[[:blank:]]%s$" % token[1:-1], freq_file], stdout=dest_fh)
+        grep_proc = subprocess.Popen(["egrep", "-a", b"[[:blank:]]%s$" % token, freq_file], stdout=dest_fh)
     except (UnicodeEncodeError, TypeError):
         grep_proc = subprocess.Popen(
-            ["egrep", "-a", b"[[:blank:]]%s$" % token[1:-1].encode("utf8"), freq_file], stdout=dest_fh
+            ["egrep", "-a", b"[[:blank:]]%s$" % token.encode("utf8"), freq_file], stdout=dest_fh
         )
     return grep_proc
 
 
 def invert_grep_exact(token, in_fh, dest_fh):
+    """NOT exact grep"""
     # don't strip accent or case, exact match only.
     try:
-        grep_proc = subprocess.Popen(
-            ["egrep", "-a", "-v", b"[[:blank:]]%s$" % token[1:-1]], stdin=in_fh, stdout=dest_fh
-        )
+        grep_proc = subprocess.Popen(["egrep", "-a", "-v", b"[[:blank:]]%s$" % token], stdin=in_fh, stdout=dest_fh)
     except (UnicodeEncodeError, TypeError):
         grep_proc = subprocess.Popen(
-            ["egrep", "-a", "-v", b"[[:blank:]]%s$" % token[1:-1].encode("utf8")], stdin=in_fh, stdout=dest_fh
+            ["egrep", "-a", "-v", b"[[:blank:]]%s$" % token.encode("utf8")], stdin=in_fh, stdout=dest_fh
         )
     # can't wait because input isn't ready yet.
     return grep_proc

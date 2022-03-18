@@ -17,7 +17,7 @@
                 :class="{ 'col-md-8': showFacets, 'col-xl-9': showFacets }"
                 v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'"
             >
-                <transition-group tag="div" v-on:before-enter="beforeEnter" v-on:enter="enter">
+                <transition-group tag="div" :css="false" v-on:before-enter="beforeEnter" v-on:enter="enter">
                     <div
                         class="card philologic-occurrence mx-2 mb-4 shadow-sm"
                         v-for="(result, index) in results.results"
@@ -30,10 +30,13 @@
                                     <input
                                         type="checkbox"
                                         class="ms-3 me-2"
+                                        :id="`biblio-index-${results.description.start + index}`"
                                         @click="addToSearch(result.metadata_fields.title)"
                                         v-if="resultType == 'doc' && philoConfig.metadata.indexOf('title') !== -1"
                                     />
-                                    <citations :citation="result.citation"></citations>
+                                    <label class="d-inline" :for="`biblio-index-${results.description.start + index}`">
+                                        <citations :citation="result.citation"></citations
+                                    ></label>
                                 </span>
                             </div>
                         </div>
@@ -79,7 +82,7 @@ import citations from "./Citations";
 import ResultsSummary from "./ResultsSummary";
 import facets from "./Facets";
 import pages from "./Pages";
-import Velocity from "velocity-animate";
+import gsap from "gsap";
 
 export default {
     name: "bibliography-report",
@@ -194,10 +197,11 @@ export default {
             el.style.opacity = 0;
         },
         enter: function (el, done) {
-            var delay = el.dataset.index * 100;
-            setTimeout(function () {
-                Velocity(el, { opacity: 1 }, { complete: done });
-            }, delay);
+            gsap.to(el, {
+                opacity: 1,
+                delay: el.dataset.index * 0.015,
+                onComplete: done,
+            });
         },
         toggleFacets() {
             if (this.showFacets) {

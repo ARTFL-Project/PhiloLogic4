@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 
-import orjson
 import os
-import regex as re
 import subprocess
 import sys
 import unicodedata
 from wsgiref.handlers import CGIHandler
 
+import orjson
+import regex as re
 from philologic.runtime.DB import DB
 from philologic.runtime.MetadataQuery import metadata_pattern_search
 from philologic.runtime.QuerySyntax import parse_query
-from philologic.runtime import access_control, login_access
-
 
 sys.path.append("..")
 import custom_functions
@@ -32,6 +30,7 @@ environ["LANG"] = "C"
 
 
 def metadata_list(environ, start_response):
+    """Retrieve metadata list"""
     status = "200 OK"
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
@@ -44,6 +43,7 @@ def metadata_list(environ, start_response):
 
 
 def autocomplete_metadata(metadata, field, db):
+    """Autocomplete metadata"""
     path = os.environ["SCRIPT_FILENAME"].replace("scripts/metadata_list.py", "")
     path += "data/frequencies/%s_frequencies" % field
 
@@ -57,6 +57,7 @@ def autocomplete_metadata(metadata, field, db):
 
 
 def format_query(q, field, db):
+    """Format query"""
     parsed = parse_query(q)
     parsed_split = []
     for label, token in parsed:
@@ -77,7 +78,8 @@ def format_query(q, field, db):
         prefix = prefix + " CUTHERE "
     if label == "QUOTE_S" or label == "TERM":
         norm_tok = token.lower()
-        norm_tok = [i for i in unicodedata.normalize("NFKD", norm_tok) if not unicodedata.combining(i)]
+        if db.locals.ascii_conversion is True:
+            norm_tok = [i for i in unicodedata.normalize("NFKD", norm_tok) if not unicodedata.combining(i)]
         norm_tok = "".join(norm_tok).encode("utf-8")
         matches = metadata_pattern_search(
             norm_tok, db.locals.db_path + "/data/frequencies/normalized_%s_frequencies" % field
@@ -89,7 +91,7 @@ def format_query(q, field, db):
         for m in exact_matches:
             if m not in matches:
                 matches.append(m)
-        matches = highlighter(matches, norm_tok, substr_token)
+        matches = highlighter(matches, norm_tok)
         for m in matches:
             if label == "QUOTE_S":
                 output_string.append(prefix + '"%s"' % m)
@@ -101,6 +103,7 @@ def format_query(q, field, db):
 
 
 def exact_word_pattern_search(term, path):
+    """Exact word pattern search"""
     command = ["egrep", "-awie", "[[:blank:]]?" + term, path]
     grep = subprocess.Popen(command, stdout=subprocess.PIPE, env=environ)
     cut = subprocess.Popen(["cut", "-f", "1"], stdin=grep.stdout, stdout=subprocess.PIPE)
@@ -109,7 +112,8 @@ def exact_word_pattern_search(term, path):
     return matches
 
 
-def highlighter(words, norm_tok, substr_tok):
+def highlighter(words, norm_tok):
+    """Highlight autocomplete"""
     new_list = []
     token_len = len(norm_tok)
     for word in words:

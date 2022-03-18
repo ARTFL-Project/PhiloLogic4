@@ -144,6 +144,15 @@ DB_LOCALS_DEFAULTS = {
             ]
         ),
     },
+    "ascii_conversion": {
+        "value": True,
+        "comment": "\n".join(
+            [
+                "# This defines whether text and metadata were converted to an ASCII representation",
+                "# Don't change this value post-database load.",
+            ]
+        ),
+    },
     "normalized_fields": {"value": [], "comment": ""},
     "default_object_level": {
         "value": "doc",
@@ -255,8 +264,8 @@ WEB_CONFIG_DEFAULTS = {
         ),
     },
     "autocomplete": {
-        "value": [],
-        "comment": "# The autocomplete variable determines which fields have autocomplete enabled.",
+        "value": ["q"],
+        "comment": "# The autocomplete variable determines which fields have autocomplete enabled. Note that the value 'q' is for term autocomplete",
     },
     "facets": {
         "value": [],
@@ -763,10 +772,6 @@ WEB_CONFIG_DEFAULTS = {
                 "",
             ]
         ),
-    },
-    "ascii_conversion": {
-        "value": True,
-        "comment": "# Defines whether to convert text to an ASCII representation for sorting. You probably should turn this off for all non-European languages.",
     },
     "report_error_link": {
         "value": "",

@@ -118,13 +118,11 @@ export default {
             this.results = { description: { end: 0 } };
             this.searchParams = { ...this.$store.state.formData };
             this.searching = true;
-            console.log("FETCHING");
             this.$http
                 .get(`${this.$dbUrl}/reports/concordance.py`, {
                     params: this.paramsFilter(this.searchParams),
                 })
                 .then((response) => {
-                    console.log("GOT DATA");
                     this.results = response.data;
                     this.$store.commit("updateResultsLength", parseInt(response.data.results_length));
                     this.searching = false;

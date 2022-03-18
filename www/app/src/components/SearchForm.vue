@@ -21,7 +21,7 @@
                                 >
                             </button>
                         </div>
-                        <div id="search_terms_container" class="p-3">
+                        <div id="search_terms_container" class="p-3 pb-2">
                             <div class="row" id="search_terms">
                                 <div class="cols-12 cols-md-8">
                                     <div class="input-group" id="q-group">

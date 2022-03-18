@@ -762,6 +762,7 @@ class Loader:
             "metadata_types": Loader.metadata_types,
             "normalized_fields": self.normalized_fields,
             "debug": self.debug,
+            "ascii_conversion": Loader.ascii_conversion,
         }
         db_values["token_regex"] = self.token_regex
         db_values["default_object_level"] = self.default_object_level
