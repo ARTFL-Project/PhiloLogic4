@@ -5,7 +5,7 @@ title: Configuring the Web Application
 -   [Layout of the Web Application](#layout)
 -   [UI configuration](#ui)
 -   [Access control](#access)
--   [Setting default start/end dates for Time Series](#setting-default-dates-for-time-series)
+-   [Changing web application theme](#changing-theme)
 
 #### <a name="layout"></a>Layout of a PhiloLogic Web Application Instance
 
@@ -19,22 +19,6 @@ Here is what the database directory looks like after a load:
 <pre><code>
 database/
 ├── app
-│   ├── assets
-│   │   ├── css
-│   │   └── js
-│   ├── components
-│   │   ├── collocation
-│   │   ├── concordanceKwic
-│   │   ├── landingPage
-│   │   ├── tableOfContents
-│   │   ├── textNavigation
-│   │   └── timeSeries
-│   └── shared
-│       ├── accessControl
-│       ├── exportResults
-│       ├── searchArguments
-│       ├── searchForm
-│       └── searchSyntax
 ├── data
 │   ├── db.locals.py
 │   ├── frequencies
@@ -71,14 +55,10 @@ In order for access control to be turned on, you first need to set the `access_c
 
 Once access control has been turned on, PhiloLogic will check the `access_file` variable which defines a file contained in the /data directory which will contain the domain names allowed as well as the IPs addresses to be blocked. If no such file is provided, access will be automatically granted.
 
-### Setting default dates for time series
+#### <a name="changing-theme"></a>Changing the Web Application theme
+Changing the Web Application theme requires editing the `theme.module.scss` file which can be found in the database directory under `app/src/assets/styles/`.
 
-If you need to set default start and end dates to time series requests (e.g. you have errors in the data such as 176 for the earliest date in an 18th century corpus, or 9999 as the latest date and you know this isn't the 100th century), you need to edit the script `get_start_end_date.py` in the `scripts/` directory of your database. After the `request` variable has been set, override the `request.start_date` or `request.end_date` (depending on your use case) if their values are empty. For example:
-
-```python
-request = WSGIHandler(environ, config)
-if request.start_date == "":
-    request.start_date = 1772
-if request.end_date == "":
-    request.end_date = 2004
+The `theme.module.scss` file is a Sass stylesheet which makes use of global variables to define the main colors used in the web app. All you should need to do is edit `$header-color`, `$button-color`, `$button-color-active`, `$link-color`. Once you've edited the theme file, you will need to rebuild the web application. In order to do so, go to the `app/` directory and run the following command in the terminal:
+```
+npm run build
 ```
