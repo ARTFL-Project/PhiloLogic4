@@ -21,7 +21,7 @@
                                 >
                             </button>
                         </div>
-                        <div id="search_terms_container" class="p-3 pb-2">
+                        <div id="search_terms_container" class="p-3">
                             <div class="row" id="search_terms">
                                 <div class="cols-12 cols-md-8">
                                     <div class="input-group" id="q-group">
@@ -71,75 +71,6 @@
                                         </button>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="mt-3">
-                                <div
-                                    class="form-check form-switch form-check-inline"
-                                    id="approximate"
-                                    style="height: 31px"
-                                >
-                                    <input
-                                        class="form-check-input"
-                                        type="checkbox"
-                                        id="approximate-input"
-                                        v-model="approximateSelected"
-                                        @change="approximateChange(approximateSelected)"
-                                    />
-                                    <label class="form-check-label" for="approximate-input"> Approximate match </label>
-                                </div>
-                                <select
-                                    class="form-select form-select-sm d-inline-block"
-                                    style="max-width: fit-content; margin-left: 0.5rem"
-                                    v-model="approximate_ratio"
-                                    v-if="approximateSelected"
-                                    aria-label=".form-select-sm"
-                                >
-                                    <option v-for="value in approximateValues" :key="value.value" :value="value.value">
-                                        {{ value.text }}
-                                    </option>
-                                    >
-                                </select>
-                                <span id="method-args" class="ps-2" v-if="currentReport != 'collocation'">
-                                    <select
-                                        class="form-select form-select-sm d-inline-block"
-                                        style="max-width: fit-content; height: 31px"
-                                        v-model="method"
-                                        aria-label=".form-select-sm"
-                                    >
-                                        <option v-for="value in methodOptions" :key="value.value" :value="value.value">
-                                            {{ value.text }}
-                                        </option>
-                                    </select>
-                                    <div class="input-group d-inline-block ms-1" v-if="method != 'cooc'">
-                                        <button
-                                            class="btn btn-sm btn-outline-secondary"
-                                            style="margin-top: -3px"
-                                            type="button"
-                                        >
-                                            <label for="arg-proxy" v-if="method == 'proxy'">how many?</label>
-                                            <label for="arg-phrase" v-if="method == 'phrase'">how many?</label>
-                                        </button>
-                                        <input
-                                            class="form-control d-inline-block"
-                                            type="text"
-                                            name="arg_proxy"
-                                            id="arg-proxy"
-                                            style="width: 50px; text-align: center; height: 31px"
-                                            v-model="arg_proxy"
-                                            v-if="method == 'proxy'"
-                                        />
-                                        <input
-                                            class="form-control d-inline-block mx-1"
-                                            type="text"
-                                            name="arg_phrase"
-                                            id="arg-phrase"
-                                            style="width: 50px; text-align: center; height: 31px"
-                                            v-model="arg_phrase"
-                                            v-if="method == 'phrase'"
-                                        />
-                                        words in the same sentence
-                                    </div>
-                                </span>
                             </div>
                         </div>
                         <div id="head-search-container" class="px-3 pt-1 pb-3" v-if="dictionary">
@@ -204,7 +135,74 @@
                     </div>
                     <transition name="slide-fade">
                         <div id="search-elements" v-if="formOpen" class="ps-3 pe-3 pb-3 shadow">
-                            <div class="mt-2">
+                            <div class="mt-1">
+                                <h6>Search term parameters:</h6>
+                                <div
+                                    class="form-check form-switch form-check-inline"
+                                    id="approximate"
+                                    style="height: 31px"
+                                >
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        id="approximate-input"
+                                        v-model="approximateSelected"
+                                        @change="approximateChange(approximateSelected)"
+                                    />
+                                    <label class="form-check-label" for="approximate-input">Approximate match </label>
+                                </div>
+                                <select
+                                    class="form-select form-select-sm d-inline-block"
+                                    style="max-width: fit-content; margin-left: 0.5rem"
+                                    v-model="approximate_ratio"
+                                    :disabled="!approximateSelected"
+                                    aria-label=".form-select-sm"
+                                >
+                                    <option v-for="value in approximateValues" :key="value.value" :value="value.value">
+                                        {{ value.text }}
+                                    </option>
+                                    >
+                                </select>
+                                <div class="input-group mb-4" v-if="currentReport != 'collocation'">
+                                    <button class="btn btn-outline-secondary" type="button">
+                                        Search co-occurrences</button
+                                    ><select
+                                        class="form-select"
+                                        style="width: fit-content; max-width: fit-content"
+                                        v-model="method"
+                                    >
+                                        <option v-for="value in methodOptions" :key="value.value" :value="value.value">
+                                            {{ value.text }}
+                                        </option>
+                                    </select>
+                                    <button
+                                        class="btn btn-outline-secondary"
+                                        type="button"
+                                        v-if="method == 'proxy' || method == 'phrase'"
+                                    >
+                                        <label for="arg-proxy" v-if="method == 'proxy'">how many?</label>
+                                        <label for="arg-phrase" v-if="method == 'phrase'">how many?</label>
+                                    </button>
+                                    <input
+                                        class="form-control"
+                                        type="text"
+                                        name="arg_proxy"
+                                        id="arg-proxy"
+                                        v-model="arg_proxy"
+                                        v-if="method == 'proxy'"
+                                    />
+                                    <input
+                                        class="form-control"
+                                        type="text"
+                                        name="arg_phrase"
+                                        id="arg-phrase"
+                                        v-model="arg_phrase"
+                                        v-if="method == 'phrase'"
+                                    />
+                                    <span class="input-group-text ms-0" v-if="method == 'proxy' || method == 'phrase'"
+                                        >words in the same sentence</span
+                                    >
+                                </div>
                                 <h6>Filter by metadata field:</h6>
                                 <div
                                     class="input-group pb-2"
@@ -605,8 +603,8 @@ export default {
             formOpen: false,
             searchOptionsButton: "Show search options",
             approximateValues: [
-                { text: "90% or higher", value: "90" },
-                { text: "80% or higher", value: "80" },
+                { text: "At least 90% similar", value: "90" },
+                { text: "At least 80% similar", value: "80" },
             ],
             approximateSelected: false,
             methodOptions: [
@@ -978,6 +976,7 @@ input[type="text"] {
 }
 #report .btn {
     font-variant: small-caps;
+    font-size: 1rem !important;
 }
 .dico-margin {
     margin-top: 210px !important;
@@ -1104,10 +1103,6 @@ input[type="text"] {
 }
 
 @media (max-width: 768px) {
-    #method-args {
-        display: block;
-        margin-left: -0.5rem;
-    }
     #collocation-options .row {
         margin-left: -15px;
     }
@@ -1200,5 +1195,10 @@ input:focus::placeholder {
 .slide-fade-leave-to {
     transform: translateY(-30px);
     opacity: 0;
+}
+h6 {
+    font-variant: small-caps;
+    font-weight: 700;
+    font-size: 1.05rem;
 }
 </style>
