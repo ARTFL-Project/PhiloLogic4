@@ -20,6 +20,7 @@ def metadata_query(db, filename, param_dicts, sort_order, raw_results=False, asc
     for d in param_dicts:
         query = query_recursive(db, d, prev, sort_order)
         prev = query
+
     try:
         corpus_fh = open(filename, "wb")
         for corpus_obj in query:
@@ -123,9 +124,10 @@ def query_lowlevel(db, param_dict, sort_order):
     for column, values in list(param_dict.items()):
         norm_path = db.path + "/frequencies/normalized_" + column + "_frequencies"
         for v in values:
-            if column != "div_date":
+            parsed = "text"
+            if db.locals.metadata_sql_types[column] in ("text", "int"):
                 parsed = parse_query(v)
-            else:
+            elif db.locals.metadata_sql_types[column] == "date":
                 parsed = parse_date_query(v)
             grouped = group_terms(parsed)
             expanded = expand_grouped_query(grouped, norm_path)
@@ -145,8 +147,7 @@ def query_lowlevel(db, param_dict, sort_order):
     if sort_order:
         query = f"{query} ORDER BY {', '.join(sort_order)}"
     if db.locals["debug"]:
-        print("INNER QUERY: ", "%s %% %s" % (query, vars), sort_order, file=sys.stderr)
-    # print("INNER QUERY: ", "%s %% %s" % (query, vars), sort_order, file=sys.stderr)
+        print("INNER QUERY: ", "%s %% %s" % (query, vars), sort_order, file=sys.stderr, flush=True)
     results = db.dbh.execute(query, vars)
     return results
 

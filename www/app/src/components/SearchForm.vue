@@ -208,163 +208,189 @@
                                     class="input-group pb-2"
                                     v-for="localField in metadataDisplayFiltered"
                                     :key="localField.value"
-                                    :id="localField.value + '-group'"
                                 >
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-secondary"
-                                        v-if="
-                                            metadataInputStyle[localField.value] != 'checkbox' &&
-                                            localField.value != 'div_date'
-                                        "
+                                    <div
+                                        class="input-group pb-2"
+                                        :id="localField.value + '-group'"
+                                        v-if="metadataInputStyle[localField.value] == 'text'"
                                     >
-                                        <label :for="localField.value + 'input-filter'">{{ localField.label }}</label>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-secondary"
-                                        style="border-top-right-radius: 0; border-bottom-right-radius: 0"
-                                        v-if="localField.value == 'div_date'"
-                                    >
-                                        <label for="div-date">Date</label>
-                                    </button>
-                                    <div class="btn-group" role="group" v-if="localField.value == 'div_date'">
-                                        <button
-                                            class="btn btn-secondary dropdown-toggle"
-                                            style="border-top-left-radius: 0; border-bottom-left-radius: 0"
-                                            type="button"
-                                            id="div-date-selector"
-                                            data-bs-toggle="dropdown"
-                                            aria-expanded="false"
+                                        <button type="button" class="btn btn-outline-secondary">
+                                            <label :for="localField.value + 'input-filter'">{{
+                                                localField.label
+                                            }}</label></button
+                                        ><input
+                                            type="text"
+                                            class="form-control"
+                                            :id="localField.value + 'input-filter'"
+                                            :name="localField.value"
+                                            :placeholder="localField.example"
+                                            v-model="metadataValues[localField.value]"
+                                            @input="onChange(localField.value)"
+                                            @keydown.down="onArrowDown(localField.value)"
+                                            @keydown.up="onArrowUp(localField.value)"
+                                            @keyup.enter="onEnter(localField.value)"
+                                            v-if="
+                                                metadataInputStyle[localField.value] == 'text' &&
+                                                metadataInputStyle[localField.value] != 'date'
+                                            "
+                                        />
+                                        <ul
+                                            :id="'autocomplete-' + localField.value"
+                                            class="autocomplete-results shadow"
+                                            :style="autoCompletePosition(localField.value)"
+                                            v-if="
+                                                autoCompleteResults[localField.value].length > 0 &&
+                                                metadataInputStyle[localField.value] != 'date'
+                                            "
                                         >
-                                            {{ `${dateType[0].toUpperCase()}${dateType.slice(1)}` }}
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="div-date-selector">
-                                            <li @click="dateTypeToggle('exact')">
-                                                <a class="dropdown-item">Exact</a>
-                                            </li>
-                                            <li @click="dateTypeToggle('range')">
-                                                <a class="dropdown-item">Range</a>
-                                            </li>
+                                            <li
+                                                tabindex="-1"
+                                                v-for="(result, i) in autoCompleteResults[localField.value]"
+                                                :key="result"
+                                                @click="setResult(result, localField.value)"
+                                                class="autocomplete-result"
+                                                :class="{ 'is-active': i === arrowCounters[localField.value] }"
+                                                v-html="result"
+                                            ></li>
                                         </ul>
                                     </div>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        :id="localField.value + 'input-filter'"
-                                        :name="localField.value"
-                                        :placeholder="localField.example"
-                                        v-model="metadataValues[localField.value]"
-                                        @input="onChange(localField.value)"
-                                        @keydown.down="onArrowDown(localField.value)"
-                                        @keydown.up="onArrowUp(localField.value)"
-                                        @keyup.enter="onEnter(localField.value)"
-                                        v-if="
-                                            metadataInputStyle[localField.value] == 'text' &&
-                                            localField.value != 'div_date'
-                                        "
-                                    />
-                                    <ul
-                                        :id="'autocomplete-' + localField.value"
-                                        class="autocomplete-results shadow"
-                                        :style="autoCompletePosition(localField.value)"
-                                        v-if="
-                                            autoCompleteResults[localField.value].length > 0 &&
-                                            localField.value != 'div_date'
-                                        "
+                                    <div
+                                        class="input-group pb-2"
+                                        :id="localField.value + '-group'"
+                                        v-if="metadataInputStyle[localField.value] == 'checkbox'"
                                     >
-                                        <li
-                                            tabindex="-1"
-                                            v-for="(result, i) in autoCompleteResults[localField.value]"
-                                            :key="result"
-                                            @click="setResult(result, localField.value)"
-                                            class="autocomplete-result"
-                                            :class="{ 'is-active': i === arrowCounters[localField.value] }"
-                                            v-html="result"
-                                        ></li>
-                                    </ul>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        :id="localField.value + 'input-filter'"
-                                        :name="localField.value"
-                                        :placeholder="localField.example"
-                                        v-model="metadataValues[localField.value]"
-                                        v-if="localField.value == 'div_date' && dateType == 'exact'"
-                                    />
-                                    <span
-                                        class="d-inline-block"
-                                        v-if="localField.value == 'div_date' && dateType == 'range'"
-                                    >
-                                        <div class="input-group ms-3">
-                                            <button class="btn btn-outline-secondary" type="button">
-                                                <label for="query-term-input">From</label>
-                                            </button>
-                                            <input
-                                                type="text"
-                                                class="form-control date-range"
-                                                :id="localField.value + '-start-input-filter'"
-                                                :name="localField.value + '-start'"
-                                                :placeholder="localField.example"
-                                                v-model="divDateRange.start"
-                                            />
-                                            <button class="btn btn-outline-secondary ms-3" type="button">
-                                                <label for="query-term-input">To</label></button
-                                            ><input
-                                                type="text"
-                                                class="form-control date-range"
-                                                :id="localField.value + 'end-input-filter'"
-                                                :name="localField.value + '-end'"
-                                                :placeholder="localField.example"
-                                                v-model="divDateRange.end"
-                                            />
+                                        <button
+                                            style="border-top-right-radius: 0; border-bottom-right-radius: 0"
+                                            class="btn btn-outline-secondary me-2"
+                                        >
+                                            {{ localField.label }}
+                                        </button>
+                                        <div class="d-inline-block">
+                                            <div
+                                                class="form-check d-inline-block ms-3"
+                                                style="padding-top: 0.35rem"
+                                                :id="localField.value"
+                                                :options="metadataChoiceValues[localField.value]"
+                                                v-for="metadataChoice in metadataChoiceValues[localField.value]"
+                                                :key="metadataChoice.value"
+                                                v-once
+                                            >
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    :id="metadataChoice.value"
+                                                    v-model="metadataChoiceSelected[localField.value]"
+                                                />
+                                                <label class="form-check-label" :for="metadataChoice.value">{{
+                                                    metadataChoice.text
+                                                }}</label>
+                                            </div>
                                         </div>
-                                    </span>
-                                    <select
-                                        class="form-select"
-                                        :id="localField.value"
-                                        v-model="metadataValues[localField.value]"
+                                    </div>
+                                    <div
+                                        class="input-group pb-2"
+                                        :id="localField.value + '-group'"
                                         v-if="metadataInputStyle[localField.value] == 'dropdown'"
                                     >
-                                        <option
-                                            v-for="value in metadataChoiceValues[localField.value]"
-                                            :key="value.value"
-                                            :value="value.value"
-                                            v-once
-                                        >
-                                            {{ value.text }}
-                                        </option>
-                                    </select>
-                                    <button
-                                        style="border-top-right-radius: 0; border-bottom-right-radius: 0"
-                                        class="btn btn-outline-secondary me-2"
-                                        v-if="metadataInputStyle[localField.value] == 'checkbox'"
-                                    >
-                                        {{ localField.label }}
-                                    </button>
-                                    <div
-                                        class="d-inline-block"
-                                        v-if="metadataInputStyle[localField.value] == 'checkbox'"
-                                    >
-                                        <div
-                                            class="form-check d-inline-block ms-3"
-                                            style="padding-top: 0.35rem"
-                                            :id="localField.value"
-                                            :options="metadataChoiceValues[localField.value]"
-                                            v-for="metadataChoice in metadataChoiceValues[localField.value]"
-                                            :key="metadataChoice.value"
-                                            v-once
-                                        >
-                                            <input
-                                                class="form-check-input"
-                                                type="checkbox"
-                                                :id="metadataChoice.value"
-                                                v-model="metadataChoiceSelected[localField.value]"
-                                            />
-                                            <label class="form-check-label" :for="metadataChoice.value">{{
-                                                metadataChoice.text
+                                        <button type="button" class="btn btn-outline-secondary">
+                                            <label :for="localField.value + 'input-filter'">{{
+                                                localField.label
                                             }}</label>
+                                        </button>
+                                        <select
+                                            class="form-select"
+                                            :id="localField.value"
+                                            v-model="metadataValues[localField.value]"
+                                        >
+                                            <option
+                                                v-for="value in metadataChoiceValues[localField.value]"
+                                                :key="value.value"
+                                                :value="value.value"
+                                                v-once
+                                            >
+                                                {{ value.text }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div
+                                        class="input-group pb-2"
+                                        :id="localField.value + '-group'"
+                                        v-if="metadataInputStyle[localField.value] == 'date'"
+                                    >
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-secondary"
+                                            style="border-top-right-radius: 0; border-bottom-right-radius: 0"
+                                        >
+                                            <label :for="localField.value + '-date'">{{ localField.label }}</label>
+                                        </button>
+                                        <div class="btn-group" role="group">
+                                            <button
+                                                class="btn btn-secondary dropdown-toggle"
+                                                style="border-top-left-radius: 0; border-bottom-left-radius: 0"
+                                                type="button"
+                                                :id="localField.value + '-selector'"
+                                                data-bs-toggle="dropdown"
+                                                aria-expanded="false"
+                                            >
+                                                {{
+                                                    `${dateType[localField.value][0].toUpperCase()}${dateType[
+                                                        localField.value
+                                                    ].slice(1)}`
+                                                }}
+                                            </button>
+                                            <ul class="dropdown-menu" :aria-labelledby="localField.value + '-selector'">
+                                                <li @click="dateTypeToggle(localField.value, 'exact')">
+                                                    <a class="dropdown-item">Exact</a>
+                                                </li>
+                                                <li @click="dateTypeToggle(localField.value, 'range')">
+                                                    <a class="dropdown-item">Range</a>
+                                                </li>
+                                            </ul>
                                         </div>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            :id="localField.value + 'input-filter'"
+                                            :name="localField.value"
+                                            :placeholder="localField.example"
+                                            v-model="metadataValues[localField.value]"
+                                            v-if="
+                                                metadataInputStyle[localField.value] == 'date' &&
+                                                dateType[localField.value] == 'exact'
+                                            "
+                                        />
+                                        <span
+                                            class="d-inline-block"
+                                            v-if="
+                                                metadataInputStyle[localField.value] == 'date' &&
+                                                dateType[localField.value] == 'range'
+                                            "
+                                        >
+                                            <div class="input-group ms-3">
+                                                <button class="btn btn-outline-secondary" type="button">
+                                                    <label for="query-term-input">From</label>
+                                                </button>
+                                                <input
+                                                    type="text"
+                                                    class="form-control date-range"
+                                                    :id="localField.value + '-start-input-filter'"
+                                                    :name="localField.value + '-start'"
+                                                    :placeholder="localField.example"
+                                                    v-model="dateRange[localField.value].start"
+                                                />
+                                                <button class="btn btn-outline-secondary ms-3" type="button">
+                                                    <label for="query-term-input">To</label></button
+                                                ><input
+                                                    type="text"
+                                                    class="form-control date-range"
+                                                    :id="localField.value + 'end-input-filter'"
+                                                    :name="localField.value + '-end'"
+                                                    :placeholder="localField.example"
+                                                    v-model="dateRange[localField.value].end"
+                                                />
+                                            </div>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -634,8 +660,8 @@ export default {
             showTips: false,
             queryTermTyped: this.$route.query.q || this.q || "",
             metadataTyped: {},
-            dateType: "exact",
-            divDateRange: {},
+            dateType: {},
+            dateRange: {},
         };
     },
     watch: {
@@ -666,7 +692,7 @@ export default {
             if (this.formData[metadataField] != "") {
                 if (this.$philoConfig.metadata_input_style[metadataField] == "text") {
                     this.metadataValues[metadataField] = this.formData[metadataField];
-                } else {
+                } else if (this.$philoConfig.metadata_input_style[metadataField] == "dropdown") {
                     this.metadataChoiceSelected[metadataField] = this.formData[metadataField].split(" | ");
                 }
             }
@@ -687,10 +713,16 @@ export default {
                 });
             }
         }
-        if ("div_date" in this.formData && this.formData.div_date.search(/<=>/) != -1) {
-            this.dateType = "range";
-            let dateRanges = this.formData.div_date.split(/<=>/);
-            this.divDateRange = { start: dateRanges[0], end: dateRanges[1] };
+        for (let metadata in this.metadataInputStyle) {
+            this.dateType[metadata] = "exact";
+            this.dateRange[metadata] = {};
+        }
+        for (let metadata in this.metadataInputStyle) {
+            if (this.metadataInputStyle[metadata] == "date" && this.formData[metadata].search(/<=>/) != -1) {
+                this.dateType[metadata] = "range";
+                let dateRanges = this.formData[metadata].split(/<=>/);
+                this.dateRange[metadata] = { start: dateRanges[0], end: dateRanges[1] };
+            }
         }
     },
     mounted() {
@@ -755,14 +787,18 @@ export default {
                 );
             }
         },
-        divDateRangeHandler() {
-            if (this.dateType != "exact") {
-                if (this.divDateRange.start.length > 0 && this.divDateRange.end.length > 0) {
-                    this.metadataValues.div_date = `${this.divDateRange.start}<=>${this.divDateRange.end}`;
-                } else if (this.divDateRange.start.length > 0 && this.divDateRange.end.length == 0) {
-                    this.metadataValues.div_date = `${this.divDateRange.start}<=>`;
-                } else if (this.divDateRange.start.length == 0 && this.divDateRange.end.length > 0) {
-                    this.metadataValues.div_date = `<=>${this.divDateRange.end}`;
+        dateRangeHandler() {
+            for (let metadata in this.metadataInputStyle) {
+                if (this.metadataInputStyle[metadata] == "date" && this.dateType[metadata] != "exact") {
+                    if (this.dateRange[metadata].start.length > 0 && this.dateRange[metadata].end.length > 0) {
+                        this.metadataValues[
+                            metadata
+                        ] = `${this.dateRange[metadata].start}<=>${this.dateRange[metadata].end}`;
+                    } else if (this.dateRange[metadata].start.length > 0 && this.dateRange[metadata].end.length == 0) {
+                        this.metadataValues[metadata] = `${this.dateRange[metadata].start}<=>`;
+                    } else if (this.dateRange[metadata].start.length == 0 && this.dateRange[metadata].end.length > 0) {
+                        this.metadataValues[metadata] = `<=>${this.dateRange[metadata].end}`;
+                    }
                 }
             }
         },
@@ -772,7 +808,21 @@ export default {
             let metadataChoices = Object.fromEntries(
                 Object.entries(this.metadataChoiceSelected).map(([key, val]) => [key, val.join(" | ")])
             );
-            this.divDateRangeHandler();
+            this.dateRangeHandler();
+            console.log(
+                this.paramsToRoute({
+                    ...this.$store.state.formData,
+                    ...this.metadataValues,
+                    ...metadataChoices,
+                    approximate: this.approximateSelected ? "yes" : "no",
+                    q: this.queryTermTyped.trim(),
+                    start: "",
+                    end: "",
+                    byte: "",
+                    start_date: this.start_date,
+                    end_date: this.end_date,
+                })
+            );
             this.$router.push(
                 this.paramsToRoute({
                     ...this.$store.state.formData,
@@ -957,10 +1007,10 @@ export default {
                 return `left: ${childOffset}px; width: ${input.offsetWidth}px`;
             }
         },
-        dateTypeToggle(dateType) {
-            this.divDateRange = {};
-            this.metadataValues.div_date = "";
-            this.dateType = dateType;
+        dateTypeToggle(metadata, dateType) {
+            this.dateRange[metadata] = {};
+            this.metadataValues[metadata] = "";
+            this.dateType[metadata] = dateType;
         },
     },
 };

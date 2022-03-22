@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """PhiloLogic4 main parser"""
 
-import datetime
 import os
 import regex as re
 import string
 import sys
 
 from philologic.loadtime.OHCOVector import CompoundStack
-from philologic.utils import convert_entities
+from philologic.utils import convert_entities, extract_full_date, extract_integer
 from collections import deque
 
 DEFAULT_TAG_TO_OBJ_MAP = {
@@ -167,7 +166,6 @@ UNICODE_WORD_BREAKERS = [
     b"\xe2\x80\xa6",  # U+2026 &hellip; HORIZONTAL ELLIPSIS
 ]
 
-MONTH_MAX_DAY = {1: 31, 2: 29, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
 
 # Pre-compiled regexes used for parsing
 join_hyphen_with_lb = re.compile(r"(\&shy;[\n \t]*<lb\/>)", re.I | re.M)
@@ -486,6 +484,8 @@ class XMLParser:
             self.flatten_ligatures = parse_options["flatten_ligatures"]
         else:
             self.flatten_ligatures = True
+
+        self.metadata_sql_types = parse_options["metadata_sql_types"]
 
         self.in_the_text = False
         self.in_text_quote = False
@@ -1024,20 +1024,17 @@ class XMLParser:
                 div = f"div{self.context_div_level}"
                 if "type" in attrib:
                     if attrib["type"] in self.metadata_to_parse["div"]:
-                        try:
-                            self.v[div].attrib[attrib["type"]] = attrib["value"]
-                        except KeyError:
-                            pass
+                        self.set_metadata_value(div, attrib["type"], attrib["value"])
                 else:
                     for metadata_name, metadata_value in attrib.items():
-                        self.v[div].attrib[metadata_name] = metadata_value
+                        self.set_metadata_value(div, metadata_name, metadata_value)
 
             elif tag_name == "date":
                 div = f"div{self.context_div_level}"
                 for attrib_name, attrib_value in self.get_attributes(tag):
                     if attrib_name == "value" or attrib_name == "when":
                         if "div_date" not in self.v[div].attrib:
-                            self.v[div].attrib["div_date"] = extract_full_date(attrib_value)
+                            self.set_metadata_value(div, "div_date", attrib_value)
                     else:
                         attrib_name = f"div_{attrib_name}"
                         if attrib_name not in self.v[div].attrib:
@@ -1054,6 +1051,17 @@ class XMLParser:
                 self.get_object_attributes(tag, tag_name, "graphic")
                 self.v["graphic"].attrib["parent"] = " ".join([str(i) for i in self.current_div_id])
                 self.v.pull("graphic", self.bytes_read_in)
+
+    def set_metadata_value(self, object_level, metadata, value):
+        try:
+            if self.metadata_sql_types[metadata] == "date":
+                self.v[object_level].attrib[metadata] = extract_full_date(value)
+            elif self.metadata_sql_types[metadata] == "int":
+                self.v[object_level].attrib[metadata] = extract_integer(value)
+            else:
+                self.v[object_level].attrib[metadata] = value
+        except KeyError:
+            pass
 
     def word_handler(self, words):
         """
@@ -1260,14 +1268,12 @@ class XMLParser:
         """Get all attributes for any given tag and attach metadata to element."""
         try:
             text_object = self.tag_to_obj_map[tag_name.lower()]
-            retrieve_attrib = True
-        except KeyError:
-            retrieve_attrib = False
-        if retrieve_attrib:
             for attrib, value in self.get_attributes(tag):
                 attrib = self.camel_case_to_snake_case(attrib)
                 if attrib in self.metadata_to_parse[text_object]:
-                    self.v[object_type][attrib] = value
+                    self.set_metadata_value(object_type, attrib, value)
+        except KeyError:
+            pass
 
     def get_div_head(self, tag):
         """Get div head."""
@@ -1531,44 +1537,6 @@ class XMLParser:
 
     def remove_control_chars(self, text):
         return control_char_re.sub("", text)
-
-
-def day_fail_safe(day, month=None):
-    if month is not None:
-        if day > MONTH_MAX_DAY[month]:
-            day = 1
-    if day > 31 or day <= 0:
-        day = 1
-    return day
-
-
-def month_fail_safe(month):
-    if month > 12:
-        month = 1
-    return month
-
-
-def extract_full_date(date):
-    """Extract full dates and format as year-month-day"""
-    full_date_match = re.search(r"^(\d+)-(\d+)-(\d+)", date)
-    if full_date_match:  # e.g. 1987-10-23
-        year, month, day = map(int, full_date_match.groups())
-        month = month_fail_safe(month)
-        day = day_fail_safe(day, month)
-        return datetime.date(year, month, day)
-    month_year_match = re.search(r"^(\d+)-(\d+)$", date)
-    if month_year_match:  # e.g. 1987-10
-        year, month = map(int, month_year_match.groups())
-        month = month_fail_safe(month)
-        return datetime.date(year, month, 1)
-    year_match = re.search(r"^(\d+)$", date)
-    if year_match:  # e.g. 1987
-        year_str = year_match.groups()[0]
-        if len(year_str) > 4:
-            year_str = year_str[:4]
-        year = int(year_str)
-        return datetime.date(year, 1, 1)
-    return datetime.date(9999, 12, 31)
 
 
 if __name__ == "__main__":

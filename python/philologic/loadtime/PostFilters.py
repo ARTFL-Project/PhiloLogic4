@@ -24,7 +24,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=None, depth=7):
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         if table == "toms":
-            query = f"create table if not exists {table} (philo_type text, philo_name text, philo_id text, philo_seq text, year int, div_date date)"
+            query = f"create table if not exists {table} (philo_type text, philo_name text, philo_id text, philo_seq text, year int)"
         else:
             query = f"create table if not exists {table} (philo_type, philo_name, philo_id, philo_seq)"
         cursor.execute(query)
@@ -47,7 +47,12 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=None, depth=7):
                             column_list = [i[1] for i in cursor]
                             for column in row:
                                 if column not in column_list:
-                                    cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column};")
+                                    if column not in loader_obj.parser_config["metadata_sql_types"]:
+                                        cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} text;")
+                                    else:
+                                        cursor.execute(
+                                            f"ALTER TABLE {table} ADD COLUMN {column} {loader_obj.parser_config['metadata_sql_types'][column]};"
+                                        )
                             cursor.execute(insert, list(row.values()))
                     pbar.update()
         conn.commit()

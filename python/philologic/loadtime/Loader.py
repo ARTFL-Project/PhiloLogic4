@@ -18,7 +18,7 @@ from black import FileMode, format_str
 from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.loadtime.PostFilters import make_sql_table, make_sentences_table
-from philologic.utils import convert_entities, load_module, pretty_print, sort_list
+from philologic.utils import convert_entities, load_module, pretty_print, sort_list, extract_full_date, extract_integer
 from tqdm import tqdm
 
 SORT_BY_WORD = "-k 2,2"
@@ -55,6 +55,7 @@ PARSER_OPTIONS = [
     "flatten_ligatures",
     "sentence_breakers",
     "file_type",
+    "metadata_sql_types",
 ]
 
 
@@ -80,6 +81,7 @@ class Loader:
     raw_files = []
     textdir = ""
     workdir = ""
+    web_app_dir = ""
     metadata_fields = []
     metadata_types = {}
     metadata_hierarchy = []
@@ -101,6 +103,7 @@ class Loader:
         cls.destination = loader_options["data_destination"]
         cls.workdir = os.path.join(loader_options["data_destination"], "WORK/")
         cls.textdir = os.path.join(loader_options["data_destination"], "TEXT/")
+        cls.web_app_dir = os.path.join(loader_options["db_destination"], "app/")
         cls.debug = loader_options["debug"]
         cls.default_object_level = loader_options["default_object_level"]
         cls.post_filters = loader_options["post_filters"]
@@ -108,6 +111,7 @@ class Loader:
         cls.url_root = loader_options["url_root"]
         cls.cores = loader_options["cores"]
         cls.ascii_conversion = loader_options["ascii_conversion"]
+        cls.metadata_sql_types = loader_options["metadata_sql_types"]
         for option in PARSER_OPTIONS:
             try:
                 cls.parser_config[option] = loader_options[option]
@@ -268,7 +272,12 @@ class Loader:
                                 elif isinstance(element, lxml.etree._ElementUnicodeResult):
                                     value = str(element).strip()
                                 if value:
-                                    data[field] = value
+                                    if field not in self.parser_config["metadata_sql_types"]:
+                                        data[field] = value
+                                    elif self.parser_config["metadata_sql_types"][field] == "int":
+                                        data[field] = extract_integer(value)
+                                    elif self.parser_config["metadata_sql_types"][field] == "date":
+                                        data[field] = extract_full_date(value)
                                     break
                         else:  # only continue looping over xpaths if no break in inner loop
                             continue
@@ -481,6 +490,7 @@ class Loader:
             "flatten_ligatures",
             "sentence_breakers",
             "punctuation",
+            "metadata_sql_types",
         ]:
             try:
                 options[option] = cls.parser_config[option]
@@ -746,9 +756,9 @@ class Loader:
             os.system(f"rm -rf {self.workdir}")
 
         print("Building Web Client Application...", end=" ", flush=True)
-        web_app_path = os.path.join(self.destination, "../app")
+        os.chdir(self.web_app_dir)
         os.system(
-            f"cd {web_app_path}; npm install > {web_app_path}/web_app_build.log 2>&1 && npm run build >> {web_app_path}/web_app_build.log 2>&1"
+            f"cd {self.web_app_dir}; npm install > {self.web_app_dir}/web_app_build.log 2>&1 && npm run build >> {self.web_app_dir}/web_app_build.log 2>&1"
         )
         print("done.")
 
@@ -756,6 +766,13 @@ class Loader:
         """Write local variables used by libphilo"""
         filename = self.destination + "/db.locals.py"
         metadata = [i for i in Loader.metadata_fields if i not in Loader.metadata_fields_not_found]
+        metadata_sql_types = {
+            "philo_type": "text",
+            "philo_id": "text",
+            "philo_name": "text",
+            "philo_seq": "text",
+            **{field: self.parser_config["metadata_sql_types"].get(field, "text") for field in metadata},
+        }
         db_values = {
             "metadata_fields": metadata,
             "metadata_hierarchy": Loader.metadata_hierarchy,
@@ -763,6 +780,7 @@ class Loader:
             "normalized_fields": self.normalized_fields,
             "debug": self.debug,
             "ascii_conversion": Loader.ascii_conversion,
+            "metadata_sql_types": metadata_sql_types,
         }
         db_values["token_regex"] = self.token_regex
         db_values["default_object_level"] = self.default_object_level
@@ -815,7 +833,15 @@ class Loader:
                 continue
         config_values["search_examples"] = search_examples
 
-        config_values["metadata_input_style"] = {f: "text" for f in metadata}
+        config_values["metadata_input_style"] = {}
+        for field in metadata:
+            if (
+                field not in self.parser_config["metadata_sql_types"]
+                or self.parser_config["metadata_sql_types"][field] == "int"
+            ):
+                config_values["metadata_input_style"][field] = "text"
+            elif self.parser_config["metadata_sql_types"][field] == "date":
+                config_values["metadata_input_style"][field] = "date"
 
         # Populate kwic metadata sorting and kwic biblio fields variables with metadata
         # Check if title and author are empty, if so, default to filename

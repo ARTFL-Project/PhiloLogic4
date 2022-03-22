@@ -140,6 +140,11 @@ metadata_to_parse = {
     "line": ["n", "id"],
 }
 
+# Define how your metadata fields are stored. This is defines as a dictionary with the field as key.
+# Types possible are text, int, date, which should be defined as strings.
+# If not defined, the metadata field will be stored and queried as text.
+metadata_sql_types = {}
+
 # Define a file (with full path) containing words to index. Must be one word per line.
 # Useful for filtering out dirty OCR.
 words_to_index = ""

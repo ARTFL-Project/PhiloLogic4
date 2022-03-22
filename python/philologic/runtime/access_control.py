@@ -19,6 +19,7 @@ ip_ranges = [re.compile(r"^%s.*" % i) for i in local_blocks]
 
 
 def check_access(environ, config):
+    """Check for access"""
     db = DB(config.db_path + "/data/")
     incoming_address, match_domain = get_client_info(environ)
 

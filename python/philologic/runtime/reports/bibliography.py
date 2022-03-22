@@ -15,7 +15,7 @@ def bibliography_results(request, config):
         hits = db.get_all(
             db.locals["default_object_level"],
             request["sort_order"],
-            ascii_sort=config.ascii_conversion,
+            ascii_sort=db.locals.ascii_conversion,
         )
     else:
         hits = db.query(sort_order=request["sort_order"], ascii_sort=db.locals.ascii_conversion, **request.metadata)

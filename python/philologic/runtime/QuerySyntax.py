@@ -2,6 +2,9 @@
 
 import regex as re
 
+YEAR_MONTH = re.compile(r"^(\d+)-(\d+)\Z")
+YEAR = re.compile(r"^(\d+)\Z")
+
 patterns = [
     ("QUOTE", r'".+?"'),
     ("QUOTE", r'".+'),
@@ -14,7 +17,6 @@ patterns = [
     ("TERM", r'[^\-|\s"]+'),
 ]
 
-# TODO: support quotes around a date, support range such as 1789-08-.* ???
 date_patterns = [
     ("NOT", "NOT"),
     ("OR", r"\|"),
@@ -24,10 +26,6 @@ date_patterns = [
     ("YEAR_MONTH_DAY", r"(\d+-\d+-\d+)\Z"),
     ("DATE_RANGE", r"([^<]+)<=>(.*)"),
 ]
-
-YEAR_MONTH_DAY = re.compile(r"(\d+)-(\d+)-(\d+)")
-YEAR_MONTH = re.compile(r"^(\d+)-(\d+)\Z")
-YEAR = re.compile(r"^(\d+)\Z")
 
 
 def parse_query(qstring):
@@ -44,9 +42,6 @@ def parse_query(qstring):
         else:
             buf = buf[1:]
     return parsed
-
-
-# TODO: convert a month DATE query into a RANGE: e.g. 1789-06 into 1789-06<=>1789-07
 
 
 def expand_date(date, start=True):

@@ -73,6 +73,7 @@ class LoadOptions:
         self.values["sentence_breakers"] = []
         self.values["punctuation"] = Parser.PUNCTUATION
         self.values["pos"] = ""
+        self.values["metadata_sql_types"] = {}
 
     def setup_parser(self):
         """Set up parser options"""
