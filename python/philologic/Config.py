@@ -835,7 +835,7 @@ class Config:
                     citations["div1_date"], citations["div2_head"], citations["div2_date"], citations["div3_head"],
                     citations["div3_date"], citations["speaker"], citations["resp"], citations["page"],
                 ]"""
-            elif key == "bibliography":
+            elif key == "bibliography_citation":
                 string += f"""\n{key} = [
                     citations["author"], citations["title"], citations["year"],
                     citations["div1_head"], citations["div2_head"], citations["div3_head"],
