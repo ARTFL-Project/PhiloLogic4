@@ -128,6 +128,7 @@ def query_lowlevel(db, param_dict, sort_order):
             if db.locals.metadata_sql_types[column] in ("text", "int"):
                 parsed = parse_query(v)
             elif db.locals.metadata_sql_types[column] == "date":
+                v = v.replace('"', "")  # remove quotes
                 parsed = parse_date_query(v)
             grouped = group_terms(parsed)
             expanded = expand_grouped_query(grouped, norm_path)

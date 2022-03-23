@@ -373,12 +373,7 @@ export default {
         },
         facetClick(metadata) {
             let metadataValue;
-            console.log(this.selectedFacet.facet);
-            if (this.selectedFacet.facet != "div_date") {
-                metadataValue = `"${metadata[this.selectedFacet.facet]}"`;
-            } else {
-                metadataValue = metadata[this.selectedFacet.facet];
-            }
+            metadataValue = `"${metadata[this.selectedFacet.facet]}"`;
             this.$store.commit("updateFormDataField", {
                 key: this.selectedFacet.facet,
                 value: metadataValue,
