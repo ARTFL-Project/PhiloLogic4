@@ -1,7 +1,7 @@
 #!/usr/bin env python3
 """CLI parser for philoload4 command"""
 
-import collections
+from collections.abc import Callable
 import os
 import sys
 from glob import glob
@@ -222,7 +222,7 @@ class LoadConfig:
             if a == "parser_factory":
                 value = getattr(load_config_file, a)
                 self.config["parser_factory"] = value
-            elif not a.startswith("__") and not isinstance(getattr(load_config_file, a), collections.Callable):
+            elif not a.startswith("__") and not isinstance(getattr(load_config_file, a), Callable):
                 value = getattr(load_config_file, a)
                 if value or value is False:
                     if a == "navigable_objects":

@@ -315,7 +315,7 @@
                                     <div
                                         class="input-group pb-2"
                                         :id="localField.value + '-group'"
-                                        v-if="metadataInputStyle[localField.value] == 'date'"
+                                        v-if="['date', 'int'].includes(metadataInputStyle[localField.value])"
                                     >
                                         <button
                                             type="button"
@@ -355,18 +355,9 @@
                                             :name="localField.value"
                                             :placeholder="localField.example"
                                             v-model="metadataValues[localField.value]"
-                                            v-if="
-                                                metadataInputStyle[localField.value] == 'date' &&
-                                                dateType[localField.value] == 'exact'
-                                            "
+                                            v-if="dateType[localField.value] == 'exact'"
                                         />
-                                        <span
-                                            class="d-inline-block"
-                                            v-if="
-                                                metadataInputStyle[localField.value] == 'date' &&
-                                                dateType[localField.value] == 'range'
-                                            "
-                                        >
+                                        <span class="d-inline-block" v-if="dateType[localField.value] == 'range'">
                                             <div class="input-group ms-3">
                                                 <button class="btn btn-outline-secondary" type="button">
                                                     <label for="query-term-input">From</label>
@@ -715,12 +706,16 @@ export default {
         }
         for (let metadata in this.metadataInputStyle) {
             this.dateType[metadata] = "exact";
-            this.dateRange[metadata] = {};
+            this.dateRange[metadata] = { start: "", end: "" };
         }
         for (let metadata in this.metadataInputStyle) {
             if (this.metadataInputStyle[metadata] == "date" && this.formData[metadata].search(/<=>/) != -1) {
                 this.dateType[metadata] = "range";
                 let dateRanges = this.formData[metadata].split(/<=>/);
+                this.dateRange[metadata] = { start: dateRanges[0], end: dateRanges[1] };
+            } else if (this.metadataInputStyle[metadata] == "int" && this.formData[metadata].search(/-/) != -1) {
+                this.dateType[metadata] = "range";
+                let dateRanges = this.formData[metadata].split(/-/);
                 this.dateRange[metadata] = { start: dateRanges[0], end: dateRanges[1] };
             }
         }
@@ -789,15 +784,19 @@ export default {
         },
         dateRangeHandler() {
             for (let metadata in this.metadataInputStyle) {
-                if (this.metadataInputStyle[metadata] == "date" && this.dateType[metadata] != "exact") {
+                if (["date", "int"].includes(this.metadataInputStyle[metadata]) && this.dateType[metadata] != "exact") {
+                    let separator = "-";
+                    if (this.metadataInputStyle[metadata] == "date") {
+                        separator = "<=>";
+                    }
                     if (this.dateRange[metadata].start.length > 0 && this.dateRange[metadata].end.length > 0) {
                         this.metadataValues[
                             metadata
-                        ] = `${this.dateRange[metadata].start}<=>${this.dateRange[metadata].end}`;
+                        ] = `${this.dateRange[metadata].start}${separator}${this.dateRange[metadata].end}`;
                     } else if (this.dateRange[metadata].start.length > 0 && this.dateRange[metadata].end.length == 0) {
-                        this.metadataValues[metadata] = `${this.dateRange[metadata].start}<=>`;
+                        this.metadataValues[metadata] = `${this.dateRange[metadata].start}${separator}`;
                     } else if (this.dateRange[metadata].start.length == 0 && this.dateRange[metadata].end.length > 0) {
-                        this.metadataValues[metadata] = `<=>${this.dateRange[metadata].end}`;
+                        this.metadataValues[metadata] = `${separator}${this.dateRange[metadata].end}`;
                     }
                 }
             }
@@ -809,20 +808,6 @@ export default {
                 Object.entries(this.metadataChoiceSelected).map(([key, val]) => [key, val.join(" | ")])
             );
             this.dateRangeHandler();
-            console.log(
-                this.paramsToRoute({
-                    ...this.$store.state.formData,
-                    ...this.metadataValues,
-                    ...metadataChoices,
-                    approximate: this.approximateSelected ? "yes" : "no",
-                    q: this.queryTermTyped.trim(),
-                    start: "",
-                    end: "",
-                    byte: "",
-                    start_date: this.start_date,
-                    end_date: this.end_date,
-                })
-            );
             this.$router.push(
                 this.paramsToRoute({
                     ...this.$store.state.formData,
@@ -1008,7 +993,7 @@ export default {
             }
         },
         dateTypeToggle(metadata, dateType) {
-            this.dateRange[metadata] = {};
+            this.dateRange[metadata] = { start: "", end: "" };
             this.metadataValues[metadata] = "";
             this.dateType[metadata] = dateType;
         },

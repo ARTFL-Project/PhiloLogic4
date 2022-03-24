@@ -310,6 +310,41 @@ WEB_CONFIG_DEFAULTS = {
             ]
         ),
     },
+    "results_summary": {
+        "value": [
+            {
+                "field": "author",
+                "object_level": "doc",
+            },
+            {
+                "field": "title",
+                "object_level": "doc",
+            },
+        ],
+        "comment": "# The results_summary variable determins which fields get stats displayed at the top of concordance/KWIC results.",
+    },
+    "stopwords": {
+        "value": "",
+        "comment": "\n".join(
+            [
+                "# The stopwords variable defines a file path containing a list of words (one word per line) used for filtering out words",
+                "# in the collocation report. The file must be located in the defined path. If the file is not found,",
+                "# no option for using a stopword list will be displayed in collocation searches.",
+            ]
+        ),
+    },
+    "citations": {
+        "value": CITATIONS,
+        "comment": "\n".join(
+            [
+                "# Define how individual metadata is displayed. The citations variable is reused by default for citations in individual reports.",
+                "# You can define styling with a dictionary of valid CSS property/value such as those in the default values.",
+                "# prefix and suffix keywords define what precedes and follows each field. You can use HTML for these strings.",
+                "# The link key enables linking for that metadata field. It links to the table of contents for title and filename,",
+                "# and to a regular query for all other metadata fields.",
+            ]
+        ),
+    },
     "aggregation_config": {
         "value": [
             {
@@ -343,41 +378,6 @@ WEB_CONFIG_DEFAULTS = {
             [
                 "# The aggregation_config variable drives the aggregation report: which fields can be used to group concordances,"
                 "# and whether you can further break down these counts by a particular metadata field.",
-            ]
-        ),
-    },
-    "results_summary": {
-        "value": [
-            {
-                "field": "author",
-                "object_level": "doc",
-            },
-            {
-                "field": "title",
-                "object_level": "doc",
-            },
-        ],
-        "comment": "# The results_summary variable determins which fields get stats displayed at the top of concordance/KWIC results.",
-    },
-    "stopwords": {
-        "value": "",
-        "comment": "\n".join(
-            [
-                "# The stopwords variable defines a file path containing a list of words (one word per line) used for filtering out words",
-                "# in the collocation report. The file must be located in the defined path. If the file is not found,",
-                "# no option for using a stopword list will be displayed in collocation searches.",
-            ]
-        ),
-    },
-    "citations": {
-        "value": CITATIONS,
-        "comment": "\n".join(
-            [
-                "# Define how individual metadata is displayed. The citations variable is reused by default for citations in individual reports.",
-                "# You can define styling with a dictionary of valid CSS property/value such as those in the default values.",
-                "# prefix and suffix keywords define what precedes and follows each field. You can use HTML for these strings.",
-                "# The link key enables linking for that metadata field. It links to the table of contents for title and filename,",
-                "# and to a regular query for all other metadata fields.",
             ]
         ),
     },
@@ -796,9 +796,7 @@ class Config:
         self.db_path = os.path.dirname(os.path.dirname(self.filename))
         self.defaults = defaults
         self.header = header
-        self.data = {}
-        for key, value in self.defaults.items():
-            self.data[key] = value["value"]
+        self.data = {key: value["value"] for key, value in self.defaults.items()}
         if self.filename and os.path.exists(self.filename):
             exec(compile(open(self.filename, "rb").read(), self.filename, "exec"), globals(), self.data)
             self.valid_config = True
@@ -912,4 +910,4 @@ if __name__ == "__main__":
         conf = Config(sys.argv[1], WEB_CONFIG_DEFAULTS)
     else:
         conf = Config(sys.argv[1], DB_LOCALS_DEFAULTS)
-    print(conf, file=sys.stderr)
+    # print(conf, file=sys.stderr)

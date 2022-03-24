@@ -238,7 +238,7 @@ def make_grouped_sql_clause(expanded, column, db):
                     lower = str(c.fetchone()[0])
                 if not upper:
                     c = db.dbh.cursor()
-                    c.execute("select max({column}) from toms")
+                    c.execute(f"select max({column}) from toms")
                     upper = str(c.fetchone()[0])
                 clause += f"({column} >= {esc(lower)} AND {column} <= {esc(upper)})"
                 if first_group:

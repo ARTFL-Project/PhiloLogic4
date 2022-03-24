@@ -771,7 +771,12 @@ class Loader:
             "philo_id": "text",
             "philo_name": "text",
             "philo_seq": "text",
-            **{field: self.parser_config["metadata_sql_types"].get(field, "text") for field in metadata},
+            "year": "int",
+            **{
+                field: self.parser_config["metadata_sql_types"].get(field, "text")
+                for field in metadata
+                if field != "year"
+            },
         }
         db_values = {
             "metadata_fields": metadata,
@@ -837,9 +842,10 @@ class Loader:
         for field in metadata:
             if (
                 field not in self.parser_config["metadata_sql_types"]
-                or self.parser_config["metadata_sql_types"][field] == "int"
             ):
                 config_values["metadata_input_style"][field] = "text"
+            elif self.parser_config["metadata_sql_types"][field] == "int":
+                config_values["metadata_input_style"][field] = "int"
             elif self.parser_config["metadata_sql_types"][field] == "date":
                 config_values["metadata_input_style"][field] = "date"
 
