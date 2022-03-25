@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name="philologic",
-    version="4.7b3",
+    version="4.7b4",
     author="The ARTFL Project",
     author_email="clovisgladstone@artfl.uchicago.edu",
     packages=[

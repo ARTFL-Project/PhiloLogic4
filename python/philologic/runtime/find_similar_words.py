@@ -4,10 +4,10 @@
 
 import hashlib
 import os
-import unicodedata
 
-from philologic.runtime.Query import get_expanded_query
 from Levenshtein import ratio
+from philologic.runtime.Query import get_expanded_query
+from unidecode import unidecode
 
 
 def get_all_words(db, request):
@@ -22,7 +22,7 @@ def get_all_words(db, request):
             normalized_group = []
             for word in word_group:
                 word = word.replace('"', "")
-                word = "".join([i for i in unicodedata.normalize("NFKD", word) if not unicodedata.combining(i)])
+                word = unidecode(word)
                 normalized_group.append(word)
             word_groups.append(normalized_group)
         return word_groups

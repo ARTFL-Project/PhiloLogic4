@@ -3,11 +3,12 @@ import sqlite3
 import struct
 import subprocess
 import sys
-import unicodedata
+
+from unidecode import unidecode
 
 from . import HitList
 from .HitList import NoHits
-from .QuerySyntax import group_terms, parse_query, parse_date_query
+from .QuerySyntax import group_terms, parse_date_query, parse_query
 
 os.environ["PATH"] += ":/usr/local/bin/"
 
@@ -171,7 +172,7 @@ def expand_grouped_query(grouped, norm_path):
         for kind, token in group:
             if kind == "TERM":
                 norm_term = token.lower()
-                norm_term = [c for c in unicodedata.normalize("NFKD", norm_term) if not unicodedata.combining(c)]
+                norm_term = unidecode(norm_term)
                 norm_term = "".join(norm_term)
                 expanded_terms = metadata_pattern_search(norm_term, norm_path)
                 if expanded_terms:

@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """Landing page reports."""
 
-import orjson
 import sqlite3
 import sys
-import unicodedata
 
-
+import orjson
 from philologic.runtime.DB import DB
+from unidecode import unidecode
 
 
 def landing_page_bibliography(request, config):
@@ -129,7 +128,7 @@ def group_by_range(request_range, request, config):
         try:
             test_value = ord(initial_letter)
             normalized_test_value = ord(
-                "".join([i for i in unicodedata.normalize("NFKD", initial_letter) if not unicodedata.combining(i)])
+                unidecode(initial_letter))
             )
         except TypeError:
             continue
@@ -137,9 +136,7 @@ def group_by_range(request_range, request, config):
         # Are we within the range?
         if test_value in query_range or normalized_test_value in query_range:
             if normalized_test_value in query_range:
-                initial = "".join(
-                    [i for i in unicodedata.normalize("NFKD", initial_letter) if not unicodedata.combining(i)]
-                ).upper()
+                initial = unidecode(initial_letter).upper()
             metadata = {m: doc[m] for m in metadata_fields_needed}
             if initial not in content:
                 content[initial] = {"prefix": initial, "results": []}

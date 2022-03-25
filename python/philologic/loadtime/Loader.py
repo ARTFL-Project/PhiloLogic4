@@ -3,10 +3,10 @@
 Calls all parsing functions and stores data in index"""
 
 import collections
+import datetime
 import math
 import os
 import pickle
-import regex as re
 import shutil
 import sqlite3
 import sys
@@ -14,11 +14,12 @@ import time
 from glob import iglob
 
 import lxml
+import regex as re
 from black import FileMode, format_str
 from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
-from philologic.loadtime.PostFilters import make_sql_table, make_sentences_table
-from philologic.utils import convert_entities, load_module, pretty_print, sort_list, extract_full_date, extract_integer
+from philologic.loadtime.PostFilters import make_sentences_table, make_sql_table
+from philologic.utils import convert_entities, extract_full_date, extract_integer, load_module, pretty_print, sort_list
 from tqdm import tqdm
 
 SORT_BY_WORD = "-k 2,2"
@@ -345,9 +346,12 @@ class Loader:
         metadata_with_year = ""
         for field in ["date", "create_date", "pub_date", "period"]:
             if field in metadata:
-                year_match = year_finder.search(metadata[field])
+                if isinstance(metadata[field], datetime.date):
+                    metadata[field] = str(metadata[field].year)
+                year_match = year_finder.search(metadata[field])  # make sure it's not a datetime or an int.
                 if year_match:
                     year = int(year_match.groups()[0])
+
                     metadata_with_year = field
                     if field == "create_date":  # this should be the canonical date
                         earliest_year = year
@@ -840,9 +844,9 @@ class Loader:
 
         config_values["metadata_input_style"] = {}
         for field in metadata:
-            if (
-                field not in self.parser_config["metadata_sql_types"]
-            ):
+            if field == "year":
+                config_values["metadata_input_style"][field] = "int"
+            elif field not in self.parser_config["metadata_sql_types"]:
                 config_values["metadata_input_style"][field] = "text"
             elif self.parser_config["metadata_sql_types"][field] == "int":
                 config_values["metadata_input_style"][field] = "int"

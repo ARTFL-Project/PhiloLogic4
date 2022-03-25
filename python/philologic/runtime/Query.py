@@ -3,13 +3,13 @@
 
 import os
 import subprocess
-import regex as re
 import sys
-import unicodedata
 from datetime import datetime
 
+import regex as re
 from philologic.runtime import HitList
 from philologic.runtime.QuerySyntax import group_terms, parse_query
+from unidecode import unidecode
 
 # Work around issue where environ PATH does not contain path to C core
 os.environ["PATH"] += ":/usr/local/bin/"
@@ -195,7 +195,7 @@ def grep_word(token, freq_file, dest_fh, lowercase=True):
     """Grep on normalized words"""
     if lowercase:
         token = token.lower()
-    norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", token) if not unicodedata.combining(i)]
+    norm_tok_uni_chars = unidecode(token)
     norm_tok = "".join(norm_tok_uni_chars)
     try:
         grep_command = ["egrep", "-a", "^%s[[:blank:]]" % norm_tok, freq_file]
@@ -210,7 +210,7 @@ def invert_grep(token, in_fh, dest_fh, lowercase=True):
     """NOT grep"""
     if lowercase:
         token = token.lower()
-    norm_tok_uni_chars = [i for i in unicodedata.normalize("NFKD", token) if not unicodedata.combining(i)]
+    norm_tok_uni_chars = unidecode(token)
     norm_tok = "".join(norm_tok_uni_chars)
     try:
         grep_command = ["egrep", "-a", "-v", "^%s[[:blank:]]" % norm_tok]
@@ -266,7 +266,7 @@ if __name__ == "__main__":
         pass
 
     fake_db = Fake_DB()
-    from philologic.Config import Config, DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER
+    from philologic.Config import DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER, Config
 
     fake_db.path = path + "/data/"
     fake_db.locals = Config(fake_db.path + "/db.locals.py", DB_LOCALS_DEFAULTS, DB_LOCALS_HEADER)

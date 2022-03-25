@@ -4,7 +4,7 @@
 import os
 import sqlite3
 import time
-import unicodedata
+from unidecode import unidecode
 
 import lz4.frame
 import msgpack
@@ -145,7 +145,7 @@ def normalized_word_frequencies(loader_obj):
         word, _ = line.split("\t")
         norm_word = word.lower()
         if loader_obj.ascii_conversion is True:
-            norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
+            norm_word = unidecode(norm_word)
         norm_word = "".join(norm_word)
         print(norm_word + "\t" + word, file=output)
     output.close()
@@ -194,7 +194,7 @@ def normalized_metadata_frequencies(loader_obj):
                 word, _ = line.split("\t")
                 norm_word = word.lower()
                 if loader_obj.ascii_conversion is True:
-                    norm_word = [i for i in unicodedata.normalize("NFKD", norm_word) if not unicodedata.combining(i)]
+                    norm_word = unidecode(norm_word)
                 norm_word = "".join(norm_word)
                 print(norm_word + "\t" + word, file=output)
             output.close()

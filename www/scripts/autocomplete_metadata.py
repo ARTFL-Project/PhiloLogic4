@@ -3,14 +3,15 @@
 import os
 import subprocess
 import sys
-import unicodedata
 from wsgiref.handlers import CGIHandler
 
 import orjson
+from numpy import unicode_
 import regex as re
 from philologic.runtime.DB import DB
 from philologic.runtime.MetadataQuery import metadata_pattern_search
 from philologic.runtime.QuerySyntax import parse_query
+from unidecode import unidecode
 
 sys.path.append("..")
 import custom_functions
@@ -79,7 +80,7 @@ def format_query(q, field, db):
     if label == "QUOTE_S" or label == "TERM":
         norm_tok = token.lower()
         if db.locals.ascii_conversion is True:
-            norm_tok = [i for i in unicodedata.normalize("NFKD", norm_tok) if not unicodedata.combining(i)]
+            norm_tok = unidecode(norm_tok)
         norm_tok = "".join(norm_tok).encode("utf-8")
         matches = metadata_pattern_search(
             norm_tok, db.locals.db_path + "/data/frequencies/normalized_%s_frequencies" % field
