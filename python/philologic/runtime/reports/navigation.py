@@ -20,7 +20,7 @@ def generate_text_object(request, config, note=False):
         doc_id = request.philo_id.split()[0] + " %"
         cursor = db.dbh.cursor()
         cursor.execute("select philo_id from toms where id=? and philo_id like ? limit 1", (target, doc_id))
-        philo_id = cursor.fetchall()[0]["philo_id"].split()[:7]
+        philo_id = cursor.fetchone()["philo_id"].split()[:7]
         obj = db[philo_id]
     else:
         try:

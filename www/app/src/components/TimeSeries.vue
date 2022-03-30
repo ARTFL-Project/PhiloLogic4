@@ -100,14 +100,12 @@ export default {
             this.interval = parseInt(this.interval);
             this.frequencyType = "absolute_time";
             this.searching = true;
-            console.log("START", this.start_date);
             this.startDate = parseInt(this.start_date || this.$philoConfig.time_series_start_end_date.start_date);
             this.endDate = parseInt(this.end_date || this.$philoConfig.time_series_start_end_date.end_date);
             this.$store.dispatch("updateStartEndDate", {
                 startDate: this.startDate,
                 endDate: this.endDate,
             });
-
             // Store the current query as a local and global variable in order to make sure they are equal later on...
             this.globalQuery = this.copyObject(this.$store.state.formData);
             this.localQuery = this.copyObject(this.globalQuery);

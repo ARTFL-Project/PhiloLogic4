@@ -44,11 +44,7 @@ def query(
     filename = filename or (dir + hfile)
     hl = open(filename, "wb")
     err = open("/dev/null", "w")
-    # if db.locals.ascii_conversion is True:
     freq_file = db.path + "/frequencies/normalized_word_frequencies"
-    # else:
-    # freq_file = db.path + "/frequencies/word_frequencies"
-    query_debug = True
     if query_debug:
         print("FORKING", file=sys.stderr)
     pid = os.fork()

@@ -191,9 +191,6 @@ class DB:
             if sort_order == ["rowid"]:
                 sort_order = None
             if not os.path.isfile(search_file):
-                import sys
-
-                print("NO HITLIST", file=sys.stderr)
                 return Query.query(
                     self,
                     qs,

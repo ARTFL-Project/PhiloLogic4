@@ -85,7 +85,7 @@ def get_neighboring_words(environ, start_response):
                 for word in words:
                     if NUMBER.search(word["word"]):
                         continue
-                    if config.ascii_conversion is True:
+                    if db.locals.ascii_conversion is True:
                         word["word"] = unidecode(word["word"])
                     if offsets[0] > word["start_byte"]:
                         left_side_text.append(word["word"])

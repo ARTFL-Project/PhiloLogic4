@@ -48,6 +48,9 @@ def generate_time_series(request, config):
         hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
         hits.finish()
         hit_len = len(hits)
+        import sys
+
+        print(hit_len, request["q"], request["method"], request["arg"], request.metadata, file=sys.stderr)
         params = {"report": "concordance", "start": "0", "end": "0"}
         params[config.time_series_year_field] = date_range
         url = make_absolute_query_link(config, request, **params)
@@ -62,7 +65,7 @@ def generate_time_series(request, config):
                 query = f"SELECT COUNT(*) FROM toms WHERE philo_type='{db.locals.default_object_level}' AND {config.time_series_year_field} BETWEEN {start_range} AND {end_range}"
         else:
             if request.q:
-                query = "select sum(word_count) from toms where %s='%s'" % (config.time_series_year_field, start_range)
+                query = f"select sum(word_count) from toms where {config.time_series_year_field}='{start_range}'"
             else:
                 query = f"SELECT COUNT(*) FROM toms WHERE philo_type='{db.locals.default_object_level}' AND {config.time_series_year_field}='{start_range}'"
         cursor.execute(query)

@@ -746,6 +746,7 @@ export default {
             for (let field in this.metadataValues) {
                 this.metadataValues[field] = this.formData[field];
             }
+            this.searchOptionsButton = "Show search options";
         },
         buildReports() {
             let reports = [];

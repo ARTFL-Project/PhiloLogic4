@@ -6,6 +6,7 @@ from builtins import AttributeError
 import os
 import sqlite3
 import sys
+from importlib_metadata import metadata
 
 from philologic.Config import Config, WEB_CONFIG_DEFAULTS, WEB_CONFIG_HEADER
 from philologic.utils import load_module
@@ -101,13 +102,14 @@ def convert_web_config(web_config_path, philo_db):
     old_config = load_module("old_config", web_config_path)
 
     start_date, end_date = get_time_series_dates(toms_path)
+    metadata_input_style = {**old_config.metadata_input_style, "year": "int"}
     config_values = {
         "dbname": old_config.dbname,
         "metadata": old_config.metadata,
         "facets": old_config.facets,
         "time_series_start_end_date": {"start_date": start_date, "end_date": end_date},
         "search_examples": old_config.search_examples,
-        "metadata_input_style": old_config.metadata_input_style,
+        "metadata_input_style": metadata_input_style,
         "kwic_metadata_sorting_fields": old_config.kwic_metadata_sorting_fields,
         "kwic_bibliography_fields": old_config.kwic_bibliography_fields,
         "concordance_biblio_sorting": old_config.concordance_biblio_sorting,

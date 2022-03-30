@@ -1,6 +1,6 @@
 <template>
     <span class="philologic-cite ps-2">
-        <span class="citation text-view" v-for="(cite, citeIndex) in filterNone(citation)" :key="citeIndex">
+        <span class="citation text-view" v-for="(cite, citeIndex) in citation" :key="citeIndex">
             <span v-html="cite.prefix" v-if="cite.prefix"></span>
             <router-link :to="cite.href" :style="cite.style" v-if="cite.href">{{ cite.label }}</router-link>
             <span :style="cite.style" v-else>{{ cite.label }}</span>
@@ -13,21 +13,6 @@
 export default {
     name: "citations-generator",
     props: ["citation"],
-    setup() {
-        const filterNone = (citation) => {
-            if (Symbol.iterator in Object(citation)) {
-                let filteredCitation = [];
-                for (let cite of citation) {
-                    if (cite.label != "None") {
-                        filteredCitation.push(cite);
-                    }
-                }
-                return filteredCitation;
-            }
-            return citation;
-        };
-        return { filterNone };
-    },
 };
 </script>
 <style scoped>

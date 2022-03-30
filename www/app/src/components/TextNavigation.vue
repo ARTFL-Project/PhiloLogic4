@@ -377,10 +377,11 @@ export default {
                             });
                         } else if (this.$route.hash) {
                             // for note link back
-                            let note = document.querySelector(this.$route.hash);
+                            console.log("HAHA");
+                            let note = document.getElementById(this.$route.hash.slice(1));
                             this.$scrollTo(note, 250, {
                                 easing: "ease-out",
-                                offset: -150,
+                                offset: -250,
                                 onDone: () => {
                                     note.focus();
                                 },

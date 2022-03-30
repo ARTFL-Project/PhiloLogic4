@@ -46,7 +46,7 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=N
     for citation_object in citation_type:
         cite = {}
         cite["label"] = get_label(hit, citation_object)
-        if cite["label"]:
+        if cite["label"] and cite["label"] != "None":
             cite["prefix"] = citation_object["prefix"]
             cite["suffix"] = citation_object["suffix"]
             cite["href"] = cite_linker(hit, citation_object, citation_hrefs, config, report)

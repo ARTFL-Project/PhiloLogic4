@@ -127,9 +127,7 @@ def group_by_range(request_range, request, config):
             continue
         try:
             test_value = ord(initial_letter)
-            normalized_test_value = ord(
-                unidecode(initial_letter))
-            )
+            normalized_test_value = ord(unidecode(initial_letter))
         except TypeError:
             continue
         initial = initial_letter.upper()

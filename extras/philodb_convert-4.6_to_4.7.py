@@ -13,6 +13,7 @@ from philologic.utils import load_module
 from philologic.utils import pretty_print
 from tqdm import tqdm
 from black import format_str, FileMode
+from json import dumps, loads
 from web_config_convert_4_6_to_4_7 import convert_web_config
 
 
@@ -139,24 +140,32 @@ def update_toms(toms):
             "philo_div3_id",
             "philo_para_id",
         ]
-        original_columns = [r[1] for r in cursor]
+        original_columns = [r[1] for r in cursor if r[1] != "year"]
         columns = original_columns + ids_to_add
-        cursor.execute(f"create table new_toms ({','.join(columns)})")
+        columns_with_types = [(c, "text") for c in columns]
+        columns_with_types.append(("year", "int"))
+        cursor.execute(f'create table new_toms ({", ".join([" ".join(c) for c in columns_with_types])})')
         cursor.execute("select * from toms")
         with open(toms + ".tmp", "w") as outfile:
             for row in cursor:
-                print("\t".join(map(str, row)), file=outfile)
+                fields = {field: row[field] for field in original_columns}
+                try:
+                    fields["year"] = int(row["year"])
+                except:
+                    fields["year"] = ""
+                print(dumps(fields), file=outfile)
         with tqdm(total=count, leave=False, desc="Adding ids") as pbar:
             with open(toms + ".tmp") as infile:
                 for line in infile:
-                    row = dict(zip(original_columns, line.split("\t")))
+                    row = loads(line)
                     object_level = row["philo_type"]
                     philo_obj_id = " ".join(row["philo_id"].split()[: obj_levels[object_level]])
                     ids = [None, None, None, None, None]
                     ids[obj_levels[object_level] - 1] = philo_obj_id
-                    values = tuple(list(row.values()) + ids)
+                    values = tuple([row[m] for m in original_columns] + [row["year"]] + ids)
+                    local_columns = original_columns + ["year"] + ids_to_add
                     cursor.execute(
-                        f"insert into new_toms ({','.join(columns)}) values ({','.join(['?' for _ in range(len(values))])})",
+                        f"insert into new_toms ({','.join(local_columns)}) values ({','.join(['?' for _ in range(len(values))])})",
                         values,
                     )
                     pbar.update()
@@ -271,6 +280,7 @@ if __name__ == "__main__":
         metadata_hierarchy[4].append("philo_para_id")
     except:
         pass
+    metadata_sql_types = {**{m: "text" for m in metadata}, "year": "int"}
     db_values = {
         "metadata_fields": metadata,
         "metadata_hierarchy": metadata_hierarchy,
@@ -282,6 +292,7 @@ if __name__ == "__main__":
             "philo_div3_id": "div3",
             "philo_para_id": "para",
         },
+        "metadata_sql_types": metadata_sql_types,
         "normalized_fields": old_db_locals.normalized_fields,
         "debug": False,
     }
