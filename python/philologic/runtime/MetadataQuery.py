@@ -122,7 +122,7 @@ def query_lowlevel(db, param_dict, sort_order):
     """SQL query builder"""
     vars = []
     clauses = []
-    for column, values in list(param_dict.items()):
+    for column, values in param_dict.items():
         norm_path = db.path + "/frequencies/normalized_" + column + "_frequencies"
         for v in values:
             parsed = "text"

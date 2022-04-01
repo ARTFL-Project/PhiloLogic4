@@ -22,7 +22,8 @@ def get_all_words(db, request):
             normalized_group = []
             for word in word_group:
                 word = word.replace('"', "")
-                word = unidecode(word)
+                if db.locals.ascii_conversion is True:
+                    word = unidecode(word)
                 normalized_group.append(word)
             word_groups.append(normalized_group)
         return word_groups

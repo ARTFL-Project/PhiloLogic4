@@ -48,9 +48,6 @@ def generate_time_series(request, config):
         hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
         hits.finish()
         hit_len = len(hits)
-        import sys
-
-        print(hit_len, request["q"], request["method"], request["arg"], request.metadata, file=sys.stderr)
         params = {"report": "concordance", "start": "0", "end": "0"}
         params[config.time_series_year_field] = date_range
         url = make_absolute_query_link(config, request, **params)

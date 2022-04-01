@@ -280,7 +280,7 @@ if __name__ == "__main__":
         metadata_hierarchy[4].append("philo_para_id")
     except:
         pass
-    metadata_sql_types = {**{m: "text" for m in metadata}, "year": "int"}
+    metadata_sql_types = {**{m: "text" for m in metadata}, "year": "int", "philo_id": "text", "philo_type": "text"}
     db_values = {
         "metadata_fields": metadata,
         "metadata_hierarchy": metadata_hierarchy,
