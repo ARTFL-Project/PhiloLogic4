@@ -2,16 +2,50 @@
 """This script converts PhiloLogic 4.6 web_config.cfg files to 4.7"""
 
 
-from builtins import AttributeError
 import os
 import sqlite3
 import sys
-from importlib_metadata import metadata
 
 from philologic.Config import Config, WEB_CONFIG_DEFAULTS, WEB_CONFIG_HEADER
 from philologic.utils import load_module
 from philologic.utils import pretty_print
 from black import format_str, FileMode
+
+
+DEFAULT_CONFIG_VALUES = [
+    "default_landing_page_display",
+    "simple_landing_citation",
+    "dico_letter_range",
+    "kwic_bibliography_fields",
+    "concordance_biblio_sorting",
+    "time_series_year_field",
+    "page_image_extension",
+    "search_syntax_template",
+    "metadata_choice_values",
+    "dictionary",
+    "dictionary_bibliography",
+    "landing_page_browsing",
+    "dbname",
+    "metadata",
+    "facets",
+    "search_examples",
+    "kwic_bibliography_fields",
+    "concordance_biblio_sorting",
+    "metadata_aliases",
+    "header_in_toc",
+    "external_page_images",
+    "skip_table_of_contents",
+    "query_parser_regex",
+    "report_error_link",
+    "concordance_formatting_regex",
+    "kwic_formatting_regex",
+    "navigation_formatting_regex",
+    "kwic_metadata_sorting_fields",
+    "page_images_url_root",
+    "time_series_interval",
+    "stopwords",
+    "link_to_home_page",
+]
 
 
 class CustomConfig(Config):
@@ -87,9 +121,16 @@ def citations_filter(citations):
 
 def convert_landing_page_browsing(landing_page):
     new_landing_page = []
+    error = False
     for l in landing_page:
-        l["citation"] = citations_filter(l["citation"])
+        try:
+            l["citation"] = citations_filter(l["citation"])
+        except KeyError:
+            error = True
+            break
         new_landing_page.append(l)
+    if error is True:
+        return WEB_CONFIG_DEFAULTS["default_landing_page_browsing"]["value"]
     return new_landing_page
 
 
@@ -100,79 +141,35 @@ def convert_web_config(web_config_path, philo_db):
 
     # Regenerate new WebConfig file
     old_config = load_module("old_config", web_config_path)
-
     start_date, end_date = get_time_series_dates(toms_path)
-    metadata_input_style = {**old_config.metadata_input_style, "year": "int"}
     config_values = {
-        "dbname": old_config.dbname,
-        "metadata": old_config.metadata,
-        "facets": old_config.facets,
         "time_series_start_end_date": {"start_date": start_date, "end_date": end_date},
-        "search_examples": old_config.search_examples,
-        "metadata_input_style": metadata_input_style,
-        "kwic_metadata_sorting_fields": old_config.kwic_metadata_sorting_fields,
-        "kwic_bibliography_fields": old_config.kwic_bibliography_fields,
-        "concordance_biblio_sorting": old_config.concordance_biblio_sorting,
-        "page_images_url_root": old_config.page_images_url_root,
-        "link_to_home_page": old_config.link_to_home_page,
-        "metadata_aliases": old_config.metadata_aliases,
-        "stopwords": old_config.stopwords,
-        "time_series_interval": old_config.time_series_interval,
-        "header_in_toc": old_config.header_in_toc,
-        "default_landing_page_browsing": convert_landing_page_browsing(old_config.default_landing_page_browsing),
-        "default_landing_page_display": old_config.default_landing_page_display,
-        "simple_landing_citation": old_config.simple_landing_citation,
-        "dico_letter_range": old_config.dico_letter_range,
-        "concordance_citation": citations_filter(old_config.concordance_citation),
-        "bibliography_citation": citations_filter(old_config.bibliography_citation),
-        "navigation_citation": citations_filter(old_config.navigation_citation),
-        "kwic_bibliography_fields": old_config.kwic_bibliography_fields,
-        "concordance_biblio_sorting": old_config.concordance_biblio_sorting,
-        "kwic_metadata_sorting_fields": old_config.kwic_metadata_sorting_fields,
-        "time_series_year_field": old_config.time_series_year_field,
-        "page_image_extension": old_config.page_image_extension,
-        "search_syntax_template": old_config.search_syntax_template or "default",
-        "metadata_choice_values": old_config.metadata_dropdown_values,
-        "dictionary": old_config.dictionary,
-        "landing_page_browsing": old_config.landing_page_browsing,
     }
-    # Check for the presence of some new config options
-    try:
-        config_values["table_of_contents_citation"] = citations_filter(old_config.table_of_contents_citation)
-    except AttributeError:
-        config_values["table_of_contents_citation"] = WEB_CONFIG_DEFAULTS["table_of_contents_citation"]["value"]
-    try:
-        config_values["external_page_images"] = old_config.external_page_images
-    except AttributeError:
-        config_values["external_page_images"] = WEB_CONFIG_DEFAULTS["external_page_images"]["value"]
-    try:
-        config_values["skip_table_of_contents"] = old_config.skip_table_of_contents
-    except AttributeError:
-        config_values["skip_table_of_contents"] = False
-    try:
-        config_values["query_parser_regex"] = old_config.query_parser_regex
-    except AttributeError:
-        config_values["query_parser_regex"] = WEB_CONFIG_DEFAULTS["query_parser_regex"]["value"]
-    try:
-        config_values["report_error_link"] = old_config.report_error_link
-    except AttributeError:
-        config_values["report_error_link"] = WEB_CONFIG_DEFAULTS["report_error_link"]["value"]
-    try:
-        config_values["concordance_formatting_regex"] = old_config.concordance_formatting_regex
-    except AttributeError:
-        config_values["concordance_formatting_regex"] = WEB_CONFIG_DEFAULTS["concordance_formatting_regex"]["value"]
-    try:
-        config_values["kwic_formatting_regex"] = old_config.kwic_formatting_regex
-    except AttributeError:
-        config_values["kwic_formatting_regex"] = WEB_CONFIG_DEFAULTS["kwic_formatting_regex"]["value"]
-    try:
-        config_values["navigation_formatting_regex"] = old_config.navigation_formatting_regex
-    except AttributeError:
-        config_values["navigation_formatting_regex"] = WEB_CONFIG_DEFAULTS["navigation_formatting_regex"]["value"]
+    for config_value in DEFAULT_CONFIG_VALUES:
+        try:
+            if config_value in (
+                "concordance_citation",
+                "bibliography_citation",
+                "navigation_citation",
+                "table_of_contents_citation",
+            ):
+                config_values[config_value] = citations_filter(getattr(old_config, config_value))
+            elif config_value == "default_landing_page_browsing":
+                config_values[config_value] = convert_landing_page_browsing(old_config.default_landing_page_browsing)
+            elif config_value == "metadata_input_style":
+                config_values["metadata_input_style"] = {**old_config.metadata_input_style, "year": "int"}
+            else:
+                config_values[config_value] = getattr(old_config, config_value)
+        except AttributeError:
+            config_values["external_page_images"] = WEB_CONFIG_DEFAULTS[config_value]["value"]
+    if config_value["dictionary"] is True:
+        if "head" not in config_value["metadata"]:
+            config_value["metadata"] = ["head", *config_value["metadata"]]
     os.system(f"mv {web_config_path} {web_config_path}_old")
     new_config = MakeWebConfig(web_config_path, **config_values)
     with open(web_config_path, "w") as output_file:
         print(format_str(str(new_config), mode=FileMode()), file=output_file)
+    os.system(f"chmod 775 {web_config_path}")
 
 
 if __name__ == "__main__":

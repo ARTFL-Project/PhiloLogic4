@@ -1,7 +1,7 @@
 <template>
     <div class="container-fluid">
         <results-summary :description="results.description"></results-summary>
-        <div style="position: relative" v-if="!showFacets">
+        <div style="position: relative" v-if="!showFacets && philoConfig.facets.length > 0">
             <button
                 type="button"
                 class="btn btn-secondary"

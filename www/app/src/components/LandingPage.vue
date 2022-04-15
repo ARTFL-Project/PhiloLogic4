@@ -50,8 +50,11 @@
                     <div class="cols-12 col-sm-8 offset-sm-2">
                         <div class="card">
                             <ul class="list-group">
-                                <li class="list-group-item">
-                                    v-for="(biblioObj, bibIndex) in bibliography.results" :key="bibIndex" >
+                                <li
+                                    class="list-group-item"
+                                    v-for="(biblioObj, bibIndex) in bibliography.results"
+                                    :key="bibIndex"
+                                >
                                     <citations :citation="biblioObj.citation"></citations>
                                 </li>
                             </ul>
@@ -171,11 +174,14 @@ export default {
             dicoLetterRows: [],
             citations: [],
             groupDisplay: {},
+            bibliography: [],
         };
     },
     created() {
         if (this.dictionary) {
             this.setupDictView();
+        } else if (this.landingPageBrowsing == "simple") {
+            this.getSimpleLandingPageData();
         }
     },
     methods: {
@@ -229,6 +235,17 @@ export default {
                     this.displayCount = response.data.display_count;
                     this.contentType = response.data.content_type;
                     this.loading = false;
+                })
+                .catch((error) => {
+                    this.debug(this, error);
+                    this.loading = false;
+                });
+        },
+        getSimpleLandingPageData() {
+            this.$http
+                .get(`${this.$dbUrl}/reports/bibliography.py`)
+                .then((response) => {
+                    this.bibliography = response.data;
                 })
                 .catch((error) => {
                     this.debug(this, error);

@@ -44,7 +44,7 @@ export default {
         };
     },
     computed: {
-        ...mapFields(["formData.report", "formData.q", "urlUpdate"]),
+        ...mapFields(["formData.report", "formData.q", "urlUpdate", "showFacets"]),
         defaultFieldValues() {
             let localFields = {
                 report: "home",
@@ -138,6 +138,9 @@ export default {
             } else {
                 this.setupApp();
             }
+        }
+        if (this.$philoConfig.facets.length < 1) {
+            this.showFacets = false;
         }
     },
     watch: {

@@ -220,6 +220,7 @@ def convert_landing_page_browsing(landing_page):
 
 if __name__ == "__main__":
     philo_db = sys.argv[1]
+    print(f"\n\n### Processing {philo_db} ###", flush=True)
 
     # Deal with TOMS db changes
     data_dir = os.path.join(philo_db, "data")
@@ -307,9 +308,9 @@ if __name__ == "__main__":
 
     # Deal with web app changes
     print("Regenerating web app...")
-    os.system(f"rm -rf {philo_db}/scripts/*")
-    os.system(f"rm -rf {philo_db}/reports/*")
-    os.system(f"rm -rf {philo_db}/app/*")
+    os.system(f"rm -rf {philo_db}/scripts")
+    os.system(f"rm -rf {philo_db}/reports")
+    os.system(f"rm -rf {philo_db}/app")
     os.system(f"cp -R /var/lib/philologic4/web_app/* {philo_db}/")
     web_app_path = os.path.join(philo_db, "app")
     os.system(

@@ -72,7 +72,10 @@ class HitWrapper:
             return self.ancestors[key]
         else:
             if key in self.db.locals["metadata_fields"]:
-                f_type = self.db.locals["metadata_types"][key]
+                try:
+                    f_type = self.db.locals["metadata_types"][key]
+                except KeyError:
+                    return ""
                 if f_type == "div":
                     for div_type in ("div3", "div2", "div1"):
                         val = self.ancestors[div_type][key]

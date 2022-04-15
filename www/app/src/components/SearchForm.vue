@@ -608,6 +608,7 @@ export default {
             } else {
                 let localMetadataDisplay = this.copyObject(this.metadataDisplay);
                 localMetadataDisplay.splice(this.headIndex, 1);
+                console.log(this.metadataDisplay, localMetadataDisplay);
                 return localMetadataDisplay;
             }
         },
@@ -709,14 +710,16 @@ export default {
             this.dateRange[metadata] = { start: "", end: "" };
         }
         for (let metadata in this.metadataInputStyle) {
-            if (this.metadataInputStyle[metadata] == "date" && this.formData[metadata].search(/<=>/) != -1) {
-                this.dateType[metadata] = "range";
-                let dateRanges = this.formData[metadata].split(/<=>/);
-                this.dateRange[metadata] = { start: dateRanges[0], end: dateRanges[1] };
-            } else if (this.metadataInputStyle[metadata] == "int" && this.formData[metadata].search(/-/) != -1) {
-                this.dateType[metadata] = "range";
-                let dateRanges = this.formData[metadata].split(/-/);
-                this.dateRange[metadata] = { start: dateRanges[0], end: dateRanges[1] };
+            if (metadata in this.formData) {
+                if (this.metadataInputStyle[metadata] == "date" && this.formData[metadata].search(/<=>/) != -1) {
+                    this.dateType[metadata] = "range";
+                    let dateRanges = this.formData[metadata].split(/<=>/);
+                    this.dateRange[metadata] = { start: dateRanges[0], end: dateRanges[1] };
+                } else if (this.metadataInputStyle[metadata] == "int" && this.formData[metadata].search(/-/) != -1) {
+                    this.dateType[metadata] = "range";
+                    let dateRanges = this.formData[metadata].split(/-/);
+                    this.dateRange[metadata] = { start: dateRanges[0], end: dateRanges[1] };
+                }
             }
         }
     },

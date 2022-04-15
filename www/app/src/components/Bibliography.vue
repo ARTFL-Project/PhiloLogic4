@@ -1,7 +1,7 @@
 <template>
     <div class="container-fluid">
         <results-summary :description="results.description"></results-summary>
-        <div style="position: relative" v-if="!showFacets">
+        <div style="position: relative" v-if="!showFacets && philoConfig.facets.length > 0">
             <button
                 type="button"
                 class="btn btn-sm btn-secondary"
@@ -14,7 +14,7 @@
         <div class="row mt-4" style="padding-right: 0.5rem">
             <div
                 class="col-12"
-                :class="{ 'col-md-8': showFacets, 'col-xl-9': showFacets }"
+                :class="{ 'col-md-9': showFacets, 'col-xl-9': showFacets }"
                 v-if="!philoConfig.dictionary_bibliography || results.result_type == 'doc'"
             >
                 <transition-group tag="div" :css="false" v-on:before-enter="beforeEnter" v-on:enter="enter">
@@ -44,7 +44,8 @@
                 </transition-group>
             </div>
             <div
-                class="col-12 col-md-7 col-xl-8"
+                class="col-12"
+                :class="{ 'col-md-9': showFacets, 'col-xl-9': showFacets }"
                 v-if="philoConfig.dictionary_bibliography && results.result_type != 'doc'"
             >
                 <div class="list-group" flush v-for="(group, groupKey) in results.results" :key="groupKey">

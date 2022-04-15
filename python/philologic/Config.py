@@ -134,16 +134,6 @@ DB_LOCALS_DEFAULTS = {
     "metadata_fields": {"value": [], "comment": ""},
     "metadata_hierarchy": {"value": [[]], "comment": ""},
     "metadata_types": {"value": {}, "comment": ""},
-    "metadata_query_types": {
-        "value": {},
-        "comment": "\n".join(
-            [
-                "# metadata_query_types determines how these fields are stored in SQLite. Three types are possible:",
-                "# string, integer, date. By default, all fields are stored as strings unless defined otherwise in the optional",
-                "# load_config.py file. DISABLED AT THIS TIME.",
-            ]
-        ),
-    },
     "ascii_conversion": {
         "value": True,
         "comment": "\n".join(
