@@ -30,7 +30,7 @@
                                     @click="getContent(browseType, range)"
                                 >
                                     <button
-                                        class="btn btn-light"
+                                        class="btn btn-light landing-page-btn"
                                         :class="{
                                             first: rangeIndex === 0,
                                             last: rangeIndex === browseType.queries.length - 1,
@@ -344,5 +344,8 @@ tr:nth-child(even) {
 }
 tr:nth-child(even) td.letter:nth-child(2n + 1) {
     background-color: #f8f8f8;
+}
+.landing-page-btn:focus {
+    border-width: 3px;
 }
 </style>

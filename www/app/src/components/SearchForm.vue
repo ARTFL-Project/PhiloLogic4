@@ -608,7 +608,6 @@ export default {
             } else {
                 let localMetadataDisplay = this.copyObject(this.metadataDisplay);
                 localMetadataDisplay.splice(this.headIndex, 1);
-                console.log(this.metadataDisplay, localMetadataDisplay);
                 return localMetadataDisplay;
             }
         },

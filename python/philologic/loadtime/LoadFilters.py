@@ -3,6 +3,7 @@
 
 import os
 import pickle
+from collections import Counter
 from orjson import dumps, loads
 import lz4.frame
 
@@ -335,6 +336,63 @@ def pos_tagger(language):
         os.rename(text["words"] + ".tmp", text["words"])
 
     return inner_pos_tagger
+
+
+def generate_word_frequencies(loader_obj, text):
+    """Generate word frequencies for each text object"""
+
+    def inner_generate_word_frequencies():
+        word_frequencies_path = os.path.join(loader_obj.destination, "frequencies/text_object_word_frequencies")
+        os.makedirs(word_frequencies_path, exist_ok=True)
+        para_frequencies = Counter()
+        div3_frequencies = Counter()
+        div2_frequencies = Counter()
+        div1_frequencies = Counter()
+        doc_frequencies = Counter()
+        with open(text["words"], encoding="utf8") as fh:
+            current_para_id = None
+            current_div3_id = None
+            current_div2_id = None
+            current_div1_id = None
+            doc_id = None
+            for line in fh:
+                _, word, philo_id, _ = line.split("\t")
+                split_id = philo_id.split()
+                para_id = " ".join(split_id[:5])
+                div3_id = " ".join(split_id[:4])
+                div2_id = " ".join(split_id[:3])
+                div1_id = " ".join(split_id[:2])
+                if current_para_id is not None and para_id != current_para_id:
+                    para_freq_path = os.path.join(word_frequencies_path, f"{current_para_id}.json")
+                    with open(para_freq_path, "wb") as output:
+                        output.write(dumps(para_freq_path))
+                if current_div3_id is not None and div3_id != current_div3_id:
+                    div3_freq_path = os.path.join(word_frequencies_path, f"{current_div3_id}.json")
+                    with open(div3_freq_path, "wb") as output:
+                        output.write(dumps(div3_freq_path))
+                if current_div2_id is not None and div2_id != current_div2_id:
+                    div2_freq_path = os.path.join(word_frequencies_path, f"{current_div2_id}.json")
+                    with open(div2_freq_path, "wb") as output:
+                        output.write(dumps(div2_freq_path))
+                if current_div1_id is not None and div1_id != current_div1_id:
+                    div1_freq_path = os.path.join(word_frequencies_path, f"{current_div1_id}.json")
+                    with open(div1_freq_path, "wb") as output:
+                        output.write(dumps(div1_freq_path))
+                para_frequencies[word] += 1
+                div3_frequencies[word] += 1
+                div2_frequencies[word] += 1
+                div1_frequencies[word] += 1
+                doc_frequencies[word] += 1
+                current_para_id = para_id
+                current_div3_id = div3_id
+                current_div2_id = div2_id
+                current_div1_id = div1_id
+                doc_id = current_div1_id.split()[0]
+            doc_freq_path = os.path.join(word_frequencies_path, f"{doc_id}.json")
+            with open(doc_freq_path, "wb") as output:
+                output.write(dumps(doc_freq_path))
+
+    return inner_generate_word_frequencies
 
 
 DefaultNavigableObjects = ("doc", "div1", "div2", "div3", "para")

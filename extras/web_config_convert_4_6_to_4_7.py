@@ -12,42 +12,6 @@ from philologic.utils import pretty_print
 from black import format_str, FileMode
 
 
-DEFAULT_CONFIG_VALUES = [
-    "default_landing_page_display",
-    "simple_landing_citation",
-    "dico_letter_range",
-    "kwic_bibliography_fields",
-    "concordance_biblio_sorting",
-    "time_series_year_field",
-    "page_image_extension",
-    "search_syntax_template",
-    "metadata_choice_values",
-    "dictionary",
-    "dictionary_bibliography",
-    "landing_page_browsing",
-    "dbname",
-    "metadata",
-    "facets",
-    "search_examples",
-    "kwic_bibliography_fields",
-    "concordance_biblio_sorting",
-    "metadata_aliases",
-    "header_in_toc",
-    "external_page_images",
-    "skip_table_of_contents",
-    "query_parser_regex",
-    "report_error_link",
-    "concordance_formatting_regex",
-    "kwic_formatting_regex",
-    "navigation_formatting_regex",
-    "kwic_metadata_sorting_fields",
-    "page_images_url_root",
-    "time_series_interval",
-    "stopwords",
-    "link_to_home_page",
-]
-
-
 class CustomConfig(Config):
     def __str__(self):
         string = "\n".join([line.strip() for line in self.header.splitlines() if line.strip()]) + "\n\n"
@@ -145,26 +109,28 @@ def convert_web_config(web_config_path, philo_db):
     config_values = {
         "time_series_start_end_date": {"start_date": start_date, "end_date": end_date},
     }
-    for config_value in DEFAULT_CONFIG_VALUES:
+    for config_name, config_value in WEB_CONFIG_DEFAULTS.items():
         try:
-            if config_value in (
+            if config_name in (
                 "concordance_citation",
                 "bibliography_citation",
                 "navigation_citation",
                 "table_of_contents_citation",
             ):
-                config_values[config_value] = citations_filter(getattr(old_config, config_value))
-            elif config_value == "default_landing_page_browsing":
-                config_values[config_value] = convert_landing_page_browsing(old_config.default_landing_page_browsing)
-            elif config_value == "metadata_input_style":
+                config_values[config_name] = citations_filter(getattr(old_config, config_name))
+            elif config_name == "default_landing_page_browsing":
+                config_values[config_name] = convert_landing_page_browsing(old_config.default_landing_page_browsing)
+            elif config_name == "metadata_input_style":
                 config_values["metadata_input_style"] = {**old_config.metadata_input_style, "year": "int"}
+            elif config_name == "metadata_choice_values":
+                config_values[config_name] = old_config.metadata_dropdown_values
             else:
-                config_values[config_value] = getattr(old_config, config_value)
+                config_values[config_name] = getattr(old_config, config_name)
         except AttributeError:
-            config_values["external_page_images"] = WEB_CONFIG_DEFAULTS[config_value]["value"]
-    if config_value["dictionary"] is True:
-        if "head" not in config_value["metadata"]:
-            config_value["metadata"] = ["head", *config_value["metadata"]]
+            config_values["external_page_images"] = config_value["value"]
+    if config_values["dictionary"] is True:
+        if "head" not in config_values["metadata"]:
+            config_values["metadata"] = ["head", *config_values["metadata"]]
     os.system(f"mv {web_config_path} {web_config_path}_old")
     new_config = MakeWebConfig(web_config_path, **config_values)
     with open(web_config_path, "w") as output_file:
