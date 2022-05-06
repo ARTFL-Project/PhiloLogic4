@@ -74,7 +74,7 @@ def generate_toc_object(request, config):
         text_hierarchy.append(toc_element)
     metadata_fields = {}
     for metadata in db.locals["metadata_fields"]:
-        if db.locals["metadata_types"][metadata] == "doc":
+        if metadata in db.locals["metadata_types"] and db.locals["metadata_types"][metadata] == "doc":
             metadata_fields[metadata] = obj[metadata]
     citation_hrefs = citation_links(db, config, obj)
     citation = citations(obj, citation_hrefs, config, report="navigation")

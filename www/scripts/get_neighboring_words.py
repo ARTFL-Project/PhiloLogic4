@@ -107,7 +107,7 @@ def get_neighboring_words(environ, start_response):
                 }
                 if metadata_search is True:
                     for metadata in config.kwic_metadata_sorting_fields:
-                        result_obj[metadata] = ",".join(hit[metadata].lower().split())
+                        result_obj[metadata] = ",".join(f"{hit[metadata]}".lower().split())
                 print("\t".join(str(result_obj[field]) for field in fields), file=cache_file)
                 index += 1
                 elapsed = timeit.default_timer() - start_time

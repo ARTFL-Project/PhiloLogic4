@@ -130,14 +130,6 @@
                         </div>
                     </div>
                 </div>
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary"
-                    v-if="!showFacetedBrowsing && facets.length < 1"
-                    @click="showFacets()"
-                >
-                    Show Facets
-                </button>
             </div>
         </div>
         <div
@@ -219,7 +211,6 @@ export default {
     data() {
         return {
             facets: this.$philoConfig.facets,
-            showFacetedBrowsing: false,
             hits: "",
             descriptionStart: 1,
             descriptionEnd: this.$store.state.formData.results_per_page,

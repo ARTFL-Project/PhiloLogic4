@@ -114,14 +114,7 @@
                         </div>
                         <div id="search-buttons">
                             <div class="input-group">
-                                <button
-                                    type="reset"
-                                    id="reset_form"
-                                    class="btn btn-outline-secondary"
-                                    @click="onReset()"
-                                >
-                                    Clear
-                                </button>
+                                <button type="reset" id="reset_form" class="btn btn-outline-secondary">Clear</button>
                                 <button
                                     type="button"
                                     id="show-search-form"
@@ -828,8 +821,15 @@ export default {
         },
         onReset() {
             this.$store.commit("setDefaultFields", this.$parent.defaultFieldValues);
-            for (let field in this.metadataValues) {
+            for (let field of this.$philoConfig.metadata) {
                 this.metadataValues[field] = "";
+            }
+            this.queryTermTyped = "";
+            for (let metadata in this.metadataInputStyle) {
+                if (this.metadataInputStyle[metadata] == "date" || this.metadataInputStyle[metadata] == "int") {
+                    this.dateType[metadata] = "exact";
+                    this.dateRange[metadata] = { start: "", end: "" };
+                }
             }
             this.$nextTick(() => {
                 this.show = true;

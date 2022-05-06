@@ -1060,8 +1060,11 @@ class XMLParser:
                 self.v[object_level].attrib[metadata] = extract_integer(value)
             else:
                 self.v[object_level].attrib[metadata] = value
-        except KeyError:
-            pass
+        except KeyError as e:
+            try:
+                self.v[object_level].attrib[metadata] = value
+            except Exception:
+                pass
 
     def word_handler(self, words):
         """
@@ -1551,5 +1554,6 @@ if __name__ == "__main__":
             known_metadata={"filename": fn},
             tag_to_obj_map=DEFAULT_TAG_TO_OBJ_MAP,
             metadata_to_parse=DEFAULT_METADATA_TO_PARSE,
+            metadata_sql_types={},
         )
         parser.parse(fh)

@@ -9,6 +9,7 @@ from philologic.runtime import kwic_hit_object, page_interval
 
 import sys
 
+
 sys.path.append("..")
 import custom_functions
 
@@ -57,19 +58,16 @@ def get_sorted_hits(request, config, db):
             sort_order.append(f"-k {key},{key}")
         sort_order = " ".join(sort_order)
         os.system(
-            f"sort {sort_order} {request.cache_path} > {request.cache_path}.sorted && rm {request.cache_path}"
+            f"tail -n +2 {request.cache_path} | sort {sort_order} > {request.cache_path}.sorted && rm {request.cache_path}"
         )  # no numeric sort since we would have to know the type of the field being sorted on: e.g. -k 2,2n
     kwic_results = []
     with open(f"{request.cache_path}.sorted") as sorted_results:
-        for line_number, line in enumerate(sorted_results):
+        for line_number, line in enumerate(sorted_results, 1):
             if line_number < start:
                 continue
             if line_number > end:
                 break
-            try:
-                index = int(line.split("\t")[0])
-            except ValueError:  # we've hit the field name rather than value
-                continue
+            index = int(line.split("\t")[0])
             hit = hits[index]
             kwic_result = kwic_hit_object(hit, config, db)
             kwic_results.append(kwic_result)

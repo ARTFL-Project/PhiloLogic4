@@ -124,6 +124,10 @@ def convert_web_config(web_config_path, philo_db):
                 config_values["metadata_input_style"] = {**old_config.metadata_input_style, "year": "int"}
             elif config_name == "metadata_choice_values":
                 config_values[config_name] = old_config.metadata_dropdown_values
+            elif config_name == "search_reports":
+                config_values[config_name] = (
+                    old_config.search_reports[:2] + ["aggregation"] + old_config.search_reports[2:]
+                )
             else:
                 config_values[config_name] = getattr(old_config, config_name)
         except AttributeError:
