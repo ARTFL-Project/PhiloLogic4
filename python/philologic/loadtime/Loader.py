@@ -12,6 +12,7 @@ import sqlite3
 import sys
 import time
 from glob import iglob
+from json import dump
 
 import lxml
 import regex as re
@@ -761,6 +762,8 @@ class Loader:
 
         print("Building Web Client Application...", end=" ", flush=True)
         os.chdir(self.web_app_dir)
+        with open(os.path.join(self.web_app_dir, "appConfig.json"), "w") as app_config:
+            dump({"dbUrl": ""}, app_config)
         os.system(
             f"cd {self.web_app_dir}; npm install > {self.web_app_dir}/web_app_build.log 2>&1 && npm run build >> {self.web_app_dir}/web_app_build.log 2>&1"
         )

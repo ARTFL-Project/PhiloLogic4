@@ -362,6 +362,7 @@ def generate_word_frequencies(loader_obj, text):
                 div3_id = " ".join(split_id[:4])
                 div2_id = " ".join(split_id[:3])
                 div1_id = " ".join(split_id[:2])
+                doc_id = split_id[0]
                 if current_para_id is not None and para_id != current_para_id:
                     para_freq_path = os.path.join(word_frequencies_path, f"{current_para_id}.json")
                     with open(para_freq_path, "wb") as output:
@@ -387,7 +388,7 @@ def generate_word_frequencies(loader_obj, text):
                 current_div3_id = div3_id
                 current_div2_id = div2_id
                 current_div1_id = div1_id
-                doc_id = current_div1_id.split()[0]
+
             doc_freq_path = os.path.join(word_frequencies_path, f"{doc_id}.json")
             with open(doc_freq_path, "wb") as output:
                 output.write(dumps(doc_freq_path))

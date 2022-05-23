@@ -6,7 +6,6 @@ import sys
 from wsgiref.handlers import CGIHandler
 
 import orjson
-from numpy import unicode_
 import regex as re
 from philologic.runtime.DB import DB
 from philologic.runtime.MetadataQuery import metadata_pattern_search
