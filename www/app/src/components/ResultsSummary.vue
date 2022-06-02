@@ -34,8 +34,10 @@
                                     <router-link
                                         :to="`/aggregation?${stat.link}&group_by=${stat.field}`"
                                         class="stat-link"
+                                        v-if="stat.link.length > 0"
                                         >{{ stat.count }} {{ stat.label }}(s)</router-link
                                     >
+                                    <span v-else>{{ stat.count }} {{ stat.label }}(s)</span>
                                     <span v-if="statIndex != statsDescription.length - 1">&nbsp;and&nbsp;</span>
                                 </span>
                             </span>
@@ -345,17 +347,21 @@ export default {
                         } else {
                             label = stat.field;
                         }
-                        statsDescription.push({
-                            label: label,
-                            field: stat.field,
-                            count: stat.count,
-                            link: this.paramsToUrlString({
+                        let link = "";
+                        if (stat.link_field) {
+                            link = this.paramsToUrlString({
                                 ...this.$store.state.formData,
                                 report: "aggregation",
                                 start: "",
                                 end: "",
                                 group_by: "",
-                            }),
+                            });
+                        }
+                        statsDescription.push({
+                            label: label,
+                            field: stat.field,
+                            count: stat.count,
+                            link: link,
                         });
                     }
                     this.statsDescription = statsDescription;

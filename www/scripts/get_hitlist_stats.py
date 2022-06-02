@@ -24,8 +24,8 @@ OBJECT_LEVEL = {"doc": 6, "div1": 5, "div2": 4, "div3": 3, "para": 2, "sent": 1}
 OBJ_DICT = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
 
 
-def get_total_doc_count(environ, start_response):
-    """Count hit occurences per doc"""
+def get_total_count(environ, start_response):
+    """Count hit occurences per metadata field"""
     status = "200 OK"
     headers = [
         ("Content-type", "application/json; charset=UTF-8"),
@@ -84,7 +84,12 @@ def get_total_doc_count(environ, start_response):
                 f"SELECT COUNT(0) FROM (SELECT DISTINCT {field_obj['field']} FROM toms WHERE philo_id IN ({', '.join(docs[pos])}) AND {field_obj['field']} IS NULL)"
             )
             count += cursor.fetchone()[0]
-        stats.append({"field": field_obj["field"], "count": count})
+        link_field = False
+        for agg_config in config.aggregation_config:
+            if agg_config["field"] == field_obj["field"]:
+                link_field = True
+                break
+        stats.append({"field": field_obj["field"], "count": count, "link_field": link_field})
     yield orjson.dumps({"stats": stats})
 
 
@@ -102,4 +107,4 @@ def tuple_to_str(philo_id, obj_level):
 
 
 if __name__ == "__main__":
-    CGIHandler().run(get_total_doc_count)
+    CGIHandler().run(get_total_count)
