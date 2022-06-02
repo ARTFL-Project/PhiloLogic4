@@ -177,15 +177,6 @@ WEB_CONFIG_DEFAULTS = {
         "value": "noname",
         "comment": "\n".join(["# The dbname variable is the title name in the HTML header"]),
     },
-    "global_config_location": {
-        "value": "/etc/philologic/philologic4.cfg",
-        "comment": "\n".join(
-            [
-                "# The global_config_location variable points to the global config file for philologic instances.",
-                "# Point to a different location if you intend to have several global config options for databases on a single server",
-            ]
-        ),
-    },
     "access_control": {
         "value": False,
         "comment": "\n".join(
@@ -868,7 +859,6 @@ class Config:
             if key not in written:
                 out_obj[key] = self.data[key]
                 written.append(key)
-        del out_obj["global_config_location"]
         if self.time_series_status is False:
             try:
                 out_obj["search_reports"].remove("time_series")
