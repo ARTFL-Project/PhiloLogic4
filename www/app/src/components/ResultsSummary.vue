@@ -19,26 +19,35 @@
                     <search-arguments :result-start="descriptionStart" :result-end="descriptionEnd"></search-arguments>
                     <div v-if="['concordance', 'kwic', 'bibliography'].includes(report)">
                         <div id="result-stats" class="pb-2">
-                            {{ resultsLength }} total occurrences spread across
-                            <div class="d-inline-block" style="position: relative" v-if="!hitlistStatsDone">
-                                <div
-                                    class="spinner-border text-secondary"
-                                    role="status"
-                                    style="position: absolute; width: 2rem; height: 2rem; z-index: 50; bottom: -0.75rem"
-                                >
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                            <span v-if="hitlistStatsDone">
-                                <span v-for="(stat, statIndex) in statsDescription" :key="stat.field">
-                                    <router-link
-                                        :to="`/aggregation?${stat.link}&group_by=${stat.field}`"
-                                        class="stat-link"
-                                        v-if="stat.link.length > 0"
-                                        >{{ stat.count }} {{ stat.label }}(s)</router-link
+                            {{ resultsLength }} total occurrences
+                            <span v-if="fieldSummary.length > 0">
+                                spread across
+                                <div class="d-inline-block" style="position: relative" v-if="!hitlistStatsDone">
+                                    <div
+                                        class="spinner-border text-secondary"
+                                        role="status"
+                                        style="
+                                            position: absolute;
+                                            width: 2rem;
+                                            height: 2rem;
+                                            z-index: 50;
+                                            bottom: -0.75rem;
+                                        "
                                     >
-                                    <span v-else>{{ stat.count }} {{ stat.label }}(s)</span>
-                                    <span v-if="statIndex != statsDescription.length - 1">&nbsp;and&nbsp;</span>
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                                <span v-if="hitlistStatsDone">
+                                    <span v-for="(stat, statIndex) in statsDescription" :key="stat.field">
+                                        <router-link
+                                            :to="`/aggregation?${stat.link}&group_by=${stat.field}`"
+                                            class="stat-link"
+                                            v-if="stat.link.length > 0"
+                                            >{{ stat.count }} {{ stat.label }}(s)</router-link
+                                        >
+                                        <span v-else>{{ stat.count }} {{ stat.label }}(s)</span>
+                                        <span v-if="statIndex != statsDescription.length - 1">&nbsp;and&nbsp;</span>
+                                    </span>
                                 </span>
                             </span>
                         </div>
@@ -213,6 +222,7 @@ export default {
     data() {
         return {
             facets: this.$philoConfig.facets,
+            fieldSummary: this.$philoConfig.results_summary,
             hits: "",
             descriptionStart: 1,
             descriptionEnd: this.$store.state.formData.results_per_page,

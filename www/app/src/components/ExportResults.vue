@@ -45,7 +45,7 @@ export default {
                 .then((response) => {
                     let text = "";
                     let element = document.createElement("a");
-                    let filename = `${this.paramsToUrlString(this.$store.state.formData)}.${format}`;
+                    let filename = `${this.paramsToUrlString({ ...this.$store.state.formData })}.${format}`;
                     if (format == "json") {
                         text = JSON.stringify(response.data);
                     } else if (format == "csv") {

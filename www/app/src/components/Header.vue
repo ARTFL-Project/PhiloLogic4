@@ -1,6 +1,6 @@
 <template>
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow" style="height: 53px" v-once>
-        <div class="collapse navbar-collapse" id="nav-collapse">
+        <div class="collapse navbar-collapse top-links">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link" :href="philoConfig.link_to_home_page" v-if="philoConfig.link_to_home_page != ''"
@@ -16,11 +16,29 @@
             </ul>
         </div>
         <router-link class="navbar-brand" to="/" v-html="philoConfig.dbname"></router-link>
-        <ul id="error-report" class="ml-auto" v-if="philoConfig.report_error_link">
+        <ul class="navbar-nav ml-auto top-links">
             <li class="nav-item">
-                <a class="nav-link" :href="philoConfig.report_error_link" target="_blank">Error Report</a>
+                <a class="nav-link" href="https://www.uchicago.edu">University of Chicago</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="https://atilf.fr">ATILF-CNRS</a>
+            </li>
+            <li class="nav-item">
+                <a
+                    class="nav-link"
+                    href="https://artfl-project.uchicago.edu/content/contact-us"
+                    title="Contact information for the ARTFL Project"
+                    >Contact Us</a
+                >
             </li>
         </ul>
+        <a
+            class="nav-link position-absolute"
+            style="right: -0.5rem; bottom: -0.25rem; font-variant: small-caps; font-weight: 700"
+            :href="philoConfig.report_error_link"
+            target="_blank"
+            >Report Error</a
+        >
     </nav>
 </template>
 
@@ -39,13 +57,13 @@ export default {
 </script>
 
 <style>
-#nav-collapse {
+.top-links {
     margin-left: -0.25rem;
     font-size: 80%;
     margin-top: -2rem;
     font-variant: small-caps;
 }
-#error-report {
+#right-side-links {
     font-size: 80%;
     margin-top: -1rem;
     font-variant: small-caps;
