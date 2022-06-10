@@ -92,9 +92,7 @@
             </div>
         </div>
         <div style="font-size: 85%; text-align: center" v-if="philoConfig.dictionary_lookup.url_root != ''">
-            To look up a word in a dictionary, select the word with your mouse and press 'd' on your keyboard.<br />
-            Or you can query the
-            <a :href="philoConfig.dictionary_lookup.url_root" target="_blank">dictionary directly</a>.
+            To look up a word in a dictionary, select the word with your mouse and press 'd' on your keyboard.
         </div>
         <div class="row" id="all-content">
             <div
