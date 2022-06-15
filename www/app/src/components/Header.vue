@@ -37,6 +37,7 @@
             style="right: -0.5rem; bottom: -0.25rem; font-variant: small-caps; font-weight: 700"
             :href="philoConfig.report_error_link"
             target="_blank"
+            v-if="philoConfig.report_error_link.length > 0"
             >Report Error</a
         >
     </nav>

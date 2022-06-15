@@ -145,4 +145,6 @@ def convert_web_config(web_config_path, philo_db):
 if __name__ == "__main__":
     web_config_path = sys.argv[1]
     philo_db = sys.argv[2]
+    print(f"Converting {web_config_path}...", end="")
     convert_web_config(web_config_path, philo_db)
+    print("done.")

@@ -125,7 +125,7 @@ CITATIONS = {
         "suffix": "",
         "object_level": "page",
         "field": "n",
-        "prefix": "",
+        "prefix": "page ",
         "link": True,
     },
 }
