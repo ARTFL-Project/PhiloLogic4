@@ -53,10 +53,7 @@ by a its own dedicated copy of PhiloLogic web application.
 By convention, this database and web app reside together in a directory
 accessible via an HTTP server configured to run Python CGI scripts.
 
-In Mac OS X systems, you will probably want to create a directory at
-`/Library/WebServer/Documents/philologic` to serve up PhiloLogic databases
-with the URL prefix: `http://<your_server's_name>/philologic/`; for Linux systems,
-the proper directory may vary, but `/var/www/philologic/` or `/var/www/html/philologic/`
+Make sure you configure the `/etc/philologic/philologic4.cfg` appropriately.
 
 Configuring your web server is outside of the scope of this document; but the web install
 does come with a preconfigured .htaccess file that allows you to run the Web App.
