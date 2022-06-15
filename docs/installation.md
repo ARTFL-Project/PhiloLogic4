@@ -11,7 +11,6 @@ You can find more detailed installation instructions for specific OSes here:
 
 -   [RedHat (and CentOS)](specific_installations/redhat_installation.md)
 -   [Ubuntu](specific_installations/ubuntu_installation.md)
--   [Mac OSX](specific_installations/mac_installation.md) (no longer maintained)
 
 ### Downloading
 
