@@ -93,6 +93,14 @@ input[type="text"]:focus {
     opacity: .5
 }
 
+.landing-page-btn:focus {
+    border-color: $link-color !important;
+}
+
+#report button:focus {
+    mix-blend-mode: hard-light;
+}
+
 :export {
     color: $link-color
 }

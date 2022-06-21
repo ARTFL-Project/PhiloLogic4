@@ -12,34 +12,32 @@
                     style="width: 4rem; height: 4rem; position: absolute; z-index: 50; top: 10px"
                 ></div>
             </div>
-            <div id="default-landing-page" v-if="landingPageBrowsing === 'default'">
-                <div class="row" id="landingGroup">
-                    <div
-                        class="col-12 col-sm-6 mb-4"
-                        :class="{ 'offset-sm-3': defaultLandingPageBrowsing.length == 1 }"
-                        v-for="browseType in defaultLandingPageBrowsing"
-                        :key="browseType.label"
-                    >
-                        <div class="card shadow-sm">
-                            <div class="card-header">{{ browseType.label }}</div>
-                            <div class="row g-0">
-                                <div
-                                    class="col"
-                                    v-for="(range, rangeIndex) in browseType.queries"
-                                    :key="rangeIndex"
-                                    @click="getContent(browseType, range)"
+            <div id="default-landing-page" class="row justify-content-center" v-if="landingPageBrowsing === 'default'">
+                <div
+                    class="col-12 col-sm-6 col-md-8 mb-4"
+                    v-for="browseType in defaultLandingPageBrowsing"
+                    :key="browseType.label"
+                >
+                    <div class="card shadow-sm">
+                        <div class="card-header">{{ browseType.label }}</div>
+                        <div class="row g-0">
+                            <div
+                                class="col"
+                                :class="{ 'col-2': browseType.queries.length > 6 }"
+                                v-for="(range, rangeIndex) in browseType.queries"
+                                :key="rangeIndex"
+                                @click="getContent(browseType, range)"
+                            >
+                                <button
+                                    class="btn btn-light landing-page-btn"
+                                    :class="{
+                                        first: rangeIndex === 0,
+                                        last: rangeIndex === browseType.queries.length - 1,
+                                    }"
+                                    style="border-radius: 0; width: 100%"
                                 >
-                                    <button
-                                        class="btn btn-light landing-page-btn"
-                                        :class="{
-                                            first: rangeIndex === 0,
-                                            last: rangeIndex === browseType.queries.length - 1,
-                                        }"
-                                        style="border-radius: 0; width: 100%"
-                                    >
-                                        {{ range }}
-                                    </button>
-                                </div>
+                                    {{ range }}
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -95,8 +95,8 @@ def group_by_range(request_range, request, config):
         for doc in cursor:
             metadata = {m: doc[m] for m in metadata_fields_needed}
             if metadata[metadata_queried] not in content:
-                content[metadata[metadata_queried]] = {"prefix": metadata[metadata_queried], "results": []}
-            content[metadata[metadata_queried]]["results"].append(
+                content[f"{metadata[metadata_queried]}"] = {"prefix": metadata[metadata_queried], "results": []}
+            content[f"{metadata[metadata_queried]}"]["results"].append(
                 {
                     "metadata": metadata,
                     "count": 1,

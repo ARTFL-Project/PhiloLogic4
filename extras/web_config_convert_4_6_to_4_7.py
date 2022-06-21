@@ -128,6 +128,8 @@ def convert_web_config(web_config_path, philo_db):
                 config_values[config_name] = (
                     old_config.search_reports[:2] + ["aggregation"] + old_config.search_reports[2:]
                 )
+            elif config_name == "dictionary_lookup":
+                config_values[config_name] = {"url_root": "", "keywords": False}
             else:
                 config_values[config_name] = getattr(old_config, config_name)
         except AttributeError:
