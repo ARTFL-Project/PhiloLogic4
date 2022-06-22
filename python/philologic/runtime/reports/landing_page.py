@@ -89,12 +89,12 @@ def group_by_range(request_range, request, config):
     content = {}
     if is_date:
         content_type = "date"
-        query = f'select * from toms where philo_type="doc" and cast({metadata_queried} as integer) between ? and ?'
+        query = f'select * from toms where philo_type="doc" and {metadata_queried} between ? and ?'
         cursor.execute(query, (int(request_range[0]), int(request_range[1])))
         content = {}
         for doc in cursor:
             metadata = {m: doc[m] for m in metadata_fields_needed}
-            if metadata[metadata_queried] not in content:
+            if str(metadata[metadata_queried]) not in content:
                 content[f"{metadata[metadata_queried]}"] = {"prefix": metadata[metadata_queried], "results": []}
             content[f"{metadata[metadata_queried]}"]["results"].append(
                 {
