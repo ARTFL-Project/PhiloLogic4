@@ -141,7 +141,7 @@ TAG_EXCEPTIONS = [
     r"</sup>",
 ]
 
-TOKEN_REGEX = r"[\p{L}\p{M}\p{N}]+|[&\p{L};]+"
+TOKEN_REGEX = r"[\p{L}\p{M}\p{N}\p{Po}]+|[&\p{L};]+"
 
 PUNCTUATION = r"""[;,:=+()"]"""
 
@@ -1555,5 +1555,8 @@ if __name__ == "__main__":
             tag_to_obj_map=DEFAULT_TAG_TO_OBJ_MAP,
             metadata_to_parse=DEFAULT_METADATA_TO_PARSE,
             metadata_sql_types={},
+            sentence_breakers=["。"],
+            file_type="html",
+            token_regex=r"[\p{L}\p{M}\p{N}\p{Po}]+|[&\p{L};]+",
         )
         parser.parse(fh)

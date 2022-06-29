@@ -13,15 +13,14 @@ from .QuerySyntax import group_terms, parse_date_query, parse_query
 os.environ["PATH"] += ":/usr/local/bin/"
 
 
-def metadata_query(db, filename, param_dicts, sort_order, raw_results=False, ascii_sort=True):
+def metadata_query(db, filename, param_dicts, sort_order, raw_results=False, ascii_conversion=True):
     """Prepare and execute SQL metadata query."""
     if db.locals["debug"]:
-        print("METADATA_QUERY:", param_dicts, file=sys.stderr)
+        print("METADATA_QUERY:", param_dicts, "\nASCII CONVERSION", ascii_conversion, file=sys.stderr)
     prev = None
     for d in param_dicts:
-        query = query_recursive(db, d, prev, sort_order)
+        query = query_recursive(db, d, prev, sort_order, ascii_conversion=ascii_conversion)
         prev = query
-
     try:
         corpus_fh = open(filename, "wb")
         for corpus_obj in query:
@@ -38,10 +37,10 @@ def metadata_query(db, filename, param_dicts, sort_order, raw_results=False, asc
     flag = open(filename + ".done", "w")
     flag.write("1")
     flag.close()
-    return HitList.HitList(filename, 0, db, raw=raw_results, sort_order=sort_order, ascii_sort=ascii_sort)
+    return HitList.HitList(filename, 0, db, raw=raw_results, sort_order=sort_order, ascii_conversion=ascii_conversion)
 
 
-def metadata_total_word_count_query(db, metadata, metadata_field_name):
+def metadata_total_word_count_query(db, metadata, metadata_field_name, ascii_conversion=True):
     """Retrieve word count from text object"""
     param_dicts = [{} for level in db.locals["metadata_hierarchy"]]
     # Taken from DB.query
@@ -64,7 +63,7 @@ def metadata_total_word_count_query(db, metadata, metadata_field_name):
     prev = None
     query = None
     for param_dict in param_dicts:
-        query = query_recursive(db, param_dict, prev, None)
+        query = query_recursive(db, param_dict, prev, None, ascii_conversion=ascii_conversion)
         prev = query
     cursor = db.dbh.cursor()
     philo_type = db.locals["metadata_types"][metadata_field_name]
@@ -95,9 +94,9 @@ def metadata_total_word_count_query(db, metadata, metadata_field_name):
     return results
 
 
-def query_recursive(db, param_dict, parent, sort_order):
+def query_recursive(db, param_dict, parent, sort_order, ascii_conversion=True):
     """Build recursise SQL query"""
-    r = query_lowlevel(db, param_dict, sort_order)
+    r = query_lowlevel(db, param_dict, sort_order, ascii_conversion)
     if parent:
         try:
             outer_hit = next(parent)
@@ -118,7 +117,7 @@ def query_recursive(db, param_dict, parent, sort_order):
             yield row
 
 
-def query_lowlevel(db, param_dict, sort_order):
+def query_lowlevel(db, param_dict, sort_order, ascii_conversion):
     """SQL query builder"""
     vars = []
     clauses = []
@@ -132,7 +131,7 @@ def query_lowlevel(db, param_dict, sort_order):
                 v = v.replace('"', "")  # remove quotes
                 parsed = parse_date_query(v)
             grouped = group_terms(parsed)
-            expanded = expand_grouped_query(grouped, norm_path)
+            expanded = expand_grouped_query(grouped, norm_path, ascii_conversion)
             sql_clause = make_grouped_sql_clause(expanded, column, db)
             if db.locals["debug"]:
                 print("METADATA_TOKENS:", parsed, file=sys.stderr)
@@ -154,7 +153,7 @@ def query_lowlevel(db, param_dict, sort_order):
     return results
 
 
-def expand_grouped_query(grouped, norm_path):
+def expand_grouped_query(grouped, norm_path, ascii_conversion):
     """Expand grouped SQL query"""
     expanded = []
     pure = True
@@ -172,8 +171,8 @@ def expand_grouped_query(grouped, norm_path):
         for kind, token in group:
             if kind == "TERM":
                 norm_term = token.lower()
-                norm_term = unidecode(norm_term)
-                norm_term = "".join(norm_term)
+                if ascii_conversion is True:
+                    norm_term = unidecode(norm_term)
                 expanded_terms = metadata_pattern_search(norm_term, norm_path)
                 if expanded_terms:
                     expanded_tokens = [("QUOTE", '"' + e + '"') for e in expanded_terms]

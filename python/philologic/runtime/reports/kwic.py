@@ -13,9 +13,7 @@ from philologic.runtime.DB import DB
 def kwic_results(request, config):
     """Fetch KWIC results"""
     db = DB(config.db_path + "/data/")
-    hits = db.query(
-        request["q"], request["method"], request["arg"], ascii_sort=db.locals.ascii_conversion, **request.metadata
-    )
+    hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
     start, end, n = page_interval(request.results_per_page, hits, request.start, request.end)
     kwic_object = {
         "description": {"start": start, "end": end, "results_per_page": request.results_per_page},

@@ -12,11 +12,21 @@ def aggregation_by_field(request, config):
     db = DB(config.db_path + "/data/")
     if request.q == "" and request.no_q:
         if request.no_metadata:
-            hits = db.get_all(db.locals["default_object_level"], sort_order=["rowid"], raw_results=True)
+            hits = db.get_all(
+                db.locals["default_object_level"],
+                sort_order=["rowid"],
+                raw_results=True,
+            )
         else:
             hits = db.query(sort_order=["rowid"], raw_results=True, **request.metadata)
     else:
-        hits = db.query(request["q"], request["method"], request["arg"], raw_results=True, **request.metadata)
+        hits = db.query(
+            request["q"],
+            request["method"],
+            request["arg"],
+            raw_results=True,
+            **request.metadata,
+        )
 
     group_by = request.group_by
     field_obj = __get_field_config(group_by, config)

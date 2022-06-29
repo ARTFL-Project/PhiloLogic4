@@ -74,7 +74,7 @@ class DB:
             return ""
 
     def get_all(
-        self, philo_type="doc", sort_order=["rowid"], raw_results=False, ascii_sort=True
+        self, philo_type="doc", sort_order=["rowid"], raw_results=False
     ):  # pylint: disable=dangerous-default-value
         """get all objects of type philo_type"""
         hash = hashlib.sha1()
@@ -89,10 +89,17 @@ class DB:
             else:
                 param_dicts = [{"philo_type": ['"%s"' % philo_type]}]
             return MetadataQuery.metadata_query(
-                self, all_file, param_dicts, sort_order, raw_results=raw_results, ascii_sort=ascii_sort
+                self,
+                all_file,
+                param_dicts,
+                sort_order,
+                raw_results=raw_results,
+                ascii_conversion=self.locals.ascii_conversion,
             )
         else:
-            return HitList.HitList(all_file, 0, self, sort_order=sort_order, raw=raw_results, ascii_sort=ascii_sort)
+            return HitList.HitList(
+                all_file, 0, self, sort_order=sort_order, raw=raw_results, ascii_conversion=self.locals.ascii_conversion
+            )
 
     def query(
         self,
@@ -103,7 +110,6 @@ class DB:
         sort_order=["rowid"],
         raw_results=False,
         get_word_count_field=None,
-        ascii_sort=True,
         **metadata,
     ):  # pylint: disable=dangerous-default-value
         """query the PhiloLogic database"""
@@ -141,7 +147,9 @@ class DB:
                 key_value = "%s=%s" % (key, "|".join(value))
                 hash.update(key_value.encode("utf8"))
         if get_word_count_field is not None:
-            return MetadataQuery.metadata_total_word_count_query(self, metadata, get_word_count_field)
+            return MetadataQuery.metadata_total_word_count_query(
+                self, metadata, get_word_count_field, ascii_conversion=self.locals.ascii_conversion
+            )
         if has_metadata:
             corpus_hash = hash.hexdigest()
             corpus_file = self.path + "/hitlists/" + corpus_hash + ".hitlist"
@@ -167,14 +175,24 @@ class DB:
                     else:
                         metadata_dicts.append({"philo_id": metadata["philo_id"]})
                 corpus = MetadataQuery.metadata_query(
-                    self, corpus_file, metadata_dicts, sort_order, raw_results=raw_results
+                    self,
+                    corpus_file,
+                    metadata_dicts,
+                    sort_order,
+                    raw_results=raw_results,
+                    ascii_conversion=self.locals.ascii_conversion,
                 )
 
             else:
                 if sort_order == ["rowid"]:
                     sort_order = None
                 corpus = HitList.HitList(
-                    corpus_file, 0, self, sort_order=sort_order, raw=raw_results, ascii_sort=ascii_sort
+                    corpus_file,
+                    0,
+                    self,
+                    sort_order=sort_order,
+                    raw=raw_results,
+                    ascii_conversion=self.locals.ascii_conversion,
                 )
                 corpus.finish()
             if len(corpus) == 0:
@@ -202,14 +220,19 @@ class DB:
                     filename=search_file,
                     sort_order=sort_order,
                     raw_results=raw_results,
-                    ascii_sort=ascii_sort,
+                    ascii_conversion=self.locals.ascii_conversion,
                 )
             parsed = QuerySyntax.parse_query(qs)
             grouped = QuerySyntax.group_terms(parsed)
             split = Query.split_terms(grouped)
             words_per_hit = len(split)
             return HitList.HitList(
-                search_file, words_per_hit, self, sort_order=sort_order, raw=raw_results, ascii_sort=ascii_sort
+                search_file,
+                words_per_hit,
+                self,
+                sort_order=sort_order,
+                raw=raw_results,
+                ascii_conversion=self.locals.ascii_conversion,
             )
         if corpus:
             return corpus

@@ -27,7 +27,7 @@ def query(
     query_debug=False,
     sort_order=None,
     raw_results=False,
-    ascii_sort=True,
+    ascii_conversion=True,
 ):
     """Runs concordance queries"""
     sys.stdout.flush()
@@ -91,7 +91,7 @@ def query(
     else:
         hl.close()
         return HitList.HitList(
-            filename, words_per_hit, db, sort_order=sort_order, raw=raw_results, ascii_sort=ascii_sort
+            filename, words_per_hit, db, sort_order=sort_order, raw=raw_results, ascii_conversion=ascii_conversion
         )
 
 

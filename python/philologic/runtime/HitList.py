@@ -24,7 +24,7 @@ class HitList(object):
         methodarg=3,
         sort_order=None,
         raw=False,
-        ascii_sort=True,
+        ascii_conversion=True,
     ):
         self.filename = filename
         self.words = words
@@ -80,7 +80,7 @@ class HitList(object):
             for i in cursor:
                 sql_row = dict(i)
                 philo_id = tuple(int(s) for s in sql_row["philo_id"].split() if int(s))
-                if ascii_sort is True:
+                if ascii_conversion is True:
                     metadata[philo_id] = [unidecode(sql_row[m] or "ZZZZZ") for m in sort_order]
                 else:
                     metadata[philo_id] = [sql_row[m] or "ZZZZZ" for m in sort_order]

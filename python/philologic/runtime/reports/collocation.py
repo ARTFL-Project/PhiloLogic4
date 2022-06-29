@@ -18,7 +18,12 @@ def collocation_results(request, config):
     """Fetch collocation results"""
     db = DB(config.db_path + "/data/")
     if request["collocate_distance"]:
-        hits = db.query(request["q"], "proxy", int(request["collocate_distance"]), **request.metadata)
+        hits = db.query(
+            request["q"],
+            "proxy",
+            int(request["collocate_distance"]),
+            **request.metadata,
+        )
     else:
         hits = db.query(request["q"], "cooc", request["arg"], **request.metadata)
     hits.finish()
@@ -46,9 +51,21 @@ def collocation_results(request, config):
     filter_list = filter_list.union(query_words)
 
     if request["collocate_distance"]:
-        hits = db.query(request["q"], "proxy", int(request["collocate_distance"]), raw_results=True, **request.metadata)
+        hits = db.query(
+            request["q"],
+            "proxy",
+            int(request["collocate_distance"]),
+            raw_results=True,
+            **request.metadata,
+        )
     else:
-        hits = db.query(request["q"], "proxy", request["arg"], raw_results=True, **request.metadata)
+        hits = db.query(
+            request["q"],
+            "proxy",
+            request["arg"],
+            raw_results=True,
+            **request.metadata,
+        )
     hits.finish()
     stored_sentence_id = None
     stored_sentence_counts = defaultdict(int)
