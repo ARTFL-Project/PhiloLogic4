@@ -64,7 +64,7 @@ def generate_toc_object(request, config):
         link = make_absolute_object_link(config, philo_id.split()[: philo_slices[philo_type]])
         philo_id = " ".join(philo_id.split()[: philo_slices[philo_type]])
         citation_hrefs = citation_links(db, config, text)
-        toc_element = {
+        toc_element = {  # TODO: make toc_element the citation object, remove other redundant stuff
             "philo_id": philo_id,
             "philo_type": philo_type,
             "label": display_name,

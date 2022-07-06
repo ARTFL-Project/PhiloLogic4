@@ -79,7 +79,7 @@
                                 >
                                     <span :class="'bullet-point-' + element.philo_type"></span>
                                     <a :class="{ 'current-obj': element.philo_id === currentPhiloId }" href>
-                                        {{ element.label }}
+                                        <citations :citation="element.citation"></citations>
                                     </a>
                                 </div>
                             </div>
