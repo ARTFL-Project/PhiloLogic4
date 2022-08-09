@@ -6,6 +6,7 @@ export function paramsFilter(formValues) {
     } else {
         validFields = new Set(Object.keys(formValues))
     }
+    console.log("START")
     if (formValues.approximate == "no") {
         formValues.approximate_ratio = ""
     }
@@ -16,6 +17,9 @@ export function paramsFilter(formValues) {
         }
         if (!validFields.has(field)) {
             continue
+        }
+        if (field == "year") {
+            console.log(value, typeof value)
         }
         if (value.length > 0 || field === 'results_per_page') {
             if (
@@ -107,11 +111,11 @@ export function sortResults(fullResults, sortKey) {
         })
     }
     if (sortKey === 'label') {
-        sortedList.sort(function (a, b) {
+        sortedList.sort(function(a, b) {
             return a.label - b.label
         })
     } else {
-        sortedList.sort(function (a, b) {
+        sortedList.sort(function(a, b) {
             return b.count - a.count
         })
     }
@@ -143,5 +147,14 @@ export function debug(component, message) {
 }
 
 export default {
-    paramsFilter, paramsToRoute, paramsToUrlString, copyObject, saveToLocalStorage, mergeResults, sortResults, deepEqual, dictionaryLookup, debug
+    paramsFilter,
+    paramsToRoute,
+    paramsToUrlString,
+    copyObject,
+    saveToLocalStorage,
+    mergeResults,
+    sortResults,
+    deepEqual,
+    dictionaryLookup,
+    debug
 }

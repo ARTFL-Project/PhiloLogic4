@@ -133,7 +133,8 @@ def convert_web_config(web_config_path, philo_db):
             else:
                 config_values[config_name] = getattr(old_config, config_name)
         except AttributeError:
-            config_values["external_page_images"] = config_value["value"]
+            if config_name == "external_page_images":
+                config_values["external_page_images"] = config_value["value"]
     if config_values["dictionary"] is True:
         if "head" not in config_values["metadata"]:
             config_values["metadata"] = ["head", *config_values["metadata"]]

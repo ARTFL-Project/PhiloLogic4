@@ -21,6 +21,8 @@ class WSGIHandler(object):
         self.path_info = environ.get("PATH_INFO", "")
         self.query_string = environ["QUERY_STRING"]
         self.script_filename = environ["SCRIPT_FILENAME"]
+        self.db_path = "/".join(environ["SCRIPT_NAME"].split("/")[:-2])
+
         self.authenticated = False
         if "HTTP_COOKIE" in environ:
             self.cookies = SimpleCookie(

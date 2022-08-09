@@ -596,10 +596,20 @@ export default {
             return sortValues;
         },
         metadataDisplayFiltered() {
-            if (!this.dictionary) {
-                return this.metadataDisplay;
+            let metadataInForm = [];
+            if (this.currentReport == "time_series") {
+                for (let metadataField of this.metadataDisplay) {
+                    if (this.$philoConfig.time_series_year_field !== metadataField.value) {
+                        metadataInForm.push(metadataField);
+                    }
+                }
             } else {
-                let localMetadataDisplay = this.copyObject(this.metadataDisplay);
+                metadataInForm = this.copyObject(this.metadataDisplay);
+            }
+            if (!this.dictionary) {
+                return metadataInForm;
+            } else {
+                let localMetadataDisplay = this.copyObject(metadataInForm);
                 localMetadataDisplay.splice(this.headIndex, 1);
                 return localMetadataDisplay;
             }

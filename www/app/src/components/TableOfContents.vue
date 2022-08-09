@@ -25,6 +25,9 @@
                                 <div v-for="(element, elIndex) in tocElements.slice(0, displayLimit)" :key="elIndex">
                                     <div :class="'toc-' + element.philo_type">
                                         <span :class="'bullet-point-' + element.philo_type"></span>
+                                        <router-link :to="element.href" class="toc-section">{{
+                                            element.label
+                                        }}</router-link>
                                         <citations :citation="element.citation"></citations>
                                     </div>
                                 </div>

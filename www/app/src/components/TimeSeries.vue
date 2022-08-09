@@ -195,7 +195,7 @@ export default {
                     let endDate = startDate + parseInt(vm.interval) - 1;
                     var year;
                     if (startDate == endDate) {
-                        year = startDate;
+                        year = startDate.toString();
                     } else {
                         year = `${startDate}-${endDate}`;
                     }
@@ -203,6 +203,15 @@ export default {
                         key: "year",
                         value: year,
                     });
+                    console.log(
+                        vm.paramsToRoute({
+                            ...vm.$store.state.formData,
+                            report: "concordance",
+                            start_date: "",
+                            end_date: "",
+                            year_interval: "",
+                        })
+                    );
                     vm.$router.push(
                         vm.paramsToRoute({
                             ...vm.$store.state.formData,
