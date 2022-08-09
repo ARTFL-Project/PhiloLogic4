@@ -203,15 +203,6 @@ export default {
                         key: "year",
                         value: year,
                     });
-                    console.log(
-                        vm.paramsToRoute({
-                            ...vm.$store.state.formData,
-                            report: "concordance",
-                            start_date: "",
-                            end_date: "",
-                            year_interval: "",
-                        })
-                    );
                     vm.$router.push(
                         vm.paramsToRoute({
                             ...vm.$store.state.formData,

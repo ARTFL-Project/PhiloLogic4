@@ -699,21 +699,11 @@ def get_first_page(philo_id, config):
     starting the object"""
     db = DB(config.db_path + "/data/")
     c = db.dbh.cursor()
-
-    import sys
-
-    print(philo_id, file=sys.stderr)
-
     if len(philo_id) < 9:
         c.execute("select start_byte, end_byte from toms where philo_id=?", (" ".join([str(i) for i in philo_id]),))
         result = c.fetchone()
         start_byte = result["start_byte"]
-        print(start_byte, file=sys.stderr)
         approx_id = f"{philo_id[0]} 0 0 0 0 0 0 %"
-        print(
-            f"select * from pages where philo_id like '{approx_id}' and CAST(end_byte AS INT) >= {start_byte} limit 1",
-            file=sys.stderr,
-        )
         try:
             c.execute(
                 f"select * from pages where philo_id like '{approx_id}' and CAST(end_byte AS INT) >= {start_byte} limit 1"

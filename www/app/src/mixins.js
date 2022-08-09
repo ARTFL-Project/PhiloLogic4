@@ -6,7 +6,6 @@ export function paramsFilter(formValues) {
     } else {
         validFields = new Set(Object.keys(formValues))
     }
-    console.log("START")
     if (formValues.approximate == "no") {
         formValues.approximate_ratio = ""
     }
@@ -17,9 +16,6 @@ export function paramsFilter(formValues) {
         }
         if (!validFields.has(field)) {
             continue
-        }
-        if (field == "year") {
-            console.log(value, typeof value)
         }
         if (value.length > 0 || field === 'results_per_page') {
             if (
