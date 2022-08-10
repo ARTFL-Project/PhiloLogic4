@@ -7,7 +7,7 @@ title: Configuring the Web Application
 -   [Access control](#access)
 -   [Changing web application theme](#changing-theme)
 
-### <a name="layout"></a>Layout of a PhiloLogic Web Application Instance
+## <a name="layout"></a>Layout of a PhiloLogic Web Application Instance
 
 This database directory contains:
 
@@ -40,11 +40,11 @@ There are four distinct sections inside the application:
 -   The `reports/` directory, which contains the major search reports which fetch data from the database by interfacing with the core library, and then return a specialized results report as a JSON object. These reports include concordance, KWIC (Key Word In Context), collocation, and time series.
 -   The `scripts/` directory, which contains standalone CGI scripts that are called directly from JavaScript code on the client side. These functions have a very specialized purpose, such as returning the total number of hits for any given query.
 
-### <a name="ui"></a>Modifying the behavior of the Web Application
+## <a name="ui"></a>Modifying the behavior of the Web Application
 
 To change the behavior of the Web Application, you should edit the `web_config.cfg` file contained in the `data/` directory. Refer to the documentation contained in the file for editing options. Note that PhiloLogic uses the Python syntax in the config file.
 
-### <a name="access"></a>Access control
+## <a name="access"></a>Access control
 
 There are two components in the built-in access control:
 
@@ -55,7 +55,7 @@ In order for access control to be turned on, you first need to set the `access_c
 
 Once access control has been turned on, PhiloLogic will check the `access_file` variable which defines a file contained in the /data directory which will contain the domain names allowed as well as the IPs addresses to be blocked. If no such file is provided, access will be automatically granted.
 
-### <a name="changing-theme"></a>Changing the Web Application theme
+## <a name="changing-theme"></a>Changing the Web Application theme
 Changing the Web Application theme requires editing the `theme.module.scss` file which can be found in the database directory under `app/src/assets/styles/`.
 
 The `theme.module.scss` file is a Sass stylesheet which makes use of global variables to define the main colors used in the web app. All you should need to do is edit `$header-color`, `$button-color`, `$button-color-active`, `$link-color`. Once you've edited the theme file, you will need to rebuild the web application. In order to do so, go to the `app/` directory and run the following command in the terminal:
@@ -63,7 +63,7 @@ The `theme.module.scss` file is a Sass stylesheet which makes use of global vari
 npm run build
 ```
 
-### <a name="aggregation"></a>Configuring the aggregation report
+## <a name="aggregation"></a>Configuring the aggregation report
 The aggregation report (much like faceted browsing) sums up results from concordances by metadata fields. What it can also do is break-up results from any metadata field
 into smaller groups of results. For instance, you can get results grouped by author, and for each author, you can break up results by title, all within the same results page.
 
