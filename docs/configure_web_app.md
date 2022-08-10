@@ -7,7 +7,7 @@ title: Configuring the Web Application
 -   [Access control](#access)
 -   [Changing web application theme](#changing-theme)
 
-## <a name="layout"></a>Layout of a PhiloLogic Web Application Instance
+# <a name="layout"></a>Layout of a PhiloLogic Web Application Instance
 
 This database directory contains:
 
@@ -40,7 +40,7 @@ There are four distinct sections inside the application:
 -   The `reports/` directory, which contains the major search reports which fetch data from the database by interfacing with the core library, and then return a specialized results report as a JSON object. These reports include concordance, KWIC (Key Word In Context), collocation, and time series.
 -   The `scripts/` directory, which contains standalone CGI scripts that are called directly from JavaScript code on the client side. These functions have a very specialized purpose, such as returning the total number of hits for any given query.
 
-## <a name="ui"></a>Modifying the behavior of the Web Application
+# <a name="ui"></a>Modifying the behavior of the Web Application
 
 To change the behavior of the Web Application, you should edit the `web_config.cfg` file contained in the `data/` directory. Refer to the documentation contained in the file for editing options. Note that PhiloLogic uses the Python syntax in the config file.
 
