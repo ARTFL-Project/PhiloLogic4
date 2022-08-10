@@ -62,3 +62,10 @@ The `theme.module.scss` file is a Sass stylesheet which makes use of global vari
 ```
 npm run build
 ```
+
+#### <a name="aggregation"></a>Configuring the aggregation report
+The aggregation report (much like faceted browsing) sums up results from concordances by metadata fields. What it can also do is break-up results from any metadata field
+into smaller groups of results. For instance, you can get results grouped by author, and for each author, you can break up results by title, all within the same results page.
+
+To configure the aggregation report, you need to modify the `aggregation_report` variable. This variable is a list where you define what groupings are possible. Below is an annotated example of such groupings:
+
