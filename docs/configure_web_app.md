@@ -69,3 +69,72 @@ into smaller groups of results. For instance, you can get results grouped by aut
 
 To configure the aggregation report, you need to modify the `aggregation_report` variable. This variable is a list where you define what groupings are possible. Below is an annotated example of such groupings:
 
+Here's a example of a database comprised of novels (with groupings done at the doc level):
+
+```python
+aggregation_config = [
+    {
+        "field": "author",  # what metadata fieds is used for grouping results
+        "object_level": "doc", # object level of the metadata field used for grouping
+        "field_citation": [citations["author"]], # citation object used for citing this field
+        "break_up_field": "title", # define by what metadata field the results can be further broken into
+        "break_up_field_citation": [ # define the citation for the break-up field
+            citations["title"],
+            citations["pub_place"],
+            citations["publisher"],
+            citations["collection"],
+            citations["year"],
+        ],
+    },
+    {
+        "field": "title",
+        "object_level": "doc",
+        "field_citation": [
+            citations["title"],
+            citations["pub_place"],
+            citations["publisher"],
+            citations["collection"],
+            citations["year"],
+        ],
+        "break_up_field": None, # set to None if no break-up field (in this case titles are typically unique so doesn't make sense)
+        "break_up_field_citation": None, # leave to None for citation as well.
+    },
+]
+```
+
+Here's an example of a database containing articles (with groupings done rather at the div1 level):
+
+```python
+aggregation_config = [
+    {
+        "field": "author",
+        "object_level": "div1",
+        "break_up_field": "head", # IMPORTANT NOTE: the break-up field MUST be of the same object level as the main metadata field used for grouping
+        "field_citation": [citations["author"]],
+        "break_up_field_citation": [
+            citations["div1_head"],
+            citations["class"],
+        ],
+    },
+    {
+        "field": "head",
+        "object_level": "div1",
+        "field_citation": [
+            citations["div1_head"],
+            citations["class"],
+        ],
+        "break_up_field": None,
+        "break_up_field_citation": None,
+    },
+    {
+        "field": "class",
+        "object_level": "div1",
+        "field_citation": [
+            citations["class"],
+        ],
+        "break_up_field": "head",
+        "break_up_field_citation": [citations["div1_head"], citations["author"]],
+    },
+]
+```
+    
