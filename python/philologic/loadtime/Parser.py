@@ -141,6 +141,7 @@ TAG_EXCEPTIONS = [
     r"</sup>",
 ]
 
+# For Asian script, try using this slightly-modified regex: r"[\p{L}\p{M}\p{N}\p{Po}]+|[&\p{L};]+"
 TOKEN_REGEX = r"[\p{L}\p{M}\p{N}]+|[&\p{L};]+"
 
 PUNCTUATION = r"""[;,:=+()"]"""

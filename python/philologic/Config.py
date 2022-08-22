@@ -733,6 +733,7 @@ WEB_CONFIG_DEFAULTS = {
     },
     "query_parser_regex": {
         "value": [
+            ("-", " "),
             (" OR ", " | "),
             ("'", " "),
             (";", ""),

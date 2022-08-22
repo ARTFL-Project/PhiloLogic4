@@ -816,7 +816,6 @@ class Loader:
         config_values = {
             "dbname": dbname,
             "metadata": metadata,
-            "autocomplete": ["q", *metadata],
             "facets": metadata,
         }
 

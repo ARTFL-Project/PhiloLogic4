@@ -150,6 +150,7 @@ metadata_sql_types = {}
 words_to_index = ""
 
 # This regex defines how to tokenize words and punctuation
+# For Asian script, try using this token_regex: r"[\p{L}\p{M}\p{N}\p{Po}]+|[&\p{L};]+"
 token_regex = r"[\p{L}\p{M}\p{N}]+|[&\p{L};]+"
 
 # This defines whether you want to convert your text and metadata to an ASCII representation for
