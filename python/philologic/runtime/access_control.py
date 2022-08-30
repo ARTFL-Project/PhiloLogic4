@@ -139,7 +139,6 @@ def check_login_info(config, request):
                 try:
                     line = line.decode("utf8", "ignore")
                 except UnicodeDecodeError:
-                    print(repr(line), file=sys.stderr)
                     continue
                 line = line.strip()
                 if not line:  # empty line
