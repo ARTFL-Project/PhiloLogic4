@@ -194,6 +194,7 @@ export default {
 <style lang="scss">
 @import "./assets/styles/theme.module.scss";
 @import "../node_modules/bootstrap/scss/bootstrap.scss";
+
 a {
     text-decoration: none;
 }

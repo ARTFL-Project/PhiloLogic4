@@ -123,8 +123,8 @@ def login_access(environ, request, config, headers):
                 token = make_token(incoming_address, db)
                 if token:
                     h, ts = token
-                    headers.append(("Set-Cookie", "hash=%s" % h))
-                    headers.append(("Set-Cookie", "timestamp=%s" % ts))
+                    headers.append(("Set-Cookie", f"hash={h}"))
+                    headers.append(("Set-Cookie", f"timestamp={ts}"))
         else:
             access = False
     return access, headers
@@ -138,7 +138,7 @@ def check_login_info(config, request):
             for line in password_file:
                 try:
                     line = line.decode("utf8", "ignore")
-                except UnicodeDecodeError as e:
+                except UnicodeDecodeError:
                     print(repr(line), file=sys.stderr)
                     continue
                 line = line.strip()

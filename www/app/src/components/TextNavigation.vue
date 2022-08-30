@@ -308,7 +308,12 @@ export default {
                         if (notes.length > 0) {
                             Array.from(notes).forEach((note) => {
                                 let innerHTML = note.nextElementSibling.innerHTML;
-                                new Popover(note, { html: true, content: innerHTML, trigger: "focus" });
+                                new Popover(note, {
+                                    html: true,
+                                    content: innerHTML,
+                                    trigger: "focus",
+                                    customClass: "custom-popover shadow-lg",
+                                });
                             });
                         }
 
@@ -329,6 +334,7 @@ export default {
                                                 html: true,
                                                 content: response.data.text,
                                                 trigger: "focus",
+                                                customClass: "custom-popover shadow-lg",
                                             });
                                             noteRef.removeEventListener("click", getNotes);
                                         });
@@ -361,7 +367,9 @@ export default {
                                     easing: "ease-out",
                                     offset: -150,
                                     onDone: function () {
-                                        note.focus();
+                                        setTimeout(() => {
+                                            note.focus();
+                                        }, 500);
                                     },
                                 });
                             } else {
@@ -377,13 +385,14 @@ export default {
                             });
                         } else if (this.$route.hash) {
                             // for note link back
-                            console.log("HAHA");
                             let note = document.getElementById(this.$route.hash.slice(1));
                             this.$scrollTo(note, 250, {
                                 easing: "ease-out",
                                 offset: -250,
                                 onDone: () => {
-                                    note.focus();
+                                    setTimeout(() => {
+                                        note.focus();
+                                    }, 500);
                                 },
                             });
                         }
@@ -691,7 +700,8 @@ export default {
     },
 };
 </script>
-<style scoped>
+<style lang="scss" scoped>
+@import "../assets/styles/theme.module.scss";
 .separator {
     padding: 5px;
     font-size: 60%;
@@ -1053,16 +1063,6 @@ body {
 }
 
 /*Note handling*/
-
-:deep(.popover) {
-    max-width: 350px;
-    overflow: scroll;
-}
-
-:deep(.popover-content) {
-    text-align: justify;
-}
-
 :deep(.popover-content .xml-p:not(:first-of-type)) {
     display: block;
     margin-top: 1em;
@@ -1077,6 +1077,10 @@ body {
 :deep(.note-ref) {
     vertical-align: 0.3em;
     font-size: 0.7em;
+    background-color: $button-color;
+    color: #fff;
+    padding: 0 0.2rem;
+    border-radius: 50%;
 }
 
 :deep(.note:hover),
