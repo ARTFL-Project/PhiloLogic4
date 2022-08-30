@@ -435,7 +435,7 @@ def format_text_object(
                         "/".join([i for i in object_id.split() if i != "0"]),
                         "#%s-link-back" % el.attrib["id"],
                     )
-                    link_back.attrib["class"] = "btn btn-xs btn-default link-back"
+                    link_back.attrib["class"] = "btn btn-sm btn-light link-back"
                     link_back.attrib["role"] = "button"
                     link_back.text = "Go back to text"
                     el.append(link_back)
@@ -682,7 +682,7 @@ def page_images(config, output, current_obj_img, current_graphic_img, philo_id):
                 return output, {}
         else:
             output = '<span class="xml-pb-image">[page ' + str(first_page_object["n"]) + "]</span>" + output
-    ## Fetch all remainging imgs in document
+    ## Fetch all remaining imgs in document
     all_imgs = get_all_page_images(philo_id, config, current_obj_img)
     all_graphics = get_all_graphics(philo_id, config)
     img_obj = {
@@ -747,7 +747,7 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
                 'select * from pages where philo_id like ? and facs is not null and facs != ""', (approx_id,)
             )
             current_obj_imgs = set(current_obj_imgs)
-            all_imgs = [tuple(i["facs"].split()) for i in cursor]
+            all_imgs = [tuple([f"{img}{config.page_image_extension}" for img in i["facs"].split()]) for i in cursor]
         except sqlite3.OperationalError:
             all_imgs = []
         if not all_imgs:
@@ -756,7 +756,7 @@ def get_all_page_images(philo_id, config, current_obj_imgs):
                     'select * from pages where philo_id like ? and id is not null and id != ""', (approx_id,)
                 )
                 current_obj_imgs = set(current_obj_imgs)
-                all_imgs = [tuple(i["id"].split()) for i in cursor]
+                all_imgs = [tuple([f"{img}{config.page_image_extension}" for img in i["id"].split()]) for i in cursor]
             except sqlite3.OperationalError:
                 return []
         return all_imgs
