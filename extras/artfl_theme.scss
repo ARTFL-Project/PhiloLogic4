@@ -1,3 +1,11 @@
+// Custom Bootstrap changes: don't edit
+$popover-max-width: 50%;
+.custom-popover {
+    overflow: auto;
+    text-align: justify !important;
+    max-height: 60%;
+}
+
 // Theme colors
 $header-color: rgb(245, 219, 157);
 $button-color: rgba(143, 57, 49, .8);
