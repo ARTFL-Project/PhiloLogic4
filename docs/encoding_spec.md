@@ -132,3 +132,14 @@ Example of a search reference
 ```xml
 <ref type="search" target="head:Gouverner">Gouverner</ref>
 ```
+
+
+### Date tags
+You can use <date> tags inside the body of your document. The date will be attached to the parent div element. We only support two attributes for `when` and `value`. You can use either attribute to express the date. The date should be using the ISO date format YYYY-MM-DD. 
+    
+Example of <date> tags:
+    
+```xml
+<date when="1999-12-23"/>
+<date value="1999-12-23"/>
+```
