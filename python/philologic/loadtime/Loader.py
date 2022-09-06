@@ -456,7 +456,7 @@ class Loader:
         print("%s: parsing %d files." % (time.ctime(), len(cls.filequeue)))
         with tqdm(total=len(cls.filequeue), smoothing=0, leave=False) as pbar:
             with Pool(workers) as pool:
-                for results in pool.imap_unordered(cls.__parse_file, range(len(cls.data_dicts))):
+                for results in pool.imap_unordered(cls.parse_file, range(len(cls.data_dicts))):
                     with open(results, "rb") as proc_fh:
                         vec = pickle.load(proc_fh)
                     cls.omax = [max(x, y) for x, y in zip(vec, cls.omax)]
@@ -464,7 +464,7 @@ class Loader:
         print("%s: done parsing" % time.ctime())
 
     @classmethod
-    def __parse_file(cls, file_pos):
+    def parse_file(cls, file_pos):
         text = cls.filequeue[file_pos]
         metadata = cls.data_dicts[file_pos]
         options = text["options"]
