@@ -405,15 +405,6 @@ export default {
             var endPos = start + parseInt(this.results.results_per_page) || 25;
             var endPosLength = endPos.toString().length;
             var spaces = endPosLength - currentPosLength + 1;
-            console.log(
-                this.results.results_per_page,
-                start,
-                currentPos,
-                currentPosLength,
-                endPos,
-                endPosLength,
-                spaces
-            );
             return currentPos + "." + Array(spaces).join("&nbsp");
         },
         sortResults() {

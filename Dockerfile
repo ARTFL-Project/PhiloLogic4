@@ -17,8 +17,9 @@ RUN mkdir PhiloLogic4 && tar -xf philologic.tar.gz -C PhiloLogic4 --strip-compon
 RUN sed -i 's/database_root = None/database_root = "\/var\/www\/html\/philologic\/"/' /etc/philologic/philologic4.cfg && \
     sed -i 's/url_root = None/url_root = "http:\/\/localhost\/philologic\/"/' /etc/philologic/philologic4.cfg
 
+RUN echo "#!/bin/bash\nservice apache2 stop\nrm /var/run/apache2/*\napachectl -D FOREGROUND" > /autostart.sh && chmod +x /autostart.sh
 
 # Set up Apache
 RUN perl -i -p0e 's/<Directory \/var\/www\/>\n\tOptions Indexes FollowSymLinks\n\tAllowOverride None/<Directory \/var\/www\/>\n\tOptions Indexes FollowSymLinks\n\tAllowOverride all/smg' /etc/apache2/apache2.conf
 EXPOSE 80
-ENTRYPOINT apachectl -D FOREGROUND
+CMD ["/autostart.sh"]

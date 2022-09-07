@@ -736,6 +736,9 @@ export default {
                     });
                 }
             });
+            document.addEventListener("click", () => {
+                this.clearAutoCompletePopup();
+            });
         });
     },
     methods: {
@@ -814,6 +817,7 @@ export default {
                 Object.entries(this.metadataChoiceSelected).map(([key, val]) => [key, val.join(" | ")])
             );
             this.dateRangeHandler();
+            this.clearAutoCompletePopup();
             this.$router.push(
                 this.paramsToRoute({
                     ...this.$store.state.formData,
@@ -912,14 +916,6 @@ export default {
                                 });
                         }
                     }
-                    let popup = document.querySelector(`#autocomplete-${field}`);
-                    const clearAutocomplete = (e) => {
-                        if (e.target !== popup) {
-                            this.autoCompleteResults[field] = [];
-                        }
-                        window.removeEventListener("click", clearAutocomplete);
-                    };
-                    window.addEventListener("click", clearAutocomplete);
                 }, 200);
             }
         },
@@ -945,14 +941,10 @@ export default {
             let result = this.autoCompleteResults[field][this.arrowCounters[field]];
             this.setResult(result, field);
         },
-        handleClickOutside(evt) {
-            if (!this.$el.contains(evt.target)) {
-                this.isOpen = false;
-                for (let field in this.arrowCounters) {
-                    this.arrowCounters[field] = -1;
-                }
-            }
+        clearAutoCompletePopup() {
+            this.autoCompleteResults = Object.fromEntries(this.$philoConfig.autocomplete.map((field) => [field, []]));
         },
+        closeAutoComplete() {},
         setResult(inputString, field) {
             if (typeof inputString != "undefined") {
                 let inputGroup, lastInput;
