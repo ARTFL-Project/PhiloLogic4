@@ -272,7 +272,7 @@
                                                     class="form-check-input"
                                                     type="checkbox"
                                                     :id="metadataChoice.value"
-                                                    v-model="metadataChoiceSelected[localField.value]"
+                                                    v-model="metadataChoiceSelected[metadataChoice.value]"
                                                 />
                                                 <label class="form-check-label" :for="metadataChoice.value">{{
                                                     metadataChoice.text
@@ -286,22 +286,22 @@
                                         v-if="metadataInputStyle[localField.value] == 'dropdown'"
                                     >
                                         <button type="button" class="btn btn-outline-secondary">
-                                            <label :for="localField.value + 'input-filter'">{{
+                                            <label :for="localField.value + '-input-filter'">{{
                                                 localField.label
                                             }}</label>
                                         </button>
                                         <select
                                             class="form-select"
-                                            :id="localField.value"
+                                            :id="localField.value + '-select'"
                                             v-model="metadataValues[localField.value]"
                                         >
                                             <option
-                                                v-for="value in metadataChoiceValues[localField.value]"
-                                                :key="value.value"
-                                                :value="value.value"
-                                                v-once
+                                                v-for="innerValue in metadataChoiceValues[localField.value]"
+                                                :key="innerValue.value"
+                                                :value="innerValue.value"
+                                                :id="innerValue.value + '-select-option'"
                                             >
-                                                {{ value.text }}
+                                                {{ innerValue.text }}
                                             </option>
                                         </select>
                                     </div>
