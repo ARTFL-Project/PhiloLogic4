@@ -145,6 +145,12 @@ Example of <date> tags:
 <date value="1999-12-23"/>
 ```
 
+Note that you can also add additional attributes in the <date> tag such as 
+```xml
+<date when="1795-11-01" revdate="10-brumaire-IV">Du 10 Brumaire.</date>
+``` 
+However, you will need to tell the parser to extract that information by customizing your load_config.py file.
+    
 ### Using ISO dates in the TEI header
 You can use ISO dates for the pub_date and create_date tags in the TEI header. But in order to make those dates searchable, you need to specify the 'date' type in load_config.py in the metadata_sql_types variable. For instance:
 
