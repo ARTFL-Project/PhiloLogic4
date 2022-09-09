@@ -241,7 +241,7 @@ export default {
         },
         getSimpleLandingPageData() {
             this.$http
-                .get(`${this.$dbUrl}/reports/bibliography.py`)
+                .get(`${this.$dbUrl}/reports/bibliography.py`, { params: { simple_bibliography: "all" } })
                 .then((response) => {
                     this.bibliography = response.data;
                 })

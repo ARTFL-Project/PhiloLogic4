@@ -27,7 +27,6 @@ def get_notes(environ, start_response):
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("scripts", ""))
-    db = DB(config.db_path + "/data/")
     request = WSGIHandler(environ, config)
     text_object = generate_text_object(request, config, note=True)
     yield orjson.dumps(text_object)

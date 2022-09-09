@@ -10,6 +10,8 @@ def get_key(d, f):
     key = d.get(f, "ZZZZZ")
     if isinstance(key, datetime.date):
         return f"{key.year}-{key.month}-{key.day}"
+    elif isinstance(key, int):
+        return key
     else:
         return unidecode(key)
 

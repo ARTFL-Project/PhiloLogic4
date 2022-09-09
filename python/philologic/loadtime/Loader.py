@@ -362,9 +362,9 @@ class Loader:
                         earliest_year = year
         if earliest_year != 2500:
             if re.search(r"BC", metadata[metadata_with_year], re.I):
-                metadata["year"] = f"-{earliest_year}"
+                metadata["year"] = int(f"-{earliest_year}")
             else:
-                metadata["year"] = str(earliest_year)
+                metadata["year"] = earliest_year
         return metadata
 
     def parse_metadata(self, sort_by_field, header="tei"):
@@ -372,7 +372,7 @@ class Loader:
         print("### Parsing metadata ###", flush=True)
         if header == "tei":
             load_metadata = self.parse_tei_header()
-        elif header == "dc":
+        else:
             load_metadata = self.parse_dc_header()
 
         print(
@@ -383,13 +383,20 @@ class Loader:
 
         self.sort_order = sort_by_field  # to be used for the sort by concordance biblio key in web config
         if sort_by_field:
-            return sort_list(load_metadata, sort_by_field)
-        sorted_load_metadata = []
-        for filename in self.filenames:
-            for m in load_metadata:
-                if m["filename"] == os.path.basename(filename):
-                    sorted_load_metadata.append(m)
-                    break
+            sorted_load_metadata = sort_list(load_metadata, sort_by_field)
+        else:
+            sorted_load_metadata = []
+            for filename in self.filenames:
+                for m in load_metadata:
+                    if m["filename"] == os.path.basename(filename):
+                        sorted_load_metadata.append(m)
+                        break
+        if self.debug is True:
+            print("Files sorted in following order:")
+            for metadata in sorted_load_metadata:
+                metadata = collections.defaultdict(str, metadata)
+                print(f"File {metadata['filename']}:")
+                print({field: metadata[field] for field in sort_by_field}, "\n")
         return sorted_load_metadata
 
     @classmethod

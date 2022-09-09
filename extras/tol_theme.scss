@@ -99,10 +99,19 @@ input[type="text"]:focus {
     opacity: .5
 }
 
-:export {
-    color: $link-color
-}
-
 .landing-page-btn {
     border-bottom-width: 1px !important;
+}
+
+.note-ref {
+    vertical-align: 0.3em !important;
+    font-size: .7em !important;
+    font-weight: 700 !important;
+    color: #670a0a !important;
+    padding: 0 0.2rem !important;
+    background-color: #fff !important;
+}
+
+:export {
+    color: $link-color
 }
