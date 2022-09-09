@@ -13,6 +13,7 @@ class brokenConfig(object):
         self.web_config_path = db_path + "/data/web_config.cfg"
         self.valid_config = False
         self.traceback = traceback
+        self.db_path = db_path
 
     def __getitem__(self, _):
         return ""

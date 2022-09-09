@@ -349,10 +349,11 @@ class Loader:
             if field in metadata:
                 if isinstance(metadata[field], datetime.date):
                     metadata[field] = str(metadata[field].year)
+                elif isinstance(metadata[field], int):
+                    metadata[field] = str(metadata[field])
                 year_match = year_finder.search(metadata[field])  # make sure it's not a datetime or an int.
                 if year_match:
                     year = int(year_match.groups()[0])
-
                     metadata_with_year = field
                     if field == "create_date":  # this should be the canonical date
                         earliest_year = year

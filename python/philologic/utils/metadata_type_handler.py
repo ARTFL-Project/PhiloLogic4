@@ -3,7 +3,7 @@
 import datetime
 import regex as re
 
-INTEGER = re.compile(r"(\d{1,})")  # we are assuming positive years
+INTEGER = re.compile(r"^(-?\d{1,})")
 YEAR_MONTH_DAY = re.compile(r"(\d+)-(\d+)-(\d+)")
 YEAR_MONTH = re.compile(r"^(\d+)-(\d+)\Z")
 YEAR = re.compile(r"^(\d+)\Z")
