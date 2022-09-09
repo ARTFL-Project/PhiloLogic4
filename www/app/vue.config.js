@@ -8,7 +8,7 @@ module.exports = {
         }
     },
     publicPath: process.env.NODE_ENV === 'production' ? getBaseUrl() : '/',
-    transpileDependencies: true
+    transpileDependencies: true,
 }
 
 function getBaseUrl() {

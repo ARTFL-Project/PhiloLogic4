@@ -648,7 +648,10 @@ export default {
                 value: f.field,
             })),
             statFieldSelected: this.getLoadedStatField(),
-            autoCompleteResults: { q: [] },
+            autoCompleteResults: {
+                q: "",
+                ...Object.fromEntries(this.$philoConfig.metadata.map((field) => [field, []])),
+            },
             arrowCounters: { q: -1 },
             isOpen: false,
             showTips: false,
@@ -690,7 +693,6 @@ export default {
                     this.metadataChoiceSelected[metadataField] = this.formData[metadataField].split(" | ");
                 }
             }
-            this.autoCompleteResults[metadataField] = [];
             this.arrowCounters[metadataField] = -1;
             if (metadataField == "head") {
                 this.headIndex = this.metadataDisplay.length - 1;
@@ -942,7 +944,10 @@ export default {
             this.setResult(result, field);
         },
         clearAutoCompletePopup() {
-            this.autoCompleteResults = Object.fromEntries(this.$philoConfig.autocomplete.map((field) => [field, []]));
+            this.autoCompleteResults = {
+                q: "",
+                ...Object.fromEntries(this.$philoConfig.metadata.map((field) => [field, []])),
+            };
         },
         closeAutoComplete() {},
         setResult(inputString, field) {

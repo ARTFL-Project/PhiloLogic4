@@ -244,7 +244,7 @@ def invert_grep_exact(token, in_fh, dest_fh):
 def query_parse(query_terms, config):
     """Parse query function."""
     for pattern, replacement in config.query_parser_regex:
-        query_terms = re.sub(r"{}".format(pattern), replacement, query_terms, re.U)
+        query_terms = re.sub(rf"{pattern}", rf"{replacement}", query_terms, re.U)
     return query_terms
 
 
