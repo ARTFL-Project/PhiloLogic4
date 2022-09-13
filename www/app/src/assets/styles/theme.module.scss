@@ -83,8 +83,13 @@ a.btn-secondary {
     color: $link-color !important;
 }
 
-.letter:hover {
+.letter:hover,
+#dico-landing-volume .list-group-item:hover {
     background-color: $button-color !important;
+    color: #fff !important;
+}
+
+#dico-landing-volume a:hover {
     color: #fff !important;
 }
 

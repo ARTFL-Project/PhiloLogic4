@@ -60,15 +60,7 @@
                     </div>
                 </div>
             </div>
-            <div
-                id="custom-landing-page"
-                v-if="
-                    landingPageBrowsing != 'default' &&
-                    landingPageBrowsing != 'dictionary' &&
-                    landingPageBrowsing != 'simple'
-                "
-                v-html="landingPageBrowsing"
-            ></div>
+            <div id="custom-landing-page" v-if="customLandingPage.length > 0" v-html="customLandingPage"></div>
             <div id="dictionary-landing-page" v-if="landingPageBrowsing === 'dictionary'">
                 <div class="row">
                     <div class="col-6" :class="{ 'offset-3': !showDicoLetterRows }" id="dico-landing-volume">
@@ -78,7 +70,7 @@
                                 <div class="list-group-item" v-for="volume in volumeData" :key="volume.philo_id">
                                     <router-link :to="`/navigate/${volume.philo_id}/table-of-contents`">
                                         <i style="font-variant: small-caps">{{ volume.title }}</i>
-                                        <span style="font-weight: 300" v-if="volume.start_head"
+                                        <span style="font-weight: 300; padding-left: 0.25rem" v-if="volume.start_head"
                                             >({{ volume.start_head }} - {{ volume.end_head }})</span
                                         >
                                     </router-link>
@@ -162,6 +154,7 @@ export default {
             logo: this.$philoConfig.logo,
             landingPageBrowsing: this.$philoConfig.landing_page_browsing,
             defaultLandingPageBrowsing: this.$philoConfig.default_landing_page_browsing,
+            customLandingPage: "",
             displayCount: true,
             resultGroups: [],
             contentType: "",
@@ -176,7 +169,9 @@ export default {
         };
     },
     created() {
-        if (this.dictionary) {
+        if (!["simple", "default", "dictionary"].includes(this.landingPageBrowsing)) {
+            this.setupCustomPage();
+        } else if (this.dictionary) {
             this.setupDictView();
         } else if (this.landingPageBrowsing == "simple") {
             this.getSimpleLandingPageData();
@@ -211,6 +206,14 @@ export default {
             if (this.dicoLetterRows.length == 0) {
                 this.showDicoLetterRows = false;
             }
+        },
+        setupCustomPage() {
+            this.$http
+                .get(`${this.$dbUrl}/${this.landingPageBrowsing}`, {
+                    withCredentials: false,
+                    headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "text/html" },
+                })
+                .then((response) => (this.customLandingPage = response.data));
         },
         getContent(browseType, range) {
             this.selectedField = browseType.group_by_field;
@@ -345,5 +348,15 @@ tr:nth-child(even) td.letter:nth-child(2n + 1) {
 }
 .landing-page-btn:focus {
     border-width: 3px;
+}
+#dico-landing-volume .list-group-item {
+    padding: 0 1rem;
+}
+#dico-landing-volume a {
+    display: inline-block;
+    padding: 0.5rem 0;
+}
+.letter {
+    text-align: center;
 }
 </style>

@@ -1191,6 +1191,9 @@ body {
 :deep(s) {
     text-decoration: none;
 }
+:deep(h5 .text-view) {
+    font-size: inherit !important;
+}
 .slide-fade-enter-active {
     transition: all 0.3s ease-out;
 }

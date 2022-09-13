@@ -2,7 +2,7 @@ module.exports = {
     devServer: {
         compress: true,
         allowedHosts: 'all',
-        proxy: "https://anomander.uchicago.edu/philologic",
+        proxy: "https://anomander.uchicago.edu/philologic4.7/",
         headers: {
             'Access-Control-Allow-Origin': '*'
         }

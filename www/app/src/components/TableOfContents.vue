@@ -143,4 +143,7 @@ export default {
     background-color: rgb(253, 253, 253);
     margin: 10px;
 }
+:deep(h5 .text-view) {
+    font-size: inherit !important;
+}
 </style>

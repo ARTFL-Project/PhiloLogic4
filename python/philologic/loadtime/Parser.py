@@ -1025,7 +1025,10 @@ class XMLParser:
                 div = f"div{self.context_div_level}"
                 if "type" in attrib:
                     if attrib["type"] in self.metadata_to_parse["div"]:
-                        self.set_metadata_value(div, attrib["type"], attrib["value"])
+                        try:
+                            self.set_metadata_value(div, attrib["type"], attrib["value"])
+                        except KeyError:
+                            pass
                 else:
                     for metadata_name, metadata_value in attrib.items():
                         self.set_metadata_value(div, metadata_name, metadata_value)
