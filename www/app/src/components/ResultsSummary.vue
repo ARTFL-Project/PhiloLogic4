@@ -366,6 +366,9 @@ export default {
                                 end: "",
                                 group_by: "",
                             });
+                            if (link.length == 0) {
+                                link = "/aggregation?";
+                            }
                         }
                         statsDescription.push({
                             label: label,

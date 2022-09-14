@@ -272,7 +272,7 @@
                                                     class="form-check-input"
                                                     type="checkbox"
                                                     :id="metadataChoice.value"
-                                                    v-model="metadataChoiceSelected[metadataChoice.value]"
+                                                    v-model="metadataChoiceChecked[metadataChoice.value]"
                                                 />
                                                 <label class="form-check-label" :for="metadataChoice.value">{{
                                                     metadataChoice.text
@@ -293,7 +293,7 @@
                                         <select
                                             class="form-select"
                                             :id="localField.value + '-select'"
-                                            v-model="metadataValues[localField.value]"
+                                            v-model="metadataChoiceSelected[localField.value]"
                                         >
                                             <option
                                                 v-for="innerValue in metadataChoiceValues[localField.value]"
@@ -635,6 +635,7 @@ export default {
             metadataDisplay: [],
             metadataValues: {},
             metadataChoiceValues: {},
+            metadataChoiceChecked: {},
             metadataChoiceSelected: {},
             collocationOptions: [
                 { text: "Most Frequent Terms", value: "frequency" },
@@ -665,8 +666,14 @@ export default {
         // call again the method if the route changes
         $route: "updateInputData",
         metadataUpdate(metadata) {
-            for (let field in metadata) {
-                this.metadataValues[field] = metadata[field];
+            for (let field of metadata) {
+                if (this.$philoConfig.metadata_input_style[field] == "text") {
+                    this.metadataValues[field] = metadata[field];
+                } else if (this.$philoConfig.metadata_input_style[field] == "dropdown") {
+                    this.metadataChoiceSelected[field] = metadata[field];
+                } else if (this.$philoConfig.metadata_input_style[field] == "checkbox") {
+                    this.metadataChoiceChecked[field] = metadata[field].split(" | ");
+                }
             }
             for (let metadataField of this.$philoConfig.metadata) {
                 this.autoCompleteResults[metadataField] = [];
@@ -689,13 +696,16 @@ export default {
             if (this.formData[metadataField] != "") {
                 if (this.$philoConfig.metadata_input_style[metadataField] == "text") {
                     this.metadataValues[metadataField] = this.formData[metadataField];
-                } else if (this.$philoConfig.metadata_input_style[metadataField] == "dropdown") {
-                    this.metadataChoiceSelected[metadataField] = this.formData[metadataField].split(" | ");
+                } else if (this.$philoConfig.metadata_input_style[metadataField] == "checkbox") {
+                    this.metadataChoiceChecked[metadataField] = this.formData[metadataField].split(" | ");
                 }
             }
             this.arrowCounters[metadataField] = -1;
             if (metadataField == "head") {
                 this.headIndex = this.metadataDisplay.length - 1;
+            }
+            if (this.$philoConfig.metadata_input_style[metadataField] == "dropdown") {
+                this.metadataChoiceSelected[metadataField] = this.formData[metadataField] || "";
             }
         }
         for (let metadata in this.$philoConfig.metadata_choice_values) {
@@ -753,8 +763,14 @@ export default {
         },
         updateInputData() {
             this.queryTermTyped = this.q;
-            for (let field in this.metadataValues) {
-                this.metadataValues[field] = this.formData[field];
+            for (let field of this.$philoConfig.metadata) {
+                if (this.$philoConfig.metadata_input_style[field] == "text") {
+                    this.metadataValues[field] = this.formData[field];
+                } else if (this.$philoConfig.metadata_input_style[field] == "dropdown") {
+                    this.metadataChoiceSelected[field] = this.formData[field];
+                } else if (this.$philoConfig.metadata_input_style[field] == "checkbox") {
+                    this.metadataChoiceChecked[field] = this.formData[field].split(" | ");
+                }
             }
             this.searchOptionsButton = "Show search options";
         },
@@ -816,7 +832,10 @@ export default {
             this.report = this.currentReport;
             this.formOpen = false;
             let metadataChoices = Object.fromEntries(
-                Object.entries(this.metadataChoiceSelected).map(([key, val]) => [key, val.join(" | ")])
+                Object.entries(this.metadataChoiceChecked).map(([key, val]) => [key, val.join(" | ")])
+            );
+            let metadataSelected = Object.fromEntries(
+                Object.entries(this.metadataChoiceSelected).map(([key, val]) => [key, val])
             );
             this.dateRangeHandler();
             this.clearAutoCompletePopup();
@@ -825,6 +844,7 @@ export default {
                     ...this.$store.state.formData,
                     ...this.metadataValues,
                     ...metadataChoices,
+                    ...metadataSelected,
                     approximate: this.approximateSelected ? "yes" : "no",
                     q: this.queryTermTyped.trim(),
                     start: "",
