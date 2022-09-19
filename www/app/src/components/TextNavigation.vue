@@ -381,8 +381,8 @@ export default {
                         } else if (this.start_byte != "") {
                             this.$scrollTo(document.querySelector(".passage-marker"), 250, {
                                 easing: "ease-out",
-                                offset: 1100, // BIG HACK: the offset should be -150. Issue comes from the fact the whole page is loaded and the top of the page is not loaded yet.
-                            }); // It breaks when loaded within the app, which should not happen, except on back button.
+                                offset: -150,
+                            });
                         } else if (this.$route.hash) {
                             // for note link back
                             let note = document.getElementById(this.$route.hash.slice(1));
