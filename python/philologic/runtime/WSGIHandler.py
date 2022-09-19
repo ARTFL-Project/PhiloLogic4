@@ -96,7 +96,7 @@ class WSGIHandler(object):
                 if db.locals["metadata_sql_types"][field] not in ("int", "date") and isinstance(
                     self.cgi[field][0], str
                 ):
-                    if not self.cgi[field][0].startswith('"'):
+                    if not self.cgi[field][0].startswith('"') and field != "filename":
                         self.cgi[field][0] = query_parse(self.cgi[field][0], config)
                 # these ifs are to fix the no results you get when you do a
                 # metadata query
