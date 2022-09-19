@@ -1231,7 +1231,7 @@ body {
     opacity: 1;
 }
 :deep([class*="passage-"]) {
-    color: rgb(0, 115, 150);
+    color: $passage-color;
     font-weight: 700;
 }
 </style>
