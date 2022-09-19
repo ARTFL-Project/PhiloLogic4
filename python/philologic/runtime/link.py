@@ -63,7 +63,7 @@ def byte_range_to_link(db, config, request, obj_level="div1"):
     cursor.execute("SELECT philo_id FROM toms WHERE filename=?", (request.filename,))
     doc_id = cursor.fetchone()[0].split()[0]
     cursor.execute(
-        f"SELECT philo_id FROM toms WHERE philo_type='{obj_level}' AND philo_id like '{doc_id} %' AND start_byte <= {request.start_byte} ORDER BY rowid desc"
+        f"SELECT philo_id FROM toms WHERE philo_type='{obj_level}' AND philo_id like '{doc_id} %' AND cast(start_byte as decimal) <= {request.start_byte} ORDER BY rowid desc"
     )
     philo_id = cursor.fetchone()[0]
     philo_id = philo_id.split()
