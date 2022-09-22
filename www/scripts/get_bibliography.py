@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import orjson
 import os
 from wsgiref.handlers import CGIHandler
 

@@ -1,5 +1,5 @@
 <template>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow" style="height: 53px" v-once>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow" style="height: 53px">
         <div class="collapse navbar-collapse top-links">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
@@ -15,6 +15,15 @@
                 </li>
             </ul>
         </div>
+        <button
+            type="button"
+            class="nav-link position-absolute cite"
+            data-bs-toggle="modal"
+            data-bs-target="#academic-citation"
+            v-if="philoConfig.academic_citation.collection.length > 0"
+        >
+            Cite Us
+        </button>
         <router-link class="navbar-brand" to="/" v-html="philoConfig.dbname"></router-link>
         <ul class="navbar-nav ml-auto top-links">
             <li class="nav-item">
@@ -40,24 +49,92 @@
             v-if="philoConfig.report_error_link.length > 0"
             >Report Error</a
         >
+        <div
+            class="modal fade"
+            id="academic-citation"
+            tabindex="-1"
+            aria-labelledby="academic-citation"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">How to cite {{ philoConfig.dbname }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <span v-if="docCitation.citation.length > 0"
+                            ><citations :citation="docCitation.citation" separator=", " /> , &nbsp;</span
+                        >
+                        <span v-html="philoConfig.academic_citation.collection"></span>
+                        <span>. Accessed on {{ date }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </nav>
 </template>
 
 <script>
-import { inject } from "vue";
+import citations from "./Citations";
 
 export default {
     name: "Header-component",
-    setup() {
-        const philoConfig = inject("$philoConfig");
+    components: { citations },
+    inject: ["$http"],
+    data() {
         return {
-            philoConfig,
+            philoConfig: this.$philoConfig,
+            date: this.getDate(),
+            docCitation: {},
         };
+    },
+    created() {
+        this.getDocCitation();
+    },
+    watch: {
+        $route() {
+            this.getDocCitation();
+        },
+    },
+    methods: {
+        getDate() {
+            let today = new Date();
+            let months = [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December",
+            ];
+            let month = months[today.getMonth()];
+            return `${today.getDate()} ${month}, ${today.getFullYear()}`;
+        },
+        getDocCitation() {
+            let textObjectURL = this.$route.params;
+            if ("pathInfo" in textObjectURL) {
+                let philoID = textObjectURL.pathInfo.split("/").join(" ");
+                this.$http
+                    .get(`${this.$dbUrl}/scripts/get_academic_citation.py?philo_id=${philoID}`)
+                    .then((response) => {
+                        this.docCitation.citation = response.data.citation;
+                    });
+            } else {
+                this.docCitation.citation = [];
+            }
+        },
     },
 };
 </script>
 
-<style>
+<style scoped>
 .top-links {
     margin-left: -0.25rem;
     font-size: 80%;
@@ -77,5 +154,16 @@ export default {
     left: 50%;
     transform: translateX(-50%);
     line-height: 80%;
+}
+.cite {
+    left: -0.5rem;
+    bottom: -0.25rem;
+    font-variant: small-caps;
+    font-weight: 700;
+    background-color: inherit;
+    border-width: 0;
+}
+.modal-dialog {
+    max-width: fit-content;
 }
 </style>

@@ -5,14 +5,16 @@
             <router-link :to="cite.href" :style="cite.style" v-if="cite.href">{{ cite.label }}</router-link>
             <span :style="cite.style" v-else>{{ cite.label }}</span>
             <span v-html="cite.suffix" v-if="cite.suffix"></span>
-            <span class="separator px-2" v-if="citeIndex != citation.length - 1">&#9679;</span>
+            <span v-if="citeIndex != citation.length - 1"
+                ><span class="separator px-2" v-if="!separator">&#9679;</span><span v-else>{{ separator }}</span></span
+            >
         </span>
     </span>
 </template>
 <script>
 export default {
     name: "citations-generator",
-    props: ["citation"],
+    props: ["citation", "separator"],
 };
 </script>
 <style scoped>

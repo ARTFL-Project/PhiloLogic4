@@ -759,6 +759,15 @@ WEB_CONFIG_DEFAULTS = {
         "value": "",
         "comment": "# The link should start with http:// or https://. This will display an error report link in the header and in document navigation",
     },
+    "academic_citation": {
+        "value": {"collection": "", "citation": []},
+        "comment": "\n".join(
+            [
+                "# The academic citation use to cite this database. The citation is build with the citation defined (from metadata values) + the collection key (which can be HTML)",
+                """# e.g.: {"collection": 'ARTFL-FRANTEXT, University of Chicago: <a href="https://link.to.db/">https://link.to.db/</a>', "citation": [citations["author"], citations["title"], citations["year"]]}""",
+            ]
+        ),
+    },
 }
 
 WEB_CONFIG_HEADER = """
