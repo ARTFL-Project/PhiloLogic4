@@ -66,7 +66,8 @@
                         <span v-if="docCitation.citation.length > 0"
                             ><citations :citation="docCitation.citation" separator=", " /> , &nbsp;</span
                         >
-                        <span v-html="philoConfig.academic_citation.collection"></span>
+                        <span v-html="philoConfig.academic_citation.collection"></span>:
+                        <a :href="citeURL">{{ citeURL }}</a>
                         <span>. Accessed on {{ date }}</span>
                     </div>
                 </div>
@@ -87,6 +88,7 @@ export default {
             philoConfig: this.$philoConfig,
             date: this.getDate(),
             docCitation: { citation: [] },
+            citeURL: this.$philoConfig.academic_citation.custom_url || this.$dbUrl,
         };
     },
     created() {
