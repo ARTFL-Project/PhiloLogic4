@@ -2,12 +2,12 @@
     <div id="facet-search" class="d-none d-sm-block mr-2">
         <div class="card shadow-sm" title="Title" header-tag="header" id="facet-panel-wrapper">
             <div class="card-header text-center">
-                <h6 class="mb-0">Browse by facet</h6>
+                <h6 class="mb-0">{{ $t("facets.browseByFacet") }}</h6>
             </div>
             <button type="button" class="btn btn-secondary btn-sm close-box" @click="toggleFacets()">x</button>
             <transition name="slide-fade">
                 <div class="list-group" flush id="select-facets" v-if="showFacetSelection">
-                    <span class="dropdown-header text-center">Frequency by</span>
+                    <span class="dropdown-header text-center">{{ $t("facets.frequencyBy") }}</span>
                     <div
                         class="list-group-item facet-selection"
                         v-for="facet in facets"
@@ -24,7 +24,7 @@
                     style="border-top: 0"
                     v-if="showFacetSelection && report != 'bibliography'"
                 >
-                    <span class="dropdown-header text-center">Collocates of query term(s)</span>
+                    <span class="dropdown-header text-center">{{ $t("facets.collocates") }}</span>
                     <div
                         class="list-group-item facet-selection"
                         @click="getFacet(collocationFacet)"
@@ -41,7 +41,7 @@
                     v-if="!showFacetSelection"
                     @click="showFacetOptions()"
                 >
-                    Show Options
+                    {{ $t("facets.showOptions") }}
                 </div>
             </transition>
         </div>
@@ -51,12 +51,12 @@
                 role="status"
                 style="width: 4rem; height: 4rem; position: absolute; z-index: 50; top: 10px"
             >
-                <span class="visually-hidden">Loading...</span>
+                <span class="visually-hidden">{{ $t("common.loading") }}...</span>
             </div>
         </div>
         <div class="card mt-3 shadow-sm" id="facet-results" v-if="showFacetResults">
             <div class="card-header text-center">
-                <h6 class="mb-0">Frequency by {{ selectedFacet.alias }}</h6>
+                <h6 class="mb-0">{{ $t("facets.frequencyByLabel", { label: selectedFacet.alias }) }}</h6>
                 <button type="button" class="btn btn-secondary btn-sm close-box" @click="hideFacets()">x</button>
             </div>
             <div
@@ -70,7 +70,7 @@
                     :class="{ active: showingRelativeFrequencies === false }"
                     @click="displayAbsoluteFrequencies()"
                 >
-                    Absolute Frequency
+                    {{ $t("facets.absoluteFrequency") }}
                 </button>
                 <button
                     type="button"
@@ -78,10 +78,12 @@
                     :class="{ active: showingRelativeFrequencies }"
                     @click="displayRelativeFrequencies()"
                 >
-                    Relative Frequency
+                    {{ $t("facets.relativeFrequency") }}
                 </button>
             </div>
-            <div class="m-2 text-center" style="opacity: 0.5">Top 500 results for {{ selectedFacet.alias }}</div>
+            <div class="m-2 text-center" style="opacity: 0.5">
+                {{ $t("facets.top500Results", { label: selectedFacet.alias }) }}
+            </div>
             <div
                 class="progress my-3 mb-3"
                 :max="resultsLength"
@@ -119,9 +121,12 @@
                         v-if="showingRelativeFrequencies"
                     >
                         <div style="display: inline-block; opacity: 0.8">
-                            {{ fullResults.unsorted[result.label].count }} actual
-                            {{ occurrence(fullResults.unsorted[result.label].count) }} in
-                            {{ fullRelativeFrequencies[result.label].total_count }} words
+                            {{
+                                $t("facets.relativeFrequencyDescription", {
+                                    total: fullResults.unsorted[result.label].count,
+                                    wordCount: fullRelativeFrequencies[result.label].total_count,
+                                })
+                            }}
                         </div>
                     </div>
                 </div>
@@ -392,7 +397,6 @@ export default {
             } else {
                 this.showFacets = true;
             }
-            console.log(this.showFacets);
         },
     },
 };

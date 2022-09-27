@@ -3,8 +3,11 @@
         <div class="collapse navbar-collapse top-links">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" :href="philoConfig.link_to_home_page" v-if="philoConfig.link_to_home_page != ''"
-                        >Go to home page</a
+                    <a
+                        class="nav-link"
+                        :href="philoConfig.link_to_home_page"
+                        v-if="philoConfig.link_to_home_page != ''"
+                        >{{ $t("header.goHome") }}</a
                     >
                 </li>
                 <li class="nav-item">
@@ -22,7 +25,7 @@
             data-bs-target="#academic-citation"
             v-if="philoConfig.academic_citation.collection.length > 0"
         >
-            Cite Us
+            {{ $t("header.citeUs") }}
         </button>
         <router-link class="navbar-brand" to="/" v-html="philoConfig.dbname"></router-link>
         <ul class="navbar-nav ml-auto top-links">
@@ -37,17 +40,17 @@
                     class="nav-link"
                     href="https://artfl-project.uchicago.edu/content/contact-us"
                     title="Contact information for the ARTFL Project"
-                    >Contact Us</a
+                    >{{ $t("header.contactUs") }}</a
                 >
             </li>
         </ul>
         <a
+            id="report-error-link"
             class="nav-link position-absolute"
-            style="right: -0.5rem; bottom: -0.25rem; font-variant: small-caps; font-weight: 700"
             :href="philoConfig.report_error_link"
             target="_blank"
             v-if="philoConfig.report_error_link.length > 0"
-            >Report Error</a
+            >{{ $t("header.reportError") }}</a
         >
         <div
             class="modal fade"
@@ -136,7 +139,8 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import "../assets/styles/theme.module.scss";
 .top-links {
     margin-left: -0.25rem;
     font-size: 80%;
@@ -157,13 +161,21 @@ export default {
     transform: translateX(-50%);
     line-height: 80%;
 }
+
+#report-error-link {
+    right: 0.5rem;
+    bottom: 0.25rem;
+    font-variant: small-caps;
+    font-weight: 700;
+}
 .cite {
-    left: -0.5rem;
-    bottom: -0.25rem;
+    left: 0.5rem;
+    bottom: 0.25rem;
     font-variant: small-caps;
     font-weight: 700;
     background-color: inherit;
     border-width: 0;
+    color: $link-color;
 }
 .modal-dialog {
     max-width: fit-content;

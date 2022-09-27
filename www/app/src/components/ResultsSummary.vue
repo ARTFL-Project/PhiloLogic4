@@ -11,7 +11,7 @@
                         data-bs-toggle="modal"
                         data-bs-target="#export-modal"
                     >
-                        Export results
+                        {{ $t("resultsSummary.exportResults") }}
                     </button>
                     <div class="modal fade" tabindex="-1" id="export-modal" title="Export Results">
                         <export-results></export-results>
@@ -19,9 +19,9 @@
                     <search-arguments :result-start="descriptionStart" :result-end="descriptionEnd"></search-arguments>
                     <div v-if="['concordance', 'kwic', 'bibliography'].includes(report)">
                         <div id="result-stats" class="pb-2">
-                            {{ resultsLength }} total occurrences
+                            {{ $t("resultsSummary.totalOccurrences", { n: resultsLength }) }}
                             <span v-if="fieldSummary.length > 0">
-                                spread across
+                                {{ $t("resultsSummary.spreadAcross") }}
                                 <div class="d-inline-block" style="position: relative" v-if="!hitlistStatsDone">
                                     <div
                                         class="spinner-border text-secondary"
@@ -34,7 +34,7 @@
                                             bottom: -0.75rem;
                                         "
                                     >
-                                        <span class="visually-hidden">Loading...</span>
+                                        <span class="visually-hidden">{{ $t("common.loading") }}...</span>
                                     </div>
                                 </div>
                                 <span v-if="hitlistStatsDone">
@@ -46,28 +46,31 @@
                                             >{{ stat.count }} {{ stat.label }}(s)</router-link
                                         >
                                         <span v-else>{{ stat.count }} {{ stat.label }}(s)</span>
-                                        <span v-if="statIndex != statsDescription.length - 1">&nbsp;and&nbsp;</span>
+                                        <span v-if="statIndex != statsDescription.length - 1"
+                                            >&nbsp;{{ $t("common.and") }}&nbsp;</span
+                                        >
                                     </span>
                                 </span>
                             </span>
                         </div>
                         <div id="search-hits">
-                            <b v-if="resultsLength > 0"
-                                >Displaying hits {{ descriptionStart }}-{{ descriptionEnd }} of {{ resultsLength }}</b
+                            <b v-if="resultsLength > 0">{{
+                                $t("resultsSummary.displayingHits", {
+                                    start: descriptionStart,
+                                    end: descriptionEnd,
+                                    total: resultsLength,
+                                })
+                            }}</b>
+                            <b v-else>{{ $t("resultsSummary.noResults") }}</b>
+                            <button
+                                type="button"
+                                class="btn rounded-pill btn-outline-secondary btn-sm ms-1"
+                                style="margin-top: -0.05rem"
+                                data-bs-toggle="modal"
+                                data-bs-target="#results-bibliography"
                             >
-                            <b v-else>No results for your query</b>
-                            <span>
-                                from these
-                                <button
-                                    type="button"
-                                    class="btn rounded-pill btn-outline-secondary btn-sm"
-                                    style="margin-top: -0.05rem"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#results-bibliography"
-                                >
-                                    titles
-                                </button>
-                            </span>
+                                {{ $t("resultsSummary.fromTheseTitles") }}
+                            </button>
                         </div>
                         <div class="modal fade" tabindex="-1" id="results-bibliography">
                             <results-bibliography></results-bibliography>
@@ -75,11 +78,16 @@
                     </div>
                     <div v-if="report == 'aggregation' && groupByLabel">
                         <div id="result-stats" class="pb-2" v-if="resultsLength > 0">
-                            {{ resultsLength }} total occurrences spread across {{ groupLength }}
-                            {{ groupByLabel.toLowerCase() }}(s)
+                            {{
+                                $t("resultsSummary.groupByOccurrences", {
+                                    total: resultsLength,
+                                    n: groupLength,
+                                    label: groupByLabel.toLowerCase(),
+                                })
+                            }}
                         </div>
                         <div id="result-stats" class="pb-2" v-else>
-                            <b>No results for your query</b>
+                            <b>{{ $t("resultsSummary.noResults") }}</b>
                         </div>
                     </div>
                     <div v-if="['collocation', 'time_series'].includes(report)">
@@ -103,20 +111,19 @@
                         <div v-if="report == 'collocation'">
                             <span>
                                 <span tooltip tooltip-title="Click to display filtered words">
-                                    The
                                     <a
                                         href
                                         @click="toggleFilterList($event)"
                                         v-if="colloc_filter_choice === 'frequency'"
-                                        >{{ filter_frequency }} most common words</a
+                                        >{{ $t("resultsSummary.commonWords", { n: filter_frequency }) }}</a
                                     >
                                     <a
                                         href
                                         @click="toggleFilterList($event)"
                                         v-if="colloc_filter_choice === 'stopwords'"
-                                        >most common function words</a
+                                        >{{ $t("resultsSummary.commonStopwords") }}</a
                                     >
-                                    are being filtered from this report.
+                                    {{ $t("resultsSummary.filtered") }}.
                                 </span>
                             </span>
                             <div class="card ps-3 pe-3 pb-3 shadow-lg" id="filter-list" v-if="showFilteredWords">
@@ -231,12 +238,12 @@ export default {
             hitlistStatsDone: false,
             reportSwitch: {
                 concordance: {
-                    labelBig: "View occurrences with context",
-                    labelSmall: "Concordance",
+                    labelBig: this.$t("resultsSummary.concordanceBig"),
+                    labelSmall: this.$t("resultsSummary.concordanceSmall"),
                 },
                 kwic: {
-                    labelBig: "View occurrences line by line (KWIC)",
-                    labelSmall: "Keyword in context",
+                    labelBig: this.$t("resultsSummary.kwicBig"),
+                    labelSmall: this.$t("resultsSummary.kwicSmall"),
                 },
             },
             showBiblio: false,

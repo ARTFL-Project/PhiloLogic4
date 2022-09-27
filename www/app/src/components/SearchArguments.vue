@@ -1,12 +1,12 @@
 <template>
     <div id="search-arguments" class="pb-2">
         <div v-if="currentWordQuery !== ''">
-            Searching database for
+            {{ $t("searchArgs.searchingDbFor") }}
             <span v-if="approximate == 'yes'">
-                terms similar to <b>{{ currentWordQuery }}</b
+                {{ $t("searchArgs.termsSimilarTo") }} <b>{{ currentWordQuery }}</b
                 >:
             </span>
-            <span v-else>the term(s) </span>
+            <span v-else>{{ $t("searchArgs.terms") }}&nbsp;</span>
             <span v-if="approximate.length == 0 || approximate == 'no'"></span>
             <span class="rounded-pill term-groups" v-for="(group, index) in wordGroups" :key="index">
                 <a class="term-group-word" href @click.prevent="getQueryTerms(group, index)">{{ group }}</a>
@@ -17,8 +17,8 @@
                 <button type="button" class="btn btn-secondary btn-sm close" @click="closeTermsList()">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h6 class="pe-4">The search terms query expanded to the following {{ words.length }} terms:</h6>
-                <h6 v-if="words.length > 100">100 most frequent terms displayed</h6>
+                <h6 class="pe-4">{{ $t("searchArgs.termsExpanded", { length: words.length }) }}:</h6>
+                <h6 v-if="words.length > 100">{{ $t("searchArgs.mostFrequentTerms") }}</h6>
                 <button
                     type="button"
                     class="btn btn-secondary btn-sm"
@@ -26,7 +26,7 @@
                     v-if="wordListChanged"
                     @click="rerunQuery()"
                 >
-                    Rerun query with the current modifications
+                    {{ $t("searchArgs.rerunQuery") }}
                 </button>
                 <div class="row" id="query-terms-list">
                     <div class="col-3" v-for="word in words" :key="word">
@@ -41,22 +41,22 @@
             </div>
         </div>
         <div>
-            Bibliography criteria:
+            {{ $t("searchArgs.biblioCriteria") }}:
             <span class="metadata-args rounded-pill" v-for="metadata in queryArgs.biblio" :key="metadata.key">
                 <span class="metadata-label">{{ metadata.alias }}</span>
                 <span class="metadata-value">{{ metadata.value.replace("<=>", "&#8212;") }}</span>
                 <span class="remove-metadata" @click="removeMetadata(metadata.key, restart)">X</span>
             </span>
-            <b v-if="queryArgs.biblio.length === 0">None</b>
+            <b v-if="queryArgs.biblio.length === 0">{{ $t("searchArgs.none") }}</b>
         </div>
         <div v-if="queryReport === 'time_series'">
-            {{ resultsLength }} occurrences of the term(s) between
+            {{ $t("searchArgs.occurrencesBetween", { n: resultsLength }) }}
             <span class="biblio-criteria">
                 <span class="metadata-args rounded-pill">
                     <span class="metadata-value">{{ start_date }}</span>
                     <span class="remove-metadata" @click="removeMetadata('start_date', restart)">X</span>
                 </span> </span
-            >&nbsp; and
+            >&nbsp; {{ $t("common.and") }}&nbsp;
             <span class="biblio-criteria">
                 <span class="metadata-args rounded-pill">
                     <span class="metadata-value">{{ end_date }}</span>
@@ -65,7 +65,7 @@
             </span>
         </div>
         <div style="margin-top: 10px" v-if="queryReport === 'collocation'">
-            Displaying the top 100 collocates for {{ resultsLength }} occurrences
+            {{ $t("searchArgs.collocOccurrences", { n: resultsLength }) }}
         </div>
     </div>
 </template>
@@ -139,18 +139,22 @@ export default {
                 if (queryParams.q.split(" ").length > 1) {
                     if (method === "proxy") {
                         if (typeof queryParams.arg_proxy !== "undefined" || queryParams.arg_proxy) {
-                            this.queryArgs.proximity = "within " + queryParams.arg_proxy + " words";
+                            this.queryArgs.proximity = this.$t("searchArgs.withinProximity", {
+                                n: queryParams.arg_proxy,
+                            });
                         } else {
                             this.queryArgs.proximity = "";
                         }
                     } else if (method === "phrase") {
                         if (typeof queryParams.arg_proxy !== "undefined" || queryParams.arg_phrase) {
-                            this.queryArgs.proximity = "within exactly " + queryParams.arg_phrase + " words";
+                            this.queryArgs.proximity = this.$t("searchArgs.withinExactlyProximity", {
+                                n: queryParams.arg_phrase,
+                            });
                         } else {
                             this.queryArgs.proximity = "";
                         }
                     } else if (method === "cooc") {
-                        this.queryArgs.proximity = "in the same sentence";
+                        this.queryArgs.proximity = this.$t("searchArgs.sameSentence");
                     }
                 } else {
                     this.queryArgs.proximity = "";

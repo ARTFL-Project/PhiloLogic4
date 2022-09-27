@@ -16,8 +16,8 @@
                             >
                                 <span v-if="searchReport.value != 'kwic'">{{ searchReport.label }}</span>
                                 <span v-else
-                                    ><span class="d-md-inline d-sm-none">Keyword In Context</span
-                                    ><span class="d-md-none">{{ searchReport.label }}</span></span
+                                    ><span class="d-md-inline d-sm-none">{{ searchReport.label }}</span
+                                    ><span class="d-md-none">{{ $t("searchForm.shortKwic") }}</span></span
                                 >
                             </button>
                         </div>
@@ -26,7 +26,7 @@
                                 <div class="cols-12 cols-md-8">
                                     <div class="input-group" id="q-group">
                                         <button class="btn btn-outline-secondary" type="button">
-                                            <label for="query-term-input">Search Terms</label>
+                                            <label for="query-term-input">{{ $t("searchForm.searchTerms") }}</label>
                                         </button>
                                         <button
                                             class="btn btn-outline-info"
@@ -37,7 +37,7 @@
                                             @mouseleave="showTips = false"
                                         >
                                             <span v-if="!showTips">?</span>
-                                            <span v-if="showTips">Tips</span>
+                                            <span v-if="showTips">{{ $t("searchForm.tips") }}</span>
                                         </button>
                                         <input
                                             type="text"
@@ -67,7 +67,7 @@
                                             ></li>
                                         </ul>
                                         <button class="btn btn-secondary" id="button-search" @click="onSubmit()">
-                                            Search
+                                            {{ $t("searchForm.search") }}
                                         </button>
                                     </div>
                                 </div>
@@ -114,7 +114,9 @@
                         </div>
                         <div id="search-buttons">
                             <div class="input-group">
-                                <button type="reset" id="reset_form" class="btn btn-outline-secondary">Clear</button>
+                                <button type="reset" id="reset_form" class="btn btn-outline-secondary">
+                                    {{ $t("searchForm.clear") }}
+                                </button>
                                 <button
                                     type="button"
                                     id="show-search-form"
@@ -129,7 +131,7 @@
                     <transition name="slide-fade">
                         <div id="search-elements" v-if="formOpen" class="ps-3 pe-3 pb-3 shadow">
                             <div class="mt-1">
-                                <h6>Search term parameters:</h6>
+                                <h6>{{ $t("searchForm.searchTermsParameters") }}:</h6>
                                 <div
                                     class="form-check form-switch form-check-inline"
                                     id="approximate"
@@ -142,7 +144,9 @@
                                         v-model="approximateSelected"
                                         @change="approximateChange(approximateSelected)"
                                     />
-                                    <label class="form-check-label" for="approximate-input">Approximate match </label>
+                                    <label class="form-check-label" for="approximate-input"
+                                        >{{ $t("searchForm.approximateMatch") }}
+                                    </label>
                                 </div>
                                 <select
                                     class="form-select form-select-sm d-inline-block"
@@ -158,7 +162,7 @@
                                 </select>
                                 <div class="input-group mb-4" v-if="currentReport != 'collocation'">
                                     <button class="btn btn-outline-secondary" type="button">
-                                        Search co-occurrences</button
+                                        {{ $t("searchForm.searchCoOccurrences") }}</button
                                     ><select
                                         class="form-select"
                                         style="width: fit-content; max-width: fit-content"
@@ -173,8 +177,12 @@
                                         type="button"
                                         v-if="method == 'proxy' || method == 'phrase'"
                                     >
-                                        <label for="arg-proxy" v-if="method == 'proxy'">how many?</label>
-                                        <label for="arg-phrase" v-if="method == 'phrase'">how many?</label>
+                                        <label for="arg-proxy" v-if="method == 'proxy'"
+                                            >{{ $t("searchForm.howMany") }}?</label
+                                        >
+                                        <label for="arg-phrase" v-if="method == 'phrase'"
+                                            >{{ $t("searchForm.howMany") }}?</label
+                                        >
                                     </button>
                                     <input
                                         class="form-control"
@@ -192,11 +200,13 @@
                                         v-model="arg_phrase"
                                         v-if="method == 'phrase'"
                                     />
-                                    <span class="input-group-text ms-0" v-if="method == 'proxy' || method == 'phrase'"
-                                        >words in the same sentence</span
+                                    <span
+                                        class="input-group-text ms-0"
+                                        v-if="method == 'proxy' || method == 'phrase'"
+                                        >{{ $t("searchForm.wordsSentence") }}</span
                                     >
                                 </div>
-                                <h6>Filter by metadata field:</h6>
+                                <h6>{{ $t("searchForm.filterByField") }}:</h6>
                                 <div
                                     class="input-group pb-2"
                                     v-for="localField in metadataDisplayFiltered"
@@ -334,10 +344,10 @@
                                             </button>
                                             <ul class="dropdown-menu" :aria-labelledby="localField.value + '-selector'">
                                                 <li @click="dateTypeToggle(localField.value, 'exact')">
-                                                    <a class="dropdown-item">Exact</a>
+                                                    <a class="dropdown-item">{{ $t("searchForm.exactDate") }}</a>
                                                 </li>
                                                 <li @click="dateTypeToggle(localField.value, 'range')">
-                                                    <a class="dropdown-item">Range</a>
+                                                    <a class="dropdown-item">{{ $t("searchForm.rangeDate") }}</a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -353,7 +363,9 @@
                                         <span class="d-inline-block" v-if="dateType[localField.value] == 'range'">
                                             <div class="input-group ms-3">
                                                 <button class="btn btn-outline-secondary" type="button">
-                                                    <label for="query-term-input">From</label>
+                                                    <label for="query-term-input">{{
+                                                        $t("searchForm.dateFrom")
+                                                    }}</label>
                                                 </button>
                                                 <input
                                                     type="text"
@@ -364,7 +376,9 @@
                                                     v-model="dateRange[localField.value].start"
                                                 />
                                                 <button class="btn btn-outline-secondary ms-3" type="button">
-                                                    <label for="query-term-input">To</label></button
+                                                    <label for="query-term-input">{{
+                                                        $t("searchForm.dateTo")
+                                                    }}</label></button
                                                 ><input
                                                     type="text"
                                                     class="form-control date-range"
@@ -381,7 +395,7 @@
                             <div class="d-flex mt-4" v-if="currentReport === 'collocation'">
                                 <div class="input-group d-inline" style="width: fit-content">
                                     <button class="btn btn-outline-secondary" style="height: fit-content">
-                                        <label for="filter-frequency">Word filtering</label>
+                                        <label for="filter-frequency">{{ $t("searchForm.wordFiltering") }}</label>
                                     </button>
                                     <input
                                         type="text"
@@ -415,9 +429,9 @@
                                 </div>
                             </div>
                             <div class="input-group mt-4 pt-1 pb-2" v-if="currentReport === 'time_series'">
-                                <button class="btn btn-outline-secondary">Date range</button>
+                                <button class="btn btn-outline-secondary">{{ $t("searchForm.dateRange") }}</button>
                                 <span class="d-inline-flex align-self-center mx-2"
-                                    ><label for="start_date">from</label></span
+                                    ><label for="start_date">{{ $t("searchForm.dateFrom") }}</label></span
                                 >
                                 <input
                                     type="text"
@@ -428,7 +442,7 @@
                                     v-model="start_date"
                                 />
                                 <span class="d-inline-flex align-self-center mx-2"
-                                    ><label for="end_date">to</label></span
+                                    ><label for="end_date">{{ $t("searchForm.dateTo") }}</label></span
                                 >
                                 <input
                                     type="text"
@@ -441,9 +455,9 @@
                             </div>
                             <div class="input-group" v-if="currentReport == 'time_series'">
                                 <button class="btn btn-outline-secondary">
-                                    <label for="year_interval">Year interval</label>
+                                    <label for="year_interval">{{ $t("searchForm.yearInterval") }}</label>
                                 </button>
-                                <span class="d-inline-flex align-self-center mx-2">every</span>
+                                <span class="d-inline-flex align-self-center mx-2">{{ $t("searchForm.every") }}</span>
                                 <input
                                     type="text"
                                     class="form-control"
@@ -452,10 +466,10 @@
                                     style="max-width: 50px; text-align: center"
                                     v-model="year_interval"
                                 />
-                                <span class="d-inline-flex align-self-center mx-2">year(s)</span>
+                                <span class="d-inline-flex align-self-center mx-2">{{ $t("searchForm.years") }}</span>
                             </div>
                             <div class="input-group mt-4" v-if="currentReport === 'aggregation'">
-                                <button class="btn btn-outline-secondary">Group results by</button>
+                                <button class="btn btn-outline-secondary">{{ $t("searchForm.groupResultsBy") }}</button>
                                 <select
                                     v-once
                                     class="form-select"
@@ -473,13 +487,13 @@
                                 </select>
                             </div>
                             <h6 class="mt-3" v-if="['concordance', 'kwic', 'bibliography'].includes(currentReport)">
-                                Display Options:
+                                {{ $t("searchForm.displayOptions") }}:
                             </h6>
                             <div
                                 class="input-group pb-2"
                                 v-if="['concordance', 'bibliography'].includes(currentReport)"
                             >
-                                <button class="btn btn-outline-secondary">Sort results by</button>
+                                <button class="btn btn-outline-secondary">{{ $t("searchForm.sortResultsBy") }}</button>
                                 <select
                                     v-once
                                     class="form-select"
@@ -505,7 +519,7 @@
                                     currentReport != 'aggregation'
                                 "
                             >
-                                <button class="btn btn-outline-secondary">Results per page</button>
+                                <button class="btn btn-outline-secondary">{{ $t("searchForm.resultsPerPage") }}</button>
                                 <span v-for="resultsPerPage in resultsPerPageOptions" :key="resultsPerPage" v-once>
                                     <input
                                         type="radio"
@@ -530,7 +544,7 @@
                 style="width: 8rem; height: 8rem; position: absolute; z-index: 50; top: 30px"
                 role="status"
             >
-                <span class="visually-hidden">Loading...</span>
+                <span class="visually-hidden">{{ $t("common.loading") }}</span>
             </div>
         </div>
         <div class="modal fade" id="search-tips" tabindex="-1">
@@ -621,16 +635,16 @@ export default {
             metadataInputStyle: this.$philoConfig.metadata_input_style,
             headIndex: 0,
             formOpen: false,
-            searchOptionsButton: "Show search options",
+            searchOptionsButton: this.$t("searchForm.showSearchOptions"),
             approximateValues: [
-                { text: "At least 90% similar", value: "90" },
-                { text: "At least 80% similar", value: "80" },
+                { text: this.$t("searchForm.similarity", { n: 90 }), value: "90" },
+                { text: this.$t("searchForm.similarity", { n: 80 }), value: "80" },
             ],
             approximateSelected: false,
             methodOptions: [
-                { text: "Within", value: "proxy" },
-                { text: "Within exactly", value: "phrase" },
-                { text: "In the same sentence", value: "cooc" },
+                { text: this.$t("searchForm.within"), value: "proxy" },
+                { text: this.$t("searchForm.withinExactly"), value: "phrase" },
+                { text: this.$t("searchForm.sameSentence"), value: "cooc" },
             ],
             metadataDisplay: [],
             metadataValues: {},
@@ -638,9 +652,9 @@ export default {
             metadataChoiceChecked: {},
             metadataChoiceSelected: {},
             collocationOptions: [
-                { text: "Most Frequent Terms", value: "frequency" },
-                { text: "Stopwords", value: "stopwords" },
-                { text: "No Filtering", value: "nofilter" },
+                { text: this.$t("searchForm.mostFrequentTerms"), value: "frequency" },
+                { text: this.$t("searchForm.stopwords"), value: "stopwords" },
+                { text: this.$t("searchForm.noFiltering"), value: "nofilter" },
             ],
             selectedSortValues: "rowid",
             resultsPerPageOptions: [25, 100, 500, 1000],
@@ -777,8 +791,9 @@ export default {
         buildReports() {
             let reports = [];
             for (let value of this.$philoConfig.search_reports) {
-                let label = value.replace("_s", "-s");
-                label = label.charAt(0).toUpperCase() + label.slice(1);
+                // let label = value.replace("_s", "-s");
+                let label = this.$t(`searchForm.${value}`);
+                // label = label.charAt(0).toUpperCase() + label.slice(1);
                 reports.push({
                     value: value,
                     label: label,
@@ -889,10 +904,10 @@ export default {
         toggleForm() {
             if (!this.formOpen) {
                 this.formOpen = true;
-                this.searchOptionsButton = "Hide search options";
+                this.searchOptionsButton = this.$t("searchForm.hideSearchOptions");
             } else {
                 this.formOpen = false;
-                this.searchOptionsButton = "Show search options";
+                this.searchOptionsButton = this.$t("searchForm.showSearchOptions");
             }
         },
         clearFormData() {},

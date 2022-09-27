@@ -7,8 +7,21 @@ module.exports = {
             'Access-Control-Allow-Origin': '*'
         }
     },
+
     publicPath: process.env.NODE_ENV === 'production' ? getBaseUrl() : '/',
     transpileDependencies: true,
+
+    pluginOptions: {
+        i18n: {
+            locale: 'en',
+            fallbackLocale: 'en',
+            localeDir: 'locales',
+            enableLegacy: false,
+            runtimeOnly: false,
+            compositionOnly: false,
+            fullInstall: true
+        }
+    }
 }
 
 function getBaseUrl() {
@@ -28,7 +41,7 @@ function getBaseUrl() {
         dbUrl = rootPath + "/" + dbname + "/"
         let jsonString = JSON.stringify({ "dbUrl": dbUrl })
         fs.writeFileSync("./appConfig.json", jsonString)
-        return url
+        return dbUrl
     }
     return dbUrl
 }

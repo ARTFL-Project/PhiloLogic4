@@ -8,12 +8,13 @@ import axios from 'axios'
 import "bootstrap"
 
 import appConfig from "../appConfig.json"
+import i18n from './i18n'
 
 axios
     .get(`${appConfig.dbUrl}/scripts/get_web_config.py`, {
     })
     .then((response) => {
-        const app = createApp(App)
+        const app = createApp(App).use(i18n)
         app.config.globalProperties.$philoConfig = response.data
         app.config.globalProperties.$scrollTo = vueScrollTo.scrollTo
         app.config.globalProperties.$dbUrl = appConfig.dbUrl

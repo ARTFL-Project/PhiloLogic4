@@ -8,7 +8,7 @@
                 style="position: absolute; bottom: 0; right: 0.5rem; padding: 0.125rem 0.25rem"
                 @click="toggleFacets()"
             >
-                Show Facets
+                {{ $t("common.showFacets") }}
             </button>
         </div>
         <div class="row mt-4" style="padding-right: 0.5rem">

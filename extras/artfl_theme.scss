@@ -10,7 +10,7 @@ $popover-max-width: 50%;
 $header-color: rgb(245, 219, 157);
 $button-color: rgba(143, 57, 49, .8);
 $button-color-active: rgb(143, 57, 49);
-$link-color: rgb(143, 57, 49);
+$link-color: #8f3931;
 $passage-color: rgb(180, 106, 85);
 // Themed elements
 nav.navbar {
@@ -84,8 +84,13 @@ a.btn-secondary {
     color: $link-color !important;
 }
 
-.letter:hover {
+.letter:hover,
+#dico-landing-volume .list-group-item:hover {
     background-color: $button-color !important;
+    color: #fff !important;
+}
+
+#dico-landing-volume a:hover {
     color: #fff !important;
 }
 

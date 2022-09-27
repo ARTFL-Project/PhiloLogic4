@@ -1,0 +1,103 @@
+{
+    "common": { "loading": "Loading", "and": "and", "showFacets": "Show Facets" },
+    "header": {
+        "goHome": "Go to home page",
+        "citeUs": "Cite us",
+        "contactUs": "Contact Us",
+        "reportError": "Report Error"
+    },
+    "searchForm": {
+        "concordance": "Concordance",
+        "kwic": "Keyword In Context",
+        "shortKwic": "KWIC",
+        "aggregation": "Aggregation",
+        "collocation": "Collocation",
+        "time_series": "Time-Series",
+        "searchTerms": "Search Terms",
+        "tips": "Tips",
+        "search": "Search",
+        "clear": "Clear",
+        "showSearchOptions": "Show search options",
+        "hideSearchOptions": "Hide search options",
+        "searchTermsParameters": "Search term parameters",
+        "approximateMatch": "Approximate match",
+        "similarity": "At least {n}% similar",
+        "searchCoOccurrences": "Search co-occurrences",
+        "within": "within",
+        "withinExactly": "within exactly",
+        "sameSentence": "in the same sentence",
+        "howMany": "how many",
+        "wordsSentence": "words in the same sentence",
+        "filterByField": "Filter by metadata field",
+        "resultsPerPage": "Results per page",
+        "exactDate": "exact",
+        "rangeDate": "range",
+        "dateFrom": "From",
+        "dateTo": "To",
+        "dateRange": "Date range",
+        "yearInterval": "Year interval",
+        "every": "every",
+        "years": "year (s)",
+        "wordFiltering": "Word filtering",
+        "groupResultsBy": "Group results by",
+        "displayOptions": "Display Options",
+        "sortResultsBy": "Sort results by",
+        "mostFrequentTerms": "Most Frequent Terms",
+        "stopwords": "Stopwords",
+        "noFiltering": "No Filtering"
+    },
+    "resultsBiblio": {
+        "heading": "Bibliography of results on this page",
+        "occurrences": "occurrence(s)"
+    },
+    "searchArgs": {
+        "searchingDbFor": "Searching database for",
+        "termsSimilarTo": "terms similar to",
+        "terms": "the terms",
+        "termsExpanded": "The search terms query expanded to the following {length} terms",
+        "mostFrequentTerms": "100 most frequent terms displayed",
+        "rerunQuery": "Rerun query with the current modifications",
+        "biblioCriteria": "Bibliography Criteria",
+        "none": "None",
+        "occurrencesBetween": "{n} occurrences of the term(s) between",
+        "collocOccurrences": "Displaying the top 100 collocates for {n} occurrences",
+        "withinProximity": "within {n} words",
+        "withinExactlyProximity": "within exactly {n} words",
+        "sameSentence": "in the same sentence"
+    },
+    "resultsSummary": {
+        "exportResults": "Export results",
+        "totalOccurrences": "{n} total occurrences",
+        "spreadAcross": "spread across",
+        "displayingHits": "Displaying hits {start}-{end} of {total}",
+        "noResults": "No results for your query",
+        "fromTheseTitles": "from these titles",
+        "groupByOccurrences": "{total} total occurrences spread across {n} {label}(s)",
+        "commonWords": "The {n} most common words",
+        "commonStopwords": "The most common function words",
+        "filtered": "are being filtered from this report",
+        "concordanceBig": "View occurrences with context",
+        "concordanceSmall": "Concordance",
+        "kwicBig": "View occurrences line by line (KWIC)",
+        "kwicSmall": "Keyword in context"
+    },
+    "collocation": {
+        "collocate": "Collocate",
+        "count": "Count"
+    },
+    "concordance": {
+        "more": "More",
+        "less": "Less"
+    },
+    "facets": {
+        "browseByFacet": "Browse by facet",
+        "frequencyBy": "Frequency by",
+        "collocates": "Collocate of query term(s)",
+        "showOptions": "Show options",
+        "frequencyByLabel": "Frequency by {label}",
+        "absoluteFrequency": "Absolute Frequency",
+        "relativeFrequency": "Relative Frequency",
+        "top500Results": "Top 500 results for {label}",
+        "relativeFrequencyDescription": "{total} actual occurrence(s) in {wordCount} words"
+    }
+}

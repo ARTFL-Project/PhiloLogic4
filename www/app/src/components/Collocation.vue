@@ -11,8 +11,8 @@
                     <table class="table table-hover table-striped table-light table-borderless caption-top">
                         <thead class="table-header">
                             <tr>
-                                <th scope="col">Collocate</th>
-                                <th scope="col">Count</th>
+                                <th scope="col">{{ $t("collocation.collocate") }}</th>
+                                <th scope="col">{{ $t("collocation.count") }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -44,7 +44,6 @@
                 </div>
             </div>
         </div>
-        <!-- <access-control v-if="!authorized"></access-control> -->
     </div>
 </template>
 <script>

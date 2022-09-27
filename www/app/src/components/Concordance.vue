@@ -8,7 +8,7 @@
                 style="position: absolute; bottom: 1rem; right: 0.5rem"
                 @click="toggleFacets()"
             >
-                Show Facets
+                {{ $t("common.showFacets") }}
             </button>
         </div>
         <div class="row" style="padding-right: 0.5rem">
@@ -33,7 +33,7 @@
                                     class="btn btn-secondary more-context"
                                     @click="moreContext(index, $event)"
                                 >
-                                    <span class="more d-none d-lg-inline-block">More</span>
+                                    <span class="more d-none d-lg-inline-block">{{ $t("concordance.more") }}</span>
                                 </button>
                             </div>
                         </div>
@@ -153,7 +153,7 @@ export default {
                             moreNode.innerHTML = moreText;
                             defaultNode.style.display = "none";
                             moreNode.style.display = "block";
-                            button.innerHTML = "Less";
+                            button.innerHTML = this.$t("concordance.less");
                         })
                         .catch((error) => {
                             this.loading = false;
@@ -163,12 +163,12 @@ export default {
                 } else {
                     defaultNode.style.display = "none";
                     moreNode.style.display = "block";
-                    button.innerHTML = "Less";
+                    button.innerHTML = this.$t("concordance.less");
                 }
             } else {
                 defaultNode.style.display = "block";
                 moreNode.style.display = "none";
-                button.innerHTML = "More";
+                button.innerHTML = this.$t("concordance.more");
             }
         },
         dicoLookup() {},
