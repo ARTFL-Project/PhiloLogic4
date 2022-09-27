@@ -1,5 +1,15 @@
 {
-    "common": { "loading": "Loading", "and": "and", "showFacets": "Show Facets" },
+    "common": {
+        "loading": "Loading",
+        "and": "and",
+        "showFacets": "Show Facets",
+        "none": "None",
+        "across": "across",
+        "na": "N/A",
+        "reportError": "Report Error",
+        "absoluteFrequency": "Absolute Frequency",
+        "relativeFrequency": "Relative Frequency"
+    },
     "header": {
         "goHome": "Go to home page",
         "citeUs": "Cite us",
@@ -99,5 +109,36 @@
         "relativeFrequency": "Relative Frequency",
         "top500Results": "Top 500 results for {label}",
         "relativeFrequencyDescription": "{total} actual occurrence(s) in {wordCount} words"
+    },
+    "exportResults": {
+        "currentPage": "ONLY results from the current page will be generated",
+        "html": "With text in HTML",
+        "plain": "With plain text"
+    },
+    "kwic": {
+        "sortResultsBy": "Sort results by",
+        "sort": "Sort",
+        "resultsDisplayed": "Results Displayed"
+    },
+    "aggregation": {
+        "performance": "For performance reasons, only the first 1000 results are displayed. Click on the link above for full results."
+    },
+    "landingPage": {
+        "browseByVolume": "Browse by volume",
+        "browseByLetter": "Browse by letter",
+        "seeResults": "See all {n} results"
+    },
+    "searchTips": {
+
+    },
+    "textNav": {
+        "backToTop": "Back to top",
+        "top": "Top",
+        "toc": "Table of contents",
+        "dicoLookUp": "To look up a word in a dictionary, select the word with your mouse and press 'd' on your keyboard"
+    },
+    "timeSeries": {
+        "occurrences": "occurrences",
+        "per1000Words": "occurrences per 10,000 words"
     }
 }

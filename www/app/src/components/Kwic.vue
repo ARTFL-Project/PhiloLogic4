@@ -8,7 +8,7 @@
                 style="position: absolute; bottom: 1rem; right: 0.5rem"
                 @click="toggleFacets()"
             >
-                Show Facets
+                {{ $t("common.showFacets") }}
             </button>
         </div>
         <div class="row">
@@ -17,7 +17,7 @@
                     <div class="p-2 mb-1">
                         <div class="btn-group" role="group">
                             <button type="button" class="btn btn-sm btn-outline-secondary" style="border-right: solid">
-                                Sort results by
+                                {{ $t("kwic.sortResultsBy") }}
                             </button>
                             <div class="btn-group" v-for="(fields, index) in sortingFields" :key="index">
                                 <div class="dropdown">
@@ -42,7 +42,9 @@
                                     </ul>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-secondary btn-sm" @click="sortResults()">Sort</button>
+                            <button type="button" class="btn btn-secondary btn-sm" @click="sortResults()">
+                                {{ $t("kwic.sort") }}
+                            </button>
                         </div>
                         <div class="float-lg-end mt-lg-0 mt-md-2">
                             <div class="btn-group" role="group">
@@ -51,7 +53,7 @@
                                     class="btn btn-sm btn-outline-secondary"
                                     style="border-right: solid"
                                 >
-                                    Results displayed
+                                    {{ $t("kwic.resultsDisplayed") }}
                                 </button>
                                 <div class="dropdown d-inline-block">
                                     <button
@@ -64,7 +66,7 @@
                                         type="button"
                                         id="kwic-results-per-page"
                                         data-bs-toggle="dropdown"
-                                        aria-expanded="false"
+                                        aria-expanded="false;"
                                     >
                                         {{ results_per_page }}
                                     </button>
@@ -177,12 +179,12 @@ export default {
                 sortingSelection.push(this.sortKeys[this.third_kwic_sorting_option]);
             }
             if (sortingSelection.length === 0) {
-                sortingSelection = ["None", "None", "None"];
+                sortingSelection = [this.$t("common.none"), this.$t("common.none"), this.$t("common.none")];
             } else if (sortingSelection.length === 1) {
-                sortingSelection.push("None");
-                sortingSelection.push("None");
+                sortingSelection.push(this.$t("common.none"));
+                sortingSelection.push(this.$t("common.none"));
             } else if (sortingSelection.length === 2) {
-                sortingSelection.push("None");
+                sortingSelection.push(this.$t("common.none"));
             }
             return sortingSelection;
         },
@@ -304,19 +306,19 @@ export default {
         },
         updateSortingSelection(index, selection) {
             if (index === 0) {
-                if (selection.label == "None") {
+                if (selection.label == this.$t("common.none")) {
                     this.first_kwic_sorting_option = "";
                 } else {
                     this.first_kwic_sorting_option = selection.field;
                 }
             } else if (index == 1) {
-                if (selection.label == "None") {
+                if (selection.label == this.$t("common.none")) {
                     this.second_kwic_sorting_option = "";
                 } else {
                     this.second_kwic_sorting_option = selection.field;
                 }
             } else {
-                if (selection.label == "None") {
+                if (selection.label == this.$t("common.none")) {
                     this.third_kwic_sorting_option = "";
                 } else {
                     this.third_kwic_sorting_option = selection.field;

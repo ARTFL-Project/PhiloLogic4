@@ -13,8 +13,8 @@
             <div id="toc-top-bar">
                 <div id="nav-buttons" v-scroll="handleScroll">
                     <button type="button" class="btn btn-secondary btn-sm" id="back-to-top" @click="backToTop()">
-                        <span class="d-none d-sm-inline-block">Back to top</span>
-                        <span class="d-inline-block d-sm-none">Top</span>
+                        <span class="d-none d-sm-inline-block">{{ $t("textNav.backToTop") }}</span>
+                        <span class="d-inline-block d-sm-none">{{ $t("textNav.top") }}</span>
                     </button>
                     <div class="btn-group btn-group-sm" style="pointer-events: all">
                         <button
@@ -33,7 +33,7 @@
                             disabled
                             @click="toggleTableOfContents()"
                         >
-                            Table of contents
+                            {{ $t("textNav.toc") }}
                         </button>
                         <button
                             type="button"
@@ -51,7 +51,7 @@
                         target="_blank "
                         :href="philoConfig.report_error_link"
                         v-if="philoConfig.report_error_link != ''"
-                        >Report Error</a
+                        >{{ $t("common.reportError") }}</a
                     >
                 </div>
                 <div id="toc">
@@ -92,7 +92,7 @@
             </div>
         </div>
         <div style="font-size: 85%; text-align: center" v-if="philoConfig.dictionary_lookup.url_root != ''">
-            To look up a word in a dictionary, select the word with your mouse and press 'd' on your keyboard.
+            {{ $t("textNav.dicoLookUp") }}.
         </div>
         <div class="row" id="all-content">
             <div

@@ -21,14 +21,14 @@
                     <span class="badge rounded-pill bg-secondary" style="font-size: 100%">{{ result.count }}</span>
                     <citations :citation="result.citation"></citations>
                     <span class="d-inline-block ps-1" v-if="breakUpFields[resultIndex].results.length"
-                        >across {{ breakUpFields[resultIndex].results.length }} {{ breakUpFieldName }}(s)</span
+                        >{{ $t("common.across") }} {{ breakUpFields[resultIndex].results.length }}
+                        {{ breakUpFieldName }}(s)</span
                     >
                     <h6
                         class="ms-4 mt-2"
                         v-if="breakUpFields[resultIndex].show && breakUpFields[resultIndex].results.length > 1000"
                     >
-                        For performance reasons, only the first 1000 results are displayed. Click on the link above for
-                        full results.
+                        {{ $t("aggregation.performance") }}
                     </h6>
                     <div class="list-group ms-4 mt-2" v-if="breakUpFields[resultIndex].show">
                         <div
@@ -193,7 +193,7 @@ export default {
                     };
                     if (label == null || label.length == 0) {
                         queryParams[fieldToLink] = ""; // Should be NULL, but that's broken in the philo lib
-                        label = "N/A";
+                        label = this.$t("common.na");
                     } else {
                         queryParams[fieldToLink] = `"${label}"`;
                     }

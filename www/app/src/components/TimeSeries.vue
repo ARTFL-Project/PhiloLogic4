@@ -10,7 +10,7 @@
                         :class="{ active: frequencyType == 'absolute_time' }"
                         @click="toggleFrequency('absolute_time')"
                     >
-                        Absolute Frequency
+                        {{ $t("common.absoluteFrequency") }}
                     </button>
                     <button
                         type="button"
@@ -18,7 +18,7 @@
                         :class="{ active: frequencyType == 'relative_time' }"
                         @click="toggleFrequency('relative_time')"
                     >
-                        Relative Frequency
+                        {{ $t("common.relativeFrequency") }}
                     </button>
                 </div>
                 <div class="p-3 mt-4" style="min-height: 500px; max-height: 800px">
@@ -133,7 +133,7 @@ export default {
                     labels: dateList,
                     datasets: [
                         {
-                            label: "Absolute Frequency",
+                            label: this.$t("common.absoluteFrequency"),
                             backgroundColor: cssVariables.color,
                             borderWidth: 1,
                             hoverBackgroundColor: this.hexToRGBA(cssVariables.color),
@@ -178,9 +178,9 @@ export default {
                             },
                             label: function (tooltipItem) {
                                 if (vm.frequencyType == "absolute_time") {
-                                    return tooltipItem.yLabel + " occurrences";
+                                    return tooltipItem.yLabel + ` ${vm.$t("timeSeries.occurrences")}`;
                                 } else {
-                                    return tooltipItem.yLabel + " occurrences per 10,000 words";
+                                    return tooltipItem.yLabel + ` ${vm.$t("timeSeries.per1000Words")}`;
                                 }
                             },
                         },
@@ -275,11 +275,11 @@ export default {
         toggleFrequency(frequencyType) {
             if (frequencyType == "absolute_time") {
                 this.myBarChart.data.datasets[0].data = this.absoluteCounts;
-                this.myBarChart.data.datasets[0].label = "Absolute Frequency";
+                this.myBarChart.data.datasets[0].label = this.$t("common.absoluteFrequency");
                 this.frequencyType = frequencyType;
             } else {
                 this.myBarChart.data.datasets[0].data = this.relativeCounts;
-                this.myBarChart.data.datasets[0].label = "Relative Frequency";
+                this.myBarChart.data.datasets[0].label = this.$t("common.relativeFrequency");
                 this.frequencyType = frequencyType;
             }
             this.myBarChart.update();

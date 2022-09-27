@@ -65,7 +65,7 @@
                 <div class="row">
                     <div class="col-6" :class="{ 'offset-3': !showDicoLetterRows }" id="dico-landing-volume">
                         <div class="card shadow-sm">
-                            <div class="card-header">Browse by volume</div>
+                            <div class="card-header">{{ $t("landingPage.browseByVolume") }}</div>
                             <div class="list-group" flush v-if="volumeData.length">
                                 <div class="list-group-item" v-for="volume in volumeData" :key="volume.philo_id">
                                     <router-link :to="`/navigate/${volume.philo_id}/table-of-contents`">
@@ -86,7 +86,7 @@
                         v-if="showDicoLetterRows"
                     >
                         <div class="card">
-                            <div class="card-header">Browse by letter</div>
+                            <div class="card-header">{{ $t("landingPage.browseByLetter") }}</div>
                             <table class="table table-borderless" style="margin-bottom: 0">
                                 <tr v-for="(row, rowIndex) in dicoLetterRows" :key="rowIndex">
                                     <td
@@ -127,7 +127,7 @@
                             </ul>
                             <p class="pt-2 ps-3" v-if="group.results.length > 100">
                                 <button type="button" class="btn btn-outline-secondary" @click="seeAll(groupIndex)">
-                                    See all {{ group.results.length }} results
+                                    {{ $t("landingPage.seeResults", { n: group.results.length }) }}
                                 </button>
                             </p>
                         </div>
