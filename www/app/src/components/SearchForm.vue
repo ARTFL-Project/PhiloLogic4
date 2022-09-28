@@ -7,16 +7,16 @@
                         <div class="btn-group" role="group" id="report" style="width: 100%; top: -1px">
                             <button
                                 type="button"
-                                :id="report.value"
+                                :id="report"
                                 v-for="searchReport in reports"
-                                @click="reportChange(searchReport.value)"
-                                :key="searchReport.value"
+                                @click="reportChange(searchReport)"
+                                :key="searchReport"
                                 class="btn btn-secondary rounded-0"
-                                :class="{ active: currentReport == searchReport.value }"
+                                :class="{ active: currentReport == searchReport }"
                             >
-                                <span v-if="searchReport.value != 'kwic'">{{ searchReport.label }}</span>
+                                <span v-if="searchReport != 'kwic'">{{ $t(`searchForm.${searchReport}`) }}</span>
                                 <span v-else
-                                    ><span class="d-md-inline d-sm-none">{{ searchReport.label }}</span
+                                    ><span class="d-md-inline d-sm-none">{{ $t(`searchForm.${searchReport}`) }}</span
                                     ><span class="d-md-none">{{ $t("searchForm.shortKwic") }}</span></span
                                 >
                             </button>
@@ -123,7 +123,8 @@
                                     class="btn btn-secondary"
                                     @click="toggleForm()"
                                 >
-                                    {{ searchOptionsButton }}
+                                    <span v-if="!formOpen">{{ $t("searchForm.showSearchOptions") }}</span>
+                                    <span v-else>{{ $t("searchForm.hideSearchOptions") }}</span>
                                 </button>
                             </div>
                         </div>
@@ -635,7 +636,6 @@ export default {
             metadataInputStyle: this.$philoConfig.metadata_input_style,
             headIndex: 0,
             formOpen: false,
-            searchOptionsButton: this.$t("searchForm.showSearchOptions"),
             approximateValues: [
                 { text: this.$t("searchForm.similarity", { n: 90 }), value: "90" },
                 { text: this.$t("searchForm.similarity", { n: 80 }), value: "80" },
@@ -674,6 +674,7 @@ export default {
             metadataTyped: {},
             dateType: {},
             dateRange: {},
+            reports: this.$philoConfig.search_reports,
         };
     },
     watch: {
@@ -696,7 +697,6 @@ export default {
         },
     },
     created() {
-        this.reports = this.buildReports();
         for (let metadataField of this.$philoConfig.metadata) {
             let metadataObj = {
                 label: metadataField[0].toUpperCase() + metadataField.slice(1),
@@ -786,20 +786,6 @@ export default {
                     this.metadataChoiceChecked[field] = this.formData[field].split(" | ");
                 }
             }
-            this.searchOptionsButton = "Show search options";
-        },
-        buildReports() {
-            let reports = [];
-            for (let value of this.$philoConfig.search_reports) {
-                // let label = value.replace("_s", "-s");
-                let label = this.$t(`searchForm.${value}`);
-                // label = label.charAt(0).toUpperCase() + label.slice(1);
-                reports.push({
-                    value: value,
-                    label: label,
-                });
-            }
-            return reports;
         },
         buildMetadataFieldDisplay() {
             for (let metadataField of this.$philoConfig.metadata) {
@@ -904,10 +890,8 @@ export default {
         toggleForm() {
             if (!this.formOpen) {
                 this.formOpen = true;
-                this.searchOptionsButton = this.$t("searchForm.hideSearchOptions");
             } else {
                 this.formOpen = false;
-                this.searchOptionsButton = this.$t("searchForm.showSearchOptions");
             }
         },
         clearFormData() {},

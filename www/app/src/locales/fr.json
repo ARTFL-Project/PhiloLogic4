@@ -1,0 +1,140 @@
+{
+    "common": {
+        "loading": "Chargement en cours",
+        "and": "et",
+        "showFacets": "Montrer les facettes",
+        "none": "Aucun",
+        "across": "à travers",
+        "na": "n/d",
+        "reportError": "Rapport d'erreur",
+        "absoluteFrequency": "Fréquence Absolue",
+        "relativeFrequency": "Fréquence Relative"
+    },
+    "header": {
+        "goHome": "Page d'accueil",
+        "citeUs": "Nous citer",
+        "contactUs": "Contactez nous"
+    },
+    "searchForm": {
+        "concordance": "Concordance",
+        "kwic": "Mot-clé en contexte",
+        "shortKwic": "KWIC",
+        "aggregation": "Aggrégation",
+        "collocation": "Collocation",
+        "time_series": "Série Temporelle",
+        "searchTerms": "Recherche par mots",
+        "tips": "Conseils",
+        "search": "Rechercher",
+        "clear": "Effacer",
+        "showSearchOptions": "Recherche avancée",
+        "hideSearchOptions": "Masquer",
+        "searchTermsParameters": "Paramètres de recherche par mots",
+        "approximateMatch": "Inclure les mots proches",
+        "similarity": "Degré de proximité: {n}%",
+        "searchCoOccurrences": "Recherche de co-occurrences",
+        "within": "au sein de",
+        "withinExactly": "exactement",
+        "sameSentence": "dans la même phrase",
+        "howMany": "combien ",
+        "wordsSentence": "mots dans la même phrase",
+        "filterByField": "Filtrer par métadonnées",
+        "resultsPerPage": "Nombre de résultats par page",
+        "exactDate": "exact",
+        "rangeDate": "intervale",
+        "dateFrom": "de",
+        "dateTo": "à",
+        "dateRange": "Intervalle de temps",
+        "yearInterval": "Intervalle en années",
+        "every": "tous les",
+        "years": "an(s)",
+        "wordFiltering": "Filtrage de mots",
+        "groupResultsBy": "Grouper résultats par",
+        "displayOptions": "Options d'affichage",
+        "sortResultsBy": "Trier résultats par",
+        "mostFrequentTerms": "Mots les plus fréquents",
+        "stopwords": "Mots vides",
+        "noFiltering": "Pas de filtrage"
+    },
+    "resultsBiblio": {
+        "heading": "Bibliographie des résultats sur cette page",
+        "occurrences": "occurrence(s)"
+    },
+    "searchArgs": {
+        "searchingDbFor": "Recherche dans la base de données des",
+        "termsSimilarTo": "termes similaires à",
+        "terms": "termes",
+        "termsExpanded": "La recherche de mots a été étendue aux {length} mots suivants",
+        "mostFrequentTerms": "100 mots les plus fréquents affichés",
+        "rerunQuery": "Relancer la recherche avec les termes suivants:",
+        "biblioCriteria": "Critères bibliographiques",
+        "occurrencesBetween": "{n} occurrences du/des terme(s) entre",
+        "collocOccurrences": "Affichage des 100 mots vides pour {n} occurrences",
+        "withinProximity": "dans une fenêtre de {n} mots",
+        "withinExactlyProximity": "dans une fenêtre exacte de {n} mots",
+        "sameSentence": "dans la même phrase"
+    },
+    "resultsSummary": {
+        "exportResults": "Exporter les résultats",
+        "totalOccurrences": "{n} occurrences",
+        "spreadAcross": "dispersés à travers",
+        "displayingHits": "Affichage des résultats {start}-{end} sur {total}",
+        "noResults": "pas de résultat pour cette recherche",
+        "fromTheseTitles": "dans ces textes",
+        "groupByOccurrences": "{total} occurrences disséminées à travers {n} {label}(s)",
+        "commonWords": "Les {n} mots les plus courants",
+        "commonStopwords": "Les mots vides les plus courants",
+        "filtered": "sont filtrés de ce rapport de recherche",
+        "concordanceBig": "Afficher les occurrences en contexte",
+        "concordanceSmall": "Concordance",
+        "kwicBig": "Afficher les occurrences par ligne",
+        "kwicSmall": "Occurrences par ligne"
+    },
+    "collocation": {
+        "collocate": "Collocation",
+        "count": "Compte"
+    },
+    "concordance": {
+        "more": "Plus",
+        "less": "Moins"
+    },
+    "facets": {
+        "browseByFacet": "Naviguer par facettes",
+        "frequencyBy": "Fréquence par",
+        "collocates": "Collocation des termes de recherche",
+        "showOptions": "Montrer les options",
+        "frequencyByLabel": "Fréquence par {label}",
+        "top500Results": "Top 500 résultats par {label}",
+        "relativeFrequencyDescription": "{total} occurrence(s) pour {wordCount} mots"
+    },
+    "exportResults": {
+        "currentPage": "SEUL les résults de cette page seront générés",
+        "html": "Texte en HTML",
+        "plain": " Texte simple"
+    },
+    "kwic": {
+        "sortResultsBy": "Trier résultats par",
+        "sort": "Trier",
+        "resultsDisplayed": "Résultats affichés"
+    },
+    "aggregation": {
+        "performance": "Pour des raisons de performance, seul les 100 premiers résultats seront affichés. Cliquer sur le lien ci-dessus pour voir tous les résultats."
+    },
+    "landingPage": {
+        "browseByVolume": "Naviguer par volume",
+        "browseByLetter": "Naviguer par lettre",
+        "seeResults": "Afficher les {n} résultats"
+    },
+    "searchTips": {
+
+    },
+    "textNav": {
+        "backToTop": "Retour en haut de la page",
+        "top": "En haut",
+        "toc": "Table des matières",
+        "dicoLookUp": "Pour rechercher la définition d’un mot, sélectionner le mot avec l’aide de la souris et appuyer sur la touche \"d\" du clavier"
+    },
+    "timeSeries": {
+        "occurrences": "occurrences",
+        "per1000Words": "occurrences pour 10,000 mots"
+    }
+}

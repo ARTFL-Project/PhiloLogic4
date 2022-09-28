@@ -68,7 +68,6 @@
         "mostFrequentTerms": "100 most frequent terms displayed",
         "rerunQuery": "Rerun query with the current modifications",
         "biblioCriteria": "Bibliography Criteria",
-        "none": "None",
         "occurrencesBetween": "{n} occurrences of the term(s) between",
         "collocOccurrences": "Displaying the top 100 collocates for {n} occurrences",
         "withinProximity": "within {n} words",
@@ -105,8 +104,6 @@
         "collocates": "Collocate of query term(s)",
         "showOptions": "Show options",
         "frequencyByLabel": "Frequency by {label}",
-        "absoluteFrequency": "Absolute Frequency",
-        "relativeFrequency": "Relative Frequency",
         "top500Results": "Top 500 results for {label}",
         "relativeFrequencyDescription": "{total} actual occurrence(s) in {wordCount} words"
     },

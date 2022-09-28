@@ -43,6 +43,9 @@
                     >{{ $t("header.contactUs") }}</a
                 >
             </li>
+            <li class="nav-item">
+                <locale-changer />
+            </li>
         </ul>
         <a
             id="report-error-link"
@@ -50,7 +53,7 @@
             :href="philoConfig.report_error_link"
             target="_blank"
             v-if="philoConfig.report_error_link.length > 0"
-            >{{ $t("header.reportError") }}</a
+            >{{ $t("common.reportError") }}</a
         >
         <div
             class="modal fade"
@@ -81,10 +84,10 @@
 
 <script>
 import citations from "./Citations";
-
+import LocaleChanger from "./LocaleChanger.vue";
 export default {
     name: "Header-component",
-    components: { citations },
+    components: { citations, LocaleChanger },
     inject: ["$http"],
     data() {
         return {
@@ -170,7 +173,7 @@ export default {
 }
 .cite {
     left: 0.5rem;
-    bottom: 0.25rem;
+    bottom: -0.25rem;
     font-variant: small-caps;
     font-weight: 700;
     background-color: inherit;

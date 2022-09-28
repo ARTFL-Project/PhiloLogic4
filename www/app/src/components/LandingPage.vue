@@ -275,7 +275,7 @@ export default {
                         };
                         if (label == "") {
                             queryParams[citation.field] = ""; // Should be NULL, but that's broken in the philo lib
-                            label = "N/A";
+                            label = this.$t("common.na");
                         } else {
                             queryParams[citation.field] = `"${label}"`;
                         }

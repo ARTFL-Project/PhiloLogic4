@@ -70,7 +70,7 @@
                     :class="{ active: showingRelativeFrequencies === false }"
                     @click="displayAbsoluteFrequencies()"
                 >
-                    {{ $t("facets.absoluteFrequency") }}
+                    {{ $t("common.absoluteFrequency") }}
                 </button>
                 <button
                     type="button"
@@ -78,7 +78,7 @@
                     :class="{ active: showingRelativeFrequencies }"
                     @click="displayRelativeFrequencies()"
                 >
-                    {{ $t("facets.relativeFrequency") }}
+                    {{ $t("common.relativeFrequency") }}
                 </button>
             </div>
             <div class="m-2 text-center" style="opacity: 0.5">

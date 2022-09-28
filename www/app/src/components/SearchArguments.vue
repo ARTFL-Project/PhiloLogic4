@@ -47,7 +47,7 @@
                 <span class="metadata-value">{{ metadata.value.replace("<=>", "&#8212;") }}</span>
                 <span class="remove-metadata" @click="removeMetadata(metadata.key, restart)">X</span>
             </span>
-            <b v-if="queryArgs.biblio.length === 0">{{ $t("searchArgs.none") }}</b>
+            <b v-if="queryArgs.biblio.length === 0">{{ $t("common.none") }}</b>
         </div>
         <div v-if="queryReport === 'time_series'">
             {{ $t("searchArgs.occurrencesBetween", { n: resultsLength }) }}
