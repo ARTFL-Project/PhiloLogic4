@@ -115,7 +115,10 @@
     "kwic": {
         "sortResultsBy": "Trier résultats par",
         "sort": "Trier",
-        "resultsDisplayed": "Résultats affichés"
+        "resultsDisplayed": "Résultats affichés",
+        "searchedTerms": "Termes recherché(s)",
+        "wordsLeft": "Mots sur la gauche",
+        "wordsRight": "Mots sur la droite"
     },
     "aggregation": {
         "performance": "Pour des raisons de performance, seul les 100 premiers résultats seront affichés. Cliquer sur le lien ci-dessus pour voir tous les résultats."

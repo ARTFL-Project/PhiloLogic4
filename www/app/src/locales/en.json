@@ -116,7 +116,10 @@
     "kwic": {
         "sortResultsBy": "Sort results by",
         "sort": "Sort",
-        "resultsDisplayed": "Results Displayed"
+        "resultsDisplayed": "Results Displayed",
+        "searchedTerms": "Searched term(s)",
+        "wordsLeft": "Words to the left",
+        "wordsRight": "Words to the right"
     },
     "aggregation": {
         "performance": "For performance reasons, only the first 1000 results are displayed. Click on the link above for full results."

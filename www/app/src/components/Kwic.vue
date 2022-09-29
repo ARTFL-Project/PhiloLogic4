@@ -167,6 +167,57 @@ export default {
             "urlUpdate",
             "showFacets",
         ]),
+        sortingFields() {
+            let sortingFields = [
+                {
+                    label: this.$t("common.none"),
+                    field: "",
+                },
+                {
+                    label: this.$t("kwic.searchedTerms"),
+                    field: "q",
+                },
+                {
+                    label: this.$t("kwic.wordsLeft"),
+                    field: "left",
+                },
+                {
+                    label: this.$t("kwic.wordsRight"),
+                    field: "right",
+                },
+            ];
+            for (let field of this.philoConfig.kwic_metadata_sorting_fields) {
+                if (field in this.philoConfig.metadata_aliases) {
+                    let label = this.philoConfig.metadata_aliases[field];
+                    sortingFields.push({
+                        label: label,
+                        field: field,
+                    });
+                } else {
+                    sortingFields.push({
+                        label: field[0].toUpperCase() + field.slice(1),
+                        field: field,
+                    });
+                }
+            }
+            return [sortingFields, sortingFields, sortingFields];
+        },
+        sortKeys() {
+            let sortKeys = {
+                q: this.$t("kwic.searchedTerms"),
+                left: this.$t("kwic.wordsLeft"),
+                right: this.$t("kwic.wordsRight"),
+            };
+            for (let field of this.philoConfig.kwic_metadata_sorting_fields) {
+                if (field in this.philoConfig.metadata_aliases) {
+                    let label = this.philoConfig.metadata_aliases[field];
+                    sortKeys[field] = label;
+                } else {
+                    sortKeys[field] = field[0].toUpperCase() + field.slice(1);
+                }
+            }
+            return sortKeys;
+        },
         sortingSelection() {
             let sortingSelection = [];
             if (this.first_kwic_sorting_option !== "") {
@@ -200,12 +251,12 @@ export default {
             philoConfig: this.$philoConfig,
             results: { description: { end: 0 } },
             searchParams: {},
-            sortingFields: [],
-            sortKeys: {
-                q: "searched term(s)",
-                left: "words to the left",
-                right: "words to the right",
-            },
+            // sortingFields: [],
+            // sortKeys: {
+            //     q: this.$t("kwic.searchedTerms"),
+            //     left: this.$t("kwic.wordsLeft"),
+            //     right: this.$t("kwic.wordsRight"),
+            // },
             sortedResults: [],
             loading: false,
             runningTotal: 0,
@@ -215,7 +266,8 @@ export default {
     created() {
         this.report = "kwic";
         this.currentReport = "kwic";
-        this.initializeKwic();
+        console.log(this.sortingFields);
+        // this.initializeKwic();
         this.fetchResults();
     },
     watch: {
@@ -227,42 +279,14 @@ export default {
     },
     methods: {
         initializeKwic() {
-            // Sorting fields
-            let sortingFields = [
-                {
-                    label: "None",
-                    field: "",
-                },
-                {
-                    label: "searched term(s)",
-                    field: "q",
-                },
-                {
-                    label: "words to the left",
-                    field: "left",
-                },
-                {
-                    label: "words to the right",
-                    field: "right",
-                },
-            ];
-            for (let field of this.philoConfig.kwic_metadata_sorting_fields) {
-                if (field in this.philoConfig.metadata_aliases) {
-                    let label = this.philoConfig.metadata_aliases[field];
-                    sortingFields.push({
-                        label: label,
-                        field: field,
-                    });
-                    this.sortKeys[field] = label;
-                } else {
-                    sortingFields.push({
-                        label: field[0].toUpperCase() + field.slice(1),
-                        field: field,
-                    });
-                    this.sortKeys[field] = field[0].toUpperCase() + field.slice(1);
-                }
-            }
-            this.sortingFields = [sortingFields, sortingFields, sortingFields];
+            // for (let field of this.philoConfig.kwic_metadata_sorting_fields) {
+            //     if (field in this.philoConfig.metadata_aliases) {
+            //         let label = this.philoConfig.metadata_aliases[field];
+            //         this.sortKeys[field] = label;
+            //     } else {
+            //         this.sortKeys[field] = field[0].toUpperCase() + field.slice(1);
+            //     }
+            // }
         },
         buildFullCitation(metadataField) {
             let citationList = [];
