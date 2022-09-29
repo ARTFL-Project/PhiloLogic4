@@ -173,7 +173,7 @@ export default {
 }
 .cite {
     left: 0.5rem;
-    bottom: -0.25rem;
+    bottom: 0.25rem;
     font-variant: small-caps;
     font-weight: 700;
     background-color: inherit;
