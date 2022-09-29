@@ -644,7 +644,7 @@ export default {
             methodOptions: [
                 { text: this.$t("searchForm.within"), value: "proxy" },
                 { text: this.$t("searchForm.withinExactly"), value: "phrase" },
-                { text: this.$t("searchForm.sameSentence"), value: "cooc" },
+                { text: this.$t("common.sameSentence"), value: "cooc" },
             ],
             metadataDisplay: [],
             metadataValues: {},
@@ -1036,7 +1036,7 @@ input[type="text"] {
 }
 .input-group,
 #search-elements h6 {
-    max-width: 700px;
+    width: fit-content;
 }
 #report .btn {
     font-variant: small-caps;
@@ -1065,6 +1065,11 @@ input[type="text"] {
 #q-group .btn-outline-secondary,
 #head-group .btn {
     pointer-events: none; /*disable hover effect*/
+}
+#search_terms .input-group,
+#search-elements .input-group {
+    max-width: 700px;
+    width: 100%;
 }
 
 #report label {

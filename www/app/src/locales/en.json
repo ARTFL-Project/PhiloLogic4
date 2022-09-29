@@ -9,7 +9,8 @@
         "na": "N/A",
         "reportError": "Report Error",
         "absoluteFrequency": "Absolute Frequency",
-        "relativeFrequency": "Relative Frequency"
+        "relativeFrequency": "Relative Frequency",
+        "sameSentence": "in the same sentence"
     },
     "header": {
         "goHome": "Go to home page",
@@ -36,7 +37,6 @@
         "searchCoOccurrences": "Search co-occurrences",
         "within": "within",
         "withinExactly": "within exactly",
-        "sameSentence": "in the same sentence",
         "howMany": "how many",
         "wordsSentence": "words in the same sentence",
         "filterByField": "Filter by metadata field",

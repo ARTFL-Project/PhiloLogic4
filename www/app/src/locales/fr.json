@@ -9,7 +9,8 @@
         "na": "n/d",
         "reportError": "Rapport d'erreur",
         "absoluteFrequency": "Fréquence Absolue",
-        "relativeFrequency": "Fréquence Relative"
+        "relativeFrequency": "Fréquence Relative",
+        "sameSentence": "dans la même phrase"
     },
     "header": {
         "goHome": "Page d'accueil",
@@ -35,7 +36,6 @@
         "searchCoOccurrences": "Recherche de co-occurrences",
         "within": "au sein de",
         "withinExactly": "exactement",
-        "sameSentence": "dans la même phrase",
         "howMany": "combien ",
         "wordsSentence": "mots dans la même phrase",
         "filterByField": "Filtrer par métadonnées",

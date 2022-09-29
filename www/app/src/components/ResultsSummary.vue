@@ -163,8 +163,8 @@
                         :class="{ active: report === 'concordance' }"
                         @click="switchReport('concordance')"
                     >
-                        <span class="d-none d-sm-none d-md-inline">{{ reportSwitch.concordance.labelBig }}</span>
-                        <span class="d-inline d-sm-inline d-md-none">{{ reportSwitch.concordance.labelSmall }}</span>
+                        <span class="d-none d-sm-none d-md-inline">{{ $t("resultsSummary.concordanceBig") }}</span>
+                        <span class="d-inline d-sm-inline d-md-none">{{ $t("resultsSummary.concordanceSmall") }}</span>
                     </button>
                     <button
                         type="button"
@@ -172,8 +172,8 @@
                         :class="{ active: report === 'kwic' }"
                         @click="switchReport('kwic')"
                     >
-                        <span class="d-none d-sm-none d-md-inline">{{ reportSwitch.kwic.labelBig }}</span>
-                        <span class="d-inline d-sm-inline d-md-none">{{ reportSwitch.kwic.labelSmall }}</span>
+                        <span class="d-none d-sm-none d-md-inline">{{ $t("resultsSummary.kwicBig") }}</span>
+                        <span class="d-inline d-sm-inline d-md-none">{{ $t("resultsSummary.kwicSmall") }}</span>
                     </button>
                 </div>
             </div>
@@ -236,16 +236,6 @@ export default {
             statsDescription: [],
             resultsPerPage: 0,
             hitlistStatsDone: false,
-            reportSwitch: {
-                concordance: {
-                    labelBig: this.$t("resultsSummary.concordanceBig"),
-                    labelSmall: this.$t("resultsSummary.concordanceSmall"),
-                },
-                kwic: {
-                    labelBig: this.$t("resultsSummary.kwicBig"),
-                    labelSmall: this.$t("resultsSummary.kwicSmall"),
-                },
-            },
             showBiblio: false,
             groupByLabel:
                 this.$route.query.group_by in this.$philoConfig.metadata_aliases

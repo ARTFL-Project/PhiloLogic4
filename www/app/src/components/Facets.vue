@@ -20,7 +20,7 @@
             </transition>
             <transition name="slide-fade">
                 <div
-                    class="list-group list-group-flush mt-1"
+                    class="list-group mt-2"
                     style="border-top: 0"
                     v-if="showFacetSelection && report != 'bibliography'"
                 >
@@ -30,7 +30,7 @@
                         @click="getFacet(collocationFacet)"
                         v-if="report !== 'bibliography'"
                     >
-                        {{ collocationFacet.alias }}
+                        {{ $t("common.sameSentence") }}
                     </div>
                 </div>
             </transition>
@@ -81,7 +81,7 @@
                     {{ $t("common.relativeFrequency") }}
                 </button>
             </div>
-            <div class="m-2 text-center" style="opacity: 0.5">
+            <div class="m-2 text-center" style="opacity: 0.7">
                 {{ $t("facets.top500Results", { label: selectedFacet.alias }) }}
             </div>
             <div
@@ -401,7 +401,18 @@ export default {
     },
 };
 </script>
-<style thisd>
+<style scoped>
+.card-header {
+    font-variant: small-caps;
+}
+.dropdown-header {
+    padding: 0.5rem 0;
+    font-variant: small-caps;
+}
+.list-group-item {
+    border-left-width: 0;
+    border-right-width: 0;
+}
 .close-box {
     position: absolute;
     line-height: 1.9;
