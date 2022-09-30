@@ -3,19 +3,19 @@
 
 import hashlib
 import os
-import regex as re
 import socket
 import sys
 import time
 from urllib.parse import unquote
 
+import regex as re
 from philologic.runtime.DB import DB
 from philologic.utils import load_module
 
 # These should always be allowed for local access
 local_blocks = ["10.0.0.", "172.16.0.", "192.168.0.", "127.0.0."]
 
-ip_ranges = [re.compile(r"^%s.*" % i) for i in local_blocks]
+ip_ranges = [re.compile(rf"^{i}.*") for i in local_blocks]
 
 
 def check_access(environ, config):
@@ -30,12 +30,15 @@ def check_access(environ, config):
             access_file = os.path.join(config.db_path, "data", config.access_file)
         if not os.path.isfile(access_file):
             print(
-                f"ACCESS FILE DOES NOT EXIST. UNAUTHORIZED ACCESS TO: {incoming_address} from domain {match_domain}",
+                f"ACCESS FILE DOES NOT EXIST. UNAUTHORIZED ACCESS TO: {incoming_address} from domain {match_domain}: access file does not exist",
                 file=sys.stderr,
             )
             return ()
     else:
-        print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)
+        print(
+            f"UNAUTHORIZED ACCESS TO:{incoming_address} from domain {match_domain} no access file is defined",
+            file=sys.stderr,
+        )
         return ()
 
     # Load access config file. If loading fails, don't grant access.
@@ -43,7 +46,10 @@ def check_access(environ, config):
         access_config = load_module("access_config", access_file)
     except Exception as e:
         print("ACCESS ERROR", repr(e), file=sys.stderr)
-        print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)
+        print(
+            f"UNAUTHORIZED ACCESS TO:{incoming_address} from domain {match_domain}: can't load access config file",
+            file=sys.stderr,
+        )
         return ()
 
     # Let's first check if the IP is local and grant access if it is.
@@ -53,11 +59,11 @@ def check_access(environ, config):
 
     try:
         domain_list = set(access_config.domain_list)
-    except:
+    except Exception:
         domain_list = []
 
     try:
-        allowed_ips = set([])
+        allowed_ips = set()
         for ip in access_config.allowed_ips:
             split_numbers = ip.split(".")
             if len(split_numbers) == 4:
@@ -92,7 +98,10 @@ def check_access(environ, config):
                 return make_token(incoming_address, db)
 
     # If no token returned, we block access.
-    print("UNAUTHORIZED ACCESS TO: %s from domain %s" % (incoming_address, match_domain), file=sys.stderr)
+    print(
+        f"UNAUTHORIZED ACCESS TO:{incoming_address} from domain {match_domain}: IP not found in IP list",
+        file=sys.stderr,
+    )
     return ()
 
 

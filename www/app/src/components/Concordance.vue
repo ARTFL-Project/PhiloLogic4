@@ -142,7 +142,7 @@ export default {
             let moreNode = document.getElementsByClassName("more-length")[index];
             let resultNumber = this.results.description.start + index - 1;
             let localParams = { hit_num: resultNumber, ...this.searchParams };
-            if (button.innerHTML == "More") {
+            if (button.innerHTML == this.$t("concordance.more")) {
                 if (moreNode.innerHTML.length == 0) {
                     this.$http
                         .get(`${this.$dbUrl}/scripts/get_more_context.py`, {
