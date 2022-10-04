@@ -30,7 +30,7 @@ class WSGIHandler(object):
             )  # remove all whitespace in Cookie since it breaks parsing in Python 3.6
             if "hash" in self.cookies and "timestamp" in self.cookies:
                 h = hashlib.md5()
-                h.update(environ["REMOTE_ADDR"].encode("utf8"))
+                # h.update(environ["REMOTE_ADDR"].encode("utf8"))
                 h.update(self.cookies["timestamp"].value.encode("utf8"))
                 h.update(db.locals.secret.encode("utf8"))
                 if self.cookies["hash"].value == h.hexdigest():

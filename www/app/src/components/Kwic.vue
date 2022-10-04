@@ -251,12 +251,6 @@ export default {
             philoConfig: this.$philoConfig,
             results: { description: { end: 0 } },
             searchParams: {},
-            // sortingFields: [],
-            // sortKeys: {
-            //     q: this.$t("kwic.searchedTerms"),
-            //     left: this.$t("kwic.wordsLeft"),
-            //     right: this.$t("kwic.wordsRight"),
-            // },
             sortedResults: [],
             loading: false,
             runningTotal: 0,
@@ -266,8 +260,6 @@ export default {
     created() {
         this.report = "kwic";
         this.currentReport = "kwic";
-        console.log(this.sortingFields);
-        // this.initializeKwic();
         this.fetchResults();
     },
     watch: {
@@ -278,16 +270,6 @@ export default {
         },
     },
     methods: {
-        initializeKwic() {
-            // for (let field of this.philoConfig.kwic_metadata_sorting_fields) {
-            //     if (field in this.philoConfig.metadata_aliases) {
-            //         let label = this.philoConfig.metadata_aliases[field];
-            //         this.sortKeys[field] = label;
-            //     } else {
-            //         this.sortKeys[field] = field[0].toUpperCase() + field.slice(1);
-            //     }
-            // }
-        },
         buildFullCitation(metadataField) {
             let citationList = [];
             let biblioFields = this.philoConfig.kwic_bibliography_fields;

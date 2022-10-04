@@ -55,7 +55,7 @@ def check_access(environ, config):
     # Let's first check if the IP is local and grant access if it is.
     for ip_range in ip_ranges:
         if ip_range.search(incoming_address):
-            return make_token(incoming_address, db)
+            return make_token(db)
 
     try:
         domain_list = set(access_config.domain_list)
@@ -87,15 +87,15 @@ def check_access(environ, config):
 
     if incoming_address not in blocked_ips:
         if match_domain in domain_list:
-            return make_token(incoming_address, db)
+            return make_token(db)
         else:
             for domain in domain_list:
                 if domain in match_domain:
-                    return make_token(incoming_address, db)
+                    return make_token(db)
         for ip_range in allowed_ips:
             if re.search(r"^%s.*" % ip_range, incoming_address):
                 print("PASS", file=sys.stderr)
-                return make_token(incoming_address, db)
+                return make_token(db)
 
     # If no token returned, we block access.
     print(
@@ -128,8 +128,7 @@ def login_access(environ, request, config, headers):
         if request.username and request.password:
             access = check_login_info(config, request)
             if access:
-                incoming_address = environ["REMOTE_ADDR"]
-                token = make_token(incoming_address, db)
+                token = make_token(db)
                 if token:
                     h, ts = token
                     headers.append(("Set-Cookie", f"hash={h}"))
@@ -162,9 +161,8 @@ def check_login_info(config, request):
         return False
 
 
-def make_token(incoming_address, db):
+def make_token(db):
     h = hashlib.md5()
-    h.update(incoming_address.encode("utf8"))
     now = str(time.time())
     h.update(now.encode("utf8"))
     h.update(db.locals.secret.encode("utf8"))

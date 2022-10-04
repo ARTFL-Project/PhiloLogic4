@@ -17,7 +17,6 @@ def start_web_app(environ, start_response):
     headers = [("Content-type", "text/html; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     if not config.valid_config:  # This means we have an error in the webconfig file
         html_page = build_misconfig_page(config.traceback, "webconfig.cfg")
-    # TODO handle errors in db.locals.py
     else:
         request = WSGIHandler(environ, config)
         if config.access_control:
