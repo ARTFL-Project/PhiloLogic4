@@ -125,16 +125,24 @@ export default {
             const html = document.documentElement;
             html.setAttribute("lang", "sv");
             this.accessAuthorized = this.$philoConfig.access_control ? false : true;
+            console.log(document.cookie);
             if (this.$philoConfig.access_control) {
-                this.$http.get(`${this.$dbUrl}/scripts/access_request.py`).then((response) => {
-                    this.accessAuthorized = response.data.access;
-                    if (this.accessAuthorized) {
-                        this.setupApp();
-                    } else {
-                        this.clientIp = response.data.incoming_address;
-                        this.domainName = response.data.domain_name;
-                    }
-                });
+                this.$http
+                    .get(`${this.$dbUrl}/scripts/access_request.py`, {
+                        headers: {
+                            "Access-Control-Allow-Origin": "*",
+                        },
+                    })
+                    .then((response) => {
+                        this.accessAuthorized = response.data.access;
+                        if (this.accessAuthorized) {
+                            this.setupApp();
+                        } else {
+                            this.clientIp = response.data.incoming_address;
+                            this.domainName = response.data.domain_name;
+                        }
+                        console.log(document.cookie);
+                    });
             } else {
                 this.setupApp();
             }

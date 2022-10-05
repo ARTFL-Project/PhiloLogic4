@@ -10,9 +10,10 @@ import "bootstrap"
 import appConfig from "../appConfig.json"
 import i18n from './i18n'
 
+axios.defaults.withCredentials = true;
+
 axios
-    .get(`${appConfig.dbUrl}/scripts/get_web_config.py`, {
-    })
+    .get(`${appConfig.dbUrl}/scripts/get_web_config.py`, {})
     .then((response) => {
         const app = createApp(App).use(i18n)
         app.config.globalProperties.$philoConfig = response.data
@@ -26,19 +27,28 @@ axios
         app.use(store)
         app.mixin({
             methods: {
-                paramsFilter, paramsToRoute, paramsToUrlString, copyObject, saveToLocalStorage, mergeResults, sortResults, deepEqual, dictionaryLookup, debug
+                paramsFilter,
+                paramsToRoute,
+                paramsToUrlString,
+                copyObject,
+                saveToLocalStorage,
+                mergeResults,
+                sortResults,
+                deepEqual,
+                dictionaryLookup,
+                debug
             }
         })
         app.directive('scroll', {
-            mounted: function (el, binding) {
-                el.scrollHandler = function (evt) {
+            mounted: function(el, binding) {
+                el.scrollHandler = function(evt) {
                     if (binding.value(evt, el)) {
                         window.removeEventListener('scroll', el.scrollHandler)
                     }
                 }
                 window.addEventListener('scroll', el.scrollHandler)
             },
-            unmounted: function (el) {
+            unmounted: function(el) {
                 window.removeEventListener("scroll", el.scrollHandler)
             }
         })

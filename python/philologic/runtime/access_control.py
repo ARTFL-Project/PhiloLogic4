@@ -134,7 +134,15 @@ def login_access(environ, request, config, headers):
                     headers.append(("Set-Cookie", f"hash={h}"))
                     headers.append(("Set-Cookie", f"timestamp={ts}"))
         else:
-            access = False
+            # WORKAROUND because cookie not being sent on access_request.py request
+            token = check_access(environ, config)
+            if token:
+                h, ts = token
+                headers.append(("Set-Cookie", f"hash={h}"))
+                headers.append(("Set-Cookie", f"timestamp={ts}"))
+                access = True
+            else:
+                access = False
     return access, headers
 
 
