@@ -124,11 +124,12 @@ export default {
             document.title = this.$philoConfig.dbname.replace(/<[^>]+>/, "");
             const html = document.documentElement;
             html.setAttribute("lang", "sv");
+            this.$i18n.locale = localStorage.getItem("lang") || "en";
             this.accessAuthorized = this.$philoConfig.access_control ? false : true;
-            console.log(document.cookie);
+            let baseUrl = this.getBaseUrl(); // Make sure proxied access uses proxy server for access request
             if (this.$philoConfig.access_control) {
                 this.$http
-                    .get(`${this.$dbUrl}/scripts/access_request.py`, {
+                    .get(`${baseUrl}/scripts/access_request.py`, {
                         headers: {
                             "Access-Control-Allow-Origin": "*",
                         },
@@ -141,7 +142,6 @@ export default {
                             this.clientIp = response.data.incoming_address;
                             this.domainName = response.data.domain_name;
                         }
-                        console.log(document.cookie);
                     });
             } else {
                 this.setupApp();
@@ -161,6 +161,19 @@ export default {
         },
     },
     methods: {
+        getBaseUrl() {
+            let href = window.location.href;
+            href = href.replace(/\/concordance.*/, "");
+            href = href.replace(/\/kwic.*/, "");
+            href = href.replace(/\/collocation.*/, "");
+            href = href.replace(/\/aggregation.*/, "");
+            href = href.replace(/\/table-of-contents.*/, "");
+            href = href.replace(/\/navigate.*/, "");
+            href = href.replace(/\/time_series.*/, "");
+            href = href.replace(/\/bibliography.*/, "");
+            return href;
+        },
+
         setupApp() {
             this.$store.commit("setDefaultFields", this.defaultFieldValues);
             this.$store.commit("setReportValues", this.reportValues);

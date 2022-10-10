@@ -30,6 +30,7 @@ export default {
     },
     methods: {
         changeLocale(locale) {
+            localStorage.setItem("lang", locale);
             this.$i18n.locale = locale;
         },
     },
