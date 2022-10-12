@@ -7,7 +7,7 @@
         "none": "Aucun",
         "across": "à travers",
         "na": "n/d",
-        "reportError": "Rapport d'erreur",
+        "reportError": "Formulaire d'erreurs",
         "absoluteFrequency": "Fréquence Absolue",
         "relativeFrequency": "Fréquence Relative",
         "sameSentence": "dans la même phrase"
@@ -41,7 +41,7 @@
         "filterByField": "Filtrer par métadonnées",
         "resultsPerPage": "Nombre de résultats par page",
         "exactDate": "exact",
-        "rangeDate": "intervale",
+        "rangeDate": "intervalle",
         "dateFrom": "de",
         "dateTo": "à",
         "dateRange": "Intervalle de temps",

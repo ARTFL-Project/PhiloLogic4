@@ -337,11 +337,7 @@
                                                 data-bs-toggle="dropdown"
                                                 aria-expanded="false"
                                             >
-                                                {{
-                                                    `${dateType[localField.value][0].toUpperCase()}${dateType[
-                                                        localField.value
-                                                    ].slice(1)}`
-                                                }}
+                                                {{ $t(`searchForm.${dateType[localField.value]}Date`) }}
                                             </button>
                                             <ul class="dropdown-menu" :aria-labelledby="localField.value + '-selector'">
                                                 <li @click="dateTypeToggle(localField.value, 'exact')">
