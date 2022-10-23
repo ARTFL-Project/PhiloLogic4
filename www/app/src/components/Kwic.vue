@@ -407,12 +407,12 @@ export default {
                 });
         },
         initializePos(index) {
-            var start = this.results.description.start;
-            var currentPos = start + index;
-            var currentPosLength = currentPos.toString().length;
-            var endPos = start + parseInt(this.results.results_per_page) || 25;
-            var endPosLength = endPos.toString().length;
-            var spaces = endPosLength - currentPosLength + 1;
+            let start = this.results.description.start;
+            let currentPos = start + index;
+            let currentPosLength = currentPos.toString().length;
+            let endPos = start + parseInt(this.results_per_page) || 25;
+            let endPosLength = endPos.toString().length;
+            let spaces = endPosLength - currentPosLength + 1;
             return currentPos + "." + Array(spaces).join("&nbsp");
         },
         sortResults() {
