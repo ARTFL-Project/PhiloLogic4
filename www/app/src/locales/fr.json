@@ -54,7 +54,8 @@
         "sortResultsBy": "Trier résultats par",
         "mostFrequentTerms": "Mots les plus fréquents",
         "stopwords": "Mots vides",
-        "noFiltering": "Pas de filtrage"
+        "noFiltering": "Pas de filtrage",
+        "collocationAlert": "Vous ne pouvez pas faire une recherche par collocation quand les termes de recherches sont séparés par plusieurs mots"
     },
     "resultsBiblio": {
         "heading": "Bibliographie des résultats sur cette page",

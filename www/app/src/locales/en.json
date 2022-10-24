@@ -55,7 +55,8 @@
         "sortResultsBy": "Sort results by",
         "mostFrequentTerms": "Most Frequent Terms",
         "stopwords": "Stopwords",
-        "noFiltering": "No Filtering"
+        "noFiltering": "No Filtering",
+        "collocationAlert": "You cannot generate a collocation report when there is a gap between the query words"
     },
     "resultsBiblio": {
         "heading": "Bibliography of results on this page",

@@ -77,17 +77,12 @@ export default {
         },
         reportValues() {
             let reportValues = {};
-            let commonFields = [
-                "q",
+            let commonFields = ["q", "approximate", "approximate_ratio", ...this.$philoConfig.metadata];
+            reportValues.concordance = new Set([
+                ...commonFields,
                 "method",
                 "arg_proxy",
                 "arg_phrase",
-                "approximate",
-                "approximate_ratio",
-                ...this.$philoConfig.metadata,
-            ];
-            reportValues.concordance = new Set([
-                ...commonFields,
                 "results_per_page",
                 "sort_by",
                 "hit_num",
@@ -97,6 +92,9 @@ export default {
             ]);
             reportValues.kwic = new Set([
                 ...commonFields,
+                "method",
+                "arg_proxy",
+                "arg_phrase",
                 "results_per_page",
                 "first_kwic_sorting_option",
                 "second_kwic_sorting_option",
@@ -108,12 +106,15 @@ export default {
             reportValues.collocation = new Set([...commonFields, "start", "colloc_filter_choice", "filter_frequency"]);
             reportValues.time_series = new Set([
                 ...commonFields,
+                "method",
+                "arg_proxy",
+                "arg_phrase",
                 "start_date",
                 "end_date",
                 "year_interval",
                 "max_time",
             ]);
-            reportValues.aggregation = new Set([...commonFields, "group_by"]);
+            reportValues.aggregation = new Set([...commonFields, "method", "arg_proxy", "arg_phrase", "group_by"]);
             return reportValues;
         },
     },
