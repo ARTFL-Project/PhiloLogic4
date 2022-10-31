@@ -826,40 +826,41 @@ export default {
             }
         },
         onSubmit() {
-            if (
-                (this.currentReport == "collocation" && ["cooc", "phrase"].includes(this.formData.method)) ||
-                this.formData.arg_phrase.length > 0 ||
-                this.formData.arg_proxy.length > 0
-            ) {
-                alert(this.$t("searchForm.collocationAlert"));
-            } else {
-                this.report = this.currentReport;
-                this.formOpen = false;
-                let metadataChoices = Object.fromEntries(
-                    Object.entries(this.metadataChoiceChecked).map(([key, val]) => [key, val.join(" | ")])
-                );
-                let metadataSelected = Object.fromEntries(
-                    Object.entries(this.metadataChoiceSelected).map(([key, val]) => [key, val])
-                );
-                this.dateRangeHandler();
-                this.clearAutoCompletePopup();
+            // TODO: disabled because currently buggy
+            // if (
+            //     (this.currentReport == "collocation" && ["cooc", "phrase"].includes(this.formData.method)) ||
+            //     this.formData.arg_phrase.length > 0 ||
+            //     this.formData.arg_proxy.length > 0
+            // ) {
+            //     alert(this.$t("searchForm.collocationAlert"));
+            // } else {
+            this.report = this.currentReport;
+            this.formOpen = false;
+            let metadataChoices = Object.fromEntries(
+                Object.entries(this.metadataChoiceChecked).map(([key, val]) => [key, val.join(" | ")])
+            );
+            let metadataSelected = Object.fromEntries(
+                Object.entries(this.metadataChoiceSelected).map(([key, val]) => [key, val])
+            );
+            this.dateRangeHandler();
+            this.clearAutoCompletePopup();
 
-                this.$router.push(
-                    this.paramsToRoute({
-                        ...this.$store.state.formData,
-                        ...this.metadataValues,
-                        ...metadataChoices,
-                        ...metadataSelected,
-                        approximate: this.approximateSelected ? "yes" : "no",
-                        q: this.queryTermTyped.trim(),
-                        start: "",
-                        end: "",
-                        byte: "",
-                        start_date: this.start_date,
-                        end_date: this.end_date,
-                    })
-                );
-            }
+            this.$router.push(
+                this.paramsToRoute({
+                    ...this.$store.state.formData,
+                    ...this.metadataValues,
+                    ...metadataChoices,
+                    ...metadataSelected,
+                    approximate: this.approximateSelected ? "yes" : "no",
+                    q: this.queryTermTyped.trim(),
+                    start: "",
+                    end: "",
+                    byte: "",
+                    start_date: this.start_date,
+                    end_date: this.end_date,
+                })
+            );
+            // }
         },
         onReset() {
             this.$store.commit("setDefaultFields", this.$parent.defaultFieldValues);
