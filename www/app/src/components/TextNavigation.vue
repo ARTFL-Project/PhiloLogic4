@@ -357,6 +357,15 @@ export default {
                             });
                         }
 
+                        let innerSearchLinks = document.querySelectorAll("a[type='search']");
+                        if (innerSearchLinks.length > 0) {
+                            Array.from(innerSearchLinks).forEach((el) => {
+                                let metadata, metadataValue;
+                                [metadata, metadataValue] = el.getAttribute("target").split(":");
+                                el.href = `${this.$dbUrl}/bibliography?${metadata}=${metadataValue}`;
+                            });
+                        }
+
                         // Scroll to highlight
                         if (this.byte != "") {
                             let element = document.getElementsByClassName("highlight")[0];

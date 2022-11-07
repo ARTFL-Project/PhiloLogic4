@@ -398,14 +398,7 @@ def format_text_object(
                     el.attrib["class"] = "xml-ref-cross"
                     del el.attrib["target"]
                 elif el.attrib["type"] == "search":
-                    metadata, metadata_value = el.attrib["target"].split(":")
-                    params = {metadata: metadata_value, "report": "bibliography"}
                     el.tag = "a"
-                    el.attrib[
-                        "href"
-                    ] = f'{request.db_path}/{make_absolute_query_link(config, [], script_name="bibliography", **params)}'
-
-                    del el.attrib["target"]
                 elif el.attrib["type"] == "url":
                     el.tag = "a"
                     el.attrib["href"] = el.attrib["url"]
