@@ -362,7 +362,10 @@ export default {
                             Array.from(innerSearchLinks).forEach((el) => {
                                 let metadata, metadataValue;
                                 [metadata, metadataValue] = el.getAttribute("target").split(":");
-                                el.href = `${this.$dbUrl}/bibliography?${metadata}=${metadataValue}`;
+                                el.href = `${this.$dbUrl.replace(
+                                    /\/+$/,
+                                    ""
+                                )}/bibliography?${metadata}=${metadataValue}`;
                             });
                         }
 

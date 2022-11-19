@@ -157,7 +157,7 @@ def expand_grouped_query(grouped, norm_path, ascii_conversion):
     """Expand grouped SQL query"""
     expanded = []
     pure = True
-    # first test to see if this is a "pure" query, which can be entirely evaluated in egrep
+    # first test to see if this is a "pure" query, which can be entirely evaluated in rg
     # this requires that it is only AND and OR's, for now--I may be able to add the others later
     for group in grouped:
         for kind, token in group:
@@ -282,8 +282,8 @@ def make_grouped_sql_clause(expanded, column, db):
 
 
 def metadata_pattern_search(term, path):
-    """Create egrep pattern to find metadata"""
-    command = ["egrep", "-awie", "[[:blank:]]?%s" % term, "%s" % path]
+    """Create rg pattern to find metadata"""
+    command = ["rg", "-awie", "[[:blank:]]?%s" % term, "%s" % path]
     grep = subprocess.Popen(command, stdout=subprocess.PIPE, env=os.environ)
     cut = subprocess.Popen(["cut", "-f", "2"], stdin=grep.stdout, stdout=subprocess.PIPE)
     match, _ = cut.communicate()

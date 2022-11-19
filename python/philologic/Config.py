@@ -396,7 +396,7 @@ WEB_CONFIG_DEFAULTS = {
                 "# If dictionary_selection is set to True, you need to populate this variable as in the following:",
                 """# [{"label": "DAF 1932", "title": "Dictionnaire de l'Académie Française 1932"}]""",
                 "# Each volume is represented as an object containing the label which is displayed in the search form",
-                "# and a title value which should either be the exact string stored in the SQL table, or an egrep expression",
+                "# and a title value which should either be the exact string stored in the SQL table, or an rg expression",
                 '# such as "Dictionnaire de Littre.*" if you wish to match more than one title.',
             ]
         ),

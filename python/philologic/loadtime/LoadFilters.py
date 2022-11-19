@@ -41,7 +41,7 @@ def get_word_counts(_, text):
 def generate_words_sorted(loader_obj, text):
     """Generate sorted words for storing in index"""
     # -a in grep to avoid issues with NULL chars in file
-    wordcommand = 'cat %s | egrep -a "^word" | LANG=C sort %s %s > %s' % (
+    wordcommand = 'cat %s | rg -a "^word" | LANG=C sort %s %s > %s' % (
         text["raw"],
         loader_obj.sort_by_word,
         loader_obj.sort_by_id,
@@ -81,7 +81,7 @@ def make_sorted_toms(*philo_types):
 
     def sorted_toms(loader_obj, text):
         philo_type_pattern = "|".join("^%s" % t for t in philo_types)
-        tomscommand = 'cat %s | egrep "%s" | LANG=C sort %s > %s' % (
+        tomscommand = 'cat %s | rg "%s" | LANG=C sort %s > %s' % (
             text["raw"],
             philo_type_pattern,
             loader_obj.sort_by_id,
@@ -134,7 +134,7 @@ def prev_next_obj(*philo_types):
         output_file.close()
         os.remove(text["sortedtoms"])
         philo_type_pattern = "|".join("^%s" % t for t in loader_obj.types)
-        tomscommand = 'cat %s | egrep "%s" | LANG=C sort %s > %s' % (
+        tomscommand = 'cat %s | rg "%s" | LANG=C sort %s > %s' % (
             temp_file,
             philo_type_pattern,
             loader_obj.sort_by_id,
@@ -149,7 +149,7 @@ def prev_next_obj(*philo_types):
 
 def generate_pages(_, text):
     """Generate separate page file"""
-    pagescommand = 'cat %s | egrep "^page" > %s' % (text["raw"], text["pages"])
+    pagescommand = 'cat %s | rg "^page" > %s' % (text["raw"], text["pages"])
     os.system(pagescommand)
 
 
@@ -191,19 +191,19 @@ def prev_next_page(_, text):
 
 def generate_refs(_, text):
     """Generate ref file"""
-    refscommand = 'cat %s | egrep "^ref" > %s' % (text["raw"], text["refs"])
+    refscommand = 'cat %s | rg "^ref" > %s' % (text["raw"], text["refs"])
     os.system(refscommand)
 
 
 def generate_graphics(_, text):
     """Generate graphics file"""
-    refscommand = 'cat %s | egrep "^graphic" > %s' % (text["raw"], text["graphics"])
+    refscommand = 'cat %s | rg "^graphic" > %s' % (text["raw"], text["graphics"])
     os.system(refscommand)
 
 
 def generate_lines(_, text):
     """Generate lines file"""
-    lines_command = 'cat %s | egrep "^line" > %s' % (text["raw"], text["lines"])
+    lines_command = 'cat %s | rg "^line" > %s' % (text["raw"], text["lines"])
     os.system(lines_command)
 
 
