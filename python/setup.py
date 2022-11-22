@@ -4,9 +4,9 @@ from distutils.core import setup
 with open("README", encoding="utf8") as input_file:
     long_description = input_file.read()
 
+
 setup(
     name="philologic",
-    version="4.7.1.3",
     author="Clovis Gladstone",
     author_email="clovisgladstone@artfl.uchicago.edu",
     description="A concordance search engine for TEI-XML",
@@ -34,4 +34,10 @@ setup(
         "lz4",
     ],
     python_requires=">=3.8",
+    use_scm_version={
+        "root": "..",
+        "relative_to": __file__,
+        "local_scheme": "no-local-version",
+    },
+    setup_requires=["setuptools_scm"],
 )
