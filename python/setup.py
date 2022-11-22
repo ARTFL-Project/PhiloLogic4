@@ -38,7 +38,6 @@ setup(
         "root": "..",
         "relative_to": __file__,
         "local_scheme": "no-local-version",
-        "write_to": "_version.py",
         "version_scheme": "guess-next-dev",
     },
     setup_requires=["setuptools_scm"],
