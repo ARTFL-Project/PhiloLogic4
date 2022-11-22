@@ -108,7 +108,6 @@ class Loader:
         cls.web_app_dir = os.path.join(loader_options["db_destination"], "app/")
         cls.debug = loader_options["debug"]
         cls.default_object_level = loader_options["default_object_level"]
-        cls.post_filters = loader_options["post_filters"]
         cls.token_regex = loader_options["token_regex"]
         cls.url_root = loader_options["url_root"]
         cls.cores = loader_options["cores"]
@@ -239,7 +238,7 @@ class Loader:
         ):
             data = {"filename": file.name}
             header = ""
-            with open(file.path) as text_file:
+            with open(file.path, encoding="utf8") as text_file:
                 try:
                     file_content = "".join(text_file.readlines())
                 except UnicodeDecodeError:
@@ -510,7 +509,7 @@ class Loader:
             except KeyError:  # option hasn't been set
                 pass
 
-        with open(text["raw"], "w") as raw_file:
+        with open(text["raw"], "w", encoding="utf8") as raw_file:
             parser = parser_factory(
                 raw_file,
                 text["id"],
@@ -522,7 +521,7 @@ class Loader:
                 file_type=cls.parser_config["file_type"],
                 **options,
             )
-            with open(text["newpath"], "r", newline="") as input_file:
+            with open(text["newpath"], "r", newline="", encoding="utf8") as input_file:
                 try:
                     parser.parse(input_file)
                 except RuntimeError:

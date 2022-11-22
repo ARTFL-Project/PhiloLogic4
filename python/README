@@ -1,1 +1,8 @@
-Philo4 python bindings.  More documentation forthcoming.
+These are the Python bindings for the PhiloLogic search engine.
+
+This package is only useful for the TEI Parser which you can import for use
+outside of PhiloLogic.
+
+To get the full functionality of PhiloLogic, you need to install the search core
+as well as the web components. See <a href="https://github.com/ARTFL-Project/PhiloLogic4">https://github.com/ARTFL-Project/PhiloLogic4</a>
+for instructions and further documentation.

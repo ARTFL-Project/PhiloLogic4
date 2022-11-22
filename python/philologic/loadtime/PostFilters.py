@@ -29,7 +29,7 @@ def make_sql_table(table, file_in, db_file="toms.db", indices=None, depth=7):
             query = f"create table if not exists {table} (philo_type, philo_name, philo_id, philo_seq)"
         cursor.execute(query)
         with tqdm(total=line_count, leave=False) as pbar:
-            with open(file_in) as input_file:
+            with open(file_in, encoding="utf8") as input_file:
                 for sequence, line in enumerate(input_file):
                     philo_type, philo_name, philo_id, attrib = line.split("\t", 3)
                     fields = philo_id.split(None, 8)

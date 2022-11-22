@@ -14,7 +14,7 @@ from philologic.loadtime.OHCOVector import Record
 def get_word_counts(_, text):
     """Lowercase and count words"""
     attrib_set = set()
-    with open(text["raw"] + ".tmp", "w") as tmp_file:
+    with open(text["raw"] + ".tmp", "w", encoding="utf8") as tmp_file:
         object_types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
         counts = [0 for i in range(5)]
         with open(text["raw"], encoding="utf8") as fh:
@@ -57,8 +57,8 @@ def make_object_ancestors(*philo_types):
 
     def inner_make_object_ancestors(_, text):
         temp_file = text["words"] + ".tmp"
-        output_file = open(temp_file, "w")
-        with open(text["words"]) as filehandle:
+        output_file = open(temp_file, "w", encoding="utf8")
+        with open(text["words"], encoding="utf8") as filehandle:
             for line in filehandle:
                 philo_type, word, philo_id, attrib = line.split("\t")
                 philo_id = philo_id.split()
@@ -101,9 +101,9 @@ def prev_next_obj(*philo_types):
         By default, this is doc, div1, div2, div3."""
         record_dict = {}
         temp_file = text["raw"] + ".tmp"
-        output_file = open(temp_file, "w")
+        output_file = open(temp_file, "w", encoding="utf8")
         attrib_set = set()
-        with open(text["sortedtoms"]) as filehandle:
+        with open(text["sortedtoms"], encoding="utf8") as filehandle:
             for line in filehandle:
                 philo_type, word, philo_id, attrib = line.split("\t")
                 philo_id = philo_id.split()
@@ -166,11 +166,11 @@ def prev_next_page(_, text):
         return record
 
     temp_file = text["pages"] + ".tmp"
-    output_file = open(temp_file, "w")
+    output_file = open(temp_file, "w", encoding="utf8")
     prev_record = None
     next_record = None
     record = None
-    with open(text["pages"]) as filehandle:
+    with open(text["pages"], encoding="utf8") as filehandle:
         whole_file = filehandle.readlines()
         last_pos = len(whole_file) - 1
         for pos, line in enumerate(whole_file):
@@ -210,7 +210,7 @@ def generate_lines(_, text):
 def make_max_id(_, text):
     """Define max id"""
     max_id = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    with open(text["words"]) as filehandle:
+    with open(text["words"], encoding="utf8") as filehandle:
         for line in filehandle:
             _, _, philo_id, _ = line.split("\t")
             philo_id = map(int, philo_id.split(" "))
@@ -239,7 +239,7 @@ def store_in_plain_text(*philo_types):
             philo_id = []
             words = []
             stored_objects = []
-            with open(text["raw"]) as filehandle:
+            with open(text["raw"], encoding="utf8") as filehandle:
                 for line in filehandle:
                     philo_type, word, philo_id, _ = line.split("\t")
                     if word == "__philo_virtual":
@@ -257,7 +257,7 @@ def store_in_plain_text(*philo_types):
                 stored_objects.append({"philo_id": philo_id, "words": words})
             for stored_obj in stored_objects:
                 path = os.path.join(files_path, "_".join(stored_obj["philo_id"]))
-                with open(path, "w") as output:
+                with open(path, "w", encoding="utf8") as output:
                     output.write(" ".join(stored_obj["words"]))
 
     return inner_store_in_plain_text
@@ -272,8 +272,8 @@ def store_words_and_philo_ids(loader_obj, text):
         # Path was already created
         pass
     filename = os.path.join(files_path, str(text["id"]))
-    with open(filename, "w") as output:
-        with open(text["raw"]) as filehandle:
+    with open(filename, "w", encoding="utf8") as output:
+        with open(text["raw"], encoding="utf8") as filehandle:
             for line in filehandle:
                 philo_type, word, philo_id, attrib = line.split("\t")
                 if word == "__philo_virtual":
@@ -310,7 +310,7 @@ def pos_tagger(language):
     nlp = spacy.load(language, disable=["parser", "ner", "textcat"])
 
     def inner_pos_tagger(_, text):
-        with open(text["words"] + ".tmp", "w") as tmp_file:
+        with open(text["words"] + ".tmp", "w", encoding="utf8") as tmp_file:
             with open(text["words"], encoding="utf8") as fh:
                 sentence = []
                 current_sent_id = None
