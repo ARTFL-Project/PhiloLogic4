@@ -343,9 +343,10 @@ class NewStack:
             self.pull(t, byte)
 
 
-class Record(object):
-    # A baseline implementation of a PhiloLogic Record class.
-    # Not usually used in parsers, but convenient and frequently used in loadFilters.
+class Record:
+    """A baseline implementation of a PhiloLogic Record class.
+    Not usually used in parsers, but convenient and frequently used in loadFilters."""
+
     def __init__(self, type, name, id):
         self.type = type
         self.name = name
