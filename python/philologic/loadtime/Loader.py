@@ -195,7 +195,7 @@ class Loader:
             os.chmod(new_file_path, 775)
             self.filenames.append(f)
         os.system(f"chmod -R 775 {self.textdir}")
-        print("Copying files to database directory... done.\n", flush=True)
+        print("Copying files to database directory... done.", flush=True)
 
     def parse_bibliography_file(self, bibliography_file, sort_by_field, reverse_sort=True):
         """Parse tab delimited bibliography file"""
@@ -224,12 +224,15 @@ class Loader:
         print("done.")
         return load_metadata
 
-    def parse_tei_header(self):
+    def parse_tei_header(self, verbose):
         """Parse header in TEI files"""
         load_metadata = []
         metadata_xpaths = self.parser_config["doc_xpaths"]
         doc_count = len(os.listdir(self.textdir))
-        prefix = f"{time.ctime()}: Parsing document level metadata"
+        if verbose:
+            prefix = f"{time.ctime()}: Parsing document level metadata"
+        else:
+            prefix = "Parsing document level metadata"
         for file in tqdm(
             os.scandir(self.textdir),
             total=doc_count,
@@ -366,11 +369,12 @@ class Loader:
                 metadata["year"] = earliest_year
         return metadata
 
-    def parse_metadata(self, sort_by_field, header="tei"):
+    def parse_metadata(self, sort_by_field, header="tei", verbose=True):
         """Parsing metadata fields in TEI or Dublin Core headers"""
-        print("### Parsing metadata ###", flush=True)
+        if verbose is True:  # Turn off output when called from other libs such as TextPAIR
+            print("### Parsing metadata ###", flush=True)
         if header == "tei":
-            load_metadata = self.parse_tei_header()
+            load_metadata = self.parse_tei_header(verbose)
         else:
             load_metadata = self.parse_dc_header()
 
@@ -454,21 +458,23 @@ class Loader:
             cls.metadata_types[f"philo_{object_level}_id"] = object_level
 
     @classmethod
-    def parse_files(cls, workers):
+    def parse_files(cls, workers, verbose=True):
         """Parse all files
         chunksize is setable from the philoload script and can be helpful when loading
         many small files"""
-        print("\n\n### Parsing files ###")
         os.chdir(cls.workdir)
-        print("%s: parsing %d files." % (time.ctime(), len(cls.filequeue)))
-        with tqdm(total=len(cls.filequeue), smoothing=0, leave=False) as pbar:
+        if verbose is True:
+            print("\n\n### Parsing files ###")
+            print("%s: parsing %d files." % (time.ctime(), len(cls.filequeue)))
+        with tqdm(total=len(cls.filequeue), smoothing=0, leave=False, desc="Parsing files") as pbar:
             with Pool(workers) as pool:
                 for results in pool.imap_unordered(cls.parse_file, range(len(cls.data_dicts))):
                     with open(results, "rb") as proc_fh:
                         vec = pickle.load(proc_fh)
                     cls.omax = [max(x, y) for x, y in zip(vec, cls.omax)]
                     pbar.update()
-        print("%s: done parsing" % time.ctime())
+        if verbose is True:
+            print("%s: done parsing" % time.ctime())
 
     @classmethod
     def parse_file(cls, file_pos):
@@ -567,7 +573,7 @@ class Loader:
                     f'for i in $(find {self.workdir} -type f -name "*{extension}"); do cat $i >> {self.workdir}/all_{extension}; done'
                 )
 
-    def merge_files(self, file_type, file_num=1000):
+    def merge_files(self, file_type, file_num=1000, verbose=True):
         """This function runs a multi-stage merge sort on words
         Since PhiloLogic can potentially merge thousands of files, we need to split
         the sorting stage into multiple steps to avoid running out of file descriptors"""
@@ -597,22 +603,24 @@ class Loader:
         if files:
             lists_of_files.append(files)
 
+        total_files = sum(len(files) for files in lists_of_files)
         # Then we run the merge sort on each chunk of 500 files and compress the result
-        print(f"{time.ctime()}: Merging {file_type} in batches of {file_num}...", flush=True)
-        already_merged = 0
+        if verbose is True:
+            print(f"{time.ctime()}: Merging {file_type} in batches of {file_num}...", flush=True)
+        else:
+            print(f"Merging {file_type} in batches of {file_num}...", flush=True)
         os.system(f"touch {self.workdir}/sorted.init")
-        for pos, object_list in enumerate(lists_of_files):
-            command_list = " ".join([i[0] for i in object_list])
-            output = os.path.join(self.workdir, f"sorted.{pos}.split")
-            args = sort_command + command_list
-            command = f'/bin/bash -c "{args} | lz4 -3 -q >{output}"'
-            status = os.system(command)
-            if status != 0:
-                print(f"{file_type} sorting failed\nInterrupting database load...")
-                sys.exit()
-            already_merged += len(object_list)
-            print(f"\r{time.ctime()}: {already_merged} files sorted...", end="", flush=True)
-        print(flush=True)
+        with tqdm(total=total_files, leave=False) as pbar:
+            for pos, object_list in enumerate(lists_of_files):
+                command_list = " ".join([i[0] for i in object_list])
+                output = os.path.join(self.workdir, f"sorted.{pos}.split")
+                args = sort_command + command_list
+                command = f'/bin/bash -c "{args} | lz4 -3 -q >{output}"'
+                status = os.system(command)
+                if status != 0:
+                    print(f"{file_type} sorting failed\nInterrupting database load...")
+                    sys.exit()
+                pbar.update(len(object_list))
 
         # WARNING: we are technically limited by the file descriptor limit (1024), which should be equivalent to 1,024,000 files.
         sorted_files = " ".join([f"<(lz4cat -q --rm {i})" for i in iglob(f"{self.workdir}/*.split")])
@@ -622,7 +630,8 @@ class Loader:
         else:
             output_file = os.path.join(self.workdir, "all_toms_sorted")
             command = f'/bin/bash -c "{sort_command} {sorted_files} > {output_file}"'
-        print(f"{time.ctime()}: Merging all merged sorted files (this may take a while)...", flush=True, end=" ")
+        if verbose is True:
+            print(f"{time.ctime()}: Merging all merged sorted files (this may take a while)...", flush=True, end=" ")
 
         status = os.system(command)
         if status != 0:
@@ -698,7 +707,7 @@ class Loader:
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1")
 
-    def setup_sql_load(self):
+    def setup_sql_load(self, verbose=True):
         """Setup SQLite DB creation"""
         for table in self.tables:
             if table == "pages":
@@ -729,13 +738,14 @@ class Loader:
                 db_destination = os.path.join(self.destination, "toms.db")
                 post_filter = make_sentences_table(self.destination, db_destination)
             else:
-                post_filter = make_sql_table(table, file_in, indices=indices, depth=depth)
+                post_filter = make_sql_table(table, file_in, indices=indices, depth=depth, verbose=verbose)
             self.post_filters.insert(0, post_filter)
 
     @classmethod
-    def post_processing(cls, *extra_filters):
+    def post_processing(cls, verbose=True, *extra_filters):
         """Run important post-parsing functions for frequencies and word normalization"""
-        print("\n### Storing in database ###")
+        if verbose is True:
+            print("\n### Storing in database ###")
         for f in cls.post_filters:
             if f.__name__ == "metadata_frequencies":
                 cls.metadata_fields_not_found = f(cls)

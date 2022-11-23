@@ -12,11 +12,14 @@ from orjson import loads
 from tqdm import tqdm
 
 
-def make_sql_table(table, file_in, db_file="toms.db", indices=None, depth=7):
+def make_sql_table(table, file_in, db_file="toms.db", indices=None, depth=7, verbose=True):
     """SQL Loader function"""
 
     def inner_make_sql_table(loader_obj):
-        print(f"{time.ctime()}: Loading the {table} SQLite table...")
+        if verbose is True:
+            print(f"{time.ctime()}: Loading the {table} SQLite table...")
+        else:
+            print(f"Loading the {table} SQLite table...")
         db_destination = os.path.join(loader_obj.destination, db_file)
         line_count = sum(1 for _ in open(file_in, "rbU"))
         conn = sqlite3.connect(db_destination, detect_types=sqlite3.PARSE_DECLTYPES)
