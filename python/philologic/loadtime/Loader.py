@@ -13,6 +13,7 @@ import sys
 import time
 from glob import iglob
 from json import dump
+import csv
 
 import lxml
 import regex as re
@@ -198,21 +199,15 @@ class Loader:
         print("Copying files to database directory... done.", flush=True)
 
     def parse_bibliography_file(self, bibliography_file, sort_by_field, reverse_sort=True):
-        """Parse tab delimited bibliography file"""
+        """Parse tab delimited bibliography file: tsv, tab, or csv"""
         load_metadata = []
-        files = set(os.listdir(self.textdir))
+        if bibliography_file.endswith(".tab") or bibliography_file.endswith(".tsv"):
+            delimiter = "\t"
+        else:
+            delimiter = ","
         with open(bibliography_file) as input_file:
-            metadata_fields = input_file.readline().strip().split("\t")
-            filename_index = metadata_fields.index("filename")
-            for line in input_file:
-                line = line.strip()
-                file_metadata = {}
-                values = line.split("\t")
-                if values[filename_index] not in files:
-                    continue
-                for pos, field in enumerate(metadata_fields):
-                    file_metadata[field] = values[pos]
-                load_metadata.append(file_metadata)
+            reader = csv.DictReader(input_file, delimiter=delimiter)
+            load_metadata = [metadata for metadata in reader]
         print("Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]), end=" ")
 
         def make_sort_key(d):
