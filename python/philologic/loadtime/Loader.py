@@ -205,7 +205,7 @@ class Loader:
             delimiter = "\t"
         else:
             delimiter = ","
-        with open(bibliography_file) as input_file:
+        with open(bibliography_file, encoding="utf8") as input_file:
             reader = csv.DictReader(input_file, delimiter=delimiter)
             load_metadata = [metadata for metadata in reader]
         print("Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]), end=" ")
