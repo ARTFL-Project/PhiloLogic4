@@ -7,7 +7,7 @@ Loading PhiloLogic databases is very straight forward, and most of the time, you
 A few important notes:
 
 -   Before loading any databases, you should first make sure the global configuration file located in `/etc/philologic/philologic4.cfg` has been edited appropriately. For more info, see [here](installation.md#global-config)
--   If your corpus is in plain text format, you will need to specify the `t plain_text` command-line argument and also provide a bibliography file (with the `-b` argument) in CSV or TSV format.
+-   If your corpus is in plain text format, you will need to specify the `t plain_text` command-line argument and also provide a bibliography file (with the `-b` argument) in CSV or TSV format. See caveats about plain text support [here][#plain-text-parser].
 -   The PhiloLogic4 Parser's behavior is configurable from an external load config file, though only to a certain extent. You can also supply a replacement Parser class if you need to.
 -   The loading process is designed to be short, and easy to understand and configure.
 
@@ -355,4 +355,7 @@ So to use a load config file as an argument, you would run the following:
 
 `philoload4 -l load_config.py db_name path_to_files`
 
-And that's it!
+
+### Plain text Parser ###
+The current plain text parser is fairly rudimentary and does not detect structure within the files themselves, with the sole exception being paragraphs when there is an empty line between blocks of text. In order for better structure detection, you will need to convert your files to TEI.
+
