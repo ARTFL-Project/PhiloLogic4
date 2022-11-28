@@ -12,7 +12,7 @@ A few important notes:
 
 ### Text format support
 PhiloLogic supports the following text files formats
-- TEI-XML: see here for configuring XML parser
+- TEI-XML: see [here](#configuring-the-xml-parser) for configuring XML parser
 - Plain text files (available with PhiloLogic 4.7.3 and up): see [here](#plain-text-parser) for using the plain text parser.
 
 ### Executing the load command
