@@ -1,9 +1,10 @@
 ![alt text](www/app/src/assets/philo.png) 4.7
 ===========
 
-PhiloLogic is an XML database/search engine/web app that is designed
-for the particular difficulties of TEI XML.  For a more theoretical
+PhiloLogic is an XML database/search engine/web app that is designed for the particular difficulties of TEI XML.  For a more theoretical
 description, you can refer to [our research publications](http://jtei.revues.org/817) or [our blog](http://artfl.blogspot.com).
+
+Note that as of version 4.7.3, PhiloLogic can now parse plain text files. See documentation for more details.
 
 ### See [documentation](https://artfl-project.github.io/PhiloLogic4/)
 
