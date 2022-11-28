@@ -207,6 +207,12 @@ export default {
         tocHeight() {
             return `max-height: ${window.innerHeight - 200}`;
         },
+        whiteSpace() {
+            if (this.$philoConfig.respect_text_line_breaks) {
+                return "pre";
+            }
+            return "normal";
+        },
     },
     data() {
         return {
@@ -792,6 +798,7 @@ a.current-obj,
 
 #book-page {
     text-align: justify;
+    white-space: v-bind("whiteSpace");
 }
 
 :deep(.xml-pb) {

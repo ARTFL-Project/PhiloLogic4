@@ -304,6 +304,15 @@ WEB_CONFIG_DEFAULTS = {
         ],
         "comment": "# The results_summary variable determins which fields get stats displayed at the top of concordance/KWIC results.",
     },
+    "respect_text_line_breaks": {
+        "value": False,
+        "comment": "\n".join(
+            [
+                "# The respect_text_line_breaks variable determines if line breaks in the source file should be displayed as line breaks in the browser",
+                "# This is really useful for displaying plain text files since they have no XML or DOM structure. Should otherwise be False for TEI/XML",
+            ]
+        ),
+    },
     "stopwords": {
         "value": "",
         "comment": "\n".join(

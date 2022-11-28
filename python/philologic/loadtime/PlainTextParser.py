@@ -2,6 +2,7 @@ import os
 import sys
 import unicodedata
 from io import TextIOWrapper
+from typing import List, Union
 
 import regex as re
 from philologic.loadtime import OHCOVector
@@ -77,7 +78,7 @@ class PlainTextParser:
 
     def parse(self, input_file: TextIOWrapper):
         """Top level function for reading a file and printing out the output."""
-        bytes_read_in = 0
+        bytes_read_in: int = 0
         # Begin by creating a document level object, just call it "text" for now.
         self.v.push("doc", "text", bytes_read_in)
         for k, v in list(self.known_metadata.items()):
@@ -85,9 +86,8 @@ class PlainTextParser:
             # we can attach it to the newly created doc object here.
             # you can attach metadata to an object at any time between push() and pull().
             self.v["doc"][k] = v
-        open_para = False
+        open_para: bool = False
         previous_line_empty = False
-        is_sent = False
         for line in input_file:  # TODO: recognize divs on lines with all characters in CAPS?
             if line == "\n" or not check_if_char_word.search(line):
                 bytes_read_in += len(line.encode("utf8"))
@@ -101,8 +101,9 @@ class PlainTextParser:
             previous_line_empty = False
             start_byte = bytes_read_in
             last_word = ""
-            words = self.token_regex.split(line)
+            words: List[Union[str, None]] = self.token_regex.split(line)
             for count, word in enumerate(words):
+                is_sent = False
                 if word is None:
                     continue
                 word_in_utf8 = word.encode("utf8")
@@ -112,14 +113,10 @@ class PlainTextParser:
                     # Switch everything to lower case
                     word = word.lower()
                     last_word = word
-                    # Check to see if the word is longer than we want.  More than 235
-                    # characters appear to cause problems in the indexer.
+                    # Check to see if the word is longer than we want. More than 235 characters appear to cause problems in the indexer.
                     if len(word_in_utf8) > 200:
-                        print("Long word in {}: {}".format(input.name, word), file=sys.stderr)
-                        print(
-                            f"Removing word from for index since over 200 bytes long...",
-                            file=sys.stderr,
-                        )
+                        print(f"Long word in {input.name}: {word}", file=sys.stderr)
+                        print("Removing word from for index since over 200 bytes long...", file=sys.stderr)
                         start_byte += len(word_in_utf8)
                         continue
 

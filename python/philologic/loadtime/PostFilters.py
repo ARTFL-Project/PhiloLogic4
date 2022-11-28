@@ -132,7 +132,7 @@ def word_frequencies(loader_obj):
     print("%s: Generating word frequencies..." % time.ctime())
     frequencies = loader_obj.destination + "/frequencies"
     os.system("mkdir %s" % frequencies)
-    output = open(frequencies + "/word_frequencies", "w")
+    output = open(frequencies + "/word_frequencies", "w", encoding="utf8")
     for line in open(loader_obj.destination + "/WORK/all_frequencies"):
         count, word = tuple(line.split())
         print(word + "\t" + count, file=output)
@@ -143,7 +143,7 @@ def normalized_word_frequencies(loader_obj):
     """Generate normalized word frequencies"""
     print("%s: Generating normalized word frequencies..." % time.ctime())
     frequencies = loader_obj.destination + "/frequencies"
-    output = open(frequencies + "/normalized_word_frequencies", "w")
+    output = open(frequencies + "/normalized_word_frequencies", "w", encoding="utf8")
     for line in open(frequencies + "/word_frequencies"):
         word, _ = line.split("\t")
         norm_word = word.lower()
@@ -177,10 +177,9 @@ def metadata_frequencies(loader_obj):
             loader_obj.metadata_fields_not_found.append(field)
             if os.path.exists(f"{frequencies}/{field}_frequencies"):
                 os.remove(f"{frequencies}/{field}_frequencies")
-    if loader_obj.metadata_fields_not_found:
+    if loader_obj.metadata_fields_not_found and loader_obj.debug is True:
         print(
-            "The following fields were not found in the input corpus %s"
-            % ", ".join(loader_obj.metadata_fields_not_found)
+            f"""The following fields were not found in the input corpus {", ".join(loader_obj.metadata_fields_not_found)}"""
         )
     conn.close()
     return loader_obj.metadata_fields_not_found
