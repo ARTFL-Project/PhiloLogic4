@@ -7,9 +7,13 @@ Loading PhiloLogic databases is very straight forward, and most of the time, you
 A few important notes:
 
 -   Before loading any databases, you should first make sure the global configuration file located in `/etc/philologic/philologic4.cfg` has been edited appropriately. For more info, see [here](installation.md#global-config)
--   If your corpus is in plain text format, you will need to specify the `t plain_text` command-line argument and also provide a bibliography file (with the `-b` argument) in CSV or TSV format. See caveats about plain text support [here](#plain-text-parser).
 -   The PhiloLogic4 Parser's behavior is configurable from an external load config file, though only to a certain extent. You can also supply a replacement Parser class if you need to.
 -   The loading process is designed to be short, and easy to understand and configure.
+
+### Text format support
+PhiloLogic supports the following text files formats
+- TEI-XML: see here for configuring XML parser
+- Plain text files (available with PhiloLogic 4.7.3 and up): see [here](#plain-text-parser) for using the plain text parser.
 
 ### Executing the load command
 
@@ -79,6 +83,14 @@ store_words_and_ids = False
 `plain_text_obj` is a very useful option that generates a flat text file representations of all objects of a given type, like "doc" or "div1", usually for data mining with Mallet or some other tool.
 
 `store_words_and_ids` defines whether you want the parser to save a representation of the text containing the individual index ID for each word in all texts indexed in the DB. This can be useful for data-mining task that need to know about word positioning such as sequence alignment.
+
+
+### Plain text Parser
+To use the plain text parser, you will need to specify the `t plain_text` command-line argument and also provide a bibliography file (with the `-b` argument) in CSV or TSV format, such as in the following example:
+`philoload4 -t plain_text -b metadata.csv database_name /path/to/files`
+
+Note that the plain text parser is fairly rudimentary and does not detect structure within the files themselves, with the sole exception being paragraphs when there is an empty line between blocks of text. In order for better structure detection, you will need to convert your files to TEI.
+
 
 ### Configuring the XML Parser
 
@@ -356,6 +368,5 @@ So to use a load config file as an argument, you would run the following:
 `philoload4 -l load_config.py db_name path_to_files`
 
 
-### Plain text Parser ###
-The current plain text parser is fairly rudimentary and does not detect structure within the files themselves, with the sole exception being paragraphs when there is an empty line between blocks of text. In order for better structure detection, you will need to convert your files to TEI.
+
 
