@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-from distutils.core import setup
+"""Install script for PhiloLogic Python library"""
+from setuptools import setup
 
 with open("README", encoding="utf8") as input_file:
     long_description = input_file.read()
