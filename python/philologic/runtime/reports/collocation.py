@@ -126,9 +126,13 @@ def extract_bytes(hit):
 def build_filter_list(request, config):
     """set up filtering with stopwords or most frequent terms."""
     if config.stopwords and request.colloc_filter_choice == "stopwords":
-        if os.path.isabs(config.stopwords):
+        if config.stopwords and "/" not in config.stopwords:
+            filter_file = os.path.join(config.db_path, "data", config.stopwords)
+        elif os.path.isabs(config.stopwords):
             filter_file = config.stopwords
         else:
+            return ["stopwords list not found"]
+        if not os.path.exists(filter_file):
             return ["stopwords list not found"]
         filter_num = float("inf")
     else:

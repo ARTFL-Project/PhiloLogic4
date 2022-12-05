@@ -15,7 +15,7 @@ from glob import iglob
 from json import dump
 import csv
 
-import lxml
+import lxml.etree
 import regex as re
 from black import FileMode, format_str
 from multiprocess import Pool
@@ -142,7 +142,7 @@ class Loader:
             already_configured_values = {}
             for attribute in dir(config_obj):
                 if not attribute.startswith("__") and not isinstance(
-                    getattr(config_obj, attribute), collections.Callable
+                    getattr(config_obj, attribute), collections.abc.Callable
                 ):
                     already_configured_values[attribute] = getattr(config_obj, attribute)
             with open(load_config_path, "a") as load_config_copy:

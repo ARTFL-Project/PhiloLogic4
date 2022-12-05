@@ -318,7 +318,8 @@ WEB_CONFIG_DEFAULTS = {
         "comment": "\n".join(
             [
                 "# The stopwords variable defines a file path containing a list of words (one word per line) used for filtering out words",
-                "# in the collocation report. The file must be located in the defined path. If the file is not found,",
+                "# in the collocation report. If only a filename is provided, it will look for the file in the /data directory.",
+                "# The file must be located in the defined path. If the file is not found,",
                 "# no option for using a stopword list will be displayed in collocation searches.",
             ]
         ),

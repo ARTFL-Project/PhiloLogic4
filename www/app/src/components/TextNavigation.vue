@@ -1098,7 +1098,7 @@ body {
     vertical-align: 0.3em;
     font-size: 0.7em;
     background-color: $button-color;
-    color: #fff;
+    color: #fff !important;
     padding: 0 0.2rem;
     border-radius: 50%;
 }
