@@ -273,6 +273,11 @@ class Loader:
                                 if value:
                                     if field not in self.parser_config["metadata_sql_types"]:
                                         data[field] = value
+                                        if (
+                                            field in ("create_date", "pub_date") and re.search(r"\d", value) is None
+                                        ):  # make sure we have a number in there
+                                            del data[field]
+                                            continue
                                     elif self.parser_config["metadata_sql_types"][field] == "int":
                                         data[field] = extract_integer(value)
                                     elif self.parser_config["metadata_sql_types"][field] == "date":
