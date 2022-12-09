@@ -45,7 +45,7 @@
             </div>
             <div id="simple-landing-page" v-if="landingPageBrowsing === 'simple'">
                 <div class="row" id="landingGroup">
-                    <div class="cols-12 col-sm-8 offset-sm-2">
+                    <div class="cols-12 col-sm-8 offset-sm-2 d-flex" style="justify-content: center">
                         <div class="card" style="width: fit-content">
                             <ul class="list-group">
                                 <li
