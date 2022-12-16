@@ -170,7 +170,7 @@
             <h3 class="title"></h3>
             <a class="prev img-buttons">&lt;</a>
             <a class="next img-buttons">&gt;</a>
-            <a id="full-size-image" class="img-buttons">&nearr;</a>
+            <a id="full-size-image" class="img-buttons" target="_blank">&nearr;</a>
             <a class="close img-buttons">&#10005;</a>
             <ol class="indicator"></ol>
         </div>
@@ -571,16 +571,16 @@ export default {
                                 index: Array.from(document.getElementsByClassName(imageType)).indexOf(target),
                                 continuous: false,
                                 thumbnailIndicators: false,
+                                onslidecomplete: () => {
+                                    let imageIndex = this.gallery.getIndex();
+                                    let img = Array.from(document.getElementsByClassName(imageType))[
+                                        imageIndex
+                                    ].getAttribute("large-img");
+                                    document.getElementById("full-size-image").setAttribute("href", img);
+                                },
                             }
                         );
                     });
-                });
-                document.getElementById("full-size-image").addEventListener("click", () => {
-                    let imageIndex = this.gallery.getIndex();
-                    let img = Array.from(document.getElementsByClassName(imageType))[imageIndex].getAttribute(
-                        "large-img"
-                    );
-                    window.open(img);
                 });
             }
         },
