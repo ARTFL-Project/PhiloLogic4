@@ -11,6 +11,12 @@ from philologic.runtime.DB import DB
 def bibliography_results(request, config):
     """Fetch bibliography results"""
     db = DB(config.db_path + "/data/")
+    if request.full_bibliography is True:  # This is an API call to get the full biblio returned as a JSON object
+        hits = db.get_all(
+            db.locals["default_object_level"],
+        )
+        metadata_to_get = [c["field"] for c in config.bibliography_citation]
+        return [{metadata: hit[metadata] for metadata in metadata_to_get} for hit in hits], ""
     if request.no_metadata:
         hits = db.get_all(
             db.locals["default_object_level"],

@@ -157,6 +157,11 @@ class WSGIHandler(object):
             except (ValueError, TypeError) as e:
                 self.end_byte = ""
 
+        if "full" in self.cgi and self["full"] == "true":
+            self.full_bibliography = True
+        else:
+            self.full_bibliography = False
+
     def __getattr__(self, key):
         """Return query arg as attribute of class."""
         return self[key]
