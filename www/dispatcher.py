@@ -4,15 +4,12 @@
 
 import datetime
 import os
-from asyncio import get_event_loop
-from cgi import FieldStorage
 from random import randint
-from glob import glob
+from urllib.parse import parse_qs, urlparse
 from wsgiref.handlers import CGIHandler
 
-from philologic.runtime import WebConfig, WSGIHandler
-
 import reports
+from philologic.runtime import WebConfig, WSGIHandler
 from webApp import start_web_app
 
 path = os.path.abspath(os.path.dirname(__file__))
@@ -20,38 +17,36 @@ path = os.path.abspath(os.path.dirname(__file__))
 
 def philo_dispatcher(environ, start_response):
     """Dispatcher function."""
-    loop = get_event_loop()
-    clean_task = loop.create_task(clean_up())
     config = WebConfig(path)
     request = WSGIHandler(environ, config)
     if request.content_type == "application/json" or request.format == "json":
         try:
             path_components = [c for c in environ["PATH_INFO"].split("/") if c]
-        except:
+        except Exception:
             path_components = []
         if path_components:
             if path_components[-1] == "table-of-contents":
-                response = "".join([i for i in reports.table_of_contents(environ, start_response)])
+                yield b"".join(reports.table_of_contents(environ, start_response))
             else:
-                response = "".join([i for i in reports.navigation(environ, start_response)])
+                yield b"".join(reports.navigation(environ, start_response))
         else:
-            report = getattr(reports, FieldStorage().getvalue("report"))
-            response = b"".join([i for i in report(environ, start_response)]).decode("utf8", "ignore")
+            try:
+                report_name: str = parse_qs(environ["QUERY_STRING"])["report"][0]
+            except KeyError:
+                report_name = urlparse(environ["REQUEST_URI"]).path.split("/")[-1]
+            report = getattr(reports, report_name)
+            yield b"".join(report(environ, start_response))
+    elif request.full_bibliography is True:
+        yield b"".join(reports.bibliography(environ, start_response))
     else:
-        response = start_web_app(environ, start_response)
-    yield response.encode("utf8")
-    loop.run_until_complete(clean_task)
+        yield start_web_app(environ, start_response).encode("utf8")
 
-
-async def clean_up():
-    """clean-up hitlist every now and then"""
-    rand = randint(0, 10)
-    if rand == 1:
-        hit_list_path = os.path.join(path, "data/hitlists/*")
-        for filename in glob(hit_list_path):
-            file_modified = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
+    # clean-up hitlist every now and then
+    if randint(0, 10) == 1:
+        for file in os.scandir(os.path.join(path, "data/hitlists/*")):
+            file_modified = datetime.datetime.fromtimestamp(os.path.getmtime(file.path))
             if datetime.datetime.now() - file_modified > datetime.timedelta(minutes=10):
-                os.remove(filename)
+                os.remove(file.path)
 
 
 if __name__ == "__main__":
