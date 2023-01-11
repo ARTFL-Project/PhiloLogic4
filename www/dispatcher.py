@@ -5,6 +5,7 @@
 import datetime
 import os
 from random import randint
+from typing import Callable
 from urllib.parse import parse_qs, urlparse
 from wsgiref.handlers import CGIHandler
 
@@ -34,7 +35,7 @@ def philo_dispatcher(environ, start_response):
                 report_name: str = parse_qs(environ["QUERY_STRING"])["report"][0]
             except KeyError:
                 report_name = urlparse(environ["REQUEST_URI"]).path.split("/")[-1]
-            report = getattr(reports, report_name)
+            report: Callable = getattr(reports, report_name)
             yield b"".join(report(environ, start_response))
     elif request.full_bibliography is True:
         yield b"".join(reports.bibliography(environ, start_response))

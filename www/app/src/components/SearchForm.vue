@@ -1073,7 +1073,7 @@ input[type="text"] {
     pointer-events: none; /*disable hover effect*/
 }
 #search_terms .input-group,
-#search-elements .input-group {
+#search-elements .input-group, #head-group {
     max-width: 700px;
     width: 100%;
 }

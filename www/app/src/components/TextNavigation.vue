@@ -119,7 +119,7 @@
                             <a
                                 :href="img[0]"
                                 :large-img="img[1]"
-                                class="inline-img"
+                                class="d-none inline-img"
                                 v-for="(img, beforeIndex) in beforeGraphicsImgs"
                                 :key="beforeIndex"
                                 data-gallery
