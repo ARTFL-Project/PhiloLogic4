@@ -349,8 +349,17 @@ def format_text_object(
             if el.tag == "page":
                 el.tag = "pb"
             elif el.tag == "head":
-                el.tag = "b"
-                el.attrib["class"] = "headword"
+                previous_el = el.getprevious()
+                if (
+                    previous_el is not None
+                    and "class" in previous_el.attrib
+                    and previous_el.attrib["class"] == "headword"
+                ):
+                    el.tag = "span"
+                    previous_el.append(el)
+                else:
+                    el.tag = "b"
+                    el.attrib["class"] = "headword"
             elif el.tag == "list":
                 el.tag = "ul"
             elif el.tag == "title":
@@ -554,7 +563,6 @@ def format_text_object(
             elif el.tag == "end-passage":
                 el.tag = "span"
                 el.attrib["id"] = f"end-passage-{passage_number}"
-                # el.attrib["class"] = "passage-marker"
                 el.attrib["n"] = passage_number
                 passage_number = None
             if el.tag not in VALID_HTML_TAGS:
