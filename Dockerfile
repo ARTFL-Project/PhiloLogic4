@@ -3,7 +3,7 @@ FROM ubuntu:22.04
 
 # Install dependencies
 RUN apt-get update && apt-get upgrade -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libxml2-dev libxslt-dev zlib1g-dev apache2 libgdbm-dev python3-pip liblz4-tool brotli ripgrep gcc make python3-dev wget sudo && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libxml2-dev libxslt-dev zlib1g-dev apache2 libgdbm-dev python3-pip liblz4-tool brotli ripgrep gcc make python3-dev wget sudo nodejs npm && \
     apt-get clean && rm -rf /var/lib/apt
 
 # Install PhiloLogic
