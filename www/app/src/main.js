@@ -10,7 +10,6 @@ import "bootstrap"
 import appConfig from "../appConfig.json"
 import i18n from './i18n'
 
-// axios.defaults.withCredentials = true;
 
 axios
     .get(`${appConfig.dbUrl}/scripts/get_web_config.py`, {})

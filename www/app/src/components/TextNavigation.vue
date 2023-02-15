@@ -17,42 +17,23 @@
                         <span class="d-inline-block d-sm-none">{{ $t("textNav.top") }}</span>
                     </button>
                     <div class="btn-group btn-group-sm" style="pointer-events: all">
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            disabled
-                            id="prev-obj"
-                            @click="goToTextObject(textObject.prev)"
-                        >
+                        <button type="button" class="btn btn-secondary" disabled id="prev-obj"
+                            @click="goToTextObject(textObject.prev)">
                             &lt;
                         </button>
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            id="show-toc"
-                            disabled
-                            @click="toggleTableOfContents()"
-                        >
+                        <button type="button" class="btn btn-secondary" id="show-toc" disabled
+                            @click="toggleTableOfContents()">
                             {{ $t("textNav.toc") }}
                         </button>
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            disabled
-                            id="next-obj"
-                            @click="goToTextObject(textObject.next)"
-                        >
+                        <button type="button" class="btn btn-secondary" disabled id="next-obj"
+                            @click="goToTextObject(textObject.next)">
                             &gt;
                         </button>
                     </div>
-                    <a
-                        id="report-error"
-                        class="btn btn-secondary btn-sm position-absolute"
-                        target="_blank "
-                        :href="philoConfig.report_error_link"
-                        v-if="philoConfig.report_error_link != ''"
-                        >{{ $t("common.reportError") }}</a
-                    >
+                    <a id="report-error" class="btn btn-secondary btn-sm position-absolute" target="_blank "
+                        :href="philoConfig.report_error_link" v-if="philoConfig.report_error_link != ''">{{
+                            $t("common.reportError")
+                        }}</a>
                 </div>
                 <div id="toc">
                     <div id="toc-titlebar" class="d-none">
@@ -61,22 +42,14 @@
                         </button>
                     </div>
                     <transition name="slide-fade">
-                        <div
-                            class="card p-3 shadow"
-                            id="toc-content"
-                            :style="tocHeight"
-                            :scroll-to="tocPosition"
-                            v-if="tocOpen"
-                        >
+                        <div class="card p-3 shadow" id="toc-content" :style="tocHeight" :scroll-to="tocPosition"
+                            v-if="tocOpen">
                             <div class="toc-more before" v-if="start !== 0">
                                 <button type="button" class="btn btn-default btn-sm" @click="loadBefore()"></button>
                             </div>
                             <div v-for="(element, tocIndex) in tocElementsToDisplay" :key="tocIndex">
-                                <div
-                                    :id="element.philo_id"
-                                    :class="'toc-' + element.philo_type"
-                                    @click="textObjectSelection(element.philo_id, tocIndex, $event)"
-                                >
+                                <div :id="element.philo_id" :class="'toc-' + element.philo_type"
+                                    @click="textObjectSelection(element.philo_id, tocIndex, $event)">
                                     <span :class="'bullet-point-' + element.philo_type"></span>
                                     <a :class="{ 'current-obj': element.philo_id === currentPhiloId }" href>
                                         {{ element.label }}
@@ -95,71 +68,38 @@
             {{ $t("textNav.dicoLookUp") }}.
         </div>
         <div class="row" id="all-content">
-            <div
-                class="col-12 col-sm-10 offset-sm-1 col-lg-8 offset-lg-2"
-                id="center-content"
-                v-if="textObject.text"
-                style="text-align: center"
-            >
+            <div class="col-12 col-sm-10 offset-sm-1 col-lg-8 offset-lg-2" id="center-content" v-if="textObject.text"
+                style="text-align: center">
                 <div class="card mt-2 mb-4 p-4 shadow d-inline-block">
                     <div id="book-page" class="text-view">
                         <div id="previous-pages" v-if="beforeObjImgs">
                             <span class="xml-pb-image">
-                                <a
-                                    :href="img[0]"
-                                    :large-img="img[1]"
-                                    class="page-image-link"
-                                    v-for="(img, imageIndex) in beforeObjImgs"
-                                    :key="imageIndex"
-                                    data-gallery
-                                ></a>
+                                <a :href="img[0]" :large-img="img[1]" class="page-image-link"
+                                    v-for="(img, imageIndex) in beforeObjImgs" :key="imageIndex" data-gallery></a>
                             </span>
                         </div>
                         <div id="previous-graphics" v-if="beforeGraphicsImgs">
-                            <a
-                                :href="img[0]"
-                                :large-img="img[1]"
-                                class="d-none inline-img"
-                                v-for="(img, beforeIndex) in beforeGraphicsImgs"
-                                :key="beforeIndex"
-                                data-gallery
-                            ></a>
+                            <a :href="img[0]" :large-img="img[1]" class="d-none inline-img"
+                                v-for="(img, beforeIndex) in beforeGraphicsImgs" :key="beforeIndex" data-gallery></a>
                         </div>
-                        <div
-                            id="text-obj-content"
-                            class="text-content-area"
-                            v-html="textObject.text"
-                            :philo-id="philoID"
-                            @keydown="dicoLookup($event)"
-                            tabindex="0"
-                        ></div>
+                        <div id="text-obj-content" class="text-content-area" v-html="textObject.text"
+                            :philo-id="philoID" @keydown="dicoLookup($event)" tabindex="0"></div>
                         <div id="next-pages" v-if="afterObjImgs">
                             <span class="xml-pb-image">
-                                <a
-                                    :href="img[0]"
-                                    :large-img="img[1]"
-                                    class="page-image-link"
-                                    v-for="(img, afterIndex) in afterObjImgs"
-                                    :key="afterIndex"
-                                    data-gallery
-                                ></a>
+                                <a :href="img[0]" :large-img="img[1]" class="page-image-link"
+                                    v-for="(img, afterIndex) in afterObjImgs" :key="afterIndex" data-gallery></a>
                             </span>
                         </div>
                         <div id="next-graphics" v-if="afterGraphicsImgs">
-                            <a
-                                :href="img[0]"
-                                :large-img="img[1]"
-                                class="inline-img"
-                                v-for="(img, afterGraphIndex) in afterGraphicsImgs"
-                                :key="afterGraphIndex"
-                                data-gallery
-                            ></a>
+                            <a :href="img[0]" :large-img="img[1]" class="inline-img"
+                                v-for="(img, afterGraphIndex) in afterGraphicsImgs" :key="afterGraphIndex"
+                                data-gallery></a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div
+        <!-- <div
             id="blueimp-gallery"
             class="blueimp-gallery blueimp-gallery-controls"
             data-full-screen="true"
@@ -173,20 +113,33 @@
             <a id="full-size-image" class="img-buttons" target="_blank">&nearr;</a>
             <a class="close img-buttons">&#10005;</a>
             <ol class="indicator"></ol>
+        </div> -->
+        <div id="gallery-template">
+            <!-- <div id="glightbox-body" class="glightbox-container">
+                <div class="gloader visible"></div>
+                <div class="goverlay"></div>
+                <div class="gcontainer">
+                    <div id="glightbox-slider" class="gslider"></div>
+                    <button class="gnext gbtn" tabindex="0" aria-label="Next"
+                        data-customattribute="example">{nextSVG}</button>
+                    <button class="gprev gbtn" tabindex="1" aria-label="Previous">{prevSVG}</button>
+                    <button class="gclose gbtn" tabindex="2" aria-label="Close">{closeSVG}</button>
+                </div>
+            </div> -->
         </div>
     </div>
 </template>
 <script>
 import { mapFields } from "vuex-map-fields";
 import citations from "./Citations";
-import Gallery from "blueimp-gallery";
-import "blueimp-gallery/css/blueimp-gallery.min.css";
+import GLightbox from 'glightbox';
+import 'glightbox/dist/css/glightbox.css';
 import { Popover } from "bootstrap";
 
 export default {
     name: "textNavigation",
     components: {
-        citations,
+        citations
     },
     inject: ["$http"],
     computed: {
@@ -238,6 +191,8 @@ export default {
             navBarVisible: false,
             timeToRender: 0,
             gallery: null,
+            images: [],
+            imageIndex: null
         };
     },
     created() {
@@ -562,24 +517,28 @@ export default {
                 Array.from(document.getElementsByClassName(imageType)).forEach((item) => {
                     item.addEventListener("click", (event) => {
                         event.preventDefault();
-                        let target = event.target;
-                        this.gallery = Gallery(
-                            [...document.getElementsByClassName(imageType)].map(
-                                (item) => item.getAttribute("href") || item.getAttribute("src")
-                            ),
-                            {
-                                index: Array.from(document.getElementsByClassName(imageType)).indexOf(target),
-                                continuous: false,
-                                thumbnailIndicators: false,
-                                onslidecomplete: () => {
-                                    let imageIndex = this.gallery.getIndex();
-                                    let img = Array.from(document.getElementsByClassName(imageType))[
-                                        imageIndex
-                                    ].getAttribute("large-img");
-                                    document.getElementById("full-size-image").setAttribute("href", img);
-                                },
-                            }
-                        );
+                        this.images = [...document.getElementsByClassName(imageType)].map(
+                            (item) => item.getAttribute("href") || item.getAttribute("src"))
+                        let imageIndex = Array.from(document.getElementsByClassName(imageType)).indexOf(event.target)
+                        this.gallery = GLightbox({
+                            elements: [...document.getElementsByClassName(imageType)].map(
+                                (item) => { return { href: item.getAttribute("href") || item.getAttribute("src"), type: "image" } }),
+                            openEffect: "fade", closeEffect: "fade", startAt: imageIndex
+                        })
+                        this.gallery.open()
+                        this.gallery.on('slide_changed', () => {
+                            let img = Array.from(document.getElementsByClassName(imageType))[
+                                this.gallery.getActiveSlideIndex()
+                            ].getAttribute("large-img");
+                            const newNode = document.createElement("a");
+                            newNode.style.cssText = `position: absolute; top: 20px; font-size: 15px; right: 70px; opacity: 0.7; border: solid; padding: 0px 5px; color: #fff !important`
+                            newNode.href = img
+                            newNode.target = "_blank"
+                            newNode.innerHTML = "&nearr;"
+                            let closeBtn = document.getElementsByClassName("gclose")[0]
+                            closeBtn.parentNode.insertBefore(newNode, closeBtn)
+
+                        });
                     });
                 });
             }
@@ -720,12 +679,14 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "../assets/styles/theme.module.scss";
+
 .separator {
     padding: 5px;
     font-size: 60%;
     display: inline-block;
     vertical-align: middle;
 }
+
 #toc-content {
     display: inline-block;
     position: relative;
@@ -736,30 +697,36 @@ export default {
     z-index: 50;
     background: #fff;
 }
+
 #toc-wrapper {
     position: relative;
     z-index: 49;
     pointer-events: all;
     margin-left: -1.5rem;
 }
+
 #toc-top-bar {
     height: 31px;
     width: 100%;
     pointer-events: none;
 }
+
 #toc {
     margin-top: 31px;
     pointer-events: all;
 }
+
 #toc-top-bar.visible {
     position: fixed;
 }
+
 #nav-buttons.visible {
     position: fixed;
     backdrop-filter: blur(0.5rem);
     background-color: rgba(255, 255, 255, 0.3);
     pointer-events: all;
 }
+
 #back-to-top {
     position: absolute;
     left: 0;
@@ -767,6 +734,7 @@ export default {
     transition: opacity 0.25s;
     pointer-events: none;
 }
+
 #report-error {
     position: absolute;
     right: 0;
@@ -774,6 +742,7 @@ export default {
     transition: opacity 0.25s;
     pointer-events: none;
 }
+
 #back-to-top.visible,
 #report-error.visible {
     opacity: 0.95;
@@ -785,6 +754,7 @@ export default {
     opacity: 0.9;
     width: 100%;
 }
+
 #toc-nav-bar {
     background-color: #ddd;
     opacity: 0.95;
@@ -815,11 +785,14 @@ a.current-obj,
 :deep(p) {
     margin-bottom: 0.5rem;
 }
+
 :deep(.highlight) {
     background-color: red;
     color: #fff;
 }
-:deep(.xml-div1::after), /* clear floats from inline images */
+
+:deep(.xml-div1::after),
+/* clear floats from inline images */
 :deep(.xml-div2::after),
 :deep(.xml-div3::after) {
     content: "";
@@ -851,6 +824,7 @@ a.current-obj,
     display: block;
     margin-top: 20px;
 }
+
 :deep(b.headword::before) {
     content: "\A";
     white-space: pre;
@@ -1048,7 +1022,7 @@ body {
 }
 
 :deep(.xml-cit::after) {
-    content: "\00a0\00bb\00a0("attr(aut) "\00a0"attr(ref) ")";
+    content: "\00a0\00bb\00a0(" attr(aut) "\00a0" attr(ref) ")";
     font-variant: small-caps;
 }
 
@@ -1115,7 +1089,7 @@ body {
 }
 
 :deep(.xml-note::before) {
-    content: "note\00a0"attr(n) "\00a0:\00a0";
+    content: "note\00a0" attr(n) "\00a0:\00a0";
     font-weight: 700;
 }
 
@@ -1205,21 +1179,27 @@ body {
 
 :deep(.xml-cell) {
     display: table-cell;
-    padding-top: inherit; /*inherit padding when image is above */
+    padding-top: inherit;
+    /*inherit padding when image is above */
     padding-bottom: inherit;
 }
+
 :deep(s) {
     text-decoration: none;
 }
+
 :deep(h5 .text-view) {
     font-size: inherit !important;
 }
+
 .slide-fade-enter-active {
     transition: all 0.3s ease-out;
 }
+
 .slide-fade-leave-active {
     transition: all 0.3s ease-out;
 }
+
 .slide-fade-enter-from,
 .slide-fade-leave-to {
     transform: translateY(-30px);
@@ -1231,7 +1211,8 @@ body {
     font-size: 45px !important;
     color: #fff !important;
 }
-#full-size-image {
+
+:deep(#full-size-image) {
     right: 90px;
     font-weight: 700 !important;
     font-size: 20px !important;
@@ -1246,9 +1227,11 @@ body {
     border: 3px solid;
     padding: 0 0.25rem;
 }
+
 #full-size-image:hover {
     opacity: 1;
 }
+
 :deep([class*="passage-"]) {
     color: $passage-color;
     font-weight: 700;

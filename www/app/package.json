@@ -3,18 +3,18 @@
     "version": "4.7.0",
     "private": true,
     "scripts": {
-        "serve": "npm i && vue-cli-service serve",
-        "build": "npm i && vue-cli-service build --modern && rm -rf node_modules",
-        "lint": "vue-cli-service lint",
-        "i18n:report": "vue-cli-service i18n:report --src \"./src/**/*.?(js|vue)\" --locales \"./src/locales/**/*.json\""
+        "serve": "npm i && vite preview",
+        "build": "npm i && vite build && rm -rf node_modules",
+        "host": "npm i && vite --host"
     },
     "dependencies": {
+        "@intlify/unplugin-vue-i18n": "^0.8.2",
         "@popperjs/core": "^2.9.2",
         "axios": "^0.21.0",
-        "blueimp-gallery": "^2.38.0",
         "bootstrap": "^5.0.1",
         "chart.js": "^2.9.3",
         "core-js": "^3.13.1",
+        "glightbox": "^3.2.0",
         "gsap": "^3.9.1",
         "vue": "^3.2.0",
         "vue-i18n": "^9.2.2",
@@ -24,17 +24,13 @@
         "vuex-map-fields": "^1.4.0"
     },
     "devDependencies": {
-        "@intlify/vue-i18n-loader": "^3.0.0",
-        "@vue/cli-plugin-babel": "~5.0.1",
-        "@vue/cli-plugin-eslint": "~5.0.1",
-        "@vue/cli-service": "~5.0.1",
+        "@originjs/vite-plugin-commonjs": "^1.0.3",
+        "@vitejs/plugin-vue": "^4.0.0",
         "@vue/compiler-sfc": "^3.1.0",
-        "babel-eslint": "^10.1.0",
         "eslint": "^7.5.0",
         "eslint-plugin-vue": "^8.5.0",
         "sass": "^1.49.9",
-        "sass-loader": "^10.1.0",
-        "vue-cli-plugin-i18n": "~2.3.1"
+        "vite": "^4.1.1"
     },
     "eslintConfig": {
         "root": true,
@@ -49,14 +45,8 @@
             "no-console": "off"
         },
         "parserOptions": {
-            "parser": "babel-eslint",
-            "ecmaVersion": 11,
+            "ecmaVersion": 12,
             "sourceType": "module"
-        }
-    },
-    "postcss": {
-        "plugins": {
-            "autoprefixer": {}
         }
     },
     "browserslist": [
