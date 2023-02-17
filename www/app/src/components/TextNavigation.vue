@@ -527,12 +527,14 @@ export default {
                         })
                         this.gallery.open()
                         this.gallery.on('slide_changed', () => {
+                            // TODO: only create anchor tag the first time.
                             let img = Array.from(document.getElementsByClassName(imageType))[
                                 this.gallery.getActiveSlideIndex()
                             ].getAttribute("large-img");
                             const newNode = document.createElement("a");
                             newNode.style.cssText = `position: absolute; top: 20px; font-size: 15px; right: 70px; opacity: 0.7; border: solid; padding: 0px 5px; color: #fff !important`
                             newNode.href = img
+                            newNode.id = "large-img-link"
                             newNode.target = "_blank"
                             newNode.innerHTML = "&nearr;"
                             let closeBtn = document.getElementsByClassName("gclose")[0]

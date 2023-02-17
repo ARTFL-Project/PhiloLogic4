@@ -4,20 +4,12 @@
             <results-summary :description="results.description" :running-total="runningTotal"></results-summary>
             <div class="card mt-4" id="time-series">
                 <div class="btn-group d-inline-block" role="group">
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        :class="{ active: frequencyType == 'absolute_time' }"
-                        @click="toggleFrequency('absolute_time')"
-                    >
+                    <button type="button" class="btn btn-secondary" :class="{ active: frequencyType == 'absolute_time' }"
+                        @click="toggleFrequency('absolute_time')">
                         {{ $t("common.absoluteFrequency") }}
                     </button>
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        :class="{ active: frequencyType == 'relative_time' }"
-                        @click="toggleFrequency('relative_time')"
-                    >
+                    <button type="button" class="btn btn-secondary" :class="{ active: frequencyType == 'relative_time' }"
+                        @click="toggleFrequency('relative_time')">
                         {{ $t("common.relativeFrequency") }}
                     </button>
                 </div>
@@ -170,9 +162,8 @@ export default {
                                 if (vm.interval == 1) {
                                     interval = tooltipItem[0].xLabel;
                                 } else {
-                                    interval = `${tooltipItem[0].xLabel}-${
-                                        parseInt(tooltipItem[0].xLabel) + parseInt(vm.interval) - 1
-                                    }`;
+                                    interval = `${tooltipItem[0].xLabel}-${parseInt(tooltipItem[0].xLabel) + parseInt(vm.interval) - 1
+                                        }`;
                                 }
                                 return interval;
                             },
@@ -310,6 +301,7 @@ export default {
 #description {
     position: relative;
 }
+
 #export-results {
     position: absolute;
     right: 0;
