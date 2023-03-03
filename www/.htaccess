@@ -4,8 +4,7 @@ AddHandler cgi-script py
 DirectoryIndex dispatcher.py
 
 RewriteEngine on
-RewriteRule ^css/(.*) app/dist/css/$1 [L]
-RewriteRule ^js/(.*) app/dist/js/$1 [L]
+RewriteRule ^assets/(.*) app/dist/assets/$1 [L]
 RewriteRule ^img/(.*) app/dist/img/$1 [L]
 RewriteRule ^concordance(.*) dispatcher.py$1 [PT,QSA]
 RewriteRule ^kwic(.*) dispatcher.py$1 [PT,QSA]
