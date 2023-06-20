@@ -100,6 +100,7 @@ def make_sentences_table(datadir, db_destination):
             )
             with tqdm(total=line_count, leave=False) as pbar:
                 for raw_words in os.scandir(f"{datadir}/words_and_philo_ids"):
+                    sentence_id = ""
                     with lz4.frame.open(raw_words.path) as input_file:
                         current_sentence = None
                         words = []
@@ -117,10 +118,11 @@ def make_sentences_table(datadir, db_destination):
                                     current_sentence = sentence_id
                                 words.append({"word": word_obj["token"], "start_byte": word_obj["start_byte"]})
                             pbar.update()
-                        cursor.execute(  # insert last sentence in doc
-                            "insert into sentences values(?, ?)",
-                            (sentence_id, lz4.frame.compress(msgpack.dumps(words))),
-                        )
+                        if sentence_id:
+                            cursor.execute(  # insert last sentence in doc
+                                "insert into sentences values(?, ?)",
+                                (sentence_id, lz4.frame.compress(msgpack.dumps(words))),
+                            )
             cursor.execute("create index sentence_index on sentences (philo_id)")
             conn.commit()
 

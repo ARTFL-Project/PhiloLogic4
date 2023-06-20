@@ -373,26 +373,29 @@ def format_text_object(
                 el.attrib["class"] = "xml-table"
             elif el.tag == "ref" or el.tag == "xref":
                 if el.attrib["type"] == "note" or el.attrib["type"] == "footnote":
-                    target = el.attrib["target"]
-                    link = make_absolute_query_link(config, request, script_name="/scripts/get_notes.py", target=target)
-                    if "n" in el.attrib:
-                        el.text = el.attrib["n"]
-                    else:
-                        el.text = "*"
-                    if el.text == "":
-                        el.text = "*"
-                    el.tag = "span"
-                    el.attrib["data-ref"] = link
-                    el.attrib["id"] = target.replace("#", "") + "-link-back"
-                    # attributes for popover note
-                    el.attrib["class"] = "note-ref"
-                    el.attrib["tabindex"] = "0"
-                    el.attrib["data-toggle"] = "popover"
-                    el.attrib["data-container"] = "body"
-                    el.attrib["data-placement"] = "right"
-                    el.attrib["data-trigger"] = "focus"
-                    el.attrib["data-html"] = "true"
-                    el.attrib["data-animation"] = "true"
+                    if "target" in el.attrib:
+                        target = el.attrib["target"]
+                        link = make_absolute_query_link(
+                            config, request, script_name="/scripts/get_notes.py", target=target
+                        )
+                        if "n" in el.attrib:
+                            el.text = el.attrib["n"]
+                        else:
+                            el.text = "*"
+                        if el.text == "":
+                            el.text = "*"
+                        el.tag = "span"
+                        el.attrib["data-ref"] = link
+                        el.attrib["id"] = target.replace("#", "") + "-link-back"
+                        # attributes for popover note
+                        el.attrib["class"] = "note-ref"
+                        el.attrib["tabindex"] = "0"
+                        el.attrib["data-toggle"] = "popover"
+                        el.attrib["data-container"] = "body"
+                        el.attrib["data-placement"] = "right"
+                        el.attrib["data-trigger"] = "focus"
+                        el.attrib["data-html"] = "true"
+                        el.attrib["data-animation"] = "true"
                 elif el.attrib["type"] == "cross":
                     c.execute("SELECT philo_id FROM toms WHERE id=? LIMIT 1", (el.attrib["target"],))
                     try:
@@ -589,36 +592,62 @@ def format_text_object(
                     el.tail = ""
                     parent = el.getparent()
                     parent.insert(parent.index(el) + 1, text_element_wrapper)
+
         except Exception as exception:
             pass
 
     if start_end_pairs:
         # Make sure we did not miss element tails
+        in_passage = True
+        n_marker = ""
         for el in xml.iter():
             match = False
             class_name = ""
-            n = ""
+            if "class" in el.attrib and el.attrib["class"] == "passage-marker":
+                in_passage = True
+                n_marker = el.attrib["n"]
+                continue
+            elif "id" in el.attrib and el.attrib["id"].startswith("end-passage"):
+                in_passage = False
+                continue
             for child in el:
                 if "class" in child.attrib and child.attrib["class"].startswith("passage-"):
                     if el.tail:
                         match = True
                         class_name = child.attrib["class"]
-                        n = child.attrib["n"]
+                        try:
+                            n_marker = child.attrib["n"]
+                        except KeyError:
+                            pass
                     if "id " in child.attrib and child.attrib["id"].startswith("end-passage-"):
                         match = False
             if match:
                 if isinstance(el.tail, str) and el.tail.strip():
-                    text_element_wrapper = create_element(f"""<span class="{class_name}" n="{n}">{el.tail[:]}</span>""")
+                    text_element_wrapper = create_element(
+                        f"""<span class="{class_name}" n="{n_marker}">{el.tail[:]}</span>"""
+                    )
                     el.tail = ""
                     parent = el.getparent()
                     parent.insert(parent.index(el) + 1, text_element_wrapper)
+            if in_passage is True and el.tail:
+                text_element_wrapper = create_element(
+                    f"""<span class="passage-{n_marker}" n="{n_marker}">{el.tail[:]}</span>"""
+                )
+                el.tail = ""
+                parent = el.getparent()
+                parent.insert(parent.index(el) + 1, text_element_wrapper)
         # Make sure we do not have trailing spans after end marker
         passages_done = set()
         for el in xml.iter():
             if "id" in el.attrib and el.attrib["id"].startswith("end-passage"):
                 passages_done.add(el.attrib["n"])
                 continue
-            if "class" in el.attrib and el.attrib["class"].startswith("passage") and el.attrib["n"] in passages_done:
+            if all(("n" in el.attrib, "class" in el.attrib)) and all(
+                (
+                    el.attrib["class"].startswith("passage"),
+                    el.attrib["n"] in passages_done,
+                )
+            ):
                 del el.attrib["class"]
                 del el.attrib["n"]
 

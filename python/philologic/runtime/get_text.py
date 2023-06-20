@@ -11,6 +11,7 @@ from .ObjectFormatter import adjust_bytes, format_concordance, format_text_objec
 
 
 def get_text(hit, start_byte, length, path):
+    """Returns the text of a hit as a string."""
     file_path = path + "/data/TEXT/" + hit.doc.filename
     with open(file_path, "rb") as text_file:
         text_file.seek(start_byte)
@@ -18,7 +19,8 @@ def get_text(hit, start_byte, length, path):
 
 
 def get_concordance_text(db, hit, path, context_size):
-    ## Determine length of text needed
+    """Returns the text of a concordance as a string."""
+    # Determine length of text needed
     byte_offsets = sorted(hit.bytes)
     byte_distance = byte_offsets[-1] - byte_offsets[0]
     length = context_size + byte_distance + context_size
@@ -29,12 +31,13 @@ def get_concordance_text(db, hit, path, context_size):
 
 
 def get_text_obj(obj, config, request, word_regex, note=False, images=True):
+    """Returns the text of an object as a string, formatted according to the request parameters."""
     path = config.db_path
     filename = obj.doc.filename
     if filename and os.path.exists(path + "/data/TEXT/" + filename):
         path += "/data/TEXT/" + filename
     else:
-        ## workaround for when no filename is returned with the full philo_id of the object
+        # workaround for when no filename is returned with the full philo_id of the object
         philo_id = str(obj.philo_id[0]) + " 0 0 0 0 0 0"
         c = obj.db.dbh.cursor()
         c.execute("select filename from toms where philo_type='doc' and philo_id =? limit 1", (philo_id,))
@@ -77,6 +80,7 @@ def get_text_obj(obj, config, request, word_regex, note=False, images=True):
 
 
 def get_tei_header(request, config):
+    """Returns the TEI header of a text as a string."""
     path = config.db_path
     db = DB(path + "/data")
     obj = ObjectWrapper(request["philo_id"].split(), db)
@@ -86,8 +90,7 @@ def get_tei_header(request, config):
     header = xml_tree.find("teiHeader")
     try:
         header_text = etree.tostring(header, pretty_print=True).decode("utf8")
-    except TypeError as e:  # workaround for when lxml doesn't find the header for whatever reason
-        start = False
+    except TypeError:  # workaround for when lxml doesn't find the header for whatever reason
         header_text = ""
         with open(filename, encoding="utf8") as file:
             file_content = file.read()

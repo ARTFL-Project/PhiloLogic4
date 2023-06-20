@@ -28,7 +28,7 @@ export default defineConfig({
         hmr: {
             overlay: false,
         },
-        cors: true,
+        // cors: true,
     },
 });
 
