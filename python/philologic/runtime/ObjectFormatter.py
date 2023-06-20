@@ -598,7 +598,7 @@ def format_text_object(
 
     if start_end_pairs:
         # Make sure we did not miss element tails
-        in_passage = True
+        in_passage = False
         n_marker = ""
         for el in xml.iter():
             match = False
