@@ -9,8 +9,7 @@ export default defineConfig({
         vue(),
         VueI18nPlugin({
             include: resolve(
-                dirname(fileURLToPath(
-                    import.meta.url)),
+                dirname(fileURLToPath(import.meta.url)),
                 "./src/locales/**"
             ),
         }),
@@ -18,8 +17,7 @@ export default defineConfig({
     base: process.env.NODE_ENV === "production" ? getBaseUrl() : "/",
     resolve: {
         alias: {
-            "@": fileURLToPath(new URL("./src",
-                import.meta.url)),
+            "@": fileURLToPath(new URL("./src", import.meta.url)),
         },
         // TODO: Remove by explicitely adding extension in imports
         extensions: [".js", ".json", ".vue"],
@@ -28,7 +26,6 @@ export default defineConfig({
         hmr: {
             overlay: false,
         },
-        // cors: true,
     },
 });
 
@@ -40,7 +37,7 @@ function getBaseUrl() {
         let dbPath = __dirname.replace(/app$/, "");
         let dbname = dbPath.split("/").reverse()[1];
         let config = fs.readFileSync("/etc/philologic/philologic4.cfg", "utf8");
-        let re = /url_root = "([^"]+)"/gm;
+        let re = /url_root = ["']([^"]+)["']/gm;
         let match = re.exec(config);
         let rootPath = match[1];
         if (rootPath.endsWith("/")) {
