@@ -1,41 +1,26 @@
 <template>
     <div id="landing-page-container" class="mt-5">
         <div class="container-fluid">
-            <div class="landing-page-logo" :class="{ dictionary: dictionary }" v-if="logo">
+            <div id="landing-page-logo" :class="{ dictionary: dictionary }" v-if="logo">
                 <img style="max-height: 300px; width: auto" :src="logo" alt="logo" />
             </div>
             <div class="d-flex justify-content-center position-relative">
-                <div
-                    class="spinner-border text-secondary"
-                    role="status"
-                    v-if="loading"
-                    style="width: 4rem; height: 4rem; position: absolute; z-index: 50; top: 10px"
-                ></div>
+                <div class="spinner-border text-secondary" role="status" v-if="loading"
+                    style="width: 4rem; height: 4rem; position: absolute; z-index: 50; top: 10px"></div>
             </div>
             <div id="default-landing-page" class="row justify-content-center" v-if="landingPageBrowsing === 'default'">
-                <div
-                    class="col-12 col-sm-6 col-md-8 mb-4"
-                    v-for="browseType in defaultLandingPageBrowsing"
-                    :key="browseType.label"
-                >
+                <div class="col-12 col-sm-6 col-md-8 mb-4" v-for="browseType in defaultLandingPageBrowsing"
+                    :key="browseType.label">
                     <div class="card shadow-sm">
                         <div class="card-header">{{ browseType.label }}</div>
                         <div class="row g-0">
-                            <div
-                                class="col"
-                                :class="{ 'col-2': browseType.queries.length > 6 }"
-                                v-for="(range, rangeIndex) in browseType.queries"
-                                :key="rangeIndex"
-                                @click="getContent(browseType, range)"
-                            >
-                                <button
-                                    class="btn btn-light landing-page-btn"
-                                    :class="{
-                                        first: rangeIndex === 0,
-                                        last: rangeIndex === browseType.queries.length - 1,
-                                    }"
-                                    style="border-radius: 0; width: 100%"
-                                >
+                            <div class="col" :class="{ 'col-2': browseType.queries.length > 6 }"
+                                v-for="(range, rangeIndex) in browseType.queries" :key="rangeIndex"
+                                @click="getContent(browseType, range)">
+                                <button class="btn btn-light landing-page-btn" :class="{
+                                    first: rangeIndex === 0,
+                                    last: rangeIndex === browseType.queries.length - 1,
+                                }" style="border-radius: 0; width: 100%">
                                     {{ range }}
                                 </button>
                             </div>
@@ -48,11 +33,8 @@
                     <div class="cols-12 col-sm-8 offset-sm-2 d-flex" style="justify-content: center">
                         <div class="card" style="width: fit-content">
                             <ul class="list-group">
-                                <li
-                                    class="list-group-item"
-                                    v-for="(biblioObj, bibIndex) in bibliography.results"
-                                    :key="bibIndex"
-                                >
+                                <li class="list-group-item" v-for="(biblioObj, bibIndex) in bibliography.results"
+                                    :key="bibIndex">
                                     <citations :citation="biblioObj.citation"></citations>
                                 </li>
                             </ul>
@@ -70,31 +52,21 @@
                                 <div class="list-group-item" v-for="volume in volumeData" :key="volume.philo_id">
                                     <router-link :to="`/navigate/${volume.philo_id}/table-of-contents`">
                                         <i style="font-variant: small-caps">{{ volume.title }}</i>
-                                        <span style="font-weight: 300; padding-left: 0.25rem" v-if="volume.start_head"
-                                            >({{ volume.start_head }} - {{ volume.end_head }})</span
-                                        >
+                                        <span style="font-weight: 300; padding-left: 0.25rem" v-if="volume.start_head">({{
+                                            volume.start_head }} - {{ volume.end_head }})</span>
                                     </router-link>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div
-                        class="col"
-                        id="dico-landing-alpha"
-                        cols="6"
-                        style="border-width: 0px; box-shadow: 0 0 0"
-                        v-if="showDicoLetterRows"
-                    >
+                    <div class="col" id="dico-landing-alpha" cols="6" style="border-width: 0px; box-shadow: 0 0 0"
+                        v-if="showDicoLetterRows">
                         <div class="card">
                             <div class="card-header">{{ $t("landingPage.browseByLetter") }}</div>
                             <table class="table table-borderless" style="margin-bottom: 0">
                                 <tr v-for="(row, rowIndex) in dicoLetterRows" :key="rowIndex">
-                                    <td
-                                        class="letter"
-                                        v-for="letter in row"
-                                        :key="letter.letter"
-                                        @click="goToLetter(letter.letter)"
-                                    >
+                                    <td class="letter" v-for="letter in row" :key="letter.letter"
+                                        @click="goToLetter(letter.letter)">
                                         {{ letter.letter }}
                                     </td>
                                 </tr>
@@ -106,21 +78,15 @@
             <div id="landing-page-content" class="mt-4">
                 <div class="row">
                     <div class="col-12 col-sm-9 offset-sm-1 col-md-8 offset-md-2 text-content-area">
-                        <div
-                            class="card mb-4 shadow-sm"
-                            v-for="(group, groupIndex) in resultGroups"
-                            :key="group.prefix"
-                            :id="`landing-${group.prefix}`"
-                        >
+                        <div class="card mb-4 shadow-sm" v-for="(group, groupIndex) in resultGroups" :key="group.prefix"
+                            :id="`landing-${group.prefix}`">
                             <div class="card-header">
                                 {{ group.prefix.toString() }}
                             </div>
                             <ul class="list-group list-group-flush">
-                                <li
-                                    class="list-group-item contentClass p-2"
+                                <li class="list-group-item contentClass p-2"
                                     v-for="(result, resultIndex) in group.results.slice(0, groupDisplay[groupIndex])"
-                                    :key="resultIndex"
-                                >
+                                    :key="resultIndex">
                                     <citations :citation="buildCitationObject(result.metadata, citations)"></citations>
                                     <span v-if="displayCount == 'true'">&nbsp;({{ result.count }})</span>
                                 </li>
@@ -312,51 +278,69 @@ export default {
     border-width: 0px 1px 0px 0px;
     border-color: rgba(0, 0, 0, 0.125);
 }
+
 .first {
     border-bottom-left-radius: 0.25rem !important;
 }
+
 .last {
     border-bottom-right-radius: 0.25rem !important;
     border-right-width: 0px;
 }
+
 .btn-light:hover {
     background-color: #f8f8f8;
 }
+
 .card-header {
     text-align: center;
     font-variant: small-caps;
 }
+
 .letter {
     text-align: center;
     cursor: pointer;
     color: #007bff;
 }
+
 .letter:hover {
     background-color: #e8e8e8;
 }
+
 tr:nth-child(odd) {
     background-color: #f8f8f8;
 }
+
 tr:nth-child(odd) td.letter:nth-child(2n + 1) {
     background-color: #fff;
 }
+
 tr:nth-child(even) {
     background-color: #fff;
 }
+
 tr:nth-child(even) td.letter:nth-child(2n + 1) {
     background-color: #f8f8f8;
 }
+
 .landing-page-btn:focus {
     border-width: 3px;
 }
+
 #dico-landing-volume .list-group-item {
     padding: 0 1rem;
 }
+
 #dico-landing-volume a {
     display: inline-block;
     padding: 0.5rem 0;
 }
+
 .letter {
+    text-align: center;
+}
+
+#landing-page-logo {
     text-align: center;
 }
 </style>

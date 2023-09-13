@@ -165,6 +165,7 @@ class CompoundStack:
                 return False
 
     def push(self, type, name, byte):
+        """push a new object onto the stack."""
         if type == self.p_type:
             self.pull(type, byte)
             self.p += 1
@@ -212,6 +213,7 @@ class CompoundStack:
                 self.stack[type]["page"] = self.current_p.id[1]
 
     def pull(self, text_obj_type, byte):
+        """pull an object off the stack."""
         if text_obj_type == self.p_type:
             if self.current_p:
                 self.current_p.attrib["end_byte"] = byte
