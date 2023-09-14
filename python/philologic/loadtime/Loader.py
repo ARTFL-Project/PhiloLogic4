@@ -59,6 +59,7 @@ PARSER_OPTIONS = [
     "sentence_breakers",
     "file_type",
     "metadata_sql_types",
+    "lowercase_index",
 ]
 
 
@@ -147,13 +148,13 @@ class Loader:
                     already_configured_values[attribute] = getattr(config_obj, attribute)
             with open(load_config_path, "a") as load_config_copy:
                 print("\n\n## The values below were also used for loading ##", file=load_config_copy)
-                for option in loader_options:
+                for option, option_value in loader_options.items():
                     if (
                         option not in already_configured_values
                         and option not in values_to_ignore
                         and option != "web_config"
                     ):
-                        print("%s = %s\n" % (option, repr(loader_options[option])), file=load_config_copy)
+                        print("%s = %s\n" % (option, repr(option_value)), file=load_config_copy)
         else:
             with open(load_config_path, "w") as load_config_copy:
                 print("#!/usr/bin/env python3", file=load_config_copy)
@@ -165,9 +166,9 @@ class Loader:
                     'the current database using the -l flag. See load documentation for more details"""\n\n',
                     file=load_config_copy,
                 )
-                for option in loader_options:
+                for option, option_value in loader_options.items():
                     if option not in values_to_ignore and option != "web_config":
-                        print("%s = %s\n" % (option, repr(loader_options[option])), file=load_config_copy)
+                        print("%s = %s\n" % (option, repr(option_value)), file=load_config_copy)
 
         if "web_config" in loader_options:
             web_config_path = os.path.join(loader_options["data_destination"], "web_config.cfg")
@@ -562,7 +563,6 @@ class Loader:
             ("graphics", "graphics"),
             ("lines", "lines"),
         ]:
-
             print(f"{time.ctime()}: joining {object_type}", flush=True)
             if self.debug is False:
                 os.system(

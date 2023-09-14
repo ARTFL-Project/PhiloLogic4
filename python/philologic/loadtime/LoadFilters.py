@@ -12,7 +12,7 @@ from philologic.loadtime.OHCOVector import Record
 
 # Default filters
 def get_word_counts(_, text):
-    """Lowercase and count words"""
+    """Count words"""
     attrib_set = set()
     with open(text["raw"] + ".tmp", "w", encoding="utf8") as tmp_file:
         object_types = ["doc", "div1", "div2", "div3", "para", "sent", "word"]
@@ -23,8 +23,6 @@ def get_word_counts(_, text):
                 philo_id = philo_id.split()
                 record = Record(philo_type, word, philo_id)
                 record.attrib = loads(attrib)
-                if philo_type == "word":
-                    word = word.lower()
                 for d, _ in enumerate(counts):
                     if philo_type == "word":
                         counts[d] += 1

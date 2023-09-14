@@ -364,6 +364,7 @@ class XMLParser:
         tag_to_obj_map=DEFAULT_TAG_TO_OBJ_MAP,
         metadata_to_parse=DEFAULT_METADATA_TO_PARSE,
         file_type="xml",
+        lowercase_index=False,
         **parse_options,
     ):
         """Initialize class"""
@@ -487,6 +488,8 @@ class XMLParser:
             self.flatten_ligatures = True
 
         self.metadata_sql_types = parse_options["metadata_sql_types"]
+
+        self.lowercase_index = lowercase_index
 
         self.in_the_text = False
         self.in_text_quote = False
@@ -1147,7 +1150,8 @@ class XMLParser:
                         # names tagged.
 
                         # Switch everything to lower case
-                        word = word.lower()
+                        if self.lowercase_index is True:
+                            word = word.lower()
 
                         # Check to see if the word is longer than we want.  More than 235
                         # characters appear to cause problems in the indexer.

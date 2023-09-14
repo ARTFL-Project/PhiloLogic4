@@ -266,6 +266,9 @@ punctuation = ""
 # Note that the tagger has an non-trival impact on parse time.
 pos_tagger = ""
 
+# Defines whether words should be stored in lowercase form in the index.
+lowercase_index = True
+
 
 ###########################################
 ####### ADVANCED CUSTOMIZATIONS ###########
