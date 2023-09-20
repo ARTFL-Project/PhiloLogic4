@@ -1215,11 +1215,10 @@ class XMLParser:
                             punct = punct.replace("\t", " ")
                             punct = self.remove_control_chars(punct)
                             for single_punct in punct:
-                                end_pos = len(single_punct.encode("utf8"))
                                 if single_punct != " ":
                                     self.v.push("punct", single_punct, punc_pos)
                                     self.v.pull("punct", punc_pos + len(single_punct.encode("utf8")))
-                                punc_pos = end_pos
+                                punc_pos += len(single_punct.encode("utf8"))
 
     def close_sent(self, end_byte):
         """Close sentence objects."""

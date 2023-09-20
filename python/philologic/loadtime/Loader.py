@@ -405,6 +405,7 @@ class Loader:
 
     @classmethod
     def set_file_data(cls, load_metadata, textdir, workdir):
+        """Set file data"""
         if load_metadata is None:
             cls.data_dicts = [{"filename": fn.name} for fn in os.scandir(textdir)]
         else:
@@ -479,6 +480,7 @@ class Loader:
 
     @classmethod
     def parse_file(cls, file_pos):
+        """Parse a single file"""
         text = cls.filequeue[file_pos]
         metadata = cls.data_dicts[file_pos]
         options = text["options"]
@@ -742,7 +744,7 @@ class Loader:
             self.post_filters.insert(0, post_filter)
 
     @classmethod
-    def post_processing(cls, verbose=True, *extra_filters):
+    def post_processing(cls, *extra_filters, verbose=True):
         """Run important post-parsing functions for frequencies and word normalization"""
         if verbose is True:
             print("\n### Storing in database ###")

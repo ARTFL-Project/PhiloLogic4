@@ -189,6 +189,7 @@ class CompoundStack:
             return self.current_graphic
         elif type == self.punctuation:
             self.punctuation_count += 1
+            # current_sent_id = self.stack["sent"].id[:6]
             try:
                 current_sent_id = self.stack["sent"].id[:6]
             except IndexError:
