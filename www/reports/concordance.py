@@ -25,6 +25,7 @@ except ImportError:
 
 
 def concordance(environ, start_response):
+    """Concordance report"""
     config = WebConfig(os.path.abspath(os.path.dirname(__file__)).replace("reports", ""))
     request = WSGIHandler(environ, config)
     concordance_object = concordance_results(request, config)

@@ -114,6 +114,7 @@ def collocation_results(request, config):
 
 
 def extract_bytes(hit):
+    """Extract byte offsets from a hit"""
     remaining = list(hit[8:])
     byte_offsets = []
     while remaining:

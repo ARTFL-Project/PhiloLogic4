@@ -3,6 +3,7 @@
 Calls all parsing functions and stores data in index"""
 
 import collections
+import csv
 import datetime
 import math
 import os
@@ -13,7 +14,8 @@ import sys
 import time
 from glob import iglob
 from json import dump
-import csv
+from orjson import loads
+import msgpack
 
 import lxml.etree
 import regex as re
@@ -23,6 +25,7 @@ from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.loadtime.PostFilters import make_sentences_table, make_sql_table
 from philologic.utils import convert_entities, extract_full_date, extract_integer, load_module, pretty_print, sort_list
 from tqdm import tqdm
+import lz4.frame
 
 SORT_BY_WORD = "-k 2,2"
 SORT_BY_ID = "-k 3,3n -k 4,4n -k 5,5n -k 6,6n -k 7,7n -k 8,8n -k 9,9n"
@@ -97,6 +100,7 @@ class Loader:
     url_root = ""
     cores = 2
     ascii_conversion = ASCII_CONVERSION
+    word_attributes = set()
 
     @classmethod
     def set_class_attributes(cls, loader_options):
@@ -115,6 +119,7 @@ class Loader:
         cls.cores = loader_options["cores"]
         cls.ascii_conversion = loader_options["ascii_conversion"]
         cls.metadata_sql_types = loader_options["metadata_sql_types"]
+        cls.word_attributes = set()
         for option in PARSER_OPTIONS:
             try:
                 cls.parser_config[option] = loader_options[option]
@@ -709,6 +714,34 @@ class Loader:
         os.system("mv index " + self.destination + "/index")
         os.system("mv index.1 " + self.destination + "/index.1")
 
+        print(f"{time.ctime()}: building word attribute index")
+        with sqlite3.connect(f"{self.destination}/words.db") as conn:
+            cursor = conn.cursor()
+            cursor.execute("CREATE TABLE words (word text, word_object blob)")
+            cursor.execute("CREATE INDEX word_index ON words (word)")
+            current_word = None
+            word_objects = []
+            for line in lz4.frame.open(f"{self.workdir}/all_words_sorted.lz4"):
+                _, word, philo_id, word_object = line.decode("utf8").rstrip().split("\t", 3)
+                word_attrib = loads(word_object)
+                Loader.word_attributes.update(word_attrib.keys())
+                split_philo_id = [int(i) for i in philo_id.split()]
+                philo_id = split_philo_id[:6] + [split_philo_id[-1]] + split_philo_id[6:-1]
+                word_attrib["philo_id"] = philo_id
+                if word is not None and word != current_word:
+                    cursor.execute(
+                        "INSERT INTO words VALUES (?, ?)",
+                        (current_word, lz4.frame.compress(msgpack.dumps(word_objects), compression_level=6)),
+                    )
+                    word_objects = []
+                word_objects.append(word_attrib)
+                current_word = word
+            if word_objects:
+                cursor.execute(
+                    "INSERT INTO words VALUES (?, ?)",
+                    (current_word, lz4.frame.compress(msgpack.dumps(word_objects))),
+                )
+
     def setup_sql_load(self, verbose=True):
         """Setup SQLite DB creation"""
         for table in self.tables:
@@ -815,6 +848,22 @@ class Loader:
         }
         db_values["token_regex"] = self.token_regex
         db_values["default_object_level"] = self.default_object_level
+        db_values["word_attributes"] = [
+            i
+            for i in Loader.word_attributes
+            if i
+            not in (
+                "start_byte",
+                "div3_ancestor",
+                "div2_ancestor",
+                "parent",
+                "end_byte",
+                "para_ancestor",
+                "div1_ancestor",
+                "doc_ancestor",
+                "xml_id",
+            )
+        ]
         db_config = MakeDBConfig(filename, **db_values)
         with open(filename, "w") as db_file:
             try:

@@ -222,7 +222,7 @@ class DB:
                     raw_results=raw_results,
                     ascii_conversion=self.locals.ascii_conversion,
                 )
-            parsed = QuerySyntax.parse_query(qs)
+            parsed, word_attributes = QuerySyntax.parse_query(qs)
             grouped = QuerySyntax.group_terms(parsed)
             split = Query.split_terms(grouped)
             words_per_hit = len(split)
@@ -233,6 +233,8 @@ class DB:
                 sort_order=sort_order,
                 raw=raw_results,
                 ascii_conversion=self.locals.ascii_conversion,
+                word_attributes=word_attributes or None,
+                terms_file=search_file + ".terms",
             )
         if corpus:
             return corpus

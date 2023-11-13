@@ -24,6 +24,7 @@ except ImportError:
 
 
 def term_group(environ, start_response):
+    """Get term groups"""
     status = "200 OK"
     headers = [("Content-type", "application/json; charset=UTF-8"), ("Access-Control-Allow-Origin", "*")]
     start_response(status, headers)
@@ -36,7 +37,7 @@ def term_group(environ, start_response):
         hits = db.query(
             request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata
         )
-        parsed = parse_query(request.q)
+        parsed, _ = parse_query(request.q)
         group = group_terms(parsed)
         all_groups = split_terms(group)
         term_groups = []
@@ -56,7 +57,7 @@ def term_group(environ, start_response):
                     term_group += " %s " % term
             term_group = term_group.strip()
             term_groups.append(term_group)
-        dump = orjson.dumps({"term_groups": term_groups, "original_query": request.original_q})
+        dump = orjson.dumps({"term_groups": term_groups, "original_query": request.original_q or request.q})
     yield dump
 
 

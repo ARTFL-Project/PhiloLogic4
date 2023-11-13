@@ -4,8 +4,11 @@ import regex as re
 
 YEAR_MONTH = re.compile(r"^(\d+)-(\d+)\Z")
 YEAR = re.compile(r"^(\d+)\Z")
+ATTRIBUTES_PATTERN = re.compile(r"\[([^]]+)\]")
+SINGLE_ATTRIBUTE = re.compile(r'(\w+="?\w+"?)')
 
 patterns = [
+    ("ATTRIBUTE", r'\[\w+="?\w+'),
     ("QUOTE", r'".+?"'),
     ("QUOTE", r'".+'),
     ("NOT", "NOT"),
@@ -28,20 +31,53 @@ date_patterns = [
 ]
 
 
+def word_attrib_parse(query_string):
+    """Parse word attributes
+    attribute search with word [attribute=value,attribute=value]
+    """
+    word_attributes = {}
+    possible_attribs = ATTRIBUTES_PATTERN.search(query_string)
+    match_end = 0
+    word = None
+    if possible_attribs:
+        attribs = possible_attribs.group(1)
+        attribs = attribs.split("&")
+        for attrib in attribs:
+            if matching_attrib := SINGLE_ATTRIBUTE.search(attrib):
+                key, value = [i.strip() for i in matching_attrib.group(1).split("=")]
+                if key == "word":
+                    word = value
+                elif key == "lemma":
+                    word = f"{key}={value}"
+                else:
+                    word_attributes[key] = value
+        match_end = possible_attribs.end()
+    return word, word_attributes, match_end
+
+
 def parse_query(qstring):
     """Parse query"""
     buf = qstring[:]
     parsed = []
+    word_attributes = []
     while len(buf) > 0:
         for label, pattern in patterns:
-            m = re.match(pattern, buf)
-            if m:
-                parsed.append((label, m.group()))
-                buf = buf[m.end() :]
+            if m := re.match(pattern, buf):
+                if label == "ATTRIBUTE":
+                    word, single_word_attribs, end = word_attrib_parse(buf)
+                    word_attributes.append((word, single_word_attribs))
+                    for label, pattern in patterns[1:]:
+                        if inner_m := re.match(pattern, word):
+                            parsed.append((label, inner_m.group()))
+                            buf = buf[end:]
+                            break
+                else:
+                    parsed.append((label, m.group()))
+                    buf = buf[m.end() :]
                 break
         else:
             buf = buf[1:]
-    return parsed
+    return parsed, word_attributes
 
 
 def expand_date(date, start=True):
@@ -120,3 +156,8 @@ def group_terms(parsed):
     # filter out possible empty groups
     grouped = [g for g in grouped if g != []]
     return grouped
+
+
+if __name__ == "__main__":
+    parse_query('[word="avoir" & pos=VERB & ent=PERS] OR avait')
+    # parse_query('lov.* NOT "LOVELL" | "Love" | "lovely" | "lovedst" | "lovelier" | "Lovell" | "Lovel"')

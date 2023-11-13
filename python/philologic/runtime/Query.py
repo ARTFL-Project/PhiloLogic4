@@ -33,7 +33,7 @@ def query(
     sys.stdout.flush()
     tstart = datetime.now()
 
-    parsed = parse_query(terms)
+    parsed, word_attributes = parse_query(terms)
     grouped = group_terms(parsed)
     split = split_terms(grouped)
     words_per_hit = len(split)
@@ -45,6 +45,7 @@ def query(
     hl = open(filename, "wb")
     err = open("/dev/null", "w")
     freq_file = db.path + "/frequencies/normalized_word_frequencies"
+    query_log_fh = filename + ".terms"
     if query_debug:
         print("FORKING", file=sys.stderr)
     pid = os.fork()
@@ -68,7 +69,6 @@ def query(
             worker = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=hl, stderr=err, env=os.environ)
             # worker2 = subprocess.Popen("head -c 1", stdin=subprocess.PIPE, stdout=worker.stdin, stderr=err)
 
-            query_log_fh = filename + ".terms"
             if query_debug:
                 print("LOGGING TERMS to " + filename + ".terms", file=sys.stderr, flush=True)
             logger = subprocess.Popen(["tee", query_log_fh], stdin=subprocess.PIPE, stdout=worker.stdin)
@@ -91,11 +91,19 @@ def query(
     else:
         hl.close()
         return HitList.HitList(
-            filename, words_per_hit, db, sort_order=sort_order, raw=raw_results, ascii_conversion=ascii_conversion
+            filename,
+            words_per_hit,
+            db,
+            sort_order=sort_order,
+            raw=raw_results,
+            ascii_conversion=ascii_conversion,
+            terms_file=query_log_fh,
+            word_attributes=word_attributes or None,
         )
 
 
 def get_expanded_query(hitlist):
+    """Get expanded query"""
     fn = hitlist.filename + ".terms"
     query = []
     term = []
@@ -115,6 +123,7 @@ def get_expanded_query(hitlist):
 
 
 def split_terms(grouped):
+    """Split terms"""
     split = []
     for group in grouped:
         if len(group) == 1:

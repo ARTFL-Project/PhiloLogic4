@@ -3,13 +3,36 @@
 import os
 import time
 import struct
-from .HitWrapper import HitWrapper
+import sqlite3
 from unidecode import unidecode
+import msgpack
+import lz4.frame
+from .HitWrapper import HitWrapper
+
 
 obj_dict = {"doc": 1, "div1": 2, "div2": 3, "div3": 4, "para": 5, "sent": 6, "word": 7}
 
 
-class HitList(object):
+def get_word_attributes(word, word_attributes, db_path):
+    """Returns a set of philo_ids for a given set of word properties.  This is used to filter hitlists by word properties."""
+    philo_ids = set()
+    word_attributes = {k: v for k, v in word_attributes.items() if v}
+    with sqlite3.connect(f"{db_path}/words.db") as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("""SELECT word_object FROM words WHERE word=?""", (word,))
+        for row in cursor:
+            word_objects = msgpack.loads(lz4.frame.decompress(row["word_object"]))
+            for word_object in word_objects:
+                for k, v in word_attributes.items():
+                    if word_object.get(k) != v:
+                        break
+                else:
+                    philo_ids.add(tuple(word_object["philo_id"]))
+    return philo_ids
+
+
+class HitList:
     """Iterable containing philologic hits"""
 
     def __init__(
@@ -25,12 +48,22 @@ class HitList(object):
         sort_order=None,
         raw=False,
         ascii_conversion=True,
+        terms_file=None,
+        word_attributes=None,
     ):
         self.filename = filename
         self.words = words
         self.method = method
         self.methodarg = methodarg
         self.sort_order = sort_order
+        self.word_attributes = word_attributes
+        self.matching_philo_ids = None
+        if self.word_attributes is not None:
+            self.matching_philo_ids = set()
+            db_path = os.path.dirname(self.filename).replace("hitlists", "")
+            for word, word_attributes in self.word_attributes:
+                self.matching_philo_ids.update(get_word_attributes(word, word_attributes, db_path))
+        self.num_hits_filtered = 0
         if self.sort_order == ["rowid"]:
             self.sort_order = None
         self.raw = raw  # if true, this return the raw hitlist consisting of a list of philo_ids
@@ -112,6 +145,7 @@ class HitList(object):
                     return HitWrapper(self.readhit(n), self.dbh)
 
     def get_slice(self, n):
+        """Returns a slice of the hitlist.  If the hitlist is sorted, this will return a sorted slice."""
         if self.sort_order:
             try:
                 for hit in self.sorted_hitlist[n]:
@@ -131,15 +165,32 @@ class HitList(object):
                     hit = self.readhit(slice_position)
                 except IndexError as IOError:
                     break
+                if self.matching_philo_ids is not None:
+                    if (
+                        hit not in self.matching_philo_ids
+                    ):  # TODO: account for the fact that there may be multiple start_bytes
+                        self.num_hits_filtered += 1
+                        slice_position += 1
+                        import sys
+
+                        print("FILTERED", hit, self.num_hits_filtered, file=sys.stderr)
+                        continue
+                    else:
+                        import sys
+
+                        print("FOUND", hit, file=sys.stderr)
                 if self.raw:
                     yield hit
                 else:
+                    import sys
+
+                    print("YIELDING", hit, file=sys.stderr)
                     yield HitWrapper(hit, self.dbh)
                 slice_position += 1
 
     def __len__(self):
         self.update()
-        return self.count
+        return self.count - self.num_hits_filtered
 
     def __iter__(self):
         if self.sort_order:
@@ -154,6 +205,10 @@ class HitList(object):
                     hit = self.readhit(iter_position)
                 except IndexError as IOError:
                     break
+                if self.matching_philo_ids is not None:
+                    if hit not in self.matching_philo_ids:
+                        self.num_hits_filtered += 1
+                        continue
                 if self.raw:
                     yield hit
                 else:
@@ -161,6 +216,7 @@ class HitList(object):
                 iter_position += 1
 
     def seek(self, n):
+        """Seeks to a particular hit in the hitlist.  This is not a byte offset, but a hit offset."""
         if self.position == n:
             pass
         else:
@@ -175,6 +231,7 @@ class HitList(object):
             self.position = n
 
     def update(self):
+        """Updates the hitlist size, count, and done status."""
         # Since the file could be growing, we should frequently check size/ if it's finished yet.
         if self.done:
             pass
@@ -188,12 +245,13 @@ class HitList(object):
             self.count = int(self.size / self.hitsize)
 
     def finish(self):
+        """Waits for the hitlist to finish and updates on a regular basis."""
         while not self.done:
             self.update()
             time.sleep(0.05)
 
     def readhit(self, n):
-        # reads hitlist into buffer, unpacks
+        """reads hitlist into buffer, unpacks"""
         # should do some work to read k at once, track buffer state.
         self.update()
         while n >= len(self):
@@ -211,6 +269,7 @@ class HitList(object):
         return struct.unpack(self.format, buffer)
 
     def get_total_word_count(self):
+        """Returns the total word count for a hitlist"""
         philo_ids = []
         total_count = 0
         iter_position = 0

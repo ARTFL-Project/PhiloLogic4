@@ -44,7 +44,7 @@ def philo_dispatcher(environ, start_response):
 
     # clean-up hitlist every now and then
     if randint(0, 10) == 1:
-        for file in os.scandir(os.path.join(path, "data/hitlists/*")):
+        for file in os.scandir(os.path.join(path, "data/hitlists/")):
             file_modified = datetime.datetime.fromtimestamp(os.path.getmtime(file.path))
             if datetime.datetime.now() - file_modified > datetime.timedelta(minutes=10):
                 os.remove(file.path)
