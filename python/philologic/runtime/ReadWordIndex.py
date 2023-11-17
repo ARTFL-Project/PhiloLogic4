@@ -21,23 +21,16 @@ def get_object_id(philo_id, level="sent"):
 
 def search_word(db_path, query):
     """Search for occurrences of a word in the database and return them."""
+    words = [w.encode("utf8") for w in query.split()]  # if we have multiple words, they will be separated by spaces
     results = []
     db_env = lmdb.open(f"{db_path}/words.lmdb", readonly=True)
-
-    words = query.split()  # if we have multiple words, they will be separated by spaces
     with db_env.begin() as txn:
-        for word in words:
-            # with db_env.begin() as txn:
-            # Retrieve the compressed data for the word
-            compressed_data = txn.get(word.encode("utf-8"))
-            if compressed_data:
-                # Decompress and deserialize the data
-                occurrence_attribs = loads(lz4.frame.decompress(compressed_data))
-
-                # Process the results
-                for philo_id, _ in occurrence_attribs:  # we can filter based on attributes in this loop
-                    results.append(philo_id)
-
+        cursor = txn.cursor()
+        local_hits = cursor.getmulti(words)
+        for _, compressed_data in local_hits:
+            occurrence_attribs = loads(lz4.frame.decompress(compressed_data))
+            for philo_id, _ in occurrence_attribs:
+                results.append(philo_id)
     db_env.close()
     return results
 
@@ -51,7 +44,7 @@ def search_cooccurrence(db_path, words, level):
     occurrences_by_text_object = defaultdict(lambda: defaultdict(list))
     with db_env.begin() as txn:
         for word in words:
-            compressed_data = txn.get(word.encode("utf-8"))
+            compressed_data = txn.get(word.encode("utf-8"))  # TODO: use getmulti to account for multiple word forms
             if compressed_data:
                 occurrences = loads(lz4.frame.decompress(compressed_data))
                 for philo_id, attrib in occurrences:
