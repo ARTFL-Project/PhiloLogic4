@@ -14,14 +14,26 @@ import time
 from glob import iglob
 from json import dump
 import csv
+import subprocess
 
+import lmdb
+import lz4.frame
+from orjson import loads
+from msgpack import dumps
 import lxml.etree
 import regex as re
 from black import FileMode, format_str
 from multiprocess import Pool
 from philologic.Config import MakeDBConfig, MakeWebConfig
 from philologic.loadtime.PostFilters import make_sentences_table, make_sql_table
-from philologic.utils import convert_entities, extract_full_date, extract_integer, load_module, pretty_print, sort_list
+from philologic.utils import (
+    convert_entities,
+    extract_full_date,
+    extract_integer,
+    load_module,
+    pretty_print,
+    sort_list,
+)
 from tqdm import tqdm
 
 SORT_BY_WORD = "-k 2,2"
@@ -147,28 +159,41 @@ class Loader:
                 ):
                     already_configured_values[attribute] = getattr(config_obj, attribute)
             with open(load_config_path, "a") as load_config_copy:
-                print("\n\n## The values below were also used for loading ##", file=load_config_copy)
+                print(
+                    "\n\n## The values below were also used for loading ##",
+                    file=load_config_copy,
+                )
                 for option, option_value in loader_options.items():
                     if (
                         option not in already_configured_values
                         and option not in values_to_ignore
                         and option != "web_config"
                     ):
-                        print("%s = %s\n" % (option, repr(option_value)), file=load_config_copy)
+                        print(
+                            "%s = %s\n" % (option, repr(option_value)),
+                            file=load_config_copy,
+                        )
         else:
             with open(load_config_path, "w") as load_config_copy:
                 print("#!/usr/bin/env python3", file=load_config_copy)
                 print(
-                    '"""This is a dump of the default configuration used to load this database,', file=load_config_copy
+                    '"""This is a dump of the default configuration used to load this database,',
+                    file=load_config_copy,
                 )
-                print("including non-configurable options. You can use this file to reload", file=load_config_copy)
+                print(
+                    "including non-configurable options. You can use this file to reload",
+                    file=load_config_copy,
+                )
                 print(
                     'the current database using the -l flag. See load documentation for more details"""\n\n',
                     file=load_config_copy,
                 )
                 for option, option_value in loader_options.items():
                     if option not in values_to_ignore and option != "web_config":
-                        print("%s = %s\n" % (option, repr(option_value)), file=load_config_copy)
+                        print(
+                            "%s = %s\n" % (option, repr(option_value)),
+                            file=load_config_copy,
+                        )
 
         if "web_config" in loader_options:
             web_config_path = os.path.join(loader_options["data_destination"], "web_config.cfg")
@@ -191,7 +216,12 @@ class Loader:
 
     def add_files(self, files):
         """Copy files to database directory"""
-        for f in tqdm(files, total=len(files), leave=False, desc="Copying files to database directory"):
+        for f in tqdm(
+            files,
+            total=len(files),
+            leave=False,
+            desc="Copying files to database directory",
+        ):
             new_file_path = os.path.join(self.textdir, os.path.basename(f).replace(" ", "_").replace("'", "_"))
             shutil.copy2(f, new_file_path)
             os.chmod(new_file_path, 775)
@@ -209,7 +239,10 @@ class Loader:
         with open(bibliography_file, encoding="utf8") as input_file:
             reader = csv.DictReader(input_file, delimiter=delimiter)
             load_metadata = [metadata for metadata in reader]
-        print("Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]), end=" ")
+        print(
+            "Sorting files by the following metadata fields: %s..." % ", ".join([i for i in sort_by_field]),
+            end=" ",
+        )
 
         def make_sort_key(d):
             """Inner sort function"""
@@ -578,7 +611,8 @@ class Loader:
     def merge_files(self, file_type, file_num=1000, verbose=True):
         """This function runs a multi-stage merge sort on words
         Since PhiloLogic can potentially merge thousands of files, we need to split
-        the sorting stage into multiple steps to avoid running out of file descriptors"""
+        the sorting stage into multiple steps to avoid running out of file descriptors
+        """
         if sys.platform == "darwin":
             file_num = 250
         lists_of_files = []
@@ -608,7 +642,10 @@ class Loader:
         total_files = sum(len(files) for files in lists_of_files)
         # Then we run the merge sort on each chunk of 500 files and compress the result
         if verbose is True:
-            print(f"{time.ctime()}: Merging {file_type} in batches of {file_num}...", flush=True)
+            print(
+                f"{time.ctime()}: Merging {file_type} in batches of {file_num}...",
+                flush=True,
+            )
         else:
             print(f"Merging {file_type} in batches of {file_num}...", flush=True)
         os.system(f"touch {self.workdir}/sorted.init")
@@ -633,7 +670,11 @@ class Loader:
             output_file = os.path.join(self.workdir, "all_toms_sorted")
             command = f'/bin/bash -c "{sort_command} {sorted_files} > {output_file}"'
         if verbose is True:
-            print(f"{time.ctime()}: Merging all merged sorted files (this may take a while)...", flush=True, end=" ")
+            print(
+                f"{time.ctime()}: Merging all merged sorted files (this may take a while)...",
+                flush=True,
+                end=" ",
+            )
 
         status = os.system(command)
         if status != 0:
@@ -645,69 +686,56 @@ class Loader:
             if sorted_file.name.endswith(".split"):
                 os.system(f"rm {sorted_file.name}")
 
-    def analyze(self):
+    def analyze(self, commit_interval=1000):
         """Create inverted index"""
         print("\n### Create inverted index ###", flush=True)
-        print(self.omax, flush=True)
-        vl = [max(int(math.ceil(math.log(float(x) + 1.0, 2.0))), 1) if x > 0 else 1 for x in self.omax]
-        print(vl, flush=True)
-        width = sum(x for x in vl)
-        print(str(width) + " bits wide.", flush=True)
-
-        hits_per_block = (BLOCKSIZE * 8) // width
-        freq1 = INDEX_CUTOFF
-        freq2 = 0
-        offset = 0
-
-        # Generate frequency table
-        os.system(
-            f'/bin/bash -c "cut -f 2 <(lz4cat {self.workdir}/all_words_sorted.lz4) | uniq -c | LANG=C sort -S 25% -rn -k 1,1> {self.workdir}/all_frequencies"'
+        line_count_process = subprocess.run(
+            f"lz4 -dc {self.workdir}/all_words_sorted.lz4 | wc -l",
+            shell=True,
+            text=True,
+            capture_output=True,
         )
-
-        # now scan over the frequency table to figure out how wide (in bits) the frequency fields are,
-        # and how large the block file will be.
-        with open(self.workdir + "/all_frequencies") as frequencies:
-            for line in frequencies:
-                f, _ = line.rsplit(" ", 1)  # uniq -c pads output on the left side, so we split on the right.
-                try:
-                    f = int(f)
-                except ValueError:
-                    f = int(re.sub(r"(\d+)\D+", r"\1", f.strip()))
-                if f > freq2:
-                    freq2 = f
-                if f < INDEX_CUTOFF:
-                    pass  # low-frequency words don't go into the block-mode index.
-                else:
-                    blocks = 1 + f // (hits_per_block + 1)  # high frequency words have at least one block.
-                    offset += blocks * BLOCKSIZE
-
-        # take the log base 2 for the length of the binary representation.
-        freq1_l = math.ceil(math.log(float(freq1), 2.0))
-        freq2_l = math.ceil(math.log(float(freq2), 2.0))
-        offset_l = math.ceil(math.log(float(offset), 2.0))
-
-        print("freq1: %d; %d bits" % (freq1, freq1_l))
-        print("freq2: %d; %d bits" % (freq2, freq2_l))
-        print("offst: %d; %d bits" % (offset, offset_l))
-
-        # now write it out in our legacy c-header-like format.  TODO: reasonable format, or ctypes bindings for packer.
-        with open(self.workdir + "dbspecs4.h", "w") as dbs:
-            print("#define FIELDS 9", file=dbs)
-            print("#define TYPE_LENGTH 1", file=dbs)
-            print("#define BLK_SIZE " + str(BLOCKSIZE), file=dbs)
-            print("#define FREQ1_LENGTH " + str(freq1_l), file=dbs)
-            print("#define FREQ2_LENGTH " + str(freq2_l), file=dbs)
-            print("#define OFFST_LENGTH " + str(offset_l), file=dbs)
-            print("#define NEGATIVES {0,0,0,0,0,0,0,0,0}", file=dbs)
-            print("#define DEPENDENCIES {-1,0,1,2,3,4,5,0,0}", file=dbs)
-            print("#define BITLENGTHS {%s}" % ",".join(str(i) for i in vl), file=dbs)
-        print("%s: analysis done" % time.ctime())
-        os.system(
-            f'/bin/bash -c "lz4cat {self.workdir}/all_words_sorted.lz4 | pack4 {self.workdir}/dbspecs4.h"',
-        )
-        print("%s: all indices built. moving into place." % time.ctime())
-        os.system("mv index " + self.destination + "/index")
-        os.system("mv index.1 " + self.destination + "/index.1")
+        line_count = int(line_count_process.stdout.strip())
+        db_env = lmdb.open(f"{self.destination}/words.lmdb", map_size=1024 * 1024 * 1024 * 1024)
+        with lz4.frame.open(f"{self.workdir}/all_words_sorted.lz4") as input_file:
+            current_word = None
+            occurrence_attribs = []
+            count = 0
+            txn = db_env.begin(write=True)
+            for line in tqdm(input_file, total=line_count, desc="Storing words in LMDB database"):
+                line = line.decode("utf-8")
+                _, word, philo_id, attrib = line.split("\t", 3)
+                attrib = loads(attrib)
+                if word != current_word:
+                    if current_word is not None:
+                        txn.put(
+                            current_word.encode("utf-8"),
+                            lz4.frame.compress(dumps(occurrence_attribs)),
+                        )
+                        count += 1
+                        if count % commit_interval == 0:
+                            txn.commit()
+                            txn = db_env.begin(write=True)
+                    current_word = word
+                    occurrence_attribs = []
+                occurrence_attribs.append(
+                    (
+                        [int(i) for i in philo_id.split()],
+                        {
+                            "start_byte": attrib["start_byte"],
+                            "end_byte": attrib["end_byte"],
+                        },
+                    )
+                )
+            # Commit any remaining words
+            if occurrence_attribs:
+                txn.put(
+                    current_word.encode("utf-8"),
+                    lz4.frame.compress(dumps(occurrence_attribs)),
+                )
+            txn.commit()
+        db_env.close()
+        print("Finished creating inverted index.")
 
     def setup_sql_load(self, verbose=True):
         """Setup SQLite DB creation"""
@@ -762,11 +790,9 @@ class Loader:
     def finish(self):
         """Write important runtime information to the database directory"""
         print("\n### Finishing up ###")
-        os.mkdir(self.destination + "/src/")
         os.mkdir(self.destination + "/hitlists/")
         os.chmod(self.destination + "/hitlists/", 0o777)
         os.chmod(os.path.join(self.destination, "TEXT"), 0o775)
-        os.system("mv dbspecs4.h ../src/dbspecs4.h")
 
         # Make data directory inaccessible from the outside
         fh = open(self.destination + "/.htaccess", "w")
@@ -889,7 +915,10 @@ class Loader:
             config_values["kwic_bibliography_fields"] = ["filename"]
 
         if "author" in config_values["search_examples"] and "title" in config_values["search_examples"]:
-            config_values["concordance_biblio_sorting"] = [("author", "title"), ("title", "author")]
+            config_values["concordance_biblio_sorting"] = [
+                ("author", "title"),
+                ("title", "author"),
+            ]
 
         # Find default start and end dates for times series
         try:
@@ -903,9 +932,15 @@ class Loader:
                 end_date = int(max_year)
             except TypeError:
                 end_date = 2100
-            config_values["time_series_start_end_date"] = {"start_date": start_date, "end_date": end_date}
+            config_values["time_series_start_end_date"] = {
+                "start_date": start_date,
+                "end_date": end_date,
+            }
         except sqlite3.OperationalError:  # no year field present
-            config_values["time_series_start_end_date"] = {"start_date": "", "end_date": ""}
+            config_values["time_series_start_end_date"] = {
+                "start_date": "",
+                "end_date": "",
+            }
 
         config_values["ascii_conversion"] = Loader.ascii_conversion
 

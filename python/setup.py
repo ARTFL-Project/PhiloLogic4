@@ -32,6 +32,7 @@ setup(
         "msgpack",
         "unidecode",
         "lz4",
+        "lmdb",
     ],
     python_requires=">=3.8",
     use_scm_version={

@@ -132,6 +132,10 @@ def make_sentences_table(datadir, db_destination):
 def word_frequencies(loader_obj):
     """Generate word frequencies"""
     print("%s: Generating word frequencies..." % time.ctime())
+    # Generate frequency table
+    os.system(
+        f'/bin/bash -c "cut -f 2 <(lz4cat {loader_obj.workdir}/all_words_sorted.lz4) | uniq -c | LANG=C sort -S 25% -rn -k 1,1> {loader_obj.workdir}/all_frequencies"'
+    )
     frequencies = loader_obj.destination + "/frequencies"
     os.system("mkdir %s" % frequencies)
     output = open(frequencies + "/word_frequencies", "w", encoding="utf8")
