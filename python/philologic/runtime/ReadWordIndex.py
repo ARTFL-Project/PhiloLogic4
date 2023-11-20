@@ -19,20 +19,24 @@ def get_object_id(philo_id, level="sent"):
         return f"{philo_id[0]} {philo_id[1]} {philo_id[2]} {philo_id[3]} {philo_id[4]}"
 
 
-def search_word(db_path, query):
+def search_word(db_path, query, hitlist_filename):
     """Search for occurrences of a word in the database and return them."""
     words = [w.encode("utf8") for w in query.split()]  # if we have multiple words, they will be separated by spaces
-    results = []
-    db_env = lmdb.open(f"{db_path}/words.lmdb", readonly=True)
-    with db_env.begin() as txn:
+    db_env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
+    with open(hitlist_filename, "w", encoding="utf8") as output_file, db_env.begin() as txn:
         cursor = txn.cursor()
         local_hits = cursor.getmulti(words)
         for _, compressed_data in local_hits:
             occurrence_attribs = loads(lz4.frame.decompress(compressed_data))
             for philo_id, _ in occurrence_attribs:
-                results.append(philo_id)
+                import sys
+
+                print(philo_id, file=sys.stderr)
+                print(
+                    f"{philo_id[0]} {philo_id[1]} {philo_id[2]} {philo_id[3]} {philo_id[4]} {philo_id[5]} {philo_id[6]}",
+                    file=output_file,
+                )
     db_env.close()
-    return results
 
 
 def search_cooccurrence(db_path, words, level):

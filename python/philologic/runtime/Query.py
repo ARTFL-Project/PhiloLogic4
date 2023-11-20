@@ -9,6 +9,7 @@ from datetime import datetime
 import regex as re
 from philologic.runtime import HitList
 from philologic.runtime.QuerySyntax import group_terms, parse_query
+from philologic.runtime.ReadWordIndex import search_word
 from unidecode import unidecode
 
 # Work around issue where environ PATH does not contain path to C core
@@ -57,35 +58,10 @@ def query(
             os._exit(0)
         else:
             # now we're detached from the parent, and can do our work.
-            if query_debug:
-                print("WORKER DETACHED at ", datetime.now() - tstart, file=sys.stderr, flush=True)
-            args = ["corpus_search"]
-            if corpus_file:
-                args.extend(("-c", corpus_file))
-            if method and method_arg:
-                args.extend(("-m", method, "-a", str(method_arg)))
-            args.extend(("-o", "binary", db.path))
-            worker = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=hl, stderr=err, env=os.environ)
-            # worker2 = subprocess.Popen("head -c 1", stdin=subprocess.PIPE, stdout=worker.stdin, stderr=err)
-
-            query_log_fh = filename + ".terms"
-            if query_debug:
-                print("LOGGING TERMS to " + filename + ".terms", file=sys.stderr, flush=True)
-            logger = subprocess.Popen(["tee", query_log_fh], stdin=subprocess.PIPE, stdout=worker.stdin)
-
-            expand_query_not(split, freq_file, logger.stdin, db.locals.ascii_conversion, db.locals["lowercase_index"])
-            logger.stdin.close()
-            worker.stdin.close()
-
-            returncode = worker.wait()
-
-            if returncode == -11:
-                print("SEGFAULT", file=sys.stderr)
-                seg_flag = open(filename + ".error", "w")
-                seg_flag.close()
+            search_word(db.path, terms, filename)
             # do something to mark query as finished
             flag = open(filename + ".done", "w")
-            flag.write(" ".join(args) + "\n")
+            # flag.write(" ".join(args) + "\n")
             flag.close()
             os._exit(0)
     else:
