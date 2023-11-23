@@ -4,7 +4,7 @@
 import os
 import subprocess
 import sys
-from datetime import datetime
+import multiprocessing
 
 import regex as re
 from philologic.runtime import HitList
@@ -31,44 +31,30 @@ def query(
     ascii_conversion=True,
 ):
     """Runs concordance queries"""
-    sys.stdout.flush()
-    tstart = datetime.now()
+    # sys.stdout.flush() TODO: verify that this is not needed
 
     parsed = parse_query(terms)
     grouped = group_terms(parsed)
     split = split_terms(grouped)
     words_per_hit = len(split)
-    origpid = os.getpid()
     if not filename:
-        hfile = str(origpid) + ".hitlist"
+        hfile = str(multiprocessing.current_process().pid) + ".hitlist"
     dir = db.path + "/hitlists/"
     filename = filename or (dir + hfile)
-    hl = open(filename, "wb")
-    err = open("/dev/null", "w")
-    freq_file = db.path + "/frequencies/normalized_word_frequencies"
+    # freq_file = db.path + "/frequencies/normalized_word_frequencies"
+    # Multiprocessing setup
     if query_debug:
-        print("FORKING", file=sys.stderr)
-    pid = os.fork()
-    if pid == 0:
-        os.umask(0)
-        os.chdir(dir)
-        os.setsid()
-        pid = os.fork()
-        if pid > 0:
-            os._exit(0)
-        else:
-            # now we're detached from the parent, and can do our work.
-            search_word(db.path, terms, filename)
-            # do something to mark query as finished
-            flag = open(filename + ".done", "w")
-            # flag.write(" ".join(args) + "\n")
-            flag.close()
-            os._exit(0)
-    else:
-        hl.close()
-        return HitList.HitList(
-            filename, words_per_hit, db, sort_order=sort_order, raw=raw_results, ascii_conversion=ascii_conversion
-        )
+        print("Using multiprocessing", file=sys.stderr)
+
+    process = multiprocessing.Process(target=search_word, args=(db.path, terms, filename))
+    process.start()
+
+    # Mark query as finished by creating a .done file
+    with open(filename + ".done", "w") as flag:
+        pass
+    return HitList.HitList(
+        filename, words_per_hit, db, sort_order=sort_order, raw=raw_results, ascii_conversion=ascii_conversion
+    )
 
 
 def get_expanded_query(hitlist):

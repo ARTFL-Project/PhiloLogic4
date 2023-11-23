@@ -718,9 +718,10 @@ class Loader:
                             txn = db_env.begin(write=True)
                     current_word = word
                     occurrence_attribs = []
+                hit = list(map(int, philo_id.split()))
                 occurrence_attribs.append(
                     (
-                        [int(i) for i in philo_id.split()],
+                        hit[:7] + [hit[8], hit[7]],
                         {
                             "start_byte": attrib["start_byte"],
                             "end_byte": attrib["end_byte"],

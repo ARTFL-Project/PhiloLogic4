@@ -3,6 +3,7 @@
 from itertools import combinations
 from collections import defaultdict
 import time
+import struct
 
 from philologic.runtime.HitList import HitList
 
@@ -23,20 +24,22 @@ def search_word(db_path, query, hitlist_filename):
     """Search for occurrences of a word in the database and return them."""
     words = [w.encode("utf8") for w in query.split()]  # if we have multiple words, they will be separated by spaces
     db_env = lmdb.open(f"{db_path}/words.lmdb", readonly=True, lock=False)
-    with open(hitlist_filename, "w", encoding="utf8") as output_file, db_env.begin() as txn:
+    with open(hitlist_filename, "wb") as output_file, db_env.begin() as txn:
         cursor = txn.cursor()
         local_hits = cursor.getmulti(words)
+        buffer = bytearray()
         for _, compressed_data in local_hits:
             occurrence_attribs = loads(lz4.frame.decompress(compressed_data))
             for philo_id, _ in occurrence_attribs:
-                import sys
-
-                print(philo_id, file=sys.stderr)
-                print(
-                    f"{philo_id[0]} {philo_id[1]} {philo_id[2]} {philo_id[3]} {philo_id[4]} {philo_id[5]} {philo_id[6]}",
-                    file=output_file,
-                )
+                buffer.extend(struct.pack("9i", *philo_id))
+                if len(buffer) >= 36000:  # that should be 1000 hits
+                    output_file.write(buffer)
+                    buffer.clear()
+        if buffer:
+            output_file.write(buffer)
     db_env.close()
+    with open(hitlist_filename + ".done", "w"):
+        pass
 
 
 def search_cooccurrence(db_path, words, level):

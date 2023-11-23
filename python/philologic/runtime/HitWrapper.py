@@ -42,7 +42,7 @@ class HitWrapper:
             self.words.append(WordWrapper(hit, db, self.start_byte))
             page_i = self["page"]
         else:
-            self.philo_id = hit[:6] + (self.hit[7],)
+            self.philo_id = hit[:7]
             parent_id = self.hit[:6]
             remaining = list(self.hit[7:])
             while remaining:
