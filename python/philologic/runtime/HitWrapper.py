@@ -37,6 +37,7 @@ class HitWrapper:
         self.row = None
         self.bytes = []
         self.words = []
+        print(hit, file=sys.stderr)
         if len(list(hit)) == 7:
             self.philo_id = hit
             self.words.append(WordWrapper(hit, db, self.start_byte))
@@ -52,7 +53,6 @@ class HitWrapper:
             self.bytes.sort()
             self.words.sort(key=lambda x: x[-1])  # assumes words in same sent, as does search4
             self.words = [WordWrapper(word, db, byte) for word, byte in zip(self.words, self.bytes)]
-
             page_i = self.hit[6]
         page_id = [self.hit[0], 0, 0, 0, 0, 0, 0, 0, page_i]
         self.page = PageWrapper(page_id, db)

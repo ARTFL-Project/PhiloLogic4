@@ -1,20 +1,6 @@
 #!/bin/sh
 
-CORE_INSTALL="\n## INSTALLING PHILOLOGIC C CORE ##"
-echo "$CORE_INSTALL"
-cd libphilo/
-make clean
-make
-if [[ $OSTYPE == 'darwin'* ]];
-then
-  sudo /usr/bin/install -c db/corpus_search /usr/local/bin/
-  sudo /usr/bin/install -c db/pack4 /usr/local/bin/
-else
-  sudo /usr/bin/install -c db/corpus_search /bin/
-  sudo /usr/bin/install -c db/pack4 /bin/
-fi
 
-cd ..;
 PYTHON_INSTALL="\n## INSTALLING PYTHON LIBRARY ##"
 echo "$PYTHON_INSTALL"
 cd python;

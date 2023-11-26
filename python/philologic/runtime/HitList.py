@@ -36,12 +36,17 @@ class HitList(object):
         self.raw = raw  # if true, this return the raw hitlist consisting of a list of philo_ids
         self.dbh = dbh
         self.encoding = encoding or "utf-8"
+        import sys
+
+        print(method, methodarg, words, file=sys.stderr)
         if method != "cooc":
             self.has_word_id = 1
             self.length = 7 + 2 * (words)
         else:
             self.has_word_id = 0  # unfortunately.  fix this next time I have 3 months to spare.
-            self.length = methodarg + 1 + (words)
+            self.length = 7 + 2 * (words)
+
+            print(self.length, file=sys.stderr)
         while not os.path.exists(self.filename):
             time.sleep(0.05)
         self.fh = open(self.filename, "rb")  # need a full path here.
