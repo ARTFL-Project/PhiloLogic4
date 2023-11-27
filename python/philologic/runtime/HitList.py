@@ -38,7 +38,6 @@ class HitList(object):
         self.encoding = encoding or "utf-8"
         import sys
 
-        print(method, methodarg, words, file=sys.stderr)
         if method != "cooc":
             self.has_word_id = 1
             self.length = 7 + 2 * (words)

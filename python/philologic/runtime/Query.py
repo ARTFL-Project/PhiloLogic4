@@ -7,6 +7,9 @@ import sys
 import multiprocessing
 import sqlite3
 import struct
+from itertools import product
+from pathlib import Path
+import time
 
 import regex as re
 from philologic.runtime import HitList
@@ -40,12 +43,13 @@ def query(
         hfile = str(multiprocessing.current_process().pid) + ".hitlist"
     dir = db.path + "/hitlists/"
     filename = filename or (dir + hfile)
+    Path(filename).touch()
     frequency_file = db.path + "/frequencies/normalized_word_frequencies"
-
     print(len(split), file=sys.stderr)
     # Multiprocessing setup
     if method in ("proxy", None):
         if len(split) == 1:
+            print("searching for a single word", file=sys.stderr)
             process = multiprocessing.Process(target=search_word, args=(db.path, split, filename, frequency_file, db))
         else:
             process = multiprocessing.Process(
@@ -107,6 +111,40 @@ def split_terms(grouped):
     return split
 
 
+def get_word_groups(terms_file):
+    word_groups = []
+    with open(terms_file, "r") as terms_file:
+        word_group = []
+        for line in terms_file:
+            word = line.strip()
+            if word:
+                word_group.append(word)
+            elif word_group:
+                word_groups.append(word_group)
+                word_group = []
+        if word_group:
+            word_groups.append(word_group)
+    return word_groups
+
+
+def get_cooccurrence_groups(db_path, word_groups, level="sent"):
+    philo_ids_by_object_id = []
+    with sqlite3.connect(f"{db_path}/words.db") as conn:
+        cursor = conn.cursor()
+        for group_num, words in enumerate(word_groups):
+            philo_ids_by_object_id.append(defaultdict(list))
+            cursor.execute(f"SELECT philo_ids FROM words WHERE word IN ({', '.join('?' * len(words))})", words)
+            for (philo_ids,) in cursor:
+                for philo_id in struct.iter_unpack("9i", philo_ids):
+                    object_id = get_object_id(philo_id, level)
+                    philo_ids_by_object_id[group_num][object_id].append(philo_id)
+
+    # Identify common object_ids across all groups
+    object_id_sets = [set(philo_ids) for philo_ids in philo_ids_by_object_id]
+    common_object_ids = set.intersection(*object_id_sets) if object_id_sets else set()
+    return philo_ids_by_object_id, common_object_ids
+
+
 def search_word(db_path, split_terms, hitlist_filename, frequency_file, db):
     """Search for a single word in the database."""
     terms_file = open(f"{hitlist_filename}.terms", "w")
@@ -130,33 +168,21 @@ def search_phrase(db_path, split_terms, hitlist_filename, frequency_file, db, n,
             split_terms, frequency_file, terms_file, db.locals.ascii_conversion, db.locals["lowercase_index"]
         )
 
-    with open(terms_file.name, "r") as terms_file:
-        words = terms_file.read().split()
+    word_groups = get_word_groups(terms_file.name)
+    philo_ids_by_object_id, common_object_ids = get_cooccurrence_groups(db_path, word_groups, level)
 
-    occurrences_by_object_id = defaultdict(lambda: defaultdict(list))
-
-    with sqlite3.connect(f"{db_path}/words.db") as conn, open(hitlist_filename, "wb") as output_file:
-        cursor = conn.cursor()
-        placeholders = ", ".join("?" * len(words))
-        cursor.execute(f"SELECT word, philo_ids FROM words WHERE word IN ({placeholders})", words)
-        for word, philo_ids in cursor:
-            for philo_id in struct.iter_unpack("9i", philo_ids):
-                object_id = get_object_id(philo_id, level)
-                occurrences_by_object_id[object_id][word].append(philo_id)
-
-        # Check for word co-occurrences within n words of each other
-        for object_id, word_occurrences in occurrences_by_object_id.items():
-            for word, philo_ids in word_occurrences.items():
-                for philo_id in philo_ids:
-                    position = philo_id[6]  # 7th element is the word position
-                    for other_word, other_philo_ids in word_occurrences.items():
-                        if word != other_word:
-                            for other_philo_id in other_philo_ids:
-                                other_position = other_philo_id[6]
-                                if abs(position - other_position) <= n:
-                                    # Write the co-occurring philo_ids to the file
-                                    output_file.write(struct.pack("9i", *philo_id))
-                                    output_file.write(struct.pack("2i", *(other_philo_id[6], other_philo_id[-1])))
+    # Find co-occurrences: we need to find all combinations between all groups
+    with open(hitlist_filename, "wb") as output_file:
+        for object_id in sorted(common_object_ids, key=lambda x: list(map(int, x.split()))):
+            philo_id_groups = (philo_ids_by_object_id[group_num][object_id] for group_num in range(len(word_groups)))
+            for group_combination in product(*philo_id_groups):
+                # we now need to check if the positions are within n words of each other
+                positions = [philo_id[6] for philo_id in group_combination]
+                if max(positions) - min(positions) <= n:
+                    starting_id = group_combination[0]
+                    for group_num in range(1, len(word_groups)):
+                        starting_id += (group_combination[group_num][6], group_combination[group_num][-1])
+                    output_file.write(struct.pack(f"{len(starting_id)}i", *starting_id))
 
     with open(hitlist_filename + ".done", "w"):
         pass
@@ -168,38 +194,8 @@ def search_cooccurrence(db_path, split_terms, hitlist_filename, frequency_file, 
         expand_query_not(
             split_terms, frequency_file, terms_file, db.locals.ascii_conversion, db.locals["lowercase_index"]
         )
-    word_groups = []
-    with open(terms_file.name, "r") as terms_file:
-        word_group = []
-        for line in terms_file:
-            word = line.strip()
-            if word:
-                word_group.append(word)
-            elif word_group:
-                word_groups.append(word_group)
-                word_group = []
-        if word_group:
-            word_groups.append(word_group)
-
-    # Load occurrences for each word and add sentence IDs
-    philo_ids_by_object_id = []
-    with sqlite3.connect(f"{db_path}/words.db") as conn:
-        cursor = conn.cursor()
-        for group_num, words in enumerate(word_groups):
-            philo_ids_by_object_id.append(defaultdict(list))
-            cursor.execute(f"SELECT philo_ids FROM words WHERE word IN ({', '.join('?' * len(words))})", words)
-            for (philo_ids,) in cursor:
-                for philo_id in struct.iter_unpack("9i", philo_ids):
-                    object_id = get_object_id(philo_id, level)
-                    philo_ids_by_object_id[group_num][object_id].append(philo_id)
-
-    # Identify common object_ids across all groups
-    common_object_ids = set()
-    for group in philo_ids_by_object_id:
-        if not common_object_ids:
-            common_object_ids = set(group)
-        else:
-            common_object_ids = common_object_ids.intersection(set(group))
+    word_groups = get_word_groups(terms_file.name)
+    philo_ids_by_object_id, common_object_ids = get_cooccurrence_groups(db_path, word_groups, level)
 
     # Find co-occurrences
     with open(hitlist_filename, "wb") as output_file:

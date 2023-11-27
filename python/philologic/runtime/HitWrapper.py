@@ -37,7 +37,6 @@ class HitWrapper:
         self.row = None
         self.bytes = []
         self.words = []
-        print(hit, file=sys.stderr)
         if len(list(hit)) == 7:
             self.philo_id = hit
             self.words.append(WordWrapper(hit, db, self.start_byte))
