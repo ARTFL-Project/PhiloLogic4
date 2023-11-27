@@ -57,7 +57,7 @@ def query(
         )
     elif method == "phrase":
         process = multiprocessing.Process(
-            target=search_phrase, args=(db.path, split, filename, frequency_file, db, method_arg)
+            target=search_phrase, args=(db.path, split, filename, frequency_file, db, method_arg, "sent")
         )
     process.start()
     return HitList.HitList(
@@ -123,18 +123,41 @@ def search_word(db_path, split_terms, hitlist_filename, frequency_file, db):
         pass
 
 
-def search_phrase(db_path, split_terms, hitlist_filename, frequency_file, db):
-    """Search for a phrase in the database."""
-    terms_file = open(f"{hitlist_filename}.terms", "w")
-    expand_query_not(split_terms, frequency_file, terms_file, db.locals.ascii_conversion, db.locals["lowercase_index"])
-    terms_file.close()
+def search_phrase(db_path, split_terms, hitlist_filename, frequency_file, db, n, level="sent"):
+    """Search for co-occurrences of multiple words within n words of each other in the database."""
+    with open(f"{hitlist_filename}.terms", "w") as terms_file:
+        expand_query_not(
+            split_terms, frequency_file, terms_file, db.locals.ascii_conversion, db.locals["lowercase_index"]
+        )
+
     with open(terms_file.name, "r") as terms_file:
         words = terms_file.read().split()
+
+    occurrences_by_object_id = defaultdict(lambda: defaultdict(list))
+
     with sqlite3.connect(f"{db_path}/words.db") as conn, open(hitlist_filename, "wb") as output_file:
         cursor = conn.cursor()
-        cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
-        for (philo_ids,) in cursor:
-            output_file.write(philo_ids)
+        placeholders = ", ".join("?" * len(words))
+        cursor.execute(f"SELECT word, philo_ids FROM words WHERE word IN ({placeholders})", words)
+        for word, philo_ids in cursor:
+            for philo_id in struct.iter_unpack("9i", philo_ids):
+                object_id = get_object_id(philo_id, level)
+                occurrences_by_object_id[object_id][word].append(philo_id)
+
+        # Check for word co-occurrences within n words of each other
+        for object_id, word_occurrences in occurrences_by_object_id.items():
+            for word, philo_ids in word_occurrences.items():
+                for philo_id in philo_ids:
+                    position = philo_id[6]  # 7th element is the word position
+                    for other_word, other_philo_ids in word_occurrences.items():
+                        if word != other_word:
+                            for other_philo_id in other_philo_ids:
+                                other_position = other_philo_id[6]
+                                if abs(position - other_position) <= n:
+                                    # Write the co-occurring philo_ids to the file
+                                    output_file.write(struct.pack("9i", *philo_id))
+                                    output_file.write(struct.pack("2i", *(other_philo_id[6], other_philo_id[-1])))
+
     with open(hitlist_filename + ".done", "w"):
         pass
 
