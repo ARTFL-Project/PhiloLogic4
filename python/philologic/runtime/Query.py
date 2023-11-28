@@ -16,8 +16,8 @@ from philologic.runtime import HitList
 from philologic.runtime.QuerySyntax import group_terms, parse_query
 from unidecode import unidecode
 
-# Work around issue where environ PATH does not contain path to C core
-os.environ["PATH"] += ":/usr/local/bin/"
+
+OBJECT_LEVEL = {"para": 5, "sent": 6}
 
 
 def query(
@@ -128,20 +128,25 @@ def get_word_groups(terms_file):
 
 
 def get_cooccurrence_groups(db_path, word_groups, level="sent"):
-    philo_ids_by_object_id = []
+    philo_ids_by_object_id = [{} for _ in range(len(word_groups))]
+    if level == "sent":
+        object_level = 6
+    elif level == "para":
+        object_level = 5
     with sqlite3.connect(f"{db_path}/words.db") as conn:
         cursor = conn.cursor()
         for group_num, words in enumerate(word_groups):
-            philo_ids_by_object_id.append(defaultdict(list))
             cursor.execute(f"SELECT philo_ids FROM words WHERE word IN ({', '.join('?' * len(words))})", words)
             for (philo_ids,) in cursor:
                 for philo_id in struct.iter_unpack("9i", philo_ids):
-                    object_id = get_object_id(philo_id, level)
+                    object_id = philo_id[:object_level]
+                    if object_id not in philo_ids_by_object_id[group_num]:
+                        philo_ids_by_object_id[group_num][object_id] = []
                     philo_ids_by_object_id[group_num][object_id].append(philo_id)
 
     # Identify common object_ids across all groups
     object_id_sets = [set(philo_ids) for philo_ids in philo_ids_by_object_id]
-    common_object_ids = set.intersection(*object_id_sets) if object_id_sets else set()
+    common_object_ids = sorted(set.intersection(*object_id_sets) if object_id_sets else set())
     return philo_ids_by_object_id, common_object_ids
 
 
@@ -173,7 +178,7 @@ def search_phrase(db_path, split_terms, hitlist_filename, frequency_file, db, n,
 
     # Find co-occurrences: we need to find all combinations between all groups
     with open(hitlist_filename, "wb") as output_file:
-        for object_id in sorted(common_object_ids, key=lambda x: list(map(int, x.split()))):
+        for object_id in common_object_ids:
             philo_id_groups = (philo_ids_by_object_id[group_num][object_id] for group_num in range(len(word_groups)))
             for group_combination in product(*philo_id_groups):
                 # we now need to check if the positions are within n words of each other
@@ -199,7 +204,7 @@ def search_cooccurrence(db_path, split_terms, hitlist_filename, frequency_file, 
 
     # Find co-occurrences
     with open(hitlist_filename, "wb") as output_file:
-        for object_id in sorted(common_object_ids, key=lambda x: list(map(int, x.split()))):
+        for object_id in common_object_ids:
             starting_id = philo_ids_by_object_id[0][object_id].pop()
             for group_num in range(
                 1, len(word_groups)
