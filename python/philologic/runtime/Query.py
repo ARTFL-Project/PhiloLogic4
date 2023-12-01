@@ -138,7 +138,9 @@ def get_word_groups(terms_file):
     return word_groups
 
 
-def get_cooccurrence_groups(db_path, word_groups, level="sent") -> Iterator[tuple[bytes]]:
+def get_cooccurrence_groups(
+    db_path, word_groups, level="sent", corpus_philo_ids=None, object_level=None
+) -> Iterator[tuple[bytes]]:
     if level == "sent":
         philo_object = "philo_sent_id"
     elif level == "para":
@@ -159,8 +161,20 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent") -> Iterator[tupl
         query = f"SELECT grp0.{philo_object}, {', '.join(f'grp{i}.philo_ids AS philo_ids{i}' for i in range(len(word_groups)))} FROM {' INNER JOIN '.join(subqueries)} ON {join_conditions}"
 
         cursor.execute(query, all_args)
-        for group in cursor:
-            yield group
+        if corpus_philo_ids is None:
+            for group in cursor:
+                yield group
+        else:
+            for group in cursor:
+                philo_ids = group[1]
+                found = False
+                for start_byte in range(0, len(philo_ids), 36):
+                    philo_id = philo_ids[start_byte : start_byte + 36]
+                    if philo_id[:object_level] in corpus_philo_ids:
+                        found = True
+                        break
+                if found is True:
+                    yield group
 
 
 def search_word(db_path, hitlist_filename, corpus_file=None):
@@ -175,15 +189,7 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
             for (philo_ids,) in cursor:
                 output_file.write(philo_ids)
     else:
-        # gather all philo_ids from the corpus file first
-        philo_ids = set()
-        with open(corpus_file, "rb") as corpus:
-            buffer = corpus.read(28)
-            while buffer:
-                philo_id = tuple(i for i in struct.unpack("7i", buffer) if i)
-                philo_ids.add(struct.pack(f"{len(philo_id)}i", *philo_id))
-                buffer = corpus.read(28)
-
+        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
         # We now check if the words are in within the corpus philo_ids
         with sqlite3.connect(f"{db_path}/words.db") as conn, open(hitlist_filename, "wb", buffering=900) as output_file:
             cursor = conn.cursor()
@@ -191,10 +197,9 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
             for (philo_ids,) in cursor:
                 for start_byte in range(0, len(philo_ids), 36):
                     philo_id = philo_ids[start_byte : start_byte + 36]
-                    for i in range(20, 0, -4):
-                        if philo_id[:i] in philo_ids:
-                            output_file.write(philo_id)
-                            break
+                    if philo_id[:object_level] in corpus_philo_ids:
+                        output_file.write(philo_id)
+                        break
 
 
 def search_within_word_span(db_path, hitlist_filename, n, exact_phrase, corpus_file=None):
@@ -240,12 +245,18 @@ def search_within_text_object(db_path, hitlist_filename, level, corpus_file=None
             output_file.write(starting_id)
 
 
-def get_object_id(philo_id, level="sent"):
-    """Return the object ID for a given level of the philo_id."""
-    if level == "sent":
-        return f"{philo_id[0]} {philo_id[1]} {philo_id[2]} {philo_id[3]} {philo_id[4]} {philo_id[5]}"
-    elif level == "para":
-        return f"{philo_id[0]} {philo_id[1]} {philo_id[2]} {philo_id[3]} {philo_id[4]}"
+def get_corpus_philo_ids(corpus_file):
+    corpus_philo_ids = set()
+    object_level = 0
+    with open(corpus_file, "rb") as corpus:
+        buffer = corpus.read(28)
+        object_level = len(tuple(i for i in struct.unpack("7i", buffer) if i)) * 4
+        while buffer:
+            philo_id = tuple(i for i in struct.unpack("7i", buffer) if i)
+            corpus_philo_ids.add(struct.pack(f"{len(philo_id)}i", *philo_id))
+            corpus_philo_ids.add(philo_id)
+            buffer = corpus.read(28)
+    return corpus_philo_ids, object_level
 
 
 def expand_query_not(split, freq_file, dest_fh, ascii_conversion, lowercase=True):
