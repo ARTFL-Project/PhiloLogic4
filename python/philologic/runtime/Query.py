@@ -54,14 +54,6 @@ def query(
     if not os.path.exists(filename):
         Path(filename).touch()
     frequency_file = db.path + "/frequencies/normalized_word_frequencies"
-    if method in ("proxy", None):
-        if len(split) == 1:
-            method = "proxy"
-        else:
-            method = "phrase"
-            exact = 0  # we don't want to do exact matching for phrases
-    if len(split) == 1:
-        method = "proxy"
     # Handle SIGCHLD to avoid zombie processes
     signal.signal(signal.SIGCHLD, signal.SIG_IGN)
     pid = os.fork()
@@ -77,6 +69,9 @@ def query(
             f"--n={method_arg or 1}",
             f"--exact={exact}",
         ]
+        if corpus_file is not None:
+            args.append(f"--corpus_file={corpus_file}")
+        print(" ".join(args), file=sys.stderr)
         subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=os.environ)
         os._exit(0)  # Exit child process
     else:
@@ -168,19 +163,41 @@ def get_cooccurrence_groups(db_path, word_groups, level="sent") -> Iterator[tupl
             yield group
 
 
-def search_word(db_path, hitlist_filename):
+def search_word(db_path, hitlist_filename, corpus_file=None):
     """Search for a single word in the database."""
     with open(f"{hitlist_filename}.terms", "r") as terms_file:
         words = terms_file.read().split()
-    # We start writing after 25 hits
-    with sqlite3.connect(f"{db_path}/words.db") as conn, open(hitlist_filename, "wb", buffering=900) as output_file:
-        cursor = conn.cursor()
-        cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
-        for (philo_ids,) in cursor:
-            output_file.write(philo_ids)
+    if corpus_file is None:
+        # We start writing after 25 hits
+        with sqlite3.connect(f"{db_path}/words.db") as conn, open(hitlist_filename, "wb", buffering=900) as output_file:
+            cursor = conn.cursor()
+            cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
+            for (philo_ids,) in cursor:
+                output_file.write(philo_ids)
+    else:
+        # gather all philo_ids from the corpus file first
+        philo_ids = set()
+        with open(corpus_file, "rb") as corpus:
+            buffer = corpus.read(28)
+            while buffer:
+                philo_id = tuple(i for i in struct.unpack("7i", buffer) if i)
+                philo_ids.add(struct.pack(f"{len(philo_id)}i", *philo_id))
+                buffer = corpus.read(28)
+
+        # We now check if the words are in within the corpus philo_ids
+        with sqlite3.connect(f"{db_path}/words.db") as conn, open(hitlist_filename, "wb", buffering=900) as output_file:
+            cursor = conn.cursor()
+            cursor.execute(f"""SELECT philo_ids FROM words WHERE word IN ({",".join(["?"] * len(words))})""", words)
+            for (philo_ids,) in cursor:
+                for start_byte in range(0, len(philo_ids), 36):
+                    philo_id = philo_ids[start_byte : start_byte + 36]
+                    for i in range(20, 0, -4):
+                        if philo_id[:i] in philo_ids:
+                            output_file.write(philo_id)
+                            break
 
 
-def search_within_word_span(db_path, hitlist_filename, n, exact_phrase):
+def search_within_word_span(db_path, hitlist_filename, n, exact_phrase, corpus_file=None):
     """Search for co-occurrences of multiple words within n words of each other in the database."""
     word_groups = get_word_groups(f"{hitlist_filename}.terms")
     common_object_ids = get_cooccurrence_groups(db_path, word_groups, "sent")
@@ -208,7 +225,7 @@ def search_within_word_span(db_path, hitlist_filename, n, exact_phrase):
                     output_file.write(starting_id)
 
 
-def search_within_text_object(db_path, hitlist_filename, level):
+def search_within_text_object(db_path, hitlist_filename, level, corpus_file=None):
     """Search for co-occurrences of multiple words in the same sentence in the database."""
     word_groups = get_word_groups(f"{hitlist_filename}.terms")
     common_object_ids = get_cooccurrence_groups(db_path, word_groups, level)

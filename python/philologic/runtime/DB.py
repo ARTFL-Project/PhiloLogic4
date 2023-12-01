@@ -192,7 +192,6 @@ class DB:
                     raw_results=raw_results,
                     ascii_conversion=self.locals.ascii_conversion,
                 )
-
             else:  # no word query here
                 if sort_order == ["rowid"]:
                     sort_order = None

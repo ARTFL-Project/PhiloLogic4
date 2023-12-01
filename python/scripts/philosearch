@@ -9,6 +9,7 @@ def parse_args():
     parser = ArgumentParser()
     parser.add_argument("--db_path", help="Path to the database")
     parser.add_argument("--hitlist", help="Path to the file where the hitlist will be written")
+    parser.add_argument("--corpus_file", help="Path to the file containing the corpus", default=None)
     parser.add_argument("--n", help="Maximum distance between words", type=int)
     parser.add_argument("--level", help="Level of the search", choices=["sent", "para"], default="sent")
     parser.add_argument("--search_type", help="Type of search", choices=["proxy", "phrase", "cooc"], default="proxy")
@@ -19,11 +20,11 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     if args.search_type == "proxy":
-        search_word(args.db_path, args.hitlist)
+        search_word(args.db_path, args.hitlist, corpus_file=args.corpus_file)
     elif args.search_type == "phrase":
-        search_within_word_span(args.db_path, args.hitlist, args.n, bool(args.exact))
+        search_within_word_span(args.db_path, args.hitlist, args.n, bool(args.exact), corpus_file=args.corpus_file)
     elif args.search_type == "cooc":
-        search_within_text_object(args.db_path, args.hitlist, args.level)
+        search_within_text_object(args.db_path, args.hitlist, args.level, corpus_file=args.corpus_file)
     # do something to mark query as finished
     with open(args.hitlist + ".done", "w") as flag:
         flag.write(" ".join(sys.argv) + "\n")
