@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+
+from argparse import ArgumentParser
+from philologic.runtime.Query import search_within_text_object, search_within_word_span, search_word
+import sys
+
+
+def parse_args():
+    parser = ArgumentParser()
+    parser.add_argument("--db_path", help="Path to the database")
+    parser.add_argument("--hitlist", help="Path to the file where the hitlist will be written")
+    parser.add_argument("--n", help="Maximum distance between words", type=int)
+    parser.add_argument("--level", help="Level of the search", choices=["sent", "para"], default="sent")
+    parser.add_argument("--search_type", help="Type of search", choices=["proxy", "phrase", "cooc"], default="proxy")
+    parser.add_argument("--exact", help="Whether to search for an exact phrase", choices=[0, 1], type=int)
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    if args.search_type == "proxy":
+        search_word(args.db_path, args.hitlist)
+    elif args.search_type == "phrase":
+        search_within_word_span(args.db_path, args.hitlist, args.n, bool(args.exact))
+    elif args.search_type == "cooc":
+        search_within_text_object(args.db_path, args.hitlist, args.level)
+    # do something to mark query as finished
+    with open(args.hitlist + ".done", "w") as flag:
+        flag.write(" ".join(sys.argv) + "\n")
