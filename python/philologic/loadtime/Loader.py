@@ -703,28 +703,35 @@ class Loader:
             f"{self.workdir}/all_words_sorted.lz4"
         ) as input_file:
             current_word = None
-            current_object_id = None
+            current_sent_id = None
+            current_para_id = None
             philo_ids = bytearray()
             cursor = conn.cursor()
             cursor.execute("DROP TABLE IF EXISTS words")
-            cursor.execute("""CREATE TABLE IF NOT EXISTS words (word TEXT, object_id TEXT, philo_ids BLOB)""")
-            for line in tqdm(input_file, total=line_count, desc="Storing words in LMDB database"):
+            cursor.execute(
+                """CREATE TABLE IF NOT EXISTS words (word TEXT, philo_sent_id BLOB, philo_para_id BLOB, philo_ids BLOB)"""
+            )
+            for line in tqdm(input_file, total=line_count, desc="Storing words in SQLite database"):
                 line = line.decode("utf-8")
                 _, word, philo_id, _ = line.split("\t", 3)
-                object_id = " ".join(philo_id.split()[: object_index + 1])
-                if object_id != current_object_id:
+                sent_id = " ".join(philo_id.split()[:6])
+                para_id = " ".join(philo_id.split()[:5])
+                if sent_id != current_sent_id:
                     words_per_object_id[current_word] = philo_ids  # add last word from previous object_id
-                    if current_object_id is not None:
+                    if current_sent_id is not None:
+                        local_sent_id = struct.pack("6i", *map(int, current_sent_id.split()))
+                        local_para_id = struct.pack("5i", *map(int, current_para_id.split()))
                         for word_to_store, word_ids in words_per_object_id.items():
                             cursor.execute(
-                                "INSERT INTO words (word, object_id, philo_ids) VALUES (?, ?, ?)",
-                                (word_to_store, current_object_id, word_ids),
+                                "INSERT INTO words (word, philo_sent_id, philo_para_id, philo_ids) VALUES (?, ?, ?, ?)",
+                                (word_to_store, local_sent_id, local_para_id, word_ids),
                             )
 
                     # Clear for new object_id
                     words_per_object_id.clear()
                     current_word = None
-                    current_object_id = object_id
+                    current_sent_id = sent_id
+                    current_para_id = para_id
 
                 if word != current_word:
                     if current_word is not None:
@@ -733,7 +740,7 @@ class Loader:
                     philo_ids.clear()
 
                 hit = list(map(int, philo_id.split()))
-                hit = hit[:7] + [hit[8], hit[7]]
+                hit = hit[:6] + [hit[8]] + [hit[6], hit[7]]
                 packed_philo_id = struct.pack("9i", *hit)
                 philo_ids.extend(packed_philo_id)
 
@@ -741,11 +748,15 @@ class Loader:
             if philo_ids:
                 words_per_object_id[current_word] = philo_ids
             for word_to_store, word_ids in words_per_object_id.items():
+                local_sent_id = struct.pack("6i", *map(int, current_sent_id.split()))
+                local_para_id = struct.pack("5i", *map(int, current_para_id.split()))
                 cursor.execute(
-                    "INSERT INTO words (word, object_id, philo_ids) VALUES (?, ?, ?)",
-                    (word_to_store, current_object_id, word_ids),
+                    "INSERT INTO words (word, philo_sent_id, philo_para_id, philo_ids) VALUES (?, ?, ?, ?)",
+                    (word_to_store, local_sent_id, local_para_id, word_ids),
                 )
-
+            cursor.execute("CREATE INDEX word_index ON words (word)")
+            cursor.execute("CREATE INDEX philo_sent_id_index ON words (word, philo_sent_id)")
+            cursor.execute("CREATE INDEX philo_para_id_index ON words (word, philo_para_id)")
             conn.commit()
         print("Finished creating inverted index.")
 

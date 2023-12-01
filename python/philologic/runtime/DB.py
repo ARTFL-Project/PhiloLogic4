@@ -122,6 +122,16 @@ class DB:
                     method_arg = 6
                 else:
                     method_arg = 0
+        exact = 1
+        words = [w for w in qs.split() if w]
+        if qs and method in ("proxy", ""):
+            if len(words) == 1:
+                method = "proxy"
+            else:
+                method = "phrase"
+                exact = 0  # we don't want to do exact matching for phrases (nonsense)
+        if len(words) == 1:
+            method = "proxy"
 
         if isinstance(limit, str):
             try:
@@ -154,7 +164,7 @@ class DB:
             corpus_hash = hash.hexdigest()
             corpus_file = self.path + "/hitlists/" + corpus_hash + ".hitlist"
 
-            if not os.path.isfile(corpus_file):
+            if not os.path.isfile(corpus_file):  # this means it contains a word query too
                 # before we query, we need to figure out what type each parameter belongs to,
                 # and sort them into a list of dictionaries, one for each type.
                 metadata_dicts = [{} for level in self.locals["metadata_hierarchy"]]
@@ -183,7 +193,7 @@ class DB:
                     ascii_conversion=self.locals.ascii_conversion,
                 )
 
-            else:
+            else:  # no word query here
                 if sort_order == ["rowid"]:
                     sort_order = None
                 corpus = HitList.HitList(
@@ -204,6 +214,7 @@ class DB:
             hash.update(method.encode("utf8"))
             hash.update(str(method_arg).encode("utf8"))
             hash.update(str(limit).encode("utf8"))
+            hash.update(str(exact).encode("utf8"))
             search_hash = hash.hexdigest()
             search_file = self.path + "/hitlists/" + search_hash + ".hitlist"
             if sort_order == ["rowid"]:
@@ -221,6 +232,7 @@ class DB:
                     sort_order=sort_order,
                     raw_results=raw_results,
                     ascii_conversion=self.locals.ascii_conversion,
+                    exact=exact,
                 )
             parsed = QuerySyntax.parse_query(qs)
             grouped = QuerySyntax.group_terms(parsed)

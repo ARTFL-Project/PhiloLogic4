@@ -36,18 +36,14 @@ class HitList(object):
         self.raw = raw  # if true, this return the raw hitlist consisting of a list of philo_ids
         self.dbh = dbh
         self.encoding = encoding or "utf-8"
-        import sys
-
         if method != "cooc":
             self.has_word_id = 1
             self.length = 7 + 2 * (words)
         else:
             self.has_word_id = 0  # unfortunately.  fix this next time I have 3 months to spare.
             self.length = 7 + 2 * (words)
-
-            print(self.length, file=sys.stderr)
-        while not os.path.exists(self.filename):
-            time.sleep(0.05)
+        while os.stat(self.filename).st_size == 0:
+            time.sleep(0.005)
         self.fh = open(self.filename, "rb")  # need a full path here.
         self.format = "=%dI" % self.length  # short for object id's, int for byte offset.
         self.hitsize = struct.calcsize(self.format)
@@ -174,7 +170,7 @@ class HitList(object):
                 if self.done:
                     raise IndexError
                 else:
-                    time.sleep(0.05)
+                    time.sleep(0.01)
                     self.update()
             offset = self.hitsize * n
             self.fh.seek(offset)
