@@ -205,6 +205,12 @@ def search_word(db_path, hitlist_filename, corpus_file=None):
 def search_within_word_span(db_path, hitlist_filename, n, exact_phrase, corpus_file=None):
     """Search for co-occurrences of multiple words within n words of each other in the database."""
     word_groups = get_word_groups(f"{hitlist_filename}.terms")
+    object_level = None
+    if corpus_file is not None:
+        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
+    common_object_ids = get_cooccurrence_groups(
+        db_path, word_groups, corpus_philo_ids=corpus_philo_ids, object_level=object_level
+    )
     common_object_ids = get_cooccurrence_groups(db_path, word_groups, "sent")
 
     def generate_philo_ids(byte_sequence) -> Iterator[bytes]:
@@ -233,7 +239,12 @@ def search_within_word_span(db_path, hitlist_filename, n, exact_phrase, corpus_f
 def search_within_text_object(db_path, hitlist_filename, level, corpus_file=None):
     """Search for co-occurrences of multiple words in the same sentence in the database."""
     word_groups = get_word_groups(f"{hitlist_filename}.terms")
-    common_object_ids = get_cooccurrence_groups(db_path, word_groups, level)
+    object_level = None
+    if corpus_file is not None:
+        corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
+    common_object_ids = get_cooccurrence_groups(
+        db_path, word_groups, level=level, corpus_philo_ids=corpus_philo_ids, object_level=object_level
+    )
     buffer_size = (36 + 8 * (len(word_groups) - 1)) * 25  # we start writing after 25 hits
     with open(hitlist_filename, "wb", buffering=buffer_size) as output_file:
         for group in common_object_ids:
