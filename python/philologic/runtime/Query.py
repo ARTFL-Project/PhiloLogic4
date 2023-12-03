@@ -145,22 +145,42 @@ def get_cooccurrence_groups(
         philo_object = "philo_sent_id"
     elif level == "para":
         philo_object = "philo_para_id"
+    # with sqlite3.connect(f"{db_path}/words.db") as conn:
+    #     cursor = conn.cursor()
+    #     subqueries = []
+    #     all_args = []
+    #     for i, words in enumerate(word_groups):
+    #         placeholders = ", ".join("?" * len(words))
+    #         subquery = f"(SELECT {philo_object}, philo_ids, rowid FROM words WHERE word IN ({placeholders})) AS grp{i}"
+    #         subqueries.append(subquery)
+    #         all_args.extend(words)
+
+    #     join_conditions = " AND ".join(
+    #         f"grp0.{philo_object} = grp{i}.{philo_object}" for i in range(1, len(word_groups))
+    #     )
+
+    #     # Construct the main query
+    #     query = f"SELECT grp0.{philo_object}, {', '.join(f'grp{i}.philo_ids AS philo_ids{i}' for i in range(len(word_groups)))} FROM {' INNER JOIN '.join(subqueries)} ON {join_conditions} ORDER BY grp0.rowid"
+
+    #     cursor.execute(query, all_args)
     with sqlite3.connect(f"{db_path}/words.db") as conn:
         cursor = conn.cursor()
-        subqueries = []
-        all_args = []
+        cursor.execute("PRAGMA temp_store = MEMORY")
+        # Create temporary tables and insert data
         for i, words in enumerate(word_groups):
-            placeholders = ", ".join("?" * len(words))
-            subquery = f"(SELECT {philo_object}, philo_ids FROM words WHERE word IN ({placeholders})) AS grp{i}"
-            subqueries.append(subquery)
-            all_args.extend(words)
+            cursor.execute(
+                f"CREATE TEMPORARY TABLE temp_grp{i} AS SELECT {philo_object}, philo_ids FROM words WHERE word IN ({', '.join(['?']*len(words))})",
+                words,
+            )
 
+        # Construct the join query using temporary tables
         join_conditions = " AND ".join(
-            f"grp0.{philo_object} = grp{i}.{philo_object}" for i in range(1, len(word_groups))
+            f"temp_grp0.{philo_object} = temp_grp{i}.{philo_object}" for i in range(1, len(word_groups))
         )
-        query = f"SELECT grp0.{philo_object}, {', '.join(f'grp{i}.philo_ids AS philo_ids{i}' for i in range(len(word_groups)))} FROM {' INNER JOIN '.join(subqueries)} ON {join_conditions}"
+        query = f"SELECT temp_grp0.{philo_object}, {', '.join(f'temp_grp{i}.philo_ids AS philo_ids{i}' for i in range(len(word_groups)))} FROM {' INNER JOIN '.join(f'temp_grp{i}' for i in range(len(word_groups)))} ON {join_conditions} ORDER BY temp_grp0.rowid"
 
-        cursor.execute(query, all_args)
+        cursor.execute(query)
+
         if corpus_philo_ids is None:
             for group in cursor:
                 yield group
@@ -206,6 +226,7 @@ def search_within_word_span(db_path, hitlist_filename, n, exact_phrase, corpus_f
     """Search for co-occurrences of multiple words within n words of each other in the database."""
     word_groups = get_word_groups(f"{hitlist_filename}.terms")
     object_level = None
+    corpus_philo_ids = None
     if corpus_file is not None:
         corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
     common_object_ids = get_cooccurrence_groups(
@@ -240,6 +261,7 @@ def search_within_text_object(db_path, hitlist_filename, level, corpus_file=None
     """Search for co-occurrences of multiple words in the same sentence in the database."""
     word_groups = get_word_groups(f"{hitlist_filename}.terms")
     object_level = None
+    corpus_philo_ids = None
     if corpus_file is not None:
         corpus_philo_ids, object_level = get_corpus_philo_ids(corpus_file)
     common_object_ids = get_cooccurrence_groups(

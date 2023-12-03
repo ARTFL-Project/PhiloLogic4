@@ -697,7 +697,6 @@ class Loader:
             capture_output=True,
         )
         line_count = int(line_count_process.stdout.strip())
-        object_index = OBJECT_TYPES.index(self.default_object_level)
         words_per_object_id = {}
         with sqlite3.connect(f"{self.destination}/words.db") as conn, lz4.frame.open(
             f"{self.workdir}/all_words_sorted.lz4"
